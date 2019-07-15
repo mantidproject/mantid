@@ -2,17 +2,17 @@
 Model (MVP) Exercise
 ====================
 
-In the previous section we did not need to update the View. However,
-the Model contains a dictionary which contains the allowed colour
-options. The GUI should show the same allowed values as the the
-Model. To achieve this you will need to add:
+In the previous section we did not need to update the view. However,
+when changing the list of allowed line colour options it is better to
+update the model. The view should then be able to be updated by the
+presenter to only show the line colours allowed in the model. To
+achieve this you will need to add:
 
-1. A method to the Model for getting the allowed colours
-
-2. A method in the View to update the ComboBox values to match some
-input values
-
-3. In the initialisation of the Presenter get the allowed colours from
-the Model and pass them to the View
+#. A function to the model containing a dictionary of allowed
+   line colours and returning them when called.
+#. A method in the view to update the ComboBox values to match some
+   input values.
+#. In the initialisation of the presenter get the allowed colours from
+   the model and pass them to the view.
 
 See :ref:`here <ModelExerciseSolution>` for the solution. 

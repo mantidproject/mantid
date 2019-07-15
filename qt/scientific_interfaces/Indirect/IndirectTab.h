@@ -19,6 +19,9 @@
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#include <boost/none_t.hpp>
+#include <boost/optional.hpp>
+
 #include <QDoubleValidator>
 #include <QMap>
 #include <QPair>
@@ -153,9 +156,10 @@ protected:
                             QtProperty *min, QtProperty *max,
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
-  void setRangeSelector(MantidQt::MantidWidgets::RangeSelector *rs,
-                        QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &bounds);
+  void setRangeSelector(
+      MantidQt::MantidWidgets::RangeSelector *rs, QtProperty *lower,
+      QtProperty *upper, const QPair<double, double> &bounds,
+      const boost::optional<QPair<double, double>> &range = boost::none);
 
   /// Function to get energy mode from a workspace
   std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);
@@ -171,6 +175,12 @@ protected:
   /// pointer
   bool getResolutionRangeFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                 QPair<double, double> &res);
+
+  /// Gets the x range from a workspace
+  QPair<double, double>
+  getXRangeFromWorkspace(std::string const &workspaceName) const;
+  QPair<double, double> getXRangeFromWorkspace(
+      Mantid::API::MatrixWorkspace_const_sptr workspace) const;
 
   /// Converts a standard vector of standard strings to a QVector of QStrings.
   QVector<QString>
@@ -240,6 +250,11 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
+
+private slots:
+  virtual void handleDataReady(QString const &dataName) {
+    UNUSED_ARG(dataName);
+  };
 
 private:
   std::string getInterfaceProperty(std::string const &interfaceName,

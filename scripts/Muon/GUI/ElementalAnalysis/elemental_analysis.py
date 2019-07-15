@@ -30,6 +30,8 @@ from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 
+from Muon.GUI.Common import message_box
+
 import mantid.simpleapi as mantid
 
 offset = 0.9
@@ -54,8 +56,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.menu.addAction("Normalise")
 
         # periodic table stuff
-        self.ptable = PeriodicTablePresenter(
-            PeriodicTableView(), PeriodicTableModel())
+        self.ptable = PeriodicTablePresenter(PeriodicTableView(), PeriodicTableModel())
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
@@ -90,6 +91,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # plotting
         self.plot_window = None
+        self.colors = ['b', 'g', 'r', 'y', 'c', 'm', 'b']
+        self.color_index = 0
 
         # layout
         self.box = QtWidgets.QHBoxLayout()
@@ -104,6 +107,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.element_lines = {}
         self.electron_peaks = self._get_electron_peaks()
         self._generate_element_widgets()
+
+    # Return an unused colour, if all used then start with the first one
+    def get_color(self):
+        color = self.colors[self.color_index]
+        self.color_index = (self.color_index + 1) % len(self.colors)
+
+        return color
 
     def closeEvent(self, event):
         if self.plot_window is not None:
@@ -125,16 +135,15 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # make sure the names are strings and x values are numbers
         return Label(str(name), float(x_value), False, offset, True, rotation=-90, protected=True)
 
-    def _plot_line(self, name, x_value_in, element=None):
+    def _plot_line(self, name, x_value_in, color, element=None):
         label = self._gen_label(name, x_value_in, element)
         if self.plot_window is None:
             return
         for subplot in self.plotting.get_subplots():
-            self.plotting.add_vline_and_annotate(
-                subplot, float(x_value_in), label)
+            self._plot_line_once(subplot, float(x_value_in), label, color)
 
-    def _plot_line_once(self, subplot, x_value, label):
-        self.plotting.add_vline_and_annotate(subplot, float(x_value), label)
+    def _plot_line_once(self, subplot, x_value, label, color):
+        self.plotting.add_vline_and_annotate(subplot, float(x_value), label, color)
 
     def _rm_line(self, name):
         if self.plot_window is None:
@@ -173,9 +182,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             data = self.element_widgets[element].get_checked()
         if element not in self.element_lines:
             self.element_lines[element] = []
+
+        # Select a different color, if all used then use the first
+        color = self.get_color()
+
         for name, x_value in iteritems(data):
             full_name = gen_name(element, name)
-            self._plot_line(full_name, x_value, element)
+            self._plot_line(full_name, x_value, color, element)
 
     def _remove_element_lines(self, element):
         if element not in self.element_lines:
@@ -209,8 +222,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
-        to_plot = deepcopy([det.isChecked()
-                           for det in self.detectors.detectors])
+        to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
         if self.plot_window is None and any(to_plot) is False:
             return
         # generate plots - if new run clear old plot(s) and replace it
@@ -228,6 +240,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
+            ws.setYUnit('Counts')
             self.plotting.plot(detector, ws.getName())
         # add current selection of lines
         for element in self.ptable.selection:
@@ -244,10 +257,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # if already selected add to just new plot
         if data is None:
             data = self.element_widgets[element].get_checked()
+        color = self.get_color()
         for name, x_value in iteritems(data):
             full_name = gen_name(element, name)
             label = self._gen_label(full_name, x_value, element)
-            self._plot_line_once(subplot, float(x_value), label)
+            self._plot_line_once(subplot, float(x_value), label, color)
 
     def _update_peak_data(self, element, data=None):
         if self.ptable.is_selected(element):
@@ -284,6 +298,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     # sets data file for periodic table
     def select_data_file(self):
+        old_lines = deepcopy(list(self.element_lines.keys()))
+
         filename = QtWidgets.QFileDialog.getOpenFileName()
         if isinstance(filename, tuple):
             filename = filename[0]
@@ -293,7 +309,20 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # these are commneted out as they are a bug
         # see issue 25326
         #self._clear_lines_after_data_file_selected()
-        self._generate_element_widgets()
+        try:
+            self._generate_element_widgets()
+        except ValueError:
+            message_box.warning('The file does not contain correctly formatted data, resetting to default data file.'
+                                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                                'Muon%20Elemental%20Analysis.html" for more information.')
+            self.ptable.set_peak_datafile(None)
+            self._generate_element_widgets()
+
+        for element in old_lines:
+            if element in self.element_widgets.keys():
+                self.ptable.select_element(element)
+            else:
+                self._remove_element_lines(element)
         #self._generate_element_data()
 
     # general checked data

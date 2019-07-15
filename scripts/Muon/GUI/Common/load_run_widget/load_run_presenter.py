@@ -12,6 +12,7 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -65,6 +66,7 @@ class LoadRunWidgetPresenter(object):
 
     def disable_loading(self):
         self._view.disable_load_buttons()
+        self.thread_success = True
 
     def enable_loading(self):
         if not self._instrument == "PSI":
@@ -209,6 +211,7 @@ class LoadRunWidgetPresenter(object):
             self._model.execute()
         except ValueError as error:
             self._view.warning_popup(error.args[0])
+            self.run_list = flatten_run_list(self._model.current_runs)
         finished_callback()
 
     def on_loading_start(self):
@@ -226,6 +229,7 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.start()
 
     def error_callback(self, error_message):
+        self.thread_success = False
         self.enable_notifier.notify_subscribers()
         self._view.warning_popup(error_message)
 
@@ -233,6 +237,8 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.deleteLater()
         self._load_thread = None
 
+        if not self.thread_success:
+            self.run_list = flatten_run_list(self._model.current_runs)
         self.on_loading_finished()
 
     def on_loading_finished(self):

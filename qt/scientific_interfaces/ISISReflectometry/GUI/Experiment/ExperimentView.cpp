@@ -24,6 +24,18 @@ void showAsInvalid(QDoubleSpinBox &spinBox) {
 }
 
 void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
+
+void showAsInvalid(QLineEdit &lineEdit) {
+  auto palette = lineEdit.palette();
+  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
+  lineEdit.setPalette(palette);
+}
+
+void showAsValid(QLineEdit &lineEdit) {
+  auto palette = lineEdit.palette();
+  palette.setColor(QPalette::Base, Qt::transparent);
+  lineEdit.setPalette(palette);
+}
 } // namespace
 
 /** Constructor
@@ -58,15 +70,11 @@ void ExperimentView::showPerAngleThetasNonUnique(double tolerance) {
 }
 
 void ExperimentView::showStitchParametersValid() {
-  auto palette = stitchOptionsLineEdit().palette();
-  palette.setColor(QPalette::Base, Qt::transparent);
-  stitchOptionsLineEdit().setPalette(palette);
+  showAsValid(stitchOptionsLineEdit());
 }
 
 void ExperimentView::showStitchParametersInvalid() {
-  auto palette = stitchOptionsLineEdit().palette();
-  palette.setColor(QPalette::Base, QColor("#ffb8ad"));
-  stitchOptionsLineEdit().setPalette(palette);
+  showAsInvalid(stitchOptionsLineEdit());
 }
 
 void ExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
@@ -111,8 +119,8 @@ void ExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(false);
 }
 
-void ExperimentView::initializeTableRow(QTableWidget &table, int row,
-                                        std::array<std::string, 8> rowValues) {
+void ExperimentView::initializeTableRow(
+    QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column)
     table.setItem(
@@ -126,7 +134,7 @@ void ExperimentView::initOptionsTable() {
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
-  table->setColumnCount(8);
+  table->setColumnCount(PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
   initializeTableItems(*table);
 
@@ -136,7 +144,7 @@ void ExperimentView::initOptionsTable() {
     totalRowHeight += table->rowHeight(i);
   }
 
-  const int padding = 2;
+  const int padding = 20;
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
@@ -198,6 +206,8 @@ void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.analysisModeComboBox->setEnabled(enabled);
   m_ui.startOverlapEdit->setEnabled(enabled);
   m_ui.endOverlapEdit->setEnabled(enabled);
+  m_ui.transStitchParamsEdit->setEnabled(enabled);
+  m_ui.transScaleRHSCheckBox->setEnabled(enabled);
   m_ui.polCorrComboBox->setEnabled(enabled);
   m_ui.CRhoEdit->setEnabled(enabled);
   m_ui.CAlphaEdit->setEnabled(enabled);
@@ -226,6 +236,8 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
+  registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
+  registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
   registerSettingWidget(*m_ui.CRhoEdit, "cRho", alg);
   registerSettingWidget(*m_ui.CAlphaEdit, "cAlpha", alg);
@@ -248,6 +260,8 @@ void ExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.analysisModeComboBox);
   connectSettingsChange(*m_ui.startOverlapEdit);
   connectSettingsChange(*m_ui.endOverlapEdit);
+  connectSettingsChange(*m_ui.transStitchParamsEdit);
+  connectSettingsChange(*m_ui.transScaleRHSCheckBox);
   connectSettingsChange(*m_ui.polCorrComboBox);
   connectSettingsChange(*m_ui.CRhoEdit);
   connectSettingsChange(*m_ui.CAlphaEdit);
@@ -267,6 +281,8 @@ void ExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.analysisModeComboBox);
   disconnectSettingsChange(*m_ui.startOverlapEdit);
   disconnectSettingsChange(*m_ui.endOverlapEdit);
+  disconnectSettingsChange(*m_ui.transStitchParamsEdit);
+  disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
   disconnectSettingsChange(*m_ui.polCorrComboBox);
   disconnectSettingsChange(*m_ui.CRhoEdit);
   disconnectSettingsChange(*m_ui.CAlphaEdit);
@@ -635,24 +651,25 @@ ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
-std::vector<std::array<std::string, 8>>
+std::vector<PerThetaDefaults::ValueArray>
 ExperimentView::getPerAngleOptions() const {
   auto const &table = *m_ui.optionsTable;
-  auto rows = std::vector<std::array<std::string, 8>>();
+  auto rows = std::vector<PerThetaDefaults::ValueArray>();
   rows.reserve(table.rowCount());
   for (auto row = 0; row < table.rowCount(); ++row) {
-    rows.emplace_back(std::array<std::string, 8>{
+    rows.emplace_back(PerThetaDefaults::ValueArray{
         textFromCell(table.item(row, 0)), textFromCell(table.item(row, 1)),
         textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
         textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
-        textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7))});
+        textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
+        textFromCell(table.item(row, 8))});
   }
   return rows;
 }
 GNU_DIAG_ON("missing-braces")
 
 void ExperimentView::setPerAngleOptions(
-    std::vector<std::array<std::string, 8>> rows) {
+    std::vector<PerThetaDefaults::ValueArray> rows) {
   auto &table = *m_ui.optionsTable;
   table.blockSignals(true);
   auto numberOfRows = static_cast<int>(rows.size());
@@ -689,6 +706,26 @@ double ExperimentView::getTransmissionEndOverlap() const {
   return m_ui.endOverlapEdit->value();
 }
 
+void ExperimentView::setTransmissionEndOverlap(double end) {
+  m_ui.endOverlapEdit->setValue(end);
+}
+
+std::string ExperimentView::getTransmissionStitchParams() const {
+  return getText(*m_ui.transStitchParamsEdit);
+}
+
+void ExperimentView::setTransmissionStitchParams(std::string const &params) {
+  setText(*m_ui.transStitchParamsEdit, params);
+}
+
+bool ExperimentView::getTransmissionScaleRHSWorkspace() const {
+  return m_ui.transScaleRHSCheckBox->isChecked();
+}
+
+void ExperimentView::setTransmissionScaleRHSWorkspace(bool enable) {
+  setChecked(*m_ui.transScaleRHSCheckBox, enable);
+}
+
 void ExperimentView::showTransmissionRangeInvalid() {
   showAsInvalid(*m_ui.startOverlapEdit);
   showAsInvalid(*m_ui.endOverlapEdit);
@@ -699,8 +736,12 @@ void ExperimentView::showTransmissionRangeValid() {
   showAsValid(*m_ui.endOverlapEdit);
 }
 
-void ExperimentView::setTransmissionEndOverlap(double end) {
-  m_ui.endOverlapEdit->setValue(end);
+void ExperimentView::showTransmissionStitchParamsValid() {
+  showAsValid(*m_ui.transStitchParamsEdit);
+}
+
+void ExperimentView::showTransmissionStitchParamsInvalid() {
+  showAsInvalid(*m_ui.transStitchParamsEdit);
 }
 
 void ExperimentView::setPolarizationCorrectionType(std::string const &type) {

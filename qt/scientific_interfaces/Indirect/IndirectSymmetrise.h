@@ -51,7 +51,8 @@ public:
 
 private slots:
   void algorithmComplete(bool error);
-  void plotRawInput(const QString &workspaceName);
+  void handleDataReady(QString const &dataName) override;
+  void plotNewData(QString const &workspaceName);
   void updateMiniPlots();
   void replotNewSpectrum(QtProperty *prop, double value);
   void verifyERange(QtProperty *prop, double value);

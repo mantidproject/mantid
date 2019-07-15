@@ -20,7 +20,7 @@ import mantid.plots.helperfunctions as funcs
 from mantid.py3compat.mock import Mock
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
-from mantid.simpleapi import AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
+from mantid.simpleapi import AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces, CreateMDHistoWorkspace, CreateSampleWorkspace, \
     CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace
 
 
@@ -437,13 +437,39 @@ class HelperFunctionsTest(unittest.TestCase):
         np.testing.assert_allclose(z[0], np.array([1, 2, 3]))
         np.testing.assert_allclose(z[1], np.array([1, 2, 3, 4]))
 
-    def test_get_sample_logs(self):
+    def test_get_sample_logs_with_full_time(self):
         x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log', FullTime=True)
         self.assertEqual(x[0], datetime.datetime(2010, 1, 1, 0, 0, 0))
         self.assertEqual(x[1], datetime.datetime(2010, 1, 1, 0, 30, 0))
         self.assertEqual(x[2], datetime.datetime(2010, 1, 1, 0, 50, 0))
         np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
         self.assertTrue(FullTime)
+        self.assertEqual(LogName, 'my_log')
+        self.assertEqual(units, '')
+        self.assertEqual(kwargs, {})
+
+    def test_get_sample_logs_with_relative_time_and_no_start_time(self):
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log',
+                                                                      FullTime=False)
+        self.assertEqual(x[0], 0)
+        self.assertEqual(x[1], 30*60)
+        self.assertEqual(x[2], 50*60)
+        np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
+        self.assertFalse(FullTime)
+        self.assertEqual(LogName, 'my_log')
+        self.assertEqual(units, '')
+        self.assertEqual(kwargs, {})
+
+    def test_get_sample_logs_with_relative_time_and_start_time_later_than_first_log(self):
+        start_time = "2010-01-01T00:00:19"
+        AddSampleLog(self.ws2d_histo, LogName='run_start', LogText=start_time)
+        x, y, FullTime, LogName, units, kwargs = funcs.get_sample_log(self.ws2d_histo, LogName='my_log',
+                                                                      FullTime=False)
+        self.assertEqual(x[0], -19)
+        self.assertEqual(x[1], 1781)
+        self.assertEqual(x[2], 2981)
+        np.testing.assert_allclose(y, np.array([100, 15, 100.2]))
+        self.assertFalse(FullTime)
         self.assertEqual(LogName, 'my_log')
         self.assertEqual(units, '')
         self.assertEqual(kwargs, {})

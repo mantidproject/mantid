@@ -1688,6 +1688,18 @@ QString DetectorPlotController::getTubeXUnitsName() const {
  * Return symbolic name of units of current TubeXUnit.
  */
 QString DetectorPlotController::getTubeXUnitsUnits() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  switch (m_tubeXUnits) {
+  case LENGTH:
+    return "(m)";
+  case PHI:
+    return "(radians)";
+  case OUT_OF_PLANE_ANGLE:
+    return "(radians)";
+  default:
+    return "";
+  }
+#else
   switch (m_tubeXUnits) {
   case LENGTH:
     return "m";
@@ -1698,13 +1710,20 @@ QString DetectorPlotController::getTubeXUnitsUnits() const {
   default:
     return "";
   }
+#endif
+}
+
+void DetectorPlotController::setTubeXUnits(TubeXUnits units) {
+  m_tubeXUnits = units;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_plot->setXLabel(getTubeXUnitsName() + " " + getTubeXUnitsUnits());
+#endif
 }
 
 /**
  * Get the plot caption for the current plot type.
  */
 QString DetectorPlotController::getPlotCaption() const {
-
   switch (m_plotType) {
   case Single:
     return "Plotting detector spectra";

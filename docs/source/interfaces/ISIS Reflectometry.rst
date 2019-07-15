@@ -8,6 +8,22 @@ ISIS Reflectometry Interface
 .. contents:: Table of Contents
   :local:
 
+.. |process| image:: /images/icons/sigma.png
+.. |pause| image:: /images/icons/pause.png
+.. |expandall| image:: /images/icons/expand-all.png
+.. |collapseall| image:: /images/icons/collapse-all.png
+.. |plotrow| image:: /images/icons/chart-line.png
+.. |plotgroup| image:: /images/icons/chart-areaspline.png
+.. |insertrow| image:: /images/icons/table-row-plus-after.png
+.. |removerow| image:: /images/icons/table-row-remove.png
+.. |insertgroup| image:: /images/icons/table-plus.png
+.. |removegroup| image:: /images/icons/table-remove.png
+.. |copy| image:: /images/icons/content-copy.png
+.. |paste| image:: /images/icons/content-paste.png
+.. |cut| image:: /images/icons/content-cut.png
+.. |filldown| image:: /images/icons/arrow-expand-down.png
+.. |transfer| image:: /images/icons/file-move.png
+
 Purpose
 -------
 This user interface allows for batch processing of data reduction for
@@ -22,18 +38,17 @@ data is being processed, and easy to adjust any of the options used.
 Integration with data archives is also provided, allowing for data to
 be located and prepared for reduction automatically.
 
-IPython notebooks which document the processing steps and output
-relevant plots can also be produced from the interface.
-
 Information on how to resolve common problems can be found in the
 `Troubleshooting`_ section of this document.
 
 Example Workflow
 ----------------
 
+Sample Data
+~~~~~~~~~~~
+
 To follow this example you will need the ISIS reflectometry example materials:
 
-* ``INTER_NR_test2.tbl``
 * ``INTER00013460.nxs``
 * ``INTER00013462.nxs``
 * ``INTER00013463.nxs``
@@ -43,111 +58,172 @@ These can be downloaded as part of the `ISIS example data <http://download.manti
 
 Once they are downloaded, place the nxs files in one of Mantid's user directories.
 To see a list of directories, click on **File -> Manage User Directories**.
-``INTER_NR_test2.tbl`` can be saved anywhere you like, as long as you know where it is.
 
-Open MantidPlot, and open the ISIS Reflectometry interface.
-**Interfaces -> Reflectometry -> ISIS Reflectometry**
+Processing Runs
+~~~~~~~~~~~~~~~
 
-Within the interface, we first want to import the tbl file as a TableWorkspace.
-To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadTBL <algm-LoadTBL>`
-dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
-as the output workspace.
+Open either ``MantidWorkbench`` or ``MantidPlot``, and open the ISIS
+Reflectometry interface from the menu: **Interfaces -> Reflectometry -> ISIS
+Reflectometry**
 
-A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis Data Service <Analysis Data Service>`).
-In addition the table workspace should be opened as well and the processing table
-(shown below) should now contain four rows (13460, 13462, 13469, 13470).
+First, we want to enter the runs that we will process into the table. Enter the
+values as shown in the figure below. Just the run number and the angle is the
+minimum requirement.
 
-.. figure:: /images/ISISReflectometryPolref_INTER_table.png
+.. tip:: You can use the `Toolbar`_ or `Keyboard Shortcuts`_ to edit the table,
+  e.g.  ``Tab`` between cells, ``Enter`` to add a new row, ``Ctrl-I`` to insert
+  a child row.
+
+.. figure:: /images/ISISReflectometryInterface/workflow_runs.png
+  :class: screenshot
+  :width: 700px
   :align: center
+  :alt: Run numbers and angles entered into the runs table
+
+  *Run numbers and angles entered into the runs table*
 
 Let's process the first group, which consists of the first two rows of the
-table (13460 and 13462). The simplest way to do this is simply to select the
-group we want to process, and then click on **Process**.
+table (13460 and 13462). Select the group we want to process, and then click on
+|process| **Process**.
 
-.. tip::
-  If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
+.. figure:: /images/ISISReflectometryInterface/workflow_processed.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: The runs table after the first group has been processed
 
-You should now have eleven workspaces in the ADS.
+  *The runs table after the first group has been processed with default settings*
 
-Amongst them should be:
+The rows within the group should turn yellow (probably very briefly) to
+indicate that they are processing, and then green when they have
+completed. Once both rows have been processed, the group will be post-processed
+and it will also turn green. The ``Q min``, ``Q max`` and ``dQ/Q`` cells will
+also be updated with the values that were calculated in the reduction.
 
-TOF_13460
-  This is the data before processing. The X axis is time of flight in µs.
+.. tip:: If a row or group turns blue, it has an error. Hover over the row to
+  see the error message and consult the `Troubleshooting`_ section of this
+  document for guidance on fixing it.
 
-TRANS_13463_13464
-  This is a transmission run, created by running :ref:`CreateTransmissionWorkspace <algm-CreateTransmissionWorkspace>`
-  on ``TOF_13463`` and ``TOF_13464``. The X axis is wavelength in Å.
+Editing Settings
+~~~~~~~~~~~~~~~~
 
-IvsQ_13460
-  This is the output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`. The X
-  axis is momentum transfer in Å\ :sup:`-1`\ .
+The above is a minimal reduction. We also want to use some transmission runs to
+correct this data. We could enter these into the runs table but instead we will
+use the **Experiment Settings** tab to set them as defaults for all runs.  We
+will also set the limits and resolution for the final rebinning in ``Q``, and
+output the debug workspaces.
 
-IvsLam_13460
-  This is the wavelength output workspace of :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`.
-  The X axis is wavelength in Å.
+Enter the following information on the table on the **Experiment Settings**
+tab, and tick the ``Debug`` option. Then re-process the group.
 
-IvsQ_13460_13462
-  This workspace is the result of stitching ``IvsQ_13460`` and ``IvsQ_13462`` together using
-  :ref:`Stitch1DMany <algm-Stitch1DMany>`. The X axis is momentum transfer in Å\ :sup:`-1`\ .
+.. figure:: /images/ISISReflectometryInterface/workflow_settings.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: Editing experiment settings
 
+  *Editing experiment settings*
+  
+Viewing Results
+~~~~~~~~~~~~~~~
+
+You should now have several workspaces in the ADS. Amongst them should be:
+
++-----------------+----------------------------------------------------------------------------+
+|Workspace        | Description                                                                |
++=================+============================================================================+
+|TOF_13460        | This is the data before processing. The X axis is time of flight in        |
+|                 | :math:`\mu s`.                                                             |
++-----------------+----------------------------------------------------------------------------+
+|IvsQ_13460       | This is the output workspace of                                            |
+|                 | :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`. |
+|                 | The X axis is momentum transfer in Å\ :sup:`-1`\ .                         |
++-----------------+----------------------------------------------------------------------------+
+|IvsQ_13460_13462 | This workspace is the result of stitching ``IvsQ_13460`` and ``IvsQ_13462``|
+|                 | together using :ref:`Stitch1DMany <algm-Stitch1DMany>`. The X axis is      |
+|                 | momentum transfer in Å\ :sup:`-1`\ .                                       |
++-----------------+----------------------------------------------------------------------------+
+|IvsLam_13460     | This is the wavelength output workspace of                                 |
+|                 | :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`. |
+|                 | The X axis is wavelength in Å. It is only output if the ``Debug`` option is|
+|                 | ticked.                                                                    |
++-----------------+----------------------------------------------------------------------------+
+|TRANS_13463_13464| This is a transmission run, created by running                             |
+|                 | :ref:`CreateTransmissionWorkspace <algm-CreateTransmissionWorkspace>`      |
+|                 | on ``TOF_13463`` and ``TOF_13464``. The X axis is wavelength in Å.         |
++-----------------+----------------------------------------------------------------------------+
+
+For convenience, the interface provides tools to easily plot the main
+outputs. The plot-rows |plotrow| button plots the reduced runs
+(i.e. ``IvsQ_binned_13460`` and ``IvsQ_binned_13462``) for the selected row(s),
+and/or all rows in the selected group(s). The plot-groups |plotgroup| button
+plots the stitched output for the selected group(s)
+(i.e. ``IvsQ_13460_13462``).
+
+.. figure:: /images/ISISReflectometryInterface/workflow_plot.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: Plotting the results of the reduction
+
+  *Plotting the results of the reduction*
+
+       
 Layout
 ------
 
-Runs tab
+Batches
+~~~~~~~
+
+The main window contains one or more "Batches", which are shown as vertical
+tabs on the left. Each Batch contains a group of settings tabs (Runs, Event
+Handling, Experiment, Instrument and Save ASCII). Together, these provide all
+of the settings for a particular reduction.
+
+.. figure:: /images/ISISReflectometryInterface/batches.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: Batch tabs on the ISIS Reflectometry interface
+
+  *Batch tabs on the left contain all of the reduction settings for a particular batch of runs*
+
+Using multiple batches is useful when users need to apply different options to
+runs measured during the same experiment. For instance, if some runs need to be
+analyzed with a wavelength range of ``LambdaMin=1, LambdaMax=17`` but others
+need a wavelength range of ``LambdaMin=1.5, LambdaMax=15``, users may want to
+enter the first set of runs in the processing table in one batch and the
+second set in the processing table in another batch, and update the settings in
+each batch accordingly. The interface will use the settings from the relevant
+batch to reduce runs in that batch's processing table.
+
+Menu Bar
 ~~~~~~~~
 
-This section describes the different elements in the *Runs* tab.
-
-.. interface:: ISIS Reflectometry
-
-Menu bar
-^^^^^^^^
-
-.. interface:: ISIS Reflectometry
-  :widget: menuBar
-
-The **Reflectometry** menu provides access to the following functionality:
+The main menu currently just contains options for managing batches via the
+**Batch** menu:
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
-| Open Table       | Opens a valid *TableWorkspace* in the `Processing Table`_|
-|                  | for processing.                                          |
-+------------------+----------------------------------------------------------+
-| New Table        | Discards the current contents of the `Processing Table`_ |
-|                  | presenting a blank table.                                |
-+------------------+----------------------------------------------------------+
-| Save Table       | Saves the current contents of the `Processing Table`_ to |
-|                  | the *TableWorkspace* it came from. If no such workspace  |
-|                  | already exists, a new one can be created.                |
-+------------------+----------------------------------------------------------+
-| Save Table As    | Saves the current contents of the `Processing Table`_ to |
-|                  | a new *TableWorkspace*.                                  |
-+------------------+----------------------------------------------------------+
-| Import .TBL      | Opens a :ref:`LoadTBL <algm-LoadTBL>` dialog,            |
-|                  | enabling you to load a ``.tbl`` file into a              |
-|                  | *TableWorkspace*.                                        |
-+------------------+----------------------------------------------------------+
-| Export .TBL      | Opens a :ref:`SaveTBL <algm-SaveTBL>` dialog,            |
-|                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
-|                  | file.                                                    |
-+------------------+----------------------------------------------------------+
-| Options          | Opens the `Options`_                             menu.   |
-+------------------+----------------------------------------------------------+
-| Slit Calculator  | Opens the slit calculator: a tool to help calculate the  |
-|                  | correct geometry for the instruments' slits. It's powered|
-|                  | by the :ref:`CalculateSlits <algm-CalculateSlits>`       |
-|                  | algorithm.                                               |
+| New              | Add a new Batch tab                                      |
 +------------------+----------------------------------------------------------+
 
-The **Edit** menu provides access to the same actions found in the tool bar.
-These are documented in the `Tool Bar`_ section of this document.
+Runs Tab
+~~~~~~~~
+
+This section describes the different elements in the *Runs* tab.
+
+.. figure:: /images/ISISReflectometryInterface/runs_tab.png
+  :class: screenshot
+  :width: 700px
+  :align: center
+  :alt: The runs tab
+
+  *The runs tab*
 
 Processing Table
 ^^^^^^^^^^^^^^^^
-
-.. interface:: ISIS Reflectometry
-  :widget: groupProcessPane
 
 The processing table is where the bulk of the work takes place. It is used to
 specify which runs to process, the properties that should be used to process
@@ -158,110 +234,58 @@ Each row represents a single reduction (i.e. execution of
 and belongs to a group. Rows that are grouped together will have their output stitched
 together using :ref:`Stitch1DMany <algm-Stitch1DMany>`.
 
-Above the processing table is a tool bar containing various actions for
-manipulating the processing table.
+Above the processing table is a `Toolbar`_ containing various actions for
+manipulating the processing table, and a filter bar to allow filtering of the
+table by group or run name. Various `Keyboard Shortcuts`_ are available to help
+with quickly editing the table.
+
+To process, simply select the rows or groups you want to process and click
+**Process** |process|. Alternatively, if nothing is selected, the entire table
+will be processed.
 
 Below the table is a progress bar, which shows the current progress of any
-processing that is in progress. And at the bottom, near the **Process**
-button is the processing instrument selector. The processing instrument is
-used to help identify the correct data to load when processing runs.
+processing that is in progress. When processing the entire table, this will
+show the percentage of the entire table that is complete. When processing a
+selection it will show the percentage of that selection that is complete.
 
-While processing, any runs that have been successfully processed will have their
-row highlighted green. Any groups that have been post-processed successfully
-will also be highlighted. Starting a new reduction will clear all highlighted
-rows and groups.
+.. figure:: /images/ISISReflectometryInterface/processing_table.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The processing table
 
-If reduction is paused and then resumed again, the interface will check if any
-data in previously processed rows and groups had been manually changed in
-between. If data within a row has been altered, the row and its containing group
-will be reprocessed. If rows are added or removed from a group, the group will
-need to be processed again as well. Deleting or renaming the output workspaces
-for processed rows or groups will cause only that item to be processed again. It
-is also possible to change the selection of rows and groups and doing so will
-process new data items while ignoring any deselected ones.
+  *The processing table*
 
-Next to the **Process** button there is a checkbox which allows enabling and
-disabling output to an ipython notebook. If the checkbox is enabled, a dialog
-window will ask for a save location for the notebook after processing is
-complete. A generated notebook contains python code to repeat the processing
-steps and output relevant plots.
+Rows or groups that are currently processing will be highlighted in yellow, and
+those that are successfully complete will be highlighted in green. Note that
+groups that only have a single row do not have any stitching to do so will not
+be processed and therefore will not turn green. If processing fails for any
+reason, the row/group will be highlighted in blue and you can over over it to
+see a tooltip displaying the error message.
 
-**Note**: The interface cannot be closed while runs are being processed. To close
-the interface, you must first stop the reduction by clicking on the **Pause** button.
+Editing any settings that may change the outputs will reset the state for all
+rows and groups. If any rows are added to or removed from a group, the group's
+state will be reset. Deleting any of the mandatory output workspaces will also
+reset the relevant row or group states. Note however that if you rename a
+workspace, the interface will track it, so it will remain associated with its
+original row or group.
 
-Tool Bar
-^^^^^^^^
+If reduction stops and is then resumed, the interface will re-process any rows
+and groups within the current selection that have not been processed, or whose
+state has been reset. If you manually select rows/groups that have an error
+then they too will be reprocessed. However if you process the entire table
+(i.e. click **Process** |process| when nothing is selected), rows/groups that
+have errors will **not** be reprocessed - you can manually select all rows in
+the table if you want to reprocess them.
 
-This table details the behaviour of the actions in the tool bar, from left to right.
-
-.. interface:: ISIS Reflectometry
-  :widget: rowToolBar
-
-.. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips in DataProcessorWidget.ui
-
-+------------------+----------------------------------------------------------+
-| Action           | Effect                                                   |
-+==================+==========================================================+
-| Process          | Processes the selected runs, or, if no runs are selected,|
-|                  | all of the runs in the table. When a group is selected,  |
-|                  | runs belonging to the same group are stitched together.  |
-+------------------+----------------------------------------------------------+
-| Pause            | Pauses processing any selected runs. Processing may be   |
-|                  | resumed by clicking on the 'Process' button.             |
-+------------------+----------------------------------------------------------+
-| Expand Selection | Expands your selection such that the group containing the|
-|                  | row you have selected is selected.                       |
-+------------------+----------------------------------------------------------+
-| Expand Groups    | Expands all currently collapsed groups in the table,     |
-|                  | revealing their individual runs.                         |
-+------------------+----------------------------------------------------------+
-| Collapse Groups  | Collapse all currently expanded groups in the table,     |
-|                  | hiding their individual runs.                            |
-+------------------+----------------------------------------------------------+
-| Plot Selected    | Creates a plot of the IvsQ workspaces generated by any of|
-| Rows             | the selected rows.                                       |
-+------------------+----------------------------------------------------------+
-| Plot Selected    | Creates a plot of the stitched IvsQ workspaces generated |
-| Groups           | by any of the selected groups.                           |
-+------------------+----------------------------------------------------------+
-| Insert Row       | Adds a new row after the first selected row, or at the   |
-|                  | end of the group if a group was selected. If nothing     |
-|                  | was selected the new row is appended at the end of the   |
-|                  | last group.                                              |
-+------------------+----------------------------------------------------------+
-| Insert Group     | Adds a new group after the first selected group, or at   |
-|                  | the end of the table if no groups were selected.         |
-+------------------+----------------------------------------------------------+
-| Group Rows       | Takes all the selected rows and places them in a group   |
-|                  | together, separate from any other group.                 |
-+------------------+----------------------------------------------------------+
-| Copy Rows        | Copies the selected rows to the clipboard. In the        |
-|                  | clipboard, each column's value is separated by a tab, and|
-|                  | each row is placed on a new line.                        |
-+------------------+----------------------------------------------------------+
-| Cut Rows         | Copies the selected rows, and then deletes them.         |
-+------------------+----------------------------------------------------------+
-| Paste Rows       | Pastes the contents of the clipboard into the selected   |
-|                  | rows. If no rows are selected, new rows are inserted.    |
-+------------------+----------------------------------------------------------+
-| Clear Rows       | Resets the cells in any selected rows to their initial   |
-|                  | value, in other words, blank.                            |
-+------------------+----------------------------------------------------------+
-| Delete Row       | Deletes any selected rows. If no rows are selected,      |
-|                  | nothing happens. If the single row of a group is selected|
-|                  | for deletion, the group will also be deleted.            |
-+------------------+----------------------------------------------------------+
-| Delete Group     | Deletes any selected Groups. If no groups are selected,  |
-|                  | nothing happens.                                         |
-+------------------+----------------------------------------------------------+
-| What's This      | Provides guidance on what various parts of the interface |
-|                  | are for.                                                 |
-+------------------+----------------------------------------------------------+
+**Note**: The interface cannot be closed while runs are being processed. To
+close the interface, you must first stop the reduction by clicking on the
+**Pause** |pause| button.
 
 Columns
-^^^^^^^
+=======
 
-.. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips for the columns in QReflTableModel.cpp
+The processing table contains the following columns:
 
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | Column Title        | Required? |  Description                                                                    |
@@ -269,11 +293,14 @@ Columns
 | Run(s)              | **Yes**   | Contains the sample runs to be processed.                                       |
 |                     |           | Runs may be given as run numbers or workspace                                   |
 |                     |           | names. Multiple runs may be added together by                                   |
-|                     |           | separating them with a '+'.                                                     |
+|                     |           | separating them with a ``+`` or ``,``.                                          |
 |                     |           |                                                                                 |
 |                     |           | Example: ``1234+1235+1236``                                                     |
+|                     |           |                                                                                 |
+|                     |           | Note that if a workspace name contains ``+`` or ``,`` you must enter it in      |
+|                     |           | quotes, e.g. ``"TOF_1234+1235+1236"``                                           |
 +---------------------+-----------+---------------------------------------------------------------------------------+
-| Angle               | No        | Contains the angle used during the run, in                                      |
+| Angle               | **Yes**   | Contains the angle used during the run, in                                      |
 |                     |           | degrees. If left blank,                                                         |
 |                     |           | :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`       |
 |                     |           | will calculate theta using                                                      |
@@ -282,9 +309,11 @@ Columns
 |                     |           |                                                                                 |
 |                     |           | Example: ``0.7``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
-| Transmission Run(s) | No        | Contains the transmission run(s) used to                                        |
+| 1st Trans Run(s)    | No        | Contains the transmission run(s) used to                                        |
 |                     |           | normalise the sample runs. To specify two                                       |
-|                     |           | transmission runs, separate them with a comma.                                  |
+| 2nd Trans Run(s)    |           | transmission runs, enter them in each input box.                                |
+|                     |           | Note that as per the Run(s) column, you can sum multiple                        |
+|                     |           | runs for each input by entering multiple values separated by ``+`` or ``,``.    |
 |                     |           | If left blank, the sample runs will be                                          |
 |                     |           | normalised by monitor only.                                                     |
 |                     |           |                                                                                 |
@@ -339,31 +368,127 @@ Columns
 |                     |           | Example: ``RegionOfDirectBeam="0,2", Params="1,2,3"``                           |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 
+Toolbar
+=======
+
+This table details the behaviour of the actions in the tool bar, from left to right.
+
+.. figure:: /images/ISISReflectometryInterface/toolbar.png
+  :class: screenshot
+  :align: center
+  :alt: The runs table toolbar
+
+  *The runs table toolbar*
+
++----------------------------------------+----------------------------------------------------------+
+| Action                                 | Effect                                                   |
++========================================+==========================================================+
+| |process| Process                      | Processes the selected runs, or, if no runs are selected,|
+|                                        | all of the runs in the table. When a group is selected,  |
+|                                        | runs belonging to the same group are stitched together.  |
++----------------------------------------+----------------------------------------------------------+
+| |pause| Pause                          | Pauses processing any selected runs. Processing may be   |
+|                                        | resumed by clicking on the 'Process' button. If the      |
+|                                        | selection has changed, the new selection will be         |
+|                                        | processed.                                               |
++----------------------------------------+----------------------------------------------------------+
+| |expandall| Expand Groups              | Expand all groups so that you can see all child rows.    |
++----------------------------------------+----------------------------------------------------------+
+| |collapseall| Collapse Groups          | Collapse all groups to hide all child rows.              |
++----------------------------------------+----------------------------------------------------------+
+| |plotrow| Plot Selected                | Creates a plot of the IvsQ workspaces generated by any of|
+| Rows                                   | the selected rows (or all child rows of the selected     |
+| Rows                                   | groups).                                                 |
++----------------------------------------+----------------------------------------------------------+
+| |plotgroup| Plot Selected              | Creates a plot of the stitched IvsQ workspaces generated |
+| Groups                                 | by any of the selected groups.                           |
++----------------------------------------+----------------------------------------------------------+
+| |insertrow| Insert Row                 | Inserts a new child row into the selected group          |
++----------------------------------------+----------------------------------------------------------+
+| |removerow| Delete Row                 | Deletes any selected rows. If no rows are selected,      |
+|                                        | nothing happens.                                         |
++----------------------------------------+----------------------------------------------------------+
+| |insertgroup| Insert Group             | Adds a new group after the first selected group, or at   |
+|                                        | the end of the table if no groups were selected.         |
++----------------------------------------+----------------------------------------------------------+
+| |removegroup| Delete Group             | Deletes any selected Groups. If no groups are selected,  |
+|                                        | nothing happens.                                         |
++----------------------------------------+----------------------------------------------------------+
+| |copy| Copy Rows                       | Copies the selected rows or groups into the clipboard.   |
++----------------------------------------+----------------------------------------------------------+
+| |paste| Paste Rows                     | Pastes the contents of the clipboard onto the selected   |
+|                                        | rows or groups. For groups, if no destination is selected|
+|                                        | the they will be pasted as new groups at the end of the  |
+|                                        | table. Rows must always be pasted onto a destination     |
+|                                        | selection of the same size.                              |
++----------------------------------------+----------------------------------------------------------+
+| |cut| Cut Rows                         | Copies the selected rows, and then deletes them.         |
++----------------------------------------+----------------------------------------------------------+
+
+Keyboard Shortcuts
+==================
+
+The following keyboard shortcuts are available for editing in the the runs
+table.
+
++-----------------------------+---------------------------------------+
+| Shortcut                    | Action                                |
++=============================+=======================================+
+|``F2``                       | Edit the current cell                 |
++-----------------------------+---------------------------------------+
+|``Esc``                      | Cancel editing                        |
++-----------------------------+---------------------------------------+
+|``Tab``                      | Next cell                             |
++-----------------------------+---------------------------------------+
+|``Shift-Tab``                | Previous cell                         |
++-----------------------------+---------------------------------------+
+|``Enter``                    | Edit the next row / append a new row  |
++-----------------------------+---------------------------------------+
+|``Ctrl-I``                   | Insert child row                      |
++-----------------------------+---------------------------------------+
+|``Ctrl-X``                   | Cut                                   |
++-----------------------------+---------------------------------------+
+|``Ctrl-C``                   | Copy                                  |
++-----------------------------+---------------------------------------+
+|``Ctrl-V``                   | Paste                                 |
++-----------------------------+---------------------------------------+
+|``Delete``                   | Delete the selected rows/groups       |
++-----------------------------+---------------------------------------+
+|``Up``/``Down``              | Select next/previous row              |
++-----------------------------+---------------------------------------+
+|``Shift-Up``/``Shift-Down``  | Extend selection to next/previous row |
++-----------------------------+---------------------------------------+
+|``Ctrl-A``                   | Select all                            |
++-----------------------------+---------------------------------------+
+
 Search Interface
 ^^^^^^^^^^^^^^^^
 
-.. interface:: ISIS Reflectometry
-  :widget: groupSearchPane
+.. figure:: /images/ISISReflectometryInterface/search.png
+  :class: screenshot
   :align: right
+  :alt: The search interface
+
+  *The search interface*
 
 To search for runs, select the instrument the runs are from, enter the id of
 the investigation the runs are part of, and click on **Search**.
 
-In the table below, valid runs and their descriptions will be listed. You
-can then transfer runs to the processing table by selecting the runs you
-wish to transfer, and click the **Transfer** button. You can also right-click
-on one of the selected runs and select *Transfer* in the context menu that
-appears.
+In the table below, valid runs and their descriptions will be listed. You can
+then transfer runs to the processing table by selecting the runs you wish to
+transfer, and click the **Transfer** |transfer| button. You can also
+right-click on one of the selected runs and select *Transfer* in the context
+menu that appears.
 
-Description Based Search Transfer
-==================================
+Search Transfer
+===============
 
-Description based search transfer uses the descriptions associated with raw files from the experiment.
+Search transfer uses the descriptions associated with raw files from the experiment.
 
-If a run's description contains the text ``in 0.7 theta``, or ``th=0.7``, or
-``th:0.7``, then the interface will deduce that the run's angle (also known
-as theta), was ``0.7``, and enter this value into the angle column for you.
-This holds true for any numeric value.
+If a run's description contains the text ``th=0.7`` at the end of the
+description then the interface will deduce that the run's angle (also known as
+theta), was ``0.7``, and enter this value into the angle column for you.  This
+holds true for any numeric value.
 
 When multiple runs are selected and transferred simultaneously, the interface
 will attempt to organise them appropriately in the processing table. The exact
@@ -374,47 +499,40 @@ behaviour of this is as follows:
 - Any runs with the same description, including their theta value, will be
   merged into a single row, with all the runs listed in the **Run(s)** column
   in the format, ``123+124+125``.
+- Rows within a group will be sorted by angle.
 
-.. _interface-isis-refl-measure-based-search-transfer:
-
-Measure Based Search Transfer
-==============================
-
-Measure based search transfer uses the log-values within nexus files from the experiment to assemble the batch. Since the files themselves are required, not just the overview metadata, the files must be accessible by mantid. One way of doing this is to mount the archive and set the user property ``icatDownload.mountPoint`` to your mount point. It may end up looking something like this ``icatDownload.mountPoint=/Volumes/inst$``. Alternately, you can download the files to your local disk and simply add that directory to the managed search directories in ``Manage User Directories``.
-
-- Any runs with the ``measurement_id`` log, will be
-  placed into the same group.
-- Any runs with the same ``measurement_id`` and the same ``measurement_subid`` logs, will be merged into a single row, with all the runs listed in the **Run(s)** column in the format, ``123+124+125``.
-
-Failed transfers
+Failed Transfers
 ================
-When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
-In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
-.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.png
-   :alt: Selecting runs from search table to transfer to processing table
+When transferring a run from the Search table to the Processing table there may
+exist invalid runs. For example, where theta could not be found or is zero. In
+the image below we have selected four runs from the Search table that we have
+transfered to the processing table.
 
-Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
-run will be highlighted in the Search table.
+.. figure:: /images/ISISReflectometryInterface/transfer.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: Selecting runs from search table to transfer to processing table
 
-.. figure:: /images/ISISReflectometryPolref_failed_transfer_run.png
-   :alt: Failed transfer will be highlighted in orange, successful transfer is put into processing table
+  *Selecting runs from search table to transfer to processing table*
 
-Hovering over the highlighted run with your cursor will allow you to see why the run was invalid.
+Attempting to transfer an invalid run will result in that run not being
+transferred to the processing table. If the transfer was not successful then
+that specific run will be highlighted in blue in the Search table. Hovering
+over the highlighted run with your cursor will allow you to see why the run was
+invalid.
 
-.. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
-   :alt: Showing tooltip from failed transfer.
+Autoprocessing
+^^^^^^^^^^^^^^
 
-Autoprocess
-===========
-
-The **Autoprocess** button allows fully automatic processing of runs for a
-particular investigation. Enter the instrument and investigation ID and then
-click `Autoprocess` to start. This then:
+The interface provides **Autoprocessing**, which allows fully automatic
+processing of runs for a particular investigation. Enter the instrument and
+investigation ID and then click `Autoprocess` to start. This then:
 
 - Searches for runs that are part of the investigation the id was supplied for.
 - Transfers any initial runs found for that investigation from the Search table
-  into the Processing table and processes them.
+  into the Processing table and processes them.y
 - Polls for new runs and transfers and processes any as they are found.
 
 If the investigation has not started yet, polling will begin straight away and
@@ -501,28 +619,29 @@ Live data monitoring has the following requirements:
 - The instrument must be on IBEX or have additional processes installed to supply the EPICS values. If it does not, you will get an error that live values could not be found for `Theta` and the slits.
 
 
-
-Event Handling tab
+Event Handling Tab
 ~~~~~~~~~~~~~~~~~~
 
-.. figure:: /images/ISISReflectometryPolref_event_handling_tab.png
-   :alt: Showing view of the settings tab.
+.. figure:: /images/ISISReflectometryInterface/event_handling_tab.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The event handling tab
 
-The *Event Handling* tab can be used to analyze event workspaces. It contains four text boxes for
+  *The event handling tab*
+
+The **Event Handling** tab can be used to analyze event workspaces. It contains four text boxes for
 specifying uniform even, uniform, custom and log value slicing respectively. Each of these slicing
 options are exclusive, no more than one can be applied. If the text box for the selected slicing
 method is empty no event analysis will be performed, runs will be loaded using
 :ref:`LoadISISNexus <algm-LoadISISNexus>` and analyzed as histogram workspaces. When this text box
 is not empty, runs will be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>` and the
 interface will try to parse the user input to obtain a set of start and stop values. These define
-different time slices that will be passed on to an appropriate filtering algorithm
-(:ref:`FilterByTime <algm-FilterByTime>` for uniform even, uniform and custom slicing,
-:ref:`FilterByLogValue <algm-FilterByLogValue>` for log value slicing). Each time slice will be
+different time slices that will be passed on to the filtering algorithms
+(:ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` and :ref:`FilterEvents <algm-FilterEvents>`). Each time slice will be
 normalized by the total proton charge and reduced as described in the previous section. Note that,
-if any of the runs in a group could not be loaded as an event workspace, the interface will load
-the runs within that group as histogram workspaces and no event analysis will be performed for that
-group. A warning message will be shown when the reduction is complete indicating that some groups
-could not be processed as event data.
+if any of the runs in a group could not be loaded as an event workspace, you will get an error message
+and the reduction will not be performed.
 
 The four slicing options are described in more detail below:
 
@@ -548,60 +667,101 @@ The four slicing options are described in more detail below:
     ``200`` seconds after the start of the run, and the second one starting at ``200`` seconds
     and ending at ``300`` seconds.
 
-- **LogValue** - Like custom slicing this takes a list of comma-separated numbers and are parsed
-  in the same manner as shown above. The values however indicate the minimum and maximum values of
-  the logs we wish to filter rather than times. In addition, this takes a second entry 'Log Name'
+- **LogValue** - This takes a single value which is the log value interval, and also the log name
   which is the name of the log we wish to filter the run for. For example, given a run and entries
-  of ``100, 200, 300`` and ``proton_charge`` for slicing values and log name respectively, we would
-  produce two slices - the first containing all log values between ``100`` and ``200`` seconds, the
-  second containing all log values between ``200`` and ``300`` seconds.
+  of ``100`` and ``proton_charge`` for slicing values and log name respectively, we would
+  produce a number of slices each with interval ``100``.
 
-Workspaces will be named according to the index of the slice, e.g ``IvsQ_13460_slice_0``, ``IvsQ_13460_slice_1``, etc.
+Workspaces will be named with a suffix providing information about the slice, e.g
+``IvsQ_13460_slice_50_75``, ``IvsQ_13460_slice_75_100``, etc.
 
-Settings tab
-~~~~~~~~~~~~
+Experiment and Instrument Settings Tabs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. figure:: /images/ISISReflectometryPolref_settings_tab.png
-   :alt: Showing view of the settings tab.
+.. figure:: /images/ISISReflectometryInterface/experiment_settings_tab.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The experiment settings tab
 
-The *Settings* tab can be used to specify options for the reduction and post-processing.
-These options are used by the interface to provide argument values for the pre-processing,
-processing and post-processing algorithms. Each of these respectively refer to the
-following algorithms:
+  *The experiment Settings tab*
 
-- :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
-  (applied to **Transmission Run(s)**).
-- :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`, main reduction algorithm.
-- :ref:`Stitch1DMany <algm-Stitch1DMany>` (note that at least a bin width must be
-  specified for this algorithm to run successfully, for instance *Params="-0.03"*).
+The **Experiment Settings** and **Instrument Settings** tabs can be used to
+specify options for the reduction and post-processing releting to a specific
+experiment. The Experiment settings are variables that are mostly set by the
+user, whereas the **Instrument Settings** are variables relating to the
+instrument used to perform the reduction. Both are populated with default
+values for the current instrument. The **Restore Defaults** button allows you
+to revert the settings to the default values for the instrument.
 
-Note that when conflicting options are specified for the reduction, i.e. different
-values for the same property are specified via the *Settings* tab and the **Options**
-column in the *Runs* tab, the latter will prevail. Therefore, the **ReflectometryReductionOneAuto**
-settings should be used to specify global options that will be applied to all the
-rows in the table, whereas the **Options** column will only be applicable to the
-specific row for which those options are defined.
+The majority of these options are used by the interface to provide argument
+values for the pre-processing and reduction steps, which are handled by the
+algorithm: :ref:`ReflectometryISISLoadAndProcess
+<algm-ReflectometryISISLoadAndProcess>`
 
-The *Settings* tab is split into two sections, **Experiment settings** and **Instrument
-settings**. The former refers to variables set mostly by the user, while the latter
-refers to variables set by the instrument used to perform the reduction. Both have
-a **Get Defaults** button that fills some of the variables with default values.
-For experiment settings, these are pulled from the **ReflectometryReductionOneAuto**
-algorithm whereas for instrument settings, they are pulled from the current instrument
-being used in the run.
+The exception is ``Output Stitch Params``, which is used for the final
+stitching done by the algorithm :ref:`Stitch1DMany <algm-Stitch1DMany>`. Note
+however that if a bin width is not provided, for instance ``Params="-0.03"``,
+then ``-dQ/Q`` will be used, if specified; otherwise a default value will be
+calculated from the slits, if possible.
 
-If either the *Experiment* or the *Instrument* settings sections are unchecked, this will disable
-all the of the entries for each respective section. In addition, the reduction will not make use of
-the values from any of the disabled entries.
+Note that when conflicting options are specified for the reduction,
+i.e. different values for the same property are specified via one of the
+settings tabs and the cells in the **Runs** tab, the latter will take
+precedence. Therefore, the Settings tabs should be used to specify
+global options that will be applied to all the rows in the table, whereas the
+row values will only be applicable to the specific row for which those options
+are defined.
 
-Save ASCII tab
+Per-Angle Defaults
+^^^^^^^^^^^^^^^^^^
+
+The **Experiment Settings** tab allows some options to be specified on a
+per-angle basis, that is, to specify defaults that will apply only to runs with
+a specific angle. Note that matching angles are searched for within a tolerance
+of ``0.01``. In the per-angle defaults table, you can also specify a "wildcard"
+row, which will apply to all runs that don't also have a matching angle - just
+leave the angle blank to create a wildcard row. Only one wildcard row may
+exist.
+
+.. figure:: /images/ISISReflectometryInterface/workflow_settings.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The per-angle defaults table
+
+  *The per-angle defaults table*
+
+Entries in the per-angle defaults table are similar to the table on the Runs
+tab. Default transmission runs can be specified and each input can take a
+single run/workspace or a number of runs/workspaces that will be summed before
+processing. Specific spectra of interest can be specified for the input runs
+and separate spectra, if required, can be specified for the transmission runs -
+if the latter are not specified then the ``Run Spectra`` will also be used for
+the transmission runs. If both a First and Second tranmission input is
+specified, then they will be stitched using the options specified.
+  
+.. figure:: /images/ISISReflectometryInterface/transmission_runs.png
+  :class: screenshot
+  :width: 600px
+  :align: center
+  :alt: Transmission run options
+
+  *Transmission run options*
+
+Save ASCII Tab
 ~~~~~~~~~~~~~~
 
-.. figure:: /images/ISISReflectometryPolref_save_tab.png
-   :alt: Showing view of the save ASCII tab.
-
-The *Save ASCII* tab allows for processed workspaces to be saved in specific
+The **Save ASCII** tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+
+.. figure:: /images/ISISReflectometryInterface/save_tab.png
+  :class: screenshot
+  :width: 800px
+  :align: center
+  :alt: The save ASCII tab
+
+  *The save ASCII tab*
 
 +-------------------------------+------------------------------------------------------+
 | Name                          | Description                                          |
@@ -649,52 +809,11 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | to specify if you want a Title and/or Q Resolution   |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
-
-Groups
-------
-
-Tabs **Runs**, **Event Handling** and **Settings** contain a tool box with two different groups. These groups
-are useful when users need to apply different options to runs measured during the same experiment. For instance,
-if some runs need to be analyzed with a wavelength range of ``LambdaMin=1, LambdaMax=17`` but others need a
-wavelength range of ``LambdaMin=1.5, LambdaMax=15``, users may want to transfer the first set to the processing
-table in the first group and the second set to the processing table in the second group. The interface will
-use the settings in the first group to reduce runs in the first processing table, and the settings in the
-second group to reduce runs in the second processing table. The process is analogous for time slicing options
-specified in the **Event Handling** tab.
-
-.. _ISIS_Reflectomety-Options:
-
-Options
--------
-
-Through the options menu, a small number of options may be configured to adjust
-the behaviour of the interface.
-
-To open the options menu, click on **Reflectometry -> Options**.
-
-+-------------------------------+------------------------------------------------------+
-| Name                          | Description                                          |
-+===============================+======================================================+
-| Warn when processing all rows | When the **Process** button is pressed with no rows  |
-|                               | selected, all rows will be processed.                |
-|                               | If this is enabled, you will be asked if you're sure |
-|                               | you want to process all rows first.                  |
-+-------------------------------+------------------------------------------------------+
-| Warn when processing only     | If this is enabled and you press **Process** with    |
-| part of a group               | only a subset of a group's rows selected, you will be|
-|                               | asked if you're sure you that's what you intended to |
-|                               | do.                                                  |
-+-------------------------------+------------------------------------------------------+
-| Warn when discarding unsaved  | If this is enabled and you try to open an existing   |
-| changes                       | table, or start a new table, with unsaved changes to |
-|                               | the current table, you will be asked if you're sure  |
-|                               | you want to discard the current table.               |
-+-------------------------------+------------------------------------------------------+
-| Rounding                      | When a column is left blank, the Reflectometry       |
-|                               | interface will try to fill it with a sensible value  |
-|                               | for you. This option allows you to configure whether |
-|                               | the value should be rounded, and if so, to how many  |
-|                               | decimal places.                                      |
+| Automatic Save                | Automatically save the main output workspace for     |
+|                               | groups in the runs table. Note that the stitched     |
+|                               | group output will be saved if there is one or, for   |
+|                               | a single-row group, the ``IvsQ_binned`` row output   |
+|                               | will be saved instead.                               |
 +-------------------------------+------------------------------------------------------+
 
 Troubleshooting
@@ -720,8 +839,8 @@ When I try to process I get an error: "Error encountered while stitching group .
 
 This occurs when Mantid is unable to stitch a group. Please check that at you have
 specified at least the bin width. This can be done either by setting a value in column
-**dQ/Q** before processing the data, or by using the *Stitch1DMany* text
-box in the **Settings** tab to provide the *Params* input property like this:
+**dQ/Q** before processing the data, or by using the ``Output Stitch Params`` text
+box in the **Experiment Settings** tab to provide the *Params* input property like this:
 ``Params="-0.03"`` (you may want to replace ``0.03`` with a bin size suitable for
 your reduction). Note that the "-" sign in this case will produce a logarithmic binning in the
 stitched workspace. For linear binning, use ``Params="0.03"``.
@@ -738,31 +857,12 @@ When I try to process I get an error: "Invalid value for property ... Can not co
 
 This occurs when a boolean property is set to "True" or "False". Please, use ``1`` or ``0`` instead.
 
-The *Open Table* menu doesn't do anything
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The **Open Table** menu contains a list of valid table workspaces to open in the
-processing table. If a workspace is not compatible, it will not be listed. So,
-if there are no compatible workspaces the **Open Table** menu will be empty.
-
 My IvsQ workspaces are not being stitched correctly
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Stitching is controlled by the group a row is in. For stitching to occur, the
-rows must be in the same group, and be processed simultaneously.
-
-An easy way to select all the rows in the same group for stitching is to select one of the
-rows you want stitched, and then in the menu bar select **Edit -> Expand Selection**.
-This will select the group your row is in. If you have another row that you
-would like to add to the group, you can do this easily by adding it to the
-selection, and then in the menu bar selecting **Edit -> Group Selected**.
-
-The *Save Table* option does not output a .TBL file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In the old interface (ISIS Reflectometry) the "Save Table" and "Save Table as.." options
-were used to output a .TBL file into a directory of your choice. This functionality is now
-provided by the "Export .TBL" option in the Options Menu. This will allow you to save a .TBL file
-to a directory of your choice. The "Save Table" option in the Options menu now provides a way for you
-to save the processing table in a TableWorkspace where the name of the TableWorkspace is provided by the user.
+rows must be in the same group, and be processed simultaneously. To select all
+rows in a group, just select the group itself - its child rows are implicitly
+selected.
 
 .. categories:: Interfaces Reflectometry

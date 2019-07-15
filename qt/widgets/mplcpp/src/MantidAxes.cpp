@@ -77,6 +77,20 @@ ErrorbarContainer MantidAxes::errorbar(
   return ErrorbarContainer{pyobj().attr("errorbar")(*args, **kwargs)};
 }
 
+void MantidAxes::pcolormesh(
+    const Mantid::API::MatrixWorkspace_sptr &workspace,
+    const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+  GlobalInterpreterLock lock;
+  const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
+  const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
+
+  Python::Dict kwargs;
+  if (otherKwargs)
+    kwargs = Python::qHashToDict(otherKwargs.get());
+
+  pyobj().attr("pcolormesh")(*args, **kwargs);
+}
+
 /**
  * Remove any artists plotted from the given workspace.
  * @param ws A reference to a workspace whose name is used to

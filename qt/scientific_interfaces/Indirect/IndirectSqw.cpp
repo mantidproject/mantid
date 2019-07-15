@@ -5,13 +5,16 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSqw.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 
 #include <QFileInfo>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
@@ -21,6 +24,17 @@ Mantid::Kernel::Logger g_log("S(Q,w)");
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
+}
+
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+std::pair<double, double>
+roundToWidth(std::tuple<double, double> const &axisRange, double width) {
+  return std::make_pair(roundToPrecision(std::get<0>(axisRange), width) + width,
+                        roundToPrecision(std::get<1>(axisRange), width) -
+                            width);
 }
 
 void convertToSpectrumAxis(std::string const &inputName,
@@ -34,6 +48,11 @@ void convertToSpectrumAxis(std::string const &inputName,
   converter->execute();
 }
 
+std::pair<double, double>
+convertTupleToPair(std::tuple<double, double> const &tuple) {
+  return std::make_pair(std::get<0>(tuple), std::get<1>(tuple));
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -45,8 +64,8 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(plotRqwContour()));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(sqwAlgDone(bool)));
 
@@ -64,9 +83,15 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
-  m_uiForm.rqwPlot2D->setColourBarVisible(false);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_uiForm.rqwPlot2D->setXAxisLabel("Energy (meV)");
   m_uiForm.rqwPlot2D->setYAxisLabel("Q (A-1)");
+#else
+  m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
+#endif
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSampleInput->isOptional(true);
 
   // Disables searching for run files in the data archive
   m_uiForm.dsSampleInput->isForRunFiles(false);
@@ -76,21 +101,55 @@ IndirectSqw::~IndirectSqw() {}
 
 void IndirectSqw::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void IndirectSqw::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsSampleInput, "Sample", DataType::Red);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty()) {
+    showMessageBox(errorMessage);
+  } else {
+    plotRqwContour(dataName.toStdString());
+    setDefaultQAndEnergy();
+  }
+}
+
 bool IndirectSqw::validate() {
   double const tolerance = 1e-10;
+  double const qLow = m_uiForm.spQLow->value();
+  double const qWidth = m_uiForm.spQWidth->value();
+  double const qHigh = m_uiForm.spQHigh->value();
+  auto const qRange =
+      m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft);
+
   UserInputValidator uiv;
 
-  // Validate the data selector
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
+  // Validate the sample
+  validateDataIsOfType(uiv, m_uiForm.dsSampleInput, "Sample", DataType::Red);
 
   // Validate Q binning
-  uiv.checkBins(m_uiForm.spQLow->value(), m_uiForm.spQWidth->value(),
-                m_uiForm.spQHigh->value(), tolerance);
+  uiv.checkBins(qLow, qWidth, qHigh, tolerance);
+  uiv.checkRangeIsEnclosed("The contour plots Q axis",
+                           convertTupleToPair(qRange), "the Q range provided",
+                           std::make_pair(qLow, qHigh));
 
   // If selected, validate energy binning
-  if (m_uiForm.ckRebinInEnergy->isChecked())
-    uiv.checkBins(m_uiForm.spELow->value(), m_uiForm.spEWidth->value(),
-                  m_uiForm.spEHigh->value(), tolerance);
+  if (m_uiForm.ckRebinInEnergy->isChecked()) {
+    double const eLow = m_uiForm.spELow->value();
+    double const eWidth = m_uiForm.spEWidth->value();
+    double const eHigh = m_uiForm.spEHigh->value();
+    auto const eRange =
+        m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
+
+    uiv.checkBins(eLow, eWidth, eHigh, tolerance);
+    uiv.checkRangeIsEnclosed("The contour plots Energy axis",
+                             convertTupleToPair(eRange), "the E range provided",
+                             std::make_pair(eLow, eHigh));
+  }
 
   auto const errorMessage = uiv.generateErrorMessage();
 
@@ -181,41 +240,47 @@ void IndirectSqw::sqwAlgDone(bool error) {
 }
 
 void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
-  m_uiForm.spSpectrum->setMaximum(maximum);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spWorkspaceIndex);
+  m_uiForm.spWorkspaceIndex->setMaximum(maximum);
 }
 
 /**
- * Handles the Plot Input button
+ * Plots the data as a contour plot
  *
  * Creates a colour 2D plot of the data
  */
-void IndirectSqw::plotRqwContour() {
-  auto &ads = AnalysisDataService::Instance();
-  if (m_uiForm.dsSampleInput->isValid()) {
-    auto const sampleName =
-        m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+void IndirectSqw::plotRqwContour(std::string const &sampleName) {
+  auto const outputName = sampleName.substr(0, sampleName.size() - 4) + "_rqw";
 
-    if (ads.doesExist(sampleName)) {
-      auto const outputName =
-          sampleName.substr(0, sampleName.size() - 4) + "_rqw";
-
-      try {
-        convertToSpectrumAxis(sampleName, outputName);
-        if (ads.doesExist(outputName)) {
-          auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
-          if (rqwWorkspace)
-            m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
-        }
-      } catch (std::exception const &ex) {
-        g_log.warning(ex.what());
-        showMessageBox("Invalid file. Please load a valid reduced workspace.");
-      }
+  try {
+    convertToSpectrumAxis(sampleName, outputName);
+    if (AnalysisDataService::Instance().doesExist(outputName)) {
+      auto const rqwWorkspace = getADSMatrixWorkspace(outputName);
+      if (rqwWorkspace)
+        m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
     }
-
-  } else {
-    emit showMessageBox("Invalid file. Please load a valid reduced workspace.");
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    showMessageBox("Invalid file. Please load a valid reduced workspace.");
   }
+}
+
+void IndirectSqw::setDefaultQAndEnergy() {
+  setQRange(m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft));
+  setEnergyRange(
+      m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom));
+}
+
+void IndirectSqw::setQRange(std::tuple<double, double> const &axisRange) {
+  auto const qRange = roundToWidth(axisRange, m_uiForm.spQWidth->value());
+  m_uiForm.spQLow->setValue(qRange.first);
+  m_uiForm.spQHigh->setValue(qRange.second);
+}
+
+void IndirectSqw::setEnergyRange(std::tuple<double, double> const &axisRange) {
+  auto const energyRange = roundToWidth(axisRange, m_uiForm.spEWidth->value());
+  m_uiForm.spELow->setValue(energyRange.first);
+  m_uiForm.spEHigh->setValue(energyRange.second);
 }
 
 void IndirectSqw::setFileExtensionsByName(bool filter) {
@@ -232,7 +297,7 @@ void IndirectSqw::runClicked() { runTab(); }
 void IndirectSqw::plotSpectrumClicked() {
   setPlotSpectrumIsPlotting(true);
 
-  auto const spectrumNumber = m_uiForm.spSpectrum->text().toInt();
+  auto const spectrumNumber = m_uiForm.spWorkspaceIndex->text().toInt();
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumNumber);
 
@@ -242,12 +307,8 @@ void IndirectSqw::plotSpectrumClicked() {
 void IndirectSqw::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-    QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" +
-                      QString::fromStdString(m_pythonExportWsName) +
-                      "').plotGraph2D()\n";
-    m_pythonRunner.runPythonCode(pyInput);
-  }
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    IndirectTab::plot2D(QString::fromStdString(m_pythonExportWsName));
 
   setPlotContourIsPlotting(false);
 }
@@ -264,7 +325,7 @@ void IndirectSqw::setRunEnabled(bool enabled) {
 
 void IndirectSqw::setPlotSpectrumEnabled(bool enabled) {
   m_uiForm.pbPlotSpectrum->setEnabled(enabled);
-  m_uiForm.spSpectrum->setEnabled(enabled);
+  m_uiForm.spWorkspaceIndex->setEnabled(enabled);
 }
 
 void IndirectSqw::setPlotContourEnabled(bool enabled) {

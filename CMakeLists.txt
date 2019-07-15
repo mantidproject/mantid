@@ -228,28 +228,31 @@ endif()
 add_subdirectory(scripts)
 
 # Docs requirements
-find_package(Sphinx 1.2)
-if(SPHINX_FOUND)
-  # run python to see if the theme is installed
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-                          "import sphinx_bootstrap_theme"
-                  OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-                  ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
-                  OUTPUT_STRIP_TRAILING_WHITESPACE
-                  ERROR_STRIP_TRAILING_WHITESPACE)
-  if(SPHINX_BOOTSTRAP_THEME_ERR)
-    message(ERROR " Did not find sphinx_bootstrap_theme")
-    message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-    message(
-      FATAL_ERROR
-        " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
-      )
-  endif()
+option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
+if (ENABLE_DOCS)
+  find_package(Sphinx 1.2)
+  if(SPHINX_FOUND)
+    # run python to see if the theme is installed
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+                            "import sphinx_bootstrap_theme"
+                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE)
+    if(SPHINX_BOOTSTRAP_THEME_ERR)
+      message(ERROR " Did not find sphinx_bootstrap_theme")
+      message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+      message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+      message(
+        FATAL_ERROR
+          " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
+        )
+    endif()
 
-  add_subdirectory(dev-docs)
-  if(ENABLE_MANTIDPLOT)
-    add_subdirectory(docs)
+    add_subdirectory(dev-docs)
+    if(ENABLE_MANTIDPLOT)
+      add_subdirectory(docs)
+    endif()
   endif()
 endif()
 

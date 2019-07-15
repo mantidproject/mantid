@@ -5,16 +5,20 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSymmetrise.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Plotting/SingleSelector.h"
+
+using namespace IndirectDataValidationHelper;
+using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectSymmetrise");
 }
-
-using namespace Mantid::API;
 
 namespace MantidQt {
 using MantidWidgets::AxisID;
@@ -26,6 +30,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
                                        QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+
+  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
 
   int numDecimals = 6;
 
@@ -70,25 +77,25 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_dblManager->setDecimals(m_properties["DeltaY"], numDecimals);
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
-  // Indicators for Y value at each EMin position
-  auto negativeEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
-      "NegativeEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
-  negativeEMinYPos->setInfoOnly(true);
-  negativeEMinYPos->setColour(Qt::blue);
-  negativeEMinYPos->setMinimum(0.0);
+  auto const xLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::XBottom);
+  auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
 
-  auto positiveEMinYPos = m_uiForm.ppRawPlot->addRangeSelector(
-      "PositiveEMinYPos", MantidWidgets::RangeSelector::YSINGLE);
-  positiveEMinYPos->setInfoOnly(true);
+  // Indicators for Y value at each EMin position
+  auto negativeEMinYPos = m_uiForm.ppRawPlot->addSingleSelector(
+      "NegativeEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 0.0);
+  negativeEMinYPos->setColour(Qt::blue);
+  negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
+
+  auto positiveEMinYPos = m_uiForm.ppRawPlot->addSingleSelector(
+      "PositiveEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 1.0);
   positiveEMinYPos->setColour(Qt::red);
-  positiveEMinYPos->setMinimum(0.0);
+  positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
 
   // Indicator for centre of symmetry (x=0)
-  auto centreMarkRaw = m_uiForm.ppRawPlot->addRangeSelector(
-      "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
-  centreMarkRaw->setInfoOnly(true);
+  auto centreMarkRaw = m_uiForm.ppRawPlot->addSingleSelector(
+      "CentreMark", MantidWidgets::SingleSelector::XSINGLE, 0.0);
   centreMarkRaw->setColour(Qt::cyan);
-  centreMarkRaw->setMinimum(0.0);
+  centreMarkRaw->setBounds(std::get<0>(xLimits), std::get<1>(xLimits));
 
   // Indicators for negative and positive X range values on X axis
   // The user can use these to move the X range
@@ -101,22 +108,6 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   auto positiveERaw = m_uiForm.ppRawPlot->addRangeSelector("PositiveE");
   positiveERaw->setColour(Qt::darkGreen);
 
-  // Indicators for negative and positive X range values on X axis
-  auto negativeEPV = m_uiForm.ppPreviewPlot->addRangeSelector("NegativeE");
-  negativeEPV->setInfoOnly(true);
-  negativeEPV->setColour(Qt::darkGreen);
-
-  auto positiveEPV = m_uiForm.ppPreviewPlot->addRangeSelector("PositiveE");
-  positiveEPV->setInfoOnly(true);
-  positiveEPV->setColour(Qt::darkGreen);
-
-  // Indicator for centre of symmetry (x=0)
-  auto centreMarkPV = m_uiForm.ppPreviewPlot->addRangeSelector(
-      "CentreMark", MantidWidgets::RangeSelector::XSINGLE);
-  centreMarkPV->setInfoOnly(true);
-  centreMarkPV->setColour(Qt::cyan);
-  centreMarkPV->setMinimum(0.0);
-
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
@@ -125,8 +116,8 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(replotNewSpectrum(QtProperty *, double)));
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(plotRawInput(const QString &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   // Preview symmetrise
   connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(preview()));
   // X range selectors
@@ -163,6 +154,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.pbRun->setEnabled(false);
   m_uiForm.pbPreview->setEnabled(false);
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsInput->isOptional(true);
+
   // Disables searching for run files in the data archive
   m_uiForm.dsInput->isForRunFiles(false);
 }
@@ -174,21 +168,47 @@ IndirectSymmetrise::~IndirectSymmetrise() {}
 
 void IndirectSymmetrise::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ * @param dataName The name of the data that has been loaded
+ */
+void IndirectSymmetrise::handleDataReady(QString const &dataName) {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+  else
+    plotNewData(dataName);
+}
+
 bool IndirectSymmetrise::validate() {
-  // Check for a valid input file
-  if (!m_uiForm.dsInput->isValid())
-    return false;
+  auto const sampleName = m_uiForm.dsInput->getCurrentDataName();
+
+  UserInputValidator uiv;
+  // Validate the sample workspace
+  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
 
   // EMin and EMax must be positive
   if (m_dblManager->value(m_properties["EMin"]) <= 0.0)
-    return false;
+    uiv.addErrorMessage("EMin must be positive.");
   if (m_dblManager->value(m_properties["EMax"]) <= 0.0)
-    return false;
+    uiv.addErrorMessage("EMax must be positive.");
 
-  return true;
+  auto const errorMessage = uiv.generateErrorMessage();
+
+  // Show an error message if needed
+  if (!errorMessage.isEmpty())
+    emit showMessageBox(errorMessage);
+
+  return errorMessage.isEmpty();
 }
 
 void IndirectSymmetrise::run() {
+  m_uiForm.ppRawPlot->watchADS(false);
+
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) +
                                 "_sym" + workspaceName.right(4);
@@ -227,6 +247,7 @@ void IndirectSymmetrise::run() {
 void IndirectSymmetrise::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
+  m_uiForm.ppRawPlot->watchADS(true);
 
   if (error)
     return;
@@ -240,13 +261,12 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
  * Plots a new workspace in the mini plot when it is loaded form the data
  *selector.
  *
- * @param workspaceName Name of the workspace that has been laoded
+ * @param workspaceName Name of the workspace that has been loaded
  */
-void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
+void IndirectSymmetrise::plotNewData(QString const &workspaceName) {
   // Set the preview spectrum number to the first spectrum in the workspace
-  MatrixWorkspace_sptr sampleWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          workspaceName.toStdString());
+  auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName.toStdString());
   int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
   m_dblManager->setValue(m_properties["PreviewSpec"],
                          static_cast<double>(minSpectrumRange));
@@ -254,7 +274,7 @@ void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
   updateMiniPlots();
 
   // Set the preview range to the maximum absolute X value
-  QPair<double, double> axisRange = m_uiForm.ppRawPlot->getCurveRange("Raw");
+  auto const axisRange = getXRangeFromWorkspace(sampleWS);
   double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
   // Set valid range for range selectors
@@ -268,6 +288,21 @@ void IndirectSymmetrise::plotRawInput(const QString &workspaceName) {
   m_originalMin = axisRange.second / 10;
 
   updateMiniPlots();
+
+  auto const xLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::XBottom);
+  auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
+
+  // Set indicator positions
+  auto negativeEMinYPos =
+      m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
+  negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
+
+  auto positiveEMinYPos =
+      m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
+  positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
+
+  auto centreMarkRaw = m_uiForm.ppRawPlot->getSingleSelector("CentreMark");
+  centreMarkRaw->setBounds(std::get<0>(xLimits), std::get<1>(xLimits));
 }
 
 /**
@@ -292,8 +327,8 @@ void IndirectSymmetrise::updateMiniPlots() {
   m_uiForm.ppRawPlot->addSpectrum("Raw", input, spectrumIndex);
 
   // Match X axis range on preview plot
-  m_uiForm.ppPreviewPlot->setAxisRange(m_uiForm.ppRawPlot->getCurveRange("Raw"),
-                                       AxisID::XBottom);
+  auto const axisRange = getXRangeFromWorkspace(input);
+  m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
 }
 
@@ -388,6 +423,7 @@ void IndirectSymmetrise::preview() {
   // Handle algorithm completion signal
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(previewAlgDone(bool)));
+  m_uiForm.ppRawPlot->watchADS(false);
 
   // Do nothing if no data has been laoded
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
@@ -398,9 +434,9 @@ void IndirectSymmetrise::preview() {
   double e_max = m_dblManager->value(m_properties["EMax"]);
 
   if (e_min == m_originalMin && e_max == m_originalMax) {
-    g_log.error("Preview has been called, but the max and min are still "
-                "default. Please update the min "
-                "and max lines on the top graph.");
+    IndirectTab::showMessageBox(
+        "Preview has been called, but the max and min are still default. "
+        "Please update the min and max lines on the top graph.");
     return;
   }
 
@@ -462,11 +498,17 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
   m_dblManager->setValue(m_properties["PositiveYValue"], positiveY);
   m_dblManager->setValue(m_properties["DeltaY"], deltaY);
 
+  auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
   // Set indicator positions
-  m_uiForm.ppRawPlot->getRangeSelector("NegativeEMinYPos")
-      ->setMinimum(negativeY);
-  m_uiForm.ppRawPlot->getRangeSelector("PositiveEMinYPos")
-      ->setMinimum(positiveY);
+  auto const negativeEMinYPos =
+      m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
+  negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
+  negativeEMinYPos->setPosition(negativeY);
+
+  auto const positiveEMinYPos =
+      m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
+  positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
+  positiveEMinYPos->setPosition(positiveY);
 
   // Plot preview plot
   size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);
@@ -477,6 +519,7 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
   // Don't want this to trigger when the algorithm is run for all spectra
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(previewAlgDone(bool)));
+  m_uiForm.ppRawPlot->watchADS(true);
 }
 
 /**
@@ -488,25 +531,17 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
 void IndirectSymmetrise::updateRangeSelectors(QtProperty *prop, double value) {
   auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
   auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
-  auto negativeEPV = m_uiForm.ppPreviewPlot->getRangeSelector("NegativeE");
-  auto positiveEPV = m_uiForm.ppPreviewPlot->getRangeSelector("PositiveE");
 
   value = fabs(value);
 
   if (prop == m_properties["EMin"]) {
     negativeERaw->setMaximum(-value);
     positiveERaw->setMinimum(value);
-
-    negativeEPV->setMinimum(-value);
-    positiveEPV->setMinimum(value);
   }
 
   if (prop == m_properties["EMax"]) {
     negativeERaw->setMinimum(-value);
     positiveERaw->setMaximum(value);
-
-    negativeEPV->setMaximum(-value);
-    positiveEPV->setMaximum(value);
   }
 }
 

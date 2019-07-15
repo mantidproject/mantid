@@ -76,7 +76,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
 makeEmptyPolarizationCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL FloodCorrections makeFloodCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeTransmissionRunRange();
-MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda makeEmptyTransmissionRunRange();
+MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions
+makeEmptyTransmissionStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeExperiment();
 MANTIDQT_ISISREFLECTOMETRY_DLL Experiment makeEmptyExperiment();
 

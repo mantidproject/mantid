@@ -20,16 +20,15 @@ namespace {
 
 Python::Object
 newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop,
-          double yBottom, double fwhm, bool yDependent,
+          double yBottom, double fwhm,
           boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(
       PyImport_ImportModule("mantidqt.widgets.fitpropertybrowser.markers"))};
 
-  auto const args =
-      Python::NewRef(Py_BuildValue("(Oiddddd)", canvas->pyobj().ptr(), peakID,
-                                   x, yTop, yBottom, fwhm, yDependent));
+  auto const args = Python::NewRef(Py_BuildValue(
+      "(Oidddd)", canvas->pyobj().ptr(), peakID, x, yTop, yBottom, fwhm));
   Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
 
   auto const marker = markersModule.attr("PeakMarker")(*args, **kwargs);
@@ -47,10 +46,9 @@ namespace MplCpp {
  */
 PeakMarker::PeakMarker(FigureCanvasQt *canvas, int peakID, double x,
                        double yTop, double yBottom, double fwhm,
-                       bool yDependent,
                        QHash<QString, QVariant> const &otherKwargs)
-    : InstanceHolder(newMarker(canvas, peakID, x, yTop, yBottom, fwhm,
-                               yDependent, otherKwargs)) {}
+    : InstanceHolder(
+          newMarker(canvas, peakID, x, yTop, yBottom, fwhm, otherKwargs)) {}
 
 /**
  * @brief Redraw the PeakMarker
@@ -116,17 +114,7 @@ void PeakMarker::deselect() { callMethodNoCheck<void>(pyobj(), "deselect"); }
  * @param y The y position of the mouse press in axes coords.
  */
 void PeakMarker::mouseMoveStart(double x, double y) {
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, false);
-}
-
-/**
- * @brief Notifies the relevant marker to start moving.
- * @param x The x position of the mouse press in pixels.
- * @param y The y position of the mouse press in pixels.
- */
-void PeakMarker::mouseMoveStart(int x, int y) {
-
-  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y, true);
+  callMethodNoCheck<void>(pyobj(), "mouse_move_start", x, y);
 }
 
 /**
@@ -146,21 +134,7 @@ void PeakMarker::mouseMoveStop() {
 bool PeakMarker::mouseMove(double x, double y) {
   GlobalInterpreterLock lock;
 
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, false));
-  return PyLong_AsLong(movedPy.ptr()) > 0;
-}
-
-/**
- * @brief Notifies the relevant marker to start moving.
- * @param x The x position of the mouse press in pixels.
- * @param y The y position of the mouse press in pixels.
- * @return True if one of the VerticalMarker's within the RangeMarker has been
- * moved.
- */
-bool PeakMarker::mouseMove(int x, int y) {
-  GlobalInterpreterLock lock;
-
-  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y, true));
+  auto const movedPy = Python::Object(pyobj().attr("mouse_move")(x, y));
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 

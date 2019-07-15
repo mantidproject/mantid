@@ -40,6 +40,8 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
 
+  m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
+
   m_uiForm.dsSampleInput->setTypeSelectorVisible(false);
   m_uiForm.dsCanInput->setTypeSelectorVisible(false);
 }

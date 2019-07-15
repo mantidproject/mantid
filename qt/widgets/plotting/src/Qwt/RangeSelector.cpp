@@ -117,7 +117,7 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
       xPlusdx = m_plot->invTransform(QwtPlot::yLeft, p.y() + 3);
       break;
     }
-    if (inRange(x)) {
+    if (inRange(x, fabs(x - xPlusdx))) {
       if (changingMin(x, xPlusdx)) {
         m_minChanging = true;
         m_canvas->setCursor(m_movCursor);
@@ -143,18 +143,20 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
   {
     if (m_minChanging || m_maxChanging) {
       QPoint p = ((QMouseEvent *)evn)->pos();
-      double x(0.0);
+      double x(0.0), xPlusdx(0.0);
       switch (m_type) {
       case XMINMAX:
       case XSINGLE:
         x = m_plot->invTransform(QwtPlot::xBottom, p.x());
+        xPlusdx = m_plot->invTransform(QwtPlot::xBottom, p.x() + 3);
         break;
       case YMINMAX:
       case YSINGLE:
         x = m_plot->invTransform(QwtPlot::yLeft, p.y());
+        xPlusdx = m_plot->invTransform(QwtPlot::yLeft, p.y() + 3);
         break;
       }
-      if (inRange(x)) {
+      if (inRange(x, fabs(x - xPlusdx))) {
         if (m_minChanging) {
           if (x <= m_max) {
             setMin(x);
@@ -205,14 +207,6 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
 }
 
 /**
- * @return the min and max of the range
- */
-std::pair<double, double> RangeSelector::getRange() {
-  std::pair<double, double> range(m_min, m_max);
-  return range;
-}
-
-/**
  * @brief set the lowest and highest values for the position of the minimum and
  * maximum
  * @post ensures the lines marking the position of the maximum and the minimum
@@ -232,8 +226,17 @@ void RangeSelector::setRange(double min, double max) {
  * maximum
  * @param range
  */
-void RangeSelector::setRange(std::pair<double, double> range) {
+void RangeSelector::setRange(const std::pair<double, double> &range) {
   this->setRange(range.first, range.second);
+}
+
+/**
+ * @brief get the lowest and highest limits for the range selector
+ * @return the limits for the allowed values of the range selector
+ */
+std::pair<double, double> RangeSelector::getRange() const {
+  std::pair<double, double> limits(m_lower, m_higher);
+  return limits;
 }
 
 /**
@@ -432,6 +435,6 @@ void RangeSelector::verify() {
  * @param x
  * @return true if position within the allowed range
  */
-bool RangeSelector::inRange(double x) {
-  return (x >= m_lower && x <= m_higher);
+bool RangeSelector::inRange(double x, double dx) {
+  return (x >= m_lower - dx && x <= m_higher + dx);
 }

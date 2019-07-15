@@ -54,7 +54,7 @@ class SubPlotContextTest(unittest.TestCase):
             patch.return_value = tuple([line()])
             self.context.addLine(ws, 3)
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(self.subplot, ws, specNum=3)
+            patch.assert_called_with(self.subplot, ws, specNum=3, distribution=True)
 
     def test_add_line_errors(self):
         ws = mock.MagicMock()
@@ -103,7 +103,7 @@ class SubPlotContextTest(unittest.TestCase):
             patch.return_value = tuple([lines])
             self.context.addLine(ws, 3)
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(self.subplot, ws, specNum=3)
+            patch.assert_called_with(self.subplot, ws, specNum=3, distribution=True)
             # redraw
             self.context.redraw(lines.get_label())
             self.assertEqual(patch.call_count, 2)
@@ -113,7 +113,8 @@ class SubPlotContextTest(unittest.TestCase):
                 specNum=3,
                 color=lines.get_color(),
                 marker=lines.get_marker(),
-                label=lines.get_label())
+                label=lines.get_label(),
+                distribution=True)
 
     def test_change_errors(self):
         self.context._lines = {"one": 1, "two": 2, "three": 3}
