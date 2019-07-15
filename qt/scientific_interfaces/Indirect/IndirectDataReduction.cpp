@@ -44,7 +44,8 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent)
     : IndirectInterface(parent),
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
-      m_changeObserver(*this, &IndirectDataReduction::handleConfigChange) {
+      m_changeObserver(*this, &IndirectDataReduction::handleConfigChange),
+      m_ipfFilename("") {
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this,
           SLOT(instrumentLoadingDone(bool)));
@@ -109,12 +110,13 @@ void IndirectDataReduction::initLayout() {
           SLOT(instrumentSetupChanged(const QString &, const QString &,
                                       const QString &)));
 
-  // Update the instrument configuration across the UI
-  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
-
-  auto facility = Mantid::Kernel::ConfigService::Instance().getFacility();
+  auto const facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
-  emit newInstrumentConfiguration();
+
+  // Update the instrument configuration across the UI
+  readSettings();
+  m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 
   // Needed to initially apply the settings loaded on the settings GUI
   applySettings(getInterfaceSettings());
@@ -163,6 +165,22 @@ void IndirectDataReduction::instrumentSetupChanged(
 }
 
 /**
+ * Gets the current instrument workspace. It will load the instrument workspace
+ * if there is currently nothing loaded
+ *
+ * @returns Pointer to instrument workspace
+ */
+MatrixWorkspace_sptr IndirectDataReduction::instrumentWorkspace() {
+  if (m_instWorkspace)
+    return m_instWorkspace;
+  m_instWorkspace = loadInstrumentIfNotExist(
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString(),
+      m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString(),
+      m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
+  return m_instWorkspace;
+}
+
+/**
  * Loads an empty instrument into a workspace and returns a pointer to it.
  *
  * If an analyser and reflection are supplied then the corresponding IPF is also
@@ -178,45 +196,48 @@ Mantid::API::MatrixWorkspace_sptr
 IndirectDataReduction::loadInstrumentIfNotExist(
     const std::string &instrumentName, const std::string &analyser,
     const std::string &reflection) {
-  std::string idfDirectory =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "instrumentDefinition.directory");
+  auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+      "instrumentDefinition.directory");
+  auto const ipfFilename = idfDirectory + instrumentName + "_" + analyser +
+                           "_" + reflection + "_Parameters.xml";
 
-  try {
-    auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
-    std::string parameterFilename =
-        idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
-    auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
-    loadAlg->setChild(true);
-    loadAlg->setLogging(false);
-    loadAlg->initialize();
-    loadAlg->setProperty("Filename", parameterFilename);
-    loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
-    loadAlg->execute();
-    MatrixWorkspace_sptr instWorkspace =
-        loadAlg->getProperty("OutputWorkspace");
+  if (ipfFilename != m_ipfFilename) {
+    try {
+      auto const dateRange = instrumentName == "BASIS" ? "_2014-2018" : "";
+      auto const parameterFilename =
+          idfDirectory + instrumentName + "_Definition" + dateRange + ".xml";
+      auto loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
+      loadAlg->setChild(true);
+      loadAlg->setLogging(false);
+      loadAlg->initialize();
+      loadAlg->setProperty("Filename", parameterFilename);
+      loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
+      loadAlg->execute();
+      MatrixWorkspace_sptr instWorkspace =
+          loadAlg->getProperty("OutputWorkspace");
 
-    // Load the IPF if given an analyser and reflection
-    if (!analyser.empty() && !reflection.empty()) {
-      std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser +
-                                "_" + reflection + "_Parameters.xml";
-      IAlgorithm_sptr loadParamAlg =
-          AlgorithmManager::Instance().create("LoadParameterFile");
-      loadParamAlg->setChild(true);
-      loadParamAlg->setLogging(false);
-      loadParamAlg->initialize();
-      loadParamAlg->setProperty("Filename", ipfFilename);
-      loadParamAlg->setProperty("Workspace", instWorkspace);
-      loadParamAlg->execute();
+      // Load the IPF if given an analyser and reflection
+      if (!analyser.empty() && !reflection.empty()) {
+        m_ipfFilename = ipfFilename;
+        auto loadParamAlg =
+            AlgorithmManager::Instance().create("LoadParameterFile");
+        loadParamAlg->setChild(true);
+        loadParamAlg->setLogging(false);
+        loadParamAlg->initialize();
+        loadParamAlg->setProperty("Filename", m_ipfFilename);
+        loadParamAlg->setProperty("Workspace", instWorkspace);
+        loadParamAlg->execute();
+      }
+
+      return instWorkspace;
+    } catch (std::exception const &ex) {
+      g_log.warning() << "Failed to load instrument with error: " << ex.what()
+                      << ". The current facility may not be fully "
+                         "supported.\n";
+      return MatrixWorkspace_sptr();
     }
-
-    return instWorkspace;
-  } catch (std::exception &ex) {
-    g_log.warning() << "Failed to load instrument with error: " << ex.what()
-                    << ". The current facility may not be fully "
-                       "supported.\n";
-    return MatrixWorkspace_sptr();
   }
+  return m_instWorkspace;
 }
 
 /**
@@ -252,13 +273,8 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   if (instrumentName == "IRIS" && analyser == "fmica")
     analyser = "mica";
 
-  if (m_instWorkspace == nullptr) {
-    g_log.warning("Instrument workspace not loaded");
-    return instDetails;
-  }
-
   // Get the instrument
-  auto instrument = m_instWorkspace->getInstrument();
+  auto const instrument = instrumentWorkspace()->getInstrument();
   if (instrument == nullptr) {
     g_log.warning("Instrument workspace has no instrument");
     return instDetails;
@@ -361,6 +377,9 @@ void IndirectDataReduction::handleConfigChange(
     filterUiForFacility(facility);
     m_uiForm.iicInstrumentConfiguration->setFacility(facility);
   }
+  // Update the instrument configuration across the UI
+  m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 }
 
 /**
@@ -380,36 +399,18 @@ void IndirectDataReduction::readSettings() {
 
   QSettings settings;
 
-  // Load settings for MWRunFile widgets
-  // TODO
-  /* settings.beginGroup(m_settingsGroup + "DataFiles"); */
-  /* settings.setValue("last_directory", m_dataDir); */
-  /* m_uiForm.ind_runFiles->readSettings(settings.group()); */
-  /* m_uiForm.cal_leRunNo->readSettings(settings.group()); */
-  /* m_uiForm.slice_inputFile->readSettings(settings.group()); */
-  /* settings.endGroup(); */
-
-  /* settings.beginGroup(m_settingsGroup + "ProcessedFiles"); */
-  /* settings.setValue("last_directory", m_saveDir); */
-  /* m_uiForm.ind_calibFile->readSettings(settings.group()); */
-  /* m_uiForm.ind_mapFile->readSettings(settings.group()); */
-  /* m_uiForm.slice_dsCalibFile->readSettings(settings.group()); */
-  /* m_uiForm.moment_dsInput->readSettings(settings.group()); */
-  /* m_uiForm.sqw_dsSampleInput->readSettings(settings.group()); */
-  /* settings.endGroup(); */
-
   // Load the last used instrument
   settings.beginGroup(m_settingsGroup);
 
-  QString instrumentName = settings.value("instrument-name", "").toString();
+  auto const instrumentName = settings.value("instrument-name", "").toString();
   if (!instrumentName.isEmpty())
     m_uiForm.iicInstrumentConfiguration->setInstrument(instrumentName);
 
-  QString analyserName = settings.value("analyser-name", "").toString();
+  auto const analyserName = settings.value("analyser-name", "").toString();
   if (!analyserName.isEmpty())
     m_uiForm.iicInstrumentConfiguration->setAnalyser(analyserName);
 
-  QString reflectionName = settings.value("reflection-name", "").toString();
+  auto const reflectionName = settings.value("reflection-name", "").toString();
   if (!reflectionName.isEmpty())
     m_uiForm.iicInstrumentConfiguration->setReflection(reflectionName);
 

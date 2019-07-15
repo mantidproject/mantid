@@ -54,7 +54,9 @@ public:
   /// Handled configuration changes
   void handleConfigChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
-  static Mantid::API::MatrixWorkspace_sptr
+  Mantid::API::MatrixWorkspace_sptr instrumentWorkspace();
+
+  Mantid::API::MatrixWorkspace_sptr
   loadInstrumentIfNotExist(const std::string &instrumentName,
                            const std::string &analyser = "",
                            const std::string &reflection = "");
@@ -156,6 +158,8 @@ private:
 
   // Pointer to the current empty instrument workspace
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
+  /// The currently loaded instrument parameter file
+  std::string m_ipfFilename;
 };
 
 } // namespace CustomInterfaces
