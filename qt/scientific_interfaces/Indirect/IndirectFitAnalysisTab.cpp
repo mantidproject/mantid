@@ -645,16 +645,10 @@ void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
-  // disconnect(m_fitPropertyBrowser,
-  //           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-  //           m_plotPresenter.get(), SLOT(updateGuess()));
-
   setAlgorithmProperties(fitAlgorithm);
-
   m_fittingAlgorithm = fitAlgorithm;
   m_spectrumPresenter->disableView();
   m_batchAlgoRunner->addAlgorithm(fitAlgorithm);
-
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(fitAlgorithmComplete(bool)));
 }

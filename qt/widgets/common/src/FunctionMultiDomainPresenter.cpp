@@ -306,11 +306,13 @@ void FunctionMultiDomainPresenter::viewChangedTie(const QString &paramName,
 void FunctionMultiDomainPresenter::viewAddedConstraint(
     const QString &functionIndex, const QString &constraint) {
   m_model->addConstraint(functionIndex, constraint);
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::viewRemovedConstraint(
     const QString &parName) {
   m_model->removeConstraint(parName);
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::viewRequestedCopyToClipboard() {
@@ -323,6 +325,7 @@ void FunctionMultiDomainPresenter::viewRequestedCopyToClipboard() {
 void FunctionMultiDomainPresenter::viewChangedGlobals(
     const QStringList &globalParameters) {
   m_model->setGlobalParameters(globalParameters);
+  emit functionStructureChanged();
 }
 
 QString FunctionMultiDomainPresenter::getFunctionString() const {

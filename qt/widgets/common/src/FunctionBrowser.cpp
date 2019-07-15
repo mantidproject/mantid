@@ -316,7 +316,7 @@ QStringList FunctionBrowser::getGlobalParameters() const {
 }
 
 QStringList FunctionBrowser::getLocalParameters() const {
-  return QStringList();
+  return m_presenter->getLocalParameters();
 }
 
 void FunctionBrowser::setGlobalParameters(const QStringList &globals) {
