@@ -66,12 +66,11 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # --------
         # Remove phi Masking
         if state.mask.phi_min:
-            state.mask.phi_min = 0.0
+            state.mask.phi_min = -90.0
         if state.mask.phi_max:
-            state.mask.phi_max = 0.0
+            state.mask.phi_max = 90.0
 
-        component = self.getProperty("Component").value
-        component_as_string = DetectorType.to_string(component)
+        component_as_string = self.getProperty("Component").value
 
         # Set test centre
         state.move.detectors[component_as_string].sample_centre_pos1 = self.getProperty(
