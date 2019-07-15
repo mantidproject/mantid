@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function
 
 from qtpy import QtWidgets
 from copy import deepcopy
+import matplotlib as mpl
 
 from six import iteritems
 
@@ -91,7 +92,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # plotting
         self.plot_window = None
-        self.colors = ['b', 'g', 'r', 'y', 'c', 'm', 'b']
+        self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
         self.color_index = 0
 
         # layout
@@ -110,8 +111,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     # Return an unused colour, if all used then start with the first one
     def get_color(self):
-        color = self.colors[self.color_index]
-        self.color_index = (self.color_index + 1) % len(self.colors)
+        color = "C%d" % self.color_index
+        self.color_index = (self.color_index + 1) % self.num_colors
 
         return color
 
