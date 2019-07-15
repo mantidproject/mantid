@@ -270,6 +270,13 @@ class MantidAxes(Axes):
                         return ads.retrieve(ws_name), ws_artists.spec_num
         raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
+    def get_artist_normalization_state(self, artist):
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ws_artists.is_normalized
+
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
                                spec_num=None, is_normalized=None):
         """
@@ -421,10 +428,13 @@ class MantidAxes(Axes):
         For keywords related to workspaces, see :func:`plotfunctions.plot` or
         :func:`plotfunctions.errorbar`
         """
+        kwargs['distribution'] = not self.get_artist_normalization_state(artist)
+
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         self.remove_artists_if(lambda art: art == artist)
         workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
         self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
+
         if errorbars:
             new_artist = self.errorbar(workspace, wkspIndex=workspace_index, **kwargs)
         else:
