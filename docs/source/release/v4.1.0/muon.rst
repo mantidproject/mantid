@@ -29,6 +29,7 @@ Bug Fixes
 #########
 
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
+* Frequency Domain Analysis old no longer throws an error when calculating PhaseQuads.
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
 * Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
 * Elemental Analysis no longer crashes when an ill formatted data file is loaded.
