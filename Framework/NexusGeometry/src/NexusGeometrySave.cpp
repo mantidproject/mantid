@@ -13,9 +13,9 @@
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
+#include <memory>
 #include <set>
 #include <string>
-#include <utility>
 
 namespace Mantid {
 namespace NexusGeometry {
