@@ -11,7 +11,11 @@ from qtpy import QtWidgets
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
+
 ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")
+
+frequency_domain = "Frequency Domain "
 
 
 class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
@@ -41,9 +45,22 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         self.run_line_edit.editingFinished.connect(self.handle_run_edit_changed)
         self.phase_quad_checkbox.stateChanged.connect(self.handle_phase_quad_changed)
 
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["MOD"])
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["MAXENT"])
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["RE"])
+        self.time_domain_combo.addItem(frequency_domain+FREQUENCY_EXTENSIONS["IM"])
+
+        self.time_domain_combo.currentIndexChanged.connect(self.time_or_freq)
+        if self.context._frequency_context:
+            self.time_domain_combo.setEnabled(True)
+            self.time_domain_combo.setCurrentIndex(1)
+
     def get_workspace_list(self):
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
-                                                                    rebin=self.rebin)
+                                                                    rebin=self.rebin, freq = "All")
+
+        filtered_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+                                                                     rebin=self.rebin, freq = "None")
 
         filtered_list = [item for item in filtered_list if item not in self.current_workspaces]
 
@@ -55,12 +72,18 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         return model_dict
 
+# make get_names_of_workspaces_to_fit handle if freq or time, default to time
     def get_exclusion_list(self):
+
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs=self.runs,
                                                                     group_and_pair=self.groups_and_pairs,
-                                                                    phasequad=self.phasequad, rebin=self.rebin)
+                                                                    phasequad=self.phasequad, rebin=self.rebin, freq = self.is_it_freq)
+
         excluded_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
-                                                                    rebin=self.rebin)
+                                                                    rebin=self.rebin, freq="None")
+        # add frequency list to excluded - needed for searching
+        excluded_list += self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
+                                                                     rebin=self.rebin, freq="All")
 
         excluded_list = [item for item in excluded_list if item not in filtered_list]
 
@@ -107,3 +130,12 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         selected_list = dialog.get_selected_list()
 
         return(selected_list, result == QtWidgets.QDialog.Accepted)
+
+    @property
+    def is_it_freq(self):
+        if frequency_domain in self.time_domain_combo.currentText():
+            return self.time_domain_combo.currentText()[len(frequency_domain):]
+        return "None"
+
+    def time_or_freq(self):
+        self.update_list()

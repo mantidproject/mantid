@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="D2B" valid-from="2019-06-01 00:00:00"
+valid-to="2100-01-31 23:59:59" last-modified="2019-07-04 13:09:30">
+  <!-- Author: bush@ill.fr -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. The y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+      <theta-sign axis="x" />
+    </reference-frame>
+  </defaults>
+  <!-- Source position -->
+  <component type="monochromator">
+    <location z="-2.997" />
+  </component>
+  <type name="monochromator" is="Source" />
+  <!-- Monitor position -->
+  <component type="monitor" idlist="monitors">
+    <location z="-1.594" name="monitor" />
+  </component>
+  <type name="monitor" is="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.005" y="-0.005" z="-0.005" />
+      <left-front-top-point x="-0.005" y="0.005" z="-0.005" />
+      <left-back-bottom-point x="-0.005" y="-0.005" z="0.005" />
+      <right-front-bottom-point x="0.005" y="-0.005" z="-0.005" />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+  <idlist idname="monitors">
+    <id val="0" />
+  </idlist>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location x="0.0" y="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <!-- Detector IDs -->
+  <idlist idname="detectors">
+    <id start="1" end="16384" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detectors" idlist="detectors">
+    <location x="0.0" y="0.0" z="0.0" />
+  </component>
+  <type name="detectors">
+    <component type="standard_tube">
+      <location r="1.296" t="-6.25" name="tube_1" />
+      <location r="1.296" t="-7.5" name="tube_2" />
+      <location r="1.296" t="-8.75" name="tube_3" />
+      <location r="1.296" t="-10.0" name="tube_4" />
+      <location r="1.296" t="-11.25" name="tube_5" />
+      <location r="1.296" t="-12.5" name="tube_6" />
+      <location r="1.296" t="-13.75" name="tube_7" />
+      <location r="1.296" t="-15.0" name="tube_8" />
+      <location r="1.296" t="-16.25" name="tube_9" />
+      <location r="1.296" t="-17.5" name="tube_10" />
+      <location r="1.296" t="-18.75" name="tube_11" />
+      <location r="1.296" t="-20.0" name="tube_12" />
+      <location r="1.296" t="-21.25" name="tube_13" />
+      <location r="1.296" t="-22.5" name="tube_14" />
+      <location r="1.296" t="-23.75" name="tube_15" />
+      <location r="1.296" t="-25.0" name="tube_16" />
+      <location r="1.296" t="-26.25" name="tube_17" />
+      <location r="1.296" t="-27.5" name="tube_18" />
+      <location r="1.296" t="-28.75" name="tube_19" />
+      <location r="1.296" t="-30.0" name="tube_20" />
+      <location r="1.296" t="-31.25" name="tube_21" />
+      <location r="1.296" t="-32.5" name="tube_22" />
+      <location r="1.296" t="-33.75" name="tube_23" />
+      <location r="1.296" t="-35.0" name="tube_24" />
+      <location r="1.296" t="-36.25" name="tube_25" />
+      <location r="1.296" t="-37.5" name="tube_26" />
+      <location r="1.296" t="-38.75" name="tube_27" />
+      <location r="1.296" t="-40.0" name="tube_28" />
+      <location r="1.296" t="-41.25" name="tube_29" />
+      <location r="1.296" t="-42.5" name="tube_30" />
+      <location r="1.296" t="-43.75" name="tube_31" />
+      <location r="1.296" t="-45.0" name="tube_32" />
+      <location r="1.296" t="-46.25" name="tube_33" />
+      <location r="1.296" t="-47.5" name="tube_34" />
+      <location r="1.296" t="-48.75" name="tube_35" />
+      <location r="1.296" t="-50.0" name="tube_36" />
+      <location r="1.296" t="-51.25" name="tube_37" />
+      <location r="1.296" t="-52.5" name="tube_38" />
+      <location r="1.296" t="-53.75" name="tube_39" />
+      <location r="1.296" t="-55.0" name="tube_40" />
+      <location r="1.296" t="-56.25" name="tube_41" />
+      <location r="1.296" t="-57.5" name="tube_42" />
+      <location r="1.296" t="-58.75" name="tube_43" />
+      <location r="1.296" t="-60.0" name="tube_44" />
+      <location r="1.296" t="-61.25" name="tube_45" />
+      <location r="1.296" t="-62.5" name="tube_46" />
+      <location r="1.296" t="-63.75" name="tube_47" />
+      <location r="1.296" t="-65.0" name="tube_48" />
+      <location r="1.296" t="-66.25" name="tube_49" />
+      <location r="1.296" t="-67.5" name="tube_50" />
+      <location r="1.296" t="-68.75" name="tube_51" />
+      <location r="1.296" t="-70.0" name="tube_52" />
+      <location r="1.296" t="-71.25" name="tube_53" />
+      <location r="1.296" t="-72.5" name="tube_54" />
+      <location r="1.296" t="-73.75" name="tube_55" />
+      <location r="1.296" t="-75.0" name="tube_56" />
+      <location r="1.296" t="-76.25" name="tube_57" />
+      <location r="1.296" t="-77.5" name="tube_58" />
+      <location r="1.296" t="-78.75" name="tube_59" />
+      <location r="1.296" t="-80.0" name="tube_60" />
+      <location r="1.296" t="-81.25" name="tube_61" />
+      <location r="1.296" t="-82.5" name="tube_62" />
+      <location r="1.296" t="-83.75" name="tube_63" />
+      <location r="1.296" t="-85.0" name="tube_64" />
+      <location r="1.296" t="-86.25" name="tube_65" />
+      <location r="1.296" t="-87.5" name="tube_66" />
+      <location r="1.296" t="-88.75" name="tube_67" />
+      <location r="1.296" t="-90.0" name="tube_68" />
+      <location r="1.296" t="-91.25" name="tube_69" />
+      <location r="1.296" t="-92.5" name="tube_70" />
+      <location r="1.296" t="-93.75" name="tube_71" />
+      <location r="1.296" t="-95.0" name="tube_72" />
+      <location r="1.296" t="-96.25" name="tube_73" />
+      <location r="1.296" t="-97.5" name="tube_74" />
+      <location r="1.296" t="-98.75" name="tube_75" />
+      <location r="1.296" t="-100.0" name="tube_76" />
+      <location r="1.296" t="-101.25" name="tube_77" />
+      <location r="1.296" t="-102.5" name="tube_78" />
+      <location r="1.296" t="-103.75" name="tube_79" />
+      <location r="1.296" t="-105.0" name="tube_80" />
+      <location r="1.296" t="-106.25" name="tube_81" />
+      <location r="1.296" t="-107.5" name="tube_82" />
+      <location r="1.296" t="-108.75" name="tube_83" />
+      <location r="1.296" t="-110.0" name="tube_84" />
+      <location r="1.296" t="-111.25" name="tube_85" />
+      <location r="1.296" t="-112.5" name="tube_86" />
+      <location r="1.296" t="-113.75" name="tube_87" />
+      <location r="1.296" t="-115.0" name="tube_88" />
+      <location r="1.296" t="-116.25" name="tube_89" />
+      <location r="1.296" t="-117.5" name="tube_90" />
+      <location r="1.296" t="-118.75" name="tube_91" />
+      <location r="1.296" t="-120.0" name="tube_92" />
+      <location r="1.296" t="-121.25" name="tube_93" />
+      <location r="1.296" t="-122.5" name="tube_94" />
+      <location r="1.296" t="-123.75" name="tube_95" />
+      <location r="1.296" t="-125.0" name="tube_96" />
+      <location r="1.296" t="-126.25" name="tube_97" />
+      <location r="1.296" t="-127.5" name="tube_98" />
+      <location r="1.296" t="-128.75" name="tube_99" />
+      <location r="1.296" t="-130.0" name="tube_100" />
+      <location r="1.296" t="-131.25" name="tube_101" />
+      <location r="1.296" t="-132.5" name="tube_102" />
+      <location r="1.296" t="-133.75" name="tube_103" />
+      <location r="1.296" t="-135.0" name="tube_104" />
+      <location r="1.296" t="-136.25" name="tube_105" />
+      <location r="1.296" t="-137.5" name="tube_106" />
+      <location r="1.296" t="-138.75" name="tube_107" />
+      <location r="1.296" t="-140.0" name="tube_108" />
+      <location r="1.296" t="-141.25" name="tube_109" />
+      <location r="1.296" t="-142.5" name="tube_110" />
+      <location r="1.296" t="-143.75" name="tube_111" />
+      <location r="1.296" t="-145.0" name="tube_112" />
+      <location r="1.296" t="-146.25" name="tube_113" />
+      <location r="1.296" t="-147.5" name="tube_114" />
+      <location r="1.296" t="-148.75" name="tube_115" />
+      <location r="1.296" t="-150.0" name="tube_116" />
+      <location r="1.296" t="-151.25" name="tube_117" />
+      <location r="1.296" t="-152.5" name="tube_118" />
+      <location r="1.296" t="-153.75" name="tube_119" />
+      <location r="1.296" t="-155.0" name="tube_120" />
+      <location r="1.296" t="-156.25" name="tube_121" />
+      <location r="1.296" t="-157.5" name="tube_122" />
+      <location r="1.296" t="-158.75" name="tube_123" />
+      <location r="1.296" t="-160.0" name="tube_124" />
+      <location r="1.296" t="-161.25" name="tube_125" />
+      <location r="1.296" t="-162.5" name="tube_126" />
+      <location r="1.296" t="-163.75" name="tube_127" />
+      <location r="1.296" t="-165.0" name="tube_128" />
+    </component>
+  </type>
+  <!-- Definition of standard_tube -->
+  <type name="standard_tube" outline="yes">
+    <component type="standard_pixel">
+      <location y="-0.155194" />
+      <location y="-0.15275" />
+      <location y="-0.150306" />
+      <location y="-0.147862" />
+      <location y="-0.145418" />
+      <location y="-0.142974" />
+      <location y="-0.14053" />
+      <location y="-0.138086" />
+      <location y="-0.135642" />
+      <location y="-0.133198" />
+      <location y="-0.130754" />
+      <location y="-0.12831" />
+      <location y="-0.125866" />
+      <location y="-0.123422" />
+      <location y="-0.120978" />
+      <location y="-0.118534" />
+      <location y="-0.11609" />
+      <location y="-0.113646" />
+      <location y="-0.111202" />
+      <location y="-0.108758" />
+      <location y="-0.106314" />
+      <location y="-0.10387" />
+      <location y="-0.101426" />
+      <location y="-0.098982" />
+      <location y="-0.096538" />
+      <location y="-0.094094" />
+      <location y="-0.09165" />
+      <location y="-0.089206" />
+      <location y="-0.086762" />
+      <location y="-0.084318" />
+      <location y="-0.081874" />
+      <location y="-0.07943" />
+      <location y="-0.076986" />
+      <location y="-0.074542" />
+      <location y="-0.072098" />
+      <location y="-0.069654" />
+      <location y="-0.06721" />
+      <location y="-0.064766" />
+      <location y="-0.062322" />
+      <location y="-0.059878" />
+      <location y="-0.057434" />
+      <location y="-0.05499" />
+      <location y="-0.052546" />
+      <location y="-0.050102" />
+      <location y="-0.047658" />
+      <location y="-0.045214" />
+      <location y="-0.04277" />
+      <location y="-0.040326" />
+      <location y="-0.037882" />
+      <location y="-0.035438" />
+      <location y="-0.032994" />
+      <location y="-0.03055" />
+      <location y="-0.028106" />
+      <location y="-0.025662" />
+      <location y="-0.023218" />
+      <location y="-0.020774" />
+      <location y="-0.01833" />
+      <location y="-0.015886" />
+      <location y="-0.013442" />
+      <location y="-0.010998" />
+      <location y="-0.008554" />
+      <location y="-0.00611" />
+      <location y="-0.003666" />
+      <location y="-0.001222" />
+      <location y="0.001222" />
+      <location y="0.003666" />
+      <location y="0.00611" />
+      <location y="0.008554" />
+      <location y="0.010998" />
+      <location y="0.013442" />
+      <location y="0.015886" />
+      <location y="0.01833" />
+      <location y="0.020774" />
+      <location y="0.023218" />
+      <location y="0.025662" />
+      <location y="0.028106" />
+      <location y="0.03055" />
+      <location y="0.032994" />
+      <location y="0.035438" />
+      <location y="0.037882" />
+      <location y="0.040326" />
+      <location y="0.04277" />
+      <location y="0.045214" />
+      <location y="0.047658" />
+      <location y="0.050102" />
+      <location y="0.052546" />
+      <location y="0.05499" />
+      <location y="0.057434" />
+      <location y="0.059878" />
+      <location y="0.062322" />
+      <location y="0.064766" />
+      <location y="0.06721" />
+      <location y="0.069654" />
+      <location y="0.072098" />
+      <location y="0.074542" />
+      <location y="0.076986" />
+      <location y="0.07943" />
+      <location y="0.081874" />
+      <location y="0.084318" />
+      <location y="0.086762" />
+      <location y="0.089206" />
+      <location y="0.09165" />
+      <location y="0.094094" />
+      <location y="0.096538" />
+      <location y="0.098982" />
+      <location y="0.101426" />
+      <location y="0.10387" />
+      <location y="0.106314" />
+      <location y="0.108758" />
+      <location y="0.111202" />
+      <location y="0.113646" />
+      <location y="0.11609" />
+      <location y="0.118534" />
+      <location y="0.120978" />
+      <location y="0.123422" />
+      <location y="0.125866" />
+      <location y="0.12831" />
+      <location y="0.130754" />
+      <location y="0.133198" />
+      <location y="0.135642" />
+      <location y="0.138086" />
+      <location y="0.14053" />
+      <location y="0.142974" />
+      <location y="0.145418" />
+      <location y="0.147862" />
+      <location y="0.150306" />
+      <location y="0.15275" />
+      <location y="0.155194" />
+    </component>
+  </type>
+  <type name="standard_pixel" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.001222" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" />
+      <radius val="0.000565486605872" />
+      <height val="0.002444" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+</instrument>

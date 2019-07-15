@@ -13,10 +13,13 @@
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
+#include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/Mpl/SingleSelector.h"
 
 #include <Poco/NObserver.h>
 
 #include <QHash>
+#include <QPair>
 #include <QVariant>
 #include <QWidget>
 #include <list>
@@ -51,6 +54,7 @@ public:
   void watchADS(bool on);
 
   Widgets::MplCpp::FigureCanvasQt *canvas() const;
+  QPointF toDataCoords(const QPoint &point) const;
 
   void addSpectrum(
       const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws,
@@ -61,11 +65,24 @@ public:
       const QColor &lineColour = QColor(),
       const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
   void removeSpectrum(const QString &lineName);
+
+  RangeSelector *
+  addRangeSelector(const QString &name,
+                   RangeSelector::SelectType type = RangeSelector::XMINMAX);
+  RangeSelector *getRangeSelector(const QString &name) const;
+
+  SingleSelector *
+  addSingleSelector(const QString &name,
+                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                    double position = 0.0);
+  SingleSelector *getSingleSelector(const QString &name) const;
+
+  void setSelectorActive(bool active);
+  bool selectorActive() const;
+
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
-
-  void replot();
 
 public slots:
   void clear();
@@ -74,6 +91,7 @@ public slots:
   void setCanvasColour(QColor colour);
   void setLinesWithErrors(QStringList labels);
   void showLegend(bool visible);
+  void replot();
 
 signals:
   void mouseDown(const QPoint &point);
@@ -81,6 +99,7 @@ signals:
   void mouseMove(const QPoint &point);
 
   void redraw();
+  void resetSelectorBounds();
 
 public:
   QColor canvasColour() const;
@@ -94,6 +113,7 @@ private:
   bool handleMousePressEvent(QMouseEvent *evt);
   bool handleMouseReleaseEvent(QMouseEvent *evt);
   bool handleMouseMoveEvent(QMouseEvent *evt);
+  bool handleWindowResizeEvent();
 
   void showContextMenu(QMouseEvent *evt);
 
@@ -117,6 +137,12 @@ private:
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
   // Map a line label to the boolean indicating whether error bars are shown
   QHash<QString, bool> m_lines;
+  // Range selector widgets
+  QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
+  // Single selector's
+  QMap<QString, MantidQt::MantidWidgets::SingleSelector *> m_singleSelectors;
+  // Whether or not a selector is currently being moved
+  bool m_selectorActive;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;

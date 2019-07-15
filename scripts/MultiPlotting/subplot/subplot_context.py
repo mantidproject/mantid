@@ -26,8 +26,8 @@ class subplotContext(object):
         self._subplot.set_position(tmp)
         self._subplot.set_subplotspec(gridspec[j])
 
-    def add_vline(self, xvalue, name):
-        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1)
+    def add_vline(self, xvalue, name, color):
+        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1, color=color)
 
     def add_annotate(self, label):
         self._labelObjects[label.text] = label
@@ -36,8 +36,7 @@ class subplotContext(object):
         if label.in_x_range(x_range):
             self._labels[label.text] = self._subplot.annotate(
                 label.text,
-                xy=(label.get_xval(x_range),
-                    label.get_yval(y_range)),
+                xy=(label.get_xval(x_range), label.get_yval(y_range)),
                 xycoords="axes fraction",
                 rotation=label.rotation)
 
@@ -48,9 +47,9 @@ class subplotContext(object):
         for label in list(self._labelObjects.keys()):
             self.add_annotate(self._labelObjects[label])
 
-    def addLine(self, ws, specNum=1):
+    def addLine(self, ws, specNum=1, distribution=True):
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, specNum=specNum)
+        line, = plots.plotfunctions.plot(self._subplot, ws, specNum=specNum, distribution=distribution)
         label = line.get_label()
         if self._errors:
             line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
@@ -69,7 +68,7 @@ class subplotContext(object):
         else:
             self._ws[ws].append(label)
 
-    def redraw(self, label):
+    def redraw(self, label, distribution=True):
         # get current colour and marker
         colour = copy(self._lines[label][0].get_color())
         marker = copy(self._lines[label][0].get_marker())
@@ -86,8 +85,8 @@ class subplotContext(object):
             all_lines.extend(bar_lines)
             self._lines[label] = all_lines
         else:
-            line, = plots.plotfunctions.plot(self._subplot, self.get_ws(
-                label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
+            line, = plots.plotfunctions.plot(self._subplot, self.get_ws(label), specNum=self.specNum[label],
+                                             color=colour, marker=marker, label=label, distribution=distribution)
             self._lines[label] = [line]
 
     def replace_ws(self, ws):

@@ -10,9 +10,10 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
 
-class FittingTabModelTest(unittest.TestCase):
+class FittingTabModelTest(GuiTest):
     def setUp(self):
         self.model = FittingTabModel(setup_context())
 

@@ -31,12 +31,12 @@ MuSR Changes
 New
 ###
 
-* :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>` GUI added to workbench.
-* :ref:`Muon ALC GUI <MuonALC-ref>` added to workbench.
+* :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>` GUI added to Workbench.
+* :ref:`Muon ALC GUI <MuonALC-ref>` added to Workbench.
 * Added phase tab for calculating :ref:`phase tables <algm-CalMuonDetectorPhases>` and :ref:`PhaseQuad <algm-PhaseQuad>`
   workspaces to Frequency Domain Analysis GUI.
-* :ref:`Muon Analysis v2 <MuonAnalysis_2-ref>` added to MantidPlot and workbench.
-* :ref:`Elemental analysis <Muon_Elemental_Analysis-ref>` interface added to workbench.
+* :ref:`Muon Analysis v2 <MuonAnalysis_2-ref>` added to MantidPlot and Workbench.
+* :ref:`Elemental analysis <Muon_Elemental_Analysis-ref>` interface added to Workbench.
 
 Improvements
 ############
@@ -65,4 +65,6 @@ Bug Fixes
 
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
-* Elemental analysis no longer crashes when it is re-opened an a plot is made.
+* Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
+* Elemental Analysis no longer crashes when an ill formatted data file is loaded.
+* Changed the y-axis label in Elemental Analysis to `Counts`.

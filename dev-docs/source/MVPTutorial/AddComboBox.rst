@@ -9,11 +9,11 @@ user can choose from. If a line edit was used instead then a typo
 would prevent the GUI from working correctly; a ComboBox prevents this
 possibility.
 
-The following code should be added to the View's ``__init__`` function.
+The following code should be added to the view's ``__init__`` function.
 
 .. code-block:: python
 
-    self.combo = QtGui.QComboBox()
+    self.combo = QtWidgets.QComboBox()
     options = ["one", "two", "three"]
     self.combo.addItems(options)
     grid.addWidget(self.combo)

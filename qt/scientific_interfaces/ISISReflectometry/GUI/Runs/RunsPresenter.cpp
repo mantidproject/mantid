@@ -125,6 +125,7 @@ void RunsPresenter::notifySearchFailed() {
 
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyInstrumentChanged() {
@@ -180,6 +181,7 @@ void RunsPresenter::notifyRowOutputsChanged(
 void RunsPresenter::reductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->reductionResumed();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::reductionPaused() {

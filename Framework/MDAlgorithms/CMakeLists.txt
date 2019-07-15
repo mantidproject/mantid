@@ -91,21 +91,6 @@ set(SRC_FILES
     src/PlusMD.cpp
     src/PowerMD.cpp
     src/PreprocessDetectorsToMD.cpp
-    src/Quantification/CachedExperimentInfo.cpp
-    src/Quantification/FitResolutionConvolvedModel.cpp
-    src/Quantification/ForegroundModel.cpp
-    src/Quantification/ForegroundModelFactory.cpp
-    src/Quantification/MDResolutionConvolution.cpp
-    src/Quantification/MDResolutionConvolutionFactory.cpp
-    src/Quantification/Models/MullerAnsatz.cpp
-    src/Quantification/Models/QCoordinate.cpp
-    src/Quantification/Models/Strontium122.cpp
-    src/Quantification/Resolution/ModeratorChopperResolution.cpp
-    src/Quantification/Resolution/TobyFitBMatrix.cpp
-    src/Quantification/Resolution/TobyFitResolutionModel.cpp
-    src/Quantification/Resolution/TobyFitYVector.cpp
-    src/Quantification/ResolutionConvolvedCrossSection.cpp
-    src/Quantification/SimulateResolutionConvolvedModel.cpp
     src/QueryMDWorkspace.cpp
     src/RecalculateTrajectoriesExtents.cpp
     src/ReflectometryTransformKiKf.cpp
@@ -226,21 +211,6 @@ set(
   inc/MantidMDAlgorithms/PlusMD.h
   inc/MantidMDAlgorithms/PowerMD.h
   inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
-  inc/MantidMDAlgorithms/Quantification/CachedExperimentInfo.h
-  inc/MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h
-  inc/MantidMDAlgorithms/Quantification/ForegroundModel.h
-  inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
-  inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
-  inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
-  inc/MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h
-  inc/MantidMDAlgorithms/Quantification/Models/QCoordinate.h
-  inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
-  inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
-  inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
-  inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
-  inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
-  inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
-  inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
   inc/MantidMDAlgorithms/QueryMDWorkspace.h
   inc/MantidMDAlgorithms/RecalculateTrajectoriesExtents.h
   inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
@@ -273,7 +243,6 @@ set(TEST_FILES
     AndMDTest.h
     BooleanBinaryOperationMDTest.h
     BoxControllerSettingsAlgorithmTest.h
-    CachedExperimentInfoTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
     CentroidPeaksMDTest.h
@@ -310,9 +279,7 @@ set(TEST_FILES
     FakeMDEventDataTest.h
     FindPeaksMDTest.h
     FitMDTest.h
-    FitResolutionConvolvedModelTest.h
     FlippingRatioCorrectionMDTest.h
-    ForegroundModelTest.h
     GetSpiceDataRawCountsFromMDTest.h
     GreaterThanMDTest.h
     ImportMDEventWorkspaceTest.h
@@ -338,7 +305,6 @@ set(TEST_FILES
     MDEventWSWrapperTest.h
     MDNormDirectSCTest.h
     MDNormSCDTest.h
-    MDResolutionConvolutionFactoryTest.h
     MDTransfAxisNamesTest.h
     MDTransfFactoryTest.h
     MDTransfModQTest.h
@@ -349,8 +315,6 @@ set(TEST_FILES
     MergeMDFilesTest.h
     MergeMDTest.h
     MinusMDTest.h
-    ModeratorChopperResolutionTest.h
-    MullerAnsatzTest.h
     MultiplyMDTest.h
     NotMDTest.h
     OneStepMDEWTest.h
@@ -364,22 +328,16 @@ set(TEST_FILES
     ReflectometryTransformPTest.h
     ReflectometryTransformQxQzTest.h
     ReplicateMDTest.h
-    ResolutionConvolvedCrossSectionTest.h
     SaveIsawQvectorTest.h
     SaveMD2Test.h
     SaveMDTest.h
     SaveZODSTest.h
     SetMDFrameTest.h
     SetMDUsingMaskTest.h
-    SimulateResolutionConvolvedModelTest.h
     SliceMDTest.h
     SlicingAlgorithmTest.h
     SmoothMDTest.h
-    Strontium122Test.h
     ThresholdMDTest.h
-    TobyFitBMatrixTest.h
-    TobyFitResolutionModelTest.h
-    TobyFitYVectorTest.h
     TransformMDTest.h
     TransposeMDTest.h
     UnaryOperationMDTest.h

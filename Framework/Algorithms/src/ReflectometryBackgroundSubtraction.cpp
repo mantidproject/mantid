@@ -134,6 +134,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   poly->setProperty("Degree", getPropertyValue("DegreeOfPolynomial"));
   poly->setProperty("XRanges", spectrumRanges);
   poly->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  poly->setProperty("Minimizer", "Levenberg-Marquardt");
   poly->execute();
   MatrixWorkspace_sptr bgd = poly->getProperty("OutputWorkspace");
 
@@ -297,6 +298,14 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
+    int range = static_cast<int>(spectraList.back() - spectraList.front());
+    int degree = getProperty("degreeOfPolynomial");
+    if (range < degree) {
+      throw std::invalid_argument(
+          "Cannot fit polynomial, number of data points in region < "
+          "the number of fitting parameters: " +
+          std::to_string(range + 1) + " < " + std::to_string(degree + 1));
+    }
     auto spectrumRanges = findSpectrumRanges(spectraList);
     calculatePolynomialBackground(inputWS, spectrumRanges);
   }

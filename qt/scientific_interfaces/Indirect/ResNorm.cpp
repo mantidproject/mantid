@@ -80,6 +80,10 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsVanadium->isOptional(true);
+  m_uiForm.dsResolution->isOptional(true);
 }
 
 void ResNorm::setFileExtensionsByName(bool filter) {

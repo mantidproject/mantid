@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>524</width>
-    <height>448</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -109,11 +109,54 @@
       <string>Time Slice</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
-       <layout class="QVBoxLayout" name="properties"/>
+       <widget class="QFrame" name="fPropertyTable">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <layout class="QVBoxLayout" name="properties">
+           <property name="topMargin">
+            <number>9</number>
+           </property>
+           <property name="bottomMargin">
+            <number>9</number>
+           </property>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
       <item>
        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppRawPlot" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
         <property name="canvasColour" stdset="0">
          <color>
           <red>255</red>
@@ -132,8 +175,20 @@
       <string>Preview</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_15">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppSlicePreview" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
         <property name="canvasColour" stdset="0">
          <color>
           <red>255</red>
