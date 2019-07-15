@@ -45,7 +45,7 @@ IndirectDataReduction::IndirectDataReduction(QWidget *parent)
       m_settingsGroup("CustomInterfaces/IndirectDataReduction"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)),
       m_changeObserver(*this, &IndirectDataReduction::handleConfigChange),
-      m_ipfFilename("") {
+      m_ipfFilename(""), m_instDetails() {
   // Signals to report load instrument algo result
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), this,
           SLOT(instrumentLoadingDone(bool)));
@@ -155,9 +155,8 @@ void IndirectDataReduction::initLocalPython() {
 void IndirectDataReduction::instrumentSetupChanged(
     const QString &instrumentName, const QString &analyser,
     const QString &reflection) {
-  m_instWorkspace = loadInstrumentIfNotExist(instrumentName.toStdString(),
-                                             analyser.toStdString(),
-                                             reflection.toStdString());
+  loadInstrumentIfNotExist(instrumentName.toStdString(), analyser.toStdString(),
+                           reflection.toStdString());
   instrumentLoadingDone(m_instWorkspace == nullptr);
 
   if (m_instWorkspace != nullptr)
@@ -171,12 +170,11 @@ void IndirectDataReduction::instrumentSetupChanged(
  * @returns Pointer to instrument workspace
  */
 MatrixWorkspace_sptr IndirectDataReduction::instrumentWorkspace() {
-  if (m_instWorkspace)
-    return m_instWorkspace;
-  m_instWorkspace = loadInstrumentIfNotExist(
-      m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString(),
-      m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString(),
-      m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
+  if (!m_instWorkspace)
+    loadInstrumentIfNotExist(
+        m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString(),
+        m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString(),
+        m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString());
   return m_instWorkspace;
 }
 
@@ -190,10 +188,8 @@ MatrixWorkspace_sptr IndirectDataReduction::instrumentWorkspace() {
  * @param instrumentName Name of the instrument to load
  * @param analyser Analyser being used (optional)
  * @param reflection Relection being used (optional)
- * @returns Pointer to instrument workspace
  */
-Mantid::API::MatrixWorkspace_sptr
-IndirectDataReduction::loadInstrumentIfNotExist(
+void IndirectDataReduction::loadInstrumentIfNotExist(
     const std::string &instrumentName, const std::string &analyser,
     const std::string &reflection) {
   auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
@@ -229,24 +225,35 @@ IndirectDataReduction::loadInstrumentIfNotExist(
         loadParamAlg->execute();
       }
 
-      return instWorkspace;
+      m_instWorkspace = instWorkspace;
+      loadInstrumentDetails();
+
     } catch (std::exception const &ex) {
       g_log.warning() << "Failed to load instrument with error: " << ex.what()
                       << ". The current facility may not be fully "
                          "supported.\n";
-      return MatrixWorkspace_sptr();
+      m_instWorkspace = MatrixWorkspace_sptr();
     }
   }
-  return m_instWorkspace;
 }
 
 /**
- * Gets details for the current instrument configuration.
+ * Gets the details for the current instrument configuration.
  *
  * @return Map of information ID to value
  */
 QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
-  QMap<QString, QString> instDetails;
+  if (m_instDetails.isEmpty())
+    loadInstrumentDetails();
+  return m_instDetails;
+}
+
+/**
+ * Loads the details for the current instrument configuration.
+ *
+ */
+void IndirectDataReduction::loadInstrumentDetails() {
+  m_instDetails.clear();
 
   std::string instrumentName =
       m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
@@ -255,9 +262,9 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
   std::string reflection =
       m_uiForm.iicInstrumentConfiguration->getReflectionName().toStdString();
 
-  instDetails["instrument"] = QString::fromStdString(instrumentName);
-  instDetails["analyser"] = QString::fromStdString(analyser);
-  instDetails["reflection"] = QString::fromStdString(reflection);
+  m_instDetails["instrument"] = QString::fromStdString(instrumentName);
+  m_instDetails["analyser"] = QString::fromStdString(analyser);
+  m_instDetails["reflection"] = QString::fromStdString(reflection);
 
   // List of values to get from IPF
   std::vector<std::string> ipfElements{
@@ -275,10 +282,8 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
 
   // Get the instrument
   auto const instrument = instrumentWorkspace()->getInstrument();
-  if (instrument == nullptr) {
+  if (instrument == nullptr)
     g_log.warning("Instrument workspace has no instrument");
-    return instDetails;
-  }
 
   // Get the analyser component
   auto component = instrument->getComponentByName(analyser);
@@ -293,7 +298,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
       if (value.isEmpty() && component != nullptr)
         value = getInstrumentParameterFrom(component, key);
 
-      instDetails[QString::fromStdString(key)] = value;
+      m_instDetails[QString::fromStdString(key)] = value;
     }
     // In the case that the parameter does not exist
     catch (Mantid::Kernel::Exception::NotFoundError &nfe) {
@@ -302,8 +307,6 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
                       << " in instrument " << instrumentName << '\n';
     }
   }
-
-  return instDetails;
 }
 
 /**

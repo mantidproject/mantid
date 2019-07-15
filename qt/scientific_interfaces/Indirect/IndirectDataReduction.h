@@ -56,10 +56,9 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr instrumentWorkspace();
 
-  Mantid::API::MatrixWorkspace_sptr
-  loadInstrumentIfNotExist(const std::string &instrumentName,
-                           const std::string &analyser = "",
-                           const std::string &reflection = "");
+  void loadInstrumentIfNotExist(const std::string &instrumentName,
+                                const std::string &analyser = "",
+                                const std::string &reflection = "");
 
   std::vector<std::pair<std::string, std::vector<std::string>>>
   getInstrumentModes();
@@ -88,6 +87,8 @@ private:
   std::string documentationPage() const override;
 
   void applySettings(std::map<std::string, QVariant> const &settings) override;
+
+  void loadInstrumentDetails();
 
   QString
   getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp,
@@ -156,10 +157,12 @@ private:
   QString m_dataDir; ///< default data search directory
   QString m_saveDir; ///< default data save directory
 
-  // Pointer to the current empty instrument workspace
+  /// Pointer to the current empty instrument workspace
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
   /// The currently loaded instrument parameter file
   std::string m_ipfFilename;
+  /// Stores the details of the instrument
+  QMap<QString, QString> m_instDetails;
 };
 
 } // namespace CustomInterfaces
