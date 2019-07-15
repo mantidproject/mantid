@@ -366,13 +366,6 @@ class MantidAxes(Axes):
             if is_empty:
                 is_empty_list.append(workspace_name)
 
-        # Catch any artists that are not tracked
-        for artist in self.artists + self.lines + self.containers + self.images:
-            if unary_predicate(artist):
-                artist.remove()
-                if isinstance(artist, ErrorbarContainer):
-                    self.containers.remove(artist)
-
         for workspace_name in is_empty_list:
             self.tracked_workspaces.pop(workspace_name)
 
