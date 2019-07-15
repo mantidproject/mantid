@@ -271,13 +271,6 @@ class CurvesTabWidgetPresenter:
     def get_curves_from_ax(ax):
         return ax.get_lines() + CurvesTabWidgetPresenter.get_errorbars_from_ax(ax)
 
-    @staticmethod
-    def get_active_lines(selected_ax, errorbars):
-        active_lines = []
-        active_lines += errorbars
-        active_lines += selected_ax.get_lines()
-        return active_lines
-
     def _update_selected_curve_name(self, curve):
         """Update the selected curve's name in the curve_names_dict"""
         name = self._generate_curve_name(curve, curve.get_label())
