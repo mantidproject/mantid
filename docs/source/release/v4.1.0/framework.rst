@@ -13,7 +13,7 @@ Concepts
 - Support has been added for negative indexing of :ref:`WorkspaceGroups <WorkspaceGroup>`.
   Try :code:`ws_group[-1]` to get the last workspace in the WorkspaceGroup :code:`ws_group`.
 - Updated the clone method of IFunction to copy parameter errors across as well as parameter values.
-  
+
 Algorithms
 ----------
 
@@ -36,6 +36,8 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` can calculate the density from the sample mass
 - We have prevented an error due to locale settings which may appear when reading, for instance, the incident energy Ei value from the logs in :ref:`ConvertUnits <algm-ConvertUnits>` and many other algorithms.
 - :ref:`Pseudo-Voigt <func-PseudoVoigt>` has been modified to be more in line with FULLPROF and GSAS.  One of its basic parameter, Height, is changed to Intensity.
+- :ref:`CalculatePolynomialBackground <algm-CalculatePolynomialBackground>` has an option to select the the minimizer used during fitting.
+- :ref:`CalculatePolynomialBackground <algm-CalculatePolynomialBackground>` has been modified to pass parameters with double precision to make it more correct.
 - 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
 - :ref:`SolidAngle <algm-SolidAngle>` is extended to accommodate new options for fast analytical calculation for SANS-type detectors.
@@ -54,6 +56,8 @@ Bug fixes
 
 - :ref:`SetSample <algm-SetSample>` now correctly handles the Sample number density being passed as a string, before the algorithm would execute, but silently ignored the provided number density, the number density is now properly used.
 - Mantid no longer crashed when invalid period logs encountered in `LoadEventNexus <algm-LoadEventNexus>`. A clear error message is displayed which explains the problem.
+- ISIS sample logs are now correctly filtered by status and period on loading.
+- A bug has been fixed in status log filtering where if a log contained times before the first running log entry then they would be included rather than excluded.
 
 Removed
 #######

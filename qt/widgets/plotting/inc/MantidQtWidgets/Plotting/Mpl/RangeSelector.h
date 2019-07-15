@@ -53,6 +53,7 @@ private slots:
   void handleMouseMove(const QPoint &point);
   void handleMouseUp(const QPoint &point);
 
+  void resetBounds();
   void redrawMarker();
 
 private:
@@ -63,6 +64,8 @@ private:
   PreviewPlot *m_plot;
   /// The range marker
   std::unique_ptr<MantidQt::Widgets::MplCpp::RangeMarker> m_rangeMarker;
+  /// The type of the range marker
+  SelectType m_type;
   /// Is the marker visible or hidden
   bool m_visible;
   ///	Is the marker moving

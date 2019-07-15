@@ -10,6 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import Qt
 
 from mantid import ConfigService
+from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.settings.general.presenter import GeneralSettings
 from workbench.widgets.settings.view import SettingsView
 
@@ -27,7 +28,7 @@ class SettingsPresenter(object):
         self.view.container.addWidget(self.general_settings.view)
 
         self.view.save_settings_button.clicked.connect(self.action_save_settings_button)
-
+        self.view.help_button.clicked.connect(self.action_open_help_window)
         self.ask_before_close = False
 
     def show(self, modal=True):
@@ -62,6 +63,9 @@ class SettingsPresenter(object):
             ConfigService.saveConfig(ConfigService.getUserFilename())
             self.parent.config_updated()
             self.view.close()
+
+    def action_open_help_window(self):
+        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/settings.html')
 
     def refresh_workspaces(self):
         """

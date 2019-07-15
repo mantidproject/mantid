@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::PythonException;
 using Mantid::PythonInterface::callMethodNoCheck;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
@@ -62,7 +63,13 @@ void RangeMarker::redraw() { callMethodNoCheck<void>(pyobj(), "redraw"); }
 /**
  * @brief Remove the RangeMarker from the plot
  */
-void RangeMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
+void RangeMarker::remove() {
+  try {
+    callMethodNoCheck<void>(pyobj(), "remove");
+  } catch (PythonException const &) {
+    // Marker has already been removed
+  }
+}
 
 /**
  * @brief Sets the color of the RangeMarker.
@@ -70,6 +77,31 @@ void RangeMarker::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
  */
 void RangeMarker::setColor(QString const &color) {
   callMethodNoCheck<void>(pyobj(), "set_color", color.toLatin1().constData());
+}
+
+/**
+ * @brief Sets the bounds of the RangeMarker.
+ * @param lowerBound The lower bound.
+ * @param upperBound The upper bound.
+ */
+void RangeMarker::setBounds(double lowerBound, double upperBound) {
+  callMethodNoCheck<void>(pyobj(), "set_bounds", lowerBound, upperBound);
+}
+
+/**
+ * @brief Sets the lower bound of the RangeMarker.
+ * @param minimum The lower bound.
+ */
+void RangeMarker::setLowerBound(double lowerBound) {
+  callMethodNoCheck<void>(pyobj(), "set_lower_bound", lowerBound);
+}
+
+/**
+ * @brief Sets the upper bound of the RangeMarker.
+ * @param upperBound The upper bound.
+ */
+void RangeMarker::setUpperBound(double upperBound) {
+  callMethodNoCheck<void>(pyobj(), "set_upper_bound", upperBound);
 }
 
 /**

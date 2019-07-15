@@ -84,6 +84,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this,
           SLOT(setCanDensity(double)));
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSample->isOptional(true);
+  m_uiForm.dsContainer->isOptional(true);
+
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
                                m_uiForm.leCanChemicalFormula,

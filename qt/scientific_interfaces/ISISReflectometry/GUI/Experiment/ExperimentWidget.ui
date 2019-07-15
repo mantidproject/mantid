@@ -315,17 +315,17 @@
        </column>
        <column>
         <property name="text">
-         <string>1st Transmission Run(s)</string>
+         <string>1st Trans Run(s)</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>2nd Transmission Run(s)</string>
+         <string>2nd Trans Run(s)</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Transmission Spectra</string>
+         <string>Trans Spectra</string>
         </property>
        </column>
        <column>

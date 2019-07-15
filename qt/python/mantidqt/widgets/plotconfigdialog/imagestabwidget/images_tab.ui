@@ -62,6 +62,9 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -73,7 +76,7 @@
      <item row="1" column="2">
       <widget class="QLineEdit" name="label_line_edit">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -81,19 +84,19 @@
        <property name="minimumSize">
         <size>
          <width>190</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>211</width>
-         <height>20</height>
+         <height>22</height>
         </size>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="draw_style_label_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Colormap</string>
        </property>
@@ -103,6 +106,9 @@
       <spacer name="horizontalSpacer_30">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -115,7 +121,7 @@
      <item row="2" column="2">
       <widget class="QComboBox" name="colormap_combo_box">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -126,16 +132,16 @@
          <height>22</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>190</width>
-         <height>22</height>
-        </size>
-       </property>
       </widget>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="width_label_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Min. value</string>
        </property>
@@ -145,6 +151,9 @@
       <spacer name="horizontalSpacer_32">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -156,6 +165,12 @@
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="color_label_4">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Max. value</string>
        </property>
@@ -165,6 +180,9 @@
       <spacer name="horizontalSpacer_29">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -176,6 +194,12 @@
      </item>
      <item row="5" column="0">
       <widget class="QLabel" name="color_label_5">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Interpolation</string>
        </property>
@@ -185,6 +209,9 @@
       <spacer name="horizontalSpacer_33">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -197,7 +224,7 @@
      <item row="5" column="2">
       <widget class="QComboBox" name="interpolation_combo_box">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -208,16 +235,16 @@
          <height>22</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>190</width>
-         <height>22</height>
-        </size>
-       </property>
       </widget>
      </item>
      <item row="6" column="0">
       <widget class="QLabel" name="color_label_6">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Scale</string>
        </property>
@@ -227,6 +254,9 @@
       <spacer name="horizontalSpacer_34">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -239,7 +269,7 @@
      <item row="6" column="2">
       <widget class="QComboBox" name="scale_combo_box">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -250,16 +280,22 @@
          <height>22</height>
         </size>
        </property>
-       <property name="maximumSize">
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QDoubleSpinBox" name="min_value_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
         <size>
          <width>190</width>
          <height>22</height>
         </size>
        </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QDoubleSpinBox" name="min_value_spin_box">
        <property name="decimals">
         <number>4</number>
        </property>
@@ -267,6 +303,18 @@
      </item>
      <item row="4" column="2">
       <widget class="QDoubleSpinBox" name="max_value_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>22</height>
+        </size>
+       </property>
        <property name="decimals">
         <number>4</number>
        </property>
@@ -287,7 +335,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="select_image_combo_box"/>
+      <widget class="QComboBox" name="select_image_combo_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

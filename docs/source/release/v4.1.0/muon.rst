@@ -5,11 +5,6 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-
 :ref:`Release 4.1.0 <v4.1.0>`
 
 New
@@ -23,6 +18,7 @@ Improvements
 ############
 
 * Phase table and phase Quad options from frequency domain transform tab moved to phase calculations tab.
+* When plotting peaks in the Elemental Analysis interface, different elements will appear in different colours.
 
 Bug Fixes
 #########
@@ -31,3 +27,5 @@ Bug Fixes
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
 * Issue where imaginary box was reappearing for FFT transforms after being unselected fixed.
 * Issue where FFT names include an imaginary part when there was no imaginary data used.
+* Elemental Analysis no longer crashes when an ill formatted data file is loaded.
+* Changed the y-axis label in Elemental Analysis to `Counts`.
