@@ -7,6 +7,7 @@
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -469,12 +470,12 @@ H5::Group instrument(const H5::Group &parent,
 H5::Group sample(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
 
-  H5::Group m_group;
+  H5::Group group;
   std::string sampleName = compInfo.name(compInfo.sample());
-  m_group = parent.createGroup(sampleName);
-  writeStrAttribute(m_group, NX_CLASS, NX_SAMPLE);
+  group = parent.createGroup(sampleName);
+  writeStrAttribute(group, NX_CLASS, NX_SAMPLE);
 
-  return m_group;
+  return group;
 }
 
 /*
@@ -492,13 +493,29 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
                                  const Geometry::ComponentInfo &compInfo,
                                  const Geometry::DetectorInfo &detInfo) {
 
-  std::set<size_t> unique_parents;
-  auto allDetIdx = compInfo.detectorsInSubtree(compInfo.root());
-  for (const size_t &i : allDetIdx)
-    unique_parents.insert(compInfo.parent(i));
+  std::vector<size_t> detectorBanks;
+
+  for (size_t i = compInfo.root() - 1; i > 0; --i) {
+    if (compInfo.isDetector(i))
+      break;
+
+    if (compInfo.hasParent(i)) {
+      size_t parent = compInfo.parent(i);
+
+      auto parentType = compInfo.componentType(parent);
+
+      auto whatsthename = compInfo.name(i);
+
+      if (compInfo.detectorsInSubtree(i).size() != 0)
+        if (parentType != Beamline::ComponentType::Rectangular &&
+            parentType != Beamline::ComponentType::Structured &&
+            parentType != Beamline::ComponentType::Grid)
+          detectorBanks.push_back(i);
+    }
+  }
 
   std::vector<H5::Group> detectorGroups;
-  for (const size_t &i : unique_parents) {
+  for (const size_t &i : detectorBanks) {
     std::string name = compInfo.name(i);
 
     H5::Group childGroup = parentGroup.createGroup(name);
@@ -546,7 +563,9 @@ H5::Group source(const H5::Group &parentGroup,
                  const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
-  childGroup = parentGroup.createGroup(compInfo.name(compInfo.source()));
+  auto source = compInfo.source();
+  auto name = compInfo.name(source);
+  childGroup = parentGroup.createGroup(name);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
   return childGroup;
 }
@@ -614,7 +633,7 @@ void saveInstrument(
   NexusGeometrySave::detectors(instrument, compInfo, detInfo);
 
   // NXsource
-  NexusGeometrySave::source(instrument, compInfo);
+  // NexusGeometrySave::source(instrument, compInfo);
 
   // NXsample
   NexusGeometrySave::sample(root, compInfo);
