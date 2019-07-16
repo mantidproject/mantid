@@ -44,6 +44,14 @@ class ElementalAnalysisGUITest(GuiTest):
         gen_label_output = self.GUI._gen_label(name, x_value_in, element="H")
         self.assertEquals(Label, type(gen_label_output))
 
+    def test_plot_line(self):
+        self.GUI._gen_label = mock.Mock()
+        self.GUI._plot_line_once = mock.Mock()
+        self.GUI.plotwindow = None
+        name = "string"
+        x_value_in = 1.0
+        color = "C0"
+        self.assertEqual(None, self.GUI._plot_line(name, x_value_in, color))
 
 
 if __name__ == "__main__":
