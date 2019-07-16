@@ -23,6 +23,7 @@ from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()

@@ -67,6 +67,7 @@ Plotting
 - A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
 - You can now toggle the normalization of plots in Workbench from the plot's context menu
 - Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
+- The plot windows now have a Mouse right-click context menu that allow showing/hiding error bars for each plotted line.
 
 Scripting
 #########
