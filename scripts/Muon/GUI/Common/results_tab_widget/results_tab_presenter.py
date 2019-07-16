@@ -82,6 +82,9 @@ class ResultsTabPresenter(QObject):
         fit_context = self.model._fit_context
         workspace_list = []
         fit_list = fit_context.fit_list
+        if len(fit_list) == 0:
+            return workspace_list, ''
+
         for ii in range(1, fit_context._number_of_fits + 1):
             workspace_list.append(fit_list[-ii].parameter_workspace_name)
         return workspace_list, fit_list[len(fit_list) - 1].fit_function_name

@@ -62,12 +62,13 @@ Scientific Interfaces
 Plotting
 --------
 
-- The plot options dialog has been improved to offer you more control over your figures
+- The plot options dialog has been improved to offer you more control over your figures.
 - You can now plot workspaces on top of figures you've created using scripts. Simply create a matplotlib figure in the
   script window, then drag and drop a workspace on top of it.
 - A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
-- You can now toggle the normalization of plots in Workbench from the plot's context menu
-- Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
+- You can now toggle the normalization of plots in Workbench from the plot's context menu.
+- Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data.
+- The plot windows now have a Mouse right-click context menu that allows showing/hiding error bars for each plotted line.
 
 Scripting
 #########
@@ -76,13 +77,15 @@ Scripting
 
 Bugfixes
 ########
-- An error raised when double-clicking an arrow in the algorithm toolbox
+- An error raised when double-clicking an arrow in the algorithm toolbox.
   when no algorithm was selected has been fixed.
 - Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 - A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
-- The units on the y-axis of distribution workspace plots have been corrected
+- The units on the y-axis of distribution workspace plots have been corrected.
 - Restore Default Layout no longer resizes the main window.
 - Entering an invalid number into a plot's axis editor no longer causes an uncaught error
 - Workbench's scaling of fonts when moved between monitors with different resolutions has been improved
+- The ErrorReporter window is now resizeable
+- The "Fit" button is now visible when plotting a spectrum with error bars
 
 :ref:`Release 4.1.0 <v4.1.0>`
