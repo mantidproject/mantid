@@ -10,11 +10,10 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import matplotlib
-
 matplotlib.use("AGG")  # noqa
-
 import matplotlib.pyplot as plt
 from qtpy.QtWidgets import QMenu
+
 # Pulling in the MantidAxes registers the 'mantid' projection
 from mantid.plots import MantidAxes  # noqa:F401
 from mantid.simpleapi import CreateWorkspace
@@ -36,7 +35,7 @@ def plot_things(make_them_errors):
 
             anonymous_menu = QMenu()
             # this initialises some of the class internals
-            self.errors_manager.add_error_bars_menu(anonymous_menu)
+            self.errors_manager.add_error_bars_menu(anonymous_menu, self.ax)
             return func(self)
 
         return function_parameters
@@ -77,7 +76,7 @@ class FigureErrorsManagerTest(GuiTest):
 
     def test_add_error_bars_menu(self):
         main_menu = QMenu()
-        self.errors_manager.add_error_bars_menu(main_menu)
+        self.errors_manager.add_error_bars_menu(main_menu, self.ax)
 
         # Check the expected sub-menu with buttons is added
         added_menu = main_menu.children()[1]
@@ -148,7 +147,7 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         # plot above doesn't have errors, nor is a MantidAxes
         # so no context menu will be added
-        self.errors_manager.add_error_bars_menu(main_menu)
+        self.errors_manager.add_error_bars_menu(main_menu, self.ax)
 
         # number of children should remain unchanged
         self.assertEqual(1, len(main_menu.children()))
@@ -166,7 +165,7 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         # plot above doesn't have errors, nor is a MantidAxes
         # so no context menu will be added for error bars
-        self.errors_manager.add_error_bars_menu(main_menu)
+        self.errors_manager.add_error_bars_menu(main_menu, self.ax)
 
         # number of children should remain unchanged
         self.assertEqual(1, len(main_menu.children()))
@@ -182,7 +181,7 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         # plot above doesn't have errors, nor is a MantidAxes
         # so no context menu will be added
-        self.errors_manager.add_error_bars_menu(main_menu)
+        self.errors_manager.add_error_bars_menu(main_menu, self.ax)
 
         added_menu = main_menu.children()[1]
 
@@ -198,7 +197,7 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         anonymous_menu = QMenu()
         # this initialises some of the class internals
-        self.errors_manager.add_error_bars_menu(anonymous_menu)
+        self.errors_manager.add_error_bars_menu(anonymous_menu, self.ax)
 
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
         self.errors_manager._toggle_all_errors(self.ax, make_visible=False)
@@ -206,6 +205,6 @@ class ScriptedPlotFigureErrorsManagerTest(GuiTest):
 
         # make the menu again, this updates the internal state of the errors manager
         # and is what actually happens when the user opens the menu again
-        self.errors_manager.add_error_bars_menu(anonymous_menu)
+        self.errors_manager.add_error_bars_menu(anonymous_menu, self.ax)
         self.errors_manager._toggle_all_errors(self.ax, make_visible=True)
         self.assertTrue(self.ax.containers[0][2][0].get_visible())

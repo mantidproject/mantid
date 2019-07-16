@@ -28,7 +28,7 @@ class FigureErrorsManager(object):
         self.canvas = canvas
         self.active_lines = []
 
-    def add_error_bars_menu(self, parent_menu):
+    def add_error_bars_menu(self, parent_menu, ax):
         """
         Add menu actions to toggle the errors for all lines in the plot.
 
@@ -43,8 +43,8 @@ class FigureErrorsManager(object):
 
         :param parent_menu: The menu to which the actions will be added
         :type parent_menu: QMenu
+        :param ax: The Axes containing lines to toggle errors on
         """
-        ax = self.canvas.figure.axes[0]  # type: matplotlib.axes.Axes
         # if the ax is not a MantidAxes, and there are no errors plotted,
         # then do not add any options for the menu
         if not isinstance(ax, MantidAxes) and len(ax.containers) == 0:
