@@ -141,6 +141,22 @@ public:
     return false;
   } // namespace
 
+  double readDoubleFromDataset(std::string &datasetName,
+                               std::string &pathToGroup) {
+    double value;
+    int rank = 1;
+    hsize_t dims[(hsize_t)1];
+    dims[0] = (hsize_t)1;
+
+    H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+
+    // open dataset and read.
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    H5::DataSet dataset = parentGroup.openDataSet(datasetName);
+    dataset.read(&value, H5::PredType::NATIVE_DOUBLE, space);
+    return value;
+  }
+
   // check dataset exists in path with attribute value of NX_class.
   bool hasNXDataset(const std::string pathToGroup,
                     const std::string nx_attributeVal) {
@@ -620,22 +636,61 @@ public:
 
     auto pathToparent = "/raw_data_1/";
     auto sampleName = compInfo.name(compInfo.sample());
-    auto fullPath = pathToparent + sampleName;
+    auto fullPathToGroup = pathToparent + sampleName;
 
-    hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+    hasNXTransformation =
+        tester.hasNXDataset(fullPathToGroup, NX_TRANSFORMATION);
 
     // assert the test sample has Nxtransformation.
     TS_ASSERT(hasNXTransformation);
 
     hasTranslation =
-        tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
+        tester.hasDataset(fullPathToGroup, TRANSLATION, TRANSFORMATION_TYPE);
 
-    hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
+    hasRotation =
+        tester.hasDataset(fullPathToGroup, ROTATION, TRANSFORMATION_TYPE);
 
     if (!(hasRotation || hasTranslation))
       hasEither = false;
 
     TS_ASSERT(hasEither);
+  }
+
+  void test_rotation_of_sample_written_to_file_in_nx_format() {
+    /* <= just remove this
+    const Quat sampleRotation(30, V3D(1, 0, 0));
+    const Quat sourceRotation(90, V3D(0, 1, 0));
+
+    auto instrument =
+        ComponentCreationHelper::createSimpleInstrumentWithRotation2(
+            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 10),
+            sampleRotation,  // sample rotation
+            sourceRotation); // source rotation
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+        auto &compInfo = (*instr.first);
+
+    ScopedFileHandle fileResource(
+        "check_nxdetector_groups_have_transformation_types_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    saveInstrument(instr, destinationFile);
+    HDF5FileTestUtility tester(destinationFile);
+
+        auto pathToparent = "/raw_data_1/";
+    auto sampleName = compInfo.name(compInfo.sample());
+    auto fullPathToGroup = pathToparent + sampleName;
+
+
+        std::string dataSetName = "orientation";
+        double angle = tester.readDoubleFromDataset(dataSetName,
+    fullPathToGroup);
+    /*
+    open dataset 'orientation' in sample group, read dataset value. assert equal
+    to sample rotation w. oppen attribute 'vector' belonging to orientation,
+    read attribute. assert values equal i j k.
+    */
   }
 };
 

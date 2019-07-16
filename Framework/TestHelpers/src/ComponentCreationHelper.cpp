@@ -789,6 +789,62 @@ Instrument_sptr createSimpleInstrumentWithRotation(
   return instrument;
 }
 
+/**
+ * createOneDetectorInstrument, creates the most simple possible definition of
+ * an instrument in which we can extract a valid L1 and L2 distance for unit
+ * calculations.
+ *
+ * Beam direction is along Z,
+ * Up direction is Y
+ *
+ * @param sourcePos : V3D position
+ * @param samplePos : V3D sample position
+ * @param detectorPos : V3D detector position
+ * @param relativeBankRotation : Quat relative bank rotation
+ * @param relativeDetRotation : Quat relative detector rotation
+ * @return Instrument generated.
+ */
+Instrument_sptr createInstrumentWithSampleAndSourceRotation(
+    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
+    const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::Quat &relativeSampleRotation,
+    const Mantid::Kernel::Quat &relativeSourceRotation) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  source->setRot(relativeSourceRotation);
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  sample->setRot(relativeSampleRotation);
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  // A detector
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  det->setPos({0, 0, 0}); // No offset relative to parent CompAssembly
+  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->markAsDetector(det);
+
+  auto compAss = new ObjCompAssembly("detector-stage");
+  compAss->add(det);
+  compAss->setPos(detectorPos);
+
+  instrument->add(compAss);
+
+  return instrument;
+}
+
 CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
 
   double width_d = double(width);
