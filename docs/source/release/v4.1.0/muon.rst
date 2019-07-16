@@ -54,12 +54,11 @@ Improvements
 * In the `Select data to fit` window it is possible to search the spectra of interest and select the ones to be fitted.
 * The order of a sequential fit can then be chosen by dragging the spectral lines and ordering them
 
-
 Removed
 #######
 
 * Removed the algorithm GetNegMuMuonicXRDDialog as the new Elemental Analysis interface provides the same, improved, functionality.
-
+* An issue which prevented the fit button from appearing on plots with errorbars was resolved. This means that the fit button now appears on plots created by Muon Analysis when it did not previously.
 
 Bug Fixes
 #########
