@@ -261,7 +261,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) != FigureType.Line:
+        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
             self._set_fit_enabled(False)
 
     def destroy(self, *args):
