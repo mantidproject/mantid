@@ -468,13 +468,12 @@ H5::Group instrument(const H5::Group &parent,
  * @param compInfo : componentInfo object.
  */
 void saveSample(const H5::Group &parent,
-                 const Geometry::ComponentInfo &compInfo) {
+                const Geometry::ComponentInfo &compInfo) {
 
   H5::Group group;
   std::string sampleName = compInfo.name(compInfo.sample());
   group = parent.createGroup(sampleName);
   writeStrAttribute(group, NX_CLASS, NX_SAMPLE);
-
 }
 
 /*
@@ -545,14 +544,13 @@ void saveDetectors(const H5::Group &parentGroup,
  * @param compInfo : componentInfo object.
  */
 void saveSource(const H5::Group &parentGroup,
-                 const Geometry::ComponentInfo &compInfo) {
+                const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
   auto source = compInfo.source();
   auto name = compInfo.name(source);
   childGroup = parentGroup.createGroup(name);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
-
 }
 
 } // namespace NexusGeometrySave
@@ -605,7 +603,7 @@ void saveInstrument(
 
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
-  
+
   H5::Group rootfile, instrument;
 
   // create NXentry (file root)
