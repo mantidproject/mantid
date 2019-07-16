@@ -45,9 +45,10 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py
-   PeriodicTableModel_test.py
-   PeriodicTablePresenter_test.py
-   elemental_analysis_test.py
+   elemental_analysis/PeriodicTableModel_test.py
+   elemental_analysis/PeriodicTablePresenter_test.py
+   elemental_analysis/elemental_analysis_test.py
+   elemental_analysis/name_generator_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
