@@ -17,6 +17,14 @@ from mantidqt.utils.qt.testing import GuiTest
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
 
 
+class MockLine2d(object):
+    def __init__(self, y):
+        self.y = y
+
+    def get_ydata(self):
+        return self.y
+
+
 class FigureManagerWorkbenchTest(GuiTest):
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")

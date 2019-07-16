@@ -19,6 +19,7 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 maximum_number_of_groups = 20
 
+
 def group_name():
     name = []
     for i in range(maximum_number_of_groups + 1):

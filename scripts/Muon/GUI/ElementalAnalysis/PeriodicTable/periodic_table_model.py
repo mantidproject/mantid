@@ -15,11 +15,11 @@ from Muon.GUI import ElementalAnalysis
 class PeriodicTableModel(object):
     def __init__(self):
         self._peak_data = {}
-        self._peak_data_file = os.path.join(
-            os.path.dirname(
-                ElementalAnalysis.__file__),
-            "peak_data.json")
+        self._peak_data_file = self.get_default_peak_data_file()
         self.load_peak_data()
+
+    def get_default_peak_data_file(self):
+        return os.path.join(os.path.dirname(ElementalAnalysis.__file__), "peak_data.json")
 
     def load_peak_data(self):
         # using os.path.isfile allows file modifications to take place before opening:

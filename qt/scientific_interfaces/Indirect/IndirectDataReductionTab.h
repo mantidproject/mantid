@@ -66,10 +66,7 @@ signals:
   void newInstrumentConfiguration();
 
 protected:
-  Mantid::API::MatrixWorkspace_sptr
-  loadInstrumentIfNotExist(std::string instrumentName,
-                           std::string analyser = "",
-                           std::string reflection = "");
+  Mantid::API::MatrixWorkspace_sptr instrumentWorkspace() const;
 
   QMap<QString, QString> getInstrumentDetails() const;
   QString getInstrumentDetail(QString const &key) const;

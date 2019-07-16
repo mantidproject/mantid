@@ -5,10 +5,6 @@ Direct Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 New Instruments
 ---------------
 
@@ -27,6 +23,9 @@ Improvements
 ############
 
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now has a `CylinderAxis` property to set the direction of the cylinder axis.
+- Improved support for thin-walled hollow cylinder shapes in :ref:`algm-MonteCarloAbsorption`.
+  The points are now generated in cylindrical coordinates to improve performance.
+
 
 Removed
 #######
@@ -40,12 +39,20 @@ Interfaces
 New features
 ############
 
+- Improvements to the MSlice interface:
+  - Added a Scale and Rebose operations.
+  - Option to copy a script to the clipboard.
+  - Added "keep open" option to figure quick plot options and plot configuration dialog.
+  - Added an option to use Integration to make a cut rather than Rebin2D or SofQW3.
+  - Various bug fixes around CLI.
+
 
 Improvements
 ############
 
 - New instrument geometry for CNCS.
 - The :ref:`GetEiT0atSNS <algm-GetEiT0atSNS>` algorithm was improved to handle monitors where TOF is not wrapped to the first frame.
+  It is also improved to handle the situation when monitor peak(s) are close to pump pulses (cannot be too close though).
 
 Bugfixes
 ########

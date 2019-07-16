@@ -80,6 +80,31 @@ void RangeMarker::setColor(QString const &color) {
 }
 
 /**
+ * @brief Sets the bounds of the RangeMarker.
+ * @param lowerBound The lower bound.
+ * @param upperBound The upper bound.
+ */
+void RangeMarker::setBounds(double lowerBound, double upperBound) {
+  callMethodNoCheck<void>(pyobj(), "set_bounds", lowerBound, upperBound);
+}
+
+/**
+ * @brief Sets the lower bound of the RangeMarker.
+ * @param minimum The lower bound.
+ */
+void RangeMarker::setLowerBound(double lowerBound) {
+  callMethodNoCheck<void>(pyobj(), "set_lower_bound", lowerBound);
+}
+
+/**
+ * @brief Sets the upper bound of the RangeMarker.
+ * @param upperBound The upper bound.
+ */
+void RangeMarker::setUpperBound(double upperBound) {
+  callMethodNoCheck<void>(pyobj(), "set_upper_bound", upperBound);
+}
+
+/**
  * @brief Sets the range marked by the RangeMarker.
  * @param minimum The minimum of the range.
  * @param maximum The maximum of the range.

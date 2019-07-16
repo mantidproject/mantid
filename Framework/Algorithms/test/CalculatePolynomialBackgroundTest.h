@@ -111,7 +111,7 @@ public:
     }
   }
 
-  void test_costFuctionLeastSquares() {
+  void test_costFunctionLeastSquares() {
     using namespace WorkspaceCreationHelper;
     const size_t nHist{2};
     const HistogramData::Counts counts{0, 4, 0, 0};
@@ -137,14 +137,14 @@ public:
       const auto &bkgXs = outWS->x(histI);
       for (size_t binI = 0; binI < counts.size(); ++binI) {
         // Number 4 in counts is heavily weighted by the small error.
-        TS_ASSERT_DELTA(bkgYs[binI], 4, 1e-5)
+        TS_ASSERT_DELTA(bkgYs[binI], 4, 1e-4)
         TS_ASSERT_EQUALS(bkgEs[binI], 0)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
     }
   }
 
-  void test_costFuctionUnweightedLeastSquares() {
+  void test_costFunctionUnweightedLeastSquares() {
     using namespace WorkspaceCreationHelper;
     const size_t nHist{2};
     const HistogramData::Counts counts{0, 4, 0, 0};

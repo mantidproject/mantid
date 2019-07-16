@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMoments.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -13,6 +14,7 @@
 #include <QDoubleValidator>
 #include <QFileInfo>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace MantidQt {
@@ -47,8 +49,8 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
   m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
 
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleSampleInputReady(const QString &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(const QString &)));
 
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rangeChanged(double, double)));
@@ -85,6 +87,25 @@ IndirectMoments::~IndirectMoments() {}
 
 void IndirectMoments::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void IndirectMoments::handleDataReady(QString const &dataName) {
+  if (validate())
+    plotNewData(dataName);
+}
+
+bool IndirectMoments::validate() {
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Sqw);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+  return errorMessage.isEmpty();
+}
+
 void IndirectMoments::run() {
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   QString outputName = workspaceName.left(workspaceName.length() - 4);
@@ -112,25 +133,11 @@ void IndirectMoments::run() {
   runAlgorithm(momentsAlg);
 }
 
-bool IndirectMoments::validate() {
-  UserInputValidator uiv;
-
-  uiv.checkDataSelectorIsValid("Sample input", m_uiForm.dsInput);
-
-  QString msg = uiv.generateErrorMessage();
-  if (!msg.isEmpty()) {
-    emit showMessageBox(msg);
-    return false;
-  }
-
-  return true;
-}
-
 /**
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
  */
-void IndirectMoments::handleSampleInputReady(const QString &filename) {
+void IndirectMoments::plotNewData(QString const &filename) {
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateProperties(QtProperty *, double)));
 

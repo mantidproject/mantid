@@ -54,14 +54,19 @@ class ModelTest(unittest.TestCase):
         names, descriptors = model.get_algorithm_data()
         self.assertTrue(isinstance(names, list))
         self.assertTrue(isinstance(descriptors, dict))
-        self.assertTrue('Load' in names)
-        self.assertTrue('Rebin' in names)
+        self.assertEqual(5, len(names))
+        self.assertEqual('ComesFirst', names[0])
+        self.assertEqual('DoStuff', names[1])
+        self.assertEqual('GoesSecond', names[2])
+        self.assertEqual('Load', names[3])
+        self.assertEqual('Rebin', names[4])
+
         self.assertTrue('Rebin' in descriptors['Transform'][AlgorithmSelectorModel.algorithm_key])
         self.assertTrue('Rebin' in descriptors['Transform']['Rebin'][AlgorithmSelectorModel.algorithm_key])
         counter = Counter(names)
         self.assertEqual(counter['Rebin'], 1)
         self.assertEqual(counter['DoStuff'], 1)
-        self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(False))
+        self.assertEqual(mock_get_algorithm_descriptors.mock_calls, [call(False), call(True)])
 
     def test_include_hidden_algorithms(self):
         model = AlgorithmSelectorModel(None, include_hidden=True)

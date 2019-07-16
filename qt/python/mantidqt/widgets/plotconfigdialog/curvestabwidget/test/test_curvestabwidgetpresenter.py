@@ -182,7 +182,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter(fig=fig)
         new_plot_kwargs = {'errorevery': 2, 'linestyle': '-.', 'color': 'r',
                            'marker': 'v'}
-        presenter.replot_selected_curve(new_plot_kwargs)
+        presenter._replot_selected_curve(new_plot_kwargs)
         new_err_container = presenter.get_selected_curve()
         self.assertEqual(new_err_container[0].get_linestyle(), '-.')
         self.assertEqual(new_err_container[0].get_color(), 'r')
@@ -194,11 +194,11 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         curve = ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4])
-        new_curve = CurvesTabWidgetPresenter.replot_curve(ax, curve,
-                                                          {'errorevery': 2})
+        new_curve = CurvesTabWidgetPresenter._replot_mpl_curve(ax, curve,
+                                                               {'errorevery': 2})
         self.assertEqual(2, len(new_curve[2][0].get_segments()))
-        new_curve = CurvesTabWidgetPresenter.replot_curve(ax, new_curve,
-                                                          {'errorevery': 1})
+        new_curve = CurvesTabWidgetPresenter._replot_mpl_curve(ax, new_curve,
+                                                               {'errorevery': 1})
         self.assertTrue(hasattr(new_curve, 'errorbar_data'))
         self.assertEqual(4, len(new_curve[2][0].get_segments()))
 

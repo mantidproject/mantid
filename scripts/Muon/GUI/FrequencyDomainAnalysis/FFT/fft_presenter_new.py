@@ -175,25 +175,26 @@ class FFTPresenter(object):
                 imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
         else:
             imaginary_workspace_input = None
+            imaginary_workspace_padding_parameters['InputWorkspace'] = ""
 
         fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
         frequency_domain_workspace = convert_to_field(run_FFT(fft_parameters))
-
         self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
                                       frequency_domain_workspace)
 
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
         run = re.search('[0-9]+', input_workspace).group()
-        Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
+        Im_run = ""
+        if imaginary_input_workspace is not "":
+            Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
         directory = get_base_data_directory(self.load, run) + group
 
         Re = get_group_or_pair_from_name(input_workspace)
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
-
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
         spectra = {"_"+FREQUENCY_EXTENSIONS["RE"]:0+shift, "_"+FREQUENCY_EXTENSIONS["IM"]:1+shift, "_"+FREQUENCY_EXTENSIONS["MOD"]:2+shift}
         for spec_type in list(spectra.keys()):

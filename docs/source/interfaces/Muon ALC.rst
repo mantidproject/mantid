@@ -1,3 +1,5 @@
+.. _MuonALC-ref:
+
 Muon ALC
 ========
 

@@ -12,6 +12,9 @@ from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
 
+MARKER_SENSITIVITY = 3
+
+
 class HorizontalMarker(QObject):
     """
     An interactive marker displayed as a horizontal line.
@@ -117,7 +120,7 @@ class HorizontalMarker(QObject):
             return False
         if self.x1 is not None and x > self.x1:
             return False
-        return abs(self.get_y_in_pixels() - y_pixels) < 3
+        return abs(self.get_y_in_pixels() - y_pixels) < MARKER_SENSITIVITY
 
     def mouse_move_start(self, x, y):
         """
@@ -274,7 +277,7 @@ class VerticalMarker(QObject):
             return False
         if self.y1 is not None and y > self.y1:
             return False
-        return abs(self.get_x_in_pixels() - x_pixels) < 3
+        return abs(self.get_x_in_pixels() - x_pixels) < MARKER_SENSITIVITY
 
     def mouse_move_start(self, x, y):
         """
@@ -697,13 +700,16 @@ class SingleMarker(QObject):
         Determines if the axis coords are within the bounds specified.
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
-        :return True if the axes coordinate is within the bounds.
+        :return True if the axes coordinate is within the bounds, and the new position for the marker.
         """
+        position_offset = MARKER_SENSITIVITY if not self.is_marker_moving() else 0
         position = x if self.marker_type == 'XSingle' else y
         if position is not None:
-            if position > self.upper_bound or position < self.lower_bound:
-                return False
-        return True
+            if position > self.upper_bound + position_offset:
+                return False, self.upper_bound
+            elif position < self.lower_bound - position_offset:
+                return False, self.lower_bound
+        return True, position
 
     def mouse_move_start(self, x, y):
         """
@@ -711,7 +717,8 @@ class SingleMarker(QObject):
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
         """
-        if self.marker.is_above(x, y) and self.is_inside_bounds(x, y):
+        inside_bounds, _ = self.is_inside_bounds(x, y)
+        if self.marker.is_above(x, y) and inside_bounds:
             self.marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
 
@@ -722,8 +729,15 @@ class SingleMarker(QObject):
         :param y: An y mouse coordinate.
         :return: True if moved or False if stayed at the old position.
         """
-        if self.marker.is_marker_moving() and self.is_inside_bounds(x, y):
+        marker_moving = self.marker.is_marker_moving()
+        inside_bounds, new_position = self.is_inside_bounds(x, y)
+
+        if marker_moving and inside_bounds:
             return self.marker.mouse_move(x, y)
+        elif marker_moving:
+            if self.marker_type == 'XSingle':
+                return self.marker.mouse_move(new_position, y)
+            return self.marker.mouse_move(x, new_position)
         return False
 
     def mouse_move_stop(self):
@@ -753,19 +767,14 @@ class RangeMarker(QObject):
         :param color: An MPL colour value
         :param minimum: The axes coordinate of the minimum marker.
         :param maximum: The axes coordinate of the maximum marker.
-        :param range_type: Whether the RangeMarker is used to select an x or y range.
+        :param range_type: Whether the RangeMarker is used to select an x or y range (XMinMax or YMinMax).
         :param line_style: An MPL line style value.
         """
         super(RangeMarker, self).__init__()
         self.range_type = range_type
-        if self.range_type == 'XMinMax':
-            self.min_marker = VerticalMarker(canvas, color, minimum, line_style=line_style)
-            self.max_marker = VerticalMarker(canvas, color, maximum, line_style=line_style)
-        elif self.range_type == 'YMinMax':
-            self.min_marker = HorizontalMarker(canvas, color, minimum, line_style=line_style)
-            self.max_marker = HorizontalMarker(canvas, color, maximum, line_style=line_style)
-        else:
-            raise RuntimeError("Incorrect RangeMarker type provided. Types are XMinMax or YMinMax.")
+        single_marker_type = 'XSingle' if self.range_type == 'XMinMax' else 'YSingle'
+        self.min_marker = SingleMarker(canvas, color, minimum, minimum, maximum, single_marker_type, line_style=line_style)
+        self.max_marker = SingleMarker(canvas, color, maximum, minimum, maximum, single_marker_type, line_style=line_style)
 
     def redraw(self):
         """
@@ -788,6 +797,31 @@ class RangeMarker(QObject):
         self.min_marker.set_color(color)
         self.max_marker.set_color(color)
         self.redraw()
+
+    def set_bounds(self, minimum, maximum):
+        """
+        Sets the bounds within which the range marker is allowed to move.
+        :param minimum: The lower bound for the markers position.
+        :param maximum: The higher bound for the markers position.
+        """
+        self.set_lower_bound(minimum)
+        self.set_upper_bound(maximum)
+
+    def set_lower_bound(self, minimum):
+        """
+        Sets the minimum bound for the range marker.
+        :param minimum: The minimum bound for the range marker.
+        """
+        self.min_marker.set_lower_bound(minimum)
+        self.max_marker.set_lower_bound(minimum)
+
+    def set_upper_bound(self, maximum):
+        """
+        Sets the maximum bound for the range marker.
+        :param maximum: The maximum bound for the range marker.
+        """
+        self.min_marker.set_upper_bound(maximum)
+        self.max_marker.set_upper_bound(maximum)
 
     def set_range(self, minimum, maximum):
         """
@@ -842,12 +876,8 @@ class RangeMarker(QObject):
         :param x: An x mouse coordinate.
         :param y: An y mouse coordinate.
         """
-        if self.min_marker.is_above(x, y):
-            self.min_marker.mouse_move_start(x, y)
-            QApplication.setOverrideCursor(self.min_marker.override_cursor(x, y))
-        elif self.max_marker.is_above(x, y):
-            self.max_marker.mouse_move_start(x, y)
-            QApplication.setOverrideCursor(self.max_marker.override_cursor(x, y))
+        self.min_marker.mouse_move_start(x, y)
+        self.max_marker.mouse_move_start(x, y)
 
     def mouse_move(self, x, y=None):
         """
@@ -868,7 +898,6 @@ class RangeMarker(QObject):
         """
         self.min_marker.mouse_move_stop()
         self.max_marker.mouse_move_stop()
-        QApplication.restoreOverrideCursor()
 
     def is_marker_moving(self):
         """

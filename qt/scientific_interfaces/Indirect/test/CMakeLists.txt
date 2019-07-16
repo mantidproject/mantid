@@ -1,23 +1,26 @@
 # Testing
-set(TEST_FILES
-    ConvFitDataPresenterTest.h
-    ConvFitModelTest.h
-    IndirectDataTablePresenterTest.h
-    IndirectFitDataPresenterTest.h
-    IndirectFitDataTest.h
-    IndirectFitOutputOptionsModelTest.h
-    IndirectFitOutputOptionsPresenterTest.h
-    IndirectFitOutputTest.h
-    IndirectFitPlotModelTest.h
-    IndirectFitPlotPresenterTest.h
-    IndirectFittingModelTest.h
-    IndirectSettingsModelTest.h
-    IndirectSettingsPresenterTest.h
-    IndirectSpectrumSelectionPresenterTest.h
-    IqtFitModelTest.h
-    JumpFitDataPresenterTest.h
-    JumpFitModelTest.h
-    MSDFitModelTest.h)
+set(
+  TEST_FILES
+  ConvFitDataPresenterTest.h
+  ConvFitModelTest.h
+  IndirectDataTablePresenterTest.h
+  IndirectDataValidationHelperTest.h
+  IndirectFitDataPresenterTest.h
+  IndirectFitDataTest.h
+  IndirectFitOutputOptionsModelTest.h
+  IndirectFitOutputOptionsPresenterTest.h
+  IndirectFitOutputTest.h
+  IndirectFitPlotModelTest.h
+  IndirectFitPlotPresenterTest.h
+  IndirectFittingModelTest.h
+  IndirectSettingsModelTest.h
+  IndirectSettingsPresenterTest.h
+  IndirectSpectrumSelectionPresenterTest.h
+  IqtFitModelTest.h
+  JumpFitDataPresenterTest.h
+  JumpFitModelTest.h
+  MSDFitModelTest.h
+)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest
@@ -34,6 +37,7 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../IndirectDataValidationHelper.cpp
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}

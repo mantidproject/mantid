@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -14,6 +15,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
@@ -237,6 +239,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  connect(m_uiForm.dsCalibrationFile, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
@@ -273,6 +277,21 @@ ISISEnergyTransfer::~ISISEnergyTransfer() {}
 
 void ISISEnergyTransfer::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void ISISEnergyTransfer::handleDataReady(QString const &dataName) {
+  UNUSED_ARG(dataName);
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
+                       DataType::Calib);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+}
+
 bool ISISEnergyTransfer::validate() {
   UserInputValidator uiv;
 
@@ -282,10 +301,9 @@ bool ISISEnergyTransfer::validate() {
   }
 
   // Calibration file input
-  if (m_uiForm.ckUseCalib->isChecked() &&
-      !m_uiForm.dsCalibrationFile->isValid()) {
-    uiv.addErrorMessage("Calibration file/workspace is invalid.");
-  }
+  if (m_uiForm.ckUseCalib->isChecked())
+    validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
+                         DataType::Calib);
 
   QString groupingError = validateDetectorGrouping();
   if (!groupingError.isEmpty())
