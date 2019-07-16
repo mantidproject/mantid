@@ -34,7 +34,6 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         if not show_continue_terminate:
             self.continue_terminate_frame.hide()
             self.adjustSize()
-        self.setFixedSize(self.width(), self.height())
 
         self.quit_signal.connect(QtWidgets.QApplication.instance().quit)
 
