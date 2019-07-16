@@ -838,7 +838,6 @@ class RangeMarker(QObject):
         """
         self.min_marker.set_position(minimum)
         self.max_marker.set_position(maximum)
-        self.range_changed.emit([minimum, maximum])
         self.redraw()
 
     def get_range(self):

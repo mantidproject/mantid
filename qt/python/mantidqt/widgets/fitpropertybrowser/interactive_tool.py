@@ -157,22 +157,14 @@ class FitInteractiveTool(QObject):
         for pm in self.peak_markers:
             pm.mouse_move_stop()
 
-    def move_start_x(self, x):
+    def set_fit_range(self, start_x, end_x):
         """
-        Move the StartX marker to a new horizontal position.
-        :param x: A new x value in data coordinates.
+        Change the fit range when it has been changed in the FitPropertyBrowser.
+        :param start_x: New value of StartX
+        :param end_x: New value of EndX
         """
-        if x is not None:
-            self.fit_range.set_minimum(x)
-            self.canvas.draw()
-
-    def move_end_x(self, x):
-        """
-        Move the EndX marker to a new horizontal position.
-        :param x: A new x value in data coordinates.
-        """
-        if x is not None:
-            self.fit_range.set_maximum(x)
+        if start_x is not None and end_x is not None:
+            self.fit_range.set_range(start_x, end_x)
             self.canvas.draw()
 
     def _make_peak_id(self):

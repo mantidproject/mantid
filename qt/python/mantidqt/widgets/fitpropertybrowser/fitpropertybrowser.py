@@ -54,8 +54,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self._connect_signals()
 
     def _connect_signals(self):
-        self.startXChanged.connect(self.move_start_x)
-        self.endXChanged.connect(self.move_end_x)
+        self.xRangeChanged.connect(self.move_x_range)
         self.algorithmFinished.connect(self.fitting_done_slot)
         self.changedParameterOf.connect(self.peak_changed_slot)
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
@@ -156,21 +155,15 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         super(FitPropertyBrowser, self).hide()
         self.setPeakToolOn(False)
 
-    def move_start_x(self, xd):
+    def move_x_range(self, start_x, end_x):
         """
-        Let the tool know that StartX has changed.
-        :param xd: New value of StartX
-        """
-        if self.tool is not None:
-            self.tool.move_start_x(xd)
-
-    def move_end_x(self, xd):
-        """
-        Let the tool know that EndX has changed.
-        :param xd: New value of EndX
+        Let the tool know that the Fit range has been changed in the FitPropertyBrowser.
+        :param start_x: New value of StartX
+        :param end_x: New value of EndX
         """
         if self.tool is not None:
-            self.tool.move_end_x(xd)
+            new_range = sorted([start_x, end_x])
+            self.tool.set_fit_range(new_range[0], new_range[1])
 
     def clear_fit_result_lines(self):
         """
