@@ -467,7 +467,7 @@ H5::Group instrument(const H5::Group &parent,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-H5::Group sample(const H5::Group &parent,
+void saveSample(const H5::Group &parent,
                  const Geometry::ComponentInfo &compInfo) {
 
   H5::Group group;
@@ -475,7 +475,6 @@ H5::Group sample(const H5::Group &parent,
   group = parent.createGroup(sampleName);
   writeStrAttribute(group, NX_CLASS, NX_SAMPLE);
 
-  return group;
 }
 
 /*
@@ -489,22 +488,18 @@ H5::Group sample(const H5::Group &parent,
  * @param compInfo : componentInfo object.
  * @
  */
-std::vector<H5::Group> detectors(const H5::Group &parentGroup,
-                                 const Geometry::ComponentInfo &compInfo,
-                                 const Geometry::DetectorInfo &detInfo) {
-
-  std::vector<H5::Group> detectorGroups;
+void saveDetectors(const H5::Group &parentGroup,
+                   const Geometry::ComponentInfo &compInfo,
+                   const Geometry::DetectorInfo &detInfo) {
 
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
     if (compInfo.isDetector(i))
       break;
 
     if (compInfo.hasParent(i)) {
+
       size_t parent = compInfo.parent(i);
-
       auto parentType = compInfo.componentType(parent);
-
-      auto whatsthename = compInfo.name(i);
 
       if (compInfo.detectorsInSubtree(i).size() != 0)
         if (parentType != Beamline::ComponentType::Rectangular &&
@@ -516,7 +511,7 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
           H5::Group childGroup = parentGroup.createGroup(name);
           writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
-          std::string localNameStr = name; // placeholder
+          std::string localNameStr = name; // optional: possible removal
           H5::StrType localNameStrType = strTypeOfSize(localNameStr);
 
           std::string dependency =
@@ -534,18 +529,10 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
           H5::DataSet dependsOn =
               childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
           dependsOn.write(dependency, dependencyStrType, H5SCALAR);
-
-          detectorGroups.push_back(childGroup);
         }
     }
-    return detectorGroups;
   }
-
-  // TODO: WRITE XY PIXEL OFFSETS RELATIVE TO THE DETECTOR BANK
-  // LOCATION/ORIENTATION.
-
-  return detectorGroups;
-} // namespace NexusGeometrySave
+}
 
 /*
  * Function: source
@@ -557,7 +544,7 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-H5::Group source(const H5::Group &parentGroup,
+void saveSource(const H5::Group &parentGroup,
                  const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
@@ -565,7 +552,7 @@ H5::Group source(const H5::Group &parentGroup,
   auto name = compInfo.name(source);
   childGroup = parentGroup.createGroup(name);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
-  return childGroup;
+
 }
 
 } // namespace NexusGeometrySave
@@ -616,25 +603,26 @@ void saveInstrument(
     throw std::invalid_argument("The component has no source.");
   }
 
-  // write instrument to file.
+  // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
-  H5::Group root, instrument;
+  
+  H5::Group rootfile, instrument;
 
-  // create NXentry root group
-  root = file.createGroup("/raw_data_1");
-  NexusGeometrySave::writeStrAttribute(root, NX_CLASS, NX_ENTRY);
+  // create NXentry (file root)
+  rootfile = file.createGroup("/raw_data_1");
+  NexusGeometrySave::writeStrAttribute(rootfile, NX_CLASS, NX_ENTRY);
 
-  // NXinstrument
-  instrument = NexusGeometrySave::instrument(root, compInfo);
+  // NXinstrument (component root)
+  instrument = NexusGeometrySave::instrument(rootfile, compInfo);
 
   // NXdetectors
-  NexusGeometrySave::detectors(instrument, compInfo, detInfo);
+  NexusGeometrySave::saveDetectors(instrument, compInfo, detInfo);
 
   // NXsource
-  NexusGeometrySave::source(instrument, compInfo);
+  NexusGeometrySave::saveSource(instrument, compInfo);
 
   // NXsample
-  NexusGeometrySave::sample(root, compInfo);
+  NexusGeometrySave::saveSample(rootfile, compInfo);
 
   file.close(); // close file
 
