@@ -40,6 +40,11 @@ The difference between |tgood|  and |tzero|  is t\ :sub:`good offset`\ .
 When using the Muon Analysis GUI, |tzero| and |tgood| are loaded from the NeXuS file (having
 been determined by the instrument scientist). 
 
+.. figure:: /images/TgoodTzero.png
+    :scale: 60%
+    :align: center
+
+    Figure 13:  A diagram showing |tzero|, |tgood| and t\ :sub:`good offset`\  at a muon pulse.
 
 The concept of dead-time
 ========================
