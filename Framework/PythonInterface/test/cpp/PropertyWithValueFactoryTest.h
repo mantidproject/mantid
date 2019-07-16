@@ -13,7 +13,7 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4005)
 #endif
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #ifdef _MSC_VER
 #pragma warning(push)

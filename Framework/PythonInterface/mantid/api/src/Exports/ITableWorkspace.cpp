@@ -12,12 +12,12 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/NDArray.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/preprocessor/list/for_each.hpp>

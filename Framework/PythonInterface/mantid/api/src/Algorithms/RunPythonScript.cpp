@@ -11,7 +11,7 @@
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
+#include "MantidPythonInterface/core/IsNone.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>

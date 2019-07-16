@@ -7,7 +7,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IValidator.h"
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"

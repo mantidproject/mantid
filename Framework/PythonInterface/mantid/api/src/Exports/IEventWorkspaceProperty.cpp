@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 using Mantid::API::IEventWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT

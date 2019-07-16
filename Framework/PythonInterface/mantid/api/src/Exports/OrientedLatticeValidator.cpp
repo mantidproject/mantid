@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/OrientedLatticeValidator.h"
-#include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
+#include "MantidPythonInterface/core/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 
 using namespace Mantid::API;

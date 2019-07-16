@@ -7,9 +7,9 @@
 #ifndef MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_
 #define MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_
 
+#include "MantidPythonInterface/core/WeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/register_ptr_to_python.hpp>
 

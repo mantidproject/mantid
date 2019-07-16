@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 

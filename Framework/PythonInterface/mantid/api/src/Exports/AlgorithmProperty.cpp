@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 

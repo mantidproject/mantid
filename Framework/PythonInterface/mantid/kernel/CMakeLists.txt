@@ -68,10 +68,6 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 # Helper code
 
 set(SRC_FILES
-    src/Converters/NDArrayToVector.cpp
-    src/Converters/PyObjectToMatrix.cpp
-    src/Converters/PyObjectToV3D.cpp
-    src/Converters/PyObjectToVMD.cpp
     src/Registry/MappingTypeHandler.cpp
     src/Registry/PropertyManagerFactory.cpp
     src/Registry/PropertyWithValueFactory.cpp
@@ -79,19 +75,6 @@ set(SRC_FILES
     src/Registry/TypeRegistry.cpp)
 
 set(INC_FILES
-    ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
-    ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
-    ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
-    ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
-    ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
-    ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
-    ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
-    ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
-    ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
-    ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
-    ${HEADER_DIR}/kernel/Policies/RemoveConst.h
-    ${HEADER_DIR}/kernel/Policies/ToWeakPtr.h
-    ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
     ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
     ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
     ${HEADER_DIR}/kernel/Registry/PropertyManagerFactory.h
@@ -99,13 +82,7 @@ set(INC_FILES
     ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
     ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
     ${HEADER_DIR}/kernel/Registry/TypeRegistry.h
-    ${HEADER_DIR}/kernel/Registry/RegisterWorkspacePtrToPython.h
-    ${HEADER_DIR}/kernel/DataServiceExporter.h
-    ${HEADER_DIR}/kernel/IsNone.h
-    ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
-    ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
-    ${HEADER_DIR}/kernel/StlExportDefinitions.h
-    ${HEADER_DIR}/kernel/TypedValidatorExporter.h)
+    ${HEADER_DIR}/kernel/Registry/RegisterWorkspacePtrToPython.h)
 
 set(PY_FILES __init__.py _aliases.py environment.py funcinspect.py plugins.py)
 

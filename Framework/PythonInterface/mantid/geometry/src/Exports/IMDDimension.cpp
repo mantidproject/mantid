@@ -8,7 +8,7 @@
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/shared_ptr.hpp>
 
 #include <boost/python/class.hpp>

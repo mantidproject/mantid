@@ -8,7 +8,7 @@
 #define MANTID_PYTHONINTERFACE_WORKSPACEPROPERTYMACRO_H_
 
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include <boost/python/args.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
