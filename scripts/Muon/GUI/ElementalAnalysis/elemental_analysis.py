@@ -121,12 +121,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
-   # general functions
+    # general functions
     def _gen_label(self, name, x_value_in, element=None):
         if element is None:
             return
         # check x value is a float
-        x_value = 0.0
         try:
             x_value = float(x_value_in)
         except:
