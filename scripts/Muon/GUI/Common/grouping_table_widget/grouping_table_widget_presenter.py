@@ -64,7 +64,8 @@ class GroupingTablePresenter(object):
         return True
 
     def validate_detector_ids(self, text):
-        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
+        if re.match(run_utils.run_string_regex, text) and run_utils.run_string_to_list(text, False) and \
+            max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
                 and min(run_utils.run_string_to_list(text, False)) > 0:
             return True
         self._view.warning_popup("Invalid detector list.")
