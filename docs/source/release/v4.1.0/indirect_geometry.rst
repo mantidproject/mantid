@@ -99,6 +99,7 @@ Improvements
 - Improved ISISEnergyTransfer by automatically loading the Detailed Balance from the sample logs if available.
 - Removed the obsolete *Plot Raw* button in ISIS Calibration.
 - Improved the validation checks for input data on all tabs.
+- Improved performance of starting up the interface, by optimising the loading of parameter files.
 
 Bug Fixes
 #########
