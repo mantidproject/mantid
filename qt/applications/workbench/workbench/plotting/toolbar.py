@@ -79,7 +79,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.adj_window = None
 
         # Adjust icon size or they are too small in PyQt5 by default
-        self.setIconSize(QtCore.QSize(24, 24))
+        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX()/100
+        self.setIconSize(QtCore.QSize(24*dpi_ratio, 24*dpi_ratio))
 
     def launch_plot_options(self):
         self.sig_plot_options_triggered.emit()

@@ -18,7 +18,8 @@ User interface
 - Mantid's offline help is now available in Workbench.
 - You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
   menu.
-  
+- Typing an algorithm name in the algorithms search box now searches all algorithms including those in hidden categories.
+
 .. figure:: ../../images/wb_sliceviewer.png
    :class: screenshot
    :width: 500px

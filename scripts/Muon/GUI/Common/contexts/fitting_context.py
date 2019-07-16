@@ -361,9 +361,13 @@ class FittingContext(object):
         list_of_fits_to_remove = []
         for fit in self.fit_list:
             if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+                self._number_of_fits_cache = 0
                 list_of_fits_to_remove.append(fit)
 
         for fit in list_of_fits_to_remove:
+            index = self.fit_list.index(fit)
+            if index >= len(self.fit_list) - self._number_of_fits:
+                self._number_of_fits -= 1
             self.fit_list.remove(fit)
 
     def log_names(self, filter_fn=None):
