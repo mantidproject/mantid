@@ -499,6 +499,9 @@ class PeakMarker(QObject):
             self.left_width.mouse_move_start(x, y)
             self.right_width.mouse_move_start(x, y)
 
+        if self.centre_marker.is_moving or self.left_width.is_moving or self.right_width.is_moving:
+            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+
     def mouse_move_stop(self):
         """
         Stop moving.
@@ -510,6 +513,7 @@ class PeakMarker(QObject):
             self.left_width.mouse_move_stop()
             self.right_width.mouse_move_stop()
         self.centre_marker.mouse_move_stop()
+        QApplication.restoreOverrideCursor()
 
     def mouse_move(self, x, y):
         """
@@ -760,6 +764,9 @@ class RangeMarker(QObject):
     A marker used to mark out a vertical or horizontal range using two markers which correspond to a minimum and
     maximum of that range.
     """
+
+    range_changed = Signal(list)
+
     def __init__(self, canvas, color, minimum, maximum, range_type='XMinMax', line_style='-'):
         """
         Init the marker.
@@ -831,6 +838,7 @@ class RangeMarker(QObject):
         """
         self.min_marker.set_position(minimum)
         self.max_marker.set_position(maximum)
+        self.range_changed.emit([minimum, maximum])
         self.redraw()
 
     def get_range(self):
@@ -886,11 +894,15 @@ class RangeMarker(QObject):
         :param y: An y mouse coordinate.
         :return: True if moved or False if stayed at the old position.
         """
+        moved = False
         if self.min_marker.is_marker_moving():
-            return self.min_marker.mouse_move(x, y)
+            moved = self.min_marker.mouse_move(x, y)
         elif self.max_marker.is_marker_moving():
-            return self.max_marker.mouse_move(x, y)
-        return False
+            moved = self.max_marker.mouse_move(x, y)
+
+        if moved:
+            self.range_changed.emit(self.get_range())
+        return moved
 
     def mouse_move_stop(self):
         """

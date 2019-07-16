@@ -9,7 +9,7 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import QObject, Signal, Slot
 from qtpy.QtWidgets import QApplication,  QInputDialog
 
-from .markers import VerticalMarker, PeakMarker
+from .markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
 
 
@@ -18,8 +18,7 @@ class FitInteractiveTool(QObject):
     Peak editing tool. Peaks can be added by clicking on the plot. Peak parameters can be edited with the mouse.
     """
 
-    fit_start_x_moved = Signal(float)
-    fit_end_x_moved = Signal(float)
+    fit_range_changed = Signal(list)
     peak_added = Signal(int, float, float, float)
     peak_moved = Signal(int, float, float)
     peak_fwhm_changed = Signal(int, float)
@@ -48,11 +47,9 @@ class FitInteractiveTool(QObject):
         # The fitting range: [StartX, EndX]
         start_x = xlim[0] + dx
         end_x = xlim[1] - dx
-        # The two interactive markers drawn on the canvas as vertical lines that represent the fitting range.
-        self.fit_start_x = VerticalMarker(canvas, 'green', start_x)
-        self.fit_end_x = VerticalMarker(canvas, 'green', end_x)
-        self.fit_start_x.x_moved.connect(self.fit_start_x_moved)
-        self.fit_end_x.x_moved.connect(self.fit_end_x_moved)
+        # The interactive range marker drawn on the canvas as vertical lines that represent the fitting range.
+        self.fit_range = RangeMarker(canvas, 'green', start_x, end_x, 'XMinMax', '--')
+        self.fit_range.range_changed.connect(self.fit_range_changed)
 
         # A list of interactive peak markers
         self.peak_markers = []
@@ -78,8 +75,6 @@ class FitInteractiveTool(QObject):
 
         # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
-        # Cache the current override cursor
-        self._override_cursor = None
 
     def disconnect(self):
         """
@@ -88,58 +83,16 @@ class FitInteractiveTool(QObject):
         QObject.disconnect(self)
         for cid in self._cids:
             self.canvas.mpl_disconnect(cid)
-        self.fit_start_x.remove()
-        self.fit_end_x.remove()
+        self.fit_range.remove()
 
     def draw_callback(self, event):
         """
         This is called at every canvas draw. Redraw the markers.
         :param event: Unused
         """
-        if self.fit_start_x.x > self.fit_end_x.x:
-            x = self.fit_start_x.x
-            self.fit_start_x.x = self.fit_end_x.x
-            self.fit_end_x.x = x
-        self.fit_start_x.redraw()
-        self.fit_end_x.redraw()
+        self.fit_range.redraw()
         for pm in self.peak_markers:
             pm.redraw()
-
-    def get_override_cursor(self, x, y):
-        """
-        Check if the point (x, y) is withing range of an editable marker and return a QCursor to hint what type
-        of mouse interaction is expected.
-        :param x: The x mouse position
-        :param y: The y mouse position
-        :return: A QCursor or None
-        """
-        cursor = self.fit_start_x.override_cursor(x, y)
-        if cursor is None:
-            cursor = self.fit_end_x.override_cursor(x, y)
-        if cursor is None:
-            for pm in self.peak_markers:
-                cursor = pm.override_cursor(x, y)
-                if cursor is not None:
-                    break
-        return cursor
-
-    @property
-    def override_cursor(self):
-        """
-        Get the current override cursor
-        """
-        return self._override_cursor
-
-    @override_cursor.setter
-    def override_cursor(self, cursor):
-        """
-        Set new override cursor.
-        :param cursor: New cursor.
-        """
-        self._override_cursor = cursor
-        QApplication.restoreOverrideCursor()
-        if cursor is not None:
-            QApplication.setOverrideCursor(cursor)
 
     def motion_notify_callback(self, event):
         """
@@ -170,9 +123,8 @@ class FitInteractiveTool(QObject):
         x, y = event.xdata, event.ydata
         if x is None or y is None:
             return
-        self.override_cursor = self.get_override_cursor(x, y)
-        should_redraw = self.fit_start_x.mouse_move(x)
-        should_redraw = self.fit_end_x.mouse_move(x) or should_redraw
+
+        should_redraw = self.fit_range.mouse_move(x, y)
         for pm in self.peak_markers:
             should_redraw = pm.mouse_move(x, y) or should_redraw
         if should_redraw:
@@ -187,8 +139,7 @@ class FitInteractiveTool(QObject):
         y = event.ydata
         if x is None or y is None:
             return
-        self.fit_start_x.mouse_move_start(x, y)
-        self.fit_end_x.mouse_move_start(x, y)
+        self.fit_range.mouse_move_start(x, y)
         selected_peak = None
         for pm in self.peak_markers:
             pm.mouse_move_start(x, y)
@@ -202,8 +153,7 @@ class FitInteractiveTool(QObject):
         """
         Stop moving all markers.
         """
-        self.fit_start_x.mouse_move_stop()
-        self.fit_end_x.mouse_move_stop()
+        self.fit_range.mouse_move_stop()
         for pm in self.peak_markers:
             pm.mouse_move_stop()
 
@@ -213,7 +163,7 @@ class FitInteractiveTool(QObject):
         :param x: A new x value in data coordinates.
         """
         if x is not None:
-            self.fit_start_x.x = x
+            self.fit_range.set_minimum(x)
             self.canvas.draw()
 
     def move_end_x(self, x):
@@ -222,7 +172,7 @@ class FitInteractiveTool(QObject):
         :param x: A new x value in data coordinates.
         """
         if x is not None:
-            self.fit_end_x.x = x
+            self.fit_range.set_maximum(x)
             self.canvas.draw()
 
     def _make_peak_id(self):
@@ -403,7 +353,7 @@ class FitInteractiveTool(QObject):
         """
         Get the MPL transform object used to draw the markers. Used by the unit tests.
         """
-        return self.fit_start_x.patch.get_transform()
+        return self.fit_range.patch.get_transform()
 
     def add_to_menu(self, menu, peak_names, current_peak_type, background_names,
                     other_names):

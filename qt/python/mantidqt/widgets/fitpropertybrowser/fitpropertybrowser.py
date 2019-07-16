@@ -124,18 +124,24 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
                                        current_peak_type=self.defaultPeakType())
-        self.tool.fit_start_x_moved.connect(self.setStartX)
-        self.tool.fit_end_x_moved.connect(self.setEndX)
+        self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
         self.tool.peak_fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.tool.add_background_requested.connect(self.add_function_slot)
         self.tool.add_other_requested.connect(self.add_function_slot)
-        self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
+        self.set_fit_range(self.tool.fit_range.get_range())
         super(FitPropertyBrowser, self).show()
         self.setPeakToolOn(True)
         self.canvas.draw()
+
+    def set_fit_range(self, fit_range):
+        """
+        Sets the range to fit in the FitPropertyBrowser
+        :param fit_range: The new fit range
+        """
+        self.setXRange(fit_range[0], fit_range[1])
 
     def hide(self):
         """
