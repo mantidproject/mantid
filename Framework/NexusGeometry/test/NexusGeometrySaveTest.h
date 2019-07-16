@@ -624,7 +624,7 @@ public:
 
     hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
 
-    // assert the test source has Nxtransformation.
+    // assert the test sample has Nxtransformation.
     TS_ASSERT(hasNXTransformation);
 
     hasTranslation =
