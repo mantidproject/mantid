@@ -52,7 +52,6 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
-from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
 
 # Pre-application setup

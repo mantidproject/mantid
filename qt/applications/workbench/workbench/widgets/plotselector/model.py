@@ -17,6 +17,7 @@ class PlotSelectorModel(object):
     This is the model for the plot selector widget. Essentially this
     is just a wrapper to the true model - GlobalFigureManager.
     """
+
     def __init__(self, presenter, global_figure_manager):
         """
         Initialise the model, keeping references to the presenter and

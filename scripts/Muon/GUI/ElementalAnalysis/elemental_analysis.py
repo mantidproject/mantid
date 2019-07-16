@@ -8,6 +8,7 @@ from __future__ import absolute_import, print_function
 
 from qtpy import QtWidgets
 from copy import deepcopy
+import matplotlib as mpl
 
 from six import iteritems
 
@@ -91,7 +92,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # plotting
         self.plot_window = None
-        self.colors = ['b', 'g', 'r', 'y', 'c', 'm', 'b']
+        self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
         self.color_index = 0
 
         # layout
@@ -110,8 +111,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     # Return an unused colour, if all used then start with the first one
     def get_color(self):
-        color = self.colors[self.color_index]
-        self.color_index = (self.color_index + 1) % len(self.colors)
+        color = "C%d" % self.color_index
+        self.color_index = (self.color_index + 1) % self.num_colors
 
         return color
 
@@ -133,17 +134,17 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if name not in self.element_lines[element]:
             self.element_lines[element].append(name)
         # make sure the names are strings and x values are numbers
-        return Label(str(name), float(x_value), False, offset, True, rotation=-90, protected=True)
+        return Label(str(name), x_value, False, offset, True, rotation=-90, protected=True)
 
     def _plot_line(self, name, x_value_in, color, element=None):
         label = self._gen_label(name, x_value_in, element)
         if self.plot_window is None:
             return
         for subplot in self.plotting.get_subplots():
-            self._plot_line_once(subplot, float(x_value_in), label, color)
+            self._plot_line_once(subplot, x_value_in, label, color)
 
     def _plot_line_once(self, subplot, x_value, label, color):
-        self.plotting.add_vline_and_annotate(subplot, float(x_value), label, color)
+        self.plotting.add_vline_and_annotate(subplot, x_value, label, color)
 
     def _rm_line(self, name):
         if self.plot_window is None:
@@ -187,6 +188,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         color = self.get_color()
 
         for name, x_value in iteritems(data):
+            try:
+                x_value = float(x_value)
+            except:
+                continue
             full_name = gen_name(element, name)
             self._plot_line(full_name, x_value, color, element)
 
@@ -222,8 +227,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
-        to_plot = deepcopy([det.isChecked()
-                           for det in self.detectors.detectors])
+        to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
         if self.plot_window is None and any(to_plot) is False:
             return
         # generate plots - if new run clear old plot(s) and replace it
@@ -241,6 +245,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
+            ws.setYUnit('Counts')
             self.plotting.plot(detector, ws.getName())
         # add current selection of lines
         for element in self.ptable.selection:
@@ -259,9 +264,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             data = self.element_widgets[element].get_checked()
         color = self.get_color()
         for name, x_value in iteritems(data):
+            try:
+                x_value = float(x_value)
+            except:
+                continue
             full_name = gen_name(element, name)
             label = self._gen_label(full_name, x_value, element)
-            self._plot_line_once(subplot, float(x_value), label, color)
+            self._plot_line_once(subplot, x_value, label, color)
 
     def _update_peak_data(self, element, data=None):
         if self.ptable.is_selected(element):

@@ -193,16 +193,23 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         if fun == '' or ws_name == '':
             return
         ws_index = self.workspaceIndex()
+        startX = self.startX()
+        endX = self.endX()
         out_ws_name = '{}_guess'.format(ws_name)
+        try:
+            alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+            alg.setChild(True)
+            alg.initialize()
+            alg.setProperty('Function', fun)
+            alg.setProperty('InputWorkspace', ws_name)
+            alg.setProperty('WorkspaceIndex', ws_index)
+            alg.setProperty('StartX', startX)
+            alg.setProperty('EndX', endX)
+            alg.setProperty('OutputWorkspace', out_ws_name)
+            alg.execute()
+        except RuntimeError:
+            return
 
-        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
-        alg.setChild(True)
-        alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', ws_name)
-        alg.setProperty('WorkspaceIndex', ws_index)
-        alg.setProperty('OutputWorkspace', out_ws_name)
-        alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
 
         plot([out_ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True, plot_kwargs={'label': out_ws_name})

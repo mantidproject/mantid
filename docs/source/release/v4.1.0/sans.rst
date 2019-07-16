@@ -30,7 +30,7 @@ Improvements
 - The path to the user file used to reduce the data is now added to the workspace sample logs. This user file path is added to canSAS file metadata.
 - The **diagnostic** page icon has been changed from a question mark to a stethoscope, to distinguish it from the **Help** page icon. The **Export Table** button now has an icon. There have been minor icon changes elsewhere on the interface.
 - Sample thickness, height, and width can be read from a batch file. These parameters are also included in the batch file generated from exporting the table.
-- The beam centre HAB/LAB update checkboxes are automatically disabled if you select LAB/HAB as the reduction mode, respectively.
+- The beam centre HAB/LAB update checkboxes are automatically deselected if you select LAB/HAB as the reduction mode, respectively.
 - The run numbers for sample transmission, sample direct, can scatter, and can direct workspaces are now added to NXCanSAS and CanSAS files.
 
 
@@ -44,6 +44,8 @@ Bug Fixes
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
+- A bug with the centre of mass beam centre calculation that prevented it running has been fixed.
+- A bug preventing the beam centre finder from plotting workspaces in the workbench has been fixed.
 
 Algorithms
 ----------

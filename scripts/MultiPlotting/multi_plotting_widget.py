@@ -28,6 +28,8 @@ class MultiPlotWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.multi_plot.removeSubplotDisonnect()
+        self.multi_plot.plots._ADSObserver.unsubscribe()
+        self.multi_plot.plots._ADSObserver = None
         self.windowClosedSignal.emit()
 
 
@@ -92,7 +94,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def rm_vline(self, subplotName, name):
         self.plots.rm_vline(subplotName, name)
 
-    # gets inital values for quickEdit
+    # gets initial values for quickEdit
     def set_all_values(self):
         names = self.quickEdit.get_selection()
         xrange = list(self._context.subplots[names[0]].xbounds)
