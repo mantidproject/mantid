@@ -81,10 +81,10 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
         setattr(self, "setData", self.validator_before_set(self.setData, self.validator))
 
 
-def setRowName(table, row, name):
+def setRowName(table, row, name, col=0):
     text = QtWidgets.QTableWidgetItem((name))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
-    table.setItem(row, 0, text)
+    table.setItem(row, col, text)
 
 
 def addComboToTable(table,row,options,col=1):

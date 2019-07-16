@@ -32,6 +32,11 @@ public:
   void remove();
 
   void setColor(QString const &color);
+
+  void setBounds(double lowerBound, double upperBound);
+  void setLowerBound(double lowerBound);
+  void setUpperBound(double upperBound);
+
   void setRange(double minimum, double maximum);
   std::tuple<double, double> getRange() const;
 

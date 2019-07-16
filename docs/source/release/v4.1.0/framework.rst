@@ -36,6 +36,8 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` can calculate the density from the sample mass
 - We have prevented an error due to locale settings which may appear when reading, for instance, the incident energy Ei value from the logs in :ref:`ConvertUnits <algm-ConvertUnits>` and many other algorithms.
 - :ref:`Pseudo-Voigt <func-PseudoVoigt>` has been modified to be more in line with FULLPROF and GSAS.  One of its basic parameter, Height, is changed to Intensity.
+- :ref:`CalculatePolynomialBackground <algm-CalculatePolynomialBackground>` has an option to select the the minimizer used during fitting.
+- :ref:`CalculatePolynomialBackground <algm-CalculatePolynomialBackground>` has been modified to pass parameters with double precision to make it more correct.
 - 10x performance improvement in calls to ``Mantid::PhysicalConstants::getAtom``.
 - :ref:`SetSample <algm-SetSample>` will now look for facility wide sample environments. instrument specific ones will be loaded first.
 - :ref:`SolidAngle <algm-SolidAngle>` is extended to accommodate new options for fast analytical calculation for SANS-type detectors.

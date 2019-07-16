@@ -47,12 +47,6 @@ private:
   void setup() override;
   void run() override;
   bool validate() override;
-  void validateCorrections(UserInputValidator &uiv) const;
-  void validateCorrections(UserInputValidator &uiv,
-                           std::string const &name) const;
-  void validateCorrections(
-      UserInputValidator &uiv,
-      Mantid::API::WorkspaceGroup_sptr correctionsWorkspace) const;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 

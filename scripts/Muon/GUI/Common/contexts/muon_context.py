@@ -45,6 +45,10 @@ class MuonContext(object):
 
         self.update_view_from_model_notifier = Observable()
 
+    def __del__(self):
+        self.ads_observer.unsubscribe()
+        self.ads_observer = None
+
     @property
     def window_title(self):
         if self._frequency_context:

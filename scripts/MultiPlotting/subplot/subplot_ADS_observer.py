@@ -19,6 +19,11 @@ class SubplotADSObserver(AnalysisDataServiceObserver):
         self.observeDelete(True)
         self.observeReplace(True)
 
+    def unsubscribe(self):
+        self._subplot = None
+        self.observeDelete(False)
+        self.observeReplace(False)
+
     def deleteHandle(self, workspace_name, workspace):
         """
         Called when the ADS has deleted a workspace. Checks

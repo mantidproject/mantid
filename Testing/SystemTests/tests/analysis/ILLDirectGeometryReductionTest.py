@@ -88,6 +88,7 @@ class IN4(systemtesting.MantidSystemTest):
 
 
 class IN5(systemtesting.MantidSystemTest):
+
     def runTest(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN5'

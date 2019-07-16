@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import unittest
+from mantidqt.utils.qt.testing import GuiTest
 
 import six
 
@@ -13,7 +14,7 @@ from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class LoadFileWidgetModelTest(unittest.TestCase):
+class LoadFileWidgetModelTest(GuiTest):
 
     def setUp(self):
         setup_context_for_tests(self)
