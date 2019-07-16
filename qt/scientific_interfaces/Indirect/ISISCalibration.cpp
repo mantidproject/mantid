@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISCalibration.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+
 #include <QDebug>
 #include <QFileInfo>
 #include <stdexcept>
@@ -40,6 +42,11 @@ namespace CustomInterfaces {
 ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
+
+  m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
+  m_uiForm.ppCalibration->watchADS(false);
+  m_uiForm.ppResolution->watchADS(false);
 
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
 
@@ -125,8 +132,10 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   connect(this, SIGNAL(newInstrumentConfiguration()), this,
           SLOT(setDefaultInstDetails()));
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   connect(resPeak, SIGNAL(rangeChanged(double, double)), resBackground,
           SLOT(setRange(double, double)));
+#endif
 
   // Update property map when a range selector is moved
   connect(calPeak, SIGNAL(minValueChanged(double)), this,
@@ -151,8 +160,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(calUpdateRS(QtProperty *, double)));
   // Plot miniplots after a file has loaded
   connect(m_uiForm.leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
-  // Plot miniplots when the user clicks Plot Raw
-  connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   // Toggle RES file options when user toggles Create RES File checkbox
   connect(m_uiForm.ckCreateResolution, SIGNAL(toggled(bool)), this,
           SLOT(resCheck(bool)));
@@ -408,11 +415,10 @@ void ISISCalibration::setDefaultInstDetails(
  * Replots the raw data mini plot and the energy mini plot
  */
 void ISISCalibration::calPlotRaw() {
-
   QString filename = m_uiForm.leRunNo->getFirstFilename();
 
   // Don't do anything if the file we would plot has not changed
-  if (filename == m_lastCalPlotFilename)
+  if (filename.isEmpty() || filename == m_lastCalPlotFilename)
     return;
 
   m_lastCalPlotFilename = filename;
@@ -520,7 +526,7 @@ void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
     if (!params.empty()) {
       double res = params[0];
 
-      const auto energyRange = m_uiForm.ppResolution->getCurveRange("Energy");
+      const auto energyRange = getXRangeFromWorkspace(ws);
       // Set default rebinning bounds
       QPair<double, double> peakERange(-res * 10, res * 10);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");

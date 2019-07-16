@@ -17,15 +17,10 @@ from __future__ import (absolute_import, division, print_function)
 
 from collections import Iterable
 
-from mantid.kernel import logger
-from mantid.plots import helperfunctions, plotfunctions
-from mantid.plots import plotfunctions3D
-from mantid.plots.scales import PowerScale, SquareScale
-from matplotlib import cbook
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
-from matplotlib.container import Container
+from matplotlib.container import Container, ErrorbarContainer
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
@@ -53,7 +48,12 @@ except ImportError:
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
+from mantid.api import AnalysisDataService as ads
+from mantid.kernel import logger
+from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
+from mantid.plots import plotfunctions3D
+from mantid.plots.scales import PowerScale, SquareScale
 
 
 def plot_decorator(func):
@@ -246,14 +246,24 @@ class MantidAxes(Axes):
     def get_spec_num_from_wksp_index(workspace, wksp_index):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 
-    def _get_spec_number(self, workspace, kwargs):
+    @staticmethod
+    def get_spec_number(workspace, kwargs):
         if kwargs.get('specNum', None) is not None:
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
-            return self.get_spec_num_from_wksp_index(workspace,
-                                                     kwargs['wkspIndex'])
+            return MantidAxes.get_spec_num_from_wksp_index(workspace,
+                                                           kwargs['wkspIndex'])
         else:
             return None
+
+    def get_artists_workspace_and_spec_num(self, artist):
+        """Retrieve the workspace and spec num of the given artist"""
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ads.retrieve(ws_name), ws_artists.spec_num
+        raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
                                spec_num=None, is_normalized=None):
@@ -300,6 +310,26 @@ class MantidAxes(Axes):
                 logger.warning("You are overlaying distribution and "
                                "non-distribution data!")
 
+    def artists_workspace_has_errors(self, artist):
+        """Check if the given artist's workspace has errors"""
+        if artist not in self.get_tracked_artists():
+            raise ValueError("Artist '{}' is not tracked and so does not have "
+                             "an associated workspace.".format(artist))
+        workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
+        workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        if any(workspace.readE(workspace_index) != 0):
+            return True
+        return False
+
+    def get_tracked_artists(self):
+        """Get the Matplotlib artist objects that are tracked"""
+        tracked_artists = []
+        for ws_artists_list in self.tracked_workspaces.values():
+            for ws_artists in ws_artists_list:
+                for artist in ws_artists._artists:
+                    tracked_artists.append(artist)
+        return tracked_artists
+
     def remove_workspace_artists(self, workspace):
         """
         Remove the artists reference by this workspace (if any) and return True
@@ -331,8 +361,22 @@ class MantidAxes(Axes):
             if is_empty:
                 is_empty_list.append(workspace_name)
 
+        # Catch any artists that are not tracked
+        for artist in self.artists + self.lines + self.containers + self.images:
+            if unary_predicate(artist):
+                artist.remove()
+                if isinstance(artist, ErrorbarContainer):
+                    self.containers.remove(artist)
+
         for workspace_name in is_empty_list:
             self.tracked_workspaces.pop(workspace_name)
+
+        # Catch any artists that are not tracked
+        for artist in self.artists + self.lines + self.containers + self.images:
+            if unary_predicate(artist):
+                artist.remove()
+                if isinstance(artist, ErrorbarContainer):
+                    self.containers.remove(artist)
 
         return self.is_empty(self)
 
@@ -369,6 +413,44 @@ class MantidAxes(Axes):
         for workspace_artist in artist_info:
             workspace_artist.replace_data(workspace)
         return True
+
+    def replot_artist(self, artist, errorbars=False, **kwargs):
+        """
+        Replot an artist with a new set of kwargs via 'plot' or 'errorbar'
+        :param artist: The artist to replace
+        :param errorbars: Plot with or without errorbars
+        :returns: The new artist that has been plotted
+        For keywords related to workspaces, see :func:`plotfunctions.plot` or
+        :func:`plotfunctions.errorbar`
+        """
+        workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
+        self.remove_artists_if(lambda art: art == artist)
+        workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        if errorbars:
+            new_artist = self.errorbar(workspace, wkspIndex=workspace_index,
+                                       **kwargs)
+        else:
+            new_artist = self.plot(workspace, wkspIndex=workspace_index,
+                                   **kwargs)
+        return new_artist
+
+    def relim(self, visible_only=True):
+        Axes.relim(self, visible_only)  # relim on any non-errorbar objects
+        lower_xlim, lower_ylim = self.dataLim.get_points()[0]
+        upper_xlim, upper_ylim = self.dataLim.get_points()[1]
+        for container in self.containers:
+            if isinstance(container, ErrorbarContainer) and (
+                    (visible_only and not helperfunctions.errorbars_hidden(container)) or
+                    not visible_only):
+                min_x, max_x, min_y, max_y = helperfunctions.get_errorbar_bounds(container)
+                lower_xlim = min(lower_xlim, min_x) if min_x else lower_xlim
+                upper_xlim = max(upper_xlim, max_x) if max_x else upper_xlim
+                lower_ylim = min(lower_ylim, min_y) if min_y else lower_ylim
+                upper_ylim = max(upper_ylim, max_y) if max_y else upper_ylim
+
+        xys = [[lower_xlim, lower_ylim], [upper_xlim, upper_ylim]]
+        # update_datalim will update limits with union of current lims and xys
+        self.update_datalim(xys)
 
     @staticmethod
     def is_empty(axes):
@@ -480,7 +562,7 @@ class MantidAxes(Axes):
                 return artists
 
             workspace = args[0]
-            spec_num = self._get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
@@ -576,16 +658,28 @@ class MantidAxes(Axes):
                                                            **kwargs)
                 self.containers.insert(orig_idx, container_new)
                 self.containers.pop()
-                orig_flat, new_flat = cbook.flatten(container_orig), cbook.flatten(container_new)
-                for artist_orig, artist_new in zip(orig_flat, new_flat):
-                    artist_new.update_from(artist_orig)
+
+                # Update joining line
+                if container_new[0] and container_orig[0]:
+                    container_new[0].update_from(container_orig[0])
+                # Update caps
+                for orig_caps, new_caps in zip(container_orig[1], container_new[1]):
+                    new_caps.update_from(orig_caps)
+                # Update bars
+                for orig_bars, new_bars in zip(container_orig[2], container_new[2]):
+                    new_bars.update_from(orig_bars)
+
+                # Re-plotting in the config dialog will assign this attr
+                if hasattr(container_orig, 'errorevery'):
+                    setattr(container_new, 'errorevery', container_orig.errorevery)
+
                 # ax.relim does not support collections...
                 self._update_line_limits(container_new[0])
                 self.set_autoscaley_on(True)
                 return container_new
 
             workspace = args[0]
-            spec_num = self._get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
                                                                **kwargs)
 

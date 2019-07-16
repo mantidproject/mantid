@@ -5,21 +5,29 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
+#include "IndirectDataValidationHelper.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QStringList>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
+
+template <typename T = MatrixWorkspace>
+boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
+  return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -55,6 +63,11 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSample->isOptional(true);
+  m_uiForm.dsContainer->isOptional(true);
+  m_uiForm.dsCorrections->isOptional(true);
+
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
 }
@@ -77,8 +90,7 @@ void ApplyAbsorptionCorrections::newSample(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // Get workspace
-  m_ppSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
+  m_ppSampleWS = getADSWorkspace(dataName.toStdString());
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppSampleWS) {
@@ -104,8 +116,7 @@ void ApplyAbsorptionCorrections::newContainer(const QString &dataName) {
   m_uiForm.ppPreview->removeSpectrum("Corrected");
 
   // get Workspace
-  m_ppContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      dataName.toStdString());
+  m_ppContainerWS = getADSWorkspace(dataName.toStdString());
 
   // Check if supplied workspace is a MatrixWorkspace
   if (!m_ppContainerWS) {
@@ -189,9 +200,7 @@ void ApplyAbsorptionCorrections::run() {
   applyCorrAlg->initialize();
 
   // get Sample Workspace
-  MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          m_sampleWorkspaceName);
+  auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
   absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -208,8 +217,7 @@ void ApplyAbsorptionCorrections::run() {
     clone->setProperty("Outputworkspace", cloneName);
     clone->execute();
 
-    canClone =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
+    canClone = getADSWorkspace(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
       const char *text = "Binning on sample and container does not match."
@@ -251,11 +259,10 @@ void ApplyAbsorptionCorrections::run() {
 
   QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-  WorkspaceGroup_sptr corrections =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          correctionsWsName.toStdString());
+  auto const corrections =
+      getADSWorkspace<WorkspaceGroup>(correctionsWsName.toStdString());
   bool interpolateAll = false;
-  for (size_t i = 0; i < corrections->size(); i++) {
+  for (std::size_t i = 0; i < corrections->size(); i++) {
     MatrixWorkspace_sptr factorWs =
         boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
@@ -317,15 +324,21 @@ void ApplyAbsorptionCorrections::run() {
     geometryType = "_cyl";
   }
 
+  QString correctionType;
+  if (correctionsWsName.contains("PP")) {
+    correctionType = "_PP";
+  } else if (correctionsWsName.contains("MC")) {
+    correctionType = "_MC";
+  }
+
   QString outputWsName = QStrSampleWsName.left(nameCutIndex);
-  outputWsName += geometryType + "_Corrected";
+  outputWsName += geometryType + correctionType + "_Corrected";
 
   // Using container
   if (m_uiForm.ckUseCan->isChecked()) {
-    const auto canName =
+    auto const canName =
         m_uiForm.dsContainer->getCurrentDataName().toStdString();
-    MatrixWorkspace_sptr containerWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canName);
+    auto const containerWs = getADSWorkspace(canName);
     auto logs = containerWs->run();
     if (logs.hasProperty("run_number")) {
       outputWsName +=
@@ -356,11 +369,6 @@ void ApplyAbsorptionCorrections::run() {
 
 std::size_t ApplyAbsorptionCorrections::getOutWsNumberOfSpectra() const {
   return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
-}
-
-MatrixWorkspace_const_sptr
-ApplyAbsorptionCorrections::getADSWorkspace(std::string const &name) const {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
 }
 
 /**
@@ -468,44 +476,18 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
 bool ApplyAbsorptionCorrections::validate() {
   UserInputValidator uiv;
 
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  // Validate the sample workspace
+  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red,
+                      {DataType::Sqw});
 
-  const auto sampleName = m_uiForm.dsSample->getCurrentDataName();
-  const auto sampleWsName = sampleName.toStdString();
-  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsName);
+  // Validate the container workspace
+  if (m_uiForm.ckUseCan->isChecked())
+    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red,
+                        {DataType::Sqw});
 
-  if (sampleExists &&
-      !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          sampleWsName)) {
-    uiv.addErrorMessage(
-        "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-  }
-
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-
-  if (useCan)
-    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
-
-  if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
-    uiv.addErrorMessage(
-        "Correction selector must contain a corrections file or workspace.");
-  } else {
-    QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
-    WorkspaceGroup_sptr corrections =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            correctionsWsName.toStdString());
-    for (size_t i = 0; i < corrections->size(); i++) {
-      // Check it is a MatrixWorkspace
-      MatrixWorkspace_sptr factorWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
-      if (!factorWs) {
-        QString msg = "Correction factor workspace " + QString::number(i) +
-                      " is not a MatrixWorkspace";
-        uiv.addErrorMessage(msg);
-        continue;
-      }
-    }
-  }
+  // Validate the corrections workspace
+  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections",
+                       DataType::Corrections);
 
   // Show errors if there are any
   if (!uiv.isAllInputValid())

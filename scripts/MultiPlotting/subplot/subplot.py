@@ -12,7 +12,7 @@ from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
@@ -68,10 +68,10 @@ class subplot(QtWidgets.QWidget):
         self._context.add_annotate(subplotName, label)
         self.canvas.draw()
 
-    def add_vline(self, subplotName, xvalue, name):
+    def add_vline(self, subplotName, xvalue, name, color):
         if subplotName not in self._context.subplots.keys():
             return
-        self._context.add_vline(subplotName, xvalue, name)
+        self._context.add_vline(subplotName, xvalue, name, color)
         self.canvas.draw()
 
     def rm_annotate(self, subplotName, name):
@@ -111,7 +111,7 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
         self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName)
+            gridspec[number], label=subplotName, projection ='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -156,56 +156,41 @@ class subplot(QtWidgets.QWidget):
 
     def _rm(self):
         names = list(self._context.subplots.keys())
-        # if the remove window is not visable
-        if self._rm_window is not None:
-            self._raise_rm_window()
-        # if the selector is not visable
-        elif self._selector_window is not None:
-            self._raise_selector_window()
-        # if only one subplot just skip selector
-        elif len(names) == 1:
-            self._get_rm_window(names[0])
-        # if no selector and no remove window -> let user pick which subplot to
-        # change
+        if len(names) == 1:
+            if self._rm_window is not None:
+                self._rm_window.show()
+            else:
+                self._get_rm_window(names[0])
         else:
+            if self._rm_window is not None:
+                self._rm_window.close()
+                self._rm_window = None
+            self._close_selector_window()
+
             self._selector_window = self._createSelectWindow(names)
-            self._selector_window.subplotSelectorSignal.connect(
-                self._get_rm_window)
-            self._selector_window.closeEventSignal.connect(
-                self._close_selector_window)
+            self._selector_window.subplotSelectorSignal.connect(self._get_rm_window)
+            self._selector_window.closeEventSignal.connect(self._close_selector_window)
             self._selector_window.setMinimumSize(300, 100)
             self._selector_window.show()
 
     def _rm_subplot(self):
         names = list(self._context.subplots.keys())
-        # if the selector is not visable
-        if self._selector_window is not None:
-            self._raise_selector_window()
-        # if no selector and no remove window -> let user pick which subplot to
-        # change
-        else:
-            self._selector_window = self._createSelectWindow(names)
-            self._selector_window.subplotSelectorSignal.connect(
-                self._remove_subplot)
-            self._selector_window.subplotSelectorSignal.connect(
-                self._close_selector_window)
-            self._selector_window.closeEventSignal.connect(
-                self._close_selector_window)
-            self._selector_window.setMinimumSize(300, 100)
-            self._selector_window.show()
+        # If the selector is hidden then close it
+        self._close_selector_window()
+
+        self._selector_window = self._createSelectWindow(names)
+        self._selector_window.subplotSelectorSignal.connect(self._remove_subplot)
+        self._selector_window.subplotSelectorSignal.connect(self._close_selector_window)
+        self._selector_window.closeEventSignal.connect(self._close_selector_window)
+        self._selector_window.setMinimumSize(300, 100)
+        self._selector_window.show()
 
     def _createSelectWindow(self, names):
         return SelectSubplot(names)
 
-    def _raise_rm_window(self):
-        self._rm_window.raise_()
-
-    def _raise_selector_window(self):
-        self._selector_window.raise_()
-
     def _close_selector_window(self):
         if self._selector_window is not None:
-            self._selector_window.close
+            self._selector_window.close()
             self._selector_window = None
 
     def _create_rm_window(self, subplotName):
@@ -235,8 +220,8 @@ class subplot(QtWidgets.QWidget):
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
             self._remove_subplot(self._rm_window.subplot)
-
-        self.canvas.draw()
+        else:
+            self.canvas.draw()
         # if no subplots then close plotting window
         if len(self._context.subplots.keys()) == 0:
             self._close_rm_window()

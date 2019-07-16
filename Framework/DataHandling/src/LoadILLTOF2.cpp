@@ -413,17 +413,20 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
                               const std::vector<detid_t> &detectorIDs,
                               const NXInt &data, Progress &progress) {
-  for (size_t i = 0; i < numberOfTubes; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const size_t currentSpectrum = spec + i * m_numberOfPixelsPerTube + j;
       m_localWorkspace->setHistogram(
-          spec, m_localWorkspace->binEdges(0),
+          currentSpectrum, m_localWorkspace->binEdges(0),
           Counts(data_p, data_p + m_numberOfChannels));
-      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec]);
-      spec++;
+      m_localWorkspace->getSpectrum(currentSpectrum)
+          .setDetectorID(detectorIDs[currentSpectrum]);
       progress.report();
     }
   }
+  spec += numberOfTubes * m_numberOfPixelsPerTube;
 }
 
 /**

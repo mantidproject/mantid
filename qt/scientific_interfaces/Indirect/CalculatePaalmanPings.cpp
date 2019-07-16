@@ -84,6 +84,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this,
           SLOT(setCanDensity(double)));
 
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSample->isOptional(true);
+  m_uiForm.dsContainer->isOptional(true);
+
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
                                m_uiForm.leCanChemicalFormula,
@@ -117,8 +121,8 @@ void CalculatePaalmanPings::run() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           sampleWsName.toStdString());
 
-  const auto emode = m_uiForm.cbEmode->currentText();
-  absCorAlgo->setProperty("EMode", emode.toStdString());
+  const auto emode = m_uiForm.cbEmode->currentText().toStdString();
+  absCorAlgo->setProperty("EMode", emode);
 
   const auto efixed = m_uiForm.doubleEfixed->value();
   absCorAlgo->setProperty("EFixed", efixed);
@@ -134,8 +138,16 @@ void CalculatePaalmanPings::run() {
   if (sampleXUnit->caption() != "Wavelength" && emode != "Efixed") {
     g_log.information(
         "Sample workspace not in wavelength, need to convert to continue.");
-    absCorProps["SampleWorkspace"] =
-        addConvertUnitsStep(sampleWs, "Wavelength");
+
+    auto const convertedSampleWorkspace =
+        addConvertUnitsStep(sampleWs, "Wavelength", "UNIT", emode, efixed);
+    if (convertedSampleWorkspace)
+      absCorProps["SampleWorkspace"] = convertedSampleWorkspace.get();
+    else {
+      setRunIsRunning(false);
+      return;
+    }
+
   } else {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
@@ -177,7 +189,16 @@ void CalculatePaalmanPings::run() {
     if (canXUnit->caption() != "Wavelength" && emode != "Efixed") {
       g_log.information("Container workspace not in wavelength, need to "
                         "convert to continue.");
-      absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
+
+      auto const convertedWorkspace =
+          addConvertUnitsStep(canWs, "Wavelength", "UNIT", emode);
+      if (convertedWorkspace)
+        absCorProps["CanWorkspace"] = convertedWorkspace.get();
+      else {
+        setRunIsRunning(false);
+        return;
+      }
+
     } else {
       absCorProps["CanWorkspace"] = canWsName;
     }

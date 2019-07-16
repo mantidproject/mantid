@@ -171,7 +171,8 @@ void MultiDomainFunctionModel::removeFunction(const QString &functionIndex) {
                                " is not composite.");
     }
     cf->removeFunction(index);
-    if (cf->nFunctions() == 1 && prefix.isEmpty()) {
+    if (cf->nFunctions() == 1 && prefix.isEmpty() &&
+        cf->name() == "CompositeFunction") {
       m_function->replaceFunction(i, cf->getFunction(0));
       m_function->checkFunction();
     } else {

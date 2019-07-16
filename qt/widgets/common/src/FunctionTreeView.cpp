@@ -416,10 +416,12 @@ void FunctionTreeView::setFunction(QtProperty *prop,
 /**
  * Add a function.
  * @param prop :: Property of the parent composite function or NULL
- * @param fun :: FunctionFactory function creation string
+ * @param fun :: A function to add
  */
-void FunctionTreeView::addFunction(QtProperty *prop,
+bool FunctionTreeView::addFunction(QtProperty *prop,
                                    Mantid::API::IFunction_sptr fun) {
+  if (!fun)
+    return false;
   if (!prop) {
     AProperty ap =
         addFunctionProperty(nullptr, QString::fromStdString(fun->name()));
@@ -427,17 +429,24 @@ void FunctionTreeView::addFunction(QtProperty *prop,
   } else {
     Mantid::API::IFunction_sptr parentFun = getFunction(prop);
     if (!parentFun)
-      return;
+      return false;
     auto cf =
         boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(parentFun);
     if (!cf) {
-      throw std::runtime_error(
+      throw std::logic_error(
           "FunctionTreeView: CompositeFunction is expected for addFunction");
     }
-    cf->addFunction(fun);
+    try {
+      cf->addFunction(fun);
+    } catch (const std::exception &e) {
+      QMessageBox::warning(this, "Mantid - Warning",
+                           QString("Cannot Add function:\n\n%1").arg(e.what()));
+      return false;
+    }
     setFunction(prop, cf);
   }
   updateFunctionIndices();
+  return true;
 }
 
 /**
@@ -1186,7 +1195,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
             prop->propertyName().toStdString());
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf) {
-      addFunction(prop, f);
+      auto const isAdded = addFunction(prop, f);
+      if (!isAdded)
+        return;
     } else {
       cf.reset(new Mantid::API::CompositeFunction);
       auto f0 = getFunction(prop);
@@ -1197,7 +1208,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
       setFunction(cf);
     }
   } else { // the browser is empty - add first function
-    addFunction(nullptr, f);
+    auto const isAdded = addFunction(nullptr, f);
+    if (!isAdded)
+      return;
   }
   emit functionAdded(QString::fromStdString(f->asString()));
 }
@@ -1431,7 +1444,7 @@ void FunctionTreeView::removeFunction() {
       // which means more than two subproperties
       size_t nFunctions = props[0]->subProperties().size() - 1;
 
-      if (nFunctions == 1) {
+      if (nFunctions == 1 && cf->name() == "CompositeFunction") {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
         auto func = getFunction(m_browser->properties()[0]->subProperties()[1]);

@@ -6,12 +6,26 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ILLEnergyTransfer.h"
 
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QInputDialog>
 
 using namespace Mantid::API;
+
+namespace {
+
+void saveNexusProcessed(std::string const &workspaceName,
+                        std::string const &filename) {
+  auto saver = AlgorithmManager::Instance().create("SaveNexusProcessed");
+  saver->initialize();
+  saver->setProperty("InputWorkspace", workspaceName);
+  saver->setProperty("Filename", filename);
+  saver->execute();
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -334,28 +348,25 @@ void ILLEnergyTransfer::runClicked() { runTab(); }
  * Handles plotting of the reduced ws.
  */
 void ILLEnergyTransfer::plot() {
-  QString pyInput = "from mantid import mtd\n"
-                    "from IndirectReductionCommon import plot_reduction\n";
-  pyInput += "plot_reduction(mtd[\"";
-  pyInput += m_uiForm.leOutWS->text();
-  pyInput += QString::fromStdString(m_suffix);
-  pyInput += "\"].getItem(0).getName(),\"Contour\")\n";
-  m_pythonRunner.runPythonCode(pyInput);
+  auto &ads = AnalysisDataService::Instance();
+
+  auto const outputGroupName =
+      m_uiForm.leOutWS->text().toStdString() + m_suffix;
+  if (ads.doesExist(outputGroupName)) {
+    auto const outputGroup = ads.retrieveWS<WorkspaceGroup>(outputGroupName);
+    auto const workspaceName = outputGroup->getItem(0)->getName();
+    IndirectTab::plot2D(QString::fromStdString(workspaceName));
+  }
 }
 
 /**
  * Handles saving of the reduced ws.
  */
 void ILLEnergyTransfer::save() {
-  QString pyInput;
-  pyInput += "SaveNexusProcessed(\"";
-  pyInput += m_uiForm.leOutWS->text();
-  pyInput += QString::fromStdString(m_suffix);
-  pyInput += "\",\"";
-  pyInput += m_uiForm.leOutWS->text();
-  pyInput += QString::fromStdString(m_suffix);
-  pyInput += ".nxs\")\n";
-  m_pythonRunner.runPythonCode(pyInput);
+  auto const workspaceName = m_uiForm.leOutWS->text().toStdString() + m_suffix;
+
+  if (AnalysisDataService::Instance().doesExist(workspaceName))
+    saveNexusProcessed(workspaceName, workspaceName + ".nxs");
 }
 
 /**

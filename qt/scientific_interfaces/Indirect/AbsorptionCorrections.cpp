@@ -160,6 +160,10 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
   connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
           SLOT(doValidation()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSampleInput->isOptional(true);
+  m_uiForm.dsCanInput->isOptional(true);
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {}

@@ -83,9 +83,11 @@ public:
   /// Get the workspace name from the list of files
   QString getWsNameFromFiles() const;
   /// Get the currently available file or workspace name
-  QString getCurrentDataName() const;
+  virtual QString getCurrentDataName() const;
   /// Sets which selector (file or workspace) is visible
   void setSelectorIndex(int index);
+  /// Sets if the option to choose selector is visible
+  void setTypeSelectorVisible(bool visible);
   /// Set the index of the combobox containing the loaded workspace
   void setWorkspaceSelectorIndex(QString const &workspaceName);
   /// Get whether the file selector is currently being shown
@@ -93,7 +95,7 @@ public:
   /// Get whether the workspace selector is currently being shown
   bool isWorkspaceSelectorVisible() const;
   /// Checks if widget is in a valid state
-  bool isValid();
+  virtual bool isValid();
   /// Get file problem, empty string means no error.
   QString getProblem() const;
   /// Read settings from the given group

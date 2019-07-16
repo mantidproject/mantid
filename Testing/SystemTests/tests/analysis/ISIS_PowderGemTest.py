@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import systemtesting
 import shutil
+import platform
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -42,10 +43,10 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+generated_offset = os.path.join(calibration_dir, "19_1")
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config['datasearch.directories']
 
@@ -57,7 +58,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return self.calibration_results.name(),\
+        return self.calibration_results.name(), \
                "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
 
     def cleanup(self):
@@ -70,7 +71,6 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
 
 class FocusTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config['datasearch.directories']
 
@@ -89,6 +89,34 @@ class FocusTest(systemtesting.MantidSystemTest):
         try:
             _try_delete(spline_path)
             _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
+class CreateCalTest(systemtesting.MantidSystemTest):
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+
+        self.focus_results = run_calibration()
+
+    def validate(self):
+        self.tolerance = 1e-5
+        if _current_os_has_gsl_lvl2():
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
+        else:
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_groupedGSAS1.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(generated_offset)
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -138,6 +166,12 @@ def run_focus():
                              sample_empty_scale=sample_empty_scale)
 
 
+def run_calibration():
+    iron_run = 87618
+    inst_object = setup_inst_object(mode="PDF")
+    return inst_object.create_cal(run_number=iron_run)
+
+
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
 
@@ -158,4 +192,9 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)
+
+
+def _current_os_has_gsl_lvl2():
+    """ Check whether the current OS should be running GSLv2 """
+    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''

@@ -12,25 +12,39 @@ from six import iteritems
 from Muon.GUI.Common.checkbox import Checkbox
 
 
+# Check that the new data format contains at least A, Z, primary (they can be empty)
+def valid_data(peak_data):
+    data_label = peak_data.keys()
+    if any(['Z' not in data_label,
+            'A' not in data_label,
+            'Primary' not in data_label,
+            'Secondary' not in data_label]):
+        return False
+
+    return True
+
+
 class PeakSelectorView(QtWidgets.QListWidget):
-    sig_finished_selection = QtCore.pyqtSignal(object, object)
+    sig_finished_selection = QtCore.Signal(object, object)
 
     def __init__(self, peak_data, element, parent=None):
         super(PeakSelectorView, self).__init__(parent)
         widget = QtWidgets.QWidget()
 
         self.new_data = {}
+        if not valid_data(peak_data):
+            raise ValueError
+
         self.update_new_data(peak_data)
         self.element = element
         self.setWindowTitle(element)
         self.list = QtWidgets.QVBoxLayout(self)
 
+        # Labels might not be present, if so return empty list
         primary = peak_data["Primary"]
-        self.primary_checkboxes = self._create_checkbox_list(
-            "Primary", primary)
+        self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
         secondary = peak_data["Secondary"]
-        self.secondary_checkboxes = self._create_checkbox_list(
-            "Secondary", secondary, checked=False)
+        self.secondary_checkboxes = self._create_checkbox_list("Secondary", secondary, checked=False)
         try:
             gammas = peak_data["Gammas"]
             self.gamma_checkboxes = self._create_checkbox_list(
@@ -64,6 +78,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
             if values is None:
                 data[el] = {}
         new_data = data["Primary"].copy()
+
         self.new_data = new_data
 
     def _setup_checkbox(self, name, checked):

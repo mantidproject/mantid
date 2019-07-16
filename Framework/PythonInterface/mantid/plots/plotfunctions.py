@@ -211,7 +211,8 @@ def errorbar(axes, workspace, *args, **kwargs):
         workspace, axes, **kwargs)
     x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(
         axes, workspace, kwargs, with_dy=True, with_dx=False)
-    _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width)
+    _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width,
+                 axis=axis)
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 

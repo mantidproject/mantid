@@ -15,6 +15,8 @@ import unittest
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
+from mantid.simpleapi import Load
+from mantidqt.utils.qt.testing import GuiTest
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
@@ -22,10 +24,9 @@ from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformat
 
 
 def create_test_workspace(ws_name=None):
-    fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
     ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
-    AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
-    return fake_ws
+    Load("MUSR22725", OutputWorkspace=ws_name)
+    return AnalysisDataService.Instance().retrieve(ws_name)
 
 
 def create_test_fits(input_workspaces,
@@ -114,7 +115,7 @@ def add_logs(workspace_name, logs):
     return workspace
 
 
-class ResultsTabModelTest(unittest.TestCase):
+class ResultsTabModelTest(GuiTest):
     def setUp(self):
         self.f0_height = (2309.2, 16)
         self.f0_centre = (2.1, 0.002)
@@ -178,8 +179,8 @@ class ResultsTabModelTest(unittest.TestCase):
                                      [], self.logs)
 
         expected_list_state = {
-            'ws1_Parameters': [0, True, True],
-            'ws2_Parameters': [1, True, True]
+            'ws1_Parameters': [0, False, True],
+            'ws2_Parameters': [1, False, True]
         }
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
@@ -187,7 +188,7 @@ class ResultsTabModelTest(unittest.TestCase):
         _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
                                      [], self.logs)
 
-        orig_list_state = {'ws1_Parameters': [0, False, True]}
+        orig_list_state = ["ws2_Parameters"]
         expected_list_state = {
             'ws1_Parameters': [0, False, True],
             'ws2_Parameters': [1, True, True]
@@ -251,7 +252,7 @@ class ResultsTabModelTest(unittest.TestCase):
                                             model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
+        _, model = create_test_model(('ws1', ), 'func1', self.parameters, ('ws1', ),
                                      self.logs)
         selected_results = [('ws1', 0)]
         table = model.create_results_table(self.log_names, selected_results)
@@ -350,10 +351,10 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('f0.Height', (100, 0.1))])
         logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)),
                 ('log4', (5., 6.))]
-        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters)
+        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters, output_workspace_names=('ws1', ))
         add_logs(fits_logs1[0].input_workspaces[0], logs[:2])
 
-        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters)
+        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters, output_workspace_names=('ws2', ))
         add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
         model = ResultsTabModel(FittingContext(fits_logs1 + fits_logs2))
 

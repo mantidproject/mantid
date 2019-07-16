@@ -339,6 +339,7 @@ IFunction_sptr FunctionMultiDomainPresenter::getFunction() const {
 void FunctionMultiDomainPresenter::clear() {
   m_model->clear();
   m_view->clear();
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::setColumnSizes(int s0, int s1, int s2) {

@@ -27,9 +27,11 @@ class WorkspaceSelectorPresenterTest(GuiTest):
         self.view.group_pair_line_edit.editingFinished.emit()
 
         self.context.get_names_of_workspaces_to_fit.assert_any_call(group_and_pair='fwd, bwd', phasequad=False,
-                                                                            rebin=False, runs='All')
+                                                                            rebin=False, runs='All', freq='None')
+
         self.context.get_names_of_workspaces_to_fit.assert_any_call(group_and_pair='All', phasequad=True,
-                                                                           rebin=False, runs='All')
+                                                                           rebin=False, runs='All', freq='None')
+
         self.view.list_selector_presenter.update_model.assert_not_called()
         self.view.list_selector_presenter.update_filter_list.assert_called_once_with([])
 

@@ -201,11 +201,12 @@ class FitInformation(object):
         self.fit_function_name = fit_function_name
         self.input_workspaces = [input_workspace] if isinstance(
             input_workspace, string_types) else input_workspace
-        self.output_workspace_names = output_workspace_names
+        self.output_workspace_names = [output_workspace_names] if isinstance(
+            output_workspace_names, string_types) else output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
-        return self.parameters == other.parameters and \
+        return self.parameter_workspace_name == other.parameter_workspace_name and \
             self.fit_function_name == other.fit_function_name and \
             self.input_workspaces == other.input_workspaces and \
             self.output_workspace_names == other.output_workspace_names
@@ -213,6 +214,10 @@ class FitInformation(object):
     @property
     def parameters(self):
         return self._fit_parameters
+
+    @property
+    def parameter_workspace_name(self):
+        return self._fit_parameters.parameter_workspace_name
 
     def log_names(self, filter_fn=None):
         """
@@ -226,7 +231,7 @@ class FitInformation(object):
         filter_fn = filter_fn if filter_fn is not None else lambda x: True
 
         all_names = []
-        for ws_name in self.input_workspaces:
+        for ws_name in self.output_workspace_names:
             logs = _run(ws_name).getLogData()
             all_names.extend([log.name for log in logs if filter_fn(log)])
 
@@ -237,7 +242,7 @@ class FitInformation(object):
         :param log_name: A string name
         :return: True if the log exists on all of the input workspaces False, otherwise
         """
-        for ws_name in self.input_workspaces:
+        for ws_name in self.output_workspace_names:
             run = _run(ws_name)
             if not run.hasProperty(log_name):
                 return False
@@ -263,13 +268,23 @@ class FitInformation(object):
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
             else:
-                return float(prop.value)
+                try:
+                    return float(prop.value)
+                except ValueError:
+                    return prop.valueAsStr
 
         values = [
             value_from_workspace(wksp_name)
-            for wksp_name in self.input_workspaces
+            for wksp_name in self.output_workspace_names
         ]
-        return np.mean(values)
+        try:
+            return np.mean(values)
+        except TypeError:
+            # This will be a string
+            if len(values) == 1:
+                return values[0]
+            elif len(values) > 1:
+                return str(values[0]) + " to " + str(values[-1])
 
 
 class FittingContext(object):
@@ -286,6 +301,8 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self._number_of_fits = 0
+        self._number_of_fits_cache = 0
 
     def __len__(self):
         """
@@ -314,8 +331,9 @@ class FittingContext(object):
         :param fit: A new FitInformation object
         """
         if fit in self.fit_list:
-            return
+            self.fit_list.pop(self.fit_list.index(fit))
         self.fit_list.append(fit)
+        self._number_of_fits += 1
         self.new_fit_notifier.notify_subscribers()
 
     def fit_function_names(self):
@@ -339,6 +357,15 @@ class FittingContext(object):
 
         return workspace_list
 
+    def remove_workspace_by_name(self, workspace_name):
+        list_of_fits_to_remove = []
+        for fit in self.fit_list:
+            if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+                list_of_fits_to_remove.append(fit)
+
+        for fit in list_of_fits_to_remove:
+            self.fit_list.remove(fit)
+
     def log_names(self, filter_fn=None):
         """
         The names of the logs on the workspaces associated with all of the workspaces.
@@ -350,6 +377,23 @@ class FittingContext(object):
         return [
             name for fit in self.fit_list for name in fit.log_names(filter_fn)
         ]
+
+    def clear(self):
+        self.fit_list = []
+
+    def remove_latest_fit(self, number_of_fits_to_remove):
+        self.fit_list = self.fit_list[:-number_of_fits_to_remove]
+        self._number_of_fits = self._number_of_fits_cache
+        self.new_fit_notifier.notify_subscribers()
+
+    @property
+    def number_of_fits(self):
+        return self._number_of_fits
+
+    @number_of_fits.setter
+    def number_of_fits(self, value):
+        self._number_of_fits_cache = self._number_of_fits
+        self._number_of_fits = value
 
 
 # Private functions

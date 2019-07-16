@@ -115,6 +115,30 @@ QStringList convertToQStringList(std::string const &str,
   return convertToQStringList(subStrings);
 }
 
+/**
+ * Used for plotting spectra on the workbench.
+ *
+ * @param workspaceNames List of names of workspaces to plot
+ * @param indices The workspace indices to plot
+ * @param errorBars True if error bars are enabled
+ * @param kwargs Other arguments for plotting
+ */
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+void workbenchPlot(QStringList const &workspaceNames,
+                   std::vector<int> const &indices, bool errorBars,
+                   boost::optional<QHash<QString, QVariant>> kwargs) {
+  QHash<QString, QVariant> plotKwargs;
+  if (kwargs)
+    plotKwargs = kwargs.get();
+  if (errorBars)
+    plotKwargs["capsize"] = 3;
+
+  using MantidQt::Widgets::MplCpp::plot;
+  plot(workspaceNames, boost::none, indices, boost::none, plotKwargs,
+       boost::none, boost::none, errorBars);
+}
+#endif
+
 } // namespace
 
 namespace MantidQt {
@@ -438,8 +462,7 @@ void IndirectTab::plotMultipleSpectra(
   }
   m_pythonRunner.runPythonCode(pyInput);
 #else
-  using MantidQt::Widgets::MplCpp::plot;
-  plot(workspaceNames, boost::none, workspaceIndices);
+  workbenchPlot(workspaceNames, workspaceIndices, m_plotErrorBars, boost::none);
 #endif
 }
 
@@ -467,8 +490,8 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
 
     m_pythonRunner.runPythonCode(pyInput);
 #else
-    using MantidQt::Widgets::MplCpp::plot;
-    plot(workspaceNames, boost::none, std::vector<int>{wsIndex});
+    workbenchPlot(workspaceNames, std::vector<int>{wsIndex}, m_plotErrorBars,
+                  boost::none);
 #endif
   }
 }
@@ -524,8 +547,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   const auto nSpectra = specEnd - specStart + 1;
   std::vector<int> wkspIndices(nSpectra);
   std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
-  plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
-       boost::none, boost::none, m_plotErrorBars);
+  workbenchPlot(workspaceNames, wkspIndices, m_plotErrorBars, boost::none);
 #endif
 }
 
@@ -579,9 +601,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
   pyInput += ", error_bars=" + errors + ")\n";
   m_pythonRunner.runPythonCode(pyInput);
 #else
-  using MantidQt::Widgets::MplCpp::plot;
-  plot(workspaceNames, boost::none, wsIndices, boost::none, boost::none,
-       boost::none, boost::none, m_plotErrorBars);
+  workbenchPlot(workspaceNames, wsIndices, m_plotErrorBars, boost::none);
 #endif
 }
 
@@ -683,11 +703,10 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   m_pythonRunner.runPythonCode(pyInput);
 #else
   using MantidQt::Widgets::MplCpp::MantidAxType;
-  using MantidQt::Widgets::MplCpp::plot;
-  QHash<QString, QVariant> plotKwargs{
-      {"axis", static_cast<int>(MantidAxType::Bin)}};
-  plot(workspaceNames, boost::none, std::vector<int>{binIndex}, boost::none,
-       plotKwargs);
+  QHash<QString, QVariant> plotKwargs;
+  plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
+  workbenchPlot(workspaceNames, std::vector<int>{binIndex}, m_plotErrorBars,
+                plotKwargs);
 #endif
 }
 
@@ -733,13 +752,22 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min,
  * @param lower :: The lower bound property in the property browser
  * @param upper :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
+ * @param range :: The range to set the range selector to.
  */
-void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower,
-                                   QtProperty *upper,
-                                   const QPair<double, double> &bounds) {
+void IndirectTab::setRangeSelector(
+    RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+    const QPair<double, double> &bounds,
+    const boost::optional<QPair<double, double>> &range) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
   rs->setRange(bounds.first, bounds.second);
+  if (range) {
+    rs->setMinimum(range.get().first);
+    rs->setMaximum(range.get().second);
+  } else {
+    rs->setMinimum(bounds.first);
+    rs->setMaximum(bounds.second);
+  }
 }
 
 /**
@@ -836,6 +864,21 @@ bool IndirectTab::getResolutionRangeFromWs(
     }
   }
   return false;
+}
+
+QPair<double, double>
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName) const {
+  auto const &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName))
+    return getXRangeFromWorkspace(
+        ads.retrieveWS<MatrixWorkspace>(workspaceName));
+  return QPair<double, double>(0.0, 0.0);
+}
+
+QPair<double, double> IndirectTab::getXRangeFromWorkspace(
+    Mantid::API::MatrixWorkspace_const_sptr workspace) const {
+  const auto xValues = workspace->x(0);
+  return QPair<double, double>(xValues[0], xValues[xValues.size() - 1]);
 }
 
 /**

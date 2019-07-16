@@ -28,10 +28,10 @@ class HomeTabPlotModelTest(unittest.TestCase):
         workspace_object_list = [self.create_workspace(workspace) for workspace in workspace_list]
         subplot_title = 'MUSR62260 bottom'
 
-        self.model.plot(workspace_list, subplot_title)
+        self.model.plot(workspace_list, subplot_title, 'Time', False, 'Muon Analysis')
 
         mock_plot.assert_called_once_with(mock.ANY, spectrum_nums=[1], window_title=subplot_title, errors=True,
-                                          plot_kwargs={'distribution': True})
+                                          plot_kwargs={'distribution': True, 'autoscale_on_update': False})
         self.assertEqual(str(mock_plot.call_args[0][0][0]), str(workspace_object_list[0]))
         self.assertEqual(str(mock_plot.call_args[0][0][1]), str(workspace_object_list[1]))
 

@@ -21,7 +21,7 @@ from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_select
 
 class TransformTest(GuiTest):
     def setUp(self):
-        self.load = mock.create_autospec(load_utils.LoadUtils, spec_set=True)
+        self.load = mock.MagicMock()
         self.fft = mock.create_autospec(fft_presenter.FFTPresenter, spec_Set=True)
         self.maxent = mock.create_autospec(maxent_presenter.MaxEntPresenter, spec_set=True)
 

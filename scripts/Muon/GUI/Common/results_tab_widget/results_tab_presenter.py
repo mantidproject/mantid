@@ -23,6 +23,8 @@ class ResultsTabPresenter(QObject):
         self.new_fit_performed_observer = GenericObserver(
             self.on_new_fit_performed)
 
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+
         self._init_view()
 
     # callbacks
@@ -72,18 +74,36 @@ class ResultsTabPresenter(QObject):
     def _on_new_fit_performed_impl(self):
         """Use as part of an invokeMethod call to call across threads"""
         self.view.set_fit_function_names(self.model.fit_functions())
-        self._update_fit_results_view()
+        self._update_fit_results_view_on_new_fit()
         self._update_logs_view()
         self.view.set_output_results_button_enabled(True)
 
+    def _get_workspace_list(self):
+        fit_context = self.model._fit_context
+        workspace_list = []
+        fit_list = fit_context.fit_list
+        for ii in range(1, fit_context._number_of_fits + 1):
+            workspace_list.append(fit_list[-ii].parameter_workspace_name)
+        return workspace_list, fit_list[len(fit_list) - 1].fit_function_name
+
+    def _update_fit_results_view_on_new_fit(self):
+        """Update the view of results workspaces based on the current model"""
+        workspace_list, function_name = self._get_workspace_list()
+        self.view.set_selected_fit_function(function_name)
+        selection = self.model.fit_selection(workspace_list)
+        self.view.set_fit_result_workspaces(selection)
+
     def _update_fit_results_view(self):
         """Update the view of results workspaces based on the current model"""
-        self.view.set_fit_result_workspaces(
-            self.model.fit_selection(
-                existing_selection=self.view.fit_result_workspaces()))
+        workspace_list, _ = self._get_workspace_list()
+        selection = self.model.fit_selection(workspace_list)
+        self.view.set_fit_result_workspaces(selection)
 
     def _update_logs_view(self):
         """Update the view of logs based on the current model"""
         self.view.set_log_values(
             self.model.log_selection(
                 existing_selection=self.view.log_values()))
+
+    def update_view_from_model(self):
+        self.on_new_fit_performed()

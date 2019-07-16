@@ -41,6 +41,9 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
           SIGNAL(endXChanged(double)));
 
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(emitViewSelected(int)));
+
+  m_dataForm->dsSample->isOptional(true);
+  m_dataForm->dsResolution->isOptional(true);
 }
 
 QTableWidget *IndirectFitDataView::getDataTable() const {

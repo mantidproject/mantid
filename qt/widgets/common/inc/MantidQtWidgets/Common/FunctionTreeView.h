@@ -134,7 +134,7 @@ protected:
   /// Set a function
   void setFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
   /// Add a function
-  void addFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
+  bool addFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
   /// Add a function property
   AProperty addFunctionProperty(QtProperty *parent, QString funName);
   /// Add a parameter property

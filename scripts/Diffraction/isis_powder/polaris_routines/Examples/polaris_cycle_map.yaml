@@ -1,0 +1,157 @@
+
+# NOTE: the data in the 8 lines below are TEST data - 
+# it is not representative of any actual cycles/data values used
+
+# Used in ISIS Powder tutorial
+#98531-98534:
+#  # Calibration run
+#  offset_file_name : "cycle_16_5_silicon_all_spectra.cal"
+#  label : "17_1"
+#  Rietveld:
+#    vanadium_run_numbers : "98532"
+#    empty_run_numbers : "98531"
+
+
+118851-:
+# Note: Bank 5, Module 7, PMT Channel 17 u/s - not fixed
+#     : exclude s2674, s2682, s2685, s2686 = UDETs 507026, 507034, 507037, 507038
+    offset_file_name : "cycle_19_1_silicon_all_spectra.cal"
+    label : "19_1"
+    Rietveld:
+        vanadium_run_numbers : "118863"
+        empty_run_numbers : "118862"
+    PDF:
+       vanadium_run_numbers : "118868"
+       empty_run_numbers : "118857-118858"
+
+114377-118850:
+# Note: Bank 5, Module 7, PMT Channel 17 u/s - not fixed
+#     : exclude s2674, s2682, s2685, s2686 = UDETs 507026, 507034, 507037, 507038
+    offset_file_name : "cycle_18_4_silicon_all_spectra.cal"
+    label : "18_4"
+    Rietveld:
+        vanadium_run_numbers : "114378"
+        empty_run_numbers : "114380"
+    PDF:
+       vanadium_run_numbers : "114400-114404"
+       empty_run_numbers : "114384-114388"
+
+113669-114376:
+    offset_file_name : "cycle_18_3_silicon_all_spectra.cal"
+    label : "18_3"
+    Rietveld:
+        vanadium_run_numbers : "113676"
+        empty_run_numbers : "113677"
+    PDF:
+       vanadium_run_numbers : "113684-113688"
+       empty_run_numbers : "113679-113683"
+
+112838-113668:
+    offset_file_name : "cycle_18_2_silicon_all_spectra.cal"
+    label : "18_2"
+    Rietveld:
+        vanadium_run_numbers : "112841"
+        empty_run_numbers : "112842"
+    PDF:
+        vanadium_run_numbers : "112845-112848"
+        empty_run_numbers : "112849-112854"
+
+109226-112837:
+# Note: Files from BOTH Cycles 2018/1a AND 2018/1 will be saved to a
+#       single folder in the ISIS data archive (ISIS_cycle = "18_1")
+    offset_file_name : "cycle_18_1_silicon_all_spectra.cal"
+    label : "18_1"
+    Rietveld:
+        vanadium_run_numbers : "109228"
+        empty_run_numbers : "109229"
+    PDF:
+        vanadium_run_numbers : "109239-109247"
+        empty_run_numbers : "109234-109238"
+
+106851-109225:
+# Note: Files from BOTH Cycles 2018/1a AND 2018/1 will be saved to a
+#       single folder in the ISIS data archive (ISIS_cycle = "18_1")
+    offset_file_name : "cycle_18_1a_silicon_all_spectra.cal"
+    label : "18_1a"
+    Rietveld:
+        vanadium_run_numbers : "106851"
+        empty_run_numbers : "106852"
+    PDF:
+        vanadium_run_numbers : "106911"
+        empty_run_numbers : "106910"
+
+102989-106850:
+    offset_file_name : "cycle_17_4_silicon_all_spectra.cal"
+    label : "17_4"
+    Rietveld:
+        vanadium_run_numbers : "102992"
+        empty_run_numbers : "102993"
+    PDF:
+        vanadium_run_numbers : "102998-103001"
+        empty_run_numbers : "103002-103005"
+
+100004-102988:
+    offset_file_name : "cycle_17_3_silicon_all_spectra.cal"
+    label : "17_3"
+    Rietveld:
+        vanadium_run_numbers : "100005"
+        empty_run_numbers : "100016"
+    PDF:
+        vanadium_run_numbers : "100022-100027"
+        empty_run_numbers : "100028-100033"
+
+99927-100003:
+    offset_file_name : "cycle_17_2_silicon_all_spectra.cal"
+    label : "17_2_700MeV"
+    Rietveld:
+        vanadium_run_numbers : "99953"
+        empty_run_numbers : "99954"
+    PDF:
+        vanadium_run_numbers : "99964-99969"
+        empty_run_numbers : "99970-99975"
+
+99154-99926:
+    offset_file_name : "cycle_17_2_silicon_all_spectra.cal"
+    label : "17_2"
+    Rietveld:
+        vanadium_run_numbers : "99156"
+        empty_run_numbers : "99155"
+    PDF:
+        vanadium_run_numbers : "99162"
+        empty_run_numbers : "99163"
+
+93000-99153:
+    offset_file_name : "cycle_17_1_silicon_all_spectra.cal"
+    label : "17_1"
+    Rietveld:
+        vanadium_run_numbers : "98532"
+        empty_run_numbers : "98531"
+    PDF:
+        vanadium_run_numbers : "98537"
+        empty_run_numbers : "98538"
+
+69963-73060:
+# Note: run 73060 (last run in Journal Folder 14_1 is
+#       VANADIUM ROD run from start of Cycle 2014/2
+    offset_file_name : "Cycle_14_1_silicon_all_spectra.cal"    
+    label : "14_1"
+    Rietveld:
+        vanadium_run_numbers : "69963"
+        empty_run_numbers : "69967"
+#    PDF:
+#        vanadium_run_numbers : ""
+#        empty_run_numbers : ""
+
+63761-64299:
+    offset_file_name : "Cycle_12_2_group_masked_collimator.cal"    
+    label : "13_2"
+    Rietveld:
+        vanadium_run_numbers : "63763"
+        empty_run_numbers : "63764"
+#    PDF:
+#        vanadium_run_numbers : ""
+#        empty_run_numbers : ""
+        
+        
+        
+        

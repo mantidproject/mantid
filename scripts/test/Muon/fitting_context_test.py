@@ -8,6 +8,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from collections import OrderedDict
 import unittest
+from mantidqt.utils.qt.testing import GuiTest
 
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
@@ -82,7 +83,7 @@ def create_test_fit_parameters(test_parameters, global_parameters=None):
     return FitParameters(parameter_workspace, global_parameters)
 
 
-class FittingContextTest(unittest.TestCase):
+class FittingContextTest(GuiTest):
     def setUp(self):
         self.fitting_context = FittingContext()
 
@@ -183,10 +184,10 @@ class FittingContextTest(unittest.TestCase):
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake1.name(),
-                           mock.MagicMock()))
+                           fake1.name()))
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake2.name(),
-                           mock.MagicMock()))
+                           fake2.name()))
 
         log_names = self.fitting_context.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
@@ -203,10 +204,10 @@ class FittingContextTest(unittest.TestCase):
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake1.name(),
-                           mock.MagicMock()))
+                           fake1.name()))
         self.fitting_context.add_fit(
             FitInformation(mock.MagicMock(), 'func1', fake2.name(),
-                           mock.MagicMock()))
+                           fake2.name()))
 
         required_logs = ('ts_2', 'ts_4')
         log_names = self.fitting_context.log_names(
