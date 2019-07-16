@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import QObject, Signal, Slot
-from qtpy.QtWidgets import QApplication,  QInputDialog
+from qtpy.QtWidgets import QInputDialog
 
 from .markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
