@@ -58,11 +58,11 @@ Removed
 #######
 
 * Removed the algorithm GetNegMuMuonicXRDDialog as the new Elemental Analysis interface provides the same, improved, functionality.
-* An issue which prevented the fit button from appearing on plots with errorbars was resolved. This means that the fit button now appears on plots created by Muon Analysis when it did not previously.
 
 Bug Fixes
 #########
 
+* An issue which prevented the fit button from appearing on plots with errorbars was resolved. This means that the fit button now appears on plots created by Muon Analysis when it did not previously. Please note that fits done in this way will not be accessible in the Muon Interface, you should use the fitting in the Muon interface Fitting Tab for that.
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
 * Frequency Domain Analysis old no longer throws an error when calculating PhaseQuads.
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
