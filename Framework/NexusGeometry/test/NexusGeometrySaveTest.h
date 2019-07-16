@@ -79,6 +79,7 @@ public:
 
   // moves down the index through groups starting at root, and if
   // child has expected CLASS_TYPE, and is in parent group with expected parent
+
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
                                     const std::string &childNX_CLASS_TYPE) {
 
@@ -502,61 +503,139 @@ public:
   test_when_nx_detector_groups_have_nx_transformation_attribute_transformation_type_is_specified_for_all() {
 
     ScopedFileHandle fileResource(
-        "check_nxdetector_groups_have_nx_transformations_test_file.hdf5");
+        "check_nxdetector_groups_have_transformation_types_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    // instrument with 10 banks
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    // saveinstrument
+    saveInstrument(instr, destinationFile);
+    auto &compInfo = (*instr.first);
+
+    bool hasNXTransformation;
+    bool hasRotation;
+    bool hasTranslation;
+    bool hasEither(true); // initialise with true
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    for (size_t i = compInfo.root() - 1; i > 0; --i) {
+      if (compInfo.isDetector(i))
+        break;
+
+      if (compInfo.hasParent(i)) {
+
+        size_t parent = compInfo.parent(i);
+        auto parentType = compInfo.componentType(parent);
+
+        if (compInfo.detectorsInSubtree(i).size() != 0) {
+
+          if (parentType != Mantid::Beamline::ComponentType::Rectangular &&
+              parentType != Mantid::Beamline::ComponentType::Structured &&
+              parentType != Mantid::Beamline::ComponentType::Grid) {
+
+            auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+            auto bankName = compInfo.name(i);
+            auto fullPath = pathToparent + "/" + bankName;
+            hasNXTransformation =
+                tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+
+            // assert all test banks have Nxtransformations
+            TS_ASSERT(hasNXTransformation);
+
+            hasTranslation =
+                tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
+
+            hasRotation =
+                tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
+
+            if (!(hasRotation || hasTranslation))
+              hasEither = false;
+
+            TS_ASSERT(hasEither);
+          }
+        }
+      }
+    }
+  }
+
+  void
+  test_when_nx_source_group_has_nx_transformation_attribute_transformation_type_is_specified() {
+
+    ScopedFileHandle fileResource(
+        "check_nxsource_group_has_transformation_type_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // saveinstrument
     saveInstrument(m_instrument, destinationFile);
     auto &compInfo = (*m_instrument.first);
 
-    // get all detector bank names from compInfo
-    std::set<std::string> uniqueDetectorBankNames;
-    auto allDetIdx = compInfo.detectorsInSubtree(compInfo.root());
-    for (const size_t &i : allDetIdx)
-      uniqueDetectorBankNames.insert(compInfo.name(compInfo.parent(i)));
+    bool hasNXTransformation;
+    bool hasRotation;
+    bool hasTranslation;
+    bool hasEither(true); // default to true
 
     HDF5FileTestUtility tester(destinationFile);
+
+    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+    auto sourceName = compInfo.name(compInfo.source());
+    auto fullPath = pathToparent + "/" + sourceName;
+
+    hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+
+    // assert the test source has Nxtransformation.
+    TS_ASSERT(hasNXTransformation);
+
+    hasTranslation =
+        tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
+
+    hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
+
+    if (!(hasRotation || hasTranslation))
+      hasEither = false;
+
+    TS_ASSERT(hasEither);
+  }
+
+  void
+  test_when_nx_sample_group_has_nx_transformation_attribute_transformation_type_is_specified() {
+
+    ScopedFileHandle fileResource(
+        "check_nxsample_group_has_transformation_type_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    // saveinstrument
+    saveInstrument(m_instrument, destinationFile);
+    auto &compInfo = (*m_instrument.first);
 
     bool hasNXTransformation;
     bool hasRotation;
     bool hasTranslation;
+    bool hasEither(true); // default to true
 
-    std::vector<std::pair<bool, bool>> hasEitherRotOrTrans;
+    HDF5FileTestUtility tester(destinationFile);
 
-    for (const std::string &name : uniqueDetectorBankNames) {
+    auto pathToparent = "/raw_data_1/";
+    auto sampleName = compInfo.name(compInfo.sample());
+    auto fullPath = pathToparent + sampleName;
 
-      std::string instrPath =
-          "/raw_data_1/" + compInfo.name(compInfo.root()) + "/";
-      std::string detPath = instrPath + name;
+    hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
 
-      hasNXTransformation = tester.hasNXDataset(detPath, NX_TRANSFORMATION);
-      if (hasNXTransformation) {
+    // assert the test source has Nxtransformation.
+    TS_ASSERT(hasNXTransformation);
 
-        hasTranslation =
-            tester.hasDataset(detPath, TRANSLATION, TRANSFORMATION_TYPE);
+    hasTranslation =
+        tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
 
-        hasRotation = tester.hasDataset(detPath, ROTATION, TRANSFORMATION_TYPE);
+    hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
 
-        // has either rotation or translation. i.e. double false pair not
-        // allowed.
-        hasEitherRotOrTrans.push_back(
-            std::make_pair(hasTranslation, hasRotation));
-      }
-    }
+    if (!(hasRotation || hasTranslation))
+      hasEither = false;
 
-    // assert that there is no double-false pair in 'hasEitherRotOrTrans';
-    bool noDoubleFalsePairs =
-        std::all_of(hasEitherRotOrTrans.begin(), hasEitherRotOrTrans.end(),
-                    [](const std::pair<bool, bool> &checker) {
-                      return (checker.first || checker.second);
-                    });
-
-    TS_ASSERT(noDoubleFalsePairs);
-  }
-
-  void
-  test_when_nx_source_has_nx_transformation_attribute_transformation_type_is_specified() {
-
+    TS_ASSERT(hasEither);
   }
 };
 

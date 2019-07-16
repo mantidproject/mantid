@@ -13,8 +13,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
 #include <boost/filesystem/operations.hpp>
-#include <memory>
-#include <set>
+#include <memory> // unique_ptr
 #include <string>
 
 namespace Mantid {
