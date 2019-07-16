@@ -7,7 +7,6 @@
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -458,7 +457,7 @@ H5::Group instrument(const H5::Group &parent,
 }
 
 /*
- * Function: sample
+ * Function: saveSample
  * For NXentry parent (root group). Produces an NXsample group in the parent
  * group, and writes the Nexus compliant datasets and metadata stored in
  * attributes to the new group.
@@ -467,17 +466,47 @@ H5::Group instrument(const H5::Group &parent,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-void saveSample(const H5::Group &parent,
+void saveSample(const H5::Group &parentGroup,
                 const Geometry::ComponentInfo &compInfo) {
 
-  H5::Group group;
+  H5::Group childGroup;
+
+  size_t idx = compInfo.sample();
+
   std::string sampleName = compInfo.name(compInfo.sample());
-  group = parent.createGroup(sampleName);
-  writeStrAttribute(group, NX_CLASS, NX_SAMPLE);
+  childGroup = parentGroup.createGroup(sampleName);
+
+  writeLocation(childGroup, compInfo, idx);
+  writeOrientation(childGroup, compInfo, idx);
+  writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
 }
 
 /*
- * Function: detector
+ * Function: saveSource
+ * For NXentry (root group). Produces an NXsource group in the parent group, and
+ * writes the Nexus compliant datasets and metadata stored in attributes to the
+ * new group.
+ *
+ *
+ * @param parent : parent group in which to write the NXinstrument group.
+ * @param compInfo : componentInfo object.
+ */
+void saveSource(const H5::Group &parentGroup,
+                const Geometry::ComponentInfo &compInfo) {
+
+  H5::Group childGroup;
+  size_t idx = compInfo.source();
+
+  std::string sourceName = compInfo.name(compInfo.source());
+  childGroup = parentGroup.createGroup(sourceName);
+  writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
+
+  writeLocation(childGroup, compInfo, idx);
+  writeOrientation(childGroup, compInfo, idx);
+}
+
+/*
+ * Function: saveDetectors
  * For NXinstrument parent (root group). Produces a set of NXdetctor groups in
  * the parent group, and writes the Nexus compliant datasets and metadata stored
  * in attributes to the new group. The NXdetector group created will be
@@ -531,26 +560,6 @@ void saveDetectors(const H5::Group &parentGroup,
         }
     }
   }
-}
-
-/*
- * Function: source
- * For NXentry (root group). Produces an NXsource group in the parent group, and
- * writes the Nexus compliant datasets and metadata stored in attributes to the
- * new group.
- *
- *
- * @param parent : parent group in which to write the NXinstrument group.
- * @param compInfo : componentInfo object.
- */
-void saveSource(const H5::Group &parentGroup,
-                const Geometry::ComponentInfo &compInfo) {
-
-  H5::Group childGroup;
-  auto source = compInfo.source();
-  auto name = compInfo.name(source);
-  childGroup = parentGroup.createGroup(name);
-  writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 }
 
 } // namespace NexusGeometrySave
