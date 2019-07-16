@@ -126,8 +126,7 @@ void IqtTemplatePresenter::setFunction(const QString & funStr)
   if (nExp > 1) {
     m_view->addExponentialTwo();
   }
-  updateViewParameterNames();
-  updateViewParameters();
+  updateView();
   emit functionStructureChanged();
 }
 
