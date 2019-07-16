@@ -25,7 +25,7 @@ class HomePlotWidgetModel(object):
     @property
     def plotted_workspaces(self):
         """
-        This property is need to check whether all the workspaces contained in the list are still on the graph. They can
+        This property is needed to check whether all the workspaces contained in the list are still on the graph. They can
         be removed from the graph from the figure window without this class knowing.
         :return:
         """
