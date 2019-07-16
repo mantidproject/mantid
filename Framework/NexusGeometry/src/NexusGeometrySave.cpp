@@ -493,7 +493,7 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
                                  const Geometry::ComponentInfo &compInfo,
                                  const Geometry::DetectorInfo &detInfo) {
 
-  std::vector<size_t> detectorBanks;
+  std::vector<H5::Group> detectorGroups;
 
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
     if (compInfo.isDetector(i))
@@ -509,38 +509,36 @@ std::vector<H5::Group> detectors(const H5::Group &parentGroup,
       if (compInfo.detectorsInSubtree(i).size() != 0)
         if (parentType != Beamline::ComponentType::Rectangular &&
             parentType != Beamline::ComponentType::Structured &&
-            parentType != Beamline::ComponentType::Grid)
-          detectorBanks.push_back(i);
+            parentType != Beamline::ComponentType::Grid) {
+
+          std::string name = compInfo.name(i);
+
+          H5::Group childGroup = parentGroup.createGroup(name);
+          writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
+
+          std::string localNameStr = name; // placeholder
+          H5::StrType localNameStrType = strTypeOfSize(localNameStr);
+
+          std::string dependency =
+              forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+          H5::StrType dependencyStrType = strTypeOfSize(dependency);
+
+          writeDetectorNumber(childGroup, detInfo);
+          writeLocation(childGroup, compInfo, i);
+          writeOrientation(childGroup, compInfo, i);
+          writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
+
+          H5::DataSet localName =
+              childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
+          localName.write(localNameStr, localNameStrType, H5SCALAR);
+          H5::DataSet dependsOn =
+              childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
+          dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+
+          detectorGroups.push_back(childGroup);
+        }
     }
-  }
-
-  std::vector<H5::Group> detectorGroups;
-  for (const size_t &i : detectorBanks) {
-    std::string name = compInfo.name(i);
-
-    H5::Group childGroup = parentGroup.createGroup(name);
-    writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
-
-    std::string localNameStr = name; // placeholder
-    H5::StrType localNameStrType = strTypeOfSize(localNameStr);
-
-    std::string dependency =
-        forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
-    H5::StrType dependencyStrType = strTypeOfSize(dependency);
-
-    writeDetectorNumber(childGroup, detInfo);
-    writeLocation(childGroup, compInfo, i);
-    writeOrientation(childGroup, compInfo, i);
-    writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
-
-    H5::DataSet localName =
-        childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
-    localName.write(localNameStr, localNameStrType, H5SCALAR);
-    H5::DataSet dependsOn =
-        childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
-    dependsOn.write(dependency, dependencyStrType, H5SCALAR);
-
-    detectorGroups.push_back(childGroup);
+    return detectorGroups;
   }
 
   // TODO: WRITE XY PIXEL OFFSETS RELATIVE TO THE DETECTOR BANK
@@ -633,7 +631,7 @@ void saveInstrument(
   NexusGeometrySave::detectors(instrument, compInfo, detInfo);
 
   // NXsource
-  // NexusGeometrySave::source(instrument, compInfo);
+  NexusGeometrySave::source(instrument, compInfo);
 
   // NXsample
   NexusGeometrySave::sample(root, compInfo);
