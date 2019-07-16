@@ -25,7 +25,7 @@ newMarker(FigureCanvasQt *canvas, int peakID, double x, double yTop,
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{
-		  Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
+      Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
   auto const args = Python::NewRef(Py_BuildValue(
       "(Oidddd)", canvas->pyobj().ptr(), peakID, x, yTop, yBottom, fwhm));
