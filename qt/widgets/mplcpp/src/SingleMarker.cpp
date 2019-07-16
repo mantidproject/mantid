@@ -23,8 +23,8 @@ newMarker(FigureCanvasQt *canvas, QString const &colour, double position,
           boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
-  Python::Object markersModule{Python::NewRef(
-      PyImport_ImportModule("mantidqt.widgets.fitpropertybrowser.markers"))};
+  Python::Object markersModule{
+		  Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
   auto const args = Python::NewRef(Py_BuildValue(
       "(Osddds)", canvas->pyobj().ptr(), colour.toLatin1().constData(),
