@@ -5,10 +5,6 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 :ref:`Release 4.1.0 <v4.1.0>`
 
 Instrument Definitions
@@ -16,8 +12,8 @@ Instrument Definitions
 
 The IDF of IN16B has been rewritten to properly model the neutronic positions of the pixels as reflections with respect to spherical analysers.
 This is needed for the new inverted time-of-flight mode (BATS), but also improves the model for the standard doppler mode.
-Particularly, this will allow to calculate correct absorption corrections before grouping the pixels tube by tube.
-With the new IDF the flight-paths inside the sample will properly take into account the off-plane angle, which was not the case with the previous IDF.
+Particularly, this will allow us to calculate correct absorption corrections before grouping the pixels tube by tube.
+With the new IDF, the flight-paths inside the sample will properly take into account the off-plane angle, which was not the case with the previous IDF.
 This change has a retroactive effect, but for reductions where the detectors were grouped, it should not produce different results.
 
 .. figure:: ../../images/IN16B-R.png
@@ -35,14 +31,14 @@ Improvements
 ############
 
 - :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` is extended to support reduction for the new inverted TOF option (BATS) of IN16B.
-- :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` permits now passing parameter values as input properties.
-- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` resolves between run with old and new DAS.
-- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` permits now flux normalization by proton charge and run duration.
-- :ref:`BASISReduction <algm-BASISReduction>` permits now flux normalization by proton charge and run duration.
-- :ref:`BASISReduction <algm-BASISReduction>` permits now retaining events only within a time window.
-- :ref:`BASISReduction <algm-BASISReduction>` can output now the powder diffraction spectra.
-- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between run with old and new DAS.
-- :ref:`Abins <algm-Abins>` permits individual numbered atom contributions to simulated INS spectrum to be specified, alongside the existing option to select by element.
+- :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` now permits the passing of parameter values as input properties.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` resolves between the run with old and new DAS.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` now permits flux normalization by proton charge and run duration.
+- :ref:`BASISReduction <algm-BASISReduction>` now permits flux normalization by proton charge and run duration.
+- :ref:`BASISReduction <algm-BASISReduction>` now permits retaining events only within a time window.
+- :ref:`BASISReduction <algm-BASISReduction>` can output the powder diffraction spectra.
+- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` resolves between the run with old and new DAS.
+- :ref:`Abins <algm-Abins>` permits individually numbered atom contributions to simulated INS spectrum to be specified, alongside the existing option to select by element.
 
 
 Data Analysis Interface
