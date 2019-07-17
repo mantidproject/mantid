@@ -116,7 +116,8 @@ void IndirectDiffractionReduction::initLayout() {
   validateCalOnly();
 
   // Update instrument dependant widgets
-  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
+  m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 }
 
 /**

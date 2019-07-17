@@ -132,7 +132,7 @@ class FigureInteraction(object):
         self._add_axes_scale_menu(menu)
         if isinstance(event.inaxes, MantidAxes):
             self._add_normalization_option_menu(menu, event.inaxes)
-        self.errors_manager.add_error_bars_menu(menu)
+        self.errors_manager.add_error_bars_menu(menu, event.inaxes)
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu):
