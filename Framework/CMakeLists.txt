@@ -53,6 +53,7 @@ include(TargetFunctions)
 
 add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)
+add_dependencies(FrameworkTests Framework)
 
 include_directories(Types/inc)
 add_subdirectory(Types)
