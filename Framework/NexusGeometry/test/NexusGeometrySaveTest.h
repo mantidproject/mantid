@@ -604,7 +604,6 @@ public:
     }
   }
 
-
   void
   test_when_nx_sample_group_has_nx_transformation_attribute_transformation_type_is_specified() {
 
@@ -697,7 +696,7 @@ public:
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10),
-            relativeBankRotation,  // sample rotation
+            relativeBankRotation, // sample rotation
             relativeDetRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
@@ -742,27 +741,31 @@ public:
             Eigen::Quaterniond bankRotationCopy =
                 Mantid::Kernel::toQuaterniond(relativeBankRotation);
 
-			// Eigen copy of relativeDetRotation
+            // Eigen copy of relativeDetRotation
             Eigen::Quaterniond detRotationCopy =
                 Mantid::Kernel::toQuaterniond(relativeDetRotation);
 
             // bank rotation in file as Eigen Quaternion
-            Eigen::Quaterniond bankRotationInFile = Mantid::Kernel::toQuaterniond(
-                Quat(angleInFile, axisVectorInFile));
+            Eigen::Quaterniond bankRotationInFile =
+                Mantid::Kernel::toQuaterniond(
+                    Quat(angleInFile, axisVectorInFile));
 
-			// get the xyz offset of the pixels, and use trig to verify that its position reflects det rotation relative to bank.
+            // get the xyz offset of the pixels, and use trig to verify that its
+            // position reflects det rotation relative to bank.
             auto detectorOffsetX =
                 tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
             auto detectorOffsetY =
                 tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
             auto detectorOffsetZ =
                 tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
-			
-			
 
+            /*
+            convert offsets to Eigen vector to get relative position. thenm test
+            absolute position of compinfo = relpos + bankPos.
+            
+            */
 
-
-            //TS_ASSERT(rotationInFile.isApprox(sampleRotationCopy));
+            // TS_ASSERT(rotationInFile.isApprox(sampleRotationCopy));
           }
         }
       }
