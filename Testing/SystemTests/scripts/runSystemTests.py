@@ -7,15 +7,16 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from multiprocessing import Process, Array, Manager, Value, Lock
+
 import optparse
 import os
-import sys
-import time
-
 # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
 # Remove this when everything is switched to qtpy
 import sip
+import sys
+import time
+from multiprocessing import Process, Array, Manager, Value, Lock
+
 try:
     sip.setapi('QString', 2)
     sip.setapi('QVariant', 2)
@@ -39,20 +40,26 @@ start_time = time.time()
 
 VERSION = "1.1"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..","lib","systemtests"))
+DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 
-if __name__ == "__main__":
-    info = []
-    info.append("This program will configure mantid run all of the system tests located in")
-    info.append("the 'tests/analysis' directory.")
-    info.append("This program will create a temporary 'Mantid.user.properties' file which")
-    info.append("it will rename to 'Mantid.user.properties.systest' upon completion. The")
-    info.append("current version of the code does not print to stdout while the test is")
-    info.append("running, so the impatient user may ^C to kill the process. In this case")
-    info.append("all of the tests that haven't been run will be marked as skipped in the")
-    info.append("full logs.")
+
+def kill_children(processes):
+    for process in processes:
+        process.terminate()
+    # Exit with status 1 - NOT OK
+    sys.exit(1)
+
+
+def main():
+    info = ["This program will configure mantid run all of the system tests located in",
+            "the 'tests/analysis' directory.",
+            "This program will create a temporary 'Mantid.user.properties' file which",
+            "it will rename to 'Mantid.user.properties.systest' upon completion. The",
+            "current version of the code does not print to stdout while the test is",
+            "running, so the impatient user may ^C to kill the process. In this case",
+            "all of the tests that haven't been run will be marked as skipped in the", "full logs."]
 
     parser = optparse.OptionParser("Usage: %prog [options]", None,
                                    optparse.Option, VERSION, 'error', ' '.join(info))
@@ -66,12 +73,12 @@ if __name__ == "__main__":
                       help="location of the system test framework (default=%s)" % DEFAULT_FRAMEWORK_LOC)
     parser.add_option("", "--disablepropmake", action="store_false", dest="makeprop",
                       help="By default this will move your properties file out of the "
-                      + "way and create a new one. This option turns off this behavior.")
+                           + "way and create a new one. This option turns off this behavior.")
     parser.add_option("-R", "--tests-regex", dest="testsInclude",
                       help="String specifying which tests to run. Simply uses 'string in testname'.")
     parser.add_option("-E", "--excluderegex", dest="testsExclude",
                       help="String specifying which tests to not run. Simply uses 'string in testname'.")
-    loglevelChoices=["error", "warning", "notice", "information", "debug"]
+    loglevelChoices = ["error", "warning", "notice", "information", "debug"]
     parser.add_option("-l", "--loglevel", dest="loglevel",
                       choices=loglevelChoices,
                       help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
@@ -91,7 +98,7 @@ if __name__ == "__main__":
                       help="A directory to use for the Mantid save path")
     parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
                       help="Turn on archive search for file finder.")
-    parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
+    parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds", action="store_true",
                       help="Skip tests that are not run in pull request builds")
     parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
                         loglevel="information", ncores=1, quiet=False, output_on_failure=False, clean=False)
@@ -158,13 +165,13 @@ if __name__ == "__main__":
     entries = os.listdir(mtdconf.saveDir)
     for file in entries:
         if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
-            os.remove(os.path.join(mtdconf.saveDir,file))
+            os.remove(os.path.join(mtdconf.saveDir, file))
 
     # Multi-core processes --------------
     # An array to hold the processes
     processes = []
     # A shared array to hold skipped and failed tests + status
-    results_array = Array('i', [0] * (3*options.ncores))
+    results_array = Array('i', [0] * (3 * options.ncores))
     # A manager to create a shared dict to store names of skipped and failed tests
     manager = Manager()
     # A shared dict to store names of skipped and failed tests
@@ -192,10 +199,10 @@ if __name__ == "__main__":
     for key, value in reverse_sorted_dict:
         tests_dict[str(counter)] = test_list[key]
         counter += 1
-        if (not options.quiet):
-            print("Test module "+key+" has %i tests:"%value)
+        if not options.quiet:
+            print("Test module {} has {} tests:".format(key, value))
             for t in test_list[key]:
-                print(" - "+t._fqtestname)
+                print(" - {}".format(t._fqtestname))
             print()
 
     # Define a lock
@@ -203,22 +210,32 @@ if __name__ == "__main__":
 
     # Prepare ncores processes
     for ip in range(options.ncores):
-        processes.append(Process(target=systemtesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
-                         mtdconf.dataDir, options, tests_dict, tests_lock, tests_left, results_array,
-                         status_dict, total_number_of_tests, maximum_name_length, tests_done, ip, lock,
-                         required_files_dict, locked_files_dict)))
+        processes.append(Process(target=systemtesting.testThreadsLoop, args=(mtdconf.testDir, mtdconf.saveDir,
+                                                                             mtdconf.dataDir, options, tests_dict,
+                                                                             tests_lock, tests_left, results_array,
+                                                                             status_dict, total_number_of_tests,
+                                                                             maximum_name_length, tests_done, ip, lock,
+                                                                             required_files_dict, locked_files_dict)))
     # Start and join processes
-    for p in processes:
-        p.start()
-    for p in processes:
-        p.join()
+    try:
+        for p in processes:
+            p.start()
+
+        for p in processes:
+            p.join()
+    except KeyboardInterrupt:
+        print("Killed via KeyboardInterrupt")
+        kill_children(processes)
+    except Exception as e:
+        print("Unexpected exception occured: {}".format(e))
+        kill_children(processes)
 
     # Gather results
-    skippedTests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
-    failedTests = sum(results_array[options.ncores:2*options.ncores])
-    totalTests = test_stats[2]
+    skipped_tests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
+    failed_tests = sum(results_array[options.ncores:2 * options.ncores])
+    total_tests = test_stats[2]
     # Find minimum of status: if min == 0, then success is False
-    success = bool(min(results_array[2*options.ncores:3*options.ncores]))
+    success = bool(min(results_array[2 * options.ncores:3 * options.ncores]))
 
     #########################################################################
     # Cleanup
@@ -229,24 +246,24 @@ if __name__ == "__main__":
         mtdconf.restoreconfig()
 
     end_time = time.time()
-    total_runtime = time.strftime("%H:%M:%S", time.gmtime(end_time-start_time))
+    total_runtime = time.strftime("%H:%M:%S", time.gmtime(end_time - start_time))
 
     #########################################################################
     # Output summary to terminal (skip if this was a cleanup run)
     #########################################################################
 
-    if (not options.clean):
+    if not options.clean:
         nwidth = 80
         banner = "#" * nwidth
         print('\n' + banner)
-        print("Total runtime: "+total_runtime)
+        print("Total runtime: " + total_runtime)
 
-        if (skippedTests > 0) and options.showskipped:
+        if (skipped_tests > 0) and options.showskipped:
             print("\nSKIPPED:")
             for key in status_dict.keys():
                 if status_dict[key] == 'skipped':
                     print(key)
-        if failedTests > 0:
+        if failed_tests > 0:
             print("\nFAILED:")
             for key in status_dict.keys():
                 if status_dict[key] == 'failed':
@@ -254,15 +271,19 @@ if __name__ == "__main__":
 
         # Report global statistics on tests
         print()
-        if skippedTests == totalTests:
+        if skipped_tests == total_tests:
             print("All tests were skipped")
-            success = False # fail if everything was skipped
+            success = False  # fail if everything was skipped
         else:
-            percent = 1.-float(failedTests)/float(totalTests-skippedTests)
+            percent = 1. - float(failed_tests) / float(total_tests - skipped_tests)
             percent = int(100. * percent)
             print("%d%s tests passed, %d tests failed out of %d (%d skipped)" %
-                  (percent, '%', failedTests, (totalTests-skippedTests), skippedTests))
+                  (percent, '%', failed_tests, (total_tests - skipped_tests), skipped_tests))
         print('All tests passed? ' + str(success))
         print(banner)
         if not success:
             sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
