@@ -9,16 +9,12 @@ The Basics of Data Reduction
 
 .. index:: The Basics of Data Reduction
 
-This section explains 
+This section explains:
 
 * the concept of |tzero|  and |tgood| 
 * the concept of dead time correction
 * how to set the detector calibration factor, :math:`{\alpha}`
 * how to group data
-
-NOTE: detailed information about functionality contained under the Mantid Analysis GUI TABS -
-Home, Grouping Options, Settings, Data Analysis and Results Table – will be referred to and can be
-found in the hand-out Mantid 4 muons.
 
 .. contents:: Table of Contents
   :local:
