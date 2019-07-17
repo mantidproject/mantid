@@ -36,8 +36,7 @@ class LModel(object):
         workspaces = {filename: get_filename(
             filename, self.run) for filename in to_load if get_filename(filename, self.run) is not None}
         self._load(workspaces)
-        self.loaded_runs[self.run] = group_by_detector(
-            self.run, workspaces.values())
+        self.loaded_runs[self.run] = group_by_detector(self.run, workspaces.values())
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
@@ -62,8 +61,7 @@ def pad_run(run):
 def search_user_dirs(run):
     files = []
     for user_dir in config["datasearch.directories"].split(";"):
-        path = os.path.join(user_dir,
-                            "ral{}.rooth*.dat".format(pad_run(run)))
+        path = os.path.join(user_dir, "ral{}.rooth*.dat".format(pad_run(run)))
         files.extend([file for file in glob.iglob(path)])
     return files
 
@@ -126,8 +124,7 @@ def get_filename(path, run):
     Returns the overall workspace name
     """
     try:
-        return "_".join([get_detectors_num(
-            path), get_run_type(path), str(run)])
+        return "_".join([get_detectors_num(path), get_run_type(path), str(run)])
     except KeyError:
         return None
 
