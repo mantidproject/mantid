@@ -90,6 +90,7 @@ target_link_libraries(
   PRIVATE
     ${TCMALLOC_LIBRARIES_LINKTIME}
     Types
+    Kernel
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
 )
