@@ -216,7 +216,7 @@ bool MultiPeriodGroupWorker::processGroups(
   // Loop through all the periods. Create spawned algorithms of the same type as
   // this to process pairs from the input groups.
   for (size_t i = 0; i < nPeriods; ++i) {
-    const int periodNumber = static_cast<int>(i + 1);
+    const auto periodNumber = static_cast<int>(i + 1);
     // use create Child Algorithm that look like this one
     Algorithm_sptr alg = sourceAlg->createChildAlgorithm(
         sourceAlg->name(), progress_proportion * periodNumber,

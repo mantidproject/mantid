@@ -199,7 +199,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
 
   auto &vecX = m_dataWS->x(m_wsIndex);
 
-  int i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
+  auto i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
   int i_maxindex = static_cast<int>(vecX.size()) - 1;
 
   m_sstream << "FWHM to guess. Range = " << minfwhm << ", " << maxfwhm
@@ -499,7 +499,7 @@ void FitOneSinglePeak::highBkgdFit() {
     g_log.warning(outss.str());
 
     size_t numpts = i_maxFitX - i_minFitX;
-    size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
+    auto shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
     const auto &Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())

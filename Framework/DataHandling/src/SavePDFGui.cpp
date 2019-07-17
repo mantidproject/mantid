@@ -59,7 +59,7 @@ std::map<std::string, std::string> SavePDFGui::validateInputs() {
     return result;
   }
 
-  const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int>(inputWS->getNumberHistograms());
   if (nHist != 1) {
     result["InputWorkspace"] = "Workspace must contain only one spectrum";
   } else if (std::string(inputWS->getAxis(0)->unit()->label()) != "Angstrom") {

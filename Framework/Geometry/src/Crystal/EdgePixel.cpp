@@ -50,8 +50,8 @@ bool edgePixel(Mantid::Geometry::Instrument_const_sptr inst,
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
+    auto NROWS = static_cast<int>(grandchildren.size());
+    auto NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
     return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
            row - startI < Edge || row - startI >= (NROWS - Edge);

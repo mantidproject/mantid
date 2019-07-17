@@ -72,7 +72,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
   // 1. Create map
   for (size_t iws = 0; iws < mGroupWS->getNumberHistograms(); iws++) {
     // a) Group ID
-    int groupid = static_cast<int>(mGroupWS->y(iws)[0]);
+    auto groupid = static_cast<int>(mGroupWS->y(iws)[0]);
 
     // b) Exist? Yes --> get handler on vector.  No --> create vector and
     auto it = groupwkspmap.find(groupid);

@@ -43,7 +43,7 @@ bool validateSingleMatrixWorkspace(
     const MatrixWorkspace &ws, const int minIndex, const int maxIndex,
     const std::vector<int> &indices) {
   bool success(true);
-  const int numSpectra = static_cast<int>(ws.getNumberHistograms());
+  const auto numSpectra = static_cast<int>(ws.getNumberHistograms());
   // check StartWorkSpaceIndex,  >=0 done by validator
   if (minIndex >= numSpectra) {
     validationOutput["StartWorkspaceIndex"] =

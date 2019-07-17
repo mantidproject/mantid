@@ -3063,7 +3063,7 @@ FitPowderDiffPeaks::buildPartialWorkspace(API::MatrixWorkspace_sptr sourcews,
   if (iright >= static_cast<int>(X.size()))
     iright = static_cast<int>(X.size() - 1);
 
-  size_t wssize = static_cast<size_t>(iright - ileft + 1);
+  auto wssize = static_cast<size_t>(iright - ileft + 1);
 
   // 3. Build the partial workspace
   size_t nspec = 6;

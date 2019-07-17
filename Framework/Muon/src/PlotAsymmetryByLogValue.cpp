@@ -44,7 +44,7 @@ namespace // anonymous
 template <typename T>
 bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
                         const std::string &function) {
-  const Mantid::Kernel::TimeSeriesProperty<T> *log =
+  const auto *log =
       dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property);
   if (log) {
     if (function == "Mean") {
@@ -275,7 +275,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
           for (size_t i = 0; i < nPoints; i++) {
             // The first spectrum contains: X -> run number, Y -> log value
             // The second spectrum contains: Y -> redY, E -> redE
-            size_t run = static_cast<size_t>(prevResults->x(0)[i]);
+            auto run = static_cast<size_t>(prevResults->x(0)[i]);
             if ((run >= is) && (run <= ie)) {
               m_logValue[run] = prevResults->y(0)[i];
               m_redY[run] = prevResults->y(1)[i];
@@ -290,7 +290,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
             // The third spectrum contains: Y -> redY, E -> redE
             // The fourth spectrum contains: Y -> greenY, E -> greeE
             // The fifth spectrum contains: Y -> sumY, E -> sumE
-            size_t run = static_cast<size_t>(prevResults->x(0)[i]);
+            auto run = static_cast<size_t>(prevResults->x(0)[i]);
             if ((run >= is) && (run <= ie)) {
               m_logValue[run] = prevResults->y(0)[i];
               m_diffY[run] = prevResults->y(1)[i];

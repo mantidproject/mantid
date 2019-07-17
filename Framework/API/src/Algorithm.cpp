@@ -57,7 +57,7 @@ public:
   explicit WorkspacePropertyValueIs(const std::string &value)
       : m_value(value) {}
   bool operator()(IWorkspaceProperty *property) {
-    Property *prop = dynamic_cast<Property *>(property);
+    auto *prop = dynamic_cast<Property *>(property);
     if (!prop)
       return false;
     return prop->value() == m_value;
@@ -221,8 +221,7 @@ const std::vector<std::string> Algorithm::categories() const {
 
   auto res = tokenizer.asVector();
 
-  const DeprecatedAlgorithm *depo =
-      dynamic_cast<const DeprecatedAlgorithm *>(this);
+  const auto *depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
   if (depo != nullptr) {
     res.emplace_back("Deprecated");
   }
@@ -494,7 +493,7 @@ bool Algorithm::executeInternal() {
   Timer timer;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
-    DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
+    auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
@@ -1389,7 +1388,7 @@ bool Algorithm::processGroups() {
 
   // ---------- Create all the output workspaces ----------------------------
   for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
-    Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
+    auto *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop && !prop->value().empty()) {
       auto outWSGrp = boost::make_shared<WorkspaceGroup>();
       outGroups.push_back(outWSGrp);
@@ -1439,8 +1438,7 @@ bool Algorithm::processGroups() {
         outputBaseName += ws->getName();
 
         // Set the property using the name of that workspace
-        if (Property *prop =
-                dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
+        if (auto *prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
           if (ws->getName().empty()) {
             alg->setProperty(prop->name(), ws);
           } else {
@@ -1456,7 +1454,7 @@ bool Algorithm::processGroups() {
     std::vector<std::string> outputWSNames(m_pureOutputWorkspaceProps.size());
     // ---------- Set all the output workspaces ----------------------------
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-      if (Property *prop =
+      if (auto *prop =
               dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
@@ -1512,8 +1510,7 @@ bool Algorithm::processGroups() {
     // this has to be done after execute() because a workspace must exist
     // when it is added to a group
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-      Property *prop =
-          dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+      auto *prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
       if (prop && prop->value().empty())
         continue;
       // And add it to the output group
@@ -1542,7 +1539,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   const auto &props = this->getProperties();
   for (const auto &prop : props) {
     if (prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)
         this->setOtherProperties(alg, prop->name(), prop->value(), periodNum);
@@ -1577,8 +1574,7 @@ bool Algorithm::isWorkspaceProperty(const Kernel::Property *const prop) const {
   if (!prop) {
     return false;
   }
-  const IWorkspaceProperty *const wsProp =
-      dynamic_cast<const IWorkspaceProperty *>(prop);
+  const auto *const wsProp = dynamic_cast<const IWorkspaceProperty *>(prop);
   return (wsProp != nullptr);
 }
 
@@ -1740,7 +1736,7 @@ void Algorithm::reportCompleted(const double &duration,
       msg << name() << " successful, Duration ";
       double seconds = duration;
       if (seconds > 60.) {
-        int minutes = static_cast<int>(seconds / 60.);
+        auto minutes = static_cast<int>(seconds / 60.);
         msg << minutes << " minutes ";
         seconds = seconds - static_cast<double>(minutes) * 60.;
       }
@@ -1979,9 +1975,8 @@ template <>
 MANTID_API_DLL API::IAlgorithm_sptr
 IPropertyManager::getValue<API::IAlgorithm_sptr>(
     const std::string &name) const {
-  PropertyWithValue<API::IAlgorithm_sptr> *prop =
-      dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -2001,9 +1996,8 @@ template <>
 MANTID_API_DLL API::IAlgorithm_const_sptr
 IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<API::IAlgorithm_sptr> *prop =
-      dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

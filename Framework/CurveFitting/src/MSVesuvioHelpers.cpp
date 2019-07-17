@@ -427,7 +427,7 @@ SimulationWithErrors SimulationAggregator::average() const {
         orderCounts[j] = 0.0;
         orderErrors[j] = 0.0;
       } else {
-        const double dblPts = static_cast<double>(npoints);
+        const auto dblPts = static_cast<double>(npoints);
         orderCounts[j] = mean / dblPts;
         // error is std dev
         double sumsq(0.0);

@@ -40,8 +40,7 @@ void RenameLog::exec() {
   std::string newlogname = this->getProperty("NewLogName");
 
   Kernel::Property *property = matrixWS->run().getLogData(origlogname)->clone();
-  Kernel::TimeSeriesProperty<double> *timeprop =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(property);
+  auto *timeprop = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(property);
 
   if (!timeprop) {
     // g_log.error() << "After Log data is removed, TimeSeriesProperty " <<

@@ -491,8 +491,8 @@ void ApplyMuonDetectorGroupPairing::setMuonProcessAlgorithmGroupingProperties(
   alg.setProperty("DetectorGroupingTable", options.grouping.toTable());
   alg.setProperty("GroupIndex", 0);
   alg.setProperty("Alpha", options.grouping.pairAlphas[0]);
-  int first = static_cast<int>(options.grouping.pairs[0].first);
-  int second = static_cast<int>(options.grouping.pairs[0].second);
+  auto first = static_cast<int>(options.grouping.pairs[0].first);
+  auto second = static_cast<int>(options.grouping.pairs[0].second);
   alg.setProperty("PairFirstIndex", first);
   alg.setProperty("PairSecondIndex", second);
 }

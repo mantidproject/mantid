@@ -108,7 +108,7 @@ void ConvertAxisByFormula::exec() {
 
   bool isRaggedBins = false;
   bool isRefAxis = false;
-  RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
+  auto *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
     isRaggedBins = !outputWs->isCommonBins();
     isRefAxis = true;
@@ -116,7 +116,7 @@ void ConvertAxisByFormula::exec() {
 
   // validate - if formula contains geometry variables then the other axis must
   // be a spectraAxis
-  SpectraAxis *spectrumAxisPtr = dynamic_cast<SpectraAxis *>(otherAxisPtr);
+  auto *spectrumAxisPtr = dynamic_cast<SpectraAxis *>(otherAxisPtr);
   std::vector<Variable_ptr> variables;
   variables.reserve(8);
   // axis value lookups
@@ -214,7 +214,7 @@ void ConvertAxisByFormula::exec() {
       calculateValues(p, vec, variables);
 
       // copy xVals to every spectra
-      int64_t numberOfSpectra_i = static_cast<int64_t>(
+      auto numberOfSpectra_i = static_cast<int64_t>(
           outputWs->getNumberHistograms()); // cast to make openmp happy
       auto xVals = outputWs->refX(0);
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);

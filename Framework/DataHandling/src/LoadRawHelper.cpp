@@ -517,7 +517,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     }
     // In this case, also need to populate the map of spectrum-regime
     // correspondence
-    const int64_t ndet = static_cast<int64_t>(isisRawRef.i_det);
+    const auto ndet = static_cast<int64_t>(isisRawRef.i_det);
     auto hint = m_specTimeRegimes.begin();
     for (int64_t j = 0; j < ndet; ++j) {
       // No checking for consistency here - that all detectors for given
@@ -1105,10 +1105,10 @@ void LoadRawHelper::loadSpectra(
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   auto &isisRawRef = isisRaw();
-  int64_t numberOfPeriods = static_cast<int64_t>(isisRawRef.t_nper);
-  double histTotal = static_cast<double>(total_specs * numberOfPeriods);
+  auto numberOfPeriods = static_cast<int64_t>(isisRawRef.t_nper);
+  auto histTotal = static_cast<double>(total_specs * numberOfPeriods);
   int64_t noTimeRegimes = getNumberofTimeRegimes();
-  int64_t lengthIn = static_cast<int64_t>(isisRawRef.t_ntc1 + 1);
+  auto lengthIn = static_cast<int64_t>(isisRawRef.t_ntc1 + 1);
 
   const int64_t periodTimesNSpectraP1 =
       period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
@@ -1321,7 +1321,7 @@ bool LoadRawHelper::isAscii(const std::string &filename) {
   // Call it a binary file if we find a non-ascii character in the first 256
   // bytes of the file.
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = static_cast<unsigned long>(*p);
+    auto ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       return false;
     }

@@ -81,10 +81,9 @@ template <>
 DLLExport Mantid::DataObjects::SplittersWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -99,10 +98,9 @@ template <>
 DLLExport Mantid::DataObjects::SplittersWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::SplittersWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

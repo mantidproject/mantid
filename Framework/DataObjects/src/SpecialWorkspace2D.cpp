@@ -432,10 +432,9 @@ template <>
 DLLExport Mantid::DataObjects::SpecialWorkspace2D_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -450,10 +449,9 @@ template <>
 DLLExport Mantid::DataObjects::SpecialWorkspace2D_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

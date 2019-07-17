@@ -89,7 +89,7 @@ void EventWorkspaceCollection::setNPeriods(
   const bool addBoolTimeSeries = (uniquePeriods.size() == nPeriods);
 
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    const int periodNumber = int(i + 1);
+    const auto periodNumber = int(i + 1);
     m_WsVec[i] = createEmptyEventWorkspace();
     m_WsVec[i]->copyExperimentInfoFrom(temp.get());
     if (addBoolTimeSeries) {

@@ -88,7 +88,7 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     throw std::invalid_argument("PeakParams needs to have ndims+2 arguments.");
   if (m_peakParams[0] <= 0)
     throw std::invalid_argument("PeakParams: number_of_events needs to be > 0");
-  size_t num = size_t(m_peakParams[0]);
+  auto num = size_t(m_peakParams[0]);
 
   // Width of the peak
   double desiredRadius = m_peakParams.back();
@@ -114,7 +114,7 @@ void FakeMD::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     }
 
     // Make a unit vector pointing in this direction
-    coord_t radius = static_cast<coord_t>(sqrt(radiusSquared));
+    auto radius = static_cast<coord_t>(sqrt(radiusSquared));
     for (size_t d = 0; d < nd; d++)
       centers[d] /= radius;
 
@@ -173,7 +173,7 @@ void FakeMD::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
     } else // regular events
     {
-      size_t nPoints = size_t(m_uniformParams[0]);
+      auto nPoints = size_t(m_uniformParams[0]);
       double Vol = 1;
       for (size_t d = 0; d < nd; ++d)
         Vol *= (ws->getDimension(d)->getMaximum() -
@@ -190,7 +190,7 @@ void FakeMD::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         double min = ws->getDimension(d)->getMinimum();
         m_uniformParams.push_back(min * (1 + FLT_EPSILON) - min + FLT_EPSILON);
         double extent = ws->getDimension(d)->getMaximum() - min;
-        size_t nStrides = size_t(extent / delta0);
+        auto nStrides = size_t(extent / delta0);
         if (nStrides < 1)
           nStrides = 1;
         m_uniformParams.push_back(extent / static_cast<double>(nStrides));
@@ -223,7 +223,7 @@ template <typename MDE, size_t nd>
 void FakeMD::addFakeRandomData(const std::vector<double> &params,
                                typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
-  size_t num = size_t(params[0]);
+  auto num = size_t(params[0]);
   if (num == 0)
     throw std::invalid_argument(
         " number of distributed events can not be equal to 0");
@@ -274,7 +274,7 @@ void FakeMD::addFakeRegularData(const std::vector<double> &params,
   std::vector<size_t> indexMax(nd);
   size_t gridSize(0);
 
-  size_t num = size_t(params[0]);
+  auto num = size_t(params[0]);
   if (num == 0)
     throw std::invalid_argument(
         " number of distributed events can not be equal to 0");

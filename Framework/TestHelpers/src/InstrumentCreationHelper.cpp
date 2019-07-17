@@ -31,7 +31,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
 
   const double detZPos(5.0);
   // Careful! Do not use size_t or auto, the unsigned will break the -=2 below.
-  int ndets = static_cast<int>(workspace.getNumberHistograms());
+  auto ndets = static_cast<int>(workspace.getNumberHistograms());
   if (includeMonitors)
     ndets -= 2;
   for (int i = 0; i < ndets; ++i) {
@@ -105,7 +105,7 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
 ObjComponent *addComponent(Mantid::Geometry::Instrument_sptr &instrument,
                            const Mantid::Kernel::V3D &position,
                            const std::string &name) {
-  ObjComponent *component = new ObjComponent(name);
+  auto *component = new ObjComponent(name);
   component->setPos(position);
   instrument->add(component);
   return component;
@@ -145,7 +145,7 @@ void addSource(Mantid::Geometry::Instrument_sptr &instrument,
 void addMonitor(Mantid::Geometry::Instrument_sptr &instrument,
                 const Mantid::Kernel::V3D &position, const int ID,
                 const std::string &name) {
-  Detector *monitor = new Detector(name, ID, nullptr);
+  auto *monitor = new Detector(name, ID, nullptr);
   monitor->setPos(position);
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);

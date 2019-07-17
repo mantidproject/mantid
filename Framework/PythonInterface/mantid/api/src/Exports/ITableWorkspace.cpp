@@ -257,7 +257,7 @@ PyObject *column(const ITableWorkspace &self, const object &value) {
     column = self.getColumn(extract<int>(value)());
   }
   const std::type_info &typeID = column->get_type_info();
-  const int numRows = static_cast<int>(column->size());
+  const auto numRows = static_cast<int>(column->size());
 
   PyObject *result = PyList_New(numRows);
   for (int i = 0; i < numRows; i++) {
@@ -281,7 +281,7 @@ PyObject *row(ITableWorkspace &self, int row) {
     throw std::invalid_argument(
         "Cannot specify row larger than number of rows");
 
-  int numCols = static_cast<int>(self.columnCount());
+  auto numCols = static_cast<int>(self.columnCount());
 
   PyObject *result = PyDict_New();
 
@@ -303,7 +303,7 @@ PyObject *row(ITableWorkspace &self, int row) {
  * called on
  */
 boost::python::list columnTypes(ITableWorkspace &self) {
-  int numCols = static_cast<int>(self.columnCount());
+  auto numCols = static_cast<int>(self.columnCount());
 
   boost::python::list types;
 
@@ -335,7 +335,7 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
   }
 
   // Add a new row to populate with values
-  const int rowIndex = static_cast<int>(self.rowCount());
+  const auto rowIndex = static_cast<int>(self.rowCount());
   self.appendRow();
 
   // Declared in this scope so we can access them in catch block
@@ -395,7 +395,7 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
   }
 
   // Add a new row to populate with values
-  const int rowIndex = static_cast<int>(self.rowCount());
+  const auto rowIndex = static_cast<int>(self.rowCount());
   self.appendRow();
 
   // Loop over sequence and set each column value in same order

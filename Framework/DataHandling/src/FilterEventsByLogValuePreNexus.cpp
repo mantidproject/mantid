@@ -247,7 +247,7 @@ int FilterEventsByLogValuePreNexus::confidence(
   // get the size of the file in bytes and reset the handle back to the
   // beginning
   handle.seekg(0, std::ios::end);
-  const size_t filesize = static_cast<size_t>(handle.tellg());
+  const auto filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
   if (filesize % objSize == 0)
@@ -1026,7 +1026,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = workspace->getSpectrum(wi);
@@ -1121,7 +1121,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
   //----------------------------------------------------------------------------------
   // Pulse ID and pulse time
   DateAndTime pulsetime;
-  int64_t numPulses = static_cast<int64_t>(m_numPulses);
+  auto numPulses = static_cast<int64_t>(m_numPulses);
   if (m_vecEventIndex.size() < m_numPulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -1635,7 +1635,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(m_localWorkspace->getNumberHistograms());
            iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = m_localWorkspace->getSpectrum(wi);
@@ -1725,7 +1725,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   //----------------------------------------------------------------------------------
   // Pulse ID and pulse time
   DateAndTime pulsetime;
-  int64_t numPulses = static_cast<int64_t>(m_numPulses);
+  auto numPulses = static_cast<int64_t>(m_numPulses);
   if (m_vecEventIndex.size() < m_numPulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -2272,7 +2272,7 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
 
   // Open the file; will throw if there is any problem
   BinaryFile<PixelType> pixelmapFile(filename);
-  PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
+  auto max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
   this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 

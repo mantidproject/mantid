@@ -714,7 +714,7 @@ size_t LoadSQW2::addEventFromBuffer(const float *pixel) {
   using DataObjects::MDEvent;
   // Is the pixel field valid? Older versions of Horace produced files with
   // an invalid field and we can't use this. It should be between 1 && nfiles
-  uint16_t irun = static_cast<uint16_t>(pixel[4]);
+  auto irun = static_cast<uint16_t>(pixel[4]);
   if (irun < 1 || irun > m_nspe) {
     return 0;
   }

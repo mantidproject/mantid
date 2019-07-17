@@ -62,7 +62,7 @@ void ApplyDeadTimeCorr::exec() {
 
     const API::Run &run = inputWs->run();
     if (run.hasProperty("goodfrm")) {
-      double numGoodFrames =
+      auto numGoodFrames =
           boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
       if (numGoodFrames == 0) {
@@ -90,7 +90,7 @@ void ApplyDeadTimeCorr::exec() {
           // Apply Dead Time
           for (size_t i = 0; i < deadTimeTable->rowCount(); ++i) {
             API::TableRow deadTimeRow = deadTimeTable->getRow(i);
-            size_t index =
+            auto index =
                 static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(
                     static_cast<int>(deadTimeRow.Int(0))));
             const auto &yIn = inputWs->y(index);

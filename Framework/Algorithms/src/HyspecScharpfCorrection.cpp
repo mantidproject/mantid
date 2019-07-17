@@ -112,7 +112,7 @@ void HyspecScharpfCorrection::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   // Get number of spectra in this workspace
-  const int64_t numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
   Mantid::Kernel::V3D samplePos = spectrumInfo.samplePosition();
   const auto refFrame = m_inputWS->getInstrument()->getReferenceFrame();
@@ -175,7 +175,7 @@ void HyspecScharpfCorrection::execEvent() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   // Get number of spectra in this workspace
-  const int64_t numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
   Mantid::Kernel::V3D samplePos = spectrumInfo.samplePosition();
   const auto refFrame = m_inputWS->getInstrument()->getReferenceFrame();
@@ -240,7 +240,7 @@ float HyspecScharpfCorrection::calculateFactor(const double kfki,
   const double angleQ =
       std::atan2(-kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
   // Scarpf agle = angle - angleQ
-  float factor = static_cast<float>(std::cos(2. * (m_angle - angleQ)));
+  auto factor = static_cast<float>(std::cos(2. * (m_angle - angleQ)));
   // set intensity to 0 if the Scarpf angle is close to 45 degrees
   if (std::abs(factor) > m_precision) {
     factor = 1.f / factor;

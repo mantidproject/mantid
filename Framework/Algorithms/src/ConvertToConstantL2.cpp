@@ -85,7 +85,7 @@ void ConvertToConstantL2::exec() {
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   const auto &inputSpecInfo = m_inputWS->spectrumInfo();

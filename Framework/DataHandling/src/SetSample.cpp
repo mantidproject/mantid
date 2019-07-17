@@ -590,7 +590,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   if (args.existsProperty(ShapeArgs::AXIS)) {
     const std::string axis = args.getPropertyValue(ShapeArgs::AXIS);
     if (axis.length() == 1) {
-      const unsigned axisId = static_cast<unsigned>(std::stoi(axis));
+      const auto axisId = static_cast<unsigned>(std::stoi(axis));
       XMLString << axisXML(axisId);
       baseCentre = cylBaseCentre(centre, height, axisId);
     } else {
@@ -600,7 +600,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
       baseCentre = cylBaseCentre(centre, height, axis);
     }
   } else {
-    const unsigned axisId = static_cast<unsigned>(refFrame.pointingUp());
+    const auto axisId = static_cast<unsigned>(refFrame.pointingUp());
     XMLString << axisXML(axisId);
     baseCentre = cylBaseCentre(centre, height, axisId);
   }
