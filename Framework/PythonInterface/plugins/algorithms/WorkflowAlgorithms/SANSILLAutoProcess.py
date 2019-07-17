@@ -84,7 +84,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     output = None
     output_sens = None
     dimensionality = None
-    references = None
+    reference = None
     normalise = None
     radius = None
     thickness = None
@@ -343,13 +343,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         sens_input = ''
         ref_input = ''
         flux_input = ''
-        if self.sensitivity:
-            [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
-            sens_input = sensitivity_name
+        if not self.reference[0]:
             flux_input = flux_name
-            self.progress.report('Loading sensitivity')
-            if load_sensitivity:
-                LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
+            if self.sensitivity:
+                [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
+                sens_input = sensitivity_name
+                self.progress.report('Loading sensitivity')
+                if load_sensitivity:
+                    LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
         else:
             reference = self.reference[i] if len(self.reference) == self.dimensionality else self.reference[0]
             [load_reference, reference_name] = needs_loading(reference, 'Reference')

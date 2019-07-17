@@ -77,6 +77,11 @@ class SANSILLReduction(PythonAlgorithm):
         return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
+    @staticmethod
+    def _mask(ws, masked_ws):
+        if masked_ws.detectorInfo().hasMaskedDetectors():
+            MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
+
     def PyInit(self):
 
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
@@ -217,9 +222,9 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
+        monID = 100000 if self._instrument != 'D33' else 500000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
-            monID = 100000 if self._instrument != 'D33' else 500000
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
             if mtd[mon].readY(0)[0] == 0:
                 raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
@@ -236,6 +241,9 @@ class SANSILLReduction(PythonAlgorithm):
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
             else:
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
+        # regardless on normalisation, mask out the monitors, but do not extract them, since extracting is slow
+        # masking however is needed to get more reasonable scales in the instrument view
+        MaskDetectors(Workspace=ws, DetectorList=[monID, monID+1])
 
     def _process_beam(self, ws):
         """
@@ -329,8 +337,7 @@ class SANSILLReduction(PythonAlgorithm):
                 self.log().warning('Reference input workspace is not processed as reference.')
             Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
             Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
-            # propagate the mask of the reference on top of the existing mask
-            MaskDetectors(Workspace=ws, MaskedWorkspace=reference_ws)
+            self._mask(ws, reference_ws)
             coll_ws = reference_ws
         else:
             sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
@@ -338,8 +345,7 @@ class SANSILLReduction(PythonAlgorithm):
                 if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
                     self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
                 Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
-                # propagate the mask of the sensitivity also to the sample
-                MaskDetectors(Workspace=ws, MaskedWorkspace=sensitivity_in)
+                self._mask(ws, sensitivity_in)
             flux_in = self.getProperty('FluxInputWorkspace').value
             if flux_in:
                 coll_ws = flux_in
@@ -517,7 +523,7 @@ class SANSILLReduction(PythonAlgorithm):
                             self._apply_container(ws, container_ws)
                         mask_ws = self.getProperty('MaskedInputWorkspace').value
                         if mask_ws:
-                            MaskDetectors(Workspace=ws, MaskedWorkspace=mask_ws)
+                            self._mask(ws, mask_ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect

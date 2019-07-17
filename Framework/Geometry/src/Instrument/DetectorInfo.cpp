@@ -111,6 +111,11 @@ bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const {
   return m_detectorInfo->isMasked(index);
 }
 
+/// Returns true if there are masked detectors
+bool DetectorInfo::hasMaskedDetectors() const {
+  return m_detectorInfo->hasMaskedDetectors();
+}
+
 /** Returns L2 (distance from sample to spectrum).
  *
  * For monitors this is defined such that L1+L2 = source-detector distance,

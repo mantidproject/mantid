@@ -67,6 +67,7 @@ public:
   bool isMasked(const std::pair<size_t, size_t> &index) const;
   void setMasked(const size_t index, bool masked);
   void setMasked(const std::pair<size_t, size_t> &index, bool masked);
+  bool hasMaskedDetectors() const;
   Eigen::Vector3d position(const size_t index) const;
   Eigen::Vector3d position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t index) const;
@@ -209,6 +210,12 @@ DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
     return index.first;
   else
     return index.first + size() * index.second;
+}
+
+/// Returns if there are masked detectors
+inline bool DetectorInfo::hasMaskedDetectors() const {
+  return std::any_of(m_isMasked->cbegin(), m_isMasked->cend(),
+                     [](const auto flag) { return flag; });
 }
 
 } // namespace Beamline

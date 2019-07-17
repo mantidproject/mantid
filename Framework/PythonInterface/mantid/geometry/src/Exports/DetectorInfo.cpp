@@ -114,5 +114,7 @@ void export_DetectorInfo() {
       .def("l2", l2, (arg("self"), arg("index")),
            "Returns the l2 scattering distance")
       .def("l1", &DetectorInfo::l1, arg("self"),
-           "Returns the l1 scattering distance");
+           "Returns the l1 scattering distance")
+      .def("hasMaskedDetectors", &DetectorInfo::hasMaskedDetectors, arg("self"),
+           "Returns if there are masked detectors");
 }

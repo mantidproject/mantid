@@ -68,6 +68,7 @@ public:
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
   bool isMasked(const size_t index) const;
   bool isMasked(const std::pair<size_t, size_t> &index) const;
+  bool hasMaskedDetectors() const;
   double l2(const size_t index) const;
   double l2(const std::pair<size_t, size_t> &index) const;
   double twoTheta(const size_t index) const;
