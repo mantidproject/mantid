@@ -16,7 +16,7 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import Pe
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
-from MultiPlotting.multi_plotting_widget import MultiPlotWindow
+from MultiPlotting.multi_plotting_widget import MultiPlotWindow, MultiPlotWidget
 from MultiPlotting.label import Label
 
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
@@ -157,6 +157,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plotting.rm_vline_and_annotate(subplot, name)
 
     # setup element pop up
+    # todo: test this
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:

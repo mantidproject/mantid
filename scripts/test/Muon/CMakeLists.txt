@@ -104,8 +104,10 @@ set ( TEST_PY_FILES_QT4
    grouping_tab/pairing_table_alpha_test.py
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
-   PeriodicTableModel_test.py
-   PeriodicTablePresenter_test.py
+   elemental_analysis/PeriodicTableModel_test.py
+   elemental_analysis/PeriodicTablePresenter_test.py
+   elemental_analysis/elemental_analysis_test.py
+   elemental_analysis/name_generator_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
    help_widget_presenter_test.py
