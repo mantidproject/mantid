@@ -33,8 +33,8 @@ Setting up PyCharm on Windows
 
    .. code-block:: sh
 
-       <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/scripts
+       <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/qt/applications/workbench
        <Mantid Source Directory>/qt/widgets
        <Mantid Source Directory>/qt/python
@@ -188,8 +188,8 @@ Setting up PyCharm on Linux
 
    .. code-block:: sh
 
-       <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/scripts
+       <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/qt/applications/workbench
        <Mantid Source Directory>/qt/widgets
        <Mantid Source Directory>/qt/python
