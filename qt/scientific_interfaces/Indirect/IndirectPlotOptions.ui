@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>IndirectPlotOptions</class>
+ <widget class="QWidget" name="IndirectPlotOptions">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>301</width>
+    <height>44</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Indirect Plot Options</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="3" column="0">
+    <widget class="QFrame" name="fPlotSpectra">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLineEdit" name="leSpectra">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>75</width>
+          <height>21</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>75</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Select workspace indices (e.g. 0-2,4,6-8)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlotSpectra">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>23</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>23</width>
+          <height>23</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Plot Spectra</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbSpectraError">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 0, 0);</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="pbPlotContour">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Plot Contour</string>
+     </property>
+     <property name="text">
+      <string>Plot Contour</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QPushButton" name="pbPlotTiled">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>23</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Plot Tiled</string>
+     </property>
+     <property name="text">
+      <string>Plot Tiled</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="7">
+    <widget class="QLabel" name="lbPlotSpectra">
+     <property name="styleSheet">
+      <string notr="true">color: rgb(84, 74, 74);</string>
+     </property>
+     <property name="text">
+      <string>Plot workspace: iris_graphite002_sqw</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3" colspan="4">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

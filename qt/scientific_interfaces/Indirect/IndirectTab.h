@@ -82,6 +82,7 @@ public:
 
   /// Allows the user to turn the plotting of error bars off and on
   void setPlotErrorBars(bool errorBars);
+  bool errorBars() const;
 
   /// Plot a spectrum plot of a given workspace
   void plotSpectrum(const QString &workspaceName, const int &wsIndex = 0);

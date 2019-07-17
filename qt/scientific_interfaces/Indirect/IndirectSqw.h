@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSQW_H_
 
 #include "IndirectDataReductionTab.h"
+#include "IndirectPlotOptionsPresenter.h"
 
 #include "MantidKernel/System.h"
 #include "ui_IndirectSqw.h"
@@ -35,8 +36,6 @@ private slots:
   void sqwAlgDone(bool error);
 
   void runClicked();
-  void plotSpectrumClicked();
-  void plotContourClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -53,16 +52,11 @@ private:
 
   std::size_t getOutWsNumberOfSpectra() const;
 
-  void setPlotSpectrumIndexMax(int maximum);
-
   void setRunEnabled(bool enabled);
-  void setPlotSpectrumEnabled(bool enabled);
-  void setPlotContourEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
   void setOutputButtonsEnabled(std::string const &enableOutputButtons);
-  void setPlotSpectrumIsPlotting(bool plotting);
-  void setPlotContourIsPlotting(bool plotting);
 
+  std::unique_ptr<IDA::IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces

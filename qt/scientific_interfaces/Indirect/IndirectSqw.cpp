@@ -57,12 +57,16 @@ convertTupleToPair(std::tuple<double, double> const &tuple) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
+using namespace IDA;
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  m_plotOptionsPresenter = std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::SpectraContour);
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this,
           SLOT(handleDataReady(QString const &)));
@@ -70,10 +74,6 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(sqwAlgDone(bool)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
-          SLOT(plotSpectrumClicked()));
-  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
-          SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -230,18 +230,11 @@ std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
  * @param error If the algorithm chain failed
  */
 void IndirectSqw::sqwAlgDone(bool error) {
+  m_plotOptionsPresenter->removeWorkspace();
   if (!error) {
-    setPlotSpectrumEnabled(true);
-    setPlotContourEnabled(true);
+    m_plotOptionsPresenter->setWorkspace(m_pythonExportWsName);
     setSaveEnabled(true);
-
-    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
   }
-}
-
-void IndirectSqw::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spWorkspaceIndex);
-  m_uiForm.spWorkspaceIndex->setMaximum(maximum);
 }
 
 /**
@@ -294,25 +287,6 @@ void IndirectSqw::setFileExtensionsByName(bool filter) {
 
 void IndirectSqw::runClicked() { runTab(); }
 
-void IndirectSqw::plotSpectrumClicked() {
-  setPlotSpectrumIsPlotting(true);
-
-  auto const spectrumNumber = m_uiForm.spWorkspaceIndex->text().toInt();
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumNumber);
-
-  setPlotSpectrumIsPlotting(false);
-}
-
-void IndirectSqw::plotContourClicked() {
-  setPlotContourIsPlotting(true);
-
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    IndirectTab::plot2D(QString::fromStdString(m_pythonExportWsName));
-
-  setPlotContourIsPlotting(false);
-}
-
 void IndirectSqw::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
@@ -323,25 +297,13 @@ void IndirectSqw::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void IndirectSqw::setPlotSpectrumEnabled(bool enabled) {
-  m_uiForm.pbPlotSpectrum->setEnabled(enabled);
-  m_uiForm.spWorkspaceIndex->setEnabled(enabled);
-}
-
-void IndirectSqw::setPlotContourEnabled(bool enabled) {
-  m_uiForm.pbPlotContour->setEnabled(enabled);
-}
-
 void IndirectSqw::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
 void IndirectSqw::setOutputButtonsEnabled(
     std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotSpectrumEnabled(enable);
-  setPlotContourEnabled(enable);
-  setSaveEnabled(enable);
+  setSaveEnabled(enableOutputButtons == "enable");
 }
 
 void IndirectSqw::updateRunButton(bool enabled,
@@ -353,22 +315,6 @@ void IndirectSqw::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void IndirectSqw::setPlotSpectrumIsPlotting(bool plotting) {
-  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
-  setPlotSpectrumEnabled(!plotting);
-  setPlotContourEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
-}
-
-void IndirectSqw::setPlotContourIsPlotting(bool plotting) {
-  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
-  setPlotSpectrumEnabled(!plotting);
-  setPlotContourEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
