@@ -734,9 +734,9 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
 }
 
 /**
- * createOneDetectorInstrument, creates the most simple possible definition of
- * an instrument in which we can extract a valid L1 and L2 distance for unit
- * calculations.
+ * createSimpleInstrumentWithRotation, creates the most simple possible
+ * definition of an instrument in which we can extract a valid L1 and L2
+ * distance for unit calculations.
  *
  * Beam direction is along Z,
  * Up direction is Y
@@ -757,6 +757,8 @@ Instrument_sptr createSimpleInstrumentWithRotation(
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
       "0,0,0"));
+
+  instrument->setName("test-instrument-with-detector-rotations");
 
   // A source
   ObjComponent *source = new ObjComponent("source");
@@ -781,8 +783,8 @@ Instrument_sptr createSimpleInstrumentWithRotation(
 
   auto compAss = new ObjCompAssembly("detector-stage");
   compAss->add(det);
-  compAss->setRot(relativeBankRotation);
   compAss->setPos(detectorPos);
+  compAss->setRot(relativeBankRotation);
 
   instrument->add(compAss);
 
@@ -790,9 +792,8 @@ Instrument_sptr createSimpleInstrumentWithRotation(
 }
 
 /**
- * createOneDetectorInstrument, creates the most simple possible definition of
- * an instrument in which we can extract a valid L1 and L2 distance for unit
- * calculations.
+ * createInstrumentWithSampleAndSourceRotation, from
+ * createSimpleInstrumentWithRotation. Rotate source and sample.
  *
  * Beam direction is along Z,
  * Up direction is Y
@@ -813,6 +814,8 @@ Instrument_sptr createInstrumentWithSampleAndSourceRotation(
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
       "0,0,0"));
+
+  instrument->setName("test-instrument-with-rotations");
 
   // A source
   ObjComponent *source = new ObjComponent("source");

@@ -7,6 +7,7 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
 #include <string>
@@ -27,6 +28,10 @@ class DetectorInfo;
 } // namespace Geometry
 
 namespace NexusGeometry {
+
+MANTID_NEXUSGEOMETRY_DLL Eigen::Affine3d
+
+toEigenTransform(const Kernel::V3D vector, const Kernel::Quat quaternion);
 
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,

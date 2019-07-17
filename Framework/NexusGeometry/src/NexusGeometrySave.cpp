@@ -116,6 +116,12 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
+// TODO: add documenttation
+inline Eigen::Translation3d toTranslation3d(const Eigen::Vector3d &vector) {
+  Eigen::Translation3d translation(vector);
+  return translation;
+}
+
 /*
  * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
@@ -178,17 +184,31 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   posy.reserve(childrenDetectors.size());
   posz.reserve(childrenDetectors.size());
 
+  // absolute bank translation and rotation
+  const Eigen::Vector3d absBankTransVec =
+      Kernel::toVector3d(compInfo.position(idx));
+  const Eigen::Quaterniond absBankRotQuat =
+      Kernel::toQuaterniond(compInfo.rotation(idx));
+
   for (const size_t &i : childrenDetectors) {
-    Eigen::Vector3d position = Kernel::toVector3d(detInfo.position(i));
 
-    posx.push_back(position[0]);
-    posy.push_back(position[1]);
-    posz.push_back(position[2]);
-  }
+    // absolute pixel translation and rotation
+    Eigen::Vector3d absDetTransVec = Kernel::toVector3d(detInfo.position(i));
+    Eigen::Quaterniond absDetRotQuat =
+        Kernel::toQuaterniond(detInfo.rotation(i));
 
-  if (!(posx.size() == posy.size() && posx.size() == posz.size())) {
-    throw std::invalid_argument(
-        "unequal number of detector pixel offsets in x, y and z.");
+    auto relDetTrans = toTranslation3d(absDetTransVec) *
+                       toTranslation3d(absBankTransVec).inverse();
+    Eigen::Vector3d resultantTransVec = relDetTrans.vector();
+
+    auto relDetRot = absDetRotQuat * absBankRotQuat.inverse();
+
+    Eigen::Matrix3d resultantRotMat = relDetRot.toRotationMatrix();
+    Eigen::Vector3d offset = resultantRotMat * resultantTransVec;
+
+    posx.push_back(offset[0]);
+    posy.push_back(offset[1]);
+    posz.push_back(offset[2]);
   }
 
   const hsize_t dimSize = (hsize_t)posx.size();
@@ -562,6 +582,19 @@ void saveDetectors(const H5::Group &parentGroup,
 }
 
 } // namespace NexusGeometrySave
+
+Eigen::Affine3d toEigenTransform(const V3D vector, const Quat quaternion) {
+
+  Eigen::Vector3d eigenVector = Mantid::Kernel::toVector3d(vector);
+
+  Eigen::Quaterniond eigenVersor = Mantid::Kernel::toQuaterniond(quaternion);
+
+  Eigen::Translation3d translation(eigenVector);
+
+  Eigen::Affine3d compoundTransform = eigenVersor * translation;
+
+  return compoundTransform;
+}
 
 /*
  * Function: Saveinstrument

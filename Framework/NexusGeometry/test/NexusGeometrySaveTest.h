@@ -50,6 +50,9 @@ const std::string NX_CHAR = "NX_CHAR";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 const std::string ROTATION = "rotation";
 const std::string TRANSLATION = "translation";
+const std::string X_PIXEL_OFFSET = "x_pixel_offset";
+const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
+const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
@@ -141,8 +144,8 @@ public:
     return false;
   } // namespace
 
-  double readDoubleFromDataset(std::string &datasetName,
-                               std::string &pathToGroup) {
+  double readDoubleFromDataset(const std::string &datasetName,
+                               const std::string &pathToGroup) {
     double value;
     int rank = 1;
     hsize_t dims[(hsize_t)1];
@@ -154,6 +157,29 @@ public:
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     H5::DataSet dataset = parentGroup.openDataSet(datasetName);
     dataset.read(&value, H5::PredType::NATIVE_DOUBLE, space);
+    return value;
+  }
+
+  // read attribute of dataset
+  std::vector<double>
+  readDoubleVectorFrom_d_Attribute(std::string &attrName,
+                                   std::string &datasetName,
+                                   std::string &pathToGroup) {
+
+    // open dataset and read.
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    H5::DataSet dataset = parentGroup.openDataSet(datasetName);
+
+    H5::Attribute attribute = dataset.openAttribute(attrName);
+
+    H5::DataType dataType = attribute.getDataType();
+    H5::DataSpace dataSpace = attribute.getSpace();
+
+    std::vector<double> value;
+    value.resize(dataSpace.getSelectNpoints());
+
+    attribute.read(dataType, value.data());
+
     return value;
   }
 
@@ -578,43 +604,6 @@ public:
     }
   }
 
-  void
-  test_when_nx_source_group_has_nx_transformation_attribute_transformation_type_is_specified() {
-
-    ScopedFileHandle fileResource(
-        "check_nxsource_group_has_transformation_type_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    // saveinstrument
-    saveInstrument(m_instrument, destinationFile);
-    auto &compInfo = (*m_instrument.first);
-
-    bool hasNXTransformation;
-    bool hasRotation;
-    bool hasTranslation;
-    bool hasEither(true); // default to true
-
-    HDF5FileTestUtility tester(destinationFile);
-
-    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-    auto sourceName = compInfo.name(compInfo.source());
-    auto fullPath = pathToparent + "/" + sourceName;
-
-    hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
-
-    // assert the test source has Nxtransformation.
-    TS_ASSERT(hasNXTransformation);
-
-    hasTranslation =
-        tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
-
-    hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
-
-    if (!(hasRotation || hasTranslation))
-      hasEither = false;
-
-    TS_ASSERT(hasEither);
-  }
 
   void
   test_when_nx_sample_group_has_nx_transformation_attribute_transformation_type_is_specified() {
@@ -656,41 +645,225 @@ public:
     TS_ASSERT(hasEither);
   }
 
-  void test_rotation_of_sample_written_to_file_in_nx_format() {
-    /* <= just remove this
+  void
+  test_when_nx_source_group_has_nx_transformation_attribute_transformation_type_is_specified() {
+
+    ScopedFileHandle fileResource(
+        "check_nxsource_group_has_transformation_type_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    // saveinstrument
+    saveInstrument(m_instrument, destinationFile);
+    auto &compInfo = (*m_instrument.first);
+
+    bool hasNXTransformation;
+    bool hasRotation;
+    bool hasTranslation;
+    bool hasEither(true); // default to true
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+    auto sourceName = compInfo.name(compInfo.source());
+    auto fullPath = pathToparent + "/" + sourceName;
+
+    hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+
+    // assert the test source has Nxtransformation.
+    TS_ASSERT(hasNXTransformation);
+
+    hasTranslation =
+        tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
+
+    hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
+
+    if (!(hasRotation || hasTranslation))
+      hasEither = false;
+
+    TS_ASSERT(hasEither);
+  }
+
+  void
+  test_rotations_of_nx_detector_written_to_file_in_nx_format_when_nxtransformation_is_present() {
+
+    ScopedFileHandle fileResource(
+        "check_nxdetector_group_rotations_written_in_nx_format_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    const Quat relativeBankRotation(15, V3D(0, 1, 0));
+    const Quat relativeDetRotation(15, V3D(0, 1, 0));
+
+    auto instrument =
+        ComponentCreationHelper::createSimpleInstrumentWithRotation(
+            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 10),
+            relativeBankRotation,  // sample rotation
+            relativeDetRotation); // source rotation
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    // saveinstrument
+    saveInstrument(instr, destinationFile);
+    auto &compInfo = (*instr.first);
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    for (size_t i = compInfo.root() - 1; i > 0; --i) {
+      if (compInfo.isDetector(i))
+        break;
+
+      if (compInfo.hasParent(i)) {
+
+        size_t parent = compInfo.parent(i);
+        auto parentType = compInfo.componentType(parent);
+
+        if (compInfo.detectorsInSubtree(i).size() != 0) {
+
+          if (parentType != Mantid::Beamline::ComponentType::Rectangular &&
+              parentType != Mantid::Beamline::ComponentType::Structured &&
+              parentType != Mantid::Beamline::ComponentType::Grid) {
+
+            auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+            auto bankName = compInfo.name(i);
+            auto fullPathToGroup = pathToparent + "/" + bankName;
+
+            std::string dataSetName = "orientation";
+            std::string attributeName = "vector";
+
+            double angleInFile =
+                tester.readDoubleFromDataset(dataSetName, fullPathToGroup);
+            std::vector<double> axisInFile =
+                tester.readDoubleVectorFrom_d_Attribute(
+                    attributeName, dataSetName, fullPathToGroup);
+
+            V3D axisVectorInFile = {axisInFile[0], axisInFile[1],
+                                    axisInFile[2]};
+
+            // Eigen copy of relativeBankRotation
+            Eigen::Quaterniond bankRotationCopy =
+                Mantid::Kernel::toQuaterniond(relativeBankRotation);
+
+			// Eigen copy of relativeDetRotation
+            Eigen::Quaterniond detRotationCopy =
+                Mantid::Kernel::toQuaterniond(relativeDetRotation);
+
+            // bank rotation in file as Eigen Quaternion
+            Eigen::Quaterniond bankRotationInFile = Mantid::Kernel::toQuaterniond(
+                Quat(angleInFile, axisVectorInFile));
+
+			// get the xyz offset of the pixels, and use trig to verify that its position reflects det rotation relative to bank.
+            auto detectorOffsetX =
+                tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
+            auto detectorOffsetY =
+                tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
+            auto detectorOffsetZ =
+                tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
+			
+			
+
+
+
+            //TS_ASSERT(rotationInFile.isApprox(sampleRotationCopy));
+          }
+        }
+      }
+    }
+  }
+
+  void
+  test_rotation_of_sample_written_to_file_in_nx_format_when_nxtransformation_is_present() {
+
     const Quat sampleRotation(30, V3D(1, 0, 0));
     const Quat sourceRotation(90, V3D(0, 1, 0));
 
     auto instrument =
-        ComponentCreationHelper::createSimpleInstrumentWithRotation2(
+        ComponentCreationHelper::createInstrumentWithSampleAndSourceRotation(
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10),
             sampleRotation,  // sample rotation
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-        auto &compInfo = (*instr.first);
+    auto &compInfo = (*instr.first);
 
     ScopedFileHandle fileResource(
-        "check_nxdetector_groups_have_transformation_types_test_file.hdf5");
+        "check_rotation_written_to_nxsample_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     saveInstrument(instr, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
 
-        auto pathToparent = "/raw_data_1/";
+    auto pathToparent = "/raw_data_1/";
     auto sampleName = compInfo.name(compInfo.sample());
     auto fullPathToGroup = pathToparent + sampleName;
 
+    std::string dataSetName = "orientation";
+    std::string attributeName = "vector";
 
-        std::string dataSetName = "orientation";
-        double angle = tester.readDoubleFromDataset(dataSetName,
-    fullPathToGroup);
-    /*
-    open dataset 'orientation' in sample group, read dataset value. assert equal
-    to sample rotation w. oppen attribute 'vector' belonging to orientation,
-    read attribute. assert values equal i j k.
-    */
+    double angleInFile =
+        tester.readDoubleFromDataset(dataSetName, fullPathToGroup);
+    std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(
+        attributeName, dataSetName, fullPathToGroup);
+
+    V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
+
+    // Eigen copy of sampleRotation
+    Eigen::Quaterniond sampleRotationCopy =
+        Mantid::Kernel::toQuaterniond(sampleRotation);
+
+    // sample rotation in file as eigen Quaternion
+    Eigen::Quaterniond rotationInFile =
+        Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
+
+    TS_ASSERT(rotationInFile.isApprox(sampleRotationCopy));
+  }
+
+  void
+  test_rotation_of_source_written_to_file_in_nexus_format_when_nxtransformation_is_present() {
+
+    const Quat sampleRotation(30, V3D(1, 0, 0));
+    const Quat sourceRotation(90, V3D(0, 1, 0));
+
+    auto instrument =
+        ComponentCreationHelper::createInstrumentWithSampleAndSourceRotation(
+            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 10),
+            sampleRotation,  // sample rotation
+            sourceRotation); // source rotation
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    auto &compInfo = (*instr.first);
+
+    ScopedFileHandle fileResource(
+        "check_rotation_written_to_nxsource_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    saveInstrument(instr, destinationFile);
+    HDF5FileTestUtility tester(destinationFile);
+
+    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+    auto sourceName = compInfo.name(compInfo.source());
+    auto fullPathToGroup = pathToparent + "/" + sourceName;
+
+    std::string dataSetName = "orientation";
+    std::string attributeName = "vector";
+
+    double angleInFile =
+        tester.readDoubleFromDataset(dataSetName, fullPathToGroup);
+
+    std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(
+        attributeName, dataSetName, fullPathToGroup);
+
+    V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
+
+    // Eigen copy of sampleRotation
+    Eigen::Quaterniond sourceRotationCopy =
+        Mantid::Kernel::toQuaterniond(sourceRotation);
+
+    // sample rotation in file as eigen Quaternion
+    Eigen::Quaterniond rotationInFile =
+        Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
+
+    TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 };
 
