@@ -172,9 +172,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.element_widgets[element] = widget
 
     # interact with periodic table
+    # todo: test this
     def table_right_clicked(self, item):
         self.element_widgets[item.symbol].view.show()
 
+    # todo: test this
     def table_left_clicked(self, item):
         if self.ptable.is_selected(item.symbol):
             self._add_element_lines(
@@ -199,6 +201,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             full_name = gen_name(element, name)
             self._plot_line(full_name, x_value, color, element)
 
+    # todo: test this
     def _remove_element_lines(self, element):
         if element not in self.element_lines:
             return
@@ -211,6 +214,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 continue
 
     # loading
+    # todo: test this
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
         if self.plot_window is None:
@@ -227,6 +231,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.show()
             self.plot_window.raise_()
 
+    # todo: test this
     def loading_finished(self):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
@@ -246,6 +251,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.detectors.detectors[j].setChecked(True)
 
     # detectors
+    # todo: test this
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
@@ -255,6 +261,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
 
+    # todo: test this
     def _unset_detectors(self):
         self.plot_window.windowClosedSignal.disconnect()
         self.plot_window = None
@@ -262,6 +269,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.detectors.setStateQuietly(name, False)
 
     # plotting
+    # todo: test this
     def add_peak_data(self, element, subplot, data=None):
         # if already selected add to just new plot
         if data is None:
@@ -276,6 +284,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             label = self._gen_label(full_name, x_value, element)
             self._plot_line_once(subplot, x_value, label, color)
 
+    # todo: test this
     def _update_peak_data(self, element, data=None):
         if self.ptable.is_selected(element):
             # remove all of the lines for the element
@@ -285,6 +294,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         else:
             self._remove_element_lines(element)
 
+    # todo: test this
     def add_plot(self, checkbox):
         detector = checkbox.name
         last_run = self.load_widget.last_loaded_run()
@@ -294,6 +304,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             if self.peaks.electron.isChecked():
                 self.add_peak_data("e-", detector, data=self.electron_peaks)
 
+    # todo: test this
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:
             self.plotting.remove_subplot(checkbox.name)
@@ -301,6 +312,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.plot_window.close()
                 self.plot_window = None
 
+    # todo: test this
     def subplotRemoved(self, name):
         # need to change the state without sending signal
         # as the plot has already been removed

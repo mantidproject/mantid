@@ -167,10 +167,9 @@ class ElementalAnalysisTest(GuiTest):
         self.assertEqual(mock_get_color.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line')
-    def test_that__add_element_lines_will_call_plot_line(self, mock_plot_line):
+    def test_that_add_element_lines_will_call_plot_line(self, mock_plot_line):
         data = {'line1': 10.0, 'line2': 20.0, 'line3': 30.0}
         self.gui._add_element_lines('Cu', data)
-
         self.assertEqual(mock_plot_line.call_count, 3)
         mock_plot_line.assert_called_with(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')
 
@@ -179,23 +178,22 @@ class ElementalAnalysisTest(GuiTest):
     def test_that_set_peak_datafile_is_called_with_select_data_file(self, mock_getOpenFileName, mock_set_peak_datafile):
         mock_getOpenFileName.return_value = 'filename'
         self.gui.select_data_file()
-        self.gui.ptable.set_peak_datafile.assert_called_with('filename')
+        mock_set_peak_datafile.assert_called_with('filename')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
-    def test_that_set_peak_datafile_is_called_with_select_data_file(self, mock_getOpenFileName, mock_set_peak_datafile):
+    def test_that_select_data_file_uses_the_first_element_of_a_tuple_when_given_as_a_filename(self,
+                                                                                              mock_getOpenFileName,
+                                                                                              mock_set_peak_datafile):
         mock_getOpenFileName.return_value = ('string1', 'string2')
         self.gui.select_data_file()
-        self.gui.ptable.set_peak_datafile.assert_called_with('string1')
-
+        mock_set_peak_datafile.assert_called_with('string1')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
-    def test_that_set_peak_datafile_is_called_with_select_data_file(self,
+    def test_that_select_data_file_raises_warning_with_correct_text(self,
                                                                     mock_getOpenFileName,
-                                                                    mock_set_peak_datafile,
                                                                     mock_generate_element_widgets,
                                                                     mock_warning):
         mock_getOpenFileName.return_value = 'filename'
@@ -205,6 +203,65 @@ class ElementalAnalysisTest(GuiTest):
                        'See "https://docs.mantidproject.org/nightly/interfaces/'\
                        'Muon%20Elemental%20Analysis.html" for more information.'
         mock_warning.assert_called_with(warning_text)
+
+    def test_gamms_checked_calls_checked_data_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.gui.checked_data = mock.Mock()
+        self.gui.gammas_checked()
+        self.assertEqual(self.gui.checked_data.call_count, elem)
+
+    def test_gamms_unchecked_calls_checked_data_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.gui.checked_data = mock.Mock()
+        self.gui.gammas_unchecked()
+        self.assertEqual(self.gui.checked_data.call_count, elem)
+
+    def test_major_checked_calls_checked_data_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.gui.checked_data = mock.Mock()
+        self.gui.major_peaks_checked()
+        self.assertEqual(self.gui.checked_data.call_count, elem)
+
+    def test_major_unchecked_calls_checked_data_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.gui.checked_data = mock.Mock()
+        self.gui.major_peaks_unchecked()
+        self.assertEqual(self.gui.checked_data.call_count, elem)
+
+    def test_minor_checked_calls_checked_data_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.gui.checked_data = mock.Mock()
+        self.gui.minor_peaks_checked()
+        self.assertEqual(self.gui.checked_data.call_count, elem)
+
+    def test_minor_unchecked_calls_checked_data_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.gui.checked_data = mock.Mock()
+        self.gui.minor_peaks_unchecked()
+        self.assertEqual(self.gui.checked_data.call_count, elem)
+
+    def test_checked_data_changes_all_states_in_list(self):
+        self.gui._update_peak_data = mock.Mock()
+        selection = [mock.Mock() for i in range(10)]
+        self.gui.checked_data('Cu', selection, True)
+
+        self.assertTrue(all(map(lambda m: m.setChecked.call_count == 1, selection)))
+        self.gui._update_peak_data.assert_called_with('Cu', self.gui.element_widgets['Cu'].get_checked())
+
+    def test_get_electron_peaks_returns_a_dict_with_correct_length(self):
+        peaks = len(self.gui.ptable.peak_data["Electrons"])
+        electron_dict = self.gui._get_electron_peaks()
+        self.assertEqual(len(electron_dict), peaks)
+        for _, peak in electron_dict.items():
+            float(peak)
+
+
 
 
 if __name__ == '__main__':
