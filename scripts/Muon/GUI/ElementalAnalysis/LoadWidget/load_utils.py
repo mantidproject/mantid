@@ -54,7 +54,7 @@ class LModel(object):
 
 
 def pad_run(run):
-    """ Pads run number: i.e. 123 -> 00123; 2695- > 02695 """
+    """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
     return str(run).zfill(5)
 
 
@@ -138,8 +138,7 @@ def flatten_run_data(*workspaces):
     out = []
     for workspace in workspaces:
         detectors = [mantid.mtd[detector] for detector in workspace]
-        out.append(sorted([_workspace.getName()
-                           for detector in detectors for _workspace in detector]))
+        out.append(sorted([_workspace.getName() for detector in detectors for _workspace in detector]))
     return out
 
 

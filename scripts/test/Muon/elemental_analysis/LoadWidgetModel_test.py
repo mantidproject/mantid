@@ -31,26 +31,44 @@ class LoadUtilsTest(unittest.TestCase):
         for run, padded_run in iteritems(tests):
             self.assertEqual(lutils.pad_run(run), padded_run)
 
+    @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.glob.iglob')
+    @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.os.path.join')
+    def test_that_search_user_dirs_explores_all_directories(self, mock_join, mock_iglob):
+        expected_len = len(config["datasearch.directories"].split(";"))
+        lutils.search_user_dirs(self.test_run)
+
+        self.assertEqual(mock_join.call_count, expected_len)
+
     def test_get_detector_num_from_ws(self):
         self.assertEquals(lutils.get_detector_num_from_ws(self.test_ws_name), "1")
 
     def test_get_detectors_num(self):
         self.assertEqual(lutils.get_detectors_num(self.test_path), "1")
 
+    def test_get_detectors_num_throws_with_bad_input(self):
+        input = ['only.one_separator', 'one.much_longer32123.three']
+        for value in input:
+            with self.assertRaises(Exception):
+                lutils.get_detectors_num(value)
+
     def test_get_end_num(self):
         self.assertEqual(lutils.get_end_num(self.test_path), "rooth2020")
 
     def test_get_run_type(self):
         self.assertEqual(lutils.get_run_type(self.test_path), "Delayed")
+        self.assertEqual(lutils.get_run_type('a.b10.c'), "Prompt")
+        self.assertEqual(lutils.get_run_type('a.b99.c'), "Total")
         with self.assertRaises(KeyError):
             lutils.get_run_type(self.bad_path)
 
     def test_get_filename(self):
         self.assertEquals(lutils.get_filename(self.test_path, self.test_run), self.test_ws_name)
 
+    def test_get_filename_returns_none_if_given_bad_path(self):
+        self.assertEqual(lutils.get_filename(self.bad_path, self.test_run), None)
+
     def test_hyphenise(self):
-        tests = {"1-5": [1, 2, 3, 4, 5],
-                 "1, 4-5": [1, 4, 5], "1-3, 5": [1, 3, 2, 5], "1, 3, 5": [1, 5, 3]}
+        tests = {"1-5": [1, 2, 3, 4, 5], "1, 4-5": [1, 4, 5], "1-3, 5": [1, 3, 2, 5], "1, 3, 5": [1, 5, 3]}
         for out, arg in iteritems(tests):
             self.assertEqual(lutils.hyphenise(arg), out)
 
