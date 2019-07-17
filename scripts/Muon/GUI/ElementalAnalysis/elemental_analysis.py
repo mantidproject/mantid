@@ -16,7 +16,7 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import Pe
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
-from MultiPlotting.multi_plotting_widget import MultiPlotWindow
+from MultiPlotting.multi_plotting_widget import MultiPlotWindow, MultiPlotWidget
 from MultiPlotting.label import Label
 
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
@@ -39,6 +39,11 @@ offset = 0.9
 
 
 def gen_name(element, name):
+    if (not isinstance(element, str)) and (not isinstance(element, unicode)):
+        raise TypeError("'%s' expected to be 'str', found '%s' instead" % (str(element), type(element)))
+    if (not isinstance(name, str)) and (not isinstance(name, unicode)):
+        raise TypeError("'%s' expected to be 'str', found '%s' instead" % (str(name), type(name)))
+
     if element in name:
         return name
     return element + " " + name
@@ -62,8 +67,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
         # load stuff
-        self.load_widget = LoadPresenter(
-            LoadView(), LoadModel(), CoLoadModel())
+        self.load_widget = LoadPresenter(LoadView(), LoadModel(), CoLoadModel())
         self.load_widget.on_loading_finished(self.loading_finished)
 
         # detectors
@@ -152,6 +156,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plotting.rm_vline_and_annotate(subplot, name)
 
     # setup element pop up
+    # todo: test this
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:
@@ -337,9 +342,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def checked_data(self, element, selection, state):
         for checkbox in selection:
             checkbox.setChecked(state)
-        self._update_peak_data(
-            element,
-            self.element_widgets[element].get_checked())
+        self._update_peak_data(element, self.element_widgets[element].get_checked())
 
     # electron Peaks
     def _get_electron_peaks(self):
