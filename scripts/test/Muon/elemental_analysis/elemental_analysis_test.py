@@ -260,6 +260,27 @@ class ElementalAnalysisTest(GuiTest):
         self.gui.loading_finished()
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 3)
 
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
+    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(self, mock_mantid, mock_add_peak_data):
+        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()],
+                           'name2': [mock.Mock(), mock.Mock()]}
+        self.gui.plotting = mock.Mock()
+
+        self.gui.add_detector_to_plot('GE1', 'name1')
+        self.assertEqual(self.gui.plotting.add_subplot.call_count, 1)
+        self.assertEqual(self.gui.plotting.plot.call_count, 2)
+        self.assertEqual(mock_add_peak_data.call_count, 0)
+
+    def test_unset_detectorsresets_plot_window_and_detectors(self):
+        self.gui.plot_window = mock.Mock()
+        self.gui.detectors = mock.Mock()
+        self.gui.detectors.getNames.return_value = ['name1', 'name2', 'name3']
+        self.gui._unset_detectors()
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
+        self.assertEqual(self.gui.plot_window, None)
+
+
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_set_peak_datafile_is_called_with_select_data_file(self, mock_getOpenFileName, mock_set_peak_datafile):

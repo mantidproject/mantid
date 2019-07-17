@@ -245,7 +245,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.detectors.detectors[j].setChecked(True)
 
     # detectors
-    # todo: test this
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
@@ -255,7 +254,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
 
-    # todo: test this
     def _unset_detectors(self):
         self.plot_window.windowClosedSignal.disconnect()
         self.plot_window = None
