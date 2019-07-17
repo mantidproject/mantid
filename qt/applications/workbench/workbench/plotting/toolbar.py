@@ -33,7 +33,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
