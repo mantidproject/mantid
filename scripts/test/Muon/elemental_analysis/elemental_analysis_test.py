@@ -152,14 +152,33 @@ class ElementalAnalysisTest(GuiTest):
         self.gui.plotting.get_subplots = mock_get_subplots
         mock_rm_vline_and_annotate = mock.Mock()
         self.gui.plotting.rm_vline_and_annotate = mock_rm_vline_and_annotate
-
         self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
-
         self.gui._rm_line('line')
 
         self.assertEqual(mock_get_subplots.call_count, 1)
         self.assertEqual(mock_rm_vline_and_annotate.call_count, 3)
         mock_rm_vline_and_annotate.assert_called_with('plot3', 'line')
+
+    def test_that_generate_element_widgets_creates_widget_once_for_each_element(self):
+        # TODO remove -2 on element number once json file has been restructured
+        elem = len(self.gui.ptable.peak_data)-2
+        self.assertEqual(len(self.gui.element_widgets), elem)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
+    def test_table_left_clicked_adds_lines_if_element_selected(self, mock_add_element_lines):
+        self.gui.ptable.is_selected = mock.Mock()
+        self.gui.ptable.is_selected.return_value = True
+        test_item = mock.Mock()
+        self.gui._add_element_lines(test_item)
+        self.assertEqual(mock_add_element_lines.call_count, 1)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    def test_table_left_clicked_removed_lines_if_element_not_selected(self, mock_remove_element_lines):
+        self.gui.ptable.is_selected = mock.Mock()
+        self.gui.ptable.is_selected.return_value = False
+        test_item = mock.Mock()
+        self.gui.table_left_clicked(test_item)
+        self.assertEqual(mock_remove_element_lines.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.get_color')
     def test_that_add_element_lines_will_call_get_color(self, mock_get_color):
@@ -172,6 +191,95 @@ class ElementalAnalysisTest(GuiTest):
         self.gui._add_element_lines('Cu', data)
         self.assertEqual(mock_plot_line.call_count, 3)
         mock_plot_line.assert_called_with(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
+    def test_remove_element_lines_does_nothing_if_element_not_in_element_lines(self, mock_rm_line):
+        self.gui.element_lines['H'] = ['alpha', 'beta']
+        self.gui._remove_element_lines('He')
+        self.assertEqual(mock_rm_line.call_count, 0)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
+    def test_remove_element_lines_removes_all_values_for_a_given_element(self, mock_rm_line):
+        self.gui.element_lines['H'] = ['alpha', 'beta']
+        self.gui._remove_element_lines('H')
+        self.assertEqual(mock_rm_line.call_count, 2)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
+    def test_load_run_opens_new_plot_window_if_none_open(self, mock_MultiPlotWindow):
+        self.gui.add_detector_to_plot = mock.Mock()
+        self.gui.load_run('GE1', '2695')
+        self.assertEqual(mock_MultiPlotWindow.call_count, 1)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
+    def test_load_run_does_not_open_new_plot_window_if_one_is_open(self, mock_MultiPlotWindow):
+        self.gui.add_detector_to_plot = mock.Mock()
+        self.gui.plot_window = MultiPlotWindow(str('2695'))
+        self.gui.load_run('GE1', 2695)
+        self.assertEqual(mock_MultiPlotWindow.call_count, 0)
+
+    def test_loading_finished_returns_nothing_if_no_run_loaded(self):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = None
+        self.gui.detectors = mock.Mock()
+        self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
+        for i in self.gui.detectors.detectors:
+            i.isChecked.return_value = True
+        self.gui.plot_window = mock.Mock()
+        self.gui.plotting = mock.Mock()
+
+        self.gui.loading_finished()
+        self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
+
+    def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = ['run1', 'run2', 'run3']
+        self.gui.detectors = mock.Mock()
+        self.gui.detectors.getNames.return_value = ['1', '2', '3']
+        self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
+        for i in self.gui.detectors.detectors:
+            i.isChecked.return_value = True
+        self.gui.plot_window = None
+        self.gui.plotting = mock.Mock()
+        self.gui.plotting.get_subplots.return_value = ['1', '2', '3']
+
+        self.gui.loading_finished()
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
+        for j in self.gui.detectors.detectors:
+            self.assertEqual(j.setChecked.call_count, 1)
+
+    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(self):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = ['run1', 'run2', 'run3']
+        self.gui.detectors = mock.Mock()
+        self.gui.detectors.getNames.return_value = ['1', '2', '3']
+        self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
+        for i in self.gui.detectors.detectors:
+            i.isChecked.return_value = False
+        self.gui.plot_window = mock.Mock()
+
+        self.gui.loading_finished()
+        self.assertEqual(self.gui.plotting.remove_subplot.call_count, 3)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
+    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(self, mock_mantid, mock_add_peak_data):
+        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()],
+                           'name2': [mock.Mock(), mock.Mock()]}
+        self.gui.plotting = mock.Mock()
+
+        self.gui.add_detector_to_plot('GE1', 'name1')
+        self.assertEqual(self.gui.plotting.add_subplot.call_count, 1)
+        self.assertEqual(self.gui.plotting.plot.call_count, 2)
+        self.assertEqual(mock_add_peak_data.call_count, 0)
+
+    def test_unset_detectorsresets_plot_window_and_detectors(self):
+        self.gui.plot_window = mock.Mock()
+        self.gui.detectors = mock.Mock()
+        self.gui.detectors.getNames.return_value = ['name1', 'name2', 'name3']
+        self.gui._unset_detectors()
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
+        self.assertEqual(self.gui.plot_window, None)
+
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')

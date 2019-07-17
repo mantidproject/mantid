@@ -156,7 +156,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plotting.rm_vline_and_annotate(subplot, name)
 
     # setup element pop up
-    # todo: test this
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:
@@ -172,11 +171,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.element_widgets[element] = widget
 
     # interact with periodic table
-    # todo: test this
     def table_right_clicked(self, item):
         self.element_widgets[item.symbol].view.show()
 
-    # todo: test this
     def table_left_clicked(self, item):
         if self.ptable.is_selected(item.symbol):
             self._add_element_lines(
@@ -201,7 +198,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             full_name = gen_name(element, name)
             self._plot_line(full_name, x_value, color, element)
 
-    # todo: test this
     def _remove_element_lines(self, element):
         if element not in self.element_lines:
             return
@@ -214,7 +210,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 continue
 
     # loading
-    # todo: test this
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
         if self.plot_window is None:
@@ -231,7 +226,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.show()
             self.plot_window.raise_()
 
-    # todo: test this
     def loading_finished(self):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
@@ -251,7 +245,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.detectors.detectors[j].setChecked(True)
 
     # detectors
-    # todo: test this
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
@@ -261,7 +254,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
 
-    # todo: test this
     def _unset_detectors(self):
         self.plot_window.windowClosedSignal.disconnect()
         self.plot_window = None
