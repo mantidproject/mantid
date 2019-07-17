@@ -18,6 +18,38 @@ template <typename T> std::string join(T list...) {
     joinedString += elem;
   }
 }
+
+std::string addToBibTex(const std::string &type, const std::string &data) {
+  return type + "{" + data + "},\n";
+}
+
+std::string addToBibTex(const std::string &type, const OptionalString &data) {
+  if (data)
+    return type + "{" + data.get() + "},\n";
+  else
+    return "";
+}
+
+std::string authorStringGenerator(const std::vector<std::string> &authors) {
+  std::string authorString = "";
+  if (authors.size() == 1)
+    authorString = authors[0];
+  else {
+    for (const auto &author : authors)
+      authorString += author + ", ";
+    // Pop off the last space and comma from authorString
+    authorString.pop_back();
+    authorString.pop_back();
+  }
+  return authorString;
+}
+
+std::string authorStringGenerator(const OptionalVectorString &authors) {
+  if (authors)
+    return authorStringGenerator(authors.get());
+  else
+    return "";
+}
 } // namespace
 
 namespace BibTex {
@@ -40,6 +72,9 @@ const std::string BOOKTITLE = "booktitle=";
 const std::string ORGANIZATION = "organization=";
 const std::string SCHOOL = "school=";
 const std::string INSTITUION = "institution=";
+const std::string EDITION = "edition=";
+const std::string DOI = "doi=";
+const std::string ENDING = "\n}";
 } // namespace BibTex
 
 namespace EndNote {
@@ -57,17 +92,17 @@ const std::string NUMBER = "IS  - ";
 const std::string STARTPAGE = "SP  - ";
 const std::string ENDPAGE = "EP  - ";
 // const std::string PAGES = ""; Replaced with start and end pages
-const std::string DESCRIPTION;
-const std::string PUBLISHER;
-const std::string SERIES;
-const std::string ADDRESS;
-const std::string HOWPUBLISHED;
-const std::string CHAPTER;
-const std::string TYPE;
-const std::string BOOKTITLE;
-const std::string ORGANIZATION;
-const std::string SCHOOL;
-const std::string INSTITUION;
+const std::string DESCRIPTION = "N1  - ";
+const std::string PUBLISHER = "PB  - ";
+const std::string SERIES = "C1  - ";
+const std::string ADDRESS = "AD  - ";
+const std::string HOWPUBLISHED = "BT  - ";
+const std::string CHAPTER = "SE  - ";
+const std::string TYPE = "M3  - ";
+const std::string BOOKTITLE = "T2  - ";
+const std::string ORGANIZATION = "PP  - ";
+const std::string SCHOOL = "PP  - ";
+const std::string INSTITUION = "PP  - ";
 } // namespace EndNote
 
 BaseCitation::BaseCitation(const OptionalString &doi,
@@ -84,7 +119,26 @@ ArticleCitation::ArticleCitation(
       m_journal(journal), m_volume(volume), m_number(number), m_pages(pages),
       m_month(month) {}
 
-ArticleCitation
+std::string ArticleCitation::toBibTex() const {
+  using namespace BibTex;
+  std::string bibTex = "@article{refference,\n";
+
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
+  bibTex += addToBibTex(TITLE, m_title);
+  bibTex += addToBibTex(JOURNAL, m_journal);
+  bibTex += addToBibTex(YEAR, m_year);
+  bibTex += addToBibTex(VOLUME, m_volume);
+  bibTex += addToBibTex(NUMBER, m_number);
+  bibTex += addToBibTex(PAGES, m_pages);
+  bibTex += addToBibTex(MONTH, m_month);
+  bibTex += addToBibTex(DESCRIPTION, m_description);
+  bibTex += addToBibTex(DOI, m_doi);
+
+  // Remove a extra comma
+  bibTex.pop_back();
+  bibTex += ENDING;
+  return bibTex;
+}
 
 BookCitation::BookCitation(
     const std::vector<std::string> &authors, const std::string &title,
@@ -97,6 +151,28 @@ BookCitation::BookCitation(
       m_publisher(publisher), m_year(year), m_volume(volume), m_series(series),
       m_address(address), m_edition(edition), m_month(month) {}
 
+std::string BookCitation::toBibTex() const {
+  using namespace BibTex;
+  std::string bibTex = "@book{refference,\n";
+
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
+  bibTex += addToBibTex(TITLE, m_title);
+  bibTex += addToBibTex(PUBLISHER, m_publisher);
+  bibTex += addToBibTex(YEAR, m_year);
+  bibTex += addToBibTex(VOLUME, m_volume);
+  bibTex += addToBibTex(SERIES, m_series);
+  bibTex += addToBibTex(ADDRESS, m_address);
+  bibTex += addToBibTex(EDITION, m_edition);
+  bibTex += addToBibTex(MONTH, m_month);
+  bibTex += addToBibTex(DESCRIPTION, m_description);
+  bibTex += addToBibTex(DOI, m_doi);
+
+  // Remove a extra comma
+  bibTex.pop_back();
+  bibTex += ENDING;
+  return bibTex;
+}
+
 BookletCitation::BookletCitation(
     const std::string &title, const OptionalVectorString &author,
     const OptionalString &howPublished, const OptionalString &address,
@@ -105,6 +181,25 @@ BookletCitation::BookletCitation(
     : BaseCitation(doi, description), m_title(title), m_author(author),
       m_howPublished(howPublished), m_address(address), m_month(month),
       m_year(year) {}
+
+std::string BookletCitation::toBibTex() const {
+  using namespace BibTex;
+  std::string bibTex = "@booklet{refference,\n";
+
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_author));
+  bibTex += addToBibTex(TITLE, m_title);
+  bibTex += addToBibTex(HOWPUBLISHED, m_howPublished);
+  bibTex += addToBibTex(ADDRESS, m_address);
+  bibTex += addToBibTex(MONTH, m_month);
+  bibTex += addToBibTex(YEAR, m_year);
+  bibTex += addToBibTex(DESCRIPTION, m_description);
+  bibTex += addToBibTex(DOI, m_doi);
+
+  // Remove a extra comma
+  bibTex.pop_back();
+  bibTex += ENDING;
+  return bibTex;
+}
 
 InBookCitation::InBookCitation(
     const std::vector<std::string> &authors, const std::string &title,
@@ -119,6 +214,30 @@ InBookCitation::InBookCitation(
       m_series(series), m_type(type), m_address(address), m_edition(edition),
       m_month(month) {}
 
+std::string InBookCitation::toBibTex() const {
+  using namespace BibTex;
+  std::string bibTex = "@inbook{refference,\n";
+
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
+  bibTex += addToBibTex(TITLE, m_title);
+  bibTex += addToBibTex(PUBLISHER, m_publisher);
+  bibTex += addToBibTex(YEAR, m_year);
+  bibTex += addToBibTex(PAGES, m_pages);
+  bibTex += addToBibTex(VOLUME, m_volume);
+  bibTex += addToBibTex(SERIES, m_series);
+  bibTex += addToBibTex(TYPE, m_type);
+  bibTex += addToBibTex(ADDRESS, m_address);
+  bibTex += addToBibTex(EDITION, m_edition);
+  bibTex += addToBibTex(MONTH, m_month);
+  bibTex += addToBibTex(DESCRIPTION, m_description);
+  bibTex += addToBibTex(DOI, m_doi);
+
+  // Remove a extra comma
+  bibTex.pop_back();
+  bibTex += ENDING;
+  return bibTex;
+}
+
 InCollectionCitation::InCollectionCitation(
     const std::vector<std::string> &authors, const std::string &title,
     const std::string &booktitle, const std::string &publisher,
@@ -132,6 +251,32 @@ InCollectionCitation::InCollectionCitation(
       m_booktitle(booktitle), m_publisher(publisher), m_year(year),
       m_volume(volume), m_series(series), m_type(type), m_chapter(chapter),
       m_pages(pages), m_address(address), m_edition(edition), m_month(month) {}
+
+std::string InCollectionCitation::toBibTex() const {
+  using namespace BibTex;
+  std::string bibTex = "@incollection{refference,\n";
+
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
+  bibTex += addToBibTex(TITLE, m_title);
+  bibTex += addToBibTex(BOOKTITLE, m_booktitle);
+  bibTex += addToBibTex(PUBLISHER, m_publisher);
+  bibTex += addToBibTex(YEAR, m_year);
+  bibTex += addToBibTex(VOLUME, m_volume);
+  bibTex += addToBibTex(SERIES, m_series);
+  bibTex += addToBibTex(TYPE, m_type);
+  bibTex += addToBibTex(CHAPTER, m_chapter);
+  bibTex += addToBibTex(PAGES, m_pages);
+  bibTex += addToBibTex(ADDRESS, m_address);
+  bibTex += addToBibTex(EDITION, m_edition);
+  bibTex += addToBibTex(MONTH, m_month);
+  bibTex += addToBibTex(DESCRIPTION, m_description);
+  bibTex += addToBibTex(DOI, m_doi);
+
+  // Remove a extra comma
+  bibTex.pop_back();
+  bibTex += ENDING;
+  return bibTex;
+}
 
 InProceedingsCitation::InProceedingsCitation(
     const std::vector<std::string> &authors, const std::string &title,
