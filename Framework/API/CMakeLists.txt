@@ -18,6 +18,7 @@ set(SRC_FILES
     src/BoxController.cpp
     src/CatalogManager.cpp
     src/CatalogSession.cpp
+    src/Citation.cpp
     src/Column.cpp
     src/ColumnFactory.cpp
     src/CommonBinsValidator.cpp
@@ -182,6 +183,7 @@ set(INC_FILES
     inc/MantidAPI/CatalogFactory.h
     inc/MantidAPI/CatalogManager.h
     inc/MantidAPI/CatalogSession.h
+    inc/MantidAPI/Citation.h
     inc/MantidAPI/Column.h
     inc/MantidAPI/ColumnFactory.h
     inc/MantidAPI/CommonBinsValidator.h
