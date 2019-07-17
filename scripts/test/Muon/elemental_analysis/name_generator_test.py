@@ -57,8 +57,8 @@ class NameGeneratorTest(unittest.TestCase):
     def test_that_gen_name_with_unicode_string_does_not_throw(self):
         element = u'element'
         label = u'label'
-
-        self.assertEqual(gen_name(element, label), element+' '+label)
+        result = u'element label'
+        self.assertEqual(gen_name(element, label), result)
 
 
 if __name__ == '__main__':

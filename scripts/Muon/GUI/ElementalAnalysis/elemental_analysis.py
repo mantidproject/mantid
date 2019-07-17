@@ -16,7 +16,7 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import Pe
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
-from MultiPlotting.multi_plotting_widget import MultiPlotWindow, MultiPlotWidget
+from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.label import Label
 
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
