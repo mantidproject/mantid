@@ -109,7 +109,8 @@ private:
         5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
     auto instrument = workspace->getInstrument();
     ExperimentOptionDefaults experimentDefaults;
-    TS_ASSERT_THROWS(experimentDefaults.get(instrument), std::invalid_argument);
+    TS_ASSERT_THROWS(experimentDefaults.get(instrument),
+                     const std::invalid_argument &);
   }
 };
 
