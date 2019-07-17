@@ -246,7 +246,6 @@ class Abins(PythonAlgorithm):
 
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
-        # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
         workspaces = []
         if self._sample_form == "Powder":
@@ -534,6 +533,8 @@ class Abins(PythonAlgorithm):
 
                     self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
                                               nucleons_number=nucleons_number)                
+
+                GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
     def _fill_s_1d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """
