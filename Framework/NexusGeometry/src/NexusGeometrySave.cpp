@@ -197,10 +197,13 @@ inline void writeXYZPixeloffset(H5::Group &grp,
     Eigen::Quaterniond absDetRotQuat =
         Kernel::toQuaterniond(detInfo.rotation(i));
 
+    // detector translation
     auto relDetTrans = toTranslation3d(absDetTransVec) *
                        toTranslation3d(absBankTransVec).inverse();
+
     Eigen::Vector3d resultantTransVec = relDetTrans.vector();
 
+    // detector rotation
     auto relDetRot = absDetRotQuat * absBankRotQuat.inverse();
 
     Eigen::Matrix3d resultantRotMat = relDetRot.toRotationMatrix();

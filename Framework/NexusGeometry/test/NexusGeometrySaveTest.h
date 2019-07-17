@@ -50,6 +50,9 @@ const std::string NX_CHAR = "NX_CHAR";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 const std::string ROTATION = "rotation";
 const std::string TRANSLATION = "translation";
+const std::string VECTOR = "vector";
+const std::string LOCATION = "location";
+const std::string ORIENTATION = "orientation";
 const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
@@ -162,9 +165,9 @@ public:
 
   // read attribute of dataset
   std::vector<double>
-  readDoubleVectorFrom_d_Attribute(std::string &attrName,
-                                   std::string &datasetName,
-                                   std::string &pathToGroup) {
+  readDoubleVectorFrom_d_Attribute(const std::string &attrName,
+                                   const std::string &datasetName,
+                                   const std::string &pathToGroup) {
 
     // open dataset and read.
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -683,7 +686,7 @@ public:
   }
 
   void
-  test_rotations_of_nx_detector_written_to_file_in_nx_format_when_nxtransformation_is_present() {
+  test_rotation_of_nx_detector_written_to_file_in_nx_format_when_nxtransformation_is_present() {
 
     ScopedFileHandle fileResource(
         "check_nxdetector_group_rotations_written_in_nx_format_test_file.hdf5");
@@ -691,11 +694,12 @@ public:
 
     const Quat relativeBankRotation(15, V3D(0, 1, 0));
     const Quat relativeDetRotation(15, V3D(0, 1, 0));
+    const V3D absDetposition(0, 0, 10);
 
     auto instrument =
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-            Mantid::Kernel::V3D(0, 0, 10),
+            absDetposition,
             relativeBankRotation, // sample rotation
             relativeDetRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
@@ -703,6 +707,7 @@ public:
     // saveinstrument
     saveInstrument(instr, destinationFile);
     auto &compInfo = (*instr.first);
+    auto &detInfo = (*instr.second);
 
     HDF5FileTestUtility tester(destinationFile);
 
@@ -752,20 +757,25 @@ public:
 
             // get the xyz offset of the pixels, and use trig to verify that its
             // position reflects det rotation relative to bank.
-            auto detectorOffsetX =
+            double detOffsetX =
                 tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
-            auto detectorOffsetY =
+            double detOffsetY =
                 tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
-            auto detectorOffsetZ =
+            double detOffsetZ =
                 tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
 
-            /*
-            convert offsets to Eigen vector to get relative position. thenm test
-            absolute position of compinfo = relpos + bankPos.
-            
-            */
+            Eigen::Vector3d relDetPositionInFile(detOffsetX, detOffsetY,
+                                                 detOffsetZ);
 
-            // TS_ASSERT(rotationInFile.isApprox(sampleRotationCopy));
+            double bankLocationMagnitude =
+                tester.readDoubleFromDataset(LOCATION, fullPathToGroup);
+
+            Eigen::Vector3d absBankPosition =
+                Mantid::Kernel::toVector3d(compInfo.position(i));
+
+            Eigen::Vector3d abs = absBankPosition + relDetPositionInFile;
+
+            TS_ASSERT(abs.isApprox(Mantid::Kernel::toVector3d(absDetposition)));
           }
         }
       }
