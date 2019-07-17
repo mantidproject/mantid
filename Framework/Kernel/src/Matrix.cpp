@@ -1185,7 +1185,7 @@ into a triangular matrix
   }
 
   for (int i = static_cast<int>(m_numRows) - 1; i >= 0; i--) {
-    auto sum = static_cast<T>(b[i]);
+    double sum = b[i];
     for (int j = i + 1; j < static_cast<int>(m_numRows); j++)
       sum -= m_rawData[i][j] * b[j];
     b[i] = sum / m_rawData[i][i];
