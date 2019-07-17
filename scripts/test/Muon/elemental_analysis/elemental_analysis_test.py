@@ -370,7 +370,5 @@ class ElementalAnalysisTest(GuiTest):
             float(peak)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
