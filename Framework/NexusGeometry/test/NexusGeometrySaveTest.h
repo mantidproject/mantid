@@ -708,7 +708,6 @@ public:
     // saveinstrument
     saveInstrument(instr, destinationFile);
     auto &compInfo = (*instr.first);
-    auto &detInfo = (*instr.second);
 
     HDF5FileTestUtility tester(destinationFile);
 
