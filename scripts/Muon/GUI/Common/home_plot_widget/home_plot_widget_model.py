@@ -17,10 +17,45 @@ class HomePlotWidgetModel(object):
         :param plotting_window_model: This is the plotting manager class to use
         """
         self.plot_figure = None
-        self.plotted_workspaces = []
-        self.plotted_workspaces_inverse_binning = {}
-        self.plotted_fit_workspaces = []
+        self._plotted_workspaces = []
+        self._plotted_workspaces_inverse_binning = {}
+        self._plotted_fit_workspaces = []
         self.plotted_group = ''
+
+    @property
+    def plotted_workspaces(self):
+        """
+        This property is needed to check whether all the workspaces contained in the list are still on the graph. They can
+        be removed from the graph from the figure window without this class knowing.
+        :return:
+        """
+        self._plotted_workspaces = [item for item in self._plotted_workspaces if item in
+                                    self.plot_figure.gca().tracked_workspaces.keys()]
+        return self._plotted_workspaces
+
+    @property
+    def plotted_workspaces_inverse_binning(self):
+        self._plotted_workspaces_inverse_binning = {key: item for key, item in self._plotted_workspaces_inverse_binning.items()
+                                                    if key in self.plot_figure.gca().tracked_workspaces.keys()}
+        return self._plotted_workspaces_inverse_binning
+
+    @property
+    def plotted_fit_workspaces(self):
+        self._plotted_fit_workspaces = [item for item in self._plotted_fit_workspaces if item in
+                                        self.plot_figure.gca().tracked_workspaces.keys()]
+        return self._plotted_fit_workspaces
+
+    @plotted_workspaces.setter
+    def plotted_workspaces(self, value):
+        self._plotted_workspaces = value
+
+    @plotted_workspaces_inverse_binning.setter
+    def plotted_workspaces_inverse_binning(self, value):
+        self._plotted_workspaces_inverse_binning = value
+
+    @plotted_fit_workspaces.setter
+    def plotted_fit_workspaces(self, value):
+        self._plotted_fit_workspaces = value
 
     def plot(self, workspace_list, title, domain, force_redraw, window_title):
         """
@@ -114,7 +149,7 @@ class HomePlotWidgetModel(object):
         self.plot_figure.gca().remove_workspace_artists(workspace)
         self.plotted_workspaces = [item for item in self.plotted_workspaces if item != workspace_name]
         self.plotted_fit_workspaces = [item for item in self.plotted_fit_workspaces if item != workspace_name]
-        if workspace_name in self.plotted_fit_workspaces:
+        if workspace_name in self.plotted_workspaces_inverse_binning:
             self.plotted_workspaces_inverse_binning.pop(workspace_name)
 
     def _clear_plot_references(self):

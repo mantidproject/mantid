@@ -140,11 +140,7 @@ The **Grouping** tab allows:
 
 The **Grouping** options are shown below
 
-.. interface:: Muon Analysis
-   :widget: GroupingOptions
-
-
-.. figure:: /images/WhitePixel.png
+.. figure:: /images/MA_Grouping_Tab.png
     :align: center
 
     Figure 4(a): The Grouping Options tab of the Muon Analysis Interface.

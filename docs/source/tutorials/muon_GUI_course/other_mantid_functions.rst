@@ -9,7 +9,6 @@ Other Mantid Functions and Basic Data Manipulation
 This section allows the user to:
 
 * familiarise themself with the content of Mantid workspaces
-* learn how to examine histograms
 * learn how to read/export data
 * learn how to overlay data/change plot style
 

@@ -30,7 +30,7 @@ Improvements
 - The path to the user file used to reduce the data is now added to the workspace sample logs. This user file path is added to canSAS file metadata.
 - The **diagnostic** page icon has been changed from a question mark to a stethoscope, to distinguish it from the **Help** page icon. The **Export Table** button now has an icon. There have been minor icon changes elsewhere on the interface.
 - Sample thickness, height, and width can be read from a batch file. These parameters are also included in the batch file generated from exporting the table.
-- The beam centre HAB/LAB update checkboxes are automatically disabled if you select LAB/HAB as the reduction mode, respectively.
+- The beam centre HAB/LAB update checkboxes are automatically deselected if you select LAB/HAB as the reduction mode, respectively.
 - The run numbers for sample transmission, sample direct, can scatter, and can direct workspaces are now added to NXCanSAS and CanSAS files.
 
 
@@ -47,6 +47,8 @@ Bug Fixes
 - When adding files, bad proton charges in run logs are identified and automatically corrected.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
 - An issue where adding runs in overlay mode where one or more runs had a bad proton charge led to incorrect data has been fixed. The erroneous proton charge is replaced with an estimated result. Note that currently only the proton charge log is corrected so many of the other logs particularly when filtered by period are still corrupted in the resulting added file.
+- A bug with the centre of mass beam centre calculation that prevented it running has been fixed.
+- A bug preventing the beam centre finder from plotting workspaces in the workbench has been fixed.
 
 Algorithms
 ----------

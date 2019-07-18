@@ -25,16 +25,9 @@ A tab-driven approach guides the user through the standard data reduction and an
 procedure. The functionalities contained in the Home, Grouping, 
 Fitting, and Results tabs are each discussed in turn, though note this tutorial does not currently 
 cover the Phase Table tab. The data used in this manual can be found 
-at:
+`here <https://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_
 
-.. code::
-
-    https://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download
-
-.. interface:: Muon Analysis
-    :widget: Home
-
-.. figure:: /images/WhitePixel.png
+.. figure:: /images/MA_Home_Tab.png
     :align: center
     
     Figure 1(a): The Muon Analysis interface.

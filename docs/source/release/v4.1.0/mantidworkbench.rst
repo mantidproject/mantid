@@ -18,12 +18,13 @@ User interface
 - Mantid's offline help is now available in Workbench.
 - You can now save, load and delete custom layouts from the settings menu with quick access to user layout in the view
   menu.
-  
+- Typing an algorithm name in the algorithms search box now searches all algorithms including those in hidden categories.
+
 .. figure:: ../../images/wb_sliceviewer.png
    :class: screenshot
    :width: 500px
    :align: right
-   
+
 SliceViewer
 -----------
 - We have merged much of the functionality of the Spectrum Viewer and Slice Viewer from Mantidplot into a single useful tool.
@@ -37,14 +38,14 @@ Scientific Interfaces
 
   - ISIS Reflectometry
   - Muon:
-  
+
     - ALC
     - Elemental Analysis
     - Frequency Domain Analysis
     - Muon Analysis 2
-    
-  - Indirect: 
-  
+
+  - Indirect:
+
     - Corrections
     - Data Reduction
     - Diffraction
@@ -57,16 +58,17 @@ Scientific Interfaces
    :class: screenshot
    :width: 500px
    :align: right
-   
+
 Plotting
 --------
 
-- The plot options dialog has been improved to offer you more control over your figures
+- The plot options dialog has been improved to offer you more control over your figures.
 - You can now plot workspaces on top of figures you've created using scripts. Simply create a matplotlib figure in the
   script window, then drag and drop a workspace on top of it.
 - A colorfill plot of a workspace with logarithmic bins is plotted on a log scale.
-- You can now toggle the normalization of plots in Workbench from the plot's context menu
-- Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data
+- You can now toggle the normalization of plots in Workbench from the plot's context menu.
+- Double-clicking a workspace now opens a prompt to plot the workspace, instead of displaying its data.
+- The plot windows now have a Mouse right-click context menu that allows showing/hiding error bars for each plotted line.
 
 Scripting
 #########
@@ -75,13 +77,21 @@ Scripting
 
 Bugfixes
 ########
-- An error raised when double-clicking an arrow in the algorithm toolbox
+- An error raised when double-clicking an arrow in the algorithm toolbox.
   when no algorithm was selected has been fixed.
 - Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 - A Colorfill plot of a workspace with one spectrum plots correctly and no longer raises an error.
-- The units on the y-axis of distribution workspace plots have been corrected
+- The units on the y-axis of distribution workspace plots have been corrected.
 - Restore Default Layout no longer resizes the main window.
 - Entering an invalid number into a plot's axis editor no longer causes an uncaught error
 - Workbench's scaling of fonts when moved between monitors with different resolutions has been improved
+- The ErrorReporter window is now resizeable
+- The "Fit" button is now visible when plotting a spectrum with error bars
+
+Known Issues
+############
+
+- Fit parameters in the fit browser are not updated when performing a simultaneous fit.
+- The fit and difference curves are not plotted on the associated figure for a simultaneous fit.
 
 :ref:`Release 4.1.0 <v4.1.0>`

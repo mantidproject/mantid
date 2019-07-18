@@ -31,6 +31,9 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
+  m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 }
 
 /*
