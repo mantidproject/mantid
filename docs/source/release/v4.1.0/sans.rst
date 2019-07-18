@@ -5,8 +5,6 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-:ref:`Release 4.1.0 <v4.1.0>`
-
 ISIS SANS Interface
 -------------------
 
@@ -64,3 +62,5 @@ Improved
 ########
 - Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
 
+
+:ref:`Release 4.1.0 <v4.1.0>`
