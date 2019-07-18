@@ -101,6 +101,7 @@ Bug Fixes
 - Fixed a bug in the :ref:`Integration <algm-Integration>` algorithm causing the Moments tab to crash.
 - Fixed an unexpected error when opening the Data Reduction interface with an unrelated facility selected.
 - Fixed a crash on the Symmetrise, Sqw and Moments tab caused by attempting to load raw data.
+- Fixed a crash on attempting to plot a loaded file before running the reduction.
 
 
 Diffraction Interface

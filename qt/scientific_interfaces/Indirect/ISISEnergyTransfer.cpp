@@ -793,9 +793,11 @@ void ISISEnergyTransfer::plotRaw() {
 
   auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
   if (instName != "TOSCA") {
-    loadAlg->setProperty("LoadLogFiles", false);
-    loadAlg->setProperty("SpectrumMin", detectorMin);
-    loadAlg->setProperty("SpectrumMax", detectorMax);
+    if (loadAlg->existsProperty("LoadLogFiles")) {
+      loadAlg->setProperty("LoadLogFiles", false);
+    }
+    loadAlg->setPropertyValue("SpectrumMin", std::to_string(detectorMin));
+    loadAlg->setPropertyValue("SpectrumMax", std::to_string(detectorMax));
   }
   loadAlg->execute();
 
