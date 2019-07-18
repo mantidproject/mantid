@@ -190,10 +190,9 @@ inline void writeXYZPixeloffset(H5::Group &grp,
 
   for (const size_t &i : childrenDetectors) {
 
-    
-	  /*
-	  the rotation of th detector is 
-	  */
+    /*
+    the rotation of th detector is
+    */
     Eigen::Vector3d absDetTransVec = Kernel::toVector3d(detInfo.position(i));
 
     // detector offest

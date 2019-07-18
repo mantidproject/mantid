@@ -685,7 +685,8 @@ public:
     TS_ASSERT(hasEither);
   }
 
-  void test_rotation_of_nx_detector_and_bank_accounted_for_in_xyz_pixel_offset_when_rotation_is_present() {
+  void
+  test_rotation_of_nx_detector_and_bank_accounted_for_in_xyz_pixel_offset_when_rotation_is_present() {
 
     ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
