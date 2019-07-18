@@ -745,11 +745,8 @@ public:
                 Mantid::Kernel::toQuaterniond(relativeDetRotation)
                     .toRotationMatrix();
 
-            Eigen::Vector3d expectedDetTrans =
-                Mantid::Kernel::toVector3d(detOffset);
-
             Eigen::Vector3d expectedOffset =
-                expectedDetRotation * expectedDetTrans;
+                Mantid::Kernel::toVector3d(detOffset);
 
             TS_ASSERT(offsetInFile.isApprox(expectedOffset));
           }
@@ -853,6 +850,12 @@ public:
         Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
 
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
+  }
+
+  void test_reload_into_parser_produces_identical_instrument() {
+    ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+    saveInstrument(m_instrument, destinationFile);
   }
 };
 

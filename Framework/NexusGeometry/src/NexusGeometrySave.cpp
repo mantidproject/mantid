@@ -187,16 +187,19 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   // absolute bank translation and rotation
   const Eigen::Vector3d absBankTransVec =
       Kernel::toVector3d(compInfo.position(idx));
+  const Eigen::Quaterniond absBankRot =
+      Kernel::toQuaterniond(compInfo.rotation(idx));
 
   for (const size_t &i : childrenDetectors) {
 
-    /*
-    the rotation of th detector is
-    */
     Eigen::Vector3d absDetTransVec = Kernel::toVector3d(detInfo.position(i));
+    Eigen::Quaterniond absDetRot = Kernel::toQuaterniond(detInfo.rotation(i));
+    // relative rotation of detetctor
+    Eigen::Quaterniond relDetRot = absDetRot * absBankRot.inverse();
 
     // detector offest
-    Eigen::Vector3d offset = absDetTransVec - absBankTransVec;
+    Eigen::Vector3d offset =
+        relDetRot.inverse() * (absDetTransVec - absBankTransVec);
 
     posx.push_back(offset[0]);
     posy.push_back(offset[1]);
