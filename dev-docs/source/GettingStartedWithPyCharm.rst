@@ -165,7 +165,7 @@ This requires a PyCharm Professional license for the Remote Debugging feature.
 This approach can be used to debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to manually add it at runtime. This can be done by appending a directory that contains the installed ``pydevd`` package on the ``PYTHONPATH``. The following code does so at runtime::
 
     PYTHON_ROOT="<Change this to point to a Python installation that has pydevd installed>"
-    # PYTHON_ROOT="c:/users/qbr77747/apps/miniconda3"
+    # PYTHON_ROOT="c:/users/<username>/apps/miniconda3"
     import os
     import sys
     sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
@@ -181,7 +181,7 @@ The ``pydevd`` package does not have to be installed on Python 2. As of 12/11/20
 Setting up PyCharm on Linux
 ###########################
 
-1. Use the native python interpreter (``/usr/bin/python2.7/python.exe``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
+1. Use the native python interpreter (``/usr/bin/python2.7``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
 2. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for python code.
 
    Within the source directory add the following to your sources:
@@ -195,7 +195,7 @@ Setting up PyCharm on Linux
        <Mantid Source Directory>/qt/python
 
 
-   The first folder can be replaced with the folder that contains your code, if you aren't writing code in ``scripts/``.
+   If you are writing scripts in any other directories, you can also mark them as sources. This helps PyCharm give better auto-complete and import suggestions during development.
 
    Additionally, in the Mantid build directory add the following as source folders:
 
