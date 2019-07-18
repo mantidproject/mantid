@@ -13,9 +13,10 @@
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 
+#include <vector>
+
 namespace Mantid {
 namespace LiveData {
-
 /**
   High-level interface to Kafka event system. It requires
   3 topic names of the data streams.
@@ -25,11 +26,24 @@ namespace LiveData {
 */
 class DLLExport KafkaEventStreamDecoder : public IKafkaStreamDecoder {
 public:
+  struct BufferedPulse {
+    Types::Core::DateAndTime pulseTime;
+    int periodNumber;
+  };
+
+  struct BufferedEvent {
+    size_t wsIdx;
+    uint64_t tof;
+    size_t pulseIndex;
+  };
+
+public:
   KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                           const std::string &eventTopic,
                           const std::string &runInfoTopic,
                           const std::string &spDetTopic,
-                          const std::string &sampleEnvTopic);
+                          const std::string &sampleEnvTopic,
+                          const std::size_t bufferThreshold);
   ~KafkaEventStreamDecoder();
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
@@ -44,12 +58,14 @@ public:
 private:
   void captureImplExcept() override;
 
+  void eventDataFromMessage(const std::string &buffer, size_t &eventCount,
+                            uint64_t &pulseTimeRet);
+
+  void flushIntermediateBuffer();
+
   /// Create the cache workspaces, LoadLiveData extracts data from these
   void initLocalCaches(const std::string &rawMsgBuffer,
                        const RunStartStruct &runStartData) override;
-
-  /// Populate cache workspaces with data from messages
-  void eventDataFromMessage(const std::string &buffer);
 
   void sampleDataFromMessage(const std::string &buffer) override;
 
@@ -58,7 +74,20 @@ private:
 
   /// Local event workspace buffers
   std::vector<DataObjects::EventWorkspace_sptr> m_localEvents;
+
+  /// Intermediate buffer for received events yet to be populated in
+  /// m_localEvents
+  std::vector<BufferedEvent> m_receivedEventBuffer;
+  std::vector<BufferedPulse> m_receivedPulseBuffer;
+  /// Mutex protecting intermediate buffers
+  mutable std::mutex m_intermediateBufferMutex;
+  /// The number of events above which the intermediate buffer will be flushed
+  const std::size_t m_intermediateBufferFlushThreshold;
 };
+
+DLLExport std::vector<size_t> computeGroupBoundaries(
+    const std::vector<KafkaEventStreamDecoder::BufferedEvent> &eventBuffer,
+    const size_t numberOfGroups);
 
 } // namespace LiveData
 } // namespace Mantid
