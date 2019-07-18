@@ -5,7 +5,6 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-:ref:`Release 4.1.0 <v4.1.0>`
 
 Instrument Definitions
 ----------------------
@@ -161,4 +160,7 @@ Tools Interface
 Improvements
 ############
 - Added a verification for the chemical formula input on the Transmission tab.
+
+
+:ref:`Release 4.1.0 <v4.1.0>`
 

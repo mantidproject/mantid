@@ -24,7 +24,7 @@ User interface
    :class: screenshot
    :width: 500px
    :align: right
-   
+
 SliceViewer
 -----------
 - We have merged much of the functionality of the Spectrum Viewer and Slice Viewer from Mantidplot into a single useful tool.
@@ -38,14 +38,14 @@ Scientific Interfaces
 
   - ISIS Reflectometry
   - Muon:
-  
+
     - ALC
     - Elemental Analysis
     - Frequency Domain Analysis
     - Muon Analysis 2
-    
-  - Indirect: 
-  
+
+  - Indirect:
+
     - Corrections
     - Data Reduction
     - Diffraction
@@ -58,7 +58,7 @@ Scientific Interfaces
    :class: screenshot
    :width: 500px
    :align: right
-   
+
 Plotting
 --------
 
@@ -87,5 +87,11 @@ Bugfixes
 - Workbench's scaling of fonts when moved between monitors with different resolutions has been improved
 - The ErrorReporter window is now resizeable
 - The "Fit" button is now visible when plotting a spectrum with error bars
+
+Known Issues
+############
+
+- Fit parameters in the fit browser are not updated when performing a simultaneous fit.
+- The fit and difference curves are not plotted on the associated figure for a simultaneous fit.
 
 :ref:`Release 4.1.0 <v4.1.0>`
