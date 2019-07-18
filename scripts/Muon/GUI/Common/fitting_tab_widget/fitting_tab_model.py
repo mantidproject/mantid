@@ -97,7 +97,8 @@ class FittingTabModel(object):
             self, parameters_dict):
         alg = mantid.AlgorithmManager.create("Fit")
 
-        output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix = run_simultaneous_Fit(parameters_dict, alg)
+        output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix\
+            = run_simultaneous_Fit(parameters_dict, alg)
         if len(parameters_dict['InputWorkspace']) > 1:
             for input_workspace, output in zip(parameters_dict['InputWorkspace'], output_workspace.getNames()):
                 CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
