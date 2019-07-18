@@ -246,7 +246,6 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
 _defaultTableItems = [ColoredPeriodicTableItem(*info) for info in _elements]
 
 
-# todo: add tests
 class _ElementButton(QtWidgets.QPushButton):
     """Atomic element button, used as a cell in the periodic table
     """
@@ -483,7 +482,7 @@ class PeriodicTable(QtWidgets.QWidget):
             elements = _defaultTableItems
         # fill cells with elements
         for elmt in elements:
-            self.__addElement(elmt)
+            self._addElement(elmt)
         self.elements = elements
 
     def silentSetElementSelected(self, symbol, state):
@@ -510,7 +509,7 @@ class PeriodicTable(QtWidgets.QWidget):
         except KeyError:
             return None
 
-    def __addElement(self, elmt):
+    def _addElement(self, elmt):
         """Add one :class:`_ElementButton` widget into the grid,
         connect its signals to interact with the cursor"""
         b = _ElementButton(elmt, self)
