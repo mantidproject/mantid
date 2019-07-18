@@ -28,23 +28,22 @@ namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
 
-extern template int NDArrayTypeIndex<bool>::typenum;
-extern template int NDArrayTypeIndex<int>::typenum;
-extern template int NDArrayTypeIndex<long>::typenum;
-extern template int NDArrayTypeIndex<long long>::typenum;
-extern template int NDArrayTypeIndex<unsigned int>::typenum;
-extern template int NDArrayTypeIndex<unsigned long>::typenum;
-extern template int NDArrayTypeIndex<unsigned long long>::typenum;
-extern template int NDArrayTypeIndex<float>::typenum;
-extern template int NDArrayTypeIndex<double>::typenum;
-extern template char NDArrayTypeIndex<bool>::typecode;
-extern template char NDArrayTypeIndex<int>::typecode;
-extern template char NDArrayTypeIndex<long>::typecode;
-extern template char NDArrayTypeIndex<long long>::typecode;
-extern template char NDArrayTypeIndex<unsigned int>::typecode;
-extern template char NDArrayTypeIndex<unsigned long>::typecode;
-extern template char NDArrayTypeIndex<unsigned long long>::typecode;
-extern template char NDArrayTypeIndex<double>::typecode;
+/// Macro to declare template instantiations as extern; those are defined in
+/// NDArrayTypeIndex.cpp
+#define DECLARE_EXTERN(HeldType)                                               \
+  extern template int NDArrayTypeIndex<HeldType>::typenum;                     \
+  extern template char NDArrayTypeIndex<HeldType>::typecode;
+
+DECLARE_EXTERN(bool)
+DECLARE_EXTERN(int)
+DECLARE_EXTERN(long)
+DECLARE_EXTERN(long long)
+DECLARE_EXTERN(unsigned int)
+DECLARE_EXTERN(unsigned long)
+DECLARE_EXTERN(unsigned long long)
+DECLARE_EXTERN(double)
+DECLARE_EXTERN(float)
+
 } // namespace Converters
 
 namespace {
