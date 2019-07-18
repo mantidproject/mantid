@@ -116,12 +116,6 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
-// TODO: add documenttation
-inline Eigen::Translation3d toTranslation3d(const Eigen::Vector3d &vector) {
-  Eigen::Translation3d translation(vector);
-  return translation;
-}
-
 /*
  * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
@@ -576,20 +570,7 @@ void saveDetectors(const H5::Group &parentGroup,
   }
 }
 
-} // namespace NexusGeometrySave
 
-Eigen::Affine3d toEigenTransform(const V3D vector, const Quat quaternion) {
-
-  Eigen::Vector3d eigenVector = Mantid::Kernel::toVector3d(vector);
-
-  Eigen::Quaterniond eigenVersor = Mantid::Kernel::toQuaterniond(quaternion);
-
-  Eigen::Translation3d translation(eigenVector);
-
-  Eigen::Affine3d compoundTransform = eigenVersor * translation;
-
-  return compoundTransform;
-}
 
 /*
  * Function: Saveinstrument
@@ -661,6 +642,6 @@ void saveInstrument(
   file.close(); // close file
 
 } // saveInstrument
-
+} // namespace NexusGeometrySave
 } // namespace NexusGeometry
 } // namespace Mantid

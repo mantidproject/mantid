@@ -14,6 +14,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
+#include "MantidNexusgeometry/NexusGeometryParser.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/filesystem.hpp>
@@ -388,7 +389,8 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    TS_ASSERT_THROWS(saveInstrument(m_instrument, destinationFile),
+    TS_ASSERT_THROWS(
+        NexusGeometrySave::saveInstrument(m_instrument, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -400,7 +402,8 @@ public:
     ScopedFileHandle fileResource("progress_report_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    saveInstrument(m_instrument, destinationFile, &progressRep);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
+                                      &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
 
@@ -412,7 +415,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    TS_ASSERT_THROWS(saveInstrument(m_instrument, destinationFile),
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(m_instrument, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -422,7 +425,7 @@ public:
     std::string destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
-    saveInstrument(m_instrument, destinationFile);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
 
     HDF5FileTestUtility tester(destinationFile);
     std::string dataSetName = compInfo.name(compInfo.root());
@@ -438,7 +441,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(m_instrument, destinationFile);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
     std::string dataSetName = compInfo.name(compInfo.root());
 
@@ -453,7 +456,8 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(m_instrument, destinationFile); // saves instrument
+    NexusGeometrySave::saveInstrument(m_instrument,
+                                      destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
     TS_ASSERT(
@@ -475,7 +479,7 @@ public:
     TS_ASSERT(compInfo.hasSource());       // rule out throw by no source
     TS_ASSERT(!compInfo.hasSample());      // verify component has no sample
 
-    TS_ASSERT_THROWS(saveInstrument(instr, destinationFile),
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -494,7 +498,7 @@ public:
     TS_ASSERT(compInfo.hasSample());       // rule out throw by no sample
     TS_ASSERT(!compInfo.hasSource());      // verify component has no source
 
-    TS_ASSERT_THROWS(saveInstrument(instr, destinationFile),
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -507,7 +511,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(m_instrument, destinationFile);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
     TS_ASSERT(compInfo.hasSource());
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT, NX_SOURCE));
@@ -522,7 +526,7 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    saveInstrument(m_instrument, destinationFile);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
 
     TS_ASSERT(compInfo.hasSample());
@@ -538,7 +542,7 @@ public:
     ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    TS_ASSERT_THROWS(saveInstrument(instr, destinationFile),
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile),
                      std::invalid_argument &);
   }
 
@@ -557,7 +561,7 @@ public:
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // saveinstrument
-    saveInstrument(instr, destinationFile);
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
     auto &compInfo = (*instr.first);
 
     bool hasNXTransformation;
@@ -615,7 +619,7 @@ public:
     std::string destinationFile = fileResource.fullPath();
 
     // saveinstrument
-    saveInstrument(m_instrument, destinationFile);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     auto &compInfo = (*m_instrument.first);
 
     bool hasNXTransformation;
@@ -655,7 +659,7 @@ public:
     std::string destinationFile = fileResource.fullPath();
 
     // saveinstrument
-    saveInstrument(m_instrument, destinationFile);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     auto &compInfo = (*m_instrument.first);
 
     bool hasNXTransformation;
@@ -706,7 +710,7 @@ public:
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // saveinstrument
-    saveInstrument(instr, destinationFile);
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
     auto &compInfo = (*instr.first);
 
     HDF5FileTestUtility tester(destinationFile);
@@ -775,7 +779,7 @@ public:
         "check_rotation_written_to_nxsample_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    saveInstrument(instr, destinationFile);
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
 
     auto pathToparent = "/raw_data_1/";
@@ -823,7 +827,7 @@ public:
         "check_rotation_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    saveInstrument(instr, destinationFile);
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
 
     auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
@@ -852,10 +856,24 @@ public:
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 
-  void test_reload_into_parser_produces_identical_instrument() {
+  void temp_test_reload_into_parser_produces_identical_instrument() {
+
     ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
-    saveInstrument(m_instrument, destinationFile);
+
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
+
+	auto &compInfo = (*m_instrument.first);
+    auto &detInfo = (*m_instrument.second);
+
+	auto reloadedInstrument = NexusGeometryParser::createInstrument(
+        destinationFile);
+
+    auto instr2 =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument); 
+	auto &compInfo2 = (*instr2.first);
+    auto &detInfo2 = (*instr2.second);
+
   }
 };
 
