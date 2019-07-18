@@ -880,8 +880,8 @@ public:
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 
-  void temp_test_reload_into_parser_produces_identical_instrument() {
-    /*
+  void test_reload_into_parser_produces_identical_instrument_temp() {
+
     ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -909,7 +909,7 @@ public:
 
     // samples
     std::string inSampleName = compInfo.name(compInfo.sample());
-    std::string outSampleeName = compInfo2.name(compInfo2.sample());
+    std::string outSampleName = compInfo2.name(compInfo2.sample());
 
     Eigen::Vector3d inSamplePos =
         Mantid::Kernel::toVector3d(compInfo.samplePosition());
@@ -933,14 +933,28 @@ public:
     std::vector<std::string> outBankNames;
     inBankNames.reserve(outNumOfBanks);
 
-    std::for_each(
-        inBanks.begin(), inBanks.end(),
-        [&compInfo](const size_t &idx) { return compInfo.name(idx); });
+    std::for_each(inBanks.begin(), inBanks.end(),
+                  [&compInfo, &inBankNames](const size_t &idx) {
+                    inBankNames.push_back(compInfo.name(idx));
+                  });
 
-    std::for_each(
-        outBanks.begin(), outBanks.end(),
-        [&compInfo2](const size_t &idx) { return compInfo2.name(idx); });
-    */
+    std::for_each(outBanks.begin(), outBanks.end(),
+                  [&compInfo2, &outBankNames](const size_t &idx) {
+                    outBankNames.push_back(compInfo2.name(idx));
+                  });
+
+    // assert names equal
+    TS_ASSERT(inSampleName == outSampleName);
+    TS_ASSERT(inSourceName == outSourceName);
+    TS_ASSERT(inBankNames == outBankNames);
+    TS_ASSERT(inInstrumentName == outInstrumentName);
+
+    // assert equal number of detector banks
+    TS_ASSERT(inNumOfBanks == outNumOfBanks);
+
+    // assert positions equal
+    TS_ASSERT(inSamplePos.isApprox(outSamplePos));
+    TS_ASSERT(inSourcePos.isApprox(outSourcePos)); //  <= failing
   }
 };
 

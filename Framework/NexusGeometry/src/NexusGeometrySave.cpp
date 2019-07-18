@@ -130,7 +130,23 @@ inline H5::StrType strTypeOfSize(const std::string &str) {
 }
 
 /*
- * Function: writeAttribute
+ * Function: writeStrDataset
+ * writes a StrType HDF dataset and dataset value to a HDF group.
+ *
+ * @param grp : HDF group object.
+ * @param attrname : attribute name.
+ * @param attrVal : string attribute value to be stored in attribute.
+ */
+inline void writeStrDataset(H5::Group &grp, const std::string dSetName,
+                            const std::string &dSetVal,
+                            H5::DataSpace dataSpace = H5SCALAR) {
+  H5::StrType dataType = strTypeOfSize(dSetVal);
+  H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
+  dSet.write(dSetVal, dataType);
+}
+
+/*
+ * Function: writeStrAttribute
  * writes a StrType HDF attribute and attribute value to a HDF group.
  *
  * @param grp : HDF group object.
@@ -160,6 +176,27 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
   H5::StrType dataType = strTypeOfSize(attrVal);
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
+}
+
+// adds additional optional data to save to file (future implementation)
+void checkSpec(std::string groupType, H5::Group grp,
+               const Geometry::ComponentInfo &compInfo) {
+
+  // group types identifiers
+  const std::string SOURCE = "source";
+  const std::string SAMPLE = "sample";
+
+  if (groupType == SOURCE) {
+
+    if (compInfo.name(compInfo.source()) != "")
+      writeStrDataset(grp, NAME, compInfo.name(compInfo.source()));
+  }
+
+  if (groupType == SAMPLE) {
+
+    if (compInfo.name(compInfo.sample()) != "")
+      writeStrDataset(grp, NAME, compInfo.name(compInfo.sample()));
+  }
 }
 
 inline void writeXYZPixeloffset(H5::Group &grp,
@@ -403,11 +440,10 @@ inline void writeOrientation(H5::Group &grp,
   // vector atrribute
   Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
 
-  /*
-   * Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
-   * stdNormAxis is the Axis of rotation as a std::vector<>. Normalised if norm
-   * != 0.
-   */
+  // Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
+  // stdNormAxis is the Axis of rotation as a std::vector<double>. Normalised if
+  // norm
+  // != 0.
   auto asize = axisOfRotation.size();
   std::vector<double> stdNormAxis;
   stdNormAxis.resize(asize);
@@ -478,11 +514,11 @@ void saveSample(const H5::Group &parentGroup,
                 const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
-
   size_t idx = compInfo.sample();
 
   std::string sampleName = compInfo.name(compInfo.sample());
   childGroup = parentGroup.createGroup(sampleName);
+  checkSpec("sample", childGroup, compInfo);
 
   writeLocation(childGroup, compInfo, idx);
   writeOrientation(childGroup, compInfo, idx); // necessary?
@@ -508,6 +544,7 @@ void saveSource(const H5::Group &parentGroup,
   std::string sourceName = compInfo.name(compInfo.source());
   childGroup = parentGroup.createGroup(sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
+  checkSpec("source", childGroup, compInfo);
 
   writeLocation(childGroup, compInfo, idx);
   writeOrientation(childGroup, compInfo, idx); // necessary?
