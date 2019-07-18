@@ -485,7 +485,7 @@ void saveSample(const H5::Group &parentGroup,
   childGroup = parentGroup.createGroup(sampleName);
 
   writeLocation(childGroup, compInfo, idx);
-  writeOrientation(childGroup, compInfo, idx);
+  writeOrientation(childGroup, compInfo, idx); // necessary?
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
 }
 
@@ -510,7 +510,7 @@ void saveSource(const H5::Group &parentGroup,
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
   writeLocation(childGroup, compInfo, idx);
-  writeOrientation(childGroup, compInfo, idx);
+  writeOrientation(childGroup, compInfo, idx); // necessary?
 }
 
 /*

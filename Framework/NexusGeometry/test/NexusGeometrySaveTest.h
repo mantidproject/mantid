@@ -34,6 +34,33 @@ using namespace Mantid::NexusGeometry;
 //---------------------------------------------------------------
 namespace {
 
+// for comparision of detector banks between saved instrument and reloaded
+// instrument, as required for the unit test.
+typedef std::vector<size_t> Indices;
+Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
+
+  std::vector<size_t> banks;
+  for (size_t i = compInfo.root() - 1; i > 0; --i) {
+    if (compInfo.isDetector(i))
+      break;
+
+    if (compInfo.hasParent(i)) {
+
+      size_t parent = compInfo.parent(i);
+      auto parentType = compInfo.componentType(parent);
+
+      if (compInfo.detectorsInSubtree(i).size() != 0) {
+
+        if (parentType != Mantid::Beamline::ComponentType::Rectangular &&
+            parentType != Mantid::Beamline::ComponentType::Structured &&
+            parentType != Mantid::Beamline::ComponentType::Grid)
+          banks.push_back(i);
+      }
+    }
+  }
+  return banks;
+}
+
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 
@@ -870,6 +897,49 @@ public:
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
     auto &compInfo2 = (*instr2.first);
     auto &detInfo2 = (*instr2.second);
+
+    // sources
+    std::string inSourceName = compInfo.name(compInfo.source());
+    std::string outSourceName = compInfo2.name(compInfo2.source());
+
+    Eigen::Vector3d inSourcePos =
+        Mantid::Kernel::toVector3d(compInfo.sourcePosition());
+    Eigen::Vector3d outSourcePos =
+        Mantid::Kernel::toVector3d(compInfo2.sourcePosition());
+
+    // samples
+    std::string inSampleName = compInfo.name(compInfo.sample());
+    std::string outSampleeName = compInfo2.name(compInfo2.sample());
+
+    Eigen::Vector3d inSamplePos =
+        Mantid::Kernel::toVector3d(compInfo.samplePosition());
+    Eigen::Vector3d outSamplePos =
+        Mantid::Kernel::toVector3d(compInfo2.samplePosition());
+
+    // instruments
+    std::string inInstrumentName = compInfo.name(compInfo.root());
+    std::string outInstrumentName = compInfo2.name(compInfo2.root());
+
+    // detector banks
+    Indices inBanks = banks(compInfo);
+    Indices outBanks = banks(compInfo2);
+
+    size_t inNumOfBanks = inBanks.size();
+    size_t outNumOfBanks = outBanks.size();
+
+    std::vector<std::string> inBankNames;
+    inBankNames.reserve(inNumOfBanks);
+
+    std::vector<std::string> outBankNames;
+    inBankNames.reserve(outNumOfBanks);
+
+    std::for_each(
+        inBanks.begin(), inBanks.end(),
+        [&compInfo](const size_t &idx) { return compInfo.name(idx); });
+
+    std::for_each(
+        outBanks.begin(), outBanks.end(),
+        [&compInfo2](const size_t &idx) { return compInfo2.name(idx); });
   }
 };
 
