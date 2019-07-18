@@ -13,8 +13,8 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
-#include "MantidNexusgeometry/NexusGeometryParser.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/filesystem.hpp>
