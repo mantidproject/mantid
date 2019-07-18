@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
 import unittest
@@ -7,7 +13,6 @@ from qtpy.QtGui import QCloseEvent
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 
-from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 

@@ -45,6 +45,7 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py
+   elemental_analysis/peak_loader_view_test.py
    elemental_analysis/PeriodicTableModel_test.py
    elemental_analysis/PeriodicTablePresenter_test.py
    elemental_analysis/elemental_analysis_test.py
