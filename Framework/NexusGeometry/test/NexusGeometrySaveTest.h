@@ -685,23 +685,23 @@ public:
     TS_ASSERT(hasEither);
   }
 
-  void
-  test_rotation_of_nx_detector_written_to_file_in_nx_format_when_nxtransformation_is_present() {
+  void test_rotation_of_nx_detector_and_bank_written_to_xyz_pixel_offset() {
 
-    ScopedFileHandle fileResource(
-        "check_nxdetector_group_rotations_written_in_nx_format_test_file.hdf5");
+    ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     const Quat relativeBankRotation(15, V3D(0, 1, 0));
     const Quat relativeDetRotation(15, V3D(0, 1, 0));
     const V3D absDetposition(0, 0, 10);
+    const V3D detOffset(2, -2, 0);
 
     auto instrument =
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-            absDetposition,
-            relativeBankRotation, // sample rotation
-            relativeDetRotation); // source rotation
+            absDetposition,       // bank position
+            relativeBankRotation, // bank rotation
+            relativeDetRotation,
+            detOffset); // detector rotation, detector offset
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // saveinstrument
@@ -730,31 +730,6 @@ public:
             auto bankName = compInfo.name(i);
             auto fullPathToGroup = pathToparent + "/" + bankName;
 
-            std::string dataSetName = "orientation";
-            std::string attributeName = "vector";
-
-            double angleInFile =
-                tester.readDoubleFromDataset(dataSetName, fullPathToGroup);
-            std::vector<double> axisInFile =
-                tester.readDoubleVectorFrom_d_Attribute(
-                    attributeName, dataSetName, fullPathToGroup);
-
-            V3D axisVectorInFile = {axisInFile[0], axisInFile[1],
-                                    axisInFile[2]};
-
-            // Eigen copy of relativeBankRotation
-            Eigen::Quaterniond bankRotationCopy =
-                Mantid::Kernel::toQuaterniond(relativeBankRotation);
-
-            // Eigen copy of relativeDetRotation
-            Eigen::Quaterniond detRotationCopy =
-                Mantid::Kernel::toQuaterniond(relativeDetRotation);
-
-            // bank rotation in file as Eigen Quaternion
-            Eigen::Quaterniond bankRotationInFile =
-                Mantid::Kernel::toQuaterniond(
-                    Quat(angleInFile, axisVectorInFile));
-
             // get the xyz offset of the pixels, and use trig to verify that its
             // position reflects det rotation relative to bank.
             double detOffsetX =
@@ -764,18 +739,19 @@ public:
             double detOffsetZ =
                 tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
 
-            Eigen::Vector3d relDetPositionInFile(detOffsetX, detOffsetY,
-                                                 detOffsetZ);
+            Eigen::Vector3d offsetInFile(detOffsetX, detOffsetY, detOffsetZ);
 
-            double bankLocationMagnitude =
-                tester.readDoubleFromDataset(LOCATION, fullPathToGroup);
+            Eigen::Matrix3d expectedDetRotation =
+                Mantid::Kernel::toQuaterniond(relativeDetRotation)
+                    .toRotationMatrix();
 
-            Eigen::Vector3d absBankPosition =
-                Mantid::Kernel::toVector3d(compInfo.position(i));
+            Eigen::Vector3d expectedDetTrans =
+                Mantid::Kernel::toVector3d(detOffset);
 
-            Eigen::Vector3d abs = absBankPosition + relDetPositionInFile;
+            Eigen::Vector3d expectedOffset =
+                expectedDetRotation * expectedDetTrans;
 
-            TS_ASSERT(abs.isApprox(Mantid::Kernel::toVector3d(absDetposition)));
+            TS_ASSERT(offsetInFile.isApprox(expectedOffset));
           }
         }
       }

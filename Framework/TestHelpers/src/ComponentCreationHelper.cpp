@@ -651,7 +651,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
 }
 
 /**
- * createOneDetectorInstrument, creates the most simple possible definition of
+ * createMinimalInstrument, creates the most simple possible definition of
  * an instrument in which we can extract a valid L1 and L2 distance for unit
  * calculations.
  *
@@ -750,9 +750,10 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
  */
 Instrument_sptr createSimpleInstrumentWithRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::V3D &detectorBankPos,
     const Mantid::Kernel::Quat &relativeBankRotation,
-    const Mantid::Kernel::Quat &relativeDetRotation) {
+    const Mantid::Kernel::Quat &relativeDetRotation,
+    const Mantid::Kernel::V3D detOffset) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
@@ -776,14 +777,14 @@ Instrument_sptr createSimpleInstrumentWithRotation(
 
   // A detector
   Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-  det->setPos({0, 0, 0}); // No offset relative to parent CompAssembly
+  det->setPos(detOffset); // defaults to {0,0,0} if no input
   det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   det->setRot(relativeDetRotation);
   instrument->markAsDetector(det);
 
   auto compAss = new ObjCompAssembly("detector-stage");
   compAss->add(det);
-  compAss->setPos(detectorPos);
+  compAss->setPos(detectorBankPos);
   compAss->setRot(relativeBankRotation);
 
   instrument->add(compAss);
