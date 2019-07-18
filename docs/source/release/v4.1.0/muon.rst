@@ -21,7 +21,6 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-:ref:`Release 4.1.0 <v4.1.0>`
 
 New
 ###
@@ -70,3 +69,6 @@ Bug Fixes
 * Issue where FFT names include an imaginary part when there was no imaginary data used.
 * Elemental Analysis no longer crashes when an ill formatted data file is loaded.
 * Changed the y-axis label in Elemental Analysis to `Counts`.
+
+
+:ref:`Release 4.1.0 <v4.1.0>`
