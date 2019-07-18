@@ -881,7 +881,7 @@ public:
   }
 
   void temp_test_reload_into_parser_produces_identical_instrument() {
-
+    /*
     ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -940,6 +940,7 @@ public:
     std::for_each(
         outBanks.begin(), outBanks.end(),
         [&compInfo2](const size_t &idx) { return compInfo2.name(idx); });
+    */
   }
 };
 
