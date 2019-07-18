@@ -477,7 +477,7 @@ class ElementalAnalysisTest(GuiTest):
         self.gui.checked_data('Cu', selection, True)
 
         self.assertTrue(all(map(lambda m: m.setChecked.call_count == 1, selection)))
-        mock_update_peak_data.assert_called_with('Cu', self.gui.element_widgets['Cu'].get_checked())
+        mock_update_peak_data.assert_called_with('Cu')
 
     def test_get_electron_peaks_returns_a_dict_with_correct_length(self):
         peaks = len(self.gui.ptable.peak_data["Electrons"])

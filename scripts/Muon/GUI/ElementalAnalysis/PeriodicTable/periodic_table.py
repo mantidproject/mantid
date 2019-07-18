@@ -388,7 +388,6 @@ class _ElementButton(QtWidgets.QPushButton):
         self.sigElementRightClicked.emit(self.item)
 
 
-# todo: add tests
 class PeriodicTable(QtWidgets.QWidget):
     """Periodic Table widget
 
@@ -615,7 +614,6 @@ class PeriodicTable(QtWidgets.QWidget):
         self.sigSelectionChanged.emit(self.getSelection())
 
 
-# todo: add tests
 class PeriodicCombo(QtWidgets.QComboBox):
     """
     Combo list with all atomic elements of the periodic table
@@ -636,7 +634,7 @@ class PeriodicCombo(QtWidgets.QComboBox):
     """
 
     def __init__(self, parent=None, detailed=True, elements=None):
-        QtGui.QComboBox.__init__(self, parent)
+        QtWidgets.QComboBox.__init__(self, parent)
 
         # add all elements from global list
         if elements is None:
@@ -648,9 +646,9 @@ class PeriodicCombo(QtWidgets.QComboBox):
                 txt = "%2s (%d)" % (elmt.symbol, elmt.Z)
             self.insertItem(i, txt)
 
-        self.currentIndexChanged[int].connect(self.__selectionChanged)
+        self.currentIndexChanged[int].connect(self._selectionChanged)
 
-    def __selectionChanged(self, idx):
+    def _selectionChanged(self, idx):
         """Emit :attr:`sigSelectionChanged`"""
         self.sigSelectionChanged.emit(_defaultTableItems[idx])
 
@@ -707,9 +705,9 @@ class PeriodicList(QtWidgets.QTreeWidget):
         self.header().setStretchLastSection(False)
 
         self.setRootIsDecorated(0)
-        self.itemClicked.connect(self.__selectionChanged)
-        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection if single
-                              else QtGui.QAbstractItemView.ExtendedSelection)
+        self.itemClicked.connect(self._selectionChanged)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single
+                              else QtWidgets.QAbstractItemView.ExtendedSelection)
         self.__fill_widget(elements)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
@@ -726,9 +724,9 @@ class PeriodicList(QtWidgets.QTreeWidget):
         previous_item = None
         for elmt in elements:
             if previous_item is None:
-                item = QtGui.QTreeWidgetItem(self)
+                item = QtWidgets.QTreeWidgetItem(self)
             else:
-                item = QtGui.QTreeWidgetItem(self, previous_item)
+                item = QtWidgets.QTreeWidgetItem(self, previous_item)
             item.setText(0, str(elmt.Z))
             item.setText(1, elmt.symbol)
             if self.detailed:
@@ -736,7 +734,7 @@ class PeriodicList(QtWidgets.QTreeWidget):
             self.tree_items.append(item)
             previous_item = item
 
-    def __selectionChanged(self, treeItem, column):
+    def _selectionChanged(self, treeItem, column):
         """Emit a :attr:`sigSelectionChanged` and send a list of
         :class:`PeriodicTableItem` objects."""
         self.sigSelectionChanged.emit(self.getSelection())

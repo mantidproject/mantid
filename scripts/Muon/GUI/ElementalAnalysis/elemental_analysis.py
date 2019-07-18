@@ -341,7 +341,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def checked_data(self, element, selection, state):
         for checkbox in selection:
             checkbox.setChecked(state)
-        self._update_peak_data(element, self.element_widgets[element].get_checked())
+        self._update_peak_data(element)
 
     # electron Peaks
     def _get_electron_peaks(self):
