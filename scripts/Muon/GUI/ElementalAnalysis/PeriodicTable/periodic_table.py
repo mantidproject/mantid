@@ -176,8 +176,7 @@ class PeriodicTableItem(object):
         (e.g. "alkali metal", "noble gas"...)
     """
 
-    def __init__(self, symbol, Z, col, row, name, mass,
-                 subcategory=""):
+    def __init__(self, symbol, Z, col, row, name, mass, subcategory=""):
         self.symbol = symbol
         """Atomic symbol (e.g. H, He, Li...)"""
         self.Z = Z
@@ -199,10 +198,7 @@ class PeriodicTableItem(object):
         if idx == 6:
             _logger.warning("density not implemented in silx, returning 0.")
 
-        ret = [self.symbol, self.Z,
-               self.col, self.row,
-               self.name, self.mass,
-               0.]
+        ret = [self.symbol, self.Z, self.col, self.row, self.name, self.mass, 0.]
         return ret[idx]
 
     def __len__(self):
@@ -232,10 +228,8 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
     }
     """Dictionary defining RGB colors for each subcategory."""
 
-    def __init__(self, symbol, Z, col, row, name, mass,
-                 subcategory="", bgcolor=None):
-        PeriodicTableItem.__init__(self, symbol, Z, col, row, name, mass,
-                                   subcategory)
+    def __init__(self, symbol, Z, col, row, name, mass, subcategory="", bgcolor=None):
+        PeriodicTableItem.__init__(self, symbol, Z, col, row, name, mass, subcategory)
 
         self.bgcolor = self.COLORS.get(subcategory, "#FFFFFF")
         """Background color of element in the periodic table,
@@ -252,6 +246,7 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
 _defaultTableItems = [ColoredPeriodicTableItem(*info) for info in _elements]
 
 
+# todo: add tests
 class _ElementButton(QtWidgets.QPushButton):
     """Atomic element button, used as a cell in the periodic table
     """
@@ -298,7 +293,7 @@ class _ElementButton(QtWidgets.QPushButton):
             self.bgcolor = QtGui.QColor("#FFFFFF")
 
         self.brush = QtGui.QBrush()
-        self.__setBrush()
+        self._setBrush()
 
         self.clicked.connect(self.leftClickedSlot)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -314,7 +309,7 @@ class _ElementButton(QtWidgets.QPushButton):
         :param b: boolean
         """
         self.current = b
-        self.__setBrush()
+        self._setBrush()
 
     def isCurrent(self):
         """
@@ -335,9 +330,9 @@ class _ElementButton(QtWidgets.QPushButton):
         :param b: boolean
         """
         self.selected = b
-        self.__setBrush()
+        self._setBrush()
 
-    def __setBrush(self):
+    def _setBrush(self):
         """Selected cells are yellow when not current.
         The current cell is dark yellow when selected or grey when not
         selected.
@@ -347,13 +342,11 @@ class _ElementButton(QtWidgets.QPushButton):
 
         if self.selected:
             self.brush = QtGui.QBrush(self.selected_color)
-
         elif self.bgcolor is not None:
             self.brush = QtGui.QBrush(self.bgcolor)
         else:
             self.brush = QtGui.QBrush()
-        palette.setBrush(self.backgroundRole(),
-                         self.brush)
+        palette.setBrush(self.backgroundRole(), self.brush)
         self.setPalette(palette)
         self.update()
 
@@ -396,6 +389,7 @@ class _ElementButton(QtWidgets.QPushButton):
         self.sigElementRightClicked.emit(self.item)
 
 
+# todo: add tests
 class PeriodicTable(QtWidgets.QWidget):
     """Periodic Table widget
 
@@ -622,6 +616,7 @@ class PeriodicTable(QtWidgets.QWidget):
         self.sigSelectionChanged.emit(self.getSelection())
 
 
+# todo: add tests
 class PeriodicCombo(QtWidgets.QComboBox):
     """
     Combo list with all atomic elements of the periodic table
@@ -680,6 +675,7 @@ class PeriodicCombo(QtWidgets.QComboBox):
         self.setCurrentIndex(symblist.index(symbol))
 
 
+# todo: add tests
 class PeriodicList(QtWidgets.QTreeWidget):
     """List of atomic elements in a :class:`QTreeView`
 
@@ -697,8 +693,7 @@ class PeriodicList(QtWidgets.QTreeWidget):
     :class:`PeriodicTableItem` objects.
     """
 
-    def __init__(self, parent=None, detailed=True,
-                 single=False, elements=None):
+    def __init__(self, parent=None, detailed=True, single=False, elements=None):
         QtWidgets.QTreeWidget.__init__(self, parent)
 
         self.detailed = detailed
@@ -767,5 +762,4 @@ class PeriodicList(QtWidgets.QTreeWidget):
         if isinstance(symbolList[0], PeriodicTableItem):
             symbolList = [elmt.symbol for elmt in symbolList]
         for idx in range(len(self.tree_items)):
-            self.tree_items[idx].setSelected(
-                _defaultTableItems[idx].symbol in symbolList)
+            self.tree_items[idx].setSelected(_defaultTableItems[idx].symbol in symbolList)

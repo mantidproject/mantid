@@ -22,17 +22,14 @@ class PeriodicTablePresenterTest(GuiTest):
     def setUp(self):
         self._model = mock.create_autospec(PeriodicTableModel)
         self.view = PeriodicTableView()
-        self.presenter = PeriodicTablePresenter(
-            self.view, self._model)
+        self.presenter = PeriodicTablePresenter(self.view, self._model)
         self.presenter.is_selected = mock.Mock()
         self.mock_elem = mock.create_autospec(PeriodicTableItem)
         self.mock_elem.symbol = mock.Mock()
 
         self.view.ptable = mock.create_autospec(silxPT)
-        self.view.ptable.getSelection = mock.Mock(
-            return_value=self.mock_elem)
-        self.view.ptable.isElementSelected = mock.Mock(
-            return_value=True)
+        self.view.ptable.getSelection = mock.Mock(return_value=self.mock_elem)
+        self.view.ptable.isElementSelected = mock.Mock(return_value=True)
 
         self.view.on_table_lclicked = mock.Mock()
         self.view.on_table_rclicked = mock.Mock()

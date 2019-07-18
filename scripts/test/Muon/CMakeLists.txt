@@ -109,6 +109,7 @@ set ( TEST_PY_FILES_QT4
    elemental_analysis/elemental_analysis_test.py
    elemental_analysis/name_generator_test.py
    elemental_analysis/detectors_presenter_test.py
+   elemental_analysis/periodic_table_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
    help_widget_presenter_test.py
