@@ -261,7 +261,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.detectors.setStateQuietly(name, False)
 
     # plotting
-    # todo: test this
     def add_peak_data(self, element, subplot, data=None):
         # if already selected add to just new plot
         if data is None:
@@ -276,8 +275,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             label = self._gen_label(full_name, x_value, element)
             self._plot_line_once(subplot, x_value, label, color)
 
-    # todo: test this
-    def _update_peak_data(self, element, data=None):
+    def _update_peak_data(self, element):
         if self.ptable.is_selected(element):
             # remove all of the lines for the element
             self._remove_element_lines(element)
@@ -286,7 +284,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         else:
             self._remove_element_lines(element)
 
-    # todo: test this
     def add_plot(self, checkbox):
         detector = checkbox.name
         last_run = self.load_widget.last_loaded_run()
@@ -296,7 +293,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             if self.peaks.electron.isChecked():
                 self.add_peak_data("e-", detector, data=self.electron_peaks)
 
-    # todo: test this
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:
             self.plotting.remove_subplot(checkbox.name)
@@ -304,7 +300,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.plot_window.close()
                 self.plot_window = None
 
-    # todo: test this
     def subplotRemoved(self, name):
         # need to change the state without sending signal
         # as the plot has already been removed

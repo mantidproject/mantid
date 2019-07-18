@@ -272,7 +272,7 @@ class ElementalAnalysisTest(GuiTest):
         self.assertEqual(self.gui.plotting.plot.call_count, 2)
         self.assertEqual(mock_add_peak_data.call_count, 0)
 
-    def test_unset_detectorsresets_plot_window_and_detectors(self):
+    def test_unset_detectors_resets_plot_window_and_detectors(self):
         self.gui.plot_window = mock.Mock()
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['name1', 'name2', 'name3']
@@ -280,6 +280,123 @@ class ElementalAnalysisTest(GuiTest):
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
         self.assertEqual(self.gui.plot_window, None)
 
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
+    def test_add_peak_data_plot_line_called_with_correct_terms(self, mock_plot_line_once, mock_gen_label):
+        mock_subplot = mock.Mock()
+        mock_gen_label.return_value = 'label'
+        test_data = {'name1': 1.0}
+        self.gui.add_peak_data('H', mock_subplot, data=test_data)
+        mock_plot_line_once.assert_called_with(mock_subplot, 1.0, 'label', 'C0')
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    def test_update_peak_data_element_is_selected(self,
+                                                  mock_remove_element_lines,
+                                                  mock_add_element_lines):
+        self.gui.ptable.is_selected = mock.Mock()
+        self.gui.ptable.is_selected.return_value = True
+        self.gui._update_peak_data('test_element')
+        mock_remove_element_lines.assert_called_with('test_element')
+        mock_add_element_lines.assert_called_with('test_element')
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
+    def test_update_peak_data_element_is_not_selected(self,
+                                                      mock_remove_element_lines,
+                                                      mock_add_element_lines):
+        self.gui.ptable.is_selected = mock.Mock()
+        self.gui.ptable.is_selected.return_value = False
+        self.gui._update_peak_data('test_element')
+        mock_remove_element_lines.assert_called_with('test_element')
+        self.assertEqual(mock_add_element_lines.call_count, 0)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
+    def test_add_plot_does_nothing_is_no_loaded_run(self, mock_load_run):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        mock_checkbox = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = None
+        self.gui.add_plot(mock_checkbox)
+        self.assertEqual(mock_load_run.call_count, 0)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
+    def test_add_plot_loads_run_and_electron_peaks_not_plotted(self, mock_load_run, add_peak_data):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = 2695
+        self.gui.peaks.electron.isChecked = mock.Mock()
+        self.gui.peaks.electron.isChecked.return_value = False
+        mock_checkbox = mock.Mock()
+        mock_checkbox.name = 'GE1'
+        self.gui.add_plot(mock_checkbox)
+        mock_load_run.assert_called_with('GE1', 2695)
+        self.assertEqual(add_peak_data.call_count, 0)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
+    def test_add_plot_loads_run_and_electron_peaks_plotted(self, mock_load_run, add_peak_data):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = 2695
+        self.gui.peaks.electron.isChecked = mock.Mock()
+        self.gui.peaks.electron.isChecked.return_value = True
+        mock_checkbox = mock.Mock()
+        mock_checkbox.name = 'GE1'
+        self.gui.add_plot(mock_checkbox)
+        mock_load_run.assert_called_with('GE1', 2695)
+        add_peak_data.assert_called_with('e-', 'GE1', data=self.gui.electron_peaks)
+
+    def test_del_plot_does_nothing_if_no_loaded_run(self):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = None
+        self.gui.plotting.remove_subplot = mock.Mock()
+        mock_checkbox = mock.Mock()
+        mock_checkbox.name = 'GE1'
+        self.gui.del_plot(mock_checkbox)
+        self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
+
+    def test_del_plot_removes_subplot_only_if_other_subplots_exist(self):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = 2695
+        self.gui.plotting.remove_subplot = mock.Mock()
+        self.gui.plotting.get_subplots = mock.Mock()
+        self.gui.plotting.get_subplots.return_value = True
+        self.gui.plot_window = 'plot_window'
+        mock_checkbox = mock.Mock()
+        mock_checkbox.name = 'GE1'
+        self.gui.del_plot(mock_checkbox)
+        self.assertEqual(self.gui.plotting.remove_subplot.call_count, 1)
+        self.assertEqual(self.gui.plot_window, 'plot_window')
+
+    def test_del_plot_closes_plot_if_no_subplots_left(self):
+        self.gui.load_widget.last_loaded_run = mock.Mock()
+        self.gui.load_widget.last_loaded_run.return_value = 2695
+        self.gui.plotting.remove_subplot = mock.Mock()
+        self.gui.plotting.get_subplots = mock.Mock()
+        self.gui.plotting.get_subplots.return_value = False
+        self.gui.plot_window = mock.Mock()
+        mock_checkbox = mock.Mock()
+        mock_checkbox.name = 'GE1'
+        self.gui.del_plot(mock_checkbox)
+        self.assertEqual(self.gui.plotting.remove_subplot.call_count, 1)
+        self.assertEqual(self.gui.plot_window, None)
+
+    def test_subplotRemoved_changes_state_only_if_other_subplots_exist(self):
+        self.gui.detectors.setStateQuietly = mock.Mock()
+        self.gui.plotting.get_subplots = mock.Mock()
+        self.gui.plotting.get_subplots.return_value = True
+        self.gui.plot_window = 'plot_window'
+        self.gui.subplotRemoved('name')
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
+        self.assertEqual(self.gui.plot_window, 'plot_window')
+
+    def test_subplotRemoved_closes_plot_if_no_other_subplots_exist(self):
+        self.gui.detectors.setStateQuietly = mock.Mock()
+        self.gui.plotting.get_subplots = mock.Mock()
+        self.gui.plotting.get_subplots.return_value = False
+        self.gui.plot_window = mock.Mock()
+        self.gui.subplotRemoved('name')
+        self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
+        self.assertEqual(self.gui.plot_window, None)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
@@ -354,13 +471,13 @@ class ElementalAnalysisTest(GuiTest):
         self.gui.minor_peaks_unchecked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
-    def test_checked_data_changes_all_states_in_list(self):
-        self.gui._update_peak_data = mock.Mock()
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._update_peak_data')
+    def test_checked_data_changes_all_states_in_list(self, mock_update_peak_data):
         selection = [mock.Mock() for i in range(10)]
         self.gui.checked_data('Cu', selection, True)
 
         self.assertTrue(all(map(lambda m: m.setChecked.call_count == 1, selection)))
-        self.gui._update_peak_data.assert_called_with('Cu', self.gui.element_widgets['Cu'].get_checked())
+        mock_update_peak_data.assert_called_with('Cu', self.gui.element_widgets['Cu'].get_checked())
 
     def test_get_electron_peaks_returns_a_dict_with_correct_length(self):
         peaks = len(self.gui.ptable.peak_data["Electrons"])
