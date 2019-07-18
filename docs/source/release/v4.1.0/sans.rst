@@ -46,6 +46,7 @@ Bug Fixes
 - The differences between non-compatibility and compatibility modes has been minimised. Compatibility mode can now be turned off in the settings tab. When off, workspaces stay as EventWorkspaces until the penultimate stage of **SANSReductionCore**. Bin masking is not performed until workspace has been converted to a histogram.
 - When adding files, bad proton charges in run logs are identified and automatically corrected.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
+- An issue where adding runs in overlay mode where one or more runs had a bad proton charge led to incorrect data has been fixed. The erroneous proton charge is replaced with an estimated result. Note that currently only the proton charge log is corrected so many of the other logs particularly when filtered by period are still corrupted in the resulting added file.
 
 Algorithms
 ----------
