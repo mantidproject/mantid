@@ -236,7 +236,7 @@ Mantid::Geometry::Instrument_sptr createSimpleInstrumentWithRotation(
 
 Mantid::Geometry::Instrument_sptr createInstrumentWithSampleAndSourceRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::V3D &detectorBankPos,
     const Mantid::Kernel::Quat &relativeSampleRotation,
     const Mantid::Kernel::Quat &relativeSourceRotation);
 

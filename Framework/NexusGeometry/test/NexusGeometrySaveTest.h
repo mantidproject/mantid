@@ -514,7 +514,7 @@ public:
   }
 
   // throws if NXentry group does not have NXsample group
-  void test_nxsample_class_exists_and_is_in_root_group() {
+  void test_nxsample_class_exists_and_is_in_nxentry_group() {
 
     ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -685,7 +685,7 @@ public:
     TS_ASSERT(hasEither);
   }
 
-  void test_rotation_of_nx_detector_and_bank_written_to_xyz_pixel_offset() {
+  void test_rotation_of_nx_detector_and_bank_accounted_for_in_xyz_pixel_offset_when_rotation_is_present() {
 
     ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -759,7 +759,7 @@ public:
   }
 
   void
-  test_rotation_of_sample_written_to_file_in_nx_format_when_nxtransformation_is_present() {
+  test_rotation_of_sample_written_to_file_in_nx_format_when_rotation_is_present() {
 
     const Quat sampleRotation(30, V3D(1, 0, 0));
     const Quat sourceRotation(90, V3D(0, 1, 0));
@@ -807,7 +807,7 @@ public:
   }
 
   void
-  test_rotation_of_source_written_to_file_in_nexus_format_when_nxtransformation_is_present() {
+  test_rotation_of_source_written_to_file_in_nexus_format_when_rotation_is_present() {
 
     const Quat sampleRotation(30, V3D(1, 0, 0));
     const Quat sourceRotation(90, V3D(0, 1, 0));

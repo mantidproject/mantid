@@ -698,7 +698,11 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
 
 /*
 An instrument creation helper allowing you to include/omit
-source/sample for unit testing.
+source/sample for unit test of exception handling.
+*
+* @param haveSource : bool option to have source in instrument
+* @param haveSample : bool option to have sample in instrument
+* @param haveDetector : bool option to have detector in instrument
 */
 Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
                                                        bool haveSample,
@@ -743,9 +747,10 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
  *
  * @param sourcePos : V3D position
  * @param samplePos : V3D sample position
- * @param detectorPos : V3D detector position
+ * @param detectorBankPos : V3D detector bank position
  * @param relativeBankRotation : Quat relative bank rotation
  * @param relativeDetRotation : Quat relative detector rotation
+ * @param detOffset : V3D offset of detector from bank
  * @return Instrument generated.
  */
 Instrument_sptr createSimpleInstrumentWithRotation(
@@ -801,14 +806,14 @@ Instrument_sptr createSimpleInstrumentWithRotation(
  *
  * @param sourcePos : V3D position
  * @param samplePos : V3D sample position
- * @param detectorPos : V3D detector position
- * @param relativeBankRotation : Quat relative bank rotation
- * @param relativeDetRotation : Quat relative detector rotation
+ * @param detectorBankPos : V3D detector position
+ * @param relativeSampleRotation : Quat relative sample rotation
+ * @param relativeSourceRotation : Quat relative source rotation
  * @return Instrument generated.
  */
 Instrument_sptr createInstrumentWithSampleAndSourceRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::V3D &detectorBankPos,
     const Mantid::Kernel::Quat &relativeSampleRotation,
     const Mantid::Kernel::Quat &relativeSourceRotation) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
@@ -842,7 +847,7 @@ Instrument_sptr createInstrumentWithSampleAndSourceRotation(
 
   auto compAss = new ObjCompAssembly("detector-stage");
   compAss->add(det);
-  compAss->setPos(detectorPos);
+  compAss->setPos(detectorBankPos);
 
   instrument->add(compAss);
 
