@@ -41,7 +41,7 @@ Setting up PyCharm on Windows
        <Mantid Source Directory>/external/src/ThirdParty/lib
 
 
-   The first folder can be replaced with the folder that contains your code, if you aren't writing code in ``scripts/``.
+   If you are writing scripts in any other directories, you can also mark them as sources. This helps PyCharm give better auto-complete and import suggestions during development.
 
    Additionally, in the Mantid build directory add the following as source folders:
 
