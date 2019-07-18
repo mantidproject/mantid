@@ -391,7 +391,7 @@ public:
 
     TS_ASSERT_THROWS(
         NexusGeometrySave::saveInstrument(m_instrument, destinationFile),
-                     std::invalid_argument &);
+        std::invalid_argument &);
   }
 
   void test_progress_reporting() {
@@ -415,8 +415,9 @@ public:
     auto const &compInfo = (*m_instrument.first);
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
-    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(m_instrument, destinationFile),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(
+        NexusGeometrySave::saveInstrument(m_instrument, destinationFile),
+        std::invalid_argument &);
   }
 
   void test_root_group_is_nxentry_class() {
@@ -745,10 +746,6 @@ public:
 
             Eigen::Vector3d offsetInFile(detOffsetX, detOffsetY, detOffsetZ);
 
-            Eigen::Matrix3d expectedDetRotation =
-                Mantid::Kernel::toQuaterniond(relativeDetRotation)
-                    .toRotationMatrix();
-
             Eigen::Vector3d expectedOffset =
                 Mantid::Kernel::toVector3d(detOffset);
 
@@ -863,17 +860,16 @@ public:
 
     NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
 
-	auto &compInfo = (*m_instrument.first);
+    auto &compInfo = (*m_instrument.first);
     auto &detInfo = (*m_instrument.second);
 
-	auto reloadedInstrument = NexusGeometryParser::createInstrument(
-        destinationFile);
+    auto reloadedInstrument =
+        NexusGeometryParser::createInstrument(destinationFile);
 
     auto instr2 =
-        Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument); 
-	auto &compInfo2 = (*instr2.first);
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
+    auto &compInfo2 = (*instr2.first);
     auto &detInfo2 = (*instr2.second);
-
   }
 };
 

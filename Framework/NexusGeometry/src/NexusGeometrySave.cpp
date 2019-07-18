@@ -570,8 +570,6 @@ void saveDetectors(const H5::Group &parentGroup,
   }
 }
 
-
-
 /*
  * Function: Saveinstrument
  * writes the instrument from memory to disk in Nexus format.
