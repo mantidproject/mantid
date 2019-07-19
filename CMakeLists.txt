@@ -402,7 +402,7 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtPy,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
@@ -484,6 +484,7 @@ if(ENABLE_CPACK)
           "python3-sip,"
           "python3-six,"
           "python3-matplotlib,"
+          "python3-qtpy,"
           "python3-scipy,"
           "python3-skimage,"
           "python3-pycifrw (>= 4.2.1),"
@@ -506,6 +507,7 @@ if(ENABLE_CPACK)
           "python-sip,"
           "python-six,"
           "python-matplotlib,"
+          "python-qtpy,"
           "python-scipy,"
           "python-skimage,"
           "python-pycifrw (>= 4.2.1),"
