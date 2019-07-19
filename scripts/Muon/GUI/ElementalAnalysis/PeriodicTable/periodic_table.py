@@ -672,7 +672,6 @@ class PeriodicCombo(QtWidgets.QComboBox):
         self.setCurrentIndex(symblist.index(symbol))
 
 
-# todo: add tests
 class PeriodicList(QtWidgets.QTreeWidget):
     """List of atomic elements in a :class:`QTreeView`
 
@@ -708,13 +707,13 @@ class PeriodicList(QtWidgets.QTreeWidget):
         self.itemClicked.connect(self._selectionChanged)
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single
                               else QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.__fill_widget(elements)
+        self._fill_widget(elements)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
         if detailed:
             self.resizeColumnToContents(2)
 
-    def __fill_widget(self, elements):
+    def _fill_widget(self, elements):
         """Fill tree widget with elements """
         if elements is None:
             elements = _defaultTableItems
@@ -755,6 +754,11 @@ class PeriodicList(QtWidgets.QTreeWidget):
         :param symbolList: List of atomic symbols ["H", "He", "Li"...]
             to be selected in the widget
         """
+        if symbolList == []:
+            for idx in range(len(self.tree_items)):
+                self.tree_items[idx].setSelected(False)
+            return
+
         # accept PeriodicTableItem for getter/setter consistency
         if isinstance(symbolList[0], PeriodicTableItem):
             symbolList = [elmt.symbol for elmt in symbolList]
