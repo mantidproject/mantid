@@ -40,10 +40,6 @@ public:
 };
 } // namespace
 
-/**
- * Constructor
- * @param parent :: The parent widget.
- */
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent)
     : FunctionTemplateBrowser(parent), m_presenter(this) {
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this,
@@ -52,138 +48,28 @@ ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent)
 
 void ConvTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(true);
-  m_exp1Height = m_parameterManager->addProperty("f0.Height");
-  m_parameterManager->setDecimals(m_exp1Height, 6);
-  m_exp1Lifetime = m_parameterManager->addProperty("f0.Lifetime");
-  m_parameterManager->setDecimals(m_exp1Lifetime, 6);
-  m_exp2Height = m_parameterManager->addProperty("f1.Height");
-  m_parameterManager->setDecimals(m_exp2Height, 6);
-  m_exp2Lifetime = m_parameterManager->addProperty("f1.Lifetime");
-  m_parameterManager->setDecimals(m_exp2Lifetime, 6);
-  m_stretchExpHeight = m_parameterManager->addProperty("Height");
-  m_parameterManager->setDecimals(m_stretchExpHeight, 6);
-  m_stretchExpLifetime = m_parameterManager->addProperty("Lifetime");
-  m_parameterManager->setDecimals(m_stretchExpLifetime, 6);
-  m_stretchExpStretching = m_parameterManager->addProperty("Stretching");
-  m_parameterManager->setDecimals(m_stretchExpStretching, 6);
-  m_A0 = m_parameterManager->addProperty("A0");
-  m_parameterManager->setDecimals(m_A0, 6);
+  m_boolManager->blockSignals(true);
+  m_enumManager->blockSignals(true);
 
-  m_parameterMap[m_exp1Height] = 0;
-  m_parameterMap[m_exp1Lifetime] = 1;
-  m_parameterMap[m_exp2Height] = 2;
-  m_parameterMap[m_exp2Lifetime] = 3;
-  m_parameterMap[m_stretchExpHeight] = 4;
-  m_parameterMap[m_stretchExpLifetime] = 5;
-  m_parameterMap[m_stretchExpStretching] = 6;
-  m_parameterMap[m_A0] = 7;
+  m_fitType = m_enumManager->addProperty("Fit Type");
+  m_fitTypeNames = getFitTypes();
+  m_enumManager->setEnumNames(m_fitType, m_fitTypeNames);
+  m_browser->addProperty(m_fitType);
 
-  m_presenter.setViewParameterDescriptions();
-
-  m_parameterManager->setDescription(m_exp1Height,
-                                     m_parameterDescriptions[m_exp1Height]);
-  m_parameterManager->setDescription(m_exp1Lifetime,
-                                     m_parameterDescriptions[m_exp1Lifetime]);
-  m_parameterManager->setDescription(m_exp2Height,
-                                     m_parameterDescriptions[m_exp2Height]);
-  m_parameterManager->setDescription(m_exp2Lifetime,
-                                     m_parameterDescriptions[m_exp2Lifetime]);
-  m_parameterManager->setDescription(
-      m_stretchExpHeight, m_parameterDescriptions[m_stretchExpHeight]);
-  m_parameterManager->setDescription(
-      m_stretchExpLifetime, m_parameterDescriptions[m_stretchExpLifetime]);
-  m_parameterManager->setDescription(
-      m_stretchExpStretching, m_parameterDescriptions[m_stretchExpStretching]);
-  m_parameterManager->setDescription(m_A0, m_parameterDescriptions[m_A0]);
-  m_parameterManager->blockSignals(false);
-
-  m_numberOfExponentials = m_intManager->addProperty("Exponentials");
-  m_intManager->setMinimum(m_numberOfExponentials, 0);
-  m_intManager->setMaximum(m_numberOfExponentials, 2);
-  m_browser->addProperty(m_numberOfExponentials);
-
-  m_stretchExponential = m_boolManager->addProperty("Stretch Exponential");
-  m_browser->addProperty(m_stretchExponential);
-
-  m_background = m_enumManager->addProperty("Background");
+  m_backgroundType = m_enumManager->addProperty("Background");
   QStringList backgrounds;
   backgrounds << "None"
-              << "FlatBackground";
-  m_enumManager->setEnumNames(m_background, backgrounds);
-  m_browser->addProperty(m_background);
+              << "FlatBackground"
+              << "LinearBackground";
+  m_enumManager->setEnumNames(m_backgroundType, backgrounds);
+  m_browser->addProperty(m_backgroundType);
+
+  m_parameterManager->blockSignals(false);
+  m_enumManager->blockSignals(false);
+  m_boolManager->blockSignals(false);
+  //updateState();
 }
 
-void ConvTemplateBrowser::addExponentialOne() {
-  m_numberOfExponentials->addSubProperty(m_exp1Height);
-  m_numberOfExponentials->addSubProperty(m_exp1Lifetime);
-}
-
-void ConvTemplateBrowser::removeExponentialOne() {
-  m_numberOfExponentials->removeSubProperty(m_exp1Height);
-  m_numberOfExponentials->removeSubProperty(m_exp1Lifetime);
-}
-
-void ConvTemplateBrowser::addExponentialTwo() {
-  m_numberOfExponentials->addSubProperty(m_exp2Height);
-  m_numberOfExponentials->addSubProperty(m_exp2Lifetime);
-}
-
-void ConvTemplateBrowser::removeExponentialTwo() {
-  m_numberOfExponentials->removeSubProperty(m_exp2Height);
-  m_numberOfExponentials->removeSubProperty(m_exp2Lifetime);
-}
-
-void ConvTemplateBrowser::addStretchExponential() {
-  m_stretchExponential->addSubProperty(m_stretchExpHeight);
-  m_stretchExponential->addSubProperty(m_stretchExpLifetime);
-  m_stretchExponential->addSubProperty(m_stretchExpStretching);
-}
-
-void ConvTemplateBrowser::removeStretchExponential() {
-  m_stretchExponential->removeSubProperty(m_stretchExpHeight);
-  m_stretchExponential->removeSubProperty(m_stretchExpLifetime);
-  m_stretchExponential->removeSubProperty(m_stretchExpStretching);
-}
-
-void ConvTemplateBrowser::addFlatBackground() {
-  m_background->addSubProperty(m_A0);
-}
-
-void ConvTemplateBrowser::removeBackground() {
-  m_background->removeSubProperty(m_A0);
-}
-
-void ConvTemplateBrowser::setExp1Height(double value, double error) {
-  setParameterPropertyValue(m_exp1Height, value, error);
-}
-
-void ConvTemplateBrowser::setExp1Lifetime(double value, double error) {
-  setParameterPropertyValue(m_exp1Lifetime, value, error);
-}
-
-void ConvTemplateBrowser::setExp2Height(double value, double error) {
-  setParameterPropertyValue(m_exp2Height, value, error);
-}
-
-void ConvTemplateBrowser::setExp2Lifetime(double value, double error) {
-  setParameterPropertyValue(m_exp2Lifetime, value, error);
-}
-
-void ConvTemplateBrowser::setStretchHeight(double value, double error) {
-  setParameterPropertyValue(m_stretchExpHeight, value, error);
-}
-
-void ConvTemplateBrowser::setStretchLifetime(double value, double error) {
-  setParameterPropertyValue(m_stretchExpLifetime, value, error);
-}
-
-void ConvTemplateBrowser::setStretchStretching(double value, double error) {
-  setParameterPropertyValue(m_stretchExpStretching, value, error);
-}
-
-void ConvTemplateBrowser::setA0(double value, double error) {
-  setParameterPropertyValue(m_A0, value, error);
-}
 
 void ConvTemplateBrowser::setFunction(const QString &funStr) {
   m_presenter.setFunction(funStr);
@@ -222,19 +108,17 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
 }
 
 void ConvTemplateBrowser::intChanged(QtProperty *prop) {
-  if (prop == m_numberOfExponentials) {
-    m_presenter.setNumberOfExponentials(m_intManager->value(prop));
-  }
 }
 
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
-  if (prop == m_stretchExponential) {
-    m_presenter.setStretchExponential(m_boolManager->value(prop));
-  }
 }
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
-  if (prop == m_background) {
+  if (prop == m_fitType) {
+    auto const index = m_enumManager->value(prop);
+    m_presenter.setFitType(m_fitTypeNames[index]);
+  }
+  if (prop == m_backgroundType) {
     auto background =
         m_enumManager->enumNames(prop)[m_enumManager->value(prop)];
     m_presenter.setBackground(background);
@@ -305,10 +189,10 @@ void ConvTemplateBrowser::setErrorsEnabled(bool enabled) {
 }
 
 void ConvTemplateBrowser::clear() {
-  removeBackground();
-  removeStretchExponential();
-  removeExponentialTwo();
-  removeExponentialOne();
+  //removeBackground();
+  //removeStretchExponential();
+  //removeExponentialTwo();
+  //removeExponentialOne();
 }
 
 void ConvTemplateBrowser::popupMenu(const QPoint &) {
@@ -341,17 +225,29 @@ void ConvTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
   }
 }
 
-QList<QtProperty *> ConvTemplateBrowser::createFunctionParameterProperties(
-    const QString &funStr) const {
-  QList<QtProperty *> props;
-  auto const fun =
-      FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  auto const na = fun->nAttributes();
-  for (size_t i = 0; i < na; ++i) {
-  
+void ConvTemplateBrowser::createFunctionParameterProperties() {
+  for(auto const fitType: m_fitTypeNames) {
+    QStringList names;
+    QStringList descriptions;
+    QList<int> ids;
+    fillParameterLists(fitType, names, descriptions, ids);
   }
-  return props;
+
+  //QList<QtProperty *> props;
+  //auto const fun =
+  //    FunctionFactory::Instance().createInitialized(funStr.toStdString());
+  //auto const np = fun->nParams();
+  //for (size_t i = 0; i < np; ++i) {
+  //  auto prop = m_parameterManager->addProperty(QString::fromStdString(fun->parameterName(i)));
+  //  m_parameterManager->setDecimals(prop, 6);
+  //}
+  //return props;
 }
+
+void ConvTemplateBrowser::
+    updateParameterEstimationData(DataForParameterEstimationCollection &&data) {}
+
+void ConvTemplateBrowser::setBackgroundA0(double value) {}
 
 } // namespace IDA
 } // namespace CustomInterfaces

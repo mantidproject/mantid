@@ -8,7 +8,7 @@
 #define INDIRECT_CONVTEMPLATEPRESENTER_H_
 
 #include "DllConfig.h"
-#include "IqtFunctionModel.h"
+#include "ConvFunctionModel.h"
 
 #include <QMap>
 #include <QWidget>
@@ -33,7 +33,7 @@ class MANTIDQT_INDIRECT_DLL ConvTemplatePresenter : public QObject {
   Q_OBJECT
 public:
   ConvTemplatePresenter(ConvTemplateBrowser *view);
-  void setNumberOfExponentials(int);
+  void setFitType(const QString &fitType);
   void setStretchExponential(bool);
   void setBackground(const QString &name);
   void setNumberOfDatasets(int);
@@ -52,6 +52,8 @@ public:
   void setDatasetNames(const QStringList &names);
   void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
+  void fillParameterLists(const QString &fitType, QStringList &names,
+                          QStringList &descriptions, QList<int> &ids);
 
 signals:
   void functionStructureChanged();
@@ -73,7 +75,7 @@ private:
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   void updateViewParameterNames();
   ConvTemplateBrowser *m_view;
-  IqtFunctionModel m_model;
+  ConvFunctionModel m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 

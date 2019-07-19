@@ -26,43 +26,9 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this, SLOT(viewChangedParameterValue(const QString &, double)));
 }
 
-void ConvTemplatePresenter::setNumberOfExponentials(int n) {
-  if (n < 0) {
-    throw std::logic_error("The number of exponents cannot be a negative number.");
-  }
-  if (n > 2) {
-    throw std::logic_error("The number of exponents is limited to 2.");
-  }
-  auto nCurrent = m_model.getNumberOfExponentials();
-  if (n == 0) {
-    if (nCurrent == 2) {
-      m_view->removeExponentialTwo();
-      --nCurrent;
-    }
-    if (nCurrent == 1) {
-      m_view->removeExponentialOne();
-      --nCurrent;
-    }
-  } else if (n == 1) {
-    if (nCurrent == 0) {
-      m_view->addExponentialOne();
-      ++nCurrent;
-    } else {
-      m_view->removeExponentialTwo();
-      --nCurrent;
-    }
-  } else /*n == 2*/ {
-    if (nCurrent == 0) {
-      m_view->addExponentialOne();
-      ++nCurrent;
-    }
-    if (nCurrent == 1) {
-      m_view->addExponentialTwo();
-      ++nCurrent;
-    }
-  }
-  assert(nCurrent == n);
-  m_model.setNumberOfExponentials(n);
+void ConvTemplatePresenter::setFitType(const QString &fitType) {
+  m_model.setFitType(fitType);
+
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
@@ -71,34 +37,34 @@ void ConvTemplatePresenter::setNumberOfExponentials(int n) {
 
 void ConvTemplatePresenter::setStretchExponential(bool on)
 {
-  if (on == m_model.hasStretchExponential()) return;
-  if (on) {
-    m_view->addStretchExponential();
-  } else {
-    m_view->removeStretchExponential();
-  }
-  m_model.setStretchExponential(on);
-  setErrorsEnabled(false);
-  updateViewParameterNames();
-  updateViewParameters();
-  emit functionStructureChanged();
+  //if (on == m_model.hasStretchExponential()) return;
+  //if (on) {
+  //  m_view->addStretchExponential();
+  //} else {
+  //  m_view->removeStretchExponential();
+  //}
+  //m_model.setStretchExponential(on);
+  //setErrorsEnabled(false);
+  //updateViewParameterNames();
+  //updateViewParameters();
+  //emit functionStructureChanged();
 }
 
 void ConvTemplatePresenter::setBackground(const QString & name)
 {
-  if (name == "None") {
-    m_view->removeBackground();
-    m_model.removeBackground();
-  } else if (name == "FlatBackground") {
-    m_view->addFlatBackground();
-    m_model.setBackground(name);
-  } else {
-    throw std::logic_error("Browser doesn't support background " + name.toStdString());
-  }
-  setErrorsEnabled(false);
-  updateViewParameterNames();
-  updateViewParameters();
-  emit functionStructureChanged();
+  //if (name == "None") {
+  //  m_view->removeBackground();
+  //  m_model.removeBackground();
+  //} else if (name == "FlatBackground") {
+  //  m_view->addFlatBackground();
+  //  m_model.setBackground(name);
+  //} else {
+  //  throw std::logic_error("Browser doesn't support background " + name.toStdString());
+  //}
+  //setErrorsEnabled(false);
+  //updateViewParameterNames();
+  //updateViewParameters();
+  //emit functionStructureChanged();
 }
 
 void ConvTemplatePresenter::setNumberOfDatasets(int n)
@@ -116,19 +82,19 @@ void ConvTemplatePresenter::setFunction(const QString & funStr)
   m_model.setFunctionString(funStr);
   m_view->clear();
   setErrorsEnabled(false);
-  if (m_model.hasBackground()) {
-    m_view->addFlatBackground();
-  }
-  if (m_model.hasStretchExponential()) {
-    m_view->addStretchExponential();
-  }
-  auto const nExp = m_model.getNumberOfExponentials();
-  if (nExp > 0) {
-    m_view->addExponentialOne();
-  }
-  if (nExp > 1) {
-    m_view->addExponentialTwo();
-  }
+  //if (m_model.hasBackground()) {
+  //  m_view->addFlatBackground();
+  //}
+  //if (m_model.hasStretchExponential()) {
+  //  m_view->addStretchExponential();
+  //}
+  //auto const nExp = m_model.getNumberOfExponentials();
+  //if (nExp > 0) {
+  //  m_view->addExponentialOne();
+  //}
+  //if (nExp > 1) {
+  //  m_view->addExponentialTwo();
+  //}
   updateViewParameterNames();
   updateViewParameters();
   emit functionStructureChanged();
@@ -157,9 +123,9 @@ QStringList ConvTemplatePresenter::getLocalParameters() const
 void ConvTemplatePresenter::setGlobalParameters(const QStringList & globals)
 {
   m_model.setGlobalParameters(globals);
-  if (m_model.hasStretchExponential()) {
-    m_view->setGlobalParametersQuiet(globals);
-  }
+  //if (m_model.hasStretchExponential()) {
+  //  m_view->setGlobalParametersQuiet(globals);
+  //}
 }
 
 void ConvTemplatePresenter::setGlobal(const QString &parName, bool on)
@@ -216,21 +182,21 @@ void ConvTemplatePresenter::setErrorsEnabled(bool enabled)
 
 void ConvTemplatePresenter::updateViewParameters()
 {
-  static std::map<IqtFunctionModel::ParamNames, void (ConvTemplateBrowser::*)(double, double)> setters{
-  { IqtFunctionModel::ParamNames::EXP1_HEIGHT, &ConvTemplateBrowser::setExp1Height },
-  { IqtFunctionModel::ParamNames::EXP1_LIFETIME, &ConvTemplateBrowser::setExp1Lifetime },
-  { IqtFunctionModel::ParamNames::EXP2_HEIGHT, &ConvTemplateBrowser::setExp2Height },
-  { IqtFunctionModel::ParamNames::EXP2_LIFETIME, &ConvTemplateBrowser::setExp2Lifetime },
-  { IqtFunctionModel::ParamNames::STRETCH_HEIGHT, &ConvTemplateBrowser::setStretchHeight},
-  { IqtFunctionModel::ParamNames::STRETCH_LIFETIME, &ConvTemplateBrowser::setStretchLifetime },
-  { IqtFunctionModel::ParamNames::STRETCH_STRETCHING, &ConvTemplateBrowser::setStretchStretching },
-  { IqtFunctionModel::ParamNames::BG_A0, &ConvTemplateBrowser::setA0 }
-  };
-  auto values = m_model.getCurrentValues();
-  auto errors = m_model.getCurrentErrors();
-  for (auto const name : values.keys()) {
-    (m_view->*setters.at(name))(values[name], errors[name]);
-  }
+  //static std::map<IqtFunctionModel::ParamNames, void (ConvTemplateBrowser::*)(double, double)> setters{
+  //{ IqtFunctionModel::ParamNames::EXP1_HEIGHT, &ConvTemplateBrowser::setExp1Height },
+  //{ IqtFunctionModel::ParamNames::EXP1_LIFETIME, &ConvTemplateBrowser::setExp1Lifetime },
+  //{ IqtFunctionModel::ParamNames::EXP2_HEIGHT, &ConvTemplateBrowser::setExp2Height },
+  //{ IqtFunctionModel::ParamNames::EXP2_LIFETIME, &ConvTemplateBrowser::setExp2Lifetime },
+  //{ IqtFunctionModel::ParamNames::STRETCH_HEIGHT, &ConvTemplateBrowser::setStretchHeight},
+  //{ IqtFunctionModel::ParamNames::STRETCH_LIFETIME, &ConvTemplateBrowser::setStretchLifetime },
+  //{ IqtFunctionModel::ParamNames::STRETCH_STRETCHING, &ConvTemplateBrowser::setStretchStretching },
+  //{ IqtFunctionModel::ParamNames::BG_A0, &ConvTemplateBrowser::setA0 }
+  //};
+  //auto values = m_model.getCurrentValues();
+  //auto errors = m_model.getCurrentErrors();
+  //for (auto const name : values.keys()) {
+  //  (m_view->*setters.at(name))(values[name], errors[name]);
+  //}
 }
 
 QStringList ConvTemplatePresenter::getDatasetNames() const

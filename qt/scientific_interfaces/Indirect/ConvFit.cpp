@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
-//#include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
+#include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -48,7 +48,7 @@ ConvFit::ConvFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  //m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(true);

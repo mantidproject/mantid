@@ -68,8 +68,10 @@ set(
   IqtFit.cpp
   IqtFitModel.cpp
   IndirectFitPropertyBrowser.cpp
-#  IndirectFunctionBrowser/ConvTemplateBrowser.cpp
-#  IndirectFunctionBrowser/ConvTemplatePresenter.cpp
+  IndirectFunctionBrowser/ConvTypes.cpp
+  IndirectFunctionBrowser/ConvFunctionModel.cpp
+  IndirectFunctionBrowser/ConvTemplateBrowser.cpp
+  IndirectFunctionBrowser/ConvTemplatePresenter.cpp
   IndirectFunctionBrowser/IqtFunctionModel.cpp
   IndirectFunctionBrowser/IqtTemplateBrowser.cpp
   IndirectFunctionBrowser/IqtTemplatePresenter.cpp
@@ -102,6 +104,7 @@ set(
   IndirectFittingModel.h
   IndirectToolsTab.h
   IqtFitModel.h
+  IndirectFunctionBrowser/ConvFunctionModel.h
   IndirectFunctionBrowser/IqtFunctionModel.h
   JumpFitModel.h
   MSDFitModel.h
@@ -168,8 +171,8 @@ set(
   IndirectTransmission.h
   IqtFit.h
   IndirectFitPropertyBrowser.h
-#  IndirectFunctionBrowser/ConvTemplateBrowser.h
-#  IndirectFunctionBrowser/ConvTemplatePresenter.h
+  IndirectFunctionBrowser/ConvTemplateBrowser.h
+  IndirectFunctionBrowser/ConvTemplatePresenter.h
   IndirectFunctionBrowser/IqtTemplateBrowser.h
   IndirectFunctionBrowser/IqtTemplatePresenter.h
   Iqt.h

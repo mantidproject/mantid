@@ -7,6 +7,7 @@
 #ifndef INDIRECT_CONVTEMPLATEBROWSER_H_
 #define INDIRECT_CONVTEMPLATEBROWSER_H_
 
+#include "ConvTypes.h"
 #include "DllConfig.h"
 #include "FunctionTemplateBrowser.h"
 #include "ConvTemplatePresenter.h"
@@ -20,6 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+using namespace ConvTypes;
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
@@ -29,24 +31,6 @@ class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser : public FunctionTemplateBrowser
   Q_OBJECT
 public:
   ConvTemplateBrowser(QWidget *parent = nullptr);
-  void addExponentialOne();
-  void removeExponentialOne();
-  void addExponentialTwo();
-  void removeExponentialTwo();
-  void addStretchExponential();
-  void removeStretchExponential();
-  void addFlatBackground();
-  void removeBackground();
-
-  void setExp1Height(double, double);
-  void setExp1Lifetime(double, double);
-  void setExp2Height(double, double);
-  void setExp2Lifetime(double, double);
-  void setStretchHeight(double, double);
-  void setStretchLifetime(double, double);
-  void setStretchStretching(double, double);
-  void setA0(double, double);
-
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
@@ -64,6 +48,9 @@ public:
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames) override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
+  void updateParameterEstimationData(
+      DataForParameterEstimationCollection &&data) override;
+  void setBackgroundA0(double value) override;
 
  protected slots:
   void intChanged(QtProperty *) override;
@@ -78,13 +65,12 @@ private:
   void popupMenu(const QPoint &);
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
-  QList<QtProperty *>
-  createFunctionParameterProperties(const QString &funStr) const;
+  void createFunctionParameterProperties();
 
   QStringList m_fitTypeNames;
   QtProperty *m_fitType;
   // Map fit type to a list of function parameters (QtProperties for those parameters)
-  QMap<int, QList<QtProperty*>> m_peakParameters;
+  QMap<QString, QList<QtProperty*>> m_peakParameters;
   QtProperty *m_deltaFunctionOn;
   QList<QtProperty *> m_deltaFunction;
   QtProperty *m_backgroundType;
