@@ -94,19 +94,28 @@ void DownloadInstrument::exec() {
 
   // to aid in general debugging, always ask github for what the rate limit
   // status is. This doesn't count against rate limit.
-  GitHubApiHelper inetHelper;
-  g_log.information(inetHelper.getRateLimitDescription());
+  try {
+    GitHubApiHelper inetHelper;
+    g_log.debug(inetHelper.getRateLimitDescription());
+  } catch (Mantid::Kernel::Exception::InternetError &ex) {
+    g_log.debug() << "Unable to get the rate limit from GitGub: " << ex.what()
+                  << '\n';
+  }
 
   try {
     fileMap = processRepository();
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
     std::string errorText(ex.what());
     if (errorText.find("rate limit") != std::string::npos) {
-      g_log.notice() << "Instrument Definition Update: " << errorText << '\n';
+      g_log.information() << "Instrument Definition Update: " << errorText
+                          << '\n';
     } else {
       // log the failure at Notice Level
-      g_log.notice("Internet Connection Failed - cannot update instrument "
-                   "definitions.");
+      g_log.notice(
+          "Internet Connection Failed - cannot update instrument "
+          "definitions. Please check your connection. If you are behind a "
+          "proxy server, consider setting proxy.host and proxy.port in "
+          "the Mantid properties file or using the config object.");
       // log this error at information level
       g_log.information() << errorText << '\n';
     }
