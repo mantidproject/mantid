@@ -285,10 +285,10 @@ public:
     b(0.0, 1.0, 0.0);
     c(1.0, 1.0, 0.0);
     d(-1.0, 0.0, 0.0);
-    TS_ASSERT_DELTA(a.CosAngle(a), 1.0, 0.0001);
-    TS_ASSERT_DELTA(a.CosAngle(b), 0.0, 0.0001);
-    TS_ASSERT_DELTA(a.CosAngle(c), M_SQRT1_2, 0.0001);
-    TS_ASSERT_DELTA(a.CosAngle(d), -1.0, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(a), 1.0, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(b), 0.0, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(c), M_SQRT1_2, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(d), -1.0, 0.0001);
   }
 
   void testRotate() {
