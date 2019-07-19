@@ -65,9 +65,9 @@ Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
 template <typename T>
 std::vector<std::pair<T, T>> pairUp(const std::vector<T> &vector1,
                                     const std::vector<T> &vector2) {
-
+  int numOfEntries = (int)vector1.size();
   std::vector<std::pair<T, T>> pairVector;
-  pairVector.reserve(vector1.size() + vector2.size());
+  pairVector.reserve(sizeof(std::pair<T, T>) * numOfEntries);
 
   for (int i = 0; i < vector1.size(); ++i) {
 
