@@ -118,6 +118,7 @@ struct GenericShape : public SolidAngleCalculator {
 struct Rectangle : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
+    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
     const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
@@ -142,6 +143,7 @@ struct Tube : public SolidAngleCalculator {
 struct Wing : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
+    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
     const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
