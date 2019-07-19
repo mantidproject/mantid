@@ -280,6 +280,17 @@ public:
     TS_ASSERT_DELTA(a.angle(d), M_PI, 0.0001);
   }
 
+  void testCosAngle() {
+    a(2.0, 0.0, 0.0);
+    b(0.0, 1.0, 0.0);
+    c(1.0, 1.0, 0.0);
+    d(-1.0, 0.0, 0.0);
+    TS_ASSERT_DELTA(a.CosAngle(a), 1.0, 0.0001);
+    TS_ASSERT_DELTA(a.CosAngle(b), 0.0, 0.0001);
+    TS_ASSERT_DELTA(a.CosAngle(c), 1.0 / std::sqrt(2.0), 0.0001);
+    TS_ASSERT_DELTA(a.CosAngle(d), -1.0, 0.0001);
+  }
+
   void testRotate() {
     V3D direc(1, 1, 1);
     const double theta = 45.0 * M_PI / 180.0;

@@ -58,8 +58,7 @@ struct AlphaAngleCalculator {
     const auto sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
     auto inPlane = sampleDetVec;
     project(inPlane);
-    return sampleDetVec.scalar_prod(inPlane) /
-           std::sqrt(sampleDetVec.norm2() * inPlane.norm2());
+    return sampleDetVec.cosAngle(inPlane);
   }
   virtual void project(V3D &v) const = 0;
   virtual ~AlphaAngleCalculator() = default;
@@ -88,7 +87,7 @@ struct SolidAngleCalculator {
                        const std::string &method, const double pixelArea)
       : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo),
         m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()),
-        m_beamLine(m_samplePos - detectorInfo.sourcePosition()), m_beamLine_norm2(m_beamLine.norm2()) {
+        m_beamLine(m_samplePos - detectorInfo.sourcePosition()) {
     if (method.find("Vertical") != std::string::npos) {
       m_alphaAngleCalculator =
           std::make_unique<AlphaAngleVertical>(detectorInfo);
@@ -106,7 +105,6 @@ protected:
   const double m_pixelArea;
   const V3D m_samplePos;
   const V3D m_beamLine;
-  const double m_beamLine_norm2;
   std::unique_ptr<const AlphaAngleCalculator> m_alphaAngleCalculator;
 };
 
@@ -120,9 +118,7 @@ struct GenericShape : public SolidAngleCalculator {
 struct Rectangle : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
-    const double cosTheta = sampleDetVec.scalar_prod(m_beamLine) /
-                            std::sqrt(m_beamLine_norm2 * sampleDetVec.norm2());
+    const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -146,10 +142,7 @@ struct Tube : public SolidAngleCalculator {
 struct Wing : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
-    const double cosTheta =
-        sampleDetVec.scalar_prod(m_beamLine) /
-        std::sqrt(m_beamLine_norm2 * sampleDetVec.norm2());
+    const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
