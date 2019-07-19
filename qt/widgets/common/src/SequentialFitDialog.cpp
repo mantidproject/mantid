@@ -76,7 +76,7 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
   if (!connected) {
     g_log.warning("Unable to update plot and parameters in the fit function "
                   "browser but the sequential fit has completed and is in the "
-                  "ADS. This is a known bug");
+                  "Workspace Toolbox. This will be fixed in r4.2");
   }
   connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this,
           SLOT(spectraChanged(int, int)));
