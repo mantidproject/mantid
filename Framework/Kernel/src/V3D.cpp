@@ -189,7 +189,7 @@ double V3D::cosAngle(const V3D &v) const {
     throw std::runtime_error(
         "Cannot calculate an angle when one of the vectors has zero length.");
   }
-  return this->scalar_prod(v) / n1 * n2;
+  return this->scalar_prod(v) / (n1 * n2);
 }
 
 /**
