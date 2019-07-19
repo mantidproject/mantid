@@ -41,7 +41,7 @@ typedef std::vector<size_t> Indices;
 Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
 
   Indices banks;
-  for (size_t i = compInfo.root() - 1; i > 0; --i) {
+  for (size_t i = compInfo.root(); i > 0; --i) {
     if (compInfo.isDetector(i))
       break;
 
@@ -908,15 +908,38 @@ public:
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 
+  // temporary test
+  void test_out_of_range_detector_pixels_during_reload_throws_temp() {
+    /*
+    ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
+
+    std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
+    TS_ASSERT_THROWS(NexusGeometryParser::createInstrument(destinationFile,
+                                                           std::move(logger)),
+                     Mantid::Kernel::Exception::InstrumentDefinitionError &);
+  */
+  }
+
   void test_reload_into_parser_produces_identical_instrument_temp() {
 
     ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto &compInfo = (*m_instrument.first);
-    auto &detInfo = (*m_instrument.second);
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
+
+    auto &compInfo = (*instr.first);
+    auto &detInfo = (*instr.second);
 
     std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
     auto reloadedInstrument = NexusGeometryParser::createInstrument(

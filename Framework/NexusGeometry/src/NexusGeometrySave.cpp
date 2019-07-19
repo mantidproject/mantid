@@ -116,19 +116,6 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
-Eigen::Affine3d toEigenTransform(const V3D vector, const Quat quaternion) {
-
-  Eigen::Vector3d eigenVector = Mantid::Kernel::toVector3d(vector);
-
-  Eigen::Quaterniond eigenVersor = Mantid::Kernel::toQuaterniond(quaternion);
-
-  Eigen::Translation3d translation(eigenVector);
-
-  Eigen::Affine3d compoundTransform = eigenVersor * translation;
-
-  return compoundTransform;
-}
-
 /*
  * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
@@ -277,12 +264,21 @@ inline void writeXYZPixeloffset(H5::Group &grp,
  * @param compInfo : componentInfo object.
  */
 inline void writeDetectorNumber(H5::Group &grp,
-                                const Geometry::DetectorInfo &detInfo) {
+                                const Geometry::ComponentInfo &compInfo,
+                                const size_t &idx,
+                                const std::vector<int> &detectorIDs) {
 
   H5::DataSet detectorNumber;
 
-  std::vector<int> detIDs = detInfo.detectorIDs();
-  const hsize_t dimSize = (hsize_t)detIDs.size();
+  std::vector<int> bankDetIDs;
+  std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx);
+  bankDetIDs.reserve(bankDetectors.size());
+
+  for (size_t &index : bankDetectors) {
+    bankDetIDs.push_back(detectorIDs[index]);
+  }
+
+  const hsize_t dimSize = (hsize_t)bankDetIDs.size();
 
   int rank = 1;
   hsize_t dims[1];
@@ -292,7 +288,7 @@ inline void writeDetectorNumber(H5::Group &grp,
 
   detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(detIDs.data(), H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -595,6 +591,7 @@ void saveDetectors(const H5::Group &parentGroup,
                    const Geometry::ComponentInfo &compInfo,
                    const Geometry::DetectorInfo &detInfo) {
 
+  const auto detectorIDs = detInfo.detectorIDs();
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
     if (compInfo.isDetector(i))
       break;
@@ -621,7 +618,7 @@ void saveDetectors(const H5::Group &parentGroup,
               forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
           H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-          writeDetectorNumber(childGroup, detInfo);
+          writeDetectorNumber(childGroup, compInfo, i, detectorIDs);
           writeLocation(childGroup, compInfo, i);
           writeOrientation(childGroup, compInfo, i);
           writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
