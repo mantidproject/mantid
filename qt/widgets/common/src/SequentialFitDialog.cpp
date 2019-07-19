@@ -26,6 +26,10 @@
 namespace MantidQt {
 using API::MantidDesktopServices;
 
+namespace {
+Mantid::Kernel::Logger g_log("SequentialFitDialog");
+}
+
 namespace MantidWidgets {
 
 /// Constructor
@@ -59,13 +63,21 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
   connect(fitBrowser, SIGNAL(functionChanged()), this, SLOT(functionChanged()));
 
   // When a fit is completed finishHandle is called which emits needShowPlot
-  connect(
+  bool connected = connect(
       this,
       SIGNAL(needShowPlot(Ui::SequentialFitDialog *,
                           MantidQt::MantidWidgets::FitPropertyBrowser *)),
       mantidui,
       SLOT(showSequentialPlot(Ui::SequentialFitDialog *,
                               MantidQt::MantidWidgets::FitPropertyBrowser *)));
+
+  // This has been added to warn users of a known bug #26333
+  // It should be removed once the bug has been fixed
+  if (!connected) {
+    g_log.warning("Unable to update plot and parameters in the fit function "
+                  "browser but the sequential fit has completed and is in the "
+                  "ADS. This is a known bug");
+  }
   connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this,
           SLOT(spectraChanged(int, int)));
   connect(ui.tWorkspaces, SIGNAL(itemSelectionChanged()), this,
