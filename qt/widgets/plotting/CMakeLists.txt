@@ -192,7 +192,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp
   INSTALL_DIR
-    ${LIB_DIR}
+    ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
   LINUX_INSTALL_RPATH

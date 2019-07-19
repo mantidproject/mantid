@@ -91,8 +91,9 @@ mtd_add_qt_library(TARGET_NAME
                    MantidQtIcons
                    MantidQtWidgetsMplCpp
                    INSTALL_DIR_BASE
-                   ${PLUGINS_DIR}
+                   ${WORKBENCH_PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                    @loader_path/../../Contents/MacOS
+                   @loader_path/../../plugins/qt5
                    LINUX_INSTALL_RPATH
                    "\$ORIGIN/../../${LIB_DIR}")
