@@ -287,7 +287,7 @@ public:
     d(-1.0, 0.0, 0.0);
     TS_ASSERT_DELTA(a.CosAngle(a), 1.0, 0.0001);
     TS_ASSERT_DELTA(a.CosAngle(b), 0.0, 0.0001);
-    TS_ASSERT_DELTA(a.CosAngle(c), 1.0 / std::sqrt(2.0), 0.0001);
+    TS_ASSERT_DELTA(a.CosAngle(c), M_SQRT1_2, 0.0001);
     TS_ASSERT_DELTA(a.CosAngle(d), -1.0, 0.0001);
   }
 
