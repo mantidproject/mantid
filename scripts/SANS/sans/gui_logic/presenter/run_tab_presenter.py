@@ -323,6 +323,7 @@ class RunTabPresenter(object):
                                                                    str)},
                                                     line_edits={"user_file":
                                                                 self._view.user_file_line_edit})
+            self._view.gui_properties_handler.set_setting("user_file", self._view.get_user_file_path())
 
     def on_user_file_load(self):
         """
