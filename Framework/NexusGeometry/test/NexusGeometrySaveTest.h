@@ -35,11 +35,12 @@ using namespace Mantid::NexusGeometry;
 namespace {
 
 // for comparision of detector banks between saved instrument and reloaded
-// instrument, as required for the unit test.
+// instrument, as required for the unit test. Delete this with along with the
+// temporary unit test to reload file.
 typedef std::vector<size_t> Indices;
 Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
 
-  std::vector<size_t> banks;
+  Indices banks;
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
     if (compInfo.isDetector(i))
       break;
@@ -59,6 +60,25 @@ Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
     }
   }
   return banks;
+}
+
+template <typename T>
+std::vector<std::pair<T, T>> pairUp(const std::vector<T> &vector1,
+                                    const std::vector<T> &vector2) {
+
+  std::vector<std::pair<T, T>> pairVector;
+  pairVector.reserve(vector1.size() + vector2.size());
+
+  for (int i = 0; i < vector1.size(); ++i) {
+
+    // position in totalVector that divides vector1 and vector2
+    T element1 = vector1[i];
+    T element2 = vector2[i];
+
+    std::pair<T, T> pair = std::make_pair(element1, element2);
+    pairVector.push_back(pair);
+  }
+  return pairVector;
 }
 
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
@@ -396,12 +416,12 @@ public:
 
   NexusGeometrySaveTest() {
 
-    const Quat bankRotation(45, V3D(0, 0, 1));
-    const Quat detRotation(45, V3D(0, 0, 1));
+    const Quat bankRotation(15, V3D(0, 1, 0));
+    const Quat detRotation(15, V3D(0, 1, 0));
 
     auto instrument =
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
-            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, -7), Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10), bankRotation, detRotation);
     instrument->setName("example-detector-bank");
     m_instrument =
@@ -595,7 +615,7 @@ public:
     bool hasNXTransformation;
     bool hasRotation;
     bool hasTranslation;
-    bool hasEither(true); // initialise with true
+    bool hasEither;
 
     HDF5FileTestUtility tester(destinationFile);
 
@@ -629,9 +649,7 @@ public:
             hasRotation =
                 tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
 
-            if (!(hasRotation || hasTranslation))
-              hasEither = false;
-
+            hasEither = (hasRotation || hasTranslation);
             TS_ASSERT(hasEither);
           }
         }
@@ -927,26 +945,41 @@ public:
     size_t inNumOfBanks = inBanks.size();
     size_t outNumOfBanks = outBanks.size();
 
-    std::vector<std::string> inBankNames;
-    inBankNames.reserve(inNumOfBanks);
+    std::vector<Eigen::Vector3d> inBankPositions;
+    inBankPositions.reserve(inNumOfBanks);
 
-    std::vector<std::string> outBankNames;
-    inBankNames.reserve(outNumOfBanks);
+    std::vector<Eigen::Vector3d> outBankPositions;
+    inBankPositions.reserve(outNumOfBanks);
 
-    std::for_each(inBanks.begin(), inBanks.end(),
-                  [&compInfo, &inBankNames](const size_t &idx) {
-                    inBankNames.push_back(compInfo.name(idx));
-                  });
+    auto bankPairs = pairUp(inBanks, outBanks);
 
-    std::for_each(outBanks.begin(), outBanks.end(),
-                  [&compInfo2, &outBankNames](const size_t &idx) {
-                    outBankNames.push_back(compInfo2.name(idx));
-                  });
+    // assertations for all detector banks
+    std::for_each(
+        bankPairs.begin(), bankPairs.end(),
+        [&compInfo, &compInfo2](const std::pair<size_t, size_t> &idx) {
+          size_t idx1 = idx.first;
+          size_t idx2 = idx.second;
+
+          Eigen::Vector3d bankPos1 =
+              Mantid::Kernel::toVector3d(compInfo.position(idx1));
+          Eigen::Vector3d bankPos2 =
+              Mantid::Kernel::toVector3d(compInfo2.position(idx2));
+          Eigen::Quaterniond bankRot1 =
+              Mantid::Kernel::toQuaterniond(compInfo.rotation(idx1));
+          Eigen::Quaterniond bankRot2 =
+              Mantid::Kernel::toQuaterniond(compInfo2.rotation(idx2));
+
+          std::string inBankName = compInfo.name(idx1);
+          std::string outbankName = compInfo2.name(idx2);
+
+          TS_ASSERT(inBankName == outbankName);   // assert all names equal
+          TS_ASSERT(bankPos1.isApprox(bankPos2)); // assert all positions equal
+          TS_ASSERT(bankRot1.isApprox(bankRot1)); // assert all rotations equal
+        });
 
     // assert names equal
     TS_ASSERT(inSampleName == outSampleName);
     TS_ASSERT(inSourceName == outSourceName);
-    TS_ASSERT(inBankNames == outBankNames);
     TS_ASSERT(inInstrumentName == outInstrumentName);
 
     // assert equal number of detector banks
@@ -954,7 +987,7 @@ public:
 
     // assert positions equal
     TS_ASSERT(inSamplePos.isApprox(outSamplePos));
-    TS_ASSERT(inSourcePos.isApprox(outSourcePos)); //  <= failing
+    TS_ASSERT(inSourcePos.isApprox(outSourcePos));
   }
 };
 

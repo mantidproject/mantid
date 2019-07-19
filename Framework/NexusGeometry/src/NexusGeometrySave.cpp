@@ -116,6 +116,19 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
+Eigen::Affine3d toEigenTransform(const V3D vector, const Quat quaternion) {
+
+  Eigen::Vector3d eigenVector = Mantid::Kernel::toVector3d(vector);
+
+  Eigen::Quaterniond eigenVersor = Mantid::Kernel::toQuaterniond(quaternion);
+
+  Eigen::Translation3d translation(eigenVector);
+
+  Eigen::Affine3d compoundTransform = eigenVersor * translation;
+
+  return compoundTransform;
+}
+
 /*
  * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
@@ -179,12 +192,8 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
 }
 
 // adds additional optional data to save to file (future implementation)
-void checkSpec(std::string &groupType, H5::Group &grp,
+void checkSpec(const std::string &groupType, H5::Group &grp,
                const Geometry::ComponentInfo &compInfo) {
-
-  // group types identifiers
-  const std::string SOURCE = "source";
-  const std::string SAMPLE = "sample";
 
   if (groupType == SOURCE) {
 
@@ -307,6 +316,7 @@ inline void writeLocation(H5::Group &grp,
                           const Geometry::ComponentInfo &compInfo, size_t idx) {
 
   Eigen::Vector3d position;
+
   double norm;
 
   H5::DataSet location;
@@ -334,8 +344,11 @@ inline void writeLocation(H5::Group &grp,
   // write norm of absolute (normalised) position vector of detector to dataset
   // TODO: these should take the idices of detectors instead of hard-coded zero
   position = Kernel::toVector3d(compInfo.position(idx)); // of bank
+
+  // capture the norm before inline normalisation.
   norm = position.norm();
-  position.normalize(); // inline?
+  position.normalize();
+
   location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
 
   // vector attribute
@@ -345,7 +358,8 @@ inline void writeLocation(H5::Group &grp,
 
   /*
    * Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
-   * stdNormAxis is the position vector as a std::vector<>. Normalised if norm
+   * stdNormAxis is the position vector as a std::vector<double>. Normalised if
+   * norm
    * != 0.
    */
   auto asize = position.size();
@@ -523,6 +537,14 @@ void saveSample(const H5::Group &parentGroup,
   writeLocation(childGroup, compInfo, idx);
   writeOrientation(childGroup, compInfo, idx); // necessary?
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
+
+  std::string dependency =
+      forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+  H5::StrType dependencyStrType = strTypeOfSize(dependency);
+
+  H5::DataSet dependsOn =
+      childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
+  dependsOn.write(dependency, dependencyStrType, H5SCALAR);
 }
 
 /*
@@ -544,10 +566,18 @@ void saveSource(const H5::Group &parentGroup,
   std::string sourceName = compInfo.name(compInfo.source());
   childGroup = parentGroup.createGroup(sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
-  checkSpec("source", childGroup, compInfo);
+  checkSpec(SOURCE, childGroup, compInfo);
 
   writeLocation(childGroup, compInfo, idx);
   writeOrientation(childGroup, compInfo, idx); // necessary?
+
+  std::string dependency =
+      forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+  H5::StrType dependencyStrType = strTypeOfSize(dependency);
+
+  H5::DataSet dependsOn =
+      childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
+  dependsOn.write(dependency, dependencyStrType, H5SCALAR);
 }
 
 /*
