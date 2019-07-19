@@ -183,13 +183,13 @@ double V3D::angle(const V3D &v) const {
  *  @return cosine of the angle between the vectors
  */
 double V3D::cosAngle(const V3D &v) const {
-  const double n1 = norm2();
-  const double n2 = v.norm2();
+  const double n1 = norm();
+  const double n2 = v.norm();
   if (n1 == 0. || n2 == 0.) {
     throw std::runtime_error(
         "Cannot calculate an angle when one of the vectors has zero length.");
   }
-  return this->scalar_prod(v) / std::sqrt(n1 * n2);
+  return this->scalar_prod(v) / n1 * n2;
 }
 
 /**
