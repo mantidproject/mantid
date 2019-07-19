@@ -1,0 +1,146 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d7732116..2d39541d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,7 +14,7 @@ include(GNUInstallDirs)
+ 
+ #Note that googlemock target already builds googletest
+ option(BUILD_GMOCK "Builds the googlemock subproject" ON)
+-option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" ON)
++option(INSTALL_GTEST "Enable installation of googletest. (Projects embedding googletest may want to turn this OFF.)" OFF)
+ 
+ if(BUILD_GMOCK)
+   add_subdirectory( googlemock )
+diff --git a/googlemock/CMakeLists.txt b/googlemock/CMakeLists.txt
+index 8a8de1f6..ce2cefdd 100644
+--- a/googlemock/CMakeLists.txt
++++ b/googlemock/CMakeLists.txt
+@@ -51,7 +51,7 @@ endif()
+ # if they are the same (the default).
+ add_subdirectory("${gtest_dir}" "${gmock_BINARY_DIR}/gtest")
+ 
+-
++set(BUILD_SHARED_LIBS OFF)
+ # These commands only run if this is the main project
+ if(CMAKE_PROJECT_NAME STREQUAL "gmock" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
+   # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+@@ -127,7 +127,7 @@ endif()
+ ########################################################################
+ #
+ # Install rules
+-install_project(gmock gmock_main)
++# install_project(gmock gmock_main)
+ 
+ ########################################################################
+ #
+diff --git a/googlemock/src/gmock-all.cc b/googlemock/src/gmock-all.cc
+index e43c9b7b..cdc04103 100644
+--- a/googlemock/src/gmock-all.cc
++++ b/googlemock/src/gmock-all.cc
+@@ -33,7 +33,11 @@
+ // This file #includes all Google Mock implementation .cc files.  The
+ // purpose is to allow a user to build Google Mock by compiling this
+ // file alone.
+-
++#if __GNUC__ >= 5
++// Disable GCC 5's -Wsuggest-override warnings in gtest
++# pragma GCC diagnostic push
++# pragma GCC diagnostic ignored "-Wsuggest-override"
++#endif
+ // This line ensures that gmock.h can be compiled on its own, even
+ // when it's fused.
+ #include "gmock/gmock.h"
+@@ -44,3 +48,6 @@
+ #include "src/gmock-matchers.cc"
+ #include "src/gmock-spec-builders.cc"
+ #include "src/gmock.cc"
++#if __GNUC__ >= 5
++# pragma GCC diagnostic pop
++#endif
+\ No newline at end of file
+diff --git a/googletest/CMakeLists.txt b/googletest/CMakeLists.txt
+index 9ee79408..b622db14 100644
+--- a/googletest/CMakeLists.txt
++++ b/googletest/CMakeLists.txt
+@@ -56,6 +56,7 @@ if (COMMAND set_up_hermetic_build)
+   set_up_hermetic_build()
+ endif()
+ 
++set(BUILD_SHARED_LIBS OFF)
+ # These commands only run if this is the main project
+ if(CMAKE_PROJECT_NAME STREQUAL "gtest" OR CMAKE_PROJECT_NAME STREQUAL "googletest-distribution")
+ 
+@@ -86,23 +87,23 @@ include(cmake/internal_utils.cmake)
+ config_compiler_and_linker()  # Defined in internal_utils.cmake.
+ 
+ # Create the CMake package file descriptors.
+-if (INSTALL_GTEST)
+-  include(CMakePackageConfigHelpers)
+-  set(cmake_package_name GTest)
+-  set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
+-  set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
+-  set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
+-  set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
+-  write_basic_package_version_file(${version_file} COMPATIBILITY AnyNewerVersion)
+-  install(EXPORT ${targets_export_name}
+-    NAMESPACE ${cmake_package_name}::
+-    DESTINATION ${cmake_files_install_dir})
+-  set(config_file "${generated_dir}/${cmake_package_name}Config.cmake")
+-  configure_package_config_file("${gtest_SOURCE_DIR}/cmake/Config.cmake.in"
+-    "${config_file}" INSTALL_DESTINATION ${cmake_files_install_dir})
+-  install(FILES ${version_file} ${config_file}
+-    DESTINATION ${cmake_files_install_dir})
+-endif()
++# if (INSTALL_GTEST)
++#   include(CMakePackageConfigHelpers)
++#   set(cmake_package_name GTest)
++#   set(targets_export_name ${cmake_package_name}Targets CACHE INTERNAL "")
++#   set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated" CACHE INTERNAL "")
++#   set(cmake_files_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${cmake_package_name}")
++#   set(version_file "${generated_dir}/${cmake_package_name}ConfigVersion.cmake")
++#   write_basic_package_version_file(${version_file} COMPATIBILITY AnyNewerVersion)
++#   install(EXPORT ${targets_export_name}
++#     NAMESPACE ${cmake_package_name}::
++#     DESTINATION ${cmake_files_install_dir})
++#   set(config_file "${generated_dir}/${cmake_package_name}Config.cmake")
++#   configure_package_config_file("${gtest_SOURCE_DIR}/cmake/Config.cmake.in"
++#     "${config_file}" INSTALL_DESTINATION ${cmake_files_install_dir})
++#   install(FILES ${version_file} ${config_file}
++#     DESTINATION ${cmake_files_install_dir})
++# endif()
+ 
+ # Where Google Test's .h files can be found.
+ set(gtest_build_include_dirs
+@@ -148,7 +149,7 @@ target_link_libraries(gtest_main PUBLIC gtest)
+ ########################################################################
+ #
+ # Install rules
+-install_project(gtest gtest_main)
++# install_project(gtest gtest_main)
+ 
+ ########################################################################
+ #
+diff --git a/googletest/src/gtest-all.cc b/googletest/src/gtest-all.cc
+index b217a180..91719292 100644
+--- a/googletest/src/gtest-all.cc
++++ b/googletest/src/gtest-all.cc
+@@ -35,6 +35,11 @@
+ 
+ // This line ensures that gtest.h can be compiled on its own, even
+ // when it's fused.
++#if __GNUC__ >= 5
++// Disable GCC 5's -Wsuggest-override warnings in gtest
++# pragma GCC diagnostic push
++# pragma GCC diagnostic ignored "-Wsuggest-override"
++#endif
+ #include "gtest/gtest.h"
+ 
+ // The following lines pull in the real gtest *.cc files.
+@@ -45,3 +50,6 @@
+ #include "src/gtest-printers.cc"
+ #include "src/gtest-test-part.cc"
+ #include "src/gtest-typed-test.cc"
++#if __GNUC__ >= 5
++# pragma GCC diagnostic pop
++#endif
+\ No newline at end of file

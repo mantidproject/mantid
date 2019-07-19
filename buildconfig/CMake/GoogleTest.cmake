@@ -3,7 +3,7 @@
 # GMOCK_FOUND If false, do not try to use Google Mock
 
 # Make gtest_version available everywhere
-set (gtest_version "1.8.0" CACHE INTERNAL "")
+set (gtest_version "1.8.1" CACHE INTERNAL "")
 
 option(USE_SYSTEM_GTEST "Use the system installed GTest - v${gtest_version}?" OFF)
 
@@ -24,9 +24,11 @@ else()
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} .
                   RESULT_VARIABLE result
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+
   if(result)
     message(FATAL_ERROR "CMake step for googletest failed: ${result}")
   endif()
+
   execute_process(COMMAND ${CMAKE_COMMAND} --build .
                   RESULT_VARIABLE result
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )

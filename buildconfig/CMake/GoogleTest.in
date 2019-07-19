@@ -15,10 +15,7 @@ ExternalProject_Add(googletest
   SOURCE_DIR        "@CMAKE_BINARY_DIR@/googletest-src"
   BINARY_DIR        "@CMAKE_BINARY_DIR@/googletest-build"
   PATCH_COMMAND     "@GIT_EXECUTABLE@" reset --hard ${_tag}
-            COMMAND "@GIT_EXECUTABLE@" apply ${_apply_flags} "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_override.patch"
-            COMMAND "@GIT_EXECUTABLE@" apply ${_apply_flags} "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_static.patch"
-            COMMAND "@GIT_EXECUTABLE@" apply ${_apply_flags} "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_msvc_cpp11.patch"
-            COMMAND "@GIT_EXECUTABLE@" apply ${_apply_flags} "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_wconversion.patch"
+            COMMAND "@GIT_EXECUTABLE@" apply ${_apply_flags} "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_1.8.1.patch"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
