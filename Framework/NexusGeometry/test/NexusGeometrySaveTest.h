@@ -112,7 +112,8 @@ public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
 };
 
-// TODO, this is duplicated from NexusGeometryParserTest, should be made the same.
+// TODO, this is duplicated from NexusGeometryParserTest, should be made the
+// same.
 class MockLogger : public Mantid::NexusGeometry::Logger {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -918,8 +919,8 @@ public:
     auto &detInfo = (*m_instrument.second);
 
     std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
-    auto reloadedInstrument =
-        NexusGeometryParser::createInstrument(destinationFile, std::move(logger));
+    auto reloadedInstrument = NexusGeometryParser::createInstrument(
+        destinationFile, std::move(logger));
 
     auto instr2 =
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
