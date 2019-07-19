@@ -356,6 +356,7 @@ class ManageUserDirectories : QDialog {
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
   static void openUserDirsDialog(QWidget *parent);
+  void setHelpButtonVisible(const bool &visible /TransferThis/ );
 };
 
 // ---------------------------------

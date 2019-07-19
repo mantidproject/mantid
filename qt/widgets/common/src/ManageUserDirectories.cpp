@@ -50,6 +50,10 @@ void ManageUserDirectories::initLayout() {
           SLOT(selectSaveDir()));
 }
 
+void ManageUserDirectories::setHelpButtonVisible(const bool &visible) {
+  m_uiForm.pbHelp->setVisible(visible);
+}
+
 void ManageUserDirectories::loadProperties() {
   m_userPropFile =
       QString::fromStdString(

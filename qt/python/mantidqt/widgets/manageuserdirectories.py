@@ -12,4 +12,18 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.utils.qt import import_qt
 
 
-ManageUserDirectories = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
+ManageUserDirectories_cpp = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
+
+
+class ManageUserDirectories(ManageUserDirectories_cpp):
+    """
+    Small wrapper class around the Manage User Directories Window that
+    hides the help button which can lead to a crash.
+    See https://github.com/mantidproject/mantid/issues/26404.
+
+    This is a safe, temporary fix, for release 4.0.1.
+    """
+
+    def __init__(self, parent=None):
+        super(ManageUserDirectories, self).__init__(parent)
+        self.setHelpButtonVisible(False)
