@@ -98,7 +98,7 @@ void DownloadInstrument::exec() {
     GitHubApiHelper inetHelper;
     g_log.debug(inetHelper.getRateLimitDescription());
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
-    g_log.debug() << "Unable to get the rate limit from GitGub: " << ex.what()
+    g_log.debug() << "Unable to get the rate limit from GitHub: " << ex.what()
                   << '\n';
   }
 
