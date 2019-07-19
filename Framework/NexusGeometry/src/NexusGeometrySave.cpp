@@ -137,7 +137,7 @@ inline H5::StrType strTypeOfSize(const std::string &str) {
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-inline void writeStrDataset(H5::Group &grp, const std::string dSetName,
+inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
                             const std::string &dSetVal,
                             H5::DataSpace dataSpace = H5SCALAR) {
   H5::StrType dataType = strTypeOfSize(dSetVal);
@@ -179,7 +179,7 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
 }
 
 // adds additional optional data to save to file (future implementation)
-void checkSpec(std::string groupType, H5::Group grp,
+void checkSpec(std::string &groupType, H5::Group &grp,
                const Geometry::ComponentInfo &compInfo) {
 
   // group types identifiers
