@@ -9,6 +9,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QTreeWidgetItem>
@@ -30,6 +31,9 @@ IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent)
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
+  m_uiForm.iicInstrumentConfiguration->updateInstrumentConfigurations(
+      m_uiForm.iicInstrumentConfiguration->getInstrumentName());
 }
 
 /*
@@ -53,7 +57,15 @@ bool IndirectTransmissionCalc::validate() {
   uiv.checkFieldIsNotEmpty("Chemical Formula", m_uiForm.leChemicalFormula,
                            m_uiForm.valChemicalFormula);
 
-  QString error = uiv.generateErrorMessage();
+  auto const chemicalFormula = m_uiForm.leChemicalFormula->text().toStdString();
+  try {
+    Mantid::Kernel::Material::parseChemicalFormula(chemicalFormula);
+  } catch (std::runtime_error const &) {
+    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+    uiv.setErrorLabel(m_uiForm.valChemicalFormula, false);
+  }
+
+  auto const error = uiv.generateErrorMessage();
   showMessageBox(error);
 
   return error.isEmpty();

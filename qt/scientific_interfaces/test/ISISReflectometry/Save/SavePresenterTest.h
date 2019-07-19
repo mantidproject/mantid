@@ -16,7 +16,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockSaveView.h"
 #include <cxxtest/TestSuite.h>
@@ -24,7 +23,6 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::MantidWidgets::DataProcessor;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
 using Mantid::DataObjects::Workspace2D_sptr;

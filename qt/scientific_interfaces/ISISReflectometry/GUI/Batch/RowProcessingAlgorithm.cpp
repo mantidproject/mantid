@@ -60,17 +60,25 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
 }
 
-void updateTransmissionRangeProperties(
+void updateTransmissionStitchProperties(
     AlgorithmRuntimeProps &properties,
-    boost::optional<RangeInLambda> const &range) {
-  if (!range)
-    return;
+    TransmissionStitchOptions const &options) {
+  auto range = options.overlapRange();
+  if (range) {
+    if (range->minSet())
+      AlgorithmProperties::update("StartOverlap", range->min(), properties);
 
-  if (range->minSet())
-    AlgorithmProperties::update("StartOverlap", range->min(), properties);
+    if (range->maxSet())
+      AlgorithmProperties::update("EndOverlap", range->max(), properties);
+  }
 
-  if (range->maxSet())
-    AlgorithmProperties::update("EndOverlap", range->max(), properties);
+  if (!options.rebinParameters().empty()) {
+    AlgorithmProperties::update("Params", options.rebinParameters(),
+                                properties);
+  }
+
+  AlgorithmProperties::update("ScaleRHSWorkspace", options.scaleRHS(),
+                              properties);
 }
 
 void updatePolarizationCorrectionProperties(
@@ -118,8 +126,8 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
                               properties);
   AlgorithmProperties::update("IncludePartialBins",
                               experiment.includePartialBins(), properties);
-  updateTransmissionRangeProperties(properties,
-                                    experiment.transmissionRunRange());
+  updateTransmissionStitchProperties(properties,
+                                     experiment.transmissionStitchOptions());
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
@@ -132,6 +140,9 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
 
   updateTransmissionWorkspaceProperties(
       properties, perThetaDefaults->transmissionWorkspaceNames());
+  AlgorithmProperties::update(
+      "TransmissionProcessingInstructions",
+      perThetaDefaults->transmissionProcessingInstructions(), properties);
   updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
   AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(),
                               properties);
@@ -199,7 +210,7 @@ public:
     // No slicing specified so there is nothing to do
   }
   void operator()(InvalidSlicing const &) const {
-    throw std::runtime_error("Program error: Invalid slicing");
+    // No valid slicing so there is nothing to do
   }
   void operator()(UniformSlicingByTime const &slicing) const {
     enableSlicing();
@@ -217,12 +228,12 @@ public:
                                 m_properties);
   }
   void operator()(SlicingByEventLog const &slicing) const {
-    if (slicing.sliceAtValues().size() < 1)
+    // If we don't have an interval, there's nothing to do. Also, we don't
+    // currently support multiple intervals, so skip that as well.
+    if (slicing.sliceAtValues().size() < 1 ||
+        slicing.sliceAtValues().size() > 1)
       return;
-    if (slicing.sliceAtValues().size() > 1)
-      throw std::runtime_error("Custom log value intervals are not "
-                               "implemented; please specify a single "
-                               "interval width");
+
     enableSlicing();
     AlgorithmProperties::update("LogName", slicing.blockName(), m_properties);
     AlgorithmProperties::update("LogValueInterval", slicing.sliceAtValues()[0],
@@ -239,8 +250,7 @@ private:
 
 void updateEventProperties(AlgorithmRuntimeProps &properties,
                            Slicing const &slicing) {
-  if (isValid(slicing))
-    boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+  boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
 boost::optional<double> getDouble(IAlgorithm_sptr algorithm,

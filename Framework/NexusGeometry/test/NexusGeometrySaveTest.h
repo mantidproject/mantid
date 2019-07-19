@@ -112,6 +112,15 @@ public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
 };
 
+// TODO, this is duplicated from NexusGeometryParserTest, should be made the same.
+class MockLogger : public Mantid::NexusGeometry::Logger {
+public:
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
+  MOCK_METHOD1(warning, void(const std::string &));
+  MOCK_METHOD1(error, void(const std::string &));
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
+};
+
 //  local Class used for validation of the structure of a nexus file as needed
 //  for the unit tests.
 class HDF5FileTestUtility {
@@ -908,8 +917,9 @@ public:
     auto &compInfo = (*m_instrument.first);
     auto &detInfo = (*m_instrument.second);
 
+    std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
     auto reloadedInstrument =
-        NexusGeometryParser::createInstrument(destinationFile);
+        NexusGeometryParser::createInstrument(destinationFile, std::move(logger));
 
     auto instr2 =
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);

@@ -31,16 +31,12 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/Hint.h"
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets::DataProcessor;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -81,8 +77,6 @@ public:
   MOCK_METHOD0(anyBatchAutoreductionResumed, void());
   MOCK_METHOD0(anyBatchAutoreductionPaused, void());
 
-  MOCK_CONST_METHOD1(getOptionsForAngle, OptionsQMap(const double));
-  MOCK_CONST_METHOD0(hasPerAngleOptions, bool());
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());

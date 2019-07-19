@@ -84,7 +84,7 @@ public:
         create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4})).release());
     MantidAxes axes{pyAxes()};
     TS_ASSERT_THROWS(axes.plot(ws, 2, "red", "mylabel"),
-                     Python::ErrorAlreadySet);
+                     const Python::ErrorAlreadySet &);
   }
 
 private:

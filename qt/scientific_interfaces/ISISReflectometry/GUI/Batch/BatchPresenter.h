@@ -65,9 +65,6 @@ public:
   void notifySettingsChanged() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
-  bool hasPerAngleOptions() const override;
-  MantidWidgets::DataProcessor::OptionsQMap
-  getOptionsForAngle(const double angle) const override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;

@@ -10,9 +10,10 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import GuiTest
 
 
-class FittingTabModelTest(unittest.TestCase):
+class FittingTabModelTest(GuiTest):
     def setUp(self):
         self.model = FittingTabModel(setup_context())
 
@@ -56,7 +57,7 @@ class FittingTabModelTest(unittest.TestCase):
         parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
 
-        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
+        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared, covariance_matrix = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
             parameter_dict)
 
         self.assertAlmostEqual(parameter_table.row(0)['Value'], 5.0)

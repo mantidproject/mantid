@@ -25,8 +25,7 @@ if(CXXTEST_FOUND)
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${HDF5_HL_LIBRARIES}
-						${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        ${GMOCK_LIBRARIES})
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
   add_dependencies(NexusGeometryTest StandardTestData)

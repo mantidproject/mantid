@@ -60,6 +60,7 @@ class ListSelectorPresenter(object):
 
     def handle_selection_changed(self, name, state):
         self.model[name][model_selected] = state
+        self.update_view_from_model()
 
     def handle_select_all_checkbox_changed(self, state):
         for item in self.get_filtered_list():

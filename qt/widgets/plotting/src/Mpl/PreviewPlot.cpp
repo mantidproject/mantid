@@ -15,6 +15,7 @@
 #include <QContextMenuEvent>
 #include <QEvent>
 #include <QMenu>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -60,6 +61,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
   createLayout();
   createActions();
 
+  m_selectorActive = false;
+
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
 }
@@ -94,6 +97,14 @@ Widgets::MplCpp::FigureCanvasQt *PreviewPlot::canvas() const {
 }
 
 /**
+ * Converts the QPoint in pixels to axes coordinates
+ * @return The axes coordinates of the QPoint
+ */
+QPointF PreviewPlot::toDataCoords(const QPoint &point) const {
+  return m_canvas->toDataCoords(point);
+}
+
+/**
  * Add a line for a given spectrum to the plot
  * @param lineName A string label for the line
  * @param ws A MatrixWorkspace that contains the data
@@ -125,7 +136,9 @@ void PreviewPlot::addSpectrum(const QString &lineName,
 
   regenerateLegend();
   axes.relim();
-  m_canvas->draw();
+
+  emit resetSelectorBounds();
+  replot();
 }
 
 /**
@@ -153,6 +166,74 @@ void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
   axes.removeArtists("lines", lineName);
 }
+
+/**
+ * Add a range selector to a preview plot
+ * @param name The name to give the range selector
+ * @param type The type of the range selector
+ * @return The range selector
+ */
+RangeSelector *PreviewPlot::addRangeSelector(const QString &name,
+                                             RangeSelector::SelectType type) {
+  if (m_rangeSelectors.contains(name))
+    throw std::runtime_error("RangeSelector already exists on PreviewPlot.");
+
+  m_rangeSelectors[name] = new MantidWidgets::RangeSelector(this, type);
+  return m_rangeSelectors[name];
+}
+
+/**
+ * Gets a range selector from the PreviewPlot
+ * @param name The name of the range selector
+ * @return The range selector
+ */
+RangeSelector *PreviewPlot::getRangeSelector(const QString &name) const {
+  if (!m_rangeSelectors.contains(name))
+    throw std::runtime_error("RangeSelector was not found on PreviewPlot.");
+  return m_rangeSelectors[name];
+}
+
+/**
+ * Add a single selector to a preview plot
+ * @param name The name to give the single selector
+ * @param type The type of the single selector
+ * @return The single selector
+ */
+SingleSelector *PreviewPlot::addSingleSelector(const QString &name,
+                                               SingleSelector::SelectType type,
+                                               double position) {
+  if (m_singleSelectors.contains(name))
+    throw std::runtime_error("SingleSelector already exists on PreviewPlot.");
+
+  m_singleSelectors[name] =
+      new MantidWidgets::SingleSelector(this, type, position);
+  return m_singleSelectors[name];
+}
+
+/**
+ * Gets a single selector from the PreviewPlot
+ * @param name The name of the single selector
+ * @return The single selector
+ */
+SingleSelector *PreviewPlot::getSingleSelector(const QString &name) const {
+  if (!m_singleSelectors.contains(name))
+    throw std::runtime_error("SingleSelector was not found on PreviewPlot.");
+  return m_singleSelectors[name];
+}
+
+/**
+ * Set whether or not one of the selectors on the preview plot is being moved or
+ * not. This is required as we only want the user to be able to move one marker
+ * at a time, otherwise the markers could get 'stuck' together.
+ * @param active True if a selector is being moved.
+ */
+void PreviewPlot::setSelectorActive(bool active) { m_selectorActive = active; }
+
+/**
+ * Returns True if a selector is currently being moved on the preview plot.
+ * @return True if a selector is currently being moved on the preview plot.
+ */
+bool PreviewPlot::selectorActive() const { return m_selectorActive; }
 
 /**
  * Set the range of the specified axis
@@ -205,7 +286,11 @@ void PreviewPlot::resizeX() { m_canvas->gca().autoscaleView(true, false); }
 /**
  * Reset the whole view to show all of the data
  */
-void PreviewPlot::resetView() { m_panZoomTool.zoomOut(); }
+void PreviewPlot::resetView() {
+  m_panZoomTool.zoomOut();
+  if (!m_panZoomTool.isPanEnabled() && !m_panZoomTool.isZoomEnabled())
+    QTimer::singleShot(0, this, SLOT(replot()));
+}
 
 /**
  * Set the face colour for the canvas
@@ -263,6 +348,9 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   case QEvent::MouseMove:
     stopEvent = handleMouseMoveEvent(static_cast<QMouseEvent *>(evt));
     break;
+  case QEvent::Resize:
+    stopEvent = handleWindowResizeEvent();
+    break;
   default:
     break;
   }
@@ -281,7 +369,6 @@ bool PreviewPlot::handleMousePressEvent(QMouseEvent *evt) {
   if (evt->buttons() & Qt::RightButton) {
     stopEvent = true;
   } else if (evt->buttons() & Qt::LeftButton) {
-    stopEvent = true;
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseDown(position);
@@ -300,23 +387,36 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
     stopEvent = true;
     showContextMenu(evt);
   } else if (evt->button() == Qt::LeftButton) {
-    stopEvent = true;
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseUp(position);
+    QTimer::singleShot(0, this, SLOT(replot()));
   }
   return stopEvent;
 }
 
+/**
+ * Handler called when the event filter recieves a mouse move event
+ * @param evt A pointer to the event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
 bool PreviewPlot::handleMouseMoveEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->buttons() == Qt::LeftButton) {
-    stopEvent = true;
     const auto position = evt->pos();
     if (!position.isNull())
       emit mouseMove(position);
   }
   return stopEvent;
+}
+
+/**
+ * Handler called when the event filter recieves a window resize event
+ * @return True if the event propagation should be stopped, false otherwise
+ */
+bool PreviewPlot::handleWindowResizeEvent() {
+  QTimer::singleShot(0, this, SLOT(replot()));
+  return false;
 }
 
 /**
@@ -429,7 +529,7 @@ void PreviewPlot::onWorkspaceRemoved(
       m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
-    m_canvas->draw();
+    this->replot();
   }
 }
 
@@ -445,7 +545,7 @@ void PreviewPlot::onWorkspaceReplaced(
     if (auto newWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
       m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS);
-      m_canvas->draw();
+      this->replot();
     }
   }
 }
@@ -479,10 +579,13 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
   if (toolName == PLOT_TOOL_NONE) {
     m_panZoomTool.enableZoom(false);
     m_panZoomTool.enablePan(false);
+    replot();
   } else if (toolName == PLOT_TOOL_PAN) {
-    m_panZoomTool.enablePan(false);
+    m_panZoomTool.enablePan(true);
+    m_canvas->draw();
   } else if (toolName == PLOT_TOOL_ZOOM) {
     m_panZoomTool.enableZoom(true);
+    m_canvas->draw();
   } else {
     // if a tool is added to the menu but no handler is added
     g_log.warning("Unknown plot tool selected.");
@@ -518,7 +621,7 @@ void PreviewPlot::setScaleType(AxisID id, QString actionName) {
   default:
     break;
   }
-  m_canvas->draw();
+  this->replot();
 }
 
 /**
@@ -531,7 +634,7 @@ void PreviewPlot::toggleLegend(const bool checked) {
   } else {
     removeLegend();
   }
-  m_canvas->draw();
+  this->replot();
 }
 
 } // namespace MantidWidgets

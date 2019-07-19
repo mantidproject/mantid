@@ -95,6 +95,10 @@ Stretch::Stretch(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSample->isOptional(true);
+  m_uiForm.dsResolution->isOptional(true);
 }
 
 void Stretch::setFileExtensionsByName(bool filter) {

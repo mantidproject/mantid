@@ -13,6 +13,7 @@ from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
+from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 from mantid.py3compat import mock
 
 
@@ -29,7 +30,7 @@ def setup_context_for_tests(parent_object):
                                         fitting_context=parent_object.fitting_context)
 
 
-def setup_context():
+def setup_context(freq = False):
     loaded_data = MuonLoadData()
     loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')
     data_context = MuonDataContext(load_data=loaded_data)
@@ -37,8 +38,12 @@ def setup_context():
     group_context = MuonGroupPairContext(data_context.check_group_contains_valid_detectors)
     phase_table_context = PhaseTableContext()
     fitting_context = FittingContext()
+    freq_context = None
+    if freq:
+        freq_context = FrequencyContext()
     return MuonContext(muon_data_context=data_context,
                        muon_group_context=group_context,
                        muon_gui_context=gui_context,
                        muon_phase_context=phase_table_context,
-                       fitting_context=fitting_context)
+                       fitting_context=fitting_context,
+                       frequency_context = freq_context)

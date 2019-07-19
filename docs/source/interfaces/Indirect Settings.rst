@@ -50,8 +50,9 @@ Options
 
 Restrict allowed input files by name
   This will allow you to load input files with any names if unticked. Previously, only
-  input files with certain end extensions such as *_red* were allowed to be loaded. See
-  the glossary below to understand the restrictions on data when this option is ticked.
+  input files with certain end extensions such as *_red* were allowed to be loaded.
+  **Keeping this turned on is highly recommended**. See the glossary below to understand
+  the restrictions on data when this option is ticked.
 
 Plot error bars for output plots
   This will ensure that error bars are plotted on the output data plots if it is ticked.

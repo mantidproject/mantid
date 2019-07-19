@@ -28,6 +28,17 @@ void IndirectSettingsPresenter::setUpPresenter() {
   connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
 
   loadSettings();
+
+  // Temporary until better validation is used when loading data into interfaces
+  setDefaultRestrictData();
+}
+
+void IndirectSettingsPresenter::setDefaultRestrictData() const {
+  auto const settingsGroup =
+      QString::fromStdString(m_model->getSettingsGroup());
+  auto const isisFacility = m_model->getFacility() == "ISIS";
+  if (isisFacility)
+    m_view->setSetting(settingsGroup, "restrict-input-by-name", isisFacility);
 }
 
 IIndirectSettingsView *IndirectSettingsPresenter::getView() {
@@ -53,8 +64,6 @@ void IndirectSettingsPresenter::loadSettings() {
   m_view->setRestrictInputByNameChecked(
       getSetting("restrict-input-by-name").toBool());
   m_view->setPlotErrorBarsChecked(getSetting("plot-error-bars").toBool());
-
-  // emit applySettings();
 }
 
 QVariant IndirectSettingsPresenter::getSetting(std::string const &settingName) {

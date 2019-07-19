@@ -20,9 +20,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "SearchModel.h"
 
-#include <QStringList>
 #include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -119,8 +117,15 @@ void RunsPresenter::notifySearchComplete() {
     autoreduceNewRuns();
 }
 
+void RunsPresenter::notifySearchFailed() {
+  if (isAutoreducing()) {
+    notifyAutoreductionPaused();
+  }
+}
+
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyInstrumentChanged() {
@@ -176,6 +181,7 @@ void RunsPresenter::notifyRowOutputsChanged(
 void RunsPresenter::reductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->reductionResumed();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::reductionPaused() {
@@ -189,6 +195,11 @@ void RunsPresenter::reductionPaused() {
 bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
+
+  if (searchString == "") {
+    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+    return false;
+  }
 
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
@@ -435,10 +446,12 @@ std::string RunsPresenter::liveDataReductionAlgorithm() {
 }
 
 std::string
-RunsPresenter::liveDataReductionOptions(const std::string &instrument) {
+RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace,
+                                        const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
   AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
+  options["InputWorkspace"] = inputWorkspace;
   options["Instrument"] = instrument;
   options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
   // Convert the properties to a string to pass to the algorithm
@@ -451,15 +464,16 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->initialize();
   alg->setChild(true);
   alg->setLogging(false);
-  auto instrument = m_view->getSearchInstrument();
+  auto const instrument = m_view->getSearchInstrument();
+  auto const inputWorkspace = "TOF_live";
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
-  alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", "20");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
-                   liveDataReductionOptions(instrument));
+                   liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {

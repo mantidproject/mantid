@@ -125,23 +125,24 @@ class FigureInteractionTest(unittest.TestCase):
                    autospec=True):
             with patch.object(interactor.toolbar_manager, 'is_tool_active',
                               lambda: False):
-                interactor.on_mouse_button_press(mouse_event)
-                self.assertEqual(0, qmenu_call1.addSeparator.call_count)
-                self.assertEqual(0, qmenu_call1.addAction.call_count)
-                expected_qmenu_calls = [call(),
-                                        call("Axes", qmenu_call1),
-                                        call("Normalization", qmenu_call1)]
-                self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
-                # 4 actions in Axes submenu
-                self.assertEqual(4, qmenu_call2.addAction.call_count)
-                # 2 actions in Normalization submenu
-                self.assertEqual(2, qmenu_call3.addAction.call_count)
+                with patch.object(interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                    interactor.on_mouse_button_press(mouse_event)
+                    self.assertEqual(0, qmenu_call1.addSeparator.call_count)
+                    self.assertEqual(0, qmenu_call1.addAction.call_count)
+                    expected_qmenu_calls = [call(),
+                                            call("Axes", qmenu_call1),
+                                            call("Normalization", qmenu_call1)]
+                    self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
+                    # 4 actions in Axes submenu
+                    self.assertEqual(4, qmenu_call2.addAction.call_count)
+                    # 2 actions in Normalization submenu
+                    self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
-        self._test_toggle_normalization(errobars_on=False)
+        self._test_toggle_normalization(errorbars_on=False)
 
     def test_toggle_normalization_with_errorbars(self):
-        self._test_toggle_normalization(errobars_on=True)
+        self._test_toggle_normalization(errorbars_on=True)
 
     def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
         fig = plot([self.ws], spectrum_nums=[1], errors=True,
@@ -180,8 +181,8 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
-    def _test_toggle_normalization(self, errobars_on):
-        fig = plot([self.ws], spectrum_nums=[1], errors=errobars_on,
+    def _test_toggle_normalization(self, errorbars_on):
+        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
                    plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)

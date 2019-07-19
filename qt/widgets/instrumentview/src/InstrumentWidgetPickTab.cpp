@@ -1579,19 +1579,19 @@ void DetectorPlotController::savePlotToWorkspace() {
                              "curve will be saved.");
       }
     } else if (parts.size() == 3) {
-      int detid = parts[1].toInt();
+      const auto detindex = actor.getDetectorByDetID(parts[1].toInt());
       QString SumOrIntegral = parts[2].trimmed();
       if (SumOrIntegral == "Sum") {
-        prepareDataForSumsPlot(detid, x, y, &e);
+        prepareDataForSumsPlot(detindex, x, y, &e);
         unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       } else {
-        prepareDataForIntegralsPlot(detid, x, y, &e);
+        prepareDataForIntegralsPlot(detindex, x, y, &e);
         unitX = SumOrIntegral.split('/')[1].toStdString();
       }
     } else if (parts.size() == 1) {
       // second word is detector id
-      int detid = parts[0].split(QRegExp("\\s+"))[1].toInt();
-      prepareDataForSinglePlot(detid, x, y, &e);
+      const auto detid = parts[0].split(QRegExp("\\s+"))[1].toInt();
+      prepareDataForSinglePlot(actor.getDetectorByDetID(detid), x, y, &e);
       unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       // save det ids for the output workspace
       detids.push_back(static_cast<Mantid::detid_t>(detid));
@@ -1688,6 +1688,18 @@ QString DetectorPlotController::getTubeXUnitsName() const {
  * Return symbolic name of units of current TubeXUnit.
  */
 QString DetectorPlotController::getTubeXUnitsUnits() const {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  switch (m_tubeXUnits) {
+  case LENGTH:
+    return "(m)";
+  case PHI:
+    return "(radians)";
+  case OUT_OF_PLANE_ANGLE:
+    return "(radians)";
+  default:
+    return "";
+  }
+#else
   switch (m_tubeXUnits) {
   case LENGTH:
     return "m";
@@ -1698,13 +1710,20 @@ QString DetectorPlotController::getTubeXUnitsUnits() const {
   default:
     return "";
   }
+#endif
+}
+
+void DetectorPlotController::setTubeXUnits(TubeXUnits units) {
+  m_tubeXUnits = units;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_plot->setXLabel(getTubeXUnitsName() + " " + getTubeXUnitsUnits());
+#endif
 }
 
 /**
  * Get the plot caption for the current plot type.
  */
 QString DetectorPlotController::getPlotCaption() const {
-
   switch (m_plotType) {
   case Single:
     return "Plotting detector spectra";

@@ -15,6 +15,8 @@ import unittest
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
 from mantid.py3compat import iteritems, mock, string_types
+from mantid.simpleapi import Load
+from mantidqt.utils.qt.testing import GuiTest
 
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
@@ -22,10 +24,9 @@ from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformat
 
 
 def create_test_workspace(ws_name=None):
-    fake_ws = WorkspaceFactory.create('Workspace2D', 1, 1, 1)
     ws_name = ws_name if ws_name is not None else 'results_tab_model_test'
-    AnalysisDataService.Instance().addOrReplace(ws_name, fake_ws)
-    return fake_ws
+    Load("MUSR22725", OutputWorkspace=ws_name)
+    return AnalysisDataService.Instance().retrieve(ws_name)
 
 
 def create_test_fits(input_workspaces,
@@ -114,7 +115,7 @@ def add_logs(workspace_name, logs):
     return workspace
 
 
-class ResultsTabModelTest(unittest.TestCase):
+class ResultsTabModelTest(GuiTest):
     def setUp(self):
         self.f0_height = (2309.2, 16)
         self.f0_centre = (2.1, 0.002)
@@ -178,8 +179,8 @@ class ResultsTabModelTest(unittest.TestCase):
                                      [], self.logs)
 
         expected_list_state = {
-            'ws1_Parameters': [0, True, True],
-            'ws2_Parameters': [1, True, True]
+            'ws1_Parameters': [0, False, True],
+            'ws2_Parameters': [1, False, True]
         }
         self.assertDictEqual(expected_list_state, model.fit_selection({}))
 
@@ -187,7 +188,7 @@ class ResultsTabModelTest(unittest.TestCase):
         _, model = create_test_model(('ws1', 'ws2'), 'func1', self.parameters,
                                      [], self.logs)
 
-        orig_list_state = {'ws1_Parameters': [0, False, True]}
+        orig_list_state = ["ws2_Parameters"]
         expected_list_state = {
             'ws1_Parameters': [0, False, True],
             'ws2_Parameters': [1, True, True]

@@ -469,6 +469,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             if removelogs:
                 RemoveLogs(Workspace=chunkname)  # accumulation has them already
+            RebinToWorkspace(WorkspaceToRebin=chunkname, WorkspaceToMatch=sumname,
+                             OutputWorkspace=chunkname)
             Plus(LHSWorkspace=sumname, RHSWorkspace=chunkname, OutputWorkspace=sumname,
                  ClearRHSWorkspace=self.kwargs['PreserveEvents'])
             DeleteWorkspace(Workspace=chunkname)

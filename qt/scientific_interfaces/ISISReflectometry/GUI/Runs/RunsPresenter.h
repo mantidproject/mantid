@@ -33,7 +33,6 @@ namespace CustomInterfaces {
 // Forward decs
 class IMessageHandler;
 class IPythonRunner;
-class ISearchModel;
 
 using MantidWidgets::ProgressableView;
 
@@ -108,6 +107,7 @@ public:
 
   // SearcherSubscriber overrides
   void notifySearchComplete() override;
+  void notifySearchFailed() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
@@ -120,7 +120,8 @@ protected:
   /// The search implementation
   std::unique_ptr<ISearcher> m_searcher;
 
-  std::string liveDataReductionOptions(const std::string &instrument);
+  std::string liveDataReductionOptions(const std::string &inputWorkspace,
+                                       const std::string &instrument);
 
 private:
   /// The main view we're managing

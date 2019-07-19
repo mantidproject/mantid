@@ -53,9 +53,9 @@ public:
   bool getDebugOption() const override;
   void setDebugOption(bool enable) override;
 
-  std::vector<std::array<std::string, 8>> getPerAngleOptions() const override;
+  std::vector<PerThetaDefaults::ValueArray> getPerAngleOptions() const override;
   void
-      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) override;
+  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) override;
   void showPerAngleOptionsAsInvalid(int row, int column) override;
   void showPerAngleOptionsAsValid(int row) override;
   void showPerAngleThetasNonUnique(double thetaTolerance) override;
@@ -66,8 +66,14 @@ public:
   void setTransmissionStartOverlap(double start) override;
   double getTransmissionEndOverlap() const override;
   void setTransmissionEndOverlap(double end) override;
+  std::string getTransmissionStitchParams() const override;
+  void setTransmissionStitchParams(std::string const &params) override;
+  bool getTransmissionScaleRHSWorkspace() const override;
+  void setTransmissionScaleRHSWorkspace(bool enable) override;
   void showTransmissionRangeInvalid() override;
   void showTransmissionRangeValid() override;
+  void showTransmissionStitchParamsInvalid() override;
+  void showTransmissionStitchParamsValid() override;
 
   std::string getPolarizationCorrectionType() const override;
   void setPolarizationCorrectionType(std::string const &type) override;
@@ -122,7 +128,7 @@ private:
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
   void initializeTableRow(QTableWidget &table, int row,
-                          std::array<std::string, 8> rowValues);
+                          PerThetaDefaults::ValueArray rowValues);
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;

@@ -43,6 +43,9 @@ IBatchView *MainWindowView::newBatch() {
 void MainWindowView::removeBatch(int batchIndex) {
   m_batchViews.erase(m_batchViews.begin() + batchIndex);
   m_ui.mainTabs->removeTab(batchIndex);
+  if (m_ui.mainTabs->count() == 0) {
+    m_notifyee->notifyNewBatchRequested();
+  }
 }
 
 std::vector<IBatchView *> MainWindowView::batches() const {
@@ -54,6 +57,10 @@ Initialise the Interface
 */
 void MainWindowView::initLayout() {
   m_ui.setupUi(this);
+  // Until this is implemented we should hide this action
+  m_ui.loadBatch->setEnabled(false);
+  m_ui.loadBatch->setVisible(false);
+
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
           SLOT(onTabCloseRequested(int)));

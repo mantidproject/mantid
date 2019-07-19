@@ -11,8 +11,8 @@
 #include "Common/GetInstrumentParameter.h"
 #include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include "Reduction/PerThetaDefaults.h"
 #include <map>
 #include <vector>
 
@@ -64,10 +64,10 @@ public:
   virtual bool getDebugOption() const = 0;
   virtual void setDebugOption(bool enable) = 0;
 
-  virtual std::vector<std::array<std::string, 8>>
+  virtual std::vector<PerThetaDefaults::ValueArray>
   getPerAngleOptions() const = 0;
   virtual void
-      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) = 0;
+  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
   virtual void showAllPerAngleOptionsAsValid() = 0;
@@ -86,8 +86,14 @@ public:
   virtual void setTransmissionStartOverlap(double start) = 0;
   virtual double getTransmissionEndOverlap() const = 0;
   virtual void setTransmissionEndOverlap(double end) = 0;
+  virtual std::string getTransmissionStitchParams() const = 0;
+  virtual void setTransmissionStitchParams(std::string const &params) = 0;
+  virtual bool getTransmissionScaleRHSWorkspace() const = 0;
+  virtual void setTransmissionScaleRHSWorkspace(bool enable) = 0;
   virtual void showTransmissionRangeInvalid() = 0;
   virtual void showTransmissionRangeValid() = 0;
+  virtual void showTransmissionStitchParamsInvalid() = 0;
+  virtual void showTransmissionStitchParamsValid() = 0;
 
   virtual std::string getPolarizationCorrectionType() const = 0;
   virtual void setPolarizationCorrectionType(std::string const &type) = 0;

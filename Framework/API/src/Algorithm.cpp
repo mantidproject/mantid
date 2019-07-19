@@ -44,7 +44,6 @@
 #include "MantidAPI/Algorithm.tcc"
 
 using namespace Mantid::Kernel;
-using VectorStringProperty = PropertyWithValue<std::vector<std::string>>;
 
 namespace Mantid {
 namespace API {

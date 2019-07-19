@@ -9,6 +9,9 @@
 
 #include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 #include "ui_ApplyAbsorptionCorrections.h"
 
 namespace MantidQt {
@@ -48,8 +51,6 @@ private:
   void setFileExtensionsByName(bool filter) override;
 
   std::size_t getOutWsNumberOfSpectra() const;
-  Mantid::API::MatrixWorkspace_const_sptr
-  getADSWorkspace(std::string const &name) const;
 
   void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate,
                             std::string toMatch);

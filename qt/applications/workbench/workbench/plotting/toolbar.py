@@ -23,10 +23,12 @@ from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_plot_options_triggered = QtCore.Signal()
 
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
@@ -35,9 +37,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
-        ('Print','Print the figure', 'mdi.printer', 'print_figure', None),
+        ('Print', 'Print the figure', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
+        ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
@@ -77,7 +79,11 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.adj_window = None
 
         # Adjust icon size or they are too small in PyQt5 by default
-        self.setIconSize(QtCore.QSize(24, 24))
+        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX()/100
+        self.setIconSize(QtCore.QSize(24*dpi_ratio, 24*dpi_ratio))
+
+    def launch_plot_options(self):
+        self.sig_plot_options_triggered.emit()
 
     def toggle_grid(self):
         self.sig_grid_toggle_triggered.emit()

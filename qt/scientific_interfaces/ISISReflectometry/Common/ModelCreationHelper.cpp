@@ -264,11 +264,20 @@ ReductionJobs twoGroupsWithMixedRowsModel() {
   return reductionJobs;
 }
 
+ReductionJobs emptyReductionJobs() {
+  auto reductionJobs = ReductionJobs();
+  auto group1 = Group("Group1");
+  group1.appendRow(makeRow());
+  reductionJobs.appendGroup(std::move(group1));
+
+  return reductionJobs;
+}
+
 /* Experiment */
 
 std::vector<PerThetaDefaults> makePerThetaDefaults() {
   auto perThetaDefaults =
-      PerThetaDefaults(boost::none, TransmissionRunPair(),
+      PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
                        RangeInQ(boost::none, boost::none, boost::none),
                        boost::none, boost::none);
   return std::vector<PerThetaDefaults>{std::move(perThetaDefaults)};
@@ -278,17 +287,19 @@ std::vector<PerThetaDefaults> makePerThetaDefaultsWithTwoAnglesAndWildcard() {
   return std::vector<PerThetaDefaults>{
       // wildcard row with no angle
       PerThetaDefaults(boost::none, TransmissionRunPair("22345", "22346"),
+                       ProcessingInstructions("5-6"),
                        RangeInQ(0.007, 0.01, 1.1), 0.7,
                        ProcessingInstructions("1")),
       // two angle rows
-      PerThetaDefaults(0.5, TransmissionRunPair("22347", ""),
+      PerThetaDefaults(0.5, TransmissionRunPair("22347", ""), boost::none,
                        RangeInQ(0.008, 0.02, 1.2), 0.8,
                        ProcessingInstructions("2-3")),
       PerThetaDefaults(
           2.3,
           TransmissionRunPair(std::vector<std::string>{"22348", "22349"},
                               std::vector<std::string>{"22358", "22359"}),
-          RangeInQ(0.009, 0.03, 1.3), 0.9, ProcessingInstructions("4-6"))};
+          ProcessingInstructions("4"), RangeInQ(0.009, 0.03, 1.3), 0.9,
+          ProcessingInstructions("4-6"))};
 }
 
 std::map<std::string, std::string> makeStitchOptions() {
@@ -313,15 +324,20 @@ FloodCorrections makeFloodCorrections() {
                           boost::optional<std::string>("test_workspace"));
 }
 
-RangeInLambda makeTransmissionRunRange() { return RangeInLambda(7.5, 9.2); }
+TransmissionStitchOptions makeTransmissionStitchOptions() {
+  return TransmissionStitchOptions(RangeInLambda{7.5, 9.2},
+                                   RebinParameters("-0.02"), true);
+}
 
-RangeInLambda makeEmptyTransmissionRunRange() { return RangeInLambda{0, 0}; }
+TransmissionStitchOptions makeEmptyTransmissionStitchOptions() {
+  return TransmissionStitchOptions(RangeInLambda{0, 0}, std::string(), false);
+}
 
 Experiment makeExperiment() {
   return Experiment(AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
                     SummationType::SumInQ, true, true,
                     makePolarizationCorrections(), makeFloodCorrections(),
-                    makeTransmissionRunRange(), makeStitchOptions(),
+                    makeTransmissionStitchOptions(), makeStitchOptions(),
                     makePerThetaDefaultsWithTwoAnglesAndWildcard());
 }
 
@@ -330,7 +346,8 @@ Experiment makeEmptyExperiment() {
                     SummationType::SumInLambda, false, false,
                     PolarizationCorrections(PolarizationCorrectionType::None),
                     FloodCorrections(FloodCorrectionType::Workspace),
-                    boost::none, std::map<std::string, std::string>(),
+                    TransmissionStitchOptions(),
+                    std::map<std::string, std::string>(),
                     std::vector<PerThetaDefaults>());
 }
 

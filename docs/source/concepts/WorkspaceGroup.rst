@@ -223,17 +223,17 @@ It is possible to have groups within groups, the inner group can simply be added
     group1 = WorkspaceGroup()
     group2 = WorkspaceGroup()
 
+    mtd.add("group1", group1)
+    mtd.add("group2", group2)
+
     group1.add("ws1")
     group1.add("ws2")
     group2.add("ws3")
     group2.add("ws4")
 
-    mtd.add("group1", group1)
-    mtd.add("group2", group2)
-
     group1.add("group2")
 
-Be careful when creating nested groups; every single group and workspace must have a unique name, if not workspaces with the same name will be overwritten. Do not be tempted to make duplicate named workspaces and put them into different folders; this will result in data being deleted without warning.
+Be careful when creating nested groups; every single group and workspace must have a unique name, if not workspaces with the same name will be overwritten. Do not try to group workspaces which are already in a group using `groupWorkspace` as this will create duplicate named workspaces in two groups; this will result in data being deleted without warning. Similarly don't try to create duplicate named workspaces and put them into different folders.
 
 One final note; it is best to add all workspaces to the ADS before configuring the grouping structure (as in the above code); otherwise you will only be able to name the top level group when you add the structure to the ADS. All the sub-groups and workspaces not already in the ADS will be given default names which you will then have to change manually, it is much easier to name them as you go (and putting them in the ADS is the only way to name them).
 

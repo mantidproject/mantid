@@ -41,21 +41,6 @@ auto getValueFromSettings(QSettings const &settings, QString const &key,
   return settings.value(key, defaultValue);
 }
 
-QString getColourMapFile(QSettings const &settings) {
-  return getValueFromSettings(settings, "ColourmapFile", "").toString();
-}
-
-int getScaleType(QSettings const &settings) {
-  int scaleType = getValueFromSettings(settings, "ColourScale", -1).toInt();
-  if (scaleType == -1)
-    scaleType = getValueFromSettings(settings, "LogColourScale", 0).toInt();
-  return scaleType;
-}
-
-double getExponent(QSettings const &settings) {
-  return getValueFromSettings(settings, "PowerScaleExponent", 2.0).toDouble();
-}
-
 bool transparentZeros(QSettings const &settings) {
   return getValueFromSettings(settings, "TransparentZeros", 1).toInt();
 }
@@ -75,13 +60,7 @@ ContourPreviewPlot::ContourPreviewPlot(QWidget *parent)
   m_normalization = NoNormalization;
   m_uiForm.setupUi(this);
 
-  QObject::connect(m_uiForm.colourBar,
-                   SIGNAL(changedColorRange(double, double, bool)), this,
-                   SLOT(handleColourRangeChanged()));
-  QObject::connect(m_uiForm.colourBar, SIGNAL(colorBarDoubleClicked()), this,
-                   SLOT(handleLoadColourMap()));
-
-  this->setupColourBarAndPlot();
+  this->setupPlot();
   this->loadSettings();
   this->updateDisplay();
 }
@@ -112,13 +91,11 @@ void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const workspace) {
   this->setVectorDimensions();
   this->findFullRange();
 
-  m_uiForm.colourBar->setViewRange(m_colourRangeFull);
-  m_uiForm.colourBar->updateColorMap();
   m_uiForm.plot2D->setWorkspace(workspace);
-  m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
+  m_spectrogram->setColorMap(
+      MantidColorMap("", MantidColorMap::ScaleType::Linear));
 
   this->updateDisplay();
-  m_uiForm.colourBar->setScale(0);
 }
 
 SafeQwtPlot *ContourPreviewPlot::getPlot2D() { return m_uiForm.plot2D; }
@@ -132,27 +109,11 @@ void ContourPreviewPlot::setPlotVisible(bool const &visible) {
 }
 
 /**
- * Set the colour bar to be visible or hidden
- * @param visible :: false to hide the colour bar
- */
-void ContourPreviewPlot::setColourBarVisible(bool const &visible) {
-  m_uiForm.colourBar->setVisible(visible);
-}
-
-/**
  * Checks if the plot is currently visible
  * @returns true if the plot is visible
  */
 bool ContourPreviewPlot::isPlotVisible() const {
   return m_uiForm.plot2D->isVisible();
-}
-
-/**
- * Checks if the colour bar is currently visible
- * @returns true if the colour bar is visible
- */
-bool ContourPreviewPlot::isColourBarVisible() const {
-  return m_uiForm.colourBar->isVisible();
 }
 
 /**
@@ -169,21 +130,6 @@ void ContourPreviewPlot::setXAxisLabel(QString const &label) {
  */
 void ContourPreviewPlot::setYAxisLabel(QString const &label) {
   m_uiForm.lbYAxis->setText(label);
-}
-
-/**
- * Slot called when the ColorBarWidget changes the range of colours
- */
-void ContourPreviewPlot::handleColourRangeChanged() {
-  m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
-  this->updateDisplay();
-}
-
-/**
- * Slot called to load a colour map
- */
-void ContourPreviewPlot::handleLoadColourMap() {
-  this->loadColourMap(QString());
 }
 
 /**
@@ -213,12 +159,12 @@ void ContourPreviewPlot::preDeleteHandle(
 void ContourPreviewPlot::clearPlot() { m_uiForm.plot2D->clear(); }
 
 /**
- * Setup the ColourBar and Plot. Attach the spectrogram to the plot
+ * Setup the Plot. Attach the spectrogram to the plot
  */
-void ContourPreviewPlot::setupColourBarAndPlot() {
-  m_uiForm.colourBar->setViewRange(1, 10);
+void ContourPreviewPlot::setupPlot() {
   m_spectrogram->attach(m_uiForm.plot2D);
-  m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
+  m_spectrogram->setColorMap(
+      MantidColorMap("", MantidColorMap::ScaleType::Linear));
   m_uiForm.plot2D->autoRefresh();
 }
 
@@ -229,65 +175,15 @@ void ContourPreviewPlot::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/ContourPreviewPlot");
 
-  setCurrentColourMapFile(settings);
-  if (!m_currentColourMapFile.isEmpty())
-    loadColourMap(m_currentColourMapFile);
-
-  m_uiForm.colourBar->setScale(getScaleType(settings));
-  m_uiForm.colourBar->setExponent(getExponent(settings));
   this->handleSetTransparentZeros(transparentZeros(settings));
 
   settings.endGroup();
 }
 
-/**
- * Set the current colour map file
- * @param settings :: stores the value of the colour map file
- */
-void ContourPreviewPlot::setCurrentColourMapFile(QSettings const &settings) {
-  if (m_mdSettings != nullptr && m_mdSettings->getUsageGeneralMdColorMap())
-    setCurrentColourMapFile(m_mdSettings->getGeneralMdColorMapFile());
-  else
-    setCurrentColourMapFile(getColourMapFile(settings));
-}
-
-/**
- * Set the current colour map file
- * @param file :: the filename as a QString
- */
-void ContourPreviewPlot::setCurrentColourMapFile(QString const &file) {
-  m_currentColourMapFile = file;
-}
-
 void ContourPreviewPlot::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/ContourPreviewPlot");
-  settings.setValue("ColourmapFile", m_currentColourMapFile);
-  settings.setValue("ColourScale", m_uiForm.colourBar->getScale());
-  settings.setValue("PowerScaleExponent", m_uiForm.colourBar->getExponent());
   settings.setValue("TransparentZeros", (m_data->isZerosAsNan() ? 1 : 0));
-}
-
-/**
- * Load a colour map from a file
- * @param file :: file to open; empty to ask via a dialog box.
- */
-void ContourPreviewPlot::loadColourMap(QString file) {
-  auto const filename = colourMapFileName(file);
-  if (!filename.isEmpty()) {
-    setCurrentColourMapFile(filename);
-    m_uiForm.colourBar->getColorMap().loadMap(filename);
-    m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
-    m_uiForm.colourBar->updateColorMap();
-
-    this->updateDisplay();
-  }
-}
-
-QString ContourPreviewPlot::colourMapFileName(QString const &filename) {
-  if (filename.isEmpty())
-    return MantidColorMap::chooseColorMap(m_currentColourMapFile, this);
-  return filename;
 }
 
 /**
@@ -295,8 +191,6 @@ QString ContourPreviewPlot::colourMapFileName(QString const &filename) {
  */
 void ContourPreviewPlot::updateDisplay() {
   if (m_workspace) {
-    m_data->setRange(m_uiForm.colourBar->getViewRange());
-
     std::vector<Mantid::coord_t> slicePoint{0, 0};
     constexpr std::size_t dimX(0);
     constexpr std::size_t dimY(1);
@@ -311,7 +205,8 @@ void ContourPreviewPlot::updateDisplay() {
     QwtDoubleRect const bounds{left, top, width, height};
     m_data->setBoundingRect(bounds.normalized());
 
-    m_spectrogram->setColorMap(m_uiForm.colourBar->getColorMap());
+    m_spectrogram->setColorMap(
+        MantidColorMap("", MantidColorMap::ScaleType::Linear));
     m_spectrogram->setData(*m_data);
     m_spectrogram->itemChanged();
     m_uiForm.plot2D->replot();
@@ -345,6 +240,18 @@ void ContourPreviewPlot::checkForInfiniteLimits(
             << ")\n";
 }
 
+std::tuple<double, double>
+ContourPreviewPlot::getAxisRange(AxisID axisID) const {
+  switch (axisID) {
+  case AxisID::XBottom:
+    return std::make_tuple(dimensionMinimum(0), dimensionMaximum(0));
+  case AxisID::YLeft:
+    return std::make_tuple(dimensionMinimum(1), dimensionMaximum(1));
+  }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+}
+
 DimensionRange
 ContourPreviewPlot::dimensionRange(std::size_t const &index) const {
   DimensionRange range =
@@ -376,7 +283,7 @@ void ContourPreviewPlot::findFullRange() {
         API::SignalRange(*workspace, m_normalization).interval();
     double minimum = m_colourRangeFull.minValue();
 
-    if (minimum <= 0 && m_uiForm.colourBar->getScale() == 1) {
+    if (minimum <= 0) {
       double const maximum = m_colourRangeFull.maxValue();
       minimum = pow(10., log10(maximum) - 10.);
       m_colourRangeFull = QwtDoubleInterval(minimum, maximum);

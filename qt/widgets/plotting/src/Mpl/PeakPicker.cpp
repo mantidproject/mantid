@@ -18,7 +18,7 @@ PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
     : QObject(), m_plot(plot), m_peak(nullptr),
       m_peakMarker(std::make_unique<PeakMarker>(
           m_plot->canvas(), 1, std::get<0>(m_plot->getAxisRange()),
-          std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0, false)) {
+          std::get<1>(m_plot->getAxisRange(AxisID::YLeft)), 0.0, 0.0)) {
   UNUSED_ARG(colour);
 
   m_plot->canvas()->draw();
@@ -55,14 +55,17 @@ void PeakPicker::select(bool select) {
 }
 
 void PeakPicker::handleMouseDown(const QPoint &point) {
-  m_peakMarker->mouseMoveStart(point.x(), point.y());
+  const auto dataCoords = m_plot->toDataCoords(point);
+  m_peakMarker->mouseMoveStart(dataCoords.x(), dataCoords.y());
 
   if (m_peakMarker->isMoving())
     m_peakMarker->select();
 }
 
 void PeakPicker::handleMouseMove(const QPoint &point) {
-  const auto markerMoved = m_peakMarker->mouseMove(point.x(), point.y());
+  const auto dataCoords = m_plot->toDataCoords(point);
+  const auto markerMoved =
+      m_peakMarker->mouseMove(dataCoords.x(), dataCoords.y());
 
   if (markerMoved) {
     m_plot->replot();

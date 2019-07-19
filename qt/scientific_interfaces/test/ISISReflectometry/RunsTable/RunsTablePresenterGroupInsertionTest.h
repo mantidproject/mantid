@@ -32,7 +32,7 @@ public:
   }
 
   void testExpandsAllGroupsWhenRequested() {
-    EXPECT_CALL(m_jobs, expandAll());
+    EXPECT_CALL(m_jobs, expandAll()).Times(2);
 
     auto presenter = makePresenter(m_view);
     presenter.notifyExpandAllRequested();

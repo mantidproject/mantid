@@ -118,16 +118,26 @@ std::map<std::string, std::string> CalculateEfficiency2::validateInputs() {
  *
  */
 void CalculateEfficiency2::exec() {
-  // create the output workspace
-  MatrixWorkspace_const_sptr inputWS =
-      getProperty(PropertyNames::INPUT_WORKSPACE);
-  MatrixWorkspace_sptr outputWS = inputWS->clone();
+  // create the output workspace from the input
+  auto childAlg = createChildAlgorithm("RebinToWorkspace", 0.0, 0.1);
+  childAlg->setPropertyValue("WorkspaceToRebin",
+                             getPropertyValue(PropertyNames::INPUT_WORKSPACE));
+  childAlg->setPropertyValue("WorkspaceToMatch",
+                             getPropertyValue(PropertyNames::INPUT_WORKSPACE));
+  childAlg->setPropertyValue("OutputWorkspace",
+                             getPropertyValue(PropertyNames::OUTPUT_WORKSPACE));
+  childAlg->setProperty("PreserveEvents", false);
+  childAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
 
   // Loop over spectra and sum all the counts to get normalization
   // Skip monitors and masked detectors
   // returns tuple with (sum, err, npixels)
   progress(0.1, "Computing the counts.");
   auto counts = sumUnmaskedAndDeadPixels(*outputWS);
+  if (counts.nPixels == 0) {
+    throw std::runtime_error("No pixels being used for calculation");
+  }
 
   progress(0.3, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);
@@ -138,6 +148,9 @@ void CalculateEfficiency2::exec() {
   // do it again only using the pixels that are within the threshold
   progress(0.7, "Computing the counts.");
   counts = sumUnmaskedAndDeadPixels(*outputWS);
+  if (counts.nPixels == 0) {
+    throw std::runtime_error("All pixels are outside of the threshold values");
+  }
 
   progress(0.9, "Normalising the detectors.");
   averageAndNormalizePixels(*outputWS, counts);

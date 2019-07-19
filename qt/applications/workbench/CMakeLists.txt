@@ -22,10 +22,10 @@ if (WIN32)
 
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if (${BUILD_TYPE} STREQUAL "build")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5/\n") 
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
       set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
     elseif(${BUILD_TYPE} STREQUAL "install")
-      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5/\n")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
       file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.webengine "[Paths]\nPrefix = ../\n")
       set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
     endif()
@@ -67,6 +67,7 @@ set(TEST_FILES
     workbench/test/test_import.py
     workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
+    workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py

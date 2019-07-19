@@ -112,6 +112,7 @@ private:
   void appendEmptyGroupInView();
   void insertEmptyGroupInModel(int beforeGroup);
   void insertEmptyGroupInView(int beforeGroup);
+  void appendRowAndGroup();
   void ensureAtLeastOneGroupExists();
   void insertEmptyRowInModel(int groupIndex, int beforeRow);
   std::vector<std::string>

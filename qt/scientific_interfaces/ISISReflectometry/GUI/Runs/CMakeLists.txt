@@ -23,7 +23,7 @@ set(RUNS_INC_FILES
     SearchModel.h
     SearchResult.h)
 
-set(RUNS_MOC_FILES RunsView.h SearchModel.h)
+set(RUNS_MOC_FILES RunsView.h SearchModel.h CatalogSearcher.h)
 
 set(RUNS_UI_FILES RunsWidget.ui)
 

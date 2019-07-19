@@ -2339,13 +2339,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
-
-  if (name() == "proton_charge") {
-    for (const auto &item : m_filterQuickRef) {
-      std::cerr << "first=" << item.first << ",  second=" << item.second
-                << "\n";
-    }
-  }
 }
 
 /*
@@ -2555,19 +2548,15 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
   if (m_filter.empty()) {
     return this->valuesAsVector(); // no filtering to do
   }
-
-  std::vector<TYPE> filteredValues;
-
   if (!m_filterApplied) {
     applyFilter();
   }
-
   sortIfNecessary();
 
-  const auto &valueMap = valueAsCorrectMap();
-  for (const auto &entry : valueMap) {
-    if (isTimeFiltered(entry.first)) {
-      filteredValues.push_back(entry.second);
+  std::vector<TYPE> filteredValues;
+  for (const auto &value : m_values) {
+    if (isTimeFiltered(value.time())) {
+      filteredValues.emplace_back(value.value());
     }
   }
 
@@ -2576,7 +2565,9 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
 
 /**
  * Find out if the given time is included in the filtered data
- * i.e. it does not lie in an excluded region
+ * i.e. it does not lie in an excluded region. This function assumes
+ * the filter is not empty, it has been applied and the values are
+ * sorted by time.
  * @param time :: [input] Time to check
  * @returns :: True if time is in an included region, false if the filter
  * excludes it.
@@ -2584,24 +2575,29 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeFiltered(
     const Types::Core::DateAndTime &time) const {
-  if (m_filter.empty()) {
-    return false; // no filter
-  }
+  // Each time/value pair in the filter defines a point where the region defined
+  // after that time is either included/excluded depending on the boolean value.
+  // By definition of the filter construction the region before a given filter
+  // time must have the opposite value. For times outside the filter region:
+  //   1. time < first filter time: inverse of the first filter value
+  //   2. time > last filter time: value of the last filter value
+  // If time == a filter time then the value is taken to belong to that filter
+  // region and not the previous
 
-  if (!m_filterApplied) {
-    applyFilter();
-  }
-
-  // Find which range it lives in
+  // Find first fitler time strictly greater than time
   auto filterEntry = std::lower_bound(
       m_filter.begin(), m_filter.end(), time,
       [](const std::pair<Types::Core::DateAndTime, bool> &filterEntry,
-         const Types::Core::DateAndTime &t) { return filterEntry.first < t; });
+         const Types::Core::DateAndTime &t) { return filterEntry.first <= t; });
 
-  if (filterEntry != m_filter.begin()) {
-    --filterEntry; // get the latest time BEFORE the given time
+  if (filterEntry == m_filter.begin()) {
+    return !filterEntry->second;
+  } else {
+    // iterator points to filter greater than time and but we want the previous
+    // region
+    --filterEntry;
+    return filterEntry->second;
   }
-  return filterEntry->second;
 }
 
 /**

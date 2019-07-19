@@ -8,29 +8,30 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import  (absolute_import, unicode_literals)
-
-from functools import wraps
-import sys
+from __future__ import (absolute_import, unicode_literals)
 
 # 3rdparty imports
-from mantid.api import AnalysisDataServiceObserver
-from mantid.plots import MantidAxes
-from mantid.py3compat import text_type
-from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 import matplotlib
+import numpy as np
+import sys
+from functools import wraps
 from matplotlib._pylab_helpers import Gcf
+from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
-from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
 # local imports
+from mantid.api import AnalysisDataServiceObserver
+from mantid.plots import MantidAxes
+from mantid.py3compat import text_type
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from .figureinteraction import FigureInteraction
 from .figurewindow import FigureWindow
-from .qappthreadcall import QAppThreadCall
 from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 
@@ -141,6 +142,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
+
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
@@ -181,12 +183,14 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.statusbar_label = QLabel()
         self.window.statusBar().addWidget(self.statusbar_label)
 
+        self.plot_options_dialog = None
         self.toolbar = self._get_toolbar(canvas, self.window)
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -215,6 +219,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # This will be called whenever the current axes is changed
             if self.toolbar is not None:
                 self.toolbar.update()
+
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
@@ -256,7 +261,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) != FigureType.Line:
+        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
             self._set_fit_enabled(False)
 
     def destroy(self, *args):
@@ -282,6 +287,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # It seems that when the python session is killed,
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
+
+    def launch_plot_options(self):
+        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
     def grid_toggle(self):
         """
@@ -367,7 +375,6 @@ def new_figure_manager_given_figure(num, figure):
 
 if __name__ == '__main__':
     # testing code
-    import numpy as np
 
     qapp = QApplication([' '])
     qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)

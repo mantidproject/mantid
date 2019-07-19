@@ -79,6 +79,9 @@ private:
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
   boost::optional<RangeInLambda> transmissionRunRangeFromView();
+  std::string transmissionStitchParamsFromView();
+  TransmissionStitchOptions transmissionStitchOptionsFromView();
+
   std::map<std::string, std::string> stitchParametersFromView();
 
   ExperimentValidationResult updateModelFromView();

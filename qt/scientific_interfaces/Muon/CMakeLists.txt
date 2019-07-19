@@ -151,10 +151,21 @@ set(
 set(
   INC_FILES
   ALCBaselineModellingModel.h
+  ALCBaselineModellingPresenter.h
+  ALCBaselineModellingView.h
+  ALCDataLoadingPresenter.h
   ALCDataLoadingView.h
+  ALCInterface.h
   ALCLatestFileFinder.h
   ALCPeakFittingModel.h
+  ALCPeakFittingPresenter.h
   ALCPeakFittingView.h
+  DllConfig.h
+  IALCBaselineModellingModel.h
+  IALCBaselineModellingView.h
+  IALCDataLoadingView.h
+  IALCPeakFittingModel.h
+  IALCPeakFittingView.h
 )
 
 set(
