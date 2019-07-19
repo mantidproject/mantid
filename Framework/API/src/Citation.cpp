@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/Citation/Citation.h"
+#include "MantidAPI/Citation.h"
+#include "MantidAPI/CitationConstructorHelpers.h"
 
 namespace Mantid {
 namespace API {
-namespace Citation {
 
 /**
   This function is designed for construction and validation for loading, however
@@ -39,7 +39,6 @@ Citation::Citation(const OptionalString &doi, const OptionalString &bibtex,
     throw std::invalid_argument(
         "If bibtex is provided, endnote must also be provided and vice-versa");
 
-  // If doi is provided then url, bibtex and endnote must be.
   if (doi && (!bibtex || !endnote || !url))
     throw std::invalid_argument(
         "If doi is provided then url, bibtex and endnote must be");
@@ -61,6 +60,16 @@ Citation::Citation(const OptionalString &doi, const OptionalString &bibtex,
   if (url)
     m_url = url.get();
 }
-} // namespace Citation
+
+bool Citation::operator==(const Citation &rhs) const {
+  return m_bibtex == rhs.m_bibtex && m_description == rhs.m_description &&
+         m_doi == rhs.m_doi && m_endnote == rhs.m_endnote && m_url == rhs.m_url;
+}
+
+Citation getCitation(const BaseCitation &cite) {
+  return Citation(cite.m_doi, cite.toBibTex(), cite.toEndNote(), cite.m_url,
+                  cite.m_description);
+}
+
 } // namespace API
 } // namespace Mantid

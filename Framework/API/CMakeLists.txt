@@ -183,6 +183,7 @@ set(INC_FILES
     inc/MantidAPI/CatalogFactory.h
     inc/MantidAPI/CatalogManager.h
     inc/MantidAPI/CatalogSession.h
+    inc/MantidAPI/CitationConstructorHelpers.h
     inc/MantidAPI/Citation.h
     inc/MantidAPI/Column.h
     inc/MantidAPI/ColumnFactory.h
@@ -388,6 +389,8 @@ set(TEST_FILES
     AsynchronousTest.h
     BinEdgeAxisTest.h
     BoxControllerTest.h
+    CitationTest.h
+    CitationConstructorHelpersTest.h
     CommonBinsValidatorTest.h
     CompositeFunctionTest.h
     CoordTransformTest.h

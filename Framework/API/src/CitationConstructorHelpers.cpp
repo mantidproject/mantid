@@ -5,11 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/Citation/CitationConstructorHelpers.h"
+#include "MantidAPI/CitationConstructorHelpers.h"
+
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace API {
-namespace Citation {
 
 namespace {
 template <typename T> std::string join(T list...) {
@@ -62,8 +63,7 @@ std::string addToEndNote(const std::string &type, const OptionalString &data) {
     return "";
 }
 
-std::string addAuthorsToEndNote(const std::string &type,
-                                const std::vector<std::string> &authors) {
+std::string addAuthorsToEndNote(const std::vector<std::string> &authors) {
   if (authors.size() == 1)
     return addToEndNote(EndNote::AUTHOR, authors[0]);
   std::string endNote = "";
@@ -73,10 +73,9 @@ std::string addAuthorsToEndNote(const std::string &type,
   return endNote;
 }
 
-std::string addAuthorsToEndNote(const std::string &type,
-                                const OptionalVectorString &authors) {
+std::string addAuthorsToEndNote(const OptionalVectorString &authors) {
   if (authors)
-    return addAuthorsToEndNote(type, authors.get());
+    return addAuthorsToEndNote(authors.get());
   else
     return "";
 }
@@ -90,9 +89,17 @@ makeEndNotePageNumbers(const std::string &pages) {
   std::vector<std::string> strs;
   boost::split(strs, pages, boost::is_any_of("-"));
   if (strs.size() > 1)
-    return {strs[0], strs.pop_back()};
+    return {strs.front(), strs.back()};
   else
     return {pages, pages};
+}
+
+std::tuple<std::string, std::string>
+makeEndNotePageNumbers(const OptionalString &pages) {
+  if (pages)
+    return makeEndNotePageNumbers(pages.get());
+  else
+    return {"", ""};
 }
 
 } // namespace
@@ -117,7 +124,7 @@ const std::string TYPE = "type=";
 const std::string BOOKTITLE = "booktitle=";
 const std::string ORGANIZATION = "organization=";
 const std::string SCHOOL = "school=";
-const std::string INSTITUION = "institution=";
+const std::string INSTITUTION = "institution=";
 const std::string EDITION = "edition=";
 const std::string DOI = "doi=";
 const std::string ENDING = "\n}";
@@ -145,7 +152,7 @@ const std::string TYPE = "M3  - ";
 const std::string BOOKTITLE = "T2  - ";
 const std::string ORGANIZATION = "PP  - ";
 const std::string SCHOOL = "PP  - ";
-const std::string INSTITUION = "PP  - ";
+const std::string INSTITUTION = "PP  - ";
 const std::string DOI = "DO  - ";
 const std::string EDITION = "ET  - ";
 const std::string EDITOR = "ED  - ";
@@ -153,22 +160,24 @@ const std::string ENDING = "EP  - \n";
 } // namespace EndNote
 
 BaseCitation::BaseCitation(const OptionalString &doi,
-                           const OptionalString &description)
-    : m_doi(doi), m_description(description) {}
+                           const OptionalString &description,
+                           const OptionalString &url)
+    : m_doi(doi), m_description(description), m_url(url) {}
 
 ArticleCitation::ArticleCitation(
     const std::vector<std::string> &authors, const std::string &title,
     const std::string &journal, const std::string &year,
     const OptionalString &volume, const OptionalString &number,
     const OptionalString &pages, const OptionalString &month,
-    const OptionalString &description, const OptionalString &doi)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &description, const OptionalString &doi,
+    const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_journal(journal), m_volume(volume), m_number(number), m_pages(pages),
       m_month(month) {}
 
 std::string ArticleCitation::toBibTex() const {
   using namespace BibTex;
-  std::string bibTex = "@article{refference,\n";
+  std::string bibTex = "@article{ref,\n";
 
   bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
   bibTex += addToBibTex(TITLE, m_title);
@@ -196,11 +205,12 @@ std::string ArticleCitation::toEndNote() const {
   endNote += addToEndNote(JOURNAL, m_journal);
   endNote += addToEndNote(VOLUME, m_volume);
   endNote += addToEndNote(NUMBER, m_number);
-  auto [start, end] = makeEndNotePageNumbers(pages);
+  std::string start, end;
+  std::tie(start, end) = makeEndNotePageNumbers(m_pages);
   endNote += addToEndNote(STARTPAGE, start);
   endNote += addToEndNote(ENDPAGE, end);
   if (m_month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -215,8 +225,8 @@ BookCitation::BookCitation(
     const OptionalString &volume, const OptionalString &series,
     const OptionalString &address, const OptionalString &edition,
     const OptionalString &month, const OptionalString &description,
-    const OptionalString &doi)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &doi, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_publisher(publisher), m_year(year), m_volume(volume), m_series(series),
       m_address(address), m_edition(edition), m_month(month) {}
 
@@ -253,8 +263,8 @@ std::string BookCitation::toEndNote() const {
   endNote += addToEndNote(VOLUME, m_volume);
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(EDITION, m_edition);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -267,8 +277,9 @@ BookletCitation::BookletCitation(
     const std::string &title, const OptionalVectorString &author,
     const OptionalString &howPublished, const OptionalString &address,
     const OptionalString &month, const OptionalString &year,
-    const OptionalString &description, const OptionalString &doi)
-    : BaseCitation(doi, description), m_title(title), m_author(author),
+    const OptionalString &description, const OptionalString &doi,
+    const OptionalString &url)
+    : BaseCitation(doi, description, url), m_title(title), m_author(author),
       m_howPublished(howPublished), m_address(address), m_month(month),
       m_year(year) {}
 
@@ -299,9 +310,10 @@ std::string BookletCitation::toEndNote() const {
   endNote += addToEndNote(TITLE, m_title);
   endNote += addToEndNote(HOWPUBLISHED, m_howPublished);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (year)
-    if (month)
-      endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_year)
+    if (m_month)
+      endNote +=
+          addToEndNote(DATE, makeEndNoteDate(m_year.get(), m_month.get()));
     else
       endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -317,8 +329,8 @@ InBookCitation::InBookCitation(
     const OptionalString &series, const OptionalString &type,
     const OptionalString &address, const OptionalString &edition,
     const OptionalString &month, const OptionalString &doi,
-    const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_publisher(publisher), m_year(year), m_pages(pages), m_volume(volume),
       m_series(series), m_type(type), m_address(address), m_edition(edition),
       m_month(month) {}
@@ -359,8 +371,8 @@ std::string InBookCitation::toEndNote() const {
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(EDITION, m_edition);
   endNote += addToEndNote(TYPE, m_type);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -377,8 +389,8 @@ InCollectionCitation::InCollectionCitation(
     const OptionalString &chapter, const OptionalString &pages,
     const OptionalString &address, const OptionalString &edition,
     const OptionalString &month, const OptionalString &doi,
-    const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_booktitle(booktitle), m_publisher(publisher), m_year(year),
       m_volume(volume), m_series(series), m_type(type), m_chapter(chapter),
       m_pages(pages), m_address(address), m_edition(edition), m_month(month) {}
@@ -422,13 +434,14 @@ std::string InCollectionCitation::toEndNote() const {
   endNote += addToEndNote(SERIES, m_series);
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(CHAPTER, m_chapter);
-  auto [start, end] = makeEndNotePageNumbers(pages);
+  std::string start, end;
+  std::tie(start, end) = makeEndNotePageNumbers(m_pages);
   endNote += addToEndNote(STARTPAGE, start);
   endNote += addToEndNote(ENDPAGE, end);
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(EDITION, m_edition);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -444,8 +457,9 @@ InProceedingsCitation::InProceedingsCitation(
     const OptionalString &series, const OptionalString &pages,
     const OptionalString &address, const OptionalString &month,
     const OptionalString &organization, const OptionalString &publisher,
-    const OptionalString &doi, const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &doi, const OptionalString &description,
+    const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_booktitle(booktitle), m_year(year), m_editor(editor), m_volume(volume),
       m_series(series), m_pages(pages), m_address(address), m_month(month),
       m_organization(organization), m_publisher(publisher) {}
@@ -486,12 +500,13 @@ std::string InProceedingsCitation::toEndNote() const {
   endNote += addToEndNote(EDITOR, m_editor);
   endNote += addToEndNote(VOLUME, m_volume);
   endNote += addToEndNote(SERIES, m_series);
-  auto [start, end] = makeEndNotePageNumbers(pages);
+  std::string start, end;
+  std::tie(start, end) = makeEndNotePageNumbers(m_pages);
   endNote += addToEndNote(STARTPAGE, start);
   endNote += addToEndNote(ENDPAGE, end);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(ORGANIZATION, m_organization);
@@ -507,8 +522,8 @@ ManualCitation::ManualCitation(
     const OptionalString &organization, const OptionalString &address,
     const OptionalString &edition, const OptionalString &month,
     const OptionalString &year, const OptionalString &doi,
-    const OptionalString &description)
-    : BaseCitation(doi, description), m_title(title), m_authors(authors),
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_title(title), m_authors(authors),
       m_organization(organization), m_address(address), m_edition(edition),
       m_month(month), m_year(year) {}
 
@@ -539,9 +554,10 @@ std::string ManualCitation::toEndNote() const {
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (year)
-    if (month)
-      endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_year)
+    if (m_month)
+      endNote +=
+          addToEndNote(DATE, makeEndNoteDate(m_year.get(), m_month.get()));
     else
       endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(ORGANIZATION, m_organization);
@@ -557,8 +573,8 @@ MastersThesisCitation::MastersThesisCitation(
     const std::string &school, const std::string &year,
     const OptionalString &type, const OptionalString &address,
     const OptionalString &month, const OptionalString &doi,
-    const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_school(school), m_year(year), m_type(type), m_address(address),
       m_month(month) {}
 
@@ -591,25 +607,22 @@ std::string MastersThesisCitation::toEndNote() const {
   endNote += addToEndNote(SCHOOL, m_school);
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (year)
-    if (month)
-      endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
-    else
-      endNote += addToEndNote(YEAR, m_year);
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
+  else
+    endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
   endNote += addToEndNote(DOI, m_doi);
   endNote += ENDING;
   return endNote;
 }
 
-MiscCitation::MiscCitation(const OptionalVectorString &authors,
-                           const OptionalString &title,
-                           const OptionalString &howpublished,
-                           const OptionalString &month,
-                           const OptionalString &year,
-                           const OptionalString &doi,
-                           const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+MiscCitation::MiscCitation(
+    const OptionalVectorString &authors, const OptionalString &title,
+    const OptionalString &howpublished, const OptionalString &month,
+    const OptionalString &year, const OptionalString &doi,
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_howpublished(howpublished), m_month(month), m_year(year) {}
 
 std::string MiscCitation::toBibTex() const {
@@ -637,9 +650,10 @@ std::string MiscCitation::toEndNote() const {
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
   endNote += addToEndNote(HOWPUBLISHED, m_howpublished);
-  if (year)
-    if (month)
-      endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_year)
+    if (m_month)
+      endNote +=
+          addToEndNote(DATE, makeEndNoteDate(m_year.get(), m_month.get()));
     else
       endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -653,8 +667,8 @@ PHDThesisCitation::PHDThesisCitation(
     const std::string &school, const std::string &year,
     const OptionalString &type, const OptionalString &address,
     const OptionalString &month, const OptionalString &doi,
-    const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_school(school), m_year(year), m_type(type), m_address(address),
       m_month(month) {}
 
@@ -687,11 +701,10 @@ std::string PHDThesisCitation::toEndNote() const {
   endNote += addToEndNote(SCHOOL, m_school);
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (year)
-    if (month)
-      endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
-    else
-      endNote += addToEndNote(YEAR, m_year);
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
+  else
+    endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
   endNote += addToEndNote(DOI, m_doi);
   endNote += ENDING;
@@ -704,8 +717,8 @@ ProceedingsCitation::ProceedingsCitation(
     const OptionalString &series, const OptionalString &address,
     const OptionalString &month, const OptionalString &organization,
     const OptionalString &publisher, const OptionalString &doi,
-    const OptionalString &description)
-    : BaseCitation(doi, description), m_title(title), m_year(year),
+    const OptionalString &description, const OptionalString &url)
+    : BaseCitation(doi, description, url), m_title(title), m_year(year),
       m_editor(editor), m_volume(volume), m_series(series), m_address(address),
       m_month(month), m_organization(organization), m_publisher(publisher) {}
 
@@ -742,8 +755,8 @@ std::string ProceedingsCitation::toEndNote() const {
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(ORGANIZATION, m_organization);
   endNote += addToEndNote(PUBLISHER, m_publisher);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -757,8 +770,9 @@ TechReportCitation::TechReportCitation(
     const std::string &institution, const std::string &year,
     const OptionalString &type, const OptionalString &number,
     const OptionalString &address, const OptionalString &month,
-    const OptionalString &doi, const OptionalString &description)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &doi, const OptionalString &description,
+    const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_institution(institution), m_year(year), m_type(type), m_number(number),
       m_address(address), m_month(month) {}
 
@@ -766,7 +780,7 @@ std::string TechReportCitation::toBibTex() const {
   using namespace BibTex;
   std::string bibTex = "@techreport{refference,\n";
 
-  bibTex += addToBibTex(AUTHORS, authorStringGenerator(m_authors));
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
   bibTex += addToBibTex(TITLE, m_title);
   bibTex += addToBibTex(INSTITUTION, m_institution);
   bibTex += addToBibTex(YEAR, m_year);
@@ -789,12 +803,12 @@ std::string TechReportCitation::toEndNote() const {
 
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
-  endNote += addToEndNote(INSTITUION, m_institution);
+  endNote += addToEndNote(INSTITUTION, m_institution);
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(NUMBER, m_number);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
+  if (m_month)
+    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month.get()));
   else
     endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
@@ -806,14 +820,15 @@ std::string TechReportCitation::toEndNote() const {
 UnPublishedCitation::UnPublishedCitation(
     const std::vector<std::string> &authors, const std::string &title,
     const std::string &description, const OptionalString &month,
-    const OptionalString &year, const OptionalString &doi)
-    : BaseCitation(doi, description), m_authors(authors), m_title(title),
+    const OptionalString &year, const OptionalString &doi,
+    const OptionalString &url)
+    : BaseCitation(doi, description, url), m_authors(authors), m_title(title),
       m_month(month), m_year(year) {}
 
 std::string UnPublishedCitation::toBibTex() const {
   using namespace BibTex;
   std::string bibTex = "@unpublished{refference,\n";
-  bibTex += addToBibTex(AUTHORS, authorStringGenerator(m_authors));
+  bibTex += addToBibTex(AUTHOR, authorStringGenerator(m_authors));
   bibTex += addToBibTex(TITLE, m_title);
   bibTex += addToBibTex(DESCRIPTION, m_description);
   bibTex += addToBibTex(MONTH, m_month);
@@ -831,15 +846,16 @@ std::string UnPublishedCitation::toEndNote() const {
 
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
-  if (month)
-    endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
-  else
-    endNote += addToEndNote(YEAR, m_year);
+  if (m_year)
+    if (m_month)
+      endNote +=
+          addToEndNote(DATE, makeEndNoteDate(m_year.get(), m_month.get()));
+    else
+      endNote += addToEndNote(YEAR, m_year);
   endNote += addToEndNote(DESCRIPTION, m_description);
   endNote += addToEndNote(DOI, m_doi);
   endNote += ENDING;
   return endNote;
 }
-} // namespace Citation
 } // namespace API
 } // namespace Mantid
