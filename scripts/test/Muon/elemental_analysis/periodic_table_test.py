@@ -12,14 +12,20 @@ import Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table as periodic_table
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTableItem,\
     ColoredPeriodicTableItem, _ElementButton, PeriodicTable, PeriodicCombo, PeriodicList
 
-DEBUG = True
 
 class PeriodicTableItemTest(unittest.TestCase):
     def setUp(self):
         self.element = PeriodicTableItem("Ti", 22, 4, 4, "titanium", 47.9000, "transition metal")
 
     def test_that_list_elements_contains_all(self):
-        self.assertEqual(len(periodic_table._elements), 109)
+        for i in range(len(periodic_table._elements)):
+            self.assertTrue(isinstance(periodic_table._elements[i][0], str))
+            self.assertTrue(isinstance(periodic_table._elements[i][1], int))
+            self.assertTrue(isinstance(periodic_table._elements[i][2], int))
+            self.assertTrue(isinstance(periodic_table._elements[i][3], int))
+            self.assertTrue(isinstance(periodic_table._elements[i][4], str))
+            self.assertTrue(isinstance(periodic_table._elements[i][5], float))
+            self.assertTrue(isinstance(periodic_table._elements[i][6], str))
 
     def test_that_get_method_works(self):
         expected = ["Ti", 22, 4, 4, "titanium", 47.9000]
@@ -416,17 +422,9 @@ class PeriodicListTest(GuiTest):
                                periodic_table._defaultTableItems[1],
                                periodic_table._defaultTableItems[3]])
 
-    def test_that_setSelectedElements_calls_setSelected_correctly_when_given_no_elements(self):
-        item1 = mock.Mock()
-        item2 = mock.Mock()
-        item3 = mock.Mock()
-        item4 = mock.Mock()
-        self.plist.tree_items = [item1, item2, item3, item4]
-        self.plist.setSelectedElements([])
-
-        for item in self.plist.tree_items:
-            self.assertEqual(item.setSelected.call_count, 1)
-            item.setSelected.assert_called_with(False)
+    def test_that_setSelectedElements_throws_when_given_no_elements(self):
+        with self.assertRaises(ValueError):
+            self.plist.setSelectedElements([])
 
     def test_that_setSelectedElements_calls_setSelected_correctly_when_given_elements(self):
         item1 = mock.Mock()

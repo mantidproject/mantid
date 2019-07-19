@@ -23,8 +23,6 @@ class LoadUtilsTest(unittest.TestCase):
         self.var_ws_name = "{}_Delayed_{}"
         self.test_ws_name = self.var_ws_name.format(1, self.test_run)
         self.test_ws_names = [self.var_ws_name.format(i, self.test_run) for i in range(1, 9)]
-        self.test_workspaces = [mantid.CreateSampleWorkspace(
-            OutputWorkspace=name) for name in self.test_ws_names]
 
     def test_pad_run(self):
         tests = {123: "00123", 0: "00000", 12345: "12345", 123456: "123456"}
@@ -84,10 +82,11 @@ class LoadUtilsTest(unittest.TestCase):
         self.assertEquals(lutils.group_by_detector(self.test_run, workspaces), output)
 
     def test_flatten_run_data(self):
+        test_workspaces = [mantid.CreateSampleWorkspace(OutputWorkspace=name) for name in self.test_ws_names]
         workspaces = []
-        for i in range(0, len(self.test_workspaces), 2):
+        for i in range(0, len(test_workspaces), 2):
             name = str(i)
-            mantid.GroupWorkspaces(self.test_workspaces[i:i + 2], OutputWorkspace=name)
+            mantid.GroupWorkspaces(test_workspaces[i:i + 2], OutputWorkspace=name)
             workspaces.append(name)
 
         self.assertEquals(lutils.flatten_run_data(workspaces), [self.test_ws_names])

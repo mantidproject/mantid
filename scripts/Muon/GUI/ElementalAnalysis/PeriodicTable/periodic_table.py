@@ -270,8 +270,8 @@ class _ElementButton(QtWidgets.QPushButton):
         """:class:`PeriodicTableItem` object represented by this button"""
 
         self.setText(item.symbol)
-        self.setFlat(1)
-        self.setCheckable(0)
+        self.setFlat(True)
+        self.setCheckable(False)
 
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                                  QtWidgets.QSizePolicy.Expanding))
@@ -754,11 +754,6 @@ class PeriodicList(QtWidgets.QTreeWidget):
         :param symbolList: List of atomic symbols ["H", "He", "Li"...]
             to be selected in the widget
         """
-        if symbolList == []:
-            for idx in range(len(self.tree_items)):
-                self.tree_items[idx].setSelected(False)
-            return
-
         # accept PeriodicTableItem for getter/setter consistency
         if isinstance(symbolList[0], PeriodicTableItem):
             symbolList = [elmt.symbol for elmt in symbolList]
