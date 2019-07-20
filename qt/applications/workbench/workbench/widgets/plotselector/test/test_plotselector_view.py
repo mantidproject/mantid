@@ -15,12 +15,13 @@ from qtpy.QtTest import QTest
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, Column
 
 
-class PlotSelectorWidgetTest(GuiTest):
+@start_qapplication
+class PlotSelectorWidgetTest(unittest.TestCase):
 
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)

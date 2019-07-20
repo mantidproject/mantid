@@ -13,10 +13,11 @@ from __future__ import (absolute_import, division, print_function,
 import unittest
 
 from mantidqt.widgets.messagedisplay import MessageDisplay
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class MessageDisplayTest(GuiTest):
+@start_qapplication
+class MessageDisplayTest(unittest.TestCase):
     """Minimal testing as it is exported from C++"""
 
     def test_widget_creation(self):

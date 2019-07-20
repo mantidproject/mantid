@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import FunctionFactory
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtWidgets
 
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
@@ -33,7 +33,8 @@ def wait_for_thread(thread_model):
         QtWidgets.QApplication.instance().processEvents()
 
 
-class FittingTabPresenterTest(GuiTest):
+@start_qapplication
+class FittingTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context()
         self.context.data_context.current_runs = [[62260]]

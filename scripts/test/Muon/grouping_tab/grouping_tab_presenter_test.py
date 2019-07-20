@@ -7,7 +7,7 @@
 import unittest
 import six
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
@@ -20,7 +20,8 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import Pairi
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-class GroupingTabPresenterTest(GuiTest):
+@start_qapplication
+class GroupingTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.loaded_data = MuonLoadData()
 

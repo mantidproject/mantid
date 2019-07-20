@@ -7,13 +7,14 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-class WorkspaceSelectorPresenterTest(GuiTest):
+@start_qapplication
+class WorkspaceSelectorPresenterTest(unittest.TestCase):
     def setUp(self):
         self.current_runs = [[22725]]
         self.context = setup_context()

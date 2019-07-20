@@ -18,7 +18,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
@@ -45,7 +45,8 @@ class ReceiverWithProgress(Receiver):
         self.lines_received.append(lineno)
 
 
-class PythonCodeExecutionTest(GuiTest):
+@start_qapplication
+class PythonCodeExecutionTest(unittest.TestCase):
 
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()

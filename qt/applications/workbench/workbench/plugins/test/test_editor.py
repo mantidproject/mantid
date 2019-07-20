@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QMainWindow
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plugins.editor import MultiFileEditor
 
 
@@ -20,7 +20,8 @@ def raise_exception(exception):
     raise exception
 
 
-class MultiFileEditorTest(GuiTest):
+@start_qapplication
+class MultiFileEditorTest(unittest.TestCase):
 
     def test_tab_session_restore(self):
         editor = MultiFileEditor(QMainWindow())

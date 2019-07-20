@@ -8,7 +8,7 @@ import unittest
 from matplotlib.gridspec import GridSpec
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot import subplot
@@ -21,7 +21,8 @@ def rm_logic(name):
     return True
 
 
-class SubplotTest(GuiTest):
+@start_qapplication
+class SubplotTest(unittest.TestCase):
 
     def setUp(self):
         context = PlottingContext()
