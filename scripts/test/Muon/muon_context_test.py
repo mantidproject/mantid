@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
@@ -17,7 +17,8 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-class MuonContextTest(GuiTest):
+@start_qapplication
+class MuonContextTest(unittest.TestCase):
     def setUp(self):
         AnalysisDataService.clear()
         ConfigService['MantidOptions.InvisibleWorkspaces'] = 'True'

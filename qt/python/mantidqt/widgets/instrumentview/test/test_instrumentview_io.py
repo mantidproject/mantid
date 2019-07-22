@@ -8,11 +8,13 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import unittest
+
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder, InstrumentViewDecoder
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
 INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
@@ -51,7 +53,8 @@ INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
                         u'currentTab': 0}
 
 
-class InstrumentViewEncoderTest(GuiTest):
+@start_qapplication
+class InstrumentViewEncoderTest(unittest.TestCase):
     def setUp(self):
         self.encoder = InstrumentViewEncoder()
         CreateSampleWorkspace(OutputWorkspace="ws")
@@ -70,7 +73,8 @@ class InstrumentViewEncoderTest(GuiTest):
         self.assertDictEqual(self.encoder.encode(self.instrumentView), INSTRUMENT_VIEW_DICT)
 
 
-class InstrumentViewDecoderTest(GuiTest):
+@start_qapplication
+class InstrumentViewDecoderTest(unittest.TestCase):
     def setUp(self):
         self.decoder = InstrumentViewDecoder()
 

@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 from qtpy import QtCore
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
@@ -16,7 +16,8 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
-class PhaseTablePresenterTest(GuiTest):
+@start_qapplication
+class PhaseTablePresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()

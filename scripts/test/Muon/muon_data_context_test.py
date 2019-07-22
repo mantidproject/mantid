@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
 import unittest
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid.py3compat import mock
@@ -16,7 +16,8 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 
 
-class MuonDataContextTest(GuiTest):
+@start_qapplication
+class MuonDataContextTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(MuonDataContextTest, cls).setUpClass()

@@ -7,7 +7,7 @@
 import unittest
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
@@ -25,7 +25,8 @@ from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
-class LoadRunWidgetPresenterTest(GuiTest):
+@start_qapplication
+class LoadRunWidgetPresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
