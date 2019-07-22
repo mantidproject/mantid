@@ -2,10 +2,8 @@ from __future__ import print_function
 
 import unittest
 
-import mantid.simpleapi as mantid
 from mantid.py3compat import mock
 
-from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 from Muon.GUI.ElementalAnalysis.LoadWidget import load_model
 
 
