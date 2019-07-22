@@ -133,8 +133,11 @@ Spectra Min & Spectra Max
 Run
   Runs the processing configured on the current tab.
 
-Plot Output
-  Allows the result to be plotted as either a spectrum plot or contour plot.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
+
+Plot Contour
+  If enabled, it will plot the selected output workspace as a contour plot.
 
 Group Output
   This will place the output reduced files from a reduction into a group workspace.
@@ -378,8 +381,11 @@ Load Log Files
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  If enabled will plot the result as a spectra plot.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
+
+Plot Bins
+  If enabled, it will plot the selected bin indices in the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -452,9 +458,14 @@ The ISIS Calibration tab operates on raw TOF data files. Before starting this wo
    workspaces ending in _red, _res and _calib. The calibration workspace can be used in the ISIS
    Energy Transfer tab by ticking **Use Calib File**.
 
-5. Click **Plot Result**. This should produce plots of your workspaces ending in _calib and _res.
+5. Select the workspace ending in _calib in the output options. Enter index 0 in the neighbouring box, 
+   and then click the down arrow on the **Plot Spectra** button, and select **Plot Bins**. This will
+   plot the bin at index 0.
 
-6. Choose a default save directory and then click **Save Result** to save the workspaces ending
+6. Select the workspace ending in _res in the output options. Enter index 0 in the neighbouring box,
+   and then click the **Plot Spectra** button. This will plot the spectrum at workspace index 0.
+
+7. Choose a default save directory and then click **Save Result** to save the workspaces ending
    in _res and _calib. The _res file is used in the :ref:`iqt-example-workflow` and 
    :ref:`convfit-example-workflow`. The _calib file is used in the
    :ref:`isis-diagnostics-example-workflow`.
@@ -507,8 +518,8 @@ Background
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  This will plot the result as a spectra plot.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -537,7 +548,7 @@ The ISIS Diagnostics tab operates on raw TOF data files. Before starting this wo
 6. Click **Run** and wait for the interface to finish processing. This should generate a
    workspace ending in _slice. The **Preview** mini-plot will be updated.
 
-7. Click **Plot Result** to produce a larger plot of the **Preview** mini-plot.
+7. Click **Plot Spectra** to produce a larger plot of the **Preview** mini-plot.
 
 Go to the :ref:`transmission-example-workflow`.
 
@@ -567,8 +578,8 @@ Background
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  This will plot the result as a spectra plot.
+Plot Spectra
+  If enabled, it will plot the selected spectra indices in the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -591,7 +602,7 @@ The Transmission tab operates on raw TOF data files. Before starting this workfl
    :ref:`IndirectTransmissionMonitor <algm-IndirectTransmissionMonitor>` and plots the output
    workspaces in the **Preview** mini-plot.
 
-4. Click **Plot Result** to produce a larger plot of the **Preview** mini-plot.
+4. Click **Plot Spectra** to produce a larger plot of the **Preview** mini-plot.
 
 Go to the :ref:`symmetrise-example-workflow`.
 
@@ -633,8 +644,8 @@ Preview
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  This will plot the result as a spectra plot.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
@@ -680,7 +691,9 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
    :ref:`Symmetrise <algm-Symmetrise>` algorithm. The output workspace is called
    ``iris26176_graphite002_sym_red``.
 
-5. Click **Plot Result** to produce a plot of the output workspace and the input workspace.
+5. Click **Plot Spectra** to produce a spectra plot of the output workspace. Other indices can be
+   plotted by entering indices in the box next to the **Plot Spectra** button. For example,
+   entering indices 0-2,4,6-7 will plot the spectra with workspace indices 0, 1, 2, 4, 6 and 7.
 
 Go to the :ref:`sqw-example-workflow`.
 
@@ -714,11 +727,11 @@ E Low, E Width & E High
 Run
   Runs the processing configured on the current tab.
 
-Plot Spectrum
-  This will plot the spectrum from the result workspace which is selected in the neighbouring spinbox.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Plot Contour
-  This will produce a contour plot of the result.
+  If enabled, it will plot the selected output workspace as a contour plot.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
@@ -747,8 +760,11 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
    rebin before performing the :ref:`SofQW <algm-SofQW>` algorithm. The output workspace ends
    with suffix _sqw and is called ``iris26176_graphite002_sqw``.
 
-6. Choose a workspace index and then click **Plot Spectrum** to plot a spectrum from the
-   output workspace.
+6. Enter a list of workspace indices in the output options (e.g. 0-2,4,6-7) and then click
+   **Plot Spectra** to plot spectra from the output workspace.
+
+6. Click the down arrow on the **Plot Spectra** button, and select **Plot Contour**. This will
+   produce a contour plot of the output workspace.
 
 7. Choose a default save directory and then click **Save Result** to save the output workspace.
    The _sqw file is used in the :ref:`moments-example-workflow`.
@@ -781,8 +797,8 @@ EMin & EMax
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  If enabled will plot the result as a spectra plot.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.

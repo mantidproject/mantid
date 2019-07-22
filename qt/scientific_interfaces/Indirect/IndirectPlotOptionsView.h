@@ -22,7 +22,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled } const;
+enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled };
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
   Q_OBJECT
