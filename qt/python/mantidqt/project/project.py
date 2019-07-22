@@ -13,11 +13,13 @@ import os
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
+from mantid.kernel import ConfigService
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
 
 
+# noinspection PyTypeChecker
 class Project(AnalysisDataServiceObserver):
     def __init__(self, globalfiguremanager_instance, interface_populating_function):
         """
@@ -106,12 +108,24 @@ class Project(AnalysisDataServiceObserver):
 
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
-        plots_to_save = self.plot_gfm.figs
-        interfaces_to_save = self.interface_populating_function()
-        project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                   plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
-        self.__saved = True
+        # Calculate the size of the workspaces in the project.
+        project_size = 0
+        for name in workspaces_to_save:
+            project_size += AnalysisDataService.retrieve(name).getMemorySize()
+        warning_size = int(ConfigService.getString("projectSaving.warningSize"))
+        # If a project is > the value in the properties file, question the user if they want to continue.
+        saving = True
+        if project_size > warning_size:
+            result = self.offer_large_size_confirmation()
+            if result == QMessageBox.Cancel:
+                saving = False
+        if saving:
+            plots_to_save = self.plot_gfm.figs
+            interfaces_to_save = self.interface_populating_function()
+            project_saver = ProjectSaver(self.project_file_ext)
+            project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
+                                       plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
+            self.__saved = True
 
     def load(self):
         """
@@ -166,6 +180,16 @@ class Project(AnalysisDataServiceObserver):
                                         QMessageBox.Yes)
         else:
             return QMessageBox.No
+
+    @staticmethod
+    def offer_large_size_confirmation():
+        """
+        Asks the user to confirm that they want to save a large project.
+        :return: QMessageBox; The response from the user. Default is Yes.
+        """
+        return QMessageBox.question(None, "You are trying to save a large project.",
+                                    "The project may take a long time to save. Would you like to continue?",
+                                    QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
 
     def modified_project(self):
         self.__saved = False
