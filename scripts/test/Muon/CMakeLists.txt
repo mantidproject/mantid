@@ -69,6 +69,8 @@ set ( TEST_PY_FILES
    elemental_analysis/periodic_combo_test.py
    elemental_analysis/periodic_list_test.py
    elemental_analysis/periodic_table_item_test.py
+   elemental_analysis/lmodel_test.py
+   elemental_analysis/load_model_test.py
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible

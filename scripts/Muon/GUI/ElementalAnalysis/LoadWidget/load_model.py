@@ -10,7 +10,7 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
-# todo: test this
+
 class LoadModel(lutils.LModel):
     def __init__(self):
         super(LoadModel, self).__init__()
@@ -22,7 +22,6 @@ class LoadModel(lutils.LModel):
             self.last_loaded_runs.append(self.run)
 
 
-# todo: test this
 class CoLoadModel(lutils.LModel):
     def __init__(self):
         super(CoLoadModel, self).__init__()
