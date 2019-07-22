@@ -114,7 +114,7 @@ class PhaseTablePresenter(object):
         phasequad_workspace_name = get_phase_quad_workspace_name(input_workspace, input_phase_table)
         phase_table_group = get_phase_table_workspace_group_name(phasequad_workspace_name,
                                                                  self.context.data_context.instrument, self.context.workspace_suffix)
-        directory = get_base_data_directory(self.context, run) + phase_table_group
+        directory = get_base_data_directory(self.context, run)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(phase_quad, directory + phasequad_workspace_name)
         muon_workspace_wrapper.show()
@@ -161,7 +161,7 @@ class PhaseTablePresenter(object):
         phase_table_group = get_phase_table_workspace_group_name(base_name,
                                                                  self.context.data_context.instrument,
                                                                  self.context.workspace_suffix)
-        directory = get_base_data_directory(self.context, run) + phase_table_group
+        directory = get_base_data_directory(self.context, run)
         muon_workspace_wrapper = MuonWorkspaceWrapper(detector_table, directory + base_name)
         muon_workspace_wrapper.show()
 

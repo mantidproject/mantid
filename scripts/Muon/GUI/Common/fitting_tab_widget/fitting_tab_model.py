@@ -213,7 +213,7 @@ class FittingTabModel(object):
                                                                            input_workspace_list,
                                                                            fit_function,
                                                                            fit_group_name)
-            self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+            self.add_workspace_to_ADS(covariance_matrix, workspace_name[0] + '_CovarianceMatrix', table_directory)
         else:
             table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0],
                                                                            fit_function,

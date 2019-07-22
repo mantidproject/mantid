@@ -128,6 +128,9 @@ class GroupingTabPresenter(object):
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
+        if filename == '':
+            return
+
         groups, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
