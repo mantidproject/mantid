@@ -87,6 +87,7 @@ Bugfixes
 - Workbench's scaling of fonts when moved between monitors with different resolutions has been improved
 - The ErrorReporter window is now resizeable
 - The "Fit" button is now visible when plotting a spectrum with error bars
+- Project save handles workspace saving erros more gracefully
 
 Known Issues
 ############
