@@ -267,11 +267,6 @@ void IndirectMoments::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void IndirectMoments::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  setSaveEnabled(enableOutputButtons == "enable");
-}
-
 void IndirectMoments::updateRunButton(bool enabled,
                                       std::string const &enableOutputButtons,
                                       QString const message,
@@ -280,7 +275,7 @@ void IndirectMoments::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces

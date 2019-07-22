@@ -67,7 +67,6 @@ private slots:
 
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
                        QString const message = "Run",

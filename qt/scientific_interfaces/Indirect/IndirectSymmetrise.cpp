@@ -617,11 +617,6 @@ void IndirectSymmetrise::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void IndirectSymmetrise::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  setSaveEnabled(enableOutputButtons == "enable");
-}
-
 void IndirectSymmetrise::updateRunButton(bool enabled,
                                          std::string const &enableOutputButtons,
                                          QString const message,
@@ -630,7 +625,7 @@ void IndirectSymmetrise::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces

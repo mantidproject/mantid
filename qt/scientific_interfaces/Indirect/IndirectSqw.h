@@ -53,7 +53,6 @@ private:
 
   void setRunEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
 
   Ui::IndirectSqw m_uiForm;
 };

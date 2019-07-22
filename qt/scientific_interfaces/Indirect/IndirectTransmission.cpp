@@ -11,6 +11,19 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+void conjoinSpectra(std::string const &inputWorkspaces,
+                    std::string const &outputName) {
+  auto conjoin = AlgorithmManager::Instance().create("ConjoinSpectra");
+  conjoin->initialize();
+  conjoin->setProperty("InputWorkspaces", inputWorkspaces);
+  conjoin->setProperty("OutputWorkspace", outputName);
+  conjoin->execute();
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -21,6 +34,8 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
                                            QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra, "0-2"));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this,
           SLOT(setInstrument()));
@@ -30,7 +45,6 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           SLOT(transAlgDone(bool)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -56,7 +70,7 @@ void IndirectTransmission::setup() {}
 void IndirectTransmission::run() {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString canWsName = m_uiForm.dsCanInput->getCurrentDataName();
-  QString outWsName = sampleWsName + "_transmission";
+  QString outWsName = sampleWsName.toLower() + "_transmission_group";
 
   IAlgorithm_sptr transAlg =
       AlgorithmManager::Instance().create("IndirectTransmissionMonitor", -1);
@@ -68,6 +82,8 @@ void IndirectTransmission::run() {
 
   m_batchAlgoRunner->addAlgorithm(transAlg);
   m_batchAlgoRunner->executeBatchAsync();
+
+  m_pythonExportWsName = outWsName.toStdString();
 }
 
 bool IndirectTransmission::validate() {
@@ -91,7 +107,15 @@ void IndirectTransmission::transAlgDone(bool error) {
   if (error)
     return;
 
-  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
+  auto const transmissionName =
+      sampleWsName.toLower().toStdString() + "_transmission";
+  conjoinSpectra(sampleWsName.toStdString() + "_Can," +
+                     sampleWsName.toStdString() + "_Sam," +
+                     sampleWsName.toStdString() + "_Trans",
+                 transmissionName);
+
+  setOutputPlotOptionsWorkspaces({transmissionName});
 
   // Do plotting
   m_uiForm.ppPlot->clear();
@@ -102,7 +126,6 @@ void IndirectTransmission::transAlgDone(bool error) {
   m_uiForm.ppPlot->resizeX();
 
   // Enable plot and save
-  m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
 
@@ -128,43 +151,17 @@ void IndirectTransmission::runClicked() { runTab(); }
  * Handle saving of workspace
  */
 void IndirectTransmission::saveClicked() {
-  QString outputWs =
-      (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
-
-  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
-    addSaveWorkspaceToQueue(outputWs);
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(m_pythonExportWsName);
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-/**
- * Handle mantid plotting
- */
-void IndirectTransmission::plotClicked() {
-  setPlotIsPlotting(true);
-  QString outputWs =
-      (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
-  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
-    plotSpectrum(outputWs);
-  setPlotIsPlotting(false);
 }
 
 void IndirectTransmission::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void IndirectTransmission::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
 void IndirectTransmission::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
-}
-
-void IndirectTransmission::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
 }
 
 void IndirectTransmission::updateRunButton(
@@ -174,14 +171,7 @@ void IndirectTransmission::updateRunButton(
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void IndirectTransmission::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces
