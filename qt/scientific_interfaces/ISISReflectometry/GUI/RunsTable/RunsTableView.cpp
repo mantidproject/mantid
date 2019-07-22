@@ -216,7 +216,6 @@ void RunsTableView::addToolbarActions() {
                          "Fill down selected rows for selected column"),
           SIGNAL(triggered(bool)), this, SLOT(onFillDownPressed(bool)));
 
-
   // Sets the pause button to disabled when the window first opens
   setActionEnabled(Action::Pause, false);
 }
