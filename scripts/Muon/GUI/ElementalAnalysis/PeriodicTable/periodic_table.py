@@ -147,7 +147,7 @@ _elements = [("H", 1, 1, 1, "hydrogen", 1.00800, "diatomic nonmetal"),
              ("Sg", 106, 6, 7, "seaborgium", 266, "transition metal"),
              ("Bh", 107, 7, 7, "bohrium", 264, "transition metal"),
              ("Hs", 108, 8, 7, "hassium", 269, "transition metal"),
-             ("Mt", 109, 9, 7, "meitnerium", 268)]
+             ("Mt", 109, 9, 7, "meitnerium", 268, "transition metal")]
 
 
 class PeriodicTableItem(object):

@@ -26,3 +26,5 @@ class DetectorsPresenterTest(unittest.TestCase):
         self.assertEqual(self.detector_presenter.getNames(), self.mock_view.widgets.keys())
 
 
+if __name__ == '__main':
+    unittest.main()
