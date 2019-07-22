@@ -217,6 +217,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
                                        QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::SpectraContour));
 
   // SIGNAL/SLOT CONNECTIONS
   // Update instrument information when a new instrument config is selected
@@ -243,10 +245,6 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
           SLOT(handleDataReady(QString const &)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
-          SLOT(plotSpectrumClicked()));
-  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
-          SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -565,14 +563,9 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       if (!m_uiForm.ckGroupOutput->isChecked())
         ungroupWorkspace(outputGroup->getName());
 
-      // Set the maximum plottable spectrum
-      auto const numberOfHistograms = static_cast<int>(
-          getADSMatrixWorkspace(m_pythonExportWsName)->getNumberHistograms());
-      m_uiForm.spWorkspaceIndex->setMaximum(numberOfHistograms - 1);
+      setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
 
       // Enable plotting and saving
-      setPlotSpectrumEnabled(true);
-      setPlotContourEnabled(true);
       setSaveEnabled(true);
     }
   }
@@ -959,33 +952,6 @@ void ISISEnergyTransfer::loadDetailedBalance(std::string const &filename) {
  */
 void ISISEnergyTransfer::runClicked() { runTab(); }
 
-/**
- * Handle plotting of a spectrum.
- */
-void ISISEnergyTransfer::plotSpectrumClicked() {
-  setPlotSpectrumIsPlotting(true);
-
-  for (auto const &workspaceName : m_outputWorkspaces)
-    if (doesExistInADS(workspaceName))
-      IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
-                                m_uiForm.spWorkspaceIndex->value());
-
-  setPlotSpectrumIsPlotting(false);
-}
-
-/**
- * Handle plotting a contour plot.
- */
-void ISISEnergyTransfer::plotContourClicked() {
-  setPlotContourIsPlotting(true);
-
-  for (auto const &workspaceName : m_outputWorkspaces)
-    if (doesExistInADS(workspaceName))
-      IndirectTab::plot2D(QString::fromStdString(workspaceName));
-
-  setPlotContourIsPlotting(false);
-}
-
 void ISISEnergyTransfer::plotWorkspace(std::string const &workspaceName,
                                        std::string const &plotType) {
 
@@ -1029,18 +995,6 @@ void ISISEnergyTransfer::setRunEnabled(bool enable) {
   m_uiForm.pbRun->setEnabled(enable);
 }
 
-void ISISEnergyTransfer::setPlotSpectrumEnabled(bool enable) {
-  m_uiForm.pbPlotSpectrum->setEnabled(!m_outputWorkspaces.empty() ? enable
-                                                                  : false);
-  m_uiForm.spWorkspaceIndex->setEnabled(!m_outputWorkspaces.empty() ? enable
-                                                                    : false);
-}
-
-void ISISEnergyTransfer::setPlotContourEnabled(bool enable) {
-  m_uiForm.pbPlotContour->setEnabled(!m_outputWorkspaces.empty() ? enable
-                                                                 : false);
-}
-
 void ISISEnergyTransfer::setPlotTimeEnabled(bool enable) {
   m_uiForm.pbPlotTime->setEnabled(enable);
   m_uiForm.spPlotTimeSpecMin->setEnabled(enable);
@@ -1067,21 +1021,9 @@ void ISISEnergyTransfer::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged") {
     auto const enableButtons = enableOutputButtons == "enable";
-    setPlotSpectrumEnabled(enableButtons);
-    setPlotContourEnabled(enableButtons);
     setPlotTimeEnabled(enableButtons);
     setSaveEnabled(enableButtons);
   }
-}
-
-void ISISEnergyTransfer::setPlotSpectrumIsPlotting(bool plotting) {
-  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
-  setButtonsEnabled(!plotting);
-}
-
-void ISISEnergyTransfer::setPlotContourIsPlotting(bool plotting) {
-  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
-  setButtonsEnabled(!plotting);
 }
 
 void ISISEnergyTransfer::setPlotTimeIsPlotting(bool plotting) {
@@ -1091,8 +1033,6 @@ void ISISEnergyTransfer::setPlotTimeIsPlotting(bool plotting) {
 
 void ISISEnergyTransfer::setButtonsEnabled(bool enable) {
   setRunEnabled(enable);
-  setPlotSpectrumEnabled(enable);
-  setPlotContourEnabled(enable);
   setPlotTimeEnabled(enable);
   setSaveEnabled(enable);
 }
