@@ -193,7 +193,7 @@ class FFTPresenter(object):
             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
         directory = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument,
-                                             self.load.workspace_suffix)
+                                                 self.load.workspace_suffix)
         Re = get_group_or_pair_from_name(input_workspace)
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
