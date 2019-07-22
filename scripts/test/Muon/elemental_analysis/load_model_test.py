@@ -37,7 +37,7 @@ class CoLoadModel(unittest.TestCase):
     def setUp(self):
         self.model = load_model.CoLoadModel()
 
-    def txest_wipe_co_runs_clears_state(self):
+    def test_wipe_co_runs_clears_state(self):
         self.model.workspace = mock.Mock()
         self.model.co_runs = [1, 2, 3]
         self.model.wipe_co_runs()
@@ -45,7 +45,7 @@ class CoLoadModel(unittest.TestCase):
         self.assertEqual(self.model.workspace, None)
         self.assertEqual(self.model.co_runs, [])
 
-    def txest_that_execute_loads_run_if_not_already_loaded(self):
+    def test_that_execute_loads_run_if_not_already_loaded(self):
         self.model.run = 1234
         self.model.loaded_runs = {1: mock.Mock(), 2: mock.Mock()}
         self.model.load_run = mock.Mock(return_value=None)
@@ -63,7 +63,7 @@ class CoLoadModel(unittest.TestCase):
         self.assertTrue(1234 in self.model.loaded_runs.keys())
         self.assertEqual(self.model.loaded_runs[1234], mock_ws)
 
-    def txest_that_run_is_appended_to_last_loaded_run_if_already_loaded(self):
+    def test_that_run_is_appended_to_last_loaded_run_if_already_loaded(self):
         self.model.run = 1234
         self.model.loaded_runs = {1234: mock.Mock(), 5678: mock.Mock()}
 

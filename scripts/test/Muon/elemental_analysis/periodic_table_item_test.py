@@ -15,7 +15,7 @@ class PeriodicTableItemTest(unittest.TestCase):
         self.element = PeriodicTableItem("Ti", 22, 4, 4, "titanium", 47.9000, "transition metal")
 
     def test_that_list_elements_contains_all(self):
-        for i in range(len(periodic_table._elements)):
+        for i in range(len(periodic_table._elements)-1):
             self.assertTrue(isinstance(periodic_table._elements[i][0], str))
             self.assertTrue(isinstance(periodic_table._elements[i][1], int))
             self.assertTrue(isinstance(periodic_table._elements[i][2], int))
@@ -24,6 +24,16 @@ class PeriodicTableItemTest(unittest.TestCase):
             self.assertTrue(isinstance(periodic_table._elements[i][5], float)
                             or isinstance(periodic_table._elements[i][5], int))
             self.assertTrue(isinstance(periodic_table._elements[i][6], str))
+
+        # Meitnerium is not confirmed to be a transition metal, hence it lacks the subcategory field (ie. field 6)
+        i = len(periodic_table._elements)-1
+        self.assertTrue(isinstance(periodic_table._elements[i][0], str))
+        self.assertTrue(isinstance(periodic_table._elements[i][1], int))
+        self.assertTrue(isinstance(periodic_table._elements[i][2], int))
+        self.assertTrue(isinstance(periodic_table._elements[i][3], int))
+        self.assertTrue(isinstance(periodic_table._elements[i][4], str))
+        self.assertTrue(isinstance(periodic_table._elements[i][5], float)
+                        or isinstance(periodic_table._elements[i][5], int))
 
     def test_that_get_method_works(self):
         expected = ["Ti", 22, 4, 4, "titanium", 47.9000]
