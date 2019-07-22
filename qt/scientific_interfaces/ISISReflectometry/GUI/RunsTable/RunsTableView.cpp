@@ -215,6 +215,10 @@ void RunsTableView::addToolbarActions() {
   connect(addToolbarItem(Action::FillDown, "mdi.arrow-expand-down",
                          "Fill down selected rows for selected column"),
           SIGNAL(triggered(bool)), this, SLOT(onFillDownPressed(bool)));
+
+
+  // Sets the pause button to disabled when the window first opens
+  setActionEnabled(Action::Pause, false);
 }
 
 MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
