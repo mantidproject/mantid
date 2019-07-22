@@ -83,10 +83,7 @@ def get_pair_data_workspace_name(context, pair_name, run, rebin):
 
 
 def get_base_data_directory(context, run):
-    if context.data_context.is_multi_period():
-        return context.data_context._base_run_name(run) + context.workspace_suffix + "/"
-    else:
-        return context.data_context._base_run_name(run) + context.workspace_suffix + "/"
+    return context.data_context._base_run_name(run) + context.workspace_suffix + "/"
 
 
 def get_raw_data_directory(context, run):

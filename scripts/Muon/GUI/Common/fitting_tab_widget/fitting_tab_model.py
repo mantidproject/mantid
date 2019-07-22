@@ -61,24 +61,18 @@ class FittingTabModel(object):
         return workspace_wrapper
 
     def create_fitted_workspace_name(self, input_workspace_name, function_name, group_name):
-        # directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
-        #                                         self.context.workspace_suffix)
         directory = input_workspace_name + '; Fitted; ' + self.function_name + '/'
         name = input_workspace_name + '; Fitted; ' + self.function_name + '; Workspace'
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function, group_name):
-        # directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
-        #                                         self.context.workspace_suffix)
         directory = input_workspace + '; Fitted; ' + self.function_name + '/'
         name = input_workspace + '+ ...; Fitted; ' + self.function_name
 
         return name, directory
 
     def create_parameter_table_name(self, input_workspace_name, function_name, group_name):
-        # directory = get_fit_workspace_directory(group_name, '_parameter_tables', self.context.data_context.base_directory,
-        #                                         self.context.workspace_suffix)
         directory = input_workspace_name + '; Fitted; ' + self.function_name + '/'
         name = input_workspace_name + '; Fitted Parameters; ' + self.function_name
 
