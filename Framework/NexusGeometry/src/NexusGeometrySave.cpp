@@ -231,11 +231,11 @@ inline void writeXYZPixeloffset(H5::Group &grp,
     posz.push_back(offset[2]);
   }
 
-  const hsize_t dimSize = (hsize_t)posx.size();
+  const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
 
   int rank = 1;
-  hsize_t dims[1];
-  dims[0] = dimSize;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = nDetectorsInBank;
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
@@ -276,11 +276,11 @@ void writeNXDetectorNumber(H5::Group &grp,
     bankDetIDs.push_back(detectorIDs[index]);
   }
 
-  const hsize_t dimSize = (hsize_t)bankDetIDs.size();
+  const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
 
   int rank = 1;
-  hsize_t dims[1];
-  dims[0] = dimSize;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = nDetectorsInBank;
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
@@ -326,8 +326,8 @@ inline void writeLocation(H5::Group &grp,
   H5::StrType strSize;
 
   int drank = 1;
-  hsize_t ddims[(hsize_t)1];
-  ddims[0] = 1;
+  hsize_t ddims[static_cast<hsize_t>(1)];
+  ddims[0] = static_cast<hsize_t>(1);
 
   // dependency for location
   std::string dependency = "."; // self dependent
@@ -360,7 +360,7 @@ inline void writeLocation(H5::Group &grp,
   Eigen::VectorXd::Map(&stdNormPos[0], asize) = position;
 
   int arank = 1;
-  hsize_t adims[(hsize_t)3];
+  hsize_t adims[static_cast<hsize_t>(3)];
   adims[0] = 3;
 
   aspace = H5Screate_simple(arank, adims, NULL);
@@ -422,8 +422,8 @@ inline void writeOrientation(H5::Group &grp,
   H5::StrType strSize;
 
   int rank = 1;
-  hsize_t ddims[(hsize_t)1];
-  ddims[0] = (hsize_t)1;
+  hsize_t ddims[static_cast<hsize_t>(1)];
+  ddims[0] = static_cast<hsize_t>(1);
 
   // dependency for orientation
   std::string dependency = forwardCompatibility::getObjName(grp) + "/" +
@@ -456,8 +456,8 @@ inline void writeOrientation(H5::Group &grp,
   Eigen::VectorXd::Map(&stdNormAxis[0], asize) = axisOfRotation;
 
   int arank = 1;
-  hsize_t adims[(hsize_t)3];
-  adims[0] = 3;
+  hsize_t adims[static_cast<hsize_t>(3)];
+  adims[0] = static_cast<hsize_t>(3);
 
   aspace = H5Screate_simple(arank, adims, NULL);
   vector =
