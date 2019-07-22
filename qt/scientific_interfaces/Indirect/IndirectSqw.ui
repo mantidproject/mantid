@@ -489,8 +489,14 @@
       <string>Output</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>7</number>
+      </property>
       <item>
-       <widget class="MantidQt::CustomInterfaces::IDA::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
+       <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_1">
@@ -539,7 +545,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectPlotOptionsView</class>
+   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
    <header>IndirectPlotOptionsView.h</header>
    <container>1</container>

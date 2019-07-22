@@ -8,6 +8,8 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
+#include <QMenu>
+#include <QMessageBox>
 #include <QSettings>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -16,18 +18,18 @@
 
 namespace {
 
-auto constexpr SETTINGS_GROUP = "Spectra suggestions";
+auto constexpr SETTINGS_GROUP = "Indices suggestions";
 auto constexpr SETTING_NAME = "Suggestions";
 auto constexpr NUMBER_OF_SUGGESTIONS = 5;
 
-void saveSpectraSuggestions(QStringList const &suggestions) {
+void saveIndicesSuggestions(QStringList const &suggestions) {
   QSettings settings;
   settings.beginGroup(SETTINGS_GROUP);
   settings.setValue(SETTING_NAME, suggestions);
   settings.endGroup();
 }
 
-QStringList spectraSuggestions() {
+QStringList indicesSuggestions() {
   QSettings settings;
   settings.beginGroup(SETTINGS_GROUP);
   auto const suggestions = settings.value(SETTING_NAME).toStringList();
@@ -36,11 +38,27 @@ QStringList spectraSuggestions() {
   return suggestions;
 }
 
-QIcon plotSpectraIcon() {
+QIcon plotCurveIcon() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QIcon(":/plot_double_y.png");
+  return QIcon(":/curves.png");
 #else
   return MantidQt::Icons::getIcon("mdi.chart-line");
+#endif
+}
+
+QIcon plotContourIcon() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  return QIcon(":/contour_map.png");
+#else
+  return MantidQt::Icons::getIcon("mdi.chart-scatterplot-hexbin");
+#endif
+}
+
+QIcon plotTiledIcon() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  return QIcon(":/arrangeLayers.png");
+#else
+  return MantidQt::Icons::getIcon("mdi.chart-line-stacked");
 #endif
 }
 
@@ -48,54 +66,56 @@ QIcon plotSpectraIcon() {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent,
                                                  PlotWidget const &plotType)
     : API::MantidWidget(parent),
       m_suggestionsModel(
-          std::make_unique<QStringListModel>(spectraSuggestions())),
+          std::make_unique<QStringListModel>(indicesSuggestions())),
       m_completer(std::make_unique<QCompleter>(m_suggestionsModel.get(), this)),
       m_plotOptions(new Ui::IndirectPlotOptions) {
   m_plotOptions->setupUi(this);
-  m_plotOptions->pbPlotSpectra->setIcon(plotSpectraIcon());
   setupView();
 }
 
 void IndirectPlotOptionsView::setupView() {
-  connect(m_plotOptions->leSpectra, SIGNAL(editingFinished()), this,
-          SLOT(emitSelectedSpectraChanged()));
-  connect(m_plotOptions->leSpectra, SIGNAL(textEdited(QString const &)), this,
-          SLOT(emitSelectedSpectraChanged(QString const &)));
+  connect(m_plotOptions->cbWorkspace,
+          SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(emitSelectedWorkspaceChanged(QString const &)));
 
-  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this,
-          SLOT(emitPlotSpectraClicked()));
-  connect(m_plotOptions->pbPlotContour, SIGNAL(clicked()), this,
-          SLOT(emitPlotContourClicked()));
-  connect(m_plotOptions->pbPlotTiled, SIGNAL(clicked()), this,
-          SLOT(emitPlotTiledClicked()));
+  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this,
+          SLOT(emitSelectedIndicesChanged()));
+  connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
+          SLOT(emitSelectedIndicesChanged(QString const &)));
 
-  setSpectraErrorLabelVisible(false);
+  setIndicesErrorLabelVisible(false); 
 
   // Setup the spectra auto-completer
   m_completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
   m_completer->setMaxVisibleItems(NUMBER_OF_SUGGESTIONS);
-  m_plotOptions->leSpectra->setCompleter(m_completer.get());
+  m_plotOptions->leIndices->setCompleter(m_completer.get());
 }
 
-void IndirectPlotOptionsView::emitSelectedSpectraChanged() {
-  emit selectedSpectraChanged(selectedSpectra().toStdString());
+void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(
+    QString const &workspaceName) {
+  emit selectedWorkspaceChanged(workspaceName.toStdString());
 }
 
-void IndirectPlotOptionsView::emitSelectedSpectraChanged(
+void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
+  emit selectedIndicesChanged(selectedIndices().toStdString());
+}
+
+void IndirectPlotOptionsView::emitSelectedIndicesChanged(
     QString const &spectra) {
   if (spectra.isEmpty())
-    emit selectedSpectraChanged(spectra.toStdString());
+    emit selectedIndicesChanged(spectra.toStdString());
 }
 
 void IndirectPlotOptionsView::emitPlotSpectraClicked() {
   emit plotSpectraClicked();
 }
+
+void IndirectPlotOptionsView::emitPlotBinsClicked() { emit plotBinsClicked(); }
 
 void IndirectPlotOptionsView::emitPlotContourClicked() {
   emit plotContourClicked();
@@ -106,84 +126,122 @@ void IndirectPlotOptionsView::emitPlotTiledClicked() {
 }
 
 void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType) {
+  auto plotMenu = new QMenu;
+
+  auto plotSpectraAction = new QAction("Plot Spectra", this);
+  plotSpectraAction->setIcon(plotCurveIcon());
+  auto plotBinAction = new QAction("Plot Bins", this);
+  plotBinAction->setIcon(plotCurveIcon());
+  auto plotContourAction = new QAction("Plot Contour", this);
+  plotContourAction->setIcon(plotContourIcon());
+  auto plotTiledAction = new QAction("Plot Tiled", this);
+  plotTiledAction->setIcon(plotTiledIcon());
+
+  connect(plotSpectraAction, SIGNAL(triggered()), this,
+          SLOT(emitPlotSpectraClicked()));
+  connect(plotBinAction, SIGNAL(triggered()), this,
+          SLOT(emitPlotBinsClicked()));
+  connect(plotContourAction, SIGNAL(triggered()), this,
+          SLOT(emitPlotContourClicked()));
+  connect(plotTiledAction, SIGNAL(triggered()), this,
+          SLOT(emitPlotTiledClicked()));
+
   switch (plotType) {
   case PlotWidget::Spectra:
-    m_plotOptions->pbPlotContour->setVisible(false);
-    m_plotOptions->pbPlotTiled->setVisible(false);
+    plotMenu->addAction(plotSpectraAction);
+    break;
+  case PlotWidget::SpectraBin:
+    plotMenu->addAction(plotSpectraAction);
+    plotMenu->addAction(plotBinAction);
     break;
   case PlotWidget::SpectraContour:
-    m_plotOptions->pbPlotTiled->setVisible(false);
+    plotMenu->addAction(plotSpectraAction);
+    plotMenu->addAction(plotContourAction);
     break;
   case PlotWidget::SpectraTiled:
-    m_plotOptions->pbPlotContour->setVisible(false);
+    plotMenu->addAction(plotSpectraAction);
+    plotMenu->addAction(plotTiledAction);
     break;
   default:
     std::runtime_error("Plot option not found. Plot types are Spectra, "
                        "SpectraContour or SpectraTiled.");
   }
+  m_plotOptions->tbPlot->setMenu(plotMenu);
+  m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);
 }
 
-void IndirectPlotOptionsView::setOptionsEnabled(Plotting const &type,
-                                                bool enable) {
-  m_plotOptions->leSpectra->setEnabled(enable);
-  m_plotOptions->pbPlotSpectra->setEnabled(enable);
-  m_plotOptions->pbPlotContour->setEnabled(enable);
-  m_plotOptions->pbPlotTiled->setEnabled(enable);
-  if (type != Plotting::None)
-    setButtonText(type, enable);
+void IndirectPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
+  API::SignalBlocker blocker(m_plotOptions->cbWorkspace);
+  m_plotOptions->cbWorkspace->setEnabled(enable);
 }
 
-void IndirectPlotOptionsView::setButtonText(Plotting const &type,
-                                            bool enabled) {
-  switch (type) {
-  case Plotting::Spectrum:
-    // m_plotOptions->pbPlotSpectra->setText(enabled ? "Plot Spectra"
-    //                                              : "Plotting...");
-    break;
-  case Plotting::Contour:
-    m_plotOptions->pbPlotContour->setText(enabled ? "Plot Contour"
-                                                  : "Plotting...");
-    break;
-  case Plotting::Tiled:
-    m_plotOptions->pbPlotTiled->setText(enabled ? "Plot Tiled" : "Plotting...");
-    break;
-  }
+void IndirectPlotOptionsView::setIndicesLineEditEnabled(bool enable) {
+  API::SignalBlocker blocker(m_plotOptions->leIndices);
+  m_plotOptions->leIndices->setEnabled(enable);
 }
 
-void IndirectPlotOptionsView::setSpectraRegex(QString const &regex) {
-  m_plotOptions->leSpectra->setValidator(createValidator(regex));
+void IndirectPlotOptionsView::setPlotButtonEnabled(bool enable) {
+  m_plotOptions->tbPlot->setEnabled(enable);
+}
+
+void IndirectPlotOptionsView::setIndicesRegex(QString const &regex) {
+  m_plotOptions->leIndices->setValidator(createValidator(regex));
 }
 
 QValidator *IndirectPlotOptionsView::createValidator(QString const &regex) {
   return new QRegExpValidator(QRegExp(regex), this);
 }
 
-QString IndirectPlotOptionsView::selectedSpectra() const {
-  return m_plotOptions->leSpectra->text();
+QString IndirectPlotOptionsView::selectedWorkspace() const {
+  return m_plotOptions->cbWorkspace->currentText();
 }
 
-void IndirectPlotOptionsView::setSpectra(QString const &spectra) {
-  API::SignalBlocker blocker(m_plotOptions->leSpectra);
-  m_plotOptions->leSpectra->setText(spectra);
+void IndirectPlotOptionsView::setWorkspaces(
+    std::vector<std::string> const &workspaces) {
+  removeWorkspaces();
+  for (auto const &name : workspaces)
+    m_plotOptions->cbWorkspace->addItem(QString::fromStdString(name));
 }
 
-void IndirectPlotOptionsView::setSpectraErrorLabelVisible(bool visible) {
-  m_plotOptions->lbSpectraError->setText(visible ? "*" : "");
-  m_plotOptions->lbSpectraError->setVisible(visible);
+void IndirectPlotOptionsView::removeWorkspaces() {
+  m_plotOptions->cbWorkspace->clear();
 }
 
-void IndirectPlotOptionsView::addSpectraSuggestion(QString const &spectra) {
+void IndirectPlotOptionsView::removeWorkspace(QString const &workspaceName) {
+  auto const index = m_plotOptions->cbWorkspace->findText(workspaceName);
+  if (index != -1)
+    m_plotOptions->cbWorkspace->removeItem(index);
+}
+
+QString IndirectPlotOptionsView::selectedIndices() const {
+  return m_plotOptions->leIndices->text();
+}
+
+void IndirectPlotOptionsView::setIndices(QString const &indices) {
+  API::SignalBlocker blocker(m_plotOptions->leIndices);
+  m_plotOptions->leIndices->setText(indices);
+}
+
+void IndirectPlotOptionsView::setIndicesErrorLabelVisible(bool visible) {
+  m_plotOptions->lbIndicesError->setText(visible ? "*" : "");
+  m_plotOptions->lbIndicesError->setVisible(visible);
+}
+
+void IndirectPlotOptionsView::addIndicesSuggestion(QString const &indices) {
   auto suggestions = m_suggestionsModel->stringList();
-  if (!suggestions.contains(spectra)) {
+  if (!suggestions.contains(indices)) {
     if (suggestions.size() >= NUMBER_OF_SUGGESTIONS)
       suggestions.removeLast();
-    suggestions.insert(suggestions.begin(), spectra);
+    suggestions.insert(suggestions.begin(), indices);
     m_suggestionsModel->setStringList(suggestions);
 
-    saveSpectraSuggestions(suggestions);
+    saveIndicesSuggestions(suggestions);
   }
 }
 
-} // namespace IDA
+void IndirectPlotOptionsView::displayWarning(QString const &message) {
+  QMessageBox::warning(parentWidget(), "Mantid - Warning", message);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

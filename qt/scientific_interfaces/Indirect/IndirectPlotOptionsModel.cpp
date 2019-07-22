@@ -18,10 +18,6 @@ using namespace Mantid::Kernel::Strings;
 
 namespace {
 
-std::string constructSpectraString(std::vector<int> const &spectras) {
-  return joinCompress(spectras.begin(), spectras.end());
-}
-
 template <typename BeginIter, typename Iterable>
 void removeFromIterable(BeginIter const &beginIter, Iterable &iterable) {
   iterable.erase(beginIter, iterable.end());
@@ -39,103 +35,101 @@ std::vector<std::string> splitStringBy(std::string const &str,
   return subStrings;
 }
 
-std::string getSpectraRange(std::string const &string) {
-  auto const bounds = splitStringBy(string, "-");
+std::string getIndicesRange(std::string const &str) {
+  auto const bounds = splitStringBy(str, "-");
   return std::stoull(bounds[0]) > std::stoull(bounds[1])
              ? bounds[1] + "-" + bounds[0]
-             : string;
+             : str;
 }
 
-std::string rearrangeSpectraSubString(std::string const &string) {
-  return string.find("-") != std::string::npos ? getSpectraRange(string)
-                                               : string;
+std::string rearrangeIndicesSubString(std::string const &str) {
+  return str.find("-") != std::string::npos ? getIndicesRange(str) : str;
 }
 
 // Swaps the two numbers in a spectra range if they go from large to small
-std::string rearrangeSpectraRangeStrings(std::string const &string) {
-  std::string spectraString;
-  auto subStrings = splitStringBy(string, ",");
+std::string rearrangeIndicesRangeStrings(std::string const &str) {
+  std::string indicesString;
+  auto subStrings = splitStringBy(str, ",");
   for (auto it = subStrings.begin(); it < subStrings.end(); ++it) {
-    spectraString += rearrangeSpectraSubString(*it);
-    spectraString += it != subStrings.end() ? "," : "";
+    indicesString += rearrangeIndicesSubString(*it);
+    indicesString += it != subStrings.end() ? "," : "";
   }
-  return spectraString;
+  return indicesString;
 }
 
-std::string formatSpectraString(std::string &string) {
+std::string formatIndicesString(std::string &str) {
   // Remove spaces
-  removeFromIterable(std::remove_if(string.begin(), string.end(), isspace),
-                     string);
+  removeFromIterable(std::remove_if(str.begin(), str.end(), isspace), str);
   // Rearrange range strings
-  auto spectras = parseRange(rearrangeSpectraRangeStrings(string));
-  std::sort(spectras.begin(), spectras.end());
+  auto indices = parseRange(rearrangeIndicesRangeStrings(str));
+  std::sort(indices.begin(), indices.end());
   // Remove duplicate entries
-  removeFromIterable(std::unique(spectras.begin(), spectras.end()), spectras);
-  return constructSpectraString(spectras);
+  removeFromIterable(std::unique(indices.begin(), indices.end()), indices);
+  return joinCompress(indices.begin(), indices.end());
 }
 
 template <typename T = std::size_t>
-void addToSpectraVector(std::vector<T> &spectraVec,
-                        std::size_t const &startSpec,
-                        std::size_t const &startEnd) {
-  for (auto spec = startSpec; spec <= startEnd; ++spec)
-    spectraVec.emplace_back(spec);
+void addToIndicesVector(std::vector<T> &indicesVec,
+                        std::size_t const &startIndex,
+                        std::size_t const &endIndex) {
+  for (auto index = startIndex; index <= endIndex; ++index)
+    indicesVec.emplace_back(index);
 }
 
 template <typename T = std::size_t>
-void addToSpectraVector(std::vector<T> &spectraVec,
-                        std::string const &spectraString) {
-  auto const range = splitStringBy(spectraString, "-");
+void addToIndicesVector(std::vector<T> &indicesVec,
+                        std::string const &indicesString) {
+  auto const range = splitStringBy(indicesString, "-");
   if (range.size() > 1)
-    addToSpectraVector<T>(spectraVec, std::stoul(range[0]),
+    addToIndicesVector<T>(indicesVec, std::stoul(range[0]),
                           std::stoul(range[1]));
   else
-    spectraVec.emplace_back(std::stoul(range[0]));
+    indicesVec.emplace_back(std::stoul(range[0]));
 }
 
 template <typename T = std::size_t>
-std::vector<T> createSpectraVector(std::string const &spectra) {
-  std::vector<T> spectraVec;
-  for (auto subString : splitStringBy(spectra, ","))
-    addToSpectraVector<T>(spectraVec, subString);
-  return spectraVec;
+std::vector<T> createIndicesVector(std::string const &indices) {
+  std::vector<T> indicesVec;
+  for (auto subString : splitStringBy(indices, ","))
+    addToIndicesVector<T>(indicesVec, subString);
+  return indicesVec;
 }
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-std::string expandSpectraRange(std::size_t const &startSpec,
-                               std::size_t const &endSpec,
+std::string expandIndicesRange(std::size_t const &startIndex,
+                               std::size_t const &endIndex,
                                std::string const &separator) {
   std::string expandedRange;
-  for (auto spec = startSpec; spec <= endSpec; ++spec) {
-    expandedRange += std::to_string(spec);
-    expandedRange += spec != endSpec ? separator : "";
+  for (auto index = startIndex; index <= endIndex; ++index) {
+    expandedRange += std::to_string(index);
+    expandedRange += index != endIndex ? separator : "";
   }
   return expandedRange;
 }
 
-std::string expandSpectraRange(std::string const &startSpec,
-                               std::string const &endSpec,
+std::string expandIndicesRange(std::string const &startIndex,
+                               std::string const &endIndex,
                                std::string const &separator) {
-  return expandSpectraRange(std::stoul(startSpec), std::stoul(endSpec),
+  return expandIndicesRange(std::stoul(startIndex), std::stoul(endIndex),
                             separator);
 }
 
-void addToSpectraList(std::string &spectraList,
-                      std::string const &spectraString) {
-  auto const range = splitStringBy(spectraString, "-");
-  auto const expandedSpectra =
-      range.size() > 1 ? expandSpectraRange(range[0], range[1], ",") : range[0];
-  spectraList += expandedSpectra;
+void addToIndicesList(std::string &indicesList,
+                      std::string const &indicesString) {
+  auto const range = splitStringBy(indicesString, "-");
+  auto const expandedIndices =
+      range.size() > 1 ? expandIndicesRange(range[0], range[1], ",") : range[0];
+  indicesList += expandedIndices;
 }
 
-std::string createSpectraList(std::string const &spectra) {
-  std::string spectraList;
-  auto const subStrings = splitStringBy(spectra, ",");
+std::string createIndicesList(std::string const &indices) {
+  std::string indicesList;
+  auto const subStrings = splitStringBy(indices, ",");
   for (auto iter = subStrings.begin(); iter < subStrings.end(); ++iter) {
-    addToSpectraList(spectraList, *iter);
-    spectraList += iter < subStrings.end() - 1 ? "," : "";
+    addToIndicesList(indicesList, *iter);
+    indicesList += iter < subStrings.end() - 1 ? "," : "";
   }
-  return "[" + spectraList + "]";
+  return "[" + indicesList + "]";
 }
 
 std::string createPlotSpectraString(std::string const &workspaceName,
@@ -144,6 +138,14 @@ std::string createPlotSpectraString(std::string const &workspaceName,
   auto const errors = errorbars ? "True" : "False";
   std::string plotString = "from mantidplot import plotSpectrum\n";
   return plotString + "plotSpectrum(['" + workspaceName + "'], " + spectra +
+         ", error_bars=" + errors + ")\n";
+}
+
+std::string createPlotBinsString(std::string const &workspaceName,
+                                 std::string const &bins, bool errorbars) {
+  auto const errors = errorbars ? "True" : "False";
+  std::string plotString = "from mantidplot import plotTimeBin\n";
+  return plotString + "plotTimeBin(['" + workspaceName + "'], " + bins +
          ", error_bars=" + errors + ")\n";
 }
 
@@ -170,10 +172,10 @@ std::string createPlotTiledString(std::string const &workspaceName,
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 IndirectPlotOptionsModel::IndirectPlotOptionsModel()
-    : m_spectra(boost::none), m_workspaceName(boost::none) {}
+    : m_fixedIndices(false), m_workspaceIndices(boost::none),
+      m_workspaceName(boost::none) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
@@ -196,31 +198,43 @@ void IndirectPlotOptionsModel::removeWorkspace() {
 }
 
 std::string
-IndirectPlotOptionsModel::formatSpectra(std::string const &spectra) const {
-  auto spectraString = spectra;
-  return formatSpectraString(spectraString);
+IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
+  auto indicesString = indices;
+  return formatIndicesString(indicesString);
 }
 
-bool IndirectPlotOptionsModel::setSpectra(std::string const &spectra) {
-  bool valid = validateSpectra(spectra);
+void IndirectPlotOptionsModel::setFixedIndices(std::string const &indices) {
+  if (m_fixedIndices = !indices.empty())
+    m_workspaceIndices = indices;
+}
+
+bool IndirectPlotOptionsModel::indicesFixed() const { return m_fixedIndices; }
+
+bool IndirectPlotOptionsModel::setIndices(std::string const &indices) {
+  bool valid = validateIndices(indices);
   if (valid)
-    m_spectra = spectra;
+    m_workspaceIndices = indices;
   else
-    m_spectra = boost::none;
+    m_workspaceIndices = boost::none;
   return valid;
 }
 
-boost::optional<std::string> IndirectPlotOptionsModel::spectra() const {
-  return m_spectra;
+boost::optional<std::string> IndirectPlotOptionsModel::indices() const {
+  return m_workspaceIndices;
 }
 
-bool IndirectPlotOptionsModel::validateSpectra(
-    std::string const &spectra) const {
+bool IndirectPlotOptionsModel::validateIndices(
+    std::string const &indices, MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
-  if (!spectra.empty() && m_workspaceName)
-    if (ads.doesExist(m_workspaceName.get()))
-      return validateSpectra(
-          ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get()), spectra);
+  if (!indices.empty() && m_workspaceName &&
+      ads.doesExist(m_workspaceName.get())) {
+    if (auto const workspace =
+            ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
+      if (axisType == MantidAxis::Spectrum)
+        return validateSpectra(workspace, indices);
+      return validateBins(workspace, indices);
+    }
+  }
   return false;
 }
 
@@ -231,14 +245,31 @@ bool IndirectPlotOptionsModel::validateSpectra(
   return lastIndex < numberOfHistograms;
 }
 
+bool IndirectPlotOptionsModel::validateBins(MatrixWorkspace_sptr workspace,
+                                            std::string const &bins) const {
+  auto const numberOfBins = workspace->y(0).size();
+  auto const lastIndex = std::stoul(splitStringBy(bins, ",-").back());
+  return lastIndex < numberOfBins;
+}
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 boost::optional<std::string>
 IndirectPlotOptionsModel::getPlotSpectraString(bool errorBars) const {
   auto const workspaceName = workspace();
-  auto const spectraString = spectra();
-  if (workspaceName && spectraString)
+  auto const indicesString = indices();
+  if (workspaceName && indicesString)
     return createPlotSpectraString(
-        workspaceName.get(), createSpectraList(spectraString.get()), errorBars);
+        workspaceName.get(), createIndicesList(indicesString.get()), errorBars);
+  return boost::none;
+}
+
+boost::optional<std::string>
+IndirectPlotOptionsModel::getPlotBinsString(bool errorBars) const {
+  auto const workspaceName = workspace();
+  auto const indicesString = indices();
+  if (workspaceName && indicesString)
+    return createPlotBinsString(
+        workspaceName.get(), createIndicesList(indicesString.get()), errorBars);
   return boost::none;
 }
 
@@ -253,24 +284,40 @@ IndirectPlotOptionsModel::getPlotContourString() const {
 boost::optional<std::string>
 IndirectPlotOptionsModel::getPlotTiledString() const {
   auto const workspaceName = workspace();
-  auto const spectraString = spectra();
-  if (workspaceName && spectraString)
+  auto const indicesString = indices();
+  if (workspaceName && indicesString)
     return createPlotTiledString(workspaceName.get(),
-                                 createSpectraVector(spectraString.get()));
+                                 createIndicesVector(indicesString.get()));
   return boost::none;
 }
 
 #else
 void IndirectPlotOptionsModel::plotSpectra(bool errorBars) {
   auto const workspaceName = workspace();
-  auto const spectraString = spectra();
-  if (workspaceName && spectraString) {
+  auto const indicesString = indices();
+  if (workspaceName && indicesString) {
     QHash<QString, QVariant> plotKwargs;
+    if (errorBars)
+      plotKwargs["capsize"] = 3;
+    using MantidQt::Widgets::MplCpp::plot; 
+    plot(QStringList(QString::fromStdString(workspaceName.get())), boost::none,
+         createIndicesVector<int>(indicesString.get()), boost::none, plotKwargs,
+         boost::none, boost::none, errorBars);
+  }
+}
+
+void IndirectPlotOptionsModel::plotBins(bool errorBars) {
+  auto const workspaceName = workspace();
+  auto const indicesString = indices();
+  if (workspaceName && indicesString) {
+    using MantidQt::Widgets::MplCpp::MantidAxType;
+    QHash<QString, QVariant> plotKwargs;
+    plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
     if (errorBars)
       plotKwargs["capsize"] = 3;
     using MantidQt::Widgets::MplCpp::plot;
     plot(QStringList(QString::fromStdString(workspaceName.get())), boost::none,
-         createSpectraVector<int>(spectraString.get()), boost::none, plotKwargs,
+         createIndicesVector<int>(indicesString.get()), boost::none, plotKwargs,
          boost::none, boost::none, errorBars);
   }
 }
@@ -288,6 +335,5 @@ void IndirectPlotOptionsModel::plotTiled() {
 }
 #endif
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

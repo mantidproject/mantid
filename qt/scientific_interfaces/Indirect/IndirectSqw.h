@@ -56,7 +56,7 @@ private:
   void setSaveEnabled(bool enabled);
   void setOutputButtonsEnabled(std::string const &enableOutputButtons);
 
-  std::unique_ptr<IDA::IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces

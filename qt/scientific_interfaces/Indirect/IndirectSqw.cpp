@@ -57,8 +57,6 @@ convertTupleToPair(std::tuple<double, double> const &tuple) {
 
 namespace MantidQt {
 namespace CustomInterfaces {
-using namespace IDA;
-
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -161,6 +159,8 @@ bool IndirectSqw::validate() {
 }
 
 void IndirectSqw::run() {
+  m_plotOptionsPresenter->removeWorkspace();
+
   auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   auto const sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
   auto const eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
@@ -230,9 +230,8 @@ std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
  * @param error If the algorithm chain failed
  */
 void IndirectSqw::sqwAlgDone(bool error) {
-  m_plotOptionsPresenter->removeWorkspace();
   if (!error) {
-    m_plotOptionsPresenter->setWorkspace(m_pythonExportWsName);
+    m_plotOptionsPresenter->setWorkspaces({m_pythonExportWsName});
     setSaveEnabled(true);
   }
 }

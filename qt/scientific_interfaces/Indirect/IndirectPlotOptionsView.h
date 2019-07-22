@@ -21,10 +21,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
-enum PlotWidget { Spectra, SpectraContour, SpectraTiled } const;
-enum Plotting { None, Spectrum, Contour, Tiled } const;
+enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled } const;
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
   Q_OBJECT
@@ -35,28 +33,42 @@ public:
   virtual ~IndirectPlotOptionsView() override = default;
 
   void setPlotType(PlotWidget const &plotType);
-  void setOptionsEnabled(Plotting const &type = Plotting::None,
-                         bool enable = false);
+  void setWorkspaceComboBoxEnabled(bool enable);
+  void setIndicesLineEditEnabled(bool enable);
+  void setPlotButtonEnabled(bool enable);
 
-  void setSpectraRegex(QString const &regex);
+  void setIndicesRegex(QString const &regex);
 
-  void setSpectra(QString const &spectra);
-  void setSpectraErrorLabelVisible(bool visible);
+  QString selectedWorkspace() const;
+  void setWorkspaces(std::vector<std::string> const &workspaces);
 
-  void addSpectraSuggestion(QString const &spectra);
+  void removeWorkspace(QString const &workspaceName);
+  void removeWorkspaces();
 
+  QString selectedIndices() const;
+  void setIndices(QString const &indices);
+  void setIndicesErrorLabelVisible(bool visible);
+
+  void addIndicesSuggestion(QString const &spectra);
+
+  void displayWarning(QString const &message);
+ 
 signals:
-  void selectedSpectraChanged(std::string const &spectra);
+  void selectedWorkspaceChanged(std::string const &workspaceName);
+  void selectedIndicesChanged(std::string const &indices);
   void plotSpectraClicked();
+  void plotBinsClicked();
   void plotContourClicked();
   void plotTiledClicked();
 
   void runAsPythonScript(QString const &code, bool noOutput = false);
 
 private slots:
-  void emitSelectedSpectraChanged();
-  void emitSelectedSpectraChanged(QString const &spectra);
+  void emitSelectedWorkspaceChanged(QString const &workspaceName);
+  void emitSelectedIndicesChanged();
+  void emitSelectedIndicesChanged(QString const &indices);
   void emitPlotSpectraClicked();
+  void emitPlotBinsClicked();
   void emitPlotContourClicked();
   void emitPlotTiledClicked();
 
@@ -64,16 +76,13 @@ private:
   void setupView();
   QValidator *createValidator(QString const &regex);
 
-  void setButtonText(Plotting const &type, bool enabled);
-
-  QString selectedSpectra() const;
+  bool m_fixedIndices;
 
   std::unique_ptr<QStringListModel> m_suggestionsModel;
   std::unique_ptr<QCompleter> m_completer;
   std::unique_ptr<Ui::IndirectPlotOptions> m_plotOptions;
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

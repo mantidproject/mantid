@@ -15,41 +15,50 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
+
+enum MantidAxis { Spectrum, Bin } const;
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
-public:
+public: 
   IndirectPlotOptionsModel();
   virtual ~IndirectPlotOptionsModel();
 
   bool setWorkspace(std::string const &workspaceName);
   void removeWorkspace();
 
-  std::string formatSpectra(std::string const &spectra) const;
-  bool setSpectra(std::string const &spectra);
+  void setFixedIndices(std::string const &indices);
+  bool indicesFixed() const;
 
-  boost::optional<std::string> spectra() const;
+  std::string formatIndices(std::string const &indices) const;
+  bool validateIndices(std::string const &indices,
+                       MantidAxis const &axisType = MantidAxis::Spectrum) const;
+  bool setIndices(std::string const &indices);
+
+  boost::optional<std::string> indices() const;
 
   boost::optional<std::string> getPlotSpectraString(bool errorBars) const;
+  boost::optional<std::string> getPlotBinsString(bool errorBars) const;
   boost::optional<std::string> getPlotContourString() const;
   boost::optional<std::string> getPlotTiledString() const;
 
   void plotSpectra(bool errorBars);
+  void plotBins(bool errorBars);
   void plotContour();
   void plotTiled();
 
 private:
-  bool validateSpectra(std::string const &spectra) const;
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
                        std::string const &spectra) const;
+  bool validateBins(Mantid::API::MatrixWorkspace_sptr workspace,
+                    std::string const &bins) const;
 
   boost::optional<std::string> workspace() const;
 
-  boost::optional<std::string> m_spectra;
+  bool m_fixedIndices;
+  boost::optional<std::string> m_workspaceIndices;
   boost::optional<std::string> m_workspaceName;
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

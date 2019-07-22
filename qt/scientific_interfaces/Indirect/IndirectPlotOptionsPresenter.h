@@ -13,41 +13,61 @@
 
 #include "DllConfig.h"
 
+#include <Poco/NObserver.h>
+
 #include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectPlotOptionsPresenter(
-      IndirectPlotOptionsView *view, IndirectTab *parent,
-      PlotWidget const &plotType = PlotWidget::Spectra);
-  ~IndirectPlotOptionsPresenter() override = default;
+  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
+                               IndirectTab *parent,
+                               PlotWidget const &plotType = PlotWidget::Spectra,
+                               std::string const &fixedIndices = "");
+  ~IndirectPlotOptionsPresenter() override; 
 
-  void setWorkspace(std::string const &plotWorkspace);
+  void setWorkspaces(std::vector<std::string> const &workspaces);
   void removeWorkspace();
 
 signals:
   void runAsPythonScript(QString const &code, bool noOutput = false);
 
 private slots:
-  void spectraChanged(std::string const &spectra);
+  void workspaceChanged(std::string const &workspaceName);
+  void indicesChanged(std::string const &indices);
   void plotSpectra();
+  void plotBins();
   void plotContour();
   void plotTiled();
 
 private:
   void setupPresenter();
+  void watchADS(bool on);
 
-  void setSpectra();
+  void setOptionsEnabled(bool enable);
+
+  void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
+  void
+  onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+
+  void setWorkspace(std::string const &plotWorkspace);
+  void setIndices();
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   void runPythonCode(boost::optional<std::string> const &plotString);
 #endif
+
+  // Observers for ADS Notifications
+  Poco::NObserver<IndirectPlotOptionsPresenter,
+                  Mantid::API::WorkspacePreDeleteNotification>
+      m_wsRemovedObserver;
+  Poco::NObserver<IndirectPlotOptionsPresenter,
+                  Mantid::API::WorkspaceBeforeReplaceNotification>
+      m_wsReplacedObserver;
 
   API::PythonRunner m_pythonRunner;
   std::unique_ptr<IndirectPlotOptionsView> m_view;
@@ -55,7 +75,6 @@ private:
   IndirectTab *m_parentTab;
 };
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
