@@ -113,6 +113,8 @@ void export_V3D() {
            "Returns the distance between this vector and another")
       .def("angle", &V3D::angle, (arg("self"), arg("other")),
            "Returns the angle between this vector and another")
+      .def("cosAngle", &V3D::cosAngle, (arg("self"), arg("other")),
+           "Returns cos(angle) between this vector and another")
       .def("zenith", &V3D::zenith, (arg("self"), arg("other")),
            "Returns the zenith between this vector and another")
       .def("scalar_prod", &V3D::scalar_prod, (arg("self"), arg("other")),
