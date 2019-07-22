@@ -525,6 +525,10 @@ bool SaveNexusProcessed::processGroups() {
   if (!workspaces.empty()) {
     for (size_t entry = 0; entry < workspaces.size(); entry++) {
       const Workspace_sptr ws = workspaces[entry];
+      if (ws->isGroup()) {
+        throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
+                                 "support nested groups of groups");
+      }
       this->doExec(ws, nexusFile, true /*keepFile*/, entry);
       g_log.information() << "Saving group index " << entry << "\n";
     }
