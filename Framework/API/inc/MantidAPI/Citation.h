@@ -19,39 +19,12 @@
 namespace Mantid {
 namespace API {
 
-using OptionalString = boost::optional<std::string>;
-using OptionalCharStar = boost::optional<const char *>;
-using OptionalVectorString = boost::optional<std::vector<std::string>>;
-
-namespace {
-OptionalString
-convertOptionalCharStarToString(const OptionalCharStar &charStar) {
-  if (charStar)
-    return boost::optional<std::string>(std::string(charStar.get()));
-  else
-    return boost::none;
-}
-} // namespace
-
 class MANTID_API_DLL Citation {
 public:
   Citation();
-  Citation(const OptionalString &doi,
-           const OptionalString &bibtex = boost::none,
-           const OptionalString &endnote = boost::none,
-           const OptionalString &url = boost::none,
-           const OptionalString &description = boost::none);
-
-  Citation(const OptionalCharStar &doi,
-           const OptionalCharStar &bibtex = boost::none,
-           const OptionalCharStar &endnote = boost::none,
-           const OptionalCharStar &url = boost::none,
-           const OptionalCharStar &description = boost::none)
-      : Citation(convertOptionalCharStarToString(doi),
-                 convertOptionalCharStarToString(bibtex),
-                 convertOptionalCharStarToString(endnote),
-                 convertOptionalCharStarToString(url),
-                 convertOptionalCharStarToString(description)) {}
+  Citation(const std::string &doi = "", const std::string &bibtex = "",
+           const std::string &endnote = "", const std::string &url = "",
+           const std::string &description = "");
 
   // Needed for future Set constructiom
   bool operator==(const Citation &rhs) const;

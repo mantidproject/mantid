@@ -25,54 +25,49 @@ public:
 
   void test_citation_constructor_accepts_none_for_some_variables() {
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::Citation("doi", "bibtex", "endnote", "url", boost::none));
+        Mantid::API::Citation("doi", "bibtex", "endnote", "url", ""));
   }
 
   void test_citation_constructor_throws_when_bibtex_given_but_endnote_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation(boost::none, "bibtex"),
+    TS_ASSERT_THROWS(Mantid::API::Citation("", "bibtex"),
                      const std::invalid_argument &)
   }
 
   void test_citation_constructor_throws_when_endnote_given_but_bibtex_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation(boost::none, boost::none, "endnote"),
+    TS_ASSERT_THROWS(Mantid::API::Citation("", "", "endnote"),
                      const std::invalid_argument &);
   }
 
   void test_citation_constructor_throws_when_doi_is_given_but_endnote_isnt() {
-    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", boost::none, "url"),
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", "", "url"),
                      const std::invalid_argument &);
   }
 
   void test_citation_constructor_throws_when_doi_is_given_but_bibtex_isnt() {
-    TS_ASSERT_THROWS(
-        Mantid::API::Citation("doi", boost::none, "endnote", "url"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "", "endnote", "url"),
+                     const std::invalid_argument &);
   }
 
   void
   test_citation_constructor_throws_when_doi_is_given_but_endnote_and_bibtex_isnt() {
-    TS_ASSERT_THROWS(
-        Mantid::API::Citation("doi", boost::none, boost::none, "url"),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "", "", "url"),
+                     const std::invalid_argument &);
   }
 
   void test_citation_constructor_throws_when_doi_is_given_but_url_isnt() {
-    TS_ASSERT_THROWS(
-        Mantid::API::Citation("doi", "bibtex", "endnote", boost::none),
-        const std::invalid_argument &);
+    TS_ASSERT_THROWS(Mantid::API::Citation("doi", "bibtex", "endnote", ""),
+                     const std::invalid_argument &);
   }
 
   void
   test_citation_constructor_throws_when_url_is_not_given_when_bibtex_endnote_and_doi_is_not_given() {
-    TS_ASSERT_THROWS(Mantid::API::Citation(boost::none, boost::none,
-                                           boost::none, boost::none, ""),
+    TS_ASSERT_THROWS(Mantid::API::Citation("", "", "", "", ""),
                      const std::invalid_argument &);
   }
 
   void
   test_citation_constructor_doesnt_throw_when_url_is_given_when_bibtex_endnote_and_doi_is_not_given() {
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::Citation(boost::none, boost::none, boost::none, "url"));
+    TS_ASSERT_THROWS_NOTHING(Mantid::API::Citation("", "", "", "url"));
   }
 
   void test_citation_equivelancy_operator_is_true_on_equal() {

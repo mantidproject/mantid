@@ -27,38 +27,33 @@ namespace API {
   than nothing)
  */
 
-Citation::Citation(const OptionalString &doi, const OptionalString &bibtex,
-                   const OptionalString &endnote, const OptionalString &url,
-                   const OptionalString &description) {
-  if (!doi && !bibtex && !endnote && !url && !description)
+Citation::Citation(const std::string &doi, const std::string &bibtex,
+                   const std::string &endnote, const std::string &url,
+                   const std::string &description) {
+  if (doi == "" && bibtex == "" && endnote == "" && url == "" &&
+      description == "")
     throw std::invalid_argument("No arguements were given!");
 
   // This is an initial implementation that expects it but it should be possible
   // to generate one from the other
-  if ((bibtex && !endnote) || (!bibtex && endnote))
+  if ((bibtex != "" && endnote == "") || (bibtex == "" && endnote != ""))
     throw std::invalid_argument(
         "If bibtex is provided, endnote must also be provided and vice-versa");
 
-  if (doi && (!bibtex || !endnote || !url))
+  if (doi != "" && (bibtex == "" || endnote == "" || url == ""))
     throw std::invalid_argument(
         "If doi is provided then url, bibtex and endnote must be");
 
-  if (!doi && !bibtex && !endnote)
-    if (!url)
+  if (doi == "" && bibtex == "" && endnote == "")
+    if (url == "")
       throw std::invalid_argument(
           "If none of doi, bibtex, or endnote is provided, then url must be");
 
-  if (doi)
-    m_doi = doi.get();
-
-  if (bibtex)
-    m_bibtex = doi.get();
-
-  if (endnote)
-    m_endnote = endnote.get();
-
-  if (url)
-    m_url = url.get();
+  m_doi = doi;
+  m_bibtex = doi;
+  m_endnote = endnote;
+  m_url = url;
+  m_description = description;
 }
 
 bool Citation::operator==(const Citation &rhs) const {
