@@ -17,6 +17,12 @@ from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 
 from MultiPlotting.multi_plotting_widget import MultiPlotWindow
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.label import Label
 

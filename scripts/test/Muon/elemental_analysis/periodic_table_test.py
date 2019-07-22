@@ -5,8 +5,7 @@ import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
 
-from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTableItem,\
-    ColoredPeriodicTableItem, _ElementButton, PeriodicTable, PeriodicCombo, PeriodicList
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTableItem, PeriodicTable
 
 
 class PeriodicTableTest(GuiTest):
@@ -141,26 +140,3 @@ class PeriodicTableTest(GuiTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
