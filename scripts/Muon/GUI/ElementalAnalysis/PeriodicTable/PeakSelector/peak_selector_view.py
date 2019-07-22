@@ -35,22 +35,26 @@ class PeakSelectorView(QtWidgets.QListWidget):
         if not valid_data(peak_data):
             raise ValueError
 
-        self.update_new_data(peak_data)
         self.element = element
+        self.update_new_data(peak_data)
         self.setWindowTitle(element)
         self.list = QtWidgets.QVBoxLayout(self)
 
-        # Labels might not be present, if so return empty list
+        # Gamma peaks might not be present, if so return empty list
         primary = peak_data["Primary"]
         self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
         secondary = peak_data["Secondary"]
         self.secondary_checkboxes = self._create_checkbox_list("Secondary", secondary, checked=False)
         try:
             gammas = peak_data["Gammas"]
-            self.gamma_checkboxes = self._create_checkbox_list(
-                "Gammas", gammas, checked=False)
+            self.gamma_checkboxes = self._create_checkbox_list("Gammas", gammas, checked=False)
         except KeyError:
             self.gamma_checkboxes = []
+        try:
+            electrons = peak_data["Electrons"]
+            self.electron_checkboxes = self._create_checkbox_list("Electrons", electrons, checked=False)
+        except KeyError:
+            self.electron_checkboxes = []
 
         widget.setLayout(self.list)
         scroll = QtWidgets.QScrollArea()
