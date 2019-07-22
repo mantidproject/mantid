@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, unicode_literals)
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit, run_CalculateMuonAsymmetry
 import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_workspace_directory
 from mantid.simpleapi import RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CopyLogs
 
 
@@ -62,22 +61,25 @@ class FittingTabModel(object):
         return workspace_wrapper
 
     def create_fitted_workspace_name(self, input_workspace_name, function_name, group_name):
-        directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
-                                                self.context.workspace_suffix)
-        name = input_workspace_name + '; Fitted; ' + self.function_name
+        # directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
+        #                                         self.context.workspace_suffix)
+        directory = input_workspace_name + '; Fitted; ' + self.function_name + '/'
+        name = input_workspace_name + '; Fitted; ' + self.function_name + '; Workspace'
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function, group_name):
-        directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
-                                                self.context.workspace_suffix)
+        # directory = get_fit_workspace_directory(group_name, '_workspaces', self.context.data_context.base_directory,
+        #                                         self.context.workspace_suffix)
+        directory = input_workspace + '; Fitted; ' + self.function_name + '/'
         name = input_workspace + '+ ...; Fitted; ' + self.function_name
 
         return name, directory
 
     def create_parameter_table_name(self, input_workspace_name, function_name, group_name):
-        directory = get_fit_workspace_directory(group_name, '_parameter_tables', self.context.data_context.base_directory,
-                                                self.context.workspace_suffix)
+        # directory = get_fit_workspace_directory(group_name, '_parameter_tables', self.context.data_context.base_directory,
+        #                                         self.context.workspace_suffix)
+        directory = input_workspace_name + '; Fitted; ' + self.function_name + '/'
         name = input_workspace_name + '; Fitted Parameters; ' + self.function_name
 
         return name, directory
@@ -206,12 +208,12 @@ class FittingTabModel(object):
             workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
                 input_workspace_list[0],
                 fit_function, fit_group_name)
-            self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-            self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+            self.add_workspace_to_ADS(output_workspace, workspace_name, '')
             workspace_name = self.rename_members_of_fitted_workspace_group(output_workspace,
                                                                            input_workspace_list,
                                                                            fit_function,
                                                                            fit_group_name)
+            self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
         else:
             table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0],
                                                                            fit_function,
