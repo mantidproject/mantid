@@ -201,7 +201,10 @@ class ElementalAnalysisTest(GuiTest):
         data = {'line1': 10.0, 'line2': 20.0, 'line3': 30.0}
         self.gui._add_element_lines('Cu', data)
         self.assertEqual(mock_plot_line.call_count, 3)
-        mock_plot_line.assert_called_with(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')
+        call_list = [mock.call(gen_name('Cu', 'line3'), 30.0, 'C0', 'Cu'),
+                     mock.call(gen_name('Cu', 'line2'), 20.0, 'C0', 'Cu'),
+                     mock.call(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')]
+        mock_plot_line.assert_has_calls(call_list)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
     def test_remove_element_lines_does_nothing_if_element_not_in_element_lines(self, mock_rm_line):
