@@ -63,8 +63,8 @@ namespace CustomInterfaces {
 IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
-  m_plotOptionsPresenter = std::make_unique<IndirectPlotOptionsPresenter>(
-      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::SpectraContour);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::SpectraContour));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this,
           SLOT(handleDataReady(QString const &)));
@@ -159,8 +159,6 @@ bool IndirectSqw::validate() {
 }
 
 void IndirectSqw::run() {
-  m_plotOptionsPresenter->removeWorkspace();
-
   auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   auto const sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
   auto const eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
@@ -231,7 +229,7 @@ std::size_t IndirectSqw::getOutWsNumberOfSpectra() const {
  */
 void IndirectSqw::sqwAlgDone(bool error) {
   if (!error) {
-    m_plotOptionsPresenter->setWorkspaces({m_pythonExportWsName});
+    setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
     setSaveEnabled(true);
   }
 }

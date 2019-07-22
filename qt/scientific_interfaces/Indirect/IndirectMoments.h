@@ -8,7 +8,6 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_
 
 #include "IndirectDataReductionTab.h"
-#include "IndirectPlotOptionsPresenter.h"
 
 #include "MantidKernel/System.h"
 #include "ui_IndirectMoments.h"
@@ -61,7 +60,6 @@ private:
   void plotNewData(QString const &filename);
   void setFileExtensionsByName(bool filter) override;
 
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
   Ui::IndirectMoments m_uiForm;
 };
 } // namespace CustomInterfaces

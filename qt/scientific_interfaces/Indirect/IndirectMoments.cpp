@@ -26,8 +26,8 @@ namespace CustomInterfaces {
 IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
-  m_plotOptionsPresenter = std::make_unique<IndirectPlotOptionsPresenter>(
-      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra, "0,2,4");
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra, "0,2,4"));
 
   const unsigned int NUM_DECIMALS = 6;
 
@@ -108,15 +108,13 @@ bool IndirectMoments::validate() {
 }
 
 void IndirectMoments::run() {
-  m_plotOptionsPresenter->removeWorkspace();
-
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   QString outputName = workspaceName.left(workspaceName.length() - 4);
   double scale = m_uiForm.spScale->value();
   double eMin = m_dblManager->value(m_properties["EMin"]);
   double eMax = m_dblManager->value(m_properties["EMax"]);
 
-  std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
+  std::string const outputWorkspaceName = outputName.toStdString() + "_Moments";
 
   IAlgorithm_sptr momentsAlg =
       AlgorithmManager::Instance().create("SofQWMoments", -1);
@@ -215,27 +213,23 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   if (error)
     return;
 
-  QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-  QString outputName = workspaceName.left(workspaceName.length() - 4);
-  std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
-
-  m_plotOptionsPresenter->setWorkspaces({outputWorkspaceName});
-
   MatrixWorkspace_sptr outputWorkspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          outputWorkspaceName);
+          m_pythonExportWsName);
 
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
+  setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
+
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M0", QString::fromStdString(outputWorkspaceName), 0, Qt::green);
+      "M0", QString::fromStdString(m_pythonExportWsName), 0, Qt::green);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M1", QString::fromStdString(outputWorkspaceName), 1, Qt::black);
+      "M1", QString::fromStdString(m_pythonExportWsName), 1, Qt::black);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M2", QString::fromStdString(outputWorkspaceName), 2, Qt::red);
+      "M2", QString::fromStdString(m_pythonExportWsName), 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
@@ -260,10 +254,8 @@ void IndirectMoments::runClicked() { runTab(); }
  * Handles saving of workspaces
  */
 void IndirectMoments::saveClicked() {
-  QString outputWs =
-      getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
-  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
-    addSaveWorkspaceToQueue(outputWs);
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(m_pythonExportWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -277,8 +269,7 @@ void IndirectMoments::setSaveEnabled(bool enabled) {
 
 void IndirectMoments::setOutputButtonsEnabled(
     std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setSaveEnabled(enable);
+  setSaveEnabled(enableOutputButtons == "enable");
 }
 
 void IndirectMoments::updateRunButton(bool enabled,

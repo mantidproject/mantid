@@ -8,7 +8,6 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSQW_H_
 
 #include "IndirectDataReductionTab.h"
-#include "IndirectPlotOptionsPresenter.h"
 
 #include "MantidKernel/System.h"
 #include "ui_IndirectSqw.h"
@@ -56,7 +55,6 @@ private:
   void setSaveEnabled(bool enabled);
   void setOutputButtonsEnabled(std::string const &enableOutputButtons);
 
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces
