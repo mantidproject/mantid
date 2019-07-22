@@ -14,8 +14,7 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, \
-    get_base_data_directory
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
 from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
@@ -155,7 +154,7 @@ class MaxEntPresenter(object):
         run = re.search('[0-9]+', input_workspace).group()
         base_name = get_maxent_workspace_name(input_workspace)
         group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
-        directory = get_base_data_directory(self.load, run) + group
+        directory = group
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
         muon_workspace_wrapper.show()

@@ -8,8 +8,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
-                                                         get_raw_data_directory, get_group_data_directory,
-                                                         get_pair_data_directory, get_group_asymmetry_name,
+                                                         get_group_asymmetry_name,
                                                          get_group_asymmetry_unnorm_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
