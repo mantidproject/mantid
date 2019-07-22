@@ -26,6 +26,8 @@ namespace CustomInterfaces {
 IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  m_plotOptionsPresenter = std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra, "0,2,4");
 
   const unsigned int NUM_DECIMALS = 6;
 
@@ -63,7 +65,6 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
 
   // Plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -107,6 +108,8 @@ bool IndirectMoments::validate() {
 }
 
 void IndirectMoments::run() {
+  m_plotOptionsPresenter->removeWorkspace();
+
   QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
   QString outputName = workspaceName.left(workspaceName.length() - 4);
   double scale = m_uiForm.spScale->value();
@@ -216,6 +219,8 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   QString outputName = workspaceName.left(workspaceName.length() - 4);
   std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
+  m_plotOptionsPresenter->setWorkspaces({outputWorkspaceName});
+
   MatrixWorkspace_sptr outputWorkspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           outputWorkspaceName);
@@ -234,7 +239,6 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
-  m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
 
@@ -253,18 +257,6 @@ void IndirectMoments::setFileExtensionsByName(bool filter) {
 void IndirectMoments::runClicked() { runTab(); }
 
 /**
- * Handle mantid plotting
- */
-void IndirectMoments::plotClicked() {
-  setPlotIsPlotting(true);
-  QString outputWs =
-      getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
-  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
-    plotSpectra(outputWs, {0, 2, 4});
-  setPlotIsPlotting(false);
-}
-
-/**
  * Handles saving of workspaces
  */
 void IndirectMoments::saveClicked() {
@@ -278,9 +270,7 @@ void IndirectMoments::saveClicked() {
 void IndirectMoments::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
-void IndirectMoments::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
+
 void IndirectMoments::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
@@ -288,7 +278,6 @@ void IndirectMoments::setSaveEnabled(bool enabled) {
 void IndirectMoments::setOutputButtonsEnabled(
     std::string const &enableOutputButtons) {
   bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
   setSaveEnabled(enable);
 }
 
@@ -301,13 +290,6 @@ void IndirectMoments::updateRunButton(bool enabled,
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
     setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void IndirectMoments::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
