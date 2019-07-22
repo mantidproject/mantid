@@ -264,12 +264,12 @@ IndirectPlotOptionsModel::getPlotSpectraString(bool errorBars) const {
 }
 
 boost::optional<std::string>
-IndirectPlotOptionsModel::getPlotBinsString(bool errorBars) const {
+IndirectPlotOptionsModel::getPlotBinsString(std::string const &indices,
+                                            bool errorBars) const {
   auto const workspaceName = workspace();
-  auto const indicesString = indices();
-  if (workspaceName && indicesString)
-    return createPlotBinsString(
-        workspaceName.get(), createIndicesList(indicesString.get()), errorBars);
+  if (workspaceName)
+    return createPlotBinsString(workspaceName.get(), createIndicesList(indices),
+                                errorBars);
   return boost::none;
 }
 
@@ -299,7 +299,7 @@ void IndirectPlotOptionsModel::plotSpectra(bool errorBars) {
     QHash<QString, QVariant> plotKwargs;
     if (errorBars)
       plotKwargs["capsize"] = 3;
-    using MantidQt::Widgets::MplCpp::plot; 
+    using MantidQt::Widgets::MplCpp::plot;
     plot(QStringList(QString::fromStdString(workspaceName.get())), boost::none,
          createIndicesVector<int>(indicesString.get()), boost::none, plotKwargs,
          boost::none, boost::none, errorBars);

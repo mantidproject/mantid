@@ -160,7 +160,7 @@ void IndirectPlotOptionsPresenter::workspaceChanged(
 void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
   auto const formattedIndices = m_model->formatIndices(indices);
   m_view->setIndices(QString::fromStdString(formattedIndices));
-  m_view->setIndicesErrorLabelVisible(!m_model->setIndices(formattedIndices)); 
+  m_view->setIndicesErrorLabelVisible(!m_model->setIndices(formattedIndices));
 
   if (!formattedIndices.empty())
     m_view->addIndicesSuggestion(QString::fromStdString(formattedIndices));
@@ -177,11 +177,12 @@ void IndirectPlotOptionsPresenter::plotSpectra() {
 }
 
 void IndirectPlotOptionsPresenter::plotBins() {
-  if (m_model->validateIndices(m_view->selectedIndices().toStdString(),
-                               MantidAxis::Bin)) {
+  auto const indicesString = m_view->selectedIndices().toStdString();
+  if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
     setOptionsEnabled(false);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    runPythonCode(m_model->getPlotBinsString(m_parentTab->errorBars()));
+    runPythonCode(
+        m_model->getPlotBinsString(indicesString, m_parentTab->errorBars()));
 #else
     m_model->plotBins(m_parentTab->errorBars());
 #endif

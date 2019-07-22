@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 enum MantidAxis { Spectrum, Bin } const;
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
-public: 
+public:
   IndirectPlotOptionsModel();
   virtual ~IndirectPlotOptionsModel();
 
@@ -37,7 +37,8 @@ public:
   boost::optional<std::string> indices() const;
 
   boost::optional<std::string> getPlotSpectraString(bool errorBars) const;
-  boost::optional<std::string> getPlotBinsString(bool errorBars) const;
+  boost::optional<std::string> getPlotBinsString(std::string const &indices,
+                                                 bool errorBars) const;
   boost::optional<std::string> getPlotContourString() const;
   boost::optional<std::string> getPlotTiledString() const;
 
