@@ -17,6 +17,7 @@ import mantid.simpleapi as mantid
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 
 
+# todo: test this
 class LModel(object):
     def __init__(self):
         self.run = 0

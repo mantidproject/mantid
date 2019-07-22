@@ -270,8 +270,8 @@ class _ElementButton(QtWidgets.QPushButton):
         """:class:`PeriodicTableItem` object represented by this button"""
 
         self.setText(item.symbol)
-        self.setFlat(1)
-        self.setCheckable(0)
+        self.setFlat(True)
+        self.setCheckable(False)
 
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                                  QtWidgets.QSizePolicy.Expanding))
@@ -672,7 +672,6 @@ class PeriodicCombo(QtWidgets.QComboBox):
         self.setCurrentIndex(symblist.index(symbol))
 
 
-# todo: add tests
 class PeriodicList(QtWidgets.QTreeWidget):
     """List of atomic elements in a :class:`QTreeView`
 
@@ -708,13 +707,13 @@ class PeriodicList(QtWidgets.QTreeWidget):
         self.itemClicked.connect(self._selectionChanged)
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single
                               else QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.__fill_widget(elements)
+        self._fill_widget(elements)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
         if detailed:
             self.resizeColumnToContents(2)
 
-    def __fill_widget(self, elements):
+    def _fill_widget(self, elements):
         """Fill tree widget with elements """
         if elements is None:
             elements = _defaultTableItems
