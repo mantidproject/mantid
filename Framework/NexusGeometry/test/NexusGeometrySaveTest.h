@@ -751,15 +751,15 @@ public:
     ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    const Quat relativeBankRotation(15, V3D(0, 1, 0));
-    const Quat relativeDetRotation(15, V3D(0, 1, 0));
-    const V3D absDetposition(0, 0, 10);
-    const V3D detOffset(2, -2, 0);
+    const Quat relativeBankRotation(45.0, V3D(0.0, 1.0, 0.0));
+    const Quat relativeDetRotation(45.0, V3D(0.0, 1.0, 0.0));
+    const V3D absBankposition(0, 0, 10);
+    const V3D detOffset(2.0, -2.0, 0.0);
 
     auto instrument =
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-            absDetposition,       // bank position
+            absBankposition,      // bank position
             relativeBankRotation, // bank rotation
             relativeDetRotation,
             detOffset); // detector rotation, detector offset
@@ -908,47 +908,35 @@ public:
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 
-  // temporary test
-  void test_out_of_range_detector_pixels_during_reload_throws_temp() {
-    /*
-    ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
-    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    NexusGeometrySave::saveInstrument(instr, destinationFile);
-
-    std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
-    TS_ASSERT_THROWS(NexusGeometryParser::createInstrument(destinationFile,
-                                                           std::move(logger)),
-                     Mantid::Kernel::Exception::InstrumentDefinitionError &);
-  */
-  }
-
   void test_reload_into_parser_produces_identical_instrument_temp() {
 
-    ScopedFileHandle fileResource("reload_into_parser_file_test.hdf5");
-    std::string destinationFile = fileResource.fullPath();
+    ScopedFileHandle inFileResource("reload_into_parser_file_test.hdf5");
+    std::string inDestinationFile = inFileResource.fullPath();
 
+    // is rotated 90 deg,
     auto instrument =
         ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    NexusGeometrySave::saveInstrument(instr, destinationFile);
 
     auto &compInfo = (*instr.first);
     auto &detInfo = (*instr.second);
 
+    NexusGeometrySave::saveInstrument(instr, inDestinationFile);
+
+    // resave file for inspection
+    ScopedFileHandle outFileResource("resave_from_parser_file_test.hdf5");
+    std::string outDestinationFile = outFileResource.fullPath();
+
     std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
     auto reloadedInstrument = NexusGeometryParser::createInstrument(
-        destinationFile, std::move(logger));
+        inDestinationFile, std::move(logger));
 
     auto instr2 =
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
     auto &compInfo2 = (*instr2.first);
     auto &detInfo2 = (*instr2.second);
+
+    NexusGeometrySave::saveInstrument(instr2, outDestinationFile);
 
     // sources
     std::string inSourceName = compInfo.name(compInfo.source());

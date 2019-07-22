@@ -212,21 +212,21 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   posz.reserve(childrenDetectors.size());
 
   // absolute bank translation and rotation
-  const Eigen::Vector3d absBankTransVec =
+  const Eigen::Vector3d absBankPosition =
       Kernel::toVector3d(compInfo.position(idx));
   const Eigen::Quaterniond absBankRot =
       Kernel::toQuaterniond(compInfo.rotation(idx));
 
+  const Eigen::Vector3d absBankTranslation =
+      absBankRot.inverse() * absBankPosition;
+
   for (const size_t &i : childrenDetectors) {
 
-    Eigen::Vector3d absDetTransVec = Kernel::toVector3d(detInfo.position(i));
-    Eigen::Quaterniond absDetRot = Kernel::toQuaterniond(detInfo.rotation(i));
-    // relative rotation of detetctor
-    Eigen::Quaterniond relDetRot = absDetRot * absBankRot.inverse();
+    // Eigen::Vector3d absDetPosition = Kernel::toVector3d(detInfo.position(i));
 
-    // detector offest
+    // get the position of the pixel relative to the bank
     Eigen::Vector3d offset =
-        relDetRot.inverse() * (absDetTransVec - absBankTransVec);
+        Mantid::Kernel::toVector3d(compInfo.relativePosition(i));
 
     posx.push_back(offset[0]);
     posy.push_back(offset[1]);
@@ -263,10 +263,10 @@ inline void writeXYZPixeloffset(H5::Group &grp,
  * @param grp : NXdetector group (HDF group)
  * @param compInfo : componentInfo object.
  */
-inline void writeDetectorNumber(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo,
-                                const size_t &idx,
-                                const std::vector<int> &detectorIDs) {
+void writeNXDetectorNumber(H5::Group &grp,
+                           const Geometry::ComponentInfo &compInfo,
+                           const size_t &idx,
+                           const std::vector<int> &detectorIDs) {
 
   H5::DataSet detectorNumber;
 
@@ -340,6 +340,8 @@ inline void writeLocation(H5::Group &grp,
   // write norm of absolute (normalised) position vector of detector to dataset
   // TODO: these should take the idices of detectors instead of hard-coded zero
   position = Kernel::toVector3d(compInfo.position(idx)); // of bank
+
+  // get translation from position by inverting rotation.
 
   // capture the norm before inline normalisation.
   norm = position.norm();
@@ -618,7 +620,7 @@ void saveDetectors(const H5::Group &parentGroup,
               forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
           H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-          writeDetectorNumber(childGroup, compInfo, i, detectorIDs);
+          writeNXDetectorNumber(childGroup, compInfo, i, detectorIDs);
           writeLocation(childGroup, compInfo, i);
           writeOrientation(childGroup, compInfo, i);
           writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
