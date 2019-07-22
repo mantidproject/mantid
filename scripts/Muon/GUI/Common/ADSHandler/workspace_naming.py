@@ -111,7 +111,7 @@ def get_pair_data_directory(context, run):
 
 def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
     workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
-    workspace_name += '; ' + forward_group + ', ' + backward_group
+    workspace_name += '; ' + forward_group + '; ' + backward_group
     return workspace_name
 
 

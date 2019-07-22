@@ -61,7 +61,7 @@ class PhaseTablePresenterTest(GuiTest):
 
         self.assertEqual(result, {'BackwardSpectra': [2, 4, 6, 8, 10], 'FirstGoodData': 0.1, 'ForwardSpectra': [1, 3, 5, 7, 9],
                                    'InputWorkspace': workspace_name, 'LastGoodData': 15,
-                                   'DetectorTable': 'input_workspace_name; PhaseTable; fwd, bwd'})
+                                   'DetectorTable': 'input_workspace_name; PhaseTable; fwd; bwd'})
 
     def test_correctly_retrieves_workspace_names_associsated_to_current_runs(self):
         self.view.set_input_combo_box = mock.MagicMock()
@@ -102,7 +102,7 @@ class PhaseTablePresenterTest(GuiTest):
         self.presenter.handle_calulate_phase_table_clicked()
         self.wait_for_thread(self.presenter.calculation_thread)
 
-        self.presenter.add_phase_table_to_ADS.assert_called_once_with('MUSR22222; PhaseTable_period_1; fwd, bwd', detector_table_mock)
+        self.presenter.add_phase_table_to_ADS.assert_called_once_with('MUSR22222; PhaseTable_period_1; fwd; bwd', detector_table_mock)
         self.assertTrue(self.view.isEnabled())
 
     @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases')
