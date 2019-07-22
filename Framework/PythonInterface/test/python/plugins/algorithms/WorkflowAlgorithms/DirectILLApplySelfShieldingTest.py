@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (mtd)
 from mantid.simpleapi import (CloneWorkspace)
 import numpy.testing
-from testhelpers import illhelpers, run_algorithm
+from testhelpers import assert_almost_equal, illhelpers, run_algorithm
 import unittest
 
 
@@ -44,7 +44,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
-        numpy.testing.assert_almost_equal(ys, (1.0 - ecFactor) * originalYs)
+        assert_almost_equal(ys, (1.0 - ecFactor) * originalYs)
 
     def testEmptyContainerSubtractionWithScaling(self):
         ws = self._cloneTestWorkspace()
@@ -67,7 +67,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
-        numpy.testing.assert_almost_equal(ys, (1.0 - ecScaling * ecFactor) * originalYs)
+        assert_almost_equal(ys, (1.0 - ecScaling * ecFactor) * originalYs)
 
     def testSelfShieldingCorrections(self):
         ws = self._cloneTestWorkspace()
@@ -91,10 +91,10 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
-        numpy.testing.assert_almost_equal(ys, originalYs / corrFactor)
+        assert_almost_equal(ys, originalYs / corrFactor)
         es = outWS.extractE()
         originalEs = ws.extractE()
-        numpy.testing.assert_almost_equal(es, originalEs / corrFactor)
+        assert_almost_equal(es, originalEs / corrFactor)
 
     def testNoOperationClonesInputWorkspace(self):
         ws = self._cloneTestWorkspace()
@@ -127,10 +127,10 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), ws.getNumberHistograms())
         ys = outWS.extractY()
         originalYs = ws.extractY()
-        numpy.testing.assert_almost_equal(ys, originalYs / corrFactor)
+        assert_almost_equal(ys, originalYs / corrFactor)
         es = outWS.extractE()
         originalEs = ws.extractE()
-        numpy.testing.assert_almost_equal(es, originalEs / corrFactor)
+        assert_almost_equal(es, originalEs / corrFactor)
 
     def _cloneTestWorkspace(self, wsName=None):
         if not wsName:
