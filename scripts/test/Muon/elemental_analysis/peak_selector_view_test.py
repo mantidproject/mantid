@@ -7,8 +7,6 @@
 from __future__ import absolute_import, print_function
 
 import unittest
-import matplotlib
-from qtpy.QtGui import QCloseEvent
 
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import GuiTest
