@@ -9,7 +9,7 @@ import unittest
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
@@ -21,7 +21,8 @@ from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import D
     DEADTIME_WORKSPACE, DEADTIME_OTHER_FILE, DEADTIME_NONE
 
 
-class HomeTabInstrumentPresenterTest(GuiTest):
+@start_qapplication
+class HomeTabInstrumentPresenterTest(unittest.TestCase):
     def setUp(self):
         self.obj = QWidget()
         setup_context_for_tests(self)

@@ -546,6 +546,10 @@ public:
 
   void invalidateCachedSpectrumNumbers();
 
+  /// Invalidates the commons bins flag.  This is generally called when a method
+  /// could allow the X values to be changed.
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
@@ -560,10 +564,6 @@ protected:
   virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   virtual ISpectrum &getSpectrumWithoutInvalidation(const size_t index) = 0;
-
-  /// Invalidates the commons bins flag.  This is generally called when a method
-  /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 

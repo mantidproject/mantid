@@ -15,7 +15,7 @@ from qtpy.QtWidgets import QMainWindow, QApplication
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateWorkspace,
                               GroupWorkspaces)
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
@@ -28,7 +28,8 @@ ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." \
 app = QApplication([])
 
 
-class WorkspaceWidgetTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 
     @classmethod
     def setUpClass(cls):

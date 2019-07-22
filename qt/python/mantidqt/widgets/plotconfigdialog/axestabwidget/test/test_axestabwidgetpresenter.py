@@ -27,7 +27,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         cls.fig = figure()
         ax = cls.fig.add_subplot(211)
         ax.plot([0, 1], [10, 12], 'rx')
-        cls.title = "My Axes \nnewline $\\mu$"
+        cls.title = "My Axes"
         ax.set_title(cls.title)
         cls.x_label = 'X'
         ax.set_xlabel(cls.x_label)
@@ -92,7 +92,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter()
         actual_props = presenter.get_selected_ax_properties()
         self.assertIsInstance(actual_props, AxProperties)
-        self.assertEqual("My Axes \\nnewline $\\\\mu$", actual_props.title)
+        self.assertEqual("My Axes", actual_props.title)
         self.assertEqual('X', actual_props.xlabel)
         self.assertEqual('Linear', actual_props.xscale)
         self.assertEqual('Y', actual_props.ylabel)
@@ -137,7 +137,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         setters = ['set_title', 'set_xlower_limit', 'set_xupper_limit',
                    'set_ylower_limit', 'set_yupper_limit', 'set_xlabel',
                    'set_ylabel', 'set_xscale', 'set_yscale']
-        expected_vals = [self.title.encode('unicode_escape').decode(),
+        expected_vals = [self.title,
                          ax.get_xlim()[0], ax.get_xlim()[1], ax.get_ylim()[0],
                          ax.get_ylim()[1], self.x_label, self.y_label,
                          self.x_scale, self.y_scale]

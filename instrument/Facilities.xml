@@ -934,12 +934,18 @@
   </instrument>
 
 </facility>
+
 <!--  ESS  -->
 <facility name="ESS" FileExtensions=".nxs,.hdf5">
- <timezone>Europe/Copenhagen</timezone>
+  <timezone>Europe/Copenhagen</timezone>
+
   <instrument name="LOKI">
     <technique>Small Angle Scattering</technique>
+    <livedata>
+      <connection name="test_event" address="localhost:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
+
 </facility>
 
 </facilities>

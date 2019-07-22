@@ -9,6 +9,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import unittest
+
 import matplotlib
 matplotlib.use("AGG")  # noqa
 import matplotlib.pyplot as plt
@@ -17,7 +19,7 @@ from qtpy.QtWidgets import QMenu
 # Pulling in the MantidAxes registers the 'mantid' projection
 from mantid.plots import MantidAxes  # noqa:F401
 from mantid.simpleapi import CreateWorkspace
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
@@ -43,7 +45,8 @@ def plot_things(make_them_errors):
     return function_reference
 
 
-class FigureErrorsManagerTest(GuiTest):
+@start_qapplication
+class FigureErrorsManagerTest(unittest.TestCase):
     """
     Test class that covers the interaction of the FigureErrorsManager with plots
     that use the mantid projection and have MantidAxes
@@ -105,7 +108,8 @@ class FigureErrorsManagerTest(GuiTest):
         self.assertFalse(self.ax.containers[0][2][0].get_visible())
 
 
-class ScriptedPlotFigureErrorsManagerTest(GuiTest):
+@start_qapplication
+class ScriptedPlotFigureErrorsManagerTest(unittest.TestCase):
     """
     Test class that covers the interaction of the FigureErrorsManager with plots that
     do not use the MantidAxes, which happens if they are scripted.

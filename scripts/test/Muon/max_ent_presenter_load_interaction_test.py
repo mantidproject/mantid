@@ -10,7 +10,7 @@ import unittest
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
 
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
@@ -31,7 +31,8 @@ def retrieve_combobox_info(combo_box):
     return output_list
 
 
-class MaxEntPresenterTest(GuiTest):
+@start_qapplication
+class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context(True)
 

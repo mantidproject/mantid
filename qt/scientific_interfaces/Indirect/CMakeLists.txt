@@ -395,7 +395,8 @@ mtd_add_qt_library(
     MantidQtWidgetsPlotting
     MantidQtWidgetsMplCpp
     MantidQtIcons
-  INSTALL_DIR_BASE ${PLUGINS_DIR}
+  INSTALL_DIR_BASE
+    ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt5

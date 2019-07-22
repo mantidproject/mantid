@@ -55,30 +55,31 @@
       <location/>
     </component>
   </type>
+
   <type name="A23">
     <component type="eightpack">
-      <location x="0.48679868" y="-2.55070008" z="5.34839183">
+      <location x="0.50646395" y="-2.55070008" z="5.48792794">
         <rot axis-x="0" axis-y="1" axis-z="0" val="185.20060450"/>
       </location>
     </component>
   </type>
   <type name="A24">
     <component type="eightpack">
-      <location x="0.30105326" y="-2.55070008" z="5.35989552">
+      <location x="0.29015287" y="-2.55070008" z="5.49609451">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-177.15940965"/>
       </location>
     </component>
   </type>
   <type name="A25">
     <component type="eightpack">
-      <location x="0.04504793" y="-2.55070008" z="5.37939514">
+      <location x="0.06170000" y="-2.55070008" z="5.47092117">
         <rot axis-x="0" axis-y="1" axis-z="0" val="-179.51939634"/>
       </location>
     </component>
   </type>
   <type name="A26">
     <component type="eightpack">
-      <location x="-0.20796271" y="-2.55070008" z="5.36647180">
+      <location x="-0.18492334" y="-2.55070008" z="5.50032064">
         <rot axis-x="0" axis-y="1" axis-z="0" val="177.78079345"/>
       </location>
     </component>

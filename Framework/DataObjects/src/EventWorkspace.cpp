@@ -184,6 +184,21 @@ const EventList &EventWorkspace::getSpectrum(const size_t index) const {
   return *data[index];
 }
 
+/**
+ * Returns a pointer to the EventList for a given spectrum in a timely manner.
+ *
+ * Very minimal checking and preprocessing is performed by this function and it
+ * should only be used in tight loops where getSpectrum is too costly.
+ *
+ * See the implementation of the non-const getSpectrum to see what is missing.
+ *
+ * @param index Workspace index
+ * @return Pointer to EventList
+ */
+EventList *EventWorkspace::getSpectrumUnsafe(const size_t index) {
+  return data[index].get();
+}
+
 double EventWorkspace::getTofMin() const { return this->getEventXMin(); }
 
 double EventWorkspace::getTofMax() const { return this->getEventXMax(); }
