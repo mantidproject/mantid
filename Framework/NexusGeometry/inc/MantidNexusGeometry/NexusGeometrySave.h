@@ -4,6 +4,16 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+
+/*
+ * NexusGeometrySave
+ *
+ * Save Beamline NXInstrument from Memory to disk
+ *
+ *@author Takudzwa Makoni, RAL (UKRI), ISIS
+ *@date 22/07/2019
+ */
+
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 

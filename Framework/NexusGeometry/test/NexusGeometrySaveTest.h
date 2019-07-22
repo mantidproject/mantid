@@ -982,6 +982,11 @@ public:
           size_t idx1 = idx.first;
           size_t idx2 = idx.second;
 
+          /*
+          indices between component infos may not be equal, search and match
+          indices by name, then compare values.
+          */
+
           Eigen::Vector3d bankPos1 =
               Mantid::Kernel::toVector3d(compInfo.position(idx1));
           Eigen::Vector3d bankPos2 =

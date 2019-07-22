@@ -5,6 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
+/*
+ * NexusGeometrySave
+ *
+ * Save Beamline NXInstrument from Memory to disk
+ *
+ *@author Takudzwa Makoni, RAL (UKRI), ISIS
+ *@date 22/07/2019
+ */
+
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -211,18 +220,7 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   posy.reserve(childrenDetectors.size());
   posz.reserve(childrenDetectors.size());
 
-  // absolute bank translation and rotation
-  const Eigen::Vector3d absBankPosition =
-      Kernel::toVector3d(compInfo.position(idx));
-  const Eigen::Quaterniond absBankRot =
-      Kernel::toQuaterniond(compInfo.rotation(idx));
-
-  const Eigen::Vector3d absBankTranslation =
-      absBankRot.inverse() * absBankPosition;
-
   for (const size_t &i : childrenDetectors) {
-
-    // Eigen::Vector3d absDetPosition = Kernel::toVector3d(detInfo.position(i));
 
     // get the position of the pixel relative to the bank
     Eigen::Vector3d offset =
@@ -336,9 +334,6 @@ inline void writeLocation(H5::Group &grp,
 
   dspace = H5Screate_simple(drank, ddims, NULL);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
-
-  // write norm of absolute (normalised) position vector of detector to dataset
-  // TODO: these should take the idices of detectors instead of hard-coded zero
   position = Kernel::toVector3d(compInfo.position(idx)); // of bank
 
   // get translation from position by inverting rotation.
@@ -357,8 +352,7 @@ inline void writeLocation(H5::Group &grp,
   /*
    * Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
    * stdNormAxis is the position vector as a std::vector<double>. Normalised if
-   * norm
-   * != 0.
+   * norm != 0.
    */
   auto asize = position.size();
   std::vector<double> stdNormPos;
@@ -452,9 +446,9 @@ inline void writeOrientation(H5::Group &grp,
   // vector atrribute
   Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
 
-  // Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
-  // stdNormAxis is the Axis of rotation as a std::vector<double>. Normalised if
-  // norm
+  // Convert Eigen::Vector to std::vector buffer and write to attribute
+  // 'vector'. stdNormAxis is the Axis of rotation as a std::vector<double>.
+  // Normalised if norm
   // != 0.
   auto asize = axisOfRotation.size();
   std::vector<double> stdNormAxis;
@@ -567,7 +561,7 @@ void saveSource(const H5::Group &parentGroup,
   checkSpec(SOURCE, childGroup, compInfo);
 
   writeLocation(childGroup, compInfo, idx);
-  writeOrientation(childGroup, compInfo, idx); // necessary?
+  writeOrientation(childGroup, compInfo, idx);
 
   std::string dependency =
       forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
@@ -613,7 +607,7 @@ void saveDetectors(const H5::Group &parentGroup,
           H5::Group childGroup = parentGroup.createGroup(name);
           writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
-          std::string localNameStr = name; // optional: possible removal
+          std::string localNameStr = name;
           H5::StrType localNameStrType = strTypeOfSize(localNameStr);
 
           std::string dependency =
