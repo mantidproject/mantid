@@ -46,18 +46,15 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
                            &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
       m_view(view), m_model(std::make_unique<IndirectPlotOptionsModel>()),
       m_parentTab(parent) {
-  setupPresenter();
-  m_view->setPlotType(plotType);
-  m_view->setIndices(QString::fromStdString(fixedIndices));
-  m_model->setFixedIndices(fixedIndices);
-  setOptionsEnabled(false);
+  setupPresenter(plotType, fixedIndices);
 }
 
 IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() {
   watchADS(false);
 }
 
-void IndirectPlotOptionsPresenter::setupPresenter() {
+void IndirectPlotOptionsPresenter::setupPresenter(
+    PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
 
   connect(m_view.get(), SIGNAL(selectedWorkspaceChanged(std::string const &)),
@@ -78,6 +75,11 @@ void IndirectPlotOptionsPresenter::setupPresenter() {
 #endif
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
+  m_view->setPlotType(plotType);
+  m_view->setIndices(QString::fromStdString(fixedIndices));
+  m_model->setFixedIndices(fixedIndices);
+
+  setOptionsEnabled(false);
 }
 
 void IndirectPlotOptionsPresenter::watchADS(bool on) {
@@ -91,8 +93,14 @@ void IndirectPlotOptionsPresenter::watchADS(bool on) {
   }
 }
 
+void IndirectPlotOptionsPresenter::setPlotting(bool plotting) {
+  m_view->setPlotButtonText(plotting ? "Plotting..." : "Plot Spectra");
+  setOptionsEnabled(!plotting);
+}
+
 void IndirectPlotOptionsPresenter::setOptionsEnabled(bool enable) {
-  m_view->setWorkspaceComboBoxEnabled(enable);
+  m_view->setWorkspaceComboBoxEnabled(m_view->numberOfWorkspaces() > 1 ? enable
+                                                                       : false);
   m_view->setIndicesLineEditEnabled(!m_model->indicesFixed() ? enable : false);
   m_view->setPlotButtonEnabled(enable);
 }
@@ -103,10 +111,9 @@ void IndirectPlotOptionsPresenter::onWorkspaceRemoved(
   if (auto const removedWorkspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     auto const removedName = removedWorkspace->getName();
-    if (removedName == m_view->selectedWorkspace().toStdString()) {
+    if (removedName == m_view->selectedWorkspace().toStdString())
       m_model->removeWorkspace();
-      m_view->removeWorkspace(QString::fromStdString(removedName));
-    }
+    m_view->removeWorkspace(QString::fromStdString(removedName));
   }
 }
 
@@ -135,9 +142,9 @@ void IndirectPlotOptionsPresenter::setWorkspace(
     setIndices();
 }
 
-void IndirectPlotOptionsPresenter::removeWorkspace() {
+void IndirectPlotOptionsPresenter::clearWorkspaces() {
   m_model->removeWorkspace();
-  m_view->removeWorkspaces();
+  m_view->clearWorkspaces();
   setOptionsEnabled(false);
 }
 
@@ -167,50 +174,49 @@ void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
 }
 
 void IndirectPlotOptionsPresenter::plotSpectra() {
-  setOptionsEnabled(false);
+  setPlotting(true);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   runPythonCode(m_model->getPlotSpectraString(m_parentTab->errorBars()));
 #else
   m_model->plotSpectra(m_parentTab->errorBars());
 #endif
-  setOptionsEnabled(true);
+  setPlotting(false);
 }
 
 void IndirectPlotOptionsPresenter::plotBins() {
   auto const indicesString = m_view->selectedIndices().toStdString();
   if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
-    setOptionsEnabled(false);
+    setPlotting(true);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     runPythonCode(
         m_model->getPlotBinsString(indicesString, m_parentTab->errorBars()));
 #else
     m_model->plotBins(m_parentTab->errorBars());
 #endif
-    setOptionsEnabled(true);
+    setPlotting(false);
   } else {
-    m_view->displayWarning(
-        "Failed to plot bins: Invalid bin indices provided.");
+    m_view->displayWarning("Plot bins failed: Invalid bin indices provided.");
   }
 }
 
 void IndirectPlotOptionsPresenter::plotContour() {
-  setOptionsEnabled(false);
+  setPlotting(true);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   runPythonCode(m_model->getPlotContourString());
 #else
   m_model->plotContour();
 #endif
-  setOptionsEnabled(true);
+  setPlotting(false);
 }
 
 void IndirectPlotOptionsPresenter::plotTiled() {
-  setOptionsEnabled(false);
+  setPlotting(true);
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   runPythonCode(m_model->getPlotTiledString());
 #else
   m_model->plotTiled();
 #endif
-  setOptionsEnabled(true);
+  setPlotting(false);
 }
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

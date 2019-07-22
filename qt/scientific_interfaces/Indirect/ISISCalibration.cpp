@@ -42,6 +42,8 @@ namespace CustomInterfaces {
 ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::SpectraBin));
 
   m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
@@ -183,7 +185,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   connect(this,
           SIGNAL(updateRunButton(bool, std::string const &, QString const &,
@@ -337,8 +338,18 @@ void ISISCalibration::run() {
  */
 void ISISCalibration::algorithmComplete(bool error) {
   if (!error) {
+    std::vector<std::string> outputWorkspaces{
+        m_outputCalibrationName.toStdString()};
+    if (m_uiForm.ckCreateResolution->isChecked() &&
+        !m_outputResolutionName.isEmpty()) {
+      outputWorkspaces.emplace_back(m_outputResolutionName.toStdString());
+      if (m_uiForm.ckSmoothResolution->isChecked())
+        outputWorkspaces.emplace_back(m_outputResolutionName.toStdString() +
+                                      "_pre_smooth");
+    }
+    setOutputPlotOptionsWorkspaces(outputWorkspaces);
+
     m_uiForm.pbSave->setEnabled(true);
-    m_uiForm.pbPlot->setEnabled(true);
   }
 }
 
@@ -694,26 +705,6 @@ void ISISCalibration::saveClicked() {
  */
 void ISISCalibration::runClicked() { runTab(); }
 
-/**
- * Handle mantid plotting
- */
-void ISISCalibration::plotClicked() {
-  setPlotIsPlotting(true);
-
-  plotTimeBin(m_outputCalibrationName);
-  checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
-  QStringList plotWorkspaces;
-  if (m_uiForm.ckCreateResolution->isChecked() &&
-      !m_outputResolutionName.isEmpty()) {
-    checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
-    plotWorkspaces.append(m_outputResolutionName);
-    if (m_uiForm.ckSmoothResolution->isChecked())
-      plotWorkspaces.append(m_outputResolutionName + "_pre_smooth");
-  }
-  plotSpectrum(plotWorkspaces);
-  setPlotIsPlotting(false);
-}
-
 void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
   auto smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
   smoothAlg->initialize();
@@ -795,19 +786,8 @@ void ISISCalibration::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void ISISCalibration::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
 void ISISCalibration::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
-}
-
-void ISISCalibration::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
 }
 
 void ISISCalibration::updateRunButton(bool enabled,
@@ -818,14 +798,7 @@ void ISISCalibration::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void ISISCalibration::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces

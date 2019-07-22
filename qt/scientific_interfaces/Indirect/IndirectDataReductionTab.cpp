@@ -51,7 +51,7 @@ void IndirectDataReductionTab::runTab() {
     emit updateRunButton(false, "disable", "Running...",
                          "Running data reduction...");
     try {
-      m_plotOptionsPresenter->removeWorkspace();
+      m_plotOptionsPresenter->clearWorkspaces();
       run();
     } catch (std::exception const &ex) {
       m_tabRunning = false;

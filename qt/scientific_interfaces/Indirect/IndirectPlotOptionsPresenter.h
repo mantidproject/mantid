@@ -28,10 +28,10 @@ public:
                                IndirectTab *parent,
                                PlotWidget const &plotType = PlotWidget::Spectra,
                                std::string const &fixedIndices = "");
-  ~IndirectPlotOptionsPresenter() override; 
+  ~IndirectPlotOptionsPresenter() override;
 
   void setWorkspaces(std::vector<std::string> const &workspaces);
-  void removeWorkspace();
+  void clearWorkspaces();
 
 signals:
   void runAsPythonScript(QString const &code, bool noOutput = false);
@@ -45,9 +45,11 @@ private slots:
   void plotTiled();
 
 private:
-  void setupPresenter();
+  void setupPresenter(PlotWidget const &plotType,
+                      std::string const &fixedIndices);
   void watchADS(bool on);
 
+  void setPlotting(bool plotting);
   void setOptionsEnabled(bool enable);
 
   void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);

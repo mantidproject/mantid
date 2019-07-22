@@ -88,7 +88,7 @@ void IndirectPlotOptionsView::setupView() {
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
           SLOT(emitSelectedIndicesChanged(QString const &)));
 
-  setIndicesErrorLabelVisible(false); 
+  setIndicesErrorLabelVisible(false);
 
   // Setup the spectra auto-completer
   m_completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
@@ -184,6 +184,10 @@ void IndirectPlotOptionsView::setPlotButtonEnabled(bool enable) {
   m_plotOptions->tbPlot->setEnabled(enable);
 }
 
+void IndirectPlotOptionsView::setPlotButtonText(QString const &text) {
+  m_plotOptions->tbPlot->setText(text);
+}
+
 void IndirectPlotOptionsView::setIndicesRegex(QString const &regex) {
   m_plotOptions->leIndices->setValidator(createValidator(regex));
 }
@@ -198,12 +202,16 @@ QString IndirectPlotOptionsView::selectedWorkspace() const {
 
 void IndirectPlotOptionsView::setWorkspaces(
     std::vector<std::string> const &workspaces) {
-  removeWorkspaces();
+  clearWorkspaces();
   for (auto const &name : workspaces)
     m_plotOptions->cbWorkspace->addItem(QString::fromStdString(name));
 }
 
-void IndirectPlotOptionsView::removeWorkspaces() {
+int IndirectPlotOptionsView::numberOfWorkspaces() const {
+  return m_plotOptions->cbWorkspace->count();
+}
+
+void IndirectPlotOptionsView::clearWorkspaces() {
   m_plotOptions->cbWorkspace->clear();
 }
 

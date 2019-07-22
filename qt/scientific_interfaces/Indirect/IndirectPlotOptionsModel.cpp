@@ -68,10 +68,18 @@ std::string formatIndicesString(std::string &str) {
   return joinCompress(indices.begin(), indices.end());
 }
 
+template <typename T = std::size_t> T convertToT(std::string const &num) {
+  if (std::is_same<T, std::size_t>::value)
+    return std::stoul(num);
+  else if (std::is_same<T, int>::value)
+    return std::stoi(num);
+  std::runtime_error(
+      "Could not convert std::string to std::size_t or int type.");
+}
+
 template <typename T = std::size_t>
-void addToIndicesVector(std::vector<T> &indicesVec,
-                        std::size_t const &startIndex,
-                        std::size_t const &endIndex) {
+void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex,
+                        T const &endIndex) {
   for (auto index = startIndex; index <= endIndex; ++index)
     indicesVec.emplace_back(index);
 }
@@ -81,10 +89,10 @@ void addToIndicesVector(std::vector<T> &indicesVec,
                         std::string const &indicesString) {
   auto const range = splitStringBy(indicesString, "-");
   if (range.size() > 1)
-    addToIndicesVector<T>(indicesVec, std::stoul(range[0]),
-                          std::stoul(range[1]));
+    addToIndicesVector<T>(indicesVec, convertToT<T>(range[0]),
+                          convertToT<T>(range[1]));
   else
-    indicesVec.emplace_back(std::stoul(range[0]));
+    indicesVec.emplace_back(convertToT<T>(range[0]));
 }
 
 template <typename T = std::size_t>
@@ -266,8 +274,7 @@ IndirectPlotOptionsModel::getPlotSpectraString(bool errorBars) const {
 boost::optional<std::string>
 IndirectPlotOptionsModel::getPlotBinsString(std::string const &indices,
                                             bool errorBars) const {
-  auto const workspaceName = workspace();
-  if (workspaceName)
+  if (auto const workspaceName = workspace())
     return createPlotBinsString(workspaceName.get(), createIndicesList(indices),
                                 errorBars);
   return boost::none;
@@ -275,8 +282,7 @@ IndirectPlotOptionsModel::getPlotBinsString(std::string const &indices,
 
 boost::optional<std::string>
 IndirectPlotOptionsModel::getPlotContourString() const {
-  auto const workspaceName = workspace();
-  if (workspaceName)
+  if (auto const workspaceName = workspace())
     return createPlotContourString(workspaceName.get());
   return boost::none;
 }

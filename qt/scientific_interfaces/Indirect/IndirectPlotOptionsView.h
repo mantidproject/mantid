@@ -36,14 +36,17 @@ public:
   void setWorkspaceComboBoxEnabled(bool enable);
   void setIndicesLineEditEnabled(bool enable);
   void setPlotButtonEnabled(bool enable);
+  void setPlotButtonText(QString const &text);
 
   void setIndicesRegex(QString const &regex);
 
   QString selectedWorkspace() const;
   void setWorkspaces(std::vector<std::string> const &workspaces);
 
+  int numberOfWorkspaces() const;
+
   void removeWorkspace(QString const &workspaceName);
-  void removeWorkspaces();
+  void clearWorkspaces();
 
   QString selectedIndices() const;
   void setIndices(QString const &indices);
@@ -52,7 +55,7 @@ public:
   void addIndicesSuggestion(QString const &spectra);
 
   void displayWarning(QString const &message);
- 
+
 signals:
   void selectedWorkspaceChanged(std::string const &workspaceName);
   void selectedIndicesChanged(std::string const &indices);
