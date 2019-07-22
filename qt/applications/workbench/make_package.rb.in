@@ -253,8 +253,13 @@ Qt_linking_dir = find_linking_directories(pyqt5_patterns, 'Qt.*.framework/Versio
 # We only need one copy of openssl
 `install_name_tool -change @loader_path/../../../libssl.1.0.0.dylib @loader_path/../../../../MacOS/libssl.dylib Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork`
 `install_name_tool -change @loader_path/../../../libcrypto.1.0.0.dylib @loader_path/../../../../MacOS/libcrypto.dylib Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork`
-# `rm Contents/Frameworks/libssl.1.0.0.dylib`
-# `rm Contents/Frameworks/libcrypto.1.0.0.dylib`
+
+# Fix up paths inside QtWebEngineProcess inside embedded bundle
+webengine_proc = "Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess"
+webengine_deps = ["QtWebEngineCore", "QtQuick", "QtGui", "QtCore", "QtQml", "QtNetwork", "QtWebChannel", "QtPositioning"]
+webengine_deps.each do |lib_name|
+  `install_name_tool -change #{Qt_linking_dir[0]}/#{lib_name}.framework/Versions/5/#{lib_name} @loader_path/../../../../../../../#{lib_name} #{webengine_proc}`
+end
 
 #change id of all libraries that match patterns
 def change_id(patterns, lib_path)
