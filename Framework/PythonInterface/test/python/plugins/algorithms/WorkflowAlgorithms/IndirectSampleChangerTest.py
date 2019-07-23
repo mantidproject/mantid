@@ -18,7 +18,7 @@ class IndirectSampleChangerTest(unittest.TestCase):
         """
         IndirectSampleChanger(FirstRun=72462, LastRun=72465, NumberSamples=1, Instrument='IRIS', Analyser='graphite',
                               Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
-                              InelasticRange='0, 0.5', GroupingMethod='All')
+                              InelasticRange='0, 0.5')
         scan_ws = mtd['iris72462_to_72465_s0_scan_eisf']
         self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
         self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0452707)
@@ -29,7 +29,7 @@ class IndirectSampleChangerTest(unittest.TestCase):
         """
         IndirectSampleChanger(FirstRun=72462, LastRun=72465, NumberSamples=2, Instrument='IRIS', Analyser='graphite',
                               Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
-                              InelasticRange='0, 0.5', GroupingMethod='All')
+                              InelasticRange='0, 0.5')
         scan_ws = mtd['iris72462_to_72464_s0_scan_eisf']
         self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
         self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0487223)
@@ -44,14 +44,14 @@ class IndirectSampleChangerTest(unittest.TestCase):
         """
         IndirectSampleChanger(FirstRun=72462, LastRun=72465, NumberSamples=1, Instrument='IRIS', Analyser='graphite',
                               Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
-                              InelasticRange='0, 0.5', GroupingMethod='Individual', msdFit=True)
-        scan_ws = mtd['iris72462_to_72465_s0_scan_eisf']
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.1014862)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.1648556)
+                              InelasticRange='0, 0.5', msdFit=True)
+        eisf_ws = mtd['iris72462_to_72465_s0_scan_eisf']
+        self.assertEqual(round(eisf_ws.readY(0)[0], 7), 1.1014862)
+        self.assertEqual(round(eisf_ws.readY(1)[0], 7), 1.1648556)
 
         msd_ws = mtd['iris72462_to_72465_s0_scan_msd']
-        self.assertEqual(round(scan_ws.readY(0)[1], 7), 1.1355038)
-        self.assertEqual(round(scan_ws.readY(1)[2], 7), 1.1431749)
+        self.assertEqual(round(msd_ws.readY(0)[1], 7), 1.1355038)
+        self.assertEqual(round(msd_ws.readY(1)[2], 7), 1.1431749)
 
 
 #----------------------------------------Failure cases-------------------------------------
@@ -61,18 +61,18 @@ class IndirectSampleChangerTest(unittest.TestCase):
         Test for run numbers in wrong order
         """
         self.assertRaises(RuntimeError, IndirectSampleChanger,
-                          FirstRun = 72465, LastRun = 72462, NumberSamples=2, Instrument='IRIS',
-                          Analyser='graphite',Reflection='002', SpectraRange='3, 50',
-                          ElasticRange='-0.5, 0', InelasticRange='0, 0.5', GroupingMethod='All')
+                          FirstRun=72465, LastRun=72462, NumberSamples=2, Instrument='IRIS',
+                          Analyser='graphite', Reflection='002', SpectraRange='3, 50',
+                          ElasticRange='-0.5, 0', InelasticRange='0, 0.5')
 
     def test_number_samples(self):
         """
         Test for more samples than runs
         """
         self.assertRaises(RuntimeError, IndirectSampleChanger,
-                          FirstRun = 72462, LastRun = 72465, NumberSamples=5, Instrument='IRIS',
-                          Analyser='graphite',Reflection='002', SpectraRange='3, 50',
-                          ElasticRange='-0.5, 0', InelasticRange='0, 0.5', GroupingMethod='All')
+                          FirstRun=72462, LastRun=72465, NumberSamples=5, Instrument='IRIS',
+                          Analyser='graphite', Reflection='002', SpectraRange='3, 50',
+                          ElasticRange='-0.5, 0', InelasticRange='0, 0.5')
 
 
 if __name__ == '__main__':
