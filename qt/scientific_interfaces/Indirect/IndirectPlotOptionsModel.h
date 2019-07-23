@@ -36,16 +36,18 @@ public:
 
   boost::optional<std::string> indices() const;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   boost::optional<std::string> getPlotSpectraString(bool errorBars) const;
   boost::optional<std::string> getPlotBinsString(std::string const &indices,
                                                  bool errorBars) const;
   boost::optional<std::string> getPlotContourString() const;
   boost::optional<std::string> getPlotTiledString() const;
-
+#else
   void plotSpectra(bool errorBars);
   void plotBins(bool errorBars);
   void plotContour();
   void plotTiled();
+#endif
 
 private:
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,

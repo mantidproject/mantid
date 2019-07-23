@@ -11,11 +11,6 @@
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/MplCpp/Plot.h"
-
-#include <QHash>
-#include <QString>
-#include <QStringList>
-#include <QVariant>
 #endif
 
 using namespace Mantid::API;
@@ -217,7 +212,8 @@ IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
 }
 
 void IndirectPlotOptionsModel::setFixedIndices(std::string const &indices) {
-  if (m_fixedIndices = !indices.empty())
+  m_fixedIndices = !indices.empty();
+  if (m_fixedIndices)
     m_workspaceIndices = indices;
 }
 
