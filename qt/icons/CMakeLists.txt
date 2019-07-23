@@ -47,7 +47,6 @@ if(ENABLE_WORKBENCH)
                         ${Boost_LIBRARIES}
                         ${JSONCPP_LIBRARIES}
                       INSTALL_DIR
-                        ${LIB_DIR}
                         ${WORKBENCH_LIB_DIR}
                       OSX_INSTALL_RPATH
                         @loader_path/../MacOS
