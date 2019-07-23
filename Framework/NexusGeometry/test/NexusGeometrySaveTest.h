@@ -62,6 +62,9 @@ Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
   return banks;
 }
 
+// for comparision of detector banks between saved instrument and reloaded
+// instrument, as required for the unit test. Delete this with along with the
+// temporary unit test to reload file.
 template <typename T>
 std::vector<std::pair<T, T>> pairUp(const std::vector<T> &vector1,
                                     const std::vector<T> &vector2) {
@@ -79,6 +82,22 @@ std::vector<std::pair<T, T>> pairUp(const std::vector<T> &vector1,
     pairVector.push_back(pair);
   }
   return pairVector;
+}
+
+// for comparision of detector banks between saved instrument and reloaded
+// instrument, as required for the unit test. Delete this with along with the
+// temporary unit test to reload file.
+std::vector<int> getDetIDs(const std::vector<size_t> detectorsInSubtree,
+                           const std::vector<int> &detectorIDs) {
+
+  std::vector<int> bankDetIDs;
+  bankDetIDs.reserve(detectorsInSubtree.size());
+
+  for (const size_t &index : detectorsInSubtree) {
+    bankDetIDs.push_back(detectorIDs[index]);
+  }
+
+  return bankDetIDs;
 }
 
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
@@ -629,6 +648,7 @@ public:
 
     HDF5FileTestUtility tester(destinationFile);
 
+    int detectorCounter = 0;
     for (size_t i = compInfo.root() - 1; i > 0; --i) {
       if (compInfo.isDetector(i))
         break;
@@ -645,7 +665,8 @@ public:
               parentType != Mantid::Beamline::ComponentType::Grid) {
 
             auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-            auto bankName = compInfo.name(i);
+            auto bankName =
+                compInfo.name(i); //+ "_" + std::to_string(detectorCounter);
             auto fullPath = pathToparent + "/" + bankName;
             hasNXTransformation =
                 tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
@@ -661,6 +682,7 @@ public:
 
             hasEither = (hasRotation || hasTranslation);
             TS_ASSERT(hasEither);
+            ++detectorCounter;
           }
         }
       }
@@ -771,6 +793,7 @@ public:
 
     HDF5FileTestUtility tester(destinationFile);
 
+    int detectorCounter = 0;
     for (size_t i = compInfo.root() - 1; i > 0; --i) {
       if (compInfo.isDetector(i))
         break;
@@ -787,7 +810,8 @@ public:
               parentType != Mantid::Beamline::ComponentType::Grid) {
 
             auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-            auto bankName = compInfo.name(i);
+            auto bankName =
+                compInfo.name(i); //+ "_" + std::to_string(detectorCounter);
             auto fullPathToGroup = pathToparent + "/" + bankName;
 
             // get the xyz offset of the pixels, and use trig to verify that its
@@ -805,6 +829,7 @@ public:
                 Mantid::Kernel::toVector3d(detOffset);
 
             TS_ASSERT(offsetInFile.isApprox(expectedOffset));
+            ++detectorCounter;
           }
         }
       }
@@ -913,9 +938,8 @@ public:
     ScopedFileHandle inFileResource("reload_into_parser_file_test.hdf5");
     std::string inDestinationFile = inFileResource.fullPath();
 
-    // is rotated 90 deg,
     auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
+        ComponentCreationHelper::createTestInstrumentRectangular2(10, 10);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     auto &compInfo = (*instr.first);
@@ -973,19 +997,19 @@ public:
     std::vector<Eigen::Vector3d> outBankPositions;
     inBankPositions.reserve(outNumOfBanks);
 
-    auto bankPairs = pairUp(inBanks, outBanks);
+    const auto detIDs1 = detInfo.detectorIDs();
+    const auto detIDs2 = detInfo2.detectorIDs();
 
-    // assertations for all detector banks
-    std::for_each(
-        bankPairs.begin(), bankPairs.end(),
-        [&compInfo, &compInfo2](const std::pair<size_t, size_t> &idx) {
-          size_t idx1 = idx.first;
-          size_t idx2 = idx.second;
+    // assertations for banks/detectors
+    int detectorCounter = 0;
+    for (const size_t &idx1 : inBanks) {
 
-          /*
-          indices between component infos may not be equal, search and match
-          indices by name, then compare values.
-          */
+      std::string bankName1 =
+          compInfo.name(idx1); // + "_" + std::to_string(detectorCounter);
+
+      for (const size_t &idx2 : outBanks) {
+        std::string bankName2 = compInfo2.name(idx2);
+        if (bankName1 == bankName2) {
 
           Eigen::Vector3d bankPos1 =
               Mantid::Kernel::toVector3d(compInfo.position(idx1));
@@ -996,13 +1020,48 @@ public:
           Eigen::Quaterniond bankRot2 =
               Mantid::Kernel::toQuaterniond(compInfo2.rotation(idx2));
 
-          std::string inBankName = compInfo.name(idx1);
-          std::string outbankName = compInfo2.name(idx2);
+          // indexes of in-file and out-file detectors
+          auto inDetectors = compInfo.detectorsInSubtree(idx1);
+          auto outDetectors = compInfo2.detectorsInSubtree(idx2);
+          TS_ASSERT(inDetectors ==
+                    outDetectors); // assert det indexes equal (and implicitly
+                                   // that the number of detectors are equal)
 
-          TS_ASSERT(inBankName == outbankName);   // assert all names equal
-          TS_ASSERT(bankPos1.isApprox(bankPos2)); // assert all positions equal
-          TS_ASSERT(bankRot1.isApprox(bankRot1)); // assert all rotations equal
-        });
+          // IDs of in-file and out-file detectors
+          auto inDetIDs = getDetIDs(inDetectors, detIDs1);
+          auto outDetIDs = getDetIDs(outDetectors, detIDs2);
+          // assert all detector IDs equal
+          TS_ASSERT(inDetIDs == outDetIDs);
+
+          for (const size_t &index1 : inDetectors) {
+
+            for (const size_t &index2 : outDetectors) {
+
+              if (index1 == index2) {
+
+                Eigen::Vector3d detPos1 = Mantid::Kernel::toVector3d(
+                    compInfo.relativePosition(index1));
+                Eigen::Vector3d detPos2 = Mantid::Kernel::toVector3d(
+                    compInfo2.relativePosition(index2));
+                Eigen::Quaterniond detRot1 = Mantid::Kernel::toQuaterniond(
+                    compInfo.relativeRotation(index1));
+                Eigen::Quaterniond detRot2 = Mantid::Kernel::toQuaterniond(
+                    compInfo2.relativeRotation(index2));
+
+                TS_ASSERT(
+                    detPos1.isApprox(detPos2)); // assert det positions equal
+                TS_ASSERT(
+                    detRot1.isApprox(detRot1)); // assert det rotations equal
+              }
+            }
+          }
+
+          TS_ASSERT(bankPos1.isApprox(bankPos2)); // assert bank positions equal
+          TS_ASSERT(bankRot1.isApprox(bankRot1)); // assert bank rotations equal
+        }
+      }
+      ++detectorCounter;
+    }
 
     // assert names equal
     TS_ASSERT(inSampleName == outSampleName);

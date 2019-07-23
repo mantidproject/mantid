@@ -206,7 +206,6 @@ void checkSpec(const std::string &groupType, H5::Group &grp,
 
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
-                                const Geometry::DetectorInfo &detInfo,
                                 size_t idx) {
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
@@ -588,6 +587,8 @@ void saveDetectors(const H5::Group &parentGroup,
                    const Geometry::DetectorInfo &detInfo) {
 
   const auto detectorIDs = detInfo.detectorIDs();
+
+  int detectorCounter = 0;
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
     if (compInfo.isDetector(i))
       break;
@@ -602,7 +603,9 @@ void saveDetectors(const H5::Group &parentGroup,
             parentType != Beamline::ComponentType::Structured &&
             parentType != Beamline::ComponentType::Grid) {
 
-          std::string name = compInfo.name(i);
+          // matches in file definition
+          std::string name =
+              compInfo.name(i); //+ "_" + std::to_string(detectorCounter);
 
           H5::Group childGroup = parentGroup.createGroup(name);
           writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
@@ -617,14 +620,17 @@ void saveDetectors(const H5::Group &parentGroup,
           writeNXDetectorNumber(childGroup, compInfo, i, detectorIDs);
           writeLocation(childGroup, compInfo, i);
           writeOrientation(childGroup, compInfo, i);
-          writeXYZPixeloffset(childGroup, compInfo, detInfo, i);
+          writeXYZPixeloffset(childGroup, compInfo, i);
 
+          // local_name set to bank name
           H5::DataSet localName =
               childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
           localName.write(localNameStr, localNameStrType, H5SCALAR);
           H5::DataSet dependsOn =
               childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
           dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+
+          ++detectorCounter;
         }
     }
   }
