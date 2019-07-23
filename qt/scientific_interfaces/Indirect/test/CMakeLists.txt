@@ -13,6 +13,8 @@ set(
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h
+  IndirectPlotOptionsModelTest.h
+  IndirectPlotOptionsPresenterTest.h
   IndirectSettingsModelTest.h
   IndirectSettingsPresenterTest.h
   IndirectSpectrumSelectionPresenterTest.h
