@@ -11,6 +11,8 @@ namespace ComponentInfoBankHelpers {
 
 MANTID_GEOMETRY_DLL bool isDetectorFixedInBank(const ComponentInfo &compInfo,
                                                const size_t detIndex);
+MANTID_GEOMETRY_DLL bool isAnyBank(const ComponentInfo &compInfo,
+                                   const size_t &idx);
 } // namespace ComponentInfoBankHelpers
 
 } // namespace Geometry

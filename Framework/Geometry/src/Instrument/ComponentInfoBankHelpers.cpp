@@ -32,6 +32,33 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
   return false;
 }
 
+bool isAnyBank(const ComponentInfo &compInfo, const size_t &idx) {
+  // if component at index is not a detector
+  if (compInfo.isDetector(idx))
+    return false;
+  if (compInfo.hasParent(idx)) {
+    size_t parent = compInfo.parent(idx);
+    auto parentType = compInfo.componentType(parent);
+    auto childType = compInfo.componentType(idx);
+    if (compInfo.detectorsInSubtree(idx).size() != 0) {
+      // if parent is not a detector bank
+      if (parentType != Beamline::ComponentType::Rectangular &&
+          parentType != Beamline::ComponentType::Structured &&
+          parentType != Beamline::ComponentType::Grid) {
+
+        // if component at index is not a tube
+        if (childType != Beamline::ComponentType::Unstructured) {
+          return true;
+        }
+        return false;
+      }
+      return false;
+    }
+    return false;
+  }
+  return false;
+}
+
 } // namespace ComponentInfoBankHelpers
 } // namespace Geometry
 } // namespace Mantid

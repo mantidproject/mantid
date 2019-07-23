@@ -54,7 +54,9 @@ const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 const std::string SOURCE = "source";
 const std::string SAMPLE = "sample";
+const std::string INSTRUMENT = "instrument";
 const std::string DETECTOR_NUMBER = "detector_number";
+const std::string DETECTOR_PREFIX = "detector_";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 
 const std::string METRES = "m";
@@ -185,23 +187,6 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
   H5::StrType dataType = strTypeOfSize(attrVal);
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
-}
-
-// adds additional optional data to save to file (future implementation)
-void checkSpec(const std::string &groupType, H5::Group &grp,
-               const Geometry::ComponentInfo &compInfo) {
-
-  if (groupType == SOURCE) {
-
-    if (compInfo.name(compInfo.source()) != "")
-      writeStrDataset(grp, NAME, compInfo.name(compInfo.source()));
-  }
-
-  if (groupType == SAMPLE) {
-
-    if (compInfo.name(compInfo.sample()) != "")
-      writeStrDataset(grp, NAME, compInfo.name(compInfo.sample()));
-  }
 }
 
 inline void writeXYZPixeloffset(H5::Group &grp,
@@ -492,17 +477,16 @@ inline void writeOrientation(H5::Group &grp,
 H5::Group instrument(const H5::Group &parent,
                      const Geometry::ComponentInfo &compInfo) {
 
-  std::string instrumentNameStr = compInfo.name(compInfo.root());
-  H5::Group group = parent.createGroup(instrumentNameStr);
-  writeStrAttribute(group, NX_CLASS, NX_INSTRUMENT);
-  H5::StrType nameStrType = strTypeOfSize(instrumentNameStr);
-  H5::DataSet name = group.createDataSet("name", nameStrType, H5SCALAR);
-  writeStrAttribute(name, SHORT_NAME,
-                    instrumentNameStr); // placeholder
+  std::string instrumentName = compInfo.name(compInfo.root());
+  H5::Group childGroup = parent.createGroup(INSTRUMENT);
 
-  name.write(instrumentNameStr, nameStrType, H5SCALAR);
+  writeStrDataset(childGroup, NAME, instrumentName);
+  writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
 
-  return group;
+  std::string defaultShortName = instrumentName.substr(0, 3);
+  H5::DataSet name = childGroup.openDataSet(NAME);
+  writeStrAttribute(name, SHORT_NAME, defaultShortName);
+  return childGroup;
 }
 
 /*
@@ -522,20 +506,17 @@ void saveSample(const H5::Group &parentGroup,
   size_t idx = compInfo.sample();
 
   std::string sampleName = compInfo.name(compInfo.sample());
-  childGroup = parentGroup.createGroup(sampleName);
-  checkSpec("sample", childGroup, compInfo);
+  childGroup = parentGroup.createGroup(SAMPLE);
 
   writeLocation(childGroup, compInfo, idx);
-  writeOrientation(childGroup, compInfo, idx); // necessary?
+  writeOrientation(childGroup, compInfo, idx);
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
 
   std::string dependency =
       forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-  H5::DataSet dependsOn =
-      childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
-  dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+  writeStrDataset(childGroup, NAME, sampleName);
+  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -555,20 +536,17 @@ void saveSource(const H5::Group &parentGroup,
   size_t idx = compInfo.source();
 
   std::string sourceName = compInfo.name(compInfo.source());
-  childGroup = parentGroup.createGroup(sourceName);
+  childGroup = parentGroup.createGroup(SOURCE);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
-  checkSpec(SOURCE, childGroup, compInfo);
 
   writeLocation(childGroup, compInfo, idx);
   writeOrientation(childGroup, compInfo, idx);
 
   std::string dependency =
       forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-  H5::DataSet dependsOn =
-      childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
-  dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+  writeStrDataset(childGroup, NAME, sourceName);
+  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -588,50 +566,38 @@ void saveDetectors(const H5::Group &parentGroup,
 
   const auto detectorIDs = detInfo.detectorIDs();
 
-  int detectorCounter = 0;
+  int detCounter = 1;
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
-    if (compInfo.isDetector(i))
-      break;
 
-    if (compInfo.hasParent(i)) {
+    if (Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
 
-      size_t parent = compInfo.parent(i);
-      auto parentType = compInfo.componentType(parent);
+      // group name
+      std::string name = DETECTOR_PREFIX + std::to_string(detCounter);
 
-      if (compInfo.detectorsInSubtree(i).size() != 0)
-        if (parentType != Beamline::ComponentType::Rectangular &&
-            parentType != Beamline::ComponentType::Structured &&
-            parentType != Beamline::ComponentType::Grid) {
+      H5::Group childGroup = parentGroup.createGroup(name);
+      writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
-          // matches in file definition
-          std::string name =
-              compInfo.name(i); //+ "_" + std::to_string(detectorCounter);
+      std::string localNameStr = compInfo.name(i);
+      H5::StrType localNameStrType = strTypeOfSize(localNameStr);
 
-          H5::Group childGroup = parentGroup.createGroup(name);
-          writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
+      std::string dependency =
+          forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+      H5::StrType dependencyStrType = strTypeOfSize(dependency);
 
-          std::string localNameStr = name;
-          H5::StrType localNameStrType = strTypeOfSize(localNameStr);
+      writeNXDetectorNumber(childGroup, compInfo, i, detectorIDs);
+      writeLocation(childGroup, compInfo, i);
+      writeOrientation(childGroup, compInfo, i);
+      writeXYZPixeloffset(childGroup, compInfo, i);
 
-          std::string dependency =
-              forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
-          H5::StrType dependencyStrType = strTypeOfSize(dependency);
+      // local_name set to bank name
+      H5::DataSet localName =
+          childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
+      localName.write(localNameStr, localNameStrType, H5SCALAR);
+      H5::DataSet dependsOn =
+          childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
+      dependsOn.write(dependency, dependencyStrType, H5SCALAR);
 
-          writeNXDetectorNumber(childGroup, compInfo, i, detectorIDs);
-          writeLocation(childGroup, compInfo, i);
-          writeOrientation(childGroup, compInfo, i);
-          writeXYZPixeloffset(childGroup, compInfo, i);
-
-          // local_name set to bank name
-          H5::DataSet localName =
-              childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
-          localName.write(localNameStr, localNameStrType, H5SCALAR);
-          H5::DataSet dependsOn =
-              childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
-          dependsOn.write(dependency, dependencyStrType, H5SCALAR);
-
-          ++detectorCounter;
-        }
+      ++detCounter;
     }
   }
 }

@@ -7,6 +7,8 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
+#include "MantidKernel/ConfigService.h" // temporary, for unit test with parser.
+
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
@@ -20,6 +22,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 
+#include <H5Cpp.h>
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -27,7 +30,7 @@
 #include <memory>
 #include <set>
 
-#include <H5Cpp.h>
+#include <Poco/Glob.h> // temporary, for unit test with parser.
 
 using namespace Mantid::NexusGeometry;
 
@@ -60,28 +63,6 @@ Indices banks(const Mantid::Geometry::ComponentInfo &compInfo) {
     }
   }
   return banks;
-}
-
-// for comparision of detector banks between saved instrument and reloaded
-// instrument, as required for the unit test. Delete this with along with the
-// temporary unit test to reload file.
-template <typename T>
-std::vector<std::pair<T, T>> pairUp(const std::vector<T> &vector1,
-                                    const std::vector<T> &vector2) {
-  int numOfEntries = (int)vector1.size();
-  std::vector<std::pair<T, T>> pairVector;
-  pairVector.reserve(sizeof(std::pair<T, T>) * numOfEntries);
-
-  for (int i = 0; i < vector1.size(); ++i) {
-
-    // position in totalVector that divides vector1 and vector2
-    T element1 = vector1[i];
-    T element2 = vector2[i];
-
-    std::pair<T, T> pair = std::make_pair(element1, element2);
-    pairVector.push_back(pair);
-  }
-  return pairVector;
 }
 
 // for comparision of detector banks between saved instrument and reloaded
@@ -120,6 +101,11 @@ const std::string TRANSLATION = "translation";
 const std::string VECTOR = "vector";
 const std::string LOCATION = "location";
 const std::string ORIENTATION = "orientation";
+const std::string SOURCE = "source";
+const std::string SAMPLE = "sample";
+const std::string NAME = "name";
+const std::string DETECTOR_PREFIX = "detector_";
+const std::string INSTRUMENT = "instrument";
 const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
@@ -331,13 +317,14 @@ public:
     return true;
   }
 
-  bool expectedValue(const std::string &dataSetValue,
-                     const std::string &pathToGroup) const {
+  bool dataSetHasStrValue(const std::string &dataSetName,
+                          const std::string &dataSetValue,
+                          const std::string &pathToGroup) const {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
     try {
-      H5::DataSet dataSet = parentGroup.openDataSet(m_dataSetName);
+      H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
       std::string dataSetVal;
       dataSet.read(dataSetVal, dataSet.getDataType());
       return dataSetVal == dataSetValue;
@@ -360,6 +347,18 @@ public:
     return attributeValue == attrVal;
   }
 
+  bool hasNXAttributeInGroup(const std::string &pathToGroup,
+                             const std::string &attrVal) {
+
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+
+    H5::Attribute attribute = parentGroup.openAttribute(NX_CLASS);
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
+  }
+
   bool hasAttributeInDataSet(const std::string &pathToGroup,
                              const std::string dataSetName,
                              const std::string &attrName,
@@ -375,12 +374,24 @@ public:
     return attributeValue == attrVal;
   }
 
+  bool hasNXAttributeInDataSet(const std::string &pathToGroup,
+                               const std::string dataSetName,
+                               const std::string &attrVal) {
+
+    H5::Attribute attribute;
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
+    attribute = dataSet.openAttribute(NX_CLASS);
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
+  }
+
 private:
   H5::H5File m_file;
-  const std::string m_dataSetName =
-      "name"; // the title for the dataset containing the instrument name
-              // is 'local_name' in file.
-};            // namespace
+
+}; // HDF5FileTestUtility
 
 // RAII: Gives a clean file destination and removes the file when
 // handle is out of scope. Must be stack allocated.
@@ -531,14 +542,25 @@ public:
     auto destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
+
+    // name of instrument
     const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
     NexusGeometrySave::saveInstrument(m_instrument,
                                       destinationFile); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
+    std::string pathToGroup = "/raw_data_1/" + INSTRUMENT;
+
     TS_ASSERT(
-        testUtility.groupExistsInPath("/raw_data_1/" + expectedInstrumentName));
+        testUtility.groupExistsInPath(pathToGroup)); // assert group exists
+
+    TS_ASSERT(testUtility.hasNXAttributeInGroup(
+        pathToGroup, NX_INSTRUMENT)); // assert group is NXinstrument
+
+    TS_ASSERT(testUtility.dataSetHasStrValue(
+        NAME, expectedInstrumentName,
+        pathToGroup)) // assert name stored in 'name'
   }
 
   void test_instrument_without_sample_throws() {
@@ -586,7 +608,6 @@ public:
     std::string destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
     NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
@@ -601,7 +622,6 @@ public:
     std::string destinationFile = fileResource.fullPath();
 
     auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
 
     NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
@@ -634,7 +654,7 @@ public:
 
     // instrument with 10 banks
     auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(10, 50);
+        ComponentCreationHelper::createTestInstrumentRectangular2(10, 10);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // saveinstrument
@@ -644,47 +664,30 @@ public:
     bool hasNXTransformation;
     bool hasRotation;
     bool hasTranslation;
-    bool hasEither;
 
     HDF5FileTestUtility tester(destinationFile);
 
-    int detectorCounter = 0;
+    int detCounter = 1;
     for (size_t i = compInfo.root() - 1; i > 0; --i) {
-      if (compInfo.isDetector(i))
-        break;
 
-      if (compInfo.hasParent(i)) {
+      if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
 
-        size_t parent = compInfo.parent(i);
-        auto parentType = compInfo.componentType(parent);
+        auto pathToparent = "/raw_data_1/" + INSTRUMENT;
+        auto bankGroupName = DETECTOR_PREFIX + std::to_string(detCounter);
+        auto fullPath = pathToparent + "/" + bankGroupName;
+        hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
 
-        if (compInfo.detectorsInSubtree(i).size() != 0) {
+        // assert all test banks have Nxtransformations
+        TS_ASSERT(hasNXTransformation);
 
-          if (parentType != Mantid::Beamline::ComponentType::Rectangular &&
-              parentType != Mantid::Beamline::ComponentType::Structured &&
-              parentType != Mantid::Beamline::ComponentType::Grid) {
+        hasTranslation =
+            tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
 
-            auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-            auto bankName =
-                compInfo.name(i); //+ "_" + std::to_string(detectorCounter);
-            auto fullPath = pathToparent + "/" + bankName;
-            hasNXTransformation =
-                tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+        hasRotation =
+            tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
 
-            // assert all test banks have Nxtransformations
-            TS_ASSERT(hasNXTransformation);
-
-            hasTranslation =
-                tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
-
-            hasRotation =
-                tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
-
-            hasEither = (hasRotation || hasTranslation);
-            TS_ASSERT(hasEither);
-            ++detectorCounter;
-          }
-        }
+        TS_ASSERT((hasRotation || hasTranslation));
+        ++detCounter;
       }
     }
   }
@@ -703,13 +706,11 @@ public:
     bool hasNXTransformation;
     bool hasRotation;
     bool hasTranslation;
-    bool hasEither(true); // default to true
 
     HDF5FileTestUtility tester(destinationFile);
 
     auto pathToparent = "/raw_data_1/";
-    auto sampleName = compInfo.name(compInfo.sample());
-    auto fullPathToGroup = pathToparent + sampleName;
+    auto fullPathToGroup = pathToparent + SAMPLE;
 
     hasNXTransformation =
         tester.hasNXDataset(fullPathToGroup, NX_TRANSFORMATION);
@@ -723,10 +724,7 @@ public:
     hasRotation =
         tester.hasDataset(fullPathToGroup, ROTATION, TRANSFORMATION_TYPE);
 
-    if (!(hasRotation || hasTranslation))
-      hasEither = false;
-
-    TS_ASSERT(hasEither);
+    TS_ASSERT((hasRotation || hasTranslation));
   }
 
   void
@@ -743,11 +741,10 @@ public:
     bool hasNXTransformation;
     bool hasRotation;
     bool hasTranslation;
-    bool hasEither(true); // default to true
 
     HDF5FileTestUtility tester(destinationFile);
 
-    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+    auto pathToparent = "/raw_data_1/" + INSTRUMENT;
     auto sourceName = compInfo.name(compInfo.source());
     auto fullPath = pathToparent + "/" + sourceName;
 
@@ -761,10 +758,7 @@ public:
 
     hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
 
-    if (!(hasRotation || hasTranslation))
-      hasEither = false;
-
-    TS_ASSERT(hasEither);
+    TS_ASSERT((hasRotation || hasTranslation));
   }
 
   void
@@ -793,45 +787,30 @@ public:
 
     HDF5FileTestUtility tester(destinationFile);
 
-    int detectorCounter = 0;
+    int detCounter = 1; // suffixes of NXdetectors start at 1
     for (size_t i = compInfo.root() - 1; i > 0; --i) {
-      if (compInfo.isDetector(i))
-        break;
 
-      if (compInfo.hasParent(i)) {
+      if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
 
-        size_t parent = compInfo.parent(i);
-        auto parentType = compInfo.componentType(parent);
+        auto pathToparent = "/raw_data_1/" + INSTRUMENT;
+        auto bankGroupName = DETECTOR_PREFIX + std::to_string(detCounter);
+        auto fullPathToGroup = pathToparent + "/" + bankGroupName;
 
-        if (compInfo.detectorsInSubtree(i).size() != 0) {
+        // get the xyz offset of the pixels, and use trig to verify that its
+        // position reflects det rotation relative to bank.
+        double detOffsetX =
+            tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
+        double detOffsetY =
+            tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
+        double detOffsetZ =
+            tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
 
-          if (parentType != Mantid::Beamline::ComponentType::Rectangular &&
-              parentType != Mantid::Beamline::ComponentType::Structured &&
-              parentType != Mantid::Beamline::ComponentType::Grid) {
+        Eigen::Vector3d offsetInFile(detOffsetX, detOffsetY, detOffsetZ);
 
-            auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-            auto bankName =
-                compInfo.name(i); //+ "_" + std::to_string(detectorCounter);
-            auto fullPathToGroup = pathToparent + "/" + bankName;
+        Eigen::Vector3d expectedOffset = Mantid::Kernel::toVector3d(detOffset);
 
-            // get the xyz offset of the pixels, and use trig to verify that its
-            // position reflects det rotation relative to bank.
-            double detOffsetX =
-                tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
-            double detOffsetY =
-                tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
-            double detOffsetZ =
-                tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
-
-            Eigen::Vector3d offsetInFile(detOffsetX, detOffsetY, detOffsetZ);
-
-            Eigen::Vector3d expectedOffset =
-                Mantid::Kernel::toVector3d(detOffset);
-
-            TS_ASSERT(offsetInFile.isApprox(expectedOffset));
-            ++detectorCounter;
-          }
-        }
+        TS_ASSERT(offsetInFile.isApprox(expectedOffset));
+        ++detCounter;
       }
     }
   }
@@ -860,8 +839,7 @@ public:
     HDF5FileTestUtility tester(destinationFile);
 
     auto pathToparent = "/raw_data_1/";
-    auto sampleName = compInfo.name(compInfo.sample());
-    auto fullPathToGroup = pathToparent + sampleName;
+    auto fullPathToGroup = pathToparent + SAMPLE;
 
     std::string dataSetName = "orientation";
     std::string attributeName = "vector";
@@ -907,9 +885,8 @@ public:
     NexusGeometrySave::saveInstrument(instr, destinationFile);
     HDF5FileTestUtility tester(destinationFile);
 
-    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-    auto sourceName = compInfo.name(compInfo.source());
-    auto fullPathToGroup = pathToparent + "/" + sourceName;
+    auto pathToparent = "/raw_data_1/" + INSTRUMENT;
+    auto fullPathToGroup = pathToparent + "/" + SOURCE;
 
     std::string dataSetName = "orientation";
     std::string attributeName = "vector";
@@ -947,10 +924,7 @@ public:
 
     NexusGeometrySave::saveInstrument(instr, inDestinationFile);
 
-    // resave file for inspection
-    ScopedFileHandle outFileResource("resave_from_parser_file_test.hdf5");
-    std::string outDestinationFile = outFileResource.fullPath();
-
+    // reload to Nexus Geometry Parser
     std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
     auto reloadedInstrument = NexusGeometryParser::createInstrument(
         inDestinationFile, std::move(logger));
@@ -959,8 +933,6 @@ public:
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
     auto &compInfo2 = (*instr2.first);
     auto &detInfo2 = (*instr2.second);
-
-    NexusGeometrySave::saveInstrument(instr2, outDestinationFile);
 
     // sources
     std::string inSourceName = compInfo.name(compInfo.source());
@@ -1001,11 +973,10 @@ public:
     const auto detIDs2 = detInfo2.detectorIDs();
 
     // assertations for banks/detectors
-    int detectorCounter = 0;
+
     for (const size_t &idx1 : inBanks) {
 
-      std::string bankName1 =
-          compInfo.name(idx1); // + "_" + std::to_string(detectorCounter);
+      std::string bankName1 = compInfo.name(idx1);
 
       for (const size_t &idx2 : outBanks) {
         std::string bankName2 = compInfo2.name(idx2);
@@ -1060,7 +1031,6 @@ public:
           TS_ASSERT(bankRot1.isApprox(bankRot2)); // assert bank rotations equal
         }
       }
-      ++detectorCounter;
     }
 
     // assert names equal
@@ -1074,6 +1044,28 @@ public:
     // assert positions equal
     TS_ASSERT(inSamplePos.isApprox(outSamplePos));
     TS_ASSERT(inSourcePos.isApprox(outSourcePos));
+  }
+
+  void test_resave_of_instrument_has_identical_files_temp() {
+
+    ScopedFileHandle inFileResource("resave_from_parser_file_test.hdf5");
+    std::string destinationFile = inFileResource.fullPath();
+
+    std::string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
+    const auto fullpath = Mantid::Kernel::ConfigService::Instance().getFullPath(
+        nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
+
+    std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
+    auto reloadedInstrument =
+        NexusGeometryParser::createInstrument(fullpath, std::move(logger));
+
+    auto instr =
+        Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
+    auto &compInfo = (*instr.first);
+    auto &detInfo = (*instr.second);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile);
+    // TODO HDF5FileTestUtility assertations on both files.
   }
 };
 
