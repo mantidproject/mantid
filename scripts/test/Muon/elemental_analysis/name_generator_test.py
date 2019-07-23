@@ -7,6 +7,7 @@
 from __future__ import absolute_import, print_function
 
 import unittest
+import sys
 
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 
@@ -32,15 +33,26 @@ class NameGeneratorTest(unittest.TestCase):
 
         with self.assertRaises(TypeError) as err:
             gen_name(element1, name)
-        self.assertEqual(str(err.exception), "'None' expected to be 'str', found '<type 'NoneType'>' instead")
+        if sys.version_info[:2] < (3, 0):
+            self.assertEqual(str(err.exception), "'None' expected to be 'str', found '<type 'NoneType'>' instead")
+        else:
+            self.assertEqual(str(err.exception), "'None' expected to be 'str', found '<class 'NoneType'>' instead")
 
         with self.assertRaises(TypeError) as err:
             gen_name(element2, name)
-        self.assertEqual(str(err.exception), "'1' expected to be 'str', found '<type 'int'>' instead")
+        if sys.version_info[:2] < (3, 0):
+            self.assertEqual(str(err.exception), "'1' expected to be 'str', found '<type 'int'>' instead")
+        else:
+            self.assertEqual(str(err.exception), "'1' expected to be 'str', found '<class 'int'>' instead")
 
         with self.assertRaises(TypeError) as err:
             gen_name(element3, name)
-        self.assertEqual(str(err.exception), "'(3.0, 'string')' expected to be 'str', found '<type 'tuple'>' instead")
+        if sys.version_info[:2] < (3, 0):
+            self.assertEqual(str(err.exception),
+                             "'(3.0, 'string')' expected to be 'str', found '<type 'tuple'>' instead")
+        else:
+            self.assertEqual(str(err.exception),
+                             "'(3.0, 'string')' expected to be 'str', found '<class 'tuple'>' instead")
 
     def test_that_gen_name_with_non_string_name_throws(self):
         element = 'valid element'
@@ -50,15 +62,26 @@ class NameGeneratorTest(unittest.TestCase):
 
         with self.assertRaises(TypeError) as err:
             gen_name(element, name1)
-        self.assertEqual(str(err.exception), "'None' expected to be 'str', found '<type 'NoneType'>' instead")
+        if sys.version_info[:2] < (3, 0):
+            self.assertEqual(str(err.exception), "'None' expected to be 'str', found '<type 'NoneType'>' instead")
+        else:
+            self.assertEqual(str(err.exception), "'None' expected to be 'str', found '<class 'NoneType'>' instead")
 
         with self.assertRaises(TypeError) as err:
             gen_name(element, name2)
-        self.assertEqual(str(err.exception), "'1' expected to be 'str', found '<type 'int'>' instead")
+        if sys.version_info[:2] < (3, 0):
+            self.assertEqual(str(err.exception), "'1' expected to be 'str', found '<type 'int'>' instead")
+        else:
+            self.assertEqual(str(err.exception), "'1' expected to be 'str', found '<class 'int'>' instead")
 
         with self.assertRaises(TypeError) as err:
             gen_name(element, name3)
-        self.assertEqual(str(err.exception), "'(3.0, 'string')' expected to be 'str', found '<type 'tuple'>' instead")
+        if sys.version_info[:2] < (3, 0):
+            self.assertEqual(str(err.exception),
+                             "'(3.0, 'string')' expected to be 'str', found '<type 'tuple'>' instead")
+        else:
+            self.assertEqual(str(err.exception),
+                             "'(3.0, 'string')' expected to be 'str', found '<class 'tuple'>' instead")
 
     def test_that_gen_name_with_unicode_string_does_not_throw(self):
         element = u'element'
