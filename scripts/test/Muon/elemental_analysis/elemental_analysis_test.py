@@ -199,7 +199,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         call_list = [mock.call(gen_name('Cu', 'line3'), 30.0, 'C0', 'Cu'),
                      mock.call(gen_name('Cu', 'line2'), 20.0, 'C0', 'Cu'),
                      mock.call(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')]
-        mock_plot_line.assert_has_calls(call_list)
+        mock_plot_line.assert_has_calls(call_list, any_order=True)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
     def test_remove_element_lines_does_nothing_if_element_not_in_element_lines(self, mock_rm_line):

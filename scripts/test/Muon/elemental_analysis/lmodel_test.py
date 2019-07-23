@@ -21,8 +21,9 @@ class LModelTest(unittest.TestCase):
     def test_load_calls_loadAscii_with_correct_parameters(self, mock_mantid):
         items = {'path1': 'name1', 'path2': 'name2'}
         self.model._load(items)
-
-        mock_mantid.LoadAscii.assert_called_with('path1', OutputWorkspace='name1')
+        call_list = [mock.call('path1', OutputWorkspace='name1'),
+                     mock.call('path2', OutputWorkspace='name2')]
+        mock_mantid.LoadAscii.assert_has_calls(call_list, any_order=True)
         self.assertEqual(mock_mantid.LoadAscii.call_count, 2)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.group_by_detector')
