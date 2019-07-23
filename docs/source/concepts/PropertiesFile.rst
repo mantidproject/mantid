@@ -234,6 +234,15 @@ See :ref:`project recovery <Project Recovery>` for more details.
 | ``projectRecovery.secondsBetween``      |How often to save checkpoints in seconds       | ``60``           |
 +-----------------------------------------+-----------------------------------------------+------------------+
 
+Project Saving
+**************
+
++---------------------------------+------------------------------------------------------------------+------------------+
+|Property                         |Description                                                       |Example value     |
++=================================+==================================================================+==================+
+| ``projectSaving.warningSize``   |Size in bytes of a project before the user is warned when saving  |  ``10737418240`` |
++---------------------------------+------------------------------------------------------------------+------------------+
+
 
 Getting access to Mantid properties
 ***********************************
