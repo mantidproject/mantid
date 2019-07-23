@@ -9,13 +9,14 @@ from __future__ import print_function, absolute_import
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 import Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table as periodic_table
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTableItem, PeriodicCombo
 
 
-class PeriodicComboTest(GuiTest):
+@start_qapplication
+class PeriodicComboTest(unittest.TestCase):
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')
     def test_that_init_defaults_to_all_elements_in_periodic_table(self, mock_insert_item):
         PeriodicCombo()
