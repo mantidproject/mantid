@@ -8,7 +8,7 @@
 #define MANTIDQT_INDIRECTPLOTOPTIONSPRESENTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
+//#include <gmock/gmock.h>
 
 class IndirectPlotOptionsPresenterTest : public CxxTest::TestSuite {
 public:

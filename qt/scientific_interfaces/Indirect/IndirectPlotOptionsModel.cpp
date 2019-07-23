@@ -11,6 +11,11 @@
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/MplCpp/Plot.h"
+
+#include <QHash>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
 #endif
 
 using namespace Mantid::API;
@@ -68,7 +73,7 @@ std::string formatIndicesString(std::string &str) {
   return joinCompress(indices.begin(), indices.end());
 }
 
-template <typename T = std::size_t> T convertToT(std::string const &num) {
+template <typename T> T convertToT(std::string const &num) {
   if (std::is_same<T, std::size_t>::value)
     return std::stoul(num);
   else if (std::is_same<T, int>::value)
@@ -77,14 +82,14 @@ template <typename T = std::size_t> T convertToT(std::string const &num) {
       "Could not convert std::string to std::size_t or int type.");
 }
 
-template <typename T = std::size_t>
+template <typename T>
 void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex,
                         T const &endIndex) {
   for (auto index = startIndex; index <= endIndex; ++index)
     indicesVec.emplace_back(index);
 }
 
-template <typename T = std::size_t>
+template <typename T>
 void addToIndicesVector(std::vector<T> &indicesVec,
                         std::string const &indicesString) {
   auto const range = splitStringBy(indicesString, "-");
@@ -95,7 +100,7 @@ void addToIndicesVector(std::vector<T> &indicesVec,
     indicesVec.emplace_back(convertToT<T>(range[0]));
 }
 
-template <typename T = std::size_t>
+template <typename T>
 std::vector<T> createIndicesVector(std::string const &indices) {
   std::vector<T> indicesVec;
   for (auto subString : splitStringBy(indices, ","))
@@ -292,8 +297,9 @@ IndirectPlotOptionsModel::getPlotTiledString() const {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    return createPlotTiledString(workspaceName.get(),
-                                 createIndicesVector(indicesString.get()));
+    return createPlotTiledString(
+        workspaceName.get(),
+        createIndicesVector<std::size_t>(indicesString.get()));
   return boost::none;
 }
 

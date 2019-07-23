@@ -67,8 +67,7 @@ QIcon plotTiledIcon() {
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent,
-                                                 PlotWidget const &plotType)
+IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
     : API::MantidWidget(parent),
       m_suggestionsModel(
           std::make_unique<QStringListModel>(indicesSuggestions())),

@@ -28,8 +28,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
   Q_OBJECT
 
 public:
-  IndirectPlotOptionsView(QWidget *parent = nullptr,
-                          PlotWidget const &plotType = PlotWidget::Spectra);
+  IndirectPlotOptionsView(QWidget *parent = nullptr);
   virtual ~IndirectPlotOptionsView() override = default;
 
   void setPlotType(PlotWidget const &plotType);
