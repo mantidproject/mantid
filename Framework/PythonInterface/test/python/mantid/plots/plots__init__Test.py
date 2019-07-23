@@ -14,12 +14,10 @@ from matplotlib.container import ErrorbarContainer
 import numpy as np
 import unittest
 
-from mantid.api import WorkspaceFactory
 from mantid.kernel import config
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
-from mantid.simpleapi import (AnalysisDataService, CreateWorkspace,
-                              CreateSampleWorkspace, DeleteWorkspace)
+from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace)
 
 
 class Plots__init__Test(unittest.TestCase):
@@ -57,7 +55,7 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_errorbar_plots(self):
         self.ax.errorbar(self.ws2d_histo, specNum=2, linewidth=6)
-        self.ax.errorbar(np.arange(10), np.arange(10), 0.1*np.ones((10,)), fmt='bo-')
+        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10,)), fmt='bo-')
 
     def test_imshow(self):
         self.ax.imshow(self.ws2d_histo)
@@ -110,7 +108,8 @@ class Plots__init__Test(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        is_empty = self.ax.remove_artists_if(lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'ws2d_histo: spec 3'])
+        is_empty = self.ax.remove_artists_if(
+            lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'ws2d_histo: spec 3'])
         self.assertEqual(0, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 not in self.ax.lines)
@@ -146,7 +145,8 @@ class Plots__init__Test(unittest.TestCase):
         line_second_ws = self.ax.plot(second_ws, specNum=5)[0]
         self.assertEqual(3, len(self.ax.lines))
 
-        is_empty = self.ax.remove_artists_if(lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'second_ws: spec 5'])
+        is_empty = self.ax.remove_artists_if(
+            lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'second_ws: spec 5'])
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -367,7 +367,7 @@ class Plots__init__Test(unittest.TestCase):
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
             'ws': [Mock(is_normalized=normalization_states[0]),
-                    Mock(is_normalized=normalization_states[1])],
+                   Mock(is_normalized=normalization_states[1])],
             'ws1': [Mock(is_normalized=normalization_states[2])]}
         with patch('mantid.kernel.logger.warning', Mock()) as mock_logger:
             with patch.object(self.ax, 'tracked_workspaces', mock_tracked_workspaces):

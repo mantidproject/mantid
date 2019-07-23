@@ -7,13 +7,14 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 
-class QuickEditWidgetTest(GuiTest):
+@start_qapplication
+class QuickEditWidgetTest(unittest.TestCase):
     def setUp(self):
         self.pres = mock.create_autospec(QuickEditPresenter)
         self.widget = QuickEditWidget()

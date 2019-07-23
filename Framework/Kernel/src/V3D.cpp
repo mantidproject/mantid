@@ -168,20 +168,28 @@ double V3D::zenith(const V3D &v) const noexcept {
  *  @return The angle between the vectors in radians (0 < theta < pi)
  */
 double V3D::angle(const V3D &v) const {
-  const double n1 = norm();
-  const double n2 = v.norm();
-  if (n1 == 0. || n2 == 0.) {
-    throw std::runtime_error(
-        "Cannot calculate an angle when one of the vectors has zero length.");
-  }
-  const double ratio = this->scalar_prod(v) / (n1 * n2);
-
+  const double ratio = this->cosAngle(v);
   if (ratio >= 1.0)       // NOTE: Due to rounding errors, if v is
     return 0.0;           //       is nearly the same as "this" or
   else if (ratio <= -1.0) //       as "-this", ratio can be slightly
     return M_PI;          //       more than 1 in absolute value.
                           //       That causes acos() to return NaN.
   return acos(ratio);
+}
+
+/** Calculates the cosine of angle between this and another vector.
+ *
+ *  @param v :: The other vector
+ *  @return cosine of the angle between the vectors
+ */
+double V3D::cosAngle(const V3D &v) const {
+  const double n1 = norm();
+  const double n2 = v.norm();
+  if (n1 == 0. || n2 == 0.) {
+    throw std::runtime_error(
+        "Cannot calculate an angle when one of the vectors has zero length.");
+  }
+  return this->scalar_prod(v) / (n1 * n2);
 }
 
 /**

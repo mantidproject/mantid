@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
-from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
+from testhelpers import (assertRaisesNothing, assert_almost_equal, create_algorithm, illhelpers)
 import unittest
 import ReflectometryILL_common as common
 
@@ -84,9 +84,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i != 49:
-                numpy.testing.assert_almost_equal(ys, [0.0] * ysSize, decimal=12)
+                assert_almost_equal(ys, [0.0] * ysSize, decimal=12)
             else:
-                numpy.testing.assert_almost_equal(ys, [10.0] * ysSize, decimal=12)
+                assert_almost_equal(ys, [10.0] * ysSize, decimal=12)
         self.assertEqual(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def _backgroundSubtraction(self, subtractionType):
@@ -113,9 +113,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i != 49:
-                numpy.testing.assert_almost_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_almost_equal(ys, [10.0] * ysSize)
+                assert_almost_equal(ys, [10.0] * ysSize)
         self.assertEqual(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testLinearFlatBackgroundSubtraction(self):
@@ -199,17 +199,17 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i in lowerBkgIndices:
-                numpy.testing.assert_almost_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize)
             elif i in lowerExclusionIndices:
-                numpy.testing.assert_almost_equal(ys, [-1005.0] * ysSize)
+                assert_almost_equal(ys, [-1005.0] * ysSize)
             elif i in foregroundIndices:
-                numpy.testing.assert_almost_equal(ys, [995.0] * ysSize)
+                assert_almost_equal(ys, [995.0] * ysSize)
             elif i in upperExclusionIndices:
-                numpy.testing.assert_almost_equal(ys, [-1005.0] * ysSize)
+                assert_almost_equal(ys, [-1005.0] * ysSize)
             elif i in upperBkgIndices:
-                numpy.testing.assert_almost_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_almost_equal(ys, [-5.0] * ysSize)
+                assert_almost_equal(ys, [-5.0] * ysSize)
         self.assertEqual(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testAsymmetricForegroundRanges(self):

@@ -217,7 +217,7 @@ class Abins(PythonAlgorithm):
                 raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
                                  "Abins cannot create multiple workspaces with the same name.")
 
-            numbered_atom_test = re.compile('^' + prefix + '_?(\d+)$')
+            numbered_atom_test = re.compile('^' + prefix + r'_?(\d+)$')
             atom_numbers = [numbered_atom_test.findall(item) for item in self._atoms]  # Matches will be lists of str
             atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
 

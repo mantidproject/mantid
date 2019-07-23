@@ -55,7 +55,7 @@ public:
       spice2d.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(spice2d.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(spice2d.execute(), const std::runtime_error &);
 
     // Set the file name
     spice2d.setPropertyValue("Filename", inputFile);
@@ -181,7 +181,7 @@ public:
       spice2d.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(spice2d.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(spice2d.execute(), const std::runtime_error &);
 
     // Set the file name
     spice2d.setPropertyValue("Filename", inputFile);

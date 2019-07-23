@@ -760,10 +760,11 @@ void IndirectTab::setRangeSelector(
     const boost::optional<QPair<double, double>> &range) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
-  rs->setRange(bounds.first, bounds.second);
   if (range) {
     rs->setMinimum(range.get().first);
     rs->setMaximum(range.get().second);
+    // clamp the bounds of the selector
+    rs->setRange(range.get().first, range.get().second);
   } else {
     rs->setMinimum(bounds.first);
     rs->setMaximum(bounds.second);

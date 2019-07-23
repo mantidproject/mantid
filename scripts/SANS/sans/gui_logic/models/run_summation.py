@@ -49,7 +49,8 @@ class RunSummation(object):
             time_shifts=additional_time_shifts,
             outFile=file_name,
             outFile_monitors=monitors_file_name,
-            save_directory=settings.save_directory)
+            save_directory=settings.save_directory,
+            estimate_logs=True)
 
     def _run_selection_as_path_list(self, run_selection):
         return [run.file_path() for run in run_selection]

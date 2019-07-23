@@ -77,6 +77,7 @@ public:
     return getSpectrumWithoutInvalidation(index);
   }
   const EventList &getSpectrum(const size_t index) const override;
+  EventList *getSpectrumUnsafe(const size_t index);
 
   //------------------------------------------------------------
 

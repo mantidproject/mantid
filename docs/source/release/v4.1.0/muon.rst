@@ -21,7 +21,6 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-:ref:`Release 4.1.0 <v4.1.0>`
 
 New
 ###
@@ -54,16 +53,15 @@ Improvements
 * In the `Select data to fit` window it is possible to search the spectra of interest and select the ones to be fitted.
 * The order of a sequential fit can then be chosen by dragging the spectral lines and ordering them
 
-
 Removed
 #######
 
 * Removed the algorithm GetNegMuMuonicXRDDialog as the new Elemental Analysis interface provides the same, improved, functionality.
 
-
 Bug Fixes
 #########
 
+* An issue which prevented the fit button from appearing on plots with errorbars was resolved. This means that the fit button now appears on plots created by Muon Analysis when it did not previously. Please note that fits done in this way will not be accessible in the Muon Interface, you should use the fitting in the Muon interface Fitting Tab for that.
 * Muon Analysis (original) no longer crashes when `TF Asymmetry` mode is activated.
 * Frequency Domain Analysis old no longer throws an error when calculating PhaseQuads.
 * Muon Analysis (original) can now produce results tables when columns contain both ranges and single values.
@@ -71,3 +69,6 @@ Bug Fixes
 * Issue where FFT names include an imaginary part when there was no imaginary data used.
 * Elemental Analysis no longer crashes when an ill formatted data file is loaded.
 * Changed the y-axis label in Elemental Analysis to `Counts`.
+
+
+:ref:`Release 4.1.0 <v4.1.0>`

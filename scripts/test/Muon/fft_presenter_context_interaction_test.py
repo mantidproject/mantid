@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -27,7 +27,8 @@ def retrieve_combobox_info(combo_box):
     return output_list
 
 
-class FFTPresenterTest(GuiTest):
+@start_qapplication
+class FFTPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context(True)
 

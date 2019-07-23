@@ -146,6 +146,12 @@ if(ENABLE_WORKBENCH)
 endif()
 
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
+if(WIN32 AND GSL_CBLAS_LIBRARY AND NOT EXISTS ${GSL_CBLAS_LIBRARY})
+  # The GSL cblas library changes its name between v1 and v2 on Windows. Workaround
+  # the fact that CMake has cached the old path to a non-existant library.
+  unset(GSL_CBLAS_LIBRARY CACHE)
+  unset(GSL_CBLAS_LIBRARY_DEBUG CACHE)
+endif()
 find_package(GSL REQUIRED)
 
 # Now add in all the components
@@ -396,7 +402,7 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtPy,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
@@ -478,6 +484,7 @@ if(ENABLE_CPACK)
           "python3-sip,"
           "python3-six,"
           "python3-matplotlib,"
+          "python3-qtpy,"
           "python3-scipy,"
           "python3-skimage,"
           "python3-pycifrw (>= 4.2.1),"
@@ -500,6 +507,7 @@ if(ENABLE_CPACK)
           "python-sip,"
           "python-six,"
           "python-matplotlib,"
+          "python-qtpy,"
           "python-scipy,"
           "python-skimage,"
           "python-pycifrw (>= 4.2.1),"

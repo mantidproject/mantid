@@ -18,7 +18,7 @@ import unittest
 from matplotlib.scale import scale_factory
 from mantid.plots.scales import PowerScale, SquareScale
 import numpy as np
-
+import testhelpers
 
 class ScalesTest(unittest.TestCase):
 
@@ -31,7 +31,7 @@ class ScalesTest(unittest.TestCase):
         scale = PowerScale(None, gamma=gamma)
         x = np.linspace(0, 10, 1)
         transform = scale.get_transform()
-        np.testing.assert_almost_equal(np.power(x, gamma),
+        testhelpers.assert_almost_equal(np.power(x, gamma),
                                        transform.transform_non_affine(x))
 
     def test_power_inverse_transform(self):
@@ -39,7 +39,7 @@ class ScalesTest(unittest.TestCase):
         scale = PowerScale(None, gamma=gamma)
         x = np.linspace(0, 10, 1)
         inv_transform = scale.get_transform().inverted()
-        np.testing.assert_almost_equal(np.power(x, 1./gamma),
+        testhelpers.assert_almost_equal(np.power(x, 1./gamma),
                                        inv_transform.transform_non_affine(x))
 
 
@@ -51,7 +51,7 @@ class ScalesTest(unittest.TestCase):
         scale = SquareScale(None)
         x = np.linspace(0, 10, 1)
         transform = scale.get_transform()
-        np.testing.assert_almost_equal(np.power(x, 2),
+        testhelpers.assert_almost_equal(np.power(x, 2),
                                        transform.transform_non_affine(x))
 
 
@@ -59,7 +59,7 @@ class ScalesTest(unittest.TestCase):
         scale = SquareScale(None)
         x = np.linspace(0, 10, 1)
         inv_transform = scale.get_transform().inverted()
-        np.testing.assert_almost_equal(np.sqrt(x),
+        testhelpers.assert_almost_equal(np.sqrt(x),
                                        inv_transform.transform_non_affine(x))
 
 
