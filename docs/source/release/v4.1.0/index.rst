@@ -22,7 +22,7 @@ OS Support Changes:
 We are proud to announce version 4.1.0 of Mantid.
 
 
-We have made significant improvements to support within the Mantid workbench for a number of techniques, adding serval technique specific user interfaces ported ver from Mantidplot.  It also includes a fresh new implmentation of the sliceviewer that merges in a lot of the popular functionality of the spectrum viewer into one capable tool.  This version also introduces the new muon interface that is the result of a long effort to rebuild the interface using modern design and engineering standards, resulting in a much more stable, extensible interface, but also just so much better to use.
+We have made significant improvements to support within the Mantid workbench for a number of techniques, adding several technique specific user interfaces ported over from Mantidplot.  It also includes a fresh new implementation of the sliceviewer that merges in a lot of the popular functionality of the spectrum viewer into one capable tool.  This version also introduces the new muon interface that is the result of a long effort to rebuild the interface using modern design and engineering standards, resulting in a much more stable, extensible interface, but also just so much better to use.
 
 This is just a few of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
@@ -91,6 +91,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: http://forum.mantidproject.org
 
-.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A4.1+is%3Amerged
-
+.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3"Release 4.1"+is%3Amerged
+milestone:"Release 4.1" 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v4.1.0
