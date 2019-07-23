@@ -1051,13 +1051,13 @@ public:
                 TS_ASSERT(
                     detPos1.isApprox(detPos2)); // assert det positions equal
                 TS_ASSERT(
-                    detRot1.isApprox(detRot1)); // assert det rotations equal
+                    detRot1.isApprox(detRot2)); // assert det rotations equal
               }
             }
           }
 
           TS_ASSERT(bankPos1.isApprox(bankPos2)); // assert bank positions equal
-          TS_ASSERT(bankRot1.isApprox(bankRot1)); // assert bank rotations equal
+          TS_ASSERT(bankRot1.isApprox(bankRot2)); // assert bank rotations equal
         }
       }
       ++detectorCounter;

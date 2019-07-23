@@ -60,8 +60,8 @@ const H5std_string ROTATION = "rotation";
 const H5std_string VECTOR = "vector";
 const H5std_string UNITS = "units";
 // Radians and degrees
-const static double PI = 3.1415926535;
-const static double DEGREES_IN_SEMICIRCLE = 180;
+const static double PI = M_PI;
+const static double DEGREES_IN_SEMICIRCLE = 180.0;
 // Nexus shape types
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
