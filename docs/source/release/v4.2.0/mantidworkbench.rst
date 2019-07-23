@@ -9,7 +9,7 @@ MantidWorkbench Changes
 User Interface
 ##############
 
-- Zoom icon in slice-viewer and plot toolbars replaced with more accurate version.
+- The zoom icon in the SliceViewer and plot toolbars have been replaced with clearer icons.
 
 Improvements
 ############
