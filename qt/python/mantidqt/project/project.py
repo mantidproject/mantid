@@ -109,9 +109,7 @@ class Project(AnalysisDataServiceObserver):
     def _save(self):
         workspaces_to_save = AnalysisDataService.getObjectNames()
         # Calculate the size of the workspaces in the project.
-        project_size = 0
-        for name in workspaces_to_save:
-            project_size += AnalysisDataService.retrieve(name).getMemorySize()
+        project_size = self._get_project_size(workspaces_to_save)
         warning_size = int(ConfigService.getString("projectSaving.warningSize"))
         # If a project is > the value in the properties file, question the user if they want to continue.
         saving = True
@@ -126,6 +124,12 @@ class Project(AnalysisDataServiceObserver):
             project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
                                        plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
             self.__saved = True
+
+    def _get_project_size(self, workspace_names):
+        project_size = 0
+        for name in workspace_names:
+            project_size += AnalysisDataService.retrieve(name).getMemorySize()
+        return project_size
 
     def load(self):
         """

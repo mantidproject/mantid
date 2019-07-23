@@ -161,6 +161,22 @@ class ProjectTest(unittest.TestCase):
 
         self.assertEqual(1, self.project.anyChangeHandle.call_count)
 
+    def test_large_file_dialog_appears_for_large_file(self):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        # 10GB = 10737418240 bytes
+        self.project._get_project_size = mock.MagicMock(return_value=10737418241)
+        self.project.offer_large_size_confirmation = mock.MagicMock()
+        self.project._save()
+        self.assertEqual(self.project.offer_large_size_confirmation.call_count, 1)
+
+    def test_large_file_dialog_does_not_appear_for_small_file(self):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        # 10GB = 10737418240 bytes
+        self.project._get_project_size = mock.MagicMock(return_value=10737418239)
+        self.project.offer_large_size_confirmation = mock.MagicMock()
+        self.project._save()
+        self.assertEqual(self.project.offer_large_size_confirmation.call_count, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
