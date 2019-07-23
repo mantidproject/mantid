@@ -286,7 +286,7 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
   const size_t maxNeighbours = calculateMaxNeighbours(ws.get());
 
   progress.doReport("Identifying clusters");
-  size_t frequency = reportEvery<size_t>(10000, ws->getNPoints());
+  auto frequency = reportEvery<size_t>(10000, ws->getNPoints());
   progress.resetNumSteps(frequency, 0.0, 0.8);
 
   // For each process maintains pair of index from within process bounds to

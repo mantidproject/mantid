@@ -14,7 +14,7 @@ Kernel::Logger IFunction1DSpectrum::g_log("IFunction1DSpectrum");
 void IFunction1DSpectrum::function(const FunctionDomain &domain,
                                    FunctionValues &values) const {
   try {
-    const FunctionDomain1DSpectrum &spectrumDomain =
+    const auto &spectrumDomain =
         dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
     function1DSpectrum(spectrumDomain, values);
   } catch (const std::bad_cast &) {
@@ -26,7 +26,7 @@ void IFunction1DSpectrum::function(const FunctionDomain &domain,
 void IFunction1DSpectrum::functionDeriv(const FunctionDomain &domain,
                                         Jacobian &jacobian) {
   try {
-    const FunctionDomain1DSpectrum &spectrumDomain =
+    const auto &spectrumDomain =
         dynamic_cast<const FunctionDomain1DSpectrum &>(domain);
     functionDeriv1DSpectrum(spectrumDomain, jacobian);
   } catch (const std::bad_cast &) {

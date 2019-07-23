@@ -73,7 +73,7 @@ void UnwrapMonitor::exec() {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Get the number of spectra in this workspace
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
                 << '\n';
@@ -342,7 +342,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
       const MatrixWorkspace::MaskList &inputMasks =
           m_inputWS->maskedBins(spectrum);
       for (const auto &inputMask : inputMasks) {
-        const int maskIndex = static_cast<int>(inputMask.first);
+        const auto maskIndex = static_cast<int>(inputMask.first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
           tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],
                              inputMask.second);

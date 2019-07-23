@@ -322,8 +322,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   for (; it1 != it1_end; it1++) {
     auto box = *it1;
     for (size_t dim = 0; dim < 3; ++dim) {
-      MDBox<MDEvent<3>, 3> *mdbox =
-          dynamic_cast<DataObjects::MDBox<MDEvent<3>, 3> *>(box);
+      auto *mdbox = dynamic_cast<DataObjects::MDBox<MDEvent<3>, 3> *>(box);
       if (!mdbox)
         throw std::runtime_error("Unable to cast to MDBox");
       mdbox->setExtents(dim, -10, 10);

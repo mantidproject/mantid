@@ -273,7 +273,7 @@ void PeakColumn::remove(size_t index) {
  * @returns A pointer to the data element at that index from this column
  */
 void *PeakColumn::void_pointer(size_t index) {
-  const PeakColumn *constThis = const_cast<const PeakColumn *>(this);
+  const auto *constThis = const_cast<const PeakColumn *>(this);
   return const_cast<void *>(constThis->void_pointer(index));
 }
 

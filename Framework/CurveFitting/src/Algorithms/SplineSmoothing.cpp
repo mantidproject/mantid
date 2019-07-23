@@ -87,7 +87,7 @@ void SplineSmoothing::init() {
 void SplineSmoothing::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
 
-  int histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  auto histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   int order = static_cast<int>(getProperty("DerivOrder"));
 
   m_inputWorkspacePointData = convertBinnedData(m_inputWorkspace);
@@ -302,7 +302,7 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
                                          const double *xs,
                                          const double *ys) const {
   // resize the number of attributes
-  int num_points = static_cast<int>(points.size());
+  auto num_points = static_cast<int>(points.size());
   std::vector<double> breakPoints;
   breakPoints.reserve(num_points);
   // set each of the x and y points to redefine the spline
@@ -335,7 +335,7 @@ void SplineSmoothing::selectSmoothingPoints(
   // retrieving number of breaks
   int maxBreaks = static_cast<int>(getProperty("MaxNumberOfBreaks"));
 
-  int xSize = static_cast<int>(xs.size());
+  auto xSize = static_cast<int>(xs.size());
 
   // evenly space initial points over data set
   int delta;

@@ -984,8 +984,8 @@ It is set on exit (to the EPI)
     cm++;
   }
 
-  const int Dsize(static_cast<int>(DNFactive.size()));
-  const int Psize(static_cast<int>(PIactive.size()));
+  const auto Dsize(static_cast<int>(DNFactive.size()));
+  const auto Psize(static_cast<int>(PIactive.size()));
   // icount == depth of search ie
   int vecI, di; // variable for later
   for (int Icount = 1; Icount < Psize; Icount++) {
@@ -1205,7 +1205,7 @@ the Base state.
 
   // Deal with case of a single object (then join
   // doesn't matter
-  int retJoin = static_cast<int>(Units.size() + Comp.size());
+  auto retJoin = static_cast<int>(Units.size() + Comp.size());
   if (retJoin != 1) // single unit is alway ok
     retJoin = 1 - Intersect;
 

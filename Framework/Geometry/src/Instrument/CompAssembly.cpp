@@ -46,7 +46,7 @@ CompAssembly::CompAssembly(const IComponent *base, const ParameterMap *map)
 CompAssembly::CompAssembly(const std::string &n, IComponent *reference)
     : Component(n, reference), m_children(), m_cachedBoundingBox(nullptr) {
   if (reference) {
-    ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
+    auto *test = dynamic_cast<ICompAssembly *>(reference);
     if (test) {
       test->add(this);
     }
@@ -416,8 +416,7 @@ void CompAssembly::testIntersectionWithChildren(
       searchQueue.push_back(comp);
     }
     // Check the physical object intersection
-    else if (IObjComponent *physicalObject =
-                 dynamic_cast<IObjComponent *>(comp.get())) {
+    else if (auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
       physicalObject->interceptSurface(testRay);
     } else {
     }

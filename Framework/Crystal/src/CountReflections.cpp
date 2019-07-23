@@ -124,13 +124,13 @@ void CountReflections::exec() {
   auto peaks = inputPeaksWorkspace->getPeaks();
   reflections.addObservations(peaks);
 
-  double possibleUniqueReflections =
+  auto possibleUniqueReflections =
       static_cast<double>(reflections.getUniqueReflectionCount());
 
   size_t observedUniqueReflections =
       reflections.getObservedUniqueReflectionCount();
 
-  double observedUniqueReflectionsD =
+  auto observedUniqueReflectionsD =
       static_cast<double>(observedUniqueReflections);
 
   size_t totalReflections = reflections.getObservedReflectionCount();
@@ -143,7 +143,7 @@ void CountReflections::exec() {
                         << std::endl;
   }
 
-  double multiplyObservedReflections =
+  auto multiplyObservedReflections =
       static_cast<double>(reflections.getObservedUniqueReflectionCount(1));
 
   setProperty("UniqueReflections", static_cast<int>(observedUniqueReflections));

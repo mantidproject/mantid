@@ -350,7 +350,7 @@ const DetectorInfoConstIt DetectorInfo::cend() const {
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
     m_lastDetector[thread] = m_instrument->getDetector((*m_detectorIDs)[index]);
@@ -362,7 +362,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 /// Helper used by SpectrumInfo.
 boost::shared_ptr<const Geometry::IDetector>
 DetectorInfo::getDetectorPtr(const size_t index) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
 }

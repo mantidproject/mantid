@@ -292,7 +292,7 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
   // peaks in the monitor histogram
   double halfWin = (timesArray.back() - timesArray.front()) * HALF_WINDOW;
   if (monitIn < std::numeric_limits<int>::max()) {
-    int ivsInd = static_cast<int>(monitIn);
+    auto ivsInd = static_cast<int>(monitIn);
 
     // runs CropWorkspace as a Child Algorithm to and puts the result in a new
     // temporary workspace that will be deleted when this algorithm has finished

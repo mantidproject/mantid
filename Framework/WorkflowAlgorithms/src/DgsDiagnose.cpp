@@ -300,10 +300,10 @@ void DgsDiagnose::exec() {
     tokenizer tokens(diag_spectra[0], "(,);",
                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     for (auto tok_iter = tokens.begin(); tok_iter != tokens.end();) {
-      int startIndex = boost::lexical_cast<int>(*tok_iter);
+      auto startIndex = boost::lexical_cast<int>(*tok_iter);
       startIndex -= 1;
       ++tok_iter;
-      int endIndex = boost::lexical_cast<int>(*tok_iter);
+      auto endIndex = boost::lexical_cast<int>(*tok_iter);
       endIndex -= 1;
       g_log.information() << "Pixel range: (" << startIndex << ", " << endIndex
                           << ")\n";

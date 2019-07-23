@@ -476,8 +476,8 @@ bool closeEnough(const double left, const double right) {
 int findRow(API::ITableWorkspace_sptr &wksp,
             const std::vector<std::string> &values) {
   // don't have a good way to mark error location in these casts
-  const double frequency = boost::lexical_cast<double>(values[0]);
-  const double wavelength = boost::lexical_cast<double>(values[1]);
+  const auto frequency = boost::lexical_cast<double>(values[0]);
+  const auto wavelength = boost::lexical_cast<double>(values[1]);
 
   // find the correct row
   const size_t numRows = wksp->rowCount();

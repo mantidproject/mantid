@@ -426,7 +426,7 @@ ReflectometryBeamStatistics::secondSlitAngularSpread(const Setup &setup) {
 double ReflectometryBeamStatistics::slitSize(const API::MatrixWorkspace &ws,
                                              const std::string &logEntry) {
   auto &run = ws.run();
-  const double opening = run.getPropertyValueAsType<double>(logEntry);
+  const auto opening = run.getPropertyValueAsType<double>(logEntry);
   const auto &units = run.getProperty(logEntry)->units();
   if (units.empty()) {
     m_log.warning() << "Slit opening entry " << logEntry

@@ -108,7 +108,7 @@ void InelasticDiffSphere::initAlphaCoeff() {
   for (std::vector<xnlc>::const_iterator it = m_xnl.begin(); it != m_xnl.end();
        ++it) {
     double x = it->x; // eigenvalue for a (n, l) pair
-    double l = static_cast<double>(it->l);
+    auto l = static_cast<double>(it->l);
     m_alpha.push_back((2.0 * l + 1) * 6.0 * x * x / (x * x - l * (l + 1)));
   }
 }

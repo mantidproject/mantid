@@ -403,9 +403,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   } // ENDWHILE of reading all lines
 
   // Get the sizes before using std::move
-  int nHist(static_cast<int>(gsasDataX.size()));
-  int xWidth(static_cast<int>(vecX.size()));
-  int yWidth(static_cast<int>(vecY.size()));
+  auto nHist(static_cast<int>(gsasDataX.size()));
+  auto xWidth(static_cast<int>(vecX.size()));
+  auto yWidth(static_cast<int>(vecY.size()));
 
   // Push the vectors (X, Y, E) of the last bank to gsasData
   if (!vecX.empty()) { // Put final spectra into data
@@ -451,7 +451,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
-      specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
+      auto specno = static_cast<specnum_t>(detectorIDs[i]);
       outputWorkspace->getSpectrum(i).setSpectrumNo(specno);
     }
   }
@@ -468,7 +468,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
  */
 double LoadGSS::convertToDouble(std::string inputstring) {
   std::string temps;
-  int isize = static_cast<int>(inputstring.size());
+  auto isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
     if ((thechar <= 'Z' && thechar >= 'A') ||
@@ -531,7 +531,7 @@ void LoadGSS::createInstrumentGeometry(
   // Add detectors
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
-  const int numDetector =
+  const auto numDetector =
       static_cast<int>(detectorids.size()); // number of detectors
   // std::vector<int> detID = detectorids;    // detector IDs
   // std::vector<double> angle = twothetas;  // angle between indicent beam and

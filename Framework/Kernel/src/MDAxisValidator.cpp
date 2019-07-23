@@ -50,7 +50,7 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
   // workspace
   if (!m_axes.empty()) {
     auto it = std::max_element(m_axes.begin(), m_axes.end());
-    size_t largest = static_cast<size_t>(*it);
+    auto largest = static_cast<size_t>(*it);
     if (largest >= m_wsDimensions) {
       invalidProperties.insert(
           std::make_pair("Axes", "One of the axis indexes specified indexes a "

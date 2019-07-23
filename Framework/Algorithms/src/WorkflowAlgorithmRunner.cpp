@@ -67,7 +67,7 @@ void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
     Column_sptr outputColumn = table->getColumn(ioPair.second);
     for (size_t i = 0; i < table->rowCount(); ++i) {
       inputColumn->cell<std::string>(i).clear();
-      std::string &outputValue = outputColumn->cell<std::string>(i);
+      auto &outputValue = outputColumn->cell<std::string>(i);
       if (!isHardCodedWorkspaceName(outputValue)) {
         outputValue.clear();
       }
@@ -79,7 +79,7 @@ void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
   for (const auto &ioPair : ioMapping) {
     Column_sptr outputColumn = table->getColumn(ioPair.second);
     for (size_t i = 0; i < table->rowCount(); ++i) {
-      std::string &outputValue = outputColumn->cell<std::string>(i);
+      auto &outputValue = outputColumn->cell<std::string>(i);
       if (isHardCodedWorkspaceName(outputValue)) {
         outputValue = tidyWorkspaceName(outputValue);
       }

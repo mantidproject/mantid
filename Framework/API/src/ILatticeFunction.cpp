@@ -25,8 +25,7 @@ ILatticeFunction::ILatticeFunction() : FunctionParameterDecorator() {}
 void ILatticeFunction::function(const FunctionDomain &domain,
                                 FunctionValues &values) const {
   try {
-    const LatticeDomain &latticeDomain =
-        dynamic_cast<const LatticeDomain &>(domain);
+    const auto &latticeDomain = dynamic_cast<const LatticeDomain &>(domain);
 
     functionLattice(latticeDomain, values);
   } catch (const std::bad_cast &) {
@@ -48,8 +47,7 @@ void ILatticeFunction::function(const FunctionDomain &domain,
 void ILatticeFunction::functionDeriv(const FunctionDomain &domain,
                                      Jacobian &jacobian) {
   try {
-    const LatticeDomain &latticeDomain =
-        dynamic_cast<const LatticeDomain &>(domain);
+    const auto &latticeDomain = dynamic_cast<const LatticeDomain &>(domain);
 
     functionDerivLattice(latticeDomain, jacobian);
   } catch (const std::bad_cast &) {

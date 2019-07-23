@@ -58,7 +58,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
 
     for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i) {
       Mantid::Geometry::IPeak &peak = filterWorkspace->getPeak(i);
-      const int labelIdAtPeakCenter =
+      const auto labelIdAtPeakCenter =
           static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
         allowedLabels.emplace(labelIdAtPeakCenter, i);
@@ -128,7 +128,7 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
 
   const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
   for (auto neighbourLinearIndex : neighbours) {
-    const int neighbourId =
+    const auto neighbourId =
         static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
 
     if (neighbourId <= emptyLabelId) {
@@ -173,7 +173,7 @@ void executeUnFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
   const double radius = -1;
   do {
     const Mantid::signal_t signalValue = mdIterator->getSignal();
-    const int id = static_cast<int>(signalValue);
+    const auto id = static_cast<int>(signalValue);
 
     if (id > emptyLabelId) {
       const size_t linearIndex = mdIterator->getLinearIndex();
@@ -213,7 +213,7 @@ void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
   PeakClusterProjection projection(clusterImage);
   do {
     const Mantid::signal_t signalValue = mdIterator->getSignal();
-    const int id = static_cast<int>(signalValue);
+    const auto id = static_cast<int>(signalValue);
 
     auto it = optionalAllowedLabels->find(id);
     if (it != optionalAllowedLabels->end()) {
@@ -325,7 +325,7 @@ void FindClusterFaces::exec() {
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
   auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
-  const int nIterators =
+  const auto nIterators =
       static_cast<int>(mdIterators.size()); // Number of iterators yielded.
   VecClusterFaces clusterFaces(nIterators);
   size_t nSteps = 1000;

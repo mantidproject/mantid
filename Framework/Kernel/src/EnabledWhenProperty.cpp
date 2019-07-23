@@ -133,8 +133,8 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
   case IS_NOT_EQUAL_TO:
     return (propValue != m_propertyDetails->value);
   case IS_MORE_OR_EQ: {
-    int check = boost::lexical_cast<int>(m_propertyDetails->value);
-    int iPropV = boost::lexical_cast<int>(propValue);
+    auto check = boost::lexical_cast<int>(m_propertyDetails->value);
+    auto iPropV = boost::lexical_cast<int>(propValue);
     return (iPropV >= check);
   }
   default:

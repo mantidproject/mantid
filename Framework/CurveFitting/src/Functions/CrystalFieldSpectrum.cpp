@@ -128,8 +128,7 @@ std::string CrystalFieldSpectrum::writeToString(
   }
 
   // Print parameters of the important peaks only
-  const CompositeFunction &spectrum =
-      dynamic_cast<const CompositeFunction &>(*m_target);
+  const auto &spectrum = dynamic_cast<const CompositeFunction &>(*m_target);
   for (size_t ip = 0; ip < m_nPeaks; ++ip) {
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
     // Print peak's atributes

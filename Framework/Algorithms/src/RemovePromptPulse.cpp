@@ -59,7 +59,7 @@ double getMedian(const API::Run &run, const std::string &name) {
   if (!run.hasProperty(name)) {
     return Mantid::EMPTY_DBL();
   }
-  Kernel::TimeSeriesProperty<double> *log =
+  auto *log =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
   if (!log)
     return Mantid::EMPTY_DBL();

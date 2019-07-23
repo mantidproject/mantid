@@ -262,7 +262,7 @@ create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
 
 Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
                              const std::set<int64_t> &maskedWorkspaceIndices) {
-  const int nhist = static_cast<int>(workspace->getNumberHistograms());
+  const auto nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
     auto instrument = boost::make_shared<Instrument>();
@@ -985,7 +985,7 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
+  auto rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
@@ -1174,7 +1174,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set Q ('y') axis binning
   std::vector<double> qbins{0.0, 1.0, 4.0};
   std::vector<double> qaxis;
-  const int numY =
+  const auto numY =
       static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
 
   // Initialize the workspace
@@ -1413,7 +1413,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   Mantid::DataObjects::TableWorkspace_sptr DetPos = createTableWorkspace(ws);
-  double Ei = ws->run().getPropertyValueAsType<double>("Ei");
+  auto Ei = ws->run().getPropertyValueAsType<double>("Ei");
   processDetectorsPositions(ws, DetPos, Ei);
 
   return DetPos;

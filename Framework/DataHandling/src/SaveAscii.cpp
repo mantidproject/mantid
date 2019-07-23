@@ -99,8 +99,8 @@ void SaveAscii::init() {
 void SaveAscii::exec() {
   // Get the workspace
   MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
-  int nSpectra = static_cast<int>(ws->getNumberHistograms());
-  int nBins = static_cast<int>(ws->blocksize());
+  auto nSpectra = static_cast<int>(ws->getNumberHistograms());
+  auto nBins = static_cast<int>(ws->blocksize());
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");

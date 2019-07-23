@@ -108,7 +108,7 @@ void FindCenterOfMassPosition::exec() {
   // first spectra
   int n_monitors =
       static_cast<int>(inputWS->getInstrument()->getMonitors().size());
-  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Find center of mass and iterate until we converge
   // to within a quarter of a pixel
@@ -131,7 +131,7 @@ void FindCenterOfMassPosition::exec() {
 
       // Get the current spectrum
       const MantidVec &YIn = inputWS->readY(i);
-      double y = static_cast<double>((i - n_monitors) % n_pixel_x);
+      auto y = static_cast<double>((i - n_monitors) % n_pixel_x);
       double x = floor(static_cast<double>(i - n_monitors) / n_pixel_y);
 
       if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {

@@ -66,7 +66,7 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   if (m_alreadyMatrix) {
     return extract<Kernel::Matrix<double>>(m_obj)();
   }
-  PyArrayObject *ndarray = (PyArrayObject *)PyArray_View(
+  auto *ndarray = (PyArrayObject *)PyArray_View(
       (PyArrayObject *)m_obj.ptr(), PyArray_DescrFromType(NPY_DOUBLE),
       &PyArray_Type);
   const auto shape = PyArray_DIMS(ndarray);

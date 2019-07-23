@@ -184,15 +184,14 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(
     dbuff = ws->getBoxController()->getFileIO();
   }
   for (const auto &boxe : boxes) {
-    DataObjects::MDBox<MDE, nd> *box =
-        dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
+    auto *box = dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
     if (box) {
       auto &events = box->getEvents();
       const bool hasEvents = !events.empty();
       for (auto &event : events) {
-        const size_t ind = static_cast<size_t>(event.getRunIndex());
-        const float scalar = static_cast<float>(m_factor[ind]);
-        const float scalarSquared =
+        const auto ind = static_cast<size_t>(event.getRunIndex());
+        const auto scalar = static_cast<float>(m_factor[ind]);
+        const auto scalarSquared =
             static_cast<float>(m_factor[ind] * m_factor[ind]);
         // Multiply weight by a scalar, propagating error
         const float oldSignal = event.getSignal();

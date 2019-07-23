@@ -58,9 +58,8 @@ clone1D(const std::vector<Types::Core::DateAndTime> &cvector) {
   // create an empty array
   PyArray_Descr *descr = Converters::descr_ns();
   Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
-  PyArrayObject *nparray =
-      reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
-          &PyArray_Type, descr, 1, dims, nullptr, nullptr, 0, nullptr));
+  auto *nparray = reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(
+      &PyArray_Type, descr, 1, dims, nullptr, nullptr, 0, nullptr));
 
   for (Py_intptr_t i = 0; i < dims[0]; ++i) {
     void *itemPtr = PyArray_GETPTR1(nparray, i);

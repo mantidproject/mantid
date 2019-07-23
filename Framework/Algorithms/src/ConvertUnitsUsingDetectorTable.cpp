@@ -143,7 +143,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
   const auto &spectraColumn = paramWS->getColVector<int>("spectra");
 
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   // Get the unit object for each workspace

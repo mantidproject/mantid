@@ -94,7 +94,7 @@ void StripVanadiumPeaks::exec() {
   // Create an output workspace - same size as input one
   outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Copy the data over from the input to the output workspace
-  const int nhists = static_cast<int>(inputWS->getNumberHistograms());
+  const auto nhists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, nhists * 2);
 
   for (int k = 0; k < nhists; ++k) {

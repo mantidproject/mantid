@@ -141,7 +141,7 @@ void MapNeXusToSeries(NeXus::NXEntry &entry, const std::string &path,
                       const std::string &time, const std::string &name,
                       const T &factor, int32_t index) {
 
-  T value = GetNeXusValue<T>(entry, path, defval, index);
+  auto value = GetNeXusValue<T>(entry, path, defval, index);
   AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
 }
 

@@ -149,7 +149,7 @@ Kernel::V3D SpectrumInfo::samplePosition() const {
 double SpectrumInfo::l1() const { return m_detectorInfo.l1(); }
 
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] == index)
     return *m_lastDetector[thread];
 

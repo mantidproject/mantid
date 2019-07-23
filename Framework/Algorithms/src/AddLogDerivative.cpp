@@ -134,8 +134,7 @@ void AddLogDerivative::exec() {
   if (!prop)
     throw std::invalid_argument("Log " + LogName +
                                 " not found in the workspace sample logs.");
-  TimeSeriesProperty<double> *tsp =
-      dynamic_cast<TimeSeriesProperty<double> *>(prop);
+  auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
   if (!tsp)
     throw std::invalid_argument("Log " + LogName +
                                 " is not a numerical series "
