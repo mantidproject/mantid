@@ -5,9 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryReductionOneAuto3.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -15,7 +15,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -246,7 +245,7 @@ void ReflectometryReductionOneAuto3::init() {
 
   // Input ws
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or wavelength");
 
@@ -264,7 +263,7 @@ void ReflectometryReductionOneAuto3::init() {
                   Direction::Input);
 
   // Processing instructions
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
@@ -279,8 +278,8 @@ void ReflectometryReductionOneAuto3::init() {
 
   // Whether to correct detectors
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
+                                                Direction::Input),
       "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
 
   // Detector position correction type
@@ -297,7 +296,7 @@ void ReflectometryReductionOneAuto3::init() {
       "should be shifted vertically or rotated around the sample position.",
       Direction::Input);
   setPropertySettings("DetectorCorrectionType",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "CorrectDetectors", IS_EQUAL_TO, "1"));
 
   // Wavelength limits
@@ -319,8 +318,8 @@ void ReflectometryReductionOneAuto3::init() {
   initMomentumTransferProperties();
 
   // Polarization correction
-  declareProperty(make_unique<PropertyWithValue<bool>>("PolarizationAnalysis",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "PolarizationAnalysis", false, Direction::Input),
                   "Apply polarization corrections");
 
   // Flood correction
@@ -332,7 +331,7 @@ void ReflectometryReductionOneAuto3::init() {
                   "workspace, ParameterFile - use parameters in the parameter "
                   "file to construct and apply flood correction workspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A flood workspace to apply; if empty and FloodCorrection is "
       "'Workspace' then no correction is applied.");
@@ -341,19 +340,19 @@ void ReflectometryReductionOneAuto3::init() {
   initDebugProperties();
 
   // Output workspace in Q
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceBinned", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in Q (native binning)");
 
   // Output workspace in wavelength
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength");

@@ -12,16 +12,12 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
-enum class PolarizationCorrectionType { None, PA, PNR, ParameterFile };
+enum class PolarizationCorrectionType { None, ParameterFile };
 
 inline PolarizationCorrectionType
 polarizationCorrectionTypeFromString(std::string const &correctionType) {
   if (correctionType == "None")
     return PolarizationCorrectionType::None;
-  else if (correctionType == "PA")
-    return PolarizationCorrectionType::PA;
-  else if (correctionType == "PNR")
-    return PolarizationCorrectionType::PNR;
   else if (correctionType == "ParameterFile")
     return PolarizationCorrectionType::ParameterFile;
   else
@@ -33,10 +29,6 @@ polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
   switch (correctionType) {
   case PolarizationCorrectionType::None:
     return "None";
-  case PolarizationCorrectionType::PA:
-    return "PA";
-  case PolarizationCorrectionType::PNR:
-    return "PNR";
   case PolarizationCorrectionType::ParameterFile:
     return "ParameterFile";
   }
@@ -45,35 +37,25 @@ polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
 
 inline bool polarizationCorrectionRequiresInputs(
     PolarizationCorrectionType correctionType) {
-  return (correctionType == PolarizationCorrectionType::PA ||
-          correctionType == PolarizationCorrectionType::PNR);
+  UNUSED_ARG(correctionType);
+  return false;
 }
 
 /** @class PoliarizationCorrections
 
-    The PoliarizationCorrections model holds information about what polarization
-    corrections should be done during reduction
+    The PoliarizationCorrections model holds information about what
+    polarization corrections should be done during reduction. Currently there
+    are just two options (namely, apply or don't apply corrections) but this
+    may be expanded to include more cases in the future.
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
-  PolarizationCorrections(PolarizationCorrectionType correctionType,
-                          boost::optional<double> CRho = boost::none,
-                          boost::optional<double> CAlpha = boost::none,
-                          boost::optional<double> CAp = boost::none,
-                          boost::optional<double> CPp = boost::none);
+  explicit PolarizationCorrections(PolarizationCorrectionType correctionType);
 
   PolarizationCorrectionType correctionType() const;
-  boost::optional<double> cRho() const;
-  boost::optional<double> cAlpha() const;
-  boost::optional<double> cAp() const;
-  boost::optional<double> cPp() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
-  boost::optional<double> m_cRho;
-  boost::optional<double> m_cAlpha;
-  boost::optional<double> m_cAp;
-  boost::optional<double> m_cPp;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool

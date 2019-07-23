@@ -87,6 +87,7 @@ public:
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
+  MOCK_CONST_METHOD0(instrumentName, std::string());
 
   // Calls we don't care about
   void acceptMainPresenter(IMainWindowPresenter *) override{};

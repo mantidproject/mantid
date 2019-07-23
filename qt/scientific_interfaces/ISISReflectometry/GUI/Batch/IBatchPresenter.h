@@ -50,6 +50,7 @@ public:
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
+  virtual std::string instrumentName() const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
