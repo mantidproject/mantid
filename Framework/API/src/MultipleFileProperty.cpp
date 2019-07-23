@@ -69,15 +69,18 @@ namespace API {
  * @param name   :: The name of the property
  * @param action :: File action
  * @param exts   ::  The allowed/suggested extensions
+ * @param allowEmptyTokens :: whether to allow empty tokens
  */
 MultipleFileProperty::MultipleFileProperty(const std::string &name,
                                            unsigned int action,
-                                           const std::vector<std::string> &exts)
+                                           const std::vector<std::string> &exts,
+                                           bool allowEmptyTokens)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
           boost::make_shared<MultiFileValidator>(
               exts, (action == FileProperty::Load)),
-          Direction::Input) {
+          Direction::Input),
+      m_allowEmptyTokens(allowEmptyTokens) {
   if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
     /// raise error for unsupported actions
     throw std::runtime_error(
@@ -260,7 +263,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
   // Return error if there are any adjacent + or , operators.
   boost::smatch invalid_substring;
-  if (boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
+  if (!m_allowEmptyTokens &&
+      boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
                           REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
 
@@ -402,11 +406,29 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
           fullyResolvedFile =
               FileFinder::Instance().findRun(unresolvedFileName, m_exts);
         }
-        if (fullyResolvedFile.empty())
-          throw std::runtime_error(
-              "Unable to find file matching the string \"" +
-              unresolvedFileName +
-              "\", even after appending suggested file extensions.");
+        if (fullyResolvedFile.empty()) {
+          bool doThrow = false;
+          if (m_allowEmptyTokens) {
+            try {
+              const int unresolvedInt = std::stoi(unresolvedFileName);
+              if (unresolvedInt != 0) {
+                doThrow = true;
+              }
+            } catch (std::invalid_argument &) {
+              doThrow = true;
+            }
+          } else {
+            doThrow = true;
+          }
+          if (doThrow) {
+            throw std::runtime_error(
+                "Unable to find file matching the string \"" +
+                unresolvedFileName +
+                "\", even after appending suggested file extensions.");
+          } else {
+            fullyResolvedFile = unresolvedFileName;
+          }
+        }
       }
 
       // Append the file name to result.
