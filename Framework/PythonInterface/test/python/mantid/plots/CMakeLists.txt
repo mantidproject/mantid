@@ -6,8 +6,11 @@ set(TEST_PY_FILES
   helperfunctionsTest.py
   plotfunctionsTest.py
   plotfunctions3DTest.py
-  plots__init__Test.py
-  ScalesTest.py)
+  plots__init__Test.py)
+
+if(NOT APPLE)
+  list(APPEND TEST_PY_FILES ScalesTest.py)
+endif()
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
