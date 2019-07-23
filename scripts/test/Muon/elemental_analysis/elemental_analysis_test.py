@@ -4,30 +4,25 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
+from __future__ import print_function, absolute_import
 
 import unittest
-import matplotlib
-from qtpy.QtGui import QCloseEvent
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
+from qtpy.QtGui import QCloseEvent
+
+import matplotlib
 from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
 from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
-
 from MultiPlotting.multi_plotting_widget import MultiPlotWindow
-# Mantid Repository : https://github.com/mantidproject/mantid
-#
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-# SPDX - License - Identifier: GPL - 3.0 +
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
 from MultiPlotting.label import Label
 
 
-class ElementalAnalysisTest(GuiTest):
+@start_qapplication
+class ElementalAnalysisTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         super(ElementalAnalysisTest, self).setUpClass()

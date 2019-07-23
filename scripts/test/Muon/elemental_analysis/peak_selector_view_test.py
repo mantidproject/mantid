@@ -4,18 +4,19 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
+from __future__ import print_function, absolute_import
 
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.checkbox import Checkbox
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 
 
-class PeakSelectorViewTest(GuiTest):
+@start_qapplication
+class PeakSelectorViewTest(unittest.TestCase):
 
     def setUp(self):
         self.element = 'He'
