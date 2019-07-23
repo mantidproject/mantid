@@ -49,6 +49,7 @@ set(
   IndirectPlotOptionsModel.cpp
   IndirectPlotOptionsPresenter.cpp
   IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
@@ -145,6 +146,7 @@ set(
   IndirectMoments.h
   IndirectPlotOptionsPresenter.h
   IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -287,6 +289,7 @@ set(
   IndirectPlotOptionsModel.cpp
   IndirectPlotOptionsPresenter.cpp
   IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
@@ -327,6 +330,7 @@ set(
   IndirectMoments.h
   IndirectPlotOptionsPresenter.h
   IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h

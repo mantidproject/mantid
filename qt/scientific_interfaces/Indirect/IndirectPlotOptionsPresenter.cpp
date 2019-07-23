@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsPresenter.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+
 using namespace Mantid::API;
 
 namespace {
@@ -44,8 +46,8 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
                           &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this,
                            &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
-      m_view(view), m_model(std::make_unique<IndirectPlotOptionsModel>()),
-      m_parentTab(parent) {
+      m_view(view),
+      m_model(std::make_unique<IndirectPlotOptionsModel>(parent)) {
   setupPresenter(plotType, fixedIndices);
 }
 
@@ -68,11 +70,6 @@ void IndirectPlotOptionsPresenter::setupPresenter(
   connect(m_view.get(), SIGNAL(plotContourClicked()), this,
           SLOT(plotContour()));
   connect(m_view.get(), SIGNAL(plotTiledClicked()), this, SLOT(plotTiled()));
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  connect(&m_pythonRunner, SIGNAL(runAsPythonScript(QString const &, bool)),
-          m_parentTab, SIGNAL(runAsPythonScript(QString const &, bool)));
-#endif
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
   m_view->setPlotType(plotType);
@@ -175,11 +172,7 @@ void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
 
 void IndirectPlotOptionsPresenter::plotSpectra() {
   setPlotting(true);
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(m_model->getPlotSpectraString(m_parentTab->errorBars()));
-#else
-  m_model->plotSpectra(m_parentTab->errorBars());
-#endif
+  m_model->plotSpectra();
   setPlotting(false);
 }
 
@@ -187,12 +180,7 @@ void IndirectPlotOptionsPresenter::plotBins() {
   auto const indicesString = m_view->selectedIndices().toStdString();
   if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
     setPlotting(true);
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    runPythonCode(
-        m_model->getPlotBinsString(indicesString, m_parentTab->errorBars()));
-#else
-    m_model->plotBins(m_parentTab->errorBars());
-#endif
+    m_model->plotBins();
     setPlotting(false);
   } else {
     m_view->displayWarning("Plot bins failed: Invalid bin indices provided.");
@@ -201,31 +189,15 @@ void IndirectPlotOptionsPresenter::plotBins() {
 
 void IndirectPlotOptionsPresenter::plotContour() {
   setPlotting(true);
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(m_model->getPlotContourString());
-#else
   m_model->plotContour();
-#endif
   setPlotting(false);
 }
 
 void IndirectPlotOptionsPresenter::plotTiled() {
   setPlotting(true);
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(m_model->getPlotTiledString());
-#else
   m_model->plotTiled();
-#endif
   setPlotting(false);
 }
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-void IndirectPlotOptionsPresenter::runPythonCode(
-    boost::optional<std::string> const &plotString) {
-  if (plotString)
-    m_pythonRunner.runPythonCode(QString::fromStdString(plotString.get()));
-}
-#endif
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

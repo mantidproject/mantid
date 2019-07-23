@@ -7,8 +7,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSMODEL_H_
 
+#include "IndirectPlotter.h"
+
 #include "DllConfig.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
@@ -20,7 +22,7 @@ enum MantidAxis { Spectrum, Bin };
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel();
+  IndirectPlotOptionsModel(IndirectTab *parentTab);
   virtual ~IndirectPlotOptionsModel();
 
   bool setWorkspace(std::string const &workspaceName);
@@ -36,18 +38,10 @@ public:
 
   boost::optional<std::string> indices() const;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  boost::optional<std::string> getPlotSpectraString(bool errorBars) const;
-  boost::optional<std::string> getPlotBinsString(std::string const &indices,
-                                                 bool errorBars) const;
-  boost::optional<std::string> getPlotContourString() const;
-  boost::optional<std::string> getPlotTiledString() const;
-#else
-  void plotSpectra(bool errorBars);
-  void plotBins(bool errorBars);
+  void plotSpectra();
+  void plotBins();
   void plotContour();
   void plotTiled();
-#endif
 
 private:
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -60,6 +54,7 @@ private:
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;
   boost::optional<std::string> m_workspaceName;
+  std::unique_ptr<IndirectPlotter> m_plotter;
 };
 
 } // namespace CustomInterfaces

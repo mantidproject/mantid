@@ -7,11 +7,8 @@
 #include "IndirectPlotOptionsModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/MplCpp/Plot.h"
-#endif
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel::Strings;
@@ -68,122 +65,15 @@ std::string formatIndicesString(std::string &str) {
   return joinCompress(indices.begin(), indices.end());
 }
 
-template <typename T> T convertToT(std::string const &num) {
-  if (std::is_same<T, std::size_t>::value)
-    return std::stoul(num);
-  else if (std::is_same<T, int>::value)
-    return std::stoi(num);
-  std::runtime_error(
-      "Could not convert std::string to std::size_t or int type.");
-}
-
-template <typename T>
-void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex,
-                        T const &endIndex) {
-  for (auto index = startIndex; index <= endIndex; ++index)
-    indicesVec.emplace_back(index);
-}
-
-template <typename T>
-void addToIndicesVector(std::vector<T> &indicesVec,
-                        std::string const &indicesString) {
-  auto const range = splitStringBy(indicesString, "-");
-  if (range.size() > 1)
-    addToIndicesVector<T>(indicesVec, convertToT<T>(range[0]),
-                          convertToT<T>(range[1]));
-  else
-    indicesVec.emplace_back(convertToT<T>(range[0]));
-}
-
-template <typename T>
-std::vector<T> createIndicesVector(std::string const &indices) {
-  std::vector<T> indicesVec;
-  for (auto subString : splitStringBy(indices, ","))
-    addToIndicesVector<T>(indicesVec, subString);
-  return indicesVec;
-}
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-std::string expandIndicesRange(std::size_t const &startIndex,
-                               std::size_t const &endIndex,
-                               std::string const &separator) {
-  std::string expandedRange;
-  for (auto index = startIndex; index <= endIndex; ++index) {
-    expandedRange += std::to_string(index);
-    expandedRange += index != endIndex ? separator : "";
-  }
-  return expandedRange;
-}
-
-std::string expandIndicesRange(std::string const &startIndex,
-                               std::string const &endIndex,
-                               std::string const &separator) {
-  return expandIndicesRange(std::stoul(startIndex), std::stoul(endIndex),
-                            separator);
-}
-
-void addToIndicesList(std::string &indicesList,
-                      std::string const &indicesString) {
-  auto const range = splitStringBy(indicesString, "-");
-  auto const expandedIndices =
-      range.size() > 1 ? expandIndicesRange(range[0], range[1], ",") : range[0];
-  indicesList += expandedIndices;
-}
-
-std::string createIndicesList(std::string const &indices) {
-  std::string indicesList;
-  auto const subStrings = splitStringBy(indices, ",");
-  for (auto iter = subStrings.begin(); iter < subStrings.end(); ++iter) {
-    addToIndicesList(indicesList, *iter);
-    indicesList += iter < subStrings.end() - 1 ? "," : "";
-  }
-  return "[" + indicesList + "]";
-}
-
-std::string createPlotSpectraString(std::string const &workspaceName,
-                                    std::string const &spectra,
-                                    bool errorbars) {
-  auto const errors = errorbars ? "True" : "False";
-  std::string plotString = "from mantidplot import plotSpectrum\n";
-  return plotString + "plotSpectrum(['" + workspaceName + "'], " + spectra +
-         ", error_bars=" + errors + ")\n";
-}
-
-std::string createPlotBinsString(std::string const &workspaceName,
-                                 std::string const &bins, bool errorbars) {
-  auto const errors = errorbars ? "True" : "False";
-  std::string plotString = "from mantidplot import plotTimeBin\n";
-  return plotString + "plotTimeBin(['" + workspaceName + "'], " + bins +
-         ", error_bars=" + errors + ")\n";
-}
-
-std::string createPlotContourString(std::string const &workspaceName) {
-  std::string plotString = "from mantidplot import plot2D\n";
-  return plotString + "plot2D('" + workspaceName + "')\n";
-}
-
-std::string createPlotTiledString(std::string const &workspaceName,
-                                  std::vector<std::size_t> const &spectra) {
-  std::string plotString = "from mantidplot import newTiledWindow\n";
-  plotString += "newTiledWindow(sources=[";
-  for (auto spectrum : spectra) {
-    plotString +=
-        "(['" + workspaceName + "'], " + std::to_string(spectrum) + ")";
-    plotString += spectrum < spectra.back() ? "," : "";
-  }
-  plotString += "])\n";
-  return plotString;
-}
-#endif
-
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotOptionsModel::IndirectPlotOptionsModel()
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectTab *parentTab)
     : m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none) {}
+      m_workspaceName(boost::none),
+      m_plotter(std::make_unique<IndirectPlotter>(parentTab)) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
@@ -261,87 +151,31 @@ bool IndirectPlotOptionsModel::validateBins(MatrixWorkspace_sptr workspace,
   return lastIndex < numberOfBins;
 }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-boost::optional<std::string>
-IndirectPlotOptionsModel::getPlotSpectraString(bool errorBars) const {
+void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    return createPlotSpectraString(
-        workspaceName.get(), createIndicesList(indicesString.get()), errorBars);
-  return boost::none;
+    m_plotter->plotSpectra(workspaceName.get(), indicesString.get());
 }
 
-boost::optional<std::string>
-IndirectPlotOptionsModel::getPlotBinsString(std::string const &indices,
-                                            bool errorBars) const {
-  if (auto const workspaceName = workspace())
-    return createPlotBinsString(workspaceName.get(), createIndicesList(indices),
-                                errorBars);
-  return boost::none;
-}
-
-boost::optional<std::string>
-IndirectPlotOptionsModel::getPlotContourString() const {
-  if (auto const workspaceName = workspace())
-    return createPlotContourString(workspaceName.get());
-  return boost::none;
-}
-
-boost::optional<std::string>
-IndirectPlotOptionsModel::getPlotTiledString() const {
+void IndirectPlotOptionsModel::plotBins() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   if (workspaceName && indicesString)
-    return createPlotTiledString(
-        workspaceName.get(),
-        createIndicesVector<std::size_t>(indicesString.get()));
-  return boost::none;
-}
-
-#else
-void IndirectPlotOptionsModel::plotSpectra(bool errorBars) {
-  auto const workspaceName = workspace();
-  auto const indicesString = indices();
-  if (workspaceName && indicesString) {
-    QHash<QString, QVariant> plotKwargs;
-    if (errorBars)
-      plotKwargs["capsize"] = 3;
-    using MantidQt::Widgets::MplCpp::plot;
-    plot(QStringList(QString::fromStdString(workspaceName.get())), boost::none,
-         createIndicesVector<int>(indicesString.get()), boost::none, plotKwargs,
-         boost::none, boost::none, errorBars);
-  }
-}
-
-void IndirectPlotOptionsModel::plotBins(bool errorBars) {
-  auto const workspaceName = workspace();
-  auto const indicesString = indices();
-  if (workspaceName && indicesString) {
-    using MantidQt::Widgets::MplCpp::MantidAxType;
-    QHash<QString, QVariant> plotKwargs;
-    plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
-    if (errorBars)
-      plotKwargs["capsize"] = 3;
-    using MantidQt::Widgets::MplCpp::plot;
-    plot(QStringList(QString::fromStdString(workspaceName.get())), boost::none,
-         createIndicesVector<int>(indicesString.get()), boost::none, plotKwargs,
-         boost::none, boost::none, errorBars);
-  }
+    m_plotter->plotBins(workspaceName.get(), indicesString.get());
 }
 
 void IndirectPlotOptionsModel::plotContour() {
-  if (auto const workspaceName = workspace()) {
-    using MantidQt::Widgets::MplCpp::pcolormesh;
-    pcolormesh(QStringList(QString::fromStdString(workspaceName.get())));
-  }
+  if (auto const workspaceName = workspace())
+    m_plotter->plotContour(workspaceName.get());
 }
 
 void IndirectPlotOptionsModel::plotTiled() {
-  std::runtime_error(
-      "Tiled plotting for the Workbench has not been implemented.");
+  auto const workspaceName = workspace();
+  auto const indicesString = indices();
+  if (workspaceName && indicesString)
+    m_plotter->plotTiled(workspaceName.get(), indicesString.get());
 }
-#endif
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
