@@ -78,7 +78,7 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
                              doc='True to save the output data.')
 
     def validateInputs(self):
-        from IndirectCommon import getInstrumentParameter
+        from IndirectReductionCommon import get_ipf_parameters_from_run
 
         self._setup()
         issues = dict()
@@ -91,10 +91,14 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
 
         if self._spectra_range[0] > self._spectra_range[1]:
             issues['SpectraRange'] = 'Range must be in format: lower,upper'
-
-        spectra_min = getInstrumentParameter(workspace, 'spectra-min')
-        spectra_max = getInstrumentParameter(workspace, 'spectra-max')
-
+        else:
+            spectra_parameters = get_ipf_parameters_from_run(self._run_first, self._instrument_name, self._analyser,
+                                                             self._reflection, ['spectra-min', 'spectra-max'])
+            if self._spectra_range[0] < spectra_parameters['spectra-min'] or \
+                    self._spectra_range[1] > spectra_parameters['spectra-max']:
+                issues['SpectraRange'] = 'The spectra range must be between {0} and {1} for the {2} instrument'.format(
+                    str(int(spectra_parameters['spectra-min'])), str(int(spectra_parameters['spectra-max'])),
+                    self._instrument_name)
 
         return issues
 
