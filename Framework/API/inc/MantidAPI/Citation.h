@@ -15,13 +15,14 @@
 #include <vector>
 
 #include <boost/optional/optional.hpp>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace API {
 
 class MANTID_API_DLL Citation {
 public:
-  Citation();
+  Citation(::NeXus::File *file, const std::string &group);
   Citation(const std::string &doi = "", const std::string &bibtex = "",
            const std::string &endnote = "", const std::string &url = "",
            const std::string &description = "");
@@ -35,8 +36,8 @@ public:
   const std::string &bibtex() const;
   const std::string &endnote() const;
 
-  void loadFromNexus(const std::string &filename);
-  void saveToNexus(const std::string &filename);
+  void loadNexus(::NeXus::File *file, const std::string &group);
+  void saveNexus(::NeXus::File *file, const std::string &group);
 
 private:
   // Optional

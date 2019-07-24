@@ -8,6 +8,8 @@
 #include "MantidAPI/Citation.h"
 #include "MantidAPI/CitationConstructorHelpers.h"
 
+#include <nexus/NeXusFile.hpp>
+
 namespace Mantid {
 namespace API {
 
@@ -56,6 +58,10 @@ Citation::Citation(const std::string &doi, const std::string &bibtex,
   m_description = description;
 }
 
+Citation::Citation(::NeXus::File *file, const std::string &group) {
+  loadNexus(file, group);
+}
+
 bool Citation::operator==(const Citation &rhs) const {
   return m_bibtex == rhs.m_bibtex && m_description == rhs.m_description &&
          m_doi == rhs.m_doi && m_endnote == rhs.m_endnote && m_url == rhs.m_url;
@@ -71,6 +77,28 @@ const std::string &Citation::url() const { return m_url; }
 const std::string &Citation::doi() const { return m_doi; }
 const std::string &Citation::bibtex() const { return m_bibtex; }
 const std::string &Citation::endnote() const { return m_endnote; }
+
+void Citation::loadNexus(::NeXus::File *file, const std::string &group) {
+  file->openGroup(group, "NXCite");
+  file->readData("url", m_url);
+  file->readData("description", m_description);
+  file->readData("doi", m_doi);
+  file->readData("endnote", m_endnote);
+  // Since it remove the whitespace and it intends to restore it's state
+  m_endnote += " \n";
+  file->readData("bibtex", m_bibtex);
+  file->closeGroup();
+}
+
+void Citation::saveNexus(::NeXus::File *file, const std::string &group) {
+  file->makeGroup(group, "NXCite", true);
+  file->writeData("url", m_url);
+  file->writeData("description", m_description);
+  file->writeData("doi", m_doi);
+  file->writeData("endnote", m_endnote);
+  file->writeData("bibtex", m_bibtex);
+  file->closeGroup();
+}
 
 } // namespace API
 } // namespace Mantid

@@ -10,7 +10,10 @@
 
 #include "MantidAPI/Citation.h"
 #include "MantidAPI/CitationConstructorHelpers.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
+
 #include <cxxtest/TestSuite.h>
+#include <nexus/NeXusFile.hpp>
 
 class CitationTest : public CxxTest::TestSuite {
 public:
@@ -100,6 +103,46 @@ public:
                      "pages\nDA  - year/month\nN1  - description\nEP  - \n")
     TS_ASSERT_EQUALS(
         cite.bibtex(),
+        "@article{ref,\nauthor={author1 and "
+        "author2},\ntitle={title},\njournal={journal},\nyear={year},"
+        "\nnumber={"
+        "number},\npages={pages},\nmonth={month},\nnote={description}\n}")
+  }
+
+  // Make sure this will cleanup
+  void test_save_nexus_doesnt_throw() {
+    const std::string filename = "saveNexusCitation1.nxs";
+    NexusTestHelper th(true);
+    th.createFile(filename);
+    auto cite = Mantid::API::getCitation(Mantid::API::ArticleCitation(
+        {"author1", "author2"}, "title", "journal", "year", "", "number",
+        "pages", "month", "description", "", "url"));
+
+    TS_ASSERT_THROWS_NOTHING(cite.saveNexus(th.file.get(), "group"))
+  }
+
+  // Make sure this will cleanup
+  void test_save_and_load_nexus() {
+    const std::string filename = "loadNexusCitation1.nxs";
+    const std::string group = "group";
+    NexusTestHelper th(true);
+    th.createFile(filename);
+    auto cite1 = Mantid::API::getCitation(Mantid::API::ArticleCitation(
+        {"author1", "author2"}, "title", "journal", "year", "", "number",
+        "pages", "month", "description", "", "url"));
+
+    cite1.saveNexus(th.file.get(), group);
+
+    Mantid::API::Citation cite2(th.file.get(), group);
+    TS_ASSERT_EQUALS(cite2.doi(), "");
+    TS_ASSERT_EQUALS(cite2.description(), "description")
+    TS_ASSERT_EQUALS(cite2.url(), "url")
+    TS_ASSERT_EQUALS(cite2.endnote(),
+                     "TY  - JOUR\nAU  - author1\nAU  - author2\nT1  - "
+                     "title\nT2  - journal\nIS  - number\nSP  - pages\nEP  - "
+                     "pages\nDA  - year/month\nN1  - description\nEP  - \n")
+    TS_ASSERT_EQUALS(
+        cite2.bibtex(),
         "@article{ref,\nauthor={author1 and "
         "author2},\ntitle={title},\njournal={journal},\nyear={year},"
         "\nnumber={"
