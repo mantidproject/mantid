@@ -153,24 +153,25 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         if self._model.plot_figure is None:
             return
 
-        for workspace_name in self._model.plotted_fit_workspaces:
-            self._model.remove_workpace_from_plot(workspace_name)
+        if self.context.fitting_context.number_of_fits <= 1:
+            for workspace_name in self._model.plotted_fit_workspaces:
+                self._model.remove_workpace_from_plot(workspace_name)
 
-        for index in range(1, self.context.fitting_context.number_of_fits + 1, 1):
-            if self.context.fitting_context.fit_list:
-                current_fit = self.context.fitting_context.fit_list[-index]
-                combined_ws_list = self._model.plotted_workspaces + list(self._model.plotted_workspaces_inverse_binning.values())
-                list_of_output_workspaces_to_plot = [output for output, input in
-                                                     zip(current_fit.output_workspace_names, current_fit.input_workspaces)
-                                                     if input in combined_ws_list]
-                list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
-                    else [current_fit.output_workspace_names[-1]]
-            else:
-                list_of_output_workspaces_to_plot = []
+        # for index in range(1, self.context.fitting_context.number_of_fits + 1, 1):
+        if self.context.fitting_context.fit_list:
+            current_fit = self.context.fitting_context.fit_list[-1]
+            combined_ws_list = self._model.plotted_workspaces + list(self._model.plotted_workspaces_inverse_binning.values())
+            list_of_output_workspaces_to_plot = [output for output, input in
+                                                 zip(current_fit.output_workspace_names, current_fit.input_workspaces)
+                                                 if input in combined_ws_list]
+            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot\
+                else [current_fit.output_workspace_names[-1]]
+        else:
+            list_of_output_workspaces_to_plot = []
 
-            for workspace_name in list_of_output_workspaces_to_plot:
-                self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
-                self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
+        for workspace_name in list_of_output_workspaces_to_plot:
+            self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
+            self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
 
         self._model.force_redraw()
 
