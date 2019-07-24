@@ -157,7 +157,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             for workspace_name in self._model.plotted_fit_workspaces:
                 self._model.remove_workpace_from_plot(workspace_name)
 
-        # for index in range(1, self.context.fitting_context.number_of_fits + 1, 1):
         if self.context.fitting_context.fit_list:
             current_fit = self.context.fitting_context.fit_list[-1]
             combined_ws_list = self._model.plotted_workspaces + list(self._model.plotted_workspaces_inverse_binning.values())
