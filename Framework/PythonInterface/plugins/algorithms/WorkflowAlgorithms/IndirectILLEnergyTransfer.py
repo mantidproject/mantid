@@ -92,7 +92,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                           action=FileAction.OptionalLoad,
                                           extensions=['map','xml']),
                              doc='Filename of the detector grouping map file to use. \n'
-                                 'By default all the pixels will be summed per each tube for doppler mode. \n'
+                                 'By default all the pixels will be summed per each tube. \n'
                                  'Use .map or .xml file (see GroupDetectors documentation) '
                                  'only if different range is needed for each tube.')
 
