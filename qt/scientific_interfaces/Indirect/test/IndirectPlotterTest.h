@@ -128,7 +128,7 @@ public:
   }
 
   void
-  test_that_validate_will_return_false_if_the_matrix_workspace_exist_but_the_workspace_indices_do_not_exist() {
+  test_that_validate_will_return_false_if_the_matrix_workspace_exists_but_the_workspace_indices_do_not_exist() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(2, 5));
 
     TS_ASSERT(!m_plotter->validate(WORKSPACE_NAME, WORKSPACE_INDICES,
@@ -136,7 +136,7 @@ public:
   }
 
   void
-  test_that_validate_will_return_false_if_the_matrix_workspace_exist_but_the_bin_indices_do_not_exist() {
+  test_that_validate_will_return_false_if_the_matrix_workspace_exists_but_the_bin_indices_do_not_exist() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 2));
 
     TS_ASSERT(!m_plotter->validate(WORKSPACE_NAME, WORKSPACE_INDICES,

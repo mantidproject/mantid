@@ -36,13 +36,13 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotter : public QObject {
 public:
   IndirectPlotter(IndirectTab *parent);
 
-  void plotSpectra(std::string const &workspaceName,
-                   std::string const &workspaceIndices);
-  void plotBins(std::string const &workspaceName,
-                std::string const &binIndices);
-  void plotContour(std::string const &workspaceName);
-  void plotTiled(std::string const &workspaceName,
-                 std::string const &workspaceIndices);
+  virtual void plotSpectra(std::string const &workspaceName,
+                           std::string const &workspaceIndices);
+  virtual void plotBins(std::string const &workspaceName,
+                        std::string const &binIndices);
+  virtual void plotContour(std::string const &workspaceName);
+  virtual void plotTiled(std::string const &workspaceName,
+                         std::string const &workspaceIndices);
 
   bool
   validate(std::string const &workspaceName,

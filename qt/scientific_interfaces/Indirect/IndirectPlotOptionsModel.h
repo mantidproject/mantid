@@ -21,10 +21,14 @@ namespace CustomInterfaces {
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
   IndirectPlotOptionsModel(IndirectTab *parentTab);
+  /// Used by the unit tests so that m_plotter can be mocked
+  IndirectPlotOptionsModel(std::unique_ptr<IndirectPlotter> plotter);
   virtual ~IndirectPlotOptionsModel();
 
   bool setWorkspace(std::string const &workspaceName);
   void removeWorkspace();
+
+  boost::optional<std::string> workspace() const;
 
   void setFixedIndices(std::string const &indices);
   bool indicesFixed() const;
@@ -46,8 +50,6 @@ private:
                        std::string const &spectra) const;
   bool validateBins(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::string const &bins) const;
-
-  boost::optional<std::string> workspace() const;
 
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;

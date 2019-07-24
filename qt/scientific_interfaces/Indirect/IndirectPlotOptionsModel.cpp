@@ -54,7 +54,7 @@ std::string rearrangeIndicesRangeStrings(std::string const &str) {
   return indicesString;
 }
 
-std::string formatIndicesString(std::string &str) {
+std::string formatIndicesString(std::string str) {
   // Remove spaces
   removeFromIterable(std::remove_if(str.begin(), str.end(), isspace), str);
   // Rearrange range strings
@@ -74,6 +74,12 @@ IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectTab *parentTab)
     : m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none),
       m_plotter(std::make_unique<IndirectPlotter>(parentTab)) {}
+
+/// Used by the unit tests so that m_plotter can be mocked
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+    std::unique_ptr<IndirectPlotter> plotter)
+    : m_fixedIndices(false), m_workspaceIndices(boost::none),
+      m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
@@ -97,8 +103,7 @@ void IndirectPlotOptionsModel::removeWorkspace() {
 
 std::string
 IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
-  auto indicesString = indices;
-  return formatIndicesString(indicesString);
+  return formatIndicesString(indices);
 }
 
 void IndirectPlotOptionsModel::setFixedIndices(std::string const &indices) {
