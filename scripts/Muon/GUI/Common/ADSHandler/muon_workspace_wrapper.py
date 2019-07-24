@@ -142,7 +142,8 @@ class MuonWorkspaceWrapper(object):
                 self.add_directory_structure()
                 # Add to the appropriate group
                 group = self._directory_structure.split("/")[-1]
-                mtd[group].add(self._workspace_name)
+                if not mtd[group].__contains__(self._workspace_name):
+                    mtd[group].add(self._workspace_name)
 
             self._workspace = None
             self._is_in_ads = True
