@@ -195,7 +195,7 @@ class FigureInteraction(object):
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
                 arg_set_copy = copy(arg_set)
-                [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
+                [arg_set_copy.pop(key) for key in ['function', 'workspaces', 'autoscale_on_update']]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
                         arg_set['specNum'] = workspace.getSpectrum(
