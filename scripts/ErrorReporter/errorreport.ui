@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>768</width>
-    <height>608</height>
+    <height>644</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,39 +20,6 @@
    <string>Error Report</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="1" column="0" colspan="2">
-    <widget class="QTextBrowser" name="requestTextBrowser">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;We are really sorry that Mantid is not behaving as it should and are aware how frustrating this is. We'd be very grateful if you could provide us with some details about your problems. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;The more information you can give, the quicker we can fix this issue. All information will be stored according to our data policy (&lt;/span&gt;&lt;a href=&quot;https://www.mantidproject.org/MantidProject:Privacy_policy&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; text-decoration: underline; color:#0000ff;&quot;&gt;privacy policy&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;Are you happy for us to send an error report about this incident? If you are willing it would also be helpful to provide some contact details below to allow us to follow up on the report.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="openExternalLinks">
-      <bool>false</bool>
-     </property>
-     <property name="openLinks">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="1">
     <widget class="QLabel" name="icon">
      <property name="enabled">
@@ -81,37 +48,81 @@ p, li { white-space: pre-wrap; }
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QPlainTextEdit" name="input_free_text">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>400</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="plainText">
-      <string>Please enter any additional information about your problems. (Max 3200 characters)
-
-For example:
-Error messages on the screen 
-A script that causes the problem 
-The functions you used immediately before the problem
-
-Thank you! </string>
-     </property>
-     <property name="overwriteMode">
-      <bool>true</bool>
-     </property>
-    </widget>
+   <item row="3" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="input_email_line_edit">
+       <property name="maxLength">
+        <number>128</number>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" colspan="2">
+      <widget class="QLineEdit" name="input_name_line_edit">
+       <property name="maxLength">
+        <number>128</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Name (optional)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Email (optional)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="label_6">
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.mantidproject.org/MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Privacy Policy&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::LinksAccessibleByMouse</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="3">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item row="4" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -144,54 +155,6 @@ Thank you! </string>
         <string>Don't share any information</string>
        </property>
       </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="input_name_line_edit">
-       <property name="maxLength">
-        <number>128</number>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Email (optional)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="input_email_line_edit">
-       <property name="maxLength">
-        <number>128</number>
-       </property>
-       <property name="frame">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Name (optional)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -288,6 +251,70 @@ Thank you! </string>
        </layout>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QTextBrowser" name="requestTextBrowser">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="html">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;We are really sorry that Mantid is not behaving as it should and are aware how frustrating this is. We'd be very grateful if you could provide us with some details about your problems. The more information you can give, the quicker we can fix this issue.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="openExternalLinks">
+      <bool>false</bool>
+     </property>
+     <property name="openLinks">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QTextEdit" name="input_free_text">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>400</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="inputMethodHints">
+      <set>Qt::ImhMultiLine</set>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="placeholderText">
+      <string>Please enter any additional information about your problems. (Max 3200 characters)
+
+For example:
+Error messages on the screen 
+A script that causes the problem
+The functions you used immediately before the problem
+
+Thank you!  </string>
+     </property>
     </widget>
    </item>
   </layout>
