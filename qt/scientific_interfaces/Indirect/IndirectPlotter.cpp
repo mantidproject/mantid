@@ -235,14 +235,12 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
  */
 void IndirectPlotter::plotTiled(std::string const &workspaceName,
                                 std::string const &workspaceIndices) {
-  auto const errorBars = m_parentTab->errorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   runPythonCode(createPlotTiledString(
       workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
   UNUSED_ARG(workspaceName);
   UNUSED_ARG(workspaceIndices);
-  UNUSED_ARG(errorBars);
   std::runtime_error(
       "Tiled plotting for the Workbench has not been implemented.");
 #endif
