@@ -46,6 +46,12 @@ THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 # Some windows paths can contain sequences such as \r, e.g. \release_systemtests
 # and need escaping to be able to add to the python path
 TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
+# Path to PythonInterface/test directory for testhelpers module
+FRAMEWORK_PYTHONINTERFACE_TEST_DIR = os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..",
+                                                                   "Framework", "PythonInterface", "test"))
+
+if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
+    raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
 
 
 #########################################################################
@@ -641,13 +647,14 @@ except AttributeError:
     pass
 
 import sys
-for p in ('{test_framework}', '{test_dir}'):
+for p in ('{test_framework}', '{pythoninterface_test_dir}', '{test_dir}'):
     sys.path.append(p)
 from {test_modname} import {test_cls}
 systest = {test_cls}()
 if {exclude_in_pr}:
     systest.excludeInPullRequests = lambda: False
-""".format(test_framework=TESTING_FRAMEWORK_DIR, test_dir=self._test_dir, test_modname=self._modname,
+""".format(test_framework=TESTING_FRAMEWORK_DIR, pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
+           test_dir=self._test_dir, test_modname=self._modname,
            test_cls=self._test_cls_name, exclude_in_pr=self._exclude_in_pr_builds)
         if (not clean):
             code += "systest.execute()\n" + \
