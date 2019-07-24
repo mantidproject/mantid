@@ -139,7 +139,9 @@ public:
         "IRS10001-10005_graphite002_info.nxs",
         // A file with a "+" and "," in the name, to see if it can be loaded
         // when multifileloading is turned off via the preferences file.
-        "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt"};
+        "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt",
+        // Runs with no instrument name as prefix, commonplace at the ILL
+        "111213.nxs", "141516.nxs", "171819.nxs"};
 
     std::unordered_set<std::string> whiteSpaceDirFilenames = {
         "file with whitespace.txt"};
@@ -609,6 +611,35 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.raw"));
     TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00003.raw"));
     TS_ASSERT_EQUALS(fileNames[0][3], dummyFile("TSC00004.raw"));
+  }
+
+  void test_allowEmptyTokenOptionalLoad() {
+    g_config.setString("default.facility", "ILL");
+    g_config.setString("default.instrument", "IN16B");
+    MultipleFileProperty p("Filename", FileProperty::FileAction::OptionalLoad,
+                           {".nxs"}, true);
+    p.setValue("111213,0,171819");
+    std::vector<std::vector<std::string>> fileNames = p();
+    TS_ASSERT_EQUALS(fileNames.size(), 3);
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("111213.nxs"));
+    TS_ASSERT_EQUALS(fileNames[1][0], "000000");
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("171819.nxs"));
+    g_config.setString("default.facility", "ISIS");
+    g_config.setString("default.instrument", "TOSCA");
+  }
+
+  void test_allowEmptyTokenLoad() {
+    g_config.setString("default.facility", "ILL");
+    g_config.setString("default.instrument", "IN16B");
+    MultipleFileProperty p("Filename", FileProperty::FileAction::Load, {".nxs"},
+                           true);
+    TS_ASSERT_THROWS_EQUALS(p.setValue("111213,0,171819"),
+                            const std::invalid_argument &err,
+                            std::string(err.what()),
+                            "When setting value of property \"Filename\": "
+                            "Could not validate the following file(s): 000000");
+    g_config.setString("default.facility", "ISIS");
+    g_config.setString("default.instrument", "TOSCA");
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////

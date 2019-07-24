@@ -426,6 +426,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
                 unresolvedFileName +
                 "\", even after appending suggested file extensions.");
           } else {
+            // if the fullyResolvedFile is empty, it means it failed to find the
+            // file so keep the unresolvedFileName as a hint to be displayed
+            // later on in the error message
             fullyResolvedFile = unresolvedFileName;
           }
         }
