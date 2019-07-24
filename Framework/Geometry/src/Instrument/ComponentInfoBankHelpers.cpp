@@ -47,7 +47,7 @@ bool isAnyBank(const ComponentInfo &compInfo, const size_t &idx) {
           parentType != Beamline::ComponentType::Grid) {
 
         // if component at index is not a tube
-        if (childType != Beamline::ComponentType::Unstructured) {
+        if (childType != Beamline::ComponentType::OutlineComposite) {
           return true;
         }
         return false;
@@ -57,6 +57,24 @@ bool isAnyBank(const ComponentInfo &compInfo, const size_t &idx) {
     return false;
   }
   return false;
+}
+
+Eigen::Vector3d
+offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
+                   const size_t ancestorIdx, const size_t &currentIdx) {
+
+  if (ancestorIdx == currentIdx) {
+    return Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
+  } else {
+    const auto ancestorPos =
+        Mantid::Kernel::toVector3d(compInfo.position(ancestorIdx));
+    auto transformation = Eigen::Affine3d(
+        Mantid::Kernel::toQuaterniond(compInfo.rotation(ancestorIdx))
+            .conjugate()); // Inverse ancestor rotation
+    transformation.translate(-ancestorPos);
+    return transformation *
+           Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
+  }
 }
 
 } // namespace ComponentInfoBankHelpers

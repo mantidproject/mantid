@@ -52,11 +52,8 @@ const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
-const std::string SOURCE = "source";
-const std::string SAMPLE = "sample";
-const std::string INSTRUMENT = "instrument";
+
 const std::string DETECTOR_NUMBER = "detector_number";
-const std::string DETECTOR_PREFIX = "detector_";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 
 const std::string METRES = "m";
@@ -191,6 +188,8 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
 
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
+                                const Geometry::DetectorInfo &detInfo,
+                                const std::vector<int> &detectorIDs,
                                 size_t idx) {
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
@@ -206,15 +205,14 @@ inline void writeXYZPixeloffset(H5::Group &grp,
 
   for (const size_t &i : childrenDetectors) {
 
-    // get the position of the pixel relative to the bank
-    Eigen::Vector3d offset =
-        Mantid::Kernel::toVector3d(compInfo.relativePosition(i));
+    auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+        compInfo, idx, i);
 
     posx.push_back(offset[0]);
     posy.push_back(offset[1]);
     posz.push_back(offset[2]);
   }
-
+  auto bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
 
   int rank = 1;
@@ -478,7 +476,7 @@ H5::Group instrument(const H5::Group &parent,
                      const Geometry::ComponentInfo &compInfo) {
 
   std::string instrumentName = compInfo.name(compInfo.root());
-  H5::Group childGroup = parent.createGroup(INSTRUMENT);
+  H5::Group childGroup = parent.createGroup(instrumentName);
 
   writeStrDataset(childGroup, NAME, instrumentName);
   writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
@@ -506,7 +504,7 @@ void saveSample(const H5::Group &parentGroup,
   size_t idx = compInfo.sample();
 
   std::string sampleName = compInfo.name(compInfo.sample());
-  childGroup = parentGroup.createGroup(SAMPLE);
+  childGroup = parentGroup.createGroup(sampleName);
 
   writeLocation(childGroup, compInfo, idx);
   writeOrientation(childGroup, compInfo, idx);
@@ -536,7 +534,7 @@ void saveSource(const H5::Group &parentGroup,
   size_t idx = compInfo.source();
 
   std::string sourceName = compInfo.name(compInfo.source());
-  childGroup = parentGroup.createGroup(SOURCE);
+  childGroup = parentGroup.createGroup(sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
   writeLocation(childGroup, compInfo, idx);
@@ -566,13 +564,12 @@ void saveDetectors(const H5::Group &parentGroup,
 
   const auto detectorIDs = detInfo.detectorIDs();
 
-  int detCounter = 1;
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
 
     if (Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
 
       // group name
-      std::string name = DETECTOR_PREFIX + std::to_string(detCounter);
+      std::string name = compInfo.name(i);
 
       H5::Group childGroup = parentGroup.createGroup(name);
       writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
@@ -587,7 +584,7 @@ void saveDetectors(const H5::Group &parentGroup,
       writeNXDetectorNumber(childGroup, compInfo, i, detectorIDs);
       writeLocation(childGroup, compInfo, i);
       writeOrientation(childGroup, compInfo, i);
-      writeXYZPixeloffset(childGroup, compInfo, i);
+      writeXYZPixeloffset(childGroup, compInfo, detInfo, detectorIDs, i);
 
       // local_name set to bank name
       H5::DataSet localName =
@@ -596,8 +593,6 @@ void saveDetectors(const H5::Group &parentGroup,
       H5::DataSet dependsOn =
           childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
       dependsOn.write(dependency, dependencyStrType, H5SCALAR);
-
-      ++detCounter;
     }
   }
 }

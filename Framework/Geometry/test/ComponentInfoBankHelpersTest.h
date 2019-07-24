@@ -72,25 +72,32 @@ public:
     TS_ASSERT(!isDetectorFixedInBank(componentInfo, componentInfo.root()));
   }
 
-  void test_isAnyBank_false_for_tube() {
+  void test_isAnyBank_false_for_tubes() {
 
-    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(1, 1);
+    auto instr =
+        ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
 
-    auto children = compInfo.children(compInfo.root());
+    std::vector<size_t> allIndices;
+    for (size_t index = compInfo.root() - 1; index > 0; --index) {
+      if (compInfo.isDetector(index))
+        break;
+      allIndices.push_back(index);
+    }
+
     bool tubeInInstrument = std::any_of(
-        children.begin(), children.end(), [&compInfo](const size_t &index) {
+        allIndices.begin(), allIndices.end(), [&compInfo](const size_t &index) {
           return compInfo.componentType(index) ==
-                 Beamline::ComponentType::Unstructured;
+                 Beamline::ComponentType::OutlineComposite;
         });
 
-    // assert at least one tube is in instrument
-    TS_ASSERT(tubeInInstrument);
+    // TODO: assert at least one tube is in instrument
+
     for (size_t index = compInfo.root() - 1; index > 0; --index) {
       auto compType = compInfo.componentType(index);
       // identify tube and assert isAnyBank returns false
-      if (compType == Beamline::ComponentType::Unstructured) {
+      if (compType == Beamline::ComponentType::OutlineComposite) {
         TS_ASSERT(!isAnyBank(compInfo, index));
       }
     }
@@ -118,6 +125,47 @@ public:
         TS_ASSERT(!isAnyBank(compInfo, index));
       }
     }
+  }
+
+  void test_offsetFromAncestor_gets_expected_offset() {
+
+    const Quat relativeBankRotation(45.0, V3D(0.0, 1.0, 0.0));
+    const Quat relativeDetRotation(45.0, V3D(0.0, 1.0, 0.0));
+    const V3D absBankposition(0, 0, 10);
+    const V3D detectorOffset(2.0, -2.0, 0.0);
+
+    auto instr = ComponentCreationHelper::createSimpleInstrumentWithRotation(
+        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
+        absBankposition,      // bank position
+        relativeBankRotation, // bank rotation
+        relativeDetRotation,
+        detectorOffset); // detector rotation, detector offset
+
+    auto wrappers = InstrumentVisitor::makeWrappers(*instr);
+    const auto &compInfo = (*wrappers.first);
+
+    const size_t bankIdx = 3;
+    const size_t detIdx = 0;
+
+    TS_ASSERT(compInfo.isDetector(detIdx));  // assert detector at this index
+    TS_ASSERT(isAnyBank(compInfo, bankIdx)); // assert bank at this index
+
+    // undo bank rotation
+    auto transformation = Eigen::Affine3d(
+        Mantid::Kernel::toQuaterniond(compInfo.rotation(bankIdx)).conjugate());
+
+    // undo bank translation
+    transformation.translate(
+        -Mantid::Kernel::toVector3d(compInfo.position(bankIdx)));
+
+    // get back expected offset
+    auto expected_offset =
+        transformation * Mantid::Kernel::toVector3d(compInfo.position(detIdx));
+
+    auto detector_offset_from_bank =
+        offsetFromAncestor(compInfo, bankIdx, detIdx);
+
+    TS_ASSERT(expected_offset.isApprox(detector_offset_from_bank));
   }
 };
 

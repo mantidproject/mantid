@@ -968,7 +968,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     if (i == 0 && xDirection < 0)
       x = -1e-32;
     const auto z = radius * cos(theta);
-    CompAssembly *tube = new CompAssembly(lexer.str());
+    ObjCompAssembly *tube = new ObjCompAssembly(lexer.str());
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
