@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotter.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
@@ -17,6 +19,8 @@
 #include <QVariant>
 using namespace MantidQt::Widgets::MplCpp;
 #endif
+
+using namespace Mantid::API;
 
 namespace {
 
@@ -179,15 +183,17 @@ IndirectPlotter::IndirectPlotter(IndirectTab *parent)
  */
 void IndirectPlotter::plotSpectra(std::string const &workspaceName,
                                   std::string const &workspaceIndices) {
-  auto const errorBars = m_parentTab->errorBars();
+  if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
+    auto const errorBars = m_parentTab->errorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(createPlotSpectraString(
-      workspaceName, createIndicesList(workspaceIndices), errorBars));
+    runPythonCode(createPlotSpectraString(
+        workspaceName, createIndicesList(workspaceIndices), errorBars));
 #else
-  plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-       createIndicesVector<int>(workspaceIndices), boost::none,
-       constructKwargs(errorBars), boost::none, boost::none, errorBars);
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+         createIndicesVector<int>(workspaceIndices), boost::none,
+         constructKwargs(errorBars), boost::none, boost::none, errorBars);
 #endif
+  }
 }
 
 /**
@@ -199,18 +205,20 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
  */
 void IndirectPlotter::plotBins(std::string const &workspaceName,
                                std::string const &binIndices) {
-  auto const errorBars = m_parentTab->errorBars();
+  if (validate(workspaceName, binIndices, MantidAxis::Bin)) {
+    auto const errorBars = m_parentTab->errorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(createPlotBinsString(workspaceName,
-                                     createIndicesList(binIndices), errorBars));
+    runPythonCode(createPlotBinsString(
+        workspaceName, createIndicesList(binIndices), errorBars));
 #else
-  QHash<QString, QVariant> plotKwargs;
-  plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
-  plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-       createIndicesVector<int>(binIndices), boost::none,
-       constructKwargs(errorBars, plotKwargs), boost::none, boost::none,
-       errorBars);
+    QHash<QString, QVariant> plotKwargs;
+    plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+         createIndicesVector<int>(binIndices), boost::none,
+         constructKwargs(errorBars, plotKwargs), boost::none, boost::none,
+         errorBars);
 #endif
+  }
 }
 
 /**
@@ -219,11 +227,13 @@ void IndirectPlotter::plotBins(std::string const &workspaceName,
  * @param workspaceName The name of the workspace to plot
  */
 void IndirectPlotter::plotContour(std::string const &workspaceName) {
+  if (validate(workspaceName)) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(createPlotContourString(workspaceName));
+    runPythonCode(createPlotContourString(workspaceName));
 #else
-  pcolormesh(QStringList(QString::fromStdString(workspaceName)));
+    pcolormesh(QStringList(QString::fromStdString(workspaceName)));
 #endif
+  }
 }
 
 /**
@@ -235,17 +245,97 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
  */
 void IndirectPlotter::plotTiled(std::string const &workspaceName,
                                 std::string const &workspaceIndices) {
+  if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  runPythonCode(createPlotTiledString(
-      workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
+    runPythonCode(createPlotTiledString(
+        workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
-  UNUSED_ARG(workspaceName);
-  UNUSED_ARG(workspaceIndices);
-  std::runtime_error(
-      "Tiled plotting for the Workbench has not been implemented.");
+    UNUSED_ARG(workspaceName);
+    UNUSED_ARG(workspaceIndices);
+    std::runtime_error(
+        "Tiled plotting for the Workbench has not been implemented.");
 #endif
+  }
 }
 
+/**
+ * Validates that the workspace exists as a matrix workspace, and that the
+ * indices specified exist in the workspace
+ *
+ * @param workspaceName The name of the workspace to plot
+ * @param workspaceIndices The indices within the workspace to plot (e.g.
+ * '0-2,5,7-10')
+ * @param axisType The axis to validate (i.e. Spectrum or Bin)
+ * @return True if the data is valid
+ */
+bool IndirectPlotter::validate(
+    std::string const &workspaceName,
+    boost::optional<std::string> const &workspaceIndices,
+    boost::optional<MantidAxis> const &axisType) const {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName))
+    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
+      return validate(workspace, workspaceIndices, axisType);
+  return false;
+}
+
+/**
+ * Validates that the indices specified exist in the workspace
+ *
+ * @param workspace The matrix workspace
+ * @param workspaceIndices The indices within the workspace to plot (e.g.
+ * '0-2,5,7-10')
+ * @param axisType The axis to validate (i.e. Spectrum or Bin)
+ * @return True if the data is valid
+ */
+bool IndirectPlotter::validate(
+    MatrixWorkspace_const_sptr workspace,
+    boost::optional<std::string> const &workspaceIndices,
+    boost::optional<MantidAxis> const &axisType) const {
+  if (workspaceIndices && axisType && axisType.get() == MantidAxis::Spectrum)
+    return validateSpectra(workspace, workspaceIndices.get());
+  else if (workspaceIndices && axisType && axisType.get() == MantidAxis::Bin)
+    return validateBins(workspace, workspaceIndices.get());
+  return true;
+}
+
+/**
+ * Validates that the workspace indices specified exist in the workspace
+ *
+ * @param workspace The matrix workspace
+ * @param workspaceIndices The indices within the workspace to check (e.g.
+ * '0-2,5,7-10')
+ * @return True if the indices exist
+ */
+bool IndirectPlotter::validateSpectra(
+    MatrixWorkspace_const_sptr workspace,
+    std::string const &workspaceIndices) const {
+  auto const numberOfHistograms = workspace->getNumberHistograms();
+  auto const lastIndex =
+      std::stoul(splitStringBy(workspaceIndices, ",-").back());
+  return lastIndex < numberOfHistograms;
+}
+
+/**
+ * Validates that the bin indices specified exist in the workspace
+ *
+ * @param workspace The matrix workspace
+ * @param binIndices The bin indices within the workspace to check (e.g.
+ * '0-2,5,7-10')
+ * @return True if the bin indices exist
+ */
+bool IndirectPlotter::validateBins(MatrixWorkspace_const_sptr workspace,
+                                   std::string const &binIndices) const {
+  auto const numberOfBins = workspace->y(0).size();
+  auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());
+  return lastIndex < numberOfBins;
+}
+
+/**
+ * Runs python code (mantidplot only)
+ *
+ * @param pythonCode The python code to run
+ */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 void IndirectPlotter::runPythonCode(std::string const &pythonCode) {
   m_pythonRunner.runPythonCode(QString::fromStdString(pythonCode));

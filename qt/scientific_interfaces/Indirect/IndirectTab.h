@@ -7,6 +7,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 
+#include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -57,7 +58,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 08/10/2014
 */
-class DLLExport IndirectTab : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject {
   Q_OBJECT
 
 public:
@@ -82,7 +83,7 @@ public:
 
   /// Allows the user to turn the plotting of error bars off and on
   void setPlotErrorBars(bool errorBars);
-  bool errorBars() const;
+  virtual bool errorBars() const;
 
   /// Plot a spectrum plot of a given workspace
   void plotSpectrum(const QString &workspaceName, const int &wsIndex = 0);

@@ -18,8 +18,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum MantidAxis { Spectrum, Bin };
-
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
   IndirectPlotOptionsModel(IndirectTab *parentTab);

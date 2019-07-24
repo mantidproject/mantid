@@ -10,6 +10,10 @@
 #include "IndirectTab.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
+#include <boost/none_t.hpp>
+#include <boost/optional.hpp>
 
 #include <QObject>
 
@@ -19,6 +23,8 @@ namespace CustomInterfaces {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 class PythonRunner;
 #endif
+
+enum MantidAxis { Spectrum, Bin };
 
 /**
  @class IndirectPlotter
@@ -38,7 +44,21 @@ public:
   void plotTiled(std::string const &workspaceName,
                  std::string const &workspaceIndices);
 
+  bool
+  validate(std::string const &workspaceName,
+           boost::optional<std::string> const &workspaceIndices = boost::none,
+           boost::optional<MantidAxis> const &axisType = boost::none) const;
+
 private:
+  bool
+  validate(Mantid::API::MatrixWorkspace_const_sptr workspace,
+           boost::optional<std::string> const &workspaceIndices = boost::none,
+           boost::optional<MantidAxis> const &axisType = boost::none) const;
+  bool validateSpectra(Mantid::API::MatrixWorkspace_const_sptr workspace,
+                       std::string const &workspaceIndices) const;
+  bool validateBins(Mantid::API::MatrixWorkspace_const_sptr workspace,
+                    std::string const &binIndices) const;
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   void runPythonCode(std::string const &pythonCode);
 
