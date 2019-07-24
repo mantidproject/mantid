@@ -29,6 +29,12 @@ public:
   // Needed for future Set constructiom
   bool operator==(const Citation &rhs) const;
 
+  const std::string &description() const;
+  const std::string &url() const;
+  const std::string &doi() const;
+  const std::string &bibtex() const;
+  const std::string &endnote() const;
+
   void loadFromNexus(const std::string &filename);
   void saveToNexus(const std::string &filename);
 
@@ -44,7 +50,7 @@ private:
   std::string m_endnote;
 };
 
-Citation getCitation(const BaseCitation &cite);
+Citation MANTID_API_DLL getCitation(const BaseCitation &cite);
 
 } // namespace API
 } // namespace Mantid

@@ -19,6 +19,7 @@ set(SRC_FILES
     src/CatalogManager.cpp
     src/CatalogSession.cpp
     src/Citation.cpp
+    src/CitationConstructorHelpers.cpp
     src/Column.cpp
     src/ColumnFactory.cpp
     src/CommonBinsValidator.cpp

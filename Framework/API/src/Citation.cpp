@@ -50,7 +50,7 @@ Citation::Citation(const std::string &doi, const std::string &bibtex,
           "If none of doi, bibtex, or endnote is provided, then url must be");
 
   m_doi = doi;
-  m_bibtex = doi;
+  m_bibtex = bibtex;
   m_endnote = endnote;
   m_url = url;
   m_description = description;
@@ -65,6 +65,12 @@ Citation getCitation(const BaseCitation &cite) {
   return Citation(cite.m_doi, cite.toBibTex(), cite.toEndNote(), cite.m_url,
                   cite.m_description);
 }
+
+const std::string &Citation::description() const { return m_description; }
+const std::string &Citation::url() const { return m_url; }
+const std::string &Citation::doi() const { return m_doi; }
+const std::string &Citation::bibtex() const { return m_bibtex; }
+const std::string &Citation::endnote() const { return m_endnote; }
 
 } // namespace API
 } // namespace Mantid

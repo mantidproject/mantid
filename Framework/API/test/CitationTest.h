@@ -9,6 +9,7 @@
 #define CITATIONEST_H_
 
 #include "MantidAPI/Citation.h"
+#include "MantidAPI/CitationConstructorHelpers.h"
 #include <cxxtest/TestSuite.h>
 
 class CitationTest : public CxxTest::TestSuite {
@@ -84,6 +85,25 @@ public:
     auto cite2 = Mantid::API::Citation("doi", "bibtex", "endnote", "url",
                                        "not description");
     TS_ASSERT(!(cite1 == cite2));
+  }
+
+  void test_getCitation_with_a_citation_struct() {
+    auto cite = Mantid::API::getCitation(Mantid::API::ArticleCitation(
+        {"author1", "author2"}, "title", "journal", "year", "", "number",
+        "pages", "month", "description", "", "url"));
+    TS_ASSERT_EQUALS(cite.doi(), "");
+    TS_ASSERT_EQUALS(cite.description(), "description")
+    TS_ASSERT_EQUALS(cite.url(), "url")
+    TS_ASSERT_EQUALS(cite.endnote(),
+                     "TY  - JOUR\nAU  - author1\nAU  - author2\nT1  - "
+                     "title\nT2  - journal\nIS  - number\nSP  - pages\nEP  - "
+                     "pages\nDA  - year/month\nN1  - description\nEP  - \n")
+    TS_ASSERT_EQUALS(
+        cite.bibtex(),
+        "@article{ref,\nauthor={author1 and "
+        "author2},\ntitle={title},\njournal={journal},\nyear={year},"
+        "\nnumber={"
+        "number},\npages={pages},\nmonth={month},\nnote={description}\n}")
   }
 };
 

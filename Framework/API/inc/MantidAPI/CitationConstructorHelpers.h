@@ -1,13 +1,15 @@
 #ifndef MANTID_API_CITATION_CITATIONCONSTRUCTORHELPERS_H_
 #define MANTID_API_CITATION_CITATIONCONSTRUCTORHELPERS_H_
 
+#include "DllConfig.h"
+
 #include <boost/optional.hpp>
 #include <vector>
 
 namespace Mantid {
 namespace API {
 
-struct BaseCitation {
+struct MANTID_API_DLL BaseCitation {
   BaseCitation(const std::string &doi = "", const std::string &description = "",
                const std::string &url = "");
   const std::string m_doi, m_description, m_url;
@@ -16,7 +18,7 @@ struct BaseCitation {
   virtual std::string toBibTex() const = 0;
 };
 
-struct ArticleCitation : BaseCitation {
+struct MANTID_API_DLL ArticleCitation : BaseCitation {
   ArticleCitation(const std::vector<std::string> &authors,
                   const std::string &title, const std::string &journal,
                   const std::string &year, const std::string &volume = "",
@@ -33,7 +35,7 @@ struct ArticleCitation : BaseCitation {
       m_month;
 };
 
-struct BookCitation : BaseCitation {
+struct MANTID_API_DLL BookCitation : BaseCitation {
   BookCitation(const std::vector<std::string> &authors,
                const std::string &title, const std::string &publisher,
                const std::string &year, const std::string &volume = "",
@@ -49,7 +51,7 @@ struct BookCitation : BaseCitation {
       m_edition, m_month;
 };
 
-struct BookletCitation : BaseCitation {
+struct MANTID_API_DLL BookletCitation : BaseCitation {
   BookletCitation(const std::string &title,
                   const std::vector<std::string> &author = {},
                   const std::string &howPublished = "",
@@ -60,12 +62,13 @@ struct BookletCitation : BaseCitation {
   std::string toEndNote() const override;
   std::string toBibTex() const override;
 
+  const std::string m_title;
   const std::vector<std::string> m_author;
-  const std::string m_title, m_howPublished, m_address, m_month, m_year;
+  const std::string m_howPublished, m_address, m_month, m_year;
 };
 
 // Pages assumes more than one would have a - seperator.
-struct InBookCitation : BaseCitation {
+struct MANTID_API_DLL InBookCitation : BaseCitation {
   InBookCitation(const std::vector<std::string> &authors,
                  const std::string &title, const std::string &publisher,
                  const std::string &year, const std::string &pages,
@@ -84,7 +87,7 @@ struct InBookCitation : BaseCitation {
 };
 
 // Pages assumes more than one would have a - seperator.
-struct InCollectionCitation : BaseCitation {
+struct MANTID_API_DLL InCollectionCitation : BaseCitation {
   InCollectionCitation(
       const std::vector<std::string> &authors, const std::string &title,
       const std::string &booktitle, const std::string &publisher,
@@ -103,7 +106,7 @@ struct InCollectionCitation : BaseCitation {
 };
 
 // Pages assumes more than one would have a - seperator.
-struct InProceedingsCitation : BaseCitation {
+struct MANTID_API_DLL InProceedingsCitation : BaseCitation {
   InProceedingsCitation(
       const std::vector<std::string> &authors, const std::string &title,
       const std::string &booktitle, const std::string &year,
@@ -121,7 +124,7 @@ struct InProceedingsCitation : BaseCitation {
       m_pages, m_address, m_month, m_organization, m_publisher;
 };
 
-struct ManualCitation : BaseCitation {
+struct MANTID_API_DLL ManualCitation : BaseCitation {
   ManualCitation(const std::string &title,
                  const std::vector<std::string> &authors = {},
                  const std::string &organization = "",
@@ -133,12 +136,12 @@ struct ManualCitation : BaseCitation {
   std::string toEndNote() const override;
   std::string toBibTex() const override;
 
+  const std::string m_title;
   const std::vector<std::string> m_authors;
-  const std::string m_title, m_organization, m_address, m_edition, m_month,
-      m_year;
+  const std::string m_organization, m_address, m_edition, m_month, m_year;
 };
 
-struct MastersThesisCitation : BaseCitation {
+struct MANTID_API_DLL MastersThesisCitation : BaseCitation {
   MastersThesisCitation(const std::vector<std::string> &authors,
                         const std::string &title, const std::string &school,
                         const std::string &year, const std::string &type = "",
@@ -154,7 +157,7 @@ struct MastersThesisCitation : BaseCitation {
   const std::string m_title, m_school, m_year, m_type, m_address, m_month;
 };
 
-struct MiscCitation : BaseCitation {
+struct MANTID_API_DLL MiscCitation : BaseCitation {
   MiscCitation(const std::vector<std::string> &authors = {},
                const std::string &title = "",
                const std::string &howpublished = "",
@@ -168,7 +171,7 @@ struct MiscCitation : BaseCitation {
   const std::string m_title, m_howpublished, m_month, m_year;
 };
 
-struct PHDThesisCitation : BaseCitation {
+struct MANTID_API_DLL PHDThesisCitation : BaseCitation {
   PHDThesisCitation(const std::vector<std::string> &authors,
                     const std::string &title, const std::string &school,
                     const std::string &year, const std::string &type = "",
@@ -183,7 +186,7 @@ struct PHDThesisCitation : BaseCitation {
   const std::string m_title, m_school, m_year, m_type, m_address, m_month;
 };
 
-struct ProceedingsCitation : BaseCitation {
+struct MANTID_API_DLL ProceedingsCitation : BaseCitation {
   ProceedingsCitation(
       const std::string &title, const std::string &year,
       const std::string &editor = "", const std::string &volume = "",
@@ -198,7 +201,7 @@ struct ProceedingsCitation : BaseCitation {
       m_month, m_organization, m_publisher;
 };
 
-struct TechReportCitation : BaseCitation {
+struct MANTID_API_DLL TechReportCitation : BaseCitation {
   TechReportCitation(const std::vector<std::string> &authors,
                      const std::string &title, const std::string &instituion,
                      const std::string &year, const std::string &type = "",
@@ -215,7 +218,7 @@ struct TechReportCitation : BaseCitation {
       m_month;
 };
 
-struct UnPublishedCitation : BaseCitation {
+struct MANTID_API_DLL UnPublishedCitation : BaseCitation {
   UnPublishedCitation(const std::vector<std::string> &authors,
                       const std::string &title, const std::string &description,
                       const std::string &month = "",
