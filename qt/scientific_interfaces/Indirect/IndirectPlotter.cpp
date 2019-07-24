@@ -39,7 +39,7 @@ std::vector<std::string> splitStringBy(std::string const &str,
 
 template <typename T> T convertToT(std::string const &num) {
   if (std::is_same<T, std::size_t>::value)
-    return std::stoul(num);
+    return static_cast<std::size_t>(std::stoi(num));
   else if (std::is_same<T, int>::value)
     return std::stoi(num);
   std::runtime_error(
@@ -240,6 +240,9 @@ void IndirectPlotter::plotTiled(std::string const &workspaceName,
   runPythonCode(createPlotTiledString(
       workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
+  UNUSED_ARG(workspaceName);
+  UNUSED_ARG(workspaceIndices);
+  UNUSED_ARG(errorBars);
   std::runtime_error(
       "Tiled plotting for the Workbench has not been implemented.");
 #endif
