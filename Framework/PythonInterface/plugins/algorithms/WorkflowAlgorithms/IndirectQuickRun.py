@@ -227,12 +227,12 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
-        self._msd_fit = self.getProperty('msdFit').value
+        self._msd_fit = self.getProperty('MSDFit').value
 
         self._width_fit = self.getProperty('WidthFit').value
 
-        self._output_ws = first_file + '-' + last_file + '_scan_red'
-        self._scan_ws = first_file + '-' + last_file + '_scan'
+        self._output_ws = first_file + '_to_' + last_file + '_scan_red'
+        self._scan_ws = first_file + '_to_' + last_file + '_scan'
 
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
