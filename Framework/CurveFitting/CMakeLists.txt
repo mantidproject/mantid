@@ -2,8 +2,8 @@ set(SRC_FILES
     src/Algorithms/CalculateChiSquared.cpp
     src/Algorithms/CalculateCostFunction.cpp
     src/Algorithms/ConvertToYSpace.cpp
-    src/Algorithms/ConvolveWorkspaces.cpp
     src/Algorithms/ConvolutionFit.cpp
+    src/Algorithms/ConvolveWorkspaces.cpp
     src/Algorithms/CrystalFieldEnergies.cpp
     src/Algorithms/EstimateFitParameters.cpp
     src/Algorithms/EstimatePeakErrors.cpp
@@ -17,8 +17,8 @@ set(SRC_FILES
     src/Algorithms/NormaliseByPeakArea.cpp
     src/Algorithms/PawleyFit.cpp
     src/Algorithms/PlotPeakByLogValue.cpp
-    src/Algorithms/QENSFitSimultaneous.cpp
     src/Algorithms/QENSFitSequential.cpp
+    src/Algorithms/QENSFitSimultaneous.cpp
     src/Algorithms/RefinePowderInstrumentParameters.cpp
     src/Algorithms/RefinePowderInstrumentParameters3.cpp
     src/Algorithms/SplineBackground.cpp
@@ -34,6 +34,7 @@ set(SRC_FILES
     src/CostFunctions/CostFuncLeastSquares.cpp
     src/CostFunctions/CostFuncRwp.cpp
     src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
+    src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
     src/FuncMinimizers/BFGS_Minimizer.cpp
     src/FuncMinimizers/DampedGaussNewtonMinimizer.cpp
@@ -62,11 +63,6 @@ set(SRC_FILES
     src/Functions/CrystalElectricField.cpp
     src/Functions/CrystalFieldControl.cpp
     src/Functions/CrystalFieldFunction.cpp
-    src/Functions/CrystalFieldPeaks.cpp
-    src/Functions/CrystalFieldPeaksBase.cpp
-    src/Functions/CrystalFieldMultiSpectrum.cpp
-    src/Functions/CrystalFieldPeakUtils.cpp
-    src/Functions/CrystalFieldSpectrum.cpp
     src/Functions/CrystalFieldHeatCapacity.cpp
     src/Functions/CrystalFieldMagnetisation.cpp
     src/Functions/CrystalFieldMoment.cpp
@@ -155,7 +151,8 @@ set(SRC_FILES
     src/RalNlls/Workspaces.cpp
     src/SeqDomain.cpp
     src/SeqDomainSpectrumCreator.cpp
-    src/SpecialFunctionHelper.cpp)
+    src/SpecialFunctionHelper.cpp
+    src/TableWorkspaceDomainCreator.cpp)
 
 set(SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp)
 
@@ -178,8 +175,8 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
     inc/MantidCurveFitting/Algorithms/PawleyFit.h
     inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
-    inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
     inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
+    inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h
     inc/MantidCurveFitting/Algorithms/SplineBackground.h
@@ -196,6 +193,7 @@ set(INC_FILES
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
     inc/MantidCurveFitting/DllConfig.h
+    inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
     inc/MantidCurveFitting/FortranDefs.h
     inc/MantidCurveFitting/FortranMatrix.h
@@ -318,14 +316,15 @@ set(INC_FILES
     inc/MantidCurveFitting/RalNlls/Workspaces.h
     inc/MantidCurveFitting/SeqDomain.h
     inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
-    inc/MantidCurveFitting/SpecialFunctionSupport.h)
+    inc/MantidCurveFitting/SpecialFunctionSupport.h
+    inc/MantidCurveFitting/TableWorkspaceDomainCreator.h)
 
 set(TEST_FILES
     Algorithms/CalculateChiSquaredTest.h
     Algorithms/CalculateCostFunctionTest.h
     Algorithms/ConvertToYSpaceTest.h
-    Algorithms/ConvolveWorkspacesTest.h
     Algorithms/ConvolutionFitSequentialTest.h
+    Algorithms/ConvolveWorkspacesTest.h
     Algorithms/EstimateFitParametersTest.h
     Algorithms/EstimatePeakErrorsTest.h
     Algorithms/EvaluateFunctionTest.h
@@ -462,7 +461,8 @@ set(TEST_FILES
     MultiDomainFunctionTest.h
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
-    SpecialFunctionSupportTest.h)
+    SpecialFunctionSupportTest.h
+    TableWorkspaceDomainCreatorTest.h)
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})

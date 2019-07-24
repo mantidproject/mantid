@@ -13,6 +13,7 @@
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+#include "MantidCurveFitting/TableWorkspaceDomainCreator.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -39,6 +40,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
                                     IDomainCreator::DomainType domainType) {
 
   IDomainCreator *creator = nullptr;
+  Workspace_sptr ws = manager->getProperty("InputWorkspace");
 
   // ILatticeFunction requires API::LatticeDomain.
   if (dynamic_cast<const ILatticeFunction *>(fun)) {
@@ -50,6 +52,9 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
     creator = new SeqDomainSpectrumCreator(manager, workspacePropertyName);
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
+  } else if (boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+    creator = new TableWorkspaceDomainCreator(manager, workspacePropertyName,
+                                              domainType);
   } else {
     bool histogramFit =
         manager->getPropertyValue("EvaluationType") == "Histogram";

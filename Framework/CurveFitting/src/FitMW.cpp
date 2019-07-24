@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
 #include "MantidCurveFitting/SeqDomain.h"
+#include "MantidCurveFitting/ExcludeRangeFinder.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -39,108 +40,6 @@ using API::MatrixWorkspace;
 using API::Workspace;
 
 namespace {
-
-/// Helper calss that finds if a point should be excluded from fit.
-/// It keeps the boundaries of the relevant exclusion region for
-/// the last checked value. A relevant region is the one which either
-/// includes the value or the nearest one with the left boundary greater
-/// than the value.
-/// The class also keeps the index of the region (its left boundary) for
-/// efficient search.
-class ExcludeRangeFinder {
-  /// Index of current excluded range
-  size_t m_exclIndex;
-  /// Start of current excluded range
-  double m_startExcludedRange;
-  /// End of current excluded range
-  double m_endExcludeRange;
-  /// Reference to a list of exclusion ranges.
-  const std::vector<double> &m_exclude;
-  /// Size of m_exclude.
-  const size_t m_size;
-
-public:
-  /// Constructor.
-  /// @param exclude :: The value of the "Exclude" property.
-  /// @param startX :: The start of the overall fit interval.
-  /// @param endX :: The end of the overall fit interval.
-  ExcludeRangeFinder(const std::vector<double> &exclude, double startX,
-                     double endX)
-      : m_exclIndex(exclude.size()), m_startExcludedRange(),
-        m_endExcludeRange(), m_exclude(exclude), m_size(exclude.size()) {
-    // m_exclIndex is initialised with exclude.size() to be the default when
-    // there are no exclusion ranges defined.
-    if (!m_exclude.empty()) {
-      if (startX < m_exclude.back() && endX > m_exclude.front()) {
-        // In this case there are some ranges, the index starts with 0
-        // and first range is found.
-        m_exclIndex = 0;
-        findNextExcludedRange(startX);
-      }
-    }
-  }
-
-  /// Check if an x-value lies in an exclusion range.
-  /// @param value :: A value to check.
-  /// @returns true if the value lies in an exclusion range and should be
-  /// excluded from fit.
-  bool isExcluded(double value) {
-    if (m_exclIndex < m_size) {
-      if (value < m_startExcludedRange) {
-        // If a value is below the start of the current interval
-        // it is not in any other interval by the workings of
-        // findNextExcludedRange
-        return false;
-      } else if (value <= m_endExcludeRange) {
-        // value is inside
-        return true;
-      } else {
-        // Value is past the current range. Find the next one or set the index
-        // to m_exclude.size() to stop further searches.
-        findNextExcludedRange(value);
-        // The value can find itself inside another range.
-        return isExcluded(value);
-      }
-    }
-    return false;
-  }
-
-private:
-  /// Find the range from m_exclude that may contain points x >= p .
-  /// @param p :: An x value to use in the seach.
-  void findNextExcludedRange(double p) {
-    if (p > m_exclude.back()) {
-      // If the value is past the last point stop any searches or checks.
-      m_exclIndex = m_size;
-      return;
-    }
-    // Starting with the current index m_exclIndex find the first value in
-    // m_exclude that is greater than p. If this point is a start than the
-    // end will be the following point. If it's an end then the start is
-    // the previous point. Keep index m_exclIndex pointing to the start.
-    for (auto it = m_exclude.begin() + m_exclIndex; it != m_exclude.end();
-         ++it) {
-      if (*it >= p) {
-        m_exclIndex = static_cast<size_t>(std::distance(m_exclude.begin(), it));
-        if (m_exclIndex % 2 == 0) {
-          // A number at an even position in m_exclude starts an exclude
-          // range
-          m_startExcludedRange = *it;
-          m_endExcludeRange = *(it + 1);
-        } else {
-          // A number at an odd position in m_exclude ends an exclude range
-          m_startExcludedRange = *(it - 1);
-          m_endExcludeRange = *it;
-          --m_exclIndex;
-        }
-        break;
-      }
-    }
-    // No need for additional checks as p < m_exclude.back()
-    // and m_exclude[m_exclIndex] < p due to conditions at the calls
-    // so the break statement will always be reached.
-  }
-};
 
 /// Helper struct for helping with joining exclusion ranges.
 /// Endge points of the ranges can be wrapped in this struct
