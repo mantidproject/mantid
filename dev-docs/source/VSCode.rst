@@ -100,8 +100,6 @@ attempt to make a useful task for you. However it may be better to use this exam
 The commands can be switched out with the command and various args for the generator
 used to generate your CMake with.
 
-
-
 .. code-block:: javascript
 
     {
@@ -215,7 +213,7 @@ To debug C++ and start directly into the Workbench, add this to the configuratio
           "ignoreFailures": true
         }
       ]
-    },
+    }
 
 
 
