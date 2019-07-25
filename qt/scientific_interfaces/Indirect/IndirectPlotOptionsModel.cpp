@@ -76,8 +76,7 @@ IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectTab *parentTab)
       m_plotter(std::make_unique<IndirectPlotter>(parentTab)) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(
-    std::unique_ptr<IndirectPlotter> plotter)
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectPlotter *plotter)
     : m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
 

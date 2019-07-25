@@ -29,31 +29,31 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
 
 public:
   IndirectPlotOptionsView(QWidget *parent = nullptr);
-  virtual ~IndirectPlotOptionsView() override = default;
+  virtual ~IndirectPlotOptionsView() override;
 
-  void setPlotType(PlotWidget const &plotType);
-  void setWorkspaceComboBoxEnabled(bool enable);
-  void setIndicesLineEditEnabled(bool enable);
-  void setPlotButtonEnabled(bool enable);
+  virtual void setPlotType(PlotWidget const &plotType);
+  virtual void setWorkspaceComboBoxEnabled(bool enable);
+  virtual void setIndicesLineEditEnabled(bool enable);
+  virtual void setPlotButtonEnabled(bool enable);
   void setPlotButtonText(QString const &text);
 
-  void setIndicesRegex(QString const &regex);
+  virtual void setIndicesRegex(QString const &regex);
 
   QString selectedWorkspace() const;
-  void setWorkspaces(std::vector<std::string> const &workspaces);
+  virtual void setWorkspaces(std::vector<std::string> const &workspaces);
 
-  int numberOfWorkspaces() const;
+  virtual int numberOfWorkspaces() const;
 
   void removeWorkspace(QString const &workspaceName);
-  void clearWorkspaces();
+  virtual void clearWorkspaces();
 
   QString selectedIndices() const;
-  void setIndices(QString const &indices);
-  void setIndicesErrorLabelVisible(bool visible);
+  virtual void setIndices(QString const &indices);
+  virtual void setIndicesErrorLabelVisible(bool visible);
 
-  void addIndicesSuggestion(QString const &spectra);
+  virtual void addIndicesSuggestion(QString const &spectra);
 
-  void displayWarning(QString const &message);
+  virtual void displayWarning(QString const &message);
 
 signals:
   void selectedWorkspaceChanged(std::string const &workspaceName);
@@ -62,8 +62,6 @@ signals:
   void plotBinsClicked();
   void plotContourClicked();
   void plotTiledClicked();
-
-  void runAsPythonScript(QString const &code, bool noOutput = false);
 
 private slots:
   void emitSelectedWorkspaceChanged(QString const &workspaceName);

@@ -28,6 +28,11 @@ public:
                                IndirectTab *parent,
                                PlotWidget const &plotType = PlotWidget::Spectra,
                                std::string const &fixedIndices = "");
+  /// Used by the unit tests so that the view and model can be mocked
+  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
+                               IndirectPlotOptionsModel *model,
+                               PlotWidget const &plotType = PlotWidget::Spectra,
+                               std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
 
   void setWorkspaces(std::vector<std::string> const &workspaces);

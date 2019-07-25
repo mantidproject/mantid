@@ -174,6 +174,8 @@ IndirectPlotter::IndirectPlotter(IndirectTab *parent)
     : QObject(nullptr), m_parentTab(parent) {}
 #endif
 
+IndirectPlotter::~IndirectPlotter() {}
+
 /**
  * Produces an external plot of workspace spectra
  *

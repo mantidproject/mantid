@@ -51,6 +51,19 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
   setupPresenter(plotType, fixedIndices);
 }
 
+/// Used by the unit tests so that m_plotter can be mocked
+IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
+    IndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
+    PlotWidget const &plotType, std::string const &fixedIndices)
+    : QObject(nullptr),
+      m_wsRemovedObserver(*this,
+                          &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
+      m_wsReplacedObserver(*this,
+                           &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
+      m_view(std::move(view)), m_model(std::move(model)) {
+  setupPresenter(plotType, fixedIndices);
+}
+
 IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() {
   watchADS(false);
 }
@@ -158,7 +171,6 @@ void IndirectPlotOptionsPresenter::setIndices() {
 void IndirectPlotOptionsPresenter::workspaceChanged(
     std::string const &workspaceName) {
   setWorkspace(workspaceName);
-  indicesChanged(m_view->selectedIndices().toStdString());
 }
 
 void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {

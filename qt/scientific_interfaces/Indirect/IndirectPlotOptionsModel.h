@@ -20,30 +20,31 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel(IndirectTab *parentTab);
+  IndirectPlotOptionsModel(IndirectTab *parentTab = nullptr);
   /// Used by the unit tests so that m_plotter can be mocked
-  IndirectPlotOptionsModel(std::unique_ptr<IndirectPlotter> plotter);
+  IndirectPlotOptionsModel(IndirectPlotter *plotter);
   virtual ~IndirectPlotOptionsModel();
 
-  bool setWorkspace(std::string const &workspaceName);
-  void removeWorkspace();
+  virtual bool setWorkspace(std::string const &workspaceName);
+  virtual void removeWorkspace();
 
   boost::optional<std::string> workspace() const;
 
-  void setFixedIndices(std::string const &indices);
-  bool indicesFixed() const;
+  virtual void setFixedIndices(std::string const &indices);
+  virtual bool indicesFixed() const;
 
-  std::string formatIndices(std::string const &indices) const;
-  bool validateIndices(std::string const &indices,
-                       MantidAxis const &axisType = MantidAxis::Spectrum) const;
-  bool setIndices(std::string const &indices);
+  virtual std::string formatIndices(std::string const &indices) const;
+  virtual bool
+  validateIndices(std::string const &indices,
+                  MantidAxis const &axisType = MantidAxis::Spectrum) const;
+  virtual bool setIndices(std::string const &indices);
 
   boost::optional<std::string> indices() const;
 
-  void plotSpectra();
-  void plotBins();
-  void plotContour();
-  void plotTiled();
+  virtual void plotSpectra();
+  virtual void plotBins();
+  virtual void plotContour();
+  virtual void plotTiled();
 
 private:
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,

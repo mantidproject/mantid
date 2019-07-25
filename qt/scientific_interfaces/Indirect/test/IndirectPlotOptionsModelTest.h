@@ -74,7 +74,6 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class IndirectPlotOptionsModelTest : public CxxTest::TestSuite {
 public:
   IndirectPlotOptionsModelTest() : m_ads(AnalysisDataService::Instance()) {
-    m_parentTab = std::make_unique<ParentTab>();
     m_ads.clear();
   }
 
@@ -87,19 +86,21 @@ public:
   }
 
   void setUp() override {
-    m_model = std::make_unique<IndirectPlotOptionsModel>(m_parentTab.get());
-    m_plotter = std::make_unique<MockIndirectPlotter>();
+    m_plotter = std::make_unique<NiceMock<MockIndirectPlotter>>();
+    m_model =
+        std::make_unique<IndirectPlotOptionsModel>(std::move(m_plotter.get()));
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_plotter.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_plotter));
 
     m_model.reset();
+    m_plotter.release();
     m_ads.clear();
   }
 
   void test_that_the_model_has_been_instantiated() {
-    TS_ASSERT(m_parentTab);
+    TS_ASSERT(m_plotter);
     TS_ASSERT(m_model);
   }
 
@@ -245,23 +246,53 @@ public:
 
   void
   test_that_plotSpectra_will_call_the_plotter_plotSpectra_method_when_a_valid_workspace_and_indices_have_been_set() {
-    //m_model.reset();
-    // m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter);
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+    m_model->setIndices(WORKSPACE_INDICES);
 
-    // m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
-    // m_model->setWorkspace(WORKSPACE_NAME);
-    // m_model->setIndices(WORKSPACE_INDICES);
+    EXPECT_CALL(*m_plotter, plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES))
+        .Times(1);
 
-    // EXPECT_CALL(*m_plotter, plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES))
-    //    .Times(1);
+    m_model->plotSpectra();
+  }
 
-    // m_model->plotSpectra();
+  void
+  test_that_plotBins_will_call_the_plotter_plotBins_method_when_a_valid_workspace_and_bin_indices_have_been_set() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+    m_model->setIndices(WORKSPACE_INDICES);
+
+    EXPECT_CALL(*m_plotter, plotBins(WORKSPACE_NAME, WORKSPACE_INDICES))
+        .Times(1);
+
+    m_model->plotBins();
+  }
+
+  void
+  test_that_plotContour_will_call_the_plotter_plotContour_method_when_a_valid_workspace_has_been_set() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    EXPECT_CALL(*m_plotter, plotContour(WORKSPACE_NAME)).Times(1);
+
+    m_model->plotContour();
+  }
+
+  void
+  test_that_plotTiled_will_call_the_plotter_plotTiled_method_when_a_valid_workspace_and_indices_have_been_set() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+    m_model->setIndices(WORKSPACE_INDICES);
+
+    EXPECT_CALL(*m_plotter, plotTiled(WORKSPACE_NAME, WORKSPACE_INDICES))
+        .Times(1);
+
+    m_model->plotTiled();
   }
 
 private:
   AnalysisDataServiceImpl &m_ads;
 
-  std::unique_ptr<ParentTab> m_parentTab;
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
   std::unique_ptr<MockIndirectPlotter> m_plotter;
 };
