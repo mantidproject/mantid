@@ -7,6 +7,7 @@
 set(
   SRC_FILES
   src/ErrorHandling.cpp
+  src/ExtractWorkspace.cpp
   src/GlobalInterpreterLock.cpp
   src/NDArray.cpp
   src/ReleaseGlobalInterpreterLock.cpp
@@ -28,6 +29,7 @@ set(
   inc/MantidPythonInterface/core/DataServiceExporter.h
   inc/MantidPythonInterface/core/DllConfig.h
   inc/MantidPythonInterface/core/ErrorHandling.h
+  inc/MantidPythonInterface/core/ExtractWorkspace.h
   inc/MantidPythonInterface/core/GlobalInterpreterLock.h
   inc/MantidPythonInterface/core/IsNone.h
   inc/MantidPythonInterface/core/NDArray.h

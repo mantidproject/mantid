@@ -75,14 +75,14 @@ set(SRC_FILES
     src/Registry/TypeRegistry.cpp)
 
 set(INC_FILES
-    ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
-    ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
-    ${HEADER_DIR}/kernel/Registry/PropertyManagerFactory.h
-    ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
-    ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
-    ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
-    ${HEADER_DIR}/kernel/Registry/TypeRegistry.h
-    ${HEADER_DIR}/kernel/Registry/RegisterWorkspacePtrToPython.h)
+    inc/MantidPythonInterface/kernel/Registry/MappingTypeHandler.h
+    inc/MantidPythonInterface/kernel/Registry/PropertyValueHandler.h
+    inc/MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h
+    inc/MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h
+    inc/MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h
+    inc/MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h
+    inc/MantidPythonInterface/kernel/Registry/TypeRegistry.h
+    inc/MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h)
 
 set(PY_FILES __init__.py _aliases.py environment.py funcinspect.py plugins.py)
 
@@ -140,6 +140,8 @@ add_library(PythonKernelModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonKernelModule _kernel)
+
+target_include_directories(PythonKernelModule PUBLIC inc)
 
 # Add the required dependencies
 target_link_libraries(PythonKernelModule

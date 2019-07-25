@@ -8,8 +8,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/IsNone.h"
 

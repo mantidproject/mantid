@@ -95,27 +95,25 @@ set(SRC_FILES
     src/PythonAlgorithm/AlgorithmAdapter.cpp
     src/PythonAlgorithm/DataProcessorAdapter.cpp
     src/CloneMatrixWorkspace.cpp
-    src/ExtractWorkspace.cpp
     src/Exports/AlgorithmFactoryObserverAdapter.cpp
     src/Exports/AnalysisDataServiceObserverAdapter.cpp)
 
 set(INC_FILES
-    ${HEADER_DIR}/api/Algorithms/AlgorithmFactoryObserverAdapter.h
-    ${HEADER_DIR}/api/Algorithms/AlgorithmObserverAdapter.h
-    ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
-    ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
-    ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
-    ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
-    ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
-    ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
-    ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
-    ${HEADER_DIR}/api/BinaryOperations.h
-    ${HEADER_DIR}/api/CloneMatrixWorkspace.h
-    ${HEADER_DIR}/api/ExtractWorkspace.h
-    ${HEADER_DIR}/api/WorkspacePropertyExporter.h
-    ${HEADER_DIR}/api/SpectrumInfoPythonIterator.h
-    ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
-    ${HEADER_DIR}/api/ComponentInfoPythonIterator.h)
+    inc/MantidPythonInterface/api/Algorithms/AlgorithmFactoryObserverAdapter.h
+    inc/MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h
+    inc/MantidPythonInterface/api/Algorithms/RunPythonScript.h
+    inc/MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h
+    inc/MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h
+    inc/MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h
+    inc/MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h
+    inc/MantidPythonInterface/api/PythonAlgorithm/DataProcessorAdapter.h
+    inc/MantidPythonInterface/api/AnalysisDataServiceObserverAdapter.h
+    inc/MantidPythonInterface/api/BinaryOperations.h
+    inc/MantidPythonInterface/api/CloneMatrixWorkspace.h
+    inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
+    inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h
+    inc/MantidPythonInterface/api/DetectorInfoPythonIterator.h
+    inc/MantidPythonInterface/api/ComponentInfoPythonIterator.h)
 
 set(PY_FILES __init__.py _adsimports.py _aliases.py _workspaceops.py)
 
@@ -138,6 +136,8 @@ add_library(PythonAPIModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonAPIModule _api)
+
+target_include_directories(PythonAPIModule PUBLIC inc)
 
 # Add the required dependencies
 target_link_libraries(PythonAPIModule
