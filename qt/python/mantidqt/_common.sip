@@ -799,3 +799,18 @@ public:
     QWidget *getParamWidget(const QString &paramName) const;
     double getParameter(const QString &paramName) const;
 };
+
+// ---------------------------------
+// MantidDesktopServices
+// ---------------------------------
+class MantidDesktopServices {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+%End
+public:
+  static bool openUrl(const QUrl &url);
+  static bool openUrl(const QString &url);
+  static void setUrlHandler(const QString &scheme, QObject *receiver,
+                            const char *method);
+  static void unsetUrlHandler(const QString &scheme);
+};

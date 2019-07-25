@@ -16,9 +16,12 @@ else:
     raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
 
 from qtpy import QtCore, QtGui, QtWidgets  # noqa: E402
-from qtpy.QtCore import Signal # noqa: E402
+from qtpy.QtCore import Signal, QUrl  # noqa: E402
 from qtpy.QtGui import QDesktopServices  # noqa: E402
 from qtpy.QtWidgets import QMessageBox, QTextEdit  # noqa: E402
+from mantidqt.utils.qt import load_ui, import_qt  # noqa: E402
+
+MantidDesktopServices = import_qt('.._common', package='mantidqt.widgets', attr='MantidDesktopServices')
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
@@ -60,6 +63,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
+
+        self.privacy_policy_label.linkActivated.connect(self.launch_privacy_policy)
 
         #  The options on what to do after closing the window (exit/continue)
         self.radioButtonContinue.setChecked(True)  # Set continue to be checked by default
@@ -105,6 +110,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         if not self.free_text_edited:
             self.input_free_text.setPlainText("")
             self.free_text_edited = True
+
+    def launch_privacy_policy(self, link):
+        MantidDesktopServices.openUrl(QUrl(link))
 
     def set_button_status(self):
         if self.input_text == '' and not self.input_name and not self.input_email:
