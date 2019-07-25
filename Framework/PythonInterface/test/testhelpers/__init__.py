@@ -14,8 +14,6 @@ from distutils.version import LooseVersion
 
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
 import mantid  # noqa
-# Add workspace creation namespace
-import WorkspaceCreationHelper
 
 import numpy
 
