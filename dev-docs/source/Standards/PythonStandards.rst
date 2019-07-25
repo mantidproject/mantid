@@ -11,14 +11,24 @@ Style
 - Unless otherwise specified, follow `PEP 8
   <https://www.python.org/dev/peps/pep-0008>`_; this means using
   `snake_case <https://en.wikipedia.org/wiki/Snake_case>`_
-- Use `flake8 <http://flake8.pycqa.org/en/latest>`_ to check
-  for problems in this area. Remember that PEP 8 is only a guide, so
-  respect the style of the surrounding code as a primary goal
+- Use `YAPF <https://github.com/google/yapf>`_ to format Python code
 - Always use four spaces for indentation
 - For docstrings please follow `Docstring Conventions PEP 257
   <https://www.python.org/dev/peps/pep-0257>`_ and document code to
   aid `sphinx
   <https://pythonhosted.org/an_example_pypi_project/sphinx.html#full-code-example>`_
+
+Formatting with YAPF
+--------------------
+
+To ensure that formatting matches across all developers please use YAPF version 0.28.0.
+This may be installed using ``pip install --user yapf==0.28.0``.
+
+YAPF will automatically find the configuration file when executed inside the Mantid source directory.
+To format a given file you may use ``yapf -i path/to/file.py``.
+
+To automatically format any Python files you have changed prior to commiting you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs yapf -i``.
+This will in place format any files with the ``.py`` extension that you have staged.
 
 None checks
 -----------  
