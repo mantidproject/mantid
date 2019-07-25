@@ -85,6 +85,7 @@ const std::string NX_CHAR = "NX_CHAR";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 const std::string ROTATION = "rotation";
 const std::string TRANSLATION = "translation";
+const std::string TRANSFORMATIONS = "transformations";
 const std::string VECTOR = "vector";
 const std::string LOCATION = "location";
 const std::string ORIENTATION = "orientation";
@@ -835,53 +836,6 @@ public:
   }
 
   void
-  test_rotation_of_sample_written_to_file_in_nx_format_when_rotation_is_present() {
-
-    const Quat sampleRotation(30, V3D(1, 0, 0));
-    const Quat sourceRotation(90, V3D(0, 1, 0));
-
-    auto instrument =
-        ComponentCreationHelper::createInstrumentWithSampleAndSourceRotation(
-            Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-            Mantid::Kernel::V3D(0, 0, 10),
-            sampleRotation,  // sample rotation
-            sourceRotation); // source rotation
-    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    auto &compInfo = (*instr.first);
-
-    ScopedFileHandle fileResource(
-        "check_rotation_written_to_nxsample_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    NexusGeometrySave::saveInstrument(instr, destinationFile);
-    HDF5FileTestUtility tester(destinationFile);
-
-    auto pathToparent = "/raw_data_1/";
-    auto fullPathToGroup = pathToparent + compInfo.name(compInfo.sample());
-
-    std::string dataSetName = "orientation";
-    std::string attributeName = "vector";
-
-    double angleInFile =
-        tester.readDoubleFromDataset(dataSetName, fullPathToGroup);
-    std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(
-        attributeName, dataSetName, fullPathToGroup);
-
-    V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
-
-    // Eigen copy of sampleRotation
-    Eigen::Quaterniond sampleRotationCopy =
-        Mantid::Kernel::toQuaterniond(sampleRotation);
-
-    // sample rotation in file as eigen Quaternion
-    Eigen::Quaterniond rotationInFile =
-        Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
-
-    TS_ASSERT(rotationInFile.isApprox(sampleRotationCopy));
-  }
-
-  void
   test_rotation_of_source_written_to_file_in_nexus_format_when_rotation_is_present() {
 
     const Quat sampleRotation(30, V3D(1, 0, 0));
@@ -906,7 +860,7 @@ public:
 
     auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
     auto fullPathToGroup =
-        pathToparent + "/" + compInfo.name(compInfo.source());
+        pathToparent + "/" + compInfo.name(compInfo.source()) + "/" + TRANSFORMATIONS;
 
     std::string dataSetName = "orientation";
     std::string attributeName = "vector";

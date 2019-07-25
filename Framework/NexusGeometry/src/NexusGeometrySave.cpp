@@ -35,12 +35,13 @@ namespace {
 const std::string NX_CLASS = "NX_class";
 const std::string NX_SAMPLE = "NXsample";
 const std::string NX_DETECTOR = "NXdetector";
+const std::string NX_MONITOR = "NXmonitor";
 const std::string NX_OFF_GEOMETRY = "NXoff_geometry";
 const std::string NX_ENTRY = "NXentry";
 const std::string NX_INSTRUMENT = "NXinstrument";
 const std::string NX_CHAR = "NX_CHAR";
 const std::string NX_SOURCE = "NXsource";
-const std::string NX_TRANSFORMATION = "NXtransformation";
+const std::string NX_TRANSFORMATIONS = "NXtransformations";
 
 const std::string SHORT_NAME = "short_name";
 const std::string TRANSFORMATIONS = "transformations";
@@ -56,6 +57,10 @@ const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 
 const std::string DETECTOR_NUMBER = "detector_number";
+
+// this is a duplicate of string DETECTOR_NUMBER, written to the group to
+// handle naming inconsistency. probably temporary.
+const std::string DETECTOR_ID = "detector_id";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 
 const std::string METRES = "m";
@@ -64,6 +69,9 @@ const std::string NAME = "name";
 const std::string UNITS = "units";
 const std::string SHAPE = "shape";
 const std::string VECTOR = "vector";
+
+const double ZERO_PRECISION = 1e-9;
+const double PI = M_PI;
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
@@ -126,25 +134,59 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
+// TODO: DOCUMENTATION. POSSIBLE MOVE TO HELPERS?
+std::vector<double> toStdVector(const V3D &data) {
+
+  std::vector<double> stdVector;
+  stdVector.resize(3);
+
+  for (int i = 0; i < 3; ++i) {
+    stdVector[i] = data[i];
+  }
+  return stdVector;
+}
+
+std::vector<double> toStdVector(const Quat &data) {
+
+  std::vector<double> stdVector;
+  stdVector.resize(4);
+
+  for (int i = 0; i < 4; ++i) {
+    stdVector[i] = data[i];
+  }
+  return stdVector;
+}
+
+std::vector<double> toStdVector(const Eigen::Vector3d &data) {
+
+  std::vector<double> stdVector;
+  stdVector.resize(3);
+
+  for (int i = 0; i < 3; ++i) {
+    stdVector[i] = data[i];
+  }
+  return stdVector;
+}
+
+std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
+
+  std::vector<double> stdVector;
+  stdVector.resize(4);
+
+  // using Eigen Quaterniond storage format (w is stored as last element)
+  stdVector[3] = data.w();
+  for (int i = 0; i < 3; ++i) {
+    stdVector[i] = data.vec()[i];
+  }
+  return stdVector;
+}
+
+// TODO: DOCUMENTATION
 template <typename T>
-bool isApproxZero(const std::vector<T> &data, double &precision) {
+bool isApproxZero(const std::vector<T> &data, const double &precision) {
   return std::all_of(data.begin(), data.end(), [&precision](const T &element) {
     return abs(element) < precision;
   });
-}
-
-std::vector<size_t> findMonitors(const Geometry::DetectorInfo &detInfo,
-                                 const std::vector<int> &detIds) {
-
-  std::vector<size_t> monitors;
-
-  std::for_each(detIds.begin(), detIds.end(),
-                [&monitors, &detInfo](const int ID) {
-                  auto index = detInfo.indexOf(ID);
-                  if (detInfo.isMonitor(index))
-                    monitors.push_back(index);
-                });
-  return monitors;
 }
 
 /*
@@ -211,8 +253,6 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
 
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
-                                const Geometry::DetectorInfo &detInfo,
-                                const std::vector<int> &detectorIDs,
                                 size_t idx) {
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
@@ -236,11 +276,9 @@ inline void writeXYZPixeloffset(H5::Group &grp,
     posz.push_back(offset[2]);
   }
 
-  double zeroPrecision = 1e-9;
-
-  bool xIsZero = isApproxZero(posx, zeroPrecision);
-  bool yIsZero = isApproxZero(posy, zeroPrecision);
-  bool zIsZero = isApproxZero(posz, zeroPrecision);
+  bool xIsZero = isApproxZero(posx, ZERO_PRECISION);
+  bool yIsZero = isApproxZero(posy, ZERO_PRECISION);
+  bool zIsZero = isApproxZero(posz, ZERO_PRECISION);
 
   auto bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
@@ -284,8 +322,8 @@ inline void writeXYZPixeloffset(H5::Group &grp,
  */
 void writeNXDetectorNumber(H5::Group &grp,
                            const Geometry::ComponentInfo &compInfo,
-                           const size_t &idx,
-                           const std::vector<int> &detectorIDs) {
+                           const std::vector<int> &detectorIDs,
+                           const size_t &idx) {
 
   H5::DataSet detectorNumber;
 
@@ -310,6 +348,42 @@ void writeNXDetectorNumber(H5::Group &grp,
   detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
 
+void writeNXMonitorNumber(H5::Group &grp,
+                          const Geometry::ComponentInfo &compInfo,
+                          const std::vector<int> &detectorIDs,
+                          const size_t &idx) {
+
+  H5::DataSet detectorNumber;
+  // this is a duplicate of dataset detectorNumber, written to the group to
+  // handle naming inconsistency. probably temporary.
+  H5::DataSet detector_id;
+
+  std::vector<int> bankDetIDs;
+  std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx);
+  bankDetIDs.reserve(bankDetectors.size());
+
+  for (size_t &index : bankDetectors) {
+    bankDetIDs.push_back(detectorIDs[index]);
+  }
+
+  const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
+
+  int rank = 1;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = nDetectorsInBank;
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+
+  detectorNumber =
+      grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+
+  // this is a duplicate of dataset detectorNumber, written to the group to
+  // handle naming inconsistency. probably temporary.
+  detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
+  detector_id.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+}
+
 /*
  * Function: writeLocation
  * For use with NXdetector group. Writes absolute position of detector bank to
@@ -331,7 +405,6 @@ inline void writeLocation(H5::Group &grp,
                           const Geometry::ComponentInfo &compInfo, size_t idx) {
 
   Eigen::Vector3d position;
-
   double norm;
 
   H5::DataSet location;
@@ -342,7 +415,6 @@ inline void writeLocation(H5::Group &grp,
   H5::Attribute units;
   H5::Attribute transformationType;
   H5::Attribute dependsOn;
-  H5::Attribute nxClass;
 
   H5::StrType strSize;
 
@@ -365,20 +437,9 @@ inline void writeLocation(H5::Group &grp,
 
   location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
 
-  // vector attribute
-  strSize = strTypeOfSize(NX_TRANSFORMATION);
-  nxClass = location.createAttribute(NX_CLASS, strSize, H5SCALAR);
-  nxClass.write(strSize, NX_TRANSFORMATION);
+  // normalised if norm is not approximately zero.
 
-  /*
-   * Convert Eigen::Vector to std::vector buffer to write to attribute 'vector'.
-   * stdNormAxis is the position vector as a std::vector<double>. Normalised if
-   * norm != 0.
-   */
-  auto asize = position.size();
-  std::vector<double> stdNormPos;
-  stdNormPos.resize(asize);
-  Eigen::VectorXd::Map(&stdNormPos[0], asize) = position;
+  std::vector<double> stdNormPos = toStdVector(position);
 
   int arank = 1;
   hsize_t adims[static_cast<hsize_t>(3)];
@@ -438,7 +499,6 @@ inline void writeOrientation(H5::Group &grp,
   H5::Attribute units;
   H5::Attribute transformationType;
   H5::Attribute dependsOn;
-  H5::Attribute nxClass;
 
   H5::StrType strSize;
 
@@ -456,25 +516,13 @@ inline void writeOrientation(H5::Group &grp,
 
   // write absolute rotation in degrees of detector bank to dataset
   rotation = Kernel::toQuaterniond(compInfo.rotation(idx));
-  angle = std::acos(rotation.w()) * (360.0 / M_PI);
+  angle = std::acos(rotation.w()) * (360.0 / PI);
   orientation.write(&angle, H5::PredType::NATIVE_DOUBLE, dspace);
 
-  // NX_class attribute
-  strSize = strTypeOfSize(NX_TRANSFORMATION);
-  nxClass = orientation.createAttribute(NX_CLASS, strSize, H5SCALAR);
-  nxClass.write(strSize, NX_TRANSFORMATION);
-
-  // vector atrribute
+  // normalised if norm is not approximately zero.
   Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
 
-  // Convert Eigen::Vector to std::vector buffer and write to attribute
-  // 'vector'. stdNormAxis is the Axis of rotation as a std::vector<double>.
-  // Normalised if norm
-  // != 0.
-  auto asize = axisOfRotation.size();
-  std::vector<double> stdNormAxis;
-  stdNormAxis.resize(asize);
-  Eigen::VectorXd::Map(&stdNormAxis[0], asize) = axisOfRotation;
+  std::vector<double> stdNormAxis = toStdVector(axisOfRotation);
 
   int arank = 1;
   hsize_t adims[static_cast<hsize_t>(3)];
@@ -500,6 +548,15 @@ inline void writeOrientation(H5::Group &grp,
   strSize = strTypeOfSize(dependency);
   dependsOn = orientation.createAttribute(DEPENDS_ON, strSize, H5SCALAR);
   dependsOn.write(strSize, dependency);
+}
+
+// function to create a simple sub-group that has a nexus class attribute,
+// inside a parent group.
+inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
+                                  const std::string &nexusAttribute) {
+  H5::Group subGroup = parent.createGroup(name);
+  writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
+  return subGroup;
 }
 
 /*
@@ -545,15 +602,8 @@ void saveNXSample(const H5::Group &parentGroup,
   std::string sampleName = compInfo.name(compInfo.sample());
   childGroup = parentGroup.createGroup(sampleName);
 
-  writeLocation(childGroup, compInfo, idx);
-  writeOrientation(childGroup, compInfo, idx);
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
-
-  std::string dependency =
-      forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
-
   writeStrDataset(childGroup, NAME, sampleName);
-  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -569,36 +619,113 @@ void saveNXSample(const H5::Group &parentGroup,
 void saveNXSource(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
 
-  H5::Group childGroup;
-  size_t idx = compInfo.source();
 
+	size_t index = compInfo.source();
+
+	Eigen::Vector3d position =
+      Mantid::Kernel::toVector3d(compInfo.position(index));
+  Eigen::Quaterniond rotation =
+      Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+
+  std::string dependency = ".";
   std::string sourceName = compInfo.name(compInfo.source());
-  childGroup = parentGroup.createGroup(sourceName);
+
+  bool locationIsOrigin =
+      isApproxZero(toStdVector(position), ZERO_PRECISION);
+  bool orientationIsZero =
+      isApproxZero(toStdVector(rotation.vec()), ZERO_PRECISION);
+
+  H5::Group childGroup = parentGroup.createGroup(sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
-  writeLocation(childGroup, compInfo, idx);
-  writeOrientation(childGroup, compInfo, idx);
+  H5::Group transformations =
+      simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  std::string dependency =
-      forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+  // Orientation is the default first dependency in the chain. first check
+  // translation in component is non-zero, and set dependency to location
+  // if true and write location. Then check if orientation in component is
+  // non-zero, replace dependency with orientation if true. If neither
+  // orientation nor location are non-zero, component is self dependent.
+  if (!locationIsOrigin) {
+    dependency =
+        forwardCompatibility::getObjName(transformations) + "/" + TRANSLATION;
+    writeLocation(transformations, compInfo, index);
+  }
+  if (!orientationIsZero) {
+    dependency =
+        forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
+    writeOrientation(transformations, compInfo, index);
+  }
 
   writeStrDataset(childGroup, NAME, sourceName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-
-// TODO: add documentation
+// TODO: add documentation. CHECK IF ANYTHING IS DIFFERENT BETWEEN NXDETECTORS
+// AND NXMONITORS OTHERWISE THIS IS DUPLICATE CODE.
 void saveNXMonitors(const H5::Group &parentGroup,
-                     const Geometry::ComponentInfo &compInfo,
-                     const Geometry::DetectorInfo &detInfo) {
+                    const Geometry::ComponentInfo &compInfo,
+                    const Geometry::DetectorInfo &detInfo) {
 
+  auto detIds = detInfo.detectorIDs();
+
+  std::vector<size_t> monitors;
+  for (const int &ID : detIds) {
+    auto index = detInfo.indexOf(ID);
+    if (detInfo.isMonitor(index)) {
+
+      Eigen::Vector3d position =
+          Mantid::Kernel::toVector3d(compInfo.position(index));
+      Eigen::Quaterniond rotation =
+          Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+
+      std::string dependency = ".";            // dependency initialiser
+      std::string name = compInfo.name(index); // group name
+
+      bool locationIsOrigin =
+          isApproxZero(toStdVector(position), ZERO_PRECISION);
+      bool orientationIsZero =
+          isApproxZero(toStdVector(rotation.vec()), ZERO_PRECISION);
+
+      H5::Group childGroup = parentGroup.createGroup(name);
+      writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
+
+      H5::Group transformations =
+          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+
+      // Orientation is the default first dependency in the chain. first check
+      // translation in component is non-zero, and set dependency to location
+      // if true and write location. Then check if orientation in component is
+      // non-zero, replace dependency with orientation if true. If neither
+      // orientation nor location are non-zero, component is self dependent.
+      if (!locationIsOrigin) {
+        dependency = forwardCompatibility::getObjName(transformations) + "/" +
+                     TRANSLATION;
+        writeLocation(transformations, compInfo, index);
+      }
+      if (!orientationIsZero) {
+        dependency = forwardCompatibility::getObjName(transformations) + "/" +
+                     ORIENTATION;
+        writeOrientation(transformations, compInfo, index);
+      }
+
+      H5::StrType dependencyStrType = strTypeOfSize(dependency);
+      writeXYZPixeloffset(childGroup, compInfo, index);
+      writeNXMonitorNumber(childGroup, compInfo, detIds, index);
+
+      writeStrDataset(childGroup, LOCAL_NAME, name);
+      writeStrDataset(childGroup, DEPENDS_ON, dependency);
+    }
+  }
 }
+
 /*
  * Function: saveNXDetectors
  * For NXinstrument parent (component info root). Produces a set of NXdetctor
- * groups from Component info detector banks, and saves it in the parent group,
- * along with the Nexus compliant datasets, and metadata stored in attributes to
- * the new group. Dependency chain is orientation => location => '.'.
+ * groups from Component info detector banks, and saves it in the parent
+ * group, along with the Nexus compliant datasets, and metadata stored in
+ * attributes to the new group. Dependency chain is orientation => location =>
+ * '.'.
  *
  * @param parentGroup : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
@@ -608,38 +735,52 @@ void saveNXDetectors(const H5::Group &parentGroup,
                      const Geometry::ComponentInfo &compInfo,
                      const Geometry::DetectorInfo &detInfo) {
 
-  const auto detectorIDs = detInfo.detectorIDs();
-  auto monitors = findMonitors(detInfo, detectorIDs);
+  const auto detIds = detInfo.detectorIDs();
+  for (size_t index = compInfo.root() - 1; index > 0; --index) {
 
-  for (size_t i = compInfo.root() - 1; i > 0; --i) {
+    if (Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, index)) {
 
-    if (Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
+      Eigen::Vector3d position =
+          Mantid::Kernel::toVector3d(compInfo.position(index));
+      Eigen::Quaterniond rotation =
+          Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
-      // group name
-      std::string name = compInfo.name(i);
+      std::string dependency = ".";            // dependency initialiser
+      std::string name = compInfo.name(index); // group name
+
+      bool locationIsOrigin =
+          isApproxZero(toStdVector(position), ZERO_PRECISION);
+      bool orientationIsZero =
+          isApproxZero(toStdVector(rotation.vec()), ZERO_PRECISION);
 
       H5::Group childGroup = parentGroup.createGroup(name);
       writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
-      std::string localNameStr = compInfo.name(i);
-      H5::StrType localNameStrType = strTypeOfSize(localNameStr);
+      H5::Group transformations =
+          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-      std::string dependency =
-          forwardCompatibility::getObjName(childGroup) + "/" + ORIENTATION;
+      // Orientation is the default first dependency in the chain. first check
+      // translation in component is non-zero, and set dependency to location
+      // if true and write location. Then check if orientation in component is
+      // non-zero, replace dependency with orientation if true. If neither
+      // orientation nor location are non-zero, component is self dependent.
+      if (!locationIsOrigin) {
+        dependency = forwardCompatibility::getObjName(transformations) + "/" +
+                     TRANSLATION;
+        writeLocation(transformations, compInfo, index);
+      }
+      if (!orientationIsZero) {
+        dependency = forwardCompatibility::getObjName(transformations) + "/" +
+                     ORIENTATION;
+        writeOrientation(transformations, compInfo, index);
+      }
+
       H5::StrType dependencyStrType = strTypeOfSize(dependency);
+      writeXYZPixeloffset(childGroup, compInfo, index);
+      writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 
-      writeNXDetectorNumber(childGroup, compInfo, i, detectorIDs);
-      writeLocation(childGroup, compInfo, i);
-      writeOrientation(childGroup, compInfo, i);
-      writeXYZPixeloffset(childGroup, compInfo, detInfo, detectorIDs, i);
-
-      // local_name set to bank name
-      H5::DataSet localName =
-          childGroup.createDataSet(LOCAL_NAME, localNameStrType, H5SCALAR);
-      localName.write(localNameStr, localNameStrType, H5SCALAR);
-      H5::DataSet dependsOn =
-          childGroup.createDataSet(DEPENDS_ON, dependencyStrType, H5SCALAR);
-      dependsOn.write(dependency, dependencyStrType, H5SCALAR);
+      writeStrDataset(childGroup, LOCAL_NAME, name);
+      writeStrDataset(childGroup, DEPENDS_ON, dependency);
     }
   }
 }
@@ -704,6 +845,9 @@ void saveInstrument(
 
   // NXdetectors
   NexusGeometrySave::saveNXDetectors(instrument, compInfo, detInfo);
+
+  // NXmonitors
+  NexusGeometrySave::saveNXMonitors(instrument, compInfo, detInfo);
 
   // NXsource
   NexusGeometrySave::saveNXSource(instrument, compInfo);
