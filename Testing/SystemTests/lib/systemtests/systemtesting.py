@@ -805,19 +805,22 @@ class TestManager(object):
     def generateMasterTestList(self):
 
         # If given option is a directory
-        if os.path.isdir(self._testDir) == True:
+        if os.path.isdir(self._testDir):
             test_dir = os.path.abspath(self._testDir).replace('\\', '/')
             sys.path.append(test_dir)
             self._runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)
+            all_loaded, full_test_list = self.loadTestsFromDir(test_dir)
         else:
-            if os.path.exists(self._testDir) == False:
+            if not os.path.exists(self._testDir):
                 print('Cannot find file ' + self._testDir + '.py. Please check the path.')
                 exit(2)
             test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\', '/')
             sys.path.append(test_dir)
             self._runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+
+        if not all_loaded:
+            sys.exit("\nUnable to load all test modules. Cannot continue.")
 
         # Gather statistics on full test list
         test_stats = [0, 0, 0]
@@ -977,12 +980,14 @@ class TestManager(object):
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
         entries = os.listdir(test_dir)
-        tests = []
-        regex = re.compile('^.*\.py$', re.IGNORECASE)
-        for file in entries:
-            if regex.match(file) != None:
-                tests.extend(self.loadTestsFromModule(os.path.join(test_dir, file)))
-        return tests
+        loaded, tests = [], []
+        for filepath in entries:
+            if filepath.endswith('.py'):
+                module_loaded, module_tests = self.loadTestsFromModule(os.path.join(test_dir, filepath))
+                loaded.append(module_loaded)
+                tests.extend(module_tests)
+
+        return all(loaded), tests
 
     def loadTestsFromModule(self, filename):
         '''
@@ -992,6 +997,7 @@ class TestManager(object):
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
         tests = []
+        module_loaded = False
         try:
             with open(filename, 'r') as pyfile:
                 mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
@@ -1003,14 +1009,16 @@ class TestManager(object):
                     if self.isValidTestClass(value):
                         test_name = key
                         tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            module_loaded = True
         except Exception as exc:
-            print("Error importing module '%s': %s" % (modname, str(exc)))
-            # Error loading the source, add fake unnamed test so that an error
-            # will get generated when the tests are run and it will be counted properly
-            tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
+            print("Error importing module '{}':".format(modname))
+            import traceback
+            traceback.print_exc()
+            module_loaded = False
         finally:
             pyfile.close()
-        return tests
+
+        return module_loaded, tests
 
     def isValidTestClass(self, class_obj):
         """Returns true if the test is a valid test class. It is valid
