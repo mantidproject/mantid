@@ -89,6 +89,9 @@ void IndirectPlotOptionsView::setupView() {
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
           SLOT(emitSelectedIndicesChanged(QString const &)));
 
+  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this,
+          SLOT(emitPlotSpectraClicked()));
+
   setIndicesErrorLabelVisible(false);
 
   // Setup the spectra auto-completer
@@ -149,17 +152,20 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType) {
 
   switch (plotType) {
   case PlotWidget::Spectra:
-    plotMenu->addAction(plotSpectraAction);
+    m_plotOptions->tbPlot->setVisible(false);
     break;
   case PlotWidget::SpectraBin:
+    m_plotOptions->pbPlotSpectra->setVisible(false);
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotBinAction);
     break;
   case PlotWidget::SpectraContour:
+    m_plotOptions->pbPlotSpectra->setVisible(false);
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotContourAction);
     break;
   case PlotWidget::SpectraTiled:
+    m_plotOptions->pbPlotSpectra->setVisible(false);
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotTiledAction);
     break;
@@ -182,10 +188,12 @@ void IndirectPlotOptionsView::setIndicesLineEditEnabled(bool enable) {
 }
 
 void IndirectPlotOptionsView::setPlotButtonEnabled(bool enable) {
+  m_plotOptions->pbPlotSpectra->setEnabled(enable);
   m_plotOptions->tbPlot->setEnabled(enable);
 }
 
 void IndirectPlotOptionsView::setPlotButtonText(QString const &text) {
+  m_plotOptions->pbPlotSpectra->setText(text);
   m_plotOptions->tbPlot->setText(text);
 }
 
