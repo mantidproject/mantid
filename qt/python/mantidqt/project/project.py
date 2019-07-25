@@ -114,7 +114,7 @@ class Project(AnalysisDataServiceObserver):
         result = None
         if project_size > warning_size:
             result = self._offer_large_size_confirmation()
-        if isinstance(result, None) or result != QMessageBox.Cancel:
+        if result is None or result != QMessageBox.Cancel:
             plots_to_save = self.plot_gfm.figs
             interfaces_to_save = self.interface_populating_function()
             project_saver = ProjectSaver(self.project_file_ext)
