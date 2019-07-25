@@ -57,9 +57,6 @@ const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 
 const std::string DETECTOR_NUMBER = "detector_number";
-
-// this is a duplicate of string DETECTOR_NUMBER, written to the group to
-// handle naming inconsistency. probably temporary.
 const std::string DETECTOR_ID = "detector_id";
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 
@@ -353,9 +350,6 @@ void writeNXMonitorNumber(H5::Group &grp,
                           const std::vector<int> &detectorIDs,
                           const size_t &idx) {
 
-  H5::DataSet detectorNumber;
-  // this is a duplicate of dataset detectorNumber, written to the group to
-  // handle naming inconsistency. probably temporary.
   H5::DataSet detector_id;
 
   std::vector<int> bankDetIDs;
@@ -374,12 +368,6 @@ void writeNXMonitorNumber(H5::Group &grp,
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-  detectorNumber =
-      grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
-
-  // this is a duplicate of dataset detectorNumber, written to the group to
-  // handle naming inconsistency. probably temporary.
   detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
   detector_id.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
@@ -619,10 +607,9 @@ void saveNXSample(const H5::Group &parentGroup,
 void saveNXSource(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
 
+  size_t index = compInfo.source();
 
-	size_t index = compInfo.source();
-
-	Eigen::Vector3d position =
+  Eigen::Vector3d position =
       Mantid::Kernel::toVector3d(compInfo.position(index));
   Eigen::Quaterniond rotation =
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
@@ -630,8 +617,7 @@ void saveNXSource(const H5::Group &parentGroup,
   std::string dependency = ".";
   std::string sourceName = compInfo.name(compInfo.source());
 
-  bool locationIsOrigin =
-      isApproxZero(toStdVector(position), ZERO_PRECISION);
+  bool locationIsOrigin = isApproxZero(toStdVector(position), ZERO_PRECISION);
   bool orientationIsZero =
       isApproxZero(toStdVector(rotation.vec()), ZERO_PRECISION);
 
@@ -648,7 +634,7 @@ void saveNXSource(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + TRANSLATION;
+        forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
@@ -699,8 +685,8 @@ void saveNXMonitors(const H5::Group &parentGroup,
       // non-zero, replace dependency with orientation if true. If neither
       // orientation nor location are non-zero, component is self dependent.
       if (!locationIsOrigin) {
-        dependency = forwardCompatibility::getObjName(transformations) + "/" +
-                     TRANSLATION;
+        dependency =
+            forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
         writeLocation(transformations, compInfo, index);
       }
       if (!orientationIsZero) {
@@ -765,8 +751,8 @@ void saveNXDetectors(const H5::Group &parentGroup,
       // non-zero, replace dependency with orientation if true. If neither
       // orientation nor location are non-zero, component is self dependent.
       if (!locationIsOrigin) {
-        dependency = forwardCompatibility::getObjName(transformations) + "/" +
-                     TRANSLATION;
+        dependency =
+            forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
         writeLocation(transformations, compInfo, index);
       }
       if (!orientationIsZero) {

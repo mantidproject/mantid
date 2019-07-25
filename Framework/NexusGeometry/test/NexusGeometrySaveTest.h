@@ -79,7 +79,7 @@ const std::string NX_SOURCE = "NXsource";
 const std::string NX_SAMPLE = "NXsample";
 const std::string SHAPE = "shape";
 
-const std::string NX_TRANSFORMATION = "NXtransformation";
+const std::string NX_TRANSFORMATIONS = "NXtransformations";
 const std::string NX_CHAR = "NX_CHAR";
 
 const std::string TRANSFORMATION_TYPE = "transformation_type";
@@ -89,6 +89,8 @@ const std::string TRANSFORMATIONS = "transformations";
 const std::string VECTOR = "vector";
 const std::string LOCATION = "location";
 const std::string ORIENTATION = "orientation";
+const std::string UNITS = "units";
+const std::string METRES = "m";
 const std::string NAME = "name";
 const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
@@ -671,59 +673,21 @@ public:
 
       if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
 
-        auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-        auto bankGroupName = compInfo.name(i);
-        auto fullPath = pathToparent + "/" + bankGroupName;
-        hasNXTransformation =
-            tester.hasDatasetWithNXAttribute(fullPath, NX_TRANSFORMATION);
+        auto fullPathToGroup = "/raw_data_1/" + compInfo.name(compInfo.root()) +
+                               "/" + compInfo.name(i) + "/" + TRANSFORMATIONS;
+        hasNXTransformation = tester.hasAttributeInGroup(
+            fullPathToGroup, NX_CLASS, NX_TRANSFORMATIONS);
 
         // assert all test banks have Nxtransformations
         TS_ASSERT(hasNXTransformation);
 
-        hasTranslation = tester.hasDatasetWithAttribute(fullPath, TRANSLATION,
-                                                        TRANSFORMATION_TYPE);
+        hasTranslation = tester.hasDataset(fullPathToGroup, LOCATION);
 
-        hasRotation = tester.hasDatasetWithAttribute(fullPath, ROTATION,
-                                                     TRANSFORMATION_TYPE);
+        hasRotation = tester.hasDataset(fullPathToGroup, ORIENTATION);
 
         TS_ASSERT((hasRotation || hasTranslation));
       }
     }
-  }
-
-  void
-  test_when_nx_sample_group_has_nx_transformation_attribute_transformation_type_is_specified() {
-
-    ScopedFileHandle fileResource(
-        "check_nxsample_group_has_transformation_type_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    // saveinstrument
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile);
-    auto &compInfo = (*m_instrument.first);
-
-    bool hasNXTransformation;
-    bool hasRotation;
-    bool hasTranslation;
-
-    HDF5FileTestUtility tester(destinationFile);
-
-    auto pathToparent = "/raw_data_1/";
-    auto fullPathToGroup = pathToparent + compInfo.name(compInfo.sample());
-
-    hasNXTransformation =
-        tester.hasDatasetWithNXAttribute(fullPathToGroup, NX_TRANSFORMATION);
-
-    // assert the test sample has Nxtransformation.
-    TS_ASSERT(hasNXTransformation);
-
-    hasTranslation = tester.hasDatasetWithAttribute(
-        fullPathToGroup, TRANSLATION, TRANSFORMATION_TYPE);
-
-    hasRotation = tester.hasDatasetWithAttribute(fullPathToGroup, ROTATION,
-                                                 TRANSFORMATION_TYPE);
-
-    TS_ASSERT((hasRotation || hasTranslation));
   }
 
   void
@@ -745,19 +709,17 @@ public:
 
     auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
     auto sourceName = compInfo.name(compInfo.source());
-    auto fullPath = pathToparent + "/" + sourceName;
+    auto fullPath = pathToparent + "/" + sourceName + "/" + TRANSFORMATIONS;
 
     hasNXTransformation =
-        tester.hasDatasetWithNXAttribute(fullPath, NX_TRANSFORMATION);
+        tester.hasAttributeInGroup(fullPath, NX_CLASS, NX_TRANSFORMATIONS);
 
     // assert the test source has Nxtransformation.
     TS_ASSERT(hasNXTransformation);
 
-    hasTranslation = tester.hasDatasetWithAttribute(fullPath, TRANSLATION,
-                                                    TRANSFORMATION_TYPE);
+    hasTranslation = tester.hasDataset(fullPath, LOCATION);
 
-    hasRotation =
-        tester.hasDatasetWithAttribute(fullPath, ROTATION, TRANSFORMATION_TYPE);
+    hasRotation = tester.hasDataset(fullPath, ORIENTATION);
 
     TS_ASSERT((hasRotation || hasTranslation));
   }
@@ -859,8 +821,9 @@ public:
     HDF5FileTestUtility tester(destinationFile);
 
     auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-    auto fullPathToGroup =
-        pathToparent + "/" + compInfo.name(compInfo.source()) + "/" + TRANSFORMATIONS;
+    auto fullPathToGroup = pathToparent + "/" +
+                           compInfo.name(compInfo.source()) + "/" +
+                           TRANSFORMATIONS;
 
     std::string dataSetName = "orientation";
     std::string attributeName = "vector";
@@ -996,6 +959,15 @@ public:
             Eigen::Quaterniond detRot2 =
                 Mantid::Kernel::toQuaterniond(detInfo2.rotation(index));
 
+            auto offset1 =
+                Mantid::Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+                    compInfo, idx1, index);
+
+            auto offset2 =
+                Mantid::Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+                    compInfo2, idx2, index);
+
+            TS_ASSERT(offset1.isApprox(offset2))  // assert det offsets equal
             TS_ASSERT(detPos1.isApprox(detPos2)); // assert det positions equal
             TS_ASSERT(detRot1.isApprox(detRot2)); // assert det rotations equal
           }
@@ -1034,9 +1006,6 @@ public:
 
     auto instr =
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*reloadedInstrument);
-    auto &compInfo = (*instr.first);
-    auto &detInfo = (*instr.second);
-
     NexusGeometrySave::saveInstrument(instr, destinationFile);
   }
 };
