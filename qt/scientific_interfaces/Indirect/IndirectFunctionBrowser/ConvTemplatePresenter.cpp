@@ -26,9 +26,14 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this, SLOT(viewChangedParameterValue(const QString &, double)));
 }
 
-void ConvTemplatePresenter::setFitType(const QString &fitType) {
-  m_model.setFitType(fitType);
-
+void ConvTemplatePresenter::setSubType(size_t subTypeIndex,
+                                            int typeIndex) {
+  if (subTypeIndex == 0) {
+    m_model.setFitType(static_cast<FitType>(typeIndex));
+  } else {
+    m_model.setBackground(static_cast<BackgroundType>(typeIndex));
+  }
+  m_view->setSubType(subTypeIndex, typeIndex);
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
@@ -44,23 +49,6 @@ void ConvTemplatePresenter::setStretchExponential(bool on)
   //  m_view->removeStretchExponential();
   //}
   //m_model.setStretchExponential(on);
-  //setErrorsEnabled(false);
-  //updateViewParameterNames();
-  //updateViewParameters();
-  //emit functionStructureChanged();
-}
-
-void ConvTemplatePresenter::setBackground(const QString & name)
-{
-  //if (name == "None") {
-  //  m_view->removeBackground();
-  //  m_model.removeBackground();
-  //} else if (name == "FlatBackground") {
-  //  m_view->addFlatBackground();
-  //  m_model.setBackground(name);
-  //} else {
-  //  throw std::logic_error("Browser doesn't support background " + name.toStdString());
-  //}
   //setErrorsEnabled(false);
   //updateViewParameterNames();
   //updateViewParameters();
@@ -168,11 +156,6 @@ void ConvTemplatePresenter::setCurrentDataset(int i)
 void ConvTemplatePresenter::setDatasetNames(const QStringList & names)
 {
   m_model.setDatasetNames(names);
-}
-
-void ConvTemplatePresenter::setViewParameterDescriptions()
-{
-  m_view->updateParameterDescriptions(m_model.getParameterDescriptionMap());
 }
 
 void ConvTemplatePresenter::setErrorsEnabled(bool enabled)

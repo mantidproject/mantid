@@ -529,15 +529,15 @@ std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
 }
 
 void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) {
-  auto const composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
-  m_backgroundIndex = getFirstInCategory(composite, "Background");
-  setParameterNameChanges(*function, m_backgroundIndex);
+  //auto const composite =
+  //    boost::dynamic_pointer_cast<CompositeFunction>(function);
+  //m_backgroundIndex = getFirstInCategory(composite, "Background");
+  //setParameterNameChanges(*function, m_backgroundIndex);
 
-  IFunction_sptr background(nullptr);
-  if (composite && m_backgroundIndex)
-    background = composite->getFunction(*m_backgroundIndex);
-  m_backgroundString = background ? backgroundString(background) : "";
+  //IFunction_sptr background(nullptr);
+  //if (composite && m_backgroundIndex)
+  //  background = composite->getFunction(*m_backgroundIndex);
+  //m_backgroundString = background ? backgroundString(background) : "";
 
   IndirectFittingModel::setFitFunction(function);
 }

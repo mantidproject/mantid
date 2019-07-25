@@ -58,8 +58,6 @@ public:
   virtual void setCurrentDataset(int i) = 0;
   virtual void
   updateParameterNames(const QMap<int, QString> &parameterNames) = 0;
-  virtual void
-  updateParameterDescriptions(const QMap<int, std::string> &parameterNames) = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clear() = 0;
   virtual void updateParameterEstimationData(

@@ -45,7 +45,6 @@ public:
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
-  void updateParameterDescriptions(const QMap<int, std::string> &parameterNames) override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
   void updateParameterEstimationData(
@@ -66,17 +65,17 @@ private:
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
+  void setSubType(size_t subTypeIndex, int typeIndex);
 
-  QStringList m_fitTypeNames;
-  QtProperty *m_fitType;
+  std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
   // Map fit type to a list of function parameters (QtProperties for those parameters)
-  QMap<QString, QList<QtProperty*>> m_peakParameters;
-  QtProperty *m_deltaFunctionOn;
-  QList<QtProperty *> m_deltaFunction;
-  QtProperty *m_backgroundType;
-  QList<QtProperty *> m_background;
+  std::vector<QMap<int, QList<QtProperty *>>> m_subTypeParameters;
+  std::vector<QList<QtProperty *>> m_currentSubTypeParameters;
+  std::vector<QtProperty *> m_subTypeProperties;
 
-  QMap<QtProperty*, int> m_parameterMap;
+  QtProperty *m_deltaFunctionOn;
+
+  QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<QtProperty*, QString> m_actualParameterNames;
   QMap<QtProperty*, std::string> m_parameterDescriptions;
 

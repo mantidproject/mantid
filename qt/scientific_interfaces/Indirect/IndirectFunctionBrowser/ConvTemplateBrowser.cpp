@@ -42,6 +42,8 @@ public:
 
 ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent)
     : FunctionTemplateBrowser(parent), m_presenter(this) {
+  m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
+  m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this,
           SIGNAL(functionStructureChanged()));
 }
@@ -51,18 +53,7 @@ void ConvTemplateBrowser::createProperties() {
   m_boolManager->blockSignals(true);
   m_enumManager->blockSignals(true);
 
-  m_fitType = m_enumManager->addProperty("Fit Type");
-  m_fitTypeNames = getFitTypes();
-  m_enumManager->setEnumNames(m_fitType, m_fitTypeNames);
-  m_browser->addProperty(m_fitType);
-
-  m_backgroundType = m_enumManager->addProperty("Background");
-  QStringList backgrounds;
-  backgrounds << "None"
-              << "FlatBackground"
-              << "LinearBackground";
-  m_enumManager->setEnumNames(m_backgroundType, backgrounds);
-  m_browser->addProperty(m_backgroundType);
+  createFunctionParameterProperties();
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
@@ -114,14 +105,13 @@ void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
 }
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
-  if (prop == m_fitType) {
-    auto const index = m_enumManager->value(prop);
-    m_presenter.setFitType(m_fitTypeNames[index]);
-  }
-  if (prop == m_backgroundType) {
-    auto background =
-        m_enumManager->enumNames(prop)[m_enumManager->value(prop)];
-    m_presenter.setBackground(background);
+  auto const index = m_enumManager->value(prop);
+  auto propIt =
+      std::find(m_subTypeProperties.begin(), m_subTypeProperties.end(), prop);
+  if (propIt != m_subTypeProperties.end()) {
+    auto const subTypeIndex =
+        std::distance(m_subTypeProperties.begin(), propIt);
+    m_presenter.setSubType(subTypeIndex, index);
   }
 }
 
@@ -163,23 +153,14 @@ void ConvTemplateBrowser::setCurrentDataset(int i) {
 void ConvTemplateBrowser::updateParameterNames(
     const QMap<int, QString> &parameterNames) {
   m_actualParameterNames.clear();
-  ScopedFalse _(m_emitParameterValueChange);
+  ScopedFalse _false(m_emitParameterValueChange);
   for (auto const prop : m_parameterMap.keys()) {
     auto const i = m_parameterMap[prop];
-    auto const name = parameterNames[i];
+    auto const name = parameterNames[static_cast<int>(i)];
     m_actualParameterNames[prop] = name;
     if (!name.isEmpty()) {
       prop->setPropertyName(name);
     }
-  }
-}
-
-void ConvTemplateBrowser::updateParameterDescriptions(
-    const QMap<int, std::string> &parameterDescriptions) {
-  m_parameterDescriptions.clear();
-  for (auto const prop : m_parameterMap.keys()) {
-    auto const i = m_parameterMap[prop];
-    m_parameterDescriptions[prop] = parameterDescriptions[i];
   }
 }
 
@@ -226,22 +207,46 @@ void ConvTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
 }
 
 void ConvTemplateBrowser::createFunctionParameterProperties() {
-  for(auto const fitType: m_fitTypeNames) {
-    QStringList names;
-    QStringList descriptions;
-    QList<int> ids;
-    fillParameterLists(fitType, names, descriptions, ids);
+  m_subTypeParameters.resize(m_templateSubTypes.size());
+  m_currentSubTypeParameters.resize(m_templateSubTypes.size());
+  for (size_t isub = 0; isub < m_templateSubTypes.size(); ++isub) {
+    auto const &subType = m_templateSubTypes[isub];
+    auto &parameters = m_subTypeParameters[isub];
+    for (int index = 0; index < subType->getNTypes(); ++index) {
+      auto const paramIDs = subType->getParameterIDs(index);
+      auto const names = subType->getParameterNames(index);
+      auto const descriptions = subType->getParameterDescriptions(index);
+      QList<QtProperty *> props;
+      auto const np = names.size();
+      for (int i = 0; i < np; ++i) {
+        auto prop = m_parameterManager->addProperty(names[i]);
+        m_parameterManager->setDescription(prop, descriptions[i]);
+        m_parameterManager->setDecimals(prop, 6);
+        props << prop;
+        m_parameterMap[prop] = paramIDs[i];
+      }
+      parameters[index] = props;
+    }
+    auto subTypeProp = m_enumManager->addProperty(subType->name());
+    m_enumManager->setEnumNames(subTypeProp,
+                                m_templateSubTypes[isub]->getTypeNames());
+    m_browser->addProperty(subTypeProp);
+    m_subTypeProperties.push_back(subTypeProp);
   }
+}
 
-  //QList<QtProperty *> props;
-  //auto const fun =
-  //    FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  //auto const np = fun->nParams();
-  //for (size_t i = 0; i < np; ++i) {
-  //  auto prop = m_parameterManager->addProperty(QString::fromStdString(fun->parameterName(i)));
-  //  m_parameterManager->setDecimals(prop, 6);
-  //}
-  //return props;
+void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {
+  auto subTypeProp = m_subTypeProperties[subTypeIndex];
+  auto &currentParameters = m_currentSubTypeParameters[subTypeIndex];
+  for (auto &&prop : currentParameters) {
+    subTypeProp->removeSubProperty(prop);
+  }
+  currentParameters.clear();
+  auto &subTypeParameters = m_subTypeParameters[subTypeIndex];
+  for (auto &&prop : subTypeParameters[typeIndex]) {
+    subTypeProp->addSubProperty(prop);
+    currentParameters.append(prop);
+  }
 }
 
 void ConvTemplateBrowser::

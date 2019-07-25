@@ -22,8 +22,10 @@ namespace IDA {
 namespace ConvTypes {
 
 enum class FitType { None, OneLorentzian, TwoLorentzians };
+enum class BackgroundType { None, Flat, Linear };
 
 enum class ParamID {
+  NONE,
   LOR1_AMPLITUDE,
   LOR1_PEAKCENTRE,
   LOR1_FWHM,
@@ -34,11 +36,43 @@ enum class ParamID {
   BG_A1
 };
 
-QStringList getFitTypes();
-FitType fitTypeId(const QString &fitType);
 QString paramName(ParamID id);
-QStringList getParameterNames(FitType fitType);
 
+struct TemplateSubType {
+  virtual QString name() const = 0;
+  virtual QStringList getTypeNames() const = 0;
+  virtual int getTypeIndex(const QString &typeName) const = 0;
+  virtual int getNTypes() const = 0;
+  virtual QList<ParamID> getParameterIDs(int typeIndex) const = 0;
+  virtual QStringList getParameterNames(int typeIndex) const = 0;
+  virtual QList<std::string> getParameterDescriptions(int typeIndex) const = 0;
+};
+
+struct FitSubType : public TemplateSubType {
+  QString name() const override { return "Fit Type"; }
+  QStringList getTypeNames() const override;
+  int getTypeIndex(const QString &typeName) const override;
+  int getNTypes() const override;
+  QList<ParamID> getParameterIDs(int typeIndex) const override;
+  QStringList getParameterNames(int typeIndex) const override;
+  QList<std::string> getParameterDescriptions(int typeIndex) const override;
+};
+
+struct BackgroundSubType : public TemplateSubType {
+  QString name() const override { return "Background"; }
+  QStringList getTypeNames() const override;
+  int getTypeIndex(const QString &typeName) const override;
+  int getNTypes() const override;
+  QList<ParamID> getParameterIDs(int typeIndex) const override;
+  QStringList getParameterNames(int typeIndex) const override;
+  QList<std::string> getParameterDescriptions(int typeIndex) const override;
+  std::string getFunctionName(BackgroundType bgType) const;
+};
+
+void applyToFitType(
+    FitType fitType, std::function<void(ParamID)> paramFun);
+void applyToBackground(
+    BackgroundType bgType, std::function<void(ParamID)> paramFun);
 
 } // namespace ConvTypes
 } // namespace IDA

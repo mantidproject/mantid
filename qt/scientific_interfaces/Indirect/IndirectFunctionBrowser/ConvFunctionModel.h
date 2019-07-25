@@ -78,10 +78,10 @@ public:
 
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
 
-  void setFitType(const QString &fitType);
+  void setFitType(FitType fitType);
   void setDeltaFunction(bool);
   bool hasDeltaFunction() const;
-  void setBackground(const QString &name);
+  void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
   void
@@ -90,7 +90,6 @@ public:
   QMap<ParamID, double> getCurrentValues() const;
   QMap<ParamID, double> getCurrentErrors() const;
   QMap<int, QString> getParameterNameMap() const;
-  QMap<int, std::string> getParameterDescriptionMap() const;
 
 private:
   void clearData();
@@ -114,15 +113,16 @@ private:
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
-  void setFitType(FitType fitType);
   int getNumberOfPeaks() const;
 
   MultiDomainFunctionModel m_model;
   FitType m_fitType;
-  QString m_background;
-  bool m_hasDeltaFunction;
+  std::string m_background;
+  bool m_hasDeltaFunction = false;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
+  FitSubType m_fitSubType;
+  BackgroundSubType m_backgroundSubtype;
 };
 
 } // namespace IDA
