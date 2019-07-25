@@ -65,6 +65,7 @@ public:
   void notifySettingsChanged() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
+  void reductionPaused() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -85,7 +86,6 @@ private:
   void resumeReduction();
   void reductionResumed();
   void pauseReduction();
-  void reductionPaused();
   void resumeAutoreduction();
   void autoreductionResumed();
   void pauseAutoreduction();
