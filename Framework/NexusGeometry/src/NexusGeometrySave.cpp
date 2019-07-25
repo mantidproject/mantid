@@ -21,7 +21,9 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include <H5Cpp.h>
+#include <algorithm>
 #include <boost/filesystem/operations.hpp>
+#include <cmath>
 #include <memory> // unique_ptr
 #include <string>
 
@@ -124,6 +126,27 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
+template <typename T>
+bool isApproxZero(const std::vector<T> &data, double &precision) {
+  return std::all_of(data.begin(), data.end(), [&precision](const T &element) {
+    return abs(element) < precision;
+  });
+}
+
+std::vector<size_t> findMonitors(const Geometry::DetectorInfo &detInfo,
+                                 const std::vector<int> &detIds) {
+
+  std::vector<size_t> monitors;
+
+  std::for_each(detIds.begin(), detIds.end(),
+                [&monitors, &detInfo](const int ID) {
+                  auto index = detInfo.indexOf(ID);
+                  if (detInfo.isMonitor(index))
+                    monitors.push_back(index);
+                });
+  return monitors;
+}
+
 /*
  * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
@@ -212,6 +235,13 @@ inline void writeXYZPixeloffset(H5::Group &grp,
     posy.push_back(offset[1]);
     posz.push_back(offset[2]);
   }
+
+  double zeroPrecision = 1e-9;
+
+  bool xIsZero = isApproxZero(posx, zeroPrecision);
+  bool yIsZero = isApproxZero(posy, zeroPrecision);
+  bool zIsZero = isApproxZero(posz, zeroPrecision);
+
   auto bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
 
@@ -221,17 +251,26 @@ inline void writeXYZPixeloffset(H5::Group &grp,
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
-  xPixelOffset =
-      grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
-  xPixelOffset.write(posx.data(), H5::PredType::NATIVE_DOUBLE, space);
+  if (!xIsZero) {
+    xPixelOffset =
+        grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+    xPixelOffset.write(posx.data(), H5::PredType::NATIVE_DOUBLE, space);
+    writeStrAttribute(xPixelOffset, UNITS, METRES);
+  }
 
-  yPixelOffset =
-      grp.createDataSet(Y_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
-  yPixelOffset.write(posy.data(), H5::PredType::NATIVE_DOUBLE);
+  if (!yIsZero) {
+    yPixelOffset =
+        grp.createDataSet(Y_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+    yPixelOffset.write(posy.data(), H5::PredType::NATIVE_DOUBLE);
+    writeStrAttribute(yPixelOffset, UNITS, METRES);
+  }
 
-  zPixelOffset =
-      grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
-  zPixelOffset.write(posz.data(), H5::PredType::NATIVE_DOUBLE);
+  if (!zIsZero) {
+    zPixelOffset =
+        grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
+    zPixelOffset.write(posz.data(), H5::PredType::NATIVE_DOUBLE);
+    writeStrAttribute(zPixelOffset, UNITS, METRES);
+  }
 }
 
 /*
@@ -464,7 +503,7 @@ inline void writeOrientation(H5::Group &grp,
 }
 
 /*
- * Function: instrument
+ * Function: NXInstrument
  * for NXentry parent (root group). Produces an NXinstrument group in the parent
  * group, and writes Nexus compliant datasets and metadata stored in attributes
  * to the new group.
@@ -472,8 +511,8 @@ inline void writeOrientation(H5::Group &grp,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-H5::Group instrument(const H5::Group &parent,
-                     const Geometry::ComponentInfo &compInfo) {
+H5::Group NXInstrument(const H5::Group &parent,
+                       const Geometry::ComponentInfo &compInfo) {
 
   std::string instrumentName = compInfo.name(compInfo.root());
   H5::Group childGroup = parent.createGroup(instrumentName);
@@ -488,7 +527,7 @@ H5::Group instrument(const H5::Group &parent,
 }
 
 /*
- * Function: saveSample
+ * Function: saveNXSample
  * For NXentry parent (root group). Produces an NXsample group in the parent
  * group, and writes the Nexus compliant datasets and metadata stored in
  * attributes to the new group.
@@ -497,8 +536,8 @@ H5::Group instrument(const H5::Group &parent,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-void saveSample(const H5::Group &parentGroup,
-                const Geometry::ComponentInfo &compInfo) {
+void saveNXSample(const H5::Group &parentGroup,
+                  const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
   size_t idx = compInfo.sample();
@@ -518,7 +557,7 @@ void saveSample(const H5::Group &parentGroup,
 }
 
 /*
- * Function: saveSource
+ * Function: saveNXSource
  * For NXentry (root group). Produces an NXsource group in the parent group, and
  * writes the Nexus compliant datasets and metadata stored in attributes to the
  * new group.
@@ -527,8 +566,8 @@ void saveSample(const H5::Group &parentGroup,
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
-void saveSource(const H5::Group &parentGroup,
-                const Geometry::ComponentInfo &compInfo) {
+void saveNXSource(const H5::Group &parentGroup,
+                  const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
   size_t idx = compInfo.source();
@@ -547,22 +586,30 @@ void saveSource(const H5::Group &parentGroup,
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
+
+// TODO: add documentation
+void saveNXMonitors(const H5::Group &parentGroup,
+                     const Geometry::ComponentInfo &compInfo,
+                     const Geometry::DetectorInfo &detInfo) {
+
+}
 /*
- * Function: saveDetectors
- * For NXinstrument parent (root group). Produces a set of NXdetctor groups in
- * the parent group, and writes the Nexus compliant datasets and metadata stored
- * in attributes to the new group. The NXdetector group created will be
- * orientation dependent. returns vector of NXdetectors
+ * Function: saveNXDetectors
+ * For NXinstrument parent (component info root). Produces a set of NXdetctor
+ * groups from Component info detector banks, and saves it in the parent group,
+ * along with the Nexus compliant datasets, and metadata stored in attributes to
+ * the new group. Dependency chain is orientation => location => '.'.
  *
  * @param parentGroup : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  * @
  */
-void saveDetectors(const H5::Group &parentGroup,
-                   const Geometry::ComponentInfo &compInfo,
-                   const Geometry::DetectorInfo &detInfo) {
+void saveNXDetectors(const H5::Group &parentGroup,
+                     const Geometry::ComponentInfo &compInfo,
+                     const Geometry::DetectorInfo &detInfo) {
 
   const auto detectorIDs = detInfo.detectorIDs();
+  auto monitors = findMonitors(detInfo, detectorIDs);
 
   for (size_t i = compInfo.root() - 1; i > 0; --i) {
 
@@ -653,16 +700,16 @@ void saveInstrument(
   NexusGeometrySave::writeStrAttribute(rootfile, NX_CLASS, NX_ENTRY);
 
   // NXinstrument (component root)
-  instrument = NexusGeometrySave::instrument(rootfile, compInfo);
+  instrument = NexusGeometrySave::NXInstrument(rootfile, compInfo);
 
   // NXdetectors
-  NexusGeometrySave::saveDetectors(instrument, compInfo, detInfo);
+  NexusGeometrySave::saveNXDetectors(instrument, compInfo, detInfo);
 
   // NXsource
-  NexusGeometrySave::saveSource(instrument, compInfo);
+  NexusGeometrySave::saveNXSource(instrument, compInfo);
 
   // NXsample
-  NexusGeometrySave::saveSample(rootfile, compInfo);
+  NexusGeometrySave::saveNXSample(rootfile, compInfo);
 
   file.close(); // close file
 

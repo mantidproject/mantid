@@ -955,9 +955,15 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
   const double pixelRadius(0.01);
   const double pixelHeight(0.003);
   const double radius(1.0);
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+  const auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
       V3D(0.0, 1.0, 0.0), "pixelShape");
+
+  const auto tubeShape = ComponentCreationHelper::createCappedCylinder(
+      pixelRadius, pixelHeight,
+      V3D(0.0, -0.5 * pixelHeight * nPixelsPerTube, 0.0), V3D(0.0, 1.0, 0.0),
+      "tubeShape");
+
   for (size_t i = 0; i < nTubes; ++i) {
     std::ostringstream lexer;
     lexer << "tube-" << i;
@@ -969,6 +975,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
       x = -1e-32;
     const auto z = radius * cos(theta);
     ObjCompAssembly *tube = new ObjCompAssembly(lexer.str());
+    tube->setShape(tubeShape);
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");

@@ -232,9 +232,9 @@ public:
     return value;
   }
 
-  // check dataset exists in path with attribute value of NX_class.
-  bool hasNXDataset(const std::string pathToGroup,
-                    const std::string nx_attributeVal) {
+  // check NX_class attribute with value exists inside dataset at path.
+  bool hasDatasetWithNXAttribute(const std::string pathToGroup,
+                                 const std::string nx_attributeVal) {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
@@ -254,9 +254,10 @@ public:
     return false;
   }
 
-  // check dataset exists in path with attribute value of attribute name.
-  bool hasDataset(const std::string pathToGroup, const std::string attributeVal,
-                  const std::string attrName) {
+  // check attriubte with value exists inside dataset at path.
+  bool hasDatasetWithAttribute(const std::string pathToGroup,
+                               const std::string attributeVal,
+                               const std::string attrName) {
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
@@ -270,6 +271,21 @@ public:
           attribute.read(attribute.getDataType(), attributeValue);
           if (attributeValue == attributeVal)
             return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool hasDataset(const std::string pathToGroup, const std::string dsetName) {
+
+    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    auto numOfChildren = parentGroup.getNumObjs();
+    for (hsize_t i = 0; i < numOfChildren; i++) {
+      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
+        std::string dataSetName = parentGroup.getObjnameByIdx(i);
+        if (dsetName == dataSetName) {
+          return true;
         }
       }
     }
@@ -657,16 +673,17 @@ public:
         auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
         auto bankGroupName = compInfo.name(i);
         auto fullPath = pathToparent + "/" + bankGroupName;
-        hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+        hasNXTransformation =
+            tester.hasDatasetWithNXAttribute(fullPath, NX_TRANSFORMATION);
 
         // assert all test banks have Nxtransformations
         TS_ASSERT(hasNXTransformation);
 
-        hasTranslation =
-            tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
+        hasTranslation = tester.hasDatasetWithAttribute(fullPath, TRANSLATION,
+                                                        TRANSFORMATION_TYPE);
 
-        hasRotation =
-            tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
+        hasRotation = tester.hasDatasetWithAttribute(fullPath, ROTATION,
+                                                     TRANSFORMATION_TYPE);
 
         TS_ASSERT((hasRotation || hasTranslation));
       }
@@ -694,16 +711,16 @@ public:
     auto fullPathToGroup = pathToparent + compInfo.name(compInfo.sample());
 
     hasNXTransformation =
-        tester.hasNXDataset(fullPathToGroup, NX_TRANSFORMATION);
+        tester.hasDatasetWithNXAttribute(fullPathToGroup, NX_TRANSFORMATION);
 
     // assert the test sample has Nxtransformation.
     TS_ASSERT(hasNXTransformation);
 
-    hasTranslation =
-        tester.hasDataset(fullPathToGroup, TRANSLATION, TRANSFORMATION_TYPE);
+    hasTranslation = tester.hasDatasetWithAttribute(
+        fullPathToGroup, TRANSLATION, TRANSFORMATION_TYPE);
 
-    hasRotation =
-        tester.hasDataset(fullPathToGroup, ROTATION, TRANSFORMATION_TYPE);
+    hasRotation = tester.hasDatasetWithAttribute(fullPathToGroup, ROTATION,
+                                                 TRANSFORMATION_TYPE);
 
     TS_ASSERT((hasRotation || hasTranslation));
   }
@@ -729,15 +746,17 @@ public:
     auto sourceName = compInfo.name(compInfo.source());
     auto fullPath = pathToparent + "/" + sourceName;
 
-    hasNXTransformation = tester.hasNXDataset(fullPath, NX_TRANSFORMATION);
+    hasNXTransformation =
+        tester.hasDatasetWithNXAttribute(fullPath, NX_TRANSFORMATION);
 
     // assert the test source has Nxtransformation.
     TS_ASSERT(hasNXTransformation);
 
-    hasTranslation =
-        tester.hasDataset(fullPath, TRANSLATION, TRANSFORMATION_TYPE);
+    hasTranslation = tester.hasDatasetWithAttribute(fullPath, TRANSLATION,
+                                                    TRANSFORMATION_TYPE);
 
-    hasRotation = tester.hasDataset(fullPath, ROTATION, TRANSFORMATION_TYPE);
+    hasRotation =
+        tester.hasDatasetWithAttribute(fullPath, ROTATION, TRANSFORMATION_TYPE);
 
     TS_ASSERT((hasRotation || hasTranslation));
   }
@@ -782,14 +801,25 @@ public:
 
         for (const size_t &i : childrenDetectors) {
 
+          double pixelOffsetX = 0.0;
+          double pixelOffsetY = 0.0;
+          double pixelOffsetZ = 0.0;
+
           // get the xyz offset of the pixels, and use trig to verify that its
           // position reflects det rotation relative to bank.
-          double pixelOffsetX =
-              tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
-          double pixelOffsetY =
-              tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
-          double pixelOffsetZ =
-              tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
+          if (tester.hasDataset(fullPathToGroup, X_PIXEL_OFFSET)) {
+            pixelOffsetX =
+                tester.readDoubleFromDataset(X_PIXEL_OFFSET, fullPathToGroup);
+          }
+
+          if (tester.hasDataset(fullPathToGroup, Y_PIXEL_OFFSET)) {
+            pixelOffsetY =
+                tester.readDoubleFromDataset(Y_PIXEL_OFFSET, fullPathToGroup);
+          }
+          if (tester.hasDataset(fullPathToGroup, Z_PIXEL_OFFSET)) {
+            pixelOffsetZ =
+                tester.readDoubleFromDataset(Z_PIXEL_OFFSET, fullPathToGroup);
+          }
 
           Eigen::Vector3d offsetInFile(pixelOffsetX, pixelOffsetY,
                                        pixelOffsetZ);
@@ -1053,19 +1083,7 @@ public:
     auto &compInfo = (*instr.first);
     auto &detInfo = (*instr.second);
 
-    std::vector<double> xPixelOffsets;
-    for (size_t bankIndex = compInfo.root(); bankIndex > 0; --bankIndex) {
-      if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo,
-                                                                bankIndex)) {
-        auto detectors = compInfo.detectorsInSubtree(bankIndex);
-        for (const size_t &detIndex : detectors) {
-          xPixelOffsets.push_back(compInfo.relativePosition(detIndex)[0]);
-        }
-      }
-    }
-
     NexusGeometrySave::saveInstrument(instr, destinationFile);
-    // TODO HDF5FileTestUtility assertations on both files.
   }
 };
 

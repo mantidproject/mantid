@@ -50,11 +50,8 @@ bool isAnyBank(const ComponentInfo &compInfo, const size_t &idx) {
         if (childType != Beamline::ComponentType::OutlineComposite) {
           return true;
         }
-        return false;
       }
-      return false;
     }
-    return false;
   }
   return false;
 }

@@ -74,33 +74,20 @@ public:
 
   void test_isAnyBank_false_for_tubes() {
 
-    auto instr =
-        ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(2, 2);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
 
-    std::vector<size_t> allIndices;
-    for (size_t index = compInfo.root() - 1; index > 0; --index) {
-      if (compInfo.isDetector(index))
-        break;
-      allIndices.push_back(index);
-    }
+    const size_t tubeIdx1 = 5;
+    const size_t tubeIdx2 = 4;
 
-    bool tubeInInstrument = std::any_of(
-        allIndices.begin(), allIndices.end(), [&compInfo](const size_t &index) {
-          return compInfo.componentType(index) ==
-                 Beamline::ComponentType::OutlineComposite;
-        });
+    TS_ASSERT(compInfo.componentType(tubeIdx1) ==
+              Beamline::ComponentType::OutlineComposite);
+    TS_ASSERT(compInfo.componentType(tubeIdx2) ==
+              Beamline::ComponentType::OutlineComposite);
 
-    // TODO: assert at least one tube is in instrument
-
-    for (size_t index = compInfo.root() - 1; index > 0; --index) {
-      auto compType = compInfo.componentType(index);
-      // identify tube and assert isAnyBank returns false
-      if (compType == Beamline::ComponentType::OutlineComposite) {
-        TS_ASSERT(!isAnyBank(compInfo, index));
-      }
-    }
+    TS_ASSERT(!isAnyBank(compInfo, tubeIdx1));
+    TS_ASSERT(!isAnyBank(compInfo, tubeIdx2));
   }
 
   void test_isAnyBank_false_for_detector() {
@@ -125,6 +112,20 @@ public:
         TS_ASSERT(!isAnyBank(compInfo, index));
       }
     }
+  }
+
+  void test_isAnyBank_finds_rectangular() {
+    auto instr =
+        ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instr);
+    const auto &compInfo = (*wrappers.first);
+
+    const size_t bankIdx = 13;
+
+    TS_ASSERT(compInfo.componentType(bankIdx) ==
+              Beamline::ComponentType::Rectangular); // assert rectangular bank
+                                                     // at bankIdx
+    TS_ASSERT(isAnyBank(compInfo, bankIdx))
   }
 
   void test_offsetFromAncestor_gets_expected_offset() {
