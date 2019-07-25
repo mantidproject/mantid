@@ -22,7 +22,8 @@ Formatting with YAPF
 --------------------
 
 To ensure that formatting matches across all developers please use YAPF version 0.28.0.
-This may be installed using ``pip install --user yapf==0.28.0``.
+This may be installed using ``pip install --user yapf==0.28.0``. Note that on Windows this
+is already included with the bundled Python distribution.
 
 YAPF will automatically find the configuration file when executed inside the Mantid source directory.
 To format a given file you may use ``yapf -i path/to/file.py``.
@@ -30,8 +31,30 @@ To format a given file you may use ``yapf -i path/to/file.py``.
 To automatically format any Python files you have changed prior to commiting you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs yapf -i``.
 This will in place format any files with the ``.py`` extension that you have staged.
 
+PyCharm Configuration
+#####################
+
+YAPF can be configured as an "External Tool" inside PyCharm and run on a per-file basis.
+Go to `File -> Settings -> Tools -> External Tools` and click `+`.
+In the dialog that opens enter the following details:
+
+- `Name`: YAPF
+- `Description`: Run Yapf formatter on current file
+- `Program`: <path to yapf>
+- `Arguments`: ``-i $FilePath$``
+- `Working directory`: ``$Project$FileDir$``
+
+``<path to yapf>`` is the full path to the YAPF executable on your system:
+
+- Linux/Mac: ``/usr/bin/yapf`` if installed with a package manager or ``$HOME/.local/bin/yapf`` if installed with `pip`
+- Windows: ``<mantid-repo>\external\src\ThirdParty\lib\python2.7\Scripts\yapf``
+
+A YAPF item should now appear in the `Tools -> External Tools` menu.
+This can be bound to a shortcut key under `File -> Settings -> Keymap -> External Tools`.
+
+
 None checks
------------  
+-----------
 
 Prefer ``if obj is not None:`` over ``if obj:``. The latter invokes
 ``object.__nonzero__`` whereas the former simply compares that obj
@@ -84,7 +107,7 @@ new style. For naming new custom signals, use the ``sig_`` prefix:
     ...
 
     class MyWidget(...):
-        """Funky new widget"""    
+        """Funky new widget"""
 
         # Signals
         sig_run_a_thing_happened = Signal(str, str, str, bool, bool)
