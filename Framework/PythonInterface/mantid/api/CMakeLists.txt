@@ -111,9 +111,7 @@ set(INC_FILES
     inc/MantidPythonInterface/api/BinaryOperations.h
     inc/MantidPythonInterface/api/CloneMatrixWorkspace.h
     inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
-    inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h
-    inc/MantidPythonInterface/api/DetectorInfoPythonIterator.h
-    inc/MantidPythonInterface/api/ComponentInfoPythonIterator.h)
+    inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h)
 
 set(PY_FILES __init__.py _adsimports.py _aliases.py _workspaceops.py)
 

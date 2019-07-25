@@ -53,7 +53,9 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
 set(SRC_FILES)
 
-set(INC_FILES)
+set(INC_FILES
+  inc/MantidPythonInterface/geometry/ComponentInfoPythonIterator.h
+  inc/MantidPythonInterface/geometry/DetectorInfoPythonIterator.h)
 
 set(PY_FILES __init__.py _aliases.py)
 
@@ -75,6 +77,8 @@ add_library(PythonGeometryModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonGeometryModule _geometry)
+
+target_include_directories(PythonGeometryModule PUBLIC inc)
 
 # Add the required dependencies
 target_link_libraries(PythonGeometryModule
