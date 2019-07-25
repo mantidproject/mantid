@@ -120,7 +120,7 @@ int Plane::setSurface(const std::string &Pstr)
     }
   } else if (item.size() == 2) //  PROCESS px type PLANE
   {
-    const int ptype = static_cast<int>(tolower(item[1]) - 'x');
+    const auto ptype = static_cast<int>(tolower(item[1]) - 'x');
     if (ptype < 0 || ptype > 2) // Not x,y,z
       return -5;
     surf[ptype] = 1.0;

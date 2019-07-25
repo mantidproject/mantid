@@ -96,7 +96,7 @@ void CentroidPeaks::integrate() {
     }
   }
 
-  const int inBlocksize = static_cast<int>(inWS->blocksize());
+  const auto inBlocksize = static_cast<int>(inWS->blocksize());
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))

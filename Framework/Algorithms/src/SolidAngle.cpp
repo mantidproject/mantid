@@ -202,7 +202,7 @@ void SolidAngle::exec() {
   int m_MinSpec = getProperty("StartWorkspaceIndex");
   int m_MaxSpec = getProperty("EndWorkspaceIndex");
 
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if (m_MinSpec > numberOfSpectra) {

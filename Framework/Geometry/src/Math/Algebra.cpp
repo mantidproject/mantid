@@ -155,7 +155,7 @@ std::string Algebra::writeMCNPX() const
 */
 {
   std::string Out = F.display();
-  const int lenOut = static_cast<int>(Out.length());
+  const auto lenOut = static_cast<int>(Out.length());
   Out += " "; // Guard string
   std::ostringstream cx;
   for (int i = 0; i < lenOut; i++) {

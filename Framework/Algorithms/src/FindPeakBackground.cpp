@@ -155,7 +155,7 @@ int FindPeakBackground::findBackground(
     maskedY.push_back(inpY[l] - bkg0);
   }
   MantidVec mask(n - l0, 0.0);
-  double xn = static_cast<double>(n - l0);
+  auto xn = static_cast<double>(n - l0);
   if ((0. == xn) || (0. == xn - 1.0))
     throw std::runtime_error(
         "The number of Y values in the input workspace for the "

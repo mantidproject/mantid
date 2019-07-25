@@ -346,7 +346,7 @@ void CorrectTOFAxis::exec() {
  *  @param outputWs The corrected workspace
  */
 void CorrectTOFAxis::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
-  const int64_t histogramCount =
+  const auto histogramCount =
       static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
@@ -409,7 +409,7 @@ void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
                       << "m: " << TOF << '\n';
   const double shift = TOF - epp;
   g_log.debug() << "TOF shift: " << shift << '\n';
-  const int64_t histogramCount =
+  const auto histogramCount =
       static_cast<int64_t>(m_inputWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_inputWs, *outputWs))
   for (int64_t i = 0; i < histogramCount; ++i) {
@@ -436,7 +436,7 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
   double l2Sum = 0;
   double eppSum = 0;
   size_t n = 0;
-  const int64_t indexCount = static_cast<int64_t>(m_workspaceIndices.size());
+  const auto indexCount = static_cast<int64_t>(m_workspaceIndices.size());
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for if (m_eppTable->threadSafe())
              reduction(+: n, l2Sum, eppSum))
@@ -478,7 +478,7 @@ void CorrectTOFAxis::averageL2AndEPP(const API::SpectrumInfo &spectrumInfo,
 double CorrectTOFAxis::averageL2(const API::SpectrumInfo &spectrumInfo) {
   double l2Sum = 0;
   size_t n = 0;
-  const int64_t indexCount = static_cast<int64_t>(m_workspaceIndices.size());
+  const auto indexCount = static_cast<int64_t>(m_workspaceIndices.size());
   PRAGMA_OMP(parallel for reduction(+: n, l2Sum))
   for (int64_t i = 0; i < indexCount; ++i) {
     PARALLEL_START_INTERUPT_REGION

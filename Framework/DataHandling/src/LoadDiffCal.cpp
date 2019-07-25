@@ -224,7 +224,7 @@ void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids,
   wksp->mutableRun().addProperty("Filename", m_filename);
 
   for (size_t i = 0; i < numDet; ++i) {
-    detid_t detid = static_cast<detid_t>(detids[i]);
+    auto detid = static_cast<detid_t>(detids[i]);
     wksp->setValue(detid, groups[i]);
     progress.report();
   }
@@ -250,7 +250,7 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
 
   for (size_t i = 0; i < numDet; ++i) {
     bool shouldUse = (use[i] > 0);
-    detid_t detid = static_cast<detid_t>(detids[i]);
+    auto detid = static_cast<detid_t>(detids[i]);
     // in maskworkspace 0=use, 1=dontuse
     wksp->setMasked(detid, !shouldUse);
     wksp->setValue(detid, (shouldUse ? 0. : 1.));

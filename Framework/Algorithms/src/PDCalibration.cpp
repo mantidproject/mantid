@@ -392,7 +392,7 @@ void PDCalibration::exec() {
 
   auto uncalibratedEWS =
       boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
-  bool isEvent = bool(uncalibratedEWS);
+  auto isEvent = bool(uncalibratedEWS);
 
   // Load Previous Calibration or create calibration table from signal file
   if ((!static_cast<std::string>(getProperty("PreviousCalibrationFile"))
@@ -424,7 +424,7 @@ void PDCalibration::exec() {
                    << "\", found peak widths and resolution should not be "
                       "directly compared to delta-d/d";
   }
-  int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
+  auto NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
 
   // create TOF peak centers workspace
   auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(
@@ -680,9 +680,9 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   const std::vector<double> *peakVec =
       reinterpret_cast<std::vector<double> *>(peaks);
   // number of peaks being fit
-  const size_t numPeaks = static_cast<size_t>(peakVec->at(0));
+  const auto numPeaks = static_cast<size_t>(peakVec->at(0));
   // number of parameters
-  const size_t numParams = static_cast<size_t>(peakVec->at(1));
+  const auto numParams = static_cast<size_t>(peakVec->at(1));
 
   // isn't strictly necessary, but makes reading the code much easier
   const std::vector<double> tofObs(peakVec->begin() + 2,
@@ -720,7 +720,7 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
 // if the fit fails it returns 0.
 double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
                         double &difa) {
-  const size_t numParams = static_cast<size_t>(peaks[1]);
+  const auto numParams = static_cast<size_t>(peaks[1]);
 
   // initial starting point as [DIFC, 0, 0]
   gsl_vector *fitParams = gsl_vector_alloc(numParams);
@@ -1062,7 +1062,7 @@ void PDCalibration::createCalTableNew() {
       difcWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // copy over the values
-  detid2index_map::const_iterator it = allDetectors.begin();
+  auto it = allDetectors.begin();
   size_t i = 0;
   for (; it != allDetectors.end(); ++it) {
     const detid_t detID = it->first;
@@ -1140,7 +1140,7 @@ API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
   for (size_t rowIndex = 0; rowIndex < numRows; ++rowIndex) {
     resolution.clear();
     // first column is detid
-    const detid_t detId =
+    const auto detId =
         static_cast<detid_t>(m_peakPositionTable->Int(rowIndex, 0));
     for (size_t peakIndex = 1; peakIndex < numPeaks + 1; ++peakIndex) {
       const double pos = m_peakPositionTable->Double(rowIndex, peakIndex);
@@ -1206,7 +1206,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
   MatrixWorkspace_sptr peak_window_ws =
       create<Workspace2D>(numspec, Points(numpeaks * 2));
 
-  const int64_t NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
+  const auto NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
   API::Progress prog(this, 0., .2, NUM_HIST);
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )

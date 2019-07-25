@@ -63,7 +63,7 @@ void ResetNegatives::exec() {
   MatrixWorkspace_const_sptr minWS = alg->getProperty("OutputWorkspace");
 
   // determine if there is anything to do
-  int64_t nHist = static_cast<int64_t>(minWS->getNumberHistograms());
+  auto nHist = static_cast<int64_t>(minWS->getNumberHistograms());
   bool hasNegative = false;
   for (int64_t i = 0; i < nHist; i++) {
     if (minWS->y(i)[0] < 0.0) {

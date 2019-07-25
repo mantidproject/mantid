@@ -281,7 +281,7 @@ File::File(const std::string &path)
       m_fileInfos.push_back(fileInfo);
     }
 
-    size_t offset = static_cast<size_t>(fileInfo.Size % 512);
+    auto offset = static_cast<size_t>(fileInfo.Size % 512);
     if (offset != 0)
       offset = 512 - offset;
 
@@ -456,7 +456,7 @@ bool File::append(const std::string &path, const std::string &name,
     fileInfo.Offset = position;
     fileInfo.Size = header.readFileSize();
 
-    size_t offset = static_cast<size_t>(fileInfo.Size % 512);
+    auto offset = static_cast<size_t>(fileInfo.Size % 512);
     if (offset != 0)
       offset = 512 - offset;
 
@@ -496,7 +496,7 @@ bool File::append(const std::string &path, const std::string &name,
   good &= 1 == fwrite(buffer, size, 1, handle.get());
 
   // write padding
-  size_t offset = static_cast<size_t>(size % 512);
+  auto offset = static_cast<size_t>(size % 512);
   if (offset != 0) {
     offset = 512 - offset;
 

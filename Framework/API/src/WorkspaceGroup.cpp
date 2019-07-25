@@ -84,7 +84,7 @@ bool WorkspaceGroup::isInChildGroup(const Workspace &workspaceToCheck) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
     // check child groups only
-    WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
+    auto *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
     if (group) {
       if (group->isInGroup(workspaceToCheck))
         return true;
@@ -502,7 +502,7 @@ bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck,
   for (const auto &workspace : m_workspaces) {
     if (workspace.get() == &workspaceToCheck)
       return true;
-    WorkspaceGroup *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
+    auto *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
     if (group) {
       if (group->isInGroup(workspaceToCheck, level + 1))
         return true;
@@ -538,7 +538,7 @@ template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_sptr
 IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -555,7 +555,7 @@ template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_const_sptr
 IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

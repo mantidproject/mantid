@@ -60,7 +60,7 @@ void FindEPP::exec() {
 
   initWorkspace();
 
-  int64_t numberspectra = static_cast<int64_t>(m_inWS->getNumberHistograms());
+  auto numberspectra = static_cast<int64_t>(m_inWS->getNumberHistograms());
 
   // Loop over spectra
   PARALLEL_FOR_IF(threadSafe(*m_inWS, *m_outWS))
@@ -78,7 +78,7 @@ void FindEPP::exec() {
  * @param index : the workspace index
  */
 void FindEPP::fitGaussian(int64_t index) {
-  size_t spectrum = static_cast<size_t>(index);
+  auto spectrum = static_cast<size_t>(index);
   m_outWS->cell<int>(spectrum, 0) = static_cast<int>(spectrum);
 
   const auto &x = m_inWS->x(spectrum).rawData();

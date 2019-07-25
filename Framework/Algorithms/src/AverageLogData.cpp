@@ -71,9 +71,8 @@ void AverageLogData::exec() {
                              " in the workspace.");
   }
 
-  Kernel::TimeSeriesProperty<double> *slog =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          inputWS->run().getLogData(logname));
+  auto *slog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData(logname));
   if (!slog) {
     throw std::runtime_error("Problem reading property " + logname);
   }

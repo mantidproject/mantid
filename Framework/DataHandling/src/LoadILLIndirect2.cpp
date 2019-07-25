@@ -88,7 +88,7 @@ void LoadILLIndirect2::exec() {
   // Retrieve filename
   const std::string filenameData = getPropertyValue("Filename");
 
-  Progress progress(this, 0., 1., 6);
+  Progress progress(this, 0., 1., 7);
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -98,27 +98,26 @@ void LoadILLIndirect2::exec() {
   loadDataDetails(firstEntry);
   progress.report("Loaded metadata");
 
-  std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+  const std::string instrumentPath =
+      m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
   initWorkSpace();
   progress.report("Initialised the workspace");
 
-  g_log.debug("Building properties...");
   loadNexusEntriesIntoProperties(filenameData);
   progress.report("Loaded data details");
 
-  g_log.debug("Loading data...");
   loadDataIntoTheWorkSpace(firstEntry);
   progress.report("Loaded the data");
 
-  // load the instrument from the IDF if it exists
-  g_log.debug("Loading instrument definition...");
   runLoadInstrument();
   progress.report("Loaded the instrument");
 
-  g_log.debug("Movind SDs...");
   moveSingleDetectors(firstEntry);
   progress.report("Loaded the single detectors");
+
+  rotateTubes();
+  progress.report("Rotating tubes if necessary");
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
@@ -358,6 +357,36 @@ void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
                 " to t=" + std::to_string(angleSD[0]));
     moveComponent(prefix + std::to_string(index), angleSD[0]);
     index++;
+  }
+}
+
+/**
+ * The detector has two positions. By IDF the first tube is at 25.1 Degree as
+ * opening angle from Z- (Z+ is the beam direction). But it could be also 33.1,
+ * in which case all the tubes should be rotated around the sample.
+ */
+void LoadILLIndirect2::rotateTubes() {
+  const auto &run = m_localWorkspace->run();
+  if (run.hasProperty("PSD.PSD Angle 1")) {
+    const double firstTubeAngle =
+        run.getPropertyAsSingleValue("PSD.PSD Angle 1");
+    const int firstTubeAngleRounded =
+        static_cast<int>(std::round(firstTubeAngle * 10));
+    if (firstTubeAngleRounded != 251 && firstTubeAngleRounded != 331) {
+      g_log.warning() << "Unexpected first tube angle found: " << firstTubeAngle
+                      << " degrees. Check your instrument configuration. "
+                         "Assuming 25.1 degrees instead.";
+    } else if (firstTubeAngleRounded == 331) {
+      auto rotator = this->createChildAlgorithm("RotateInstrumentComponent");
+      rotator->setProperty("Workspace", m_localWorkspace);
+      rotator->setProperty("RelativeRotation", false);
+      rotator->setPropertyValue("ComponentName", "psds");
+      rotator->setProperty("Y", 1.);
+      rotator->setProperty("Angle", -8.);
+      rotator->execute();
+    }
+  } else {
+    g_log.warning("Unable to find first tube angle, assuming 25.1 degree");
   }
 }
 

@@ -728,8 +728,8 @@ void GridDetector::testIntersectionWithChildren(
   //  std::cout << u << ", " << v << "\n";
 
   // In indices
-  int xIndex = int(u);
-  int yIndex = int(v);
+  auto xIndex = int(u);
+  auto yIndex = int(v);
 
   // Out of range?
   if (xIndex < 0)

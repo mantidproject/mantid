@@ -41,7 +41,7 @@ double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2,
                              const double pixelSize) {
   const auto &spectrumInfo = ws.spectrumInfo();
   const size_t maxWorkspaceIndex = spectrumInfo.size() - 1;
-  double const specSize = static_cast<double>(maxWorkspaceIndex);
+  auto const specSize = static_cast<double>(maxWorkspaceIndex);
   if (linePosition > specSize) {
     std::ostringstream msg;
     msg << "LinePosition is greater than the maximum workspace index "

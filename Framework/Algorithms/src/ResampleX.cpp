@@ -300,7 +300,7 @@ void ResampleX::exec() {
   bool inPlace = (inputWS == outputWS); // Rebinning in-place
   m_isDistribution = inputWS->isDistribution();
   m_isHistogram = inputWS->isHistogramData();
-  const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   // the easy parameters
   m_useLogBinning = getProperty("LogBinning");

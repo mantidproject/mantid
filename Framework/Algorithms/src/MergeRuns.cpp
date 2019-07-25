@@ -182,7 +182,7 @@ void MergeRuns::buildAdditionTables() {
 
   // This is the workspace against which everything will be added
   EventWorkspace_sptr lhs = m_inEventWS[0];
-  int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
+  auto lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
 
   detid2index_map lhs_det_to_wi;
   try {

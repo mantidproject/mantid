@@ -200,8 +200,7 @@ ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
     if (emode == 1) {
       if (inputWS->run().hasProperty("Ei")) {
         Kernel::Property *p = inputWS->run().getProperty("Ei");
-        Kernel::PropertyWithValue<double> *doublep =
-            dynamic_cast<Kernel::PropertyWithValue<double> *>(p);
+        auto *doublep = dynamic_cast<Kernel::PropertyWithValue<double> *>(p);
         if (doublep) {
           efixed = (*doublep)();
         } else {

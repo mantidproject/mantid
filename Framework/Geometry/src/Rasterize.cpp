@@ -120,9 +120,9 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
   const double yLength = bbox.yMax() - bbox.yMin();
   const double zLength = bbox.zMax() - bbox.zMin();
 
-  const size_t numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
-  const size_t numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
-  const size_t numZSlices = static_cast<size_t>(zLength / cubeSizeInMetre);
+  const auto numXSlices = static_cast<size_t>(xLength / cubeSizeInMetre);
+  const auto numYSlices = static_cast<size_t>(yLength / cubeSizeInMetre);
+  const auto numZSlices = static_cast<size_t>(zLength / cubeSizeInMetre);
   const double XSliceThickness = xLength / static_cast<double>(numXSlices);
   const double YSliceThickness = yLength / static_cast<double>(numYSlices);
   const double ZSliceThickness = zLength / static_cast<double>(numZSlices);

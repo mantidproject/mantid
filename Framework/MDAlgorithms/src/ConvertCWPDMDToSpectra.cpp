@@ -488,7 +488,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
           calculate2Theta(v_det_sample, v_sample_src) / M_PI * 180.;
 
       // convert unit optionally
-      int temprun = static_cast<int>(mditer->getInnerRunIndex(iev));
+      auto temprun = static_cast<int>(mditer->getInnerRunIndex(iev));
       double outx;
       if (unitbit == 't')
         outx = twotheta;
@@ -673,8 +673,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
     API::MatrixWorkspace_sptr matrixws,
     API::IMDEventWorkspace_const_sptr inputmdws) {
   // get hold of the last experiment info from md workspace to copy over
-  uint16_t lastindex =
-      static_cast<uint16_t>(inputmdws->getNumExperimentInfo() - 1);
+  auto lastindex = static_cast<uint16_t>(inputmdws->getNumExperimentInfo() - 1);
   ExperimentInfo_const_sptr lastexpinfo =
       inputmdws->getExperimentInfo(lastindex);
 

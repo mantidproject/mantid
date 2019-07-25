@@ -86,9 +86,9 @@ void SliceMDHisto::exec() {
   }
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
-  coord_t *sourceDim =
+  auto *sourceDim =
       reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
-  coord_t *targetDim =
+  auto *targetDim =
       reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
   cutData(inWS, outWS, sourceDim, targetDim, start, end, 0);
   free(sourceDim);

@@ -235,7 +235,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     }
 
     bool skip{false};
-    size_t index = static_cast<size_t>(-1);
+    auto index = static_cast<size_t>(-1);
     const Geometry::IDetector *det{nullptr};
     if (isSpectrum) {
       auto it = specToIndex.find(detOrSpec);
@@ -397,7 +397,7 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
 void UpdateInstrumentFromFile::setDetectorPositions(
     const std::vector<int32_t> &detID, const std::vector<float> &l2,
     const std::vector<float> &theta, const std::vector<float> &phi) {
-  const int numDetector = static_cast<int>(detID.size());
+  const auto numDetector = static_cast<int>(detID.size());
   g_log.information() << "Setting new positions for " << numDetector
                       << " detectors\n";
 

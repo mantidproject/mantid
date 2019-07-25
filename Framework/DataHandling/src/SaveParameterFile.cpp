@@ -139,7 +139,7 @@ void SaveParameterFile::exec() {
         // With fitting parameters we do something special (i.e. silly)
         // We create an entire XML element to be inserted into the output,
         // instead of just giving a single fixed value
-        const FitParameter &fitParam = paramsIt.second->value<FitParameter>();
+        const auto &fitParam = paramsIt.second->value<FitParameter>();
         const std::string fpName =
             fitParam.getFunction() + ":" + fitParam.getName();
         std::stringstream fpValue;

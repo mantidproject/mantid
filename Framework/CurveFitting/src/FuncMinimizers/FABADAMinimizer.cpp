@@ -325,7 +325,7 @@ void FABADAMinimizer::finalize() {
                        " (StepsBetweenValues = 10).\n";
     nSteps = 10;
   }
-  size_t convLength = size_t(double(chainLength) / double(nSteps));
+  auto convLength = size_t(double(chainLength) / double(nSteps));
 
   // Reduced chain
   std::vector<std::vector<double>> reducedConvergedChain;
@@ -400,8 +400,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
   API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
   if (!iConstraint)
     return;
-  Constraints::BoundaryConstraint *bcon =
-      dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+  auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
   if (!bcon)
     return;
 
@@ -1072,8 +1071,7 @@ void FABADAMinimizer::initChainsAndParameters() {
 
     API::IConstraint *iConstraint = m_fitFunction->getConstraint(i);
     if (iConstraint) {
-      Constraints::BoundaryConstraint *bcon =
-          dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+      auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
       if (bcon) {
         if (bcon->hasLower()) {
           if (param < bcon->lower())

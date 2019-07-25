@@ -8,8 +8,7 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
-                                                         get_raw_data_directory, get_group_data_directory,
-                                                         get_pair_data_directory, get_group_asymmetry_name,
+                                                         get_group_asymmetry_name,
                                                          get_group_asymmetry_unnorm_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
@@ -86,7 +85,7 @@ class MuonContext(object):
             for group_name in self._group_pair_context.group_names:
                 run_as_string = run_list_to_string(run)
 
-                directory = get_base_data_directory(self, run_as_string) + get_group_data_directory(self, run_as_string)
+                directory = get_base_data_directory(self, run_as_string)
 
                 name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=False)
                 asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=False)
@@ -114,8 +113,6 @@ class MuonContext(object):
                     run_as_string,
                     rebin=False)
                 directory = get_base_data_directory(
-                    self,
-                    run_as_string) + get_pair_data_directory(
                     self,
                     run_as_string)
 
@@ -185,8 +182,6 @@ class MuonContext(object):
                 self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
                     'OutputWorkspace']
             directory = get_base_data_directory(
-                self,
-                run_string) + get_raw_data_directory(
                 self,
                 run_string)
 

@@ -499,7 +499,7 @@ void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval) {
   const double scale = this->getProperty("ScaleFactor");
 
   for (auto &event : events) {
-    float de = static_cast<float>(
+    auto de = static_cast<float>(
         this->detectorEfficiency(expval * event.tof(), scale));
     event.m_weight *= de;
     event.m_errorSquared *= de * de;

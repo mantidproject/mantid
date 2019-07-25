@@ -45,7 +45,7 @@ template <>
 MANTID_API_DLL Mantid::API::IEventWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::IEventWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -62,7 +62,7 @@ template <>
 MANTID_API_DLL Mantid::API::IEventWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::IEventWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

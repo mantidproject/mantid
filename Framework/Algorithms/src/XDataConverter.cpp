@@ -54,7 +54,7 @@ void XDataConverter::exec() {
     return;
   }
 
-  const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numSpectra = static_cast<int>(inputWS->getNumberHistograms());
   const size_t numYValues = getNewYSize(inputWS);
   const size_t numXValues = getNewXSize(numYValues);
   m_sharedX = API::WorkspaceHelpers::sharedXData(*inputWS);

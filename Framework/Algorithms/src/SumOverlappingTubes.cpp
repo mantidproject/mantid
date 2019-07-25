@@ -136,7 +136,7 @@ void SumOverlappingTubes::exec() {
     for (int64_t ii = 0; ii < static_cast<int64_t>(m_numPoints); ++ii)
       for (size_t j = 0; j < m_numHistograms; ++j) {
         // Avoid spurious normalisation for low counting cells
-        const size_t i = static_cast<size_t>(ii);
+        const auto i = static_cast<size_t>(ii);
         if (normalisation[j][i] < 1e-15)
           continue;
         outputWS->mutableY(j)[i] /= normalisation[j][i];
@@ -326,7 +326,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      const int angleIndex = static_cast<int>(
+      const auto angleIndex = static_cast<int>(
           std::floor((angle - m_startScatteringAngle) / m_stepScatteringAngle));
 
       // point is out of range, a warning should have been generated already for

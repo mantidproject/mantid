@@ -79,8 +79,7 @@ void SavePAR::exec() {
                     }*/
   spCalcDetPar->execute();
   //
-  FindDetectorsPar *pCalcDetPar =
-      dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+  auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
   if (!pCalcDetPar) { // "can not get pointer to FindDetectorsPar algorithm"
     throw(std::bad_cast());
   }

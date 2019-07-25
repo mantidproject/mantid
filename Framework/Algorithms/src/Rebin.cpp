@@ -150,7 +150,7 @@ void Rebin::exec() {
   const bool isHist = inputWS->isHistogramData();
 
   // workspace independent determination of length
-  const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
   bool fullBinsOnly = getProperty("FullBinsOnly");
 

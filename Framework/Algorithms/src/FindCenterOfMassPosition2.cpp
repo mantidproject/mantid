@@ -83,7 +83,7 @@ void FindCenterOfMassPosition2::exec() {
 
   // Get the number of monitors. We assume that all monitors are stored in the
   // first spectra
-  const int numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, max_iteration);

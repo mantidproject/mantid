@@ -115,8 +115,8 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
         throw std::invalid_argument(error);
       }
       // b) parse
-      T intstart = boost::lexical_cast<T>(ptemp[0]);
-      T intend = boost::lexical_cast<T>(ptemp[1]);
+      auto intstart = boost::lexical_cast<T>(ptemp[0]);
+      auto intend = boost::lexical_cast<T>(ptemp[1]);
       if (intstart >= intend) {
         std::string error =
             "Range string " + rawstring + " has wrong order of detectors ID!";
@@ -126,7 +126,7 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
       pairs.push_back(intend);
 
     } else { // 3. Treat singles
-      T itemp = boost::lexical_cast<T>(rawstring);
+      auto itemp = boost::lexical_cast<T>(rawstring);
       singles.push_back(itemp);
     }
   } // ENDFOR i

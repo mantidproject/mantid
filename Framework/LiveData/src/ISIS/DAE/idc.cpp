@@ -41,7 +41,7 @@ static idc_error_report_t status_reporter = default_status_reporter;
 /** report an error */
 int IDCreport(int status, int code, const char *format, ...) {
   va_list ap;
-  char *message = reinterpret_cast<char *>(malloc(1024));
+  auto *message = reinterpret_cast<char *>(malloc(1024));
   va_start(ap, format);
   vsprintf(message, format, ap);
   va_end(ap);

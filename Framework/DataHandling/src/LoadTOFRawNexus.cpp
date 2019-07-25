@@ -270,7 +270,7 @@ struct range_check {
       : m_min(min), m_max(max), m_id_to_wi(id_to_wi) {}
 
   bool operator()(specnum_t x) {
-    specnum_t wi = static_cast<specnum_t>((m_id_to_wi)[x]);
+    auto wi = static_cast<specnum_t>((m_id_to_wi)[x]);
     return (wi + 1 < m_min || wi + 1 > m_max);
   }
 

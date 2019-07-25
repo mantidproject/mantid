@@ -20,8 +20,7 @@ GET_POINTER_SPECIALIZATION(SymmetryElement)
 namespace {
 Mantid::Kernel::V3D getAxis(SymmetryElement &self) {
   try {
-    SymmetryElementWithAxis &axisElement =
-        dynamic_cast<SymmetryElementWithAxis &>(self);
+    auto &axisElement = dynamic_cast<SymmetryElementWithAxis &>(self);
     return Mantid::Kernel::V3D(axisElement.getAxis());
   } catch (std::bad_cast &) {
     return Mantid::Kernel::V3D(0, 0, 0);
@@ -30,8 +29,7 @@ Mantid::Kernel::V3D getAxis(SymmetryElement &self) {
 
 SymmetryElementRotation::RotationSense getRotationSense(SymmetryElement &self) {
   try {
-    SymmetryElementRotation &rotationElement =
-        dynamic_cast<SymmetryElementRotation &>(self);
+    auto &rotationElement = dynamic_cast<SymmetryElementRotation &>(self);
     return rotationElement.getRotationSense();
   } catch (std::bad_cast &) {
     return SymmetryElementRotation::NoRotation;

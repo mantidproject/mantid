@@ -242,7 +242,7 @@ void LoadSQW::readEvents(
   size_t blockSize = pixel_width * 1000000;
 
   // Report progress once per block
-  int numBlocks = int((data_buffer_size + blockSize - 1) / blockSize);
+  auto numBlocks = int((data_buffer_size + blockSize - 1) / blockSize);
   m_prog->setNumSteps(numBlocks);
   m_prog->setNotifyStep(0.1);
 
@@ -269,19 +269,19 @@ void LoadSQW::readEvents(
     this->m_fileStream.read(&Buffer[0], currentBlockSize);
 
     // Go through each pixel in the input
-    int currentNumPixels = int(currentBlockSize / pixel_width);
+    auto currentNumPixels = int(currentBlockSize / pixel_width);
     eventsAdded += size_t(currentNumPixels);
 
     // Add the events in parallel
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < currentNumPixels; i++) {
-      size_t current_pix = size_t(i * pixel_width);
+      auto current_pix = size_t(i * pixel_width);
       coord_t centers[4] = {
           interpretAs<float>(Buffer, current_pix),
           interpretAs<float>(Buffer, current_pix + column_size),
           interpretAs<float>(Buffer, current_pix + column_size_2),
           interpretAs<float>(Buffer, current_pix + column_size_3)};
-      const float errorSQ =
+      const auto errorSQ =
           interpretAs<float>(Buffer, current_pix + column_size_8);
       ws->addEvent(MDEvent<4>(
           interpretAs<float>(Buffer, current_pix + column_size_7), // Signal
@@ -387,12 +387,12 @@ void LoadSQW::addLattice(
   this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
   this->m_fileStream.read(&buf[0], buf.size());
 
-  double a = static_cast<double>(interpretAs<float>(buf, 0));
-  double b = static_cast<double>(interpretAs<float>(buf, 4));
-  double c = static_cast<double>(interpretAs<float>(buf, 8));
-  double aa = static_cast<double>(interpretAs<float>(buf, 12));
-  double bb = static_cast<double>(interpretAs<float>(buf, 16));
-  double cc = static_cast<double>(interpretAs<float>(buf, 20));
+  auto a = static_cast<double>(interpretAs<float>(buf, 0));
+  auto b = static_cast<double>(interpretAs<float>(buf, 4));
+  auto c = static_cast<double>(interpretAs<float>(buf, 8));
+  auto aa = static_cast<double>(interpretAs<float>(buf, 12));
+  auto bb = static_cast<double>(interpretAs<float>(buf, 16));
+  auto cc = static_cast<double>(interpretAs<float>(buf, 20));
 
   ExperimentInfo_sptr info(new ExperimentInfo());
   // set up the goniometer. All mdEvents (pixels) in Horace sqw file are in lab
@@ -471,8 +471,8 @@ void LoadSQW::readDNDDimensions(
 
   // axis labels size
   i0 += 4 * 4;
-  unsigned int nRows = interpretAs<uint32_t>(buf, i0);
-  unsigned int nCols = interpretAs<uint32_t>(buf, i0 + 4);
+  auto nRows = interpretAs<uint32_t>(buf, i0);
+  auto nCols = interpretAs<uint32_t>(buf, i0 + 4);
 
   // read axis labelsg
   buf.resize(nRows * nCols);
@@ -501,7 +501,7 @@ void LoadSQW::readDNDDimensions(
   buf.resize(4 * 4 * 3);
   this->m_fileStream.read(&buf[0], 4);
 
-  unsigned int npax = interpretAs<uint32_t>(buf);
+  auto npax = interpretAs<uint32_t>(buf);
   unsigned int niax = 4 - npax;
 
   /*
@@ -529,7 +529,7 @@ void LoadSQW::readDNDDimensions(
 
     for (unsigned int i = 0; i < niax; i++) {
       iax[i] = interpretAs<uint32_t>(buf, i * 4) - 1;
-      float min = interpretAs<float>(buf, 4 * (niax + i * 2));
+      auto min = interpretAs<float>(buf, 4 * (niax + i * 2));
       float max =
           interpretAs<float>(buf, 4 * (niax + i * 2 + 1)) * (1 + FLT_EPSILON);
 
@@ -579,13 +579,13 @@ void LoadSQW::readDNDDimensions(
 
       std::vector<char> axis_buffer(101 * 4);
       this->m_fileStream.read(&axis_buffer[0], 4);
-      unsigned int nAxisPoints = interpretAs<uint32_t>(axis_buffer);
+      auto nAxisPoints = interpretAs<uint32_t>(axis_buffer);
       if (axis_buffer.size() < nAxisPoints * 4)
         axis_buffer.resize(nAxisPoints * 4);
 
       this->m_fileStream.read(&axis_buffer[0], 4 * nAxisPoints);
 
-      float min = interpretAs<float>(axis_buffer, 0);
+      auto min = interpretAs<float>(axis_buffer, 0);
       float max = interpretAs<float>(axis_buffer, 4 * (nAxisPoints - 1)) *
                   (1 + FLT_EPSILON);
 
@@ -650,7 +650,7 @@ void LoadSQW::readSQWDimensions(
   this->m_fileStream.read(&buf[0], buf.size());
 
   for (unsigned int i = 0; i < 4; i++) {
-    float min = interpretAs<float>(buf, 4 * i * 2);
+    auto min = interpretAs<float>(buf, 4 * i * 2);
     float max = interpretAs<float>(buf, 4 * (i * 2 + 1)) * (1 + FLT_EPSILON);
     DimVectorOut[i].setNumBins(m_nBins[i]);
     DimVectorOut[i].setMax(max);

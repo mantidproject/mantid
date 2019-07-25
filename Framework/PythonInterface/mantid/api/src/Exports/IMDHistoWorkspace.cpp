@@ -46,7 +46,7 @@ PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
                                   std::vector<Py_intptr_t> dims) {
   int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
 #if NPY_API_VERSION >= 0x00000007 //(1.7)
-  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(PyArray_New(
+  auto *nparray = reinterpret_cast<PyArrayObject *>(PyArray_New(
       &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, nullptr,
       static_cast<void *>(const_cast<double *>(arr)), 0, NPY_ARRAY_FARRAY,
       nullptr));

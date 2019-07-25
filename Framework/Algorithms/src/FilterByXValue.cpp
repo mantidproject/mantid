@@ -76,7 +76,7 @@ void FilterByXValue::exec() {
   xmin *= 0.999999999;
   xmax *= 1.000000001;
 
-  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Check if we're doing thing in-place.
   if (inputWS != outputWS) {

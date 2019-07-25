@@ -162,7 +162,7 @@ void MaskMD::exec() {
   // Explicitly cast nGroups and group to double to avoid compiler warnings
   // loss of precision does not matter as we are only using the result
   // for reporting algorithm progress
-  const double nGroups_double = static_cast<double>(nGroups);
+  const auto nGroups_double = static_cast<double>(nGroups);
   // Loop over all groups
   for (size_t group = 0; group < nGroups; ++group) {
     std::vector<InputArgument> arguments(nDims);
@@ -196,7 +196,7 @@ void MaskMD::exec() {
     // Add new masking.
     ws->setMDMasking(std::make_unique<MDBoxImplicitFunction>(mins, maxs));
     this->interruption_point();
-    double group_double = static_cast<double>(group);
+    auto group_double = static_cast<double>(group);
     this->progress(group_double / nGroups_double);
   }
   this->progress(1.0); // Ensure algorithm progress is reported as complete
