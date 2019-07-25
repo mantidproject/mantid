@@ -15,10 +15,10 @@ elif qtpy.PYQT4:
 else:
     raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
 
-from qtpy import QtCore, QtGui, QtWidgets # noqa: E402
+from qtpy import QtCore, QtGui, QtWidgets  # noqa: E402
 from qtpy.QtCore import Signal # noqa: E402
-from qtpy.QtWidgets import QMessageBox # noqa: E402
-from mantidqt.utils.qt import load_ui # noqa: E402
+from qtpy.QtGui import QDesktopServices  # noqa: E402
+from qtpy.QtWidgets import QMessageBox, QTextEdit  # noqa: E402
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
@@ -26,10 +26,25 @@ ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     action = Signal(bool, int, str, str, str)
     quit_signal = Signal()
+    default_plain_text = ("Please enter any additional information about your problems. "
+                          "(Max 3200 characters)\n"
+                          "\n"
+                          "For example:\n"
+                          "Error messages on the screen\n "
+                          "A script that causes the problem\n "
+                          "The functions you used immediately before the problem\n"
+                          "\n"
+                          "Thank you!")
+    free_text_edited = False;
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+        if qtpy.PYQT4:  # TODO
+            self.input_free_text.setPlainText(self.default_plain_text)
+            self.input_free_text.cursorPositionChanged.connect(self.check_placeholder_text)
+        elif qtpy.PYQT5:
+            self.input_free_text.setPlaceholderText(self.default_plain_text)
         self.input_text = ""
         if not show_continue_terminate:
             self.continue_terminate_frame.hide()
@@ -85,6 +100,11 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         value_as_string = gui_element.toPlainText()
 
         return expected_type(value_as_string) if value_as_string else ''
+
+    def check_placeholder_text(self):
+        if not self.free_text_edited:
+            self.input_free_text.setPlainText("")
+            self.free_text_edited = True
 
     def set_button_status(self):
         if self.input_text == '' and not self.input_name and not self.input_email:
