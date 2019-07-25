@@ -123,7 +123,7 @@ std::recursive_mutex FUNCTION_REGISTER_MUTEX;
  */
 void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
-  static PyTypeObject *baseClass = const_cast<PyTypeObject *>(
+  static auto *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
   // object mantidapi(handle<>(PyImport_ImportModule("mantid.api")));
   // object ifunction = mantidapi.attr("IFunction");

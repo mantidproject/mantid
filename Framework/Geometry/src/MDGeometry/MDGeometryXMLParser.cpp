@@ -80,7 +80,7 @@ void MDGeometryXMLParser::execute() {
 
   ////Extract dimensions
   for (size_t i = 0; i < nDimensions; i++) {
-    Poco::XML::Element *dimensionXML = static_cast<Poco::XML::Element *>(
+    auto *dimensionXML = static_cast<Poco::XML::Element *>(
         dimensionsXML->item(static_cast<unsigned long>(i)));
     vecAllDims[i] = createDimension(*dimensionXML);
   }

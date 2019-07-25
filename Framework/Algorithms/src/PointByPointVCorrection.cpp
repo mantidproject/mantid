@@ -56,8 +56,8 @@ void PointByPointVCorrection::exec() {
   check_validity(inputWS1, inputWS2, outputWS);
 
   // Now do the normalisation
-  const int size = static_cast<int>(inputWS1->x(0).size());
-  const int nHist = static_cast<int>(inputWS1->getNumberHistograms());
+  const auto size = static_cast<int>(inputWS1->x(0).size());
+  const auto nHist = static_cast<int>(inputWS1->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS1, *inputWS2, *outputWS))

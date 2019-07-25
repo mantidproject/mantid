@@ -292,7 +292,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     int slabx = x % x_pixel_slab;
 
     Timer tim1;
-    int ypixels = static_cast<int>(det->ypixels());
+    auto ypixels = static_cast<int>(det->ypixels());
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
     for (int y = 0; y < ypixels; y++) {

@@ -275,8 +275,7 @@ void PlotPeakByLogValue::exec() {
           throw std::invalid_argument("Log value " + logName +
                                       " does not exist");
         }
-        TimeSeriesProperty<double> *logp =
-            dynamic_cast<TimeSeriesProperty<double> *>(prop);
+        auto *logp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
         if (!logp) {
           throw std::runtime_error("Failed to cast " + logName +
                                    " to TimeSeriesProperty");
@@ -485,7 +484,7 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
         out.spec = axis->spectraNo(out.i);
       } else { // i < 0 && spec < 0 => use start and end
         for (size_t i = 0; i < axis->length(); ++i) {
-          double s = double(axis->spectraNo(i));
+          auto s = double(axis->spectraNo(i));
           if (s >= out.start && s <= out.end) {
             out.indx.push_back(static_cast<int>(i));
           }
@@ -662,7 +661,7 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
   auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(format);
   auto minimizerProps = minimizer->getProperties();
   for (auto &minimizerProp : minimizerProps) {
-    Mantid::API::WorkspaceProperty<> *wsProp =
+    auto *wsProp =
         dynamic_cast<Mantid::API::WorkspaceProperty<> *>(minimizerProp);
     if (wsProp) {
       const std::string &wsPropValue = minimizerProp->value();

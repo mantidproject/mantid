@@ -222,7 +222,7 @@ void LoadIsawDetCal::exec() {
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           if (run.hasProperty("T0")) {
-            double T0IDF = run.getPropertyValueAsType<double>("T0");
+            auto T0IDF = run.getPropertyValueAsType<double>("T0");
             alg1->setProperty("Offset", mT0 - T0IDF);
           } else {
             alg1->setProperty("Offset", mT0);

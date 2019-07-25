@@ -53,8 +53,8 @@ void MultiplyMD::checkInputs() {
 template <typename MDE, size_t nd>
 void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
-  float scalar = static_cast<float>(m_rhs_scalar->y(0)[0]);
-  float scalarError = static_cast<float>(m_rhs_scalar->e(0)[0]);
+  auto scalar = static_cast<float>(m_rhs_scalar->y(0)[0]);
+  auto scalarError = static_cast<float>(m_rhs_scalar->e(0)[0]);
   float scalarErrorSquared = scalarError * scalarError;
   float scalarSquared = scalar * scalar;
 
@@ -71,7 +71,7 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   }
 
   for (auto &boxe : boxes) {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
+    auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
     if (box) {
       typename std::vector<MDE> &events = box->getEvents();
       size_t ic(events.size());

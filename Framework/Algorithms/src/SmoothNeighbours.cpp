@@ -734,7 +734,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
 
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = outWI;
-  const int YLength = static_cast<int>(inWS->blocksize());
+  const auto YLength = static_cast<int>(inWS->blocksize());
 
   EventWorkspace_sptr outWS;
   // Make a brand new EventWorkspace

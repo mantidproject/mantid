@@ -911,7 +911,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   // the same bin width as the input workspace
   const double binWidth = (detectorWS->x(0).back() - detectorWS->x(0).front()) /
                           static_cast<double>(detectorWS->blocksize());
-  const int numBins = static_cast<int>(
+  const auto numBins = static_cast<int>(
       std::ceil((wavelengthMax() - wavelengthMin()) / binWidth));
   // Construct the histogram with these X values. Y and E values are zero.
   const BinEdges xValues(numBins, LinearGenerator(wavelengthMin(), binWidth));
@@ -987,7 +987,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       std::vector<double> projectedE(outputE.size(), 0.0);
 
       // Process each value in the spectrum
-      const int ySize = static_cast<int>(inputY.size());
+      const auto ySize = static_cast<int>(inputY.size());
       for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
         // Do the summation in Q
         sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY,
@@ -995,7 +995,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       }
 
       // Sum errors in quadrature
-      const int eSize = static_cast<int>(outputE.size());
+      const auto eSize = static_cast<int>(outputE.size());
       for (int outIdx = 0; outIdx < eSize; ++outIdx) {
         outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
       }
@@ -1091,7 +1091,7 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  const int xSize = static_cast<int>(outputX.size());
+  const auto xSize = static_cast<int>(outputX.size());
   for (auto outIdx = startIter - outputX.begin(); outIdx < xSize - 1;
        ++outIdx) {
     const double binStart = outputX[outIdx];

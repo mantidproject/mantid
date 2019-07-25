@@ -219,6 +219,7 @@ endif()
 
 add_custom_target(AllTests)
 add_dependencies(AllTests FrameworkTests)
+
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)

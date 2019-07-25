@@ -121,7 +121,7 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
     throw std::runtime_error(
         "NearestNeighbours::build - Cannot find any spectra");
   }
-  const int nspectra =
+  const auto nspectra =
       static_cast<int>(indices.size()); // ANN only deals with integers
   if (noNeighbours >= nspectra) {
     throw std::invalid_argument(
@@ -215,7 +215,7 @@ WorkspaceNearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
     Graph::adjacency_iterator adjIt;
     for (adjIt = adjacent.first; adjIt != adjacent.second; adjIt++) {
       Vertex nearest = (*adjIt);
-      specnum_t nrSpec = specnum_t(m_vertexID[nearest]);
+      auto nrSpec = specnum_t(m_vertexID[nearest]);
       std::pair<Graph::edge_descriptor, bool> nrEd =
           boost::edge(vertex->second, nearest, m_graph);
       result[nrSpec] = m_edgeLength[nrEd.first];

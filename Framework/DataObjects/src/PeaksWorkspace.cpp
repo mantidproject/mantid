@@ -599,7 +599,7 @@ bool PeaksWorkspace::hasIntegratedPeaks() const {
   bool ret = false;
   const std::string peaksIntegrated = "PeaksIntegrated";
   if (this->run().hasProperty(peaksIntegrated)) {
-    const int value = boost::lexical_cast<int>(
+    const auto value = boost::lexical_cast<int>(
         this->run().getProperty(peaksIntegrated)->value());
     ret = (value != 0);
   }
@@ -625,7 +625,7 @@ API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const {
   table->addColumn("int", "Index");
   table->addColumn("int", "DetectorID");
 
-  const int npeaks(static_cast<int>(this->rowCount()));
+  const auto npeaks(static_cast<int>(this->rowCount()));
   int nrows(0);
   for (int i = 0; i < npeaks; ++i) {
     const Peak &peak = this->peaks[i];
@@ -997,10 +997,9 @@ template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -1015,10 +1014,9 @@ template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

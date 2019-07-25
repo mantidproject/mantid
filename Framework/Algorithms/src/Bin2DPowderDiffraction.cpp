@@ -222,7 +222,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   outputWS->replaceAxis(1, std::move(verticalAxis));
 
   Progress prog(this, 0.0, 1.0, m_numberOfSpectra);
-  int64_t numSpectra = static_cast<int64_t>(m_numberOfSpectra);
+  auto numSpectra = static_cast<int64_t>(m_numberOfSpectra);
   std::vector<std::vector<double>> newYValues(
       dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
   std::vector<std::vector<double>> newEValues(

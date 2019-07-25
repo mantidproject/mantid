@@ -71,7 +71,7 @@ void FindDetectorsPar::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   // Number of spectra
-  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
@@ -100,7 +100,7 @@ void FindDetectorsPar::exec() {
   this->m_nDetectors = 0;
 
   Progress progress(this, 0.0, 1.0, 100);
-  const int progStep = static_cast<int>(ceil(double(nHist) / 100.0));
+  const auto progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
 

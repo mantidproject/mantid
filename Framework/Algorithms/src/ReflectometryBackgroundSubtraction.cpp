@@ -298,7 +298,7 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
-    int range = static_cast<int>(spectraList.back() - spectraList.front());
+    auto range = static_cast<int>(spectraList.back() - spectraList.front());
     int degree = getProperty("degreeOfPolynomial");
     if (range < degree) {
       throw std::invalid_argument(

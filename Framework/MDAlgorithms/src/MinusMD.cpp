@@ -75,7 +75,7 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   // workspace
   MDBoxIterator<MDE, nd> it2(box2, 1000, true);
   do {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(it2.getBox());
+    auto *box = dynamic_cast<MDBox<MDE, nd> *>(it2.getBox());
     if (box) {
       // Copy the events from WS2 and add them into WS1
       const std::vector<MDE> &events = box->getConstEvents();

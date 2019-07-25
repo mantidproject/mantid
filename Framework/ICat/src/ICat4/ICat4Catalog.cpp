@@ -361,8 +361,7 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
   std::vector<xsd__anyType *>::const_iterator iter;
   for (iter = response.begin(); iter != response.end(); ++iter) {
     // Cast from xsd__anyType to subclass (xsd__string).
-    ns1__investigation *investigation =
-        dynamic_cast<ns1__investigation *>(*iter);
+    auto *investigation = dynamic_cast<ns1__investigation *>(*iter);
     if (investigation) {
       API::TableRow table = outputws->appendRow();
       // Used to insert an empty string into the cell if value does not exist.
@@ -450,7 +449,7 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
 
   std::string emptyCell;
   for (auto &iter : response) {
-    ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(iter);
+    auto *dataset = dynamic_cast<ns1__dataset *>(iter);
     if (dataset) {
       API::TableRow table = outputws->appendRow();
 
@@ -517,7 +516,7 @@ void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType *> response,
 
   std::vector<xsd__anyType *>::const_iterator iter;
   for (iter = response.begin(); iter != response.end(); ++iter) {
-    ns1__datafile *datafile = dynamic_cast<ns1__datafile *>(*iter);
+    auto *datafile = dynamic_cast<ns1__datafile *>(*iter);
     if (datafile) {
       API::TableRow table = outputws->appendRow();
       // Now add the relevant investigation data to the table.

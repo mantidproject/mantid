@@ -40,7 +40,7 @@ void updateTreeValues(Poco::XML::Element *root,
   NodeIterator nodeIter(root, NodeFilter::SHOW_ELEMENT);
   Node *node = nodeIter.nextNode();
   while (node) {
-    Element *element = static_cast<Element *>(node);
+    auto *element = static_cast<Element *>(node);
     auto argIter = args.find(node->nodeName());
     if (argIter != args.end()) {
       element->setAttribute(VAL_ATT, std::to_string(argIter->second));

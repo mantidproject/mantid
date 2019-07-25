@@ -225,8 +225,7 @@ void StartLiveData::exec() {
     // Create the MonitorLiveData but DO NOT make a AlgorithmProxy to it
     IAlgorithm_sptr algBase =
         AlgorithmManager::Instance().create("MonitorLiveData", -1, false);
-    MonitorLiveData *monitorAlg =
-        dynamic_cast<MonitorLiveData *>(algBase.get());
+    auto *monitorAlg = dynamic_cast<MonitorLiveData *>(algBase.get());
 
     if (!monitorAlg)
       throw std::runtime_error("Error creating the MonitorLiveData algorithm");

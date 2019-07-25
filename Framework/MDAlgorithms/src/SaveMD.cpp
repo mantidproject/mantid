@@ -135,7 +135,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   //-----------------------------------------------------------------------------------------------------
   // create or open WS group and put there additional information about WS and
   // its dimensions
-  int nDims = static_cast<int>(nd);
+  auto nDims = static_cast<int>(nd);
   bool data_exist;
   auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(
       filename, nDims, MDE::getTypeName(), false, data_exist));
@@ -295,7 +295,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
                 "signal_t typedef has been changed!");
 
   // Number of data points
-  int nPoints = static_cast<int>(ws->getNPoints());
+  auto nPoints = static_cast<int>(ws->getNPoints());
 
   file->makeData("signal", ::NeXus::FLOAT64, nPoints, true);
   file->putData(ws->getSignalArray());

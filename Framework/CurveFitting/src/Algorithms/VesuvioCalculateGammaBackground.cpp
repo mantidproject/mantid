@@ -116,7 +116,7 @@ void VesuvioCalculateGammaBackground::exec() {
   retrieveInputs();
   createOutputWorkspaces();
 
-  const int64_t nhist = static_cast<int64_t>(m_indices.size());
+  const auto nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
   m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nreports);

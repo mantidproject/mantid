@@ -400,14 +400,14 @@ void ISISHistoDataListener::calculateIndicesForReading(
       specnum_t next = m_specList[i];
       if (next - m_specList[i - 1] > 1 ||
           static_cast<int>(i - i0) >= maxNumberOfSpectra) {
-        int n = static_cast<int>(i - i0);
+        auto n = static_cast<int>(i - i0);
         index.push_back(spec);
         count.push_back(n);
         i0 = i;
         spec = next;
       }
     }
-    int n = static_cast<int>(m_specList.size() - i0);
+    auto n = static_cast<int>(m_specList.size() - i0);
     index.push_back(spec);
     count.push_back(n);
   }

@@ -661,7 +661,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   const double height = *maxValueIt;
   // determine initial centre: index of the maximum value
   const size_t maxIndex = std::distance(integralWS->y(0).cbegin(), maxValueIt);
-  const double centreByMax = static_cast<double>(maxIndex);
+  const auto centreByMax = static_cast<double>(maxIndex);
   g_log.debug() << "Peak maximum position: " << centreByMax << '\n';
   // determine sigma
   const auto &ys = integralWS->y(0);
@@ -676,7 +676,7 @@ double LoadILLReflectometry::reflectometryPeak() {
                        "value as beam center.\n";
     return centreByMax;
   }
-  const double fwhm =
+  const auto fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
                 << '\n';

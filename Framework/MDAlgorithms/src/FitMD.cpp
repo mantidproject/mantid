@@ -227,7 +227,7 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
   const float errorSq = 0.0;
   do {
     const size_t numEvents = inputIter->getNumEvents();
-    const float signal =
+    const auto signal =
         static_cast<float>(values.getCalculated(resultValueIndex));
     for (size_t i = 0; i < numEvents; ++i) {
       coord_t centers[4] = {

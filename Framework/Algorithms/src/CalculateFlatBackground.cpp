@@ -358,7 +358,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram,
 
   // the +1 is because this is an inclusive sum (includes each bin that contains
   // each X-value). Hence if startInd == endInd we are still analyzing one bin
-  const double numBins = static_cast<double>(1 + endInd - startInd);
+  const auto numBins = static_cast<double>(1 + endInd - startInd);
   // the +1 here is because the accumulate() stops one before the location of
   // the last iterator
   background =

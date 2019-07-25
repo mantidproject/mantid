@@ -93,7 +93,7 @@ void BoxControllerSettingsAlgorithm::takeDefaultsFromInstrument(
     std::vector<double> instrumentSplitInto =
         instrument->getNumberParameter(splitIntoName, true);
     if (!instrumentSplitInto.empty()) {
-      const int splitInto = static_cast<int>(instrumentSplitInto.front());
+      const auto splitInto = static_cast<int>(instrumentSplitInto.front());
       std::vector<int> newSplitInto(ndims, splitInto);
       setProperty(splitIntoName, newSplitInto);
     }

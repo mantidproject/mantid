@@ -546,7 +546,7 @@ double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
 
   std::vector<double> boundaries = getBoundariesOfNumericImage(inWS);
   const auto &refX = inWS->x(inputWS->getNumberHistograms() / 2);
-  int nX = static_cast<int>(refX.size());
+  auto nX = static_cast<int>(refX.size());
   int nY = static_cast<int>(inWS->getAxis(1)->length());
 
   // remembering boundaries is defined as { xMin, xMax, yMin, yMax}

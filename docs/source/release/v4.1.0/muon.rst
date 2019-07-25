@@ -70,5 +70,10 @@ Bug Fixes
 * Elemental Analysis no longer crashes when an ill formatted data file is loaded.
 * Changed the y-axis label in Elemental Analysis to `Counts`.
 
+Known Issues
+############
+
+* Plotting can be very slow to update if large numbers of workspaces are plotted. This can lead to unresponsive behaviour when large numbers of workspaces are fitted with sequential fits. As a temporary solution closing the plot window before performing large sequential fits can avoid this slowdown.
+
 
 :ref:`Release 4.1.0 <v4.1.0>`

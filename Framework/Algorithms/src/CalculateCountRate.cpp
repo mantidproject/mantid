@@ -214,12 +214,12 @@ void CalculateCountRate::calcRateLog(
     pVisWS_locks.reset(new std::mutex[m_visWs->getNumberHistograms()]);
   }
 
-  int64_t nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
+  auto nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
   // Initialize progress reporting.
   API::Progress prog(this, 0.0, 1.0, nHist);
 
-  double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
-  double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
+  auto dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
+  auto dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
   std::vector<MantidVec> Buff;
 
 #pragma omp parallel
@@ -301,8 +301,8 @@ void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
     if (tof < m_XRangeMin || tof >= m_XRangeMax)
       continue;
 
-    size_t n_spec = static_cast<size_t>((pulsetime - m_visT0) / m_visDT);
-    size_t n_bin = static_cast<size_t>((tof - m_XRangeMin) / m_visDX);
+    auto n_spec = static_cast<size_t>((pulsetime - m_visT0) / m_visDT);
+    auto n_bin = static_cast<size_t>((tof - m_XRangeMin) / m_visDX);
     (spectraLocks + n_spec)->lock();
     auto &Y = m_visWs->mutableY(n_spec);
     Y[n_bin]++;
@@ -447,7 +447,7 @@ void CalculateCountRate::setOutLogParameters(
   // identify epsilon to use with current time
   double t_epsilon = double(runTMax.totalNanoseconds()) *
                      (1 + std::numeric_limits<double>::epsilon());
-  int64_t eps_increment =
+  auto eps_increment =
       static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
 
   m_TRangeMin = runTMin - eps_increment;

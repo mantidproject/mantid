@@ -234,7 +234,7 @@ std::complex<double> E1(std::complex<double> z) {
     std::complex<double> cr = r;
 
     for (size_t k = 1; k <= 150; ++k) {
-      double dk = double(k);
+      auto dk = double(k);
       cr = -cr * dk * z / ((dk + 1.0) * (dk + 1.0));
       exp_e1 += cr;
       if (abs(cr) < abs(exp_e1) * 1.0E-15) {
