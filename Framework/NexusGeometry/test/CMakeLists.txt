@@ -6,7 +6,8 @@ if(CXXTEST_FOUND)
                       ${Boost_INCLUDE_DIRS}
                       ../../TestHelpers/inc)
 
-  set(TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp)
+  set(TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp
+                      ../../TestHelpers/src/JSONGeometryParserTestHelper.cpp)
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 
