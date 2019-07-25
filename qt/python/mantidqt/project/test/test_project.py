@@ -166,17 +166,17 @@ class ProjectTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project._get_project_size = mock.MagicMock(return_value=
                                                         int(ConfigService.getString("projectSaving.warningSize")) + 1)
-        self.project.offer_large_size_confirmation = mock.MagicMock()
+        self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
-        self.assertEqual(self.project.offer_large_size_confirmation.call_count, 1)
+        self.assertEqual(self.project._offer_large_size_confirmation.call_count, 1)
 
     def test_large_file_dialog_does_not_appear_for_small_file(self):
         CreateSampleWorkspace(OutputWorkspace="ws1")
         self.project._get_project_size = mock.MagicMock(return_value=
                                                         int(ConfigService.getString("projectSaving.warningSize")) - 1)
-        self.project.offer_large_size_confirmation = mock.MagicMock()
+        self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
-        self.assertEqual(self.project.offer_large_size_confirmation.call_count, 0)
+        self.assertEqual(self.project._offer_large_size_confirmation.call_count, 0)
 
 
 if __name__ == "__main__":

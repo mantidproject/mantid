@@ -19,7 +19,6 @@ from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
 
 
-# noinspection PyTypeChecker
 class Project(AnalysisDataServiceObserver):
     def __init__(self, globalfiguremanager_instance, interface_populating_function):
         """
@@ -112,12 +111,10 @@ class Project(AnalysisDataServiceObserver):
         project_size = self._get_project_size(workspaces_to_save)
         warning_size = int(ConfigService.getString("projectSaving.warningSize"))
         # If a project is > the value in the properties file, question the user if they want to continue.
-        saving = True
+        result = None
         if project_size > warning_size:
-            result = self.offer_large_size_confirmation()
-            if result == QMessageBox.Cancel:
-                saving = False
-        if saving:
+            result = self._offer_large_size_confirmation()
+        if isinstance(result, None) or result != QMessageBox.Cancel:
             plots_to_save = self.plot_gfm.figs
             interfaces_to_save = self.interface_populating_function()
             project_saver = ProjectSaver(self.project_file_ext)
@@ -125,7 +122,8 @@ class Project(AnalysisDataServiceObserver):
                                        plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
             self.__saved = True
 
-    def _get_project_size(self, workspace_names):
+    @staticmethod
+    def _get_project_size(workspace_names):
         project_size = 0
         for name in workspace_names:
             project_size += AnalysisDataService.retrieve(name).getMemorySize()
@@ -186,7 +184,7 @@ class Project(AnalysisDataServiceObserver):
             return QMessageBox.No
 
     @staticmethod
-    def offer_large_size_confirmation():
+    def _offer_large_size_confirmation():
         """
         Asks the user to confirm that they want to save a large project.
         :return: QMessageBox; The response from the user. Default is Yes.
