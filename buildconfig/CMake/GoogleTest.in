@@ -14,7 +14,8 @@ ExternalProject_Add(googletest
   GIT_TAG           "${_tag}"
   SOURCE_DIR        "@CMAKE_BINARY_DIR@/googletest-src"
   BINARY_DIR        "@CMAKE_BINARY_DIR@/googletest-build"
-  PATCH_COMMAND     "@GIT_EXECUTABLE@" reset --hard ${_tag}
+  PATCH_COMMAND     "@GIT_EXECUTABLE@" checkout .
+            COMMAND "@GIT_EXECUTABLE@" reset --hard ${_tag}
             COMMAND "@GIT_EXECUTABLE@" apply ${_apply_flags} "@CMAKE_SOURCE_DIR@/buildconfig/CMake/googletest_1.8.1.patch"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
