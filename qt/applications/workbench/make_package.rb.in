@@ -348,11 +348,13 @@ if !File.exist?(mpltoolkit_init)
   `touch #{mpltoolkit_init}`
 end
 
-files = ["gnureadline.so","cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py","six.py"]
+files = ["cycler.py","readline.py","pyparsing.py","mistune.py","decorator.py","kiwisolver.so","subprocess32.py","six.py"]
 files.each do |file|
   copyFile("#{pip_site_packages}/#{file}")
 end
 
+# gnureadline is only present on older versions of readline
+copyOptionalFile("#{pip_site_packages}/gnureadline.so")
 # mistune.so isn't present in v0.7
 copyOptionalFile("#{pip_site_packages}/mistune.so")
 
