@@ -22,6 +22,7 @@ namespace API {
 
 class MANTID_API_DLL Citation {
 public:
+  Citation(const BaseCitation &cite);
   Citation(::NeXus::File *file, const std::string &group);
   Citation(const std::string &doi = "", const std::string &bibtex = "",
            const std::string &endnote = "", const std::string &url = "",
@@ -50,9 +51,6 @@ private:
   std::string m_bibtex;
   std::string m_endnote;
 };
-
-Citation MANTID_API_DLL getCitation(const BaseCitation &cite);
-
 } // namespace API
 } // namespace Mantid
 

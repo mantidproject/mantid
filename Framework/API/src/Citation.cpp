@@ -62,14 +62,13 @@ Citation::Citation(::NeXus::File *file, const std::string &group) {
   loadNexus(file, group);
 }
 
+Citation::Citation(const BaseCitation &cite)
+    : Citation(cite.m_doi, cite.toBibTex(), cite.toEndNote(), cite.m_url,
+               cite.m_description) {}
+
 bool Citation::operator==(const Citation &rhs) const {
   return m_bibtex == rhs.m_bibtex && m_description == rhs.m_description &&
          m_doi == rhs.m_doi && m_endnote == rhs.m_endnote && m_url == rhs.m_url;
-}
-
-Citation getCitation(const BaseCitation &cite) {
-  return Citation(cite.m_doi, cite.toBibTex(), cite.toEndNote(), cite.m_url,
-                  cite.m_description);
 }
 
 const std::string &Citation::description() const { return m_description; }

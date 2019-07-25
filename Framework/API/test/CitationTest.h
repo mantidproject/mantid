@@ -91,7 +91,7 @@ public:
   }
 
   void test_getCitation_with_a_citation_struct() {
-    auto cite = Mantid::API::getCitation(Mantid::API::ArticleCitation(
+    auto cite = Mantid::API::Citation(Mantid::API::ArticleCitation(
         {"author1", "author2"}, "title", "journal", "year", "", "number",
         "pages", "month", "description", "", "url"));
     TS_ASSERT_EQUALS(cite.doi(), "");
