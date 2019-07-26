@@ -633,7 +633,7 @@ private:
       shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
       isGroup = true;
     } catch (H5::Exception &) {
- 		// shape is not mandatory
+      // shape is not mandatory
       try {
         shapeGroup = detectorGroup.openGroup(SHAPE);
       } catch (H5::Exception &) {
