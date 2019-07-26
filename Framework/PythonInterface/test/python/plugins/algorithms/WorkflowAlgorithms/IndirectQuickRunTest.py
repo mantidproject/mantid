@@ -30,7 +30,7 @@ class IndirectQuickRunTest(unittest.TestCase):
         self._spectra_range = '963,980'
         self._elastic_range = '-0.02,0.02'
         self._inelastic_range = '0.4,0.5'
-        self._total_range = '-0.5, 0.5'
+        self._total_range = '-0.5,0.5'
 
     def tearDown(self):
         AnalysisDataService.clear()
@@ -62,7 +62,7 @@ class IndirectQuickRunTest(unittest.TestCase):
         msd_fit_group = get_ads_workspace('osiris92762_to_osiris92766_scan_msd_fit')
 
         self.assertTrue(isinstance(msd_fit_group, WorkspaceGroup))
-        self.assertEqual(msd_fit_group.getNumberOfEntries(), 2)
+        self.assertEqual(msd_fit_group.getNumberOfEntries(), 5)
 
     def test_that_IndirectQuickRun_produces_the_correct_workspaces_when_doing_a_WidthFit(self):
         self._execute_IndirectQuickRun(width_fit=True)
