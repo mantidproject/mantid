@@ -259,6 +259,13 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         graph = windows()[0]
         self.assertTrue('Graph' in str(graph))
 
+    def test_size_warning_true_with_large_file(self):
+        print("TODO") #TODO
+
+    def test_size_warning_false_with_small_file(self):
+        print("TODO") #TODO
+
+
     def test_save_instrument_view(self):
       workspace_name = 'fake_workspace'
       instrument_name = 'IRIS'
