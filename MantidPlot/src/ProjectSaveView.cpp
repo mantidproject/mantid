@@ -248,7 +248,7 @@ void ProjectSaveView::save(bool checked) {
     return;
   }
   auto wsNames = getCheckedWorkspaceNames();
-  if (m_serialiser.needsSizeWarning()) {
+  if (m_serialiser.needsSizeWarning(wsNames)) {
     auto result = QMessageBox::question(
         this, "Project Save",
         "This project is very large, and so may take a long "
