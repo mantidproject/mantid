@@ -147,9 +147,11 @@ protected:
 
   /// Gets the x range from a workspace
   QPair<double, double>
-  getXRangeFromWorkspace(std::string const &workspaceName) const;
-  QPair<double, double> getXRangeFromWorkspace(
-      Mantid::API::MatrixWorkspace_const_sptr workspace) const;
+  getXRangeFromWorkspace(std::string const &workspaceName,
+                         double precision = 0.000001) const;
+  QPair<double, double>
+  getXRangeFromWorkspace(Mantid::API::MatrixWorkspace_const_sptr workspace,
+                         double precision = 0.000001) const;
 
   /// Converts a standard vector of standard strings to a QVector of QStrings.
   QVector<QString>

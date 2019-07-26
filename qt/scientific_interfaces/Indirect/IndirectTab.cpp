@@ -39,6 +39,17 @@ using Mantid::Types::Core::DateAndTime;
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
 
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd,
+                                            double precision) {
+  return QPair<double, double>(
+      roundToPrecision(rangeStart, precision) + precision,
+      roundToPrecision(rangeEnd, precision) - precision);
+}
+
 std::string castToString(int value) {
   return boost::lexical_cast<std::string>(value);
 }
@@ -549,18 +560,20 @@ bool IndirectTab::getResolutionRangeFromWs(
 }
 
 QPair<double, double>
-IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName) const {
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName,
+                                    double precision) const {
   auto const &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
     return getXRangeFromWorkspace(
-        ads.retrieveWS<MatrixWorkspace>(workspaceName));
+        ads.retrieveWS<MatrixWorkspace>(workspaceName), precision);
   return QPair<double, double>(0.0, 0.0);
 }
 
 QPair<double, double> IndirectTab::getXRangeFromWorkspace(
-    Mantid::API::MatrixWorkspace_const_sptr workspace) const {
-  const auto xValues = workspace->x(0);
-  return QPair<double, double>(xValues[0], xValues[xValues.size() - 1]);
+    Mantid::API::MatrixWorkspace_const_sptr workspace, double precision) const {
+  auto const xValues = workspace->x(0);
+  return roundRangeToPrecision(xValues[0], xValues[xValues.size() - 1],
+                               precision);
 }
 
 /**
