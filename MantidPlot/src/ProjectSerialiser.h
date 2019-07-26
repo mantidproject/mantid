@@ -64,6 +64,8 @@ public:
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
+  /// Check the size of workspaces to be saved
+  bool needsSizeWarning();
 
 signals:
   /// Set the curret progress of serialisation
