@@ -331,9 +331,11 @@ void Stretch::loadSettings(const QSettings &settings) {
  */
 void Stretch::handleSampleInputReady(const QString &filename) {
   try {
+    m_uiForm.ppPlot->clear();
     m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
+    return;
   }
 
   // update the maximum and minimum range bar positions

@@ -299,9 +299,13 @@ void ResNorm::loadSettings(const QSettings &settings) {
 void ResNorm::handleVanadiumInputReady(const QString &filename) {
   // Plot the vanadium
   try {
+    if (!m_uiForm.ppPlot->hasCurve("Resolution"))
+      m_uiForm.ppPlot->clear();
+
     m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
+    return;
   }
 
   QPair<double, double> res;
@@ -343,6 +347,9 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
  */
 void ResNorm::handleResolutionInputReady(const QString &filename) {
   try {
+    if (!m_uiForm.ppPlot->hasCurve("Vanadium"))
+      m_uiForm.ppPlot->clear();
+
     m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
@@ -394,11 +401,16 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
 void ResNorm::previewSpecChanged(int value) {
   m_previewSpec = value;
 
+  m_uiForm.ppPlot->clear();
+
   // Update vanadium plot
   if (m_uiForm.dsVanadium->isValid())
     try {
       m_uiForm.ppPlot->addSpectrum(
           "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+      m_uiForm.ppPlot->addSpectrum("Resolution",
+                                   m_uiForm.dsResolution->getCurrentDataName(),
+                                   0, Qt::blue);
     } catch (std::exception const &ex) {
       g_log.warning(ex.what());
     }
