@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
@@ -332,7 +333,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   }
 
   // update the maximum and minimum range bar positions
-  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);

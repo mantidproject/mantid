@@ -301,8 +301,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   }
 
   QPair<double, double> res;
-  QPair<double, double> const range =
-      m_uiForm.ppPlot->getCurveRange("Vanadium");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
   if (vanWs)

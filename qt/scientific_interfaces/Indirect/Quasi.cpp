@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -302,8 +304,8 @@ void Quasi::updateMiniPlot() {
 
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
-  for (size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms();
-       histIndex++) {
+  for (std::size_t histIndex = 0;
+       histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
     QString specName = QString::fromStdString(axis->label(histIndex));
     QColor curveColour;
 
@@ -343,7 +345,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
 
-  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
+
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
