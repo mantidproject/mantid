@@ -222,6 +222,10 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                         const Mantid::Kernel::V3D &samplePos,
                         const Mantid::Kernel::V3D &detectorPos);
 
+Mantid::Geometry::Instrument_sptr
+createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
+                                   const Mantid::Kernel::Quat &monitorRot);
+
 // creates a minimal instrument with optional source, sample, and detector.
 Mantid::Geometry::Instrument_sptr
 createInstrumentWithOptionalComponents(bool haveSource, bool haveSample,
@@ -229,14 +233,14 @@ createInstrumentWithOptionalComponents(bool haveSource, bool haveSample,
 
 Mantid::Geometry::Instrument_sptr createSimpleInstrumentWithRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorBankPos,
+    const Mantid::Kernel::V3D &detectorPos,
     const Mantid::Kernel::Quat &relativeBankRotation,
     const Mantid::Kernel::Quat &relativeDetRotation,
     const Mantid::Kernel::V3D detOffset = Mantid::Kernel::V3D(0, 0, 0));
 
 Mantid::Geometry::Instrument_sptr createInstrumentWithSampleAndSourceRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
-    const Mantid::Kernel::V3D &detectorBankPos,
+    const Mantid::Kernel::V3D &detectorPos,
     const Mantid::Kernel::Quat &relativeSampleRotation,
     const Mantid::Kernel::Quat &relativeSourceRotation);
 

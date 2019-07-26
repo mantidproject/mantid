@@ -25,7 +25,7 @@ template <class T> class Matrix;
 
 Templated class for quaternions.
 Quaternions are the 3D generalization of complex numbers
-Quaternions are used for roations in 3D spaces and
+Quaternions are used for rotations in 3D spaces and
 often implemented for computer graphics applications.
 Quaternion can be written q=W+ai+bj+ck where
 w is the scalar part, and a, b, c the 3 imaginary parts.
