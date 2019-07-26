@@ -49,6 +49,10 @@ class IndirectQuickRunTest(unittest.TestCase):
         self.assertTrue(isinstance(scan_group, WorkspaceGroup))
         self.assertEqual(scan_group.getNumberOfEntries(), 12)
 
+    def test_that_IndirectQuickRun_produces_the_correct_eisf_workspace(self):
+        self._execute_IndirectQuickRun()
+        self._assert_equal_to_reference_file('osiris92762_to_osiris92766_scan_eisf')
+
     def test_that_IndirectQuickRun_produces_the_correct_workspaces_when_doing_an_MSDFit(self):
         self._execute_IndirectQuickRun(msd_fit=True)
 
@@ -56,13 +60,11 @@ class IndirectQuickRunTest(unittest.TestCase):
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_msd_Parameters'))
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_msd_fit'))
 
-    def test_that_IndirectQuickRun_produces_an_msd_fit_workspace_with_the_correct_size_when_doing_an_MSDFit(self):
-        self._execute_IndirectQuickRun(msd_fit=True)
-
         msd_fit_group = get_ads_workspace('osiris92762_to_osiris92766_scan_msd_fit')
-
         self.assertTrue(isinstance(msd_fit_group, WorkspaceGroup))
         self.assertEqual(msd_fit_group.getNumberOfEntries(), 5)
+
+        self._assert_equal_to_reference_file('osiris92762_to_osiris92766_scan_msd')
 
     def test_that_IndirectQuickRun_produces_the_correct_workspaces_when_doing_a_WidthFit(self):
         self._execute_IndirectQuickRun(width_fit=True)
@@ -71,27 +73,12 @@ class IndirectQuickRunTest(unittest.TestCase):
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_red_Diffusion'))
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_red_Width_Fit'))
 
-    def test_that_IndirectQuickRun_produces_an_msd_fit_workspace_with_the_correct_size(self):
-        self._execute_IndirectQuickRun(width_fit=True)
-
-        width_fit_group = get_ads_workspace('osiris92762_to_osiris92766_scan_red_Width_Fit')
-
-        self.assertTrue(isinstance(width_fit_group, WorkspaceGroup))
-        self.assertEqual(width_fit_group.getNumberOfEntries(), 12)
-
-    def test_that_IndirectQuickRun_produces_the_correct_eisf_workspace(self):
-        self._execute_IndirectQuickRun()
-        self._assert_equal_to_reference_file('osiris92762_to_osiris92766_scan_eisf')
-
-    def test_that_IndirectQuickRun_produces_the_correct_msd_workspace_when_doing_an_MSDFit(self):
-        self._execute_IndirectQuickRun(msd_fit=True)
-        self._assert_equal_to_reference_file('osiris92762_to_osiris92766_scan_msd')
-
-    def test_that_IndirectQuickRun_produces_the_correct_width_and_diffusion_workspace_when_doing_a_WidthFit(self):
-        self._execute_IndirectQuickRun(width_fit=True)
-
         self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Width1')
         self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Diffusion')
+
+        width_fit_group = get_ads_workspace('osiris92762_to_osiris92766_scan_red_Width_Fit')
+        self.assertTrue(isinstance(width_fit_group, WorkspaceGroup))
+        self.assertEqual(width_fit_group.getNumberOfEntries(), 12)
 
     def _execute_IndirectQuickRun(self, msd_fit=False, width_fit=False):
         IndirectQuickRun(InputFiles=self._run_numbers, Instrument=self._instrument, Analyser=self._analyser,
