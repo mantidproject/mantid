@@ -169,6 +169,8 @@ bool Quasi::validate() {
  * Run the BayesQuasi algorithm
  */
 void Quasi::run() {
+  m_uiForm.ppPlot->watchADS(false);
+
   bool elasticPeak = false;
   bool sequence = false;
 
@@ -251,9 +253,10 @@ void Quasi::run() {
  */
 void Quasi::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error)
+  if (!error) {
     updateMiniPlot();
-  else {
+    m_uiForm.ppPlot->watchADS(true);
+  } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }

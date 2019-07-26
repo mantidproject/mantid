@@ -141,6 +141,7 @@ bool Stretch::validate() {
  * script that runs Stretch
  */
 void Stretch::run() {
+  m_uiForm.ppPlot->watchADS(false);
 
   // Workspace input
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
@@ -205,6 +206,8 @@ void Stretch::algorithmComplete(const bool &error) {
       populateContourWorkspaceComboBox();
     else
       setPlotContourEnabled(false);
+
+    m_uiForm.ppPlot->watchADS(true);
   }
 }
 

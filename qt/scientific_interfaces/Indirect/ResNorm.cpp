@@ -159,6 +159,8 @@ bool ResNorm::validate() {
  * Run the ResNorm v2 algorithm.
  */
 void ResNorm::run() {
+  m_uiForm.ppPlot->watchADS(false);
+
   auto const vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
 
@@ -194,6 +196,8 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     previewSpecChanged(m_previewSpec);
     // Copy and add sample logs to result workspaces
     processLogs();
+
+    m_uiForm.ppPlot->watchADS(true);
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
