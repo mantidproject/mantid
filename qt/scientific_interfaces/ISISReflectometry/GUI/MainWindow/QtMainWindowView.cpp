@@ -92,7 +92,7 @@ void QtMainWindowView::initLayout() {
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
 
-  auto makeBatchPresenter = BatchPresenterFactory(
+  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
       std::move(makeExperimentPresenter), std::move(makeInstrumentPresenter),
       std::move(makeSaveSettingsPresenter));

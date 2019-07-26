@@ -7,6 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
 
+#include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "IMainWindowPresenter.h"
