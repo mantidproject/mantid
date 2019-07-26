@@ -22,6 +22,7 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 from mantid.py3compat import setswitchinterval
+from mantid.utils import is_required_version
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
@@ -97,8 +98,7 @@ def qapplication():
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)
 
-        # removes the ? button from the title bar of dialog windows
-        if qVersion >= 5.10:
+        if is_required_version(required_version='5.10.0', version=qVersion()):
             app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
     return app
