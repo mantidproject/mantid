@@ -23,7 +23,7 @@ def get_ads_workspace(workspace_name):
 class IndirectTwoPeakFitTest(unittest.TestCase):
 
     def setUp(self):
-        EnergyWindowScan(InputFiles='92762', Instrument='OSIRIS', Analyser='graphite', Reflection='002',
+        EnergyWindowScan(InputFiles='OSIRIS92762', Instrument='OSIRIS', Analyser='graphite', Reflection='002',
                          SpectraRange='963,980', ElasticRange='-0.02,0.02', InelasticRange='0.4,0.5',
                          TotalRange='-0.5,0.5', ReducedWorkspace='__reduced_group', ScanWorkspace='__scan_workspace')
 
@@ -33,7 +33,7 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
         self._x_min = -0.927689707342884
         self._x_max = 2.1502418039357183
 
-        self._execute_IndirectQuickRun()
+        self._execute_IndirectTwoPeakFit()
 
     def tearDown(self):
         AnalysisDataService.clear()
@@ -60,7 +60,7 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
         y_axis = result_workspace.getAxis(1)
         self.assertEqual(y_axis.label(0), 'fwhm.1')
         self.assertEqual(y_axis.label(1), 'fwhm.2.1')
-        self.assertEqual(y_axis.label(1), 'fwhm.2.2')
+        self.assertEqual(y_axis.label(2), 'fwhm.2.2')
 
     def test_that_IndirectTwoPeakFit_produces_a_chi_squared_workspace_with_the_correct_y_labels(self):
         chi_squared_workspace = get_ads_workspace('osiris92762_graphite002_two_peak_fit_ChiSq')
