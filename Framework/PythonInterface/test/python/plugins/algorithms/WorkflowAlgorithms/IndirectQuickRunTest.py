@@ -100,8 +100,9 @@ class IndirectQuickRunTest(unittest.TestCase):
                          TotalRange=self._total_range, MSDFit=msd_fit, WidthFit=width_fit)
 
     def _assert_equal_to_reference_file(self, output_name):
-        expected_workspace = LoadNexus(Filename='IndirectQuickRun_' + output_name +'.nxs')
-        self.assertTrue(CompareWorkspaces(get_ads_workspace(output_name), expected_workspace)[0])
+        expected_workspace = LoadNexus(Filename='IndirectQuickRun_' + output_name + '.nxs')
+        self.assertTrue(CompareWorkspaces(Workspace1=get_ads_workspace(output_name), Workspace2=expected_workspace,
+                                          Tolerance=5.0, ToleranceRelErr=True)[0])
 
 
 if __name__ == '__main__':

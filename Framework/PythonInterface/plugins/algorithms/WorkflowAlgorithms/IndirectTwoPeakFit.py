@@ -23,8 +23,6 @@ class IndirectTwoPeakFit(PythonAlgorithm):
     _res_ws = None
     _e_min = None
     _e_max = None
-    _hist_min = None
-    _hist_max = None
     _bgd = None
     _elastic = None
     _parameter_table = None
@@ -49,8 +47,8 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
                              doc='Maximum energy for fit. Default=0.5')
 
-        self.declareProperty(name='Minimizer',defaultValue='Levenberg-Marquardt',
-                             validator=StringListValidator(['Levenberg-Marquardt','FABADA']),
+        self.declareProperty(name='Minimizer', defaultValue='Levenberg-Marquardt',
+                             validator=StringListValidator(['Levenberg-Marquardt', 'FABADA']),
                              doc='Type of minimizer')
 
         self.declareProperty(name='MaxIterations', defaultValue=500,
@@ -65,9 +63,6 @@ class IndirectTwoPeakFit(PythonAlgorithm):
 
         if self._e_max <= self._e_min:
             issues['EnergyMax'] = 'Energy maximum must be greater than energy minimum.'
-
-        if self._hist_max < self._hist_min:
-            issues['HistogramMax'] = 'Histogram maximum cannot be less than histogram minimum.'
 
         if self._max_iterations == 0 or self._max_iterations == '':
             issues['MaxIterations'] = 'Maximum iterations must be greater than 0.'
@@ -98,9 +93,6 @@ class IndirectTwoPeakFit(PythonAlgorithm):
 
         self._convert_to_histogram(self._temporary_fit_name, self._temporary_fit_name)
         convertToElasticQ(self._temporary_fit_name)
-
-        if self._hist_max is None:
-            self._hist_max = self._sample_workspace.getNumberHistograms() - 1
 
         # Perform fits
         progress_tracker.report('Fitting 1 peak...')
