@@ -585,7 +585,6 @@ void saveNXSample(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
 
   H5::Group childGroup;
-  size_t idx = compInfo.sample();
 
   std::string sampleName = compInfo.name(compInfo.sample());
   childGroup = parentGroup.createGroup(sampleName);
@@ -655,7 +654,6 @@ void saveNXMonitors(const H5::Group &parentGroup,
 
   auto detIds = detInfo.detectorIDs();
 
-  std::vector<size_t> monitors;
   for (const int &ID : detIds) {
     auto index = detInfo.indexOf(ID);
     if (detInfo.isMonitor(index)) {
