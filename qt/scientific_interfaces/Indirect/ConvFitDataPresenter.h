@@ -22,6 +22,9 @@ class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
 public:
   ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
 
+signals:
+  void modelResolutionAdded(std::string const &name, DatasetIndex const &index);
+
 private slots:
   void setModelResolution(const QString &name);
 

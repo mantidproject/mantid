@@ -72,6 +72,7 @@ public:
 public slots:
   void fit();
   void sequentialFit();
+  void setModelResolution(std::string const &name, DatasetIndex const &index);
 
 protected slots:
   void clear();
@@ -95,6 +96,8 @@ private:
   IFunction_sptr getSingleFunction() const;
   QStringList getGlobalParameters() const;
   QStringList getLocalParameters() const;
+  void syncFullBrowserWithTemplate();
+  void syncTemplateBrowserWithFull();
 
   QVBoxLayout *m_mainLayout;
   FunctionBrowser *m_functionBrowser;

@@ -50,6 +50,7 @@ public:
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
+  void setResolution(std::string const &name, DatasetIndex const &index) override;
 
  protected slots:
   void intChanged(QtProperty *) override;
@@ -66,6 +67,7 @@ private:
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
+  void setParameterValueQuiet(ParamID id, double value, double error);
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
   // Map fit type to a list of function parameters (QtProperties for those parameters)
@@ -76,7 +78,8 @@ private:
   QtProperty *m_deltaFunctionOn;
 
   QMap<QtProperty *, ParamID> m_parameterMap;
-  QMap<QtProperty*, QString> m_actualParameterNames;
+  QMap<ParamID, QtProperty *> m_parameterReverseMap;
+  QMap<QtProperty *, QString> m_actualParameterNames;
   QMap<QtProperty*, std::string> m_parameterDescriptions;
 
 private:

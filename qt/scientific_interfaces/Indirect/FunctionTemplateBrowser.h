@@ -8,6 +8,7 @@
 #define INDIRECT_FUNCTIONTEMPLATEBROWSER_H_
 
 #include "ParameterEstimation.h"
+#include "IndexTypes.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -63,6 +64,7 @@ public:
   virtual void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) = 0;
   virtual void setBackgroundA0(double value) = 0;
+  virtual void setResolution(std::string const &name, DatasetIndex const &index) = 0;
 
 signals:
   void functionStructureChanged();

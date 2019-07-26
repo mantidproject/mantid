@@ -50,6 +50,7 @@ public:
   void setCurrentDataset(int i);
   void setDatasetNames(const QStringList &names);
   void setErrorsEnabled(bool enabled);
+  void setResolution(std::string const &name, DatasetIndex const &index);
 
 signals:
   void functionStructureChanged();

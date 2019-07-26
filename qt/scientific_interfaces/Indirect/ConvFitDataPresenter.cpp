@@ -48,6 +48,7 @@ void ConvFitDataPresenter::setModelResolution(std::string const &name,
                                               DatasetIndex const &index) {
   try {
     m_convModel->setResolution(name, index);
+    emit modelResolutionAdded(name, index);
   } catch (std::exception const &ex) {
     displayWarning(ex.what());
   }

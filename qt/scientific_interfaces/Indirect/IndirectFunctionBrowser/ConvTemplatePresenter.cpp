@@ -163,23 +163,18 @@ void ConvTemplatePresenter::setErrorsEnabled(bool enabled)
   m_view->setErrorsEnabled(enabled);
 }
 
+void ConvTemplatePresenter::setResolution(std::string const &name,
+                                          DatasetIndex const &index) {
+  m_model.setResolution(name, index);
+}
+
 void ConvTemplatePresenter::updateViewParameters()
 {
-  //static std::map<IqtFunctionModel::ParamNames, void (ConvTemplateBrowser::*)(double, double)> setters{
-  //{ IqtFunctionModel::ParamNames::EXP1_HEIGHT, &ConvTemplateBrowser::setExp1Height },
-  //{ IqtFunctionModel::ParamNames::EXP1_LIFETIME, &ConvTemplateBrowser::setExp1Lifetime },
-  //{ IqtFunctionModel::ParamNames::EXP2_HEIGHT, &ConvTemplateBrowser::setExp2Height },
-  //{ IqtFunctionModel::ParamNames::EXP2_LIFETIME, &ConvTemplateBrowser::setExp2Lifetime },
-  //{ IqtFunctionModel::ParamNames::STRETCH_HEIGHT, &ConvTemplateBrowser::setStretchHeight},
-  //{ IqtFunctionModel::ParamNames::STRETCH_LIFETIME, &ConvTemplateBrowser::setStretchLifetime },
-  //{ IqtFunctionModel::ParamNames::STRETCH_STRETCHING, &ConvTemplateBrowser::setStretchStretching },
-  //{ IqtFunctionModel::ParamNames::BG_A0, &ConvTemplateBrowser::setA0 }
-  //};
-  //auto values = m_model.getCurrentValues();
-  //auto errors = m_model.getCurrentErrors();
-  //for (auto const name : values.keys()) {
-  //  (m_view->*setters.at(name))(values[name], errors[name]);
-  //}
+  auto values = m_model.getCurrentValues();
+  auto errors = m_model.getCurrentErrors();
+  for (auto const id : values.keys()) {
+    m_view->setParameterValueQuiet(id, values[id], errors[id]);
+  }
 }
 
 QStringList ConvTemplatePresenter::getDatasetNames() const

@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include <map>
 
@@ -26,7 +27,7 @@ ConvFunctionModel::ConvFunctionModel() {}
 void ConvFunctionModel::clearData() {
   m_fitType = FitType::None;
   m_hasDeltaFunction = false;
-  m_background.clear();
+  m_backgroundType = BackgroundType::None;
   m_model.clear();
 }
 
@@ -40,8 +41,10 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
       m_fitType = FitType::OneLorentzian;
     } else if (name == "DeltaFunction") {
       m_hasDeltaFunction = true;
-    } else if (name == "FlatBackground" || name == "LinearBackground") {
-      m_background =name;
+    } else if (name == "FlatBackground") {
+      m_backgroundType = BackgroundType::Flat;
+    } else if (name == "LinearBackground") {
+      m_backgroundType = BackgroundType::Linear;
     } else {
       throw std::runtime_error("Cannot set function " + name);
     }
@@ -70,11 +73,14 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
       }
       m_hasDeltaFunction = true;
       isFitTypeSet = true;
-    } else if (name == "FlatBackground" || name == "LinearBackground") {
-      if (isBackgroundSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_background = name;
+    } else if (isBackgroundSet) {
+      throw std::runtime_error("Function has wrong structure.");
+    } else if (name == "FlatBackground") {
+      m_backgroundType = BackgroundType::Flat;
+      isFitTypeSet = true;
+      isBackgroundSet = true;
+    } else if (name == "LinearBackground") {
+      m_backgroundType = BackgroundType::Linear;
       isFitTypeSet = true;
       isBackgroundSet = true;
     } else {
@@ -86,8 +92,25 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
 }
 
 IFunction_sptr ConvFunctionModel::getFitFunction() const {
-  // Add the resolution here
-  return m_model.getFitFunction();
+  auto modelFunction = m_model.getFitFunction();
+  if (!modelFunction) {
+    return modelFunction;
+  }
+  auto resolution = FunctionFactory::Instance().createFunction("Resolution");
+  if (!m_resolutionName.empty()) {
+    resolution->setAttributeValue("Workspace", m_resolutionName);
+  }
+  auto fitFunction = boost::dynamic_pointer_cast<CompositeFunction>(
+      FunctionFactory::Instance().createFunction("MultiDomainFunction"));
+  for (size_t i = 0; i < modelFunction->nFunctions(); ++i) {
+    auto convolution = boost::dynamic_pointer_cast<CompositeFunction>(
+        FunctionFactory::Instance().createFunction("Convolution"));
+    convolution->addFunction(resolution->clone());
+    convolution->addFunction(modelFunction->getFunction(i)->clone());
+    fitFunction->addFunction(convolution);
+    fitFunction->setLocalAttributeValue(i, "domains", "i");
+  }
+  return fitFunction;
 }
 
 bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
@@ -182,7 +205,7 @@ bool ConvFunctionModel::hasDeltaFunction() const {
 
 void ConvFunctionModel::setBackground(BackgroundType bgType) {
   auto oldValues = getCurrentValues();
-  m_background = m_backgroundSubtype.getFunctionName(bgType);
+  m_backgroundType = bgType;
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
@@ -190,14 +213,14 @@ void ConvFunctionModel::setBackground(BackgroundType bgType) {
 
 void ConvFunctionModel::removeBackground() {
   auto oldValues = getCurrentValues();
-  m_background.clear();
+  m_backgroundType = BackgroundType::None;
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
 }
 
 bool ConvFunctionModel::hasBackground() const {
-  return !m_background.empty();
+  return m_backgroundType != BackgroundType::None;
 }
 
 void ConvFunctionModel::updateParameterEstimationData(
@@ -205,10 +228,17 @@ void ConvFunctionModel::updateParameterEstimationData(
   m_estimationData = std::move(data);
 }
 
+void ConvFunctionModel::setResolution(std::string const &name,
+                                      DatasetIndex const &index) {
+  m_resolutionName = name;
+  m_resolutionIndex = index;
+}
+
 QString ConvFunctionModel::setBackgroundA0(double value) {
   if (hasBackground()) {
-    setParameter(ParamID::BG_A0, value);
-    return *getParameterName(ParamID::BG_A0);
+    auto const paramID = (m_backgroundType == BackgroundType::Flat) ? ParamID::FLAT_BG_A0 : ParamID::LINEAR_BG_A0;
+    setParameter(paramID, value);
+    return *getParameterName(paramID);
   }
   return "";
 }
@@ -337,16 +367,18 @@ void ConvFunctionModel::updateMultiDatasetParameters(
 
   auto const globalParameterNames = getGlobalParameters();
   for (auto &&name : globalParameterNames) {
-    auto valueColumn = paramTable.getColumn(name.toStdString());
-    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    auto valueColumn = paramTable.getColumn(("f1." + name).toStdString());
+    auto errorColumn =
+        paramTable.getColumn(("f1." + name + "_Err").toStdString());
     m_model.setParameter(name, valueColumn->toDouble(0));
     m_model.setParameterError(name, errorColumn->toDouble(0));
   }
 
   auto const localParameterNames = getLocalParameters();
   for (auto &&name : localParameterNames) {
-    auto valueColumn = paramTable.getColumn(name.toStdString());
-    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    auto valueColumn = paramTable.getColumn(("f1." + name).toStdString());
+    auto errorColumn =
+        paramTable.getColumn(("f1." + name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
         m_model.setLocalParameterValue(name, static_cast<int>(i),
@@ -476,9 +508,9 @@ ConvFunctionModel::getParameterDescription(ParamID name) const {
 }
 
 boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
-  if (name <= ParamID::LOR1_FWHM) {
+  if (name <= ParamID::LOR2_FWHM_1) {
     return getLor1Prefix();
-  } else if (name <= ParamID::LOR2_FWHM) {
+  } else if (name <= ParamID::LOR2_FWHM_2) {
     return getLor2Prefix();
   } else {
     return getBackgroundPrefix();
@@ -523,12 +555,7 @@ void ConvFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 void ConvFunctionModel::applyParameterFunction(
     std::function<void(ParamID)> paramFun) const {
   applyToFitType(m_fitType, paramFun);
-  if (!m_background.empty()) {
-    paramFun(ParamID::BG_A0);
-    if (m_background == "LinearBackground") {
-      paramFun(ParamID::BG_A1);
-    }
-  }
+  applyToBackground(m_backgroundType, paramFun);
 }
 
 boost::optional<ParamID>
@@ -551,7 +578,8 @@ std::string ConvFunctionModel::buildDeltaFunctionString() const {
 }
 
 std::string ConvFunctionModel::buildBackgroundFunctionString() const {
-  return "name=" + m_background + ",A0=0,constraints=(A0>0)";
+  return "name=" + m_backgroundSubtype.getFunctionName(m_backgroundType) +
+         ",A0=0,constraints=(A0>0)";
 }
 
 //void ConvFunctionModel::estimateStretchExpParameters() {
@@ -586,7 +614,7 @@ QString ConvFunctionModel::buildFunctionString() const {
   if (m_hasDeltaFunction) {
     functions << QString::fromStdString(buildDeltaFunctionString());
   }
-  if (!m_background.empty()) {
+  if (m_backgroundType != BackgroundType::None) {
     functions << QString::fromStdString(buildBackgroundFunctionString());
   }
   return functions.join(";");
@@ -597,7 +625,7 @@ boost::optional<QString> ConvFunctionModel::getLor1Prefix() const {
       m_fitType != FitType::TwoLorentzians)
     return boost::optional<QString>();
   if (m_fitType != FitType::TwoLorentzians && !m_hasDeltaFunction &&
-      m_background.empty())
+      m_backgroundType == BackgroundType::None)
     return "";
   return "f0.";
 }
@@ -611,13 +639,13 @@ boost::optional<QString> ConvFunctionModel::getLor2Prefix() const {
 boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const {
   if (!m_hasDeltaFunction)
     return boost::optional<QString>();
-  if (m_fitType == FitType::None && m_background.empty())
+  if (m_fitType == FitType::None && m_backgroundType == BackgroundType::None)
     return "";
   return QString("f%1.").arg(getNumberOfPeaks());
 }
 
 boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const {
-  if (m_background.empty())
+  if (m_backgroundType == BackgroundType::None)
     return boost::optional<QString>();
   auto const numberOfPeaks = getNumberOfPeaks();
   if (numberOfPeaks == 0 && !m_hasDeltaFunction)

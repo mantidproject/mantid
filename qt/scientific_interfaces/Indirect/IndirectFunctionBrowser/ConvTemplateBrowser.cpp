@@ -222,8 +222,10 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
         auto prop = m_parameterManager->addProperty(names[i]);
         m_parameterManager->setDescription(prop, descriptions[i]);
         m_parameterManager->setDecimals(prop, 6);
-        props << prop;
-        m_parameterMap[prop] = paramIDs[i];
+        props.append(prop);
+        auto const id = paramIDs[i];
+        m_parameterMap[prop] = id;
+        m_parameterReverseMap[id] = prop;
       }
       parameters[index] = props;
     }
@@ -249,10 +251,23 @@ void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {
   }
 }
 
+void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
+                                                 double error) {
+  ScopedFalse _(m_emitParameterValueChange);
+  auto prop = m_parameterReverseMap[id];
+  m_parameterManager->setValue(prop, value);
+  m_parameterManager->setError(prop, error);
+}
+
 void ConvTemplateBrowser::
     updateParameterEstimationData(DataForParameterEstimationCollection &&data) {}
 
 void ConvTemplateBrowser::setBackgroundA0(double value) {}
+
+void ConvTemplateBrowser::setResolution(std::string const &name,
+                                        DatasetIndex const &index) {
+  m_presenter.setResolution(name, index);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

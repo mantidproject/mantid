@@ -42,14 +42,19 @@ ConvFit::ConvFit(QWidget *parent)
       m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
-
-  setFitDataPresenter(std::make_unique<ConvFitDataPresenter>(
-      m_convFittingModel, m_uiForm->fitDataView));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
+      m_convFittingModel, m_uiForm->fitDataView);
+  connect(
+      dataPresenter.get(),
+      SIGNAL(modelResolutionAdded(std::string const &, DatasetIndex const &)),
+      m_uiForm->fitPropertyBrowser,
+      SLOT(setModelResolution(std::string const &, DatasetIndex const &)));
+  setFitDataPresenter(std::move(dataPresenter));
 
   setEditResultVisible(true);
 }

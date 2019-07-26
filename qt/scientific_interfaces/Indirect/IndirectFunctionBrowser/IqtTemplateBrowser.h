@@ -69,6 +69,8 @@ public:
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
+  void setResolution(std::string const &name,
+                     DatasetIndex const &index) override {}
 
 protected slots:
   void intChanged(QtProperty *) override;

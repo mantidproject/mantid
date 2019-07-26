@@ -102,6 +102,27 @@ QStringList IndirectFitPropertyBrowser::getLocalParameters() const
   return isFullFunctionBrowserActive() ? m_functionBrowser->getLocalParameters() : m_templateBrowser->getLocalParameters();
 }
 
+void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
+  auto const fun = m_templateBrowser->getFunction();
+  m_functionBrowser->setFunction(fun);
+  if (fun) {
+    m_functionBrowser->updateMultiDatasetParameters(
+        *m_templateBrowser->getGlobalFunction());
+    m_functionBrowser->setGlobalParameters(
+        m_templateBrowser->getGlobalParameters());
+  }
+}
+
+void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
+  auto const funStr = m_functionBrowser->getFunctionString();
+  m_templateBrowser->setFunction(funStr);
+  if (auto const fun = m_functionBrowser->getGlobalFunction()) {
+    m_templateBrowser->updateMultiDatasetParameters(*fun);
+    m_templateBrowser->setGlobalParameters(
+        m_functionBrowser->getGlobalParameters());
+  }
+}
+
 void IndirectFitPropertyBrowser::init() {
   initFunctionBrowser();
   initFitOptionsBrowser();
@@ -306,6 +327,14 @@ void IndirectFitPropertyBrowser::sequentialFit() {
   emit sequentialFitScheduled();
 }
 
+void IndirectFitPropertyBrowser::setModelResolution(std::string const &name,
+                                                    DatasetIndex const &index) {
+  if (isFullFunctionBrowserActive()) {
+    showFullFunctionBrowser(false);
+  }
+  m_templateBrowser->setResolution(name, index);
+}
+
 /**
  * Called when the browser visibility has changed.
  *
@@ -327,20 +356,10 @@ void IndirectFitPropertyBrowser::updateFitType() {
 
 void IndirectFitPropertyBrowser::showFullFunctionBrowser(bool on){
   if (on) {
-    auto const fun = m_templateBrowser->getFunction();
-    m_functionBrowser->setFunction(fun);
-    if (fun) {
-      m_functionBrowser->updateMultiDatasetParameters(*m_templateBrowser->getGlobalFunction());
-      m_functionBrowser->setGlobalParameters(m_templateBrowser->getGlobalParameters());
-    }
+    syncFullBrowserWithTemplate();
   } else {
     try {
-      auto const funStr = m_functionBrowser->getFunctionString();
-      m_templateBrowser->setFunction(funStr);
-      if (auto const fun = m_functionBrowser->getGlobalFunction()) {
-        m_templateBrowser->updateMultiDatasetParameters(*fun);
-        m_templateBrowser->setGlobalParameters(m_functionBrowser->getGlobalParameters());
-      }
+      syncTemplateBrowserWithFull();
     } catch (const std::runtime_error&) {
       // Function doesn't match the template.
       // Stay with generic function browser.

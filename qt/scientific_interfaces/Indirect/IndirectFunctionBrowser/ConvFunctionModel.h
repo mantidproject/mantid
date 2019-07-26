@@ -8,6 +8,7 @@
 #define MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
 
 #include "ConvTypes.h"
+#include "IndexTypes.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -86,6 +87,7 @@ public:
   bool hasBackground() const;
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void setResolution(std::string const &name, DatasetIndex const &index);
 
   QMap<ParamID, double> getCurrentValues() const;
   QMap<ParamID, double> getCurrentErrors() const;
@@ -116,13 +118,16 @@ private:
   int getNumberOfPeaks() const;
 
   MultiDomainFunctionModel m_model;
-  FitType m_fitType;
-  std::string m_background;
+  FitType m_fitType = FitType::None;
+  BackgroundType m_backgroundType = BackgroundType::None;
+  //std::string m_background;
   bool m_hasDeltaFunction = false;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;
   BackgroundSubType m_backgroundSubtype;
+  std::string m_resolutionName;
+  DatasetIndex m_resolutionIndex;
 };
 
 } // namespace IDA
