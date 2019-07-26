@@ -41,7 +41,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, qVersion)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -98,7 +98,8 @@ def qapplication():
         UsageService.setApplicationName(APPNAME)
 
         # removes the ? button from the title bar of dialog windows
-        app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
+        if qVersion >= 5.10:
+            app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
     return app
 
