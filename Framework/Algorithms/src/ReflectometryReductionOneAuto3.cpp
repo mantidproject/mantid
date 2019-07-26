@@ -115,7 +115,6 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  */
 std::map<std::string, std::string>
 ReflectometryReductionOneAuto3::validateInputs() {
-
   std::map<std::string, std::string> results;
 
   // Validate transmission runs only if our input workspace is a group
@@ -242,7 +241,6 @@ void ReflectometryReductionOneAuto3::setDefaultOutputWorkspaceNames() {
 /** Initialize the algorithm's properties.
  */
 void ReflectometryReductionOneAuto3::init() {
-
   // Input ws
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -361,7 +359,6 @@ void ReflectometryReductionOneAuto3::init() {
 /** Execute the algorithm.
  */
 void ReflectometryReductionOneAuto3::exec() {
-
   applyFloodCorrections();
   setDefaultOutputWorkspaceNames();
 
@@ -469,7 +466,6 @@ void ReflectometryReductionOneAuto3::exec() {
  */
 std::vector<std::string>
 ReflectometryReductionOneAuto3::getDetectorNames(MatrixWorkspace_sptr inputWS) {
-
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex,
                boost::is_any_of(":,-+"));
@@ -508,7 +504,6 @@ ReflectometryReductionOneAuto3::getDetectorNames(MatrixWorkspace_sptr inputWS) {
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::correctDetectorPositions(
     MatrixWorkspace_sptr inputWS, const double twoTheta) {
-
   auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
@@ -546,7 +541,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::correctDetectorPositions(
  */
 double
 ReflectometryReductionOneAuto3::calculateTheta(MatrixWorkspace_sptr inputWS) {
-
   const auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
@@ -575,7 +569,6 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
   // With algorithmic corrections, monitors should not be integrated, see below
-
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
 
   if (correctionAlgorithm == "PolynomialCorrection") {
@@ -601,7 +594,6 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
       }
 
       const std::string correctionStr = corrVec[0];
-
       if (correctionStr == "polynomial") {
         const auto polyVec = instrument->getStringParameter("polystring");
         if (polyVec.empty())
@@ -755,7 +747,6 @@ double ReflectometryReductionOneAuto3::getPropertyOrDefault(
 /** Check if input workspace is a group
  */
 bool ReflectometryReductionOneAuto3::checkGroups() {
-
   const std::string wsName = getPropertyValue("InputWorkspace");
 
   try {
@@ -834,7 +825,6 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
 
   // Check if the transmission runs are groups or not
-
   const std::string firstTrans = getPropertyValue("FirstTransmissionRun");
   WorkspaceGroup_sptr firstTransG;
   MatrixWorkspace_sptr firstTransSum;
