@@ -114,7 +114,7 @@ public:
     const std::string filename = "saveNexusCitation1.nxs";
     NexusTestHelper th(true);
     th.createFile(filename);
-    auto cite = Mantid::API::getCitation(Mantid::API::ArticleCitation(
+    auto cite = Mantid::API::Citation(Mantid::API::ArticleCitation(
         {"author1", "author2"}, "title", "journal", "year", "", "number",
         "pages", "month", "description", "", "url"));
 
@@ -127,7 +127,7 @@ public:
     const std::string group = "group";
     NexusTestHelper th(true);
     th.createFile(filename);
-    auto cite1 = Mantid::API::getCitation(Mantid::API::ArticleCitation(
+    auto cite1 = Mantid::API::Citation(Mantid::API::ArticleCitation(
         {"author1", "author2"}, "title", "journal", "year", "", "number",
         "pages", "month", "description", "", "url"));
 

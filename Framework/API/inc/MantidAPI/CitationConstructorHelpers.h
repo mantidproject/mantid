@@ -10,6 +10,7 @@ namespace Mantid {
 namespace API {
 
 struct MANTID_API_DLL BaseCitation {
+  BaseCitation() = delete;
   BaseCitation(const std::string &doi = "", const std::string &description = "",
                const std::string &url = "");
   const std::string m_doi, m_description, m_url;
@@ -99,6 +100,8 @@ struct MANTID_API_DLL InCollectionCitation : BaseCitation {
       const std::string &description = "", const std::string &url = "");
   std::string toEndNote() const override;
   std::string toBibTex() const override;
+
+  // A function so that in python
 
   const std::vector<std::string> m_authors;
   const std::string m_title, m_booktitle, m_publisher, m_year, m_volume,
