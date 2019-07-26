@@ -728,7 +728,6 @@ void saveNXMonitors(const H5::Group &parentGroup,
       }
 
       H5::StrType dependencyStrType = strTypeOfSize(dependency);
-      writeXYZPixeloffset(childGroup, compInfo, index);
       writeNXMonitorNumber(childGroup, compInfo, detIds, index);
 
       writeStrDataset(childGroup, LOCAL_NAME, name);
@@ -765,9 +764,6 @@ void saveNXDetectors(const H5::Group &parentGroup,
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
   bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
-
-  bool orientationIsZeroTest =
-      isApproxZero(toStdVector(compInfo.rotation(bankIdx)), PRECISION, true);
 
   H5::Group childGroup = parentGroup.createGroup(name);
   writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
