@@ -73,9 +73,9 @@ class IndirectQuickRunTest(unittest.TestCase):
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_red_Diffusion'))
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_red_Width_Fit'))
 
-        self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Width1',
-                                             'osiris92762_to_osiris92763_scan_red_Width')
-        self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Diffusion')
+        self._assert_equal_to_reference_file('osiris92762_to_osiris92766_scan_red_Width1',
+                                             'osiris92762_to_osiris92766_scan_red_Width')
+        self._assert_equal_to_reference_file('osiris92762_to_osiris92766_scan_red_Diffusion')
 
         width_fit_group = get_ads_workspace('osiris92762_to_osiris92766_scan_red_Width_Fit')
         self.assertTrue(isinstance(width_fit_group, WorkspaceGroup))
