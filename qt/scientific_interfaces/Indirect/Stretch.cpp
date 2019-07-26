@@ -308,6 +308,7 @@ void Stretch::plotContourClicked() {
       m_uiForm.cbPlotContour->currentText().toStdString();
   if (checkADSForPlotSaveWorkspace(workspaceName, true))
     m_plotter->plotContour(workspaceName);
+
   setPlotContourIsPlotting(false);
 }
 
