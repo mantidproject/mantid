@@ -73,7 +73,8 @@ class IndirectQuickRunTest(unittest.TestCase):
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_red_Diffusion'))
         self.assertTrue(exists_in_ads('osiris92762_to_osiris92766_scan_red_Width_Fit'))
 
-        self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Width1')
+        self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Width1',
+                                             'osiris92762_to_osiris92763_scan_red_Width')
         self._assert_equal_to_reference_file('osiris92762_to_osiris92763_scan_red_Diffusion')
 
         width_fit_group = get_ads_workspace('osiris92762_to_osiris92766_scan_red_Width_Fit')
@@ -86,8 +87,9 @@ class IndirectQuickRunTest(unittest.TestCase):
                          ElasticRange=self._elastic_range, InelasticRange=self._inelastic_range,
                          TotalRange=self._total_range, MSDFit=msd_fit, WidthFit=width_fit)
 
-    def _assert_equal_to_reference_file(self, output_name):
-        expected_workspace = LoadNexus(Filename='IndirectQuickRun_' + output_name + '.nxs')
+    def _assert_equal_to_reference_file(self, output_name, reference_name=None):
+        reference_name = output_name if reference_name is None else reference_name
+        expected_workspace = LoadNexus(Filename='IndirectQuickRun_' + reference_name + '.nxs')
         self.assertTrue(CompareWorkspaces(Workspace1=get_ads_workspace(output_name), Workspace2=expected_workspace,
                                           Tolerance=5.0, ToleranceRelErr=True)[0])
 
