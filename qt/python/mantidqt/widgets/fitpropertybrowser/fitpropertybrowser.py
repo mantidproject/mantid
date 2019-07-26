@@ -61,6 +61,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
+        # Update whether data needs to be normalised when a button on the Fit menu is clicked
+        self.getFitMenu().aboutToShow.connect(self._set_normalise_data_from_workspace_artist)
 
     def _add_spectra(self, spectra):
         """
@@ -85,6 +87,20 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
         return allowed_spectra
+
+    def _get_selected_workspace_artist(self):
+        ws_artists_list = self.get_axes().tracked_workspaces[self.workspaceName()]
+        for ws_artists in ws_artists_list:
+            if ws_artists.workspace_index == self.workspaceIndex():
+                return ws_artists
+
+    def _set_normalise_data_from_workspace_artist(self):
+        """
+        Set if the data should be normalised before fitting using the
+        normalisation state of the active workspace artist.
+        """
+        ws_artist = self._get_selected_workspace_artist()
+        self.normaliseData(ws_artist.is_normalized)
 
     def closeEvent(self, event):
         """
