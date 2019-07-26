@@ -37,19 +37,6 @@ using namespace Mantid::NexusGeometry;
 //---------------------------------------------------------------
 namespace {
 
-// get all banks in component info. from NexusGeometrySave.cpp
-std::vector<size_t> detectors(const Mantid::Geometry::ComponentInfo &compInfo) {
-
-  std::vector<size_t> detectorsInComponent;
-  for (size_t index = compInfo.root() - 1; index > 0; --index) {
-    if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo,
-                                                              index)) {
-      detectorsInComponent.push_back(index);
-    }
-  }
-  return detectorsInComponent;
-}
-
 // for comparision of detector banks between saved instrument and reloaded
 // instrument, as required for the unit test. Delete this with along with the
 // temporary unit test to reload file.
@@ -822,7 +809,6 @@ public:
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
     auto &compInfo = (*instr.first);
-    auto &detInfo = (*instr.second);
 
     HDF5FileTestUtility tester(destinationFile);
 
@@ -830,7 +816,6 @@ public:
 
       if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo,
                                                                 idx)) {
-
         auto childrenDetectors = compInfo.detectorsInSubtree(idx);
 
         auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
@@ -957,7 +942,7 @@ public:
 
   void test_nx_monitor_location_not_written_when_is_zero() {
 
-    ScopedFileHandle fileResource("zero_nx_detector_location_file_test.hdf5");
+    ScopedFileHandle fileResource("zero_nx_monitor_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     Quat someRotation(45, V3D(0, 1, 0));
@@ -1060,7 +1045,7 @@ public:
 
   void test_nx_monitor_rotation_not_written_when_is_zero() {
 
-    ScopedFileHandle fileResource("zero_nx_detector_location_file_test.hdf5");
+    ScopedFileHandle fileResource("zero_nx_monitor_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     V3D someLocation(0.0, 0.0, -5.0);

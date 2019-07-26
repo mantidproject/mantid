@@ -633,8 +633,7 @@ private:
       shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
       isGroup = true;
     } catch (H5::Exception &) {
-      // TODO. Current assumption. Can we have pixels without specifying a
-      // shape?
+ 		// shape is not mandatory
       try {
         shapeGroup = detectorGroup.openGroup(SHAPE);
       } catch (H5::Exception &) {
@@ -742,7 +741,7 @@ public:
       // Get the pixel detIds
       auto detectorIds = getDetectorIds(detectorGroup);
 
-      try {
+      try { // detector shape is not mandatory.
         auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
         parseAndAddBank(shapeGroup, builder, detectorIds, bankName);
         continue;

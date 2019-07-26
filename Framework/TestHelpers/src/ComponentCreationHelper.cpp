@@ -1014,8 +1014,8 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
 
   const auto tubeShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, pixelHeight,
-      V3D(0.0, -0.5 * pixelHeight * nPixelsPerTube, 0.0), V3D(0.0, 1.0, 0.0),
-      "tubeShape");
+      V3D(0.0, -0.5 * pixelHeight * (double)nPixelsPerTube, 0.0),
+      V3D(0.0, 1.0, 0.0), "tubeShape");
 
   for (size_t i = 0; i < nTubes; ++i) {
     std::ostringstream lexer;

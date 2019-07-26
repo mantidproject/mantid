@@ -10,7 +10,7 @@
  *
  * Save Beamline NXInstrument from Memory to disk
  *
- *@author Takudzwa Makoni, RAL (UKRI), ISIS
+ *@author Takudzwa Makoni, ISIS RAL
  *@date 22/07/2019
  */
 
