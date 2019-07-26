@@ -38,12 +38,12 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
                           "The functions you used immediately before the problem\n"
                           "\n"
                           "Thank you!")
-    free_text_edited = False;
+    free_text_edited = False
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
-        if qtpy.PYQT4:  # TODO
+        if qtpy.PYQT4:
             self.input_free_text.setPlainText(self.default_plain_text)
             self.input_free_text.cursorPositionChanged.connect(self.check_placeholder_text)
         elif qtpy.PYQT5:
