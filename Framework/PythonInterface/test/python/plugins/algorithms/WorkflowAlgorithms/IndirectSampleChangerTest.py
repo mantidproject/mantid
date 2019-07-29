@@ -30,8 +30,8 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._analyser = 'graphite'
         self._reflection = '002'
         self._spectra_range = '3,50'
-        self._elastic_range = '-0.5,0'
-        self._inelastic_range = '0,0.5'
+        self._elastic_range = '-0.02,0.02'
+        self._inelastic_range = '0.4,0.5'
         self._total_range = '-0.5,0.5'
         self._msd_fit = False
         self._width_fit = False
@@ -46,8 +46,8 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._execute_IndirectSampleChanger()
 
         scan_ws = get_ads_workspace('iris72462_to_iris72465_scan_eisf')
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.5131213)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.5246563)
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.795287)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.837118)
 
     def test_multiple_samples(self):
         """
@@ -58,12 +58,12 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._execute_IndirectSampleChanger()
 
         scan_ws = get_ads_workspace('iris72462_to_iris72464_scan_eisf')
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.5131213)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.5089692)
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.795287)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.8005723)
 
         scan_ws = get_ads_workspace('iris72463_to_iris72465_scan_eisf')
-        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.5246563)
-        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.5204655)
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 0.837118)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 0.8447051)
 
     def test_msdFit(self):
         """
@@ -74,12 +74,12 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self._execute_IndirectSampleChanger()
 
         eisf_ws = get_ads_workspace('iris72462_to_iris72465_scan_eisf')
-        self.assertEqual(round(eisf_ws.readY(0)[0], 7), 0.5131213)
-        self.assertEqual(round(eisf_ws.readY(1)[0], 7), 0.5246563)
+        self.assertEqual(round(eisf_ws.readY(0)[0], 7), 0.795287)
+        self.assertEqual(round(eisf_ws.readY(1)[0], 7), 0.837118)
 
         msd_ws = get_ads_workspace('iris72462_to_iris72465_scan_msd')
-        self.assertEqual(round(msd_ws.readY(0)[1], 7), 0.1518028)
-        self.assertEqual(round(msd_ws.readY(1)[2], 7), 0.4238669)
+        self.assertEqual(round(msd_ws.readY(0)[1], 7), 0.4284148)
+        self.assertEqual(round(msd_ws.readY(1)[2], 7), 0.4145711)
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_run_numbers_in_the_wrong_order(self):
         self.assertRaises(RuntimeError, IndirectSampleChanger,
