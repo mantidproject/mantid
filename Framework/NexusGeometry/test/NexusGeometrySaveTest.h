@@ -783,7 +783,7 @@ ROTATION TESTS
   test_when_nx_monitor_groups_have_nx_transformations_transformation_type_is_specified_for_all() {
 
     ScopedFileHandle fileResource(
-        "check_nxdetector_groups_have_transformation_types_test_file.hdf5");
+        "check_nxmonitor_groups_have_transformation_types_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     const Quat someRotation(45.0, V3D(0.0, 1.0, 0.0));
@@ -989,7 +989,7 @@ ROTATION TESTS
     const V3D sourceLocation(0, 0, -10);
     const Quat someRotation(30, V3D(1, 0, 0));
 
-    ScopedFileHandle fileResource("zero_nx_detector_location_file_test.hdf5");
+    ScopedFileHandle fileResource("origin_nx_detector_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =
@@ -1017,7 +1017,7 @@ ROTATION TESTS
 
   void test_nx_monitor_location_not_written_when_is_at_origin() {
 
-    ScopedFileHandle fileResource("zero_nx_monitor_location_file_test.hdf5");
+    ScopedFileHandle fileResource("origin_nx_monitor_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     Quat someRotation(45, V3D(0, 1, 0));
@@ -1056,7 +1056,7 @@ ROTATION TESTS
 
     const Quat sourceRotation(90, V3D(0, 1, 0));
 
-    ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+    ScopedFileHandle fileResource("origin_nx_source_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =
@@ -1118,7 +1118,7 @@ ROTATION TESTS
 
   void test_nx_monitor_rotation_not_written_when_is_zero() {
 
-    ScopedFileHandle fileResource("zero_nx_monitor_location_file_test.hdf5");
+    ScopedFileHandle fileResource("zero_nx_monitor_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     V3D someLocation(0.0, 0.0, -5.0);
@@ -1209,7 +1209,7 @@ ROTATION TESTS
 
     const Quat sourceRotation(90, V3D(0, 1, 0));
 
-    ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+    ScopedFileHandle fileResource("no_location_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =
@@ -1256,7 +1256,7 @@ const V3D sourceLocation(0, 0, -10);
 
 const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
-ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+ScopedFileHandle fileResource("no_orientation_dependency_test.hdf5");
 std::string destinationFile = fileResource.fullPath();
 
 auto instrument =
@@ -1303,7 +1303,7 @@ TS_ASSERT(locationDependencyIsSelf);
 
     const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
-    ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+    ScopedFileHandle fileResource("both_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =

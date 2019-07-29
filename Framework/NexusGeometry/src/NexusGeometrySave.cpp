@@ -878,7 +878,7 @@ void saveInstrument(
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  /// Exception handling.
+  // Exception handling.
   boost::filesystem::path tmp(fullPath);
   if (!boost::filesystem::is_directory(tmp.root_directory())) {
     throw std::invalid_argument(
