@@ -402,7 +402,11 @@ void Quasi::handleResolutionInputReady(const QString &wsName) {
  * @param min :: The new value of the lower guide
  */
 void Quasi::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -411,7 +415,11 @@ void Quasi::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Quasi::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**

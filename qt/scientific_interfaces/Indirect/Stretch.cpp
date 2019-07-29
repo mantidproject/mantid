@@ -394,7 +394,11 @@ void Stretch::plotCurrentPreview() {
  * @param min :: The new value of the lower guide
  */
 void Stretch::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -403,7 +407,11 @@ void Stretch::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Stretch::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**

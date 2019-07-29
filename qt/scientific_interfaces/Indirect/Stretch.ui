@@ -191,7 +191,7 @@
        <item>
         <widget class="QLabel" name="lbPreviewSpectrum">
          <property name="text">
-          <string>Preview Spectrum:</string>
+          <string>Preview Spectrum: </string>
          </property>
         </widget>
        </item>
