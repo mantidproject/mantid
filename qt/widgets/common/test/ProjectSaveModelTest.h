@@ -267,6 +267,12 @@ public:
     TS_ASSERT_EQUALS(winInfo[1].type, "Matrix");
     TS_ASSERT_EQUALS(winInfo[1].icon_id, "matrix_xpm");
   }
+
+  void testNeedsSizeWarningForEmptyWorkspace() {
+    ProjectSaveModel model({});
+    std::vector<std::string> wsNames{"ws1"};
+    TS_ASSERT_EQUALS(model.needsSizeWarning(wsNames), false);
+  }
 };
 
 #endif // MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
