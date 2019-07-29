@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -41,11 +40,11 @@ public:
   void saveNexus(::NeXus::File *file, const std::string &group);
 
 private:
-  std::string m_description;
-  std::string m_url;
   std::string m_doi;
   std::string m_bibtex;
   std::string m_endnote;
+  std::string m_url;
+  std::string m_description;
 };
 } // namespace API
 } // namespace Mantid

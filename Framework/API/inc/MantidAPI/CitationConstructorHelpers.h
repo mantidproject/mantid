@@ -1,9 +1,15 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_API_CITATION_CITATIONCONSTRUCTORHELPERS_H_
 #define MANTID_API_CITATION_CITATIONCONSTRUCTORHELPERS_H_
 
 #include "DllConfig.h"
 
-#include <boost/optional.hpp>
+#include <string>
 #include <vector>
 
 namespace Mantid {
