@@ -35,12 +35,6 @@ polarizationCorrectionTypeToString(PolarizationCorrectionType correctionType) {
   throw std::invalid_argument("Unexpected polarization correction type.");
 }
 
-inline bool polarizationCorrectionRequiresInputs(
-    PolarizationCorrectionType correctionType) {
-  UNUSED_ARG(correctionType);
-  return false;
-}
-
 /** @class PoliarizationCorrections
 
     The PoliarizationCorrections model holds information about what
