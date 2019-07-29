@@ -121,14 +121,22 @@ protected:
                     const size_t &axisIndex) const;
 
   /// Function to set the range limits of the plot
-  void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector *rs,
-                            QtProperty *min, QtProperty *max,
+  void setPlotPropertyRange(MantidWidgets::RangeSelector *rs, QtProperty *min,
+                            QtProperty *max,
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
   void setRangeSelector(
-      MantidQt::MantidWidgets::RangeSelector *rs, QtProperty *lower,
-      QtProperty *upper, const QPair<double, double> &bounds,
+      MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+      const QPair<double, double> &bounds,
       const boost::optional<QPair<double, double>> &range = boost::none);
+  /// Sets the min of the range selector if it is less than the max
+  void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
+                           MantidWidgets::RangeSelector *rangeSelector,
+                           double newValue);
+  /// Sets the max of the range selector if it is more than the min
+  void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty,
+                           MantidWidgets::RangeSelector *rangeSelector,
+                           double newValue);
 
   /// Function to get energy mode from a workspace
   std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);

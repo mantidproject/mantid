@@ -389,16 +389,21 @@ void ResNorm::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void ResNorm::updateProperties(QtProperty *prop, double val) {
-  UNUSED_ARG(val);
-
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
-  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(getDoubleManagerProperty("EMin"),
-                            getDoubleManagerProperty("EMax"));
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     bounds);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
+  if (prop == m_properties["EMin"]) {
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
+  } else if (prop == m_properties["EMax"]) {
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**

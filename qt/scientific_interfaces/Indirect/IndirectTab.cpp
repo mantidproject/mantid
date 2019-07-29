@@ -464,6 +464,44 @@ void IndirectTab::setRangeSelector(
 }
 
 /**
+ * Set the minimum of a range selector if it is less than the maximum value.
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the minimum
+ */
+void IndirectTab::setRangeSelectorMin(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue <= maxProperty->valueText().toDouble())
+    rangeSelector->setMinimum(newValue);
+  else
+    m_dblManager->setValue(minProperty, rangeSelector->getMinimum());
+}
+
+/**
+ * Set the maximum of a range selector if it is greater than the minimum value
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the maximum
+ */
+void IndirectTab::setRangeSelectorMax(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue >= minProperty->valueText().toDouble())
+    rangeSelector->setMaximum(newValue);
+  else
+    m_dblManager->setValue(maxProperty, rangeSelector->getMaximum());
+}
+
+/**
  * Gets the energy mode from a workspace based on the X unit.
  *
  * Units of dSpacing typically denote diffraction, hence Elastic.
@@ -572,8 +610,7 @@ IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName,
 QPair<double, double> IndirectTab::getXRangeFromWorkspace(
     Mantid::API::MatrixWorkspace_const_sptr workspace, double precision) const {
   auto const xValues = workspace->x(0);
-  return roundRangeToPrecision(xValues[0], xValues[xValues.size() - 1],
-                               precision);
+  return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 
 /**
