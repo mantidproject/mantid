@@ -203,7 +203,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Plot the guess curve.
         """
-        from mantidqt.plotting.functions import plot
         fun = self.getFittingFunction()
         ws_name = self.workspaceName()
         if fun == '' or ws_name == '':
@@ -227,12 +226,13 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             return
 
         out_ws = alg.getProperty('OutputWorkspace').value
-
-        plot([out_ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True, plot_kwargs={'label': out_ws_name})
-        for lin in self.get_lines():
-            if lin.get_label().startswith(out_ws_name):
-                self.guess_line = lin
-                self.setTextPlotGuess('Remove Guess')
+        # Setting distribution=True prevents the guess being normalised
+        self.guess_line = self.get_axes().plot(out_ws, wkspIndex=1,
+                                               label=out_ws_name,
+                                               distribution=True,
+                                               update_axes_labels=False)[0]
+        if self.guess_line:
+            self.setTextPlotGuess('Remove Guess')
         self.canvas.draw()
 
     def remove_guess(self):
