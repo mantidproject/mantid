@@ -61,7 +61,7 @@ void MainWindowPresenter::notifyAutoreductionResumed() {
 
 void MainWindowPresenter::notifyAutoreductionPaused() {
   for (auto &batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionResumed();
+    batchPresenter->anyBatchAutoreductionPaused();
   }
 }
 
