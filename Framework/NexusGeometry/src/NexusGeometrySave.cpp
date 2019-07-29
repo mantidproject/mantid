@@ -56,8 +56,11 @@ const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
 const std::string PIXEL_SHAPE = "pixel_shape";
 
+// these strings belong to DataSets which are duplicates of each other. written
+// to NXmonitor group to handle the naming inconsistency. probably temporary.
 const std::string DETECTOR_NUMBER = "detector_number";
 const std::string DETECTOR_ID = "detector_id";
+
 const std::string TRANSFORMATION_TYPE = "transformation_type";
 
 const std::string METRES = "m";
@@ -399,13 +402,13 @@ inline void writeXYZPixeloffset(H5::Group &grp,
 }
 
 /*
- * Function: writeDetectorNumber
- * For use with NXdetector group. Finds all detector pixels by index in the
- * component Info object and writes the detector numbers to a new dataset in the
- * group.
+ * Function: writeNXDetectorNumber
+ * For use with NXdetector group. Writes the detector numbers for all detector
+ * pixels in compInfo to a new dataset in the group.
  *
- * @param grp : NXdetector group (HDF group)
- * @param compInfo : componentInfo object.
+ * @param detectorIDs : std::vector<int> container of all detectorIDs to be
+ * stored into dataset 'detector_number'.
+ * @idx : size_t index of bank in compInfo.
  */
 void writeNXDetectorNumber(H5::Group &grp,
                            const Geometry::ComponentInfo &compInfo,
@@ -436,24 +439,32 @@ void writeNXDetectorNumber(H5::Group &grp,
 }
 
 /*
-TODO: DOCUMENTATION
-*/
+ * Function: writeNXDetectorNumber
+ * For use with NXmonitor group. write 'detector_id's of an NXmonitor, which is
+ * a specific type of NXdetector, to its group.
+ *
+ * @param grp : NXmonitor group (HDF group)
+ * @param compInfo : componentInfo object.
+ * @param monitorIDs : std::vector<int> container of all monitorIDs to be stored
+ * into dataset 'detector_id' (or 'detector_number'. naming convention
+ * inconsistency?).
+ * @idx : size_t index of monitor in compInfo.
+ */
 void writeNXMonitorNumber(H5::Group &grp,
                           const Geometry::ComponentInfo &compInfo,
-                          const std::vector<int> &detectorIDs,
+                          const std::vector<int> &monitorIDs,
                           const size_t &idx) {
 
-  H5::DataSet detectorNumber;
-  // this is a duplicate of dataset detectorNumber, written to the group to
-  // handle naming inconsistency. probably temporary.
-  H5::DataSet detector_id;
+  // these DataSets are duplicates of each other. written to the NXmonitor group
+  // to handle the naming inconsistency. probably temporary.
+  H5::DataSet detectorNumber, detector_id;
 
   std::vector<int> bankDetIDs;
   std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx);
   bankDetIDs.reserve(bankDetectors.size());
 
   for (size_t &index : bankDetectors) {
-    bankDetIDs.push_back(detectorIDs[index]);
+    bankDetIDs.push_back(monitorIDs[index]);
   }
 
   const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
@@ -464,12 +475,12 @@ void writeNXMonitorNumber(H5::Group &grp,
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
+  // these DataSets are duplicates of each other. written to the group to
+  // handle the naming inconsistency. probably temporary.
   detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
   detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 
-  // this is a duplicate of dataset detectorNumber, written to the group to
-  // handle naming inconsistency. probably temporary.
   detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
   detector_id.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
@@ -747,8 +758,17 @@ void saveNXSource(const H5::Group &parentGroup,
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-// TODO: add documentation. CHECK IF ANYTHING IS DIFFERENT BETWEEN NXDETECTORS
-// AND NXMONITORS OTHERWISE THIS IS DUPLICATE CODE.
+/*
+ * Function: saveNXMonitors
+ * For NXinstrument parent (component info root). Produces a set of NXmonitor
+ * groups from Component info, and saves it in the parent
+ * group, along with the Nexus compliant datasets, and metadata stored in
+ * attributes to the new group.
+ *
+ * @param parentGroup : parent group in which to write the NXinstrument group.
+ * @param compInfo : componentInfo object.
+ * @param detInfo : DetectorInfo object.
+ */
 void saveNXMonitors(const H5::Group &parentGroup,
                     const Geometry::ComponentInfo &compInfo,
                     const Geometry::DetectorInfo &detInfo) {
@@ -811,7 +831,7 @@ void saveNXMonitors(const H5::Group &parentGroup,
  *
  * @param parentGroup : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
- * @
+ * @param detInfo : DetectorInfo object.
  */
 void saveNXDetectors(const H5::Group &parentGroup,
                      const Geometry::ComponentInfo &compInfo,
