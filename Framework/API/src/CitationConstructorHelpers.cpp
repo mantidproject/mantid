@@ -116,7 +116,7 @@ std::string makeEndNoteDate(const std::string &year, const std::string &month) {
   return year + "/" + month;
 }
 
-std::tuple<std::string, std::string>
+std::pair<std::string, std::string>
 makeEndNotePageNumbers(const std::string &pages) {
   if (pages != "") {
     std::vector<std::string> strs;
@@ -183,7 +183,7 @@ std::string ArticleCitation::toEndNote() const {
   std::tie(start, end) = makeEndNotePageNumbers(m_pages);
   endNote += addToEndNote(STARTPAGE, start);
   endNote += addToEndNote(ENDPAGE, end);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -241,7 +241,7 @@ std::string BookCitation::toEndNote() const {
   endNote += addToEndNote(VOLUME, m_volume);
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(EDITION, m_edition);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -292,8 +292,8 @@ std::string BookletCitation::toEndNote() const {
   endNote += addToEndNote(TITLE, m_title);
   endNote += addToEndNote(HOWPUBLISHED, m_howPublished);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (m_year != "") {
-    if (m_month != "")
+  if (!m_year.empty()) {
+    if (!m_month.empty())
       endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
     else
       endNote += addToEndNote(YEAR, m_year);
@@ -359,7 +359,7 @@ std::string InBookCitation::toEndNote() const {
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(EDITION, m_edition);
   endNote += addToEndNote(TYPE, m_type);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -430,7 +430,7 @@ std::string InCollectionCitation::toEndNote() const {
   endNote += addToEndNote(ENDPAGE, end);
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(EDITION, m_edition);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -497,7 +497,7 @@ std::string InProceedingsCitation::toEndNote() const {
   endNote += addToEndNote(STARTPAGE, start);
   endNote += addToEndNote(ENDPAGE, end);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -548,8 +548,8 @@ std::string ManualCitation::toEndNote() const {
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (m_year != "") {
-    if (m_month != "")
+  if (!m_year.empty()) {
+    if (!m_month.empty())
       endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
     else
       endNote += addToEndNote(YEAR, m_year);
@@ -603,7 +603,7 @@ std::string MastersThesisCitation::toEndNote() const {
   endNote += addToEndNote(SCHOOL, m_school);
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -650,8 +650,8 @@ std::string MiscCitation::toEndNote() const {
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
   endNote += addToEndNote(HOWPUBLISHED, m_howpublished);
-  if (m_year != "") {
-    if (m_month != "")
+  if (!m_year.empty()) {
+    if (!m_month.empty())
       endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
     else
       endNote += addToEndNote(YEAR, m_year);
@@ -703,7 +703,7 @@ std::string PHDThesisCitation::toEndNote() const {
   endNote += addToEndNote(SCHOOL, m_school);
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -759,7 +759,7 @@ std::string ProceedingsCitation::toEndNote() const {
   endNote += addToEndNote(ADDRESS, m_address);
   endNote += addToEndNote(ORGANIZATION, m_organization);
   endNote += addToEndNote(PUBLISHER, m_publisher);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -813,7 +813,7 @@ std::string TechReportCitation::toEndNote() const {
   endNote += addToEndNote(TYPE, m_type);
   endNote += addToEndNote(NUMBER, m_number);
   endNote += addToEndNote(ADDRESS, m_address);
-  if (m_month != "")
+  if (!m_month.empty())
     endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
   else
     endNote += addToEndNote(YEAR, m_year);
@@ -853,8 +853,8 @@ std::string UnPublishedCitation::toEndNote() const {
 
   endNote += addAuthorsToEndNote(m_authors);
   endNote += addToEndNote(TITLE, m_title);
-  if (m_year != "") {
-    if (m_month != "")
+  if (!m_year.empty()) {
+    if (!m_month.empty())
       endNote += addToEndNote(DATE, makeEndNoteDate(m_year, m_month));
     else
       endNote += addToEndNote(YEAR, m_year);

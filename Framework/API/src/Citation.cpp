@@ -31,31 +31,28 @@ namespace API {
 
 Citation::Citation(const std::string &doi, const std::string &bibtex,
                    const std::string &endnote, const std::string &url,
-                   const std::string &description) {
-  if (doi == "" && bibtex == "" && endnote == "" && url == "" &&
-      description == "")
+                   const std::string &description)
+    : m_doi(doi), m_bibtex(bibtex), m_endnote(endnote), m_url(url),
+      m_description(description) {
+  if (doi.empty() && bibtex.empty() && endnote.empty() && url.empty() &&
+      description.empty())
     throw std::invalid_argument("No arguements were given!");
 
   // This is an initial implementation that expects it but it should be possible
   // to generate one from the other
-  if ((bibtex != "" && endnote == "") || (bibtex == "" && endnote != ""))
+  if ((!bibtex.empty() && endnote.empty()) ||
+      (bibtex.empty() && !endnote.empty()))
     throw std::invalid_argument(
         "If bibtex is provided, endnote must also be provided and vice-versa");
 
-  if (doi != "" && (bibtex == "" || endnote == "" || url == ""))
+  if (!doi.empty() && (bibtex.empty() || endnote.empty() || url.empty()))
     throw std::invalid_argument(
         "If doi is provided then url, bibtex and endnote must be");
 
-  if (doi == "" && bibtex == "" && endnote == "")
-    if (url == "")
+  if (doi.empty() && bibtex.empty() && endnote.empty())
+    if (url.empty())
       throw std::invalid_argument(
           "If none of doi, bibtex, or endnote is provided, then url must be");
-
-  m_doi = doi;
-  m_bibtex = bibtex;
-  m_endnote = endnote;
-  m_url = url;
-  m_description = description;
 }
 
 Citation::Citation(::NeXus::File *file, const std::string &group) {

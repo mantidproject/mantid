@@ -41,12 +41,8 @@ public:
   void saveNexus(::NeXus::File *file, const std::string &group);
 
 private:
-  // Optional
   std::string m_description;
-
-  // If this is set doi, bibtex or endote are provided then url must be.
   std::string m_url;
-
   std::string m_doi;
   std::string m_bibtex;
   std::string m_endnote;

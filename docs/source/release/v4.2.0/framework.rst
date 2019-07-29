@@ -12,8 +12,6 @@ Framework Changes
 Concepts
 --------
 
-- Added trivially citable citation objects for workbench and MantidPlot
-
 Algorithms
 ----------
 
