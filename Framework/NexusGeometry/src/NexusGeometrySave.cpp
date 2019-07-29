@@ -833,10 +833,10 @@ void saveNXMonitors(const H5::Group &parentGroup,
  * @param compInfo : componentInfo object.
  * @param detInfo : DetectorInfo object.
  */
-void saveNXDetectors(const H5::Group &parentGroup,
-                     const Geometry::ComponentInfo &compInfo,
-                     const size_t &bankIdx,
-                     const Geometry::DetectorInfo &detInfo) {
+void saveNXDetector(const H5::Group &parentGroup,
+                    const Geometry::ComponentInfo &compInfo,
+                    const size_t &bankIdx,
+                    const Geometry::DetectorInfo &detInfo) {
 
   const auto detIds = detInfo.detectorIDs();
 
@@ -944,7 +944,7 @@ void saveInstrument(
 
   // save NXdetectors
   for (const size_t &index : nxDetectors) {
-    NexusGeometrySave::saveNXDetectors(instrument, compInfo, index, detInfo);
+    NexusGeometrySave::saveNXDetector(instrument, compInfo, index, detInfo);
   }
 
   // save NXmonitors
