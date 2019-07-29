@@ -52,7 +52,7 @@ ConvFit::ConvFit(QWidget *parent)
   connect(
       dataPresenter.get(),
       SIGNAL(modelResolutionAdded(std::string const &, DatasetIndex const &)),
-      m_uiForm->fitPropertyBrowser,
+      this,
       SLOT(setModelResolution(std::string const &, DatasetIndex const &)));
   setFitDataPresenter(std::move(dataPresenter));
 
@@ -139,11 +139,17 @@ EstimationDataSelector ConvFit::getEstimationDataSelector() const {
       };
 }
 
-void ConvFit::setModelResolution(const QString &resolutionName) {
-  const auto name = resolutionName.toStdString();
+void ConvFit::setModelResolution(const std::string &resolutionName) {
+  setModelResolution(resolutionName, DatasetIndex{0});
+}
+
+void ConvFit::setModelResolution(const std::string &resolutionName,
+                                 DatasetIndex index) {
   const auto resolution =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-  m_convFittingModel->setResolution(resolution, DatasetIndex{0});
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          resolutionName);
+  m_convFittingModel->setResolution(resolution, index);
+  m_uiForm->fitPropertyBrowser->setModelResolution(resolutionName, index);
   setModelFitFunction();
 }
 

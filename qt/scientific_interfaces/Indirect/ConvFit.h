@@ -30,7 +30,8 @@ public:
   bool hasResolution() const override { return true; }
 
 protected slots:
-  void setModelResolution(const QString &resolutionName);
+  void setModelResolution(const std::string &resolutionName);
+  void setModelResolution(const std::string &resolutionName, DatasetIndex index);
   void runClicked();
   void fitFunctionChanged();
 
