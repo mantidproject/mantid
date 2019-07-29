@@ -8,7 +8,7 @@ from qtpy.QtWidgets import QApplication
 from qtpy.QtCore import Qt, QMetaObject
 
 from mantid import FrameworkManager
-from mantidqt.utils.qt.testing.gui_window_test import GuiWindowTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 
@@ -19,7 +19,8 @@ def on_ubuntu_or_darwin():
 
 @unittest.skipIf(on_ubuntu_or_darwin(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb."
                                         "Qt4 has a bug on macs which is fixed in Qt5.")
-class TestFitPropertyBrowser(GuiWindowTest):
+@start_qapplication
+class TestFitPropertyBrowser(unittest.TestCase):
 
     def create_widget(self):
         return FitPropertyBrowserBase()
