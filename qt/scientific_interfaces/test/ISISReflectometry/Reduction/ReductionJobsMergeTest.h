@@ -97,7 +97,7 @@ public:
   }
 
   void testMergeJobsIntoExistingWhenNameClashButNoRows() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A"));
     auto addition = ReductionJobs();
@@ -110,7 +110,7 @@ public:
   }
 
   void testMergeJobsIntoExistingWhenNameClashButRowsWithDifferentAngles() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
     auto addition = ReductionJobs();
@@ -124,7 +124,7 @@ public:
   }
 
   void testCallsInsertWhenAddingRow() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
     auto addition = ReductionJobs();
@@ -140,7 +140,7 @@ public:
   }
 
   void testMergeJobsIntoExistingWhenNameClashAndRowsHaveSameAngles() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithNameAndAngle("C", 0.1)}));
     auto addition = ReductionJobs();
@@ -156,7 +156,7 @@ public:
   }
 
   void testCallsModifiedWhenMergingRow() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithNameAndAngle("C", 0.1)}));
     auto addition = ReductionJobs();
@@ -201,7 +201,7 @@ public:
   }
 
   void testMergeIntoSelfResultsInNoChange() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(
         Group("S1 SI/ D20 ", {rowWithNameAndAngle("47450", 0.7),
