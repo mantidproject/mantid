@@ -329,7 +329,7 @@ void LoadPSIMuonBin::readArrayVariables(
 
   for (auto i = 0u; i <= 15; ++i) {
     streamReader.moveStreamToPosition(948 + (i * 4));
-    streamReader >> m_header.labelsOfHistograms[i];
+    streamReader.read(m_header.labelsOfHistograms[i], 4);
 
     streamReader.moveStreamToPosition(458 + (i * 2));
     streamReader >> m_header.integerT0[i];
@@ -529,10 +529,19 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     if (m_header.labels_scalars[i] == "NONE")
       // Break out of for loop
       break;
-    addToSampleLog("Label Spectra " + std::to_string(i),
+    addToSampleLog("Scalar Label Spectra " + std::to_string(i),
                    m_header.labels_scalars[i], outputWorkspace);
     addToSampleLog("Scalar Spectra " + std::to_string(i), m_header.scalars[i],
                    outputWorkspace);
+  }
+
+  constexpr auto sizeOfLabels = sizeof(m_header.labelsOfHistograms) /
+                                sizeof(*m_header.labelsOfHistograms);
+  for (auto i = 0u; i < sizeOfLabels; ++i) {
+    if (m_header.labelsOfHistograms[i] == "")
+      break;
+    addToSampleLog("Label Spectra " + std::to_string(i),
+                   m_header.labelsOfHistograms[i], outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);
