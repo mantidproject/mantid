@@ -22,7 +22,6 @@
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iterator>
@@ -356,29 +355,6 @@ RunsPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
   return progress;
 }
 
-struct RunDescriptionMetadata {
-  std::string groupName;
-  std::string theta;
-};
-
-RunDescriptionMetadata metadataFromDescription(std::string const &description) {
-  static boost::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
-  boost::smatch matches;
-  if (boost::regex_search(description, matches, descriptionFormatRegex)) {
-    constexpr auto preThetaGroup = 1;
-    constexpr auto thetaValueGroup = 3;
-    constexpr auto postThetaGroup = 4;
-
-    const auto theta = matches[thetaValueGroup].str();
-    const auto preTheta = matches[preThetaGroup].str();
-    const auto postTheta = matches[postThetaGroup].str();
-
-    return RunDescriptionMetadata{preTheta, theta};
-  } else {
-    return RunDescriptionMetadata{description, ""};
-  }
-}
-
 /** Transfers the selected runs in the search results to the processing table
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
@@ -395,15 +371,13 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
-      auto resultMetadata = metadataFromDescription(result.description);
-      auto row =
-          validateRowFromRunAndTheta(result.runNumber, resultMetadata.theta);
+      auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
       if (row.is_initialized()) {
         auto rowChanged = [](Row const &rowA, Row const &rowB) -> bool {
           return rowA.runNumbers() != rowB.runNumbers();
         };
-        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          resultMetadata.groupName, rowChanged);
+        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName(),
+                          rowChanged);
       } else {
         m_searcher->setSearchResultError(
             rowIndex, "Theta was not specified in the description.");
