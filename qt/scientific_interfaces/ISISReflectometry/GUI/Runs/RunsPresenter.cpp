@@ -9,6 +9,7 @@
 #include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IPythonRunner.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -366,11 +367,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
       auto const &result = m_searcher->getSearchResult(rowIndex);
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
       if (row.is_initialized()) {
-        auto rowChanged = [](Row const &rowA, Row const &rowB) -> bool {
-          return rowA.runNumbers() != rowB.runNumbers();
-        };
-        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName(),
-                          rowChanged);
+        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
+                          result.groupName());
       } else {
         m_searcher->setSearchResultError(
             rowIndex, "Theta was not specified in the description.");

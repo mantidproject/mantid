@@ -85,9 +85,9 @@ std::string groupName(ReductionJobs const &jobs, int groupIndex);
 
 int percentComplete(ReductionJobs const &jobs);
 
-void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
-                       double thetaTolerance, std::string const &groupName,
-                       bool (*rowChanged)(Row const &rowA, Row const &rowB));
+MANTIDQT_ISISREFLECTOMETRY_DLL void
+mergeRowIntoGroup(ReductionJobs &jobs, Row const &row, double thetaTolerance,
+                  std::string const &groupName);
 
 template <typename ModificationListener>
 void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
