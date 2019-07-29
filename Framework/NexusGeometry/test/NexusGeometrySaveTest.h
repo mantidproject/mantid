@@ -7,30 +7,30 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
-#include "MantidKernel/ConfigService.h" // temporary, for unit test with parser. TODO: remove
-
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
-
 #include <H5Cpp.h>
 #include <algorithm>
+#include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <gmock/gmock.h>
+#include <iostream> // TODO: FOR DEBUGGING. DELETE LATER
 #include <memory>
 #include <set>
 
-#include <Poco/Glob.h> // temporary, for unit test with parser. TODO: remove
+// TODO: FOR DEBUGGING. DELETE LATER
+#define DEBUG_PRINT(x) std::cout << "DEBUG: " << x << std::endl
+// TODO: FOR DEBUGGING. DELETE LATER
+#define WAIT std::cin.get()
 
 using namespace Mantid::NexusGeometry;
 
@@ -57,6 +57,7 @@ const std::string TRANSLATION = "translation";
 const std::string TRANSFORMATIONS = "transformations";
 const std::string VECTOR = "vector";
 const std::string LOCATION = "location";
+const std::string DEPENDS_ON = "depends_on";
 const std::string ORIENTATION = "orientation";
 const std::string UNITS = "units";
 const std::string METRES = "m";
@@ -64,24 +65,15 @@ const std::string NAME = "name";
 const std::string X_PIXEL_OFFSET = "x_pixel_offset";
 const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
 const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
+const std::string SELF_DEPENDENT = ".";
 
-const std::string DEFAULT_ROOT_PATH = "raw_data_1";
+const std::string DEFAULT_ROOT_PATH = "/raw_data_1";
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(doReport, void(const std::string &));
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
-};
-
-// TODO, this is duplicated from NexusGeometryParserTest, should be made the
-// same.
-class MockLogger : public Mantid::NexusGeometry::Logger {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(warning, void(const std::string &));
-  MOCK_METHOD1(error, void(const std::string &));
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 //  local Class used for validation of the structure of a nexus file as needed
@@ -109,8 +101,7 @@ public:
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
                                     const std::string &childNX_CLASS_TYPE) {
 
-    H5::Group rootGroup =
-        m_file.openGroup("raw_data_1"); // as defined in saveInstrument.
+    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_PATH);
 
     // if specified parent NX class type is NX entry, check the top level of
     // file structure only. (dont take extra step to look for parent group)
@@ -174,6 +165,9 @@ public:
     hsize_t dims[(hsize_t)1];
     dims[0] = (hsize_t)1;
 
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
+
     H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
     // open dataset and read.
@@ -188,6 +182,9 @@ public:
   readDoubleVectorFrom_d_Attribute(const std::string &attrName,
                                    const std::string &datasetName,
                                    const std::string &pathToGroup) {
+
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     // open dataset and read.
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -207,8 +204,11 @@ public:
   }
 
   // check NX_class attribute with value exists inside dataset at path.
-  bool hasDatasetWithNXAttribute(const std::string pathToGroup,
-                                 const std::string nx_attributeVal) {
+  bool hasDatasetWithNXAttribute(const std::string &pathToGroup,
+                                 const std::string &nx_attributeVal) {
+
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
@@ -229,9 +229,11 @@ public:
   }
 
   // check attriubte with value exists inside dataset at path.
-  bool hasDatasetWithAttribute(const std::string pathToGroup,
-                               const std::string attributeVal,
-                               const std::string attrName) {
+  bool hasDatasetWithAttribute(const std::string &pathToGroup,
+                               const std::string &attributeVal,
+                               const std::string &attrName) {
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
@@ -251,9 +253,13 @@ public:
     return false;
   }
 
-  bool hasDataset(const std::string pathToGroup, const std::string dsetName) {
+  bool hasDataset(const std::string &pathToGroup, const std::string dsetName) {
+
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
+
     auto numOfChildren = parentGroup.getNumObjs();
     for (hsize_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
@@ -269,6 +275,9 @@ public:
   bool groupHasNxClass(const std::string &attrVal,
                        const std::string &pathToGroup) const {
 
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
+
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     attribute = parentGroup.openAttribute(NX_CLASS);
@@ -278,21 +287,25 @@ public:
     return attributeValue == attrVal;
   }
 
-  bool groupExistsInPath(std::string fullPath) {
+  bool groupExistsInPath(const std::string &fullPath) const {
 
     try {
       H5::Group parentGroup = m_file.openGroup(fullPath);
     } catch (H5::Exception &) {
-
-      return false;
+      DEBUG_PRINT("group doesnt exist...");
+      DEBUG_PRINT(fullPath);
+      WAIT;
+      exit(1);
     }
-
     return true;
   }
 
   bool dataSetHasStrValue(const std::string &dataSetName,
                           const std::string &dataSetValue,
                           const std::string &pathToGroup) const {
+
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
@@ -311,6 +324,9 @@ public:
                            const std::string &attrName,
                            const std::string &attrVal) {
 
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
+
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
     H5::Attribute attribute = parentGroup.openAttribute(attrName);
@@ -322,6 +338,9 @@ public:
 
   bool hasNXAttributeInGroup(const std::string &pathToGroup,
                              const std::string &attrVal) {
+
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
@@ -337,6 +356,9 @@ public:
                              const std::string &attrName,
                              const std::string &attrVal) {
 
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
+
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
@@ -350,6 +372,9 @@ public:
   bool hasNXAttributeInDataSet(const std::string &pathToGroup,
                                const std::string dataSetName,
                                const std::string &attrVal) {
+
+    // TODO: REMOVE LATER
+    groupExistsInPath(pathToGroup);
 
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
@@ -441,6 +466,30 @@ public:
         Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
   }
 
+  /*
+====================================================================
+
+IO PRECONDITIONS TESTS
+
+DESCRIPTION:
+
+The following tests are written to document the behaviour of the SaveInstrument
+method when a valid and invalid beamline Instrument are attempted to be saved
+out from memory to file. Included also are tests that document the behaviour
+when a valid (.nxs, .hdf5 ) or invalid output file extension is attempted to
+used.
+
+LIST IN DESCENDING ORDER:
+
+* test providing invalid path throws
+* test progress reporting
+* test false file extension throws
+* test instrument without sample throws
+* test instrument without source throws
+
+====================================================================
+*/
+
   void test_providing_invalid_path_throws() {
 
     ScopedFileHandle fileResource("invalid_path_to_file_test_file.hdf5");
@@ -471,7 +520,7 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
 
-  void test_extension_validation() {
+  void test_false_file_extension_throws() {
 
     ScopedFileHandle fileResource("invalid_extension_test_file.abc");
     std::string destinationFile = fileResource.fullPath();
@@ -482,64 +531,6 @@ public:
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
                          m_instrument, destinationFile, DEFAULT_ROOT_PATH),
                      std::invalid_argument &);
-  }
-
-  void test_root_group_is_nxentry_class() {
-
-    ScopedFileHandle fileResource("check_nxentry_group_test_file.nxs");
-    std::string destinationFile = fileResource.fullPath();
-
-    auto const &compInfo = (*m_instrument.first);
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
-                                      DEFAULT_ROOT_PATH);
-
-    HDF5FileTestUtility tester(destinationFile);
-    std::string dataSetName = compInfo.name(compInfo.root());
-
-    TS_ASSERT(tester.groupHasNxClass(NX_ENTRY, "/raw_data_1"));
-  }
-
-  void test_nxinstrument_class_group_exists_in_root_group() {
-
-    ScopedFileHandle fileResource("check_nxinstrument_group_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    auto const &compInfo = (*m_instrument.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
-
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
-                                      DEFAULT_ROOT_PATH);
-    HDF5FileTestUtility tester(destinationFile);
-    std::string dataSetName = compInfo.name(compInfo.root());
-
-    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_INSTRUMENT));
-  }
-
-  void test_NXinstrument_has_expected_name() {
-
-    ScopedFileHandle fileResource("check_instrument_name_test_file.nxs");
-    auto destinationFile = fileResource.fullPath();
-
-    auto const &compInfo = (*m_instrument.first);
-
-    // name of instrument
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
-
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
-                                      DEFAULT_ROOT_PATH); // saves instrument
-    HDF5FileTestUtility testUtility(destinationFile);
-
-    std::string pathToGroup = "/raw_data_1/" + expectedInstrumentName;
-
-    TS_ASSERT(
-        testUtility.groupExistsInPath(pathToGroup)); // assert group exists
-
-    TS_ASSERT(testUtility.hasNXAttributeInGroup(
-        pathToGroup, NX_INSTRUMENT)); // assert group is NXinstrument
-
-    TS_ASSERT(testUtility.dataSetHasStrValue(
-        NAME, expectedInstrumentName,
-        pathToGroup)) // assert name stored in 'name'
   }
 
   void test_instrument_without_sample_throws() {
@@ -582,37 +573,6 @@ public:
                      std::invalid_argument &);
   }
 
-  // throws if NXinstrument group does not have NXsource group
-  void test_nxsource_class_exists_and_is_in_instrument_group() {
-
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    auto const &compInfo = (*m_instrument.first);
-
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
-                                      DEFAULT_ROOT_PATH);
-    HDF5FileTestUtility tester(destinationFile);
-    TS_ASSERT(compInfo.hasSource());
-    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT, NX_SOURCE));
-  }
-
-  // throws if NXentry group does not have NXsample group
-  void test_nxsample_class_exists_and_is_in_nxentry_group() {
-
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    auto const &compInfo = (*m_instrument.first);
-
-    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
-                                      DEFAULT_ROOT_PATH);
-    HDF5FileTestUtility tester(destinationFile);
-
-    TS_ASSERT(compInfo.hasSample());
-    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
-  }
-
   void test_sample_not_at_origin_throws() {
 
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
@@ -627,10 +587,158 @@ public:
                      std::invalid_argument &);
   }
 
-  // test that if NXtransformation exists in NXdetector, either orientation or
-  // rotation also exists in NXdetector.
+  /*
+ ====================================================================
+
+ NEXUS FILE FORMAT TESTS
+
+ DESCRIPTION:
+
+ The following tests document that the file format produced by saveInstrument is
+ compliant to the present Nexus standard as of the date corresponding to the
+ latest version of this document.
+
+ LIST IN DESCENDING ORDER:
+
+ * test root group is NXentry class
+ * test NXinstrument group exists in root group
+ * test NXinstrument has expected name
+ * test NXsource group exists and is in NXinstrument group
+ * test NXsample group exists and is in NXentry group
+
+ ====================================================================
+ */
+
+  void test_root_group_is_nxentry_class() {
+
+    ScopedFileHandle fileResource("check_nxentry_group_test_file.nxs");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+
+    HDF5FileTestUtility tester(destinationFile);
+    std::string dataSetName = compInfo.name(compInfo.root());
+
+    TS_ASSERT(tester.groupHasNxClass(NX_ENTRY, "/raw_data_1"));
+  }
+
+  void test_nxinstrument_group_exists_in_root_group() {
+
+    ScopedFileHandle fileResource("check_nxinstrument_group_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+    HDF5FileTestUtility tester(destinationFile);
+    std::string dataSetName = compInfo.name(compInfo.root());
+
+    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_INSTRUMENT));
+  }
+
+  void test_NXinstrument_has_expected_name() {
+
+    ScopedFileHandle fileResource("check_instrument_name_test_file.nxs");
+    auto destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+
+    // name of instrument
+    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
+
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
+                                      DEFAULT_ROOT_PATH); // saves instrument
+    HDF5FileTestUtility testUtility(destinationFile);
+
+    std::string pathToGroup = "/raw_data_1/" + expectedInstrumentName;
+
+    TS_ASSERT(
+        testUtility.groupExistsInPath(pathToGroup)); // assert group exists
+
+    TS_ASSERT(testUtility.hasNXAttributeInGroup(
+        pathToGroup, NX_INSTRUMENT)); // assert group is NXinstrument
+
+    TS_ASSERT(testUtility.dataSetHasStrValue(
+        NAME, expectedInstrumentName,
+        pathToGroup)) // assert name stored in 'name'
+  }
+
+  void test_nxsource_group_exists_and_is_in_nxinstrument_group() {
+
+    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+    HDF5FileTestUtility tester(destinationFile);
+    TS_ASSERT(compInfo.hasSource());
+    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_INSTRUMENT, NX_SOURCE));
+  }
+
+
+  void test_nxsample_group_exists_and_is_in_nxentry_group() {
+
+    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto const &compInfo = (*m_instrument.first);
+
+    NexusGeometrySave::saveInstrument(m_instrument, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+    HDF5FileTestUtility tester(destinationFile);
+
+    TS_ASSERT(compInfo.hasSample());
+    TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
+  }
+
+  /*
+====================================================================
+
+NEXUS TRANSFOMATIONS TESTS
+
+DESCRIPTION:
+
+The following tests document that saveInstrument will find and write detectors
+and other Instrument components to file in Nexus format, and where there exists
+transformations in ComponentInfo and DetectorInfo, SaveInstrument will generate
+'NXtransformations' groups to contain the corresponding component
+rotations/translations, and pixel offsets in any 'NXdetector' or 'NXmonitor'
+found in the Instrument cache.
+
+LIST(S) IN DESCENDING ORDER:
+
+* test when NXdetector groups have NXtransformations, 'transformation_type' is
+specified for all
+* test when NXmonitor groups have NXtransformations, 'transformation_type' is
+specified for all
+*  test when NXsource group has NXtransformations, 'transformation_type' is
+specified
+* test x/y/z pixel offset in file is relative position from bank without
+rotation
+
+* test rotation of source written to file is same as in component info.
+
+LOCATION TESTS:
+* test NXmonitor location not written when is at origin
+* test NXdetector location not written when is at origin
+* test NXsource location not written when is at origin
+
+ROTATION TESTS
+* test NXdetector rotation not written when is zero
+* test NXmonitor rotation not written when is zero
+* test NXsource rotation not written when is zero
+
+====================================================================
+*/
+
   void
-  test_when_nx_detector_groups_have_nx_transformation_attribute_transformation_type_is_specified_for_all() {
+  test_when_nx_detector_groups_have_nx_transformations_transformation_type_is_specified_for_all() {
 
     ScopedFileHandle fileResource(
         "check_nxdetector_groups_have_transformation_types_test_file.hdf5");
@@ -673,14 +781,17 @@ public:
   }
 
   void
-  test_when_nx_monitor_groups_have_nx_transformation_attribute_transformation_type_is_specified_for_all() {
+  test_when_nx_monitor_groups_have_nx_transformations_transformation_type_is_specified_for_all() {
 
     ScopedFileHandle fileResource(
         "check_nxdetector_groups_have_transformation_types_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
+    const Quat someRotation(45.0, V3D(0.0, 1.0, 0.0));
+
     auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+        ComponentCreationHelper::createMinimalInstrumentWithMonitor(
+            V3D(0, 0, 0), someRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // saveinstrument
@@ -720,7 +831,7 @@ public:
   }
 
   void
-  test_when_nx_source_group_has_nx_transformation_attribute_transformation_type_is_specified() {
+  test_when_nx_source_group_has_nx_transformations_transformation_type_is_specified() {
 
     ScopedFileHandle fileResource(
         "check_nxsource_group_has_transformation_type_test_file.hdf5");
@@ -755,7 +866,7 @@ public:
   }
 
   void
-  test_rotation_of_nx_detector_and_bank_accounted_for_in_xyz_pixel_offset_when_rotation_is_present() {
+  test_xyz_pixel_offset_in_file_is_relative_position_from_bank_without_rotation() {
 
     ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -826,17 +937,14 @@ public:
     }
   }
 
-  void
-  test_rotation_of_source_written_to_file_in_nexus_format_when_rotation_is_present() {
+  void test_rotation_of_source_written_to_file_is_same_as_in_component_info() {
 
-    const Quat sampleRotation(30, V3D(1, 0, 0));
     const Quat sourceRotation(90, V3D(0, 1, 0));
 
     auto instrument =
-        ComponentCreationHelper::createInstrumentWithSampleAndSourceRotation(
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10),
-            sampleRotation,  // sample rotation
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
@@ -855,31 +963,30 @@ public:
                            compInfo.name(compInfo.source()) + "/" +
                            TRANSFORMATIONS;
 
-    std::string dataSetName = "orientation";
     std::string attributeName = "vector";
 
     double angleInFile =
-        tester.readDoubleFromDataset(dataSetName, fullPathToGroup);
+        tester.readDoubleFromDataset(ORIENTATION, fullPathToGroup);
 
     std::vector<double> axisInFile = tester.readDoubleVectorFrom_d_Attribute(
-        attributeName, dataSetName, fullPathToGroup);
+        attributeName, ORIENTATION, fullPathToGroup);
 
     V3D axisVectorInFile = {axisInFile[0], axisInFile[1], axisInFile[2]};
 
-    // Eigen copy of sampleRotation
+    // Eigen copy of sorecRotation
     Eigen::Quaterniond sourceRotationCopy =
         Mantid::Kernel::toQuaterniond(sourceRotation);
 
-    // sample rotation in file as eigen Quaternion
+    // source rotation in file as eigen Quaternion
     Eigen::Quaterniond rotationInFile =
         Mantid::Kernel::toQuaterniond(Quat(angleInFile, axisVectorInFile));
 
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 
-  void test_nx_detector_location_not_written_when_is_zero() {
+  void test_nx_detector_location_not_written_when_is_at_origin() {
 
-    const V3D bankLocation(0, 0, 0); // set to zero
+    const V3D bankLocation(0, 0, 0); // set to origin
     const V3D sourceLocation(0, 0, -10);
     const Quat someRotation(30, V3D(1, 0, 0));
 
@@ -909,7 +1016,7 @@ public:
     TS_ASSERT(!hasLocation);
   }
 
-  void test_nx_monitor_location_not_written_when_is_zero() {
+  void test_nx_monitor_location_not_written_when_is_at_origin() {
 
     ScopedFileHandle fileResource("zero_nx_monitor_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -943,21 +1050,19 @@ public:
     TS_ASSERT(!hasLocation);
   }
 
-  void test_nx_source_location_not_written_when_is_zero() {
+  void test_nx_source_location_not_written_when_is_at_origin() {
 
     const V3D detectorLocation(0, 0, 10);
     const V3D sourceLocation(0, 0, 0); // set to zero
 
-    const Quat sampleRotation(30, V3D(1, 0, 0));
     const Quat sourceRotation(90, V3D(0, 1, 0));
 
     ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =
-        ComponentCreationHelper::createInstrumentWithSampleAndSourceRotation(
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
-            sampleRotation,  // sample rotation
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
@@ -1051,16 +1156,14 @@ public:
     const V3D detectorLocation(0, 0, 10);
     const V3D sourceLocation(-10, 0, 0);
 
-    const Quat sampleRotation(30, V3D(1, 0, 0));
     const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
 
     ScopedFileHandle inFileResource("zero_nx_source_rotation_file_test.hdf5");
     std::string destinationFile = inFileResource.fullPath();
 
     auto instrument =
-        ComponentCreationHelper::createInstrumentWithSampleAndSourceRotation(
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
-            sampleRotation,  // sample rotation
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
@@ -1079,6 +1182,162 @@ public:
     bool hasRotation = tester.hasDataset(fullPathToGroup, ORIENTATION);
 
     TS_ASSERT(!hasRotation);
+  }
+  /*
+  ====================================================================
+
+  DEPENDENCY CHAIN TESTS
+
+  DESCRIPTION:
+
+  LIST IN DESCENDING ORDER:
+
+  * test when location is not written and orientation exists, source dependency
+  is 'orientation' path and orientation is self dependent.
+  * test when orientation is not written and location exists, source dependency
+  is 'location' path and location is self dependent.
+  * test when both orientation and location are written in source, dependency
+  chain is: source => orientation => location => self dependent.
+
+  ====================================================================
+  */
+
+  void
+  test_when_location_is_not_written_and_orientation_exists_source_dependency_is_orientation_path_and_orientation_is_self_dependent() {
+
+    const V3D detectorLocation(0, 0, 10);
+    const V3D sourceLocation(0, 0, 0); // set to zero
+
+    const Quat sourceRotation(90, V3D(0, 1, 0));
+
+    ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto instrument =
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
+            sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
+            sourceRotation); // source rotation
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    auto &compInfo = (*instr.first);
+
+    auto pathToparent =
+        DEFAULT_ROOT_PATH + "/" + compInfo.name(compInfo.root());
+    auto sourceGroup = pathToparent + "/" + compInfo.name(compInfo.source());
+    auto transformationsGroup = pathToparent + "/" +
+                                compInfo.name(compInfo.source()) + "/" +
+                                TRANSFORMATIONS;
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    bool hasLocation = tester.hasDataset(transformationsGroup, LOCATION);
+    bool hasOrientation = tester.hasDataset(transformationsGroup, ORIENTATION);
+
+    TS_ASSERT(hasOrientation); // assert orientation dataset exists.
+    TS_ASSERT(!hasLocation);   // assert location dataset doesn't exist.
+
+    bool sourceDependencyIsOrientation = tester.dataSetHasStrValue(
+        DEPENDS_ON, transformationsGroup + "/" + ORIENTATION, sourceGroup);
+    bool orientationDependencyIsSelf = tester.hasAttributeInDataSet(
+        transformationsGroup, ORIENTATION, DEPENDS_ON, SELF_DEPENDENT);
+
+    TS_ASSERT(sourceDependencyIsOrientation);
+    TS_ASSERT(orientationDependencyIsSelf);
+  }
+
+  void
+  test_when_orientation_is_not_written_and_location_exists_source_dependency_is_location_path_and_location_is_self_dependent() {
+
+    const V3D detectorLocation(0, 0, 10);
+    const V3D sourceLocation(0, 0, -10);
+
+    const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
+
+    ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto instrument =
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
+            sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
+            sourceRotation); // source rotation
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    auto &compInfo = (*instr.first);
+
+    auto pathToparent =
+        DEFAULT_ROOT_PATH + "/" + compInfo.name(compInfo.root());
+    auto sourceGroup = pathToparent + "/" + compInfo.name(compInfo.source());
+    auto transformationsGroup = pathToparent + "/" +
+                                compInfo.name(compInfo.source()) + "/" +
+                                TRANSFORMATIONS;
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    bool hasLocation = tester.hasDataset(transformationsGroup, LOCATION);
+    bool hasOrientation = tester.hasDataset(transformationsGroup, ORIENTATION);
+
+    TS_ASSERT(!hasOrientation); // assert orientation dataset doesn't exist.
+    TS_ASSERT(hasLocation);     // assert location dataset exists.
+
+    bool sourceDependencyIsLocation = tester.dataSetHasStrValue(
+        DEPENDS_ON, transformationsGroup + "/" + LOCATION, sourceGroup);
+    bool locationDependencyIsSelf = tester.hasAttributeInDataSet(
+        transformationsGroup, LOCATION, DEPENDS_ON, SELF_DEPENDENT);
+
+    TS_ASSERT(sourceDependencyIsLocation);
+    TS_ASSERT(locationDependencyIsSelf);
+  }
+
+  void
+  test_when_both_orientation_and_Location_are_written_in_source_dependency_chain_is_source_orientation_location_self_dependent() {
+
+    const V3D detectorLocation(0, 0, 10);
+    const V3D sourceLocation(0, 0, -10);
+
+    const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
+
+    ScopedFileHandle fileResource("zero_nx_source_location_file_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto instrument =
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
+            sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
+            sourceRotation); // source rotation
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    auto &compInfo = (*instr.first);
+
+    auto pathToparent =
+        DEFAULT_ROOT_PATH + "/" + compInfo.name(compInfo.root());
+    auto sourceGroup = pathToparent + "/" + compInfo.name(compInfo.source());
+    auto transformationsGroup = pathToparent + "/" +
+                                compInfo.name(compInfo.source()) + "/" +
+                                TRANSFORMATIONS;
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+
+    HDF5FileTestUtility tester(destinationFile);
+
+    bool hasLocation = tester.hasDataset(transformationsGroup, LOCATION);
+    bool hasOrientation = tester.hasDataset(transformationsGroup, ORIENTATION);
+
+    TS_ASSERT(!hasOrientation); // assert orientation dataset doesn't exist.
+    TS_ASSERT(hasLocation);     // assert location dataset exists.
+
+    bool sourceDependencyIsLocation = tester.dataSetHasStrValue(
+        DEPENDS_ON, transformationsGroup + "/" + LOCATION, sourceGroup);
+    bool locationDependencyIsSelf = tester.hasAttributeInDataSet(
+        transformationsGroup, LOCATION, DEPENDS_ON, SELF_DEPENDENT);
+
+    TS_ASSERT(sourceDependencyIsLocation);
+    TS_ASSERT(locationDependencyIsSelf);
   }
 };
 

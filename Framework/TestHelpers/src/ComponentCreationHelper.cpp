@@ -851,7 +851,7 @@ Instrument_sptr createSimpleInstrumentWithRotation(
 }
 
 /**
- * createInstrumentWithSampleAndSourceRotation, from
+ * createInstrumentWithSourceRotation, from
  * createSimpleInstrumentWithRotation. Rotate source and sample.
  *
  * Beam direction is along Z,
@@ -860,21 +860,19 @@ Instrument_sptr createSimpleInstrumentWithRotation(
  * @param sourcePos : V3D position
  * @param samplePos : V3D sample position
  * @param detectorPos : V3D detector position
- * @param relativeSampleRotation : Quat relative sample rotation
  * @param relativeSourceRotation : Quat relative source rotation
  * @return Instrument generated.
  */
-Instrument_sptr createInstrumentWithSampleAndSourceRotation(
+Instrument_sptr createInstrumentWithSourceRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
     const Mantid::Kernel::V3D &detectorPos,
-    const Mantid::Kernel::Quat &relativeSampleRotation,
     const Mantid::Kernel::Quat &relativeSourceRotation) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
       "0,0,0"));
 
-  instrument->setName("test-instrument-with-rotations");
+  instrument->setName("test-instrument-with-source-rotation");
 
   // A source
   ObjComponent *source = new ObjComponent("source");
@@ -888,7 +886,6 @@ Instrument_sptr createInstrumentWithSampleAndSourceRotation(
   ObjComponent *sample = new ObjComponent("some-surface-holder");
   sample->setPos(samplePos);
   sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  sample->setRot(relativeSampleRotation);
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 

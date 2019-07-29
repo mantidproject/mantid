@@ -131,7 +131,15 @@ std::string getObjName(const H5::H5Object &obj) {
 
 namespace NexusGeometrySave {
 
-// TODO: DOCUMENTATION. POSSIBLE MOVE TO HELPERS?
+/*
+ * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
+ * into std::vector<double> vector. Used by saveInstrument to write array-type
+ * datasets to file.
+ *
+ * @param data : Mantid::Kernel::V3D vector containing data values
+ * @return std::vector<double> vector containing data values in
+ * Mantid::Kernel::V3D format.
+ */
 std::vector<double> toStdVector(const V3D &data) {
 
   std::vector<double> stdVector;
@@ -143,6 +151,14 @@ std::vector<double> toStdVector(const V3D &data) {
   return stdVector;
 }
 
+/*
+ * Function toStdVector (Overloaded). Store data in Mantid::Kernel::Quat
+ * vector into std::vector<double> vector. Used by saveInstrument to write
+ * array-type datasets to file.
+ *
+ * @param data :  Mantid::Kernel::Quat quaternion containing data values
+ * @return std::vector<double> vector containing data values in Quat format
+ */
 std::vector<double> toStdVector(const Quat &data) {
 
   std::vector<double> stdVector;
@@ -154,6 +170,15 @@ std::vector<double> toStdVector(const Quat &data) {
   return stdVector;
 }
 
+/*
+ * Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector into
+ * std::vector<double> vector. Used by saveInstrument to write array-type
+ * datasets to file.
+ *
+ * @param data : Eigen::Vector3d vector containing data values
+ * @return std::vector<double> vector containing data values in Eigen::Vector3d
+ * format
+ */
 std::vector<double> toStdVector(const Eigen::Vector3d &data) {
 
   std::vector<double> stdVector;
@@ -165,6 +190,15 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
   return stdVector;
 }
 
+/*
+ * Function toStdVector (Overloaded). Store data in Eigen::Quaterniond vector
+ * into std::vector<double> vector. Used by saveInstrument to write array-type
+ * datasets to file.
+ *
+ * @param data : Eigen::Quaterniond quaternion containing data values
+ * @return std::vector<double> vector containing data values in
+ * Eigen::Quaterniond format
+ */
 std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
 
   std::vector<double> stdVector;
@@ -178,7 +212,19 @@ std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
   return stdVector;
 }
 
-// TODO: DOCUMENTATION. EXPLAIN ISQUATERNION FLAG
+/*
+ * Function: isApproxZero. returns true if all values in a std vector container
+ * evaluate to zero with a given level of precision. Used by SaveInstrument
+ * methods to determine whether or not to write a dataset to file. If data is
+ * Quaternion, returns true if quaternion is equivalent to zero rotation
+ *
+ * @param data : std::vector<T> data
+ * @param precision : double precision specifier
+ * @param isQuaternion : bool quaternion flag. if true, evaluates is rotation is
+ * zero
+ *
+ * @return true if all elements are approx zero, else false.
+ */
 template <typename T>
 bool isApproxZero(const std::vector<T> &data, const double &precision,
                   const bool isQuaternion = false) {
@@ -200,15 +246,23 @@ bool isApproxZero(const std::vector<T> &data, const double &precision,
   });
 }
 
-std::vector<size_t> detectors(const Geometry::ComponentInfo &compInfo) {
+/*
+ * Function: nxDetectorIndices. finds any banks in component info and returns
+ * all indexes found.
+ *
+ * @param compInfo : Mantid::Geometry::ComponentInfo object.
+ * @return std::vector<size_t> container with all indices in compInfo found to
+ * be a detector bank
+ */
+std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
 
-  std::vector<size_t> detectorsInComponent;
+  std::vector<size_t> banksInComponent;
   for (size_t index = compInfo.root() - 1; index > 0; --index) {
     if (Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, index)) {
-      detectorsInComponent.push_back(index);
+      banksInComponent.push_back(index);
     }
   }
-  return detectorsInComponent;
+  return banksInComponent;
 }
 /*
  * Function: strTypeOfSize
@@ -281,6 +335,9 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
   return subGroup;
 }
 
+/*
+ * Function: writeXYZPixeloffset. Writes the x X
+ */
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
                                 size_t idx) {
@@ -516,10 +573,18 @@ inline void writeLocation(H5::Group &grp,
  *
  * @param grp : NXdetector group : (HDF group)
  * @param compInfo : componentInfo object.
+ * @param idx : size_t index of bank in component Info.
+ * @param noTranslation : bool flag specifying if the save method calling
+ * writeOrientation also wrote a translation. If true, then no translation was
+ * written to file, and the dependency for the orientation dataset is itself.
+ *
+ * Compliant to the Mantid Instrument Definition file, if a translation exists,
+ * it precedes a rotation.
+ * https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html
  */
 inline void writeOrientation(H5::Group &grp,
                              const Geometry::ComponentInfo &compInfo,
-                             size_t idx) {
+                             size_t idx, bool noTranslation) {
 
   Eigen::Quaterniond rotation;
   double angle;
@@ -539,10 +604,11 @@ inline void writeOrientation(H5::Group &grp,
   hsize_t ddims[static_cast<hsize_t>(1)];
   ddims[0] = static_cast<hsize_t>(1);
 
-  // dependency for orientation
-  std::string dependency = forwardCompatibility::getObjName(grp) + "/" +
-                           LOCATION; // depends on location
-
+  // dependency for orientation defaults to self-dependent. If Location dataset
+  // exists, the orientation will depend on it instead.
+  std::string dependency = ".";
+  if (!noTranslation)
+    dependency = forwardCompatibility::getObjName(grp) + "/" + LOCATION;
   dspace = H5Screate_simple(rank, ddims, NULL);
   orientation =
       grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -572,7 +638,7 @@ inline void writeOrientation(H5::Group &grp,
   units.write(strSize, DEGREES);
 
   // transformation-type attribute
-  strSize = strTypeOfSize(TRANSLATION);
+  strSize = strTypeOfSize(ROTATION);
   transformationType =
       orientation.createAttribute(TRANSFORMATION_TYPE, strSize, H5SCALAR);
   transformationType.write(strSize, ROTATION);
@@ -674,7 +740,7 @@ void saveNXSource(const H5::Group &parentGroup,
   if (!orientationIsZero) {
     dependency =
         forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, compInfo, index);
+    writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 
   writeStrDataset(childGroup, NAME, sourceName);
@@ -724,7 +790,7 @@ void saveNXMonitors(const H5::Group &parentGroup,
       if (!orientationIsZero) {
         dependency = forwardCompatibility::getObjName(transformations) + "/" +
                      ORIENTATION;
-        writeOrientation(transformations, compInfo, index);
+        writeOrientation(transformations, compInfo, index, locationIsOrigin);
       }
 
       H5::StrType dependencyStrType = strTypeOfSize(dependency);
@@ -784,7 +850,7 @@ void saveNXDetectors(const H5::Group &parentGroup,
   if (!orientationIsZero) {
     dependency =
         forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, compInfo, bankIdx);
+    writeOrientation(transformations, compInfo, bankIdx, locationIsOrigin);
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
@@ -845,7 +911,7 @@ void saveInstrument(
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
-  std::vector<size_t> nxDetectors = detectors(compInfo);
+  std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
 
   H5::Group rootGroup, instrument;
 
