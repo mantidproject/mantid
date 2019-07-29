@@ -9,20 +9,13 @@
 #include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
-#include "GUI/Common/IPythonRunner.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CatalogManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <algorithm>
-#include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iterator>
 #include <sstream>
