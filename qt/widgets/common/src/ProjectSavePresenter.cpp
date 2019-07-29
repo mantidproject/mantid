@@ -51,6 +51,14 @@ void ProjectSavePresenter::notify(Notification notification) {
   }
 }
 
+bool ProjectSavePresenter::needsSizeWarning(std::vector<std::string> &wsNames) {
+  if (!wsNames.empty()) {
+    return m_model.needsSizeWarning(wsNames);
+  } else {
+    return false;
+  }
+}
+
 /**
  * Update the view with a new list of windows that are included in project
  * saving based on the currently checked workspaces

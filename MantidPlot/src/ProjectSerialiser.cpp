@@ -214,28 +214,6 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
 }
 
 /**
- * @brief Check if the project size will be larger than the warning size defined
- * in mantid.properties.
- *
- * @param wsNames A vector of workspace names as strings.
- * @return true If larger warning.
- * @return false If equal or less than warning.
- */
-bool ProjectSerialiser::needsSizeWarning(std::vector<std::string> &wsNames) {
-  size_t totalSize = 0;
-  std::istringstream iss(Mantid::Kernel::ConfigService::Instance().getString(
-      "projectSaving.warningSize"));
-  size_t warningSize;
-  iss >> warningSize;
-  for (auto &ws : wsNames) {
-    totalSize += Mantid::API::AnalysisDataService::Instance()
-                     .retrieve(ws)
-                     ->getMemorySize();
-  }
-  return totalSize > warningSize;
-}
-
-/**
  * Load the state of Mantid from a collection of lines read from a project file
  *
  * @param lines :: filepath to load from

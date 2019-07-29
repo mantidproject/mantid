@@ -35,6 +35,8 @@ public:
   ProjectSavePresenter(IProjectSaveView *view);
   /// Notify the presenter to do something
   void notify(Notification notification);
+  /// Find out if a project needs a save warning.
+  bool needsSizeWarning(std::vector<std::string> &wsNames);
 
 private:
   /// Update the view to add included windows for a workspace
