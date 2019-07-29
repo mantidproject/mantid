@@ -94,12 +94,17 @@ class _WorkspaceArtists(object):
         self._data_replace_cb = data_replace_cb
         self.workspace_name = workspace_name
         self.spec_num = spec_num
-        if self.spec_num is None or self.workspace_name is None:
-            self.workspace_index = None
-        else:
-            self.workspace_index = ads.retrieve(
-                self.workspace_name).getIndexFromSpectrumNumber(self.spec_num)
+        self.workspace_index = self._get_workspace_index()
         self.is_normalized = is_normalized
+
+    def _get_workspace_index(self):
+        """Get the workspace index of the workspace artist"""
+        if self.spec_num is None or self.workspace_name is None:
+            return None
+        try:
+            return ads.retrieve(self.workspace_name).getIndexFromSpectrumNumber(self.spec_num)
+        except KeyError:  # Return None if the workspace is not in the ADS
+            return None
 
     def remove(self, axes):
         """
