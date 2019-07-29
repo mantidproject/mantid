@@ -36,8 +36,10 @@ private:
   void parseMetadata();
 };
 
-bool operator==(SearchResult const &lhs, SearchResult const &rhs);
-bool operator!=(SearchResult const &lhs, SearchResult const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(SearchResult const &lhs,
+                                               SearchResult const &rhs);
+MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(SearchResult const &lhs,
+                                               SearchResult const &rhs);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_SEARCHRESULT_H
