@@ -368,28 +368,21 @@ void LoadPSIMuonBin::readInHeader(
 
 void LoadPSIMuonBin::readInHistograms(
     Mantid::Kernel::BinaryStreamReader &streamReader) {
-  // Read in the m_histograms
-  m_histograms.reserve(m_header.numberOfHistograms);
+  constexpr auto sizeInt32_t = sizeof(int32_t);
+  const auto headerSize = 1024;
+  m_histograms.resize(m_header.numberOfHistograms);
   for (auto histogramIndex = 0; histogramIndex < m_header.numberOfHistograms;
        ++histogramIndex) {
-    std::vector<double> nextHistogram;
-    nextHistogram.reserve(m_header.lengthOfHistograms);
+    const auto offset = histogramIndex * m_header.numberOfDataRecordsHistogram *
+                        m_header.lengthOfDataRecordsBin;
+    std::vector<double> &nextHistogram = m_histograms[histogramIndex];
+    streamReader.moveStreamToPosition(offset * sizeInt32_t + headerSize);
     for (auto rowIndex = 0; rowIndex < m_header.lengthOfHistograms;
          ++rowIndex) {
-      // Each histogram bit is 1024 bytes below the file start, and 4 bytes
-      // apart, and the HistogramNumber * NumberOfRecordsInEach *
-      // LengthOfTheDataRecordBins + PositionInHistogram
-      unsigned long histogramStreamPosition =
-          1024 + (histogramIndex * m_header.numberOfDataRecordsFile *
-                  m_header.lengthOfDataRecordsBin);
-      unsigned long streamPosition =
-          histogramStreamPosition + rowIndex * sizeof(int32_t);
-      streamReader.moveStreamToPosition(streamPosition);
       int32_t nextReadValue;
       streamReader >> nextReadValue;
       nextHistogram.emplace_back(nextReadValue);
     }
-    m_histograms.emplace_back(nextHistogram);
   }
 }
 
