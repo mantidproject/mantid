@@ -377,6 +377,7 @@ void LoadPSIMuonBin::readInHistograms(
                         m_header.lengthOfDataRecordsBin;
     std::vector<double> &nextHistogram = m_histograms[histogramIndex];
     streamReader.moveStreamToPosition(offset * sizeInt32_t + headerSize);
+    nextHistogram.reserve(m_header.lengthOfHistograms);
     for (auto rowIndex = 0; rowIndex < m_header.lengthOfHistograms;
          ++rowIndex) {
       int32_t nextReadValue;
