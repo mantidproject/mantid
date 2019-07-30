@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QApplication)  # noqa
-from mantidqt.mantiddesktopservices import MantidDesktopServices
-from qtpy import QtCore
+from qtpy import QtCore, QtGui
 import matplotlib
 import sys
 import os
@@ -98,7 +97,7 @@ def show_interface_help(mantidplot_name, assistant_process, collection_file, qt_
             assistant_process.waitForFinished()
             assistant_process.start(helpapp, args)
         else:
-            openUrl=MantidDesktopServices.openUrl
+            openUrl=QtGui.QDesktopServices.openUrl
             sysenv=QtCore.QProcessEnvironment.systemEnvironment()
             ldp=sysenv.value('LD_PRELOAD')
             if ldp:
