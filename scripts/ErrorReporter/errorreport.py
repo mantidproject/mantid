@@ -8,12 +8,12 @@ from __future__ import (absolute_import, print_function)
 
 import qtpy
 
-if qtpy.PYQT5:
-    pass
-elif qtpy.PYQT4:
-    pass
-else:
-    raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
+if qtpy.PYQT5:  # noqa
+    from ErrorReporter import resources_qt5  # noqa
+elif qtpy.PYQT4:  # noqa
+    from ErrorReporter import resources_qt4  # noqa
+else:  # noqa
+    raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))  # noqa
 
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal, QUrl
