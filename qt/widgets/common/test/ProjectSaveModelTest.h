@@ -7,16 +7,30 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
 
-#include <cxxtest/TestSuite.h>
-
+#include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
+using namespace testing;
+using namespace Mantid::API;
+
+class MockProjectSaveModel : public ProjectSaveModel {
+public:
+  MockProjectSaveModel(
+      std::vector<MantidQt::API::IProjectSerialisable *> windows,
+      std::vector<std::string> activePythonInterfaces =
+          std::vector<std::string>())
+      : ProjectSaveModel(windows, activePythonInterfaces) {}
+  MOCK_METHOD1(getProjectSize, size_t(std::vector<std::string> &wsNames));
+};
 
 //=====================================================================================
 // Functional tests
@@ -268,10 +282,23 @@ public:
     TS_ASSERT_EQUALS(winInfo[1].icon_id, "matrix_xpm");
   }
 
-  void testNeedsSizeWarningForEmptyWorkspace() {
-    ProjectSaveModel model({});
+  void testNeedsSizeWarningIsFalseWithEmptyWorkspace() {
     std::vector<std::string> wsNames{"ws1"};
+    ProjectSaveModel model({});
     TS_ASSERT_EQUALS(model.needsSizeWarning(wsNames), false);
+  }
+
+  void testNeedsSizeWarningIsTrueWithLargeWorkspace() {
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
+    NiceMock<MockProjectSaveModel> model(windows);
+    // std::unique_ptr<MockProjectSaveModel> model =
+    // std::make_unique<NiceMock<MockProjectSaveModel>>(windows);
+
+    std::vector<std::string> wsNames{"ws1", "ws2"};
+
+    ON_CALL(model, getProjectSize(wsNames)).WillByDefault(Return(107374182411));
+
+    TS_ASSERT(model.needsSizeWarning(wsNames));
   }
 };
 

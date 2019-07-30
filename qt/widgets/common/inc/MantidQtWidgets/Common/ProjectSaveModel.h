@@ -75,6 +75,8 @@ public:
   std::vector<Mantid::API::Workspace_sptr> getWorkspaces() const;
   /// Check if the size of the project is > than the warning size.
   bool needsSizeWarning(std::vector<std::string> &wsNames);
+  /// Find the size of a project from a list of workspace names.
+  virtual size_t getProjectSize(std::vector<std::string> &wsNames);
 
 private:
   /// Create a workspace info object for this workspace
@@ -83,9 +85,6 @@ private:
 
   WindowInfo
   makeWindowInfoObject(MantidQt::API::IProjectSerialisable *window) const;
-
-  /// Find the size of a project from a list of workspace names.
-  size_t getProjectSize(std::vector<std::string> &wsNames);
 
   // Instance variables
 
