@@ -212,7 +212,7 @@ void ManageUserDirectories::addDirectory() {
     input = m_uiForm.leDirectoryPathPython;
   }
 
-  if (input->text() != "") {
+  if (input && input->text() != "") {
     listWidget()->addItem(input->text());
     input->clear();
   }

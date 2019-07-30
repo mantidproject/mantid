@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "Process.h"
+#include "Processes.h"
 
 #include <QCoreApplication>
 #include <QFileInfo>
@@ -39,7 +39,7 @@ bool isOtherInstance(int64_t otherPID, QString otherExeName) {
 
 } // namespace
 
-namespace Process {
+namespace Processes {
 /**
  * Returns true is another instance of Mantid is running
  * on this machine
@@ -182,4 +182,4 @@ unsigned int numberOfMantids() {
 }
 #endif
 long long getProcessID() { return QCoreApplication::applicationPid(); }
-} // namespace Process
+} // namespace Processes

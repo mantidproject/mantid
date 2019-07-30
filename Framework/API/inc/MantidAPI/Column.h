@@ -17,6 +17,7 @@
 #endif
 #include <cstring>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <typeinfo>
 #include <vector>
