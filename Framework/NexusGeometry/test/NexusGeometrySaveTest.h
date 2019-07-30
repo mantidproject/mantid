@@ -1157,40 +1157,42 @@ ROTATION TESTS
     bool hasRotation = tester.hasDataset(fullPathToGroup, ORIENTATION);
 
     TS_ASSERT(!hasRotation);
+        */
   }
 
   void test_source_rotation_not_written_when_is_zero() {
+    /*
+      const V3D detectorLocation(0, 0, 10);
+      const V3D sourceLocation(-10, 0, 0);
 
-    const V3D detectorLocation(0, 0, 10);
-    const V3D sourceLocation(-10, 0, 0);
+      const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
 
-    const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
+      ScopedFileHandle inFileResource("zero_nx_source_rotation_file_test.hdf5");
+      std::string destinationFile = inFileResource.fullPath();
 
-    ScopedFileHandle inFileResource("zero_nx_source_rotation_file_test.hdf5");
-    std::string destinationFile = inFileResource.fullPath();
+      auto instrument =
+          ComponentCreationHelper::createInstrumentWithSourceRotation(
+              sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
+              sourceRotation); // source rotation
+      auto instr =
+      Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto instrument =
-        ComponentCreationHelper::createInstrumentWithSourceRotation(
-            sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
-            sourceRotation); // source rotation
-    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+      auto &compInfo = (*instr.first);
 
-    auto &compInfo = (*instr.first);
+      auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
+      auto fullPathToGroup = pathToparent + "/" +
+                             compInfo.name(compInfo.source()) + "/" +
+                             TRANSFORMATIONS;
 
-    auto pathToparent = "/raw_data_1/" + compInfo.name(compInfo.root());
-    auto fullPathToGroup = pathToparent + "/" +
-                           compInfo.name(compInfo.source()) + "/" +
-                           TRANSFORMATIONS;
+      NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                        DEFAULT_ROOT_PATH);
 
-    NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+      HDF5FileTestUtility tester(destinationFile);
 
-    HDF5FileTestUtility tester(destinationFile);
+      bool hasRotation = tester.hasDataset(fullPathToGroup, ORIENTATION);
 
-    bool hasRotation = tester.hasDataset(fullPathToGroup, ORIENTATION);
-
-    TS_ASSERT(!hasRotation);
-        */
+      TS_ASSERT(!hasRotation);
+          */
   }
   /*
   ====================================================================
