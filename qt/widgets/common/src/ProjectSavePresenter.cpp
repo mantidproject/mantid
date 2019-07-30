@@ -51,6 +51,13 @@ void ProjectSavePresenter::notify(Notification notification) {
   }
 }
 
+/**
+ * @brief Check if the user needs to be warned about saving a large project.
+ *
+ * @param wsNames Vector of workspace names to check.
+ * @return true If a warning is required.
+ * @return false If a warning is not neccessary.
+ */
 bool ProjectSavePresenter::needsSizeWarning(std::vector<std::string> &wsNames) {
   if (!wsNames.empty()) {
     return m_model.needsSizeWarning(wsNames);
