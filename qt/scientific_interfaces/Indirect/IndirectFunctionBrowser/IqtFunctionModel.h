@@ -125,7 +125,7 @@ private:
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
 
-  MultiDomainFunctionModel m_model;
+  FunctionModel m_model;
   int m_numberOfExponentials = 0;
   bool m_hasStretchExponential = false;
   QString m_background;

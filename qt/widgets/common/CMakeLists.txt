@@ -6,6 +6,7 @@ set(QT5_SRC_FILES
     src/AlgorithmRunner.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlternateCSPythonLexer.cpp
+    src/ConvolutionFunctionModel.cpp
     src/BatchAlgorithmRunner.cpp
     src/BoolPropertyWidget.cpp
     src/DataSelector.cpp
@@ -30,6 +31,7 @@ set(QT5_SRC_FILES
     src/HintingLineEdit.cpp
     # todo: move this to the instrument view library when the slice
     # viewer library is removed
+    src/IFunctionModel.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
@@ -345,6 +347,7 @@ set(SRC_FILES
     src/CatalogSearch.cpp
     src/CatalogSelector.cpp
     src/CheckboxHeader.cpp
+    src/ConvolutionFunctionModel.cpp
     src/DataProcessorUI/AbstractTreeModel.cpp
     src/DataProcessorUI/TreeData.cpp
     src/DataProcessorUI/GenerateNotebook.cpp
@@ -401,6 +404,7 @@ set(SRC_FILES
     src/FunctionMultiDomainPresenter.cpp
     src/FunctionTreeView.cpp
     src/HintingLineEdit.cpp
+    src/IFunctionModel.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/LineEditWithClear.cpp
@@ -609,6 +613,7 @@ set(
   inc/MantidQtWidgets/Common/WorkspaceIcons.h
   inc/MantidQtWidgets/Common/AlgorithmHintStrategy.h
   inc/MantidQtWidgets/Common/CatalogHelper.h
+  inc/MantidQtWidgets/Common/ConvolutionFunctionModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
   inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
@@ -661,6 +666,7 @@ set(
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
+  inc/MantidQtWidgets/Common/IFunctionModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataSelector.h
   inc/MantidQtWidgets/Common/IMuonFitFunctionModel.h
@@ -879,6 +885,7 @@ mtd_add_qt_library(TARGET_NAME
 set(TEST_FILES
     test/AlgorithmHintStrategyTest.h
     test/BatchAlgorithmRunnerTest.h
+    test/ConvolutionFunctionModelTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h

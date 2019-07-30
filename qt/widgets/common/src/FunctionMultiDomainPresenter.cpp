@@ -26,7 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
-    : m_view(view), m_model(std::make_unique<MultiDomainFunctionModel>()),
+    : m_view(view), m_model(std::make_unique<FunctionModel>()),
       m_editLocalParameterDialog(nullptr) {
   connect(m_view, SIGNAL(parameterChanged(const QString &)), this,
           SLOT(viewChangedParameter(const QString &)));

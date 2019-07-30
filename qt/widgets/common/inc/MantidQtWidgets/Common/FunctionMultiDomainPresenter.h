@@ -20,7 +20,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class MultiDomainFunctionModel;
+class FunctionModel;
 class IFunctionView;
 class EditLocalParameterDialog;
 
@@ -91,7 +91,7 @@ private slots:
 
 private:
   IFunctionView *m_view;
-  std::unique_ptr<MultiDomainFunctionModel> m_model;
+  std::unique_ptr<FunctionModel> m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 
 public:

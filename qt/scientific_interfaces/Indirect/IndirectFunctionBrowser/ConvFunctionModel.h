@@ -117,7 +117,7 @@ private:
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
 
-  MultiDomainFunctionModel m_model;
+  FunctionModel m_model;
   FitType m_fitType = FitType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
   //std::string m_background;
