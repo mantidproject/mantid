@@ -98,8 +98,14 @@ public:
     H5::Group parent = m_file.openGroup(pathList[0]);
     H5::Group child;
     for (size_t i = 1; i < pathList.size(); ++i) {
-      child = parent.openGroup(pathList[i]);
-      parent = child;
+      try {
+        child = parent.openGroup(pathList[i]);
+        parent = child;
+      } catch (H5::GroupIException &) {
+        DEBUG_PRINT("HDF5 GroupIException was thrown here.");
+        DEBUG_PRINT("Failure at open: " + pathList[i]);
+        WAIT;
+      }
     }
     return child;
   }
@@ -279,9 +285,6 @@ public:
   bool groupHasNxClass(const std::string &attrVal,
                        const std::string &pathToGroup) const {
 
-    // TODO: REMOVE LATER
-    groupExistsInPath(pathToGroup);
-
     H5::Attribute attribute;
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     attribute = parentGroup.openAttribute(NX_CLASS);
@@ -308,9 +311,6 @@ public:
   bool dataSetHasStrValue(const std::string &dataSetName,
                           const std::string &dataSetValue,
                           const std::string &pathToGroup) const {
-
-    // TODO: REMOVE LATER
-    groupExistsInPath(pathToGroup);
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
 
@@ -785,7 +785,7 @@ ROTATION TESTS
 
   void
   test_when_nx_monitor_groups_have_nx_transformations_transformation_type_is_specified_for_all() {
-    /*
+
     ScopedFileHandle fileResource(
         "check_nxmonitor_groups_have_transformation_types_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -803,9 +803,7 @@ ROTATION TESTS
     auto &compInfo = (*instr.first);
     auto &detInfo = (*instr.second);
 
-    bool hasNXTransformation;
-    bool hasRotation;
-    bool hasTranslation;
+    auto instrName = compInfo.name(compInfo.root());
 
     HDF5FileTestUtility tester(destinationFile);
 
@@ -815,23 +813,21 @@ ROTATION TESTS
       auto index = detInfo.indexOf(ID);
       if (detInfo.isMonitor(index)) {
 
-        auto fullPathToGroup = "/raw_data_1/" + compInfo.name(compInfo.root()) +
-                               "/" + compInfo.name(index) + "/" +
-                               TRANSFORMATIONS;
-        hasNXTransformation = tester.hasAttributeInGroup(
-            fullPathToGroup, NX_CLASS, NX_TRANSFORMATIONS);
+        auto monitorName = compInfo.name(index);
+        fullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
+                           TRANSFORMATIONS};
+
+        bool hasNXTransformation =
+            tester.hasAttributeInGroup(path, NX_CLASS, NX_TRANSFORMATIONS);
+        bool hasTranslation = tester.hasDataset(path, LOCATION);
+        bool hasRotation = tester.hasDataset(path, ORIENTATION);
+        bool hasEither = (hasRotation || hasTranslation);
 
         // TODO: having such a group may be optional.
         TS_ASSERT(hasNXTransformation);
-
-        hasTranslation = tester.hasDataset(fullPathToGroup, LOCATION);
-
-        hasRotation = tester.hasDataset(fullPathToGroup, ORIENTATION);
-
-        TS_ASSERT((hasRotation || hasTranslation));
+        TS_ASSERT(hasEither);
       }
     }
-        */
   }
 
   void
@@ -867,10 +863,10 @@ ROTATION TESTS
         tester.hasAttributeInGroup(path, NX_CLASS, NX_TRANSFORMATIONS);
     bool hasTranslation = tester.hasDataset(path, LOCATION);
     bool hasRotation = tester.hasDataset(path, ORIENTATION);
-
+    bool hasEither = (hasRotation || hasTranslation);
     // TODO: having such a group may be optional.
     TS_ASSERT(hasNXTransformation);
-    TS_ASSERT((hasRotation || hasTranslation));
+    TS_ASSERT(hasEither);
   }
 
   void

@@ -34,6 +34,8 @@ namespace NexusGeometry {
 
 namespace {
 
+enum class NXclass { NXinstrument, NXsample, NXdetector, NXmonitor, NXsource };
+
 const std::string NX_CLASS = "NX_class";
 const std::string NX_SAMPLE = "NXsample";
 const std::string NX_DETECTOR = "NXdetector";
@@ -135,6 +137,50 @@ std::string getObjName(const H5::H5Object &obj) {
 } // namespace
 
 namespace NexusGeometrySave {
+
+// handles naming of groups for named and unnamed components for iterated and
+// single use case
+std::string groupName(const Geometry::ComponentInfo &compInfo,
+                      const NXclass &groupType, const size_t &iterator = 0) {
+
+  // get groupName for NXinstrument creation
+  if (groupType == NXclass::NXinstrument) {
+    std::string nameInCache = compInfo.name(compInfo.root());
+    std::string name =
+        nameInCache == "" ? "unspecified_instrument" : nameInCache;
+    return name;
+  }
+
+  if (groupType == NXclass::NXsample) {
+    std::string nameInCache = compInfo.name(compInfo.sample());
+    std::string name = nameInCache == "" ? "unspecified_sample" : nameInCache;
+    return name;
+  }
+
+  if (groupType == NXclass::NXdetector) {
+    std::string nameInCache = compInfo.name(iterator);
+    std::string name = nameInCache == ""
+                           ? "unspecified_detector_" + std::to_string(iterator)
+                           : nameInCache;
+    return name;
+  }
+
+  if (groupType == NXclass::NXmonitor) {
+    std::string nameInCache = compInfo.name(iterator);
+    std::string name = nameInCache == ""
+                           ? "unspecified_monitor_" + std::to_string(iterator)
+                           : nameInCache;
+    return name;
+  }
+
+  if (groupType == NXclass::NXsource) {
+    std::string nameInCache = compInfo.name(compInfo.source());
+    std::string name = nameInCache == "" ? "unspecified_source" : nameInCache;
+    return name;
+  }
+
+  return "";
+}
 
 /*
  * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
@@ -269,6 +315,20 @@ std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
   }
   return banksInComponent;
 }
+
+std::vector<size_t> nxMonitorIndices(const Geometry::DetectorInfo &detInfo) {
+
+  std::vector<size_t> monitorsInComponent;
+  auto detIds = detInfo.detectorIDs();
+  for (const int &ID : detIds) {
+    auto index = detInfo.indexOf(ID);
+    if (detInfo.isMonitor(index)) {
+      monitorsInComponent.push_back(index);
+    }
+  }
+  return monitorsInComponent;
+}
+
 /*
  * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
@@ -461,19 +521,19 @@ void writeNXMonitorNumber(H5::Group &grp,
   // to handle the naming inconsistency. probably temporary.
   H5::DataSet detectorNumber, detector_id;
 
-  std::vector<int> bankDetIDs;
+  std::vector<int> monitorDetIDs;
   std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx);
-  bankDetIDs.reserve(bankDetectors.size());
+  monitorDetIDs.reserve(bankDetectors.size());
 
   for (size_t &index : bankDetectors) {
-    bankDetIDs.push_back(monitorIDs[index]);
+    monitorDetIDs.push_back(monitorIDs[index]);
   }
 
-  const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
+  const auto nMonitorsInBank = static_cast<hsize_t>(monitorDetIDs.size());
 
   int rank = 1;
   hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = nDetectorsInBank;
+  dims[0] = nMonitorsInBank;
 
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
@@ -481,10 +541,10 @@ void writeNXMonitorNumber(H5::Group &grp,
   // handle the naming inconsistency. probably temporary.
   detectorNumber =
       grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(monitorDetIDs.data(), H5::PredType::NATIVE_INT, space);
 
   detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
-  detector_id.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+  detector_id.write(monitorDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -674,6 +734,8 @@ inline void writeOrientation(H5::Group &grp,
 H5::Group NXInstrument(const H5::Group &parent,
                        const Geometry::ComponentInfo &compInfo) {
 
+  NXclass groupType = NXclass::NXinstrument;
+
   std::string instrumentName = compInfo.name(compInfo.root());
   H5::Group childGroup = parent.createGroup(instrumentName);
 
@@ -699,6 +761,8 @@ H5::Group NXInstrument(const H5::Group &parent,
 void saveNXSample(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
 
+  NXclass groupType = NXclass::NXsample;
+
   H5::Group childGroup;
 
   std::string sampleName = compInfo.name(compInfo.sample());
@@ -720,6 +784,8 @@ void saveNXSample(const H5::Group &parentGroup,
  */
 void saveNXSource(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
+
+  NXclass groupType = NXclass::NXsource;
 
   size_t index = compInfo.source();
 
@@ -771,57 +837,52 @@ void saveNXSource(const H5::Group &parentGroup,
  * @param compInfo : componentInfo object.
  * @param detInfo : DetectorInfo object.
  */
-void saveNXMonitors(const H5::Group &parentGroup,
-                    const Geometry::ComponentInfo &compInfo,
-                    const Geometry::DetectorInfo &detInfo) {
+void saveNXMonitor(const H5::Group &parentGroup,
+                   const Geometry::ComponentInfo &compInfo,
+                   const Geometry::DetectorInfo &detInfo, const size_t &index) {
+
+  NXclass groupType = NXclass::NXmonitor;
 
   auto detIds = detInfo.detectorIDs();
 
-  for (const int &ID : detIds) {
-    auto index = detInfo.indexOf(ID);
-    if (detInfo.isMonitor(index)) {
+  Eigen::Vector3d position =
+      Mantid::Kernel::toVector3d(compInfo.position(index));
+  Eigen::Quaterniond rotation =
+      Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
-      Eigen::Vector3d position =
-          Mantid::Kernel::toVector3d(compInfo.position(index));
-      Eigen::Quaterniond rotation =
-          Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+  std::string dependency = "."; // dependency initialiser
+  std::string name = groupName(compInfo, groupType, index); // group name
 
-      std::string dependency = ".";            // dependency initialiser
-      std::string name = compInfo.name(index); // group name
+  bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
+  bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
 
-      bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
-      bool orientationIsZero =
-          isApproxZero(toStdVector(rotation), PRECISION, true);
+  H5::Group childGroup = parentGroup.createGroup(name);
+  writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
-      H5::Group childGroup = parentGroup.createGroup(name);
-      writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
+  H5::Group transformations =
+      simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-      H5::Group transformations =
-          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
-
-      // Orientation is the default first dependency in the chain. first check
-      // translation in component is non-zero, and set dependency to location
-      // if true and write location. Then check if orientation in component is
-      // non-zero, replace dependency with orientation if true. If neither
-      // orientation nor location are non-zero, component is self dependent.
-      if (!locationIsOrigin) {
-        dependency =
-            forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
-        writeLocation(transformations, compInfo, index);
-      }
-      if (!orientationIsZero) {
-        dependency = forwardCompatibility::getObjName(transformations) + "/" +
-                     ORIENTATION;
-        writeOrientation(transformations, compInfo, index, locationIsOrigin);
-      }
-
-      H5::StrType dependencyStrType = strTypeOfSize(dependency);
-      writeNXMonitorNumber(childGroup, compInfo, detIds, index);
-
-      writeStrDataset(childGroup, LOCAL_NAME, name);
-      writeStrDataset(childGroup, DEPENDS_ON, dependency);
-    }
+  // Orientation is the default first dependency in the chain. first check
+  // translation in component is non-zero, and set dependency to location
+  // if true and write location. Then check if orientation in component is
+  // non-zero, replace dependency with orientation if true. If neither
+  // orientation nor location are non-zero, component is self dependent.
+  if (!locationIsOrigin) {
+    dependency =
+        forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
+    writeLocation(transformations, compInfo, index);
   }
+  if (!orientationIsZero) {
+    dependency =
+        forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
+    writeOrientation(transformations, compInfo, index, locationIsOrigin);
+  }
+
+  H5::StrType dependencyStrType = strTypeOfSize(dependency);
+  writeNXMonitorNumber(childGroup, compInfo, detIds, index);
+
+  writeStrDataset(childGroup, LOCAL_NAME, name);
+  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -837,18 +898,20 @@ void saveNXMonitors(const H5::Group &parentGroup,
  */
 void saveNXDetector(const H5::Group &parentGroup,
                     const Geometry::ComponentInfo &compInfo,
-                    const size_t &bankIdx,
-                    const Geometry::DetectorInfo &detInfo) {
+                    const Geometry::DetectorInfo &detInfo,
+                    const size_t &index) {
+
+  NXclass groupType = NXclass::NXdetector;
 
   const auto detIds = detInfo.detectorIDs();
 
   Eigen::Vector3d position =
-      Mantid::Kernel::toVector3d(compInfo.position(bankIdx));
+      Mantid::Kernel::toVector3d(compInfo.position(index));
   Eigen::Quaterniond rotation =
-      Mantid::Kernel::toQuaterniond(compInfo.rotation(bankIdx));
+      Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
-  std::string dependency = ".";              // dependency initialiser
-  std::string name = compInfo.name(bankIdx); // group name
+  std::string dependency = "."; // dependency initialiser
+  std::string name = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
   bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
@@ -867,17 +930,17 @@ void saveNXDetector(const H5::Group &parentGroup,
   if (!locationIsOrigin) {
     dependency =
         forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
-    writeLocation(transformations, compInfo, bankIdx);
+    writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
     dependency =
         forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, compInfo, bankIdx, locationIsOrigin);
+    writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeXYZPixeloffset(childGroup, compInfo, bankIdx);
-  writeNXDetectorNumber(childGroup, compInfo, detIds, bankIdx);
+  writeXYZPixeloffset(childGroup, compInfo, index);
+  writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 
   writeStrDataset(childGroup, LOCAL_NAME, name);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
@@ -934,7 +997,7 @@ void saveInstrument(
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
   std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
-
+  std::vector<size_t> nxMonitors = nxMonitorIndices(detInfo);
   H5::Group rootGroup, instrument;
 
   // create NXentry (file root)
@@ -946,11 +1009,13 @@ void saveInstrument(
 
   // save NXdetectors
   for (const size_t &index : nxDetectors) {
-    NexusGeometrySave::saveNXDetector(instrument, compInfo, index, detInfo);
+    NexusGeometrySave::saveNXDetector(instrument, compInfo, detInfo, index);
   }
 
   // save NXmonitors
-  NexusGeometrySave::saveNXMonitors(instrument, compInfo, detInfo);
+  for (const size_t &index : nxMonitors) {
+    NexusGeometrySave::saveNXMonitor(instrument, compInfo, detInfo, index);
+  }
 
   // save NXsource
   NexusGeometrySave::saveNXSource(instrument, compInfo);
