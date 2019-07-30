@@ -10,7 +10,6 @@ import numpy as np
 import AbinsModules
 
 
-# noinspection PyMethodMayBeStatic
 class FrequencyPowderGenerator(object):
     """
     Class which generates frequencies for quantum order events.
@@ -19,7 +18,8 @@ class FrequencyPowderGenerator(object):
     def __init__(self):
         super(FrequencyPowderGenerator, self).__init__()
 
-    def construct_freq_combinations(self, previous_array=None, previous_coefficients=None,
+    @staticmethod
+    def construct_freq_combinations(previous_array=None, previous_coefficients=None,
                                     fundamentals_array=None, fundamentals_coefficients=None, quantum_order=None):
         """
         Generates frequencies for the given order of quantum event.
