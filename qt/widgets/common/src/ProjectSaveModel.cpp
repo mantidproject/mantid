@@ -237,12 +237,13 @@ bool ProjectSaveModel::hasWindows(const std::string &wsName) const {
  * @return true If larger warning.
  * @return false If equal or less than warning.
  */
-bool ProjectSaveModel::needsSizeWarning(std::vector<std::string> &wsNames) {
+bool ProjectSaveModel::needsSizeWarning(
+    const std::vector<std::string> &wsNames) {
   std::istringstream iss(Mantid::Kernel::ConfigService::Instance().getString(
       "projectSaving.warningSize"));
   size_t warningSize;
   iss >> warningSize;
-  size_t totalSize = getProjectSize(wsNames);
+  const size_t totalSize = getProjectSize(wsNames);
   return totalSize > warningSize;
 }
 
@@ -252,9 +253,10 @@ bool ProjectSaveModel::needsSizeWarning(std::vector<std::string> &wsNames) {
  * @param wsNames List of workspace names to look up.
  * @return size_t The size of the project in bytes.
  */
-size_t ProjectSaveModel::getProjectSize(std::vector<std::string> &wsNames) {
+size_t
+ProjectSaveModel::getProjectSize(const std::vector<std::string> &wsNames) {
   size_t totalSize = 0;
-  for (auto &ws : wsNames) {
+  for (const auto &ws : wsNames) {
     totalSize += Mantid::API::AnalysisDataService::Instance()
                      .retrieve(ws)
                      ->getMemorySize();

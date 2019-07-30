@@ -29,7 +29,7 @@ public:
       std::vector<std::string> activePythonInterfaces =
           std::vector<std::string>())
       : ProjectSaveModel(windows, activePythonInterfaces) {}
-  MOCK_METHOD1(getProjectSize, size_t(std::vector<std::string> &wsNames));
+  MOCK_METHOD1(getProjectSize, size_t(const std::vector<std::string> &wsNames));
 };
 
 //=====================================================================================
@@ -302,10 +302,10 @@ public:
 
   void testGetProjectSizeReturnsCorrectAnswer() {
     ProjectSaveModel model({});
-    auto workspaces = model.getWorkspaces();
+    const auto workspaces = model.getWorkspaces();
     size_t assumedSize = 0;
 
-    for (auto &ws : workspaces) {
+    for (const auto &ws : workspaces) {
       assumedSize += ws->getMemorySize();
     }
     auto workspaceNames = model.getWorkspaceNames();
