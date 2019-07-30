@@ -21,6 +21,7 @@ from mantid.simpleapi import AnalysisDataService
 
 from mantid.kernel import ConfigService
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.mantiddesktopservices import MantidDesktopServices
 from matplotlib.pyplot import (Figure, setp)
 import os
 
@@ -1077,7 +1078,7 @@ class MainWindow(QMainWindow):
         except ImportError:
             url = ("http://docs.mantidproject.org/nightly/interfaces/{}.html"
                    "".format("Filter Events"))
-            QDesktopServices.openUrl(QUrl(url))
+            MantidDesktopServices.openUrl(QUrl(url))
 
     def _resetGUI(self, resetfilerun=False):
         """ Reset GUI including all text edits and etc.
