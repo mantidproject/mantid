@@ -56,7 +56,7 @@ s_relative_threshold = 0.01
 
 # values of S below that value are considered to be zero (to be use in case threshold calculated from
 # s_relative_threshold is larger than s_absolute_threshold)
-s_absolute_threshold = 10e-8
+s_absolute_threshold = 1e-7
 
 optimal_size = 5000000  # this is used to create optimal size of chunk energies for which S is calculated
 # Actual chunk of energies < optimal_size
