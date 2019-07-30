@@ -97,7 +97,7 @@ public:
   H5::Group openfullH5Path(const fullH5Path &pathList) {
     H5::Group parent = m_file.openGroup(pathList[0]);
     H5::Group child;
-    for (int i = 1; i < pathList.size(); ++i) {
+    for (size_t i = 1; i < pathList.size(); ++i) {
       child = parent.openGroup(pathList[i]);
       parent = child;
     }
