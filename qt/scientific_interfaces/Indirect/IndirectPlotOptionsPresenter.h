@@ -7,6 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSPRESENTER_H_
 
+#include "IPythonRunner.h"
+#include "IndirectInterface.h"
 #include "IndirectPlotOptionsModel.h"
 #include "IndirectPlotOptionsView.h"
 #include "IndirectTab.h"
@@ -25,7 +27,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
 
 public:
   IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
-                               IndirectTab *parent,
+                               IPyRunner *pythonRunner,
                                PlotWidget const &plotType = PlotWidget::Spectra,
                                std::string const &fixedIndices = "");
   /// Used by the unit tests so that the view and model can be mocked
@@ -34,6 +36,8 @@ public:
                                PlotWidget const &plotType = PlotWidget::Spectra,
                                std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
+
+  void setPlotType(PlotWidget const &plotType);
 
   void setWorkspaces(std::vector<std::string> const &workspaces);
   void clearWorkspaces();

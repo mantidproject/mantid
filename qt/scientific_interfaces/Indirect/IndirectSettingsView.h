@@ -37,11 +37,6 @@ public:
   void setPlotErrorBarsChecked(bool check) override;
   bool isPlotErrorBarsChecked() const override;
 
-  void setSetting(QString const &settingsGroup, QString const &settingName,
-                  bool const &value) override;
-  QVariant getSetting(QString const &settingsGroup,
-                      QString const &settingName) override;
-
   void setApplyText(QString const &text) override;
   void setApplyEnabled(bool enable) override;
   void setOkEnabled(bool enable) override;

@@ -20,13 +20,8 @@ public:
   IndirectSettingsModel();
   virtual ~IndirectSettingsModel() = default;
 
-  virtual std::string getSettingsGroup() const;
-
   virtual void setFacility(std::string const &facility);
   virtual std::string getFacility() const;
-
-private:
-  std::string const m_settingsGroup;
 };
 
 } // namespace CustomInterfaces

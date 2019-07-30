@@ -31,8 +31,6 @@ public:
 
   void loadSettings();
 
-  QVariant getSetting(std::string const &settingName);
-
 signals:
   void closeSettings();
   void applySettings();

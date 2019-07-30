@@ -150,6 +150,9 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType) {
   connect(plotTiledAction, SIGNAL(triggered()), this,
           SLOT(emitPlotTiledClicked()));
 
+  m_plotOptions->tbPlot->setVisible(true);
+  m_plotOptions->pbPlotSpectra->setVisible(true);
+
   switch (plotType) {
   case PlotWidget::Spectra:
     m_plotOptions->tbPlot->setVisible(false);

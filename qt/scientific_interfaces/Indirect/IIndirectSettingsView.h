@@ -31,11 +31,6 @@ public:
   virtual void setPlotErrorBarsChecked(bool check) = 0;
   virtual bool isPlotErrorBarsChecked() const = 0;
 
-  virtual void setSetting(QString const &settingsGroup,
-                          QString const &settingName, bool const &value) = 0;
-  virtual QVariant getSetting(QString const &settingsGroup,
-                              QString const &settingName) = 0;
-
   virtual void setApplyText(QString const &text) = 0;
   virtual void setApplyEnabled(bool enable) = 0;
   virtual void setOkEnabled(bool enable) = 0;

@@ -7,7 +7,7 @@
 #ifndef MANTID_INDIRECTPLOTTER_H
 #define MANTID_INDIRECTPLOTTER_H
 
-#include "IndirectTab.h"
+#include "IPythonRunner.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,7 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-class PythonRunner;
+class IPyRunner;
 #endif
 
 enum MantidAxis { Spectrum, Bin };
@@ -34,7 +34,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectPlotter(IndirectTab *parent = nullptr);
+  IndirectPlotter(IPyRunner *parent);
   virtual ~IndirectPlotter();
 
   virtual void plotSpectra(std::string const &workspaceName,
@@ -63,9 +63,8 @@ private:
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   void runPythonCode(std::string const &pythonCode);
 
-  API::PythonRunner m_pythonRunner;
+  IPyRunner *m_pyRunner;
 #endif
-  IndirectTab *m_parentTab;
 };
 
 } // namespace CustomInterfaces

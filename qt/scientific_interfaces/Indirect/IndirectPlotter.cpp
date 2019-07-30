@@ -5,18 +5,19 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotter.h"
+#include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidKernel/Strings.h"
-#include "MantidQtWidgets/Common/PythonRunner.h"
 #else
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <QHash>
 #include <QString>
 #include <QVariant>
+
 using namespace MantidQt::Widgets::MplCpp;
 #endif
 
@@ -164,14 +165,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-IndirectPlotter::IndirectPlotter(IndirectTab *parent)
-    : QObject(nullptr), m_pythonRunner(), m_parentTab(parent) {
-  connect(&m_pythonRunner, SIGNAL(runAsPythonScript(QString const &, bool)),
-          m_parentTab, SIGNAL(runAsPythonScript(QString const &, bool)));
-}
+IndirectPlotter::IndirectPlotter(IPyRunner *pythonRunner)
+    : QObject(nullptr), m_pyRunner(pythonRunner) {}
+
 #else
-IndirectPlotter::IndirectPlotter(IndirectTab *parent)
-    : QObject(nullptr), m_parentTab(parent) {}
+IndirectPlotter::IndirectPlotter(IPyRunner *pythonRunner) : QObject(nullptr) {
+  UNUSED_ARG(pythonRunner);
+}
 #endif
 
 IndirectPlotter::~IndirectPlotter() {}
@@ -186,7 +186,7 @@ IndirectPlotter::~IndirectPlotter() {}
 void IndirectPlotter::plotSpectra(std::string const &workspaceName,
                                   std::string const &workspaceIndices) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
-    auto const errorBars = m_parentTab->errorBars();
+    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     runPythonCode(createPlotSpectraString(
         workspaceName, createIndicesList(workspaceIndices), errorBars));
@@ -208,7 +208,7 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
 void IndirectPlotter::plotBins(std::string const &workspaceName,
                                std::string const &binIndices) {
   if (validate(workspaceName, binIndices, MantidAxis::Bin)) {
-    auto const errorBars = m_parentTab->errorBars();
+    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     runPythonCode(createPlotBinsString(
         workspaceName, createIndicesList(binIndices), errorBars));
@@ -340,7 +340,7 @@ bool IndirectPlotter::validateBins(MatrixWorkspace_const_sptr workspace,
  */
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 void IndirectPlotter::runPythonCode(std::string const &pythonCode) {
-  m_pythonRunner.runPythonCode(QString::fromStdString(pythonCode));
+  m_pyRunner->runPythonCode(pythonCode);
 }
 #endif
 

@@ -360,6 +360,15 @@ IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceName) const {
 }
 
 /**
+ * Used to run python code
+ *
+ * @param pythonCode The python code to run
+ */
+void IndirectTab::runPythonCode(std::string const &pythonCode) {
+  m_pythonRunner.runPythonCode(QString::fromStdString(pythonCode));
+}
+
+/**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
  * default save directory and adds the algorithm to the batch queue.
  *

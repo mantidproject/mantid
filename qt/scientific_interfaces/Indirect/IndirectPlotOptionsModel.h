@@ -7,6 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSMODEL_H_
 
+#include "IPythonRunner.h"
 #include "IndirectPlotter.h"
 
 #include "DllConfig.h"
@@ -20,7 +21,7 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel(IndirectTab *parentTab = nullptr);
+  IndirectPlotOptionsModel(IPyRunner *pythonRunner);
   /// Used by the unit tests so that m_plotter can be mocked
   IndirectPlotOptionsModel(IndirectPlotter *plotter);
   virtual ~IndirectPlotOptionsModel();

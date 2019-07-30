@@ -7,33 +7,37 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
 
+#include "IPythonRunner.h"
 #include "IndirectInterface.h"
+#include "IndirectPlotOptionsPresenter.h"
+
 #include "ui_IndirectDiffractionReduction.h"
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDiffractionReduction : public IndirectInterface {
+class IndirectDiffractionReduction : public IndirectInterface,
+                                     public IPyRunner {
   Q_OBJECT
-
-public:
-  /// The name of the interface as registered into the factory
-  static std::string name() { return "Diffraction"; }
-  // This interface's categories.
-  static QString categoryInfo() { return "Indirect"; }
 
 public:
   /// Default Constructor
   explicit IndirectDiffractionReduction(QWidget *parent = nullptr);
   ~IndirectDiffractionReduction() override;
 
+  /// The name of the interface as registered into the factory
+  static std::string name() { return "Diffraction"; }
+  /// This interface's categories.
+  static QString categoryInfo() { return "Indirect"; }
+  /// Used to run python code
+  void runPythonCode(std::string const &pythonCode) override;
+
 public slots:
   void instrumentSelected(const QString &instrumentName,
                           const QString &analyserName,
                           const QString &reflectionName);
   void run();
-  void plotResults();
   void saveReductions();
   void runFilesChanged();
   void runFilesFinding();
@@ -82,10 +86,8 @@ private:
   void createGroupingWorkspace(const std::string &outputWsName);
 
   void setRunIsRunning(bool running);
-  void setPlotIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
 private:
@@ -97,6 +99,8 @@ private:
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
   std::string m_groupingWsName;
+
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

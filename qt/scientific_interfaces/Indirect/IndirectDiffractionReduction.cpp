@@ -61,8 +61,11 @@ IndirectDiffractionReduction::~IndirectDiffractionReduction() {
  */
 void IndirectDiffractionReduction::initLayout() {
   m_uiForm.setupUi(this);
-
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
+
+  m_plotOptionsPresenter = std::make_unique<IndirectPlotOptionsPresenter>(
+      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra, "0");
+
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
@@ -102,8 +105,6 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this,
           SLOT(manualGroupingToggled(int)));
 
-  // Handle plotting
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
   // Handle saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
 
@@ -136,6 +137,8 @@ void IndirectDiffractionReduction::connectRunButtonValidation(
  * Runs a diffraction reduction when the user clicks Run.
  */
 void IndirectDiffractionReduction::run() {
+  m_plotOptionsPresenter->clearWorkspaces();
+
   setRunIsRunning(true);
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
@@ -205,60 +208,19 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
 
       diffResultsGroup->removeAll();
       AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
+
+      m_plotOptionsPresenter->setWorkspaces(m_plotWorkspaces);
     }
   } else {
-    setPlotEnabled(false);
     setSaveEnabled(false);
     showInformationBox(
         "Error running diffraction reduction.\nSee Results Log for details.");
   }
 }
 
-/**
- * Handles plotting result spectra from algorithm chains.
- */
-void IndirectDiffractionReduction::plotResults() {
-  setPlotIsPlotting(true);
-  const QString plotType = m_uiForm.cbPlotType->currentText();
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
-  if (plotType == "Spectra" || plotType == "Both") {
-    for (const auto &it : m_plotWorkspaces) {
-      const auto workspaceExists =
-          AnalysisDataService::Instance().doesExist(it);
-      if (workspaceExists)
-        pyInput += "plotSpectrum('" + QString::fromStdString(it) + "', 0)\n";
-      else
-        showInformationBox(QString::fromStdString(
-            "Workspace '" + it + "' not found\nUnable to plot workspace"));
-    }
-  }
-
-  if (plotType == "Contour" || plotType == "Both") {
-    for (const auto &it : m_plotWorkspaces) {
-      const auto workspaceExists =
-          AnalysisDataService::Instance().doesExist(it);
-      if (workspaceExists)
-        pyInput += "plot2D('" + QString::fromStdString(it) + "')\n";
-      else
-        showInformationBox(QString::fromStdString(
-            "Workspace '" + it + "' not found\nUnable to plot workspace"));
-    }
-  }
-  runPythonCode(pyInput);
-#else
-  if (plotType == "Spectra" || plotType == "Both") {
-    using MantidQt::Widgets::MplCpp::plot;
-    plot(m_plotWorkspaces, boost::none, std::vector<int>{0});
-  }
-  if (plotType == "Contour" || plotType == "Both") {
-    using MantidQt::Widgets::MplCpp::pcolormesh;
-    pcolormesh(toQStringList(m_plotWorkspaces));
-  }
-#endif
-
-  setPlotIsPlotting(false);
+void IndirectDiffractionReduction::runPythonCode(
+    std::string const &pythonCode) {
+  UserSubWindow::runPythonCode(QString::fromStdString(pythonCode));
 }
 
 /**
@@ -924,23 +886,13 @@ void IndirectDiffractionReduction::runFilesFound() {
  * @param state The selection state of the check box
  */
 void IndirectDiffractionReduction::manualGroupingToggled(int state) {
-  int itemCount = m_uiForm.cbPlotType->count();
-
   switch (state) {
   case Qt::Unchecked:
-    if (itemCount == 3) {
-      m_uiForm.cbPlotType->removeItem(1);
-      m_uiForm.cbPlotType->removeItem(2);
-    }
+    m_plotOptionsPresenter->setPlotType(PlotWidget::Spectra);
     break;
-
   case Qt::Checked:
-    if (itemCount == 1) {
-      m_uiForm.cbPlotType->insertItem(1, "Contour");
-      m_uiForm.cbPlotType->insertItem(2, "Both");
-    }
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContour);
     break;
-
   default:
     return;
   }
@@ -951,24 +903,13 @@ void IndirectDiffractionReduction::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void IndirectDiffractionReduction::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
-}
-
 void IndirectDiffractionReduction::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
 void IndirectDiffractionReduction::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void IndirectDiffractionReduction::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotType->setEnabled(enabled);
 }
 
 void IndirectDiffractionReduction::setSaveEnabled(bool enabled) {

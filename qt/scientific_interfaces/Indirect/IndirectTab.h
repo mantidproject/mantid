@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 
 #include "DllConfig.h"
+#include "IPythonRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -51,14 +52,15 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 /** IndirectTab
 
-  Provided common functionality of all indirect interface tabs.
+Provided common functionality of all indirect interface tabs.
 
-  @author Dan Nixon
-  @date 08/10/2014
+@author Dan Nixon
+@date 08/10/2014
 */
-class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject, public IPyRunner {
   Q_OBJECT
 
 public:
@@ -87,6 +89,8 @@ public:
 
   /// Plot a spectrum plot of a given workspace
   void plotSpectrum(const QString &workspaceName, const int &wsIndex = 0);
+  /// Used to run python code
+  void runPythonCode(std::string const &pythonCode) override;
 
 public slots:
   void runTab();

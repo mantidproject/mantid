@@ -70,10 +70,10 @@ std::string formatIndicesString(std::string str) {
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectTab *parentTab)
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(IPyRunner *pythonRunner)
     : m_fixedIndices(false), m_workspaceIndices(boost::none),
       m_workspaceName(boost::none),
-      m_plotter(std::make_unique<IndirectPlotter>(parentTab)) {}
+      m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectPlotter *plotter)

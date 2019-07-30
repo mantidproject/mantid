@@ -102,6 +102,12 @@
       </item>
       <item>
        <widget class="QLabel" name="lbIndicesError">
+        <property name="maximumSize">
+         <size>
+          <width>20</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Invalid indices provided</string>
         </property>

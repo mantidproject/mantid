@@ -52,6 +52,7 @@ set(
   IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -97,6 +98,7 @@ set(
   IndirectFittingModel.h
   IndirectPlotOptionsModel.h
   IndirectToolsTab.h
+  IPythonRunner.h
   IqtFitModel.h
   JumpFitModel.h
   MSDFitModel.h
@@ -149,6 +151,7 @@ set(
   IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
+  IndirectSettingsHelper.h
   IndirectSettingsPresenter.h
   IndirectSettingsView.h
   IndirectSimulation.h
@@ -292,6 +295,7 @@ set(
   IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -350,6 +354,8 @@ set(
   INC_FILES
   IndirectDataValidationHelper.h
   IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
+  IPythonRunner.h
 )
 
 set(
