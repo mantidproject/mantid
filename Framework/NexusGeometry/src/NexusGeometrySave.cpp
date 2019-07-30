@@ -27,6 +27,8 @@
 #include <memory> // unique_ptr
 #include <string>
 
+// TODO: default group names for unspecifed names of components
+
 namespace Mantid {
 namespace NexusGeometry {
 
