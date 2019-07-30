@@ -97,7 +97,7 @@ class ProjectTest(unittest.TestCase):
 
     def test_offer_save_does_something_if_saved_is_false(self):
         self.project._offer_save_message_box = mock.MagicMock(return_value=QMessageBox.Yes)
-        self.project.save = mock.MagicMock()
+        self.project.save = mock.MagicMock(return_value=None)
 
         # Add something to the ads so __saved is set to false
         CreateSampleWorkspace(OutputWorkspace="ws1")
