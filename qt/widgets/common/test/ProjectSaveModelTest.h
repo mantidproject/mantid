@@ -295,10 +295,21 @@ public:
     // std::make_unique<NiceMock<MockProjectSaveModel>>(windows);
 
     std::vector<std::string> wsNames{"ws1", "ws2"};
-
     ON_CALL(model, getProjectSize(wsNames)).WillByDefault(Return(107374182411));
 
     TS_ASSERT(model.needsSizeWarning(wsNames));
+  }
+
+  void testGetProjectSizeReturnsCorrectAnswer() {
+    ProjectSaveModel model({});
+    auto workspaces = model.getWorkspaces();
+    size_t assumedSize = 0;
+
+    for (auto &ws : workspaces) {
+      assumedSize += ws->getMemorySize();
+    }
+    auto workspaceNames = model.getWorkspaceNames();
+    TS_ASSERT_EQUALS(model.getProjectSize(workspaceNames), assumedSize);
   }
 };
 
