@@ -617,8 +617,6 @@ class MantidAxes(Axes):
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
-
-            self.set_autoscaley_on(True)
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -729,8 +727,6 @@ class MantidAxes(Axes):
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
-
-            self.set_autoscaley_on(True)
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
