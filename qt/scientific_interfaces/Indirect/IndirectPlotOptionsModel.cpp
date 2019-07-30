@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Strings.h"
 
 using namespace Mantid::API;
@@ -65,6 +66,21 @@ std::string formatIndicesString(std::string str) {
   return joinCompress(indices.begin(), indices.end());
 }
 
+void insertWorkspaceNames(std::vector<std::string> &allNames,
+                          std::string const &workspaceName) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+      auto const groupContents = group->getNames();
+      allNames.insert(allNames.end(), groupContents.begin(),
+                      groupContents.end());
+    } else if (auto const workspace =
+                   ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+      allNames.emplace_back(workspace->getName());
+    }
+  }
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -98,6 +114,14 @@ boost::optional<std::string> IndirectPlotOptionsModel::workspace() const {
 
 void IndirectPlotOptionsModel::removeWorkspace() {
   m_workspaceName = boost::none;
+}
+
+std::vector<std::string> IndirectPlotOptionsModel::getAllWorkspaceNames(
+    std::vector<std::string> const &workspaceNames) const {
+  std::vector<std::string> allNames;
+  for (auto const &workspaceName : workspaceNames)
+    insertWorkspaceNames(allNames, workspaceName);
+  return allNames;
 }
 
 std::string

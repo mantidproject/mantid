@@ -7,10 +7,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSIMULATIONTAB_H_
 
+#include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
+
 #include <QSettings>
 #include <QWidget>
 
@@ -33,7 +36,16 @@ public:
   IndirectSimulationTab(QWidget *parent = nullptr);
   ~IndirectSimulationTab() override;
 
+  void setOutputPlotOptionsPresenter(
+      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsWorkspaces(
+      std::vector<std::string> const &outputWorkspaces);
+  void clearOutputPlotOptionsWorkspaces();
+
   virtual void loadSettings(const QSettings &settings) = 0;
+
+private:
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

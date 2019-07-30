@@ -32,15 +32,12 @@ private slots:
   void handleFileChange();
   void ionLoadComplete(bool error);
   void runClicked();
-  void plotClicked();
   void saveClicked();
 
 private:
   void setRunIsRunning(bool running);
-  void setPlotIsPlotting(bool plotting);
   void setButtonsEnabled(bool enabled);
   void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
 
   /// The ui form

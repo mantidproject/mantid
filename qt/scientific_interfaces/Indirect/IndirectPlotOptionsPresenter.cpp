@@ -142,8 +142,9 @@ void IndirectPlotOptionsPresenter::onWorkspaceReplaced(
 
 void IndirectPlotOptionsPresenter::setWorkspaces(
     std::vector<std::string> const &workspaces) {
-  m_view->setWorkspaces(workspaces);
-  workspaceChanged(workspaces.front());
+  auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
+  m_view->setWorkspaces(workspaceNames);
+  workspaceChanged(workspaceNames.front());
 }
 
 void IndirectPlotOptionsPresenter::setWorkspace(

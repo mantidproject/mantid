@@ -18,19 +18,20 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("DensityOfStates");
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 DensityOfStates::DensityOfStates(QWidget *parent)
     : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
           SLOT(handleFileChange()));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
@@ -157,10 +158,10 @@ void DensityOfStates::dosAlgoComplete(bool error) {
              SLOT(dosAlgoComplete(bool)));
 
   setRunIsRunning(false);
-  if (error) {
-    setPlotEnabled(false);
+  if (error)
     setSaveEnabled(false);
-  }
+  else
+    setOutputPlotOptionsWorkspaces({m_outputWsName.toStdString()});
 }
 
 /**
@@ -247,16 +248,9 @@ void DensityOfStates::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
 
-void DensityOfStates::runClicked() { runTab(); }
-
-/**
- * Handle mantid plotting of workspace
- */
-void DensityOfStates::plotClicked() {
-  setPlotIsPlotting(true);
-  if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
-    plotSpectrum(m_outputWsName);
-  setPlotIsPlotting(false);
+void DensityOfStates::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
 
 /**
@@ -273,23 +267,13 @@ void DensityOfStates::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void DensityOfStates::setPlotIsPlotting(bool running) {
-  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot Result");
-  setButtonsEnabled(!running);
-}
-
 void DensityOfStates::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
 void DensityOfStates::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void DensityOfStates::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
 }
 
 void DensityOfStates::setSaveEnabled(bool enabled) {

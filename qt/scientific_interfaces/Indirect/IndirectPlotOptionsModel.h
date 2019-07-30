@@ -29,6 +29,9 @@ public:
   virtual bool setWorkspace(std::string const &workspaceName);
   virtual void removeWorkspace();
 
+  std::vector<std::string>
+  getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const;
+
   boost::optional<std::string> workspace() const;
 
   virtual void setFixedIndices(std::string const &indices);
