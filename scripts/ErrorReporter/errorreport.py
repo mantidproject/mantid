@@ -18,8 +18,9 @@ else:  # noqa
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QMessageBox
-from mantidqt.utils.qt import load_ui
+
 from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.utils.qt import load_ui
 
 DEFAULT_PLAIN_TEXT = ("""Please enter any additional information about your problems. (Max 3200 characters)
 
@@ -56,7 +57,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
-        self.requestTextBrowser.anchorClicked.connect(InterfaceManager.showWebPage)
+        self.requestTextBrowser.anchorClicked.connect(self.interface_manager.showWebPage)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
