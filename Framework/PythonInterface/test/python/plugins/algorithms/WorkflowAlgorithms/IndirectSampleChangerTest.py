@@ -78,7 +78,7 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self.assertEqual(round(eisf_ws.readY(1)[0], 7), 0.837118)
 
         msd_ws = get_ads_workspace('iris72462_to_iris72465_scan_msd')
-        self.assertEqual(round(msd_ws.readY(0)[1], 7), 0.4284148)
+        self.assertEqual(round(msd_ws.readY(0)[1], 7), 0.2456879)
         self.assertEqual(round(msd_ws.readY(1)[2], 7), 0.4145711)
 
     def test_that_IndirectSampleChanger_will_raise_an_error_when_given_run_numbers_in_the_wrong_order(self):
