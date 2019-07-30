@@ -101,11 +101,11 @@ public:
   }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectPlotOptionsModel>>();
+    m_view = new NiceMock<MockIndirectPlotOptionsView>();
+    m_model = new NiceMock<MockIndirectPlotOptionsModel>();
 
-    m_presenter = std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(),
-                                                                 m_model.get());
+    m_presenter =
+        std::make_unique<IndirectPlotOptionsPresenter>(m_view, m_model);
   }
 
   void tearDown() override {
@@ -113,8 +113,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
 
     m_presenter.reset(); /// The model and view is destructed by the presenter
-    m_view.release();
-    m_model.release();
   }
 
   ///----------------------------------------------------------------------
@@ -130,16 +128,16 @@ public:
   void
   test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
-    m_view = std::make_unique<MockIndirectPlotOptionsView>();
-    m_model = std::make_unique<MockIndirectPlotOptionsModel>();
+    m_view = new NiceMock<MockIndirectPlotOptionsView>();
+    m_model = new NiceMock<MockIndirectPlotOptionsModel>();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
     EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra)).Times(1);
     EXPECT_CALL(*m_view, setIndices(QString(""))).Times(1);
     EXPECT_CALL(*m_model, setFixedIndices("")).Times(1);
 
-    m_presenter = std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(),
-                                                                 m_model.get());
+    m_presenter =
+        std::make_unique<IndirectPlotOptionsPresenter>(m_view, m_model);
   }
 
   ///----------------------------------------------------------------------
@@ -314,8 +312,8 @@ private:
     EXPECT_CALL(*m_view, setPlotButtonEnabled(enabled)).Times(1);
   }
 
-  std::unique_ptr<MockIndirectPlotOptionsView> m_view;
-  std::unique_ptr<MockIndirectPlotOptionsModel> m_model;
+  MockIndirectPlotOptionsView *m_view;
+  MockIndirectPlotOptionsModel *m_model;
   std::unique_ptr<IndirectPlotOptionsPresenter> m_presenter;
 };
 

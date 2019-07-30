@@ -86,16 +86,14 @@ public:
   }
 
   void setUp() override {
-    m_plotter = std::make_unique<NiceMock<MockIndirectPlotter>>();
-    m_model =
-        std::make_unique<IndirectPlotOptionsModel>(std::move(m_plotter.get()));
+    m_plotter = new NiceMock<MockIndirectPlotter>();
+    m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter);
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_plotter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_plotter));
 
     m_model.reset();
-    m_plotter.release();
     m_ads.clear();
   }
 
@@ -294,7 +292,7 @@ private:
   AnalysisDataServiceImpl &m_ads;
 
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
-  std::unique_ptr<MockIndirectPlotter> m_plotter;
+  MockIndirectPlotter *m_plotter;
 };
 
 #endif /* MANTIDQT_INDIRECTPLOTOPTIONSMODELTEST_H_ */

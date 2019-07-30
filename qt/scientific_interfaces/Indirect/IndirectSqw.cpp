@@ -64,7 +64,7 @@ IndirectSqw::IndirectSqw(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::SpectraContour));
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(QString const &)), this,
           SLOT(handleDataReady(QString const &)));

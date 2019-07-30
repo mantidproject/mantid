@@ -31,7 +31,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra));
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));

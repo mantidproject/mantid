@@ -35,7 +35,7 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
-      std::move(m_uiForm.ipoPlotOptions), this, PlotWidget::Spectra, "0-2"));
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra, "0-2"));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this,
           SLOT(setInstrument()));
