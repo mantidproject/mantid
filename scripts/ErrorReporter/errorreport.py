@@ -6,22 +6,29 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, print_function)
 
-import qtpy  # noqa
+import qtpy
 
 if qtpy.PYQT5:
-    from ErrorReporter import resources_qt5  # noqa
+    pass
 elif qtpy.PYQT4:
-    from ErrorReporter import resources_qt4  # noqa
+    pass
 else:
     raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))
 
-from qtpy import QtCore, QtGui, QtWidgets  # noqa: E402
-from qtpy.QtCore import Signal, QUrl  # noqa: E402
-from qtpy.QtGui import QDesktopServices  # noqa: E402
-from qtpy.QtWidgets import QMessageBox, QTextEdit  # noqa: E402
-from mantidqt.utils.qt import load_ui, import_qt  # noqa: E402
+from qtpy import QtCore, QtGui, QtWidgets
+from qtpy.QtCore import Signal, QUrl
+from qtpy.QtWidgets import QMessageBox
+from mantidqt.utils.qt import load_ui
+from mantidqt.mantiddesktopservices import MantidDesktopServices
 
-MantidDesktopServices = import_qt('.._common', package='mantidqt.widgets', attr='MantidDesktopServices')
+DEFAULT_PLAIN_TEXT = ("""Please enter any additional information about your problems. (Max 3200 characters)
+
+For example:
+    Error messages on the screen
+    A script that causes the problem
+    The functions you used immediately before the problem
+
+Thank you!""")
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 
@@ -29,25 +36,16 @@ ErrorReportUIBase, ErrorReportUI = load_ui(__file__, 'errorreport.ui')
 class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     action = Signal(bool, int, str, str, str)
     quit_signal = Signal()
-    default_plain_text = ("Please enter any additional information about your problems. "
-                          "(Max 3200 characters)\n"
-                          "\n"
-                          "For example:\n"
-                          "Error messages on the screen\n "
-                          "A script that causes the problem\n "
-                          "The functions you used immediately before the problem\n"
-                          "\n"
-                          "Thank you!")
     free_text_edited = False
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
         if qtpy.PYQT4:
-            self.input_free_text.setPlainText(self.default_plain_text)
+            self.input_free_text.setPlainText(DEFAULT_PLAIN_TEXT)
             self.input_free_text.cursorPositionChanged.connect(self.check_placeholder_text)
         elif qtpy.PYQT5:
-            self.input_free_text.setPlaceholderText(self.default_plain_text)
+            self.input_free_text.setPlaceholderText(DEFAULT_PLAIN_TEXT)
         self.input_text = ""
         if not show_continue_terminate:
             self.continue_terminate_frame.hide()
@@ -57,7 +55,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
-        self.requestTextBrowser.anchorClicked.connect(QtGui.QDesktopServices.openUrl)
+        self.requestTextBrowser.anchorClicked.connect(MantidDesktopServices.openUrl)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
