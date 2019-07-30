@@ -11,6 +11,11 @@ from __future__ import (absolute_import, unicode_literals)
 from numpy import ndarray
 
 BASE_CREATE_FIG_COMMAND = "plt.figure({})"
+BASE_CREATE_AX_COMMAND = "add_subplot({})"
+
+ADD_SUBPLOT_KWARGS = {  # kwargs passed to the "add_subplot" command
+    'frame_on', 'label', 'title', 'visible', 'xlabel', 'xlim', 'xscale',
+    'ylabel', 'ylim', 'yscale'}
 
 
 def convert_value_to_arg_string(value):
@@ -42,6 +47,12 @@ def convert_args_to_string(args, kwargs):
     return ', '.join(arg_strings)
 
 
+def get_axes_index(ax):
+    """Get the index position of given Axes in its figure"""
+    index = ax.rowNum*ax.numCols + ax.colNum + 1
+    return index
+
+
 class PlotScriptGenerator:
 
     def __init__(self):
@@ -60,3 +71,28 @@ class PlotScriptGenerator:
         """Generate command to create figure"""
         kwargs = PlotScriptGenerator.get_figure_command_kwargs(fig)
         return BASE_CREATE_FIG_COMMAND.format(convert_args_to_string(None, kwargs))
+
+    @staticmethod
+    def get_add_subplot_pos_args(ax):
+        """Get list of positional args to recreate an axes"""
+        return [ax.numRows, ax.numCols, get_axes_index(ax)]
+
+    @staticmethod
+    def get_add_subplot_kwargs(ax):
+        """Get kwargs for recreating an axes"""
+        props = {}
+        for prop, value in ax.properties().items():
+            if prop in ADD_SUBPLOT_KWARGS:
+                props[prop] = value
+        props['projection'] = 'mantid'
+        props['sharex'] = True if ax.get_shared_x_axes()._mapping else None
+        props['sharey'] = True if ax.get_shared_y_axes()._mapping else None
+        return props
+
+    @staticmethod
+    def generate_add_subplot_command(ax):
+        command = BASE_CREATE_AX_COMMAND.format(
+            convert_args_to_string(PlotScriptGenerator.get_add_subplot_pos_args(ax),
+                                   PlotScriptGenerator.get_add_subplot_kwargs(ax))
+        )
+        return command
