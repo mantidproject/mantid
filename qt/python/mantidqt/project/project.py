@@ -75,7 +75,7 @@ class Project(AnalysisDataServiceObserver):
         path = self._save_file_dialog()
         if path is None:
             # Cancel close dialogs
-            return
+            return True
 
         # If the selected path is a project directory ask if overwrite is required?
         if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
@@ -151,7 +151,8 @@ class Project(AnalysisDataServiceObserver):
         result = self._offer_save_message_box(parent)
 
         if result == QMessageBox.Yes:
-            self.save()
+            if self.save():
+                return True
         elif result == QMessageBox.Cancel:
             return True
         # if yes or no return false

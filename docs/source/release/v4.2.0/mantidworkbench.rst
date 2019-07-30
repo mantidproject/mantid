@@ -16,6 +16,7 @@ Improvements
 
 Bugfixes
 ########
+- Clicking Cancel after attempting to save a project upon closing now keeps Workbench open instead of closing without saving.
 - Dialog windows no longer contain a useless ? button in their title bar.
 
 :ref:`Release 4.2.0 <v4.2.0>`
