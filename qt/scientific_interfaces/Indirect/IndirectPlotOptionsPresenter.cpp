@@ -60,7 +60,7 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
                           &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this,
                            &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
-      m_view(std::move(view)), m_model(std::move(model)) {
+      m_view(view), m_model(std::move(model)) {
   setupPresenter(plotType, fixedIndices);
 }
 
@@ -72,17 +72,15 @@ void IndirectPlotOptionsPresenter::setupPresenter(
     PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
 
-  connect(m_view.get(), SIGNAL(selectedWorkspaceChanged(std::string const &)),
-          this, SLOT(workspaceChanged(std::string const &)));
-  connect(m_view.get(), SIGNAL(selectedIndicesChanged(std::string const &)),
-          this, SLOT(indicesChanged(std::string const &)));
+  connect(m_view, SIGNAL(selectedWorkspaceChanged(std::string const &)), this,
+          SLOT(workspaceChanged(std::string const &)));
+  connect(m_view, SIGNAL(selectedIndicesChanged(std::string const &)), this,
+          SLOT(indicesChanged(std::string const &)));
 
-  connect(m_view.get(), SIGNAL(plotSpectraClicked()), this,
-          SLOT(plotSpectra()));
-  connect(m_view.get(), SIGNAL(plotBinsClicked()), this, SLOT(plotBins()));
-  connect(m_view.get(), SIGNAL(plotContourClicked()), this,
-          SLOT(plotContour()));
-  connect(m_view.get(), SIGNAL(plotTiledClicked()), this, SLOT(plotTiled()));
+  connect(m_view, SIGNAL(plotSpectraClicked()), this, SLOT(plotSpectra()));
+  connect(m_view, SIGNAL(plotBinsClicked()), this, SLOT(plotBins()));
+  connect(m_view, SIGNAL(plotContourClicked()), this, SLOT(plotContour()));
+  connect(m_view, SIGNAL(plotTiledClicked()), this, SLOT(plotTiled()));
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
   m_view->setPlotType(plotType);

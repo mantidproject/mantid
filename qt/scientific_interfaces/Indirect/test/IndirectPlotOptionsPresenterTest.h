@@ -101,18 +101,19 @@ public:
   }
 
   void setUp() override {
-    m_view = new NiceMock<MockIndirectPlotOptionsView>();
+    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
     m_model = new NiceMock<MockIndirectPlotOptionsModel>();
 
     m_presenter =
-        std::make_unique<IndirectPlotOptionsPresenter>(m_view, m_model);
+        std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(), m_model);
   }
 
   void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
 
-    m_presenter.reset(); /// The model and view is destructed by the presenter
+    m_presenter.reset(); /// The model is destructed by the presenter
+    m_view.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -128,7 +129,7 @@ public:
   void
   test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
-    m_view = new NiceMock<MockIndirectPlotOptionsView>();
+    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
     m_model = new NiceMock<MockIndirectPlotOptionsModel>();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
@@ -137,7 +138,7 @@ public:
     EXPECT_CALL(*m_model, setFixedIndices("")).Times(1);
 
     m_presenter =
-        std::make_unique<IndirectPlotOptionsPresenter>(m_view, m_model);
+        std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(), m_model);
   }
 
   ///----------------------------------------------------------------------
@@ -312,7 +313,7 @@ private:
     EXPECT_CALL(*m_view, setPlotButtonEnabled(enabled)).Times(1);
   }
 
-  MockIndirectPlotOptionsView *m_view;
+  std::unique_ptr<MockIndirectPlotOptionsView> m_view;
   MockIndirectPlotOptionsModel *m_model;
   std::unique_ptr<IndirectPlotOptionsPresenter> m_presenter;
 };

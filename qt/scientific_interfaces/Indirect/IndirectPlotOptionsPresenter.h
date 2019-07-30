@@ -69,7 +69,7 @@ private:
                   Mantid::API::WorkspaceBeforeReplaceNotification>
       m_wsReplacedObserver;
 
-  std::unique_ptr<IndirectPlotOptionsView> m_view;
+  IndirectPlotOptionsView *m_view;
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
 };
 
