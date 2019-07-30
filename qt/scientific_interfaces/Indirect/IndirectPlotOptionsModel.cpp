@@ -81,6 +81,22 @@ void insertWorkspaceNames(std::vector<std::string> &allNames,
   }
 }
 
+boost::optional<std::string>
+checkWorkspaceSpectrumSize(MatrixWorkspace_const_sptr workspace) {
+  if (workspace->y(0).size() < 2)
+    return "Plot Spectra failed: There is only one data point to plot in " +
+           workspace->getName() + ".";
+  return boost::none;
+}
+
+boost::optional<std::string>
+checkWorkspaceBinSize(MatrixWorkspace_const_sptr workspace) {
+  if (workspace->getNumberHistograms() < 2)
+    return "Plot Bins failed: There is only one data point to plot in " +
+           workspace->getName() + ".";
+  return boost::none;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -203,6 +219,27 @@ void IndirectPlotOptionsModel::plotTiled() {
   auto const indicesString = indices();
   if (workspaceName && indicesString)
     m_plotter->plotTiled(workspaceName.get(), indicesString.get());
+}
+
+boost::optional<std::string>
+IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
+  if (auto const workspaceName = workspace())
+    return checkWorkspaceSize(workspaceName.get(), axisType);
+  return boost::none;
+}
+
+boost::optional<std::string>
+IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
+                                             MantidAxis const &axisType) const {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+      if (axisType == MantidAxis::Spectrum)
+        return checkWorkspaceSpectrumSize(workspace);
+      return checkWorkspaceBinSize(workspace);
+    }
+  }
+  return boost::none;
 }
 
 } // namespace CustomInterfaces

@@ -50,11 +50,18 @@ public:
   virtual void plotContour();
   virtual void plotTiled();
 
+  boost::optional<std::string>
+  singleDataPoint(MantidAxis const &axisType) const;
+
 private:
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
                        std::string const &spectra) const;
   bool validateBins(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::string const &bins) const;
+
+  boost::optional<std::string>
+  checkWorkspaceSize(std::string const &workspaceName,
+                     MantidAxis const &axisType) const;
 
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;

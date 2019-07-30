@@ -65,6 +65,8 @@ private:
   void setWorkspace(std::string const &plotWorkspace);
   void setIndices();
 
+  bool validateWorkspaceSize(MantidAxis const &axisType);
+
   // Observers for ADS Notifications
   Poco::NObserver<IndirectPlotOptionsPresenter,
                   Mantid::API::WorkspacePreDeleteNotification>

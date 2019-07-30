@@ -186,19 +186,23 @@ void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
 }
 
 void IndirectPlotOptionsPresenter::plotSpectra() {
-  setPlotting(true);
-  m_model->plotSpectra();
-  setPlotting(false);
+  if (validateWorkspaceSize(MantidAxis::Spectrum)) {
+    setPlotting(true);
+    m_model->plotSpectra();
+    setPlotting(false);
+  }
 }
 
 void IndirectPlotOptionsPresenter::plotBins() {
-  auto const indicesString = m_view->selectedIndices().toStdString();
-  if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
-    setPlotting(true);
-    m_model->plotBins();
-    setPlotting(false);
-  } else {
-    m_view->displayWarning("Plot bins failed: Invalid bin indices provided.");
+  if (validateWorkspaceSize(MantidAxis::Bin)) {
+    auto const indicesString = m_view->selectedIndices().toStdString();
+    if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
+      setPlotting(true);
+      m_model->plotBins();
+      setPlotting(false);
+    } else {
+      m_view->displayWarning("Plot Bins failed: Invalid bin indices provided.");
+    }
   }
 }
 
@@ -209,9 +213,21 @@ void IndirectPlotOptionsPresenter::plotContour() {
 }
 
 void IndirectPlotOptionsPresenter::plotTiled() {
-  setPlotting(true);
-  m_model->plotTiled();
-  setPlotting(false);
+  if (validateWorkspaceSize(MantidAxis::Spectrum)) {
+    setPlotting(true);
+    m_model->plotTiled();
+    setPlotting(false);
+  }
+}
+
+bool IndirectPlotOptionsPresenter::validateWorkspaceSize(
+    MantidAxis const &axisType) {
+  auto const errorMessage = m_model->singleDataPoint(axisType);
+  if (errorMessage) {
+    m_view->displayWarning(QString::fromStdString(errorMessage.get()));
+    return false;
+  }
+  return true;
 }
 
 } // namespace CustomInterfaces
