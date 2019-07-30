@@ -39,6 +39,20 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
+void IndirectDataAnalysisTab::setOutputPlotOptionsPresenter(
+    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+  m_plotOptionsPresenter = std::move(presenter);
+}
+
+void IndirectDataAnalysisTab::setOutputPlotOptionsWorkspaces(
+    std::vector<std::string> const &outputWorkspaces) {
+  m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
+}
+
+void IndirectDataAnalysisTab::clearOutputPlotOptionsWorkspaces() {
+  m_plotOptionsPresenter->clearWorkspaces();
+}
+
 /**
  * Loads the tab's settings.
  *

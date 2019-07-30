@@ -37,21 +37,9 @@ private:
   void plotResult(QString const &workspaceName);
 
   void setRunEnabled(bool enabled);
-  void setPlotSpectrumEnabled(bool enabled);
-  void setTiledPlotEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
-  void setPlotSpectrumIsPlotting(bool plotting);
-  void setTiledPlotIsPlotting(bool plotting);
-
-  void setTiledPlotFirstIndex(int value);
-  void setTiledPlotLastIndex(int value);
-  void setMinMaxOfTiledPlotFirstIndex(int minimum, int maximum);
-  void setMinMaxOfTiledPlotLastIndex(int minimum, int maximum);
-  void setPlotSpectrumIndexMax(int maximum);
-  void setPlotSpectrumIndex(int value);
-  int getPlotSpectrumIndex();
 
 private slots:
   void algorithmComplete(bool error);
@@ -61,19 +49,13 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
   void updateDisplayedBinParameters();
-  void setTiledPlotFirstPlot(int value);
-  void setTiledPlotLastPlot(int value);
   void runClicked();
   void saveClicked();
-  void plotClicked();
   void errorsClicked();
-  void plotTiled();
   void updateEnergyRange(int state);
 
 private:
   void setPreviewSpectrumMaximum(int value);
-
-  int m_maxTiledPlots = 17;
 
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
