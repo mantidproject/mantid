@@ -16,10 +16,10 @@ else:  # noqa
     raise RuntimeError("Unknown QT version: {}".format(qtpy.QT_VERSION))  # noqa
 
 from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal, QUrl
+from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QMessageBox
 from mantidqt.utils.qt import load_ui
-from mantidqt.mantiddesktopservices import MantidDesktopServices
+from mantidqt.interfacemanager import InterfaceManager
 
 DEFAULT_PLAIN_TEXT = ("""Please enter any additional information about your problems. (Max 3200 characters)
 
@@ -37,6 +37,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     action = Signal(bool, int, str, str, str)
     quit_signal = Signal()
     free_text_edited = False
+    interface_manager = InterfaceManager()
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -55,7 +56,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
-        self.requestTextBrowser.anchorClicked.connect(MantidDesktopServices.openUrl)
+        self.requestTextBrowser.anchorClicked.connect(InterfaceManager.showWebPage)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
@@ -110,7 +111,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.free_text_edited = True
 
     def launch_privacy_policy(self, link):
-        MantidDesktopServices.openUrl(QUrl(link))
+        self.interface_manager.showWebPage(link)
 
     def set_button_status(self):
         if self.input_text == '' and not self.input_name and not self.input_email:
