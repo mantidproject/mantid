@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #ifndef CITATIONTEST_H_
-#define CITATIONEST_H_
+#define CITATIONTEST_H_
 
 #include "MantidAPI/Citation.h"
 #include "MantidAPI/CitationConstructorHelpers.h"
@@ -150,4 +150,4 @@ public:
   }
 };
 
-#endif
+#endif /* CITATIONTEST_H_ */
