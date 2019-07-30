@@ -7,7 +7,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
 
+#include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -66,6 +68,15 @@ public:
   /// Constructor
   CorrectionsTab(QWidget *parent = nullptr);
 
+  /// Set the presenter for the output plotting options
+  void setOutputPlotOptionsPresenter(
+      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  /// Set the active workspaces used in the plotting options
+  void setOutputPlotOptionsWorkspaces(
+      std::vector<std::string> const &outputWorkspaces);
+  /// Used to clear the workspaces held by the output plotting widget
+  void clearOutputPlotOptionsWorkspaces();
+
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
@@ -106,6 +117,8 @@ private:
 
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
+
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

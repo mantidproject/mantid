@@ -35,6 +35,8 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent) {
   m_spectra = 0;
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(newSample(const QString &)));
@@ -54,10 +56,6 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent)
           SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
-  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
-          SLOT(plotSpectrumClicked()));
-  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
-          SLOT(plotContourClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
@@ -232,8 +230,6 @@ void ApplyAbsorptionCorrections::run() {
       } else {
         m_batchAlgoRunner->clearQueue();
         setRunIsRunning(false);
-        setPlotSpectrumEnabled(false);
-        setPlotContourEnabled(false);
         setSaveResultEnabled(false);
         g_log.error("Cannot apply absorption corrections "
                     "using a sample and "
@@ -295,8 +291,6 @@ void ApplyAbsorptionCorrections::run() {
       default:
         m_batchAlgoRunner->clearQueue();
         setRunIsRunning(false);
-        setPlotSpectrumEnabled(false);
-        setPlotContourEnabled(false);
         setSaveResultEnabled(false);
         g_log.error(
             "ApplyAbsorptionCorrections cannot run with corrections that do "
@@ -367,10 +361,6 @@ void ApplyAbsorptionCorrections::run() {
   // updateContainer();
 }
 
-std::size_t ApplyAbsorptionCorrections::getOutWsNumberOfSpectra() const {
-  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
-}
-
 /**
  * Adds a spline interpolation as a step in the calculation for using legacy
  *correction factor
@@ -424,9 +414,9 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
+
+    setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
   } else {
-    setPlotSpectrumEnabled(false);
-    setPlotContourEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
@@ -444,8 +434,6 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
   setRunIsRunning(false);
 
   if (!error) {
-    setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
-
     // Handle preview plot
     plotPreview(m_uiForm.spPreviewSpec->value());
 
@@ -465,8 +453,6 @@ void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
       deleteAlg->execute();
     }
   } else {
-    setPlotSpectrumEnabled(false);
-    setPlotContourEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox("Unable to process corrected workspace.\nSee Results "
                         "Log for more details.");
@@ -555,26 +541,10 @@ void ApplyAbsorptionCorrections::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void ApplyAbsorptionCorrections::plotSpectrumClicked() {
-  setPlotSpectrumIsPlotting(true);
-
-  auto const spectrumIndex = m_uiForm.spSpectrum->text().toInt();
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumIndex);
-
-  setPlotSpectrumIsPlotting(false);
+void ApplyAbsorptionCorrections::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
-
-void ApplyAbsorptionCorrections::plotContourClicked() {
-  setPlotContourIsPlotting(true);
-
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plot2D(QString::fromStdString(m_pythonExportWsName));
-
-  setPlotContourIsPlotting(false);
-}
-
-void ApplyAbsorptionCorrections::runClicked() { runTab(); }
 
 /**
  * Plots the current spectrum displayed in the preview plot
@@ -637,26 +607,8 @@ void ApplyAbsorptionCorrections::plotInPreview(const QString &curveName,
   }
 }
 
-void ApplyAbsorptionCorrections::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
-  m_uiForm.spSpectrum->setMaximum(maximum);
-}
-
-int ApplyAbsorptionCorrections::getPlotSpectrumIndex() {
-  return m_uiForm.spSpectrum->text().toInt();
-}
-
 void ApplyAbsorptionCorrections::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void ApplyAbsorptionCorrections::setPlotSpectrumEnabled(bool enabled) {
-  m_uiForm.pbPlotSpectrum->setEnabled(enabled);
-  m_uiForm.spSpectrum->setEnabled(enabled);
-}
-
-void ApplyAbsorptionCorrections::setPlotContourEnabled(bool enabled) {
-  m_uiForm.pbPlotContour->setEnabled(enabled);
 }
 
 void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
@@ -665,24 +617,12 @@ void ApplyAbsorptionCorrections::setSaveResultEnabled(bool enabled) {
 
 void ApplyAbsorptionCorrections::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotSpectrumEnabled(enabled);
-  setPlotContourEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
 void ApplyAbsorptionCorrections::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
-}
-
-void ApplyAbsorptionCorrections::setPlotSpectrumIsPlotting(bool plotting) {
-  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
-  setButtonsEnabled(!plotting);
-}
-
-void ApplyAbsorptionCorrections::setPlotContourIsPlotting(bool plotting) {
-  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
-  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces
