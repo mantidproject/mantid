@@ -13,6 +13,7 @@ User Interface
 
 Improvements
 ############
+- The keyboard shortcut Ctrl+N now opens a new tab in the script editor.
 
 Bugfixes
 ########
