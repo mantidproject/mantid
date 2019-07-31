@@ -23,7 +23,6 @@
 #include "Mantid/MantidMatrixFunction.h"
 #include "Mantid/MantidUI.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
@@ -36,7 +35,6 @@
 
 #include <QTextCodec>
 #include <QTextStream>
-#include <QMessageBox>
 
 #include <string>
 #include <unordered_map>
@@ -172,7 +170,6 @@ bool ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &windowNames,
                              const std::vector<std::string> &interfaces,
                              bool compress) {
-
   m_windowNames = windowNames;
   m_workspaceNames = wsNames;
   m_interfacesNames = interfaces;
@@ -208,6 +205,7 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
   // update any listening progress bars
   emit setProgressBarRange(0, static_cast<int>(m_workspaceNames.size()));
   emit setProgressBarValue(0);
+
   QString text = serialiseProjectState(m_currentFolder);
   saveProjectFile(&fileHandle, projectName, text, compress);
   return true;
