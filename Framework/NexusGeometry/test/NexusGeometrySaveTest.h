@@ -939,7 +939,7 @@ ROTATION TESTS
   test_rotation_of_NXdetector_written_to_file_is_same_as_in_component_info() {
     // create RAII file resource for testing
     ScopedFileHandle fileResource(
-        "check_rotation_written_to_nxsource_test_file.hdf5");
+        "check_rotation_written_to_nxdetector_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // prepare rotation for instrument
@@ -993,7 +993,7 @@ ROTATION TESTS
 
     // create RAII file resource for testing
     ScopedFileHandle fileResource(
-        "check_rotation_written_to_nxsource_test_file.hdf5");
+        "check_rotation_written_to_nx_monitor_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // prepare rotation for instrument
@@ -1500,7 +1500,8 @@ ROTATION TESTS
     const V3D sourceLocation(0, 0, 0);          // set to zero
     const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
-    ScopedFileHandle fileResource("both_transformations_dependency_test.hdf5");
+    ScopedFileHandle fileResource(
+        "neither_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =

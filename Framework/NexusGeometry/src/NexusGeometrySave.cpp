@@ -72,7 +72,7 @@ const std::string UNITS = "units";
 const std::string SHAPE = "shape";
 const std::string VECTOR = "vector";
 
-const double PRECISION = 1e-5; //
+const double PRECISION = 1e-5; // match Eigen precision.
 const double PI = M_PI;
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
