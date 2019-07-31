@@ -8,10 +8,12 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib.lines import Line2D
 from numpy import ndarray
 
 BASE_CREATE_FIG_COMMAND = "plt.figure({})"
 BASE_CREATE_AX_COMMAND = "add_subplot({})"
+BASE_CREATE_LINE_COMMAND = "plot({})"
 
 ADD_SUBPLOT_KWARGS = [  # kwargs passed to the "add_subplot" command
     'frame_on', 'label', 'title', 'visible', 'xlabel', 'xlim', 'xscale',
@@ -102,5 +104,19 @@ class PlotScriptGenerator:
         return command
 
     @staticmethod
+    def get_plot_command_pos_args(artist):
+        return [artist.axes.get_artists_workspace_and_spec_num(artist)[0]]
+
+    @staticmethod
     def get_plot_command_kwargs_from_line2d(line):
-        return {key: line.properties()[key] for key in PLOT_KWARGS}
+        props = {key: line.properties()[key] for key in PLOT_KWARGS}
+        props['specNum'] = line.axes.get_artists_workspace_and_spec_num(line)[1]
+        return props
+
+    @staticmethod
+    def generate_plot_command(artist):
+        pos_args = PlotScriptGenerator.get_plot_command_pos_args(artist)
+        kwargs = PlotScriptGenerator.get_plot_command_kwargs_from_line2d(artist)
+        if isinstance(artist, Line2D):
+            arg_string = convert_args_to_string(pos_args, kwargs)
+            return BASE_CREATE_LINE_COMMAND.format(arg_string)

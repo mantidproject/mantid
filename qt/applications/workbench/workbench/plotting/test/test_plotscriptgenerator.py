@@ -13,13 +13,32 @@ matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from numpy import array
 
+from mantid.simpleapi import CreateWorkspace
 from mantid.plots import MantidAxes  # register mantid projection  # noqa
 from mantid.py3compat.mock import MagicMock
 from workbench.plotting.plotscriptgenerator import convert_args_to_string
 from workbench.plotting.plotscriptgenerator import PlotScriptGenerator as PSG
 
+LINE2D_KWARGS = {
+    'alpha': 0.5, 'color': 'r', 'drawstyle': 'steps',
+    'fillstyle': 'left', 'label': 'test label', 'linestyle': '--',
+    'linewidth': 1.1, 'marker': 'o', 'markeredgecolor': 'g',
+    'markeredgewidth': 1.2, 'markerfacecolor': 'y',
+    'markerfacecoloralt': 'k', 'markersize': 1.3, 'markevery': 2,
+    'solid_capstyle': 'butt', 'solid_joinstyle': 'round',
+    'visible': False, 'zorder': 1.4, 'specNum': 1}
+
 
 class PlotScriptGeneratorTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.test_ws = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30],
+            DataY=[2, 3, 4, 5],
+            DataE=[1, 2, 3, 4],
+            NSpec=2,
+            OutputWorkspace='test_ws')
 
     def tearDown(self):
         plt.close()
@@ -64,20 +83,21 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         self.assertEqual(expected, code)
 
     def test_get_plot_command_kwargs_from_line2d_returns_correct_dict(self):
-        kwargs = {
-            'alpha': 0.5, 'color': 'r', 'drawstyle': 'steps',
-            'fillstyle': 'left', 'label': 'test label', 'linestyle': '--',
-            'linewidth': 1.1, 'marker': 'o', 'markeredgecolor': 'g',
-            'markeredgewidth': 1.2, 'markerfacecolor': 'y',
-            'markerfacecoloralt': 'k', 'markersize': 1.3, 'markevery': 2,
-            'solid_capstyle': 'butt', 'solid_joinstyle': 'round',
-            'visible': False, 'zorder': 1.4
-        }
         fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        line = ax.plot([0, 1], [1, 0], **kwargs)[0]
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        line = ax.plot(self.test_ws, **LINE2D_KWARGS)[0]
         ret = PSG.get_plot_command_kwargs_from_line2d(line)
-        self.assertEqual(kwargs, ret)
+        self.assertEqual(LINE2D_KWARGS, ret)
+
+    def test_generate_plot_command_returns_correct_string_for_line2d(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        line = ax.plot(self.test_ws, **LINE2D_KWARGS)[0]
+        ret = PSG.generate_plot_command(line)
+        expected_command = (
+            "plot({}, {})".format(self.test_ws.name(),
+                                  convert_args_to_string(None, LINE2D_KWARGS)))
+        self.assertEqual(expected_command, ret)
 
     # Utility function tests
     def test_convert_args_to_string_returns_correct_string(self):
