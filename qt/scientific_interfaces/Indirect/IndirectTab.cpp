@@ -18,10 +18,6 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/MplCpp/Plot.h"
-#endif
-
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>
@@ -125,7 +121,6 @@ QStringList convertToQStringList(std::string const &str,
   boost::split(subStrings, str, boost::is_any_of(delimiter));
   return convertToQStringList(subStrings);
 }
-
 } // namespace
 
 namespace MantidQt {
