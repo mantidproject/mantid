@@ -27,8 +27,6 @@
 #include <memory> // unique_ptr
 #include <string>
 
-// TODO: default group names for unspecifed names of components
-
 namespace Mantid {
 namespace NexusGeometry {
 
@@ -276,25 +274,30 @@ std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
  *
  * @return true if all elements are approx zero, else false.
  */
-template <typename T>
-bool isApproxZero(const std::vector<T> &data, const double &precision,
+
+bool isApproxZero(const std::vector<double> &data, const double &precision,
                   const bool isQuaternion = false) {
 
   // if data is a quaternion return true if the associated rotation about an
   // axis is approximately zero
   if (isQuaternion) {
-    // Kernel Quat case
-    if (abs(data[0] - 1.0) < precision && data[1] < precision &&
-        data[2] < precision && data[3] < precision)
-      return true;
-    // Eigen Quaterniond case
-    if (data[0] < precision && data[1] < precision && data[2] < precision &&
-        abs(data[3] - 1.0) < precision)
-      return true;
+    /*
+       If isQuaterion flag is true, isApproxZero returns true if the quaternion
+       rotation is zero angle. which corresponds to either values depending on
+       type: Quat(1,0,0,0) or Eigen::Quaterniond(0,0,0,1).
+        */
+    return /*Kernel Quat case*/ (
+               std::abs(data[0] - 1.0) < precision &&
+               std::abs(data[1]) < precision && std::abs(data[2]) < precision &&
+               std::abs(data[3]) < precision) || /*Eigen Quateriond case*/
+           (std::abs(data[0]) < precision && std::abs(data[1]) < precision &&
+            std::abs(data[2]) < precision &&
+            std::abs(data[3] - 1.0) < precision);
   }
-  return std::all_of(data.begin(), data.end(), [&precision](const T &element) {
-    return abs(element) < precision;
-  });
+  return std::all_of(data.begin(), data.end(),
+                     [&precision](const double &element) {
+                       return std::abs(element) < precision;
+                     });
 }
 
 /*
@@ -736,7 +739,9 @@ H5::Group NXInstrument(const H5::Group &parent,
 
   NXclass groupType = NXclass::NXinstrument;
 
-  std::string instrumentName = compInfo.name(compInfo.root());
+  size_t index = compInfo.root();
+
+  std::string instrumentName = groupName(compInfo, groupType, index);
   H5::Group childGroup = parent.createGroup(instrumentName);
 
   writeStrDataset(childGroup, NAME, instrumentName);
@@ -763,9 +768,11 @@ void saveNXSample(const H5::Group &parentGroup,
 
   NXclass groupType = NXclass::NXsample;
 
+  size_t index = compInfo.sample();
+
   H5::Group childGroup;
 
-  std::string sampleName = compInfo.name(compInfo.sample());
+  std::string sampleName = groupName(compInfo, groupType, index); // group name
   childGroup = parentGroup.createGroup(sampleName);
 
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
@@ -795,7 +802,7 @@ void saveNXSource(const H5::Group &parentGroup,
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
   std::string dependency = ".";
-  std::string sourceName = compInfo.name(compInfo.source());
+  std::string sourceName = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
   bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
