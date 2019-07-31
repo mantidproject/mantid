@@ -32,7 +32,7 @@ class ConvTemplateBrowser;
 class MANTIDQT_INDIRECT_DLL ConvTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  ConvTemplatePresenter(ConvTemplateBrowser *view);
+  explicit ConvTemplatePresenter(ConvTemplateBrowser *view);
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setStretchExponential(bool);
   void setNumberOfDatasets(int);

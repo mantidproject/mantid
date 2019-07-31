@@ -133,9 +133,10 @@ struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
   QString name() const override { return "Background"; }
 };
 
-void applyToFitType(FitType fitType, std::function<void(ParamID)> paramFun);
+void applyToFitType(FitType fitType,
+                    const std::function<void(ParamID)> &paramFun);
 void applyToBackground(BackgroundType bgType,
-                       std::function<void(ParamID)> paramFun);
+                       const std::function<void(ParamID)> &paramFun);
 
 } // namespace ConvTypes
 } // namespace IDA

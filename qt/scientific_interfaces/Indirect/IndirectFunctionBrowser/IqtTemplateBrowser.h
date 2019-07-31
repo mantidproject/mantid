@@ -29,7 +29,7 @@ class MANTIDQT_INDIRECT_DLL IqtTemplateBrowser
     : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  IqtTemplateBrowser(QWidget *parent = nullptr);
+  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();

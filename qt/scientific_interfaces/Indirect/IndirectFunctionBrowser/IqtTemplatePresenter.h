@@ -33,7 +33,7 @@ class IqtTemplateBrowser;
 class MANTIDQT_INDIRECT_DLL IqtTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  IqtTemplatePresenter(IqtTemplateBrowser *view);
+  explicit IqtTemplatePresenter(IqtTemplateBrowser *view);
   void setNumberOfExponentials(int);
   void setStretchExponential(bool);
   void setBackground(const QString &name);

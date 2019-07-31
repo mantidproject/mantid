@@ -31,7 +31,7 @@ class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser
     : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  ConvTemplateBrowser(QWidget *parent = nullptr);
+  explicit ConvTemplateBrowser(QWidget *parent = nullptr);
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;

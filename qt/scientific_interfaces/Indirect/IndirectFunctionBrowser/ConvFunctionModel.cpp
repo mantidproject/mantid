@@ -141,7 +141,7 @@ void ConvFunctionModel::addFunction(const QString &prefix,
       throw std::runtime_error("Cannot add a DeltaFunction.");
     setDeltaFunction(true);
     newPrefix = *getDeltaPrefix();
-  } else if (name == "FlatBackground" || "LinearBackground") {
+  } else if (name == "FlatBackground" || name == "LinearBackground") {
     if (hasBackground())
       throw std::runtime_error("Cannot add more backgrounds.");
     if (name == "FlatBackground") {

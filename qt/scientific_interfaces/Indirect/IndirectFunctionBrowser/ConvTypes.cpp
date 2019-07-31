@@ -50,13 +50,14 @@ std::map<BackgroundType, TemplateSubTypeDescriptor>
 
 QString paramName(ParamID id) { return g_paramName.at(id); }
 
-void applyToFitType(FitType fitType, std::function<void(ParamID)> paramFun) {
+void applyToFitType(FitType fitType,
+                    const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(FitSubType::g_typeMap[fitType].blocks.front(),
                       FitSubType::g_typeMap[fitType].blocks.back(), paramFun);
 }
 
 void applyToBackground(BackgroundType bgType,
-                       std::function<void(ParamID)> paramFun) {
+                       const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(BackgroundSubType::g_typeMap[bgType].blocks.front(),
                       BackgroundSubType::g_typeMap[bgType].blocks.back(),
                       paramFun);

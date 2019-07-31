@@ -33,7 +33,7 @@ class ScopedFalse {
   bool m_oldValue;
 
 public:
-  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
+  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
     m_ref = false;
   }
   ~ScopedFalse() { m_ref = m_oldValue; }
