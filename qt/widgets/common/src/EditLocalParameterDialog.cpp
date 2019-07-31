@@ -26,9 +26,12 @@ namespace MantidWidgets {
 /**
  * Constructor used inside and outside of MultiDatasetFit interface
  * @param parent :: [input] Parent widget of this dialog
- * @param funcBrowser :: [input] Function browser this is working with
  * @param parName :: [input] Name of parameter to edit in this dialog
  * @param wsNames :: [input] Names of workspaces being fitted
+ * @param values :: [input] Parameter values.
+ * @param fixes :: [input] Flags indicating if a parameter is fixed.
+ * @param ties :: [input] Parameter ties.
+ * @param constraints :: [input] Parameter constraints.
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, const QString &parName, const QStringList &wsNames,
