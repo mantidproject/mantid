@@ -63,7 +63,7 @@ bool doesExistInADS(std::string const &workspaceName) {
 //  return function;
 //}
 
-//IFunction_sptr createResolutionFunction(const std::string &resolutionName) {
+// IFunction_sptr createResolutionFunction(const std::string &resolutionName) {
 //  auto func = FunctionFactory::Instance().createFunction("Resolution");
 //  // add resolution file
 //  IFunction::Attribute attr(resolutionName);
@@ -71,7 +71,7 @@ bool doesExistInADS(std::string const &workspaceName) {
 //  return func;
 //}
 
-//CompositeFunction_sptr applyTemperatureCorrection(IFunction_sptr function,
+// CompositeFunction_sptr applyTemperatureCorrection(IFunction_sptr function,
 //                                                  IFunction_sptr correction,
 //                                                  double value) {
 //  auto product = boost::dynamic_pointer_cast<CompositeFunction>(
@@ -83,7 +83,7 @@ bool doesExistInADS(std::string const &workspaceName) {
 //  return product;
 //}
 
-//IFunction_sptr createTemperatureCorrection(double correction) {
+// IFunction_sptr createTemperatureCorrection(double correction) {
 //  // create temperature correction function to multiply with the lorentzians
 //  IFunction_sptr tempFunc;
 //
@@ -98,7 +98,7 @@ bool doesExistInADS(std::string const &workspaceName) {
 //  return tempFunc;
 //}
 
-//CompositeFunction_sptr addTemperatureCorrection(CompositeFunction_sptr model,
+// CompositeFunction_sptr addTemperatureCorrection(CompositeFunction_sptr model,
 //                                                double value) {
 //  auto correction = createTemperatureCorrection(value);
 //
@@ -106,14 +106,14 @@ bool doesExistInADS(std::string const &workspaceName) {
 //    auto function = model->getFunction(i);
 //
 //    if (function->name() != "DeltaFunction") {
-//      auto corrected = applyTemperatureCorrection(function, correction, value);
-//      model->replaceFunction(i, corrected);
+//      auto corrected = applyTemperatureCorrection(function, correction,
+//      value); model->replaceFunction(i, corrected);
 //    }
 //  }
 //  return model;
 //}
 //
-//CompositeFunction_sptr addTemperatureCorrection(IFunction_sptr model,
+// CompositeFunction_sptr addTemperatureCorrection(IFunction_sptr model,
 //                                                double value) {
 //  auto correction = createTemperatureCorrection(value);
 //  return applyTemperatureCorrection(model, correction, value);
