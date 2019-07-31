@@ -9,6 +9,7 @@
 
 #include <QMetaType>
 #include <ostream>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -114,8 +115,8 @@ operator<<(std::ostream &out,
   return out;
 }
 
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::SpectrumRowIndex);
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex);
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::GroupIndex);
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::SpectrumRowIndex)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex)
+Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::GroupIndex)
 
 #endif /* MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_ */
