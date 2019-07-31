@@ -7,8 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 
-#include "IndirectFittingModel.h"
 #include "IndexTypes.h"
+#include "IndirectFittingModel.h"
 
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"

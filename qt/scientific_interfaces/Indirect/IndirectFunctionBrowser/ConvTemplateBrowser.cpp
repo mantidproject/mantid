@@ -58,9 +58,8 @@ void ConvTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
-  //updateState();
+  // updateState();
 }
-
 
 void ConvTemplateBrowser::setFunction(const QString &funStr) {
   m_presenter.setFunction(funStr);
@@ -98,11 +97,9 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
   m_presenter.setGlobalParameters(globals);
 }
 
-void ConvTemplateBrowser::intChanged(QtProperty *prop) {
-}
+void ConvTemplateBrowser::intChanged(QtProperty *prop) {}
 
-void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
-}
+void ConvTemplateBrowser::boolChanged(QtProperty *prop) {}
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   auto const index = m_enumManager->value(prop);
@@ -116,7 +113,7 @@ void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
 }
 
 void ConvTemplateBrowser::globalChanged(QtProperty *prop, const QString &name,
-                                       bool on) {
+                                        bool on) {
   std::cerr << "Global " << name.toStdString() << ' ' << on << std::endl;
 }
 
@@ -170,10 +167,10 @@ void ConvTemplateBrowser::setErrorsEnabled(bool enabled) {
 }
 
 void ConvTemplateBrowser::clear() {
-  //removeBackground();
-  //removeStretchExponential();
-  //removeExponentialTwo();
-  //removeExponentialOne();
+  // removeBackground();
+  // removeStretchExponential();
+  // removeExponentialTwo();
+  // removeExponentialOne();
 }
 
 void ConvTemplateBrowser::popupMenu(const QPoint &) {
@@ -181,7 +178,8 @@ void ConvTemplateBrowser::popupMenu(const QPoint &) {
 }
 
 void ConvTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
-                                                   double value, double error) {
+                                                    double value,
+                                                    double error) {
   if (prop) {
     ScopedFalse _(m_emitParameterValueChange);
     m_parameterManager->setValue(prop, value);
@@ -259,8 +257,8 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value,
   m_parameterManager->setError(prop, error);
 }
 
-void ConvTemplateBrowser::
-    updateParameterEstimationData(DataForParameterEstimationCollection &&data) {}
+void ConvTemplateBrowser::updateParameterEstimationData(
+    DataForParameterEstimationCollection &&data) {}
 
 void ConvTemplateBrowser::setBackgroundA0(double value) {}
 

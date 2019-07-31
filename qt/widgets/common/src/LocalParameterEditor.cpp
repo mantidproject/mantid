@@ -38,8 +38,9 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
                                            bool allOthersFixed, bool othersTied,
                                            bool logOptionsEnabled)
     : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)),
-      m_fixed(fixed), m_tie(tie), m_constraint(constraint), m_othersFixed(othersFixed),
-      m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
+      m_fixed(fixed), m_tie(tie), m_constraint(constraint),
+      m_othersFixed(othersFixed), m_allOthersFixed(allOthersFixed),
+      m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -112,19 +113,22 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
   setMenu->addAction(m_setConstraintAction);
 
   m_removeConstraintAction = new QAction("Remove constraint", this);
-  m_removeConstraintAction->setToolTip("Remove the constraint for this parameter.");
+  m_removeConstraintAction->setToolTip(
+      "Remove the constraint for this parameter.");
   connect(m_removeConstraintAction, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
   setMenu->addAction(m_removeConstraintAction);
 
   m_setConstraintToAllAction = new QAction("Set constraint to all", this);
-  m_setConstraintToAllAction->setToolTip("Set this constraint for all parameters.");
+  m_setConstraintToAllAction->setToolTip(
+      "Set this constraint for all parameters.");
   connect(m_setConstraintToAllAction, SIGNAL(triggered()), this,
           SLOT(setConstraintAll()));
   setMenu->addAction(m_setConstraintToAllAction);
 
   m_removeAllConstraintsAction = new QAction("Remove all constraints", this);
-  m_removeAllConstraintsAction->setToolTip("Remove constraints for all parameters.");
+  m_removeAllConstraintsAction->setToolTip(
+      "Remove constraints for all parameters.");
   connect(m_removeAllConstraintsAction, SIGNAL(triggered()), this,
           SLOT(removeAllConstraints()));
   setMenu->addAction(m_removeAllConstraintsAction);

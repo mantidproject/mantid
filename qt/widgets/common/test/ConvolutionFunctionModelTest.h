@@ -41,14 +41,16 @@ public:
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_EQUALS(
         model.setFunctionString("name=LinearBackground,A0=1,A1=2"),
-        const std::runtime_error &e, std::string(e.what()), "Model doesn't contain a convolution.");
+        const std::runtime_error &e, std::string(e.what()),
+        "Model doesn't contain a convolution.");
   }
 
   void test_no_convolution_2() {
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_EQUALS(
         model.setFunctionString("name=LinearBackground;name=Gaussian"),
-        const std::runtime_error &e, std::string(e.what()), "Model doesn't contain a convolution.");
+        const std::runtime_error &e, std::string(e.what()),
+        "Model doesn't contain a convolution.");
   }
 
   void test_two_backgrounds() {
@@ -82,7 +84,8 @@ public:
 
   void test_background_empty_convolution() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("name=LinearBackground;composite=Convolution"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("name=LinearBackground;composite=Convolution"));
     TS_ASSERT_EQUALS(*model.backgroundPrefix(), "f0.");
     TS_ASSERT_EQUALS(*model.convolutionPrefix(), "f1.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -93,7 +96,9 @@ public:
 
   void test_background_before_convolution() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("name=LinearBackground;(composite=Convolution;name=Resolution;name=Gaussian)"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("name=LinearBackground;(composite=Convolution;"
+                                "name=Resolution;name=Gaussian)"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -105,7 +110,9 @@ public:
 
   void test_background_after_convolution() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name=Gaussian);name=LinearBackground"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("(composite=Convolution;name=Resolution;name="
+                                "Gaussian);name=LinearBackground"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -117,7 +124,9 @@ public:
 
   void test_two_peaks() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name=Gaussian;name=Gaussian);name=LinearBackground"));
+    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
+        "(composite=Convolution;name=Resolution;name=Gaussian;name=Gaussian);"
+        "name=LinearBackground"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -130,7 +139,8 @@ public:
 
   void test_two_peaks_no_background() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution;name=Gaussian;name=Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
+        "composite=Convolution;name=Resolution;name=Gaussian;name=Gaussian"));
     TS_ASSERT(!model.backgroundPrefix());
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -143,7 +153,9 @@ public:
 
   void test_delta() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("(composite=Convolution;name=Resolution;name=DeltaFunction);name=LinearBackground"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("(composite=Convolution;name=Resolution;name="
+                                "DeltaFunction);name=LinearBackground"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -154,7 +166,8 @@ public:
 
   void test_delta_no_background() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString("composite=Convolution;name=Resolution;name=DeltaFunction"));
+    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
+        "composite=Convolution;name=Resolution;name=DeltaFunction"));
     TS_ASSERT(!model.backgroundPrefix());
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -165,8 +178,9 @@ public:
 
   void test_two_peaks_no_background_delta() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
-        "composite=Convolution;name=Resolution;name=Gaussian;name=Gaussian;name=DeltaFunction"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("composite=Convolution;name=Resolution;name="
+                                "Gaussian;name=Gaussian;name=DeltaFunction"));
     TS_ASSERT(!model.backgroundPrefix());
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -179,9 +193,10 @@ public:
 
   void test_two_peaks_delta() {
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
-        "(composite=Convolution;name=Resolution;name=DeltaFunction;name=Gaussian;name=Gaussian);"
-        "name=LinearBackground"));
+    TS_ASSERT_THROWS_NOTHING(
+        model.setFunctionString("(composite=Convolution;name=Resolution;name="
+                                "DeltaFunction;name=Gaussian;name=Gaussian);"
+                                "name=LinearBackground"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -201,7 +216,8 @@ public:
     algo->execute();
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(
-        model.setFunctionString("composite=Convolution;name=Resolution,Workspace=\"abc\";name=Gaussian"));
+        model.setFunctionString("composite=Convolution;name=Resolution,"
+                                "Workspace=\"abc\";name=Gaussian"));
     TS_ASSERT(!model.backgroundPrefix());
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "abc");
@@ -219,8 +235,9 @@ public:
     algo->setPropertyValue("OutputWorkspace", "abc");
     algo->execute();
     ConvolutionFunctionModel model;
-    TS_ASSERT_THROWS_NOTHING(
-        model.setFunctionString("composite=Convolution;name=Resolution,Workspace=\"abc\",WorkspaceIndex=3;name=Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(model.setFunctionString(
+        "composite=Convolution;name=Resolution,Workspace=\"abc\","
+        "WorkspaceIndex=3;name=Gaussian"));
     TS_ASSERT(!model.backgroundPrefix());
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "abc");

@@ -56,7 +56,8 @@ public:
   virtual QStringList getLocalParameters() const = 0;
   virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
-  virtual double getLocalParameterValue(const QString &parName, int i) const = 0;
+  virtual double getLocalParameterValue(const QString &parName,
+                                        int i) const = 0;
   virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;
   virtual QString getLocalParameterTie(const QString &parName, int i) const = 0;
   virtual QString getLocalParameterConstraint(const QString &parName,

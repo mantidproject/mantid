@@ -107,7 +107,8 @@ void FunctionBrowser::setParameter(const QString &paramName, double value) {
  * @param paramName :: Fully qualified parameter name (includes function index)
  * @param error :: New error
  */
-void FunctionBrowser::setParameterError(const QString &paramName, double error) {
+void FunctionBrowser::setParameterError(const QString &paramName,
+                                        double error) {
   m_presenter->setParameterError(paramName, error);
 }
 
@@ -257,10 +258,11 @@ void FunctionBrowser::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter->updateMultiDatasetParameters(fun);
 }
 
-void FunctionBrowser::updateMultiDatasetParameters(const ITableWorkspace & paramTable)
-{
+void FunctionBrowser::updateMultiDatasetParameters(
+    const ITableWorkspace &paramTable) {
   auto const nRows = paramTable.rowCount();
-  if (nRows == 0) return;
+  if (nRows == 0)
+    return;
 
   auto const globalParameterNames = getGlobalParameters();
   for (auto &&name : globalParameterNames) {
@@ -276,11 +278,15 @@ void FunctionBrowser::updateMultiDatasetParameters(const ITableWorkspace & param
     auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
-        setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
+        setLocalParameterValue(name, static_cast<int>(i),
+                               valueColumn->toDouble(i),
+                               errorColumn->toDouble(i));
       }
     } else {
       auto const i = getCurrentDataset();
-      setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
+      setLocalParameterValue(name, static_cast<int>(i),
+                             valueColumn->toDouble(0),
+                             errorColumn->toDouble(0));
     }
   }
 }

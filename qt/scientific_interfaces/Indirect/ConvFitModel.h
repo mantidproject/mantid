@@ -13,7 +13,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-using ResolutionCollectionType = IndexCollectionType<DatasetIndex, boost::weak_ptr<Mantid::API::MatrixWorkspace>>;
+using ResolutionCollectionType =
+    IndexCollectionType<DatasetIndex,
+                        boost::weak_ptr<Mantid::API::MatrixWorkspace>>;
 using ExtendedResolutionType = IndexCollectionType<DatasetIndex, std::string>;
 
 class DLLExport ConvFitModel : public IndirectFittingModel {
@@ -48,7 +50,8 @@ private:
   Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
-  std::string singleFitOutputName(DatasetIndex index, WorkspaceIndex spectrum) const override;
+  std::string singleFitOutputName(DatasetIndex index,
+                                  WorkspaceIndex spectrum) const override;
   Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(DatasetIndex index) const override;
@@ -78,7 +81,8 @@ private:
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData *fitData, WorkspaceIndex spectrum) const override;
+                 IndirectFitData *fitData,
+                 WorkspaceIndex spectrum) const override;
   void addExtendedResolution(DatasetIndex index);
   void addSampleLogs();
 

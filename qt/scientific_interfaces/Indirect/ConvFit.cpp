@@ -45,7 +45,8 @@ ConvFit::ConvFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(
+      new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
   auto dataPresenter = std::make_unique<ConvFitDataPresenter>(
       m_convFittingModel, m_uiForm->fitDataView);
@@ -60,7 +61,7 @@ ConvFit::ConvFit(QWidget *parent)
 }
 
 void ConvFit::setupFitTab() {
-  //setDefaultPeakType("Lorentzian");
+  // setDefaultPeakType("Lorentzian");
   setConvolveMembers(true);
 
   // Initialise fitTypeStrings
@@ -91,27 +92,27 @@ void ConvFit::setupFitTab() {
 
   auto deltaFunction = functionFactory.createFunction("DeltaFunction");
 
-  //addCheckBoxFunctionGroup("Use Delta Function", {deltaFunction});
+  // addCheckBoxFunctionGroup("Use Delta Function", {deltaFunction});
 
-  //addComboBoxFunctionGroup("One Lorentzian", {lorentzian});
-  //addComboBoxFunctionGroup("Two Lorentzians", {lorentzian, lorentzian});
-  //addComboBoxFunctionGroup("Teixeira Water", {teixeiraWater});
-  //addComboBoxFunctionGroup("InelasticDiffSphere", {inelasticDiffSphere});
-  //addComboBoxFunctionGroup("InelasticDiffRotDiscreteCircle",
+  // addComboBoxFunctionGroup("One Lorentzian", {lorentzian});
+  // addComboBoxFunctionGroup("Two Lorentzians", {lorentzian, lorentzian});
+  // addComboBoxFunctionGroup("Teixeira Water", {teixeiraWater});
+  // addComboBoxFunctionGroup("InelasticDiffSphere", {inelasticDiffSphere});
+  // addComboBoxFunctionGroup("InelasticDiffRotDiscreteCircle",
   //                         {inelasticDiffRotDiscCircle});
-  //addComboBoxFunctionGroup("ElasticDiffSphere", {elasticDiffSphere});
-  //addComboBoxFunctionGroup("ElasticDiffRotDiscreteCircle",
+  // addComboBoxFunctionGroup("ElasticDiffSphere", {elasticDiffSphere});
+  // addComboBoxFunctionGroup("ElasticDiffRotDiscreteCircle",
   //                         {elasticDiffRotDiscCircle});
-  //addComboBoxFunctionGroup("StretchedExpFT", {stretchedExpFT});
+  // addComboBoxFunctionGroup("StretchedExpFT", {stretchedExpFT});
 
   //// Set available background options
-  //setBackgroundOptions({"None", "FlatBackground", "LinearBackground"});
+  // setBackgroundOptions({"None", "FlatBackground", "LinearBackground"});
 
-  //addBoolCustomSetting("ExtractMembers", "Extract Members");
-  //addOptionalDoubleSetting("TempCorrection", "Temp. Correction",
+  // addBoolCustomSetting("ExtractMembers", "Extract Members");
+  // addOptionalDoubleSetting("TempCorrection", "Temp. Correction",
   //                         "UseTempCorrection", "Use Temp. Correction");
-  //setCustomSettingChangesFunction("TempCorrection", true);
-  //setCustomSettingChangesFunction("UseTempCorrection", true);
+  // setCustomSettingChangesFunction("TempCorrection", true);
+  // setCustomSettingChangesFunction("UseTempCorrection", true);
 
   // Instrument resolution
   m_properties["InstrumentResolution"] =
@@ -123,11 +124,11 @@ void ConvFit::setupFitTab() {
 }
 
 void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  //if (boolSettingValue("UseTempCorrection"))
+  // if (boolSettingValue("UseTempCorrection"))
   //  m_convFittingModel->setTemperature(doubleSettingValue("TempCorrection"));
-  //else
+  // else
   //  m_convFittingModel->setTemperature(boost::none);
-  //fitAlgorithm->setProperty("ExtractMembers",
+  // fitAlgorithm->setProperty("ExtractMembers",
   //                          boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }

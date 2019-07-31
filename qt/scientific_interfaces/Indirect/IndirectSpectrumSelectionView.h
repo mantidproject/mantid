@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
 
-#include "ui_IndirectSpectrumSelector.h"
 #include "IndexTypes.h"
+#include "ui_IndirectSpectrumSelector.h"
 
 #include "DllConfig.h"
 #include "MantidKernel/System.h"

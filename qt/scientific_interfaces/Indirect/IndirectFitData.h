@@ -42,13 +42,19 @@ public:
   SpectrumRowIndex size() const;
   std::string getString() const;
   std::pair<WorkspaceIndex, WorkspaceIndex> getMinMax() const;
-  WorkspaceIndex front() const {return m_vec.front();}
-  WorkspaceIndex back() const {return m_vec.back();}
+  WorkspaceIndex front() const { return m_vec.front(); }
+  WorkspaceIndex back() const { return m_vec.back(); }
   std::vector<WorkspaceIndex>::iterator begin() { return m_vec.begin(); }
   std::vector<WorkspaceIndex>::iterator end() { return m_vec.end(); }
-  std::vector<WorkspaceIndex>::const_iterator begin() const { return m_vec.begin(); }
-  std::vector<WorkspaceIndex>::const_iterator end() const { return m_vec.end(); }
-  const WorkspaceIndex &operator[](SpectrumRowIndex index) const { return m_vec[index.value]; }
+  std::vector<WorkspaceIndex>::const_iterator begin() const {
+    return m_vec.begin();
+  }
+  std::vector<WorkspaceIndex>::const_iterator end() const {
+    return m_vec.end();
+  }
+  const WorkspaceIndex &operator[](SpectrumRowIndex index) const {
+    return m_vec[index.value];
+  }
   bool operator==(Spectra const &spec) const;
   bool isContinuous() const;
   SpectrumRowIndex indexOf(WorkspaceIndex i) const;
@@ -73,13 +79,11 @@ private:
   F m_functor;
 };
 
-template <typename F>
-struct ApplyEnumeratedSpectra {
+template <typename F> struct ApplyEnumeratedSpectra {
   ApplyEnumeratedSpectra(F &&functor, WorkspaceIndex start = 0)
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
-  WorkspaceIndex
-  operator()(const Spectra &spectra) const {
+  WorkspaceIndex operator()(const Spectra &spectra) const {
     auto i = m_start;
     for (const auto &spectrum : spectra)
       m_functor(i++, spectrum);
@@ -91,12 +95,11 @@ private:
   F m_functor;
 };
 
-template<class T>
+template <class T>
 std::vector<T> vectorFromString(const std::string &listString) {
   try {
     return Mantid::Kernel::ArrayProperty<T>("vector", listString);
-  }
-  catch (const std::runtime_error &) {
+  } catch (const std::runtime_error &) {
     return std::vector<T>();
   }
 }
@@ -114,7 +117,7 @@ public:
   std::string displayName(const std::string &formatString,
                           const std::string &rangeDelimiter) const;
   std::string displayName(const std::string &formatString,
-    WorkspaceIndex spectrum) const;
+                          WorkspaceIndex spectrum) const;
   std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
@@ -133,8 +136,11 @@ public:
   }
 
   template <typename F>
-  WorkspaceIndex applyEnumeratedSpectra(F &&functor, WorkspaceIndex start = WorkspaceIndex{0}) const {
-    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor), start)(m_spectra);
+  WorkspaceIndex
+  applyEnumeratedSpectra(F &&functor,
+                         WorkspaceIndex start = WorkspaceIndex{0}) const {
+    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor),
+                                     start)(m_spectra);
   }
 
   void setSpectra(std::string const &spectra);
@@ -145,7 +151,7 @@ public:
   void setEndX(double const &endX, WorkspaceIndex const &spectrum);
   void setEndX(double const &endX);
   void setExcludeRegionString(std::string const &excludeRegion,
-    WorkspaceIndex const &spectrum);
+                              WorkspaceIndex const &spectrum);
 
 private:
   void validateSpectra(Spectra const &spectra);

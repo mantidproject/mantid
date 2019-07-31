@@ -117,8 +117,8 @@ namespace IDA {
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
     IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
-    : QObject(nullptr), m_model(model), m_view(view), m_activeIndex{0},
-      m_maskIndex{0} {
+    : QObject(nullptr), m_model(model),
+      m_view(view), m_activeIndex{0}, m_maskIndex{0} {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
           this, SLOT(updateSpectraList(const std::string &)));
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
@@ -139,7 +139,8 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
           SLOT(displayBinMask()));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SIGNAL(maskChanged(const std::string &)));
-  connect(m_view.get(), SIGNAL(spectraSelectionWidgetChanged(int)), this, SLOT(initSpectraSelectionWidget(int)));
+  connect(m_view.get(), SIGNAL(spectraSelectionWidgetChanged(int)), this,
+          SLOT(initSpectraSelectionWidget(int)));
 
   m_view->setSpectraRegex(Regexes::SPECTRA_LIST);
   m_view->setMaskBinsRegex(Regexes::MASK_LIST);
@@ -157,12 +158,11 @@ void IndirectSpectrumSelectionPresenter::enableView() {
   m_view->setEnabled(true);
 }
 
-void IndirectSpectrumSelectionPresenter::initSpectraSelectionWidget(int index)
-{
+void IndirectSpectrumSelectionPresenter::initSpectraSelectionWidget(int index) {
   auto spectra = m_model->getSpectra(m_activeIndex);
   if (index == 0) {
     m_view->displaySpectra(spectra.getMinMax());
-  }  else {
+  } else {
     m_view->displaySpectra(spectra.getString());
   }
 }
@@ -190,8 +190,8 @@ void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
   updateSpectra();
 }
 
-void IndirectSpectrumSelectionPresenter::setSpectraRange(WorkspaceIndex minimum,
-                                                         WorkspaceIndex maximum) {
+void IndirectSpectrumSelectionPresenter::setSpectraRange(
+    WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_view->setSpectraRange(minimum, maximum);
 }
 
@@ -211,13 +211,12 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     std::string const &spectraList) {
-  setModelSpectra(
-      Spectra(createSpectraString(spectraList)));
+  setModelSpectra(Spectra(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
-  WorkspaceIndex minimum, WorkspaceIndex maximum) {
+    WorkspaceIndex minimum, WorkspaceIndex maximum) {
   setModelSpectra(Spectra(minimum, maximum));
   emit spectraChanged(m_activeIndex);
 }
@@ -227,7 +226,8 @@ void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
   if (m_spectraError.empty()) {
     auto const intVec = vectorFromString<int>(spectra);
     std::vector<WorkspaceIndex> vec(intVec.size());
-    std::transform(intVec.begin(), intVec.end(), vec.begin(), [](int i){return WorkspaceIndex{i};});
+    std::transform(intVec.begin(), intVec.end(), vec.begin(),
+                   [](int i) { return WorkspaceIndex{i}; });
     m_view->setMaskSpectraList(vec);
   } else
     m_view->setMaskSpectraList({});

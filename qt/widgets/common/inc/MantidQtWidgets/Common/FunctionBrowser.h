@@ -106,8 +106,9 @@ public:
   IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
   void updateMultiDatasetParameters(const IFunction &fun) override;
-  /// Update parameter values in the browser to match those in a table workspace.
-  void updateMultiDatasetParameters(const ITableWorkspace & paramTable) override;
+  /// Update parameter values in the browser to match those in a table
+  /// workspace.
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   /// Get the index of the current dataset.
   int getCurrentDataset() const override;
   /// Resize the browser's columns

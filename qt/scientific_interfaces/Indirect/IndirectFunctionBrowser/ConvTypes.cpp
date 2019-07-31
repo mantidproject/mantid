@@ -9,18 +9,19 @@ namespace ConvTypes {
 
 using namespace Mantid::API;
 
-std::map<ParamID, QString> g_paramName{{ParamID::LOR1_AMPLITUDE, "Amplitude"},
-                                       {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
-                                       {ParamID::LOR1_FWHM, "FWHM"},
-                                       {ParamID::LOR2_AMPLITUDE_1, "Amplitude"},
-                                       {ParamID::LOR2_PEAKCENTRE_1, "PeakCentre"},
-                                       {ParamID::LOR2_FWHM_1, "FWHM"},
-                                       {ParamID::LOR2_AMPLITUDE_2, "Amplitude"},
-                                       {ParamID::LOR2_PEAKCENTRE_2, "PeakCentre"},
-                                       {ParamID::LOR2_FWHM_2, "FWHM"},
-                                       {ParamID::FLAT_BG_A0, "A0"},
-                                       {ParamID::LINEAR_BG_A0, "A0"},
-                                       {ParamID::LINEAR_BG_A1, "A1"}};
+std::map<ParamID, QString> g_paramName{
+    {ParamID::LOR1_AMPLITUDE, "Amplitude"},
+    {ParamID::LOR1_PEAKCENTRE, "PeakCentre"},
+    {ParamID::LOR1_FWHM, "FWHM"},
+    {ParamID::LOR2_AMPLITUDE_1, "Amplitude"},
+    {ParamID::LOR2_PEAKCENTRE_1, "PeakCentre"},
+    {ParamID::LOR2_FWHM_1, "FWHM"},
+    {ParamID::LOR2_AMPLITUDE_2, "Amplitude"},
+    {ParamID::LOR2_PEAKCENTRE_2, "PeakCentre"},
+    {ParamID::LOR2_FWHM_2, "FWHM"},
+    {ParamID::FLAT_BG_A0, "A0"},
+    {ParamID::LINEAR_BG_A0, "A0"},
+    {ParamID::LINEAR_BG_A1, "A1"}};
 
 std::map<FitType, TemplateSubTypeDescriptor> FitSubType::g_typeMap{
     {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
@@ -34,17 +35,18 @@ std::map<FitType, TemplateSubTypeDescriptor> FitSubType::g_typeMap{
       {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1, ParamID::LOR2_FWHM_2}}},
 };
 
-std::map<BackgroundType, TemplateSubTypeDescriptor> BackgroundSubType::g_typeMap{
-    {BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
-    {BackgroundType::Flat,
-     {"FlatBackground",
-      "FlatBackground",
-      {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
-    {BackgroundType::Linear,
-     {"LinearBackground",
-      "LinearBackground",
-      {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
-};
+std::map<BackgroundType, TemplateSubTypeDescriptor>
+    BackgroundSubType::g_typeMap{
+        {BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {BackgroundType::Flat,
+         {"FlatBackground",
+          "FlatBackground",
+          {ParamID::FLAT_BG_A0, ParamID::FLAT_BG_A0}}},
+        {BackgroundType::Linear,
+         {"LinearBackground",
+          "LinearBackground",
+          {ParamID::LINEAR_BG_A0, ParamID::LINEAR_BG_A1}}},
+    };
 
 QString paramName(ParamID id) { return g_paramName.at(id); }
 

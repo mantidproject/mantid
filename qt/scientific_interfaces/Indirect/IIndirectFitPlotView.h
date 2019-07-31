@@ -36,9 +36,9 @@ public:
 
   virtual void setAvailableSpectra(WorkspaceIndex minimum,
                                    WorkspaceIndex maximum) = 0;
-  virtual void
-  setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
-                      const std::vector<WorkspaceIndex>::const_iterator &to) = 0;
+  virtual void setAvailableSpectra(
+      const std::vector<WorkspaceIndex>::const_iterator &from,
+      const std::vector<WorkspaceIndex>::const_iterator &to) = 0;
 
   virtual void setMinimumSpectrum(int minimum) = 0;
   virtual void setMaximumSpectrum(int maximum) = 0;

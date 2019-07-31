@@ -189,7 +189,7 @@ public:
   void
   test_that_setResolution_will_throw_when_provided_the_name_of_a_workspace_which_does_not_exist() {
     TS_ASSERT_THROWS(m_model->setResolution("InvalidName", DatasetIndex{0}),
-                     const std::runtime_error&);
+                     const std::runtime_error &);
   }
 
   void

@@ -9,8 +9,8 @@
 
 #include "DllConfig.h"
 
-#include "IndirectFitPlotModel.h"
 #include "IndexTypes.h"
+#include "IndirectFitPlotModel.h"
 
 #include "IIndirectFitPlotView.h"
 #include "LazyAsyncRunner.h"
@@ -29,7 +29,8 @@ public:
   WorkspaceIndex getSelectedSpectrum() const;
   SpectrumRowIndex getSelectedSpectrumIndex() const;
   SpectrumRowIndex getSelectedDomainIndex() const;
-  bool isCurrentlySelected(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  bool isCurrentlySelected(DatasetIndex dataIndex,
+                           WorkspaceIndex spectrum) const;
 
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);

@@ -341,7 +341,9 @@ void IqtTemplateBrowser::updateParameterEstimationData(
   m_presenter.updateParameterEstimationData(std::move(data));
 }
 
-void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
+void IqtTemplateBrowser::setBackgroundA0(double value) {
+  m_presenter.setBackgroundA0(value);
+}
 
 void IqtTemplateBrowser::popupMenu(const QPoint &) {
   std::cerr << "Popup" << std::endl;

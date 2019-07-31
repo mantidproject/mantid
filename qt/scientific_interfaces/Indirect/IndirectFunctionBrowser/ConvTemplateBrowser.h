@@ -7,10 +7,10 @@
 #ifndef INDIRECT_CONVTEMPLATEBROWSER_H_
 #define INDIRECT_CONVTEMPLATEBROWSER_H_
 
+#include "ConvTemplatePresenter.h"
 #include "ConvTypes.h"
 #include "DllConfig.h"
 #include "FunctionTemplateBrowser.h"
-#include "ConvTemplatePresenter.h"
 
 #include <QMap>
 #include <QWidget>
@@ -27,7 +27,8 @@ using namespace ConvTypes;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser : public FunctionTemplateBrowser {
+class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser
+    : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
   ConvTemplateBrowser(QWidget *parent = nullptr);
@@ -40,8 +41,8 @@ public:
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;
-  void updateMultiDatasetParameters(const IFunction & fun) override;
-  void updateMultiDatasetParameters(const ITableWorkspace & paramTable) override;
+  void updateMultiDatasetParameters(const IFunction &fun) override;
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
@@ -50,9 +51,10 @@ public:
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
-  void setResolution(std::string const &name, DatasetIndex const &index) override;
+  void setResolution(std::string const &name,
+                     DatasetIndex const &index) override;
 
- protected slots:
+protected slots:
   void intChanged(QtProperty *) override;
   void boolChanged(QtProperty *) override;
   void enumChanged(QtProperty *) override;
@@ -70,7 +72,8 @@ private:
   void setParameterValueQuiet(ParamID id, double value, double error);
 
   std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
-  // Map fit type to a list of function parameters (QtProperties for those parameters)
+  // Map fit type to a list of function parameters (QtProperties for those
+  // parameters)
   std::vector<QMap<int, QList<QtProperty *>>> m_subTypeParameters;
   std::vector<QList<QtProperty *>> m_currentSubTypeParameters;
   std::vector<QtProperty *> m_subTypeProperties;
@@ -80,7 +83,7 @@ private:
   QMap<QtProperty *, ParamID> m_parameterMap;
   QMap<ParamID, QtProperty *> m_parameterReverseMap;
   QMap<QtProperty *, QString> m_actualParameterNames;
-  QMap<QtProperty*, std::string> m_parameterDescriptions;
+  QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
   ConvTemplatePresenter m_presenter;

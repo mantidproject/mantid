@@ -22,12 +22,13 @@ using namespace MantidWidgets;
  */
 ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
     : QObject(view), m_view(view) {
-  connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this, SLOT(editLocalParameter(const QString &)));
-  connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this, SLOT(viewChangedParameterValue(const QString &, double)));
+  connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
+          SLOT(editLocalParameter(const QString &)));
+  connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
+          SLOT(viewChangedParameterValue(const QString &, double)));
 }
 
-void ConvTemplatePresenter::setSubType(size_t subTypeIndex,
-                                            int typeIndex) {
+void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   if (subTypeIndex == 0) {
     m_model.setFitType(static_cast<FitType>(typeIndex));
   } else {
@@ -40,47 +41,43 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex,
   emit functionStructureChanged();
 }
 
-void ConvTemplatePresenter::setStretchExponential(bool on)
-{
-  //if (on == m_model.hasStretchExponential()) return;
-  //if (on) {
+void ConvTemplatePresenter::setStretchExponential(bool on) {
+  // if (on == m_model.hasStretchExponential()) return;
+  // if (on) {
   //  m_view->addStretchExponential();
   //} else {
   //  m_view->removeStretchExponential();
   //}
-  //m_model.setStretchExponential(on);
-  //setErrorsEnabled(false);
-  //updateViewParameterNames();
-  //updateViewParameters();
-  //emit functionStructureChanged();
+  // m_model.setStretchExponential(on);
+  // setErrorsEnabled(false);
+  // updateViewParameterNames();
+  // updateViewParameters();
+  // emit functionStructureChanged();
 }
 
-void ConvTemplatePresenter::setNumberOfDatasets(int n)
-{
+void ConvTemplatePresenter::setNumberOfDatasets(int n) {
   m_model.setNumberDomains(n);
 }
 
-int ConvTemplatePresenter::getNumberOfDatasets() const
-{
+int ConvTemplatePresenter::getNumberOfDatasets() const {
   return m_model.getNumberDomains();
 }
 
-void ConvTemplatePresenter::setFunction(const QString & funStr)
-{
+void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
   m_view->clear();
   setErrorsEnabled(false);
-  //if (m_model.hasBackground()) {
+  // if (m_model.hasBackground()) {
   //  m_view->addFlatBackground();
   //}
-  //if (m_model.hasStretchExponential()) {
+  // if (m_model.hasStretchExponential()) {
   //  m_view->addStretchExponential();
   //}
-  //auto const nExp = m_model.getNumberOfExponentials();
-  //if (nExp > 0) {
+  // auto const nExp = m_model.getNumberOfExponentials();
+  // if (nExp > 0) {
   //  m_view->addExponentialOne();
   //}
-  //if (nExp > 1) {
+  // if (nExp > 1) {
   //  m_view->addExponentialTwo();
   //}
   updateViewParameterNames();
@@ -88,36 +85,30 @@ void ConvTemplatePresenter::setFunction(const QString & funStr)
   emit functionStructureChanged();
 }
 
-IFunction_sptr ConvTemplatePresenter::getGlobalFunction() const
-{
+IFunction_sptr ConvTemplatePresenter::getGlobalFunction() const {
   return m_model.getFitFunction();
 }
 
-IFunction_sptr ConvTemplatePresenter::getFunction() const
-{
+IFunction_sptr ConvTemplatePresenter::getFunction() const {
   return m_model.getCurrentFunction();
 }
 
-QStringList ConvTemplatePresenter::getGlobalParameters() const
-{
+QStringList ConvTemplatePresenter::getGlobalParameters() const {
   return m_model.getGlobalParameters();
 }
 
-QStringList ConvTemplatePresenter::getLocalParameters() const
-{
+QStringList ConvTemplatePresenter::getLocalParameters() const {
   return m_model.getLocalParameters();
 }
 
-void ConvTemplatePresenter::setGlobalParameters(const QStringList & globals)
-{
+void ConvTemplatePresenter::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(globals);
-  //if (m_model.hasStretchExponential()) {
+  // if (m_model.hasStretchExponential()) {
   //  m_view->setGlobalParametersQuiet(globals);
   //}
 }
 
-void ConvTemplatePresenter::setGlobal(const QString &parName, bool on)
-{
+void ConvTemplatePresenter::setGlobal(const QString &parName, bool on) {
   auto globals = m_model.getGlobalParameters();
   if (on) {
     if (!globals.contains(parName)) {
@@ -129,37 +120,32 @@ void ConvTemplatePresenter::setGlobal(const QString &parName, bool on)
   setGlobalParameters(globals);
 }
 
-void ConvTemplatePresenter::updateMultiDatasetParameters(const IFunction & fun)
-{
+void ConvTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   m_model.updateMultiDatasetParameters(fun);
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::updateMultiDatasetParameters(const ITableWorkspace & paramTable)
-{
+void ConvTemplatePresenter::updateMultiDatasetParameters(
+    const ITableWorkspace &paramTable) {
   m_model.updateMultiDatasetParameters(paramTable);
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::updateParameters(const IFunction & fun)
-{
+void ConvTemplatePresenter::updateParameters(const IFunction &fun) {
   m_model.updateParameters(fun);
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::setCurrentDataset(int i)
-{
+void ConvTemplatePresenter::setCurrentDataset(int i) {
   m_model.setCurrentDomainIndex(i);
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::setDatasetNames(const QStringList & names)
-{
+void ConvTemplatePresenter::setDatasetNames(const QStringList &names) {
   m_model.setDatasetNames(names);
 }
 
-void ConvTemplatePresenter::setErrorsEnabled(bool enabled)
-{
+void ConvTemplatePresenter::setErrorsEnabled(bool enabled) {
   m_view->setErrorsEnabled(enabled);
 }
 
@@ -168,8 +154,7 @@ void ConvTemplatePresenter::setResolution(std::string const &name,
   m_model.setResolution(name, index);
 }
 
-void ConvTemplatePresenter::updateViewParameters()
-{
+void ConvTemplatePresenter::updateViewParameters() {
   auto values = m_model.getCurrentValues();
   auto errors = m_model.getCurrentErrors();
   for (auto const id : values.keys()) {
@@ -177,49 +162,47 @@ void ConvTemplatePresenter::updateViewParameters()
   }
 }
 
-QStringList ConvTemplatePresenter::getDatasetNames() const
-{
+QStringList ConvTemplatePresenter::getDatasetNames() const {
   return m_model.getDatasetNames();
 }
 
-double ConvTemplatePresenter::getLocalParameterValue(const QString & parName, int i) const
-{
+double ConvTemplatePresenter::getLocalParameterValue(const QString &parName,
+                                                     int i) const {
   return m_model.getLocalParameterValue(parName, i);
 }
 
-bool ConvTemplatePresenter::isLocalParameterFixed(const QString & parName, int i) const
-{
+bool ConvTemplatePresenter::isLocalParameterFixed(const QString &parName,
+                                                  int i) const {
   return m_model.isLocalParameterFixed(parName, i);
 }
 
-QString ConvTemplatePresenter::getLocalParameterTie(const QString & parName, int i) const
-{
+QString ConvTemplatePresenter::getLocalParameterTie(const QString &parName,
+                                                    int i) const {
   return m_model.getLocalParameterTie(parName, i);
 }
 
 QString
 ConvTemplatePresenter::getLocalParameterConstraint(const QString &parName,
-                                                  int i) const {
+                                                   int i) const {
   return m_model.getLocalParameterConstraint(parName, i);
 }
 
-void ConvTemplatePresenter::setLocalParameterValue(const QString & parName, int i, double value)
-{
+void ConvTemplatePresenter::setLocalParameterValue(const QString &parName,
+                                                   int i, double value) {
   m_model.setLocalParameterValue(parName, i, value);
 }
 
-void ConvTemplatePresenter::setLocalParameterTie(const QString & parName, int i, const QString & tie)
-{
+void ConvTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
+                                                 const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
-void ConvTemplatePresenter::updateViewParameterNames()
-{
+void ConvTemplatePresenter::updateViewParameterNames() {
   m_view->updateParameterNames(m_model.getParameterNameMap());
 }
 
-void ConvTemplatePresenter::setLocalParameterFixed(const QString & parName, int i, bool fixed)
-{
+void ConvTemplatePresenter::setLocalParameterFixed(const QString &parName,
+                                                   int i, bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
@@ -242,9 +225,9 @@ void ConvTemplatePresenter::editLocalParameter(const QString &parName) {
   }
 
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-    m_view, parName, wsNames, values, fixes, ties, constraints);
+      m_view, parName, wsNames, values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
-    SLOT(editLocalParameterFinish(int)));
+          SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();
 }
 
@@ -259,11 +242,9 @@ void ConvTemplatePresenter::editLocalParameterFinish(int result) {
       setLocalParameterValue(parName, i, values[i]);
       if (!ties[i].isEmpty()) {
         setLocalParameterTie(parName, i, ties[i]);
-      }
-      else if (fixes[i]) {
+      } else if (fixes[i]) {
         setLocalParameterFixed(parName, i, fixes[i]);
-      }
-      else {
+      } else {
         setLocalParameterTie(parName, i, "");
       }
     }
@@ -273,9 +254,10 @@ void ConvTemplatePresenter::editLocalParameterFinish(int result) {
   emit functionStructureChanged();
 }
 
-void ConvTemplatePresenter::viewChangedParameterValue(const QString & parName, double value)
-{
-  if (parName.isEmpty()) return;
+void ConvTemplatePresenter::viewChangedParameterValue(const QString &parName,
+                                                      double value) {
+  if (parName.isEmpty())
+    return;
   if (m_model.isGlobal(parName)) {
     auto const n = getNumberOfDatasets();
     for (int i = 0; i < n; ++i) {

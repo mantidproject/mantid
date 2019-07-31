@@ -79,7 +79,6 @@ public:
     TS_ASSERT(m_model->getSpectrumDependentAttributes().empty());
   }
 
-
 private:
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;

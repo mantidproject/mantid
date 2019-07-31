@@ -64,7 +64,8 @@ public:
                               double error);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, QString tie);
-  void setLocalParameterConstraint(const QString &parName, int i, QString constraint);
+  void setLocalParameterConstraint(const QString &parName, int i,
+                                   QString constraint);
   QStringList getGlobalParameters() const;
   void setGlobalParameters(const QStringList &globals);
   QStringList getLocalParameters() const;

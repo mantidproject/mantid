@@ -54,8 +54,8 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setupFitTab() {
-  //setSampleWSSuffices({"_iqt"});
-  //setSampleFBSuffices({"_iqt.nxs"});
+  // setSampleWSSuffices({"_iqt"});
+  // setSampleFBSuffices({"_iqt.nxs"});
 
   // Create custom function groups
   auto &functionFactory = FunctionFactory::Instance();
@@ -95,7 +95,7 @@ std::string IqtFit::fitTypeString() const {
 }
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  //fitAlgorithm->setProperty("ExtractMembers",
+  // fitAlgorithm->setProperty("ExtractMembers",
   //                          boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }

@@ -20,7 +20,7 @@ public:
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(DatasetIndex index,
-    WorkspaceIndex spectrum) const override;
+                                  WorkspaceIndex spectrum) const override;
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
 

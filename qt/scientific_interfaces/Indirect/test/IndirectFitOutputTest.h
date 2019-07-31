@@ -296,7 +296,8 @@ public:
                       data2.get(), IDAWorkspaceIndex{0});
     output->removeOutput(data2.get());
 
-    TS_ASSERT(!output->getParameters(m_fitData.get(), IDAWorkspaceIndex{0}).empty());
+    TS_ASSERT(
+        !output->getParameters(m_fitData.get(), IDAWorkspaceIndex{0}).empty());
     TS_ASSERT(output->getParameters(data2.get(), IDAWorkspaceIndex{0}).empty());
   }
 

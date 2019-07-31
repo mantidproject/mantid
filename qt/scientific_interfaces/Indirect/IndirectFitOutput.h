@@ -34,12 +34,11 @@ struct ResultLocation {
   ResultLocation(Mantid::API::WorkspaceGroup_sptr group, GroupIndex i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
-  GroupIndex index = GroupIndex{ 0 };
+  GroupIndex index = GroupIndex{0};
 };
 
 using ParameterValues =
-    std::map<WorkspaceIndex,
-                       std::unordered_map<std::string, ParameterValue>>;
+    std::map<WorkspaceIndex, std::unordered_map<std::string, ParameterValue>>;
 
 using ResultLocations = std::map<WorkspaceIndex, ResultLocation>;
 
@@ -63,13 +62,15 @@ public:
                     Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                     IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
-  bool isSpectrumFit(IndirectFitData const *fitData, WorkspaceIndex spectrum) const;
+  bool isSpectrumFit(IndirectFitData const *fitData,
+                     WorkspaceIndex spectrum) const;
 
   std::unordered_map<std::string, ParameterValue>
   getParameters(IndirectFitData const *fitData, WorkspaceIndex spectrum) const;
 
   boost::optional<ResultLocation>
-  getResultLocation(IndirectFitData const *fitData, WorkspaceIndex spectrum) const;
+  getResultLocation(IndirectFitData const *fitData,
+                    WorkspaceIndex spectrum) const;
   std::vector<std::string> getResultParameterNames() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const;

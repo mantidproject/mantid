@@ -87,7 +87,7 @@ void FunctionMultiDomainPresenter::setParameter(const QString &paramName,
 }
 
 void FunctionMultiDomainPresenter::setParameterError(const QString &paramName,
-                                                 double value) {
+                                                     double value) {
   m_model->setParameterError(paramName, value);
   m_view->setParameterError(paramName, value);
 }

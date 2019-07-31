@@ -472,9 +472,7 @@ public:
   }
 
   void test_that_the_endXChanged_signal_will_set_the_fitting_models_endX() {
-    EXPECT_CALL(*m_fittingModel,
-                setEndX(2.0, DatasetIndex{0}))
-        .Times(1);
+    EXPECT_CALL(*m_fittingModel, setEndX(2.0, DatasetIndex{0})).Times(1);
     m_view->emitEndXChanged(2.0);
   }
 
@@ -524,8 +522,8 @@ public:
   void
   test_that_isCurrentlySelected_returns_true_if_the_index_and_spectrum_given_are_selected() {
     m_view->emitSelectedFitDataChanged(DatasetIndex{2});
-    TS_ASSERT(
-        m_presenter->isCurrentlySelected(DatasetIndex{2}, IDAWorkspaceIndex{0}));
+    TS_ASSERT(m_presenter->isCurrentlySelected(DatasetIndex{2},
+                                               IDAWorkspaceIndex{0}));
   }
 
   void
@@ -589,8 +587,10 @@ public:
   test_that_appendLastDataToSelection_will_set_the_name_of_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_equal() {
     DatasetIndex const index{1};
 
-    ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(DatasetIndex{2}));
-    ON_CALL(*m_fittingModel, numberOfWorkspaces()).WillByDefault(Return(DatasetIndex{2}));
+    ON_CALL(*m_view, dataSelectionSize())
+        .WillByDefault(Return(DatasetIndex{2}));
+    ON_CALL(*m_fittingModel, numberOfWorkspaces())
+        .WillByDefault(Return(DatasetIndex{2}));
     ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
         .WillByDefault(Return("DisplayName-1"));
     ON_CALL(*m_fittingModel, getWorkspace(index))
@@ -610,7 +610,8 @@ public:
   test_that_appendLastDataToSelection_will_add_to_the_data_selection_if_the_dataSelectionSize_and_numberOfWorkspaces_are_not_equal() {
     DatasetIndex const index{1};
 
-    ON_CALL(*m_view, dataSelectionSize()).WillByDefault(Return(DatasetIndex{1}));
+    ON_CALL(*m_view, dataSelectionSize())
+        .WillByDefault(Return(DatasetIndex{1}));
     ON_CALL(*m_fittingModel, numberOfWorkspaces())
         .WillByDefault(Return(DatasetIndex{2}));
     ON_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
@@ -640,7 +641,8 @@ public:
     Expectation createName =
         EXPECT_CALL(*m_fittingModel, createDisplayName("%1% (%2%)", "-", index))
             .Times(1);
-    EXPECT_CALL(*m_view, setNameInDataSelection("DisplayName-1", DatasetIndex{0}))
+    EXPECT_CALL(*m_view,
+                setNameInDataSelection("DisplayName-1", DatasetIndex{0}))
         .Times(1)
         .After(createName);
 

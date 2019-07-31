@@ -8,8 +8,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -114,7 +114,7 @@ namespace IDA {
 using namespace Mantid::API;
 
 IndirectFitPlotModel::IndirectFitPlotModel(IndirectFittingModel *fittingModel)
-  : m_fittingModel(fittingModel), m_activeIndex{0}, m_activeSpectrum{0} {}
+    : m_fittingModel(fittingModel), m_activeIndex{0}, m_activeSpectrum{0} {}
 
 IndirectFitPlotModel::~IndirectFitPlotModel() {
   deleteExternalGuessWorkspace();
@@ -139,8 +139,8 @@ void IndirectFitPlotModel::setEndX(double endX) {
 }
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
-  //m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
-  //setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
+  // m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
+  // setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
   //                      fwhm);
 }
 
@@ -188,18 +188,18 @@ DatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-SpectrumRowIndex IndirectFitPlotModel::getActiveDomainIndex() const
-{
-  SpectrumRowIndex index{ 0 };
+SpectrumRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
+  SpectrumRowIndex index{0};
   for (DatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
     if (iws < m_activeIndex) {
-      index += SpectrumRowIndex{ m_fittingModel->getNumberOfSpectra(iws) };
+      index += SpectrumRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
     } else {
       auto const spectra = m_fittingModel->getSpectra(iws);
       try {
         index += spectra.indexOf(m_activeSpectrum);
       } catch (const std::runtime_error &) {
-        if (m_activeSpectrum.value != 0) throw;
+        if (m_activeSpectrum.value != 0)
+          throw;
       }
       break;
     }
@@ -290,9 +290,9 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
 MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
     MatrixWorkspace_sptr guessWorkspace) const {
   const auto range = getRange();
-  return createInputAndGuessWorkspace(
-      getWorkspace(), guessWorkspace,
-      m_activeSpectrum.value, range.first, range.second);
+  return createInputAndGuessWorkspace(getWorkspace(), guessWorkspace,
+                                      m_activeSpectrum.value, range.first,
+                                      range.second);
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(

@@ -19,8 +19,7 @@ namespace IDA {
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-namespace {
-}
+namespace {}
 
 ConvFunctionModel::ConvFunctionModel() {}
 
@@ -199,9 +198,7 @@ void ConvFunctionModel::setDeltaFunction(bool on) {
   setCurrentValues(oldValues);
 }
 
-bool ConvFunctionModel::hasDeltaFunction() const {
-  return m_hasDeltaFunction;
-}
+bool ConvFunctionModel::hasDeltaFunction() const { return m_hasDeltaFunction; }
 
 void ConvFunctionModel::setBackground(BackgroundType bgType) {
   auto oldValues = getCurrentValues();
@@ -236,7 +233,9 @@ void ConvFunctionModel::setResolution(std::string const &name,
 
 QString ConvFunctionModel::setBackgroundA0(double value) {
   if (hasBackground()) {
-    auto const paramID = (m_backgroundType == BackgroundType::Flat) ? ParamID::FLAT_BG_A0 : ParamID::LINEAR_BG_A0;
+    auto const paramID = (m_backgroundType == BackgroundType::Flat)
+                             ? ParamID::FLAT_BG_A0
+                             : ParamID::LINEAR_BG_A0;
     setParameter(paramID, value);
     return *getParameterName(paramID);
   }
@@ -347,7 +346,7 @@ void ConvFunctionModel::setFitType(FitType fitType) {
   setCurrentValues(oldValues);
 }
 
-int ConvFunctionModel::getNumberOfPeaks() const { 
+int ConvFunctionModel::getNumberOfPeaks() const {
   if (m_fitType == FitType::None)
     return 0;
   if (m_fitType == FitType::TwoLorentzians)
@@ -517,8 +516,7 @@ boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
   }
 }
 
-QMap<ParamID, double>
-ConvFunctionModel::getCurrentValues() const {
+QMap<ParamID, double> ConvFunctionModel::getCurrentValues() const {
   QMap<ParamID, double> values;
   auto store = [&values, this](ParamID name) {
     values[name] = *getParameter(name);
@@ -527,8 +525,7 @@ ConvFunctionModel::getCurrentValues() const {
   return values;
 }
 
-QMap<ParamID, double>
-ConvFunctionModel::getCurrentErrors() const {
+QMap<ParamID, double> ConvFunctionModel::getCurrentErrors() const {
   QMap<ParamID, double> errors;
   auto store = [&errors, this](ParamID name) {
     errors[name] = *getParameterError(name);
@@ -582,7 +579,7 @@ std::string ConvFunctionModel::buildBackgroundFunctionString() const {
          ",A0=0,constraints=(A0>0)";
 }
 
-//void ConvFunctionModel::estimateStretchExpParameters() {
+// void ConvFunctionModel::estimateStretchExpParameters() {
 //  auto const heightName = getParameterName(ParamID::STRETCH_HEIGHT);
 //  auto const lifeTimeName = getParameterName(ParamID::STRETCH_LIFETIME);
 //  auto const stretchingName = getParameterName(ParamID::STRETCH_STRETCHING);

@@ -31,7 +31,8 @@ public:
 
 protected slots:
   void setModelResolution(const std::string &resolutionName);
-  void setModelResolution(const std::string &resolutionName, DatasetIndex index);
+  void setModelResolution(const std::string &resolutionName,
+                          DatasetIndex index);
   void runClicked();
   void fitFunctionChanged();
 

@@ -42,12 +42,14 @@ int ConvFitDataTablePresenter::endXColumn() const { return 4; }
 
 int ConvFitDataTablePresenter::excludeColumn() const { return 5; }
 
-std::string ConvFitDataTablePresenter::getResolutionName(SpectrumRowIndex row) const {
+std::string
+ConvFitDataTablePresenter::getResolutionName(SpectrumRowIndex row) const {
   return getString(row, 1);
 }
 
 void ConvFitDataTablePresenter::addTableEntry(DatasetIndex dataIndex,
-                                              WorkspaceIndex spectrum, SpectrumRowIndex row) {
+                                              WorkspaceIndex spectrum,
+                                              SpectrumRowIndex row) {
   IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
 
   const auto resolution = m_convFitModel->getResolution(dataIndex);

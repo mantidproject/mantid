@@ -102,8 +102,8 @@ private:
   CollectionImplementationType m_collection;
 };
 
+} // namespace IDA
 } // namespace CustomInterfaces
-} // namespace MantidQt
 } // namespace MantidQt
 
 template <int i>

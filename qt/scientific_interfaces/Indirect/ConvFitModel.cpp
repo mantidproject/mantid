@@ -7,8 +7,8 @@
 #include "ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <boost/algorithm/string/join.hpp>
@@ -376,7 +376,8 @@ private:
 };
 
 std::vector<std::string>
-getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType &workspaces) {
+getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType
+             &workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size().value);
   std::transform(workspaces.begin(), workspaces.end(),
@@ -469,8 +470,9 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
-  return createOutputName(
-      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", DatasetIndex{0});
+  return createOutputName("%1%_conv_" + m_fitType + m_backgroundString +
+                              "_s%2%",
+                          "_to_", DatasetIndex{0});
 }
 
 std::string ConvFitModel::simultaneousFitOutputName() const {
@@ -478,20 +480,20 @@ std::string ConvFitModel::simultaneousFitOutputName() const {
 }
 
 std::string ConvFitModel::singleFitOutputName(DatasetIndex index,
-  WorkspaceIndex spectrum) const {
+                                              WorkspaceIndex spectrum) const {
   return createSingleFitOutputName("%1%_conv_" + m_fitType +
                                        m_backgroundString + "_s%2%_Results",
                                    index, spectrum);
 }
 
 Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
-  //auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
-  //auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  // auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
+  // auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
 
-  //IFunction_sptr background(nullptr);
-  //if (composite && m_backgroundIndex)
+  // IFunction_sptr background(nullptr);
+  // if (composite && m_backgroundIndex)
   //  background = removeFunction(composite, *m_backgroundIndex);
-  //return createConvolutionFitModel(function, background, m_temperature);
+  // return createConvolutionFitModel(function, background, m_temperature);
   return IndirectFittingModel::getFittingFunction();
 }
 
@@ -529,15 +531,15 @@ std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
 }
 
 void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) {
-  //auto const composite =
+  // auto const composite =
   //    boost::dynamic_pointer_cast<CompositeFunction>(function);
-  //m_backgroundIndex = getFirstInCategory(composite, "Background");
-  //setParameterNameChanges(*function, m_backgroundIndex);
+  // m_backgroundIndex = getFirstInCategory(composite, "Background");
+  // setParameterNameChanges(*function, m_backgroundIndex);
 
-  //IFunction_sptr background(nullptr);
-  //if (composite && m_backgroundIndex)
+  // IFunction_sptr background(nullptr);
+  // if (composite && m_backgroundIndex)
   //  background = composite->getFunction(*m_backgroundIndex);
-  //m_backgroundString = background ? backgroundString(background) : "";
+  // m_backgroundString = background ? backgroundString(background) : "";
 
   IndirectFittingModel::setFitFunction(function);
 }
@@ -587,7 +589,8 @@ void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
     m_resolution.emplace_back(resolution);
   else
     throw std::out_of_range("Provided resolution index '" +
-                            std::to_string(index.value) + "' was out of range.");
+                            std::to_string(index.value) +
+                            "' was out of range.");
 
   if (numberOfWorkspaces() > index)
     addExtendedResolution(index);

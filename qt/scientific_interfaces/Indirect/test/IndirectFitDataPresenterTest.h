@@ -110,7 +110,7 @@ public:
 
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
   MOCK_CONST_METHOD2(getDomainIndex,
-               SpectrumRowIndex(DatasetIndex, IDAWorkspaceIndex));
+                     SpectrumRowIndex(DatasetIndex, IDAWorkspaceIndex));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };

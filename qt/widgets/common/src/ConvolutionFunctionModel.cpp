@@ -23,23 +23,24 @@ using namespace Mantid::API;
 
 namespace {
 
-bool isConvolution(const IFunction_sptr& fun) {
+bool isConvolution(const IFunction_sptr &fun) {
   return fun->name() == "Convolution";
 }
 
-bool isResolution(const IFunction_sptr& fun) {
+bool isResolution(const IFunction_sptr &fun) {
   return fun->name() == "Resolution";
 }
 
-bool isDeltaFunction(const IFunction_sptr& fun) {
+bool isDeltaFunction(const IFunction_sptr &fun) {
   return fun->name() == "DeltaFunction";
 }
 
-bool isBackground(const IFunction_sptr& fun) {
-  return static_cast<bool>(boost::dynamic_pointer_cast<const IBackgroundFunction>(fun));
+bool isBackground(const IFunction_sptr &fun) {
+  return static_cast<bool>(
+      boost::dynamic_pointer_cast<const IBackgroundFunction>(fun));
 }
 
-}
+} // namespace
 
 void ConvolutionFunctionModel::setFunction(IFunction_sptr fun) {
   FunctionModel::setFunction(fun);
@@ -58,7 +59,8 @@ void ConvolutionFunctionModel::setModel(const std::string &background,
                 "\",WorkspaceIndex=" + std::to_string(workspaceIndex);
   auto const model = hasDeltaFunction ? "name=DeltaFunction;" + peaks : peaks;
   auto const convolution = "composite=Convolution;" + resolution + ";" + model;
-  auto const function = background.empty() ? convolution : background + ";(" + convolution + ")";
+  auto const function =
+      background.empty() ? convolution : background + ";(" + convolution + ")";
   setFunction(FunctionFactory::Instance().createInitialized(function));
 }
 
@@ -93,7 +95,8 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
       m_backgroundPrefix = QString("f%1.").arg(i);
     } else if (isConvolution(fun)) {
       if (m_convolutionPrefix) {
-        throw std::runtime_error("Model cannot have more than one convolution.");
+        throw std::runtime_error(
+            "Model cannot have more than one convolution.");
       }
       m_convolutionPrefix = QString("f%1.").arg(i);
       findConvolutionPrefixes(fun);
@@ -104,7 +107,8 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   }
 }
 
-void ConvolutionFunctionModel::findConvolutionPrefixes(const IFunction_sptr &fun) {
+void ConvolutionFunctionModel::findConvolutionPrefixes(
+    const IFunction_sptr &fun) {
   auto const nf = fun->nFunctions();
   if (nf == 0)
     return;
@@ -145,7 +149,6 @@ void ConvolutionFunctionModel::findConvolutionPrefixes(const IFunction_sptr &fun
     throw std::runtime_error("Model doesn't contain a convolution.");
   }
 }
-
 
 } // namespace MantidWidgets
 } // namespace MantidQt

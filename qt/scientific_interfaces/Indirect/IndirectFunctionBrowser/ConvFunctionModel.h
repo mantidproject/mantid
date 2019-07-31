@@ -8,8 +8,8 @@
 #define MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
 
 #include "ConvTypes.h"
-#include "IndexTypes.h"
 #include "DllConfig.h"
+#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
@@ -120,7 +120,7 @@ private:
   FunctionModel m_model;
   FitType m_fitType = FitType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
-  //std::string m_background;
+  // std::string m_background;
   bool m_hasDeltaFunction = false;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;

@@ -25,9 +25,9 @@ QWidget *LocalParameterItemDelegate::createEditor(
   auto row = index.row();
   m_currentEditor = new LocalParameterEditor(
       parent, row, owner()->getValue(row), owner()->isFixed(row),
-      owner()->getTie(row), owner()->getConstraint(row), owner()->areOthersFixed(row),
-      owner()->areAllOthersFixed(row), owner()->areOthersTied(row),
-      owner()->isLogCheckboxTicked());
+      owner()->getTie(row), owner()->getConstraint(row),
+      owner()->areOthersFixed(row), owner()->areAllOthersFixed(row),
+      owner()->areOthersTied(row), owner()->isLogCheckboxTicked());
   connect(m_currentEditor, SIGNAL(setAllValues(double)), this,
           SIGNAL(setAllValues(double)));
   connect(m_currentEditor, SIGNAL(fixParameter(int, bool)), this,

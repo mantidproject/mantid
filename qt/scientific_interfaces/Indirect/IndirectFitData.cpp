@@ -234,7 +234,7 @@ SpectrumRowIndex Spectra::indexOf(WorkspaceIndex i) const {
   return SpectrumRowIndex{static_cast<int>(std::distance(begin(), it))};
 }
 
-Spectra Spectra::combine(const Spectra &other) const { 
+Spectra Spectra::combine(const Spectra &other) const {
   std::set<WorkspaceIndex> indices(begin(), end());
   indices.insert(other.begin(), other.end());
   return Spectra(indices);
@@ -261,7 +261,8 @@ IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
                                  const Spectra &spectra)
     : m_workspace(workspace), m_spectra(Spectra("")) {
   setSpectra(spectra);
-  auto const range = !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
+  auto const range =
+      !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
   for (auto const spectrum : spectra) {
     m_ranges[spectrum] = range;
   }

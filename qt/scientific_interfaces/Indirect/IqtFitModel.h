@@ -29,7 +29,7 @@ private:
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(DatasetIndex index,
-    WorkspaceIndex spectrum) const override;
+                                  WorkspaceIndex spectrum) const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(DatasetIndex index) const override;
   Mantid::API::MultiDomainFunction_sptr

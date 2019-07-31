@@ -79,8 +79,7 @@ bool FunctionModel::hasFunction() const {
   return true;
 }
 
-void FunctionModel::addFunction(const QString &prefix,
-                                           const QString &funStr) {
+void FunctionModel::addFunction(const QString &prefix, const QString &funStr) {
   if (!hasFunction()) {
     setFunctionString(funStr);
     return;
@@ -134,8 +133,7 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
   updateGlobals();
 }
 
-void FunctionModel::setParameter(const QString &paramName,
-                                            double value) {
+void FunctionModel::setParameter(const QString &paramName, double value) {
   auto fun = getCurrentFunction();
   if (!fun) {
     throw std::logic_error("Function is undefined.");
@@ -143,8 +141,7 @@ void FunctionModel::setParameter(const QString &paramName,
   fun->setParameter(paramName.toStdString(), value);
 }
 
-void FunctionModel::setParameterError(const QString &paramName,
-                                                 double value) {
+void FunctionModel::setParameterError(const QString &paramName, double value) {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
   fun->setError(index, value);
@@ -154,15 +151,13 @@ double FunctionModel::getParameter(const QString &paramName) const {
   return getCurrentFunction()->getParameter(paramName.toStdString());
 }
 
-double
-FunctionModel::getParameterError(const QString &paramName) const {
+double FunctionModel::getParameterError(const QString &paramName) const {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
   return fun->getError(index);
 }
 
-QString FunctionModel::getParameterDescription(
-    const QString &paramName) const {
+QString FunctionModel::getParameterDescription(const QString &paramName) const {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
   return QString::fromStdString(fun->parameterDescription(index));
@@ -172,19 +167,16 @@ bool FunctionModel::isParameterFixed(const QString &parName) const {
   return isLocalParameterFixed(parName, static_cast<int>(m_currentDomainIndex));
 }
 
-QString
-FunctionModel::getParameterTie(const QString &parName) const {
+QString FunctionModel::getParameterTie(const QString &parName) const {
   return getLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex));
 }
 
-void FunctionModel::setParameterFixed(const QString &parName,
-                                                 bool fixed) {
+void FunctionModel::setParameterFixed(const QString &parName, bool fixed) {
   setLocalParameterFixed(parName, static_cast<int>(m_currentDomainIndex),
                          fixed);
 }
 
-void FunctionModel::setParameterTie(const QString &parName,
-                                               QString tie) {
+void FunctionModel::setParameterTie(const QString &parName, QString tie) {
   setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
 }
 
@@ -278,19 +270,18 @@ void FunctionModel::setCurrentDomainIndex(int index) {
 }
 
 double FunctionModel::getLocalParameterValue(const QString &parName,
-                                                        int i) const {
+                                             int i) const {
   return getSingleFunction(i)->getParameter(parName.toStdString());
 }
 
-bool FunctionModel::isLocalParameterFixed(const QString &parName,
-                                                     int i) const {
+bool FunctionModel::isLocalParameterFixed(const QString &parName, int i) const {
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   return fun->isFixed(parIndex);
 }
 
 QString FunctionModel::getLocalParameterTie(const QString &parName,
-                                                       int i) const {
+                                            int i) const {
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   auto const tie = fun->getTie(parIndex);
@@ -301,9 +292,8 @@ QString FunctionModel::getLocalParameterTie(const QString &parName,
   return tieStr.mid(j + 1);
 }
 
-QString
-FunctionModel::getLocalParameterConstraint(const QString &parName,
-                                                      int i) const {
+QString FunctionModel::getLocalParameterConstraint(const QString &parName,
+                                                   int i) const {
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   auto const constraint = fun->getConstraint(parIndex);
@@ -312,22 +302,21 @@ FunctionModel::getLocalParameterConstraint(const QString &parName,
   return out;
 }
 
-void FunctionModel::setLocalParameterValue(const QString &parName,
-                                                      int i, double value) {
+void FunctionModel::setLocalParameterValue(const QString &parName, int i,
+                                           double value) {
   getSingleFunction(i)->setParameter(parName.toStdString(), value);
 }
 
-void FunctionModel::setLocalParameterValue(const QString &parName,
-                                                      int i, double value,
-                                                      double error) {
+void FunctionModel::setLocalParameterValue(const QString &parName, int i,
+                                           double value, double error) {
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   fun->setParameter(parIndex, value);
   fun->setError(parIndex, error);
 }
 
-void FunctionModel::setLocalParameterFixed(const QString &parName,
-                                                      int i, bool fixed) {
+void FunctionModel::setLocalParameterFixed(const QString &parName, int i,
+                                           bool fixed) {
   auto fun = getSingleFunction(i);
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   if (fixed) {
@@ -337,8 +326,8 @@ void FunctionModel::setLocalParameterFixed(const QString &parName,
   }
 }
 
-void FunctionModel::setLocalParameterTie(const QString &parName,
-                                                    int i, const QString &tie) {
+void FunctionModel::setLocalParameterTie(const QString &parName, int i,
+                                         const QString &tie) {
   auto logError = [&parName](const std::string &msg) {
     g_log.error() << "Tie " << parName.toStdString() << ": " << msg << '\n';
   };
@@ -358,8 +347,8 @@ void FunctionModel::setLocalParameterTie(const QString &parName,
   }
 }
 
-void FunctionModel::setLocalParameterConstraint(
-    const QString &parName, int i, const QString &constraint) {
+void FunctionModel::setLocalParameterConstraint(const QString &parName, int i,
+                                                const QString &constraint) {
   auto const parts = splitConstraintString(constraint);
   QString prefix, name;
   std::tie(prefix, name) = splitParameterName(parName);
@@ -373,8 +362,7 @@ void FunctionModel::setLocalParameterConstraint(
   }
 }
 
-void FunctionModel::changeTie(const QString &parName,
-                                         const QString &tie) {
+void FunctionModel::changeTie(const QString &parName, const QString &tie) {
   try {
     setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
   } catch (std::exception &) {
@@ -383,7 +371,7 @@ void FunctionModel::changeTie(const QString &parName,
 }
 
 void FunctionModel::addConstraint(const QString &functionIndex,
-                                             const QString &constraint) {
+                                  const QString &constraint) {
   auto fun = getFunctionWithPrefix(functionIndex, getCurrentFunction());
   fun->addConstraints(constraint.toStdString());
 }
@@ -420,8 +408,7 @@ void FunctionModel::checkIndex(int index) const {
   }
 }
 
-void FunctionModel::updateMultiDatasetParameters(
-    const IFunction &fun) {
+void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
   if (!hasFunction())
     return;
   if (m_function->nParams() != fun.nParams())

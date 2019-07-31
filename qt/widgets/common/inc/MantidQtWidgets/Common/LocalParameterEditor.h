@@ -26,8 +26,8 @@ class LocalParameterEditor : public QWidget {
 public:
   LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
                        QString tie, QString constraint, bool othersFixed,
-                       bool allOthersFixed,
-                       bool othersTied, bool logOptionsEnabled);
+                       bool allOthersFixed, bool othersTied,
+                       bool logOptionsEnabled);
 signals:
   void setAllValues(double /*_t1*/);
   void fixParameter(int /*_t1*/, bool /*_t2*/);

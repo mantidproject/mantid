@@ -53,7 +53,8 @@ findAxisLabels(MatrixWorkspace const *workspace, Predicate const &predicate) {
   auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
   if (axis)
     return findAxisLabels(axis, predicate);
-  return std::make_pair(std::vector<std::string>(), std::vector<IDAWorkspaceIndex>());
+  return std::make_pair(std::vector<std::string>(),
+                        std::vector<IDAWorkspaceIndex>());
 }
 
 Spectra createSpectra(IDAWorkspaceIndex spectrum) {
@@ -102,8 +103,10 @@ std::string scaleWorkspace(std::string const &inputName,
   return outputName;
 }
 
-std::string extractSpectra(std::string const &inputName, IDAWorkspaceIndex startIndex,
-                           IDAWorkspaceIndex endIndex, std::string const &outputName) {
+std::string extractSpectra(std::string const &inputName,
+                           IDAWorkspaceIndex startIndex,
+                           IDAWorkspaceIndex endIndex,
+                           std::string const &outputName) {
   auto extractAlg = AlgorithmManager::Instance().create("ExtractSpectra");
   extractAlg->initialize();
   extractAlg->setLogging(false);
@@ -115,12 +118,14 @@ std::string extractSpectra(std::string const &inputName, IDAWorkspaceIndex start
   return outputName;
 }
 
-std::string extractSpectrum(MatrixWorkspace_sptr workspace, IDAWorkspaceIndex index,
+std::string extractSpectrum(MatrixWorkspace_sptr workspace,
+                            IDAWorkspaceIndex index,
                             std::string const &outputName) {
   return extractSpectra(workspace->getName(), index, index, outputName);
 }
 
-std::string extractHWHMSpectrum(MatrixWorkspace_sptr workspace, IDAWorkspaceIndex index) {
+std::string extractHWHMSpectrum(MatrixWorkspace_sptr workspace,
+                                IDAWorkspaceIndex index) {
   auto const scaledName = "__scaled_" + std::to_string(index.value);
   auto const extractedName = "__extracted_" + std::to_string(index.value);
   auto const outputName = scaleWorkspace(
@@ -159,10 +164,11 @@ subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
   IDAWorkspaceIndex start{0};
   for (auto spectrum : widthSpectra) {
     if (spectrum > start) {
-      auto const outputName = "__extracted_" + std::to_string(start.value) + "_to_" +
-                              std::to_string(spectrum.value);
+      auto const outputName = "__extracted_" + std::to_string(start.value) +
+                              "_to_" + std::to_string(spectrum.value);
       subworkspaces.emplace_back(extractSpectra(workspace->getName(), start,
-                                                spectrum - IDAWorkspaceIndex{1}, outputName));
+                                                spectrum - IDAWorkspaceIndex{1},
+                                                outputName));
     }
     subworkspaces.emplace_back(extractHWHMSpectrum(workspace, spectrum));
     start = spectrum + IDAWorkspaceIndex{1};
@@ -170,10 +176,10 @@ subdivideWidthWorkspace(MatrixWorkspace_sptr workspace,
 
   IDAWorkspaceIndex end{static_cast<int>(workspace->getNumberHistograms())};
   if (start < end) {
-    auto const outputName =
-        "__extracted_" + std::to_string(start.value) + "_to_" + std::to_string(end.value);
-    subworkspaces.emplace_back(
-        extractSpectra(workspace->getName(), start, end - IDAWorkspaceIndex{1}, outputName));
+    auto const outputName = "__extracted_" + std::to_string(start.value) +
+                            "_to_" + std::to_string(end.value);
+    subworkspaces.emplace_back(extractSpectra(
+        workspace->getName(), start, end - IDAWorkspaceIndex{1}, outputName));
   }
   return subworkspaces;
 }
@@ -257,7 +263,7 @@ JumpFitModel::findJumpFitParameters(DatasetIndex dataIndex) const {
 }
 
 std::string JumpFitModel::getFitParameterName(DatasetIndex dataIndex,
-              WorkspaceIndex spectrum) const {
+                                              WorkspaceIndex spectrum) const {
   const auto ws = getWorkspace(dataIndex);
   const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
   return axis->label(spectrum.value);
@@ -274,7 +280,8 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
     throw std::runtime_error("Invalid width index specified.");
 }
 
-void JumpFitModel::setActiveEISF(std::size_t eisfIndex, DatasetIndex dataIndex) {
+void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
+                                 DatasetIndex dataIndex) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
@@ -357,7 +364,7 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
 }
 
 std::string JumpFitModel::singleFitOutputName(DatasetIndex index,
-        WorkspaceIndex spectrum) const {
+                                              WorkspaceIndex spectrum) const {
   return createSingleFitOutputName("%1%_FofQFit_" + m_fitType + "_s%2%_Results",
                                    index, spectrum);
 }
@@ -367,7 +374,8 @@ std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
 
 std::string JumpFitModel::constructOutputName() const {
-  auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", DatasetIndex{0});
+  auto const name =
+      createOutputName("%1%_FofQFit_" + m_fitType, "", DatasetIndex{0});
   auto const position = name.find("_Results");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());

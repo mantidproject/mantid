@@ -50,9 +50,9 @@ void MSDFit::setupFitTab() {
   auto gaussian = functionFactory.createFunction("MSDGauss");
   auto peters = functionFactory.createFunction("MSDPeters");
   auto yi = functionFactory.createFunction("MSDYi");
-  //addComboBoxFunctionGroup("Gaussian", {gaussian});
-  //addComboBoxFunctionGroup("Peters", {peters});
-  //addComboBoxFunctionGroup("Yi", {yi});
+  // addComboBoxFunctionGroup("Gaussian", {gaussian});
+  // addComboBoxFunctionGroup("Peters", {peters});
+  // addComboBoxFunctionGroup("Yi", {yi});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(functionChanged()), this,

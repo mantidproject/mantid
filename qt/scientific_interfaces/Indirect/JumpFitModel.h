@@ -36,20 +36,21 @@ public:
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
 
-  std::string getFitParameterName(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
+  std::string getFitParameterName(DatasetIndex dataIndex,
+                                  WorkspaceIndex spectrum) const;
   std::vector<std::string> getWidths(DatasetIndex dataIndex) const;
   std::vector<std::string> getEISF(DatasetIndex dataIndex) const;
-  boost::optional<WorkspaceIndex> getWidthSpectrum(std::size_t widthIndex,
-                                                DatasetIndex dataIndex) const;
+  boost::optional<WorkspaceIndex>
+  getWidthSpectrum(std::size_t widthIndex, DatasetIndex dataIndex) const;
   boost::optional<WorkspaceIndex> getEISFSpectrum(std::size_t eisfIndex,
-                                               DatasetIndex dataIndex) const;
+                                                  DatasetIndex dataIndex) const;
   void setActiveWidth(std::size_t widthIndex, DatasetIndex dataIndex);
   void setActiveEISF(std::size_t eisfIndex, DatasetIndex dataIndex);
 
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
   std::string singleFitOutputName(DatasetIndex index,
-    WorkspaceIndex spectrum) const override;
+                                  WorkspaceIndex spectrum) const override;
 
 private:
   std::string constructOutputName() const;

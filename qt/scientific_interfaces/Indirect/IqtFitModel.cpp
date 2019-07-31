@@ -233,7 +233,7 @@ std::string IqtFitModel::simultaneousFitOutputName() const {
 }
 
 std::string IqtFitModel::singleFitOutputName(DatasetIndex index,
-  WorkspaceIndex spectrum) const {
+                                             WorkspaceIndex spectrum) const {
   auto const fitString = getFitString(getWorkspace(DatasetIndex{0}));
   return createSingleFitOutputName(
       "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);

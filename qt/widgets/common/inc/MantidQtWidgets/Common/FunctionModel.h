@@ -19,8 +19,7 @@ namespace MantidWidgets {
 
 using namespace Mantid::API;
 
-class EXPORT_OPT_MANTIDQT_COMMON FunctionModel
-    : public IFunctionModel {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionModel : public IFunctionModel {
 public:
   void setFunction(IFunction_sptr) override;
   IFunction_sptr getFitFunction() const override;

@@ -268,7 +268,7 @@ protected slots:
   void setAttributeToFunction(Mantid::API::IFunction &fun, QtProperty *prop);
 
 protected:
-  void removeConstraintsQuiet(QtProperty* paramProp);
+  void removeConstraintsQuiet(QtProperty *paramProp);
   /// Manager for function group properties
   QtGroupPropertyManager *m_functionManager;
   /// Manager for function parameter properties

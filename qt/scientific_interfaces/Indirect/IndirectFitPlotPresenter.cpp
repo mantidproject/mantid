@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
+using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 std::string createPlotString(const std::string &workspaceName,
@@ -127,13 +127,12 @@ SpectrumRowIndex IndirectFitPlotPresenter::getSelectedSpectrumIndex() const {
   return m_view->getSelectedSpectrumIndex();
 }
 
-SpectrumRowIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const
-{
+SpectrumRowIndex IndirectFitPlotPresenter::getSelectedDomainIndex() const {
   return m_model->getActiveDomainIndex();
 }
 
-bool IndirectFitPlotPresenter::isCurrentlySelected(DatasetIndex dataIndex,
-          WorkspaceIndex spectrum) const {
+bool IndirectFitPlotPresenter::isCurrentlySelected(
+    DatasetIndex dataIndex, WorkspaceIndex spectrum) const {
   return getSelectedDataIndex() == dataIndex &&
          getSelectedSpectrum() == spectrum;
 }

@@ -120,7 +120,7 @@ void ParameterPropertyManager::setErrorsEnabled(bool enabled) {
   m_errorsEnabled = enabled;
   cleanUpErrors();
   foreach (QtProperty *prop, m_errors.keys()) {
-    //updateTooltip(prop) emits propertyChanged(prop)
+    // updateTooltip(prop) emits propertyChanged(prop)
     updateTooltip(prop);
   }
 }
@@ -170,8 +170,7 @@ QString ParameterPropertyManager::valueText(const QtProperty *property) const {
   return originalValueText;
 }
 
-void ParameterPropertyManager::cleanUpErrors()
-{
+void ParameterPropertyManager::cleanUpErrors() {
   for (auto it = m_errors.begin(); it != m_errors.end();) {
     if (!hasProperty(it.key())) {
       it = m_errors.erase(it);

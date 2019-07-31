@@ -105,7 +105,6 @@ public:
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
   MOCK_METHOD1(setStartX, void(double));
   MOCK_METHOD1(setEndX, void(double));
-
 };
 
 /// Mock object to mock the model

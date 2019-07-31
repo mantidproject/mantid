@@ -22,7 +22,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ConvolutionFunctionModel
 public:
   void setFunction(IFunction_sptr) override;
   void setModel(const std::string &background, const std::string &workspace,
-                int workspaceIndex, const std::string &peaks, bool hasDeltaFunction);
+                int workspaceIndex, const std::string &peaks,
+                bool hasDeltaFunction);
   boost::optional<QString> backgroundPrefix() const {
     return m_backgroundPrefix;
   }
@@ -38,7 +39,7 @@ public:
 
 private:
   void findComponentPrefixes();
-  void findConvolutionPrefixes(const IFunction_sptr& fun);
+  void findConvolutionPrefixes(const IFunction_sptr &fun);
   boost::optional<QString> m_backgroundPrefix;
   boost::optional<QString> m_convolutionPrefix;
   boost::optional<QString> m_deltaFunctionPrefix;

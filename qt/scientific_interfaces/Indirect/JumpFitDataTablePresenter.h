@@ -29,9 +29,9 @@ public:
 
 protected:
   void addTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum,
-    SpectrumRowIndex row) override;
+                     SpectrumRowIndex row) override;
   void updateTableEntry(DatasetIndex dataIndex, WorkspaceIndex spectrum,
-    SpectrumRowIndex row) override;
+                        SpectrumRowIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;

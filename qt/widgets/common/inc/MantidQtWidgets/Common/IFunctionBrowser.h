@@ -33,7 +33,8 @@ public:
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
-  virtual void updateMultiDatasetParameters(const Mantid::API::ITableWorkspace & paramTable) = 0;
+  virtual void updateMultiDatasetParameters(
+      const Mantid::API::ITableWorkspace &paramTable) = 0;
   virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;
   virtual double getLocalParameterValue(const QString &parName,
                                         int i) const = 0;

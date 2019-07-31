@@ -52,11 +52,9 @@ namespace IDA {
  * @param parent :: The parent widget.
  */
 FunctionTemplateBrowser::FunctionTemplateBrowser(QWidget *parent)
-    : QWidget(parent), m_decimals(6) {
-}
+    : QWidget(parent), m_decimals(6) {}
 
-void FunctionTemplateBrowser::createBrowser()
-{
+void FunctionTemplateBrowser::createBrowser() {
   m_stringManager = new QtStringPropertyManager(this);
   m_doubleManager = new QtDoublePropertyManager(this);
   m_intManager = new QtIntPropertyManager(this);
@@ -83,30 +81,28 @@ void FunctionTemplateBrowser::createBrowser()
   m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
 
   connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
-    SLOT(intChanged(QtProperty *)));
+          SLOT(intChanged(QtProperty *)));
   connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this,
-    SLOT(boolChanged(QtProperty *)));
+          SLOT(boolChanged(QtProperty *)));
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
-    SLOT(enumChanged(QtProperty *)));
+          SLOT(enumChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
-    SLOT(parameterChanged(QtProperty *)));
+          SLOT(parameterChanged(QtProperty *)));
 
   connect(doubleDialogFactory, SIGNAL(buttonClicked(QtProperty *)), this,
-    SLOT(parameterButtonClicked(QtProperty *)));
+          SLOT(parameterButtonClicked(QtProperty *)));
   connect(doubleDialogFactory, SIGNAL(closeEditor()), m_browser,
-    SLOT(closeEditor()));
+          SLOT(closeEditor()));
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-    SLOT(popupMenu(const QPoint &)));
+          SLOT(popupMenu(const QPoint &)));
 
   connect(m_browser, SIGNAL(optionChanged(QtProperty *, const QString &, bool)),
-    this, SLOT(globalChanged(QtProperty *, const QString &, bool)));
-
+          this, SLOT(globalChanged(QtProperty *, const QString &, bool)));
 }
 
-void FunctionTemplateBrowser::init()
-{
+void FunctionTemplateBrowser::init() {
   createBrowser();
   createProperties();
   QVBoxLayout *layout = new QVBoxLayout(this);

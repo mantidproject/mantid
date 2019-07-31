@@ -224,7 +224,7 @@ void IqtFunctionModel::tieIntensities(bool on) {
   auto const a0Name = getParameterName(ParamID::BG_A0);
   if (!heightName || !a0Name)
     return;
-  auto const tie = on? QString("1-%1").arg(*a0Name) : QString();
+  auto const tie = on ? QString("1-%1").arg(*a0Name) : QString();
   for (auto i = 0; i < getNumberDomains(); ++i) {
     setLocalParameterTie(*heightName, i, tie);
   }
@@ -551,13 +551,11 @@ QMap<int, std::string> IqtFunctionModel::getParameterDescriptionMap() const {
       stretchExp->parameterDescription(2);
   auto background = FunctionFactory::Instance().createInitialized(
       buildBackgroundFunctionString());
-  out[static_cast<int>(ParamID::BG_A0)] =
-      background->parameterDescription(0);
+  out[static_cast<int>(ParamID::BG_A0)] = background->parameterDescription(0);
   return out;
 }
 
-void IqtFunctionModel::setCurrentValues(
-    const QMap<ParamID, double> &values) {
+void IqtFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
   for (auto const name : values.keys()) {
     setParameter(name, values[name]);
   }

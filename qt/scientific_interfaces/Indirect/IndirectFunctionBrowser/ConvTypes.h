@@ -8,8 +8,8 @@
 #define MANTIDQT_INDIRECT_CONVTYPES_H_
 
 #include "DllConfig.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 
 #include <QMap>
 #include <boost/optional.hpp>
@@ -63,16 +63,13 @@ struct TemplateSubType {
   virtual QList<std::string> getParameterDescriptions(int typeIndex) const = 0;
 };
 
-
 struct TemplateSubTypeDescriptor {
   QString name;
   std::string function;
   std::vector<ParamID> blocks;
 };
 
-
-template<class Type>
-struct TemplateSubTypeImpl : public TemplateSubType {
+template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
   QStringList getTypeNames() const override {
     QStringList out;
     for (auto &&it : g_typeMap) {
@@ -87,9 +84,7 @@ struct TemplateSubTypeImpl : public TemplateSubType {
     }
     return static_cast<int>(FitType::None);
   }
-  int getNTypes() const override {
-    return static_cast<int>(g_typeMap.size());
-  }
+  int getNTypes() const override { return static_cast<int>(g_typeMap.size()); }
   QList<ParamID> getParameterIDs(int typeIndex) const override {
     QList<ParamID> ids;
     auto fillIDs = [&ids](ParamID id) { ids << id; };
@@ -113,8 +108,7 @@ struct TemplateSubTypeImpl : public TemplateSubType {
             fun->parameterIndex(paramName(id).toStdString()));
       };
       applyToParamIDRange(g_typeMap[type].blocks.front(),
-                          g_typeMap[type].blocks.back(),
-                          fillDescriptions);
+                          g_typeMap[type].blocks.back(), fillDescriptions);
     }
     return descriptions;
   }
@@ -122,7 +116,6 @@ struct TemplateSubTypeImpl : public TemplateSubType {
   std::string getFunctionName(Type type) const {
     return g_typeMap[type].function;
   }
-
 
   void applyToType(Type type, std::function<void(ParamID)> paramFun) const {
     applyToParamIDRange(g_typeMap[type].blocks.front(),
@@ -140,10 +133,9 @@ struct BackgroundSubType : public TemplateSubTypeImpl<BackgroundType> {
   QString name() const override { return "Background"; }
 };
 
-void applyToFitType(
-    FitType fitType, std::function<void(ParamID)> paramFun);
-void applyToBackground(
-    BackgroundType bgType, std::function<void(ParamID)> paramFun);
+void applyToFitType(FitType fitType, std::function<void(ParamID)> paramFun);
+void applyToBackground(BackgroundType bgType,
+                       std::function<void(ParamID)> paramFun);
 
 } // namespace ConvTypes
 } // namespace IDA

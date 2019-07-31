@@ -7,8 +7,8 @@
 #ifndef INDIRECT_CONVTEMPLATEPRESENTER_H_
 #define INDIRECT_CONVTEMPLATEPRESENTER_H_
 
-#include "DllConfig.h"
 #include "ConvFunctionModel.h"
+#include "DllConfig.h"
 
 #include <QMap>
 #include <QWidget>
@@ -44,8 +44,8 @@ public:
   QStringList getLocalParameters() const;
   void setGlobalParameters(const QStringList &globals);
   void setGlobal(const QString &parName, bool on);
-  void updateMultiDatasetParameters(const IFunction & fun);
-  void updateMultiDatasetParameters(const ITableWorkspace & paramTable);
+  void updateMultiDatasetParameters(const IFunction &fun);
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   void setDatasetNames(const QStringList &names);

@@ -580,8 +580,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(model->getSpectra(DatasetIndex{1}));
   }
 
-  void
-  test_setStartX() {
+  void test_setStartX() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
     model->setStartX(4.0, DatasetIndex{0}, IDAWorkspaceIndex{3});
@@ -594,8 +593,7 @@ public:
         4.0);
   }
 
-  void
-  test_setEndX() {
+  void test_setEndX() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
     model->setEndX(4.0, DatasetIndex{0}, IDAWorkspaceIndex{3});
@@ -608,15 +606,13 @@ public:
         4.0);
   }
 
-  void
-  test_setExcludeRegion() {
+  void test_setExcludeRegion() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 5);
 
     model->setExcludeRegion("0,1,3,4", DatasetIndex{0}, IDAWorkspaceIndex{3});
 
     TS_ASSERT_EQUALS(
-        model->getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{0}),
-        "");
+        model->getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{0}), "");
     TS_ASSERT_EQUALS(
         model->getExcludeRegion(DatasetIndex{0}, IDAWorkspaceIndex{3}),
         "0.000,1.000,3.000,4.000");

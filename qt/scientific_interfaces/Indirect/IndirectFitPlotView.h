@@ -33,7 +33,8 @@ public:
   void hideMultipleDataSelection() override;
   void showMultipleDataSelection() override;
 
-  void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
+  void setAvailableSpectra(WorkspaceIndex minimum,
+                           WorkspaceIndex maximum) override;
   void setAvailableSpectra(
       const std::vector<WorkspaceIndex>::const_iterator &from,
       const std::vector<WorkspaceIndex>::const_iterator &to) override;
@@ -48,7 +49,8 @@ public:
 
   void plotInTopPreview(const QString &name,
                         Mantid::API::MatrixWorkspace_sptr workspace,
-                        WorkspaceIndex spectrum, Qt::GlobalColor colour) override;
+                        WorkspaceIndex spectrum,
+                        Qt::GlobalColor colour) override;
   void plotInBottomPreview(const QString &name,
                            Mantid::API::MatrixWorkspace_sptr workspace,
                            WorkspaceIndex spectrum,
