@@ -133,24 +133,10 @@ void ExperimentPresenter::restoreDefaults() {
 }
 
 PolarizationCorrections ExperimentPresenter::polarizationCorrectionsFromView() {
-  auto const correctionType = polarizationCorrectionTypeFromString(
-      m_view->getPolarizationCorrectionType());
-
-  if (polarizationCorrectionRequiresInputs(correctionType)) {
-    return PolarizationCorrections(correctionType, m_view->getCRho(),
-                                   m_view->getCAlpha(), m_view->getCAp(),
-                                   m_view->getCPp());
-  }
-
+  auto const correctionType = m_view->getPolarizationCorrectionOption()
+                                  ? PolarizationCorrectionType::ParameterFile
+                                  : PolarizationCorrectionType::None;
   return PolarizationCorrections(correctionType);
-}
-
-void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
-  if (polarizationCorrectionRequiresInputs(
-          m_model.polarizationCorrections().correctionType()))
-    m_view->enablePolarizationCorrectionInputs();
-  else
-    m_view->disablePolarizationCorrectionInputs();
 }
 
 FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
@@ -162,6 +148,19 @@ FloodCorrections ExperimentPresenter::floodCorrectionsFromView() {
   }
 
   return FloodCorrections(correctionType);
+}
+
+void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
+  // We could generalise which instruments polarization corrections are
+  // applicable for but for now it's not worth it, so just hard code the
+  // instrument names.
+  auto const instrumentName = m_mainPresenter->instrumentName();
+  if (instrumentName == "INTER" || instrumentName == "SURF") {
+    m_view->setPolarizationCorrectionOption(false);
+    m_view->disablePolarizationCorrections();
+  } else {
+    m_view->enablePolarizationCorrections();
+  }
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
@@ -309,8 +308,9 @@ void ExperimentPresenter::updateViewFromModel() {
       m_model.transmissionStitchOptions().rebinParameters());
   m_view->setTransmissionScaleRHSWorkspace(
       m_model.transmissionStitchOptions().scaleRHS());
-  m_view->setPolarizationCorrectionType(polarizationCorrectionTypeToString(
-      m_model.polarizationCorrections().correctionType()));
+  m_view->setPolarizationCorrectionOption(
+      m_model.polarizationCorrections().correctionType() !=
+      PolarizationCorrectionType::None);
   m_view->setFloodCorrectionType(
       floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())

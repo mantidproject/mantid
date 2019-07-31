@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
+#ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_
+#define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ReflectometryWorkflowBase2.h"
@@ -15,10 +15,10 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ReflectometryReductionOneAuto2 : Algorithm to run ReflectometryReductionOne,
-attempting to pick instrument parameters for missing properties. Version 2.
+/** ReflectometryReductionOneAuto3 : Algorithm to run ReflectometryReductionOne,
+attempting to pick instrument parameters for missing properties. Version 3.
 */
-class DLLExport ReflectometryReductionOneAuto2
+class DLLExport ReflectometryReductionOneAuto3
     : public ReflectometryWorkflowBase2 {
 public:
   const std::string name() const override;
@@ -121,4 +121,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_ */
+#endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO3_H_ */

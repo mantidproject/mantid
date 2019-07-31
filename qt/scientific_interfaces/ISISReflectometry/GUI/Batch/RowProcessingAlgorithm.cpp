@@ -87,18 +87,7 @@ void updatePolarizationCorrectionProperties(
   if (corrections.correctionType() == PolarizationCorrectionType::None)
     return;
 
-  AlgorithmProperties::update(
-      "PolarizationAnalysis",
-      polarizationCorrectionTypeToString(corrections.correctionType()),
-      properties);
-
-  if (corrections.correctionType() == PolarizationCorrectionType::PA ||
-      corrections.correctionType() == PolarizationCorrectionType::PNR) {
-    AlgorithmProperties::update("CRho", corrections.cRho(), properties);
-    AlgorithmProperties::update("CAlpha", corrections.cRho(), properties);
-    AlgorithmProperties::update("CAp", corrections.cRho(), properties);
-    AlgorithmProperties::update("CPp", corrections.cRho(), properties);
-  }
+  AlgorithmProperties::update("PolarizationAnalysis", true, properties);
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,

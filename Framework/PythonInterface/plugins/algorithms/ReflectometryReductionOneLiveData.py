@@ -52,7 +52,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
-            'ScaleFactor', 'PolarizationAnalysis', 'CPp', 'CAp', 'CRho', 'CAlpha',
+            'ScaleFactor', 'PolarizationAnalysis',
             'FloodCorrection', 'FloodWorkspace', 'Debug',
             'OutputWorkspace']
         self.copyProperties('ReflectometryISISLoadAndProcess', self._child_properties)

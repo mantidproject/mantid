@@ -75,16 +75,8 @@ public:
   void showTransmissionStitchParamsInvalid() override;
   void showTransmissionStitchParamsValid() override;
 
-  std::string getPolarizationCorrectionType() const override;
-  void setPolarizationCorrectionType(std::string const &type) override;
-  double getCRho() const override;
-  void setCRho(double cRho) override;
-  double getCAlpha() const override;
-  void setCAlpha(double cAlpha) override;
-  double getCAp() const override;
-  void setCAp(double cAp) override;
-  double getCPp() const override;
-  void setCPp(double cPp) override;
+  bool getPolarizationCorrectionOption() const override;
+  void setPolarizationCorrectionOption(bool enable) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
@@ -106,9 +98,6 @@ public:
 
   void enablePolarizationCorrections() override;
   void disablePolarizationCorrections() override;
-  void enablePolarizationCorrectionInputs() override;
-  void disablePolarizationCorrectionInputs() override;
-
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;
 
