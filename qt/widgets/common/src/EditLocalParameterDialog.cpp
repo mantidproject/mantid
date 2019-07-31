@@ -39,11 +39,10 @@ EditLocalParameterDialog::EditLocalParameterDialog(
     QStringList constraints)
     : QDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes),
       m_ties(ties), m_constraints(constraints) {
-  const int n = wsNames.size();
-  assert(values.size() == n);
-  assert(fixes.size() == n);
-  assert(ties.size() == n);
-  assert(constraints.size() == n);
+  assert(values.size() == wsNames.size());
+  assert(fixes.size() == wsNames.size());
+  assert(ties.size() == wsNames.size());
+  assert(constraints.size() == wsNames.size());
   m_uiForm.setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
   doSetup(parName, wsNames);

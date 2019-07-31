@@ -355,7 +355,8 @@ void IndirectFitOutput::removeOutput(IndirectFitData const *fitData) {
 void IndirectFitOutput::updateFitResults(WorkspaceGroup_sptr resultGroup,
                                          const FitDataIterator &fitDataBegin,
                                          const FitDataIterator &fitDataEnd) {
-  if (numberOfSpectraIn(fitDataBegin, fitDataEnd).value <= resultGroup->size())
+  if (numberOfSpectraIn(fitDataBegin, fitDataEnd).value <=
+      static_cast<int>(resultGroup->size()))
     updateFitResultsFromStructured(resultGroup, fitDataBegin, fitDataEnd);
   else
     updateFitResultsFromUnstructured(resultGroup, fitDataBegin, fitDataEnd);
@@ -382,7 +383,7 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
       auto defaultIt = indices.find(spectrum);
       if (defaultIt != indices.end()) {
         fitResults[spectrum] = ResultLocation(resultGroup, defaultIt->second);
-      } else if (resultGroup->size() > index.value) {
+      } else if (static_cast<int>(resultGroup->size()) > index.value) {
         fitResults[spectrum] = ResultLocation(resultGroup, index);
         indices[spectrum] = index;
         ++index;

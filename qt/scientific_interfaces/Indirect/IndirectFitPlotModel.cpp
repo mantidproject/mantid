@@ -138,7 +138,7 @@ void IndirectFitPlotModel::setEndX(double endX) {
     m_fittingModel->setEndX(endX, m_activeIndex);
 }
 
-void IndirectFitPlotModel::setFWHM(double fwhm) {
+void IndirectFitPlotModel::setFWHM(double) {
   // m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
   // setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
   //                      fwhm);

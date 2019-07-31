@@ -37,30 +37,30 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-void updateParameters(
-    IFunction_sptr function,
-    std::unordered_map<std::string, ParameterValue> const &parameters) {
-  if (!function)
-    return;
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    auto const value = parameters.find(function->parameterName(i));
-    if (value != parameters.end()) {
-      function->setParameter(i, value->second.value);
-      if (value->second.error)
-        function->setError(i, *value->second.error);
-    }
-  }
-}
+//void updateParameters(
+//    IFunction_sptr function,
+//    std::unordered_map<std::string, ParameterValue> const &parameters) {
+//  if (!function)
+//    return;
+//  for (auto i = 0u; i < function->nParams(); ++i) {
+//    auto const value = parameters.find(function->parameterName(i));
+//    if (value != parameters.end()) {
+//      function->setParameter(i, value->second.value);
+//      if (value->second.error)
+//        function->setError(i, *value->second.error);
+//    }
+//  }
+//}
 
-void updateAttributes(
-    IFunction_sptr function, std::vector<std::string> const &attributeNames,
-    std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-  for (const auto &attributeName : attributeNames) {
-    auto const value = attributes.find(attributeName);
-    if (value != attributes.end())
-      function->setAttribute(attributeName, value->second);
-  }
-}
+//void updateAttributes(
+//    IFunction_sptr function, std::vector<std::string> const &attributeNames,
+//    std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
+//  for (const auto &attributeName : attributeNames) {
+//    auto const value = attributes.find(attributeName);
+//    if (value != attributes.end())
+//      function->setAttribute(attributeName, value->second);
+//  }
+//}
 
 } // namespace
 
@@ -259,7 +259,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
  *                      included in the selected model.
  */
 size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
-    const std::string &functionName) const {
+    const std::string &) const {
   return 0;
 }
 
@@ -400,7 +400,7 @@ void IndirectFitAnalysisTab::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTab::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> &parameters) {
+    const std::unordered_map<std::string, ParameterValue> &) {
   try {
     updateFitBrowserParameterValues();
   } catch (const std::out_of_range &) {
@@ -743,7 +743,7 @@ void IndirectFitAnalysisTab::respondToNoFitDataSelected() {
   m_spectrumPresenter->disableView();
 }
 
-void IndirectFitAnalysisTab::respondToPlotSpectrumChanged(WorkspaceIndex i) {
+void IndirectFitAnalysisTab::respondToPlotSpectrumChanged(WorkspaceIndex) {
   auto const index = m_plotPresenter->getSelectedDomainIndex();
   m_fitPropertyBrowser->setCurrentDataset(index);
 }

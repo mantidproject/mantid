@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction.h"
 
 #include <QMap>
+#include <QStringList>
 #include <boost/optional.hpp>
 
 namespace MantidQt {

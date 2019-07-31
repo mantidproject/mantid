@@ -270,7 +270,7 @@ IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
 
 std::string
 IndirectFitData::displayName(const std::string &formatString,
-                             const std::string &rangeDelimiter) const {
+                             const std::string &) const {
   const auto workspaceName = getBasename();
   const auto spectraString = m_spectra.getString();
 
