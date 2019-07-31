@@ -408,6 +408,30 @@ public:
     verifyAndClear();
   }
 
+  void testTransferUpdatesTablePresenter() {
+    auto presenter = makePresenter();
+    // Set up a valid search result with content
+    auto const rowIndex = 0;
+    auto const selectedRows = std::set<int>({rowIndex});
+    EXPECT_CALL(m_view, getSelectedSearchRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    auto searchResult = SearchResult("12345", "Test group 1th=0.5", "");
+    EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
+        .Times(1)
+        .WillOnce(ReturnRef(searchResult));
+    // Check the runs table presenter is notified with the expected content
+    auto jobs = ReductionJobs();
+    auto group = Group("Test group 1");
+    group.appendRow(Row({"12345"}, 0.5, TransmissionRunPair(), RangeInQ(), boost::none,
+               ReductionOptionsMap(),
+               ReductionWorkspaces({"12345"}, TransmissionRunPair())));
+    jobs.appendGroup(group);
+    EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(jobs)).Times(1);
+    presenter.notifyTransfer();
+    verifyAndClear();
+  }
+
   void testInstrumentChanged() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
