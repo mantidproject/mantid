@@ -37,7 +37,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-//void updateParameters(
+// void updateParameters(
 //    IFunction_sptr function,
 //    std::unordered_map<std::string, ParameterValue> const &parameters) {
 //  if (!function)
@@ -52,7 +52,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 //  }
 //}
 
-//void updateAttributes(
+// void updateAttributes(
 //    IFunction_sptr function, std::vector<std::string> const &attributeNames,
 //    std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
 //  for (const auto &attributeName : attributeNames) {
@@ -258,8 +258,8 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
-    const std::string &) const {
+size_t
+IndirectFitAnalysisTab::numberOfCustomFunctions(const std::string &) const {
   return 0;
 }
 
