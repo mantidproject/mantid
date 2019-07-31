@@ -72,7 +72,7 @@ const std::string UNITS = "units";
 const std::string SHAPE = "shape";
 const std::string VECTOR = "vector";
 
-const double PRECISION = 1e-7;
+const double PRECISION = 1e-5; //
 const double PI = M_PI;
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
@@ -192,10 +192,10 @@ std::string groupName(const Geometry::ComponentInfo &compInfo,
 std::vector<double> toStdVector(const V3D &data) {
 
   std::vector<double> stdVector;
-  stdVector.resize(3);
+  stdVector.reserve(3);
 
   for (int i = 0; i < 3; ++i) {
-    stdVector[i] = data[i];
+    stdVector.push_back(data[i]);
   }
   return stdVector;
 }
@@ -211,10 +211,10 @@ std::vector<double> toStdVector(const V3D &data) {
 std::vector<double> toStdVector(const Quat &data) {
 
   std::vector<double> stdVector;
-  stdVector.resize(4);
+  stdVector.reserve(4);
 
   for (int i = 0; i < 4; ++i) {
-    stdVector[i] = data[i];
+    stdVector.push_back(data[i]);
   }
   return stdVector;
 }
@@ -231,10 +231,10 @@ std::vector<double> toStdVector(const Quat &data) {
 std::vector<double> toStdVector(const Eigen::Vector3d &data) {
 
   std::vector<double> stdVector;
-  stdVector.resize(3);
+  stdVector.reserve(3);
 
   for (int i = 0; i < 3; ++i) {
-    stdVector[i] = data[i];
+    stdVector.push_back(data[i]);
   }
   return stdVector;
 }
@@ -251,13 +251,12 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
 std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
 
   std::vector<double> stdVector;
-  stdVector.resize(4);
-
+  stdVector.reserve(4);
   // using Eigen Quaterniond storage format (w is stored as last element)
-  stdVector[3] = data.w();
   for (int i = 0; i < 3; ++i) {
-    stdVector[i] = data.vec()[i];
+    stdVector.push_back(data.vec()[i]);
   }
+  stdVector.push_back(data.w());
   return stdVector;
 }
 
