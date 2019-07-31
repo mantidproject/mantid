@@ -35,10 +35,11 @@ def convert_value_to_arg_string(value):
     if isinstance(value, list) or isinstance(value, ndarray):
         return "[{}]".format(', '.join([convert_value_to_arg_string(v) for v in value]))
     if isinstance(value, dict):
-        arg_string = "{"
+        kv_pairs = []
         for key, val in value.items():
-            arg_string += "'{}': {}, ".format(key, convert_value_to_arg_string(val))
-        return arg_string[:-2] + "}"
+            kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key),
+                                            convert_value_to_arg_string(val)))
+        return "{{{}}}".format(', '.join(kv_pairs))
     return str(value)
 
 
