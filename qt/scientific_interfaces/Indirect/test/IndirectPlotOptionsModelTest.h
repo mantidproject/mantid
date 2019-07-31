@@ -12,9 +12,12 @@
 
 #include "IndirectPlotOptionsModel.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -26,6 +29,7 @@ using namespace testing;
 
 namespace {
 
+std::string const GROUP_NAME = "GroupName";
 std::string const WORKSPACE_NAME = "WorkspaceName";
 std::string const WORKSPACE_INDICES = "0-2,4";
 
@@ -44,13 +48,44 @@ TableWorkspace_sptr createTableWorkspace(std::size_t const &size) {
   return boost::make_shared<TableWorkspace>(size);
 }
 
-/// Mock object to mock an IndirectTab
-class ParentTab : public IndirectTab {
-private:
-  void setup() override{};
-  void run() override{};
-  bool validate() override { return true; };
-};
+void createWorkspaceGroup(std::vector<std::string> const &workspaceNames,
+                          std::size_t const &numberOfHistograms,
+                          std::size_t const &numberOfBins) {
+  auto const workspace =
+      createMatrixWorkspace(numberOfHistograms, numberOfBins);
+  for (auto const &workspaceName : workspaceNames)
+    AnalysisDataService::Instance().addOrReplace(workspaceName,
+                                                 workspace->clone());
+
+  const auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->setProperty("InputWorkspaces", workspaceNames);
+  groupAlg->setProperty("OutputWorkspace", GROUP_NAME);
+  groupAlg->execute();
+}
+
+std::map<std::string, std::string>
+constructActions(boost::optional<std::map<std::string, std::string>> const
+                     &availableActions) {
+  std::map<std::string, std::string> actions;
+  if (availableActions)
+    actions = availableActions.get();
+  if (actions.find("Plot Spectra") == actions.end())
+    actions["Plot Spectra"] = "Plot Spectra";
+  if (actions.find("Plot Bins") == actions.end())
+    actions["Plot Bins"] = "Plot Bins";
+  if (actions.find("Plot Contour") == actions.end())
+    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Plot Tiled") == actions.end())
+    actions["Plot Tiled"] = "Plot Tiled";
+  return actions;
+}
+
+std::map<std::string, std::string> customActions() {
+  std::map<std::string, std::string> actions;
+  actions["Plot Spectra"] = "Plot Wavelength";
+  actions["Plot Bins"] = "Plot Angle";
+  return actions;
+}
 
 } // namespace
 
@@ -74,6 +109,7 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class IndirectPlotOptionsModelTest : public CxxTest::TestSuite {
 public:
   IndirectPlotOptionsModelTest() : m_ads(AnalysisDataService::Instance()) {
+    FrameworkManager::Instance();
     m_ads.clear();
   }
 
@@ -258,12 +294,11 @@ public:
   test_that_plotBins_will_call_the_plotter_plotBins_method_when_a_valid_workspace_and_bin_indices_have_been_set() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
-    m_model->setIndices(WORKSPACE_INDICES);
 
     EXPECT_CALL(*m_plotter, plotBins(WORKSPACE_NAME, WORKSPACE_INDICES))
         .Times(1);
 
-    m_model->plotBins();
+    m_model->plotBins(WORKSPACE_INDICES);
   }
 
   void
@@ -286,6 +321,70 @@ public:
         .Times(1);
 
     m_model->plotTiled();
+  }
+
+  void
+  test_that_getAllWorkspaceNames_will_return_all_of_the_expected_workspace_names_when_provided_a_matrix_and_group_workspace() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    createWorkspaceGroup({"Workspace1", "Workspace2", "Workspace3"}, 5, 5);
+
+    auto const allWorkspaces =
+        m_model->getAllWorkspaceNames({GROUP_NAME, WORKSPACE_NAME});
+
+    std::vector<std::string> const expectedWorkspaces{
+        "Workspace1", "Workspace2", "Workspace3", WORKSPACE_NAME};
+    TS_ASSERT_EQUALS(allWorkspaces, expectedWorkspaces);
+  }
+
+  void
+  test_that_singleDataPoint_will_return_an_no_error_message_if_the_workspace_has_more_than_one_data_points_to_plot_for_spectrum() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(!m_model->singleDataPoint(MantidAxis::Spectrum));
+  }
+
+  void
+  test_that_singleDataPoint_will_return_an_no_error_message_if_the_workspace_has_more_than_one_data_points_to_plot_for_bin() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(!m_model->singleDataPoint(MantidAxis::Bin));
+  }
+
+  void
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_a_single_data_point_to_plot_for_spectrum() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 1));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(m_model->singleDataPoint(MantidAxis::Spectrum));
+  }
+
+  void
+  test_that_singleDataPoint_will_return_an_error_message_if_the_workspace_has_a_single_data_point_to_plot_for_bin() {
+    m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(1, 5));
+    m_model->setWorkspace(WORKSPACE_NAME);
+
+    TS_ASSERT(m_model->singleDataPoint(MantidAxis::Bin));
+  }
+
+  void
+  test_that_availableActions_will_return_the_default_actions_when_none_are_set() {
+    TS_ASSERT_EQUALS(m_model->availableActions(),
+                     constructActions(boost::none));
+  }
+
+  void
+  test_that_availableActions_will_return_the_correct_actions_when_they_have_been_set() {
+    auto actions = customActions();
+
+    tearDown();
+    m_plotter = new NiceMock<MockIndirectPlotter>();
+    m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter, actions);
+
+    actions["Plot Contour"] = "Plot Contour";
+    actions["Plot Tiled"] = "Plot Tiled";
+    TS_ASSERT_EQUALS(m_model->availableActions(), actions);
   }
 
 private:

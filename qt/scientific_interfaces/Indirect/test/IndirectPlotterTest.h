@@ -49,15 +49,10 @@ TableWorkspace_sptr createTableWorkspace(std::size_t const &size) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock an IndirectTab
-class MockIndirectTab : public IndirectTab {
+class MockIPyRunner : public IPyRunner {
 public:
   /// Public Methods
-  MOCK_CONST_METHOD0(errorBars, bool());
-
-  /// Protected Methods
-  MOCK_METHOD0(setup, void());
-  MOCK_METHOD0(run, void());
-  MOCK_METHOD0(validate, bool());
+  MOCK_METHOD1(runPythonCode, void(std::string const &pythonCode));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -75,38 +70,36 @@ public:
   static void destroySuite(IndirectPlotterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_indirectTab = std::make_unique<MockIndirectTab>();
-    m_plotter = std::make_unique<IndirectPlotter>(m_indirectTab.get());
+    m_pyRunner = std::make_unique<MockIPyRunner>();
+    m_plotter = std::make_unique<IndirectPlotter>(m_pyRunner.get());
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_indirectTab.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pyRunner));
 
     m_plotter.reset();
     m_ads.clear();
   }
 
   void test_that_the_plotter_has_been_instantiated() {
-    TS_ASSERT(m_indirectTab);
+    TS_ASSERT(m_pyRunner);
     TS_ASSERT(m_plotter);
   }
 
   void
-  test_that_plotSpectra_will_check_to_see_if_errorBars_are_turned_on_when_the_data_provided_is_valid() {
+  test_that_plotSpectra_will_attempt_to_run_python_code_using_the_IPyRunner() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
-    ON_CALL(*m_indirectTab, errorBars()).WillByDefault(Return(false));
 
-    EXPECT_CALL(*m_indirectTab, errorBars()).Times(1);
+    EXPECT_CALL(*m_pyRunner, runPythonCode(_)).Times(1);
 
     m_plotter->plotSpectra(WORKSPACE_NAME, WORKSPACE_INDICES);
   }
 
   void
-  test_that_plotBins_will_check_to_see_if_errorBars_are_turned_on_when_the_data_provided_is_valid() {
+  test_that_plotBins_will_attempt_to_run_python_code_using_the_IPyRunner() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
-    ON_CALL(*m_indirectTab, errorBars()).WillByDefault(Return(false));
 
-    EXPECT_CALL(*m_indirectTab, errorBars()).Times(1);
+    EXPECT_CALL(*m_pyRunner, runPythonCode(_)).Times(1);
 
     m_plotter->plotBins(WORKSPACE_NAME, WORKSPACE_INDICES);
   }
@@ -174,7 +167,7 @@ public:
 private:
   AnalysisDataServiceImpl &m_ads;
 
-  std::unique_ptr<MockIndirectTab> m_indirectTab;
+  std::unique_ptr<MockIPyRunner> m_pyRunner;
   std::unique_ptr<IndirectPlotter> m_plotter;
 };
 

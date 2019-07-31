@@ -22,7 +22,7 @@ namespace CustomInterfaces {
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
   IndirectPlotOptionsModel(
-      IPyRunner *pythonRunner,
+      IPyRunner *pythonRunner = nullptr,
       boost::optional<std::map<std::string, std::string>> const
           &availableActions = boost::none);
   /// Used by the unit tests so that m_plotter can be mocked
@@ -35,7 +35,7 @@ public:
   virtual bool setWorkspace(std::string const &workspaceName);
   virtual void removeWorkspace();
 
-  std::vector<std::string>
+  virtual std::vector<std::string>
   getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const;
 
   boost::optional<std::string> workspace() const;

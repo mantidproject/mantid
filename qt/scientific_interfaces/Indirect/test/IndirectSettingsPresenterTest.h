@@ -145,28 +145,6 @@ public:
     checkForLoadingOfSettings(settingGroup);
   }
 
-  void test_that_getSetting_will_attempt_to_get_a_setting_from_the_view() {
-    QString const settingGroup("Indirect Settings");
-    std::string const settingName("plot-error-bars");
-
-    ON_CALL(*m_model, getSettingsGroup())
-        .WillByDefault(Return(settingGroup.toStdString()));
-    ON_CALL(*m_view,
-            getSetting(settingGroup, QString::fromStdString(settingName)))
-        .WillByDefault(Return(true));
-
-    Expectation getSettingsGroup =
-        EXPECT_CALL(*m_model, getSettingsGroup())
-            .Times(1)
-            .WillOnce(Return(settingGroup.toStdString()));
-    EXPECT_CALL(*m_view,
-                getSetting(settingGroup, QString::fromStdString(settingName)))
-        .Times(1)
-        .After(getSettingsGroup);
-
-    m_presenter->getSetting(settingName);
-  }
-
 private:
   void checkForLoadingOfSettings(QString const &settingGroup) {
     std::string const facility("ISIS");

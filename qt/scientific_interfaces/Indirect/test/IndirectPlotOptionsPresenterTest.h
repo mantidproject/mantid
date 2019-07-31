@@ -22,6 +22,23 @@ namespace {
 std::string const WORKSPACE_NAME = "WorkspaceName";
 std::string const WORKSPACE_INDICES = "0-2,4";
 
+std::map<std::string, std::string>
+constructActions(boost::optional<std::map<std::string, std::string>> const
+                     &availableActions) {
+  std::map<std::string, std::string> actions;
+  if (availableActions)
+    actions = availableActions.get();
+  if (actions.find("Plot Spectra") == actions.end())
+    actions["Plot Spectra"] = "Plot Spectra";
+  if (actions.find("Plot Bins") == actions.end())
+    actions["Plot Bins"] = "Plot Bins";
+  if (actions.find("Plot Contour") == actions.end())
+    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Plot Tiled") == actions.end())
+    actions["Plot Tiled"] = "Plot Tiled";
+  return actions;
+}
+
 } // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -46,7 +63,10 @@ public:
   void emitPlotTiledClicked() { emit plotTiledClicked(); }
 
   /// Public Methods
-  MOCK_METHOD1(setPlotType, void(PlotWidget const &plotType));
+  MOCK_METHOD2(
+      setPlotType,
+      void(PlotWidget const &plotType,
+           std::map<std::string, std::string> const &availableActions));
 
   MOCK_METHOD1(setIndicesRegex, void(QString const &regex));
 
@@ -74,6 +94,10 @@ public:
   MOCK_METHOD1(setWorkspace, bool(std::string const &workspaceName));
   MOCK_METHOD0(removeWorkspace, void());
 
+  MOCK_CONST_METHOD1(
+      getAllWorkspaceNames,
+      std::vector<std::string>(std::vector<std::string> const &workspaceNames));
+
   MOCK_METHOD1(setFixedIndices, void(std::string const &indices));
   MOCK_CONST_METHOD0(indicesFixed, bool());
 
@@ -83,7 +107,7 @@ public:
   MOCK_METHOD1(setIndices, bool(std::string const &indices));
 
   MOCK_METHOD0(plotSpectra, void());
-  MOCK_METHOD0(plotBins, void());
+  MOCK_METHOD1(plotBins, void(std::string const &binIndices));
   MOCK_METHOD0(plotContour, void());
   MOCK_METHOD0(plotTiled, void());
 };
@@ -133,7 +157,9 @@ public:
     m_model = new NiceMock<MockIndirectPlotOptionsModel>();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
-    EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra)).Times(1);
+    EXPECT_CALL(*m_view,
+                setPlotType(PlotWidget::Spectra, constructActions(boost::none)))
+        .Times(1);
     EXPECT_CALL(*m_view, setIndices(QString(""))).Times(1);
     EXPECT_CALL(*m_model, setFixedIndices("")).Times(1);
 
@@ -240,7 +266,7 @@ public:
         .WillByDefault(Return(true));
 
     setExpectationsForWidgetEnabling(false);
-    EXPECT_CALL(*m_model, plotBins()).Times(1);
+    EXPECT_CALL(*m_model, plotBins(_)).Times(1);
     setExpectationsForWidgetEnabling(true);
 
     m_view->emitPlotBinsClicked();
@@ -253,7 +279,7 @@ public:
 
     EXPECT_CALL(*m_view,
                 displayWarning(
-                    QString("Plot bins failed: Invalid bin indices provided.")))
+                    QString("Plot Bins failed: Invalid bin indices provided.")))
         .Times(1);
 
     m_view->emitPlotBinsClicked();
@@ -283,6 +309,8 @@ public:
 
   void test_that_setWorkspaces_will_set_the_workspaces_in_the_view_and_model() {
     std::vector<std::string> const workspaceNames{WORKSPACE_NAME};
+    ON_CALL(*m_model, getAllWorkspaceNames(workspaceNames))
+        .WillByDefault(Return(workspaceNames));
 
     EXPECT_CALL(*m_view, setWorkspaces(workspaceNames)).Times(1);
     EXPECT_CALL(*m_model, setWorkspace(WORKSPACE_NAME)).Times(1);

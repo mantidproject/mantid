@@ -34,7 +34,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectPlotter(IPyRunner *parent);
+  IndirectPlotter(IPyRunner *parent = nullptr);
   virtual ~IndirectPlotter();
 
   virtual void plotSpectra(std::string const &workspaceName,
