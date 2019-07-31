@@ -13,9 +13,15 @@ from numpy import ndarray
 BASE_CREATE_FIG_COMMAND = "plt.figure({})"
 BASE_CREATE_AX_COMMAND = "add_subplot({})"
 
-ADD_SUBPLOT_KWARGS = {  # kwargs passed to the "add_subplot" command
+ADD_SUBPLOT_KWARGS = [  # kwargs passed to the "add_subplot" command
     'frame_on', 'label', 'title', 'visible', 'xlabel', 'xlim', 'xscale',
-    'ylabel', 'ylim', 'yscale'}
+    'ylabel', 'ylim', 'yscale']
+PLOT_KWARGS = [
+    'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle',
+    'linewidth', 'marker', 'markeredgecolor', 'markeredgewidth',
+    'markerfacecolor', 'markerfacecoloralt', 'markersize', 'markevery',
+    'solid_capstyle', 'solid_joinstyle','visible', 'zorder'
+]
 
 
 def convert_value_to_arg_string(value):
@@ -80,10 +86,7 @@ class PlotScriptGenerator:
     @staticmethod
     def get_add_subplot_kwargs(ax):
         """Get kwargs for recreating an axes"""
-        props = {}
-        for prop, value in ax.properties().items():
-            if prop in ADD_SUBPLOT_KWARGS:
-                props[prop] = value
+        props = {key: ax.properties()[key] for key in ADD_SUBPLOT_KWARGS}
         props['projection'] = 'mantid'
         props['sharex'] = True if ax.get_shared_x_axes()._mapping else None
         props['sharey'] = True if ax.get_shared_y_axes()._mapping else None
@@ -91,8 +94,12 @@ class PlotScriptGenerator:
 
     @staticmethod
     def generate_add_subplot_command(ax):
+        """Generate command to create an axes"""
         command = BASE_CREATE_AX_COMMAND.format(
             convert_args_to_string(PlotScriptGenerator.get_add_subplot_pos_args(ax),
-                                   PlotScriptGenerator.get_add_subplot_kwargs(ax))
-        )
+                                   PlotScriptGenerator.get_add_subplot_kwargs(ax)))
         return command
+
+    @staticmethod
+    def get_plot_command_kwargs_from_line2d(line):
+        return {key: line.properties()[key] for key in PLOT_KWARGS}

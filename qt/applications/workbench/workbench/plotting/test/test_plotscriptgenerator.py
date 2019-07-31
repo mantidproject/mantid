@@ -21,6 +21,9 @@ from workbench.plotting.plotscriptgenerator import PlotScriptGenerator as PSG
 
 class PlotScriptGeneratorTest(unittest.TestCase):
 
+    def tearDown(self):
+        plt.close()
+
     def test_get_figure_command_kwargs_returns_correct_dict(self):
         mock_figure = MagicMock(get_figwidth=lambda: 10, get_figheight=lambda: 7,
                                 dpi=111)
@@ -59,6 +62,22 @@ class PlotScriptGeneratorTest(unittest.TestCase):
                     "visible=False, xlabel='', xlim=(0.1, 1.1), xscale='log', "
                     "ylabel='', ylim=(0.1, 1.1), yscale='linear')")
         self.assertEqual(expected, code)
+
+    def test_get_plot_command_kwargs_from_line2d_returns_correct_dict(self):
+        kwargs = {
+            'alpha': 0.5, 'color': 'r', 'drawstyle': 'steps',
+            'fillstyle': 'left', 'label': 'test label', 'linestyle': '--',
+            'linewidth': 1.1, 'marker': 'o', 'markeredgecolor': 'g',
+            'markeredgewidth': 1.2, 'markerfacecolor': 'y',
+            'markerfacecoloralt': 'k', 'markersize': 1.3, 'markevery': 2,
+            'solid_capstyle': 'butt', 'solid_joinstyle': 'round',
+            'visible': False, 'zorder': 1.4
+        }
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+        line = ax.plot([0, 1], [1, 0], **kwargs)[0]
+        ret = PSG.get_plot_command_kwargs_from_line2d(line)
+        self.assertEqual(kwargs, ret)
 
     # Utility function tests
     def test_convert_args_to_string_returns_correct_string(self):
