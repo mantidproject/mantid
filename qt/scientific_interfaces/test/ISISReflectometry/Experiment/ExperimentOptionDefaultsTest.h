@@ -144,23 +144,17 @@ private:
   Experiment getDefaults() {
     // Provide the mandatory params file so that we don't throw. Other params
     // will be unset so the hard-coded defaults will be used instead.
+
+    // Note that we use an instrument suffix here because otherwise
+    // the workspace instrument can pick up settings from a previously-loaded
+    // parameters file for the same instrument for another test!
     auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "Mandatory");
+        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "MANDATORY");
     auto instrument = workspace->getInstrument();
     ExperimentOptionDefaults experimentDefaults;
     return experimentDefaults.get(instrument);
   }
-  
-  Experiment getDefaultsThrows() {
-    // If no params file is given then getting the defaults will always through
-    // because the mandatory values are not specified
-    auto workspace = Mantid::TestHelpers::createREFL_WS(
-        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "Empty");
-    auto instrument = workspace->getInstrument();
-    ExperimentOptionDefaults experimentDefaults;
-    TS_ASSERT_THROWS(experimentDefaults.get(instrument), const std::invalid_argument &);
-  }
-  
+
   Experiment getDefaultsFromParamsFile(std::string const &paramsType) {
     // Get a dummy reflectometry instrument with the given parameters file type.
     // paramsType is appended to "REFL_Parameters_" to form the name for the

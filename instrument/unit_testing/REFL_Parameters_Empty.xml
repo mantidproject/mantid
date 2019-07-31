@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="REFL" valid-from="forever">
-
-<component-link name="REFL" >
-
-</component-link>
-
-</parameter-file>
