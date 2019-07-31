@@ -106,7 +106,7 @@ private:
   SearchModel m_searchModel;
 
   // the interface
-  Ui::RunsWidget ui;
+  Ui::RunsWidget m_ui;
   // the slit calculator
   SlitCalculator *m_calculator;
 
@@ -114,6 +114,8 @@ private:
 
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
+
+  friend class ISISReflectometryEncoder;
 
 private slots:
   void on_actionSearch_triggered();

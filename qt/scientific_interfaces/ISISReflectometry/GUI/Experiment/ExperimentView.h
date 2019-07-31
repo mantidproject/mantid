@@ -174,6 +174,8 @@ private:
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
+
+  friend class ISISReflectometryEncoder;
 };
 
 } // namespace CustomInterfaces

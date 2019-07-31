@@ -77,6 +77,8 @@ private:
   std::vector<std::string> m_instruments;
   RunsTableViewSubscriber *m_notifyee;
   std::map<Action, QAction *> m_actions;
+
+  friend class ISISReflectometryEncoder;
 };
 
 class RunsTableViewFactory {

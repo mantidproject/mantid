@@ -51,6 +51,8 @@ private:
   IMessageHandler *m_messageHandler;
   BatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
+
+  friend class ISISReflectometryEncoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

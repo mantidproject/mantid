@@ -77,6 +77,8 @@ private:
   /// The widget
   Ui::EventWidget m_ui;
   EventViewSubscriber *m_notifyee;
+
+  friend class ISISReflectometryEncoder;
 };
 
 } // namespace CustomInterfaces

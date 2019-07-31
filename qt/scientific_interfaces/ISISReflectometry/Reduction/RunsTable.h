@@ -50,6 +50,8 @@ private:
   double m_thetaTolerance;
   ReductionJobs m_reductionJobs;
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
+
+  friend class ISISReflectometryEncoder;
 };
 
 template <typename T>

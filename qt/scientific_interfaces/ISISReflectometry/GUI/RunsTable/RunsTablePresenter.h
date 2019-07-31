@@ -162,6 +162,8 @@ private:
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
+
+  friend class ISISReflectometryEncoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

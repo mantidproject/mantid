@@ -35,6 +35,8 @@ public:
 private:
   std::vector<std::string> m_firstTransmissionRunNumbers;
   std::vector<std::string> m_secondTransmissionRunNumbers;
+
+  friend class ISISReflectometryEncoder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(TransmissionRunPair const &lhs,

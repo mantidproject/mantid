@@ -178,6 +178,8 @@ private:
   void updateViewWhenMonitorStarting();
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();
+
+  friend class ISISReflectometryEncoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

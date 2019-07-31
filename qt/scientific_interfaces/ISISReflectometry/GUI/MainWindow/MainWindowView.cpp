@@ -57,9 +57,6 @@ Initialise the Interface
 */
 void MainWindowView::initLayout() {
   m_ui.setupUi(this);
-  // Until this is implemented we should hide this action
-  m_ui.loadBatch->setEnabled(false);
-  m_ui.loadBatch->setVisible(false);
 
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,

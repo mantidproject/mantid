@@ -33,7 +33,7 @@ RunsView::RunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
       m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
       m_timer() {
   initLayout();
-  ui.tableSearchResults->setModel(&m_searchModel);
+  m_ui.tableSearchResults->setModel(&m_searchModel);
 }
 
 void RunsView::subscribe(RunsViewSubscriber *notifyee) {
@@ -54,34 +54,34 @@ IRunsTableView *RunsView::table() const { return m_tableView; }
 Initialise the Interface
 */
 void RunsView::initLayout() {
-  ui.setupUi(this);
+  m_ui.setupUi(this);
 
-  ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
+  m_ui.buttonTransfer->setDefaultAction(m_ui.actionTransfer);
 
   // Expand the process runs column at the expense of the search column
-  ui.splitterTables->setStretchFactor(0, 0);
-  ui.splitterTables->setStretchFactor(1, 1);
-  ui.tablePane->layout()->addWidget(m_tableView);
+  m_ui.splitterTables->setStretchFactor(0, 0);
+  m_ui.splitterTables->setStretchFactor(1, 1);
+  m_ui.tablePane->layout()->addWidget(m_tableView);
 
   // Add Icons to the buttons
-  ui.actionAutoreducePause->setIcon(getIcon("mdi.pause", "red", 1.3));
-  ui.buttonAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
-  ui.buttonAutoreducePause->setIcon(getIcon("mdi.pause", "red", 1.3));
-  ui.buttonMonitor->setIcon(getIcon("mdi.play", "green", 1.3));
-  ui.buttonStopMonitor->setIcon(getIcon("mdi.pause", "red", 1.3));
-  ui.actionAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
-  ui.actionSearch->setIcon(getIcon("mdi.folder", "black", 1.3));
-  ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
+  m_ui.actionAutoreducePause->setIcon(getIcon("mdi.pause", "red", 1.3));
+  m_ui.buttonAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
+  m_ui.buttonAutoreducePause->setIcon(getIcon("mdi.pause", "red", 1.3));
+  m_ui.buttonMonitor->setIcon(getIcon("mdi.play", "green", 1.3));
+  m_ui.buttonStopMonitor->setIcon(getIcon("mdi.pause", "red", 1.3));
+  m_ui.actionAutoreduce->setIcon(getIcon("mdi.play", "green", 1.3));
+  m_ui.actionSearch->setIcon(getIcon("mdi.folder", "black", 1.3));
+  m_ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
 
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
   m_monitorAlgoRunner =
       boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
-  connect(ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)),
+  connect(m_ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(onShowSearchContextMenuRequested(const QPoint &)));
   // Synchronize the slit calculator
-  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
+  connect(m_ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onInstrumentChanged(int)));
   // Connect signal for when search algorithm completes
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
@@ -103,7 +103,7 @@ void RunsView::updateMenuEnabledState(bool isProcessing) {
  */
 void RunsView::setAutoreduceButtonEnabled(bool enabled) {
 
-  ui.buttonAutoreduce->setEnabled(enabled);
+  m_ui.buttonAutoreduce->setEnabled(enabled);
 }
 
 /**
@@ -112,7 +112,7 @@ void RunsView::setAutoreduceButtonEnabled(bool enabled) {
  */
 void RunsView::setAutoreducePauseButtonEnabled(bool enabled) {
 
-  ui.buttonAutoreducePause->setEnabled(enabled);
+  m_ui.buttonAutoreducePause->setEnabled(enabled);
 }
 
 /**
@@ -121,7 +121,7 @@ void RunsView::setAutoreducePauseButtonEnabled(bool enabled) {
  */
 void RunsView::setTransferButtonEnabled(bool enabled) {
 
-  ui.buttonTransfer->setEnabled(enabled);
+  m_ui.buttonTransfer->setEnabled(enabled);
 }
 
 /**
@@ -130,7 +130,7 @@ void RunsView::setTransferButtonEnabled(bool enabled) {
  */
 void RunsView::setInstrumentComboEnabled(bool enabled) {
 
-  ui.comboSearchInstrument->setEnabled(enabled);
+  m_ui.comboSearchInstrument->setEnabled(enabled);
 }
 
 /**
@@ -139,7 +139,7 @@ void RunsView::setInstrumentComboEnabled(bool enabled) {
  */
 void RunsView::setSearchTextEntryEnabled(bool enabled) {
 
-  ui.textSearch->setEnabled(enabled);
+  m_ui.textSearch->setEnabled(enabled);
 }
 
 /**
@@ -148,7 +148,7 @@ void RunsView::setSearchTextEntryEnabled(bool enabled) {
  */
 void RunsView::setSearchButtonEnabled(bool enabled) {
 
-  ui.buttonSearch->setEnabled(enabled);
+  m_ui.buttonSearch->setEnabled(enabled);
 }
 
 /**
@@ -157,7 +157,7 @@ void RunsView::setSearchButtonEnabled(bool enabled) {
  */
 void RunsView::setStartMonitorButtonEnabled(bool enabled) {
 
-  ui.buttonMonitor->setEnabled(enabled);
+  m_ui.buttonMonitor->setEnabled(enabled);
 }
 
 /**
@@ -166,7 +166,7 @@ void RunsView::setStartMonitorButtonEnabled(bool enabled) {
  */
 void RunsView::setStopMonitorButtonEnabled(bool enabled) {
 
-  ui.buttonStopMonitor->setEnabled(enabled);
+  m_ui.buttonStopMonitor->setEnabled(enabled);
 }
 
 /**
@@ -178,10 +178,10 @@ default
 */
 void RunsView::setInstrumentList(const std::vector<std::string> &instruments,
                                  int defaultInstrumentIndex) {
-  ui.comboSearchInstrument->clear();
+  m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
-    ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
-  ui.comboSearchInstrument->setCurrentIndex(defaultInstrumentIndex);
+    m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
+  m_ui.comboSearchInstrument->setCurrentIndex(defaultInstrumentIndex);
 }
 
 /**
@@ -190,7 +190,7 @@ Set the range of the progress bar
 @param max : The maxmimum value of the bar
 */
 void RunsView::setProgressRange(int min, int max) {
-  ui.progressBar->setRange(min, max);
+  m_ui.progressBar->setRange(min, max);
   ProgressableView::setProgressRange(min, max);
 }
 
@@ -198,18 +198,20 @@ void RunsView::setProgressRange(int min, int max) {
 Set the status of the progress bar
 @param progress : The current value of the bar
 */
-void RunsView::setProgress(int progress) { ui.progressBar->setValue(progress); }
+void RunsView::setProgress(int progress) {
+  m_ui.progressBar->setValue(progress);
+}
 
 /**
  * Clear the progress
  */
-void RunsView::clearProgress() { ui.progressBar->reset(); }
+void RunsView::clearProgress() { m_ui.progressBar->reset(); }
 
 /**
  * Resize the search results table columns
  */
 void RunsView::resizeSearchResultsColumnsToContents() {
-  ui.tableSearchResults->resizeColumnsToContents();
+  m_ui.tableSearchResults->resizeColumnsToContents();
 }
 
 /**
@@ -255,7 +257,7 @@ This slot shows the slit calculator
 */
 void RunsView::onShowSlitCalculatorRequested() {
   m_calculator->setCurrentInstrumentName(
-      ui.comboSearchInstrument->currentText().toStdString());
+      m_ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
 }
 
@@ -264,13 +266,13 @@ This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
 void RunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
-  if (!ui.tableSearchResults->indexAt(pos).isValid())
+  if (!m_ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
   // parent widget takes ownership of QMenu
   QMenu *menu = new QMenu(this);
-  menu->addAction(ui.actionTransfer);
-  menu->popup(ui.tableSearchResults->viewport()->mapToGlobal(pos));
+  menu->addAction(m_ui.actionTransfer);
+  menu->popup(m_ui.tableSearchResults->viewport()->mapToGlobal(pos));
 }
 
 /** This is slot is triggered when any of the instrument combo boxes changes. It
@@ -278,9 +280,9 @@ void RunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  * @param index : The index of the combo box
  */
 void RunsView::onInstrumentChanged(int index) {
-  ui.textSearch->clear();
+  m_ui.textSearch->clear();
   m_calculator->setCurrentInstrumentName(
-      ui.comboSearchInstrument->itemText(index).toStdString());
+      m_ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
   m_notifyee->notifyInstrumentChanged();
 }
@@ -290,11 +292,11 @@ Get the selected instrument for searching
 @returns the selected instrument to search for
 */
 std::string RunsView::getSearchInstrument() const {
-  return ui.comboSearchInstrument->currentText().toStdString();
+  return m_ui.comboSearchInstrument->currentText().toStdString();
 }
 
 void RunsView::setSearchInstrument(std::string const &instrumentName) {
-  setSelected(*ui.comboSearchInstrument, instrumentName);
+  setSelected(*m_ui.comboSearchInstrument, instrumentName);
 }
 
 /**
@@ -303,7 +305,7 @@ Get the indices of the highlighted search result rows
 */
 std::set<int> RunsView::getSelectedSearchRows() const {
   std::set<int> rows;
-  auto selectionModel = ui.tableSearchResults->selectionModel();
+  auto selectionModel = m_ui.tableSearchResults->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
@@ -318,9 +320,9 @@ Get the indices of all search result rows
 */
 std::set<int> RunsView::getAllSearchRows() const {
   std::set<int> rows;
-  if (!ui.tableSearchResults || !ui.tableSearchResults->model())
+  if (!m_ui.tableSearchResults || !m_ui.tableSearchResults->model())
     return rows;
-  auto const rowCount = ui.tableSearchResults->model()->rowCount();
+  auto const rowCount = m_ui.tableSearchResults->model()->rowCount();
   for (auto row = 0; row < rowCount; ++row)
     rows.insert(row);
   return rows;
@@ -341,7 +343,7 @@ Get the string the user wants to search for.
 @returns The search string
 */
 std::string RunsView::getSearchString() const {
-  return ui.textSearch->text().toStdString();
+  return m_ui.textSearch->text().toStdString();
 }
 
 void MantidQt::CustomInterfaces::RunsView::on_buttonMonitor_clicked() {
