@@ -59,7 +59,7 @@ protected:
   void setSampleFBSuffixes(const QStringList &suffices);
   void setResolutionWSSuffixes(const QStringList &suffices);
   void setResolutionFBSuffixes(const QStringList &suffices);
-  void setFileExtensionsByName(bool filter);
+  void setFileExtensionsByName(bool filter) override;
   void setSampleSuffixes(std::string const &tab, bool filter);
   void setResolutionSuffixes(std::string const &tab, bool filter);
 

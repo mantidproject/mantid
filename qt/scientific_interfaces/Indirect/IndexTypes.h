@@ -64,13 +64,13 @@ public:
   }
   CollectionIndexType size() const {
     return CollectionIndexType{
-        static_cast<CollectionIndexType::IntImplementationType>(
+        static_cast<typename CollectionIndexType::IntImplementationType>(
             m_collection.size())};
   }
   CollectionIndexType zero() const { return CollectionIndexType{0}; }
   CollectionIndexType last() const {
     return CollectionIndexType{
-        static_cast<CollectionIndexType::IntImplementationType>(
+        static_cast<typename CollectionIndexType::IntImplementationType>(
             m_collection.size() - 1)};
   }
   bool empty() const { return m_collection.empty(); }

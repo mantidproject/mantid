@@ -135,7 +135,7 @@ void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 
 EstimationDataSelector ConvFit::getEstimationDataSelector() const {
   return
-      [](const MantidVec &x, const MantidVec &y) -> DataForParameterEstimation {
+      [](const MantidVec &, const MantidVec &) -> DataForParameterEstimation {
         return DataForParameterEstimation{};
       };
 }

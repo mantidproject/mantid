@@ -80,7 +80,7 @@ private:
 };
 
 template <typename F> struct ApplyEnumeratedSpectra {
-  ApplyEnumeratedSpectra(F &&functor, WorkspaceIndex start = 0)
+  ApplyEnumeratedSpectra(F &&functor, WorkspaceIndex start = WorkspaceIndex{0})
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
   WorkspaceIndex operator()(const Spectra &spectra) const {

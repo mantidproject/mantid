@@ -44,17 +44,21 @@ public:
   int getNumberDomains() const override;
   int currentDomainIndex() const override;
   void setCurrentDomainIndex(int) override;
-  double getLocalParameterValue(const QString &parName, int i) const;
-  bool isLocalParameterFixed(const QString &parName, int i) const;
-  QString getLocalParameterTie(const QString &parName, int i) const;
-  QString getLocalParameterConstraint(const QString &parName, int i) const;
-  void setLocalParameterValue(const QString &parName, int i, double value);
+  double getLocalParameterValue(const QString &parName, int i) const override;
+  bool isLocalParameterFixed(const QString &parName, int i) const override;
+  QString getLocalParameterTie(const QString &parName, int i) const override;
+  QString getLocalParameterConstraint(const QString &parName,
+                                      int i) const override;
+  void setLocalParameterValue(const QString &parName, int i,
+                              double value) override;
   void setLocalParameterValue(const QString &parName, int i, double value,
-                              double error);
-  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
-  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
+                              double error) override;
+  void setLocalParameterFixed(const QString &parName, int i,
+                              bool fixed) override;
+  void setLocalParameterTie(const QString &parName, int i,
+                            const QString &tie) override;
   void setLocalParameterConstraint(const QString &parName, int i,
-                                   const QString &constraint);
+                                   const QString &constraint) override;
   void changeTie(const QString &parName, const QString &tie) override;
   void addConstraint(const QString &functionIndex,
                      const QString &constraint) override;

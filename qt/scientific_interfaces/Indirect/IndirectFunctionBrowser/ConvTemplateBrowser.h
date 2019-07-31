@@ -64,7 +64,7 @@ protected slots:
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &);
+  void popupMenu(const QPoint &) override;
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();

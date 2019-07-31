@@ -51,7 +51,7 @@ public:
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
 
-  void IndirectFitDataView::setXRange(std::pair<double, double> const &range);
+  void setXRange(std::pair<double, double> const &range) override;
 
 public slots:
   void displayWarning(const std::string &warning) override;
