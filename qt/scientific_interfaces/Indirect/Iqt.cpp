@@ -87,15 +87,6 @@ void addErrorMessage(UserInputValidator &uiv, std::string const &message) {
     uiv.addErrorMessage(QString::fromStdString(message) + "\n");
 }
 
-void cloneWorkspace(std::string const &workspaceName,
-                    std::string const &cloneName) {
-  auto cloner = AlgorithmManager::Instance().create("CloneWorkspace");
-  cloner->initialize();
-  cloner->setProperty("InputWorkspace", workspaceName);
-  cloner->setProperty("OutputWorkspace", cloneName);
-  cloner->execute();
-}
-
 bool isTechniqueDirect(MatrixWorkspace_const_sptr sampleWorkspace,
                        MatrixWorkspace_const_sptr resWorkspace) {
   try {
@@ -105,16 +96,6 @@ bool isTechniqueDirect(MatrixWorkspace_const_sptr sampleWorkspace,
   } catch (std::exception const &) {
     return false;
   }
-}
-
-void cropWorkspace(std::string const &name, std::string const &newName,
-                   double const &cropValue) {
-  auto croper = AlgorithmManager::Instance().create("CropWorkspace");
-  croper->initialize();
-  croper->setProperty("InputWorkspace", name);
-  croper->setProperty("OutputWorkspace", newName);
-  croper->setProperty("XMin", cropValue);
-  croper->execute();
 }
 
 /**
@@ -324,53 +305,6 @@ void Iqt::errorsClicked() {
 }
 
 bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
-
-std::size_t Iqt::getXMinIndex(Mantid::MantidVec const &yData,
-                              std::vector<double>::const_iterator iter) {
-  auto cropIndex = 0;
-  if (iter != yData.end()) {
-    auto const index = static_cast<int>(iter - yData.begin());
-    cropIndex = index > 0 ? index - 1 : index;
-  } else
-    showMessageBox(
-        "Incorrect data provided for Tiled Plot: y values are out of range");
-  return cropIndex;
-}
-
-double Iqt::getXMinValue(MatrixWorkspace_const_sptr workspace,
-                         std::size_t const &index) {
-  auto const firstSpectraYData = workspace->dataY(index);
-  auto const positionIter =
-      std::find_if(firstSpectraYData.begin(), firstSpectraYData.end(),
-                   [&](double const &value) { return value < 1.0; });
-  auto const cropIndex = getXMinIndex(firstSpectraYData, positionIter);
-  return workspace->dataX(index)[cropIndex];
-}
-
-// void Iqt::plotTiled() {
-//  setTiledPlotIsPlotting(true);
-//
-//  auto const outWs = getADSMatrixWorkspace(m_pythonExportWsName);
-//
-//  auto const tiledPlotWsName = outWs->getName() + "_tiled";
-//  auto const firstTiledPlot = m_uiForm.spTiledPlotFirst->text().toInt();
-//  auto const lastTiledPlot = m_uiForm.spTiledPlotLast->text().toInt();
-//
-//  // Clone workspace before cropping to keep in ADS
-//  if (!AnalysisDataService::Instance().doesExist(tiledPlotWsName))
-//    cloneWorkspace(outWs->getName(), tiledPlotWsName);
-//
-//  // Get first x value which corresponds to a y value below 1
-//  auto const cropValue =
-//      getXMinValue(outWs, static_cast<std::size_t>(firstTiledPlot));
-//  cropWorkspace(tiledPlotWsName, tiledPlotWsName, cropValue);
-//
-//  auto const tiledPlotWs = getADSMatrixWorkspace(tiledPlotWsName);
-//
-//  IndirectTab::plotTiled(tiledPlotWsName, firstTiledPlot, lastTiledPlot);
-//
-//  setTiledPlotIsPlotting(false);
-//}
 
 /**
  * Ensure we have present and valid file/ws inputs.

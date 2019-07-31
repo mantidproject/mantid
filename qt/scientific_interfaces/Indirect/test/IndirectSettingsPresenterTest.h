@@ -97,8 +97,7 @@ public:
 
   void
   test_that_calling_a_presenter_method_will_invoke_the_relevant_view_and_model_methods() {
-    QString const settingGroup("Indirect Settings");
-    checkForLoadingOfSettings(settingGroup);
+    checkForLoadingOfSettings();
   }
 
   ///----------------------------------------------------------------------
@@ -106,18 +105,12 @@ public:
   ///----------------------------------------------------------------------
 
   void test_that_the_okClicked_signal_will_attempt_to_save_the_settings() {
-    QString const settingGroup("Indirect Settings");
-
-    checkForSavingOfSettings(settingGroup);
-
+    checkForSavingOfSettings();
     m_view->emitOkClicked();
   }
 
   void test_that_the_applyClicked_signal_will_attempt_to_save_the_settings() {
-    QString const settingGroup("Indirect Settings");
-
-    checkForSavingOfSettings(settingGroup);
-
+    checkForSavingOfSettings();
     m_view->emitApplyClicked();
   }
 
@@ -136,17 +129,8 @@ public:
     m_view->emitApplyClicked();
   }
 
-  ///----------------------------------------------------------------------
-  /// Unit Tests that test the methods of the presenter
-  ///----------------------------------------------------------------------
-
-  void test_that_loadSettings_will_attempt_to_load_the_relevant_settings() {
-    QString const settingGroup("Indirect Settings");
-    checkForLoadingOfSettings(settingGroup);
-  }
-
 private:
-  void checkForLoadingOfSettings(QString const &settingGroup) {
+  void checkForLoadingOfSettings() {
     std::string const facility("ISIS");
 
     ON_CALL(*m_model, getFacility()).WillByDefault(Return(facility));
@@ -161,7 +145,7 @@ private:
     m_presenter->loadSettings();
   }
 
-  void checkForSavingOfSettings(QString const &settingGroup) {
+  void checkForSavingOfSettings() {
     std::string const facility("ISIS");
 
     ON_CALL(*m_view, getSelectedFacility())
