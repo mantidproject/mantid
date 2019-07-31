@@ -119,6 +119,8 @@ protected:
   std::unique_ptr<IRunNotifier> m_runNotifier;
   /// The search implementation
   std::unique_ptr<ISearcher> m_searcher;
+  /// The algorithm used when the live data monitor is running
+  Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
   std::string liveDataReductionOptions(const std::string &inputWorkspace,
                                        const std::string &instrument);
@@ -136,8 +138,7 @@ private:
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list
   int m_defaultInstrumentIndex;
-  /// The name to use for the live data workspace
-  Mantid::API::IAlgorithm_sptr m_monitorAlg;
+  /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
 
   bool isAnyBatchAutoreducing() const;

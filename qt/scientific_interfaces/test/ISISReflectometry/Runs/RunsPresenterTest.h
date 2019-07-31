@@ -13,9 +13,12 @@
 #include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
+#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MockRunsView.h"
 #include <cxxtest/TestSuite.h>
@@ -49,6 +52,7 @@ public:
         m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
         m_searchString("test search string"), m_searchResult("", "", "") {
+    Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -423,9 +427,9 @@ public:
     // Check the runs table presenter is notified with the expected content
     auto jobs = ReductionJobs();
     auto group = Group("Test group 1");
-    group.appendRow(Row({"12345"}, 0.5, TransmissionRunPair(), RangeInQ(), boost::none,
-               ReductionOptionsMap(),
-               ReductionWorkspaces({"12345"}, TransmissionRunPair())));
+    group.appendRow(Row({"12345"}, 0.5, TransmissionRunPair(), RangeInQ(),
+                        boost::none, ReductionOptionsMap(),
+                        ReductionWorkspaces({"12345"}, TransmissionRunPair())));
     jobs.appendGroup(group);
     EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(jobs)).Times(1);
     presenter.notifyTransfer();
@@ -498,29 +502,41 @@ public:
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  // TODO
-  //  void testStartMonitor() {
-  //    auto presenter = makePresenter();
-  //    EXPECT_CALL(m_view, getMonitorAlgorithmRunner()).Times(1);
-  //    EXPECT_CALL(m_view, getSearchInstrument()).Times(1);
-  //    expectUpdateViewWhenMonitorStarting();
-  //    presenter.notifyStartMonitor();
-  //    verifyAndClear();
-  //  }
-  //
-  //  void testStopMonitor() {
-  //    auto presenter = makePresenter();
-  //    expectUpdateViewWhenMonitorStopped();
-  //    presenter.notifyStopMonitor();
-  //    verifyAndClear();
-  //  }
-  //
-  //  void testStartMonitorComplete() {
-  //    auto presenter = makePresenter();
-  //    expectUpdateViewWhenMonitorStarted();
-  //    presenter.notifyStartMonitorComplete();
-  //    verifyAndClear();
-  //  }
+  void testStartMonitor() {
+    auto presenter = makePresenter();
+    expectGetLiveDataOptions();
+    auto algRunner = expectGetAlgorithmRunner();
+    EXPECT_CALL(*algRunner, startAlgorithm(_)).Times(1);
+    expectUpdateViewWhenMonitorStarting();
+    presenter.notifyStartMonitor();
+    verifyAndClear();
+  }
+
+  void testStopMonitor() {
+    auto presenter = makePresenter();
+    presenter.m_monitorAlg =
+        AlgorithmManager::Instance().createUnmanaged("MonitorLiveData");
+    expectUpdateViewWhenMonitorStopped();
+    presenter.notifyStopMonitor();
+    TS_ASSERT_EQUALS(presenter.m_monitorAlg, nullptr);
+    verifyAndClear();
+  }
+
+  void testMonitorNotRunningAfterStartMonitorFails() {
+    auto presenter = makePresenter();
+    auto algRunner = expectGetAlgorithmRunner();
+    // Ideally we should have a mock algorithm but for now just create the real
+    // one but don't run it so that it will fail to find the results
+    auto startMonitorAlg =
+        AlgorithmManager::Instance().createUnmanaged("StartLiveData");
+    startMonitorAlg->initialize();
+    EXPECT_CALL(*algRunner, getAlgorithm())
+        .Times(1)
+        .WillOnce(Return(startMonitorAlg));
+    expectUpdateViewWhenMonitorStopped();
+    presenter.notifyStartMonitorComplete();
+    verifyAndClear();
+  }
 
 private:
   class RunsPresenterFriend : public RunsPresenter {
@@ -780,6 +796,29 @@ private:
     EXPECT_CALL(m_mainPresenter, isProcessing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
+  }
+
+  void expectGetLiveDataOptions() {
+    auto const instrument = std::string("OFFSPEC");
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    auto options = AlgorithmRuntimeProps{
+        {"InputWorkspace", "TOF_live"},
+        {"Instrument", instrument},
+        {"GetLieValueAlgorithm", "GetLiveInstrumentValue"}};
+    EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
+        .Times(1)
+        .WillOnce(Return(options));
+  }
+
+  boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+    // Get the algorithm runner
+    auto algRunner = boost::make_shared<NiceMock<MockAlgorithmRunner>>();
+    EXPECT_CALL(m_view, getMonitorAlgorithmRunner())
+        .Times(1)
+        .WillOnce(Return(algRunner));
+    return algRunner;
   }
 
   double m_thetaTolerance;
