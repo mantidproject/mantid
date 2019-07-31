@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/WindowIcons.h"
 #include "MantidQtWidgets/Common/WorkspaceIcons.h"
 
+#include <sstream>
 #include <unordered_set>
 
 using namespace Mantid::API;
