@@ -37,46 +37,46 @@ public:
 
   InstrumentOptionDefaultsTest() { Mantid::API::FrameworkManager::Instance(); }
 
-  void testValidMonitorOptions() {
-    auto result = getDefaults("Instrument");
+  void testValidMonitorOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Instrument");
     auto expected = MonitorCorrections(2, true, RangeInLambda(17.0, 18.0),
                                        RangeInLambda(4.0, 10.0));
     TS_ASSERT_EQUALS(result.monitorCorrections(), expected);
   }
 
-  void testInvalidMonitorIndex() { getDefaultsThrows("MonitorIndex_Invalid"); }
+  void testInvalidMonitorIndexFromParamsFile() { getDefaultsFromParamsFileThrows("MonitorIndex_Invalid"); }
 
-  void testInvalidMonitorBackground() {
-    getDefaultsThrows("MonitorBackground_Invalid");
+  void testInvalidMonitorBackgroundFromParamsFile() {
+    getDefaultsFromParamsFileThrows("MonitorBackground_Invalid");
   }
 
-  void testInvalidMonitorIntegral() {
-    getDefaultsThrows("MonitorIntegral_Invalid");
+  void testInvalidMonitorIntegralFromParamsFile() {
+    getDefaultsFromParamsFileThrows("MonitorIntegral_Invalid");
   }
 
-  void testValidWavelengthRange() {
-    auto result = getDefaults("Instrument");
+  void testValidWavelengthRangeFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Instrument");
     auto expected = RangeInLambda(1.5, 17.0);
     TS_ASSERT_EQUALS(result.wavelengthRange(), expected);
   }
 
-  void testInvalidWavelengthRange() {
-    getDefaultsThrows("WavelengthRange_Invalid");
+  void testInvalidWavelengthRangeFromParamsFile() {
+    getDefaultsFromParamsFileThrows("WavelengthRange_Invalid");
   }
 
-  void testValidDetectorOptions() {
-    auto result = getDefaults("Instrument");
+  void testValidDetectorOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Instrument");
     auto expected =
         DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
     TS_ASSERT_EQUALS(result.detectorCorrections(), expected);
   }
 
-  void testInvalidDetectorCorrection() {
-    getDefaultsThrows("DetectorCorrection_Invalid");
+  void testInvalidDetectorCorrectionFromParamsFile() {
+    getDefaultsFromParamsFileThrows("DetectorCorrection_Invalid");
   }
 
 private:
-  Instrument getDefaults(std::string const &paramsType) {
+  Instrument getDefaultsFromParamsFile(std::string const &paramsType) {
     // Get a dummy reflectometry instrument with the given parameters file type.
     // paramsType is appended to "REFL_Parameters_" to form the name for the
     // file
@@ -88,7 +88,7 @@ private:
     return instrumentDefaults.get(instrument);
   }
 
-  void getDefaultsThrows(std::string const &paramsType) {
+  void getDefaultsFromParamsFileThrows(std::string const &paramsType) {
     auto workspace = Mantid::TestHelpers::createREFL_WS(
         5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
     auto instrument = workspace->getInstrument();
