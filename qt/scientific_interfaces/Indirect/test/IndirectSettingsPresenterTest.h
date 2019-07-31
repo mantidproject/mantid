@@ -149,14 +149,7 @@ private:
   void checkForLoadingOfSettings(QString const &settingGroup) {
     std::string const facility("ISIS");
 
-    ON_CALL(*m_model, getSettingsGroup())
-        .WillByDefault(Return(settingGroup.toStdString()));
     ON_CALL(*m_model, getFacility()).WillByDefault(Return(facility));
-    ON_CALL(*m_view,
-            getSetting(settingGroup, QString("restrict-input-by-name")))
-        .WillByDefault(Return(true));
-    ON_CALL(*m_view, getSetting(settingGroup, QString("plot-error-bars")))
-        .WillByDefault(Return(true));
 
     ExpectationSet expectations =
         EXPECT_CALL(*m_model, getFacility()).WillOnce(Return(facility));
@@ -164,12 +157,6 @@ private:
         EXPECT_CALL(*m_view,
                     setSelectedFacility(QString::fromStdString(facility)))
             .Times(1);
-    expectations +=
-        EXPECT_CALL(*m_view, setRestrictInputByNameChecked(true)).Times(1);
-
-    EXPECT_CALL(*m_view, setPlotErrorBarsChecked(true))
-        .Times(1)
-        .After(expectations);
 
     m_presenter->loadSettings();
   }
@@ -177,28 +164,15 @@ private:
   void checkForSavingOfSettings(QString const &settingGroup) {
     std::string const facility("ISIS");
 
-    ON_CALL(*m_model, getSettingsGroup())
-        .WillByDefault(Return(settingGroup.toStdString()));
     ON_CALL(*m_view, getSelectedFacility())
         .WillByDefault(Return(QString::fromStdString(facility)));
     ON_CALL(*m_view, isRestrictInputByNameChecked())
         .WillByDefault(Return(true));
     ON_CALL(*m_view, isPlotErrorBarsChecked()).WillByDefault(Return(true));
 
-    EXPECT_CALL(*m_model, getSettingsGroup())
-        .Times(1)
-        .WillOnce(Return(settingGroup.toStdString()));
-
     Expectation expectation =
         EXPECT_CALL(*m_view, getSelectedFacility()).Times(1);
     EXPECT_CALL(*m_model, setFacility(facility)).Times(1).After(expectation);
-
-    EXPECT_CALL(*m_view, setSetting(settingGroup,
-                                    QString("restrict-input-by-name"), true))
-        .Times(1);
-    EXPECT_CALL(*m_view,
-                setSetting(settingGroup, QString("plot-error-bars"), true))
-        .Times(1);
   }
 
   MockIIndirectSettingsView *m_view;
