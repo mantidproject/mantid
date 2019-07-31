@@ -133,7 +133,7 @@ void CorelliCrossCorrelate::exec() {
   // Need the cumulative sum of the chopper sequence and total transparent
   double totalOpen = 0;
   for (unsigned int i = 1; i < chopperSequenceSplit.size(); i++) {
-    double seqAngle = boost::lexical_cast<double>(chopperSequenceSplit[i]);
+    auto seqAngle = boost::lexical_cast<double>(chopperSequenceSplit[i]);
     sequence[i] = sequence[i - 1] + seqAngle;
     if (i % 2 == 1)
       totalOpen += seqAngle;
@@ -141,7 +141,7 @@ void CorelliCrossCorrelate::exec() {
 
   // Calculate the duty cycle and the event weights from the duty cycle.
   double dutyCycle = totalOpen / sequence.back();
-  float weightAbsorbing = static_cast<float>(-dutyCycle / (1.0 - dutyCycle));
+  auto weightAbsorbing = static_cast<float>(-dutyCycle / (1.0 - dutyCycle));
   g_log.information() << "dutyCycle = " << dutyCycle
                       << " weightTransparent = 1.0"
                       << " weightAbsorbing = " << weightAbsorbing << "\n";
@@ -156,7 +156,7 @@ void CorelliCrossCorrelate::exec() {
   std::vector<DateAndTime> tdc = chopperTdc->timesAsVector();
 
   int offset_int = getProperty("TimingOffset");
-  const int64_t offset = static_cast<int64_t>(offset_int);
+  const auto offset = static_cast<int64_t>(offset_int);
   for (auto &timing : tdc)
     timing += offset;
 
@@ -192,7 +192,7 @@ void CorelliCrossCorrelate::exec() {
                               Mantid::PhysicalConstants::meV;
 
   // Do the cross correlation.
-  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  auto numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   const auto &spectrumInfo = inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))

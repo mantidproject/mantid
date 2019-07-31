@@ -477,8 +477,7 @@ bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
     asmb2->getChildren(grandchildren, false);
 
     for (auto &row : grandchildren) {
-      Detector *d =
-          dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
+      auto *d = dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
       if (d) {
         auto detID = d->getID();
         if (detID < 0)

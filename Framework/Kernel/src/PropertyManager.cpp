@@ -567,7 +567,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
  */
 ::Json::Value PropertyManager::asJson(bool withDefaultValues) const {
   ::Json::Value jsonMap;
-  const int count = static_cast<int>(propertyCount());
+  const auto count = static_cast<int>(propertyCount());
   for (int i = 0; i < count; ++i) {
     Property *p = getPointerToPropertyOrdinal(i);
     bool is_enabled = true;

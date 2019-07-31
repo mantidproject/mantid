@@ -521,8 +521,8 @@ void Fit1D::exec() {
   int iter = 0;
   int status;
   double finalCostFuncVal;
-  double dof = static_cast<double>(
-      l_data.n - l_data.p); // dof stands for degrees of freedom
+  auto dof = static_cast<double>(l_data.n -
+                                 l_data.p); // dof stands for degrees of freedom
 
   // Standard least-squares used if derivative function defined otherwise
   // simplex

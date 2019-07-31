@@ -135,7 +135,7 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   // Get offset between origin and next bin boundary towards the max value
   // NOTE: GCC shows a conversion warning from double to float here. This
   // is incorrect. Silence warning with explicit cast.
-  const Mantid::coord_t offset = static_cast<Mantid::coord_t>(fmod(max, width));
+  const auto offset = static_cast<Mantid::coord_t>(fmod(max, width));
 
   // Create the shifted pMax and pMin
   auto minBin = (pMin - offset) / width;
@@ -206,8 +206,8 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
     } else if (i < pbins.size() && similarBinning(pbins[i])) {
       auto binning = pbins[i];
 
-      Mantid::coord_t pMin = static_cast<Mantid::coord_t>(binning.front());
-      Mantid::coord_t pMax = static_cast<Mantid::coord_t>(binning.back());
+      auto pMin = static_cast<Mantid::coord_t>(binning.front());
+      auto pMax = static_cast<Mantid::coord_t>(binning.back());
       size_t numberOfBins;
 
       setMinMaxBins(pMin, pMax, numberOfBins, inDim, logger);

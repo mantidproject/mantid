@@ -182,8 +182,7 @@ size_t findXIndex(const std::vector<double> &vecx, double x) {
   } else if (x >= vecx.back()) {
     index = vecx.size() - 1;
   } else {
-    vector<double>::const_iterator fiter =
-        lower_bound(vecx.begin(), vecx.end(), x);
+    auto fiter = lower_bound(vecx.begin(), vecx.end(), x);
     if (fiter == vecx.end())
       throw runtime_error("It seems impossible to have this value. ");
 
@@ -879,8 +878,7 @@ void FitPeaks::convertParametersNameToIndex() {
 
   // map the input parameter names to parameter indexes
   for (const auto &paramName : m_peakParamNames) {
-    std::map<std::string, size_t>::iterator locator =
-        parname_index_map.find(paramName);
+    auto locator = parname_index_map.find(paramName);
     if (locator != parname_index_map.end())
       m_initParamIndexes.push_back(locator->second);
     else {
@@ -913,7 +911,7 @@ FitPeaks::fitPeaks() {
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (int wi = static_cast<int>(m_startWorkspaceIndex);
+  for (auto wi = static_cast<int>(m_startWorkspaceIndex);
        wi <= static_cast<int>(m_stopWorkspaceIndex); ++wi) {
 
     PARALLEL_START_INTERUPT_REGION
@@ -971,13 +969,13 @@ double numberCounts(const Histogram &histogram, const double xmin,
   const auto &vector_x = histogram.points();
 
   // determine left boundary
-  std::vector<double>::const_iterator start_iter = vector_x.begin();
+  auto start_iter = vector_x.begin();
   if (xmin > vector_x.front())
     start_iter = std::lower_bound(vector_x.begin(), vector_x.end(), xmin);
   if (start_iter == vector_x.end())
     return 0.; // past the end of the data means nothing to integrate
   // determine right boundary
-  std::vector<double>::const_iterator stop_iter = vector_x.end();
+  auto stop_iter = vector_x.end();
   if (xmax < vector_x.back()) // will set at end of vector if too large
     stop_iter = std::lower_bound(start_iter, stop_iter, xmax);
 
@@ -1257,7 +1255,7 @@ void FitPeaks::calculateFittedPeaks(
   size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_fittedPeakWS))
-  for (int64_t iws = static_cast<int64_t>(m_startWorkspaceIndex);
+  for (auto iws = static_cast<int64_t>(m_startWorkspaceIndex);
        iws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iws) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -1293,9 +1291,9 @@ void FitPeaks::calculateFittedPeaks(
       const auto &vec_x = m_fittedPeakWS->x(static_cast<size_t>(iws));
       std::pair<double, double> peakwindow =
           getPeakFitWindow(static_cast<size_t>(iws), ipeak);
-      std::vector<double>::const_iterator start_x_iter =
+      auto start_x_iter =
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
-      std::vector<double>::const_iterator stop_x_iter =
+      auto stop_x_iter =
           std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
 
       if (start_x_iter == stop_x_iter)
@@ -1415,9 +1413,9 @@ int FitPeaks::estimatePeakParameters(
 
   // get the range of start and stop to construct a function domain
   const auto &vector_x = histogram.points();
-  std::vector<double>::const_iterator start_iter =
+  auto start_iter =
       std::lower_bound(vector_x.begin(), vector_x.end(), peak_window.first);
-  std::vector<double>::const_iterator stop_iter =
+  auto stop_iter =
       std::lower_bound(vector_x.begin(), vector_x.end(), peak_window.second);
   size_t start_index = static_cast<size_t>(start_iter - vector_x.begin());
   size_t stop_index = static_cast<size_t>(stop_iter - vector_x.begin());

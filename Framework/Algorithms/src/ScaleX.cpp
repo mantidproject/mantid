@@ -93,7 +93,7 @@ void ScaleX::exec() {
   const std::string op = getPropertyValue("Operation");
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
   // Get number of histograms
-  int histnumber = static_cast<int>(inputW->getNumberHistograms());
+  auto histnumber = static_cast<int>(inputW->getNumberHistograms());
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, histnumber + 1);
   m_progress->report("Scaling X");
   m_wi_min = 0;
@@ -185,7 +185,7 @@ void ScaleX::execEvent() {
   auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string op = getPropertyValue("Operation");
-  int numHistograms = static_cast<int>(outputWS->getNumberHistograms());
+  auto numHistograms = static_cast<int>(outputWS->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION

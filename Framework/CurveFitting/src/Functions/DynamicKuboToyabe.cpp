@@ -191,11 +191,11 @@ double HKT(const double x, const double G, const double F) {
 double DynamicKuboToyabe::getDKT(double t, double G, double F, double v,
                                  double eps) const {
 
-  const int tsmax = static_cast<int>(std::ceil(32.768 / eps));
+  const auto tsmax = static_cast<int>(std::ceil(32.768 / eps));
 
   static double oldG = -1., oldV = -1., oldF = -1., oldEps = -1.;
 
-  const int maxTsmax = static_cast<int>(std::ceil(32.768 / m_minEps));
+  const auto maxTsmax = static_cast<int>(std::ceil(32.768 / m_minEps));
   static std::vector<double> gStat(maxTsmax), gDyn(maxTsmax);
 
   if ((G != oldG) || (v != oldV) || (F != oldF) || (eps != oldEps)) {
@@ -244,7 +244,7 @@ double DynamicKuboToyabe::getDKT(double t, double G, double F, double v,
 
   // Interpolate table
   // If beyond end, extrapolate
-  int x = int(fabs(t) / eps);
+  auto x = int(fabs(t) / eps);
   if (x > tsmax - 2)
     x = tsmax - 2;
   double xe = (fabs(t) / eps) - x;

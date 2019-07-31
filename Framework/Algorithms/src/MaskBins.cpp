@@ -111,7 +111,7 @@ void MaskBins::exec() {
         this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
 
       // Loop over masking each bin in the range
-      for (int j = static_cast<int>(startBinLoop);
+      for (auto j = static_cast<int>(startBinLoop);
            j < static_cast<int>(endBinLoop); ++j) {
         outputWS->maskBin(wi, j);
       }

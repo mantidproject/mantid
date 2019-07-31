@@ -89,8 +89,7 @@ Valid input is:
   if (item.length() == 2) // sx/sy/sz
   {
     if (tolower(item[1]) != 'o') {
-      const std::size_t pType =
-          static_cast<std::size_t>(tolower(item[1]) - 'x');
+      const auto pType = static_cast<std::size_t>(tolower(item[1]) - 'x');
       if (pType > 2)
         return -3;
       if (!Mantid::Kernel::Strings::section(Line, cent[pType]))

@@ -67,7 +67,7 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
   } else {
     nl = nl->item(0)->childNodes();
     if (nl->length() > 0) {
-      Poco::XML::Text *txt = dynamic_cast<Poco::XML::Text *>(nl->item(0));
+      auto *txt = dynamic_cast<Poco::XML::Text *>(nl->item(0));
       if (txt) {
         m_baseURL = txt->getData();
       } else {

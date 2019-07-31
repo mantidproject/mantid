@@ -111,7 +111,7 @@ void ConvertAxesToRealSpace::exec() {
   alg->executeAsChildAlg();
   MatrixWorkspace_sptr summedWs = alg->getProperty("OutputWorkspace");
 
-  int nHist = static_cast<int>(summedWs->getNumberHistograms());
+  auto nHist = static_cast<int>(summedWs->getNumberHistograms());
   Progress progress(this, 0.4, 1.0, nHist * 4);
 
   std::vector<SpectraData> dataVector(nHist);
@@ -233,7 +233,7 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   // set all the X arrays - share the same vector
-  int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
+  auto nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
   for (int i = 0; i < nOutputHist; ++i) {
     outputWs->setPoints(i, x);

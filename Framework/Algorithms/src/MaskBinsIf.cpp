@@ -97,7 +97,7 @@ void MaskBinsIf::exec() {
     throw std::runtime_error(
         "Vertical axis must be NumericAxis or SpectraAxis");
   }
-  const int64_t numberHistograms =
+  const auto numberHistograms =
       static_cast<int64_t>(outputWorkspace->getNumberHistograms());
   auto progress = std::make_unique<Progress>(this, 0., 1., numberHistograms);
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))

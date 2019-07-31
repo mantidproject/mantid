@@ -12,7 +12,7 @@ from __future__ import (absolute_import, unicode_literals)
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
@@ -21,7 +21,8 @@ PERMISSION_BOX_FUNC = ('mantidqt.widgets.codeeditor.scriptcompatibility.'
                        'permission_box_to_prepend_import')
 
 
-class MultiPythonFileInterpreterTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
 
     def test_default_contains_single_editor(self):
         widget = MultiPythonFileInterpreter()

@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import CalculateFlux, CreateSampleWorkspace, FindDetectorsInShape, mtd
 import numpy as np
-
+import testhelpers
 
 class CalculateFluxTest(unittest.TestCase):
 
@@ -37,7 +37,7 @@ class CalculateFluxTest(unittest.TestCase):
         expectation.fill(self.pixels_in_shape * 0.3)
         expectation[50] = self.pixels_in_shape * 10.3
         reality = mtd["flux"].readY(0)
-        np.testing.assert_almost_equal(reality, expectation, decimal=6)
+        testhelpers.assert_almost_equal(reality, expectation, decimal=6)
 
 if __name__ == "__main__":
     unittest.main()

@@ -337,8 +337,8 @@ MaskDetectors::getRanges(const MatrixWorkspace_sptr &targWS) {
     if (startIndex < 0) {
       startIndex = 0;
     }
-    size_t startIndex_l = static_cast<size_t>(startIndex);
-    size_t endIndex_l = static_cast<size_t>(endIndex);
+    auto startIndex_l = static_cast<size_t>(startIndex);
+    auto endIndex_l = static_cast<size_t>(endIndex);
 
     if (endIndex == EMPTY_INT()) {
       endIndex_l = max_ind;

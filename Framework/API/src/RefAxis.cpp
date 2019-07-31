@@ -85,7 +85,7 @@ bool RefAxis::operator==(const Axis &axis2) const {
   if (length() != axis2.length()) {
     return false;
   }
-  const RefAxis *ra2 = dynamic_cast<const RefAxis *>(&axis2);
+  const auto *ra2 = dynamic_cast<const RefAxis *>(&axis2);
   return ra2 != nullptr;
 }
 

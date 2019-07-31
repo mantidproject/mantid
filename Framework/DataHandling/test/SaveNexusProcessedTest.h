@@ -40,6 +40,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <memory>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -904,6 +905,31 @@ public:
     for (size_t i{0}; i < data.size(); ++i) {
       TS_ASSERT_EQUALS(data[i], i * 11)
     }
+  }
+
+  void test_when_nested_workspaces_are_being_saved() {
+    Workspace2D_sptr ws1 = boost::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr ws2 = boost::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+
+    Mantid::API::WorkspaceGroup_sptr gws1 =
+        boost::make_shared<WorkspaceGroup>();
+    gws1->addWorkspace(ws1);
+    gws1->addWorkspace(ws2);
+    Mantid::API::WorkspaceGroup_sptr gws2 =
+        boost::make_shared<WorkspaceGroup>();
+    gws2->addWorkspace(gws1);
+    AnalysisDataService::Instance().addOrReplace("gws2", gws2);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        saveAlg.setPropertyValue("InputWorkspace", "gws2"));
+    std::string file = "namesdoesntmatterasitshouldntsaveanyway.nxs";
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS(saveAlg.execute(), const std::runtime_error &);
+    TS_ASSERT(!saveAlg.isExecuted());
   }
 
 private:

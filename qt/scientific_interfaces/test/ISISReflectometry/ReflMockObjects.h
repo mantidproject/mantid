@@ -76,6 +76,7 @@ public:
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
   MOCK_METHOD0(anyBatchAutoreductionResumed, void());
   MOCK_METHOD0(anyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(reductionPaused, void());
 
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());

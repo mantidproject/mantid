@@ -434,11 +434,9 @@ void LoadBankFromDiskTask::run() {
   }
 
   const auto bank_size = m_max_id - m_min_id;
-  const uint32_t minSpectraToLoad =
-      static_cast<uint32_t>(m_loader.alg->m_specMin);
-  const uint32_t maxSpectraToLoad =
-      static_cast<uint32_t>(m_loader.alg->m_specMax);
-  const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
+  const auto minSpectraToLoad = static_cast<uint32_t>(m_loader.alg->m_specMin);
+  const auto maxSpectraToLoad = static_cast<uint32_t>(m_loader.alg->m_specMax);
+  const auto emptyInt = static_cast<uint32_t>(EMPTY_INT());
   // check that if a range of spectra were requested that these fit within
   // this bank
   if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
@@ -471,8 +469,8 @@ void LoadBankFromDiskTask::run() {
     mid_id = (m_max_id + m_min_id) / 2;
 
   // No error? Launch a new task to process that data.
-  size_t numEvents = static_cast<size_t>(m_loadSize[0]);
-  size_t startAt = static_cast<size_t>(m_loadStart[0]);
+  auto numEvents = static_cast<size_t>(m_loadSize[0]);
+  auto startAt = static_cast<size_t>(m_loadStart[0]);
 
   // convert things to shared_arrays to share between tasks
   boost::shared_array<uint32_t> event_id_shrd(event_id.release());

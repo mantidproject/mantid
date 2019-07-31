@@ -374,7 +374,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius;
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
-      if (Peak *shapeablePeak = dynamic_cast<Peak *>(&p)) {
+      if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
 
         PeakShape *sphereShape = new PeakShapeSpherical(
             PeakRadiusVector[i], BackgroundInnerRadiusVector[i],

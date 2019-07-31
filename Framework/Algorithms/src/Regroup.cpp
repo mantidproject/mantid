@@ -65,7 +65,7 @@ void Regroup::exec() {
 
   const bool dist = inputW->isDistribution();
 
-  const int histnumber = static_cast<int>(inputW->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inputW->getNumberHistograms());
   HistogramData::BinEdges XValues_new(0);
   auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
@@ -185,7 +185,7 @@ int Regroup::newAxis(const std::vector<double> &params,
                      std::vector<int> &xoldIndex) {
   double xcurr, xs;
   int ibound(2), istep(1), inew(0);
-  int ibounds = static_cast<int>(
+  auto ibounds = static_cast<int>(
       params.size()); // highest index in params array containing a bin boundary
   int isteps = ibounds - 1; // highest index in params array containing a step
 

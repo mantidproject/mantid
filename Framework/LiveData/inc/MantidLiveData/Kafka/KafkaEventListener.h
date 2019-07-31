@@ -31,7 +31,7 @@ class KafkaEventStreamDecoder;
  */
 class DLLExport KafkaEventListener : public API::LiveListener {
 public:
-  KafkaEventListener() = default;
+  KafkaEventListener();
   ~KafkaEventListener() override = default;
 
   //----------------------------------------------------------------------

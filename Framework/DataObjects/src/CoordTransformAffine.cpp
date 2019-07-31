@@ -353,11 +353,10 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
                              "The # of output dimensions of first must be the "
                              "same as the # of input dimensions of second.");
   // Convert both inputs to affine matrices, if needed
-  CoordTransformAffine *firstAff = dynamic_cast<CoordTransformAffine *>(first);
+  auto *firstAff = dynamic_cast<CoordTransformAffine *>(first);
   bool ownFirstAff(false);
   if (!firstAff) {
-    CoordTransformAligned *firstAl =
-        dynamic_cast<CoordTransformAligned *>(first);
+    auto *firstAl = dynamic_cast<CoordTransformAligned *>(first);
     if (!firstAl)
       throw std::runtime_error(
           "CoordTransformAffine::combineTransformations(): first transform "
@@ -366,12 +365,10 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
     firstAff->setMatrix(firstAl->makeAffineMatrix());
     ownFirstAff = true;
   }
-  CoordTransformAffine *secondAff =
-      dynamic_cast<CoordTransformAffine *>(second);
+  auto *secondAff = dynamic_cast<CoordTransformAffine *>(second);
   bool ownSecondAff(false);
   if (!secondAff) {
-    CoordTransformAligned *secondAl =
-        dynamic_cast<CoordTransformAligned *>(second);
+    auto *secondAl = dynamic_cast<CoordTransformAligned *>(second);
     if (!secondAl)
       throw std::runtime_error(
           "CoordTransformAffine::combineTransformations(): second transform "

@@ -44,6 +44,7 @@ Improvements
 - :ref:`FilterEvents <algm-FilterEvents>` has a property `InformativeOutputNames` which changes the name of output workspace to include the start and end time of the slice.
 - :ref:`algm-SumOverlappingTubes` was speeded up due to parallelization of the actual histogramming step.
 - :ref:`CylinderAbsorption <algm-CylinderAbsorption>` now has a `CylinderAxis` property to set the direction of the cylinder axis.
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` now throws a clearer error on saving of nested groups of groups.
 
 Instrument Definition Files
 ###########################

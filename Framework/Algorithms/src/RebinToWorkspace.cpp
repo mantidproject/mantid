@@ -123,7 +123,7 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin,
   }
   auto outputWSEvents = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-  const int numHist = static_cast<int>(toRebin->getNumberHistograms());
+  const auto numHist = static_cast<int>(toRebin->getNumberHistograms());
   Progress prog(this, 0.5, 1.0, numHist);
 
   // everything gets the same bin boundaries as the first spectrum
@@ -156,7 +156,7 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin,
                                  API::MatrixWorkspace_sptr &toMatch) {
   const auto &inputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(toRebin);
-  const int numHist = static_cast<int>(toRebin->getNumberHistograms());
+  const auto numHist = static_cast<int>(toRebin->getNumberHistograms());
   // everything gets the same bin boundaries as the first spectrum
   const bool matchingX =
       (toRebin->getNumberHistograms() != toMatch->getNumberHistograms());

@@ -7,14 +7,15 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 from Muon.GUI.Common.utilities.muon_test_helpers import IteratorWithException
 
 
-class LoadRunWidgetModelTest(GuiTest):
+@start_qapplication
+class LoadRunWidgetModelTest(unittest.TestCase):
     def setUp(self):
         setup_context_for_tests(self)
         self.data_context.instrument = 'EMU'

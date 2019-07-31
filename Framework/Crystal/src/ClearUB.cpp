@@ -74,12 +74,11 @@ bool ClearUB::clearSingleExperimentInfo(ExperimentInfo *const experimentInfo,
  */
 bool ClearUB::doExecute(Workspace *const ws, bool dryRun) {
   bool doesClear = false;
-  ExperimentInfo *experimentInfo = dynamic_cast<ExperimentInfo *>(ws);
+  auto *experimentInfo = dynamic_cast<ExperimentInfo *>(ws);
   if (experimentInfo) {
     doesClear = clearSingleExperimentInfo(experimentInfo, dryRun);
   } else {
-    MultipleExperimentInfos *experimentInfos =
-        dynamic_cast<MultipleExperimentInfos *>(ws);
+    auto *experimentInfos = dynamic_cast<MultipleExperimentInfos *>(ws);
     if (!experimentInfos) {
       if (!dryRun) {
         throw std::invalid_argument("Input workspace is neither of type "

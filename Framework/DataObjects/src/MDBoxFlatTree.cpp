@@ -415,7 +415,7 @@ void MDBoxFlatTree::loadExperimentInfos(
     const std::string &name = entry.first;
     if (boost::starts_with(name, "experiment")) {
       try {
-        uint16_t num =
+        auto num =
             boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
         if (num < std::numeric_limits<uint16_t>::max() - 1) {
           // dublicated experiment info names are impossible due to the
@@ -510,7 +510,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
 
   uint64_t totalNumEvents(0);
   m_nDim = static_cast<int>(bc->getNDims());
-  int maxNdim = int(MDEventFactory::getMaxNumDim());
+  auto maxNdim = int(MDEventFactory::getMaxNumDim());
   if (m_nDim <= 0 || m_nDim > maxNdim)
     throw std::runtime_error(
         "Workspace dimesnions are not defined properly in the box controller");
@@ -835,7 +835,7 @@ void saveMatrix(::NeXus::File *const file, std::string name,
                 std::string tag) {
   std::vector<T> v = m.getVector();
   // Number of data points
-  int nPoints = static_cast<int>(v.size());
+  auto nPoints = static_cast<int>(v.size());
 
   file->makeData(name, type, nPoints, true);
   // Need a pointer

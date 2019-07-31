@@ -56,7 +56,7 @@ PoldiTimeTransformer::detectorElementIntensity(double centreD,
 
 double PoldiTimeTransformer::calculatedTotalIntensity(double centreD) const {
   double sum = 0.0;
-  double chopperSlitFactor = static_cast<double>(m_chopperSlits);
+  auto chopperSlitFactor = static_cast<double>(m_chopperSlits);
 
   for (size_t i = 0; i < m_detectorElementData.size(); ++i) {
     sum += chopperSlitFactor * detectorElementIntensity(centreD, i);

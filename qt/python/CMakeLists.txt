@@ -46,7 +46,7 @@ if(ENABLE_WORKBENCH)
                    PythonInterface)
 
   if(ENABLE_MANTIDPLOT)
-    add_dependencies(mantidqt mantidqt_commonqt4)
+    add_dependencies(mantidqt mantidqt_commonqt4 mantidqt_iconsqt4)
   endif()
 
   if(MSVC)
@@ -60,7 +60,7 @@ if(ENABLE_WORKBENCH)
   endif()
 
   # Testing
-
+  add_dependencies(GUITests mantidqt)
   # ctest targets
   set(
     PYTHON_TEST_FILES

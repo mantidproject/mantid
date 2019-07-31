@@ -10,7 +10,7 @@ import unittest
 
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
 
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view_new
@@ -31,7 +31,8 @@ def retrieve_combobox_info(combo_box):
     return output_list
 
 
-class MaxEntPresenterTest(GuiTest):
+@start_qapplication
+class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context(True)
 
@@ -106,7 +107,7 @@ class MaxEntPresenterTest(GuiTest):
         self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', maxent_workspace, mock.MagicMock())
 
         workspace_wrapper_mock.assert_called_once_with(maxent_workspace,
-                                                       'Muon Data/MUSR22725 MA/MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
+                                                       'MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_get_output_options_defaults_returns_correctly(self):

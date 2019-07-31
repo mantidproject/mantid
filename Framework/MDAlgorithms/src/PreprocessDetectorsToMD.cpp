@@ -105,7 +105,7 @@ void PreprocessDetectorsToMD::exec() {
       targWS = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
           API::AnalysisDataService::Instance().retrieve(wsName));
       if (targWS) {
-        int *pMasksArray = targWS->getColDataArray<int>("detMask");
+        auto *pMasksArray = targWS->getColDataArray<int>("detMask");
         if (pMasksArray)
           updateMasks = true;
         // was this workspace calculated without eFixed and now we need one?
@@ -222,7 +222,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
   auto &detDir = targWS->getColVector<Kernel::V3D>("DetDirections");
 
   // Efixed; do we need one and does one exist?
-  double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
+  auto Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
   float *pEfixedArray(nullptr);
   const Geometry::ParameterMap &pmap = inputWS->constInstrumentParameters();
   if (m_getEFixed)
@@ -317,7 +317,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
 void PreprocessDetectorsToMD::updateMasksState(
     const API::MatrixWorkspace_const_sptr &inputWS,
     DataObjects::TableWorkspace_sptr &targWS) {
-  int *pMasksArray = targWS->getColDataArray<int>("detMask");
+  auto *pMasksArray = targWS->getColDataArray<int>("detMask");
   if (!pMasksArray)
     throw std::invalid_argument(
         "target workspace " + targWS->getName() +

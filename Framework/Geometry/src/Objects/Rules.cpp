@@ -421,7 +421,7 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
       TRule = PObj->clone();
     } else // Basic surf object
     {
-      SurfPoint *SX = dynamic_cast<SurfPoint *>(Ptr);
+      auto *SX = dynamic_cast<SurfPoint *>(Ptr);
       if (!SX) {
         throw std::logic_error("Failed to cast Rule object to SurfPoint");
       }
@@ -585,7 +585,7 @@ int Rule::substituteSurf(const int SurfN, const int newSurfN,
 */
 {
   int cnt(0);
-  SurfPoint *Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
+  auto *Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
   while (Ptr) {
     Ptr->setKeyN(Ptr->getSign() * newSurfN);
     Ptr->setKey(SPtr);
@@ -618,7 +618,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
       if (tmpC)
         TreeLine.push(tmpC);
     } else {
-      const SurfPoint *SurX = dynamic_cast<const SurfPoint *>(tmpA);
+      const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX)
         IList.push_back(SurX->getKeyN());
       else {

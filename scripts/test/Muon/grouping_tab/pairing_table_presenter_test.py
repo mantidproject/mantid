@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 import six
 from qtpy.QtWidgets import QWidget
 
@@ -24,7 +24,8 @@ def pair_name():
         name.append("pair_" + str(i+1))
     return name
 
-class PairingTablePresenterTest(GuiTest):
+@start_qapplication
+class PairingTablePresenterTest(unittest.TestCase):
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

@@ -333,8 +333,7 @@ void ComptonScatteringCountRate::cacheBackground(
   // Check for the order attribute
   if (function1D->hasAttribute(m_bkgdOrderAttr)) {
     m_bkgdPolyN = function1D->getAttribute(m_bkgdOrderAttr).asInt();
-    const size_t npars =
-        static_cast<size_t>(m_bkgdPolyN + 1); // + constant term
+    const auto npars = static_cast<size_t>(m_bkgdPolyN + 1); // + constant term
     // we assume the parameters are at index 0->N on the background so we need
     // to reverse them
     for (size_t i = npars; i > 0; --i) // i = from npars->1

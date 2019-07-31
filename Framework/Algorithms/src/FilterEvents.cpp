@@ -602,14 +602,10 @@ void FilterEvents::copyNoneSplitLogs(
     std::string name_i = prop_i->name();
 
     // cast to different type of TimeSeriesProperties
-    TimeSeriesProperty<double> *dbl_prop =
-        dynamic_cast<TimeSeriesProperty<double> *>(prop_i);
-    TimeSeriesProperty<int> *int_prop =
-        dynamic_cast<TimeSeriesProperty<int> *>(prop_i);
-    TimeSeriesProperty<bool> *bool_prop =
-        dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
-    TimeSeriesProperty<string> *string_prop =
-        dynamic_cast<TimeSeriesProperty<string> *>(prop_i);
+    auto *dbl_prop = dynamic_cast<TimeSeriesProperty<double> *>(prop_i);
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(prop_i);
+    auto *bool_prop = dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
+    auto *string_prop = dynamic_cast<TimeSeriesProperty<string> *>(prop_i);
 
     // check for time series properties
     if (dbl_prop || int_prop || bool_prop || string_prop) {
@@ -765,8 +761,7 @@ void FilterEvents::splitTimeSeriesProperty(
   // generate new propertys for the source to split to
   std::vector<TimeSeriesProperty<TYPE> *> output_vector;
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-    TimeSeriesProperty<TYPE> *new_property =
-        new TimeSeriesProperty<TYPE>(property_name);
+    auto *new_property = new TimeSeriesProperty<TYPE>(property_name);
     new_property->setUnits(tsp->units());
     output_vector.push_back(new_property);
   }
@@ -963,10 +958,10 @@ void FilterEvents::processMatrixSplitterWorkspace() {
 
   for (size_t i = 0; i < sizey; ++i) {
 
-    int y_index = static_cast<int>(Y[i]);
+    auto y_index = static_cast<int>(Y[i]);
 
     // try to find Y[i] in m_yIndexMap
-    std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
+    auto mapiter = m_yIndexMap.find(y_index);
     if (mapiter == m_yIndexMap.end()) {
       // new
       // default to 0 as undefined slot.
@@ -1132,7 +1127,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
 
   // Set up new workspaces
   int numoutputws = 0;
-  double numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
+  auto numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
   double wsgindex = 0.;
 
   // Work out how it has been split so the naming can be done
@@ -1662,7 +1657,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     map<detid_t, double>::iterator fiter;
     // correction factor
     for (fiter = toffactormap.begin(); fiter != toffactormap.end(); ++fiter) {
-      size_t wsindex = static_cast<size_t>(fiter->first);
+      auto wsindex = static_cast<size_t>(fiter->first);
       if (wsindex < numhist)
         m_detTofFactors[wsindex] = fiter->second;
       else {
@@ -1673,7 +1668,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     }
     // correction shift
     for (fiter = tofshiftmap.begin(); fiter != tofshiftmap.end(); ++fiter) {
-      size_t wsindex = static_cast<size_t>(fiter->first);
+      auto wsindex = static_cast<size_t>(fiter->first);
       if (wsindex < numhist)
         m_detTofOffsets[wsindex] = fiter->second;
       else {
@@ -2005,12 +2000,9 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
       m_eventWS->mutableRun().getProperties();
   for (auto ip : allprop) {
     // cast to double log and integer log
-    Kernel::TimeSeriesProperty<double> *dbltimeprop =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
-    Kernel::TimeSeriesProperty<int> *inttimeprop =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
-    Kernel::TimeSeriesProperty<bool> *booltimeprop =
-        dynamic_cast<Kernel::TimeSeriesProperty<bool> *>(ip);
+    auto *dbltimeprop = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
+    auto *inttimeprop = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
+    auto *booltimeprop = dynamic_cast<Kernel::TimeSeriesProperty<bool> *>(ip);
 
     // append to vector if it is either double TimeSeries or int TimeSeries
     if (dbltimeprop || inttimeprop || booltimeprop) {

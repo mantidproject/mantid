@@ -97,7 +97,7 @@ void WienerSmooth::exec() {
   const size_t nOutputSpectra = wsIndexList.size();
 
   // smooth the first spectrum to find out the output blocksize
-  size_t wsIndex = static_cast<size_t>(wsIndexList.front());
+  auto wsIndex = static_cast<size_t>(wsIndexList.front());
   auto first = smoothSingleSpectrum(inputWS, wsIndex);
 
   // create full output workspace by copying all settings from tinputWS
@@ -300,7 +300,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     }
     double cd2 = log(cd1);
     wf[i] = cd1 / (1.0 + cd1);
-    double j = static_cast<double>(i + 1);
+    auto j = static_cast<double>(i + 1);
     xx += j * j;
     xy += j * cd2;
     ym += cd2;
@@ -311,7 +311,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     g_log.debug() << "Noise start index " << i0 << '\n';
 
     // high frequency filter values: smooth decreasing function
-    double ri0f = static_cast<double>(i0 + 1);
+    auto ri0f = static_cast<double>(i0 + 1);
     double xm = (1.0 + ri0f) / 2;
     ym /= ri0f;
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
@@ -326,7 +326,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
       g_log.warning() << "Failed to build Wiener filter: no smoothing.\n";
       ri1 = static_cast<double>(i0);
     }
-    size_t i1 = static_cast<size_t>(ri1);
+    auto i1 = static_cast<size_t>(ri1);
     if (i1 > n2)
       i1 = n2;
     for (size_t i = i0; i < i1; ++i) {

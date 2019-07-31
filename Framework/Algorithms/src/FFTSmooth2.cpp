@@ -78,7 +78,7 @@ void FFTSmooth2::exec() {
       inWS, send - s0, inWS->x(0).size(), inWS->y(0).size());
 
   // Symmetrize the input spectrum
-  int dn = static_cast<int>(inWS->y(0).size());
+  auto dn = static_cast<int>(inWS->y(0).size());
   API::MatrixWorkspace_sptr symmWS = API::WorkspaceFactory::Instance().create(
       "Workspace2D", 1, inWS->x(0).size() + dn, inWS->y(0).size() + dn);
 
@@ -211,8 +211,8 @@ void FFTSmooth2::exec() {
  */
 void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
                       API::MatrixWorkspace_sptr &filteredWS) {
-  int mx = static_cast<int>(unfilteredWS->x(0).size());
-  int my = static_cast<int>(unfilteredWS->y(0).size());
+  auto mx = static_cast<int>(unfilteredWS->x(0).size());
+  auto my = static_cast<int>(unfilteredWS->y(0).size());
   int ny = my / n;
 
   if (ny == 0)
@@ -247,8 +247,8 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
 void FFTSmooth2::Butterworth(int n, int order,
                              API::MatrixWorkspace_sptr &unfilteredWS,
                              API::MatrixWorkspace_sptr &filteredWS) {
-  int mx = static_cast<int>(unfilteredWS->x(0).size());
-  int my = static_cast<int>(unfilteredWS->y(0).size());
+  auto mx = static_cast<int>(unfilteredWS->x(0).size());
+  auto my = static_cast<int>(unfilteredWS->y(0).size());
   int ny = my / n;
 
   if (ny == 0)

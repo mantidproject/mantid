@@ -31,8 +31,7 @@ ImplicitFunctionParameterParser *ImplicitFunctionParameterParserFactoryImpl::
   ImplicitFunctionParameterParser *paramParser = nullptr;
   ImplicitFunctionParameterParser *nextParser = nullptr;
   for (unsigned long i = 0; i < parameters->length(); i++) {
-    Poco::XML::Element *parameter =
-        dynamic_cast<Poco::XML::Element *>(parameters->item(i));
+    auto *parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(i));
     std::string paramParserName =
         parameter->getChildElement("Type")->innerText() +
         "Parser"; // Append parser to the name. Fixed convention

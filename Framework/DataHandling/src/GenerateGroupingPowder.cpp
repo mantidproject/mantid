@@ -77,7 +77,7 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Workspace contains no detectors.");
 
   const double step = getProperty("AngleStep");
-  const size_t numSteps = static_cast<size_t>(180. / step + 1);
+  const auto numSteps = static_cast<size_t>(180. / step + 1);
 
   std::vector<std::vector<detid_t>> groups(numSteps);
   std::vector<double> twoThetaAverage(numSteps, 0.);
@@ -91,7 +91,7 @@ void GenerateGroupingPowder::exec() {
     const auto &det = spectrumInfo.detector(i);
     const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
     const double r = spectrumInfo.l2(i);
-    const size_t where = static_cast<size_t>(tt / step);
+    const auto where = static_cast<size_t>(tt / step);
     twoThetaAverage[where] += tt;
     rAverage[where] += r;
     if (spectrumInfo.hasUniqueDetector(i)) {

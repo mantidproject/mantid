@@ -160,7 +160,7 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
                                                double &sum, double &error,
                                                int &nPixels) {
   // Number of spectra
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(rebinnedWS->getNumberHistograms());
   sum = 0.0;
   error = 0.0;

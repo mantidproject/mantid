@@ -128,8 +128,7 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
     Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces =
         elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i) {
-      Poco::XML::Element *elem =
-          dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
+      auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
       std::string plugin = elem->getAttribute("plugin");
       if (!plugin.empty()) {
         m_archiveSearch.push_back(plugin);
@@ -147,8 +146,7 @@ void FacilityInfo::fillTimezone(const Poco::XML::Element *elem) {
   } else if (pNL_timezones->length() == 1) {
     pNL_timezones = pNL_timezones->item(0)->childNodes();
     if (pNL_timezones->length() > 0) {
-      Poco::XML::Text *txt =
-          dynamic_cast<Poco::XML::Text *>(pNL_timezones->item(0));
+      auto *txt = dynamic_cast<Poco::XML::Text *>(pNL_timezones->item(0));
       m_timezone = txt->getData();
     }
   } else {
@@ -165,8 +163,7 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
   m_instruments.reserve(n);
 
   for (unsigned long i = 0; i < n; ++i) {
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
+    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
     if (elem) {
       try {
         InstrumentInfo instr(this, elem);
@@ -188,8 +185,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       elem->getElementsByTagName("computeResource");
   unsigned long n = pNL_compute->length();
   for (unsigned long i = 0; i < n; i++) {
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
+    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
 
     if (elem) {
       try {

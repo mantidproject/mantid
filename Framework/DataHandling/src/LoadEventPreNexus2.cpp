@@ -220,7 +220,7 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
   // get the size of the file in bytes and reset the handle back to the
   // beginning
   handle.seekg(0, std::ios::end);
-  const size_t filesize = static_cast<size_t>(handle.tellg());
+  const auto filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
   if (filesize % objSize == 0)
@@ -864,7 +864,7 @@ void LoadEventPreNexus2::procEvents(
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = workspace->getSpectrum(wi);
@@ -976,7 +976,7 @@ void LoadEventPreNexus2::procEventsLinear(
   // Starting pulse time
   DateAndTime pulsetime;
   int64_t pulse_i = 0;
-  int64_t numPulses = static_cast<int64_t>(num_pulses);
+  auto numPulses = static_cast<int64_t>(num_pulses);
   if (event_indices.size() < num_pulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -1231,7 +1231,7 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
 
   // Open the file; will throw if there is any problem
   BinaryFile<PixelType> pixelmapFile(filename);
-  PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
+  auto max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
   this->pixelmap = pixelmapFile.loadAllIntoVector();
 

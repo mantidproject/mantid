@@ -184,6 +184,21 @@ const EventList &EventWorkspace::getSpectrum(const size_t index) const {
   return *data[index];
 }
 
+/**
+ * Returns a pointer to the EventList for a given spectrum in a timely manner.
+ *
+ * Very minimal checking and preprocessing is performed by this function and it
+ * should only be used in tight loops where getSpectrum is too costly.
+ *
+ * See the implementation of the non-const getSpectrum to see what is missing.
+ *
+ * @param index Workspace index
+ * @return Pointer to EventList
+ */
+EventList *EventWorkspace::getSpectrumUnsafe(const size_t index) {
+  return data[index].get();
+}
+
 double EventWorkspace::getTofMin() const { return this->getEventXMin(); }
 
 double EventWorkspace::getTofMax() const { return this->getEventXMax(); }
@@ -237,7 +252,7 @@ void EventWorkspace::getPulseTimeMinMax(
   Tmax = DateAndTime::minimum();
   Tmin = DateAndTime::maximum();
 
-  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
+  auto numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {
     DateAndTime tTmax = DateAndTime::minimum();
@@ -377,7 +392,7 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   if (this->getNumberEvents() == 0)
     return;
 
-  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
+  auto numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {
     double tXmin = xmin;
@@ -707,10 +722,9 @@ template <>
 DLLExport Mantid::DataObjects::EventWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -725,10 +739,9 @@ template <>
 DLLExport Mantid::DataObjects::EventWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

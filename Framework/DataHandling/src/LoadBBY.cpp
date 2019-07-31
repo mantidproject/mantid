@@ -348,7 +348,7 @@ void LoadBBY::exec() {
   // set log values
   API::LogManager &logManager = eventWS->mutableRun();
 
-  int frame_count = static_cast<int>(eventCounter.numFrames());
+  auto frame_count = static_cast<int>(eventCounter.numFrames());
 
   logManager.addProperty("filename", filename);
   logManager.addProperty("att_pos", static_cast<int>(instrumentInfo.att_pos));

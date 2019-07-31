@@ -58,7 +58,7 @@ struct AlphaAngleCalculator {
     const auto sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
     auto inPlane = sampleDetVec;
     project(inPlane);
-    return sampleDetVec.angle(inPlane);
+    return sampleDetVec.cosAngle(inPlane);
   }
   virtual void project(V3D &v) const = 0;
   virtual ~AlphaAngleCalculator() = default;
@@ -86,7 +86,8 @@ struct SolidAngleCalculator {
                        const DetectorInfo &detectorInfo,
                        const std::string &method, const double pixelArea)
       : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo),
-        m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()) {
+        m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()),
+        m_beamLine(m_samplePos - detectorInfo.sourcePosition()) {
     if (method.find("Vertical") != std::string::npos) {
       m_alphaAngleCalculator =
           std::make_unique<AlphaAngleVertical>(detectorInfo);
@@ -103,6 +104,7 @@ protected:
   const DetectorInfo &m_detectorInfo;
   const double m_pixelArea;
   const V3D m_samplePos;
+  const V3D m_beamLine;
   std::unique_ptr<const AlphaAngleCalculator> m_alphaAngleCalculator;
 };
 
@@ -116,7 +118,8 @@ struct GenericShape : public SolidAngleCalculator {
 struct Rectangle : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
+    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
+    const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -128,7 +131,7 @@ struct Rectangle : public SolidAngleCalculator {
 struct Tube : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
+    const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -140,8 +143,9 @@ struct Tube : public SolidAngleCalculator {
 struct Wing : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
-    const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
+    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
+    const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
+    const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -198,7 +202,7 @@ void SolidAngle::exec() {
   int m_MinSpec = getProperty("StartWorkspaceIndex");
   int m_MaxSpec = getProperty("EndWorkspaceIndex");
 
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if (m_MinSpec > numberOfSpectra) {

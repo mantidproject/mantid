@@ -97,6 +97,9 @@ def qapplication():
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)
 
+        # removes the ? button from the title bar of dialog windows
+        app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
+
     return app
 
 

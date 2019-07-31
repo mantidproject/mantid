@@ -16,8 +16,8 @@ import unittest
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import numpy as np
-from numpy.testing import assert_almost_equal
 from qtpy.QtCore import Qt
+from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
