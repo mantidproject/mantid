@@ -1328,7 +1328,7 @@ ROTATION TESTS
   * test when orientation is not written and location exists, dependency
   is 'location' path and location is self dependent.
   * test when both orientation and location are written, dependency
-  chain is: self => orientation => location => self dependent.
+  chain is: => orientation => location => self dependent.
   * test when neither orientation nor location are written, dependency is self.
 
   ====================================================================
@@ -1392,17 +1392,18 @@ ROTATION TESTS
     // TRANSFORMATIONS ARE WRITTEN THE SAME FOR ALL. NECESSARY TESTS FOR MONITOR
     // AND DETECTOR ALSO?
 
-    const V3D detectorLocation(0, 0, 10);
-    const V3D sourceLocation(0, 0, -10);
+    const V3D detectorLocation(0.0, 0.0, 10.0);
+    const V3D sourceLocation(0.0, 0.0, -10.0);
 
-    const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
+    const Quat sourceRotation(0.0, V3D(0.0, 1.0, 0.0)); // set to zero
 
     ScopedFileHandle fileResource("no_orientation_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument =
         ComponentCreationHelper::createInstrumentWithSourceRotation(
-            sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
+            sourceLocation, Mantid::Kernel::V3D(0.0, 0.0, 0.0),
+            detectorLocation,
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
@@ -1437,7 +1438,7 @@ ROTATION TESTS
   }
 
   void
-  test_when_both_orientation_and_Location_are_written_dependency_chain_is_self_orientation_location_self_dependent() {
+  test_when_both_orientation_and_Location_are_written_dependency_chain_is_orientation_location_self_dependent() {
 
     // NOTE: USING SOURCE ONLY BECAUSE IT IS THE MOST PLAIN EXAMPLE, AND
     // TRANSFORMATIONS ARE WRITTEN THE SAME FOR ALL. NECESSARY TESTS FOR MONITOR
