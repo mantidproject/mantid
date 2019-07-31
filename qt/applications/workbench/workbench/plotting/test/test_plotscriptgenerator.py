@@ -7,8 +7,10 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+from copy import copy
 
 import matplotlib
+
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from numpy import array
@@ -27,6 +29,12 @@ LINE2D_KWARGS = {
     'markerfacecoloralt': 'k', 'markersize': 1.3, 'markevery': 2,
     'solid_capstyle': 'butt', 'solid_joinstyle': 'round',
     'visible': False, 'zorder': 1.4, 'specNum': 1}
+ERRORBAR_ONLY_KWARGS = {
+    'ecolor': '#ff0000', 'elinewidth': 1.5, 'capsize': 1.6, 'capthick': 1.7,
+    'barsabove': True, 'errorevery': 1}
+ERRORBAR_KWARGS = copy(LINE2D_KWARGS)
+ERRORBAR_KWARGS.update(ERRORBAR_ONLY_KWARGS)
+MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': False}
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
@@ -86,18 +94,42 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1, projection='mantid')
         line = ax.plot(self.test_ws, **LINE2D_KWARGS)[0]
-        ret = PSG.get_plot_command_kwargs_from_line2d(line)
+        ret = PSG._get_plot_command_kwargs_from_line2d(line)
         self.assertEqual(LINE2D_KWARGS, ret)
 
     def test_generate_plot_command_returns_correct_string_for_line2d(self):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1, projection='mantid')
-        line = ax.plot(self.test_ws, **LINE2D_KWARGS)[0]
-        ret = PSG.generate_plot_command(line)
+        kwargs = copy(LINE2D_KWARGS)
+        kwargs.update(MANTID_ONLY_KWARGS)
+        line = ax.plot(self.test_ws, **kwargs)[0]
+        output = PSG.generate_plot_command(line)
         expected_command = (
             "plot({}, {})".format(self.test_ws.name(),
-                                  convert_args_to_string(None, LINE2D_KWARGS)))
-        self.assertEqual(expected_command, ret)
+                                  convert_args_to_string(None, kwargs)))
+        self.assertEqual(expected_command, output)
+
+    def test_get_errorbar_specific_plot_kwargs_returns_correct_dict(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        kwargs = copy(ERRORBAR_KWARGS)
+        kwargs.pop('markeredgewidth')
+        err_cont = ax.errorbar(self.test_ws, **kwargs)
+        output = PSG._get_errorbar_specific_plot_kwargs(err_cont)
+        self.assertEqual(ERRORBAR_ONLY_KWARGS, output)
+
+    def test_generate_plot_command_returns_correct_string_for_errorbar_container(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        kwargs = copy(ERRORBAR_KWARGS)
+        kwargs.pop('markeredgewidth')
+        kwargs.update(MANTID_ONLY_KWARGS)
+        err_cont = ax.errorbar(self.test_ws, **kwargs)
+        output = PSG.generate_plot_command(err_cont)
+        expected_command = (
+            "errorbar({}, {})".format(self.test_ws.name(),
+                                      convert_args_to_string(None, kwargs)))
+        self.assertEqual(expected_command, output)
 
     # Utility function tests
     def test_convert_args_to_string_returns_correct_string(self):
