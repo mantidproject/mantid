@@ -40,14 +40,15 @@ namespace CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
     IndirectPlotOptionsView *view, IPyRunner *pythonRunner,
-    PlotWidget const &plotType, std::string const &fixedIndices)
+    PlotWidget const &plotType, std::string const &fixedIndices,
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
     : QObject(nullptr),
       m_wsRemovedObserver(*this,
                           &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this,
                            &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
-      m_view(view),
-      m_model(std::make_unique<IndirectPlotOptionsModel>(pythonRunner)) {
+      m_view(view), m_model(std::make_unique<IndirectPlotOptionsModel>(
+                        pythonRunner, availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 
@@ -83,7 +84,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(
   connect(m_view, SIGNAL(plotTiledClicked()), this, SLOT(plotTiled()));
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
-  m_view->setPlotType(plotType);
+  m_view->setPlotType(plotType, m_model->availableActions());
   m_view->setIndices(QString::fromStdString(fixedIndices));
   m_model->setFixedIndices(fixedIndices);
 
@@ -102,11 +103,14 @@ void IndirectPlotOptionsPresenter::watchADS(bool on) {
 }
 
 void IndirectPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
-  m_view->setPlotType(plotType);
+  m_view->setPlotType(plotType, m_model->availableActions());
 }
 
 void IndirectPlotOptionsPresenter::setPlotting(bool plotting) {
-  m_view->setPlotButtonText(plotting ? "Plotting..." : "Plot Spectra");
+  m_view->setPlotButtonText(
+      plotting ? "Plotting..."
+               : QString::fromStdString(
+                     m_model->availableActions()["Plot Spectra"]));
   setOptionsEnabled(!plotting);
 }
 
@@ -198,7 +202,7 @@ void IndirectPlotOptionsPresenter::plotBins() {
     auto const indicesString = m_view->selectedIndices().toStdString();
     if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
       setPlotting(true);
-      m_model->plotBins();
+      m_model->plotBins(indicesString);
       setPlotting(false);
     } else {
       m_view->displayWarning("Plot Bins failed: Invalid bin indices provided.");

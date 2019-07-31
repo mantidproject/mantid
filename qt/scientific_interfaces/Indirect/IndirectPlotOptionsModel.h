@@ -21,9 +21,15 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel(IPyRunner *pythonRunner);
+  IndirectPlotOptionsModel(
+      IPyRunner *pythonRunner,
+      boost::optional<std::map<std::string, std::string>> const
+          &availableActions = boost::none);
   /// Used by the unit tests so that m_plotter can be mocked
-  IndirectPlotOptionsModel(IndirectPlotter *plotter);
+  IndirectPlotOptionsModel(
+      IndirectPlotter *plotter,
+      boost::optional<std::map<std::string, std::string>> const
+          &availableActions = boost::none);
   virtual ~IndirectPlotOptionsModel();
 
   virtual bool setWorkspace(std::string const &workspaceName);
@@ -46,12 +52,14 @@ public:
   boost::optional<std::string> indices() const;
 
   virtual void plotSpectra();
-  virtual void plotBins();
+  virtual void plotBins(std::string const &binIndices);
   virtual void plotContour();
   virtual void plotTiled();
 
   boost::optional<std::string>
   singleDataPoint(MantidAxis const &axisType) const;
+
+  std::map<std::string, std::string> availableActions() const;
 
 private:
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -63,6 +71,7 @@ private:
   checkWorkspaceSize(std::string const &workspaceName,
                      MantidAxis const &axisType) const;
 
+  std::map<std::string, std::string> m_actions;
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;
   boost::optional<std::string> m_workspaceName;

@@ -26,10 +26,12 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
-                               IPyRunner *pythonRunner,
-                               PlotWidget const &plotType = PlotWidget::Spectra,
-                               std::string const &fixedIndices = "");
+  IndirectPlotOptionsPresenter(
+      IndirectPlotOptionsView *view, IPyRunner *pythonRunner,
+      PlotWidget const &plotType = PlotWidget::Spectra,
+      std::string const &fixedIndices = "",
+      boost::optional<std::map<std::string, std::string>> const
+          &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked
   IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
                                IndirectPlotOptionsModel *model,

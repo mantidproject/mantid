@@ -16,6 +16,7 @@
 #include <memory>
 
 #include <QCompleter>
+#include <QHash>
 #include <QStringList>
 #include <QStringListModel>
 
@@ -31,7 +32,9 @@ public:
   IndirectPlotOptionsView(QWidget *parent = nullptr);
   virtual ~IndirectPlotOptionsView() override;
 
-  virtual void setPlotType(PlotWidget const &plotType);
+  virtual void
+  setPlotType(PlotWidget const &plotType,
+              std::map<std::string, std::string> const &availableActions);
   virtual void setWorkspaceComboBoxEnabled(bool enable);
   virtual void setIndicesLineEditEnabled(bool enable);
   virtual void setPlotButtonEnabled(bool enable);

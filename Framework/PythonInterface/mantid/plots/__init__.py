@@ -263,12 +263,16 @@ class MantidAxes(Axes):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 
     @staticmethod
-    def get_spec_number(workspace, kwargs):
+    def get_spec_number_or_bin(workspace, kwargs):
         if kwargs.get('specNum', None) is not None:
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
-            return MantidAxes.get_spec_num_from_wksp_index(workspace,
-                                                           kwargs['wkspIndex'])
+            # If wanting to plot a bin
+            if kwargs.get('axis', None) is not None and kwargs.get('axis', None) == 0:
+                return kwargs['wkspIndex']
+            # If wanting to plot a spectrum
+            else:
+                return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
             return None
 
@@ -582,7 +586,7 @@ class MantidAxes(Axes):
                 return artists
 
             workspace = args[0]
-            spec_num = self.get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
@@ -699,7 +703,7 @@ class MantidAxes(Axes):
                 return container_new
 
             workspace = args[0]
-            spec_num = self.get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
                                                                **kwargs)
 

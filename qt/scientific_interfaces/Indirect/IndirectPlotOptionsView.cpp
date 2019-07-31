@@ -38,6 +38,14 @@ QStringList indicesSuggestions() {
   return suggestions;
 }
 
+QString getAction(std::map<std::string, std::string> const &actions,
+                  std::string const &key) {
+  auto const iter = actions.find(key);
+  if (iter != actions.end())
+    return QString::fromStdString(iter->second);
+  return "";
+}
+
 QIcon plotCurveIcon() {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   return QIcon(":/curves.png");
@@ -129,16 +137,22 @@ void IndirectPlotOptionsView::emitPlotTiledClicked() {
   emit plotTiledClicked();
 }
 
-void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType) {
+void IndirectPlotOptionsView::setPlotType(
+    PlotWidget const &plotType,
+    std::map<std::string, std::string> const &availableActions) {
   auto plotMenu = new QMenu;
 
-  auto plotSpectraAction = new QAction("Plot Spectra", this);
+  auto plotSpectraAction =
+      new QAction(getAction(availableActions, "Plot Spectra"), this);
   plotSpectraAction->setIcon(plotCurveIcon());
-  auto plotBinAction = new QAction("Plot Bins", this);
+  auto plotBinAction =
+      new QAction(getAction(availableActions, "Plot Bins"), this);
   plotBinAction->setIcon(plotCurveIcon());
-  auto plotContourAction = new QAction("Plot Contour", this);
+  auto plotContourAction =
+      new QAction(getAction(availableActions, "Plot Contour"), this);
   plotContourAction->setIcon(plotContourIcon());
-  auto plotTiledAction = new QAction("Plot Tiled", this);
+  auto plotTiledAction =
+      new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
 
   connect(plotSpectraAction, SIGNAL(triggered()), this,
@@ -152,6 +166,8 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType) {
 
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);
+  m_plotOptions->pbPlotSpectra->setText(
+      getAction(availableActions, "Plot Spectra"));
 
   switch (plotType) {
   case PlotWidget::Spectra:

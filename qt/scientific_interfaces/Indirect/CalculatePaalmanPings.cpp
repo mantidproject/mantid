@@ -43,6 +43,11 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
     : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
+  std::map<std::string, std::string> actions;
+  actions["Plot Spectra"] = "Plot Wavelength";
+  actions["Plot Bins"] = "Plot Angle";
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraBin, "", actions));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(getBeamWidthFromWorkspace(const QString &)));
@@ -60,7 +65,6 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   // Connect slots for run, plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   // Connect slots for toggling the mass/number density unit
@@ -426,7 +430,6 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
             SLOT(postProcessComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
-    setPlotResultEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox("Absorption correction calculation failed.\nSee "
                         "Results Log for more details.");
@@ -453,8 +456,8 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
       correctionsWorkspace->setYUnit("");
       correctionsWorkspace->setYUnitLabel("Attenuation Factor");
     }
+    setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
   } else {
-    setPlotResultEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox("Correction factor post processing failed.\nSee "
                         "Results Log for more details.");
@@ -656,22 +659,10 @@ void CalculatePaalmanPings::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void CalculatePaalmanPings::plotClicked() {
-  setPlotResultIsPlotting(true);
-
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
-
-    if (plotType == "All" || plotType == "Wavelength")
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-    if (plotType == "All" || plotType == "Angle")
-      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
-  }
-  setPlotResultIsPlotting(false);
+void CalculatePaalmanPings::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
-
-void CalculatePaalmanPings::runClicked() { runTab(); }
 
 void CalculatePaalmanPings::setSampleDensityOptions(QString const &method) {
   setComboBoxOptions(m_uiForm.cbSampleDensity, getDensityOptions(method));
@@ -771,29 +762,18 @@ void CalculatePaalmanPings::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void CalculatePaalmanPings::setPlotResultEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotOutput->setEnabled(enabled);
-}
-
 void CalculatePaalmanPings::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
 void CalculatePaalmanPings::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
 void CalculatePaalmanPings::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
-}
-
-void CalculatePaalmanPings::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

@@ -97,20 +97,42 @@ checkWorkspaceBinSize(MatrixWorkspace_const_sptr workspace) {
   return boost::none;
 }
 
+std::map<std::string, std::string>
+constructActions(boost::optional<std::map<std::string, std::string>> const
+                     &availableActions) {
+  std::map<std::string, std::string> actions;
+  if (availableActions)
+    actions = availableActions.get();
+  if (actions.find("Plot Spectra") == actions.end())
+    actions["Plot Spectra"] = "Plot Spectra";
+  if (actions.find("Plot Bins") == actions.end())
+    actions["Plot Bins"] = "Plot Bins";
+  if (actions.find("Plot Contour") == actions.end())
+    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Plot Tiled") == actions.end())
+    actions["Plot Tiled"] = "Plot Tiled";
+  return actions;
+}
+
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(IPyRunner *pythonRunner)
-    : m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none),
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+    IPyRunner *pythonRunner,
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false),
+      m_workspaceIndices(boost::none), m_workspaceName(boost::none),
       m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectPlotter *plotter)
-    : m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+    IndirectPlotter *plotter,
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false),
+      m_workspaceIndices(boost::none), m_workspaceName(boost::none),
+      m_plotter(std::move(plotter)) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
@@ -202,11 +224,9 @@ void IndirectPlotOptionsModel::plotSpectra() {
     m_plotter->plotSpectra(workspaceName.get(), indicesString.get());
 }
 
-void IndirectPlotOptionsModel::plotBins() {
-  auto const workspaceName = workspace();
-  auto const indicesString = indices();
-  if (workspaceName && indicesString)
-    m_plotter->plotBins(workspaceName.get(), indicesString.get());
+void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
+  if (auto const workspaceName = workspace())
+    m_plotter->plotBins(workspaceName.get(), binIndices);
 }
 
 void IndirectPlotOptionsModel::plotContour() {
@@ -240,6 +260,11 @@ IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
     }
   }
   return boost::none;
+}
+
+std::map<std::string, std::string>
+IndirectPlotOptionsModel::availableActions() const {
+  return m_actions;
 }
 
 } // namespace CustomInterfaces
