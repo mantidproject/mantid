@@ -58,12 +58,12 @@ void ProjectSavePresenter::notify(Notification notification) {
  * @return true If a warning is required.
  * @return false If a warning is not neccessary.
  */
-bool ProjectSavePresenter::needsSizeWarning(std::vector<std::string> &wsNames) {
+bool ProjectSavePresenter::needsSizeWarning(
+    const std::vector<std::string> &wsNames) {
   if (!wsNames.empty()) {
     return m_model.needsSizeWarning(wsNames);
-  } else {
-    return false;
   }
+  return false;
 }
 
 /**

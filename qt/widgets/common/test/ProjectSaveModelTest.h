@@ -8,6 +8,7 @@
 #define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
 
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
@@ -22,6 +23,9 @@ using namespace MantidQt::MantidWidgets;
 using namespace testing;
 using namespace Mantid::API;
 
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+// Mock object for the model;
 class MockProjectSaveModel : public ProjectSaveModel {
 public:
   MockProjectSaveModel(
@@ -32,11 +36,22 @@ public:
   MOCK_METHOD1(getProjectSize, size_t(const std::vector<std::string> &wsNames));
 };
 
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+
+namespace {
+size_t calculateSize(std::vector<Workspace_sptr> workspaces) {
+  size_t result = 0;
+  for (const auto &ws : workspaces) {
+    result += ws->getMemorySize();
+  }
+  return result;
+}
+} // namespace
+
 //=====================================================================================
 // Functional tests
 //=====================================================================================
 class ProjectSaveModelTest : public CxxTest::TestSuite {
-
 public:
   void setUp() override {
     auto ws1 = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
@@ -282,33 +297,28 @@ public:
     TS_ASSERT_EQUALS(winInfo[1].icon_id, "matrix_xpm");
   }
 
-  void testNeedsSizeWarningIsFalseWithEmptyWorkspace() {
-    std::vector<std::string> wsNames{"ws1"};
+  void test_needsSizeWarning_is_false_with_empty_workspace() {
+    const std::vector<std::string> wsNames{"ws1"};
     ProjectSaveModel model({});
     TS_ASSERT_EQUALS(model.needsSizeWarning(wsNames), false);
   }
 
-  void testNeedsSizeWarningIsTrueWithLargeWorkspace() {
+  void test_needsSizeWarning_is_true_with_large_workspace() {
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     NiceMock<MockProjectSaveModel> model(windows);
-    // std::unique_ptr<MockProjectSaveModel> model =
-    // std::make_unique<NiceMock<MockProjectSaveModel>>(windows);
 
-    std::vector<std::string> wsNames{"ws1", "ws2"};
+    const std::vector<std::string> wsNames{"ws1", "ws2"};
     ON_CALL(model, getProjectSize(wsNames)).WillByDefault(Return(107374182411));
 
     TS_ASSERT(model.needsSizeWarning(wsNames));
   }
 
-  void testGetProjectSizeReturnsCorrectAnswer() {
+  void test_getProjectSize_returns_correctAnswer() {
     ProjectSaveModel model({});
     const auto workspaces = model.getWorkspaces();
-    size_t assumedSize = 0;
+    size_t assumedSize = calculateSize(workspaces);
+    const auto workspaceNames = model.getWorkspaceNames();
 
-    for (const auto &ws : workspaces) {
-      assumedSize += ws->getMemorySize();
-    }
-    auto workspaceNames = model.getWorkspaceNames();
     TS_ASSERT_EQUALS(model.getProjectSize(workspaceNames), assumedSize);
   }
 };
