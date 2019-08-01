@@ -7,6 +7,7 @@ MantidPlot Changes
 
 Improvements
 ############
+- A warning is presented when saving a project larger than (by default) 10GB.
 
 Bugfixes
 ########

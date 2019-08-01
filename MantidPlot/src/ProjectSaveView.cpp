@@ -247,9 +247,19 @@ void ProjectSaveView::save(bool checked) {
                          "Please choose a valid file path", QMessageBox::Ok);
     return;
   }
-
-  m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto wsNames = getCheckedWorkspaceNames();
+  if (m_presenter->needsSizeWarning(wsNames)) {
+    auto result = QMessageBox::question(
+        this, "Project Save",
+        "This project is very large, and so may take a long "
+        "time to save. Would you like to continue?",
+        QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::No) {
+      close();
+      return;
+    }
+  }
+  m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto interfaces = getCheckedPythonInterfaces();
   auto windowNames = getIncludedWindowNames();
   auto filePath = m_ui.projectPath->text();
