@@ -162,10 +162,11 @@ std::string createPlotTiledString(std::string const &workspaceName,
  */
 using namespace MantidQt::Widgets::Common;
 
-Python::Object workbenchPlot(QStringList const &workspaceNames,
-                             std::vector<int> const &indices, bool errorBars,
-                             boost::optional<QHash<QString, QVariant>> kwargs,
-                             boost::optional<Python::Object> figure) {
+Python::Object
+workbenchPlot(QStringList const &workspaceNames,
+              std::vector<int> const &indices, bool errorBars,
+              boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
+              boost::optional<Python::Object> figure = boost::none) {
   QHash<QString, QVariant> plotKwargs;
   if (kwargs)
     plotKwargs = kwargs.get();
@@ -227,30 +228,32 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
 void IndirectPlotter::plotCorrespondingSpectra(
     std::vector<std::string> const &workspaceNames,
     std::vector<int> const &workspaceIndices) {
-  if (workspaceNames.size() != workspaceIndices.size())
+  if (workspaceNames.size() > 1 &&
+      workspaceNames.size() != workspaceIndices.size())
     return;
   auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  std::string const errors = errorBars ? "True" : "False";
   std::string pyInput = "from mantidplot import plotSpectrum\n";
   pyInput += "current_window = plotSpectrum('";
   pyInput += workspaceNames[0];
   pyInput += "', ";
   pyInput += std::to_string(workspaceIndices[0]);
-  pyInput += ")\n";
+  pyInput += ", error_bars=" + errors + ")\n";
 
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
     pyInput += "plotSpectrum('";
     pyInput += workspaceNames[i];
     pyInput += "', ";
     pyInput += std::to_string(workspaceIndices[i]);
-    pyInput += ", window=current_window)\n";
+    pyInput += ", error_bars=" + errors + ", window=current_window)\n";
   }
   runPythonCode(pyInput);
 #else
   auto figure =
       workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])),
                     {workspaceIndices[0]}, errorBars);
-  for (auto i = 1; i < workspaceNames.size(); ++i) {
+  for (auto i = 1u; i < workspaceNames.size(); ++i) {
     figure =
         workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])),
                       {workspaceIndices[i]}, errorBars, boost::none, figure);
