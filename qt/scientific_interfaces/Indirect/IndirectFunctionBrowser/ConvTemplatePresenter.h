@@ -34,7 +34,7 @@ class MANTIDQT_INDIRECT_DLL ConvTemplatePresenter : public QObject {
 public:
   explicit ConvTemplatePresenter(ConvTemplateBrowser *view);
   void setSubType(size_t subTypeIndex, int typeIndex);
-  void setStretchExponential(bool);
+  void setDeltaFunction(bool);
   void setNumberOfDatasets(int);
   int getNumberOfDatasets() const;
   void setFunction(const QString &funStr);

@@ -54,6 +54,11 @@ void ConvTemplateBrowser::createProperties() {
   m_enumManager->blockSignals(true);
 
   createFunctionParameterProperties();
+  createDeltaFunctionProperties();
+
+  m_browser->addProperty(m_subTypeProperties[0]);
+  m_browser->addProperty(m_deltaFunctionOn);
+  m_browser->addProperty(m_subTypeProperties[1]);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
@@ -99,7 +104,11 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
 
 void ConvTemplateBrowser::intChanged(QtProperty *prop) {}
 
-void ConvTemplateBrowser::boolChanged(QtProperty *prop) {}
+void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
+  if (prop == m_deltaFunctionOn) {
+    m_presenter.setDeltaFunction(m_boolManager->value(prop));
+  }
+}
 
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   auto const index = m_enumManager->value(prop);
@@ -230,9 +239,12 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
     auto subTypeProp = m_enumManager->addProperty(subType->name());
     m_enumManager->setEnumNames(subTypeProp,
                                 m_templateSubTypes[isub]->getTypeNames());
-    m_browser->addProperty(subTypeProp);
     m_subTypeProperties.push_back(subTypeProp);
   }
+}
+
+void ConvTemplateBrowser::createDeltaFunctionProperties() {
+  m_deltaFunctionOn = m_boolManager->addProperty("Delta Function");
 }
 
 void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {

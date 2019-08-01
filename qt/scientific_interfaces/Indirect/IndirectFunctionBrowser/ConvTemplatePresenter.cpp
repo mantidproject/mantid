@@ -42,18 +42,13 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   emit functionStructureChanged();
 }
 
-void ConvTemplatePresenter::setStretchExponential(bool) {
-  // if (on == m_model.hasStretchExponential()) return;
-  // if (on) {
-  //  m_view->addStretchExponential();
-  //} else {
-  //  m_view->removeStretchExponential();
-  //}
-  // m_model.setStretchExponential(on);
-  // setErrorsEnabled(false);
-  // updateViewParameterNames();
-  // updateViewParameters();
-  // emit functionStructureChanged();
+void ConvTemplatePresenter::setDeltaFunction(bool on) {
+   if (on == m_model.hasDeltaFunction()) return;
+   m_model.setDeltaFunction(on);
+   setErrorsEnabled(false);
+   updateViewParameterNames();
+   updateViewParameters();
+   emit functionStructureChanged();
 }
 
 void ConvTemplatePresenter::setNumberOfDatasets(int n) {

@@ -493,12 +493,15 @@ ConvFunctionModel::getParameterDescription(ParamID name) const {
 }
 
 boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
-  if (name <= ParamID::LOR2_FWHM_1) {
-    return m_model.peakPrefixes()->at(0);
-  } else if (name <= ParamID::LOR2_FWHM_2) {
-    return m_model.peakPrefixes()->at(1);
-  } else {
+  if (name >= ParamID::FLAT_BG_A0) {
     return m_model.backgroundPrefix();
+  } else {
+    auto const prefixes = m_model.peakPrefixes();
+    if (!prefixes)
+      return boost::optional<QString>();
+    auto const index =
+        name > ParamID::LOR2_FWHM_1 && name <= ParamID::LOR2_FWHM_2 ? 1 : 0;
+    return m_model.peakPrefixes()->at(index);
   }
 }
 

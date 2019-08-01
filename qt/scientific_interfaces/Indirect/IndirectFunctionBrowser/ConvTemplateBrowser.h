@@ -68,6 +68,7 @@ private:
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
   void createFunctionParameterProperties();
+  void createDeltaFunctionProperties();
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setParameterValueQuiet(ParamID id, double value, double error);
 
