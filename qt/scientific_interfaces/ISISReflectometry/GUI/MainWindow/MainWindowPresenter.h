@@ -42,6 +42,8 @@ public:
   void notifyHelpPressed() override;
   void notifyNewBatchRequested() override;
   void notifyCloseBatchRequested(int batchIndex) override;
+  void notifySaveBatchRequested(int batchIndex) override;
+  void notifyLoadBatchRequested(int batchIndex) override;
 
 private:
   void showHelp();
@@ -52,7 +54,7 @@ private:
   BatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

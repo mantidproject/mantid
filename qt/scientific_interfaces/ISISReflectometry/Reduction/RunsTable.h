@@ -51,7 +51,7 @@ private:
   ReductionJobs m_reductionJobs;
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 
 template <typename T>

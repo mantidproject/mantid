@@ -78,7 +78,7 @@ private:
   RunsTableViewSubscriber *m_notifyee;
   std::map<Action, QAction *> m_actions;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 
 class RunsTableViewFactory {

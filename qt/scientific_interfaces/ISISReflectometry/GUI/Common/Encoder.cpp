@@ -5,13 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "ISISReflectometryEncoder.h"
-#include "GUI/RunsTable/RunsTablePresenter.h"
+#include "Encoder.h"
+#include "../RunsTable/RunsTablePresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encode(const MainWindowView &gui) {
+QMap<QString, QVariant> Encoder::encode(const MainWindowView &gui) {
   QMap<QString, QVariant> map;
   QList<QVariant> batches;
   for (const auto &batchView : gui.m_batchViews) {
@@ -22,9 +21,8 @@ ISISReflectometryEncoder::encode(const MainWindowView &gui) {
   return map;
 }
 
-BatchPresenter *
-ISISReflectometryEncoder::findBatchPresenter(const BatchView *gui,
-                                             const MainWindowView &mwv) {
+BatchPresenter *Encoder::findBatchPresenter(const BatchView *gui,
+                                            const MainWindowView &mwv) {
   for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
     auto presenter = std::dynamic_pointer_cast<BatchPresenter>(ipresenter);
     if (presenter->m_view == gui) {
@@ -34,9 +32,14 @@ ISISReflectometryEncoder::findBatchPresenter(const BatchView *gui,
   return nullptr;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeBatch(
-    const BatchView *gui, const MainWindowView &mwv, bool projectSave) {
-  auto batchPresenter = findBatchPresenter(gui, mwv);
+QMap<QString, QVariant> Encoder::encodeBatch(const BatchView *gui,
+                                             const MainWindowView &mwv,
+                                             bool projectSave,
+                                             const BatchPresenter *presenter) {
+  auto batchPresenter = presenter;
+  if (!batchPresenter) {
+    batchPresenter = findBatchPresenter(gui, mwv);
+  }
   if (!batchPresenter) {
     throw std::runtime_error(
         "BatchPresenter could not be found during encode.");
@@ -61,9 +64,18 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeBatch(
   return map;
 }
 
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encodeRuns(const RunsView *gui, bool projectSave,
-                                     const ReductionJobs *redJobs) {
+QMap<QString, QVariant> Encoder::encodeBatch(const IBatchPresenter *presenter,
+                                             const IMainWindowView *mwv,
+                                             bool projectSave) {
+  auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
+  return encodeBatch(dynamic_cast<BatchView *>(batchPresenter->m_view),
+                     *dynamic_cast<const MainWindowView *>(mwv), projectSave,
+                     batchPresenter);
+}
+
+QMap<QString, QVariant> Encoder::encodeRuns(const RunsView *gui,
+                                            bool projectSave,
+                                            const ReductionJobs *redJobs) {
   QMap<QString, QVariant> map;
   map.insert(QString("runsTable"),
              QVariant(encodeRunsTable(gui->m_tableView, projectSave, redJobs)));
@@ -73,8 +85,9 @@ ISISReflectometryEncoder::encodeRuns(const RunsView *gui, bool projectSave,
   return map;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeRunsTable(
-    const RunsTableView *gui, bool projectSave, const ReductionJobs *redJobs) {
+QMap<QString, QVariant> Encoder::encodeRunsTable(const RunsTableView *gui,
+                                                 bool projectSave,
+                                                 const ReductionJobs *redJobs) {
   QMap<QString, QVariant> map;
   map.insert(QString("filterBox"), QVariant(gui->m_ui.filterBox->text()));
 
@@ -84,8 +97,7 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeRunsTable(
   return map;
 }
 
-QList<QVariant>
-ISISReflectometryEncoder::encodeRunsTableModel(const ReductionJobs *redJobs) {
+QList<QVariant> Encoder::encodeRunsTableModel(const ReductionJobs *redJobs) {
   QList<QVariant> groups;
   for (const auto &group : redJobs->groups()) {
     groups.append(QVariant(encodeGroup(group)));
@@ -93,8 +105,8 @@ ISISReflectometryEncoder::encodeRunsTableModel(const ReductionJobs *redJobs) {
   return groups;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeGroup(
-    const MantidQt::CustomInterfaces::Group &group) {
+QMap<QString, QVariant>
+Encoder::encodeGroup(const MantidQt::CustomInterfaces::Group &group) {
   QMap<QString, QVariant> map;
   map.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
   map.insert(
@@ -104,8 +116,8 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeGroup(
   return map;
 }
 
-QList<QVariant> ISISReflectometryEncoder::encodeRows(
-    const MantidQt::CustomInterfaces::Group &group) {
+QList<QVariant>
+Encoder::encodeRows(const MantidQt::CustomInterfaces::Group &group) {
   QList<QVariant> rows;
   for (const auto &row : group.m_rows) {
     if (row) {
@@ -117,8 +129,7 @@ QList<QVariant> ISISReflectometryEncoder::encodeRows(
   return rows;
 }
 
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
+QMap<QString, QVariant> Encoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
   QMap<QString, QVariant> map;
   auto min = rangeInQ.min();
   auto max = rangeInQ.max();
@@ -135,8 +146,8 @@ ISISReflectometryEncoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
   return map;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeTransmissionRunPair(
-    const TransmissionRunPair &transRunPair) {
+QMap<QString, QVariant>
+Encoder::encodeTransmissionRunPair(const TransmissionRunPair &transRunPair) {
   QList<QVariant> firstTransRunNums;
   for (const auto firstTransRunNum :
        transRunPair.m_firstTransmissionRunNumbers) {
@@ -155,8 +166,8 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeTransmissionRunPair(
   return map;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeReductionWorkspace(
-    const ReductionWorkspaces &redWs) {
+QMap<QString, QVariant>
+Encoder::encodeReductionWorkspace(const ReductionWorkspaces &redWs) {
   QList<QVariant> inputRunNumbers;
   for (const auto &inputRunNum : redWs.m_inputRunNumbers) {
     inputRunNumbers.append(QVariant(QString::fromStdString(inputRunNum)));
@@ -173,8 +184,8 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeReductionWorkspace(
   return map;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeReductionOptions(
-    const ReductionOptionsMap &rom) {
+QMap<QString, QVariant>
+Encoder::encodeReductionOptions(const ReductionOptionsMap &rom) {
   QMap<QString, QVariant> map;
   for (const auto &elem : rom) {
     map.insert(QString::fromStdString(elem.first),
@@ -183,8 +194,8 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeReductionOptions(
   return map;
 }
 
-QMap<QString, QVariant> ISISReflectometryEncoder::encodeRow(
-    const MantidQt::CustomInterfaces::Row &row) {
+QMap<QString, QVariant>
+Encoder::encodeRow(const MantidQt::CustomInterfaces::Row &row) {
   QMap<QString, QVariant> map;
   QList<QVariant> runNumbers;
   for (const auto &runNumber : row.m_runNumbers) {
@@ -209,8 +220,7 @@ QMap<QString, QVariant> ISISReflectometryEncoder::encodeRow(
   return map;
 }
 
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encodeEvent(const EventView *gui) {
+QMap<QString, QVariant> Encoder::encodeEvent(const EventView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("disabledSlicingButton"),
              QVariant(gui->m_ui.disabledSlicingButton->isChecked()));
@@ -238,8 +248,7 @@ ISISReflectometryEncoder::encodeEvent(const EventView *gui) {
   return map;
 }
 
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encodeInstrument(const InstrumentView *gui) {
+QMap<QString, QVariant> Encoder::encodeInstrument(const InstrumentView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("intMonCheckBox"),
              QVariant(gui->m_ui.intMonCheckBox->isChecked()));
@@ -261,8 +270,7 @@ ISISReflectometryEncoder::encodeInstrument(const InstrumentView *gui) {
   return map;
 }
 
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encodeExperiment(const ExperimentView *gui) {
+QMap<QString, QVariant> Encoder::encodeExperiment(const ExperimentView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("analysisModeComboBox"),
              QVariant(gui->m_ui.analysisModeComboBox->currentIndex()));
@@ -282,12 +290,10 @@ ISISReflectometryEncoder::encodeExperiment(const ExperimentView *gui) {
              QVariant(gui->m_ui.endOverlapEdit->text()));
   map.insert(QString("transStitchParamsEdit"),
              QVariant(gui->m_ui.transStitchParamsEdit->text()));
-  map.insert(QString("polCorrComboBox"),
-             QVariant(gui->m_ui.polCorrComboBox->currentIndex()));
-  map.insert(QString("CRhoEdit"), QVariant(gui->m_ui.CRhoEdit->text()));
-  map.insert(QString("CAlphaEdit"), QVariant(gui->m_ui.CAlphaEdit->text()));
-  map.insert(QString("CApEdit"), QVariant(gui->m_ui.CApEdit->text()));
-  map.insert(QString("CPpEdit"), QVariant(gui->m_ui.CPpEdit->text()));
+  map.insert(QString("transScaleRHSCheckBox"),
+             QVariant(gui->m_ui.transScaleRHSCheckBox->isChecked()));
+  map.insert(QString("polCorrCheckBox"),
+             QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
   map.insert(QString("floodCorComboBox"),
              QVariant(gui->m_ui.floodCorComboBox->currentIndex()));
   map.insert(QString("floodWorkspaceWsSelector"),
@@ -297,19 +303,20 @@ ISISReflectometryEncoder::encodeExperiment(const ExperimentView *gui) {
 }
 
 QMap<QString, QVariant>
-ISISReflectometryEncoder::encodePerAngleDefaults(const QTableWidget *tab) {
+Encoder::encodePerAngleDefaults(const QTableWidget *tab) {
   QMap<QString, QVariant> map;
   const int rowsNum = tab->rowCount();
   const int columnNum = tab->columnCount();
   map.insert(QString("rowsNum"), QVariant(rowsNum));
   map.insert(QString("columnsNum"), QVariant(columnNum));
   map.insert(QString("rows"),
-             QVariant(encodePerAngleDefaultsRow(tab, rowsNum, columnNum)));
+             QVariant(encodePerAngleDefaultsRow(tab, rowsNum - 1, columnNum)));
   return map;
 }
 
-QList<QVariant> ISISReflectometryEncoder::encodePerAngleDefaultsRows(
-    const QTableWidget *tab, int rowsNum, int columnsNum) {
+QList<QVariant> Encoder::encodePerAngleDefaultsRows(const QTableWidget *tab,
+                                                    int rowsNum,
+                                                    int columnsNum) {
   QList<QVariant> rows;
   for (auto rowIndex = 0; rowIndex < rowsNum; ++rowIndex) {
     rows.append(QVariant(encodePerAngleDefaultsRow(tab, rowIndex, columnsNum)));
@@ -317,8 +324,9 @@ QList<QVariant> ISISReflectometryEncoder::encodePerAngleDefaultsRows(
   return rows;
 }
 
-QList<QVariant> ISISReflectometryEncoder::encodePerAngleDefaultsRow(
-    const QTableWidget *tab, int rowIndex, int columnsNum) {
+QList<QVariant> Encoder::encodePerAngleDefaultsRow(const QTableWidget *tab,
+                                                   int rowIndex,
+                                                   int columnsNum) {
   QList<QVariant> row;
   for (auto columnIndex = 0; columnIndex < columnsNum; ++columnIndex) {
     row.append(QVariant(tab->item(rowIndex, columnIndex)->text()));
@@ -326,8 +334,7 @@ QList<QVariant> ISISReflectometryEncoder::encodePerAngleDefaultsRow(
   return row;
 }
 
-QMap<QString, QVariant>
-ISISReflectometryEncoder::encodeSave(const SaveView *gui) {
+QMap<QString, QVariant> Encoder::encodeSave(const SaveView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("savePathEdit"), QVariant(gui->m_ui.savePathEdit->text()));
   map.insert(QString("prefixEdit"), QVariant(gui->m_ui.prefixEdit->text()));

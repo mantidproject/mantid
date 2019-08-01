@@ -163,7 +163,7 @@ private:
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -64,6 +64,7 @@ set(QT5_SRC_FILES
     src/PropertyWidgetFactory.cpp
     src/PythonRunner.cpp
     src/QtSignalChannel.cpp
+    src/QtJSONUtils.cpp
     src/RenameParDialog.cpp
     src/ScriptEditor.cpp
     src/SequentialFitDialog.cpp
@@ -238,6 +239,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
@@ -326,6 +328,7 @@ set(SRC_FILES
     src/PythonRunner.cpp
     src/QScienceSpinBox.cpp
     src/QtSignalChannel.cpp
+    src/QtJSONUtils.cpp
     src/RepoModel.cpp
     src/ScriptRepositoryView.cpp
     src/SelectionNotificationService.cpp
@@ -600,6 +603,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
   inc/MantidQtWidgets/Common/QStringUtils.h
+  inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/SignalBlocker.h
@@ -826,6 +830,7 @@ mtd_add_qt_library(TARGET_NAME
                    Qt4::QtNetwork
                    Qt4::QtWebKit
                    Qt4::Qscintilla
+                   Qt4::QtScript
                    INSTALL_DIR
                    ${LIB_DIR}
                    OSX_INSTALL_RPATH

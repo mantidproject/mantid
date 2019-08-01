@@ -110,7 +110,7 @@ private:
   Ui::InstrumentWidget m_ui;
   InstrumentViewSubscriber *m_notifyee;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 
 } // namespace CustomInterfaces

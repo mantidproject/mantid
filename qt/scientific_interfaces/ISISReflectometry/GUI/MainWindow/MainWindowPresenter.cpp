@@ -5,11 +5,15 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
+#include "../Common/Encoder.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
+
+#include <QFileDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -98,6 +102,22 @@ void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
 void MainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("ISIS Reflectometry"));
+}
+
+void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
+  auto filename = QFileDialog::getSaveFileName();
+  Encoder encoder;
+  IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
+  auto map = encoder.encodeBatch(batchPresenter, m_view, false);
+  MantidQt::API::saveJSONToFile(filename, map);
+}
+
+void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
+  //   auto filename = QFileDialog::getOpenFileName();
+  //   auto map = MantidQt::API::loadJSONFromFile(filename);
+  UNUSED_ARG(tabIndex)
+  // ISISReflectometryDecoder decoder;
+  // decoder.decodeBatch(m_batchPresenters[tabIndex].get(), m_view, false);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

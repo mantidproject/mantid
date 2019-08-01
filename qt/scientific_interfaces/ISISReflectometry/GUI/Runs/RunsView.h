@@ -115,7 +115,7 @@ private:
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 
 private slots:
   void on_actionSearch_triggered();

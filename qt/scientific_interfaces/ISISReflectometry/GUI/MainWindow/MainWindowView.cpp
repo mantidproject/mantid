@@ -63,6 +63,10 @@ void MainWindowView::initLayout() {
           SLOT(onTabCloseRequested(int)));
   connect(m_ui.newBatch, SIGNAL(triggered(bool)), this,
           SLOT(onNewBatchRequested(bool)));
+  connect(m_ui.loadBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onLoadBatchRequested(bool)));
+  connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onSaveBatchRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -107,6 +111,14 @@ void MainWindowView::onTabCloseRequested(int tabIndex) {
 
 void MainWindowView::onNewBatchRequested(bool) {
   m_notifyee->notifyNewBatchRequested();
+}
+
+void MainWindowView::onLoadBatchRequested(bool) {
+  m_notifyee->notifyLoadBatchRequested(m_ui.mainTabs->currentIndex());
+}
+
+void MainWindowView::onSaveBatchRequested(bool) {
+  m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
 void MainWindowView::subscribe(MainWindowSubscriber *notifyee) {

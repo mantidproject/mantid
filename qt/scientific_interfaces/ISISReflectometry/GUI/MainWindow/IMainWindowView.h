@@ -26,6 +26,8 @@ public:
   virtual void notifyHelpPressed() = 0;
   virtual void notifyNewBatchRequested() = 0;
   virtual void notifyCloseBatchRequested(int) = 0;
+  virtual void notifySaveBatchRequested(int) = 0;
+  virtual void notifyLoadBatchRequested(int) = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 

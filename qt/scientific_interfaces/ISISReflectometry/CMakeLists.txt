@@ -13,8 +13,7 @@ add_subdirectory(Reduction)
 set(SRC_FILES
     ${COMMON_SRC_FILES}
     ${GUI_SRC_FILES}
-    ${REDUCTION_SRC_FILES}
-    ISISReflectometryEncoder.cpp)
+    ${REDUCTION_SRC_FILES})
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -23,8 +22,7 @@ set(INC_FILES
     ${COMMON_INC_FILES}
     ${GUI_INC_FILES}
     ${REDUCTION_INC_FILES}
-    PrecompiledHeader.h
-    ISISReflectometryEncoder.h)
+    PrecompiledHeader.h)
 
 set(MOC_FILES ${GUI_MOC_FILES})
 

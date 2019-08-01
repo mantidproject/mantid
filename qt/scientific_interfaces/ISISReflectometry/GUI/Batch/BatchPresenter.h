@@ -105,7 +105,7 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 
 protected:
   std::unique_ptr<IBatchJobRunner> m_jobRunner;

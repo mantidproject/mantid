@@ -56,6 +56,8 @@ public slots:
   void helpPressed();
   void onTabCloseRequested(int tabIndex);
   void onNewBatchRequested(bool);
+  void onLoadBatchRequested(bool);
+  void onSaveBatchRequested(bool);
 
 private:
   /// Initializes the interface
@@ -70,7 +72,7 @@ private:
   std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

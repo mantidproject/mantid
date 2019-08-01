@@ -7,17 +7,17 @@
 #ifndef MANTID_ISISREFLECTOMETRY_ENCODER_H
 #define MANTID_ISISREFLECTOMETRY_ENCODER_H
 
-#include "GUI/Batch/BatchView.h"
-#include "GUI/Experiment/ExperimentView.h"
-#include "GUI/Instrument/InstrumentView.h"
-#include "GUI/MainWindow/MainWindowView.h"
-#include "GUI/Runs/RunsView.h"
-#include "GUI/RunsTable/RunsTableView.h"
-#include "GUI/Save/SaveView.h"
-#include "Reduction/Group.h"
-#include "Reduction/ReductionJobs.h"
-#include "Reduction/ReductionWorkspaces.h"
-#include "Reduction/Row.h"
+#include "../../Reduction/Group.h"
+#include "../../Reduction/ReductionJobs.h"
+#include "../../Reduction/ReductionWorkspaces.h"
+#include "../../Reduction/Row.h"
+#include "../Batch/BatchView.h"
+#include "../Experiment/ExperimentView.h"
+#include "../Instrument/InstrumentView.h"
+#include "../MainWindow/MainWindowView.h"
+#include "../Runs/RunsView.h"
+#include "../RunsTable/RunsTableView.h"
+#include "../Save/SaveView.h"
 
 #include <QMap>
 #include <QString>
@@ -27,12 +27,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ISISReflectometryEncoder {
+class Encoder {
 public:
-  ISISReflectometryEncoder();
+  Encoder() {}
   QMap<QString, QVariant> encode(const MainWindowView &gui);
-  QMap<QString, QVariant> encodeBatch(const BatchView *gui,
-                                      const MainWindowView &mwv,
+  QMap<QString, QVariant>
+  encodeBatch(const BatchView *gui, const MainWindowView &mwv,
+              bool projectSave = false,
+              const BatchPresenter *presenter = nullptr);
+  QMap<QString, QVariant> encodeBatch(const IBatchPresenter *presenter,
+                                      const IMainWindowView *mwv,
                                       bool projectSave = false);
 
 private:

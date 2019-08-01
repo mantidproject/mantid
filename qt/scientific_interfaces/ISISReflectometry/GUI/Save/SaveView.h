@@ -107,7 +107,7 @@ private:
   Ui::SaveWidget m_ui;
   SaveViewSubscriber *m_notifyee;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 
 } // namespace CustomInterfaces

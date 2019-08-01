@@ -175,7 +175,7 @@ private:
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 
 } // namespace CustomInterfaces

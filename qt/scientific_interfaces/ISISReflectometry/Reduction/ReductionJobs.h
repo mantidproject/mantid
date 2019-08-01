@@ -60,7 +60,7 @@ private:
   std::vector<Group> m_groups;
   size_t m_groupNameSuffix;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionJobs const &lhs,

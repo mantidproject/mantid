@@ -66,7 +66,7 @@ private:
   std::unique_ptr<InstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 
-  friend class ISISReflectometryEncoder;
+  friend class Encoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
