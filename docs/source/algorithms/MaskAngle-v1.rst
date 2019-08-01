@@ -21,7 +21,7 @@ The three angle options are subtly different:
 * ``Phi`` is the detector's angle with respect to the positive z-axis not constrained to be in-plane. For many geometries this will be the same as the ``TwoTheta`` option.
 * ``InPlane`` is the detector's angle with respect to the positive z-axis constrained within the x-z-plane.
 
-For the ``TwoTheta`` and ``Phi`` options, the absolute value of the min and max angles are used.
+For the ``TwoTheta`` and ``Phi`` options, only positive angles are allowed.
 
 Usage
 -----

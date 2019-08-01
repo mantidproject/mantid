@@ -66,13 +66,16 @@ class MaskAngle(mantid.api.PythonAlgorithm):
 
         angleMin = self.getProperty('MinAngle').value
         angleMax = self.getProperty('MaxAngle').value
-        if self.getProperty('Angle').value != 'InPlane':
-            angleMin = numpy.fabs(angleMin)
-            angleMax = numpy.fabs(angleMax)
         if angleMin >= angleMax:
             msg = 'MinAngle ({}) must be less than MaxAngle ({})'.format(angleMin, angleMax)
             issues['MinAngle'] = msg
             issues['MaxAngle'] = msg
+
+        if self.getProperty('Angle').value != 'InPlane':
+            if angleMin < 0.:
+                issues['MinAngle'] = 'Must be positive'
+            if angleMax < 0.:
+                issues['MaxAngle'] = 'Must be positive'
 
         return issues
 
@@ -101,13 +104,6 @@ class MaskAngle(mantid.api.PythonAlgorithm):
 
         angle_phi = self.getProperty('Angle').value == 'Phi'
         angle_in_plane = self.getProperty('Angle').value == 'InPlane'
-        if not angle_in_plane:
-            if ttmin < 0.:
-                self.log().information('Using absolute value of MinAngle')
-                ttmin = numpy.fabs(ttmin)
-            if ttmax < 0.:
-                self.log().information('Using absolute value of MaxAngle')
-                ttmax = numpy.fabs(ttmax)
         spectrum_info = ws.spectrumInfo()
         detector_info = ws.detectorInfo()
         det_ids = detector_info.detectorIDs()
