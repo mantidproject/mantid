@@ -7,8 +7,8 @@
 #ifndef MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
 #define MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
 
-#include "MantidPythonInterface/api/ExtractWorkspace.h"
-#include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
+#include "MantidPythonInterface/core/ExtractWorkspace.h"
+#include "MantidPythonInterface/core/IsNone.h" // includes object.hpp
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
 #include "MantidAPI/Workspace.h"

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 using Mantid::API::WorkspaceProperty; // NOLINT
 using Mantid::DataObjects::PeaksWorkspace;

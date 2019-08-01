@@ -8,7 +8,7 @@
 #define MANTID_PYTHONINTERFACE_DATASERVICEEXPORTER_H_
 
 #include "MantidKernel/Exception.h"
-#include "MantidPythonInterface/kernel/WeakPtr.h"
+#include "MantidPythonInterface/core/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>

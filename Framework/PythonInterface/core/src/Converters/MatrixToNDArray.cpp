@@ -7,10 +7,10 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
 
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 

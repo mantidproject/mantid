@@ -7,14 +7,14 @@
 //----------------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
 #include <boost/python/extract.hpp>
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 

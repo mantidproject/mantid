@@ -13,8 +13,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/IsNone.h"
 
 namespace Mantid {
 namespace PythonInterface {

@@ -7,7 +7,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/api/ExtractWorkspace.h"
+#include "MantidPythonInterface/core/ExtractWorkspace.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/weak_ptr.hpp>

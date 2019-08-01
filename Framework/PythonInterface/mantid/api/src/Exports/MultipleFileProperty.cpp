@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/IsNone.h"
+#include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>

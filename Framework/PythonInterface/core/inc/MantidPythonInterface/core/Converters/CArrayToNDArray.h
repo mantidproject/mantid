@@ -8,7 +8,7 @@
 #define MANTID_PYTHONINTERFACE_CARRAYTONDARRAY_H_
 
 #include "MantidKernel/System.h"
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNumpy.h"
 
 namespace Mantid {
 namespace PythonInterface {

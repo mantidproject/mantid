@@ -15,11 +15,11 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/core/Converters/MapToPyDictionary.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/IsNone.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>

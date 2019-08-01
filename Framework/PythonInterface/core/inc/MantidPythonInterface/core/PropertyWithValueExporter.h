@@ -8,7 +8,7 @@
 #define MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
+#include "MantidPythonInterface/core/Converters/ContainerDtype.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/python/bases.hpp>
