@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ILLENERGYTRANSFER_H_
 
 #include "IndirectDataReductionTab.h"
+
 #include "MantidKernel/System.h"
 #include "ui_ILLEnergyTransfer.h"
 

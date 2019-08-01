@@ -355,7 +355,7 @@ void ILLEnergyTransfer::plot() {
   if (ads.doesExist(outputGroupName)) {
     auto const outputGroup = ads.retrieveWS<WorkspaceGroup>(outputGroupName);
     auto const workspaceName = outputGroup->getItem(0)->getName();
-    IndirectTab::plot2D(QString::fromStdString(workspaceName));
+    m_plotter->plotContour(workspaceName);
   }
 }
 

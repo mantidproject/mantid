@@ -378,22 +378,28 @@ void ContainerSubtraction::runClicked() {
  * Plots the current spectrum displayed in the preview plot
  */
 void ContainerSubtraction::plotCurrentPreview() {
-  QStringList workspaces = QStringList();
-
+  std::vector<std::string> workspaces;
+  auto const index = boost::numeric_cast<int>(m_spectra);
+  std::vector<int> indices;
   // Check whether a sample workspace has been specified
-  if (m_csSampleWS)
-    workspaces.append(QString::fromStdString(m_csSampleWS->getName()));
+  if (m_csSampleWS) {
+    workspaces.emplace_back(m_csSampleWS->getName());
+    indices.emplace_back(index);
+  }
 
   // Check whether a container workspace has been specified
-  if (m_transformedContainerWS)
-    workspaces.append(
-        QString::fromStdString(m_transformedContainerWS->getName()));
+  if (m_transformedContainerWS) {
+    workspaces.emplace_back(m_transformedContainerWS->getName());
+    indices.emplace_back(index);
+  }
 
   // Check whether a subtracted workspace has been generated
-  if (m_csSubtractedWS)
-    workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));
+  if (m_csSubtractedWS) {
+    workspaces.emplace_back(m_csSubtractedWS->getName());
+    indices.emplace_back(index);
+  }
 
-  IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
+  m_plotter->plotCorrespondingSpectra(workspaces, indices);
 }
 
 /*

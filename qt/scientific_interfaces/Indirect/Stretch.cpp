@@ -277,29 +277,19 @@ int Stretch::displaySaveDirectoryMessage() {
  */
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
-  WorkspaceGroup_sptr fitWorkspace;
-  fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
+  WorkspaceGroup_sptr fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
   // Check Sigma and Beta workspaces exist
   if (sigma.right(5).compare("Sigma") == 0 &&
       beta.right(4).compare("Beta") == 0) {
-    QString pyInput = "from mantidplot import plot2D\n";
 
     std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
-    if (plotType == "All" || plotType == "Beta") {
-      pyInput += "importMatrixWorkspace('";
-      pyInput += beta;
-      pyInput += "').plotGraph2D()\n";
-    }
-    if (plotType == "All" || plotType == "Sigma") {
-      pyInput += "importMatrixWorkspace('";
-      pyInput += sigma;
-      pyInput += "').plotGraph2D()\n";
-    }
-
-    m_pythonRunner.runPythonCode(pyInput);
+    if (plotType == "All" || plotType == "Beta")
+      m_plotter->plotSpectra(beta.toStdString(), "0");
+    if (plotType == "All" || plotType == "Sigma")
+      m_plotter->plotSpectra(sigma.toStdString(), "0");
   } else {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
@@ -310,12 +300,10 @@ void Stretch::plotWorkspaces() {
 void Stretch::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  auto const workspaceName = m_uiForm.cbPlotContour->currentText();
-  if (checkADSForPlotSaveWorkspace(workspaceName.toStdString(), true)) {
-    QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" +
-                      workspaceName + "').plotGraph2D()\n";
-    m_pythonRunner.runPythonCode(pyInput);
-  }
+  auto const workspaceName =
+      m_uiForm.cbPlotContour->currentText().toStdString();
+  if (checkADSForPlotSaveWorkspace(workspaceName, true))
+    m_plotter->plotContour(workspaceName);
   setPlotContourIsPlotting(false);
 }
 
@@ -387,7 +375,9 @@ void Stretch::previewSpecChanged(int value) {
  */
 void Stretch::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
+    m_plotter->plotSpectra(
+        m_uiForm.dsSample->getCurrentDataName().toStdString(),
+        std::to_string(m_previewSpec));
   }
 }
 

@@ -289,14 +289,5 @@ void IndirectDataReductionTab::filterInputData(bool filter) {
   setFileExtensionsByName(filter);
 }
 
-/**
- * Allows the user to turn the plotting of error bars off and on
- *
- * @param errorBars :: true if you want output plots to have error bars
- */
-void IndirectDataReductionTab::setPlotErrorBars(bool errorBars) {
-  IndirectTab::setPlotErrorBars(errorBars);
-}
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

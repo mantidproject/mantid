@@ -74,15 +74,6 @@ void IndirectDataAnalysisTab::filterInputData(bool filter) {
 }
 
 /**
- * Allows the user to turn the plotting of error bars off and on
- *
- * @param errorBars :: true if you want output plots to have error bars
- */
-void IndirectDataAnalysisTab::setPlotErrorBars(bool errorBars) {
-  IndirectTab::setPlotErrorBars(errorBars);
-}
-
-/**
  * Sets the active browser workspace when the tab is changed
  */
 void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
@@ -190,21 +181,18 @@ void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
 void IndirectDataAnalysisTab::plotCurrentPreview() {
   auto previewWs = previewPlotWorkspace();
   auto inputWs = inputWorkspace();
+  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
 
   // Check a workspace has been selected
   if (previewWs) {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
-      IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                static_cast<int>(m_selectedSpectrum));
+      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index));
     } else {
-      IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
-                                2);
+      m_plotter->plotSpectra(previewWs->getName(), "0-2");
     }
-  } else if (inputWs && boost::numeric_cast<size_t>(m_selectedSpectrum) <
-                            inputWs->getNumberHistograms()) {
-    IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
-                              static_cast<int>(m_selectedSpectrum));
+  } else if (inputWs && index < inputWs->getNumberHistograms()) {
+    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index));
   } else
     showMessageBox("Workspace not found - data may not be loaded.");
 }

@@ -9,6 +9,7 @@
 
 #include "DllConfig.h"
 #include "IPythonRunner.h"
+#include "IndirectPlotter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -83,12 +84,6 @@ public:
   QStringList getCorrectionsFBSuffixes(std::string const &interfaceName) const;
   QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) const;
 
-  /// Allows the user to turn the plotting of error bars off and on
-  void setPlotErrorBars(bool errorBars);
-  virtual bool errorBars() const;
-
-  /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, const int &wsIndex = 0);
   /// Used to run python code
   void runPythonCode(std::string const &pythonCode) override;
 
@@ -118,38 +113,6 @@ protected:
   QString getWorkspaceSuffix(const QString &wsName);
   /// Gets the base name of a workspace
   QString getWorkspaceBasename(const QString &wsName);
-  /// Plot multiple spectra from multiple workspaces
-  void plotMultipleSpectra(const QStringList &workspaceNames,
-                           const std::vector<int> &workspaceIndices);
-  /// Plot a spectrum plot with a given ws index
-  void plotSpectrum(const QStringList &workspaceNames,
-                    const int &spectraIndex = 0);
-
-  /// Plot a spectrum plot with a given spectra range
-  void plotSpectrum(const QStringList &workspaceNames, int specStart,
-                    int specEnd);
-  /// Plot a spectrum plot with a given spectra range of a given workspace
-  void plotSpectrum(const QString &workspaceName, int specStart, int specEnd);
-
-  /// Plot a spectrum plot with a given set of spectra
-  void plotSpectra(const QStringList &workspaceNames,
-                   const std::vector<int> &wsIndices);
-
-  /// Plot a spectrum plot with a given set of spectra of a given workspace
-  void plotSpectra(const QString &workspaceName,
-                   const std::vector<int> &wsIndices);
-
-  /// Plot multiple spectra in a tiled plot
-  void plotTiled(std::string const &workspaceName, std::size_t const &fromIndex,
-                 std::size_t const &toIndex);
-
-  /// Plot a time bin plot given a list of workspace names
-  void plotTimeBin(const QStringList &workspaceNames, int binIndex = 0);
-  /// Plot a time bin plot of a given workspace
-  void plotTimeBin(const QString &workspaceName, int binIndex = 0);
-
-  /// Plot a contour plot of a given workspace
-  void plot2D(const QString &workspaceName);
 
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
@@ -229,9 +192,6 @@ protected:
   /// Use a Python runner for when we need the output of a script
   MantidQt::API::PythonRunner m_pythonRunner;
 
-  /// Plot error bars when plotting a spectrum
-  bool m_plotErrorBars;
-
   /// Validator for int inputs
   QIntValidator *m_valInt;
   /// Validator for double inputs
@@ -256,6 +216,8 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
+
+  std::unique_ptr<IndirectPlotter> m_plotter;
 
 private slots:
   virtual void handleDataReady(QString const &dataName) {

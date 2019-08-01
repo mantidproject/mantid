@@ -12,12 +12,6 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidKernel/Strings.h"
 #else
-#include "MantidQtWidgets/MplCpp/Plot.h"
-
-#include <QHash>
-#include <QString>
-#include <QVariant>
-
 using namespace MantidQt::Widgets::MplCpp;
 #endif
 
@@ -149,14 +143,14 @@ std::string createPlotTiledString(std::string const &workspaceName,
   return plotString;
 }
 
-#else
-QHash<QString, QVariant> constructKwargs(
-    bool errorBars,
-    QHash<QString, QVariant> otherKwargs = QHash<QString, QVariant>()) {
-  if (errorBars)
-    otherKwargs["capsize"] = 3;
-  return otherKwargs;
-}
+//#else
+// QHash<QString, QVariant> constructKwargs(
+//    bool errorBars,
+//    QHash<QString, QVariant> otherKwargs = QHash<QString, QVariant>()) {
+//  if (errorBars)
+//    otherKwargs["capsize"] = 3;
+//  return otherKwargs;
+//}
 #endif
 
 } // namespace
@@ -191,11 +185,57 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
     runPythonCode(createPlotSpectraString(
         workspaceName, createIndicesList(workspaceIndices), errorBars));
 #else
-    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-         createIndicesVector<int>(workspaceIndices), boost::none,
-         constructKwargs(errorBars), boost::none, boost::none, errorBars);
+    workbenchPlot(QStringList(QString::fromStdString(workspaceName)),
+                  createIndicesVector<int>(workspaceIndices), errorBars,
+                  boost::none);
+    // plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+    //     createIndicesVector<int>(workspaceIndices), boost::none,
+    //     constructKwargs(errorBars), boost::none, boost::none, errorBars);
 #endif
   }
+}
+
+/**
+ * Plots different spectra for multiple workspaces on the same plot.
+ * The size of workspaceNames and workspaceIndices must be equal.
+ *
+ * @param workspaceNames List of names of workspaces to plot
+ * @param workspaceIndices List of indices to plot
+ */
+void IndirectPlotter::plotCorrespondingSpectra(
+    std::vector<std::string> const &workspaceNames,
+    std::vector<int> const &workspaceIndices) {
+  if (workspaceNames.size() != workspaceIndices.size())
+    return;
+  auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  std::string pyInput = "from mantidplot import plotSpectrum\n";
+  pyInput += "current_window = plotSpectrum('";
+  pyInput += workspaceNames[0];
+  pyInput += "', ";
+  pyInput += std::to_string(workspaceIndices[0]);
+  pyInput += ")\n";
+
+  for (auto i = 1u; i < workspaceNames.size(); ++i) {
+    pyInput += "plotSpectrum('";
+    pyInput += workspaceNames[i];
+    pyInput += "', ";
+    pyInput += std::to_string(workspaceIndices[i]);
+    pyInput += ", window=current_window)\n";
+  }
+  runPythonCode(pyInput);
+#else
+  auto figure =
+      workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])),
+                    {workspaceIndices[0]}, errorBars);
+  for (auto i = 1; i < workspaceNames.size(); ++i) {
+    figure =
+        workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])),
+                      {workspaceIndices[i]}, errorBars, boost::none, figure);
+  }
+  // workbenchPlot(workspaceNames, workspaceIndices, m_plotErrorBars,
+  // boost::none);
+#endif
 }
 
 /**
@@ -215,10 +255,12 @@ void IndirectPlotter::plotBins(std::string const &workspaceName,
 #else
     QHash<QString, QVariant> plotKwargs;
     plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
-    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-         createIndicesVector<int>(binIndices), boost::none,
-         constructKwargs(errorBars, plotKwargs), boost::none, boost::none,
-         errorBars);
+    // plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+    //     createIndicesVector<int>(binIndices), boost::none,
+    //     constructKwargs(errorBars, plotKwargs), boost::none, boost::none,
+    //     errorBars);
+    workbenchPlot(QStringList(QString::fromStdString(workspaceName)),
+                  createIndicesVector<int>(binIndices), errorBars, plotKwargs);
 #endif
   }
 }
@@ -341,6 +383,34 @@ bool IndirectPlotter::validateBins(MatrixWorkspace_const_sptr workspace,
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 void IndirectPlotter::runPythonCode(std::string const &pythonCode) {
   m_pyRunner->runPythonCode(pythonCode);
+}
+#else
+
+/**
+ * Used for plotting spectra or bins on the workbench
+ *
+ * @param workspaceNames List of names of workspaces to plot
+ * @param indices The workspace indices to plot
+ * @param errorBars True if error bars are enabled
+ * @param kwargs Other arguments for plotting
+ * @param figure The figure to plot on top of
+ */
+using namespace MantidQt::Widgets::Common;
+
+Python::Object
+IndirectPlotter::workbenchPlot(QStringList const &workspaceNames,
+                               std::vector<int> const &indices, bool errorBars,
+                               boost::optional<QHash<QString, QVariant>> kwargs,
+                               boost::optional<Python::Object> figure) {
+  QHash<QString, QVariant> plotKwargs;
+  if (kwargs)
+    plotKwargs = kwargs.get();
+  if (errorBars)
+    plotKwargs["capsize"] = 3;
+
+  using MantidQt::Widgets::MplCpp::plot;
+  return plot(workspaceNames, boost::none, indices, figure, plotKwargs,
+              boost::none, boost::none, errorBars);
 }
 #endif
 

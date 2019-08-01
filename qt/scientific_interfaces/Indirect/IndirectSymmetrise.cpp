@@ -606,7 +606,8 @@ void IndirectSymmetrise::runClicked() { runTab(); }
  */
 void IndirectSymmetrise::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName),
+                            QString::fromStdString(m_pythonExportWsName));
 }
 
 void IndirectSymmetrise::setRunEnabled(bool enabled) {

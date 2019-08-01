@@ -12,6 +12,15 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Plot.h"
+
+#include <QHash>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
+#endif
+
 #include <boost/none_t.hpp>
 #include <boost/optional.hpp>
 
@@ -39,6 +48,9 @@ public:
 
   virtual void plotSpectra(std::string const &workspaceName,
                            std::string const &workspaceIndices);
+  virtual void
+  plotCorrespondingSpectra(std::vector<std::string> const &workspaceNames,
+                           std::vector<int> const &workspaceIndices);
   virtual void plotBins(std::string const &workspaceName,
                         std::string const &binIndices);
   virtual void plotContour(std::string const &workspaceName);
@@ -60,7 +72,13 @@ private:
   bool validateBins(Mantid::API::MatrixWorkspace_const_sptr workspace,
                     std::string const &binIndices) const;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  Widgets::Common::Python::Object workbenchPlot(
+      QStringList const &workspaceNames, std::vector<int> const &indices,
+      bool errorBars,
+      boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
+      boost::optional<Widgets::Common::Python::Object> figure = boost::none);
+#else
   void runPythonCode(std::string const &pythonCode);
 
   IPyRunner *m_pyRunner;

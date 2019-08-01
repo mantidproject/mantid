@@ -54,8 +54,9 @@ Restrict allowed input files by name
   **Keeping this turned on is highly recommended**. See the glossary below to understand
   the restrictions on data when this option is ticked.
 
-Plot error bars for output plots
-  This will ensure that error bars are plotted on the output data plots if it is ticked.
+Plot error bars for external plots
+  If ticked, this will ensure that error bars are plotted on any plots which are plotted 
+  externally (i.e. in a separate window) from the indirect interfaces.
 
 
 Glossary of Allowed Suffixes

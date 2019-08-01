@@ -83,9 +83,6 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
-  /// Allows the user to turn the plotting of error bars off and on
-  void setPlotErrorBars(bool errorBars);
-
 protected:
   /// Check the binning between two workspaces match
   bool

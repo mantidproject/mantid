@@ -38,7 +38,7 @@ namespace IndirectSettingsHelper {
 
 static std::string const INDIRECT_SETTINGS_GROUP("Indirect Settings");
 static std::string const RESTRICT_DATA_PROPERTY("restrict-input-by-name");
-static std::string const ERROR_BARS_PROPERTY("plot-error-bars");
+static std::string const ERROR_BARS_PROPERTY("plot-error-bars-external");
 
 bool restrictInputDataByName() {
   return getSetting(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY).toBool();

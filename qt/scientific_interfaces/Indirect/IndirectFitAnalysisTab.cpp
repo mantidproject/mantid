@@ -273,8 +273,8 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter =
-      std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
+      m_fittingModel.get(), view, this);
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
@@ -915,8 +915,7 @@ void IndirectFitAnalysisTab::plotSelectedSpectra(
  */
 void IndirectFitAnalysisTab::plotSpectrum(std::string const &workspaceName,
                                           std::size_t const &index) {
-  IndirectTab::plotSpectrum(QString::fromStdString(workspaceName),
-                            static_cast<int>(index));
+  m_plotter->plotSpectra(workspaceName, std::to_string(index));
 }
 
 /**

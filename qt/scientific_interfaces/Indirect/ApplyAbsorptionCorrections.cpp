@@ -550,24 +550,29 @@ void ApplyAbsorptionCorrections::runClicked() {
  * Plots the current spectrum displayed in the preview plot
  */
 void ApplyAbsorptionCorrections::plotCurrentPreview() {
-  QStringList workspaces = QStringList();
+  std::vector<std::string> workspaces;
+  auto const index = boost::numeric_cast<int>(m_spectra);
+  std::vector<int> indices;
 
   // Check whether a sample workspace has been specified
   if (m_ppSampleWS) {
-    workspaces.append(QString::fromStdString(m_ppSampleWS->getName()));
+    workspaces.emplace_back(m_ppSampleWS->getName());
+    indices.emplace_back(index);
   }
 
   // Check whether a container workspace has been specified
   if (m_ppContainerWS) {
-    workspaces.append(QString::fromStdString(m_containerWorkspaceName));
+    workspaces.emplace_back(m_containerWorkspaceName);
+    indices.emplace_back(index);
   }
 
   // Check whether a subtracted workspace has been generated
   if (!m_pythonExportWsName.empty()) {
-    workspaces.append(QString::fromStdString(m_pythonExportWsName));
+    workspaces.emplace_back(m_pythonExportWsName);
+    indices.emplace_back(index);
   }
 
-  IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
+  m_plotter->plotCorrespondingSpectra(workspaces, indices);
 }
 
 /*
