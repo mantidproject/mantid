@@ -51,8 +51,15 @@ class PeakSelectorView(QtWidgets.QListWidget):
         except KeyError:
             self.gamma_checkboxes = []
         try:
+            # Electron data has the x position as key and relative intensity as value
             electrons = peak_data["Electrons"]
-            self.electron_checkboxes = self._create_checkbox_list("Electrons", electrons, checked=False)
+            electron_data = {}
+            for xpos, int in electrons.items():
+                name = 'e- {}'.format(xpos)
+                electron_data[name] = float(xpos)
+            print(electrons)
+            print(electron_data)
+            self.electron_checkboxes = self._create_checkbox_list("Electrons", electron_data, checked=False)
         except KeyError:
             self.electron_checkboxes = []
 
