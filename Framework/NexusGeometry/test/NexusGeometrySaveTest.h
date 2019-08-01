@@ -316,7 +316,9 @@ public:
     try {
       H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
       std::string dataSetVal;
-      dataSet.read(dataSetVal, dataSet.getDataType());
+      auto type = dataSet.getDataType();
+      dataSet.read(dataSetVal, type);
+      dataSetVal.resize(type.getSize());
       return dataSetVal == dataSetValue;
     } catch (H5::DataSetIException &) {
       return false;
@@ -332,8 +334,9 @@ public:
 
     H5::Attribute attribute = parentGroup.openAttribute(attrName);
     std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
+    auto type = attribute.getDataType();
+    attribute.read(type, attributeValue);
+    attributeValue.resize(type.getSize());
     return attributeValue == attrVal;
   }
 

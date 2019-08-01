@@ -340,7 +340,7 @@ std::vector<size_t> nxMonitorIndices(const Geometry::DetectorInfo &detInfo) {
  * @return string datatype of size = length of input string
  */
 inline H5::StrType strTypeOfSize(const std::string &str) {
-  H5::StrType stringType(1, (size_t)str.length());
+  H5::StrType stringType(H5::PredType::C_S1, str.size());
   return stringType;
 }
 
