@@ -34,6 +34,16 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
 
 IndirectDataReductionTab::~IndirectDataReductionTab() {}
 
+void IndirectDataReductionTab::setOutputPlotOptionsPresenter(
+    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+  m_plotOptionsPresenter = std::move(presenter);
+}
+
+void IndirectDataReductionTab::setOutputPlotOptionsWorkspaces(
+    std::vector<std::string> const &outputWorkspaces) {
+  m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
+}
+
 void IndirectDataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
@@ -41,6 +51,7 @@ void IndirectDataReductionTab::runTab() {
     emit updateRunButton(false, "disable", "Running...",
                          "Running data reduction...");
     try {
+      m_plotOptionsPresenter->clearWorkspaces();
       run();
     } catch (std::exception const &ex) {
       m_tabRunning = false;
