@@ -74,25 +74,19 @@ class HRPD(AbstractInst):
         if not self._inst_settings.do_solid_angle:
             return
         solid_angle = mantid.SolidAngle(InputWorkspace=vanadium)
+        solid_angle = mantid.Scale(InputWorkspace=solid_angle, Factor=100, Operation='Multiply')
 
-        scale = mantid.CreateSingleValuedWorkspace(DataValue='100')
-        correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=scale)
-
-        eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=correction)
+        eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=solid_angle)
         eff = mantid.ConvertUnits(InputWorkspace=eff, Target='Wavelength')
-        eff = mantid.Integration(InputWorkspace=eff, RangeLower='1.3999999999999999', RangeUpper='3')
+        eff = mantid.Integration(InputWorkspace=eff, RangeLower=1.4, RangeUpper=3)
 
-        correction = mantid.Multiply(LHSWorkspace=correction, RHSWorkspace=eff)
-        scale = mantid.CreateSingleValuedWorkspace(DataValue='100000')
-        correction = mantid.Divide(LHSWorkspace=correction, RHSWorkspace=scale)
-
+        correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=eff)
+        correction = mantid.Scale(InputWorkspace=correction, Factor=1e-5,
+                                  Operation='Multiply')
         name = "sac" + common.generate_splined_name(run_details.run_number, [])
         path = run_details.van_paths
 
         mantid.SaveNexus(InputWorkspace=correction, Filename=os.path.join(path, name))
-
-        common.remove_intermediate_workspace(solid_angle)
-        common.remove_intermediate_workspace(scale)
         common.remove_intermediate_workspace(eff)
         common.remove_intermediate_workspace(correction)
 
