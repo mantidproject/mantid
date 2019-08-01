@@ -148,8 +148,9 @@ class HRPD(AbstractInst):
     def _mask_prompt_pulses(self, ws):
         left_crop = 30
         right_crop = 140
-        for i in range(6):
-            middle = 100000 + 20000 * i
+        pulse_interval = 20000
+        for i in range(1, 6):
+            middle = i*pulse_interval
             min_crop = middle - left_crop
             max_crop = middle + right_crop
             mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
