@@ -97,6 +97,7 @@ set(
   IndirectFitPlotPresenter.h
   IndirectFittingModel.h
   IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
   IndirectToolsTab.h
   IPythonRunner.h
   IqtFitModel.h
@@ -151,7 +152,6 @@ set(
   IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
-  IndirectSettingsHelper.h
   IndirectSettingsPresenter.h
   IndirectSettingsView.h
   IndirectSimulation.h
