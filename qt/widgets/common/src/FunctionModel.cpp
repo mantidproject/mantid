@@ -131,6 +131,7 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
       cf->checkFunction();
     }
   }
+  m_function->checkFunction();
   updateGlobals();
 }
 

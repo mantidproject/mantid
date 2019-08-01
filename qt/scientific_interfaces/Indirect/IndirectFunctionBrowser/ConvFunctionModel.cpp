@@ -30,6 +30,13 @@ void ConvFunctionModel::clearData() {
   m_model.clear();
 }
 
+void ConvFunctionModel::setModel() {
+  m_model.setModel(buildBackgroundFunctionString(), m_resolutionName,
+                   m_resolutionIndex.value, buildPeaksFunctionString(),
+                   m_hasDeltaFunction);
+  m_model.setGlobalParameters(makeGlobalList());
+}
+
 void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
@@ -91,25 +98,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
 }
 
 IFunction_sptr ConvFunctionModel::getFitFunction() const {
-  auto modelFunction = m_model.getFitFunction();
-  if (!modelFunction) {
-    return modelFunction;
-  }
-  auto resolution = FunctionFactory::Instance().createFunction("Resolution");
-  if (!m_resolutionName.empty()) {
-    resolution->setAttributeValue("Workspace", m_resolutionName);
-  }
-  auto fitFunction = boost::dynamic_pointer_cast<CompositeFunction>(
-      FunctionFactory::Instance().createFunction("MultiDomainFunction"));
-  for (size_t i = 0; i < modelFunction->nFunctions(); ++i) {
-    auto convolution = boost::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("Convolution"));
-    convolution->addFunction(resolution->clone());
-    convolution->addFunction(modelFunction->getFunction(i)->clone());
-    fitFunction->addFunction(convolution);
-    fitFunction->setLocalAttributeValue(i, "domains", "i");
-  }
-  return fitFunction;
+  return m_model.getFitFunction();
 }
 
 bool ConvFunctionModel::hasFunction() const { return m_model.hasFunction(); }
@@ -193,8 +182,7 @@ void ConvFunctionModel::removeFunction(const QString &prefix) {
 void ConvFunctionModel::setDeltaFunction(bool on) {
   auto oldValues = getCurrentValues();
   m_hasDeltaFunction = on;
-  m_model.setFunctionString(buildFunctionString());
-  m_model.setGlobalParameters(makeGlobalList());
+  setModel();
   setCurrentValues(oldValues);
 }
 
@@ -203,16 +191,14 @@ bool ConvFunctionModel::hasDeltaFunction() const { return m_hasDeltaFunction; }
 void ConvFunctionModel::setBackground(BackgroundType bgType) {
   auto oldValues = getCurrentValues();
   m_backgroundType = bgType;
-  m_model.setFunctionString(buildFunctionString());
-  m_model.setGlobalParameters(makeGlobalList());
+  setModel();
   setCurrentValues(oldValues);
 }
 
 void ConvFunctionModel::removeBackground() {
   auto oldValues = getCurrentValues();
   m_backgroundType = BackgroundType::None;
-  m_model.setFunctionString(buildFunctionString());
-  m_model.setGlobalParameters(makeGlobalList());
+  setModel();
   setCurrentValues(oldValues);
 }
 
@@ -229,6 +215,7 @@ void ConvFunctionModel::setResolution(std::string const &name,
                                       DatasetIndex const &index) {
   m_resolutionName = name;
   m_resolutionIndex = index;
+  setModel();
 }
 
 QString ConvFunctionModel::setBackgroundA0(double value) {
@@ -341,8 +328,7 @@ QStringList ConvFunctionModel::makeGlobalList() const {
 void ConvFunctionModel::setFitType(FitType fitType) {
   auto oldValues = getCurrentValues();
   m_fitType = fitType;
-  m_model.setFunctionString(buildFunctionString());
-  m_model.setGlobalParameters(makeGlobalList());
+  setModel();
   setCurrentValues(oldValues);
 }
 
@@ -366,18 +352,18 @@ void ConvFunctionModel::updateMultiDatasetParameters(
 
   auto const globalParameterNames = getGlobalParameters();
   for (auto &&name : globalParameterNames) {
-    auto valueColumn = paramTable.getColumn(("f1." + name).toStdString());
+    auto valueColumn = paramTable.getColumn((name).toStdString());
     auto errorColumn =
-        paramTable.getColumn(("f1." + name + "_Err").toStdString());
+        paramTable.getColumn((name + "_Err").toStdString());
     m_model.setParameter(name, valueColumn->toDouble(0));
     m_model.setParameterError(name, errorColumn->toDouble(0));
   }
 
   auto const localParameterNames = getLocalParameters();
   for (auto &&name : localParameterNames) {
-    auto valueColumn = paramTable.getColumn(("f1." + name).toStdString());
+    auto valueColumn = paramTable.getColumn((name).toStdString());
     auto errorColumn =
-        paramTable.getColumn(("f1." + name + "_Err").toStdString());
+        paramTable.getColumn((name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
         m_model.setLocalParameterValue(name, static_cast<int>(i),
@@ -508,11 +494,11 @@ ConvFunctionModel::getParameterDescription(ParamID name) const {
 
 boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
   if (name <= ParamID::LOR2_FWHM_1) {
-    return getLor1Prefix();
+    return m_model.peakPrefixes()->at(0);
   } else if (name <= ParamID::LOR2_FWHM_2) {
-    return getLor2Prefix();
+    return m_model.peakPrefixes()->at(1);
   } else {
-    return getBackgroundPrefix();
+    return m_model.backgroundPrefix();
   }
 }
 
@@ -570,84 +556,41 @@ std::string ConvFunctionModel::buildLorentzianFunctionString() const {
   return "name=Lorentzian,Amplitude=1,FWHM=1,constraints=(Amplitude>0,FWHM>0)";
 }
 
-std::string ConvFunctionModel::buildDeltaFunctionString() const {
-  return "name=DeltaFunction";
+std::string ConvFunctionModel::buildPeaksFunctionString() const {
+  std::string functions;
+  if (m_fitType == FitType::OneLorentzian) {
+    functions.append(buildLorentzianFunctionString());
+  }
+  if (m_fitType == FitType::TwoLorentzians) {
+    auto const lorentzian = buildLorentzianFunctionString();
+    functions.append(lorentzian);
+    functions.append(";");
+    functions.append(lorentzian);
+  }
+  return functions;
 }
 
 std::string ConvFunctionModel::buildBackgroundFunctionString() const {
+  if (m_backgroundType == BackgroundType::None)
+    return "";
   return "name=" + m_backgroundSubtype.getFunctionName(m_backgroundType) +
          ",A0=0,constraints=(A0>0)";
 }
 
-// void ConvFunctionModel::estimateStretchExpParameters() {
-//  auto const heightName = getParameterName(ParamID::STRETCH_HEIGHT);
-//  auto const lifeTimeName = getParameterName(ParamID::STRETCH_LIFETIME);
-//  auto const stretchingName = getParameterName(ParamID::STRETCH_STRETCHING);
-//  if (!heightName || !lifeTimeName || !stretchingName)
-//    return;
-//  assert(getNumberDomains() == m_estimationData.size());
-//  for (auto i = 0; i < getNumberDomains(); ++i) {
-//    auto const &x = m_estimationData[i].x;
-//    auto const &y = m_estimationData[i].y;
-//    auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-//    if (lifeTime <= 0)
-//      lifeTime = 1.0;
-//    auto const height = y[0] * exp(x[0] / lifeTime);
-//    setLocalParameterValue(*heightName, i, height);
-//    setLocalParameterValue(*lifeTimeName, i, lifeTime);
-//    setLocalParameterValue(*stretchingName, i, 1.0);
-//  }
-//}
-
-QString ConvFunctionModel::buildFunctionString() const {
-  QStringList functions;
-  if (m_fitType == FitType::OneLorentzian) {
-    functions << QString::fromStdString(buildLorentzianFunctionString());
-  }
-  if (m_fitType == FitType::TwoLorentzians) {
-    functions << QString::fromStdString(buildLorentzianFunctionString());
-    functions << QString::fromStdString(buildLorentzianFunctionString());
-  }
-  if (m_hasDeltaFunction) {
-    functions << QString::fromStdString(buildDeltaFunctionString());
-  }
-  if (m_backgroundType != BackgroundType::None) {
-    functions << QString::fromStdString(buildBackgroundFunctionString());
-  }
-  return functions.join(";");
-}
-
 boost::optional<QString> ConvFunctionModel::getLor1Prefix() const {
-  if (m_fitType != FitType::OneLorentzian &&
-      m_fitType != FitType::TwoLorentzians)
-    return boost::optional<QString>();
-  if (m_fitType != FitType::TwoLorentzians && !m_hasDeltaFunction &&
-      m_backgroundType == BackgroundType::None)
-    return QString("");
-  return QString("f0.");
+  return m_model.peakPrefixes()->at(0);
 }
 
 boost::optional<QString> ConvFunctionModel::getLor2Prefix() const {
-  if (m_fitType != FitType::TwoLorentzians)
-    return boost::optional<QString>();
-  return QString("f1.");
+  return m_model.peakPrefixes()->at(1);
 }
 
 boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const {
-  if (!m_hasDeltaFunction)
-    return boost::optional<QString>();
-  if (m_fitType == FitType::None && m_backgroundType == BackgroundType::None)
-    return QString("");
-  return QString("f%1.").arg(getNumberOfPeaks());
+  return m_model.deltaFunctionPrefix();
 }
 
 boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const {
-  if (m_backgroundType == BackgroundType::None)
-    return boost::optional<QString>();
-  auto const numberOfPeaks = getNumberOfPeaks();
-  if (numberOfPeaks == 0 && !m_hasDeltaFunction)
-    return QString("");
-  return QString("f%1.").arg(numberOfPeaks + (m_hasDeltaFunction ? 1 : 0));
+  return m_model.backgroundPrefix();
 }
 
 } // namespace IDA

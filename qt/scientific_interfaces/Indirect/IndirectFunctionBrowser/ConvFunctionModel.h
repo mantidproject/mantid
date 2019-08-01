@@ -12,7 +12,7 @@
 #include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "ParameterEstimation.h"
 
 #include <QMap>
@@ -95,7 +95,8 @@ public:
 
 private:
   void clearData();
-  QString buildFunctionString() const;
+  void setModel();
+  //QString buildFunctionString() const;
   boost::optional<QString> getLor1Prefix() const;
   boost::optional<QString> getLor2Prefix() const;
   boost::optional<QString> getDeltaPrefix() const;
@@ -110,17 +111,16 @@ private:
   void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildLorentzianFunctionString() const;
-  std::string buildDeltaFunctionString() const;
+  std::string buildPeaksFunctionString() const;
   std::string buildBackgroundFunctionString() const;
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
 
-  FunctionModel m_model;
+  ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
-  // std::string m_background;
   bool m_hasDeltaFunction = false;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
