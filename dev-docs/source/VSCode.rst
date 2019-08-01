@@ -66,7 +66,7 @@ Features
 Auto Formatting
 ---------------
 It is required in the mantid project to format code using clang-format, this can be done
-in multiple ways but VSCode makes it easier. With a formatter installed as an extension 
+in multiple ways but VSCode makes it easier. With a formatter installed as an extension
 it is possible to format any open file in VSCode. It is recommended to use this `Clang-Format <https://marketplace.visualstudio.com/items?itemName=xaver.clang-format>`_ extension.
 It is possible to format your code using on save, type, paste and save timeout. To set
 when you want to format:
@@ -158,6 +158,8 @@ If this fails
 For this section the guide will show you how to use GDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
 
+*MantidPlot*
+
 .. code-block:: javascript
 
     {
@@ -186,7 +188,36 @@ you will want to make your file look something a little like this:
         ]
     }
 
-**Window:**
+*Workbench*
+
+To debug C++ and start directly into the Workbench, add this to the configuration list in ``launch.json``.
+
+.. code-block:: javascript
+
+    {
+      "name": "(gdb) Workbench C++ Only",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/usr/bin/python2.7", // Path to your used Python interpreter, here and below
+      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python2.7","$!"], // $! gets the process ID
+      "stopAtEntry": false,
+      "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build Mantid",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+
+
+
+**Windows:**
 
 For this section of the guide it will discuss use of the MSVC debugger. Please
 follow on with the `guide <https://code.visualstudio.com/docs/cpp/config-msvc>`_.
@@ -306,7 +337,7 @@ Keybindings
 -----------
 
 To get a list of all of possible keybindings the open your command line
-(Ctrl+Shift+P or ⌘+Shift+P) and search for "Help: Keyboard Shortcuts 
+(Ctrl+Shift+P or ⌘+Shift+P) and search for "Help: Keyboard Shortcuts
 Reference" and hit Enter.
 
 **Very commonly used keybindings:**
