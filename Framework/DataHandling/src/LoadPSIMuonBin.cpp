@@ -466,9 +466,16 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   // Set Start date and time and end date and time
   auto startDate = getFormattedDateTime(m_header.dateStart, m_header.timeStart);
   auto endDate = getFormattedDateTime(m_header.dateEnd, m_header.timeEnd);
-  Mantid::Types::Core::DateAndTime start(startDate);
-  Mantid::Types::Core::DateAndTime end(endDate);
-  outputWorkspace->mutableRun().setStartAndEndTime(start, end);
+  try {
+    Mantid::Types::Core::DateAndTime start(startDate);
+    Mantid::Types::Core::DateAndTime end(endDate);
+    outputWorkspace->mutableRun().setStartAndEndTime(start, end);
+  } catch (const std::logic_error &) {
+    Mantid::Types::Core::DateAndTime start;
+    Mantid::Types::Core::DateAndTime end;
+    outputWorkspace->mutableRun().setStartAndEndTime(start, end);
+    g_log.warning("The date in the .bin file was invalid");
+  }
 
   addToSampleLog("run_end", startDate, outputWorkspace);
   addToSampleLog("run_start", endDate, outputWorkspace);
