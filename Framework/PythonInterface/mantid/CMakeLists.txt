@@ -1,13 +1,9 @@
 # PythonInterface sub modules
 
-# Generate the version module Build version
-set(VERSION_PY pyversion)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py)
-
-# Package version
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in
-               ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py)
+# Generate the buildconfig module
+set(BUILDCONFIG_PY buildconfig.py)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${BUILDCONFIG_PY}.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/${BUILDCONFIG_PY})
 
 # There is no library target for the top level package just the python files
 add_custom_target(PythonModule

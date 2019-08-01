@@ -4,18 +4,19 @@
 """
 import sys
 
-# Define the target major.minor version (i.e. the one mantid was built against)
-TARGET_VERSION="@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@"
+# Constants describing various compile-time dependencies
+PYTHON_VERSION = "@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@"
+GSL_VERSION = "@GSL_VERSION@"
 
 
 def check_python_version():
     vers_info = sys.version_info
     running_vers = "%d.%d" % (vers_info[0], vers_info[1])
-    if running_vers != TARGET_VERSION:
+    if running_vers != PYTHON_VERSION:
         message = \
     """Python version mismatch, cannot continue.
     Mantid was built against version '%s' but you are running version '%s'. These versions
     must match.
     """
-        raise ImportError(message % (TARGET_VERSION, running_vers))
+        raise ImportError(message % (PYTHON_VERSION, running_vers))
 
