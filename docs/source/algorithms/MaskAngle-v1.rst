@@ -16,6 +16,13 @@ that were masked
 
 When masking the phi angle the absolute value of phi is used.
 
+The three angle options are subtly different:
+* ``TwoTheta`` is the detector's :math:`2 \theta` value as calcualted from the downstream beam. This is the angle from the pole and not constrained to be in-plane.
+* ``Phi`` is the detector's angle with respect to the positive z-axis not constrained to be in-plane. For many geometries this will be the same as the ``TwoTheta`` option.
+* ``InPlane`` is the detector's angle with respect to the positive z-axis constrained within the x-z-plane.
+
+For the ``TwoTheta`` and ``Phi`` options, only positive angles are allowed.
+
 Usage
 -----
 
@@ -27,11 +34,11 @@ Usage
 
     #Load a workspace
     ws = Load("CNCS_7860")
-    
+
     #Do the masking for direct beam
     mask = MaskAngle(ws, MinAngle=0, MaxAngle=10)
     print("The algorithm has masked {} detectors".format(mask.size))
-    
+
     #to test check a couple of detectors
     inst = ws.getInstrument()
     print("Is the minimum element in the mask list (detector {}) masked?  {}".format(mask.min(), inst.getDetector(int(mask.min())).isMasked()))
@@ -55,7 +62,7 @@ Output:
 The instrument view would look like:
 
 .. figure:: /images/MaskAngle.png
-   :alt: MaskAngle.png    
+   :alt: MaskAngle.png
 
 **Phi example**
 
