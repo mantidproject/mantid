@@ -10,6 +10,7 @@ import unittest
 
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
+from testhelpers import assertRaisesNothing
 
 from qtpy.QtGui import QCloseEvent
 
@@ -36,11 +37,11 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plot_window = None
         self.gui.color_index = 0
         self.gui.element_lines = {}
-        self.has_raise_ValueError_once_been_called = False
+        self.has_raise_ValueError_been_called_once = False
 
     def raise_ValueError_once(self):
-        if not self.has_raise_ValueError_once_been_called:
-            self.has_raise_ValueError_once_been_called = True
+        if not self.has_raise_ValueError_been_called_once:
+            self.has_raise_ValueError_been_called_once = True
             raise ValueError()
 
     def test_that_default_colour_cycle_is_used(self):
@@ -64,7 +65,8 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     def test_that_closing_with_no_plot_will_not_throw(self):
         self.gui.plot_window = None
-        self.gui.closeEvent(QCloseEvent())
+
+        assertRaisesNothing(self, self.gui.closeEvent, QCloseEvent())
 
     def test_that_closing_with_a_plot_will_close_the_window(self):
         self.gui.plot_window = mock.create_autospec(MultiPlotWindow)

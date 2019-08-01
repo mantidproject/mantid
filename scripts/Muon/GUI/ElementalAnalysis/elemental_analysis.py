@@ -41,14 +41,14 @@ offset = 0.9
 def gen_name(element, name):
     if sys.version_info[:2] < (3, 0):
         if (not isinstance(element, str)) and (not isinstance(element, unicode)):
-            raise TypeError("'%s' expected to be 'str', found '%s' instead" % (str(element), type(element)))
+            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
         if (not isinstance(name, str)) and (not isinstance(name, unicode)):
-            raise TypeError("'%s' expected to be 'str', found '%s' instead" % (str(name), type(name)))
+            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
     else:
         if not isinstance(element, str):
-            raise TypeError("'%s' expected to be 'str', found '%s' instead" % (str(element), type(element)))
+            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
         if not isinstance(name, str):
-            raise TypeError("'%s' expected to be 'str', found '%s' instead" % (str(name), type(name)))
+            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
 
     if element in name:
         return name

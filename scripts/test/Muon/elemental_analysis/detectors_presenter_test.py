@@ -28,6 +28,7 @@ class DetectorsPresenterTest(unittest.TestCase):
         self.detector_presenter.setStateQuietly(name, state)
 
         self.mock_view.setStateQuietly.assert_called_with(name, state)
+        self.assertEqual(self.mock_view.setStateQuietly.call_count, 1)
 
     def test_that_get_names_gives_correct_list_of_names(self):
         self.assertEqual(self.detector_presenter.getNames(), self.mock_view.widgets.keys())

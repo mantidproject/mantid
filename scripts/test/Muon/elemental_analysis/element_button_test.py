@@ -84,7 +84,7 @@ class _ElementButtonTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent')
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPainter.fillRect')
-    def test_that_paint_event_does_not_call_fillRect_is_brush_is_none(self, mock_fillRect, mock_paintEvent):
+    def test_that_paint_event_does_not_call_fillRect_if_brush_is_none(self, mock_fillRect, mock_paintEvent):
         self.element.brush = None
         self.element.paintEvent(mock.Mock())
 
@@ -92,7 +92,7 @@ class _ElementButtonTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QPushButton.paintEvent')
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtGui.QPainter.fillRect')
-    def test_that_paint_event_calls_fillRect_is_brush_is_not_none(self, mock_fillRect, mock_paintEvent):
+    def test_that_paint_event_calls_fillRect_if_brush_is_not_none(self, mock_fillRect, mock_paintEvent):
         self.element.brush = mock.Mock()
         self.element.paintEvent(mock.Mock())
 
