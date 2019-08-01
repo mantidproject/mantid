@@ -57,8 +57,6 @@ class PeakSelectorView(QtWidgets.QListWidget):
             for xpos, int in electrons.items():
                 name = 'e- {}'.format(xpos)
                 electron_data[name] = float(xpos)
-            print(electrons)
-            print(electron_data)
             self.electron_checkboxes = self._create_checkbox_list("Electrons", electron_data, checked=False)
         except KeyError:
             self.electron_checkboxes = []
