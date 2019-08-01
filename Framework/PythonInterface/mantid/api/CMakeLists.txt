@@ -113,18 +113,6 @@ set(INC_FILES
     inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
     inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h)
 
-set(PY_FILES __init__.py _adsimports.py _aliases.py _workspaceops.py)
-
-# Copy over the pure Python files for the module
-
-# Set the destination directory
-set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/api)
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  # Set the output directory for the libraries.
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/api)
-endif()
-
 # Create the target for this directory
 
 add_library(PythonAPIModule
@@ -171,12 +159,5 @@ endif()
 mtd_install_targets(TARGETS
                     PythonAPIModule
                     INSTALL_DIRS
-                    ${BIN_DIR}/mantid/api
-                    ${WORKBENCH_BIN_DIR}/mantid/api)
-
-# Pure Python files
-mtd_install_files(FILES
-                  ${PY_FILES}
-                  INSTALL_DIRS
-                  ${BIN_DIR}/mantid/api
-                  ${WORKBENCH_BIN_DIR}/mantid/api)
+                    ${LIB_DIR}/mantid/api
+                    ${WORKBENCH_LIB_DIR}/mantid/api)

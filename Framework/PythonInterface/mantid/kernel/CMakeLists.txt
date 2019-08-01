@@ -84,16 +84,6 @@ set(INC_FILES
     inc/MantidPythonInterface/kernel/Registry/TypeRegistry.h
     inc/MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h)
 
-set(PY_FILES __init__.py _aliases.py environment.py funcinspect.py plugins.py)
-
-# Add rule to copy over the pure Python files for the module
-set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel)
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  # Set the output directory for the libraries.
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel)
-endif()
-
 # Generate the packagesetup module for the build & install package
 set(PACKAGESETUP_PY packagesetup)
 set(NEXUSLIB ${NEXUS_C_LIBRARIES})
@@ -169,29 +159,22 @@ endif()
 mtd_install_targets(TARGETS
                     PythonKernelModule
                     INSTALL_DIRS
-                    ${BIN_DIR}/mantid/kernel
-                    ${WORKBENCH_BIN_DIR}/mantid/kernel)
-
-# Pure Python files
-mtd_install_files(FILES
-                  ${PY_FILES}
-                  INSTALL_DIRS
-                  ${BIN_DIR}/mantid/kernel
-                  ${WORKBENCH_BIN_DIR}/mantid/kernel)
+                    ${LIB_DIR}/mantid/kernel
+                    ${WORKBENCH_LIB_DIR}/mantid/kernel)
 
 # packagesetup.py that will overwrite the ones from the built target
 mtd_install_files(FILES
                   ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
                   INSTALL_DIRS
-                  ${BIN_DIR}/mantid/kernel
-                  ${WORKBENCH_BIN_DIR}/mantid/kernel
+                  ${LIB_DIR}/mantid/kernel
+                  ${WORKBENCH_LIB_DIR}/mantid/kernel
                   RENAME
                   ${PACKAGESETUP_PY}.py)
 
 mtd_install_files(FILES
                   ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
                   INSTALL_DIRS
-                  ${BIN_DIR}/mantid/kernel
-                  ${WORKBENCH_BIN_DIR}/mantid/kernel
+                  ${LIB_DIR}/mantid/kernel
+                  ${WORKBENCH_LIB_DIR}/mantid/kernel
                   RENAME
                   ${MPISETUP_PY}.py)

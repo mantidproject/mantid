@@ -57,18 +57,6 @@ set(INC_FILES
   inc/MantidPythonInterface/geometry/ComponentInfoPythonIterator.h
   inc/MantidPythonInterface/geometry/DetectorInfoPythonIterator.h)
 
-set(PY_FILES __init__.py _aliases.py)
-
-# Copy over the pure Python files for the module
-
-# Set the destination directory
-set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/geometry)
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  # Set the output directory for the libraries.
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry)
-endif()
-
 # Create the target for this directory
 add_library(PythonGeometryModule
             ${EXPORT_FILES}
@@ -110,12 +98,5 @@ endif()
 mtd_install_targets(TARGETS
                     PythonGeometryModule
                     INSTALL_DIRS
-                    ${BIN_DIR}/mantid/geometry
-                    ${WORKBENCH_BIN_DIR}/mantid/geometry)
-
-# Pure Python files
-mtd_install_files(FILES
-                  ${PY_FILES}
-                  INSTALL_DIRS
-                  ${BIN_DIR}/mantid/geometry
-                  ${WORKBENCH_BIN_DIR}/mantid/geometry)
+                    ${LIB_DIR}/mantid/geometry
+                    ${WORKBENCH_LIB_DIR}/mantid/geometry)
