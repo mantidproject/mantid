@@ -69,8 +69,8 @@ public:
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
-  void setResolution(std::string const &name,
-                     DatasetIndex const &index) override {}
+  void setResolution(std::string const &,
+                     DatasetIndex const &) override {}
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -82,7 +82,7 @@ protected slots:
 
 private:
   void createProperties() override;
-  void popupMenu(const QPoint &);
+  void popupMenu(const QPoint &) override;
   double getParameterPropertyValue(QtProperty *prop) const;
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);

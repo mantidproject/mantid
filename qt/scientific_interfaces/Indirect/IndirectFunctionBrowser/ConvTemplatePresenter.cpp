@@ -8,6 +8,7 @@
 #include "ConvTemplateBrowser.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
 
+#include <cmath>
 #include <iostream>
 
 namespace MantidQt {
@@ -41,7 +42,7 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
   emit functionStructureChanged();
 }
 
-void ConvTemplatePresenter::setStretchExponential(bool on) {
+void ConvTemplatePresenter::setStretchExponential(bool) {
   // if (on == m_model.hasStretchExponential()) return;
   // if (on) {
   //  m_view->addStretchExponential();

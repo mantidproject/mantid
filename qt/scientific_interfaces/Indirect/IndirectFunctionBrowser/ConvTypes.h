@@ -20,6 +20,8 @@ namespace CustomInterfaces {
 namespace IDA {
 namespace ConvTypes {
 
+using namespace Mantid::API;
+
 enum class FitType { None, OneLorentzian, TwoLorentzians };
 enum class BackgroundType { None, Flat, Linear };
 

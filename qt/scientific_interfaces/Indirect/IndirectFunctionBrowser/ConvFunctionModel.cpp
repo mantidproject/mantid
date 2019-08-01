@@ -623,21 +623,21 @@ boost::optional<QString> ConvFunctionModel::getLor1Prefix() const {
     return boost::optional<QString>();
   if (m_fitType != FitType::TwoLorentzians && !m_hasDeltaFunction &&
       m_backgroundType == BackgroundType::None)
-    return "";
-  return "f0.";
+    return QString("");
+  return QString("f0.");
 }
 
 boost::optional<QString> ConvFunctionModel::getLor2Prefix() const {
   if (m_fitType != FitType::TwoLorentzians)
     return boost::optional<QString>();
-  return "f1.";
+  return QString("f1.");
 }
 
 boost::optional<QString> ConvFunctionModel::getDeltaPrefix() const {
   if (!m_hasDeltaFunction)
     return boost::optional<QString>();
   if (m_fitType == FitType::None && m_backgroundType == BackgroundType::None)
-    return "";
+    return QString("");
   return QString("f%1.").arg(getNumberOfPeaks());
 }
 
@@ -646,7 +646,7 @@ boost::optional<QString> ConvFunctionModel::getBackgroundPrefix() const {
     return boost::optional<QString>();
   auto const numberOfPeaks = getNumberOfPeaks();
   if (numberOfPeaks == 0 && !m_hasDeltaFunction)
-    return "";
+    return QString("");
   return QString("f%1.").arg(numberOfPeaks + (m_hasDeltaFunction ? 1 : 0));
 }
 

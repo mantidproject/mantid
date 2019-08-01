@@ -85,7 +85,7 @@ void JumpFit::updateAvailableFitTypes() {
     addFunctions(getEISFFunctions());
 }
 
-void JumpFit::addFunctions(std::vector<std::string> const &functions) {
+void JumpFit::addFunctions(std::vector<std::string> const &) {
   // auto &factory = FunctionFactory::Instance();
   // for (auto const &function : functions)
   //  addComboBoxFunctionGroup(QString::fromStdString(function),
@@ -94,7 +94,7 @@ void JumpFit::addFunctions(std::vector<std::string> const &functions) {
 
 EstimationDataSelector JumpFit::getEstimationDataSelector() const {
   return
-      [](const MantidVec &x, const MantidVec &y) -> DataForParameterEstimation {
+      [](const MantidVec &, const MantidVec &) -> DataForParameterEstimation {
         return DataForParameterEstimation{{}, {}};
       };
 }

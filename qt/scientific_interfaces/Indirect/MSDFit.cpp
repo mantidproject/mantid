@@ -61,7 +61,7 @@ void MSDFit::setupFitTab() {
 
 EstimationDataSelector MSDFit::getEstimationDataSelector() const {
   return
-      [](const MantidVec &x, const MantidVec &y) -> DataForParameterEstimation {
+      [](const MantidVec &, const MantidVec &) -> DataForParameterEstimation {
         return DataForParameterEstimation{{}, {}};
       };
 }

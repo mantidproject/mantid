@@ -23,7 +23,8 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::LINEAR_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A1, "A1"}};
 
-std::map<FitType, TemplateSubTypeDescriptor> FitSubType::g_typeMap{
+template<>
+std::map<FitType, TemplateSubTypeDescriptor> TemplateSubTypeImpl<FitType>::g_typeMap{
     {FitType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
     {FitType::OneLorentzian,
      {"One Lorentzian",
@@ -35,8 +36,9 @@ std::map<FitType, TemplateSubTypeDescriptor> FitSubType::g_typeMap{
       {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1, ParamID::LOR2_FWHM_2}}},
 };
 
+template<>
 std::map<BackgroundType, TemplateSubTypeDescriptor>
-    BackgroundSubType::g_typeMap{
+    TemplateSubTypeImpl<BackgroundType>::g_typeMap{
         {BackgroundType::None, {"None", "", {ParamID::NONE, ParamID::NONE}}},
         {BackgroundType::Flat,
          {"FlatBackground",
