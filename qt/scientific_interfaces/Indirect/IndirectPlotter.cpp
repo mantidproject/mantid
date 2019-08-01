@@ -12,6 +12,13 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidKernel/Strings.h"
 #else
+#include "MantidQtWidgets/MplCpp/Plot.h"
+
+#include <QHash>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
+
 using namespace MantidQt::Widgets::MplCpp;
 #endif
 
@@ -141,6 +148,33 @@ std::string createPlotTiledString(std::string const &workspaceName,
   }
   plotString += "])\n";
   return plotString;
+}
+#else
+
+/**
+ * Used for plotting spectra or bins on the workbench
+ *
+ * @param workspaceNames List of names of workspaces to plot
+ * @param indices The workspace indices to plot
+ * @param errorBars True if error bars are enabled
+ * @param kwargs Other arguments for plotting
+ * @param figure The figure to plot on top of
+ */
+using namespace MantidQt::Widgets::Common;
+
+Python::Object workbenchPlot(QStringList const &workspaceNames,
+                             std::vector<int> const &indices, bool errorBars,
+                             boost::optional<QHash<QString, QVariant>> kwargs,
+                             boost::optional<Python::Object> figure) {
+  QHash<QString, QVariant> plotKwargs;
+  if (kwargs)
+    plotKwargs = kwargs.get();
+  if (errorBars)
+    plotKwargs["capsize"] = 3;
+
+  using MantidQt::Widgets::MplCpp::plot;
+  return plot(workspaceNames, boost::none, indices, figure, plotKwargs,
+              boost::none, boost::none, errorBars);
 }
 #endif
 
@@ -365,34 +399,6 @@ bool IndirectPlotter::validateBins(MatrixWorkspace_const_sptr workspace,
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 void IndirectPlotter::runPythonCode(std::string const &pythonCode) {
   m_pyRunner->runPythonCode(pythonCode);
-}
-#else
-
-/**
- * Used for plotting spectra or bins on the workbench
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param indices The workspace indices to plot
- * @param errorBars True if error bars are enabled
- * @param kwargs Other arguments for plotting
- * @param figure The figure to plot on top of
- */
-using namespace MantidQt::Widgets::Common;
-
-Python::Object
-IndirectPlotter::workbenchPlot(QStringList const &workspaceNames,
-                               std::vector<int> const &indices, bool errorBars,
-                               boost::optional<QHash<QString, QVariant>> kwargs,
-                               boost::optional<Python::Object> figure) {
-  QHash<QString, QVariant> plotKwargs;
-  if (kwargs)
-    plotKwargs = kwargs.get();
-  if (errorBars)
-    plotKwargs["capsize"] = 3;
-
-  using MantidQt::Widgets::MplCpp::plot;
-  return plot(workspaceNames, boost::none, indices, figure, plotKwargs,
-              boost::none, boost::none, errorBars);
 }
 #endif
 
