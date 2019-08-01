@@ -101,6 +101,7 @@ void FunctionModel::addFunction(const QString &prefix, const QString &funStr) {
                                " is not composite.");
     }
   }
+  m_function->checkFunction();
   updateGlobals();
 }
 
