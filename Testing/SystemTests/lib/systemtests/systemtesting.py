@@ -1172,6 +1172,15 @@ def envAsString():
 
 
 #########################################################################
+# Check if we are on an OS that has GSL v1
+#########################################################################
+def using_gsl_v1():
+    """ Check whether the current build is running GSL v1"""
+    from mantid.buildconfig import GSL_VERSION
+    return GSL_VERSION.startswith('1')
+
+
+#########################################################################
 # Function to keep a pool of threads active in a loop to run the tests.
 # Each thread starts a loop and gathers a first test module from the
 # master test list which is stored in the tests_dict shared dictionary,

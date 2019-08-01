@@ -74,23 +74,18 @@ systemtesting.MantidSystemTest
 '''
 
 from __future__ import (absolute_import, division, print_function)
-import systemtesting
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
-import platform
+from systemtesting import MantidSystemTest, using_gsl_v1
+
 from six import with_metaclass
 
 
-def current_OS_has_GSLv2():
-    """ Check whether the current OS should be running GSLv2 """
-    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''
-
-
-class ISISIndirectInelasticBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISIndirectInelasticBase(with_metaclass(ABCMeta, MantidSystemTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''
@@ -1118,7 +1113,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
     def get_reference_files(self):
         self.tolerance = 0.3
         # gsl v2 gives a slightly different result than v1
-        return ['II.OSIRISConvFitSeq_gslv2.nxs'] if current_OS_has_GSLv2() else ['II.OSIRISConvFitSeq.nxs']
+        return ['II.OSIRISConvFitSeq.nxs'] if using_gsl_v1() \
+            else ['II.OSIRISConvFitSeq_gslv2.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -1146,7 +1142,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
     def get_reference_files(self):
         self.tolerance = 0.2
         # gsl v2 gives a slightly different result than v1
-        return ['II.IRISConvFitSeq_gslv2.nxs'] if current_OS_has_GSLv2() else ['II.IRISConvFitSeq.nxs']
+        return ['II.IRISConvFitSeq.nxs'] if using_gsl_v1() else ['II.IRISConvFitSeq_gslv2.nxs']
 
 #==============================================================================
 # Transmission Monitor Test
