@@ -142,15 +142,6 @@ std::string createPlotTiledString(std::string const &workspaceName,
   plotString += "])\n";
   return plotString;
 }
-
-//#else
-// QHash<QString, QVariant> constructKwargs(
-//    bool errorBars,
-//    QHash<QString, QVariant> otherKwargs = QHash<QString, QVariant>()) {
-//  if (errorBars)
-//    otherKwargs["capsize"] = 3;
-//  return otherKwargs;
-//}
 #endif
 
 } // namespace
@@ -188,9 +179,6 @@ void IndirectPlotter::plotSpectra(std::string const &workspaceName,
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)),
                   createIndicesVector<int>(workspaceIndices), errorBars,
                   boost::none);
-    // plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-    //     createIndicesVector<int>(workspaceIndices), boost::none,
-    //     constructKwargs(errorBars), boost::none, boost::none, errorBars);
 #endif
   }
 }
@@ -233,8 +221,6 @@ void IndirectPlotter::plotCorrespondingSpectra(
         workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])),
                       {workspaceIndices[i]}, errorBars, boost::none, figure);
   }
-  // workbenchPlot(workspaceNames, workspaceIndices, m_plotErrorBars,
-  // boost::none);
 #endif
 }
 
@@ -255,10 +241,6 @@ void IndirectPlotter::plotBins(std::string const &workspaceName,
 #else
     QHash<QString, QVariant> plotKwargs;
     plotKwargs["axis"] = static_cast<int>(MantidAxType::Bin);
-    // plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
-    //     createIndicesVector<int>(binIndices), boost::none,
-    //     constructKwargs(errorBars, plotKwargs), boost::none, boost::none,
-    //     errorBars);
     workbenchPlot(QStringList(QString::fromStdString(workspaceName)),
                   createIndicesVector<int>(binIndices), errorBars, plotKwargs);
 #endif
