@@ -97,13 +97,10 @@ std::string groupName(const Geometry::ComponentInfo &compInfo,
  * Mantid::Kernel::V3D format.
  */
 std::vector<double> toStdVector(const V3D &data) {
-
   std::vector<double> stdVector;
   stdVector.reserve(3);
-
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 3; ++i)
     stdVector.push_back(data[i]);
-  }
   return stdVector;
 }
 
@@ -116,13 +113,10 @@ std::vector<double> toStdVector(const V3D &data) {
  * @return std::vector<double> vector containing data values in Quat format
  */
 std::vector<double> toStdVector(const Quat &data) {
-
   std::vector<double> stdVector;
   stdVector.reserve(4);
-
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 4; ++i)
     stdVector.push_back(data[i]);
-  }
   return stdVector;
 }
 
@@ -136,14 +130,7 @@ std::vector<double> toStdVector(const Quat &data) {
  * format
  */
 std::vector<double> toStdVector(const Eigen::Vector3d &data) {
-
-  std::vector<double> stdVector;
-  stdVector.reserve(3);
-
-  for (int i = 0; i < 3; ++i) {
-    stdVector.push_back(data[i]);
-  }
-  return stdVector;
+  return toStdVector(Kernel::toV3D(data));
 }
 
 /*
@@ -156,19 +143,11 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
  * Eigen::Quaterniond format
  */
 std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
-
-  std::vector<double> stdVector;
-  stdVector.reserve(4);
-  // using Eigen Quaterniond storage format (w is stored as last element)
-  for (int i = 0; i < 3; ++i) {
-    stdVector.push_back(data.vec()[i]);
-  }
-  stdVector.push_back(data.w());
-  return stdVector;
+  return toStdVector(Kernel::toQuat(data));
 }
 
 /*
- * Function: isApproxZero. returns true if all values in a std vector container
+ * Function: isApproxZero. returns true if all values in an std-vector container
  * evaluate to zero with a given level of precision. Used by SaveInstrument
  * methods to determine whether or not to write a dataset to file. If data is
  * Quaternion, returns true if quaternion is equivalent to zero rotation
@@ -180,31 +159,36 @@ std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
  *
  * @return true if all elements are approx zero, else false.
  */
-
-bool isApproxZero(const std::vector<double> &data, const double &precision,
-                  const bool isQuaternion = false) {
+bool isApproxZero(const std::vector<double> &data, const double &precision) {
 
   // if data is a quaternion return true if the associated rotation about an
   // axis is approximately zero
-  if (isQuaternion) {
-    /*
-       If isQuaterion flag is true, isApproxZero returns true if the quaternion
-       rotation is zero angle. which corresponds to either values depending on
-       type: Quat(1,0,0,0) or Eigen::Quaterniond(0,0,0,1).
-        */
-    return /*Kernel Quat case*/ (
-               std::abs(data[0] - 1.0) < precision &&
-               std::abs(data[1]) < precision && std::abs(data[2]) < precision &&
-               std::abs(data[3]) < precision) || /*Eigen Quateriond case*/
-           (std::abs(data[0]) < precision && std::abs(data[1]) < precision &&
-            std::abs(data[2]) < precision &&
-            std::abs(data[3] - 1.0) < precision);
-  }
   return std::all_of(data.begin(), data.end(),
                      [&precision](const double &element) {
                        return std::abs(element) < precision;
                      });
 }
+
+// overload. return true if vector is approx to zero
+bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
+  return data.isApprox(Eigen::Vector3d(0,0,0), precision);
+}
+
+// overload. returns true is angle is approx to zero
+bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
+  return  data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
+}
+
+// overload. convert to Eigen to use isApprox member function
+bool isApproxZero(const Kernel::V3D  &data, const double &precision) {
+  return Kernel::toVector3d(data).isApprox(Eigen::Vector3d(0, 0, 0), precision);
+}
+
+// overload. convert to Eigen to use isApprox member function
+bool isApproxZero(const Kernel::Quat &data, const double &precision) {
+  return Kernel::toQuaterniond(data).isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
+}
+
 
 /*
  * Function: nxDetectorIndices. finds banks in component info and returns
@@ -718,8 +702,8 @@ void saveNXSource(const H5::Group &parentGroup,
   std::string dependency = NO_DEPENDENCY;
   std::string sourceName = groupName(compInfo, groupType, index); // group name
 
-  bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
-  bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
+  bool locationIsOrigin = isApproxZero(position, PRECISION);
+  bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
   H5::Group childGroup = parentGroup.createGroup(sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
@@ -772,8 +756,8 @@ void saveNXMonitor(const H5::Group &parentGroup,
   std::string dependency = NO_DEPENDENCY; // dependency initialiser
   std::string name = groupName(compInfo, groupType, index); // group name
 
-  bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
-  bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
+  bool locationIsOrigin = isApproxZero(position, PRECISION);
+  bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
   H5::Group childGroup = parentGroup.createGroup(name);
   writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
@@ -830,7 +814,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   std::string name = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
-  bool orientationIsZero = isApproxZero(toStdVector(rotation), PRECISION, true);
+  bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
   H5::Group childGroup = parentGroup.createGroup(name);
   writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);

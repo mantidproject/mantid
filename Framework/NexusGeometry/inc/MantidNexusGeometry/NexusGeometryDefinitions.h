@@ -57,7 +57,7 @@ const H5std_string UNITS = "units";
 const H5std_string VECTOR = "vector";
 
 const double DEGREES_IN_SEMICIRCLE = 180.0;
-const double PRECISION = 1e-5; // match Eigen precision.
+const double PRECISION = 1e-5;
 const double PI = M_PI;
 
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
