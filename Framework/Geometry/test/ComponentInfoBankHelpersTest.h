@@ -73,17 +73,13 @@ public:
   }
 
   void test_isSaveableBank_false_for_tubes() {
-    // test instrument with detector tubes to test that IsSaveableBank will
-    // return false detector tubes
-    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(2, 2);
+    // test instrument with detector tubes.
+    auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(
+        2 /*number of tubes*/, 2 /*pixels per tube*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
-    const auto &detInfo = (*wrappers.second);
-    const size_t tubeIdx = 5; // index of tube in component info
+    const size_t tubeIdx = 5; // index of a tube in component info
 
-    // verify component is tube
-    TS_ASSERT(compInfo.componentType(tubeIdx) ==
-              Beamline::ComponentType::OutlineComposite);
     // assert isSaveableBank returns false
     TS_ASSERT(!isSaveableBank(compInfo, tubeIdx));
   }
@@ -92,10 +88,10 @@ public:
     // test instrument with a detetctor to test that IsSaveableBank will
     // return false for detectors
     auto instr = ComponentCreationHelper::createMinimalInstrument(
-        V3D(0.0, 0.0, -10.0), V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 10.0));
+        V3D(0.0, 0.0, -10.0) /*source pos*/, V3D(0.0, 0.0, 0.0) /*sample pos*/,
+        V3D(0.0, 0.0, 10.0) /*bank pos*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
-    const auto &detInfo = (*wrappers.second);
 
     TS_ASSERT(!isSaveableBank(compInfo, 0 /*index of detector*/));
   }
@@ -106,7 +102,6 @@ public:
         2 /*number of banks*/, 2 /*number of pixels*/);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
-    const auto &detInfo = (*wrappers.second);
     // index of rectangular bank
     const size_t bankIdx = 13;
     // assert rectangular bank at bankIdx
@@ -131,7 +126,7 @@ public:
      able to retrieve the detector offset (2,-2,0) relative to the bank by
      internally applying the reverse transformations unto the position of the
      detector.
-        */
+     */
 
     // specify the detector offset that offsetFromAncestor should retrieve from
     // compInfo.

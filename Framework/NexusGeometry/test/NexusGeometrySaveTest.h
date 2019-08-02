@@ -672,7 +672,6 @@ found in the Instrument cache.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
     auto &compInfo = (*instr.first);
-    auto &detInfo = (*instr.second);
 
     auto instrName = compInfo.name(compInfo.root());
 
@@ -807,7 +806,6 @@ found in the Instrument cache.
             detPosition);         // detector position
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     auto &compInfo = (*instr.first);
-    auto &detInfo = (*instr.second);
 
     // saveinstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
