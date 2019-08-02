@@ -733,13 +733,11 @@ void saveNXSource(const H5::Group &parentGroup,
   // non-zero, replace dependency with orientation if true. If neither
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
-    dependency =
-        H5_OBJ_NAME(transformations) + "/" + LOCATION;
+    dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
-    dependency =
-        H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+    dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
     writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 
@@ -789,8 +787,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   // non-zero, replace dependency with orientation if true. If neither
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
-    dependency =
-        H5_OBJ_NAME(transformations) + "/" + LOCATION;
+    dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
@@ -847,13 +844,11 @@ void saveNXDetector(const H5::Group &parentGroup,
   // non-zero, replace dependency with orientation if true. If neither
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
-    dependency =
-        H5_OBJ_NAME(transformations) + "/" + LOCATION;
+    dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
-    dependency =
-        H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+    dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
     writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 
