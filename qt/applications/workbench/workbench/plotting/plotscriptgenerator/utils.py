@@ -10,7 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from numpy import ndarray
 
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, AnalysisDataService as ads
 from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE
 
 
@@ -44,6 +44,16 @@ def convert_args_to_string(args, kwargs):
     return ', '.join(arg_strings)
 
 
+def get_plotted_workspaces_names(fig):
+    plotted_workspaces = []
+    for ax in fig.get_axes():
+        try:
+            plotted_workspaces += list(ax.tracked_workspaces.keys())
+        except AttributeError:  # Scripted plots have no tracked workspaces
+            pass
+    return plotted_workspaces
+
+
 def get_workspace_history_script(workspace):
     """Get a script that will recover the state of a workspace"""
     alg_name = "GeneratePythonScript"
@@ -56,3 +66,16 @@ def get_workspace_history_script(workspace):
     alg.execute()
     history = alg.getPropertyValue("ScriptText")
     return '\n'.join(history.split('\n')[5:])  # trim the header and import
+
+
+def get_workspace_history_commands(fig):
+    plotted_workspaces = get_plotted_workspaces_names(fig)
+    history_commands = []
+    for ws_name in plotted_workspaces:
+        try:
+            workspace = ads.retrieve(ws_name)
+            history_commands.append('{} = {}\n'.format(
+                ws_name, get_workspace_history_script(workspace)))
+        except KeyError:   # Raised if workspace is not in ADS
+            pass
+    return history_commands
