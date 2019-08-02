@@ -1,4 +1,4 @@
-set(MAINWINDOW_SRC_FILES MainWindowPresenter.cpp MainWindowView.cpp)
+set(MAINWINDOW_SRC_FILES MainWindowPresenter.cpp QMainWindowView.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -7,9 +7,9 @@ set(MAINWINDOW_INC_FILES
     IMainWindowPresenter.h
     IMainWindowView.h
     MainWindowPresenter.h
-    MainWindowView.h)
+    QMainWindowView.h)
 
-set(MAINWINDOW_MOC_FILES MainWindowView.h)
+set(MAINWINDOW_MOC_FILES QMainWindowView.h)
 
 set(MAINWINDOW_UI_FILES MainWindowWidget.ui)
 

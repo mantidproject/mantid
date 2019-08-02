@@ -20,18 +20,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class MainWindowView
+/** @class QMainWindowView
 
 MainWindowView is the concrete main window view implementing the
 functionality defined by the interface IMainWindowView
 */
-class MainWindowView : public MantidQt::API::UserSubWindow,
-                       public IMainWindowView,
-                       public IMessageHandler,
-                       public IPythonRunner {
+class QMainWindowView : public MantidQt::API::UserSubWindow,
+                        public IMainWindowView,
+                        public IMessageHandler,
+                        public IPythonRunner {
   Q_OBJECT
 public:
-  explicit MainWindowView(QWidget *parent = nullptr);
+  explicit QMainWindowView(QWidget *parent = nullptr);
   void subscribe(MainWindowSubscriber *notifyee) override;
 
   static std::string name() { return "ISIS Reflectometry"; }
@@ -65,7 +65,7 @@ private:
   MainWindowSubscriber *m_notifyee;
   /// The presenter handling this view. It is not normal in MVP for a view to
   /// have ownership of its presenter, but due to the way interfaces get
-  /// instantiated this is currently necessary for MainWindowView. Direct use
+  /// instantiated this is currently necessary for QMainWindowView. Direct use
   /// of m_presenter should be avoided - use m_notifyee instead.
   std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
