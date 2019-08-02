@@ -70,6 +70,7 @@ set(TEST_FILES
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
     workbench/plotting/plotscriptgenerator/test/test_plotscriptgenerator.py
     workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py

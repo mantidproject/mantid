@@ -12,12 +12,10 @@ import matplotlib
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from copy import copy
-from numpy import array
 
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator import generate_script
 from workbench.plotting.plotscriptgenerator.test.test_plotscriptgeneratorlines import ERRORBAR_KWARGS
-from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
@@ -55,18 +53,6 @@ plt.show()"""
         err_message = ("Expected to output 5 lines, found {}.\nOutput:\n{}"
                        "".format(num_lines, output))
         self.assertEqual(5, num_lines, msg=err_message)
-
-
-class PlotScriptGeneratorUtilsTest(unittest.TestCase):
-
-    # Utility function tests
-    def test_convert_args_to_string_returns_correct_string(self):
-        kwargs_dict = {'key0': 'val0', 'key1': [2, 'str'], 'key2': 1,
-                       'key3': {'a': 1.1, 'b': {'c': ['str2', 1.1]}},
-                       'ndarray': array([1.1, 1.2])}
-        expected_str = ("key0='val0', key1=[2, 'str'], key2=1, key3={'a': 1.1, "
-                        "'b': {'c': ['str2', 1.1]}}, ndarray=[1.1, 1.2]")
-        self.assertEqual(expected_str, convert_args_to_string(None, kwargs_dict))
 
 
 if __name__ == '__main__':
