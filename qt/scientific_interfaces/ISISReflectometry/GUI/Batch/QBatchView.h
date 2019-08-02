@@ -23,10 +23,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class BatchView : public QWidget, public IBatchView {
+class QBatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
-  explicit BatchView(QWidget *parent);
+  explicit QBatchView(QWidget *parent);
   void subscribe(BatchViewSubscriber *notifyee) override;
 
   IRunsView *runs() const override;

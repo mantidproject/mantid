@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "BatchView.h"
+#include "QBatchView.h"
 #include "GUI/Event/EventView.h"
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
@@ -21,7 +21,7 @@ namespace CustomInterfaces {
 using API::BatchAlgorithmRunner;
 using Mantid::API::IAlgorithm_sptr;
 
-BatchView::BatchView(QWidget *parent)
+QBatchView::QBatchView(QWidget *parent)
     : QWidget(parent), m_batchAlgoRunner(this) {
   qRegisterMetaType<API::IConfiguredAlgorithm_sptr>(
       "MantidQt::API::IConfiguredAlgorithm_sptr");
@@ -30,11 +30,11 @@ BatchView::BatchView(QWidget *parent)
   connectBatchAlgoRunnerSlots();
 }
 
-void BatchView::subscribe(BatchViewSubscriber *notifyee) {
+void QBatchView::subscribe(BatchViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void BatchView::initLayout() {
+void QBatchView::initLayout() {
   m_ui.setupUi(this);
 
   m_runs = createRunsTab();
@@ -53,24 +53,24 @@ void BatchView::initLayout() {
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
 }
 
-IExperimentView *BatchView::experiment() const { return m_experiment.get(); }
+IExperimentView *QBatchView::experiment() const { return m_experiment.get(); }
 
-IInstrumentView *BatchView::instrument() const { return m_instrument.get(); }
+IInstrumentView *QBatchView::instrument() const { return m_instrument.get(); }
 
-IRunsView *BatchView::runs() const { return m_runs.get(); }
+IRunsView *QBatchView::runs() const { return m_runs.get(); }
 
-IEventView *BatchView::eventHandling() const { return m_eventHandling.get(); }
+IEventView *QBatchView::eventHandling() const { return m_eventHandling.get(); }
 
-ISaveView *BatchView::save() const { return m_save.get(); }
+ISaveView *QBatchView::save() const { return m_save.get(); }
 
-void BatchView::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
+void QBatchView::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
 
-void BatchView::setAlgorithmQueue(
+void QBatchView::setAlgorithmQueue(
     std::deque<API::IConfiguredAlgorithm_sptr> algorithms) {
   m_batchAlgoRunner.setQueue(algorithms);
 }
 
-void BatchView::connectBatchAlgoRunnerSlots() {
+void QBatchView::connectBatchAlgoRunnerSlots() {
   connect(&m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(onBatchComplete(bool)));
   connect(&m_batchAlgoRunner, SIGNAL(batchCancelled()), this,
@@ -91,47 +91,47 @@ void BatchView::connectBatchAlgoRunnerSlots() {
                                 std::string)));
 }
 
-void BatchView::executeAlgorithmQueue() {
+void QBatchView::executeAlgorithmQueue() {
   m_batchAlgoRunner.executeBatchAsync();
 }
 
-void BatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
+void QBatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
-void BatchView::onBatchComplete(bool error) {
+void QBatchView::onBatchComplete(bool error) {
   m_notifyee->notifyBatchComplete(error);
 }
 
-void BatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
+void QBatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
 
-void BatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
+void QBatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
   m_notifyee->notifyAlgorithmStarted(algorithm);
 }
 
-void BatchView::onAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
+void QBatchView::onAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
   m_notifyee->notifyAlgorithmComplete(algorithm);
 }
 
-void BatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
-                                 std::string message) {
+void QBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
+                                  std::string message) {
   m_notifyee->notifyAlgorithmError(algorithm, message);
 }
 
-std::unique_ptr<RunsView> BatchView::createRunsTab() {
+std::unique_ptr<RunsView> QBatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
   return std::make_unique<RunsView>(this, RunsTableViewFactory(instruments));
 }
 
-std::unique_ptr<EventView> BatchView::createEventTab() {
+std::unique_ptr<EventView> QBatchView::createEventTab() {
   return std::make_unique<EventView>(this);
 }
 
-IAlgorithm_sptr BatchView::createReductionAlg() {
+IAlgorithm_sptr QBatchView::createReductionAlg() {
   return Mantid::API::AlgorithmManager::Instance().create(
       "ReflectometryReductionOneAuto");
 }
 
-std::unique_ptr<SaveView> BatchView::createSaveTab() {
+std::unique_ptr<SaveView> QBatchView::createSaveTab() {
   return std::make_unique<SaveView>(this);
 }
 } // namespace CustomInterfaces

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QMainWindowView.h"
 #include "Common/IndexOf.h"
-#include "GUI/Batch/BatchView.h"
+#include "GUI/Batch/QBatchView.h"
 #include "GUI/Common/Plotter.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -34,7 +34,7 @@ QMainWindowView::QMainWindowView(QWidget *parent)
 
 IBatchView *QMainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
-  auto *newTab = new BatchView(this);
+  auto *newTab = new QBatchView(this);
   m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
   m_batchViews.emplace_back(newTab);
   return newTab;
