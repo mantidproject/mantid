@@ -10,7 +10,7 @@
 #include "Common/DllConfig.h"
 #include "IRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
-#include "ui_RunsTableView.h"
+#include "ui_RunsTableWidget.h"
 #include <memory>
 #include <vector>
 
@@ -19,12 +19,12 @@ namespace CustomInterfaces {
 
 class RunsView;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTableView : public QWidget,
-                                                     public IRunsTableView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QRunsTableView : public QWidget,
+                                                      public IRunsTableView {
   Q_OBJECT
 public:
-  explicit RunsTableView(std::vector<std::string> const &instruments,
-                         int defaultInstrumentIndex);
+  explicit QRunsTableView(std::vector<std::string> const &instruments,
+                          int defaultInstrumentIndex);
   void subscribe(RunsTableViewSubscriber *notifyee) override;
   void setProgress(int value) override;
   void resetFilterBox() override;
@@ -72,7 +72,7 @@ private:
   void setSelected(QComboBox &box, std::string const &str);
   void setEnabledStateForAllWidgets(bool enabled);
 
-  Ui::RunsTableView m_ui;
+  Ui::RunsTableWidget m_ui;
   std::unique_ptr<MantidQt::MantidWidgets::Batch::JobTreeView> m_jobs;
   std::vector<std::string> m_instruments;
   RunsTableViewSubscriber *m_notifyee;
@@ -82,7 +82,7 @@ private:
 class RunsTableViewFactory {
 public:
   explicit RunsTableViewFactory(std::vector<std::string> const &instruments);
-  RunsTableView *operator()() const;
+  QRunsTableView *operator()() const;
   int defaultInstrumentFromConfig() const;
   int indexOfElseFirst(std::string const &instrument) const;
 

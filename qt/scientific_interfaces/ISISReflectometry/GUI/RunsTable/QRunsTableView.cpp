@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "RunsTableView.h"
+#include "QRunsTableView.h"
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtIcons/Icon.h"
@@ -15,8 +15,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
-                             int defaultInstrumentIndex)
+QRunsTableView::QRunsTableView(std::vector<std::string> const &instruments,
+                               int defaultInstrumentIndex)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
   m_ui.progressBar->setRange(0, 100);
@@ -43,63 +43,63 @@ RunsTableView::RunsTableView(std::vector<std::string> const &instruments,
       MantidQt::Icons::getIcon("mdi.sigma", "black", 1.3));
 }
 
-void RunsTableView::invalidSelectionForCopy() {
+void QRunsTableView::invalidSelectionForCopy() {
   QMessageBox::critical(this, "Bad selection for copy",
                         "All selected rows must share a common group.");
 }
 
-void RunsTableView::invalidSelectionForPaste() {
+void QRunsTableView::invalidSelectionForPaste() {
   QMessageBox::critical(this, "Bad selection for paste",
                         "Please ensure destination is the same depth and size");
 }
 
-void RunsTableView::invalidSelectionForCut() {
+void QRunsTableView::invalidSelectionForCut() {
   QMessageBox::critical(this, "Bad selection for cut",
                         "All selected rows must share a common group.");
 }
 
-void RunsTableView::mustSelectRow() {
+void QRunsTableView::mustSelectRow() {
   QMessageBox::critical(this, "No Row Selected",
                         "To delete a row you must select one or more rows.");
 }
 
-void RunsTableView::mustSelectGroup() {
+void QRunsTableView::mustSelectGroup() {
   QMessageBox::critical(
       this, "No Group Selected",
       "To insert a row you must select a group to add it to.");
 }
 
-void RunsTableView::mustNotSelectGroup() {
+void QRunsTableView::mustNotSelectGroup() {
   QMessageBox::critical(this, "Group Selected",
                         "To delete rows you should not select any groups.");
 }
 
-void RunsTableView::mustSelectGroupOrRow() {
+void QRunsTableView::mustSelectGroupOrRow() {
   QMessageBox::critical(
       this, "No Group Or Row Selected",
       "You must select a group or a row to perform this action.");
 }
 
-void RunsTableView::onFilterChanged(QString const &filter) {
+void QRunsTableView::onFilterChanged(QString const &filter) {
   m_notifyee->notifyFilterChanged(filter.toStdString());
 }
 
-void RunsTableView::onInstrumentChanged(int index) {
+void QRunsTableView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
   m_notifyee->notifyInstrumentChanged();
 }
 
-std::string RunsTableView::getInstrumentName() const {
+std::string QRunsTableView::getInstrumentName() const {
   return m_ui.instrumentSelector->currentText().toStdString();
 }
 
-void RunsTableView::setInstrumentName(std::string const &instrumentName) {
+void QRunsTableView::setInstrumentName(std::string const &instrumentName) {
   setSelected(*m_ui.instrumentSelector, instrumentName);
 }
 
-void RunsTableView::resetFilterBox() { m_ui.filterBox->clear(); }
+void QRunsTableView::resetFilterBox() { m_ui.filterBox->clear(); }
 
-void RunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
+void QRunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
   auto constexpr optionsColumn = 8;
   m_jobs->setHintsForColumn(
       optionsColumn,
@@ -113,7 +113,7 @@ void RunsTableView::showAlgorithmPropertyHintsInOptionsColumn() {
               "MomentumTransferStep", "ScaleFactor"}));
 }
 
-void RunsTableView::setJobsTableEnabled(bool enabled) {
+void QRunsTableView::setJobsTableEnabled(bool enabled) {
   static const auto editTriggers = m_jobs->editTriggers();
 
   if (enabled)
@@ -122,15 +122,15 @@ void RunsTableView::setJobsTableEnabled(bool enabled) {
     m_jobs->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
-void RunsTableView::setActionEnabled(Action action, bool enable) {
+void QRunsTableView::setActionEnabled(Action action, bool enable) {
   m_actions[action]->setEnabled(enable);
 }
 
-void RunsTableView::setInstrumentSelectorEnabled(bool enable) {
+void QRunsTableView::setInstrumentSelectorEnabled(bool enable) {
   m_ui.instrumentSelector->setEnabled(enable);
 }
 
-void RunsTableView::setProcessButtonEnabled(bool enable) {
+void QRunsTableView::setProcessButtonEnabled(bool enable) {
   m_ui.processButton->setEnabled(enable);
 }
 
@@ -142,8 +142,8 @@ void RunsTableView::setProcessButtonEnabled(bool enable) {
  * @param description
  * @return QAction*
  */
-QAction *RunsTableView::addToolbarItem(Action action, std::string const &icon,
-                                       std::string const &description) {
+QAction *QRunsTableView::addToolbarItem(Action action, std::string const &icon,
+                                        std::string const &description) {
   QIcon qIcon;
   if (icon == "") {
     qIcon = QIcon(QString::fromStdString(""));
@@ -156,7 +156,7 @@ QAction *RunsTableView::addToolbarItem(Action action, std::string const &icon,
   return m_actions[action];
 }
 
-void RunsTableView::addToolbarActions() {
+void QRunsTableView::addToolbarActions() {
   connect(addToolbarItem(Action::Process, "mdi.sigma", "Process selected runs"),
           SIGNAL(triggered(bool)), this, SLOT(onProcessPressed(bool)));
 
@@ -216,76 +216,78 @@ void RunsTableView::addToolbarActions() {
           SIGNAL(triggered(bool)), this, SLOT(onFillDownPressed(bool)));
 }
 
-MantidQt::MantidWidgets::Batch::IJobTreeView &RunsTableView::jobs() {
+MantidQt::MantidWidgets::Batch::IJobTreeView &QRunsTableView::jobs() {
   return *m_jobs;
 }
 
-void RunsTableView::subscribe(RunsTableViewSubscriber *notifyee) {
+void QRunsTableView::subscribe(RunsTableViewSubscriber *notifyee) {
   m_notifyee = notifyee;
   m_jobs->subscribe(notifyee);
   connect(m_ui.processButton, SIGNAL(clicked(bool)), this,
           SLOT(onProcessPressed(bool)));
 }
 
-void RunsTableView::setProgress(int value) {
+void QRunsTableView::setProgress(int value) {
   m_ui.progressBar->setValue(value);
 }
 
-void RunsTableView::onExpandAllGroupsPressed(bool) {
+void QRunsTableView::onExpandAllGroupsPressed(bool) {
   m_notifyee->notifyExpandAllRequested();
 }
 
-void RunsTableView::onCollapseAllGroupsPressed(bool) {
+void QRunsTableView::onCollapseAllGroupsPressed(bool) {
   m_notifyee->notifyCollapseAllRequested();
 }
 
-void RunsTableView::onProcessPressed(bool) {
+void QRunsTableView::onProcessPressed(bool) {
   m_notifyee->notifyReductionResumed();
 }
 
-void RunsTableView::onPausePressed(bool) {
+void QRunsTableView::onPausePressed(bool) {
   m_notifyee->notifyReductionPaused();
 }
 
-void RunsTableView::onInsertRowPressed(bool) {
+void QRunsTableView::onInsertRowPressed(bool) {
   m_notifyee->notifyInsertRowRequested();
 }
 
-void RunsTableView::onInsertGroupPressed(bool) {
+void QRunsTableView::onInsertGroupPressed(bool) {
   m_notifyee->notifyInsertGroupRequested();
 }
 
-void RunsTableView::onDeleteRowPressed(bool) {
+void QRunsTableView::onDeleteRowPressed(bool) {
   m_notifyee->notifyDeleteRowRequested();
 }
 
-void RunsTableView::onDeleteGroupPressed(bool) {
+void QRunsTableView::onDeleteGroupPressed(bool) {
   m_notifyee->notifyDeleteGroupRequested();
 }
 
-void RunsTableView::onCopyPressed(bool) {
+void QRunsTableView::onCopyPressed(bool) {
   m_notifyee->notifyCopyRowsRequested();
 }
 
-void RunsTableView::onCutPressed(bool) { m_notifyee->notifyCutRowsRequested(); }
+void QRunsTableView::onCutPressed(bool) {
+  m_notifyee->notifyCutRowsRequested();
+}
 
-void RunsTableView::onPastePressed(bool) {
+void QRunsTableView::onPastePressed(bool) {
   m_notifyee->notifyPasteRowsRequested();
 }
 
-void RunsTableView::onPlotSelectedPressed(bool) {
+void QRunsTableView::onPlotSelectedPressed(bool) {
   m_notifyee->notifyPlotSelectedPressed();
 }
 
-void RunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
+void QRunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
   m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
 
-void RunsTableView::onFillDownPressed(bool) { m_notifyee->notifyFillDown(); }
+void QRunsTableView::onFillDownPressed(bool) { m_notifyee->notifyFillDown(); }
 
 /** Set a combo box to the given value
  */
-void RunsTableView::setSelected(QComboBox &box, std::string const &str) {
+void QRunsTableView::setSelected(QComboBox &box, std::string const &str) {
   auto const index = box.findText(QString::fromStdString(str));
   if (index != -1)
     box.setCurrentIndex(index);
@@ -295,8 +297,8 @@ RunsTableViewFactory::RunsTableViewFactory(
     std::vector<std::string> const &instruments)
     : m_instruments(instruments) {}
 
-RunsTableView *RunsTableViewFactory::operator()() const {
-  return new RunsTableView(m_instruments, defaultInstrumentFromConfig());
+QRunsTableView *RunsTableViewFactory::operator()() const {
+  return new QRunsTableView(m_instruments, defaultInstrumentFromConfig());
 }
 
 int RunsTableViewFactory::indexOfElseFirst(

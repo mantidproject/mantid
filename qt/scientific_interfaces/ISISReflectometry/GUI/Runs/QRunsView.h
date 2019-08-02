@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_RUNSTABVIEW_H_
 
 #include "Common/DllConfig.h"
-#include "GUI/RunsTable/RunsTableView.h"
+#include "GUI/RunsTable/QRunsTableView.h"
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
@@ -110,7 +110,7 @@ private:
   // the slit calculator
   SlitCalculator *m_calculator;
 
-  RunsTableView *m_tableView;
+  QRunsTableView *m_tableView;
 
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
