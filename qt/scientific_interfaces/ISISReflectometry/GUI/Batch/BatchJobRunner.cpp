@@ -61,7 +61,7 @@ int BatchJobRunner::itemsInSelection(
 int BatchJobRunner::percentComplete() const {
   // If processing everything, get the percent from the whole table
   if (m_processAll)
-    return MantidQt::CustomInterfaces::percentComplete(
+    return MantidQt::CustomInterfaces::ISISReflectometry::percentComplete(
         m_batch.runsTable().reductionJobs());
 
   // If processing a selection but there is nothing to process, return 100%

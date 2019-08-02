@@ -48,7 +48,8 @@ PerThetaDefaultsValidator::parseThetaOrWhitespace(CellText const &cellText) {
   if (isEntirelyWhitespace(cellText[0])) {
     return boost::optional<double>();
   } else {
-    auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[0]);
+    auto theta = ::MantidQt::CustomInterfaces::ISISReflectometry::parseTheta(
+        cellText[0]);
     if (theta.is_initialized()) {
       return theta;
     }
@@ -60,8 +61,8 @@ PerThetaDefaultsValidator::parseThetaOrWhitespace(CellText const &cellText) {
 boost::optional<TransmissionRunPair>
 PerThetaDefaultsValidator::parseTransmissionRuns(CellText const &cellText) {
   auto transmissionRunsOrError =
-      ::MantidQt::CustomInterfaces::parseTransmissionRuns(cellText[1],
-                                                          cellText[2]);
+      ::MantidQt::CustomInterfaces::ISISReflectometry::parseTransmissionRuns(
+          cellText[1], cellText[2]);
   return boost::apply_visitor(
       AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, 1),
       transmissionRunsOrError);
@@ -70,8 +71,8 @@ PerThetaDefaultsValidator::parseTransmissionRuns(CellText const &cellText) {
 boost::optional<boost::optional<std::string>>
 PerThetaDefaultsValidator::parseTransmissionProcessingInstructions(
     CellText const &cellText) {
-  auto optionalInstructionsOrNoneIfError =
-      ::MantidQt::CustomInterfaces::parseProcessingInstructions(cellText[3]);
+  auto optionalInstructionsOrNoneIfError = ::MantidQt::CustomInterfaces::
+      ISISReflectometry::parseProcessingInstructions(cellText[3]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(3);
   return optionalInstructionsOrNoneIfError;
@@ -79,8 +80,9 @@ PerThetaDefaultsValidator::parseTransmissionProcessingInstructions(
 
 boost::optional<RangeInQ>
 PerThetaDefaultsValidator::parseQRange(CellText const &cellText) {
-  auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
-      cellText[4], cellText[5], cellText[6]);
+  auto qRangeOrError =
+      ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(
+          cellText[4], cellText[5], cellText[6]);
   return boost::apply_visitor(
       AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 4), qRangeOrError);
 }
@@ -88,7 +90,8 @@ PerThetaDefaultsValidator::parseQRange(CellText const &cellText) {
 boost::optional<boost::optional<double>>
 PerThetaDefaultsValidator::parseScaleFactor(CellText const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
-      ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[7]);
+      ::MantidQt::CustomInterfaces::ISISReflectometry::parseScaleFactor(
+          cellText[7]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(7);
   return optionalScaleFactorOrNoneIfError;
@@ -97,8 +100,8 @@ PerThetaDefaultsValidator::parseScaleFactor(CellText const &cellText) {
 boost::optional<boost::optional<std::string>>
 PerThetaDefaultsValidator::parseProcessingInstructions(
     CellText const &cellText) {
-  auto optionalInstructionsOrNoneIfError =
-      ::MantidQt::CustomInterfaces::parseProcessingInstructions(cellText[8]);
+  auto optionalInstructionsOrNoneIfError = ::MantidQt::CustomInterfaces::
+      ISISReflectometry::parseProcessingInstructions(cellText[8]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(8);
   return optionalInstructionsOrNoneIfError;

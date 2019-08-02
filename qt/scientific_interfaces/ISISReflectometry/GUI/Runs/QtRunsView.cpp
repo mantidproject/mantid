@@ -348,13 +348,9 @@ std::string QtRunsView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
 
-void MantidQt::CustomInterfaces::QtRunsView::on_buttonMonitor_clicked() {
-  startMonitor();
-}
+void QtRunsView::on_buttonMonitor_clicked() { startMonitor(); }
 
-void MantidQt::CustomInterfaces::QtRunsView::on_buttonStopMonitor_clicked() {
-  stopMonitor();
-}
+void QtRunsView::on_buttonStopMonitor_clicked() { stopMonitor(); }
 
 /** Start live data monitoring
  */
