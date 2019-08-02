@@ -63,11 +63,12 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo,
     auto parentType = compInfo.componentType(parent);
     auto childType = compInfo.componentType(idx);
     if (detInfo.size() != 0) {
-      // if parent is not a detector bank
+      // if parent is any of the types below detector, then return false as it
+      // is not characteristic of a bank.
       if (parentType != Beamline::ComponentType::Rectangular &&
           parentType != Beamline::ComponentType::Structured &&
           parentType != Beamline::ComponentType::Grid) {
-        // if component at index is not a tube
+        // if component at index is not a tube then identify it as a bank
         if (childType != Beamline::ComponentType::OutlineComposite) {
           return true;
         }
