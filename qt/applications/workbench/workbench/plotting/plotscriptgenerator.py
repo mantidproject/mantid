@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 from matplotlib.container import ErrorbarContainer
 from numpy import ndarray
 
+from mantid.plots.utility import get_errorbar_containers, get_axes_index
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, get_ax_from_curve
 
 BASE_CREATE_FIG_COMMAND = "plt.figure({})"
@@ -57,12 +58,6 @@ def convert_args_to_string(args, kwargs):
     for kwarg, value in sorted(kwargs.items()):  # sorting makes this testable
         arg_strings.append("{}={}".format(kwarg, convert_value_to_arg_string(value)))
     return ', '.join(arg_strings)
-
-
-def get_axes_index(ax):
-    """Get the index position of given Axes in its figure"""
-    index = ax.rowNum*ax.numCols + ax.colNum + 1
-    return index
 
 
 class PlotScriptGenerator:
@@ -168,3 +163,20 @@ class PlotScriptGenerator:
             base_command = BASE_CREATE_LINE_COMMAND
         arg_string = convert_args_to_string(pos_args, kwargs)
         return base_command.format(arg_string)
+
+    @staticmethod
+    def generate_script(fig):
+        fig_var = "fig"
+        ax_var = "ax"
+        cmds = list()
+        cmds.append("{} = {}".format(fig_var, PlotScriptGenerator.generate_figure_command(fig)))
+        for ax in fig.get_axes():
+            cmds.append("{} = {}.{}"
+                        "".format(ax_var, fig_var,
+                                  PlotScriptGenerator.generate_add_subplot_command(ax)))
+            for artist in ax.lines + get_errorbar_containers(ax):
+                if artist in ax.get_tracked_artists():
+                    cmds.append("{}.{}".format(
+                        ax_var, PlotScriptGenerator.generate_plot_command(artist)))
+        cmds.append("plt.show()")
+        return '\n'.join(cmds)

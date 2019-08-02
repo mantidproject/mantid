@@ -131,6 +131,28 @@ class PlotScriptGeneratorTest(unittest.TestCase):
                                       convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
 
+    def test_generate_script_returns_correct_string_for_single_errorbar_plot(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        kwargs = copy(ERRORBAR_KWARGS)
+        ax.errorbar(self.test_ws, **kwargs)
+        expected_string = """fig = plt.figure(dpi=100.0, figsize=(6.4, 4.8))
+ax = fig.add_subplot(1, 1, 1, frame_on=True, label='', projection='mantid', sharex=None, sharey=None, title='', visible=True, xlabel='', xlim=(14.5, 25.5), xscale='linear', ylabel='', ylim=(0.07999999999999997, 0.52), yscale='linear')
+ax.errorbar(test_ws, alpha=0.5, barsabove=True, capsize=1.6, capthick=1.2, color='r', distribution=False, drawstyle='steps', ecolor='#ff0000', elinewidth=1.5, errorevery=1, fillstyle='left', label='test label', linestyle='--', linewidth=1.1, marker='o', markeredgecolor='g', markerfacecolor='y', markerfacecoloralt='k', markersize=1.3, markevery=2, solid_capstyle='butt', solid_joinstyle='round', specNum=1, visible=False, zorder=1.4)
+plt.show()"""
+        self.assertEqual(expected_string, PSG.generate_script(fig))
+
+    def test_generate_script_returns_correct_number_of_lines_for_overplot(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='mantid')
+        ax.plot(self.test_ws, specNum=1)
+        ax.errorbar(self.test_ws, specNum=2)
+        output = PSG.generate_script(fig)
+        num_lines = len(output.split('\n'))
+        err_message = ("Expected to output 5 lines, found {}.\nOutput:\n{}"
+                       "".format(num_lines, output))
+        self.assertEqual(5, num_lines, msg=err_message)
+
     # Utility function tests
     def test_convert_args_to_string_returns_correct_string(self):
         kwargs_dict = {'key0': 'val0', 'key1': [2, 'str'], 'key2': 1,
