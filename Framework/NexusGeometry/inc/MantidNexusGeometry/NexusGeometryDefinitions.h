@@ -13,8 +13,6 @@
 namespace Mantid {
 namespace NexusGeometry {
 
-using namespace H5;
-
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 

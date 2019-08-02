@@ -21,6 +21,7 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <H5Cpp.h>
 #include <algorithm>
@@ -38,61 +39,6 @@ enum class NXclass { NXinstrument, NXsample, NXdetector, NXmonitor, NXsource };
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
-namespace forwardCompatibility {
-
-/*
- * Function "getObjName"
- * Ported from newer versions of the HDF API for forward compatibility.
- */
-
-ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
-  // H5Iget_name will get buf_size-1 chars of the name to null terminate it
-  ssize_t name_size = H5Iget_name(obj.getId(), obj_name, buf_size);
-
-  // If H5Iget_name returns a negative value, raise an exception
-  if (name_size < 0) {
-    throw H5::Exception("getObjName", "H5Iget_name failed");
-  } else if (name_size == 0) {
-    throw H5::Exception("getObjName",
-                        "Object must have a name, but name length is 0");
-  }
-  // Return length of the name
-  return (name_size);
-}
-
-std::string getObjName(const H5::H5Object &obj) {
-  std::string obj_name(""); // object name to return
-
-  // Preliminary call to get the size of the object name
-  ssize_t name_size = H5Iget_name(obj.getId(), NULL, static_cast<size_t>(0));
-
-  // If H5Iget_name failed, throw exception
-  if (name_size < 0) {
-    throw H5::Exception("getObjName", "H5Iget_name failed");
-  } else if (name_size == 0) {
-    throw H5::Exception("getObjName",
-                        "Object must have a name, but name length is 0");
-  }
-  // Object's name exists, retrieve it
-  else if (name_size > 0) {
-    char *name_C = new char[name_size + 1]; // temporary C-string
-    memset(name_C, 0, name_size + 1);       // clear buffer
-
-    // Use overloaded function
-    name_size = getObjName(obj, name_C, name_size + 1);
-
-    // Convert the C object name to return
-    obj_name = name_C;
-
-    // Clean up resource
-    delete[] name_C;
-  }
-  // Return object's name
-  return (obj_name);
-}
-
-} // namespace forwardCompatibility
-
 } // namespace
 
 namespace NexusGeometrySave {
@@ -100,7 +46,7 @@ namespace NexusGeometrySave {
 // handles naming of groups for named and unnamed components for iterated and
 // single use case
 std::string groupName(const Geometry::ComponentInfo &compInfo,
-                      const NXclass &groupType, const size_t &iterator = 0) {
+                      const NXclass &groupType, const size_t iterator = 0) {
 
   // get groupName for NXinstrument creation
   if (groupType == NXclass::NXinstrument) {
@@ -652,7 +598,7 @@ inline void writeOrientation(H5::Group &grp,
   // exists, the orientation will depend on it instead.
   std::string dependency = NO_DEPENDENCY;
   if (!noTranslation)
-    dependency = forwardCompatibility::getObjName(grp) + "/" + LOCATION;
+    dependency = H5_OBJ_NAME(grp) + "/" + LOCATION;
   dspace = H5Screate_simple(rank, ddims, NULL);
   orientation =
       grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -788,12 +734,12 @@ void saveNXSource(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
+        H5_OBJ_NAME(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
     dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
+        H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
     writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 
@@ -844,12 +790,11 @@ void saveNXMonitor(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
+        H5_OBJ_NAME(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
-    dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
+    dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
     writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 
@@ -903,12 +848,12 @@ void saveNXDetector(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + LOCATION;
+        H5_OBJ_NAME(transformations) + "/" + LOCATION;
     writeLocation(transformations, compInfo, index);
   }
   if (!orientationIsZero) {
     dependency =
-        forwardCompatibility::getObjName(transformations) + "/" + ORIENTATION;
+        H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
     writeOrientation(transformations, compInfo, index, locationIsOrigin);
   }
 

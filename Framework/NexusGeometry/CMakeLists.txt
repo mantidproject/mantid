@@ -5,7 +5,8 @@ set(SRC_FILES
     src/NexusGeometrySave.cpp
     src/NexusShapeFactory.cpp
     src/TubeBuilder.cpp
-    src/TubeHelpers.cpp)
+    src/TubeHelpers.cpp
+	src/H5ForwardCompatibility.cpp)
 
 set(INC_FILES
     inc/MantidNexusGeometry/DllConfig.h
@@ -16,7 +17,8 @@ set(INC_FILES
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
     inc/MantidNexusGeometry/TubeHelpers.h
-    inc/MantidNexusGeometry/NexusGeometryDefinitions.h)
+    inc/MantidNexusGeometry/NexusGeometryDefinitions.h
+	inc/MantidNexusGeometry/H5ForwardCompatibility.h)
 
 set(TEST_FILES
     InstrumentBuilderTest.h
