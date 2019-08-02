@@ -55,7 +55,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
             electrons = peak_data["Electrons"]
             electron_data = {}
             for xpos, int in electrons.items():
-                name = 'e- {}'.format(xpos)
+                name = '$e^-$              {}'.format(xpos)
                 electron_data[name] = float(xpos)
             self.electron_checkboxes = self._create_checkbox_list("Electrons", electron_data, checked=False)
         except KeyError:
@@ -103,9 +103,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         self.list.addWidget(_heading)
         checkboxes = []
         for peak_type, value in iteritems(checkbox_data):
-            checkboxes.append(
-                self._setup_checkbox(
-                    "{}: {}".format(peak_type, value), checked))
+            checkboxes.append(self._setup_checkbox("{}: {}".format(peak_type, value), checked))
         return checkboxes
 
     def _parse_checkbox_name(self, name):
