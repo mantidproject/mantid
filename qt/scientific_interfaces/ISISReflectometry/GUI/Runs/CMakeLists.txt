@@ -1,6 +1,6 @@
 set(RUNS_SRC_FILES
     RunsPresenter.cpp
-    RunsView.cpp
+    QRunsView.cpp
     CatalogRunNotifier.cpp
     CatalogSearcher.cpp
     SearchModel.cpp
@@ -14,7 +14,7 @@ set(RUNS_INC_FILES
     IRunsView.h
     RunsPresenter.h
     RunsPresenterFactory.h
-    RunsView.h
+    QRunsView.h
     IRunNotifier.h
     ISearcher.h
     CatalogRunNotifier.h
@@ -23,7 +23,7 @@ set(RUNS_INC_FILES
     SearchModel.h
     SearchResult.h)
 
-set(RUNS_MOC_FILES RunsView.h SearchModel.h CatalogSearcher.h)
+set(RUNS_MOC_FILES QRunsView.h SearchModel.h CatalogSearcher.h)
 
 set(RUNS_UI_FILES RunsWidget.ui)
 

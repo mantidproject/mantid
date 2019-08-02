@@ -10,7 +10,7 @@
 #include "GUI/Event/QEventView.h"
 #include "GUI/Experiment/QExperimentView.h"
 #include "GUI/Instrument/QInstrumentView.h"
-#include "GUI/Runs/RunsView.h"
+#include "GUI/Runs/QRunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "IBatchView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
@@ -53,13 +53,13 @@ private:
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   void connectBatchAlgoRunnerSlots();
 
-  std::unique_ptr<RunsView> createRunsTab();
+  std::unique_ptr<QRunsView> createRunsTab();
   std::unique_ptr<QEventView> createEventTab();
   std::unique_ptr<SaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
   BatchViewSubscriber *m_notifyee;
-  std::unique_ptr<RunsView> m_runs;
+  std::unique_ptr<QRunsView> m_runs;
   std::unique_ptr<QEventView> m_eventHandling;
   std::unique_ptr<SaveView> m_save;
   std::unique_ptr<QExperimentView> m_experiment;

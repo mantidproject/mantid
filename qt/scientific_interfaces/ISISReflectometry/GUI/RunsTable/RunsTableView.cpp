@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTableView.h"
-#include "../Runs/RunsView.h"
 #include "Common/IndexOf.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtIcons/Icon.h"

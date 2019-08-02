@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QBatchView.h"
 #include "GUI/Event/QEventView.h"
-#include "GUI/Runs/RunsView.h"
+#include "GUI/Runs/QRunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -116,10 +116,10 @@ void QBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
   m_notifyee->notifyAlgorithmError(algorithm, message);
 }
 
-std::unique_ptr<RunsView> QBatchView::createRunsTab() {
+std::unique_ptr<QRunsView> QBatchView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
-  return std::make_unique<RunsView>(this, RunsTableViewFactory(instruments));
+  return std::make_unique<QRunsView>(this, RunsTableViewFactory(instruments));
 }
 
 std::unique_ptr<QEventView> QBatchView::createEventTab() {

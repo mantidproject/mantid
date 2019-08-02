@@ -30,15 +30,15 @@ namespace CustomInterfaces {
 
 using MantidWidgets::SlitCalculator;
 
-/** RunsView : Provides an interface for the "Runs" tab in the
+/** QRunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL RunsView
+class MANTIDQT_ISISREFLECTOMETRY_DLL QRunsView
     : public MantidQt::API::MantidWidget,
       public IRunsView {
   Q_OBJECT
 public:
-  RunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QRunsView(QWidget *parent, RunsTableViewFactory makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
