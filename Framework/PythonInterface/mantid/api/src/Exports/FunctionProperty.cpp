@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionProperty.h"
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::FunctionProperty;

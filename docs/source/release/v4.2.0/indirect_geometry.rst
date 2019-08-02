@@ -16,3 +16,15 @@ Improved
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` is extended to support also the configurations with the first tube angle at 33.1 degrees.
 
 :ref:`Release 4.2.0 <v4.2.0>`
+
+
+Data Reduction Interface
+------------------------
+
+Improvements
+############
+- Improved the output plotting options so that it is now possible to choose a list of spectra
+  for plotting. For example, entering 0-2,4,6-8 and clicking **Plot Spectra** will plot the
+  workspace indices 0, 1, 2, 4, 6, 7 and 8.
+- Improved the output plotting options so that they now show the workspace currently selected.
+  The options have also been made more consistent across the interface.

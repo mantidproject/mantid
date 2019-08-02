@@ -7,11 +7,11 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
 
+#include "MantidPythonInterface/core/Converters/ContainerDtype.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>

@@ -431,6 +431,13 @@ void IndirectTab::setPlotErrorBars(bool errorBars) {
 }
 
 /**
+ * Returns whether or not error bars are turned on or not
+ *
+ * @return True if the errorbars should be plotted
+ */
+bool IndirectTab::errorBars() const { return m_plotErrorBars; }
+
+/**
  * Plots different spectra from multiple workspaces on the same plot
  *
  * This uses the plotSpectrum function from the Python API.

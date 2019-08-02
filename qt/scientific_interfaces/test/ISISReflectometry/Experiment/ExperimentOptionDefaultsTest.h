@@ -37,29 +37,60 @@ public:
 
   ExperimentOptionDefaultsTest() { Mantid::API::FrameworkManager::Instance(); }
 
-  void testValidAnalysisMode() {
-    auto result = getDefaults("Experiment");
+  void testDefaultAnalysisMode() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.analysisMode(), AnalysisMode::PointDetector);
+  }
+
+  void testValidAnalysisModeFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
     TS_ASSERT_EQUALS(result.analysisMode(), AnalysisMode::MultiDetector);
   }
 
-  void testInvalidAnalysisMode() { getDefaultsThrows("Analysis_Invalid"); }
+  void testInvalidAnalysisModeFromParamsFile() {
+    getDefaultsFromParamsFileThrows("Analysis_Invalid");
+  }
 
-  void testValidReductionOptions() {
-    auto result = getDefaults("Experiment");
+  void testDefaultReductionOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.summationType(), SummationType::SumInLambda);
+    TS_ASSERT_EQUALS(result.reductionType(), ReductionType::Normal);
+    TS_ASSERT_EQUALS(result.includePartialBins(), false);
+  }
+
+  void testValidReductionOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
     TS_ASSERT_EQUALS(result.summationType(), SummationType::SumInQ);
     TS_ASSERT_EQUALS(result.reductionType(), ReductionType::NonFlatSample);
     TS_ASSERT_EQUALS(result.includePartialBins(), true);
   }
 
-  void testInvalidReductionOptions() { getDefaultsThrows("Reduction_Invalid"); }
+  void testInvalidReductionOptionsFromParamsFile() {
+    getDefaultsFromParamsFileThrows("Reduction_Invalid");
+  }
 
-  void testValidDebugOptions() {
-    auto result = getDefaults("Experiment");
+  void testDefaultDebugOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.debug(), false);
+  }
+
+  void testValidDebugOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
     TS_ASSERT_EQUALS(result.debug(), true);
   }
 
-  void testValidPerThetaOptions() {
-    auto result = getDefaults("Experiment");
+  void testDefaultPerThetaOptions() {
+    auto result = getDefaults();
+    auto expected =
+        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
+                         RangeInQ(boost::none, boost::none, boost::none),
+                         boost::none, boost::none);
+    TS_ASSERT_EQUALS(result.perThetaDefaults().size(), 1);
+    TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
+  }
+
+  void testValidPerThetaOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      boost::none, RangeInQ(0.01, 0.03, 0.2),
                                      0.7, std::string("390-415"));
@@ -67,33 +98,64 @@ public:
     TS_ASSERT_EQUALS(result.perThetaDefaults().front(), expected);
   }
 
-  void testInvalidPerThetaOptions() { getDefaultsThrows("PerTheta_Invalid"); }
+  void testInvalidPerThetaOptionsFromParamsFile() {
+    getDefaultsFromParamsFileThrows("PerTheta_Invalid");
+  }
 
-  void testValidTransmissionRunRange() {
-    auto result = getDefaults("Experiment");
+  void testDefaultTransmissionRunRange() {
+    auto result = getDefaults();
+    auto const expected = RangeInLambda{0.0, 0.0};
+    TS_ASSERT_EQUALS(result.transmissionStitchOptions().overlapRange(),
+                     expected);
+  }
+
+  void testValidTransmissionRunRangeFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
     auto const expected = RangeInLambda{10.0, 12.0};
     TS_ASSERT_EQUALS(result.transmissionStitchOptions().overlapRange(),
                      expected);
   }
 
-  void testInvalidTransmissionRunRange() {
-    getDefaultsThrows("TransmissionRunRange_Invalid");
+  void testInvalidTransmissionRunRangeFromParamsFile() {
+    getDefaultsFromParamsFileThrows("TransmissionRunRange_Invalid");
   }
 
-  void testValidCorrectionOptions() {
-    auto result = getDefaults("Experiment");
+  void testDefaultCorrectionOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.polarizationCorrections().correctionType(),
+                     PolarizationCorrectionType::None);
+    TS_ASSERT_EQUALS(result.floodCorrections().correctionType(),
+                     FloodCorrectionType::Workspace);
+  }
+
+  void testValidCorrectionOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
     TS_ASSERT_EQUALS(result.polarizationCorrections().correctionType(),
                      PolarizationCorrectionType::ParameterFile);
     TS_ASSERT_EQUALS(result.floodCorrections().correctionType(),
                      FloodCorrectionType::ParameterFile);
   }
 
-  void testInvalidCorrectionOptions() {
-    getDefaultsThrows("Correction_Invalid");
+  void testInvalidCorrectionOptionsFromParamsFile() {
+    getDefaultsFromParamsFileThrows("Correction_Invalid");
   }
 
 private:
-  Experiment getDefaults(std::string const &paramsType) {
+  Experiment getDefaults() {
+    // Provide the mandatory params file so that we don't throw. Other params
+    // will be unset so the hard-coded defaults will be used instead.
+
+    // Note that we use an instrument suffix here because otherwise
+    // the workspace instrument can pick up settings from a previously-loaded
+    // parameters file for the same instrument for another test!
+    auto workspace = Mantid::TestHelpers::createREFL_WS(
+        5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, "", "MANDATORY");
+    auto instrument = workspace->getInstrument();
+    ExperimentOptionDefaults experimentDefaults;
+    return experimentDefaults.get(instrument);
+  }
+
+  Experiment getDefaultsFromParamsFile(std::string const &paramsType) {
     // Get a dummy reflectometry instrument with the given parameters file type.
     // paramsType is appended to "REFL_Parameters_" to form the name for the
     // file to load. See ReflectometryHelper.h for details.
@@ -104,7 +166,7 @@ private:
     return experimentDefaults.get(instrument);
   }
 
-  void getDefaultsThrows(std::string const &paramsType) {
+  void getDefaultsFromParamsFileThrows(std::string const &paramsType) {
     auto workspace = Mantid::TestHelpers::createREFL_WS(
         5, 100.0, 500.0, {1.0, 2.0, 3.0, 4.0, 5.0}, paramsType);
     auto instrument = workspace->getInstrument();

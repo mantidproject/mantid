@@ -71,6 +71,7 @@ public:
   bool isAutoreducing() const override;
   bool isAnyBatchAutoreducing() const override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
+  std::string instrumentName() const override;
   int percentComplete() const override;
   AlgorithmRuntimeProps rowProcessingProperties() const override;
 

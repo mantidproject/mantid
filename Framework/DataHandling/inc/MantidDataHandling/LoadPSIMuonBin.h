@@ -46,8 +46,8 @@ struct headerData {
   std::string timeEnd;
   std::string monDeviation;
   int32_t scalars[18];
-  std::string labels_scalars[18]; // 18 Strings with 4 max length
-  int32_t labelsOfHistograms[16];
+  std::string labels_scalars[18];     // 18 Strings with 4 max length
+  std::string labelsOfHistograms[16]; // 18 Strings with 4 max length
   int16_t integerT0[16];
   int16_t firstGood[16];
   int16_t lastGood[16];

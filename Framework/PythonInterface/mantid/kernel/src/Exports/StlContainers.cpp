@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"

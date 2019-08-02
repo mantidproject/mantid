@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/DataProcessorAdapter.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 

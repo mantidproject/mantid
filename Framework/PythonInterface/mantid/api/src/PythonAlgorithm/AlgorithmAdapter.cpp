@@ -11,9 +11,9 @@
 #include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/WrapperHelpers.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>

@@ -289,6 +289,13 @@ Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
   return m_instrument;
 }
 
+std::string BatchPresenter::instrumentName() const {
+  if (m_instrument)
+    return m_instrument->getName();
+
+  return std::string();
+}
+
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
 
 /**

@@ -46,6 +46,10 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
@@ -91,6 +95,7 @@ set(
   IndirectFitPlotModel.h
   IndirectFitPlotPresenter.h
   IndirectFittingModel.h
+  IndirectPlotOptionsModel.h
   IndirectToolsTab.h
   IqtFitModel.h
   JumpFitModel.h
@@ -139,6 +144,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -196,6 +204,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
@@ -277,6 +286,10 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
   IndirectSettingsModel.cpp
@@ -315,6 +328,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -333,6 +349,7 @@ set(
 set(
   INC_FILES
   IndirectDataValidationHelper.h
+  IndirectPlotOptionsModel.h
 )
 
 set(
@@ -354,6 +371,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui

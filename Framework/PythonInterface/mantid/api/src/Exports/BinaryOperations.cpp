@@ -13,7 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidPythonInterface/kernel/Policies/AsType.h"
+#include "MantidPythonInterface/core/Policies/AsType.h"
 
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>

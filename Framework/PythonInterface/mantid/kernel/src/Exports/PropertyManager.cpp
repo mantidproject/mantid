@@ -11,7 +11,7 @@
 #endif
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 
 #include <boost/python/class.hpp>
