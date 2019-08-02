@@ -7,7 +7,7 @@
 #include "QBatchView.h"
 #include "GUI/Event/QEventView.h"
 #include "GUI/Runs/QRunsView.h"
-#include "GUI/Save/SaveView.h"
+#include "GUI/Save/QSaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -131,8 +131,8 @@ IAlgorithm_sptr QBatchView::createReductionAlg() {
       "ReflectometryReductionOneAuto");
 }
 
-std::unique_ptr<SaveView> QBatchView::createSaveTab() {
-  return std::make_unique<SaveView>(this);
+std::unique_ptr<QSaveView> QBatchView::createSaveTab() {
+  return std::make_unique<QSaveView>(this);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

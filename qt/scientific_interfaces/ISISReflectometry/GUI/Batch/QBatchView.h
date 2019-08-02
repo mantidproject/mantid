@@ -11,7 +11,7 @@
 #include "GUI/Experiment/QExperimentView.h"
 #include "GUI/Instrument/QInstrumentView.h"
 #include "GUI/Runs/QRunsView.h"
-#include "GUI/Save/SaveView.h"
+#include "GUI/Save/QSaveView.h"
 #include "IBatchView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -55,13 +55,13 @@ private:
 
   std::unique_ptr<QRunsView> createRunsTab();
   std::unique_ptr<QEventView> createEventTab();
-  std::unique_ptr<SaveView> createSaveTab();
+  std::unique_ptr<QSaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
   BatchViewSubscriber *m_notifyee;
   std::unique_ptr<QRunsView> m_runs;
   std::unique_ptr<QEventView> m_eventHandling;
-  std::unique_ptr<SaveView> m_save;
+  std::unique_ptr<QSaveView> m_save;
   std::unique_ptr<QExperimentView> m_experiment;
   std::unique_ptr<QInstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;

@@ -14,17 +14,17 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** SaveView : Provides an interface for the "Save ASCII" tab in the
+/** QSaveView : Provides an interface for the "Save ASCII" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL SaveView : public QWidget,
-                                                public ISaveView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QSaveView : public QWidget,
+                                                 public ISaveView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit SaveView(QWidget *parent = nullptr);
+  explicit QSaveView(QWidget *parent = nullptr);
   /// Destructor
-  ~SaveView() override;
+  ~QSaveView() override;
 
   void subscribe(SaveViewSubscriber *notifyee) override;
 

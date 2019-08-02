@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "SaveView.h"
+#include "QSaveView.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -16,11 +16,11 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: The parent of this view
  */
-SaveView::SaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
+QSaveView::QSaveView(QWidget *parent) : QWidget(parent), m_notifyee(nullptr) {
   initLayout();
 }
 
-void SaveView::subscribe(SaveViewSubscriber *notifyee) {
+void QSaveView::subscribe(SaveViewSubscriber *notifyee) {
   m_notifyee = notifyee;
   populateListOfWorkspaces();
   suggestSaveDir();
@@ -28,12 +28,12 @@ void SaveView::subscribe(SaveViewSubscriber *notifyee) {
 
 /** Destructor
  */
-SaveView::~SaveView() {}
+QSaveView::~QSaveView() {}
 
 /**
 Initialize the Interface
 */
-void SaveView::initLayout() {
+void QSaveView::initLayout() {
   m_ui.setupUi(this);
 
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
@@ -51,7 +51,7 @@ void SaveView::initLayout() {
           SLOT(browseToSaveDirectory()));
 }
 
-void SaveView::browseToSaveDirectory() {
+void QSaveView::browseToSaveDirectory() {
   auto savePath = QFileDialog::getExistingDirectory(
       this, "Select the directory to save to.");
   if (!savePath.isEmpty()) {
@@ -60,29 +60,29 @@ void SaveView::browseToSaveDirectory() {
   }
 }
 
-void SaveView::onSavePathChanged() { m_notifyee->notifySavePathChanged(); }
+void QSaveView::onSavePathChanged() { m_notifyee->notifySavePathChanged(); }
 
-void SaveView::onAutosaveChanged(int state) {
+void QSaveView::onAutosaveChanged(int state) {
   if (state == Qt::CheckState::Checked)
     m_notifyee->notifyAutosaveEnabled();
   else
     m_notifyee->notifyAutosaveDisabled();
 }
 
-void SaveView::disableAutosaveControls() {
+void QSaveView::disableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(false);
 }
 
-void SaveView::enableAutosaveControls() {
+void QSaveView::enableAutosaveControls() {
   m_ui.autosaveGroup->setEnabled(true);
 }
 
-void SaveView::enableFileFormatAndLocationControls() {
+void QSaveView::enableFileFormatAndLocationControls() {
   m_ui.fileFormatGroup->setEnabled(true);
   m_ui.fileLocationGroup->setEnabled(true);
 }
 
-void SaveView::disableFileFormatAndLocationControls() {
+void QSaveView::disableFileFormatAndLocationControls() {
   m_ui.fileFormatGroup->setEnabled(false);
   m_ui.fileLocationGroup->setEnabled(false);
 }
@@ -90,47 +90,49 @@ void SaveView::disableFileFormatAndLocationControls() {
 /** Returns the save path
  * @return :: The save path
  */
-std::string SaveView::getSavePath() const {
+std::string QSaveView::getSavePath() const {
   return m_ui.savePathEdit->text().toStdString();
 }
 
 /** Sets the save path
  */
-void SaveView::setSavePath(const std::string &path) const {
+void QSaveView::setSavePath(const std::string &path) const {
   m_ui.savePathEdit->setText(QString::fromStdString(path));
 }
 
 /** Returns the file name prefix
  * @return :: The prefix
  */
-std::string SaveView::getPrefix() const {
+std::string QSaveView::getPrefix() const {
   return m_ui.prefixEdit->text().toStdString();
 }
 
 /** Returns the workspace list filter
  * @return :: The filter
  */
-std::string SaveView::getFilter() const {
+std::string QSaveView::getFilter() const {
   return m_ui.filterEdit->text().toStdString();
 }
 
 /** Returns the regular expression check value
  * @return :: The regex check
  */
-bool SaveView::getRegexCheck() const { return m_ui.regexCheckBox->isChecked(); }
+bool QSaveView::getRegexCheck() const {
+  return m_ui.regexCheckBox->isChecked();
+}
 
 /** Returns the name of the currently selected workspace from the 'List of
  * workspaces' widget
  * @return :: item name
  */
-std::string SaveView::getCurrentWorkspaceName() const {
+std::string QSaveView::getCurrentWorkspaceName() const {
   return m_ui.listOfWorkspaces->currentItem()->text().toStdString();
 }
 
 /** Returns a list of names of currently selected workspaces
  * @return :: workspace names
  */
-std::vector<std::string> SaveView::getSelectedWorkspaces() const {
+std::vector<std::string> QSaveView::getSelectedWorkspaces() const {
   std::vector<std::string> itemNames;
   auto items = m_ui.listOfWorkspaces->selectedItems();
   for (auto it = items.begin(); it != items.end(); it++) {
@@ -142,7 +144,7 @@ std::vector<std::string> SaveView::getSelectedWorkspaces() const {
 /** Returns a list of names of currently selected parameters
  * @return :: parameter names
  */
-std::vector<std::string> SaveView::getSelectedParameters() const {
+std::vector<std::string> QSaveView::getSelectedParameters() const {
   std::vector<std::string> paramNames;
   auto items = m_ui.listOfLoggedParameters->selectedItems();
   for (auto it = items.begin(); it != items.end(); it++) {
@@ -154,30 +156,32 @@ std::vector<std::string> SaveView::getSelectedParameters() const {
 /** Returns the index of the selected file format
  * @return :: File format index
  */
-int SaveView::getFileFormatIndex() const {
+int QSaveView::getFileFormatIndex() const {
   return m_ui.fileFormatComboBox->currentIndex();
 }
 
 /** Returns the title check value
  * @return :: The title check
  */
-bool SaveView::getTitleCheck() const { return m_ui.titleCheckBox->isChecked(); }
+bool QSaveView::getTitleCheck() const {
+  return m_ui.titleCheckBox->isChecked();
+}
 
 /** Returns the Q resolution check value
  * @return :: The Q resolution check
  */
-bool SaveView::getQResolutionCheck() const {
+bool QSaveView::getQResolutionCheck() const {
   return m_ui.qResolutionCheckBox->isChecked();
 }
 
-void SaveView::disallowAutosave() {
+void QSaveView::disallowAutosave() {
   m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked);
 }
 
 /** Returns the separator type
  * @return :: The separator
  */
-std::string SaveView::getSeparator() const {
+std::string QSaveView::getSeparator() const {
   auto sep = m_ui.separatorButtonGroup->checkedButton()->text().toStdString();
   boost::to_lower(sep); // lowercase
   return sep;
@@ -185,18 +189,18 @@ std::string SaveView::getSeparator() const {
 
 /** Clear the 'List of workspaces' widget
  */
-void SaveView::clearWorkspaceList() const { m_ui.listOfWorkspaces->clear(); }
+void QSaveView::clearWorkspaceList() const { m_ui.listOfWorkspaces->clear(); }
 
 /** Clear the 'List of Logged Parameters' widget
  */
-void SaveView::clearParametersList() const {
+void QSaveView::clearParametersList() const {
   m_ui.listOfLoggedParameters->clear();
 }
 
 /** Set the 'List of workspaces' widget with workspace names
  * @param names :: The list of workspace names
  */
-void SaveView::setWorkspaceList(const std::vector<std::string> &names) const {
+void QSaveView::setWorkspaceList(const std::vector<std::string> &names) const {
   for (auto it = names.begin(); it != names.end(); it++) {
     m_ui.listOfWorkspaces->addItem(QString::fromStdString(*it));
   }
@@ -205,7 +209,7 @@ void SaveView::setWorkspaceList(const std::vector<std::string> &names) const {
 /** Set the 'List of logged parameters' widget with workspace run logs
  * @param logs :: The list of workspace run logs
  */
-void SaveView::setParametersList(const std::vector<std::string> &logs) const {
+void QSaveView::setParametersList(const std::vector<std::string> &logs) const {
   for (auto it = logs.begin(); it != logs.end(); it++) {
     m_ui.listOfLoggedParameters->addItem(QString::fromStdString(*it));
   }
@@ -213,75 +217,75 @@ void SaveView::setParametersList(const std::vector<std::string> &logs) const {
 
 /** Populate the 'List of workspaces' widget
  */
-void SaveView::populateListOfWorkspaces() const {
+void QSaveView::populateListOfWorkspaces() const {
   m_notifyee->notifyPopulateWorkspaceList();
 }
 
 /** Filter the 'List of workspaces' widget
  */
-void SaveView::filterWorkspaceList() const {
+void QSaveView::filterWorkspaceList() const {
   m_notifyee->notifyFilterWorkspaceList();
 }
 
 /** Request for the parameters of a workspace
  */
-void SaveView::requestWorkspaceParams() const {
+void QSaveView::requestWorkspaceParams() const {
   m_notifyee->notifyPopulateParametersList();
 }
 
 /** Save selected workspaces
  */
-void SaveView::saveWorkspaces() const {
+void QSaveView::saveWorkspaces() const {
   m_notifyee->notifySaveSelectedWorkspaces();
 }
 
 /** Suggest a save directory
  */
-void SaveView::suggestSaveDir() const { m_notifyee->notifySuggestSaveDir(); }
+void QSaveView::suggestSaveDir() const { m_notifyee->notifySuggestSaveDir(); }
 
-void SaveView::error(const std::string &title, const std::string &prompt) {
+void QSaveView::error(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
                         QString::fromStdString(prompt));
 }
 
-void SaveView::warning(const std::string &title, const std::string &prompt) {
+void QSaveView::warning(const std::string &title, const std::string &prompt) {
   QMessageBox::critical(this, QString::fromStdString(title),
                         QString::fromStdString(prompt));
 }
 
-void SaveView::showFilterEditValid() {
+void QSaveView::showFilterEditValid() {
   auto palette = m_ui.filterEdit->palette();
   palette.setColor(QPalette::Base, Qt::transparent);
   m_ui.filterEdit->setPalette(palette);
 }
 
-void SaveView::showFilterEditInvalid() {
+void QSaveView::showFilterEditInvalid() {
   auto palette = m_ui.filterEdit->palette();
   palette.setColor(QPalette::Base, QColor("#ffb8ad"));
   m_ui.filterEdit->setPalette(palette);
 }
 
-void SaveView::errorInvalidSaveDirectory() {
+void QSaveView::errorInvalidSaveDirectory() {
   error("Invalid directory", "The save path specified doesn't exist or is "
                              "not writable.");
 }
 
-void SaveView::warnInvalidSaveDirectory() {
+void QSaveView::warnInvalidSaveDirectory() {
   warning("Invalid directory",
           "You just changed the save path to a directory which "
           "doesn't exist or is not writable.");
 }
 
-void SaveView::noWorkspacesSelected() {
+void QSaveView::noWorkspacesSelected() {
   error("No workspaces selected.",
         "You must select the workspaces in order to save.");
 }
 
-void SaveView::cannotSaveWorkspaces() {
+void QSaveView::cannotSaveWorkspaces() {
   error("Error", "Unknown error while saving workspaces");
 }
 
-void SaveView::cannotSaveWorkspaces(std::string const &fullError) {
+void QSaveView::cannotSaveWorkspaces(std::string const &fullError) {
   error("Error", fullError);
 }
 } // namespace CustomInterfaces
