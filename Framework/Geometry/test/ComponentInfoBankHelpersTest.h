@@ -73,7 +73,8 @@ public:
   }
 
   void test_isSaveableBank_false_for_tubes() {
-
+    // test instrument with detector tubes to test that IsSaveableBank will
+    // return false detector tubes
     auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(2, 2);
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
@@ -88,7 +89,8 @@ public:
   }
 
   void test_isSaveableBank_false_for_detector() {
-    // test instrument with a detetctor
+    // test instrument with a detetctor to test that IsSaveableBank will
+    // return false for detectors
     auto instr = ComponentCreationHelper::createMinimalInstrument(
         V3D(0.0, 0.0, -10.0), V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 10.0));
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
@@ -116,7 +118,14 @@ public:
   }
 
   void test_offsetFromAncestor_gets_expected_offset() {
-    // prepare geometry for test instrument
+    // preparation of geometry for test instrument:
+    // bank position is 10m along z, the detector is then offset from the bank
+    // with xyz value (2,-2, 0) . The bank is then rotated 45 degrees about y,
+    // detector in bank is then rotated an additional 45 degrees, therefore the
+    // detector has a net rotation of 90 degrees. offset fromAncestor should be
+    // able to retrieve the detector offset (2,-2,0) relative to the bank by
+    // internally applying the reverse transformations unto the position of the
+    // detector.
     const Quat relativeBankRotation(45.0, V3D(0.0, 1.0, 0.0));
     const Quat relativeDetRotation(45.0, V3D(0.0, 1.0, 0.0));
     const V3D absBankposition(0, 0, 10);
@@ -128,7 +137,6 @@ public:
         detectorOffset); // detector offset which is specified
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
-    const auto &detInfo = (*wrappers.second);
     const size_t bankIdx = 3; // bank index
     const size_t detIdx = 0;  // detector index
     // Eigen copy of the detector offset that was specified in the instrument
