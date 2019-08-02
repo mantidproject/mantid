@@ -130,10 +130,11 @@ public:
      detector has a net rotation of 90 degrees. offsetFromAncestor should be
      able to retrieve the detector offset (2,-2,0) relative to the bank by
      internally applying the reverse transformations unto the position of the
-     detector.    
-	*/
+     detector.
+        */
 
-	// specify the detector offset that offsetFromAncestor should retrieve from compInfo.
+    // specify the detector offset that offsetFromAncestor should retrieve from
+    // compInfo.
     const V3D detectorOffset(2.0, -2.0, 0.0);
 
     // create instrument with geometry as above
