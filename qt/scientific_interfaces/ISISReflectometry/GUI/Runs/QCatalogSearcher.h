@@ -17,19 +17,19 @@ namespace CustomInterfaces {
 
 class IMainWindowView;
 
-/** @class CatalogSearcher
+/** @class QCatalogSearcher
 
-CatalogSearcher implements ISearcher to provide ICAT search
+QCatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class CatalogSearcher : public QObject,
-                        public ISearcher,
-                        public RunsViewSearchSubscriber,
-                        public Mantid::API::AlgorithmObserver {
+class QCatalogSearcher : public QObject,
+                         public ISearcher,
+                         public RunsViewSearchSubscriber,
+                         public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
-  explicit CatalogSearcher(IRunsView *m_view);
-  ~CatalogSearcher() override{};
+  explicit QCatalogSearcher(IRunsView *m_view);
+  ~QCatalogSearcher() override{};
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;

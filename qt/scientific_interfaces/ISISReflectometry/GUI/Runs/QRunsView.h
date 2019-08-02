@@ -12,7 +12,7 @@
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "SearchModel.h"
+#include "QSearchModel.h"
 
 #include "ui_RunsWidget.h"
 #include <QBasicTimer>
@@ -103,7 +103,7 @@ private:
   RunsViewTimerSubscriber *m_timerNotifyee;
   RunsViewSearchSubscriber *m_searchNotifyee;
 
-  SearchModel m_searchModel;
+  QSearchModel m_searchModel;
 
   // the interface
   Ui::RunsWidget ui;

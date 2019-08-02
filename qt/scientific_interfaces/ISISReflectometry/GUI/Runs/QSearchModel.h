@@ -20,14 +20,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** SearchModel : Provides a QAbstractTableModel for a Mantid
+/** QSearchModel : Provides a QAbstractTableModel for a Mantid
 ITableWorkspace of Reflectometry search results.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL SearchModel : public QAbstractTableModel,
-                                                   public ISearchModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QSearchModel : public QAbstractTableModel,
+                                                    public ISearchModel {
   Q_OBJECT
 public:
-  SearchModel();
+  QSearchModel();
   void addDataFromTable(Mantid::API::ITableWorkspace_sptr tableWorkspace,
                         const std::string &instrument) override;
   // row and column counts

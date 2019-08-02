@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
 #include "CatalogRunNotifier.h"
-#include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
@@ -14,6 +13,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "QCatalogSearcher.h"
 
 #include <algorithm>
 #include <fstream>
@@ -48,9 +48,10 @@ RunsPresenter::RunsPresenter(
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<CatalogSearcher>(mainView)), m_view(mainView),
-      m_progressView(progressableView), m_mainPresenter(nullptr),
-      m_messageHandler(messageHandler), m_instruments(instruments),
+      m_searcher(std::make_unique<QCatalogSearcher>(mainView)),
+      m_view(mainView), m_progressView(progressableView),
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
+      m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_thetaTolerance(thetaTolerance) {
 

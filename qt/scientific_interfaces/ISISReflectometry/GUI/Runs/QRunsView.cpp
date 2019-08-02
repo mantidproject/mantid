@@ -12,7 +12,6 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
-#include "SearchModel.h"
 #include <QMenu>
 #include <QMessageBox>
 

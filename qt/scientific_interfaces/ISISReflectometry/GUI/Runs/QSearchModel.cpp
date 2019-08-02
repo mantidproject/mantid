@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "SearchModel.h"
+#include "QSearchModel.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <QColor>
@@ -44,25 +44,25 @@ bool resultExists(SearchResult const &result,
 }
 } // unnamed namespace
 
-SearchModel::SearchModel() : m_runDetails() {}
+QSearchModel::QSearchModel() : m_runDetails() {}
 
-bool SearchModel::knownFileType(std::string const &filename) const {
+bool QSearchModel::knownFileType(std::string const &filename) const {
   boost::regex pattern("raw$", boost::regex::icase);
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
 
-std::vector<SearchResult> const &SearchModel::results() const {
+std::vector<SearchResult> const &QSearchModel::results() const {
   return m_runDetails;
 }
 
-void SearchModel::setError(int i, std::string const &error) {
+void QSearchModel::setError(int i, std::string const &error) {
   m_runDetails[i].setError(error);
   emit dataChanged(index(i, 0), index(i, 2));
 }
 
-void SearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
-                                   const std::string &instrument) {
+void QSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
+                                    const std::string &instrument) {
 
   // Copy the data from the input table workspace
   std::vector<SearchResult> newRunDetails;
@@ -87,7 +87,7 @@ void SearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
   mergeNewResults(newRunDetails);
 }
 
-void SearchModel::mergeNewResults(std::vector<SearchResult> const &source) {
+void QSearchModel::mergeNewResults(std::vector<SearchResult> const &source) {
   if (source.empty())
     return;
 
@@ -104,14 +104,14 @@ void SearchModel::mergeNewResults(std::vector<SearchResult> const &source) {
 /**
 @return the row count.
 */
-int SearchModel::rowCount(const QModelIndex &) const {
+int QSearchModel::rowCount(const QModelIndex &) const {
   return static_cast<int>(m_runDetails.size());
 }
 
 /**
 @return the number of columns in the model.
 */
-int SearchModel::columnCount(const QModelIndex &) const { return 3; }
+int QSearchModel::columnCount(const QModelIndex &) const { return 3; }
 
 /**
 Overrident data method, allows consuming view to extract data for an index and
@@ -119,7 +119,7 @@ role.
 @param index : For which to extract the data
 @param role : Role mode
 */
-QVariant SearchModel::data(const QModelIndex &index, int role) const {
+QVariant QSearchModel::data(const QModelIndex &index, int role) const {
 
   const int colNumber = index.column();
   const int rowNumber = index.row();
@@ -166,8 +166,8 @@ Get the heading for a given section, orientation and role.
 @param role : Role mode of table.
 @return HeaderData.
 */
-QVariant SearchModel::headerData(int section, Qt::Orientation orientation,
-                                 int role) const {
+QVariant QSearchModel::headerData(int section, Qt::Orientation orientation,
+                                  int role) const {
   if (role != Qt::DisplayRole)
     return QVariant();
 
@@ -190,7 +190,7 @@ QVariant SearchModel::headerData(int section, Qt::Orientation orientation,
 Provide flags on an index by index basis
 @param index: To generate a flag for.
 */
-Qt::ItemFlags SearchModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags QSearchModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return nullptr;
   else
@@ -200,7 +200,7 @@ Qt::ItemFlags SearchModel::flags(const QModelIndex &index) const {
 /**
 Clear the model
 */
-void SearchModel::clear() {
+void QSearchModel::clear() {
   beginResetModel();
   m_runDetails.clear();
   endResetModel();
@@ -210,11 +210,11 @@ void SearchModel::clear() {
 @param run : the run number
 @return : true if there is at least one error for this run
 */
-bool SearchModel::runHasError(const SearchResult &run) const {
+bool QSearchModel::runHasError(const SearchResult &run) const {
   return !(run.error().empty());
 }
 
-SearchResult const &SearchModel::getRowData(int index) const {
+SearchResult const &QSearchModel::getRowData(int index) const {
   return m_runDetails[index];
 }
 } // namespace CustomInterfaces
