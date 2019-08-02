@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ExperimentView.h"
+#include "QExperimentView.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
@@ -43,48 +43,48 @@ void showAsValid(QLineEdit &lineEdit) {
  * used to find tooltips for the input properties
  * @param parent :: [input] The parent of this widget
  */
-ExperimentView::ExperimentView(
+QExperimentView::QExperimentView(
     Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
     : QWidget(parent) {
   initLayout();
   registerSettingsWidgets(algorithmForTooltips);
 }
 
-void ExperimentView::onRemovePerThetaDefaultsRequested() {
+void QExperimentView::onRemovePerThetaDefaultsRequested() {
   auto index = m_ui.optionsTable->currentIndex();
   if (index.isValid()) {
     m_notifyee->notifyRemovePerAngleDefaultsRequested(index.row());
   }
 }
 
-void ExperimentView::showAllPerAngleOptionsAsValid() {
+void QExperimentView::showAllPerAngleOptionsAsValid() {
   for (auto row = 0; row < m_ui.optionsTable->rowCount(); ++row)
     showPerAngleOptionsAsValid(row);
 }
 
-void ExperimentView::showPerAngleThetasNonUnique(double tolerance) {
+void QExperimentView::showPerAngleThetasNonUnique(double tolerance) {
   QMessageBox::critical(
       this, "Invalid theta combination!",
       "Cannot have multiple defaults with theta values less than " +
           QString::number(tolerance) + " apart.");
 }
 
-void ExperimentView::showStitchParametersValid() {
+void QExperimentView::showStitchParametersValid() {
   showAsValid(stitchOptionsLineEdit());
 }
 
-void ExperimentView::showStitchParametersInvalid() {
+void QExperimentView::showStitchParametersInvalid() {
   showAsInvalid(stitchOptionsLineEdit());
 }
 
-void ExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
+void QExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
 /**
 Initialise the Interface
 */
-void ExperimentView::initLayout() {
+void QExperimentView::initLayout() {
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")),
                                                  m_ui.optionsTable);
@@ -107,19 +107,19 @@ void ExperimentView::initLayout() {
           SLOT(onNewPerThetaDefaultsRowRequested()));
 }
 
-void ExperimentView::initializeTableItems(QTableWidget &table) {
+void QExperimentView::initializeTableItems(QTableWidget &table) {
   for (auto row = 0; row < table.rowCount(); ++row)
     initializeTableRow(table, row);
 }
 
-void ExperimentView::initializeTableRow(QTableWidget &table, int row) {
+void QExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column)
     table.setItem(row, column, new QTableWidgetItem());
   m_ui.optionsTable->blockSignals(false);
 }
 
-void ExperimentView::initializeTableRow(
+void QExperimentView::initializeTableRow(
     QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < table.columnCount(); ++column)
@@ -129,7 +129,7 @@ void ExperimentView::initializeTableRow(
   m_ui.optionsTable->blockSignals(false);
 }
 
-void ExperimentView::initOptionsTable() {
+void QExperimentView::initOptionsTable() {
   auto table = m_ui.optionsTable;
 
   // Set angle and scale columns to a small width so everything fits
@@ -148,60 +148,60 @@ void ExperimentView::initOptionsTable() {
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
-void ExperimentView::initFloodControls() {
+void QExperimentView::initFloodControls() {
   m_ui.floodWorkspaceWsSelector->setOptional(true);
   m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
-void ExperimentView::connectSettingsChange(QLineEdit &edit) {
+void QExperimentView::connectSettingsChange(QLineEdit &edit) {
   connect(&edit, SIGNAL(textChanged(QString const &)), this,
           SLOT(onSettingsChanged()));
 }
 
-void ExperimentView::connectSettingsChange(QDoubleSpinBox &edit) {
+void QExperimentView::connectSettingsChange(QDoubleSpinBox &edit) {
   connect(&edit, SIGNAL(valueChanged(QString const &)), this,
           SLOT(onSettingsChanged()));
 }
 
-void ExperimentView::connectSettingsChange(QComboBox &edit) {
+void QExperimentView::connectSettingsChange(QComboBox &edit) {
   connect(&edit, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onSettingsChanged()));
 }
 
-void ExperimentView::connectSettingsChange(QCheckBox &edit) {
+void QExperimentView::connectSettingsChange(QCheckBox &edit) {
   connect(&edit, SIGNAL(stateChanged(int)), this, SLOT(onSettingsChanged()));
 }
 
-void ExperimentView::connectSettingsChange(QTableWidget &edit) {
+void QExperimentView::connectSettingsChange(QTableWidget &edit) {
   connect(&edit, SIGNAL(cellChanged(int, int)), this,
           SLOT(onPerAngleDefaultsChanged(int, int)));
 }
 
-void ExperimentView::disconnectSettingsChange(QLineEdit &edit) {
+void QExperimentView::disconnectSettingsChange(QLineEdit &edit) {
   disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
 }
 
-void ExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
+void QExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
   disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
 }
 
-void ExperimentView::disconnectSettingsChange(QComboBox &edit) {
+void QExperimentView::disconnectSettingsChange(QComboBox &edit) {
   disconnect(&edit, SIGNAL(currentIndexChanged(int)), 0, 0);
 }
 
-void ExperimentView::disconnectSettingsChange(QCheckBox &edit) {
+void QExperimentView::disconnectSettingsChange(QCheckBox &edit) {
   disconnect(&edit, SIGNAL(stateChanged(int)), 0, 0);
 }
 
-void ExperimentView::disconnectSettingsChange(QTableWidget &edit) {
+void QExperimentView::disconnectSettingsChange(QTableWidget &edit) {
   disconnect(&edit, SIGNAL(cellChanged(int, int)), 0, 0);
 }
 
-void ExperimentView::onSettingsChanged() {
+void QExperimentView::onSettingsChanged() {
   m_notifyee->notifySettingsChanged();
 }
 
-void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
+void QExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.optionsTable->setEnabled(enabled);
   m_ui.analysisModeComboBox->setEnabled(enabled);
   m_ui.startOverlapEdit->setEnabled(enabled);
@@ -218,16 +218,17 @@ void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.debugCheckBox->setEnabled(enabled);
 }
 
-void ExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
+void QExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
 
-void ExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
+void QExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
 
-void ExperimentView::registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg) {
+void QExperimentView::registerSettingsWidgets(
+    Mantid::API::IAlgorithm_sptr alg) {
   registerExperimentSettingsWidgets(alg);
   connectExperimentSettingsWidgets();
 }
 
-void ExperimentView::registerExperimentSettingsWidgets(
+void QExperimentView::registerExperimentSettingsWidgets(
     Mantid::API::IAlgorithm_sptr alg) {
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
@@ -245,7 +246,7 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
 }
 
-void ExperimentView::connectExperimentSettingsWidgets() {
+void QExperimentView::connectExperimentSettingsWidgets() {
   connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onSummationTypeChanged(int)));
   connectSettingsChange(*m_ui.optionsTable);
@@ -263,7 +264,7 @@ void ExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.debugCheckBox);
 }
 
-void ExperimentView::disconnectExperimentSettingsWidgets() {
+void QExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.summationTypeComboBox);
   disconnectSettingsChange(*m_ui.optionsTable);
   disconnectSettingsChange(*m_ui.analysisModeComboBox);
@@ -280,111 +281,111 @@ void ExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.debugCheckBox);
 }
 
-void ExperimentView::onRestoreDefaultsRequested() {
+void QExperimentView::onRestoreDefaultsRequested() {
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 
-void ExperimentView::onSummationTypeChanged(int reductionTypeIndex) {
+void QExperimentView::onSummationTypeChanged(int reductionTypeIndex) {
   UNUSED_ARG(reductionTypeIndex);
   m_notifyee->notifySummationTypeChanged();
 }
 
-void ExperimentView::enableReductionType() {
+void QExperimentView::enableReductionType() {
   m_ui.reductionTypeComboBox->setEnabled(true);
 }
 
-void ExperimentView::disableReductionType() {
+void QExperimentView::disableReductionType() {
   m_ui.reductionTypeComboBox->setEnabled(false);
 }
 
-void ExperimentView::enableIncludePartialBins() {
+void QExperimentView::enableIncludePartialBins() {
   m_ui.includePartialBinsCheckBox->setEnabled(true);
 }
 
-void ExperimentView::disableIncludePartialBins() {
+void QExperimentView::disableIncludePartialBins() {
   m_ui.includePartialBinsCheckBox->setEnabled(false);
 }
 
 template <typename Widget>
-void ExperimentView::registerSettingWidget(Widget &widget,
-                                           std::string const &propertyName,
-                                           Mantid::API::IAlgorithm_sptr alg) {
+void QExperimentView::registerSettingWidget(Widget &widget,
+                                            std::string const &propertyName,
+                                            Mantid::API::IAlgorithm_sptr alg) {
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
 }
 
-void ExperimentView::setToolTipAsPropertyDocumentation(
+void QExperimentView::setToolTipAsPropertyDocumentation(
     QWidget &widget, std::string const &propertyName,
     Mantid::API::IAlgorithm_sptr alg) {
   widget.setToolTip(QString::fromStdString(
       alg->getPointerToProperty(propertyName)->documentation()));
 }
 
-void ExperimentView::setSelected(QComboBox &box, std::string const &str) {
+void QExperimentView::setSelected(QComboBox &box, std::string const &str) {
   auto const index = box.findText(QString::fromStdString(str));
   if (index != -1)
     box.setCurrentIndex(index);
 }
 
-void ExperimentView::setText(QLineEdit &lineEdit,
-                             boost::optional<double> value) {
+void QExperimentView::setText(QLineEdit &lineEdit,
+                              boost::optional<double> value) {
   if (value)
     setText(lineEdit, value.get());
 }
 
-void ExperimentView::setText(QLineEdit &lineEdit, boost::optional<int> value) {
+void QExperimentView::setText(QLineEdit &lineEdit, boost::optional<int> value) {
   if (value)
     setText(lineEdit, value.get());
 }
 
-void ExperimentView::setText(QLineEdit &lineEdit,
-                             boost::optional<std::string> const &text) {
+void QExperimentView::setText(QLineEdit &lineEdit,
+                              boost::optional<std::string> const &text) {
   if (text && !text->empty())
     setText(lineEdit, text);
 }
 
-void ExperimentView::setText(QLineEdit &lineEdit, double value) {
+void QExperimentView::setText(QLineEdit &lineEdit, double value) {
   auto valueAsString = QString::number(value);
   lineEdit.setText(valueAsString);
 }
 
-void ExperimentView::setText(QLineEdit &lineEdit, int value) {
+void QExperimentView::setText(QLineEdit &lineEdit, int value) {
   auto valueAsString = QString::number(value);
   lineEdit.setText(valueAsString);
 }
 
-void ExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
+void QExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
   auto textAsQString = QString::fromStdString(text);
   lineEdit.setText(textAsQString);
 }
 
-// void ExperimentView::setText(QTableWidget &table,
+// void QExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName,
 //                             boost::optional<double> value) {
 //  if (value)
 //    setText(table, propertyName, value.get());
 //}
 //
-// void ExperimentView::setText(QTableWidget &table,
+// void QExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName, double value) {
 //  auto valueAsString = QString::number(value);
 //  setText(table, propertyName, valueAsString);
 //}
 //
-// void ExperimentView::setText(QTableWidget &table,
+// void QExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName,
 //                             boost::optional<std::string> text) {
 //  if (text && !text->empty())
 //    setText(table, propertyName, text.get());
 //}
 //
-// void ExperimentView::setText(QTableWidget &table,
+// void QExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName,
 //                             std::string const &text) {
 //  auto textAsQString = QString::fromStdString(text);
 //  setText(table, propertyName, textAsQString);
 //}
 //
-// void ExperimentView::setText(QTableWidget &table,
+// void QExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName,
 //                             const QString &value) {
 //  // Find the column with this property name
@@ -408,41 +409,41 @@ void ExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
 //  cell->setText(value);
 //}
 
-void ExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
+void QExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
   auto checkedAsCheckState = checked ? Qt::Checked : Qt::Unchecked;
   checkBox.setCheckState(checkedAsCheckState);
 }
 
-void ExperimentView::enablePolarizationCorrections() {
+void QExperimentView::enablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(true);
   m_ui.polCorrLabel->setEnabled(true);
 }
 
-void ExperimentView::disablePolarizationCorrections() {
+void QExperimentView::disablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(false);
   m_ui.polCorrLabel->setEnabled(false);
 }
 
-void ExperimentView::disableFloodCorrectionInputs() {
+void QExperimentView::disableFloodCorrectionInputs() {
   m_ui.floodWorkspaceWsSelector->setEnabled(false);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(false);
 }
 
-void ExperimentView::enableFloodCorrectionInputs() {
+void QExperimentView::enableFloodCorrectionInputs() {
   m_ui.floodWorkspaceWsSelector->setEnabled(true);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
 }
 
-void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {
+void QExperimentView::onPerAngleDefaultsChanged(int row, int column) {
   m_notifyee->notifyPerAngleDefaultsChanged(row, column);
 }
 
 /** Add a new row to the transmission runs table **/
-void ExperimentView::onNewPerThetaDefaultsRowRequested() {
+void QExperimentView::onNewPerThetaDefaultsRowRequested() {
   m_notifyee->notifyNewPerAngleDefaultsRequested();
 }
 
-void ExperimentView::addPerThetaDefaultsRow() {
+void QExperimentView::addPerThetaDefaultsRow() {
   auto newRowIndex = m_ui.optionsTable->rowCount();
   // Select the first cell in the new row
   m_ui.optionsTable->insertRow(newRowIndex);
@@ -450,19 +451,19 @@ void ExperimentView::addPerThetaDefaultsRow() {
   m_ui.optionsTable->setCurrentCell(newRowIndex, 0);
 }
 
-void ExperimentView::removePerThetaDefaultsRow(int rowIndex) {
+void QExperimentView::removePerThetaDefaultsRow(int rowIndex) {
   m_ui.optionsTable->removeRow(rowIndex);
 }
 
-std::string ExperimentView::getText(QLineEdit const &lineEdit) const {
+std::string QExperimentView::getText(QLineEdit const &lineEdit) const {
   return lineEdit.text().toStdString();
 }
 
-std::string ExperimentView::getText(QComboBox const &box) const {
+std::string QExperimentView::getText(QComboBox const &box) const {
   return box.currentText().toStdString();
 }
 
-QString ExperimentView::messageFor(
+QString QExperimentView::messageFor(
     InstrumentParameterTypeMissmatch const &typeError) const {
   return QString::fromStdString(typeError.parameterName()) +
          " should hold an " + QString::fromStdString(typeError.expectedType()) +
@@ -478,7 +479,7 @@ std::string toCsv(std::vector<T> const &values, StringConverter toString) {
   return boost::algorithm::join(valuesAsStrings, ", ");
 }
 
-QString ExperimentView::messageFor(
+QString QExperimentView::messageFor(
     std::vector<MissingInstrumentParameterValue> const &missingValues) const {
   auto missingNamesCsv = toCsv(
       missingValues,
@@ -491,7 +492,7 @@ QString ExperimentView::messageFor(
          " not set in the instrument parameter file but should be.\n";
 }
 
-void ExperimentView::showOptionLoadErrors(
+void QExperimentView::showOptionLoadErrors(
     std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
     std::vector<MissingInstrumentParameterValue> const &missingValues) {
   auto message = QString(
@@ -507,14 +508,14 @@ void ExperimentView::showOptionLoadErrors(
       this, "Failed to load one or more defaults from parameter file", message);
 }
 
-QLineEdit &ExperimentView::stitchOptionsLineEdit() const {
+QLineEdit &QExperimentView::stitchOptionsLineEdit() const {
   return *static_cast<QLineEdit *>(m_stitchEdit);
 }
 
 /** Creates hints for 'Stitch1DMany'
  * @param hints :: Hints as a map
  */
-void ExperimentView::createStitchHints(
+void QExperimentView::createStitchHints(
     const std::vector<MantidWidgets::Hint> &hints) {
 
   // We want to add the stitch params box next to the stitch
@@ -528,64 +529,64 @@ void ExperimentView::createStitchHints(
   m_ui.expSettingsGrid->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
 }
 
-std::string ExperimentView::getFloodCorrectionType() const {
+std::string QExperimentView::getFloodCorrectionType() const {
   return getText(*m_ui.floodCorComboBox);
 }
 
-void ExperimentView::setFloodCorrectionType(std::string const &type) {
+void QExperimentView::setFloodCorrectionType(std::string const &type) {
   setSelected(*m_ui.floodCorComboBox, type);
 }
 
-std::string ExperimentView::getFloodWorkspace() const {
+std::string QExperimentView::getFloodWorkspace() const {
   return getText(*m_ui.floodWorkspaceWsSelector);
 }
 
-void ExperimentView::setFloodWorkspace(std::string const &workspace) {
+void QExperimentView::setFloodWorkspace(std::string const &workspace) {
   setSelected(*m_ui.floodWorkspaceWsSelector, workspace);
 }
 
-std::string ExperimentView::getAnalysisMode() const {
+std::string QExperimentView::getAnalysisMode() const {
   return getText(*m_ui.analysisModeComboBox);
 }
 
-void ExperimentView::setAnalysisMode(std::string const &analysisMode) {
+void QExperimentView::setAnalysisMode(std::string const &analysisMode) {
   setSelected(*m_ui.analysisModeComboBox, analysisMode);
 }
 
-std::string ExperimentView::getSummationType() const {
+std::string QExperimentView::getSummationType() const {
   return getText(*m_ui.summationTypeComboBox);
 }
 
-void ExperimentView::setSummationType(std::string const &summationType) {
+void QExperimentView::setSummationType(std::string const &summationType) {
   return setSelected(*m_ui.summationTypeComboBox, summationType);
 }
 
-std::string ExperimentView::getReductionType() const {
+std::string QExperimentView::getReductionType() const {
   return getText(*m_ui.reductionTypeComboBox);
 }
 
-bool ExperimentView::getIncludePartialBins() const {
+bool QExperimentView::getIncludePartialBins() const {
   return m_ui.includePartialBinsCheckBox->isChecked();
 }
 
-void ExperimentView::setIncludePartialBins(bool enable) {
+void QExperimentView::setIncludePartialBins(bool enable) {
   setChecked(*m_ui.includePartialBinsCheckBox, enable);
 }
 
-bool ExperimentView::getDebugOption() const {
+bool QExperimentView::getDebugOption() const {
   return m_ui.debugCheckBox->isChecked();
 }
 
-void ExperimentView::setDebugOption(bool enable) {
+void QExperimentView::setDebugOption(bool enable) {
   setChecked(*m_ui.debugCheckBox, enable);
 }
 
-void ExperimentView::setReductionType(std::string const &reductionType) {
+void QExperimentView::setReductionType(std::string const &reductionType) {
   return setSelected(*m_ui.reductionTypeComboBox, reductionType);
 }
 
 std::string
-ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
+QExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
   if (maybeNullItem != nullptr) {
     return maybeNullItem->text().toStdString();
   } else {
@@ -597,7 +598,7 @@ ExperimentView::textFromCell(QTableWidgetItem const *maybeNullItem) const {
 // https://llvm.org/bugs/show_bug.cgi?id=21629
 GNU_DIAG_OFF("missing-braces")
 std::vector<PerThetaDefaults::ValueArray>
-ExperimentView::getPerAngleOptions() const {
+QExperimentView::getPerAngleOptions() const {
   auto const &table = *m_ui.optionsTable;
   auto rows = std::vector<PerThetaDefaults::ValueArray>();
   rows.reserve(table.rowCount());
@@ -613,7 +614,7 @@ ExperimentView::getPerAngleOptions() const {
 }
 GNU_DIAG_ON("missing-braces")
 
-void ExperimentView::setPerAngleOptions(
+void QExperimentView::setPerAngleOptions(
     std::vector<PerThetaDefaults::ValueArray> rows) {
   auto &table = *m_ui.optionsTable;
   table.blockSignals(true);
@@ -626,82 +627,82 @@ void ExperimentView::setPerAngleOptions(
   table.blockSignals(false);
 }
 
-void ExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
+void QExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
   m_ui.optionsTable->blockSignals(true);
   m_ui.optionsTable->item(row, column)->setBackground(QColor("#ffb8ad"));
   m_ui.optionsTable->blockSignals(false);
 }
 
-void ExperimentView::showPerAngleOptionsAsValid(int row) {
+void QExperimentView::showPerAngleOptionsAsValid(int row) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
     m_ui.optionsTable->item(row, column)->setBackground(Qt::transparent);
   m_ui.optionsTable->blockSignals(false);
 }
 
-double ExperimentView::getTransmissionStartOverlap() const {
+double QExperimentView::getTransmissionStartOverlap() const {
   return m_ui.startOverlapEdit->value();
 }
 
-void ExperimentView::setTransmissionStartOverlap(double start) {
+void QExperimentView::setTransmissionStartOverlap(double start) {
   m_ui.startOverlapEdit->setValue(start);
 }
 
-double ExperimentView::getTransmissionEndOverlap() const {
+double QExperimentView::getTransmissionEndOverlap() const {
   return m_ui.endOverlapEdit->value();
 }
 
-void ExperimentView::setTransmissionEndOverlap(double end) {
+void QExperimentView::setTransmissionEndOverlap(double end) {
   m_ui.endOverlapEdit->setValue(end);
 }
 
-std::string ExperimentView::getTransmissionStitchParams() const {
+std::string QExperimentView::getTransmissionStitchParams() const {
   return getText(*m_ui.transStitchParamsEdit);
 }
 
-void ExperimentView::setTransmissionStitchParams(std::string const &params) {
+void QExperimentView::setTransmissionStitchParams(std::string const &params) {
   setText(*m_ui.transStitchParamsEdit, params);
 }
 
-bool ExperimentView::getTransmissionScaleRHSWorkspace() const {
+bool QExperimentView::getTransmissionScaleRHSWorkspace() const {
   return m_ui.transScaleRHSCheckBox->isChecked();
 }
 
-void ExperimentView::setTransmissionScaleRHSWorkspace(bool enable) {
+void QExperimentView::setTransmissionScaleRHSWorkspace(bool enable) {
   setChecked(*m_ui.transScaleRHSCheckBox, enable);
 }
 
-void ExperimentView::showTransmissionRangeInvalid() {
+void QExperimentView::showTransmissionRangeInvalid() {
   showAsInvalid(*m_ui.startOverlapEdit);
   showAsInvalid(*m_ui.endOverlapEdit);
 }
 
-void ExperimentView::showTransmissionRangeValid() {
+void QExperimentView::showTransmissionRangeValid() {
   showAsValid(*m_ui.startOverlapEdit);
   showAsValid(*m_ui.endOverlapEdit);
 }
 
-void ExperimentView::showTransmissionStitchParamsValid() {
+void QExperimentView::showTransmissionStitchParamsValid() {
   showAsValid(*m_ui.transStitchParamsEdit);
 }
 
-void ExperimentView::showTransmissionStitchParamsInvalid() {
+void QExperimentView::showTransmissionStitchParamsInvalid() {
   showAsInvalid(*m_ui.transStitchParamsEdit);
 }
 
-void ExperimentView::setPolarizationCorrectionOption(bool enable) {
+void QExperimentView::setPolarizationCorrectionOption(bool enable) {
   setChecked(*m_ui.polCorrCheckBox, enable);
 }
 
-bool ExperimentView::getPolarizationCorrectionOption() const {
+bool QExperimentView::getPolarizationCorrectionOption() const {
   return m_ui.polCorrCheckBox->isChecked();
 }
 
-std::string ExperimentView::getStitchOptions() const {
+std::string QExperimentView::getStitchOptions() const {
   return getText(stitchOptionsLineEdit());
 }
 
-void ExperimentView::setStitchOptions(std::string const &stitchOptions) {
+void QExperimentView::setStitchOptions(std::string const &stitchOptions) {
   setText(stitchOptionsLineEdit(), stitchOptions);
 }
 

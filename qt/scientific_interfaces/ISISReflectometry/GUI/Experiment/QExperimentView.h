@@ -21,12 +21,12 @@ namespace CustomInterfaces {
 /** ExperiementView : Provides an interface for the "Experiement" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentView : public QWidget,
-                                                      public IExperimentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QExperimentView : public QWidget,
+                                                       public IExperimentView {
   Q_OBJECT
 public:
-  ExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
-                 QWidget *parent = nullptr);
+  QExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+                  QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
   void connectExperimentSettingsWidgets() override;
   void disconnectExperimentSettingsWidgets() override;

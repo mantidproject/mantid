@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
 
 #include "GUI/Event/QEventView.h"
-#include "GUI/Experiment/ExperimentView.h"
+#include "GUI/Experiment/QExperimentView.h"
 #include "GUI/Instrument/InstrumentView.h"
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
@@ -62,7 +62,7 @@ private:
   std::unique_ptr<RunsView> m_runs;
   std::unique_ptr<QEventView> m_eventHandling;
   std::unique_ptr<SaveView> m_save;
-  std::unique_ptr<ExperimentView> m_experiment;
+  std::unique_ptr<QExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 };

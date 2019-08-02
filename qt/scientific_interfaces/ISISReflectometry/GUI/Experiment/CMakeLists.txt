@@ -1,5 +1,5 @@
 set(EXPERIMENT_SRC_FILES
-    ExperimentView.cpp
+    QExperimentView.cpp
     ExperimentPresenter.cpp
     ExperimentOptionDefaults.cpp
     InvalidDefaultsError.cpp
@@ -10,10 +10,10 @@ set(EXPERIMENT_SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
 # find it.
-set(EXPERIMENT_INC_FILES ExperimentView.h ExperimentPresenter.h
+set(EXPERIMENT_INC_FILES QExperimentView.h ExperimentPresenter.h
                          IExperimentView.h)
 
-set(EXPERIMENT_MOC_FILES ExperimentView.h)
+set(EXPERIMENT_MOC_FILES QExperimentView.h)
 
 set(EXPERIMENT_UI_FILES ExperimentWidget.ui)
 
