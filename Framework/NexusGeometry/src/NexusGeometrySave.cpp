@@ -43,6 +43,15 @@ const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
 namespace NexusGeometrySave {
 
+// for ease of future addition of compatible file extensions
+const std::vector<std::string> exts = {".nxs", ".hdf5"};
+std::string stringOfValidExtensions() {
+  std::string str = "";
+  std::for_each(exts.begin(), exts.end(),
+                [&str](const std::string &s) { str += " " + s; });
+  return str;
+}
+
 // handles naming of groups for named and unnamed components for iterated and
 // single use case
 std::string groupName(const Geometry::ComponentInfo &compInfo,
@@ -171,24 +180,13 @@ bool isApproxZero(const std::vector<double> &data, const double &precision) {
 
 // overload. return true if vector is approx to zero
 bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
-  return data.isApprox(Eigen::Vector3d(0,0,0), precision);
+  return data.isApprox(Eigen::Vector3d(0, 0, 0), precision);
 }
 
 // overload. returns true is angle is approx to zero
 bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
-  return  data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
+  return data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
 }
-
-// overload. convert to Eigen to use isApprox member function
-bool isApproxZero(const Kernel::V3D  &data, const double &precision) {
-  return Kernel::toVector3d(data).isApprox(Eigen::Vector3d(0, 0, 0), precision);
-}
-
-// overload. convert to Eigen to use isApprox member function
-bool isApproxZero(const Kernel::Quat &data, const double &precision) {
-  return Kernel::toQuaterniond(data).isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
-}
-
 
 /*
  * Function: nxDetectorIndices. finds banks in component info and returns
@@ -711,7 +709,7 @@ void saveNXSource(const H5::Group &parentGroup,
   H5::Group transformations =
       simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  // Orientation is the default first dependency in the chain. first check
+  // self, ".", is the default first dependency in the chain. first check
   // translation in component is non-zero, and set dependency to location
   // if true and write location. Then check if orientation in component is
   // non-zero, replace dependency with orientation if true. If neither
@@ -765,7 +763,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   H5::Group transformations =
       simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  // Orientation is the default first dependency in the chain. first check
+  // self, ".", is the default first dependency in the chain. first check
   // translation in component is non-zero, and set dependency to location
   // if true and write location. Then check if orientation in component is
   // non-zero, replace dependency with orientation if true. If neither
@@ -813,7 +811,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   std::string dependency = NO_DEPENDENCY; // dependency initialiser
   std::string name = groupName(compInfo, groupType, index); // group name
 
-  bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
+  bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
   H5::Group childGroup = parentGroup.createGroup(name);
@@ -822,7 +820,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   H5::Group transformations =
       simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  // Orientation is the default first dependency in the chain. first check
+  // self, ".", is the default first dependency in the chain. first check
   // translation in component is non-zero, and set dependency to location
   // if true and write location. Then check if orientation in component is
   // non-zero, replace dependency with orientation if true. If neither
@@ -868,27 +866,36 @@ void saveInstrument(
         "The path provided for saving the file is invalid: " + fullPath + "\n");
   }
   const auto ext = boost::filesystem::path(tmp).extension();
-  if ((ext != ".nxs") && (ext != ".hdf5")) {
-    throw std::invalid_argument("invalid extension for file: " +
-                                ext.generic_string());
+  bool isValidExt =
+      std::any_of(exts.begin(), exts.end(), [&ext](const std::string &str) {
+        return ext.generic_string() == str;
+      });
+
+  if (!isValidExt) {
+    throw std::invalid_argument(
+        "invalid extension for file: " + ext.generic_string() +
+        ". Valid extensions are: " + stringOfValidExtensions());
   }
   if (reporter != nullptr) {
     reporter->report();
   }
   if (!compInfo.hasDetectorInfo()) {
-    throw std::invalid_argument("The component has no detector info.\n");
+    throw std::invalid_argument(
+        "No detector info was found in the Instrument cache.\n");
   }
   if (!compInfo.hasSample()) {
 
-    throw std::invalid_argument("The component has no sample.\n");
+    throw std::invalid_argument(
+        "No sample was found in the Instrument cache.\n");
   }
 
   if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    throw std::invalid_argument("The sample is not at the origin.\n");
+    throw std::invalid_argument(
+        "The sample posiiton is required to be at the origin.\n");
   }
 
   if (!compInfo.hasSource()) {
-    throw std::invalid_argument("The component has no source.");
+    throw std::invalid_argument("No source was found in the Instrument cache.");
   }
 
   // open file
