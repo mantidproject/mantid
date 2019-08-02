@@ -9,7 +9,8 @@
 
 #include "BatchJobRunnerTest.h"
 
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 
 class BatchJobRunnerProgressBarTest : public CxxTest::TestSuite,
                                       public BatchJobRunnerTest {

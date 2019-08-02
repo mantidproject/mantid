@@ -16,7 +16,7 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::_;
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace ModelCreationHelper;
 
 class MockModificationListener {

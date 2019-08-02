@@ -11,7 +11,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
