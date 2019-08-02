@@ -54,37 +54,37 @@ std::string groupName(const Geometry::ComponentInfo &compInfo,
     std::string name =
         nameInCache == "" ? "unspecified_instrument" : nameInCache;
     return name;
-  }
+  } else
 
-  if (groupType == NXclass::NXsample) {
+      if (groupType == NXclass::NXsample) {
     std::string nameInCache = compInfo.name(compInfo.sample());
     std::string name = nameInCache == "" ? "unspecified_sample" : nameInCache;
     return name;
-  }
+  } else
 
-  if (groupType == NXclass::NXdetector) {
+      if (groupType == NXclass::NXdetector) {
     std::string nameInCache = compInfo.name(iterator);
     std::string name = nameInCache == ""
                            ? "unspecified_detector_" + std::to_string(iterator)
                            : nameInCache;
     return name;
-  }
+  } else
 
-  if (groupType == NXclass::NXmonitor) {
+      if (groupType == NXclass::NXmonitor) {
     std::string nameInCache = compInfo.name(iterator);
     std::string name = nameInCache == ""
                            ? "unspecified_monitor_" + std::to_string(iterator)
                            : nameInCache;
     return name;
-  }
+  } else
 
-  if (groupType == NXclass::NXsource) {
+      if (groupType == NXclass::NXsource) {
     std::string nameInCache = compInfo.name(compInfo.source());
     std::string name = nameInCache == "" ? "unspecified_source" : nameInCache;
     return name;
-  }
+  } else
 
-  return "";
+    return "";
 }
 
 /*
