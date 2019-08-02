@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class RunsPresenterFactory {
 public:
@@ -44,6 +45,7 @@ private:
   IMessageHandler *m_messageHandler;
   IPythonRunner *m_pythonRunner;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_RUNSPRESENTERFACTORY_H

@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
                                  int defaultInstrumentIndex)
@@ -314,5 +315,6 @@ int RunsTableViewFactory::defaultInstrumentFromConfig() const {
   return indexOfElseFirst(Mantid::Kernel::ConfigService::Instance().getString(
       "default.instrument"));
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

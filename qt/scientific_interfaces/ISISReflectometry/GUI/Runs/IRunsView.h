@@ -23,6 +23,7 @@ class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /**
 IRunsView is the base view class for the Reflectometry "Runs"
@@ -107,6 +108,7 @@ public:
   virtual void startMonitor() = 0;
   virtual void stopMonitor() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H */

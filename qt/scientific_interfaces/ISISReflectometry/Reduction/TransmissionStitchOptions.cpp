@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 TransmissionStitchOptions::TransmissionStitchOptions()
     : m_overlapRange(boost::none), m_rebinParameters(), m_scaleRHS(false) {}
@@ -39,5 +40,6 @@ bool operator!=(TransmissionStitchOptions const &lhs,
                 TransmissionStitchOptions const &rhs) {
   return !(lhs == rhs);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

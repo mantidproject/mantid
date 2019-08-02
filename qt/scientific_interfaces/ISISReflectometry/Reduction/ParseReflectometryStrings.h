@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::vector<std::string>>
 parseRunNumbers(std::string const &runNumbers);
@@ -52,6 +53,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<boost::optional<std::string>>
 parseProcessingInstructions(std::string const &instructions);
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGS_H_

@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class OptionDefaults
 
@@ -78,6 +79,7 @@ T OptionDefaults::getValue(std::string const &propertyName,
   return Mantid::API::checkForMandatoryInstrumentDefault<T>(
       m_algorithm.get(), propertyName, m_instrument, parameterName);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_OPTIONDEFAULTS_H

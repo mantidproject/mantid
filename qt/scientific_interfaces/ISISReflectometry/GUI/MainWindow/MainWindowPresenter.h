@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IMainWindowView;
 class IMessageHandler;
@@ -52,6 +53,7 @@ private:
   BatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_MAINWINDOWPRESENTER_H */

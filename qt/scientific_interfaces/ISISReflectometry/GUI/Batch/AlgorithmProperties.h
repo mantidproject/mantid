@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 namespace AlgorithmProperties {
 
 using AlgorithmRuntimeProps = std::map<std::string, std::string>;
@@ -61,6 +62,7 @@ void update(std::string const &property, std::vector<VALUE_TYPE> const &values,
   update(property, value, properties);
 }
 } // namespace AlgorithmProperties
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

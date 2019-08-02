@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param parent :: The parent of this view
@@ -288,5 +289,6 @@ void QtSaveView::cannotSaveWorkspaces() {
 void QtSaveView::cannotSaveWorkspaces(std::string const &fullError) {
   error("Error", fullError);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

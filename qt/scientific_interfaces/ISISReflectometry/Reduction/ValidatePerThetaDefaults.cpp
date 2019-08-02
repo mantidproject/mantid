@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename T>
 class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
@@ -130,5 +131,6 @@ validatePerThetaDefaults(CellText const &cells) {
   auto validate = PerThetaDefaultsValidator();
   return validate(cells);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

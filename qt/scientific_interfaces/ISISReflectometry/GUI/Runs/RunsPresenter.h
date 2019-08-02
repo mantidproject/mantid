@@ -29,6 +29,7 @@ class ProgressableView;
 } // namespace MantidWidgets
 
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 // Forward decs
 class IMessageHandler;
@@ -179,6 +180,7 @@ private:
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H */

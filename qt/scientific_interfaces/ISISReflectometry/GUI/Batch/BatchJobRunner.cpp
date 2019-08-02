@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace { // unnamed
 
@@ -294,5 +295,6 @@ void BatchJobRunner::notifyAllWorkspacesDeleted() {
   // All output workspaces will be deleted so reset all rows and groups
   m_batch.resetState();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

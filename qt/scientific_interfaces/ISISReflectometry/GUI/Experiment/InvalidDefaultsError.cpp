@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 InvalidDefaultsError::InvalidDefaultsError( // cppcheck-suppress passedByValue
     int row, std::vector<int> invalidColumns)
@@ -28,5 +29,6 @@ bool operator!=(InvalidDefaultsError const &lhs,
                 InvalidDefaultsError const &rhs) {
   return !(lhs == rhs);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

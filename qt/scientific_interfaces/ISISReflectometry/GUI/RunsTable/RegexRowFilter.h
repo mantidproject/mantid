@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class RegexFilter : public MantidQt::MantidWidgets::Batch::RowPredicate {
 public:
@@ -37,6 +38,7 @@ std::unique_ptr<RegexFilter>
 filterFromRegexString(std::string const &regex,
                       MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
                       ReductionJobs const &jobs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsTableValidationError {
 public:
@@ -28,6 +29,7 @@ private:
   boost::optional<ThetaValuesValidationError> m_fullTableError;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATIONERROR_H

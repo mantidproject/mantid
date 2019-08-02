@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}
 
@@ -156,5 +157,6 @@ Clipboard::mutableSubtreeRoots() {
 bool containsGroups(Clipboard const &clipboard) {
   return containsGroups(clipboard.subtreeRoots());
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

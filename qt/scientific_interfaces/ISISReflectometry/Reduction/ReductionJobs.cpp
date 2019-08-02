@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs,
@@ -331,5 +332,6 @@ bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) {
 bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) {
   return lhs.groups() == rhs.groups();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

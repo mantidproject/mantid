@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class Item;
 
@@ -26,6 +27,7 @@ public:
   virtual void updateItem() = 0;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

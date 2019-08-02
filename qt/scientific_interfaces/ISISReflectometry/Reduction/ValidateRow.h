@@ -16,6 +16,7 @@
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class RowValidator
 
@@ -49,6 +50,7 @@ RowValidationResult validateRow(std::vector<std::string> const &cellText);
 
 boost::optional<Row> validateRowFromRunAndTheta(std::string const &run,
                                                 std::string const &theta);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

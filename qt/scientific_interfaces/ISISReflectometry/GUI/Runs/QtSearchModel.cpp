@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 using namespace Mantid::API;
 
 namespace { // unnamed
@@ -217,5 +218,6 @@ bool QtSearchModel::runHasError(const SearchResult &run) const {
 SearchResult const &QtSearchModel::getRowData(int index) const {
   return m_runDetails[index];
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

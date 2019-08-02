@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 namespace ModelCreationHelper {
 
 /* Helper methods to create reduction configuration models for the
@@ -90,6 +91,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL DetectorCorrections makeDetectorCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL Instrument makeInstrument();
 MANTIDQT_ISISREFLECTOMETRY_DLL Instrument makeEmptyInstrument();
 } // namespace ModelCreationHelper
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_MODELCREATIONHELPER_H_

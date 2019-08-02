@@ -22,6 +22,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class QtBatchView : public QWidget, public IBatchView {
   Q_OBJECT
@@ -66,6 +67,7 @@ private:
   std::unique_ptr<QtInstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTBATCHVIEW_H */

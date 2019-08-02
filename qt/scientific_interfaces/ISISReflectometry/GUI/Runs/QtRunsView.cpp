@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::Icons;
@@ -404,5 +405,6 @@ void QtRunsView::startTimer(const int millisecs) {
 /** stop
  */
 void QtRunsView::stopTimer() { m_timer.stop(); }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

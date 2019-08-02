@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using API::BatchAlgorithmRunner;
 using Mantid::API::IAlgorithm_sptr;
@@ -135,5 +136,6 @@ IAlgorithm_sptr QtBatchView::createReductionAlg() {
 std::unique_ptr<QtSaveView> QtBatchView::createSaveTab() {
   return std::make_unique<QtSaveView>(this);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

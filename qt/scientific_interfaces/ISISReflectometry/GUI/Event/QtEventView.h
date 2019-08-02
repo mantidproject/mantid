@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** QtEventView : Provides an interface for the "Event Handling" widget
 in
@@ -79,6 +80,7 @@ private:
   EventViewSubscriber *m_notifyee;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

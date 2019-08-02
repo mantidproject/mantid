@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 enum ColumnNumber {
@@ -145,5 +146,6 @@ boost::optional<Row> validateRowFromRunAndTheta(std::string const &run,
   std::vector<std::string> cells = {run, theta, "", "", "", "", "", "", ""};
   return validateRow(cells).validElseNone();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

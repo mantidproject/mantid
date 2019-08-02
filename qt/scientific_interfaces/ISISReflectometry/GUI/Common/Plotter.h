@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 class IPythonRunner;
 #endif
@@ -36,6 +37,7 @@ private:
 #endif
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL SaveViewSubscriber {
 public:
@@ -71,6 +72,7 @@ public:
   virtual void cannotSaveWorkspaces() = 0;
   virtual void cannotSaveWorkspaces(std::string const &fullError) = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_ISAVEVIEW_H */
