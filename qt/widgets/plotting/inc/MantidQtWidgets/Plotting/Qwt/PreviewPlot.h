@@ -110,6 +110,8 @@ public:
 
   QString getAxisType(int axisID);
 
+  void disableYAxisMenu();
+
 signals:
   /// Signals that the plot should be refreshed
   void needToReplot();

@@ -97,7 +97,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
     connect(xAxisTypeAction, SIGNAL(triggered()), this,
             SLOT(handleAxisTypeSelect()));
 
-  // Create the X axis type list for context menu
+  // Create the Y axis type list for context menu
   m_yAxisTypeGroup = new QActionGroup(m_contextMenu);
   m_yAxisTypeGroup->setExclusive(true);
 
@@ -986,4 +986,12 @@ void PreviewPlot::handleAxisTypeSelect() {
 
   // Update the plot
   emit needToHardReplot();
+}
+
+/**
+ * Removes the Y-Axis option from the context menu as the Sample Transmission
+ * Calculator does not need it.
+ */
+void PreviewPlot::disableYAxisMenu() {
+  m_contextMenu->actions().at(4)->setVisible(false);
 }
