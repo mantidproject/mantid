@@ -7,7 +7,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
 #define MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
 
-#include "GUI/Event/EventView.h"
+#include "GUI/Event/QEventView.h"
 #include "GUI/Experiment/ExperimentView.h"
 #include "GUI/Instrument/InstrumentView.h"
 #include "GUI/Runs/RunsView.h"
@@ -54,13 +54,13 @@ private:
   void connectBatchAlgoRunnerSlots();
 
   std::unique_ptr<RunsView> createRunsTab();
-  std::unique_ptr<EventView> createEventTab();
+  std::unique_ptr<QEventView> createEventTab();
   std::unique_ptr<SaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
   BatchViewSubscriber *m_notifyee;
   std::unique_ptr<RunsView> m_runs;
-  std::unique_ptr<EventView> m_eventHandling;
+  std::unique_ptr<QEventView> m_eventHandling;
   std::unique_ptr<SaveView> m_save;
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;

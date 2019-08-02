@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QBatchView.h"
-#include "GUI/Event/EventView.h"
+#include "GUI/Event/QEventView.h"
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -122,8 +122,8 @@ std::unique_ptr<RunsView> QBatchView::createRunsTab() {
   return std::make_unique<RunsView>(this, RunsTableViewFactory(instruments));
 }
 
-std::unique_ptr<EventView> QBatchView::createEventTab() {
-  return std::make_unique<EventView>(this);
+std::unique_ptr<QEventView> QBatchView::createEventTab() {
+  return std::make_unique<QEventView>(this);
 }
 
 IAlgorithm_sptr QBatchView::createReductionAlg() {

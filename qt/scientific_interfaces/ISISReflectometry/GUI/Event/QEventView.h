@@ -15,15 +15,15 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** EventView : Provides an interface for the "Event Handling" widget
+/** QEventView : Provides an interface for the "Event Handling" widget
 in
 the ISIS Reflectometry interface.
 */
-class EventView : public QWidget, public IEventView {
+class QEventView : public QWidget, public IEventView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit EventView(QWidget *parent = nullptr);
+  explicit QEventView(QWidget *parent = nullptr);
   /// Returns time-slicing values
   void initUniformSliceTypeLayout();
   void initUniformEvenSliceTypeLayout();
