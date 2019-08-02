@@ -64,6 +64,7 @@ window_180_280_params = {
 }
 
 file_names = {
+    "vanadium_peaks_masking_file": "VanaPeaks.dat",
     "grouping_file_name": "hrpd_new_072_01_corr.cal"
 }
 

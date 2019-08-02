@@ -149,12 +149,6 @@ class HRPD(AbstractInst):
             max_crop = middle + right_crop
             mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
 
-    def _spline_vanadium_ws(self, focused_vanadium_banks, instrument_version=''):
-        spline_coeff = self._inst_settings.spline_coeff
-        output = hrpd_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_banks,
-                                                         spline_number=spline_coeff)
-        return output
-
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(
             advanced_config=hrpd_advanced_config.get_tof_window_dict(tof_window=tof_window))
