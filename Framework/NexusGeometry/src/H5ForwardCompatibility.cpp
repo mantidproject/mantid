@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
+#include <string>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -14,7 +15,9 @@ namespace H5ForwardCompatibility {
 
 /*
  * Function "getObjName"
- * Ported from newer versions of the HDF API for forward compatibility.
+ * Ported from newer versions of the HDF API for forward compatibility to
+ * support HDF5 version < 1.8.13
+ * https://portal.hdfgroup.org/display/HDF5/Software+Changes+from+Release+to+Release+for+HDF5-1.8
  */
 
 ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
