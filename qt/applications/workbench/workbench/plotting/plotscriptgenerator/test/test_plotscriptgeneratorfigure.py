@@ -15,21 +15,20 @@ from workbench.plotting.plotscriptgenerator.figure import (
 
 class PlotScriptGeneratorFigureTest(unittest.TestCase):
 
+    def setUp(self):
+        self.mock_figure = MagicMock(get_figwidth=lambda: 10,
+                                     get_figheight=lambda: 7,
+                                     dpi=111)
+
     def test_get_figure_command_kwargs_returns_correct_dict(self):
-        mock_figure = MagicMock(get_figwidth=lambda: 10,
-                                get_figheight=lambda: 7,
-                                dpi=111)
         expected_dict = {'figsize': (10, 7), 'dpi': 111}
         self.assertEqual(expected_dict,
-                         get_figure_command_kwargs(mock_figure))
+                         get_figure_command_kwargs(self.mock_figure))
 
     def test_generate_figure_command_returns_correct_string(self):
-        mock_figure = MagicMock(get_figwidth=lambda: 10,
-                                get_figheight=lambda: 7,
-                                dpi=111)
         expected_command = "plt.figure(dpi=111, figsize=(10, 7))"
         self.assertEqual(expected_command,
-                         generate_figure_command(mock_figure))
+                         generate_figure_command(self.mock_figure))
 
 
 if __name__ == '__main__':

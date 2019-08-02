@@ -20,28 +20,25 @@ from workbench.plotting.plotscriptgenerator.axes import (
 
 class PlotScriptGeneratorAxesTest(unittest.TestCase):
 
+    def setUp(self):
+        self.kwargs = {
+            'projection': 'mantid', 'visible': False, 'xscale': 'log',
+            'frame_on': False, 'xlim': (0.1, 1.1), 'yscale': 'linear',
+            'ylim': (0.1, 1.1), 'sharex': None, 'sharey': None,
+            'title': 'myPlot'}
+        fig = plt.figure()
+        self.ax = fig.add_subplot(2, 2, 1, **self.kwargs)
+
     def tearDown(self):
         plt.close()
 
     def test_get_add_subplot_kwargs_returns_correct_dict(self):
-        input_kwargs = {
-            'projection': 'mantid', 'visible': False, 'xscale': 'log',
-            'frame_on': False, 'xlim': (0.1, 1.1), 'yscale': 'linear',
-            'ylim': (0.1, 1.1), 'sharex': True, 'sharey': None
-        }
-        fig, ax = plt.subplots(subplot_kw=input_kwargs)
-        output_kwargs = get_add_subplot_kwargs(ax)
-        for key, value in input_kwargs.items():
+        output_kwargs = get_add_subplot_kwargs(self.ax)
+        for key, value in self.kwargs.items():
             self.assertEqual(output_kwargs[key], value)
 
     def test_generate_add_subplot_command_returns_correct_string(self):
-        kwargs = {
-            'projection': 'mantid', 'visible': False, 'xscale': 'log',
-            'frame_on': False, 'xlim': (0.1, 1.1), 'yscale': 'linear',
-            'ylim': (0.1, 1.1), 'title': 'myPlot'}
-        fig = plt.figure()
-        ax = fig.add_subplot(2, 2, 1, **kwargs)
-        code = generate_add_subplot_command(ax)
+        code = generate_add_subplot_command(self.ax)
         expected = ("add_subplot(2, 2, 1, frame_on=False, label='', "
                     "projection='mantid', sharex=None, sharey=None, title='myPlot', "
                     "visible=False, xlabel='', xlim=(0.1, 1.1), xscale='log', "
