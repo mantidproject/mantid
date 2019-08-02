@@ -300,24 +300,34 @@ bool isApproxZero(const std::vector<double> &data, const double &precision,
 }
 
 /*
- * Function: nxDetectorIndices. finds any banks in component info and returns
+ * Function: nxDetectorIndices. finds banks in component info and returns
  * all indexes found.
  *
  * @param compInfo : Mantid::Geometry::ComponentInfo object.
  * @return std::vector<size_t> container with all indices in compInfo found to
  * be a detector bank
  */
-std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
+std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo,
+                                      const Geometry::DetectorInfo &detInfo) {
 
   std::vector<size_t> banksInComponent;
   for (size_t index = compInfo.root() - 1; index > 0; --index) {
-    if (Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, index)) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo,
+                                                           index)) {
       banksInComponent.push_back(index);
     }
   }
   return banksInComponent;
 }
 
+/*
+ * Function: nxMonitorIndices. finds monitors in component info and returns
+ * all indexes found.
+ *
+ * @param compInfo : Mantid::Geometry::ComponentInfo object.
+ * @return std::vector<size_t> container with all indices in compInfo found to
+ * be a monitor
+ */
 std::vector<size_t> nxMonitorIndices(const Geometry::DetectorInfo &detInfo) {
 
   std::vector<size_t> monitorsInComponent;
@@ -477,7 +487,7 @@ inline void writeXYZPixeloffset(H5::Group &grp,
 void writeNXDetectorNumber(H5::Group &grp,
                            const Geometry::ComponentInfo &compInfo,
                            const std::vector<int> &detectorIDs,
-                           const size_t &idx) {
+                           const size_t idx) {
 
   H5::DataSet detectorNumber;
 
@@ -517,7 +527,7 @@ void writeNXDetectorNumber(H5::Group &grp,
 void writeNXMonitorNumber(H5::Group &grp,
                           const Geometry::ComponentInfo &compInfo,
                           const std::vector<int> &monitorIDs,
-                          const size_t &idx) {
+                          const size_t idx) {
 
   // these DataSets are duplicates of each other. written to the NXmonitor group
   // to handle the naming inconsistency. probably temporary.
@@ -845,7 +855,7 @@ void saveNXSource(const H5::Group &parentGroup,
  */
 void saveNXMonitor(const H5::Group &parentGroup,
                    const Geometry::ComponentInfo &compInfo,
-                   const Geometry::DetectorInfo &detInfo, const size_t &index) {
+                   const Geometry::DetectorInfo &detInfo, const size_t index) {
 
   NXclass groupType = NXclass::NXmonitor;
 
@@ -904,8 +914,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
  */
 void saveNXDetector(const H5::Group &parentGroup,
                     const Geometry::ComponentInfo &compInfo,
-                    const Geometry::DetectorInfo &detInfo,
-                    const size_t &index) {
+                    const Geometry::DetectorInfo &detInfo, const size_t index) {
 
   NXclass groupType = NXclass::NXdetector;
 
@@ -1002,7 +1011,7 @@ void saveInstrument(
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
-  std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
+  std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo, detInfo);
   std::vector<size_t> nxMonitors = nxMonitorIndices(detInfo);
   H5::Group rootGroup, instrument;
 

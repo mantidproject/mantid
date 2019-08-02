@@ -127,10 +127,6 @@ public:
     return child;
   }
 
-  // check if nx transformations writtern to group properly.
-  // void canGetTransformations(H5::H5File &file, std::string &groupName) {
-  //}
-
   // moves down the index through groups starting at root, and if
   // child has expected CLASS_TYPE, and is in parent group with expected parent
 
@@ -473,14 +469,6 @@ out from memory to file. Included also are tests that document the behaviour
 when a valid (.nxs, .hdf5 ) or invalid output file extension is attempted to
 used.
 
-LIST:
-
-* test providing invalid path throws
-* test progress reporting
-* test false file extension throws
-* test instrument without sample throws
-* test instrument without source throws
-
 ====================================================================
 */
 
@@ -592,14 +580,6 @@ LIST:
  compliant to the present Nexus standard as of the date corresponding to the
  latest version of this document.
 
- LIST:
-
- * test root group is NXentry class
- * test NXinstrument group exists in root group
- * test NXinstrument has expected name
- * test NXsource group exists and is in NXinstrument group
- * test NXsample group exists and is in NXentry group
-
  ====================================================================
  */
 
@@ -702,31 +682,6 @@ transformations in ComponentInfo and DetectorInfo, SaveInstrument will generate
 rotations/translations, and pixel offsets in any 'NXdetector' or 'NXmonitor'
 found in the Instrument cache.
 
-LIST(S):
-
-* test when NXdetector groups have NXtransformations, 'transformation_type' is
-specified for all
-* test when NXmonitor groups have NXtransformations, 'transformation_type' is
-specified for all
-*  test when NXsource group has NXtransformations, 'transformation_type' is
-specified
-* test x/y/z pixel offset in file is relative position from bank without
-rotation
-
-* test rotation of NXdetector written to file is same as in component info.
-* test rotation of NXmonitor written to file is same as in component info.
-* test rotation of source written to file is same as in component info.
-
-LOCATION TESTS:
-* test NXmonitor location not written when is at origin
-* test NXdetector location not written when is at origin
-* test NXsource location not written when is at origin
-
-ROTATION TESTS
-* test NXdetector rotation not written when is zero
-* test NXmonitor rotation not written when is zero
-* test NXsource rotation not written when is zero
-
 ====================================================================
 */
 
@@ -745,6 +700,7 @@ ROTATION TESTS
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
     auto &compInfo = (*instr.first);
+    auto &detInfo = (*instr.second);
 
     auto instrName = compInfo.name(compInfo.root());
 
@@ -752,7 +708,8 @@ ROTATION TESTS
 
     for (size_t i = compInfo.root() - 1; i > 0; --i) {
 
-      if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo, i)) {
+      if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(
+              compInfo, detInfo, i)) {
 
         fullH5Path path = {DEFAULT_ROOT_PATH, instrName, compInfo.name(i),
                            TRANSFORMATIONS};
@@ -878,6 +835,7 @@ ROTATION TESTS
             detPosition);         // detector position
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
     auto &compInfo = (*instr.first);
+    auto &detInfo = (*instr.second);
 
     // saveinstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -891,8 +849,8 @@ ROTATION TESTS
 
     for (size_t idx = compInfo.root() - 1; idx > 0; --idx) {
 
-      if (Mantid::Geometry::ComponentInfoBankHelpers::isAnyBank(compInfo,
-                                                                idx)) {
+      if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(
+              compInfo, detInfo, idx)) {
         auto childrenDetectors = compInfo.detectorsInSubtree(idx);
 
         // get specific bank group name to access H5 group in test utility
@@ -1325,14 +1283,6 @@ ROTATION TESTS
   DESCRIPTION:
 
   LIST IN DESCENDING ORDER:
-
-  * test when location is not written and orientation exists, dependency
-  is 'orientation' path and orientation is self dependent.
-  * test when orientation is not written and location exists, dependency
-  is 'location' path and location is self dependent.
-  * test when both orientation and location are written, dependency
-  chain is: => orientation => location => self dependent.
-  * test when neither orientation nor location are written, dependency is self.
 
   ====================================================================
   */

@@ -1021,10 +1021,8 @@ public:
   void test_output_workspace_contains_instrument_with_expected_name() {
     LoadEmptyInstrument alg;
     alg.setChild(true);
-
     const std::string inputFile =
         "unit_testing/SMALLFAKE_example_geometry.hdf5";
-
     alg.initialize();
     alg.setPropertyValue("Filename", inputFile);
     alg.setPropertyValue("OutputWorkspace", "dummy");
