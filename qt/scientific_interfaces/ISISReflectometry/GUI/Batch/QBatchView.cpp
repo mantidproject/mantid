@@ -46,7 +46,7 @@ void QBatchView::initLayout() {
   m_experiment = std::make_unique<QExperimentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_experiment.get(), "Experiment Settings");
 
-  m_instrument = std::make_unique<InstrumentView>(createReductionAlg(), this);
+  m_instrument = std::make_unique<QInstrumentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
 
   m_save = createSaveTab();

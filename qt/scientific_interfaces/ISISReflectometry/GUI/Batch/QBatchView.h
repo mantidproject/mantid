@@ -9,7 +9,7 @@
 
 #include "GUI/Event/QEventView.h"
 #include "GUI/Experiment/QExperimentView.h"
-#include "GUI/Instrument/InstrumentView.h"
+#include "GUI/Instrument/QInstrumentView.h"
 #include "GUI/Runs/RunsView.h"
 #include "GUI/Save/SaveView.h"
 #include "IBatchView.h"
@@ -63,7 +63,7 @@ private:
   std::unique_ptr<QEventView> m_eventHandling;
   std::unique_ptr<SaveView> m_save;
   std::unique_ptr<QExperimentView> m_experiment;
-  std::unique_ptr<InstrumentView> m_instrument;
+  std::unique_ptr<QInstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 };
 } // namespace CustomInterfaces

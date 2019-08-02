@@ -17,15 +17,15 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** InstrumentView : Provides an interface for the "Instrument" tab in the
+/** QInstrumentView : Provides an interface for the "Instrument" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentView : public QWidget,
-                                                      public IInstrumentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QInstrumentView : public QWidget,
+                                                       public IInstrumentView {
   Q_OBJECT
 public:
-  InstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
-                 QWidget *parent = nullptr);
+  QInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+                  QWidget *parent = nullptr);
   void subscribe(InstrumentViewSubscriber *notifyee) override;
   void connectInstrumentSettingsWidgets() override;
   void disconnectInstrumentSettingsWidgets() override;
