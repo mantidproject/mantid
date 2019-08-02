@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
 #define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/BatchJobRunner.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
