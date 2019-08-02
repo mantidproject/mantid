@@ -17,12 +17,12 @@ public:
   SearchResult(const std::string &runNumber, const std::string &desc,
                const std::string &loc);
 
-  std::string runNumber() const;
-  std::string description() const;
-  std::string location() const;
-  std::string error() const;
-  std::string groupName() const;
-  std::string theta() const;
+  const std::string &runNumber() const;
+  const std::string &description() const;
+  const std::string &location() const;
+  const std::string &error() const;
+  const std::string &groupName() const;
+  const std::string &theta() const;
   void setError(std::string const &error);
 
 private:

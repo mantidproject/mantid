@@ -30,17 +30,17 @@ void SearchResult::parseMetadata() {
   }
 }
 
-std::string SearchResult::runNumber() const { return m_runNumber; }
+const std::string &SearchResult::runNumber() const { return m_runNumber; }
 
-std::string SearchResult::description() const { return m_description; }
+const std::string &SearchResult::description() const { return m_description; }
 
-std::string SearchResult::location() const { return m_location; }
+const std::string &SearchResult::location() const { return m_location; }
 
-std::string SearchResult::error() const { return m_error; }
+const std::string &SearchResult::error() const { return m_error; }
 
-std::string SearchResult::groupName() const { return m_groupName; }
+const std::string &SearchResult::groupName() const { return m_groupName; }
 
-std::string SearchResult::theta() const { return m_theta; }
+const std::string &SearchResult::theta() const { return m_theta; }
 
 void SearchResult::setError(std::string const &error) { m_error = error; }
 
