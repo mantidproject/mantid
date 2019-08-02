@@ -65,6 +65,7 @@ set(TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
+    test/ISISReflectometry/Runs/SearchResultTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
 )
