@@ -17,8 +17,6 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 
-#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
-#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
 #include <string>

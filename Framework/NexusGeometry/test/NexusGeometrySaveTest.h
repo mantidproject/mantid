@@ -8,11 +8,13 @@
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -34,6 +36,8 @@ using namespace Mantid::NexusGeometry;
 //---------------------------------------------------------------
 namespace {
 
+const std::string DEFAULT_ROOT_PATH = "raw_data_1";
+
 typedef std::vector<std::string> fullH5Path;
 
 // get path as string. Used for the dependency tests.
@@ -44,38 +48,6 @@ std::string toH5PathString(fullH5Path &path) {
   }
   return pathString;
 }
-
-const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
-const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
-
-const std::string SHORT_NAME = "short_name";
-const std::string NX_CLASS = "NX_class";
-const std::string NX_ENTRY = "NXentry";
-const std::string NX_INSTRUMENT = "NXinstrument";
-const std::string NX_SOURCE = "NXsource";
-const std::string NX_SAMPLE = "NXsample";
-const std::string SHAPE = "shape";
-
-const std::string NX_TRANSFORMATIONS = "NXtransformations";
-const std::string NX_CHAR = "NX_CHAR";
-
-const std::string TRANSFORMATION_TYPE = "transformation_type";
-const std::string ROTATION = "rotation";
-const std::string TRANSLATION = "translation";
-const std::string TRANSFORMATIONS = "transformations";
-const std::string VECTOR = "vector";
-const std::string LOCATION = "location";
-const std::string DEPENDS_ON = "depends_on";
-const std::string ORIENTATION = "orientation";
-const std::string UNITS = "units";
-const std::string METRES = "m";
-const std::string NAME = "name";
-const std::string X_PIXEL_OFFSET = "x_pixel_offset";
-const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
-const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
-const std::string SELF_DEPENDENT = ".";
-
-const std::string DEFAULT_ROOT_PATH = "raw_data_1";
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
@@ -708,8 +680,8 @@ found in the Instrument cache.
 
     for (size_t i = compInfo.root() - 1; i > 0; --i) {
 
-      if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(
-              compInfo, detInfo, i)) {
+      if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo,
+                                                                     i)) {
 
         fullH5Path path = {DEFAULT_ROOT_PATH, instrName, compInfo.name(i),
                            TRANSFORMATIONS};
@@ -849,8 +821,8 @@ found in the Instrument cache.
 
     for (size_t idx = compInfo.root() - 1; idx > 0; --idx) {
 
-      if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(
-              compInfo, detInfo, idx)) {
+      if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo,
+                                                                     idx)) {
         auto childrenDetectors = compInfo.detectorsInSubtree(idx);
 
         // get specific bank group name to access H5 group in test utility
@@ -1332,7 +1304,7 @@ found in the Instrument cache.
         DEPENDS_ON, toH5PathString(transformationsPath) + "/" + ORIENTATION,
         sourcePath);
     bool orientationDependencyIsSelf = tester.hasAttributeInDataSet(
-        ORIENTATION, DEPENDS_ON, SELF_DEPENDENT, transformationsPath);
+        ORIENTATION, DEPENDS_ON, NO_DEPENDENCY, transformationsPath);
 
     TS_ASSERT(sourceDependencyIsOrientation);
     TS_ASSERT(orientationDependencyIsSelf);
@@ -1384,7 +1356,7 @@ found in the Instrument cache.
         DEPENDS_ON, toH5PathString(transformationsPath) + "/" + LOCATION,
         sourcePath);
     bool locationDependencyIsSelf = tester.hasAttributeInDataSet(
-        LOCATION, DEPENDS_ON, SELF_DEPENDENT, transformationsPath);
+        LOCATION, DEPENDS_ON, NO_DEPENDENCY, transformationsPath);
 
     TS_ASSERT(sourceDependencyIsLocation);
     TS_ASSERT(locationDependencyIsSelf);
@@ -1435,7 +1407,7 @@ found in the Instrument cache.
         DEPENDS_ON, toH5PathString(transformationsPath) + "/" + LOCATION,
         sourcePath);
     bool locationDependencyIsSelf = tester.hasAttributeInDataSet(
-        LOCATION, DEPENDS_ON, SELF_DEPENDENT, transformationsPath);
+        LOCATION, DEPENDS_ON, NO_DEPENDENCY, transformationsPath);
 
     TS_ASSERT(sourceDependencyIsLocation);
     TS_ASSERT(locationDependencyIsSelf);
@@ -1484,7 +1456,7 @@ found in the Instrument cache.
     TS_ASSERT(!hasLocation);    // assert location dataset doesn't exist.
 
     bool sourceDependencyIsSelf =
-        tester.dataSetHasStrValue(DEPENDS_ON, SELF_DEPENDENT, sourcePath);
+        tester.dataSetHasStrValue(DEPENDS_ON, NO_DEPENDENCY, sourcePath);
 
     TS_ASSERT(sourceDependencyIsSelf);
   }

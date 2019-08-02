@@ -15,7 +15,8 @@ set(INC_FILES
     inc/MantidNexusGeometry/NexusGeometrySave.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
-    inc/MantidNexusGeometry/TubeHelpers.h)
+    inc/MantidNexusGeometry/TubeHelpers.h
+    inc/MantidNexusGeometry/NexusGeometryDefinitions.h)
 
 set(TEST_FILES
     InstrumentBuilderTest.h

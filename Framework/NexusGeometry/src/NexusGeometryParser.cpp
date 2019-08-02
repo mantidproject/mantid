@@ -12,6 +12,7 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
@@ -34,38 +35,6 @@ using namespace H5;
 
 // Anonymous namespace
 namespace {
-const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
-const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
-const H5std_string NX_CLASS = "NX_class";
-const H5std_string NX_ENTRY = "NXentry";
-const H5std_string NX_INSTRUMENT = "NXinstrument";
-const H5std_string NX_DETECTOR = "NXdetector";
-const H5std_string NX_MONITOR = "NXmonitor";
-const H5std_string NX_SAMPLE = "NXsample";
-const H5std_string NX_SOURCE = "NXsource";
-const H5std_string DETECTOR_IDS = "detector_number";
-const H5std_string DETECTOR_ID = "detector_id";
-const H5std_string X_PIXEL_OFFSET = "x_pixel_offset";
-const H5std_string Y_PIXEL_OFFSET = "y_pixel_offset";
-const H5std_string Z_PIXEL_OFFSET = "z_pixel_offset";
-const H5std_string DEPENDS_ON = "depends_on";
-const H5std_string NO_DEPENDENCY = ".";
-const H5std_string PIXEL_SHAPE = "pixel_shape";
-const H5std_string DETECTOR_SHAPE = "detector_shape";
-const H5std_string SHAPE = "shape";
-// Transformation types
-const H5std_string TRANSFORMATION_TYPE = "transformation_type";
-const H5std_string TRANSLATION = "translation";
-const H5std_string ROTATION = "rotation";
-const H5std_string VECTOR = "vector";
-const H5std_string UNITS = "units";
-// Radians and degrees
-const static double PI = M_PI;
-const static double DEGREES_IN_SEMICIRCLE = 180.0;
-// Nexus shape types
-const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
-const H5std_string NX_OFF = "NXoff_geometry";
-const H5std_string BANK_NAME = "local_name";
 
 using FaceV = std::vector<Eigen::Vector3d>;
 

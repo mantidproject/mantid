@@ -1,7 +1,6 @@
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 using Mantid::Beamline::ComponentType;
 
@@ -40,14 +39,11 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
 *
 * @param compInfo : Geometry::ComponentInfo Instrument cache containing the
 * component info.
-* @param detInfo :  Geometry::DetectorInfo Instrument cache containing the
-* detector info.
 * @param idx : size_t index of component
 * @return true if component at index is bank, false otherwise.
 
 */
-bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo,
-                    const size_t idx) {
+bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
   // return false if is a detector.
   if (compInfo.isDetector(idx))
     return false;
@@ -62,16 +58,14 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo,
     size_t parent = compInfo.parent(idx);
     auto parentType = compInfo.componentType(parent);
     auto childType = compInfo.componentType(idx);
-    if (detInfo.size() != 0) {
-      // if parent is any of the types below detector, then return false as it
-      // is not characteristic of a bank.
-      if (parentType != Beamline::ComponentType::Rectangular &&
-          parentType != Beamline::ComponentType::Structured &&
-          parentType != Beamline::ComponentType::Grid) {
-        // if component at index is not a tube then identify it as a bank
-        if (childType != Beamline::ComponentType::OutlineComposite) {
-          return true;
-        }
+    // if parent is any of the types below detector, then return false as it
+    // is not characteristic of a bank.
+    if (parentType != Beamline::ComponentType::Rectangular &&
+        parentType != Beamline::ComponentType::Structured &&
+        parentType != Beamline::ComponentType::Grid) {
+      // if component at index is not a tube then identify it as a bank
+      if (childType != Beamline::ComponentType::OutlineComposite) {
+        return true;
       }
     }
   }
@@ -95,6 +89,11 @@ bool isSaveableBank(const ComponentInfo &compInfo, const DetectorInfo &detInfo,
 Eigen::Vector3d
 offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
                    const size_t ancestorIdx, const size_t currentIdx) {
+
+  if (!(ancestorIdx > currentIdx)) {
+    throw std::invalid_argument(
+        "Index of ancestor component is not higher than current Index.");
+  }
 
   if (ancestorIdx == currentIdx) {
     return Mantid::Kernel::toVector3d(compInfo.position(currentIdx));

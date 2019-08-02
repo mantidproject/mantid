@@ -98,8 +98,7 @@ void InstrumentBuilder::addDetectorToLastBank(
   detector->translate(Mantid::Kernel::toV3D(relativeOffset));
   // No rotation set for detector pixels of a bank. This is not possible in the
   // Nexus Geometry specification.
-  if (shape.get() == nullptr)
-    detector->setShape(shape);
+  detector->setShape(shape);
   m_lastBank->add(detector);
   m_instrument->markAsDetectorIncomplete(detector);
 }

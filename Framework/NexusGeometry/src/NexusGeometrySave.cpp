@@ -16,15 +16,17 @@
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <H5Cpp.h>
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <cmath>
-#include <memory> // unique_ptr
+#include <memory>
 #include <string>
 
 namespace Mantid {
@@ -33,47 +35,6 @@ namespace NexusGeometry {
 namespace {
 
 enum class NXclass { NXinstrument, NXsample, NXdetector, NXmonitor, NXsource };
-
-const std::string NX_CLASS = "NX_class";
-const std::string NX_SAMPLE = "NXsample";
-const std::string NX_DETECTOR = "NXdetector";
-const std::string NX_MONITOR = "NXmonitor";
-const std::string NX_OFF_GEOMETRY = "NXoff_geometry";
-const std::string NX_ENTRY = "NXentry";
-const std::string NX_INSTRUMENT = "NXinstrument";
-const std::string NX_CHAR = "NX_CHAR";
-const std::string NX_SOURCE = "NXsource";
-const std::string NX_TRANSFORMATIONS = "NXtransformations";
-
-const std::string SHORT_NAME = "short_name";
-const std::string TRANSFORMATIONS = "transformations";
-const std::string TRANSLATION = "translation";
-const std::string ROTATION = "rotation";
-const std::string LOCAL_NAME = "local_name";
-const std::string LOCATION = "location";
-const std::string ORIENTATION = "orientation";
-const std::string DEPENDS_ON = "depends_on";
-const std::string X_PIXEL_OFFSET = "x_pixel_offset";
-const std::string Y_PIXEL_OFFSET = "y_pixel_offset";
-const std::string Z_PIXEL_OFFSET = "z_pixel_offset";
-const std::string PIXEL_SHAPE = "pixel_shape";
-
-// these strings belong to DataSets which are duplicates of each other. written
-// to NXmonitor group to handle the naming inconsistency. probably temporary.
-const std::string DETECTOR_NUMBER = "detector_number";
-const std::string DETECTOR_ID = "detector_id";
-
-const std::string TRANSFORMATION_TYPE = "transformation_type";
-
-const std::string METRES = "m";
-const std::string DEGREES = "degrees";
-const std::string NAME = "name";
-const std::string UNITS = "units";
-const std::string SHAPE = "shape";
-const std::string VECTOR = "vector";
-
-const double PRECISION = 1e-5; // match Eigen precision.
-const double PI = M_PI;
 
 const H5::DataSpace H5SCALAR(H5S_SCALAR);
 
@@ -307,13 +268,11 @@ bool isApproxZero(const std::vector<double> &data, const double &precision,
  * @return std::vector<size_t> container with all indices in compInfo found to
  * be a detector bank
  */
-std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo,
-                                      const Geometry::DetectorInfo &detInfo) {
+std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
 
   std::vector<size_t> banksInComponent;
   for (size_t index = compInfo.root() - 1; index > 0; --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, detInfo,
-                                                           index)) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
       banksInComponent.push_back(index);
     }
   }
@@ -508,7 +467,7 @@ void writeNXDetectorNumber(H5::Group &grp,
   H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
 
   detectorNumber =
-      grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
+      grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
   detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
 
@@ -552,7 +511,7 @@ void writeNXMonitorNumber(H5::Group &grp,
   // these DataSets are duplicates of each other. written to the group to
   // handle the naming inconsistency. probably temporary.
   detectorNumber =
-      grp.createDataSet(DETECTOR_NUMBER, H5::PredType::NATIVE_INT, space);
+      grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
   detectorNumber.write(monitorDetIDs.data(), H5::PredType::NATIVE_INT, space);
 
   detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
@@ -598,7 +557,7 @@ inline void writeLocation(H5::Group &grp,
   ddims[0] = static_cast<hsize_t>(1);
 
   // dependency for location
-  std::string dependency = "."; // self dependent
+  std::string dependency = NO_DEPENDENCY; // self dependent
 
   dspace = H5Screate_simple(drank, ddims, NULL);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -691,7 +650,7 @@ inline void writeOrientation(H5::Group &grp,
 
   // dependency for orientation defaults to self-dependent. If Location dataset
   // exists, the orientation will depend on it instead.
-  std::string dependency = ".";
+  std::string dependency = NO_DEPENDENCY;
   if (!noTranslation)
     dependency = forwardCompatibility::getObjName(grp) + "/" + LOCATION;
   dspace = H5Screate_simple(rank, ddims, NULL);
@@ -810,7 +769,7 @@ void saveNXSource(const H5::Group &parentGroup,
   Eigen::Quaterniond rotation =
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
-  std::string dependency = ".";
+  std::string dependency = NO_DEPENDENCY;
   std::string sourceName = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
@@ -866,7 +825,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   Eigen::Quaterniond rotation =
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
-  std::string dependency = "."; // dependency initialiser
+  std::string dependency = NO_DEPENDENCY; // dependency initialiser
   std::string name = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
@@ -897,7 +856,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, compInfo, detIds, index);
 
-  writeStrDataset(childGroup, LOCAL_NAME, name);
+  writeStrDataset(childGroup, BANK_NAME, name);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
@@ -925,7 +884,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   Eigen::Quaterniond rotation =
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
-  std::string dependency = "."; // dependency initialiser
+  std::string dependency = NO_DEPENDENCY; // dependency initialiser
   std::string name = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(toStdVector(position), PRECISION);
@@ -957,7 +916,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   writeXYZPixeloffset(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 
-  writeStrDataset(childGroup, LOCAL_NAME, name);
+  writeStrDataset(childGroup, BANK_NAME, name);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
@@ -1011,7 +970,7 @@ void saveInstrument(
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
-  std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo, detInfo);
+  std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
   std::vector<size_t> nxMonitors = nxMonitorIndices(detInfo);
   H5::Group rootGroup, instrument;
 

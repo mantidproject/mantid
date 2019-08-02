@@ -85,7 +85,7 @@ public:
     TS_ASSERT(compInfo.componentType(tubeIdx) ==
               Beamline::ComponentType::OutlineComposite);
     // assert isSaveableBank returns false
-    TS_ASSERT(!isSaveableBank(compInfo, detInfo, tubeIdx));
+    TS_ASSERT(!isSaveableBank(compInfo, tubeIdx));
   }
 
   void test_isSaveableBank_false_for_detector() {
@@ -97,7 +97,7 @@ public:
     const auto &compInfo = (*wrappers.first);
     const auto &detInfo = (*wrappers.second);
 
-    TS_ASSERT(!isSaveableBank(compInfo, detInfo, 0 /*index of detector*/));
+    TS_ASSERT(!isSaveableBank(compInfo, 0 /*index of detector*/));
   }
 
   void test_isSaveableBank_finds_rectangular() {
@@ -114,27 +114,37 @@ public:
     TS_ASSERT(compInfo.componentType(bankIdx) ==
               Beamline::ComponentType::Rectangular);
     // assert isSaveableBank returns true
-    TS_ASSERT(isSaveableBank(compInfo, detInfo, bankIdx))
+    TS_ASSERT(isSaveableBank(compInfo, bankIdx))
   }
 
   void test_offsetFromAncestor_gets_expected_offset() {
-    // preparation of geometry for test instrument:
-    // bank position is 10m along z, the detector is then offset from the bank
-    // with xyz value (2,-2, 0) . The bank is then rotated 45 degrees about y,
-    // detector in bank is then rotated an additional 45 degrees, therefore the
-    // detector has a net rotation of 90 degrees. offset fromAncestor should be
-    // able to retrieve the detector offset (2,-2,0) relative to the bank by
-    // internally applying the reverse transformations unto the position of the
-    // detector.
-    const Quat relativeBankRotation(45.0, V3D(0.0, 1.0, 0.0));
-    const Quat relativeDetRotation(45.0, V3D(0.0, 1.0, 0.0));
-    const V3D absBankposition(0, 0, 10);
+    /*
+     Provide offsetFromAncestor with a bank index as the 'ancestor', and a
+     detector as the 'current' index, and assert that offsetFromAncestor returns
+     the specified detector offset from the bank.
+
+     Preparation of geometry for test instrument:
+     bank position is 10m along z, the detector is then offset from the bank
+     with xyz value (2,-2, 0) . The bank is then rotated 45 degrees about y,
+     detector in bank is then rotated an additional 45 degrees, therefore the
+     detector has a net rotation of 90 degrees. offsetFromAncestor should be
+     able to retrieve the detector offset (2,-2,0) relative to the bank by
+     internally applying the reverse transformations unto the position of the
+     detector.    
+	*/
+
+	// specify the detector offset that offsetFromAncestor should retrieve from compInfo.
     const V3D detectorOffset(2.0, -2.0, 0.0);
+
     // create instrument with geometry as above
     auto instr = ComponentCreationHelper::createSimpleInstrumentWithRotation(
-        Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
-        absBankposition, relativeBankRotation, relativeDetRotation,
-        detectorOffset); // detector offset which is specified
+        Mantid::Kernel::V3D(0.0, 0.0, -10.0) /*arbitrary source pos*/,
+        Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*arbitrary sample pos*/,
+        V3D(0.0, 0.0, 10.0) /* bank position*/,
+        Quat(45.0, V3D(0.0, 1.0, 0.0)) /* bank rotation*/,
+        Quat(45.0, V3D(0.0, 1.0, 0.0)) /* detector position*/,
+        detectorOffset); // detector offset which is expected back.
+
     auto wrappers = InstrumentVisitor::makeWrappers(*instr);
     const auto &compInfo = (*wrappers.first);
     const size_t bankIdx = 3; // bank index
@@ -147,6 +157,26 @@ public:
     // assert offsetFromAncestor gives back the detector offset
 
     TS_ASSERT(expected_offset.isApprox(returnedOffset));
+  }
+
+  void
+  test_offsetFromAncestor_throws_if_ancestor_index_is_not_greater_than_current_index() {
+
+    /* provide offsetFromAncestor with an ancestor index value not greater than
+    current index, and assert offsetFromAncestor will throw. */
+
+    // test instrument with arbitrary geometry
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+
+    size_t ancestorIndex = 0; // proposed ancestor < current index
+    size_t currentIndex = 1;  // proposed current index
+    TS_ASSERT_THROWS(offsetFromAncestor(compInfo, ancestorIndex, currentIndex),
+                     std::invalid_argument &);
   }
 };
 
