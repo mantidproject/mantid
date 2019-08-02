@@ -10,6 +10,9 @@ from __future__ import (absolute_import, unicode_literals)
 
 from numpy import ndarray
 
+from mantid.api import AlgorithmManager
+from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE
+
 
 def convert_value_to_arg_string(value):
     """
@@ -39,3 +42,17 @@ def convert_args_to_string(args, kwargs):
     for kwarg, value in sorted(kwargs.items()):  # sorting makes this testable
         arg_strings.append("{}={}".format(kwarg, convert_value_to_arg_string(value)))
     return ', '.join(arg_strings)
+
+
+def get_workspace_history_script(workspace):
+    """Get a script that will recover the state of a workspace"""
+    alg_name = "GeneratePythonScript"
+    alg = AlgorithmManager.createUnmanaged(alg_name, 1)
+    alg.setChild(True)
+    alg.setLogging(False)
+    alg.initialize()
+    alg.setProperty("InputWorkspace", workspace)
+    alg.setProperty("IgnoreTheseAlgs", ALGS_TO_IGNORE)
+    alg.execute()
+    history = alg.getPropertyValue("ScriptText")
+    return '\n'.join(history.split('\n')[5:])  # trim the header and import
