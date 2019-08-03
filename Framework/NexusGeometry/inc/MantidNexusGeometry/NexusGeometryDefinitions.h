@@ -67,8 +67,6 @@ const H5std_string NX_OFF = "NXoff_geometry";
 
 const H5::DataSpace SCALAR(H5S_SCALAR);
 
-
-
 } // namespace NexusGeometry
 } // namespace Mantid
 
