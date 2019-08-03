@@ -27,74 +27,12 @@
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <cmath>
+#include <iostream>
 #include <memory>
 #include <string>
-
 namespace Mantid {
 namespace NexusGeometry {
-
-namespace {
-
-enum class NXclass { NXinstrument, NXsample, NXdetector, NXmonitor, NXsource };
-
-const H5::DataSpace H5SCALAR(H5S_SCALAR);
-
-} // namespace
-
 namespace NexusGeometrySave {
-
-// for ease of future addition of compatible file extensions
-const std::vector<std::string> exts = {".nxs", ".hdf5"};
-std::string stringOfValidExtensions() {
-  std::string str = "";
-  std::for_each(exts.begin(), exts.end(),
-                [&str](const std::string &s) { str += " " + s; });
-  return str;
-}
-
-// handles naming of groups for named and unnamed components for iterated and
-// single use case
-std::string groupName(const Geometry::ComponentInfo &compInfo,
-                      const NXclass &groupType, const size_t iterator = 0) {
-
-  // get groupName for NXinstrument creation
-  if (groupType == NXclass::NXinstrument) {
-    std::string nameInCache = compInfo.name(compInfo.root());
-    std::string name =
-        nameInCache == "" ? "unspecified_instrument" : nameInCache;
-    return name;
-  } else
-
-      if (groupType == NXclass::NXsample) {
-    std::string nameInCache = compInfo.name(compInfo.sample());
-    std::string name = nameInCache == "" ? "unspecified_sample" : nameInCache;
-    return name;
-  } else
-
-      if (groupType == NXclass::NXdetector) {
-    std::string nameInCache = compInfo.name(iterator);
-    std::string name = nameInCache == ""
-                           ? "unspecified_detector_" + std::to_string(iterator)
-                           : nameInCache;
-    return name;
-  } else
-
-      if (groupType == NXclass::NXmonitor) {
-    std::string nameInCache = compInfo.name(iterator);
-    std::string name = nameInCache == ""
-                           ? "unspecified_monitor_" + std::to_string(iterator)
-                           : nameInCache;
-    return name;
-  } else
-
-      if (groupType == NXclass::NXsource) {
-    std::string nameInCache = compInfo.name(compInfo.source());
-    std::string name = nameInCache == "" ? "unspecified_source" : nameInCache;
-    return name;
-  } else
-
-    return "";
-}
 
 /*
  * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
@@ -105,7 +43,7 @@ std::string groupName(const Geometry::ComponentInfo &compInfo,
  * @return std::vector<double> vector containing data values in
  * Mantid::Kernel::V3D format.
  */
-std::vector<double> toStdVector(const V3D &data) {
+inline std::vector<double> toStdVector(const V3D &data) {
   std::vector<double> stdVector;
   stdVector.reserve(3);
   for (int i = 0; i < 3; ++i)
@@ -121,7 +59,7 @@ std::vector<double> toStdVector(const V3D &data) {
  * @param data :  Mantid::Kernel::Quat quaternion containing data values
  * @return std::vector<double> vector containing data values in Quat format
  */
-std::vector<double> toStdVector(const Quat &data) {
+inline std::vector<double> toStdVector(const Quat &data) {
   std::vector<double> stdVector;
   stdVector.reserve(4);
   for (int i = 0; i < 4; ++i)
@@ -138,7 +76,7 @@ std::vector<double> toStdVector(const Quat &data) {
  * @return std::vector<double> vector containing data values in Eigen::Vector3d
  * format
  */
-std::vector<double> toStdVector(const Eigen::Vector3d &data) {
+inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
   return toStdVector(Kernel::toV3D(data));
 }
 
@@ -151,24 +89,22 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
  * @return std::vector<double> vector containing data values in
  * Eigen::Quaterniond format
  */
-std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
+inline std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
   return toStdVector(Kernel::toQuat(data));
 }
 
 /*
- * Function: isApproxZero. returns true if all values in an std-vector container
- * evaluate to zero with a given level of precision. Used by SaveInstrument
- * methods to determine whether or not to write a dataset to file. If data is
- * Quaternion, returns true if quaternion is equivalent to zero rotation
+ * Function: isApproxZero. returns true if all values in an variable size
+ * std-vector container evaluate to zero with a given level of precision. Used
+ * by SaveInstrument methods to determine whether or not to write a dataset to
+ * file.
  *
  * @param data : std::vector<T> data
  * @param precision : double precision specifier
- * @param isQuaternion : bool quaternion flag. if true, evaluates is rotation is
- * zero
- *
  * @return true if all elements are approx zero, else false.
  */
-bool isApproxZero(const std::vector<double> &data, const double &precision) {
+inline bool isApproxZero(const std::vector<double> &data,
+                         const double &precision) {
 
   // if data is a quaternion return true if the associated rotation about an
   // axis is approximately zero
@@ -179,12 +115,13 @@ bool isApproxZero(const std::vector<double> &data, const double &precision) {
 }
 
 // overload. return true if vector is approx to zero
-bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
+inline bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
   return data.isApprox(Eigen::Vector3d(0, 0, 0), precision);
 }
 
 // overload. returns true is angle is approx to zero
-bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
+inline bool isApproxZero(const Eigen::Quaterniond &data,
+                         const double &precision) {
   return data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
 }
 
@@ -197,7 +134,6 @@ bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
  * be a detector bank
  */
 std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
-
   std::vector<size_t> banksInComponent;
   for (size_t index = compInfo.root() - 1; index > 0; --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
@@ -216,7 +152,6 @@ std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
  * be a monitor
  */
 std::vector<size_t> nxMonitorIndices(const Geometry::DetectorInfo &detInfo) {
-
   std::vector<size_t> monitorsInComponent;
   auto detIds = detInfo.detectorIDs();
   for (const int &ID : detIds) {
@@ -251,7 +186,7 @@ inline H5::StrType strTypeOfSize(const std::string &str) {
  */
 inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
                             const std::string &dSetVal,
-                            H5::DataSpace dataSpace = H5SCALAR) {
+                            H5::DataSpace dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(dSetVal);
   H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
   dSet.write(dSetVal, dataType);
@@ -267,7 +202,7 @@ inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
  */
 inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
                               const std::string &attrVal,
-                              H5::DataSpace dataSpace = H5SCALAR) {
+                              H5::DataSpace dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(attrVal);
   H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
@@ -284,7 +219,7 @@ inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
  */
 inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
                               const std::string &attrVal,
-                              H5::DataSpace dataSpace = H5SCALAR) {
+                              H5::DataSpace dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(attrVal);
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
@@ -463,10 +398,11 @@ void writeNXMonitorNumber(H5::Group &grp,
  * @param grp : NXdetector group : (HDF group)
  * @param compInfo : componentInfo object.
  */
-inline void writeLocation(H5::Group &grp,
-                          const Geometry::ComponentInfo &compInfo, size_t idx) {
+inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position,
+                          size_t idx) {
 
-  Eigen::Vector3d position;
+  std::string dependency = NO_DEPENDENCY; // self dependent
+
   double norm;
 
   H5::DataSet location;
@@ -484,24 +420,13 @@ inline void writeLocation(H5::Group &grp,
   hsize_t ddims[static_cast<hsize_t>(1)];
   ddims[0] = static_cast<hsize_t>(1);
 
-  // dependency for location
-  std::string dependency = NO_DEPENDENCY; // self dependent
+  norm = position.norm();
+  auto unitVec = position.normalized();
+  std::vector<double> stdNormPos = toStdVector(position);
 
   dspace = H5Screate_simple(drank, ddims, NULL);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
-  position = Kernel::toVector3d(compInfo.position(idx)); // of bank
-
-  // get translation from position by inverting rotation.
-
-  // capture the norm before inline normalisation.
-  norm = position.norm();
-  position.normalize();
-
   location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
-
-  // normalised if norm is not approximately zero.
-
-  std::vector<double> stdNormPos = toStdVector(position);
 
   int arank = 1;
   hsize_t adims[static_cast<hsize_t>(3)];
@@ -514,18 +439,18 @@ inline void writeLocation(H5::Group &grp,
 
   // units attribute
   strSize = strTypeOfSize(METRES);
-  units = location.createAttribute(UNITS, strSize, H5SCALAR);
+  units = location.createAttribute(UNITS, strSize, SCALAR);
   units.write(strSize, METRES);
 
   // transformation-type attribute
   strSize = strTypeOfSize(TRANSLATION);
   transformationType =
-      location.createAttribute(TRANSFORMATION_TYPE, strSize, H5SCALAR);
+      location.createAttribute(TRANSFORMATION_TYPE, strSize, SCALAR);
   transformationType.write(strSize, TRANSLATION);
 
   // dependency attribute
   strSize = strTypeOfSize(dependency);
-  dependsOn = location.createAttribute(DEPENDS_ON, strSize, H5SCALAR);
+  dependsOn = location.createAttribute(DEPENDS_ON, strSize, SCALAR);
   dependsOn.write(strSize, dependency);
 }
 
@@ -554,11 +479,14 @@ inline void writeLocation(H5::Group &grp,
  * it precedes a rotation.
  * https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html
  */
-inline void writeOrientation(H5::Group &grp,
-                             const Geometry::ComponentInfo &compInfo,
+inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
                              size_t idx, bool noTranslation) {
 
-  Eigen::Quaterniond rotation;
+  // dependency for orientation defaults to self-dependent. If Location dataset
+  // exists, the orientation will depend on it instead.
+  std::string dependency =
+      !noTranslation ? H5_OBJ_NAME(grp) + "/" + LOCATION : NO_DEPENDENCY;
+
   double angle;
 
   H5::DataSet orientation;
@@ -576,24 +504,14 @@ inline void writeOrientation(H5::Group &grp,
   hsize_t ddims[static_cast<hsize_t>(1)];
   ddims[0] = static_cast<hsize_t>(1);
 
-  // dependency for orientation defaults to self-dependent. If Location dataset
-  // exists, the orientation will depend on it instead.
-  std::string dependency = NO_DEPENDENCY;
-  if (!noTranslation)
-    dependency = H5_OBJ_NAME(grp) + "/" + LOCATION;
+  angle = std::acos(rotation.w()) * (360.0 / PI);
+  Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
+  std::vector<double> stdNormAxis = toStdVector(axisOfRotation);
+
   dspace = H5Screate_simple(rank, ddims, NULL);
   orientation =
       grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
-
-  // write absolute rotation in degrees of detector bank to dataset
-  rotation = Kernel::toQuaterniond(compInfo.rotation(idx));
-  angle = std::acos(rotation.w()) * (360.0 / PI);
   orientation.write(&angle, H5::PredType::NATIVE_DOUBLE, dspace);
-
-  // normalised if norm is not approximately zero.
-  Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
-
-  std::vector<double> stdNormAxis = toStdVector(axisOfRotation);
 
   int arank = 1;
   hsize_t adims[static_cast<hsize_t>(3)];
@@ -606,18 +524,18 @@ inline void writeOrientation(H5::Group &grp,
 
   // units attribute
   strSize = strTypeOfSize(DEGREES);
-  units = orientation.createAttribute(UNITS, strSize, H5SCALAR);
+  units = orientation.createAttribute(UNITS, strSize, SCALAR);
   units.write(strSize, DEGREES);
 
   // transformation-type attribute
   strSize = strTypeOfSize(ROTATION);
   transformationType =
-      orientation.createAttribute(TRANSFORMATION_TYPE, strSize, H5SCALAR);
+      orientation.createAttribute(TRANSFORMATION_TYPE, strSize, SCALAR);
   transformationType.write(strSize, ROTATION);
 
   // dependency attribute
   strSize = strTypeOfSize(dependency);
-  dependsOn = orientation.createAttribute(DEPENDS_ON, strSize, H5SCALAR);
+  dependsOn = orientation.createAttribute(DEPENDS_ON, strSize, SCALAR);
   dependsOn.write(strSize, dependency);
 }
 
@@ -633,17 +551,15 @@ inline void writeOrientation(H5::Group &grp,
 H5::Group NXInstrument(const H5::Group &parent,
                        const Geometry::ComponentInfo &compInfo) {
 
-  NXclass groupType = NXclass::NXinstrument;
+  std::string nameInCache = compInfo.name(compInfo.root());
+  std::string instrName =
+      nameInCache == "" ? "unspecified_instrument" : nameInCache;
+  H5::Group childGroup = parent.createGroup(instrName);
 
-  size_t index = compInfo.root();
-
-  std::string instrumentName = groupName(compInfo, groupType, index);
-  H5::Group childGroup = parent.createGroup(instrumentName);
-
-  writeStrDataset(childGroup, NAME, instrumentName);
+  writeStrDataset(childGroup, NAME, instrName);
   writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
 
-  std::string defaultShortName = instrumentName.substr(0, 3);
+  std::string defaultShortName = instrName.substr(0, 3);
   H5::DataSet name = childGroup.openDataSet(NAME);
   writeStrAttribute(name, SHORT_NAME, defaultShortName);
   return childGroup;
@@ -662,15 +578,11 @@ H5::Group NXInstrument(const H5::Group &parent,
 void saveNXSample(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
 
-  NXclass groupType = NXclass::NXsample;
+  std::string nameInCache = compInfo.name(compInfo.sample());
+  std::string sampleName =
+      nameInCache == "" ? "unspecified_sample" : nameInCache;
 
-  size_t index = compInfo.sample();
-
-  H5::Group childGroup;
-
-  std::string sampleName = groupName(compInfo, groupType, index); // group name
-  childGroup = parentGroup.createGroup(sampleName);
-
+  H5::Group childGroup = parentGroup.createGroup(sampleName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
   writeStrDataset(childGroup, NAME, sampleName);
 }
@@ -688,17 +600,18 @@ void saveNXSample(const H5::Group &parentGroup,
 void saveNXSource(const H5::Group &parentGroup,
                   const Geometry::ComponentInfo &compInfo) {
 
-  NXclass groupType = NXclass::NXsource;
-
   size_t index = compInfo.source();
+
+  std::string nameInCache = compInfo.name(index);
+  std::string sourceName =
+      nameInCache == "" ? "unspecified_source" : nameInCache;
+
+  std::string dependency = NO_DEPENDENCY;
 
   Eigen::Vector3d position =
       Mantid::Kernel::toVector3d(compInfo.position(index));
   Eigen::Quaterniond rotation =
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
-
-  std::string dependency = NO_DEPENDENCY;
-  std::string sourceName = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
@@ -716,11 +629,11 @@ void saveNXSource(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, compInfo, index);
+    writeLocation(transformations, position, index);
   }
   if (!orientationIsZero) {
     dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, compInfo, index, locationIsOrigin);
+    writeOrientation(transformations, rotation, index, locationIsOrigin);
   }
 
   writeStrDataset(childGroup, NAME, sourceName);
@@ -740,11 +653,12 @@ void saveNXSource(const H5::Group &parentGroup,
  */
 void saveNXMonitor(const H5::Group &parentGroup,
                    const Geometry::ComponentInfo &compInfo,
-                   const Geometry::DetectorInfo &detInfo, const size_t index) {
+                   const std::vector<int> &detIds, const size_t index) {
 
-  NXclass groupType = NXclass::NXmonitor;
-
-  auto detIds = detInfo.detectorIDs();
+  std::string nameInCache = compInfo.name(index);
+  std::string monitorName = nameInCache == ""
+                                ? "unspecified_monitor_" + std::to_string(index)
+                                : nameInCache;
 
   Eigen::Vector3d position =
       Mantid::Kernel::toVector3d(compInfo.position(index));
@@ -752,12 +666,11 @@ void saveNXMonitor(const H5::Group &parentGroup,
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
   std::string dependency = NO_DEPENDENCY; // dependency initialiser
-  std::string name = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = parentGroup.createGroup(name);
+  H5::Group childGroup = parentGroup.createGroup(monitorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
   H5::Group transformations =
@@ -770,17 +683,17 @@ void saveNXMonitor(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, compInfo, index);
+    writeLocation(transformations, position, index);
   }
   if (!orientationIsZero) {
     dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, compInfo, index, locationIsOrigin);
+    writeOrientation(transformations, rotation, index, locationIsOrigin);
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, compInfo, detIds, index);
 
-  writeStrDataset(childGroup, BANK_NAME, name);
+  writeStrDataset(childGroup, BANK_NAME, monitorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
@@ -797,11 +710,12 @@ void saveNXMonitor(const H5::Group &parentGroup,
  */
 void saveNXDetector(const H5::Group &parentGroup,
                     const Geometry::ComponentInfo &compInfo,
-                    const Geometry::DetectorInfo &detInfo, const size_t index) {
+                    const std::vector<int> &detIds, const size_t index) {
 
-  NXclass groupType = NXclass::NXdetector;
-
-  const auto detIds = detInfo.detectorIDs();
+  std::string nameInCache = compInfo.name(index);
+  std::string detectorName =
+      nameInCache == "" ? "unspecified_detector_" + std::to_string(index)
+                        : nameInCache;
 
   Eigen::Vector3d position =
       Mantid::Kernel::toVector3d(compInfo.position(index));
@@ -809,12 +723,11 @@ void saveNXDetector(const H5::Group &parentGroup,
       Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
 
   std::string dependency = NO_DEPENDENCY; // dependency initialiser
-  std::string name = groupName(compInfo, groupType, index); // group name
 
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = parentGroup.createGroup(name);
+  H5::Group childGroup = parentGroup.createGroup(detectorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
   H5::Group transformations =
@@ -827,18 +740,18 @@ void saveNXDetector(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, compInfo, index);
+    writeLocation(transformations, position, index);
   }
   if (!orientationIsZero) {
     dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, compInfo, index, locationIsOrigin);
+    writeOrientation(transformations, rotation, index, locationIsOrigin);
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeXYZPixeloffset(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 
-  writeStrDataset(childGroup, BANK_NAME, name);
+  writeStrDataset(childGroup, BANK_NAME, detectorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
@@ -865,16 +778,27 @@ void saveInstrument(
     throw std::invalid_argument(
         "The path provided for saving the file is invalid: " + fullPath + "\n");
   }
-  const auto ext = boost::filesystem::path(tmp).extension();
-  bool isValidExt =
-      std::any_of(exts.begin(), exts.end(), [&ext](const std::string &str) {
-        return ext.generic_string() == str;
-      });
 
+  // check the file extension matches any of the valid extensions defined in
+  // nexus_geometry_extensions
+  const auto ext = boost::filesystem::path(tmp).extension();
+  bool isValidExt = std::any_of(
+      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+      [&ext](const std::string &str) { return ext.generic_string() == str; });
+
+  // throw if the file extension is invalid
   if (!isValidExt) {
-    throw std::invalid_argument(
-        "invalid extension for file: " + ext.generic_string() +
-        ". Valid extensions are: " + stringOfValidExtensions());
+
+	  // string of valid extensions to output in exception
+    std::string extensions = "";
+    std::for_each(
+        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+        [&extensions](const std::string &s) { extensions += " " + s; });
+    std::cout << extensions;
+
+    throw std::invalid_argument("invalid extension for file: '" +
+                                ext.generic_string() +
+                                "'. Expected any of: " + extensions);
   }
   if (reporter != nullptr) {
     reporter->report();
@@ -901,8 +825,9 @@ void saveInstrument(
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
-  std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
-  std::vector<size_t> nxMonitors = nxMonitorIndices(detInfo);
+  const auto detIds = detInfo.detectorIDs();
+  const std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
+  const std::vector<size_t> nxMonitors = nxMonitorIndices(detInfo);
   H5::Group rootGroup, instrument;
 
   // create NXentry (file root)
@@ -914,12 +839,12 @@ void saveInstrument(
 
   // save NXdetectors
   for (const size_t &index : nxDetectors) {
-    NexusGeometrySave::saveNXDetector(instrument, compInfo, detInfo, index);
+    NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
   }
 
   // save NXmonitors
   for (const size_t &index : nxMonitors) {
-    NexusGeometrySave::saveNXMonitor(instrument, compInfo, detInfo, index);
+    NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
   }
 
   // save NXsource

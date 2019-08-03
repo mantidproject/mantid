@@ -8,6 +8,7 @@
 #define MANTIDNEXUSGEOMETRY_NEXUSGEOMETRYDEFINITIONS_H
 
 #include <H5Cpp.h>
+#include <algorithm>
 #include <string>
 
 namespace Mantid {
@@ -15,6 +16,7 @@ namespace NexusGeometry {
 
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
+const std::vector<std::string> nexus_geometry_extensions = {".nxs", ".hdf5"};
 
 const H5std_string NX_CLASS = "NX_class";
 const H5std_string NX_SAMPLE = "NXsample";
@@ -62,6 +64,10 @@ const double PI = M_PI;
 
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
+
+const H5::DataSpace SCALAR(H5S_SCALAR);
+
+
 
 } // namespace NexusGeometry
 } // namespace Mantid

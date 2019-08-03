@@ -6,9 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
-#include <cstring> //memset?
+#include <cstring> //memset.
 #include <string>
-// #include <H5Cpp.h>
 
 namespace Mantid {
 namespace NexusGeometry {
