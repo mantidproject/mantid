@@ -789,7 +789,7 @@ void saveInstrument(
   // throw if the file extension is invalid
   if (!isValidExt) {
 
-	  // string of valid extensions to output in exception
+    // string of valid extensions to output in exception
     std::string extensions = "";
     std::for_each(
         nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
