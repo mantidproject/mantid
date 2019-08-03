@@ -398,8 +398,7 @@ void writeNXMonitorNumber(H5::Group &grp,
  * @param grp : NXdetector group : (HDF group)
  * @param compInfo : componentInfo object.
  */
-inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position,
-                          size_t idx) {
+inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
   std::string dependency = NO_DEPENDENCY; // self dependent
 
@@ -422,7 +421,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position,
 
   norm = position.norm();
   auto unitVec = position.normalized();
-  std::vector<double> stdNormPos = toStdVector(position);
+  std::vector<double> stdNormPos = toStdVector(unitVec);
 
   dspace = H5Screate_simple(drank, ddims, NULL);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -480,7 +479,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position,
  * https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html
  */
 inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
-                             size_t idx, bool noTranslation) {
+                             bool noTranslation) {
 
   // dependency for orientation defaults to self-dependent. If Location dataset
   // exists, the orientation will depend on it instead.
@@ -629,11 +628,11 @@ void saveNXSource(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, position, index);
+    writeLocation(transformations, position);
   }
   if (!orientationIsZero) {
     dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, rotation, index, locationIsOrigin);
+    writeOrientation(transformations, rotation, locationIsOrigin);
   }
 
   writeStrDataset(childGroup, NAME, sourceName);
@@ -683,11 +682,11 @@ void saveNXMonitor(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, position, index);
+    writeLocation(transformations, position);
   }
   if (!orientationIsZero) {
     dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, rotation, index, locationIsOrigin);
+    writeOrientation(transformations, rotation, locationIsOrigin);
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
@@ -740,11 +739,11 @@ void saveNXDetector(const H5::Group &parentGroup,
   // orientation nor location are non-zero, component is self dependent.
   if (!locationIsOrigin) {
     dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, position, index);
+    writeLocation(transformations, position);
   }
   if (!orientationIsZero) {
     dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, rotation, index, locationIsOrigin);
+    writeOrientation(transformations, rotation, locationIsOrigin);
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
@@ -794,8 +793,6 @@ void saveInstrument(
     std::for_each(
         nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
         [&extensions](const std::string &s) { extensions += " " + s; });
-    std::cout << extensions;
-
     throw std::invalid_argument("invalid extension for file: '" +
                                 ext.generic_string() +
                                 "'. Expected any of: " + extensions);

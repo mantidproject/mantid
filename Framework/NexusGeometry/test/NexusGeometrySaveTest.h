@@ -973,7 +973,58 @@ found in the Instrument cache.
     TS_ASSERT(rotationInFile.isApprox(monitorRotationCopy));
   }
 
-  void test_rotation_of_source_written_to_file_is_same_as_in_component_info() {
+  void test_location_written_to_file_is_same_as_in_component_info() {
+
+    // create RAII file resource for testing
+    ScopedFileHandle fileResource(
+        "check_location_written_to_nxsource_test_file.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    // prepare location for instrument
+    const V3D sourceLocation(0, 0, 10);
+
+    // create test instrument and get cache
+    auto instrument =
+        ComponentCreationHelper::createInstrumentWithSourceRotation(
+            sourceLocation, Mantid::Kernel::V3D(0, 0, 0),
+            Mantid::Kernel::V3D(0, 0, 10), Quat(90, V3D(0, 1, 0)));
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+    auto &compInfo = (*instr.first);
+
+    // get component names to access path to H5 group
+    auto instrName = compInfo.name(compInfo.root());
+    auto sourceName = compInfo.name(compInfo.source());
+
+    // call saveInstrument
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+
+    // instance of test utility to check saved file
+    HDF5FileTestUtility tester(destinationFile);
+
+    // full path to group to be opened in test utility
+    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
+                       TRANSFORMATIONS};
+
+    // get magnitude of vector in dataset
+    double normInFile = tester.readDoubleFromDataset(LOCATION, path);
+
+    // get axis or rotation
+    std::string attributeName = "vector";
+    std::vector<double> data =
+        tester.readDoubleVectorFrom_d_Attribute(attributeName, LOCATION, path);
+    Eigen::Vector3d unitVecInFile = {data[0], data[1], data[2]};
+
+    // Eigen copy of sourceRotation for assertation
+    Eigen::Vector3d sourceLocationCopy =
+        Mantid::Kernel::toVector3d(sourceLocation);
+
+    auto positionInFile = normInFile * unitVecInFile;
+
+    TS_ASSERT(positionInFile.isApprox(sourceLocationCopy));
+  }
+
+  void test_rotation_written_to_file_is_same_as_in_component_info() {
 
     // create RAII file resource for testing
     ScopedFileHandle fileResource(
