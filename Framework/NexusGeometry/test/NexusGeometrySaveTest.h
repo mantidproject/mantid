@@ -37,11 +37,10 @@ using namespace Mantid::NexusGeometry;
 namespace {
 
 const std::string DEFAULT_ROOT_PATH = "raw_data_1";
-
-typedef std::vector<std::string> fullH5Path;
+using FullH5Path = std::vector<std::string>;
 
 // get path as string. Used for the dependency tests.
-std::string toH5PathString(fullH5Path &path) {
+std::string toH5PathString(FullH5Path &path) {
   std::string pathString = "";
   for (const std::string &grp : path) {
     pathString += "/" + grp;
@@ -73,7 +72,7 @@ public:
 
   /* safely open a HDF5 group path with additional helpful
    debug information to output where open fails) */
-  H5::Group openfullH5Path(const fullH5Path &pathList) const {
+  H5::Group openfullH5Path(const FullH5Path &pathList) const {
 
     H5::Group child;
     H5::Group parent;
@@ -88,12 +87,8 @@ public:
         child = parent.openGroup(pathList[i]);
         parent = child;
       } catch (H5::Exception &) {
-        throw std::invalid_argument("");
-        DEBUG_PRINT("HDF5 Exception was thrown here.");
-        DEBUG_PRINT("Failure at open H5 path: " + pathList[i] + " in chain:");
-        for (fullH5Path::const_iterator i = pathList.begin();
-             i != pathList.end(); ++i)
-          DEBUG_PRINT(*i);
+        throw std::invalid_argument("Failure at open H5 path: " + pathList[i] +
+                                    " in chain:");
       }
     }
     return child;
@@ -163,7 +158,7 @@ public:
   } // namespace
 
   double readDoubleFromDataset(const std::string &datasetName,
-                               const fullH5Path &pathToGroup) {
+                               const FullH5Path &pathToGroup) {
     double value;
     int rank = 1;
     hsize_t dims[(hsize_t)1];
@@ -182,7 +177,7 @@ public:
   std::vector<double>
   readDoubleVectorFrom_d_Attribute(const std::string &attrName,
                                    const std::string &datasetName,
-                                   const fullH5Path &pathToGroup) {
+                                   const FullH5Path &pathToGroup) {
 
     // open dataset and read.
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -246,7 +241,7 @@ public:
     return false;
   }
 
-  bool hasDataset(const std::string dsetName, const fullH5Path &pathToGroup) {
+  bool hasDataset(const std::string dsetName, const FullH5Path &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -277,7 +272,7 @@ public:
   // HERE
   bool dataSetHasStrValue(
       const std::string &dataSetName, const std::string &dataSetValue,
-      const fullH5Path &pathToGroup /*where the dataset lives*/) const {
+      const FullH5Path &pathToGroup /*where the dataset lives*/) const {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -296,7 +291,7 @@ public:
   // check if dataset or group has name-specific attribute
   bool hasAttributeInGroup(const std::string &attrName,
                            const std::string &attrVal,
-                           const fullH5Path &pathToGroup) {
+                           const FullH5Path &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -309,7 +304,7 @@ public:
   }
 
   bool hasNXAttributeInGroup(const std::string &attrVal,
-                             const fullH5Path &pathToGroup) {
+                             const FullH5Path &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -323,7 +318,7 @@ public:
   bool hasAttributeInDataSet(
       const std::string dataSetName, const std::string &attrName,
       const std::string &attrVal,
-      const fullH5Path &pathToGroup /*where the dataset lives*/) {
+      const FullH5Path &pathToGroup /*where the dataset lives*/) {
 
     H5::Attribute attribute;
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -337,7 +332,7 @@ public:
 
   bool hasNXAttributeInDataSet(const std::string dataSetName,
                                const std::string &attrVal,
-                               const fullH5Path &pathToGroup) {
+                               const FullH5Path &pathToGroup) {
     H5::Attribute attribute;
     H5::Group parentGroup = openfullH5Path(pathToGroup);
     H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
@@ -460,7 +455,7 @@ used.
   void test_progress_reporting() {
 
     MockProgressBase progressRep;
-    EXPECT_CALL(progressRep, doReport(testing::_)).Times(1);
+    EXPECT_CALL(progressRep, doReport(testing::_)).Times(2);
 
     ScopedFileHandle fileResource("progress_report_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -600,7 +595,7 @@ used.
                                       DEFAULT_ROOT_PATH); // saves instrument
     HDF5FileTestUtility testUtility(destinationFile);
 
-    fullH5Path path = {DEFAULT_ROOT_PATH, expectedInstrumentName};
+    FullH5Path path = {DEFAULT_ROOT_PATH, expectedInstrumentName};
     TS_ASSERT_THROWS_NOTHING(testUtility.openfullH5Path(path));
 
     TS_ASSERT(testUtility.hasNXAttributeInGroup(
@@ -682,7 +677,7 @@ found in the Instrument cache.
       if (Mantid::Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo,
                                                                      i)) {
 
-        fullH5Path path = {DEFAULT_ROOT_PATH, instrName, compInfo.name(i),
+        FullH5Path path = {DEFAULT_ROOT_PATH, instrName, compInfo.name(i),
                            TRANSFORMATIONS};
         bool hasNXTransformation =
             tester.hasAttributeInGroup(NX_CLASS, NX_TRANSFORMATIONS, path);
@@ -730,7 +725,7 @@ found in the Instrument cache.
       if (detInfo.isMonitor(index)) {
 
         auto monitorName = compInfo.name(index);
-        fullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
+        FullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
                            TRANSFORMATIONS};
 
         bool hasNXTransformation =
@@ -769,7 +764,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
                        TRANSFORMATIONS};
 
     // assertations
@@ -826,7 +821,7 @@ found in the Instrument cache.
         // get specific bank group name to access H5 group in test utility
         auto bankGroupName = compInfo.name(idx);
 
-        fullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankGroupName};
+        FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankGroupName};
 
         for (const size_t &i : childrenDetectors) {
 
@@ -897,7 +892,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
     double angleInFile = tester.readDoubleFromDataset(ORIENTATION, path);
@@ -950,7 +945,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
                        TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -1003,7 +998,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
                        TRANSFORMATIONS};
 
     // get magnitude of vector in dataset
@@ -1054,7 +1049,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
                        TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -1108,7 +1103,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
 
     // assertations
     bool hasLocation = tester.hasDataset(LOCATION, path);
@@ -1145,7 +1140,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
                        TRANSFORMATIONS};
 
     // assertations
@@ -1185,7 +1180,7 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
                        TRANSFORMATIONS};
 
     // assertations
@@ -1216,7 +1211,7 @@ found in the Instrument cache.
 
     std::string bankName = "detector-stage";
 
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -1250,7 +1245,7 @@ found in the Instrument cache.
     TS_ASSERT(detInfo.isMonitor(1));
 
     std::string monitorName = "test-monitor";
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
                        TRANSFORMATIONS};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1284,7 +1279,7 @@ found in the Instrument cache.
     auto instrName = compInfo.name(compInfo.root());
     auto sourceName = compInfo.name(compInfo.source());
 
-    fullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
                        TRANSFORMATIONS};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1334,9 +1329,9 @@ found in the Instrument cache.
     auto instrName = compInfo.name(compInfo.root());
     auto sourceName = compInfo.name(compInfo.source());
 
-    fullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
                                       TRANSFORMATIONS};
-    fullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
+    FullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -1386,9 +1381,9 @@ found in the Instrument cache.
     auto instrName = compInfo.name(compInfo.root());
     auto sourceName = compInfo.name(compInfo.source());
 
-    fullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
                                       TRANSFORMATIONS};
-    fullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
+    FullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -1437,9 +1432,9 @@ found in the Instrument cache.
     auto instrName = compInfo.name(compInfo.root());
     auto sourceName = compInfo.name(compInfo.source());
 
-    fullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
                                       TRANSFORMATIONS};
-    fullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
+    FullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -1489,9 +1484,9 @@ found in the Instrument cache.
     auto instrName = compInfo.name(compInfo.root());
     auto sourceName = compInfo.name(compInfo.source());
 
-    fullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
+    FullH5Path transformationsPath = {DEFAULT_ROOT_PATH, instrName, sourceName,
                                       TRANSFORMATIONS};
-    fullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
+    FullH5Path sourcePath = {DEFAULT_ROOT_PATH, instrName, sourceName};
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);

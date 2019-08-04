@@ -46,24 +46,9 @@ namespace NexusGeometrySave {
 inline std::vector<double> toStdVector(const V3D &data) {
   std::vector<double> stdVector;
   stdVector.reserve(3);
-  for (int i = 0; i < 3; ++i)
-    stdVector.push_back(data[i]);
-  return stdVector;
-}
-
-/*
- * Function toStdVector (Overloaded). Store data in Mantid::Kernel::Quat
- * vector into std::vector<double> vector. Used by saveInstrument to write
- * array-type datasets to file.
- *
- * @param data :  Mantid::Kernel::Quat quaternion containing data values
- * @return std::vector<double> vector containing data values in Quat format
- */
-inline std::vector<double> toStdVector(const Quat &data) {
-  std::vector<double> stdVector;
-  stdVector.reserve(4);
-  for (int i = 0; i < 4; ++i)
-    stdVector.push_back(data[i]);
+  stdVector.push_back(data.X());
+  stdVector.push_back(data.Y());
+  stdVector.push_back(data.Z());
   return stdVector;
 }
 
@@ -81,20 +66,7 @@ inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
 }
 
 /*
- * Function toStdVector (Overloaded). Store data in Eigen::Quaterniond vector
- * into std::vector<double> vector. Used by saveInstrument to write array-type
- * datasets to file.
- *
- * @param data : Eigen::Quaterniond quaternion containing data values
- * @return std::vector<double> vector containing data values in
- * Eigen::Quaterniond format
- */
-inline std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
-  return toStdVector(Kernel::toQuat(data));
-}
-
-/*
- * Function: isApproxZero. returns true if all values in an variable size
+ * Function: isApproxZero. returns true if all values in an variable-sized
  * std-vector container evaluate to zero with a given level of precision. Used
  * by SaveInstrument methods to determine whether or not to write a dataset to
  * file.
@@ -106,8 +78,6 @@ inline std::vector<double> toStdVector(const Eigen::Quaterniond &data) {
 inline bool isApproxZero(const std::vector<double> &data,
                          const double &precision) {
 
-  // if data is a quaternion return true if the associated rotation about an
-  // axis is approximately zero
   return std::all_of(data.begin(), data.end(),
                      [&precision](const double &element) {
                        return std::abs(element) < precision;
@@ -123,44 +93,6 @@ inline bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
 inline bool isApproxZero(const Eigen::Quaterniond &data,
                          const double &precision) {
   return data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
-}
-
-/*
- * Function: nxDetectorIndices. finds banks in component info and returns
- * all indexes found.
- *
- * @param compInfo : Mantid::Geometry::ComponentInfo object.
- * @return std::vector<size_t> container with all indices in compInfo found to
- * be a detector bank
- */
-std::vector<size_t> nxDetectorIndices(const Geometry::ComponentInfo &compInfo) {
-  std::vector<size_t> banksInComponent;
-  for (size_t index = compInfo.root() - 1; index > 0; --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
-      banksInComponent.push_back(index);
-    }
-  }
-  return banksInComponent;
-}
-
-/*
- * Function: nxMonitorIndices. finds monitors in component info and returns
- * all indexes found.
- *
- * @param compInfo : Mantid::Geometry::ComponentInfo object.
- * @return std::vector<size_t> container with all indices in compInfo found to
- * be a monitor
- */
-std::vector<size_t> nxMonitorIndices(const Geometry::DetectorInfo &detInfo) {
-  std::vector<size_t> monitorsInComponent;
-  auto detIds = detInfo.detectorIDs();
-  for (const int &ID : detIds) {
-    auto index = detInfo.indexOf(ID);
-    if (detInfo.isMonitor(index)) {
-      monitorsInComponent.push_back(index);
-    }
-  }
-  return monitorsInComponent;
 }
 
 /*
@@ -570,7 +502,6 @@ H5::Group NXInstrument(const H5::Group &parent,
  * group, and writes the Nexus compliant datasets and metadata stored in
  * attributes to the new group.
  *
- *
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
  */
@@ -591,7 +522,6 @@ void saveNXSample(const H5::Group &parentGroup,
  * For NXentry (root group). Produces an NXsource group in the parent group, and
  * writes the Nexus compliant datasets and metadata stored in attributes to the
  * new group.
- *
  *
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
@@ -797,15 +727,12 @@ void saveInstrument(
                                 ext.generic_string() +
                                 "'. Expected any of: " + extensions);
   }
-  if (reporter != nullptr) {
-    reporter->report();
-  }
+
   if (!compInfo.hasDetectorInfo()) {
     throw std::invalid_argument(
         "No detector info was found in the Instrument cache.\n");
   }
   if (!compInfo.hasSample()) {
-
     throw std::invalid_argument(
         "No sample was found in the Instrument cache.\n");
   }
@@ -819,12 +746,29 @@ void saveInstrument(
     throw std::invalid_argument("No source was found in the Instrument cache.");
   }
 
+  const auto detIds = detInfo.detectorIDs();
+  std::vector<size_t> banksInComponent;
+  std::vector<size_t> monitorsInComponent;
+  auto nonDetectors = compInfo.root() - detInfo.size();
+
+  // ignore component root (instrument), and detectors.
+  for (size_t index = compInfo.root() - 1; index > nonDetectors - 1; --index) {
+    auto name = compInfo.name(index);
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+      banksInComponent.push_back(index);
+    }
+  }
+
+  for (const int &ID : detIds) {
+    auto index = detInfo.indexOf(ID);
+    if (detInfo.isMonitor(index)) {
+      monitorsInComponent.push_back(index);
+    }
+  }
+
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
-  const auto detIds = detInfo.detectorIDs();
-  const std::vector<size_t> nxDetectors = nxDetectorIndices(compInfo);
-  const std::vector<size_t> nxMonitors = nxMonitorIndices(detInfo);
   H5::Group rootGroup, instrument;
 
   // create NXentry (file root)
@@ -834,21 +778,27 @@ void saveInstrument(
   // save and capture NXinstrument (component root)
   instrument = NexusGeometrySave::NXInstrument(rootGroup, compInfo);
 
-  // save NXdetectors
-  for (const size_t &index : nxDetectors) {
-    NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
-  }
-
-  // save NXmonitors
-  for (const size_t &index : nxMonitors) {
-    NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
-  }
-
   // save NXsource
   NexusGeometrySave::saveNXSource(instrument, compInfo);
 
   // save NXsample
   NexusGeometrySave::saveNXSample(rootGroup, compInfo);
+
+  // save NXdetectors
+  for (const size_t &index : banksInComponent) {
+    if (reporter != nullptr) {
+      reporter->report();
+    }
+    NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
+  }
+
+  // save NXmonitors
+  for (const size_t &index : monitorsInComponent) {
+    if (reporter != nullptr) {
+      reporter->report();
+    }
+    NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
+  }
 
   file.close(); // close file
 
