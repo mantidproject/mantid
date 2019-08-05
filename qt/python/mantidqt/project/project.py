@@ -54,7 +54,7 @@ class Project(AnalysisDataServiceObserver):
     def save(self):
         """
         The function that is called if the save button is clicked on the mainwindow
-        :return: None; if the user cancels
+        :return: True; if the user cancels
         """
         if self.last_project_location is None:
             return self.save_as()
@@ -67,26 +67,20 @@ class Project(AnalysisDataServiceObserver):
                 self._save()
             elif answer == QMessageBox.No:
                 # Save with a new name
-                self.save_as()
+                return self.save_as()
+            else:
+                # Cancel clicked
+                return True
 
     def save_as(self):
         """
         The function that is called if the save as... button is clicked on the mainwindow
-        :return: None; if the user cancels.
+        :return: True; if the user cancels.
         """
         path = self._save_file_dialog()
         if path is None:
             # Cancel close dialogs
             return True
-
-        # If the selected path is a project directory ask if overwrite is required?
-        if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
-            answer = self._offer_overwriting_gui()
-            if answer == QMessageBox.No:
-                return
-            elif answer == QMessageBox.Yes:
-                # Just continue on
-                pass
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
@@ -96,11 +90,12 @@ class Project(AnalysisDataServiceObserver):
     def _offer_overwriting_gui():
         """
         Offers up a overwriting QMessageBox giving the option to overwrite a project, and returns the reply.
-        :return: QMessaageBox.Yes or QMessageBox.No; The value is the value selected by the user.
+        :return: QMessaageBox.Yes or QMessageBox.No or QMessageBox.Cancel; The value is the value selected by the user.
         """
-        return QMessageBox.question(None, "Overwrite project?",
+        return QMessageBox().question(None, "Overwrite project?",
                                     "Would you like to overwrite the selected project?",
-                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                    QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                    QMessageBox.Yes)
 
     def _save_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
