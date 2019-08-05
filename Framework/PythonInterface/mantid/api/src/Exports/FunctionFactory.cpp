@@ -9,8 +9,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>

@@ -10,8 +10,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/AsType.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/AsType.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -28,7 +28,7 @@ namespace {
  * The C++ implementation accepts a boost::shared<const MatrixWorkspace> which
  * we cannot currently handle. This allows a boost::shared<MatrixWorkspace> to
  *be passed
- * in an converted. See MantidPythonInterface/kernel/Policies/RemoveConst for
+ * in an converted. See MantidPythonInterface/core/Policies/RemoveConst for
  *the full
  * explanation of why this is necessary
  *

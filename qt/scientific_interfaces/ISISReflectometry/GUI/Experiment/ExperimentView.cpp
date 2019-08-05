@@ -208,11 +208,7 @@ void ExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.endOverlapEdit->setEnabled(enabled);
   m_ui.transStitchParamsEdit->setEnabled(enabled);
   m_ui.transScaleRHSCheckBox->setEnabled(enabled);
-  m_ui.polCorrComboBox->setEnabled(enabled);
-  m_ui.CRhoEdit->setEnabled(enabled);
-  m_ui.CAlphaEdit->setEnabled(enabled);
-  m_ui.CApEdit->setEnabled(enabled);
-  m_ui.CPpEdit->setEnabled(enabled);
+  m_ui.polCorrCheckBox->setEnabled(enabled);
   stitchOptionsLineEdit().setEnabled(enabled);
   m_ui.reductionTypeComboBox->setEnabled(enabled);
   m_ui.summationTypeComboBox->setEnabled(enabled);
@@ -238,11 +234,7 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
-  registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(*m_ui.CRhoEdit, "cRho", alg);
-  registerSettingWidget(*m_ui.CAlphaEdit, "cAlpha", alg);
-  registerSettingWidget(*m_ui.CApEdit, "cAp", alg);
-  registerSettingWidget(*m_ui.CPpEdit, "cPp", alg);
+  registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
@@ -262,11 +254,7 @@ void ExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.endOverlapEdit);
   connectSettingsChange(*m_ui.transStitchParamsEdit);
   connectSettingsChange(*m_ui.transScaleRHSCheckBox);
-  connectSettingsChange(*m_ui.polCorrComboBox);
-  connectSettingsChange(*m_ui.CRhoEdit);
-  connectSettingsChange(*m_ui.CAlphaEdit);
-  connectSettingsChange(*m_ui.CApEdit);
-  connectSettingsChange(*m_ui.CPpEdit);
+  connectSettingsChange(*m_ui.polCorrCheckBox);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -283,11 +271,7 @@ void ExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.endOverlapEdit);
   disconnectSettingsChange(*m_ui.transStitchParamsEdit);
   disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
-  disconnectSettingsChange(*m_ui.polCorrComboBox);
-  disconnectSettingsChange(*m_ui.CRhoEdit);
-  disconnectSettingsChange(*m_ui.CAlphaEdit);
-  disconnectSettingsChange(*m_ui.CApEdit);
-  disconnectSettingsChange(*m_ui.CPpEdit);
+  disconnectSettingsChange(*m_ui.polCorrCheckBox);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
@@ -430,44 +414,23 @@ void ExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
 }
 
 void ExperimentView::enablePolarizationCorrections() {
-  m_ui.polCorrComboBox->setEnabled(true);
-  enablePolarizationCorrectionInputs();
+  m_ui.polCorrCheckBox->setEnabled(true);
+  m_ui.polCorrLabel->setEnabled(true);
 }
 
 void ExperimentView::disablePolarizationCorrections() {
-  m_ui.polCorrComboBox->setEnabled(false);
-  disablePolarizationCorrectionInputs();
-  // Set polarization corrections text to 'None' when disabled
-  setSelected(*m_ui.polCorrComboBox, "None");
-  // Clear all parameters as well
-  m_ui.CRhoEdit->clear();
-  m_ui.CAlphaEdit->clear();
-  m_ui.CApEdit->clear();
-  m_ui.CPpEdit->clear();
-}
-
-void ExperimentView::enablePolarizationCorrectionInputs() {
-  m_ui.CRhoEdit->setEnabled(true);
-  m_ui.CAlphaEdit->setEnabled(true);
-  m_ui.CApEdit->setEnabled(true);
-  m_ui.CPpEdit->setEnabled(true);
-}
-
-void ExperimentView::disablePolarizationCorrectionInputs() {
-  m_ui.CRhoEdit->setEnabled(false);
-  m_ui.CAlphaEdit->setEnabled(false);
-  m_ui.CApEdit->setEnabled(false);
-  m_ui.CPpEdit->setEnabled(false);
-}
-
-void ExperimentView::enableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setEnabled(true);
-  m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
+  m_ui.polCorrCheckBox->setEnabled(false);
+  m_ui.polCorrLabel->setEnabled(false);
 }
 
 void ExperimentView::disableFloodCorrectionInputs() {
   m_ui.floodWorkspaceWsSelector->setEnabled(false);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(false);
+}
+
+void ExperimentView::enableFloodCorrectionInputs() {
+  m_ui.floodWorkspaceWsSelector->setEnabled(true);
+  m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
 }
 
 void ExperimentView::onPerAngleDefaultsChanged(int row, int column) {
@@ -564,24 +527,6 @@ void ExperimentView::createStitchHints(
   m_stitchEdit = new MantidWidgets::HintingLineEdit(this, hints);
   m_ui.expSettingsGrid->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
 }
-
-double ExperimentView::getCRho() const { return m_ui.CRhoEdit->value(); }
-
-void ExperimentView::setCRho(double cRho) { m_ui.CRhoEdit->setValue(cRho); }
-
-double ExperimentView::getCAlpha() const { return m_ui.CAlphaEdit->value(); }
-
-void ExperimentView::setCAlpha(double cAlpha) {
-  m_ui.CAlphaEdit->setValue(cAlpha);
-}
-
-double ExperimentView::getCAp() const { return m_ui.CApEdit->value(); }
-
-void ExperimentView::setCAp(double cAp) { m_ui.CApEdit->setValue(cAp); }
-
-double ExperimentView::getCPp() const { return m_ui.CPpEdit->value(); }
-
-void ExperimentView::setCPp(double cPp) { m_ui.CPpEdit->setValue(cPp); }
 
 std::string ExperimentView::getFloodCorrectionType() const {
   return getText(*m_ui.floodCorComboBox);
@@ -744,12 +689,12 @@ void ExperimentView::showTransmissionStitchParamsInvalid() {
   showAsInvalid(*m_ui.transStitchParamsEdit);
 }
 
-void ExperimentView::setPolarizationCorrectionType(std::string const &type) {
-  setSelected(*m_ui.polCorrComboBox, type);
+void ExperimentView::setPolarizationCorrectionOption(bool enable) {
+  setChecked(*m_ui.polCorrCheckBox, enable);
 }
 
-std::string ExperimentView::getPolarizationCorrectionType() const {
-  return getText(*m_ui.polCorrComboBox);
+bool ExperimentView::getPolarizationCorrectionOption() const {
+  return m_ui.polCorrCheckBox->isChecked();
 }
 
 std::string ExperimentView::getStitchOptions() const {

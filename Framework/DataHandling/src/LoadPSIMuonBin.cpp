@@ -329,7 +329,7 @@ void LoadPSIMuonBin::readArrayVariables(
 
   for (auto i = 0u; i <= 15; ++i) {
     streamReader.moveStreamToPosition(948 + (i * 4));
-    streamReader >> m_header.labelsOfHistograms[i];
+    streamReader.read(m_header.labelsOfHistograms[i], 4);
 
     streamReader.moveStreamToPosition(458 + (i * 2));
     streamReader >> m_header.integerT0[i];
@@ -368,28 +368,22 @@ void LoadPSIMuonBin::readInHeader(
 
 void LoadPSIMuonBin::readInHistograms(
     Mantid::Kernel::BinaryStreamReader &streamReader) {
-  // Read in the m_histograms
-  m_histograms.reserve(m_header.numberOfHistograms);
+  constexpr auto sizeInt32_t = sizeof(int32_t);
+  const auto headerSize = 1024;
+  m_histograms.resize(m_header.numberOfHistograms);
   for (auto histogramIndex = 0; histogramIndex < m_header.numberOfHistograms;
        ++histogramIndex) {
-    std::vector<double> nextHistogram;
+    const auto offset = histogramIndex * m_header.numberOfDataRecordsHistogram *
+                        m_header.lengthOfDataRecordsBin;
+    std::vector<double> &nextHistogram = m_histograms[histogramIndex];
+    streamReader.moveStreamToPosition(offset * sizeInt32_t + headerSize);
     nextHistogram.reserve(m_header.lengthOfHistograms);
     for (auto rowIndex = 0; rowIndex < m_header.lengthOfHistograms;
          ++rowIndex) {
-      // Each histogram bit is 1024 bytes below the file start, and 4 bytes
-      // apart, and the HistogramNumber * NumberOfRecordsInEach *
-      // LengthOfTheDataRecordBins + PositionInHistogram
-      unsigned long histogramStreamPosition =
-          1024 + (histogramIndex * m_header.numberOfDataRecordsFile *
-                  m_header.lengthOfDataRecordsBin);
-      unsigned long streamPosition =
-          histogramStreamPosition + rowIndex * sizeof(int32_t);
-      streamReader.moveStreamToPosition(streamPosition);
       int32_t nextReadValue;
       streamReader >> nextReadValue;
       nextHistogram.emplace_back(nextReadValue);
     }
-    m_histograms.emplace_back(nextHistogram);
   }
 }
 
@@ -472,9 +466,16 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   // Set Start date and time and end date and time
   auto startDate = getFormattedDateTime(m_header.dateStart, m_header.timeStart);
   auto endDate = getFormattedDateTime(m_header.dateEnd, m_header.timeEnd);
-  Mantid::Types::Core::DateAndTime start(startDate);
-  Mantid::Types::Core::DateAndTime end(endDate);
-  outputWorkspace->mutableRun().setStartAndEndTime(start, end);
+  try {
+    Mantid::Types::Core::DateAndTime start(startDate);
+    Mantid::Types::Core::DateAndTime end(endDate);
+    outputWorkspace->mutableRun().setStartAndEndTime(start, end);
+  } catch (const std::logic_error &) {
+    Mantid::Types::Core::DateAndTime start;
+    Mantid::Types::Core::DateAndTime end;
+    outputWorkspace->mutableRun().setStartAndEndTime(start, end);
+    g_log.warning("The date in the .bin file was invalid");
+  }
 
   addToSampleLog("run_end", startDate, outputWorkspace);
   addToSampleLog("run_start", endDate, outputWorkspace);
@@ -536,10 +537,19 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     if (m_header.labels_scalars[i] == "NONE")
       // Break out of for loop
       break;
-    addToSampleLog("Label Spectra " + std::to_string(i),
+    addToSampleLog("Scalar Label Spectra " + std::to_string(i),
                    m_header.labels_scalars[i], outputWorkspace);
     addToSampleLog("Scalar Spectra " + std::to_string(i), m_header.scalars[i],
                    outputWorkspace);
+  }
+
+  constexpr auto sizeOfLabels = sizeof(m_header.labelsOfHistograms) /
+                                sizeof(*m_header.labelsOfHistograms);
+  for (auto i = 0u; i < sizeOfLabels; ++i) {
+    if (m_header.labelsOfHistograms[i] == "")
+      break;
+    addToSampleLog("Label Spectra " + std::to_string(i),
+                   m_header.labelsOfHistograms[i], outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);

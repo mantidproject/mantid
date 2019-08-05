@@ -9,9 +9,9 @@
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/geometry/DetectorInfoPythonIterator.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

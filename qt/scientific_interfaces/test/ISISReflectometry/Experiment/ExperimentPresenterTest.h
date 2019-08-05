@@ -161,38 +161,6 @@ public:
     verifyAndClear();
   }
 
-  void testSetPolarizationCorrectionsUpdatesModel() {
-    auto presenter = makePresenter();
-    PolarizationCorrections polCorr(PolarizationCorrectionType::PA, 1.2, 1.3,
-                                    2.4, 2.5);
-
-    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return("PA"));
-    EXPECT_CALL(m_view, getCRho()).WillOnce(Return(polCorr.cRho().get()));
-    EXPECT_CALL(m_view, getCAlpha()).WillOnce(Return(polCorr.cAlpha().get()));
-    EXPECT_CALL(m_view, getCAp()).WillOnce(Return(polCorr.cAp().get()));
-    EXPECT_CALL(m_view, getCPp()).WillOnce(Return(polCorr.cPp().get()));
-    presenter.notifySettingsChanged();
-
-    TS_ASSERT_EQUALS(presenter.experiment().polarizationCorrections(), polCorr);
-    verifyAndClear();
-  }
-
-  void testSettingPolarizationCorrectionsToNoneDisablesInputs() {
-    runWithPolarizationCorrectionInputsDisabled("None");
-  }
-
-  void testSetPolarizationCorrectionsToParameterFileDisablesInputs() {
-    runWithPolarizationCorrectionInputsDisabled("ParameterFile");
-  }
-
-  void testSettingPolarizationCorrectionsToPAEnablesInputs() {
-    runWithPolarizationCorrectionInputsEnabled("PA");
-  }
-
-  void testSettingPolarizationCorrectionsToPNREnablesInputs() {
-    runWithPolarizationCorrectionInputsEnabled("PNR");
-  }
-
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace,
@@ -636,8 +604,7 @@ public:
         FloodCorrections(FloodCorrectionType::ParameterFile));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    EXPECT_CALL(m_view, setPolarizationCorrectionType("ParameterFile"))
-        .Times(1);
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
@@ -665,6 +632,26 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
+  }
+
+  void testPolarizationCorrectionsDisabledForINTER() {
+    runTestThatPolarizationCorrectionsAreDisabledForInstrument("INTER");
+  }
+
+  void testPolarizationCorrectionsDisabledForSURF() {
+    runTestThatPolarizationCorrectionsAreDisabledForInstrument("SURF");
+  }
+
+  void testPolarizationCorrectionsEnabledForOFFSPEC() {
+    runTestThatPolarizationCorrectionsAreEnabledForInstrument("OFFSPEC");
+  }
+
+  void testPolarizationCorrectionsEnabledForPOLREF() {
+    runTestThatPolarizationCorrectionsAreEnabledForInstrument("POLREF");
+  }
+
+  void testPolarizationCorrectionsEnabledForCRISP() {
+    runTestThatPolarizationCorrectionsAreEnabledForInstrument("CRISP");
   }
 
 private:
@@ -784,29 +771,28 @@ private:
     return defaultOptions;
   }
 
-  void runWithPolarizationCorrectionInputsDisabled(std::string const &type) {
+  void runTestThatPolarizationCorrectionsAreEnabledForInstrument(
+      std::string const &instrument) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return(type));
-    EXPECT_CALL(m_view, disablePolarizationCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getCRho()).Times(0);
-    EXPECT_CALL(m_view, getCAlpha()).Times(0);
-    EXPECT_CALL(m_view, getCAp()).Times(0);
-    EXPECT_CALL(m_view, getCPp()).Times(0);
+    EXPECT_CALL(m_mainPresenter, instrumentName())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_view, enablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
 
     verifyAndClear();
   }
 
-  void runWithPolarizationCorrectionInputsEnabled(std::string const &type) {
+  void runTestThatPolarizationCorrectionsAreDisabledForInstrument(
+      std::string const &instrument) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionType()).WillOnce(Return(type));
-    EXPECT_CALL(m_view, enablePolarizationCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getCRho()).Times(1);
-    EXPECT_CALL(m_view, getCAlpha()).Times(1);
-    EXPECT_CALL(m_view, getCAp()).Times(1);
-    EXPECT_CALL(m_view, getCPp()).Times(1);
+    EXPECT_CALL(m_mainPresenter, instrumentName())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption(false)).Times(1);
+    EXPECT_CALL(m_view, disablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
 
     verifyAndClear();

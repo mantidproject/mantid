@@ -18,12 +18,12 @@ Windows
 
 Install the following:
 
-* `Visual Studio 2017 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
+* `Visual Studio 2019 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
 
   * When asked about installation workloads choose ``Desktop development with C++``
   * Under the "Installation details" section verify that the following are checked:
 
-    * ``Windows 8.1 SDK and UCRT SDK``
+    * ``Windows Universal CRT SDK``
     * The latest Windows 10 SDK
 
 
@@ -34,7 +34,7 @@ Install the following:
   * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
   * run ``git lfs install`` to initialize Git LFS. (Note that if you miss this step you may get errors due to the third party libraries not checking out properly. This can be fixed later by running ``git lfs fetch`` and ``git lfs checkout`` in the ``external\src\ThirdParty`` directory.)
 
-* `CMake <https://cmake.org/download/>`_ >= 3.14
+* `CMake <https://cmake.org/download/>`_ >= 3.15
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
   * open the MikTeX console from the start menu

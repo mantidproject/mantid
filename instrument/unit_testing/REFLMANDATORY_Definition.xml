@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument name="REFLMANDATORY" valid-from   ="1900-01-31 23:59:59"
+                        valid-to     ="2100-01-31 23:59:59"
+        last-modified="2010-10-01 09:56:20.177358">
+
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+    <components-are-facing x="0.0" y="0.0" z="0.0" />
+  </defaults>
+ 
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-23.83" />
+  </component>
+  <type name="source" is="Source"/>
+   
+  <component type="some-surface-holder">
+    <location x="0.0" y="0.0" z="0.0" />
+  </component>
+  <type name="some-surface-holder" is="SamplePos"/>
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+
+  <!-- detector components (including monitors) -->
+
+  <component type="monitor1" idlist="monitor1">
+    <location r="11.38" t="180.0" />
+  </component>
+
+  <type name="monitor1" is="monitor">
+    <percent-transparency val="95" />
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.02" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" /> 
+      <radius val="0.015" />
+      <height val="0.04" />
+    </cylinder> 
+    <algebra val="shape" />
+  </type>  
+
+   <component type="LinearDetector" idlist="LinearDetector">
+     <location z="3.65" /> 
+   </component>
+
+  <type name="LinearDetector">
+  <component type="pixel">
+    <locations y="-0.1301" y-end="0.1771" n-elements="256" />
+  </component>
+  </type>
+
+  <type name="pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.025" y="-0.0006" z="0.0"  />
+      <left-front-top-point  x="-0.025" y="0.0006" z="0.0"  />
+      <left-back-bottom-point  x="-0.025" y="-0.0006" z="0.05"  />
+      <right-front-bottom-point  x="0.025" y="-0.0006" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+  <component type="point-detector" idlist="point-detector">
+     <location z="3.19" /> 
+  </component>   
+
+  <type name="point-detector" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="-0.05" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.005" />
+      <height val="0.1" />
+    </cylinder> 
+    <algebra val="shape" />
+  </type>    
+
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+
+  <idlist idname="LinearDetector">
+    <id start="1001" end="1256" />
+  </idlist>
+
+  <idlist idname="point-detector">
+    <id val="2000" />
+  </idlist>
+
+</instrument>
