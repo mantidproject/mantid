@@ -536,7 +536,7 @@ void JSONGeometryParser::parse(const std::string &jsonGeometry) {
   extractDetectorContent();
 }
 
-constexpr double
+inline double
 JSONGeometryParser::degreesToRadians(const double degrees) noexcept {
   return degrees * PI / DEGREES_IN_SEMICIRCLE;
 }

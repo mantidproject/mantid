@@ -51,21 +51,6 @@ struct Monitor {
   bool isOffGeometry;
 };
 
-struct Detector {
-  std::string name;
-  std::string componentName;
-  std::string detectorID;
-  Eigen::Vector3d position;
-  Eigen::Vector3d translation;
-  Eigen::Quaterniond orientation;
-  // detector shape
-  std::vector<Eigen::Vector3d> vertices;
-  std::vector<int32_t> cylinders;
-  std::vector<int32_t> faces;
-  std::vector<int32_t> windingOrder;
-  bool isOffGeometry;
-};
-
 /** JSONGeometryParser : Parses a JSON string which has a parallel structure to
    nexus geometry in nexus files and extracts all information about the
    instrument. https://www.nexusformat.org/
@@ -77,7 +62,7 @@ public:
   JSONGeometryParser() = delete;
   JSONGeometryParser(const std::string &json);
   ~JSONGeometryParser() = default;
-  size_t size() noexcept { return m_jsonDetectorBanks.size(); }
+  size_t numberOfBanks() noexcept { return m_jsonDetectorBanks.size(); }
   const std::vector<int64_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
   }
@@ -129,7 +114,7 @@ public:
     return m_pixelShapeCylinders[index];
   }
 
-  constexpr double degreesToRadians(const double degrees) noexcept;
+  inline double degreesToRadians(const double degrees) noexcept;
 
 private:
   /// Parse geometry provided with a string representing geometry.
@@ -158,7 +143,6 @@ private:
   std::vector<Chopper> m_choppers;
   // detector information
   std::vector<Json::Value> m_jsonDetectorBanks;
-  std::vector<Detector> m_detectors;
   std::vector<std::string> m_detectorBankNames;
   std::vector<std::vector<int64_t>> m_detIDs;
   std::vector<std::vector<double>> m_x;

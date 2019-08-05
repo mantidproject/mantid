@@ -144,7 +144,7 @@ public:
   void test_load_full_instrument_simple_off_pixel_shape() {
     std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleOFF();
     JSONGeometryParser parser(json);
-    TS_ASSERT_EQUALS(parser.size(), 1);
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
@@ -176,7 +176,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleCylindrical();
     JSONGeometryParser parser(json);
-    TS_ASSERT_EQUALS(parser.size(), 1);
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
@@ -206,7 +206,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleWithChopper();
     JSONGeometryParser parser(json);
-    TS_ASSERT_EQUALS(parser.size(), 1);
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     // validate choppers
     const auto &choppers = parser.choppers();
     TS_ASSERT_EQUALS(choppers.size(), 1);
@@ -250,7 +250,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitorNoShape();
     JSONGeometryParser parser(json);
-    TS_ASSERT_EQUALS(parser.size(), 1);
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     // validate monitors
     const auto &monitors = parser.monitors();
     TS_ASSERT_EQUALS(monitors.size(), 1);
@@ -303,7 +303,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
     JSONGeometryParser parser(json);
-    TS_ASSERT_EQUALS(parser.size(), 1);
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     // validate monitors
     const auto &monitors = parser.monitors();
     TS_ASSERT_EQUALS(monitors.size(), 1);
