@@ -103,7 +103,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # plotting
         self.plot_window = None
         self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
-        self.color_index = 0
+        self.used_colors = {}
 
         # layout
         self.box = QtWidgets.QHBoxLayout()
@@ -119,10 +119,20 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.electron_peaks = {}
         self._generate_element_widgets()
 
-    # Return an unused colour, if all used then start with the first one
-    def get_color(self):
-        color = "C%d" % self.color_index
-        self.color_index = (self.color_index + 1) % self.num_colors
+    # Return the first unused colour, if all used then restart from the beginning of the cycle
+    def get_color(self, element):
+        if element in self.used_colors:
+            return self.used_colors[element]
+
+        occurrences = []
+        for i in range(self.num_colors):
+            occurrences.append(self.used_colors.values().count('C{}'.format(i)))
+
+        color_list = ['C{}'.format(i) for i in range(self.num_colors) if occurrences[i] == min(occurrences)]
+        color_index = min([int(col[1:]) for col in color_list])
+
+        color = "C{}".format(color_index)
+        self.used_colors[element] = color
 
         return color
 
@@ -187,7 +197,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.element_lines[element] = []
 
         # Select a different color, if all used then use the first
-        color = self.get_color()
+        color = self.get_color(element)
 
         for name, x_value in iteritems(data):
             try:
@@ -207,6 +217,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             try:
                 self.element_lines[element].remove(name)
                 self._rm_line(name)
+                if not self.element_lines[element]:
+                    del self.element_lines[element]
+                    if element in self.used_colors:
+                        del self.used_colors[element]
             except:
                 continue
 
@@ -266,7 +280,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # if already selected add to just new plot
         if data is None:
             data = self.element_widgets[element].get_checked()
-        color = self.get_color()
+        color = self.get_color(element)
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
