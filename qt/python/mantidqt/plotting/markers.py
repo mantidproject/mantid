@@ -699,6 +699,20 @@ class SingleMarker(QObject):
         if self.upper_bound < self.get_position():
             self.set_position(maximum)
 
+    def get_lower_bound(self):
+        """
+        Gets the minimum bound for the marker.
+        :return: The minimum bound for the marker.
+        """
+        return self.lower_bound
+
+    def get_upper_bound(self):
+        """
+        Gets the maximum bound for the marker.
+        :return: The maximum bound for the marker.
+        """
+        return self.upper_bound
+
     def is_inside_bounds(self, x, y):
         """
         Determines if the axis coords are within the bounds specified.
@@ -813,6 +827,14 @@ class RangeMarker(QObject):
         """
         self.set_lower_bound(minimum)
         self.set_upper_bound(maximum)
+
+    def get_bounds(self):
+        """
+        Gets the bounds within which the range marker is allowed to move. Note that the lower and upper bound for the
+        min and max markers is the same.
+        :return: the bounds within which the range marker is allowed to move.
+        """
+        return sorted([self.min_marker.get_lower_bound(), self.min_marker.get_upper_bound()])
 
     def set_lower_bound(self, minimum):
         """

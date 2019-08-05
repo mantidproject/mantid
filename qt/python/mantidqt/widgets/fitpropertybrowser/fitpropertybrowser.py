@@ -147,8 +147,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Override the base class method. Hide the peak editing tool.
         """
         if self.tool is not None:
-            self.tool.fit_start_x_moved.disconnect()
-            self.tool.fit_end_x_moved.disconnect()
+            self.tool.fit_range_changed.disconnect()
             self.tool.disconnect()
             self.tool = None
             self.canvas.draw()
@@ -163,7 +162,11 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         if self.tool is not None:
             new_range = sorted([start_x, end_x])
-            self.tool.set_fit_range(new_range[0], new_range[1])
+            bounds = self.tool.fit_range.get_bounds()
+            if bounds[0] <= new_range[0] and bounds[1] >= new_range[1]:
+                self.tool.set_fit_range(new_range[0], new_range[1])
+            else:
+                self.set_fit_range(self.tool.fit_range.get_range())
 
     def clear_fit_result_lines(self):
         """
