@@ -40,8 +40,8 @@ const std::string ROTATION = "rotation";
 const std::string VECTOR = "vector";
 const std::string UNITS = "units";
 // Radians and degrees
-const static double PI = 3.1415926535;
-const static double DEGREES_IN_SEMICIRCLE = 180;
+constexpr double PI = 3.1415926535;
+constexpr double DEGREES_IN_SEMICIRCLE = 180;
 // Nexus shape types
 const std::string NX_CYLINDER = "NXcylindrical_geometry";
 const std::string NX_OFF = "NXoff_geometry";
