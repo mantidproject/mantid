@@ -121,15 +121,24 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     # Return the first unused colour, if all used then restart from the beginning of the cycle
     def get_color(self, element):
+        """
+        When requesting the colour for a new element, return the first unused colour of the matplotlib
+        default colour cycle (i.e. mpl.rcParams['axes.prop_cycle']).
+        If all colours are used, return the first among the least used ones.
+        That is if C0-4 are all used twice and C5-9 are used once, C5 will be returned.
+
+        When requesting the colour for an element that is already plotted return the colour of that element.
+        This prevents the same element from being displayed in different colours in separate plots
+
+        :param element: Chemical symbol of the element that one wants the colour of
+        :return: Matplotlib colour string: C0, C1, ..., C9 to be used as plt.plot(..., color='C3')
+        """
         if element in self.used_colors:
             return self.used_colors[element]
 
-        occurrences = []
-        for i in range(self.num_colors):
-            occurrences.append(self.used_colors.values().count('C{}'.format(i)))
+        occurrences = [self.used_colors.values().count('C{}'.format(i)) for i in range(self.num_colors)]
 
-        color_list = ['C{}'.format(i) for i in range(self.num_colors) if occurrences[i] == min(occurrences)]
-        color_index = min([int(col[1:]) for col in color_list])
+        color_index = occurrences.index(min(occurrences))
 
         color = "C{}".format(color_index)
         self.used_colors[element] = color
