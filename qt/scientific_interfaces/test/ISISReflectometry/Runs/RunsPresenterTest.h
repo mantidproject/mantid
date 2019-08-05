@@ -7,9 +7,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
