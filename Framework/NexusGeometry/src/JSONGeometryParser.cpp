@@ -285,6 +285,8 @@ Json::Value getRoot(const std::string &jsonGeometry) {
 namespace Mantid {
 namespace NexusGeometry {
 
+JSONGeometryParser::JSONGeometryParser(const std::string &json) { parse(json); }
+
 void JSONGeometryParser::reset() noexcept {
   m_jsonDetectorBanks.clear();
   m_jsonChoppers.clear();

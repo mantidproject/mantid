@@ -74,10 +74,9 @@ struct Detector {
  */
 class MANTID_NEXUSGEOMETRY_DLL JSONGeometryParser {
 public:
-  JSONGeometryParser() = default;
+  JSONGeometryParser() = delete;
+  JSONGeometryParser(const std::string &json);
   ~JSONGeometryParser() = default;
-  /// Parse geometry provided with a string representing geometry.
-  void parse(const std::string &jsonGeometry);
   size_t size() noexcept { return m_jsonDetectorBanks.size(); }
   const std::vector<int64_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
@@ -133,6 +132,8 @@ public:
   constexpr double degreesToRadians(const double degrees) noexcept;
 
 private:
+  /// Parse geometry provided with a string representing geometry.
+  void parse(const std::string &jsonGeometry);
   /// clear all geometry information
   void reset() noexcept;
   void validateAndRetrieveGeometry(const std::string &jsonGeometry);
