@@ -32,6 +32,7 @@ def generate_script(fig):
         fig = plt.figure()
         ax = fig.add_subplot()
         ax.plot() or ax.errorbar()
+        ax.legend().draggable()     (if legend present)
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
@@ -46,6 +47,8 @@ def generate_script(fig):
                                        generate_add_subplot_command(ax)))
         for artist in ax.get_tracked_artists():
             plot_commands.append("{}.{}".format(AXES_VARIABLE, generate_plot_command(artist)))
+        if ax.legend_:
+            plot_commands.append("{}.legend().draggable()".format(AXES_VARIABLE))
     if not plot_commands:
         return
     cmds = [DEFAULT_CONTENT] + get_workspace_history_commands(fig)
