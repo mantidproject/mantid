@@ -76,8 +76,8 @@ public:
     H5::Group parent = m_file.openGroup(pathList[0]);
 
     for (size_t i = 1; i < pathList.size(); ++i) {
-        child = parent.openGroup(pathList[i]);
-        parent = child;
+      child = parent.openGroup(pathList[i]);
+      parent = child;
     }
     return child;
   }
@@ -1018,9 +1018,9 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor"/*instrument name*/,
-                       "test-monitor"/*monitor name*/,
-                       TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH,
+                       "test-instrument-with-monitor" /*instrument name*/,
+                       "test-monitor" /*monitor name*/, TRANSFORMATIONS};
 
     // assertations
     bool hasLocation = tester.hasDataset(LOCATION, path);
@@ -1089,27 +1089,27 @@ found in the Instrument cache.
     ScopedFileHandle fileResource("zero_nx_detector_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-	// test instrument with zero source rotation
+    // test instrument with zero source rotation
     auto instrument =
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
             bankRotation, someRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-	// full path to access NXtransformations group with test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH,
-                       "test-instrument-with-detector-rotations"/*instrument name*/,
-                       "detector-stage"/*bank name*/,
-                       TRANSFORMATIONS};
+    // full path to access NXtransformations group with test utility
+    FullH5Path path = {
+        DEFAULT_ROOT_PATH,
+        "test-instrument-with-detector-rotations" /*instrument name*/,
+        "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
-	// call saveInstrument passing test instrument as parameter
+    // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
 
-	// test utility to check output file
+    // test utility to check output file
     HDF5FileTestUtility tester(destinationFile);
 
-	// assert rotation not written to file
+    // assert rotation not written to file
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
     TS_ASSERT(!hasRotation);
   }
