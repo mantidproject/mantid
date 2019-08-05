@@ -54,8 +54,8 @@ def get_plotted_workspaces_names(fig):
     return plotted_workspaces
 
 
-def get_workspace_history_script(workspace):
-    """Get a script that will recover the state of a workspace"""
+def get_workspace_history_list(workspace):
+    """Return a list of commands that will recover the state of a workspace."""
     alg_name = "GeneratePythonScript"
     alg = AlgorithmManager.createUnmanaged(alg_name, 1)
     alg.setChild(True)
@@ -65,17 +65,25 @@ def get_workspace_history_script(workspace):
     alg.setProperty("IgnoreTheseAlgs", ALGS_TO_IGNORE)
     alg.execute()
     history = alg.getPropertyValue("ScriptText")
-    return '\n'.join(history.split('\n')[5:])  # trim the header and import
+    return history.split('\n')[5:]  # trim the header and import
 
 
 def get_workspace_history_commands(fig):
+    """
+    Get a list of commands that will recover the state of all the
+    Workspaces tracked by a figure. If the final command in a Workspace's
+    history is a Load command then we only append that command.
+    """
     plotted_workspaces = get_plotted_workspaces_names(fig)
     history_commands = []
     for ws_name in plotted_workspaces:
         try:
             workspace = ads.retrieve(ws_name)
-            history_commands.append('{} = {}\n'.format(
-                ws_name, get_workspace_history_script(workspace)))
+            ws_history = get_workspace_history_list(workspace)
+            if ws_history[-1].startswith('Load('):
+                ws_history = [ws_history[-1]]
+            history_commands += ['{} = {}'.format(ws_name, cmd) for cmd in ws_history]
+            history_commands.append('')  # Blank line to separate each workspace's history
         except KeyError:   # Raised if workspace is not in ADS
             pass
     return history_commands

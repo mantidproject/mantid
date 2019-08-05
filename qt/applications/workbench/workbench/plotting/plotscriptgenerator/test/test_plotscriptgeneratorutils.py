@@ -13,13 +13,12 @@ from numpy import array
 from mantid.py3compat.mock import patch, Mock
 from mantid.simpleapi import CreateSampleWorkspace
 from workbench.plotting.plotscriptgenerator.utils import (
-    convert_args_to_string, get_workspace_history_script,
+    convert_args_to_string, get_workspace_history_list,
     get_plotted_workspaces_names, get_workspace_history_commands)
 
-EXPECTED_SCRIPT = """
-Load(Filename=r'MAR11060.raw', OutputWorkspace='ws')
-Load(Filename=r'MAR11061.raw', OutputWorkspace='ws2')
+EXPECTED_SCRIPT = """Load(Filename=r'MAR11060.raw', OutputWorkspace='ws')
 
+Load(Filename=r'MAR11061.raw', OutputWorkspace='ws2')
 Rebin(...)"""
 
 SAMPLE_HISTORY_SCRIPT = """######################################################################
@@ -41,11 +40,11 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
         self.assertEqual(expected_str, convert_args_to_string(None, kwargs_dict))
 
     @patch('workbench.plotting.plotscriptgenerator.utils.AlgorithmManager')
-    def test_get_workspace_history_script_trims_headers(self, mock_alg_manager):
+    def test_get_workspace_history_list_trims_headers(self, mock_alg_manager):
         mock_alg = Mock(getPropertyValue=lambda x: SAMPLE_HISTORY_SCRIPT)
         mock_alg_manager.createUnmanaged.return_value = mock_alg
-        output = get_workspace_history_script(Mock())
-        self.assertEqual(EXPECTED_SCRIPT, output)
+        output = get_workspace_history_list(Mock())
+        self.assertEqual(EXPECTED_SCRIPT.split('\n'), output)
 
     def test_get_plotted_workspace_names_returns_list_of_workspace_names(self):
         mock_axes = [Mock(tracked_workspaces={'test_ws': None}),
@@ -60,12 +59,26 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
             self, mock_get_workspace_names, mock_ads):
         mock_get_workspace_names.return_value = ['ws_name', 'ws_name1', 'ws_name2']
         mock_ads.retrieve = lambda x: CreateSampleWorkspace(OutputWorkspace=x)
-        expected_commands = [
-            "ws_name = CreateSampleWorkspace(OutputWorkspace='ws_name')\n",
-            "ws_name1 = CreateSampleWorkspace(OutputWorkspace='ws_name1')\n",
-            "ws_name2 = CreateSampleWorkspace(OutputWorkspace='ws_name2')\n"]
+        expected_output = [
+            "ws_name = CreateSampleWorkspace(OutputWorkspace='ws_name')", "",
+            "ws_name1 = CreateSampleWorkspace(OutputWorkspace='ws_name1')", "",
+            "ws_name2 = CreateSampleWorkspace(OutputWorkspace='ws_name2')", ""]
         actual_output = get_workspace_history_commands(None)
-        self.assertEqual(expected_commands, actual_output)
+        self.assertEqual(expected_output, actual_output)
+
+    @patch('workbench.plotting.plotscriptgenerator.utils.get_workspace_history_list')
+    @patch('workbench.plotting.plotscriptgenerator.utils.ads')
+    @patch('workbench.plotting.plotscriptgenerator.utils.get_plotted_workspaces_names')
+    def test_get_workspace_history_commands_only_contains_load_command_if_load_was_last_command(
+            self,  mock_get_workspace_names, mock_ads, mock_get_workspace_history):
+        mock_get_workspace_names.return_value = ['ws']
+        mock_get_workspace_history.return_value = [
+            "Some command",
+            "Some other command",
+            "Load(myFile)"]
+        expected_output = ["ws = Load(myFile)", '']
+        actual_output = get_workspace_history_commands(None)
+        self.assertEqual(expected_output, actual_output)
 
 
 if __name__ == '__main__':
