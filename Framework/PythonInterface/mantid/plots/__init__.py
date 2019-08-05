@@ -80,20 +80,31 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-
-    def __init__(self, artists, data_replace_cb, is_normalized,
+    def __init__(self, artists, data_replace_cb, is_normalized, workspace_name=None,
                  spec_num=None):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
         :param is_normalized: bool specifying whether the line being plotted is a distribution
+        :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
+        self.workspace_name = workspace_name
         self.spec_num = spec_num
+        self.workspace_index = self._get_workspace_index()
         self.is_normalized = is_normalized
+
+    def _get_workspace_index(self):
+        """Get the workspace index of the workspace artist"""
+        if self.spec_num is None or self.workspace_name is None:
+            return None
+        try:
+            return ads.retrieve(self.workspace_name).getIndexFromSpectrumNumber(self.spec_num)
+        except KeyError:  # Return None if the workspace is not in the ADS
+            return None
 
     def remove(self, axes):
         """
@@ -300,7 +311,7 @@ class MantidAxes(Axes):
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 is_normalized,
+                                                 is_normalized, name,
                                                  spec_num))
             self.check_axes_distribution_consistency()
         return artists
