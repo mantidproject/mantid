@@ -548,23 +548,25 @@ void saveNXSource(const H5::Group &parentGroup,
   H5::Group childGroup = parentGroup.createGroup(sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
-  H5::Group transformations =
-      simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+  // do not write NXtransformations if there is no translation or rotation
+  if (!(locationIsOrigin && orientationIsZero)) {
+    H5::Group transformations =
+        simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  // self, ".", is the default first dependency in the chain. first check
-  // translation in component is non-zero, and set dependency to location
-  // if true and write location. Then check if orientation in component is
-  // non-zero, replace dependency with orientation if true. If neither
-  // orientation nor location are non-zero, component is self dependent.
-  if (!locationIsOrigin) {
-    dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, position);
+    // self, ".", is the default first dependency in the chain. first check
+    // translation in component is non-zero, and set dependency to location
+    // if true and write location. Then check if orientation in component is
+    // non-zero, replace dependency with orientation if true. If neither
+    // orientation nor location are non-zero, component is self dependent.
+    if (!locationIsOrigin) {
+      dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+      writeLocation(transformations, position);
+    }
+    if (!orientationIsZero) {
+      dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+      writeOrientation(transformations, rotation, locationIsOrigin);
+    }
   }
-  if (!orientationIsZero) {
-    dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, rotation, locationIsOrigin);
-  }
-
   writeStrDataset(childGroup, NAME, sourceName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
@@ -584,6 +586,8 @@ void saveNXMonitor(const H5::Group &parentGroup,
                    const Geometry::ComponentInfo &compInfo,
                    const std::vector<int> &detIds, const size_t index) {
 
+  // if the component is unnamed sets the name as unspecified with the
+  // location of the component in the cache
   std::string nameInCache = compInfo.name(index);
   std::string monitorName = nameInCache == ""
                                 ? "unspecified_monitor_" + std::to_string(index)
@@ -602,28 +606,31 @@ void saveNXMonitor(const H5::Group &parentGroup,
   H5::Group childGroup = parentGroup.createGroup(monitorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
-  H5::Group transformations =
-      simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+  // do not write NXtransformations if there is no translation or rotation
+  if (!(locationIsOrigin && orientationIsZero)) {
+    H5::Group transformations =
+        simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  // self, ".", is the default first dependency in the chain. first check
-  // translation in component is non-zero, and set dependency to location
-  // if true and write location. Then check if orientation in component is
-  // non-zero, replace dependency with orientation if true. If neither
-  // orientation nor location are non-zero, component is self dependent.
-  if (!locationIsOrigin) {
-    dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, position);
+    // self, ".", is the default first dependency in the chain. first check
+    // translation in component is non-zero, and set dependency to location
+    // if true and write location. Then check if orientation in component is
+    // non-zero, replace dependency with orientation if true. If neither
+    // orientation nor location are non-zero, component is self dependent.
+    if (!locationIsOrigin) {
+      dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+      writeLocation(transformations, position);
+    }
+    if (!orientationIsZero) {
+      dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+      writeOrientation(transformations, rotation, locationIsOrigin);
+    }
+
+    H5::StrType dependencyStrType = strTypeOfSize(dependency);
+    writeNXMonitorNumber(childGroup, compInfo, detIds, index);
+
+    writeStrDataset(childGroup, BANK_NAME, monitorName);
+    writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
-  if (!orientationIsZero) {
-    dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, rotation, locationIsOrigin);
-  }
-
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeNXMonitorNumber(childGroup, compInfo, detIds, index);
-
-  writeStrDataset(childGroup, BANK_NAME, monitorName);
-  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -641,9 +648,11 @@ void saveNXDetector(const H5::Group &parentGroup,
                     const Geometry::ComponentInfo &compInfo,
                     const std::vector<int> &detIds, const size_t index) {
 
+  // if the component is unnamed sets the name as unspecified with the
+  // location of the component in the cache
   std::string nameInCache = compInfo.name(index);
   std::string detectorName =
-      nameInCache == "" ? "unspecified_detector_" + std::to_string(index)
+      nameInCache == "" ? "unspecified_detector_at_" + std::to_string(index)
                         : nameInCache;
 
   Eigen::Vector3d position =
@@ -659,29 +668,32 @@ void saveNXDetector(const H5::Group &parentGroup,
   H5::Group childGroup = parentGroup.createGroup(detectorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
-  H5::Group transformations =
-      simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+  // do not write NXtransformations if there is no translation or rotation
+  if (!(locationIsOrigin && orientationIsZero)) {
+    H5::Group transformations =
+        simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-  // self, ".", is the default first dependency in the chain. first check
-  // translation in component is non-zero, and set dependency to location
-  // if true and write location. Then check if orientation in component is
-  // non-zero, replace dependency with orientation if true. If neither
-  // orientation nor location are non-zero, component is self dependent.
-  if (!locationIsOrigin) {
-    dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
-    writeLocation(transformations, position);
+    // self, ".", is the default first dependency in the chain. first check
+    // translation in component is non-zero, and set dependency to location
+    // if true and write location. Then check if orientation in component is
+    // non-zero, replace dependency with orientation if true. If neither
+    // orientation nor location are non-zero, component is self dependent.
+    if (!locationIsOrigin) {
+      dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+      writeLocation(transformations, position);
+    }
+    if (!orientationIsZero) {
+      dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+      writeOrientation(transformations, rotation, locationIsOrigin);
+    }
+
+    H5::StrType dependencyStrType = strTypeOfSize(dependency);
+    writeXYZPixeloffset(childGroup, compInfo, index);
+    writeNXDetectorNumber(childGroup, compInfo, detIds, index);
+
+    writeStrDataset(childGroup, BANK_NAME, detectorName);
+    writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
-  if (!orientationIsZero) {
-    dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-    writeOrientation(transformations, rotation, locationIsOrigin);
-  }
-
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeXYZPixeloffset(childGroup, compInfo, index);
-  writeNXDetectorNumber(childGroup, compInfo, detIds, index);
-
-  writeStrDataset(childGroup, BANK_NAME, detectorName);
-  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -747,24 +759,7 @@ void saveInstrument(
   }
 
   const auto detIds = detInfo.detectorIDs();
-  std::vector<size_t> banksInComponent;
-  std::vector<size_t> monitorsInComponent;
   auto nonDetectors = compInfo.root() - detInfo.size();
-
-  // ignore component root (instrument), and detectors.
-  for (size_t index = compInfo.root() - 1; index > nonDetectors - 1; --index) {
-    auto name = compInfo.name(index);
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
-      banksInComponent.push_back(index);
-    }
-  }
-
-  for (const int &ID : detIds) {
-    auto index = detInfo.indexOf(ID);
-    if (detInfo.isMonitor(index)) {
-      monitorsInComponent.push_back(index);
-    }
-  }
 
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
@@ -785,19 +780,23 @@ void saveInstrument(
   NexusGeometrySave::saveNXSample(rootGroup, compInfo);
 
   // save NXdetectors
-  for (const size_t &index : banksInComponent) {
-    if (reporter != nullptr) {
-      reporter->report();
+  for (size_t index = compInfo.root() - 1; index > 0; --index) {
+    if (compInfo.isDetector(index))
+      break;
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+      if (reporter != nullptr)
+        reporter->report();
+      NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
     }
-    NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
   }
 
   // save NXmonitors
-  for (const size_t &index : monitorsInComponent) {
-    if (reporter != nullptr) {
-      reporter->report();
+  for (size_t index = 0; index < detInfo.size(); ++index) {
+    if (detInfo.isMonitor(index)) {
+      if (reporter != nullptr)
+        reporter->report();
+      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
     }
-    NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
   }
 
   file.close(); // close file

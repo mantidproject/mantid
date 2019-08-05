@@ -651,6 +651,61 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
 }
 
 /**
+ * Create an test instrument with multiple nameless banks. Used for testing
+ * behaviour of name handling implementation in saveInstrument
+ *
+ * Banks are centered at (1*banknum, 0, 0) and are facing 0,0.
+ * Pixels are 4 mm wide.
+ *
+ * @param num_banks: number of rectangular banks to create
+ * @param pixels :: number of pixels in each direction.
+ * @param pixelSpacing :: padding between pixels
+ */
+Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels,
+                                              double pixelSpacing) {
+  auto testInst = boost::make_shared<Instrument>("");
+
+  const double cylRadius(pixelSpacing / 2);
+  const double cylHeight(0.0002);
+  // One object
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+      "pixel-shape");
+
+  for (int banknum = 1; banknum <= num_banks; banknum++) {
+    // Make a new bank
+    std::ostringstream bankname;
+    bankname << "";
+
+    RectangularDetector *bank = new RectangularDetector(bankname.str());
+    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
+                     pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
+                     pixelSpacing, (banknum - 1) * pixels * pixels, true,
+                     pixels);
+
+    // Mark them all as detectors
+    for (int x = 0; x < pixels; x++)
+      for (int y = 0; y < pixels; y++) {
+        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+        if (detector)
+          // Mark it as a detector (add to the instrument cache)
+          testInst->markAsDetector(detector.get());
+      }
+
+    testInst->add(bank);
+    // Place the center.
+    bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
+    // rotate detector 90 degrees along vertical
+    bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+  }
+
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
+
+  return testInst;
+}
+
+/**
  * createMinimalInstrument, creates the most simple possible definition of
  * an instrument in which we can extract a valid L1 and L2 distance for unit
  * calculations.
@@ -872,7 +927,7 @@ Instrument_sptr createInstrumentWithSourceRotation(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
       "0,0,0"));
 
-  instrument->setName("test-instrument-with-source-rotation");
+  instrument->setName("test-instrument");
 
   // A source
   ObjComponent *source = new ObjComponent("source");
