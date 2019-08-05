@@ -759,7 +759,6 @@ void saveInstrument(
   }
 
   const auto detIds = detInfo.detectorIDs();
-  auto nonDetectors = compInfo.root() - detInfo.size();
 
   // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file

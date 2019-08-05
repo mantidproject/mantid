@@ -29,8 +29,6 @@
 #include <memory>
 #include <set>
 
-#define DEBUG_PRINT(x) std::cout << "\nDEBUG: " << x << std::endl
-
 using namespace Mantid::NexusGeometry;
 
 //---------------------------------------------------------------
@@ -75,21 +73,11 @@ public:
   H5::Group openfullH5Path(const FullH5Path &pathList) const {
 
     H5::Group child;
-    H5::Group parent;
-    try {
-      parent = m_file.openGroup(pathList[0]);
-    } catch (H5::GroupIException &) {
-      throw std::invalid_argument("Failure at open H5 path at root");
-    }
+    H5::Group parent = m_file.openGroup(pathList[0]);
 
     for (size_t i = 1; i < pathList.size(); ++i) {
-      try {
         child = parent.openGroup(pathList[i]);
         parent = child;
-      } catch (H5::GroupIException &) {
-        throw std::invalid_argument("Failure at open H5 path: " + pathList[i] +
-                                    " in chain:");
-      }
     }
     return child;
   }
@@ -432,7 +420,6 @@ used.
         V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto const &compInfo = (*instr.first);
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
                          instr, badDestinationPath, DEFAULT_ROOT_PATH),
                      std::invalid_argument &);
@@ -464,9 +451,6 @@ used.
         V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto const &compInfo = (*instr.first);
-    const std::string expectedInstrumentName = compInfo.name(compInfo.root());
-
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
                                                        DEFAULT_ROOT_PATH),
                      std::invalid_argument &);
@@ -478,10 +462,12 @@ used.
         ComponentCreationHelper::createInstrumentWithOptionalComponents(
             true, false, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
 
     ScopedFileHandle fileResource("check_no_sample_throws_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
+
+    // instrument cache
+    auto const &compInfo = (*instr.first);
 
     TS_ASSERT(compInfo.hasDetectorInfo()); // rule out throw by no detector info
     TS_ASSERT(compInfo.hasSource());       // rule out throw by no source
@@ -498,6 +484,8 @@ used.
         ComponentCreationHelper::createInstrumentWithOptionalComponents(
             false, true, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache
     auto &compInfo = (*instr.first);
 
     ScopedFileHandle fileResource("check_no_source_throws_test_file.hdf5");
@@ -554,8 +542,6 @@ used.
         V3D(0, 0, 10) /*bank position*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    // instrument cache
-    auto const &compInfo = (*instr.first);
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
 
@@ -579,9 +565,6 @@ used.
         V3D(0, 0, -10) /*source position*/, V3D(0, 0, 0) /*sample position*/,
         V3D(0, 0, 10) /*bank position*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto const &compInfo = (*instr.first);
 
     // call saveinstrument taking test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -617,9 +600,6 @@ used.
     // set name of instrument
     instrument->setName("test_instrument_name");
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto const &compInfo = (*instr.first);
 
     // call saveInstrument passing the test instrument as parameter.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -679,9 +659,6 @@ used.
         V3D(0, 0, -10) /*source position*/, V3D(0, 0, 0) /*sample position*/,
         V3D(0, 0, 10) /*bank position*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto const &compInfo = (*instr.first);
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -760,11 +737,6 @@ found in the Instrument cache.
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10), bankRotation, detRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-
-    // get component names to access path to H5 group
-    auto instrName = compInfo.name(compInfo.root());
-    auto bankName = "detector-stage";
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -774,7 +746,10 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
+    FullH5Path path = {
+        DEFAULT_ROOT_PATH,
+        "test-instrument-with-detector-rotations" /*instrument name*/,
+        "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
     double angleInFile = tester.readDoubleFromDataset(ORIENTATION, path);
@@ -823,11 +798,6 @@ found in the Instrument cache.
         ComponentCreationHelper::createMinimalInstrumentWithMonitor(
             monitorPosition, monitorRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-
-    // get component names to access path to H5 group
-    auto instrName = compInfo.name(compInfo.root());
-    auto monitorName = "test-monitor";
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -837,8 +807,8 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
-                       TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
+                       "test-monitor", TRANSFORMATIONS};
 
     // get angle magnitude in dataset
     double angleInFile = tester.readDoubleFromDataset(ORIENTATION, path);
@@ -885,11 +855,6 @@ found in the Instrument cache.
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10), Quat(90, V3D(0, 1, 0)));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-
-    // get component names to access path to H5 group
-    auto instrName = compInfo.name(compInfo.root());
-    auto sourceName = compInfo.name(compInfo.source());
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -899,8 +864,8 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
-                       TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+                       "source" /*source name*/, TRANSFORMATIONS};
 
     // get magnitude of vector in dataset
     double normInFile = tester.readDoubleFromDataset(LOCATION, path);
@@ -946,11 +911,6 @@ found in the Instrument cache.
             Mantid::Kernel::V3D(0, 0, -10), Mantid::Kernel::V3D(0, 0, 0),
             Mantid::Kernel::V3D(0, 0, 10), sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-
-    // get component names to access path to H5 group
-    auto instrName = compInfo.name(compInfo.root());
-    auto sourceName = compInfo.name(compInfo.source());
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -960,8 +920,8 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
-                       TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+                       "source" /*source name*/, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
     double angleInFile = tester.readDoubleFromDataset(ORIENTATION, path);
@@ -1008,11 +968,6 @@ found in the Instrument cache.
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), bankLocation,
             someRotation, someRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-
-    // get component names to access path to H5 group
-    std::string bankName = "detector-stage";
-    auto instrName = compInfo.name(compInfo.root());
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1022,7 +977,10 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
+    FullH5Path path = {
+        DEFAULT_ROOT_PATH,
+        "test-instrument-with-detector-rotations" /*instrument name*/,
+        "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
     // assertations
     bool hasLocation = tester.hasDataset(LOCATION, path);
@@ -1051,12 +1009,6 @@ found in the Instrument cache.
         ComponentCreationHelper::createMinimalInstrumentWithMonitor(
             monitorPosition, someRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-    auto &detInfo = (*instr.second);
-
-    // get component names to access path to H5 group
-    std::string monitorName = "test-monitor";
-    auto instrName = compInfo.name(compInfo.root());
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1066,12 +1018,12 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, monitorName,
+    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor"/*instrument name*/,
+                       "test-monitor"/*monitor name*/,
                        TRANSFORMATIONS};
 
     // assertations
     bool hasLocation = tester.hasDataset(LOCATION, path);
-    TS_ASSERT(detInfo.isMonitor(1)); // assert NXmonitor is at this index
     TS_ASSERT(!hasLocation);
   }
 
@@ -1100,11 +1052,6 @@ found in the Instrument cache.
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-    auto &compInfo = (*instr.first);
-
-    // get component names to access path to H5 group
-    auto instrName = compInfo.name(compInfo.root());
-    auto sourceName = compInfo.name(compInfo.source());
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1114,8 +1061,8 @@ found in the Instrument cache.
     HDF5FileTestUtility tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, sourceName,
-                       TRANSFORMATIONS};
+    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+                       "source" /*source name*/, TRANSFORMATIONS};
 
     // assertations
     bool hasLocation = tester.hasDataset(LOCATION, path);
@@ -1142,27 +1089,28 @@ found in the Instrument cache.
     ScopedFileHandle fileResource("zero_nx_detector_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
+	// test instrument with zero source rotation
     auto instrument =
         ComponentCreationHelper::createSimpleInstrumentWithRotation(
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
             bankRotation, someRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto &compInfo = (*instr.first);
+	// full path to access NXtransformations group with test utility
+    FullH5Path path = {DEFAULT_ROOT_PATH,
+                       "test-instrument-with-detector-rotations"/*instrument name*/,
+                       "detector-stage"/*bank name*/,
+                       TRANSFORMATIONS};
 
-    auto instrName = compInfo.name(compInfo.root());
-
-    std::string bankName = "detector-stage";
-
-    FullH5Path path = {DEFAULT_ROOT_PATH, instrName, bankName, TRANSFORMATIONS};
-
+	// call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
 
+	// test utility to check output file
     HDF5FileTestUtility tester(destinationFile);
 
+	// assert rotation not written to file
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
-
     TS_ASSERT(!hasRotation);
   }
 
@@ -1187,9 +1135,6 @@ found in the Instrument cache.
         ComponentCreationHelper::createMinimalInstrumentWithMonitor(
             someLocation, Quat(0, V3D(0, 1, 0)) /*monitor rotation of zero*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto &compInfo = (*instr.first);
 
     // full path to group to be opened in test utility
     FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
@@ -1232,9 +1177,6 @@ found in the Instrument cache.
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto &compInfo = (*instr.first);
 
     // full path to group to be opened in test utility
     FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument", "source",
@@ -1284,9 +1226,6 @@ found in the Instrument cache.
             relativeDetRotation,            // detector (pixel) rotation
             relativeDetposition);           // detector (pixel) position
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto &compInfo = (*instr.first);
 
     // call save insrument passing the test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1367,9 +1306,6 @@ found in the Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    // instrument cache
-    auto &compInfo = (*instr.first);
-
     FullH5Path transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
@@ -1412,12 +1348,12 @@ found in the Instrument cache.
     // USING SOURCE FOR DEMONSTRATION.
 
     /*
-        test scenario: saveInstrument called with zero rotation, and some
-        non-zero translation in source. Expected behaviour is: (dataset)
-       'depends_on' has value "/absoulute/path/to/location", and (dataset)
-       'location' has dAttribute (AKA attribute of dataset) 'depends_on' with
-       value "."
-        */
+    test scenario: saveInstrument called with zero rotation, and some
+    non-zero translation in source. Expected behaviour is: (dataset)
+   'depends_on' has value "/absoulute/path/to/location", and (dataset)
+   'location' has dAttribute (AKA attribute of dataset) 'depends_on' with
+   value "."
+    */
 
     // Geometry for test instrument
     const V3D detectorLocation(0.0, 0.0, 10.0);         // arbitrary
@@ -1435,9 +1371,6 @@ found in the Instrument cache.
             Mantid::Kernel::V3D(0.0, 0.0, 0.0) /*samle position*/,
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto &compInfo = (*instr.first);
 
     FullH5Path transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
@@ -1506,9 +1439,6 @@ found in the Instrument cache.
             sourceLocation, Mantid::Kernel::V3D(0, 0, 0), detectorLocation,
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-
-    // instrument cache
-    auto &compInfo = (*instr.first);
 
     // path to NXtransformations subgoup in NXsource
     FullH5Path transformationsPath = {
@@ -1581,9 +1511,6 @@ found in the Instrument cache.
             sourceRotation); // source rotation
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    // instrument cache
-    auto &compInfo = (*instr.first);
-
     // path to NXtransformations subgoup in NXsource
     FullH5Path transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
@@ -1607,7 +1534,7 @@ found in the Instrument cache.
 
     // assert the group NXtransformations doesnt exist in file
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath),
-                     std::invalid_argument &)
+                     H5::GroupIException &)
   }
 };
 
