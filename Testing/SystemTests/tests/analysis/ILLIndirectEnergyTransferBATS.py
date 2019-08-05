@@ -36,11 +36,11 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
 
-        center, epp = IndirectILLEnergyTransfer(Run='215962', PulseChopper='34')
+        center, epp = IndirectILLEnergyTransfer(Run='215962', PulseChopper='34', GroupDetectors=False)
 
-        offset_p100 = IndirectILLEnergyTransfer(Run='215967', InputElasticChannelWorkspace=epp, PulseChopper='34')
+        offset_p100 = IndirectILLEnergyTransfer(Run='215967', InputElasticChannelWorkspace=epp, PulseChopper='34', GroupDetectors=False)
 
-        offset_m275 = IndirectILLEnergyTransfer(Run='215968', InputElasticChannelWorkspace=epp, PulseChopper='34')
+        offset_m275 = IndirectILLEnergyTransfer(Run='215968', InputElasticChannelWorkspace=epp, PulseChopper='34', GroupDetectors=False)
 
         GroupWorkspaces(InputWorkspaces=[center, offset_p100, offset_m275], OutputWorkspace='group')
 
