@@ -8,6 +8,7 @@ set(SRC_FILES
     src/TubeHelpers.cpp)
 
 set(INC_FILES
+    inc/MantidNexusGeometry/Constants.h
     inc/MantidNexusGeometry/DllConfig.h
     inc/MantidNexusGeometry/Hdf5Version.h
     inc/MantidNexusGeometry/InstrumentBuilder.h

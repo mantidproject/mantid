@@ -38,8 +38,7 @@ void addNXMonitorWaveformStreamInfo(Json::Value &monitor,
                                     const std::string &source,
                                     const std::string &writerModule);
 
-Json::Value &addNXChopper(Json::Value &instrument,
-                                   const std::string &name);
+Json::Value &addNXChopper(Json::Value &instrument, const std::string &name);
 void addNXChopperName(Json::Value &chopper, const std::string &chopperName);
 void addNXChopperRadius(Json::Value &chopper, const double radius = 350);
 void addNXChopperSlitEdges(Json::Value &chopper,
@@ -57,51 +56,61 @@ void addNXTransformationDependency(Json::Value &nxDetector,
 Json::Value &addNXTransformation(Json::Value &nxDetector,
                                  const std::string &name);
 void addNXTransformationBeamDirectionOffset(
-    Json::Value &nxTransformation, const std::vector<int> &shape = {1},
+    Json::Value &nxTransformation, const std::vector<int> &arrayShape = {1},
     const std::vector<double> &values = {0.049},
-    const std::vector<double> vec = {0, 0, -1});
+    const std::vector<double> &vec = {0, 0, -1});
 
 void addNXTransformationLocation(Json::Value &nxTransformation,
-                                 const std::vector<int> &shape = {1},
+                                 const std::vector<int> &arrayShape = {1},
                                  const std::vector<double> &values = {0.971},
-                                 const std::vector<double> vec = {1, 0, 0});
+                                 const std::vector<double> &vec = {1, 0, 0});
 
 void addNXTransformationOrientation(Json::Value &nxTransformation,
-                                    const std::vector<int> &shape = {1},
+                                    const std::vector<int> &arrayShape = {1},
                                     const std::vector<double> &values = {90},
-                                    const std::vector<double> vec = {0, 1, 0});
+                                    const std::vector<double> &vec = {0, 1, 0});
 
-void addDetectorNumbers(Json::Value &nxDetector, const std::vector<int> &shape,
+void addDetectorNumbers(Json::Value &nxDetector,
+                        const std::vector<int> &arrayShape,
                         const std::vector<int64_t> &values);
-void addXPixelOffset(Json::Value &nxDetector, const std::vector<int> &shape,
-                     const std::vector<double> &values);
-void addYPixelOffset(Json::Value &nxDetector, const std::vector<int> &shape,
+
+void addXPixelOffset(Json::Value &nxDetector,
+                     const std::vector<int> &arrayShape,
                      const std::vector<double> &values);
 
-Json::Value &addOffPixelShape(Json::Value &nxDetector);
-void addOffPixelShapeFaces(Json::Value &pixelShape,
-                           const std::vector<int> &shape = {1},
-                           const std::vector<int> &faces = {0});
-void addOffPixelShapeVertices(Json::Value &pixelShape,
-                              const std::vector<int> &shape = {4, 3},
-                              const std::vector<double> &vertices = {
-                                  -0.001, -0.001, 0, 0.001, -0.001, 0, 0.001,
-                                  0.001, 0, -0.001, 0.001, 0});
-void addOffPixelShapeWindingOrder(Json::Value &pixelShape,
-                                  const std::vector<int> &shape = {4},
-                                  const std::vector<int> &windingOrder = {
-                                      0, 1, 2, 3});
+void addYPixelOffset(Json::Value &nxDetector,
+                     const std::vector<int> &arrayShape,
+                     const std::vector<double> &values);
 
-Json::Value &addCylindricalPixelShape(Json::Value &nxDetector);
-void addCylindricalPixelShapeCylinders(Json::Value &pixelShape,
-                                       const std::vector<int> &shape = {3},
-                                       const std::vector<int> &indices = {0, 1,
-                                                                          2});
-void addCylindricalPixelShapeVertices(Json::Value &pixelShape,
-                                      const std::vector<int> &shape = {3, 3},
-                                      const std::vector<double> &vertices = {
-                                          -0.001, 0, 0, 0.001, 0.00405, 0,
-                                          0.001, 0, 0});
+void addZPixelOffset(Json::Value &nxDetector,
+                     const std::vector<int> &arrayShape,
+                     const std::vector<double> &values);
+
+Json::Value &addOffShape(Json::Value &nxDetector,
+                         const std::string &name = "pixel_shape");
+void addOffShapeFaces(Json::Value &shape,
+                      const std::vector<int> &arrayShape = {1},
+                      const std::vector<int> &faces = {0});
+void addOffShapeVertices(Json::Value &shape,
+                         const std::vector<int> &arrayShape = {4, 3},
+                         const std::vector<double> &vertices = {
+                             -0.001, -0.001, 0, 0.001, -0.001, 0, 0.001, 0.001,
+                             0, -0.001, 0.001, 0});
+void addOffShapeWindingOrder(Json::Value &shape,
+                             const std::vector<int> &arrayShape = {4},
+                             const std::vector<int> &windingOrder = {0, 1, 2,
+                                                                     3});
+
+Json::Value &addCylindricalShape(Json::Value &nxDetector,
+                                 const std::string &name = "pixel_shape");
+void addCylindricalShapeCylinders(Json::Value &shape,
+                                  const std::vector<int> &arrayShape = {3},
+                                  const std::vector<int> &indices = {0, 1, 2});
+void addCylindricalShapeVertices(Json::Value &shape,
+                                 const std::vector<int> &arrayShape = {3, 3},
+                                 const std::vector<double> &vertices = {
+                                     -0.001, 0, 0, 0.001, 0.00405, 0, 0.001, 0,
+                                     0});
 
 const std::string convertToString(const Json::Value &value);
 } // namespace JSONInstrumentBuilder
@@ -125,7 +134,9 @@ std::string getJSONGeometryMissingChopperInformation();
 std::string getFullJSONInstrumentSimpleOFF();
 std::string getFullJSONInstrumentSimpleCylindrical();
 std::string getFullJSONInstrumentSimpleWithChopper();
+std::string getFullJSONInstrumentSimpleWithMonitorNoShape();
 std::string getFullJSONInstrumentSimpleWithMonitor();
+std::string getFullJSONInstrumentSimpleWithZPixelOffset();
 
 } // namespace TestHelpers
 } // namespace Mantid

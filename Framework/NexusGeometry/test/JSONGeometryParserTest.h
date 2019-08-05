@@ -28,8 +28,6 @@ public:
   }
   static void destroySuite(JSONGeometryParserTest *suite) { delete suite; }
 
-  void setUp() override { m_parser.reset(); }
-
   void test_parse_fail_with_empty_json_string() {
     std::string json;
     attemptParseInvalidArgument(json, "Empty geometry json string provided.");
@@ -251,9 +249,9 @@ public:
     TS_ASSERT(faces.empty());
   }
 
-  void test_load_full_instrument_with_single_monitor() {
+  void test_load_full_instrument_with_single_monitor_without_shape() {
     std::string json =
-        Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
+        Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitorNoShape();
     TS_ASSERT_THROWS_NOTHING(m_parser.parse(json));
     TS_ASSERT_EQUALS(m_parser.size(), 1);
     // validate monitors
@@ -274,6 +272,10 @@ public:
     TS_ASSERT_EQUALS(monitor.waveformTopic, "monitor");
     TS_ASSERT_EQUALS(monitor.waveformSource, "Monitor_Adc0_Ch1");
     TS_ASSERT_EQUALS(monitor.waveformWriterModule, "senv");
+    TS_ASSERT_EQUALS(monitor.cylinders.size(), 0);
+    TS_ASSERT_EQUALS(monitor.faces.size(), 0);
+    TS_ASSERT_EQUALS(monitor.windingOrder.size(), 0);
+    TS_ASSERT_EQUALS(monitor.vertices.size(), 0);
 
     // validate detectors
     TS_ASSERT_EQUALS(m_parser.detectorName(0), "detector_1");
@@ -302,13 +304,79 @@ public:
     TS_ASSERT(faces.empty());
   }
 
+  void test_load_full_instrument_with_single_monitor_with_shape() {
+    std::string json =
+        Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
+    TS_ASSERT_THROWS_NOTHING(m_parser.parse(json));
+    TS_ASSERT_EQUALS(m_parser.size(), 1);
+    // validate monitors
+    const auto &monitors = m_parser.monitors();
+    TS_ASSERT_EQUALS(monitors.size(), 1);
+    const auto &monitor = monitors[0];
+    TS_ASSERT_EQUALS(monitor.componentName, "monitor_1");
+    TS_ASSERT_EQUALS(monitor.detectorID, 90000);
+    TS_ASSERT_EQUALS(monitor.name, "Helium-3 monitor");
+    TS_ASSERT_EQUALS(monitor.translation, Eigen::Vector3d(0, 0, -3.298));
+    auto angleAxis = Eigen::AngleAxisd(monitor.orientation);
+    TS_ASSERT_DELTA(angleAxis.angle(), m_parser.degreesToRadians(45),
+                    TOLERANCE);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(0, 1, 0));
+    TS_ASSERT_EQUALS(monitor.eventStreamTopic, "monitor");
+    TS_ASSERT_EQUALS(monitor.eventStreamSource, "Monitor_Adc0_Ch1");
+    TS_ASSERT_EQUALS(monitor.eventStreamWriterModule, "ev42");
+    TS_ASSERT_EQUALS(monitor.waveformTopic, "monitor");
+    TS_ASSERT_EQUALS(monitor.waveformSource, "Monitor_Adc0_Ch1");
+    TS_ASSERT_EQUALS(monitor.waveformWriterModule, "senv");
+    TS_ASSERT_EQUALS(monitor.isOffGeometry, false);
+    TS_ASSERT_EQUALS(monitor.cylinders.size(), 3);
+    TS_ASSERT_EQUALS(monitor.faces.size(), 0);
+    TS_ASSERT_EQUALS(monitor.windingOrder.size(), 0);
+    TS_ASSERT_EQUALS(monitor.vertices.size(), 3);
+
+    // validate detectors
+    TS_ASSERT_EQUALS(m_parser.detectorName(0), "detector_1");
+    const auto &detIDs = m_parser.detectorIDs(0);
+    TS_ASSERT_EQUALS(detIDs.size(), 4);
+    TS_ASSERT((detIDs == std::vector<int64_t>{1, 2, 3, 4}));
+    const auto &x = m_parser.xPixelOffsets(0);
+    TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
+    const auto &y = m_parser.yPixelOffsets(0);
+    TS_ASSERT((y == std::vector<double>{-0.299, -0.299, -0.297, -0.297}));
+    const auto &translation = m_parser.translation(0);
+    TS_ASSERT_EQUALS(translation, Eigen::Vector3d(0.971, 0, -0.049));
+    angleAxis = Eigen::AngleAxisd(m_parser.orientation(0));
+    TS_ASSERT_DELTA(angleAxis.angle(), m_parser.degreesToRadians(90),
+                    TOLERANCE);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(0, 1, 0));
+    TS_ASSERT(!m_parser.isOffGeometry(0));
+    std::vector<Eigen::Vector3d> testVerticesVec{
+        {-0.001, 0, 0}, {0.001, 0.00405, 0}, {0.001, 0, 0}};
+    assertVectors(m_parser.vertices(0), testVerticesVec);
+    std::vector<int32_t> testCylindersVec{0, 1, 2};
+    TS_ASSERT_EQUALS(m_parser.cylinders(0), testCylindersVec);
+    const auto &windingOrder = m_parser.windingOrder(0);
+    TS_ASSERT(windingOrder.empty());
+    const auto &faces = m_parser.faces(0);
+    TS_ASSERT(faces.empty());
+  }
+
+  void test_load_full_instrument_with_z_pixel_offset() {
+    std::string json =
+        Mantid::TestHelpers::getFullJSONInstrumentSimpleWithZPixelOffset();
+    TS_ASSERT_THROWS_NOTHING(m_parser.parse(json));
+    const auto &zPixelOffsets = m_parser.zPixelOffsets(0);
+    TS_ASSERT_EQUALS(zPixelOffsets.size(), 4);
+    TS_ASSERT_EQUALS(zPixelOffsets,
+                     (std::vector<double>{-0.0405, -0.0405, -0.0405, -0.0405}));
+  }
+
 private:
   JSONGeometryParser m_parser;
   const double TOLERANCE = 1e-5;
   std::string getSimpleJSONInstrument() { return ""; }
 
   void attemptParseInvalidArgument(const std::string &json,
-                                   const std::string expectedError) {
+                                   const std::string &expectedError) {
     TS_ASSERT_THROWS_EQUALS((m_parser.parse(json)),
                             const std::invalid_argument &e,
                             std::string(e.what()), expectedError);

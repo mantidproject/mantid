@@ -16,66 +16,92 @@
 namespace Mantid {
 
 namespace NexusGeometry {
+struct Chopper {
+  std::string componentName;
+  std::string name;
+  std::vector<double> slitEdges;
+  double radius;
+  double slitHeight;
+  int64_t slits;
+  std::string tdcTopic;
+  std::string tdcSource;
+  std::string tdcWriterModule;
+};
+
+struct Monitor {
+  std::string componentName;
+  std::string name;
+  int64_t detectorID;
+  // monitor stream
+  std::string eventStreamTopic;
+  std::string eventStreamSource;
+  std::string eventStreamWriterModule;
+  std::string waveformTopic;
+  std::string waveformSource;
+  std::string waveformWriterModule;
+
+  // monitor transformation
+  Eigen::Vector3d translation;
+  Eigen::Quaterniond orientation;
+  // monitor shape
+  std::vector<Eigen::Vector3d> vertices;
+  std::vector<int32_t> cylinders;
+  std::vector<int32_t> faces;
+  std::vector<int32_t> windingOrder;
+  bool isOffGeometry;
+};
+
+struct Detector {
+  std::string name;
+  std::string componentName;
+  std::string detectorID;
+  Eigen::Vector3d position;
+  Eigen::Vector3d translation;
+  Eigen::Quaterniond orientation;
+  // detector shape
+  std::vector<Eigen::Vector3d> vertices;
+  std::vector<int32_t> cylinders;
+  std::vector<int32_t> faces;
+  std::vector<int32_t> windingOrder;
+  bool isOffGeometry;
+};
 
 /** JSONGeometryParser : Parses a JSON string which has a parallel structure to
-   nexus files and extracts all information about the instrument.
+   nexus geometry in nexus files and extracts all information about the
+   instrument. https://www.nexusformat.org/
+
+   @see NexusGeometryParser
  */
 class MANTID_NEXUSGEOMETRY_DLL JSONGeometryParser {
 public:
-  struct ChopperInfo {
-    std::string componentName;
-    std::string name;
-    std::vector<double> slitEdges;
-    double radius;
-    double slitHeight;
-    int64_t slits;
-    std::string tdcTopic;
-    std::string tdcSource;
-    std::string tdcWriterModule;
-  };
-
-  struct MonitorInfo {
-    std::string componentName;
-    std::string name;
-    int64_t detectorID;
-    std::string eventStreamTopic;
-    std::string eventStreamSource;
-    std::string eventStreamWriterModule;
-    Eigen::Vector3d translation;
-    Eigen::Quaterniond orientation;
-    std::string waveformTopic;
-    std::string waveformSource;
-    std::string waveformWriterModule;
-  };
-
-  JSONGeometryParser() noexcept {};
+  JSONGeometryParser() = default;
   ~JSONGeometryParser() = default;
   /// Parse geometry provided with a string representing geometry.
   void parse(const std::string &jsonGeometry);
-  size_t size() noexcept { return m_detectors.size(); }
+  size_t size() noexcept { return m_jsonDetectorBanks.size(); }
   const std::vector<int64_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
   }
 
   const std::string &detectorName(const size_t index) const noexcept {
-    return m_detectorNames[index];
+    return m_detectorBankNames[index];
   }
 
-  const std::vector<MonitorInfo> &monitors() const noexcept {
-    return m_monitorInfos;
-  }
+  const std::vector<Monitor> &monitors() const noexcept { return m_monitors; }
 
-  const std::vector<ChopperInfo> &choppers() const noexcept {
-    return m_chopperInfos;
-  }
+  const std::vector<Chopper> &choppers() const noexcept { return m_choppers; }
 
   const std::vector<double> &xPixelOffsets(const size_t index) const noexcept {
     return m_x[index];
   }
+
   const std::vector<double> &yPixelOffsets(const size_t index) const noexcept {
     return m_y[index];
   }
 
+  const std::vector<double> &zPixelOffsets(const size_t index) const noexcept {
+    return m_z[index];
+  }
   const Eigen::Vector3d &translation(const size_t index) const noexcept {
     return m_translations[index];
   }
@@ -84,7 +110,7 @@ public:
     return m_orientations[index];
   }
 
-  const bool isOffGeometry(const size_t index) const noexcept {
+  bool isOffGeometry(const size_t index) const noexcept {
     return m_isOffGeometry[index];
   }
 
@@ -105,10 +131,10 @@ public:
   }
 
   constexpr double degreesToRadians(const double degrees) noexcept;
-  /// clear all geometry information
-  void reset() noexcept;
 
 private:
+  /// clear all geometry information
+  void reset() noexcept;
   void validateAndRetrieveGeometry(const std::string &jsonGeometry);
   void extractDetectorContent();
   void extractMonitorContent();
@@ -124,17 +150,19 @@ private:
   Json::Value m_instrument;
   Json::Value m_sample;
   // monitor information
-  std::vector<Json::Value> m_monitors;
-  std::vector<MonitorInfo> m_monitorInfos;
+  std::vector<Json::Value> m_jsonMonitors;
+  std::vector<Monitor> m_monitors;
   // chopper information
-  std::vector<Json::Value> m_choppers;
-  std::vector<ChopperInfo> m_chopperInfos;
+  std::vector<Json::Value> m_jsonChoppers;
+  std::vector<Chopper> m_choppers;
   // detector information
-  std::vector<Json::Value> m_detectors;
-  std::vector<std::string> m_detectorNames;
+  std::vector<Json::Value> m_jsonDetectorBanks;
+  std::vector<Detector> m_detectors;
+  std::vector<std::string> m_detectorBankNames;
   std::vector<std::vector<int64_t>> m_detIDs;
   std::vector<std::vector<double>> m_x;
   std::vector<std::vector<double>> m_y;
+  std::vector<std::vector<double>> m_z;
   // pixel shapes
   std::vector<std::vector<int32_t>> m_pixelShapeFaces;
   std::vector<std::vector<int32_t>> m_pixelShapeCylinders;
