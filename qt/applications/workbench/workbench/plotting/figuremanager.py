@@ -10,19 +10,17 @@
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 from __future__ import (absolute_import, unicode_literals)
 
-# 3rdparty imports
-import matplotlib
-import numpy as np
 import sys
 from functools import wraps
+
+import matplotlib
 from matplotlib._pylab_helpers import Gcf
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
 
-# local imports
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
 from mantid.py3compat import text_type
@@ -30,16 +28,13 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
-from .figureinteraction import FigureInteraction
-from .figurewindow import FigureWindow
-from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
+from workbench.plotting.figureinteraction import FigureInteraction
+from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 
 def _catch_exceptions(func):
-    """
-    Catch all exceptions in method and print a traceback to stderr
-    """
-
+    """Catch all exceptions in method and print a traceback to stderr"""
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -53,7 +48,6 @@ def _catch_exceptions(func):
 
 
 class FigureManagerADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, manager):
         super(FigureManagerADSObserver, self).__init__()
         self.window = manager.window
@@ -65,9 +59,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
 
     @_catch_exceptions
     def clearHandle(self):
-        """
-        Called when the ADS is deleted all of its workspaces
-        """
+        """Called when the ADS is deleted all of its workspaces"""
         self.window.emit_close()
 
     @_catch_exceptions
@@ -142,7 +134,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
-
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
@@ -204,8 +195,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas,
-                                              ToolbarStateManager(self.toolbar))
+        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
@@ -241,10 +231,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         return WorkbenchNavigationToolbar(canvas, parent, False)
 
     def resize(self, width, height):
-        'set the canvas size in pixels'
+        """Set the canvas size in pixels"""
         self.window.resize(width, height + self._status_and_tool_height)
 
-    def show(self):  # noqa
+    def show(self):
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
@@ -292,9 +282,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
     def grid_toggle(self):
-        """
-        Toggle grid lines on/off
-        """
+        """Toggle grid lines on/off"""
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
@@ -302,9 +290,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas.draw_idle()
 
     def fit_toggle(self):
-        """
-        Toggle fit browser and tool on/off
-        """
+        """Toggle fit browser and tool on/off"""
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
         else:
@@ -312,14 +298,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def handle_fit_browser_close(self):
         """
-        Respond to a signal that user closed self.fit_browser by clicking the [x] button.
+        Respond to a signal that user closed self.fit_browser by
+        clicking the [x] button.
         """
         self.toolbar.trigger_fit_toggle_action()
 
     def hold(self):
-        """
-        Mark this figure as held
-        """
+        """ Mark this figure as held"""
         self.toolbar.hold()
 
     def get_window_title(self):
@@ -354,10 +339,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 # Figure control
 # -----------------------------------------------------------------------------
 
+
 def new_figure_manager(num, *args, **kwargs):
-    """
-    Create a new figure manager instance
-    """
+    """Create a new figure manager instance"""
     from matplotlib.figure import Figure  # noqa
     figure_class = kwargs.pop('FigureClass', Figure)
     this_fig = figure_class(*args, **kwargs)
@@ -365,31 +349,7 @@ def new_figure_manager(num, *args, **kwargs):
 
 
 def new_figure_manager_given_figure(num, figure):
-    """
-    Create a new figure manager instance for the given figure.
-    """
+    """Create a new figure manager instance for the given figure."""
     canvas = FigureCanvasQTAgg(figure)
     manager = FigureManagerWorkbench(canvas, num)
     return manager
-
-
-if __name__ == '__main__':
-    # testing code
-
-    qapp = QApplication([' '])
-    qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-    if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-        qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-
-    x = np.linspace(0, 10 * np.pi, 1000)
-    cx, sx = np.cos(x), np.sin(x)
-    fig_mgr_1 = new_figure_manager(1)
-    fig1 = fig_mgr_1.canvas.figure
-    ax = fig1.add_subplot(111)
-    ax.set_title("Test title")
-    ax.set_xlabel(r"$\mu s$")
-    ax.set_ylabel("Counts")
-
-    ax.plot(x, cx)
-    fig1.show()
-    qapp.exec_()
