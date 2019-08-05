@@ -45,7 +45,7 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
 
   m_workspaceName = map[QString("workspaceName")].toString();
 
-  const auto surfaceType = map[QString("surfaceType")].toString();
+  const auto surfaceType = map[QString("surfaceType")].toInt();
   obj.setSurfaceType(surfaceType);
 
   const auto currentTab = map[QString("currentTab")].toInt();
