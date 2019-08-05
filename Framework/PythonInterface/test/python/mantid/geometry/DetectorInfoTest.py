@@ -12,6 +12,7 @@ from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
 from mantid.simpleapi import *
+import numpy as np
 
 
 class DetectorInfoTest(unittest.TestCase):
@@ -88,6 +89,13 @@ class DetectorInfoTest(unittest.TestCase):
         """ See if the returned value is a double (float in Python). """
         info = self._ws.detectorInfo()
         self.assertEqual(type(info.twoTheta(0)), float)
+
+    def test_azimuthal(self):
+        """ See if the returned value is a double (float in Python). """
+        info = self._ws.detectorInfo()
+        self.assertEqual(type(info.azimuthal(0)), float)
+        x, y, _ = info.position(0)
+        self.assertEqual(np.arctan2(y, x), info.azimuthal(0))
 
     def test_createWorkspaceAndDetectorInfo(self):
     	""" Try to create a workspace and see if DetectorInfo object

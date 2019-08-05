@@ -18,6 +18,7 @@ Algorithms
 
 Data Objects
 ------------
+* New methods :py:obj:`mantid.api.SpectrumInfo.azimuthal` and :py:obj:`mantid.geometry.DetectorInfo.azimuthal`  which returns the out-of-plane angle for a spectrum
 
 Python
 ------

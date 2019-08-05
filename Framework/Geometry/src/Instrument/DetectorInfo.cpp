@@ -228,6 +228,48 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
   return angle;
 }
 
+double DetectorInfo::azimuthal(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error("Azimuthal angle is not defined for monitors");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+
+  const auto sampleDetVec = position(index) - samplePos;
+  const double dotHorizontal = sampleDetVec.scalar_prod(
+      m_instrument->getReferenceFrame()->vecPointingHorizontal());
+  const double dotVertical = sampleDetVec.scalar_prod(
+      m_instrument->getReferenceFrame()->vecPointingUp());
+
+  return atan2(dotVertical, dotHorizontal);
+}
+
+double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
+  if (isMonitor(index))
+    throw std::logic_error("Azimuthal angle is not defined for monitors");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+
+  const auto sampleDetVec = position(index) - samplePos;
+  const double dotHorizontal = sampleDetVec.scalar_prod(
+      m_instrument->getReferenceFrame()->vecPointingHorizontal());
+  const double dotVertical = sampleDetVec.scalar_prod(
+      m_instrument->getReferenceFrame()->vecPointingUp());
+
+  return atan2(dotVertical, dotHorizontal);
+}
+
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));

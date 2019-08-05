@@ -99,6 +99,18 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
+/** Returns the out-of-plane angle in radians (angle w.r.t. to vecPointingHorizontal
+ * direction).
+ *
+ * Throws an exception if the spectrum is a monitor.
+ */ double
+SpectrumInfo::azimuthal(const size_t index) const {
+  double phi{0.0};
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
+    phi += m_detectorInfo.azimuthal(detIndex);
+  return phi / static_cast<double>(spectrumDefinition(index).size());
+}
+
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
