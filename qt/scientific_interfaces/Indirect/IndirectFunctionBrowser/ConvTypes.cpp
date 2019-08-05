@@ -19,6 +19,10 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::LOR2_AMPLITUDE_2, "Amplitude"},
     {ParamID::LOR2_PEAKCENTRE_2, "PeakCentre"},
     {ParamID::LOR2_FWHM_2, "FWHM"},
+    {ParamID::TW_HEIGHT, "Height"},
+    {ParamID::TW_DIFFCOEFF, "DiffCoeff"},
+    {ParamID::TW_TAU, "Tau"},
+    {ParamID::TW_CENTRE, "Centre"},
     {ParamID::FLAT_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A0, "A0"},
     {ParamID::LINEAR_BG_A1, "A1"}};
@@ -36,6 +40,10 @@ std::map<FitType, TemplateSubTypeDescriptor>
           "Lorentzian",
           {ParamID::LOR2_AMPLITUDE_1, ParamID::LOR2_FWHM_1,
            ParamID::LOR2_FWHM_2}}},
+        {FitType::TeixeiraWater,
+         {"Teixeira Water",
+          "TeixeiraWaterSQE",
+          {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
     };
 
 template <>

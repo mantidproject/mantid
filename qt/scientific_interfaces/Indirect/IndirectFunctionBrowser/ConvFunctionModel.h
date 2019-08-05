@@ -111,6 +111,7 @@ private:
   void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildLorentzianFunctionString() const;
+  std::string buildTeixeiraFunctionString() const;
   std::string buildPeaksFunctionString() const;
   std::string buildBackgroundFunctionString() const;
   void addGlobal(const QString &parName);

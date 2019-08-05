@@ -559,16 +559,21 @@ std::string ConvFunctionModel::buildLorentzianFunctionString() const {
   return "name=Lorentzian,Amplitude=1,FWHM=1,constraints=(Amplitude>0,FWHM>0)";
 }
 
+std::string ConvFunctionModel::buildTeixeiraFunctionString() const {
+  return "name=TeixeiraWaterSQE";
+}
+
 std::string ConvFunctionModel::buildPeaksFunctionString() const {
   std::string functions;
   if (m_fitType == FitType::OneLorentzian) {
     functions.append(buildLorentzianFunctionString());
-  }
-  if (m_fitType == FitType::TwoLorentzians) {
+  } else if (m_fitType == FitType::TwoLorentzians) {
     auto const lorentzian = buildLorentzianFunctionString();
     functions.append(lorentzian);
     functions.append(";");
     functions.append(lorentzian);
+  } else if (m_fitType == FitType::TeixeiraWater) {
+    functions.append(buildTeixeiraFunctionString());
   }
   return functions;
 }
