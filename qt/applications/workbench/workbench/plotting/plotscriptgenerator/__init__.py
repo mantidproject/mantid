@@ -8,24 +8,48 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantid.plots.utility import get_errorbar_containers
+from mantid.plots import MantidAxes
+
+from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import generate_add_subplot_command
 from workbench.plotting.plotscriptgenerator.figure import generate_figure_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
+from workbench.plotting.plotscriptgenerator.utils import get_workspace_history_commands
+
+FIG_VARIABLE = "fig"
+AXES_VARIABLE = "ax"
 
 
 def generate_script(fig):
-    fig_var = "fig"
-    ax_var = "ax"
-    cmds = list()
-    cmds.append("{} = {}".format(fig_var, generate_figure_command(fig)))
+    """
+    Generate a script to recreate a figure.
+
+    This currently only supports recreating artists that were plotted
+    from a Workspace. The format of the outputted script is as follows:
+
+        <Default Workbench script contents (imports)>
+        <Workspace history to recreate Workspaces>
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        ax.plot() or ax.errorbar()
+        plt.show()
+
+    :param fig: A matplotlib.pyplot.Figure object you want to create a script from
+    :return: A String. A script to recreate the given figure
+    """
+    plot_commands = []
     for ax in fig.get_axes():
-        cmds.append("{} = {}.{}"
-                    "".format(ax_var, fig_var,
-                              generate_add_subplot_command(ax)))
-        for artist in ax.lines + get_errorbar_containers(ax):
-            if artist in ax.get_tracked_artists():
-                cmds.append("{}.{}".format(
-                    ax_var, generate_plot_command(artist)))
+        if not isinstance(ax, MantidAxes):
+            continue
+        plot_commands.append("{} = {}.{}"
+                             "".format(AXES_VARIABLE, FIG_VARIABLE,
+                                       generate_add_subplot_command(ax)))
+        for artist in ax.get_tracked_artists():
+            plot_commands.append("{}.{}".format(AXES_VARIABLE, generate_plot_command(artist)))
+    if not plot_commands:
+        return
+    cmds = [DEFAULT_CONTENT] + get_workspace_history_commands(fig)
+    cmds.append("{} = {}".format(FIG_VARIABLE, generate_figure_command(fig)))
+    cmds += plot_commands
     cmds.append("plt.show()")
     return '\n'.join(cmds)
