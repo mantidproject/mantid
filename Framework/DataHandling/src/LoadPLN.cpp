@@ -811,7 +811,10 @@ void LoadPLN::loadParameters(const std::string &hdfFile,
     m_startRun = startTime.toISO8601String();
   }
 
-  // Add support for instrument running in lambda on two mode
+  // Add support for instrument running in lambda on two mode.
+  // Added as UI option as the available instrument parameters
+  // cannot be reliably interpreted to predict the mode (as
+  // advised by the instrument scientist).
   bool const lambdaOnTwoMode = getProperty(LambdaOnTwoStr);
   double lambdaFactor = (lambdaOnTwoMode ? 0.5 : 1.0);
   logm.addProperty("LambdaOnTwoMode", (lambdaOnTwoMode ? 1 : 0));
