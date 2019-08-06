@@ -20,7 +20,7 @@ FIG_VARIABLE = "fig"
 AXES_VARIABLE = "ax"
 
 
-def generate_script(fig):
+def generate_script(fig, exclude_headers=False):
     """
     Generate a script to recreate a figure.
 
@@ -36,6 +36,7 @@ def generate_script(fig):
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
+    :param exclude_headers: Boolean. Set to True to ignore imports/headers
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
@@ -51,7 +52,8 @@ def generate_script(fig):
             plot_commands.append("{}.legend().draggable()".format(AXES_VARIABLE))
     if not plot_commands:
         return
-    cmds = [DEFAULT_CONTENT] + get_workspace_history_commands(fig)
+    cmds = [] if exclude_headers else [DEFAULT_CONTENT]
+    cmds += get_workspace_history_commands(fig)
     cmds.append("{} = {}".format(FIG_VARIABLE, generate_figure_command(fig)))
     cmds += plot_commands
     cmds.append("plt.show()")
