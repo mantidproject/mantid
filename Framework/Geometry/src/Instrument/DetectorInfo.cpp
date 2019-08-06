@@ -241,10 +241,12 @@ double DetectorInfo::azimuthal(const size_t index) const {
   }
 
   const auto sampleDetVec = position(index) - samplePos;
-  const double dotHorizontal = sampleDetVec.scalar_prod(
-      m_instrument->getReferenceFrame()->vecPointingHorizontal());
-  const double dotVertical = sampleDetVec.scalar_prod(
-      m_instrument->getReferenceFrame()->vecPointingUp());
+  const auto horizontal =
+      m_instrument->getReferenceFrame()->vecPointingHorizontal();
+
+  const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
+  const auto vertical = Kernel::normalize(beamLine).cross_prod(horizontal);
+  const double dotVertical = sampleDetVec.scalar_prod(vertical);
 
   return atan2(dotVertical, dotHorizontal);
 }
@@ -262,10 +264,12 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   }
 
   const auto sampleDetVec = position(index) - samplePos;
-  const double dotHorizontal = sampleDetVec.scalar_prod(
-      m_instrument->getReferenceFrame()->vecPointingHorizontal());
-  const double dotVertical = sampleDetVec.scalar_prod(
-      m_instrument->getReferenceFrame()->vecPointingUp());
+  const auto horizontal =
+      m_instrument->getReferenceFrame()->vecPointingHorizontal();
+
+  const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
+  const auto vertical = Kernel::normalize(beamLine).cross_prod(horizontal);
+  const double dotVertical = sampleDetVec.scalar_prod(vertical);
 
   return atan2(dotVertical, dotHorizontal);
 }
