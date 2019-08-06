@@ -16,7 +16,8 @@ BASE_CREATE_FIG_COMMAND = "plt.figure({})"
 def get_figure_command_kwargs(fig):
     kwargs = {
         'figsize': (fig.get_figwidth(), fig.get_figheight()),
-        'dpi': fig.dpi
+        'dpi': fig.dpi,
+        'num': fig.get_label()
     }
     return kwargs
 
