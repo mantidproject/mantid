@@ -26,3 +26,8 @@ SliceViewer and Vates Simple Interface
 --------------------------------------
 
 :ref:`Release 4.2.0 <v4.2.0>`
+
+Miscellaneous
+-------------
+
+- Error Reporter text entry and information made more user friendly.

@@ -1009,10 +1009,9 @@ bool ReflectometryReductionOneAuto2::processGroups() {
  * TOF_<runNumber>_<otherInfo> then the output workspaces will be of the same
  * format otherwise they are numbered according to the wsGroupNumber
  */
-ReflectometryReductionOneAuto2::WorkspaceNames
-ReflectometryReductionOneAuto2::getOutputNamesForGroups(
+auto ReflectometryReductionOneAuto2::getOutputNamesForGroups(
     const std::string &inputName, const std::string &runNumber,
-    const size_t wsGroupNumber) {
+    const size_t wsGroupNumber) -> WorkspaceNames {
   auto const output = getOutputWorkspaceNames();
   std::string informativeName = "TOF" + runNumber + "_";
 

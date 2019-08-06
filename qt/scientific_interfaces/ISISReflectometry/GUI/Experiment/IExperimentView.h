@@ -76,9 +76,6 @@ public:
 
   virtual void enablePolarizationCorrections() = 0;
   virtual void disablePolarizationCorrections() = 0;
-  virtual void enablePolarizationCorrectionInputs() = 0;
-  virtual void disablePolarizationCorrectionInputs() = 0;
-
   virtual void enableFloodCorrectionInputs() = 0;
   virtual void disableFloodCorrectionInputs() = 0;
 
@@ -95,16 +92,8 @@ public:
   virtual void showTransmissionStitchParamsInvalid() = 0;
   virtual void showTransmissionStitchParamsValid() = 0;
 
-  virtual std::string getPolarizationCorrectionType() const = 0;
-  virtual void setPolarizationCorrectionType(std::string const &type) = 0;
-  virtual double getCRho() const = 0;
-  virtual void setCRho(double cRho) = 0;
-  virtual double getCAlpha() const = 0;
-  virtual void setCAlpha(double cAlpha) = 0;
-  virtual double getCAp() const = 0;
-  virtual void setCAp(double cAp) = 0;
-  virtual double getCPp() const = 0;
-  virtual void setCPp(double cPp) = 0;
+  virtual bool getPolarizationCorrectionOption() const = 0;
+  virtual void setPolarizationCorrectionOption(bool enable) = 0;
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;

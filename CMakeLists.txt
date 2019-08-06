@@ -297,10 +297,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(${output_var} ${_first}${_rest} PARENT_SCOPE)
   endfunction()
 
-  function(install_desktop_files filename app_name exec_cmd icon_file)
+  function(install_desktop_files filename app_name exec_cmd icon_file icon_install_file)
     set(DESKTOP_NAME ${app_name})
     set(DESKTOP_EXEC_CMD ${exec_cmd})
-    get_filename_component(DESKTOP_ICON ${icon_file} NAME_WE)
+    get_filename_component(DESKTOP_ICON ${icon_install_file} NAME_WE)
     set(_output_file ${CMAKE_CURRENT_BINARY_DIR}/${filename}.install)
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/launcher-template.desktop.in
@@ -310,8 +310,16 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             RENAME ${filename})
     install(FILES ${icon_file}
             DESTINATION /usr/share/pixmaps
-            RENAME ${DESKTOP_ICON}.png)
+            RENAME ${icon_install_file})
   endfunction()
+
+  set(_icon_suffix)
+  if(CPACK_PACKAGE_SUFFIX)
+    if (${CPACK_PACKAGE_SUFFIX} STREQUAL "nightly" OR
+        ${CPACK_PACKAGE_SUFFIX} STREQUAL "unstable")
+      set(_icon_suffix ${CPACK_PACKAGE_SUFFIX})
+    endif()
+  endif()
 
   set( IMAGES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/images )
   set(_app_name_suffix)
@@ -320,24 +328,26 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   endif()
   if(ENABLE_MANTIDPLOT)
     set(_icon_filename ${IMAGES_DIR}/mantidplot)
-    if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
+    if(_icon_suffix)
+      set(_icon_filename ${_icon_filename}${_icon_suffix})
     endif()
     install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
                           MantidPlot${_app_name_suffix}
                           ${CMAKE_INSTALL_PREFIX}/bin/MantidPlot
-                          ${_icon_filename}.png)
+                          ${_icon_filename}.png
+                          mantidplot${CPACK_PACKAGE_SUFFIX}.png )
   endif()
 
   if(ENABLE_WORKBENCH)
     set(_icon_filename ${IMAGES_DIR}/mantid_workbench)
-    if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
+    if(_icon_suffix)
+      set(_icon_filename ${_icon_filename}${_icon_suffix})
     endif()
     install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
                           MantidWorkbench${_app_name_suffix}
                           ${CMAKE_INSTALL_PREFIX}/bin/mantidworkbench
-                          ${_icon_filename}.png)
+                          ${_icon_filename}.png
+                          mantid_workbench${CPACK_PACKAGE_SUFFIX}.png)
   endif()
 endif()
 

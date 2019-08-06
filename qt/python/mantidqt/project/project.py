@@ -65,7 +65,9 @@ class Project(AnalysisDataServiceObserver):
             if answer == QMessageBox.Yes:
                 # Actually save
                 self._save()
-            # Else do nothing
+            elif answer == QMessageBox.No:
+                # Save with a new name
+                self.save_as()
 
     def save_as(self):
         """
