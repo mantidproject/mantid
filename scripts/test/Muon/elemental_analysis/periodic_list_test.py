@@ -16,6 +16,18 @@ from qtpy import QtWidgets
 import Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table as periodic_table
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicList
 
+
+number_side_effect_true = 3
+
+
+def isSelected_side_effect():
+    global number_side_effect_true
+    if number_side_effect_true > 0:
+        number_side_effect_true -= 1
+        return True
+    return False
+
+
 @start_qapplication
 class PeriodicListTest(unittest.TestCase):
     def setUp(self):
@@ -57,22 +69,15 @@ class PeriodicListTest(unittest.TestCase):
 
         self.plist.sigSelectionChanged.emit.assert_called_with('my-return')
 
-    def test_that_getSelection_returns_correct_number_of_elements(self):
-        item1 = mock.Mock()
-        item1.isSelected.return_value = True
-        item2 = mock.Mock()
-        item2.isSelected.return_value = True
-        item3 = mock.Mock()
-        item3.isSelected.return_value = False
-        item4 = mock.Mock()
-        item4.isSelected.return_value = True
-        self.plist.tree_items = [item1, item2, item3, item4]
+    @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QTreeWidgetItem.isSelected',
+                side_effect=isSelected_side_effect)
+    def test_that_getSelection_returns_correct_number_of_elements(self, mock_isSelected):
         ret = self.plist.getSelection()
 
         self.assertEqual(len(ret), 3)
         self.assertEqual(ret, [periodic_table._defaultTableItems[0],
                                periodic_table._defaultTableItems[1],
-                               periodic_table._defaultTableItems[3]])
+                               periodic_table._defaultTableItems[2]])
 
     def test_that_setSelectedElements_throws_when_given_no_elements(self):
         with self.assertRaises(IndexError):

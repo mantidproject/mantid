@@ -216,41 +216,39 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.load_run('GE1', 2695)
         self.assertEqual(mock_MultiPlotWindow.call_count, 0)
 
-    def test_loading_finished_returns_nothing_if_no_run_loaded(self):
+    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    def test_loading_finished_returns_nothing_if_no_run_loaded(self, mock_QWidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
-        self.gui.detectors = mock.Mock()
-        self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
-        for detector in self.gui.detectors.detectors:
-            detector.isChecked.return_value = True
+        mock_QWidget.return_value = True
         self.gui.plot_window = mock.Mock()
         self.gui.plotting = mock.Mock()
 
         self.gui.loading_finished()
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
 
-    def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self):
+    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self, mock_QWidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
-        for detector in self.gui.detectors.detectors:
-            detector.isChecked.return_value = True
         self.gui.plot_window = None
         self.gui.plotting = mock.Mock()
         self.gui.plotting.get_subplots.return_value = ['1', '2', '3']
+        mock_QWidget.return_value = True
 
         self.gui.loading_finished()
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
         for detector in self.gui.detectors.detectors:
             self.assertEqual(detector.setChecked.call_count, 1)
 
-    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(self):
+    @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
+    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(self, mock_QWidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
-        for detector in self.gui.detectors.detectors:
-            detector.isChecked.return_value = False
+        mock_QWidget.return_value = True
         self.gui.plot_window = mock.Mock()
 
         self.gui.loading_finished()
