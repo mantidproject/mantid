@@ -414,24 +414,9 @@ public:
 
   void testTransferUpdatesTablePresenter() {
     auto presenter = makePresenter();
-    // Set up a valid search result with content
-    auto const rowIndex = 0;
-    auto const selectedRows = std::set<int>({rowIndex});
-    EXPECT_CALL(m_view, getSelectedSearchRows())
-        .Times(1)
-        .WillOnce(Return(selectedRows));
-    auto searchResult = SearchResult("12345", "Test group 1th=0.5", "");
-    EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
-        .Times(1)
-        .WillOnce(ReturnRef(searchResult));
-    // Check the runs table presenter is notified with the expected content
-    auto jobs = ReductionJobs();
-    auto group = Group("Test group 1");
-    group.appendRow(Row({"12345"}, 0.5, TransmissionRunPair(), RangeInQ(),
-                        boost::none, ReductionOptionsMap(),
-                        ReductionWorkspaces({"12345"}, TransmissionRunPair())));
-    jobs.appendGroup(group);
-    EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(jobs)).Times(1);
+    auto expectedJobs = expectGetValidSearchResult();
+    EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(expectedJobs))
+        .Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }
@@ -686,10 +671,39 @@ private:
     EXPECT_CALL(m_view, getSelectedSearchRows())
         .Times(1)
         .WillOnce(Return(selectedRows));
+    m_searchResult = SearchResult("", "", "");
     for (auto rowIndex : selectedRows)
       EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
           .Times(1)
           .WillOnce(ReturnRef(m_searchResult));
+  }
+
+  // Set up a valid search result with content and return the corresponding
+  // model
+  ReductionJobs
+  expectGetValidSearchResult(std::string const &run = "13245",
+                             std::string const &groupName = "Test group 1",
+                             double theta = 0.5) {
+    // Set a selected row in the search results table
+    auto const rowIndex = 0;
+    auto const selectedRows = std::set<int>({rowIndex});
+    EXPECT_CALL(m_view, getSelectedSearchRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    // Set the expected result from the search results model
+    auto const title = groupName + std::string("th=") + std::to_string(theta);
+    m_searchResult = SearchResult(run, title, "");
+    EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
+        .Times(1)
+        .WillOnce(ReturnRef(m_searchResult));
+    // Construct the corresponding model expected in the main table
+    auto jobs = ReductionJobs();
+    auto group = Group(groupName);
+    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(),
+                        boost::none, ReductionOptionsMap(),
+                        ReductionWorkspaces({run}, TransmissionRunPair())));
+    jobs.appendGroup(group);
+    return jobs;
   }
 
   void expectCreateEndlessProgressIndicator() {
