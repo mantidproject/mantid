@@ -11,8 +11,11 @@
 #include <H5Cpp.h>
 #include <string>
 
-// use forward compatibility for lower than 1.8.13 versions of HDF5
-#if (H5_VERS_MAJOR >= 1 && H5_VERS_MINOR >= 8 && H5_VERS_RELEASE >= 13)
+// use forward compatibility for lower than 1.8.13 versions of HDF5: if (major >
+// 1) or (major >= 1 and minor > 8) or (major >= 1 and minor >= 8 and patch >=12
+// )
+#if ((H5_VERS_MAJOR > 1) || (H5_VERS_MAJOR >= 1 && H5_VERS_MINOR > 8) ||       \
+     (H5_VERS_MAJOR >= 1 && H5_VERS_MINOR >= 8 && H5_VERS_RELEASE > 12))
 #define H5_OBJ_NAME(obj) obj.getObjName()
 #else
 #define H5_OBJ_NAME(obj)                                                       \
