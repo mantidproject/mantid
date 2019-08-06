@@ -53,6 +53,7 @@ constexpr char FilterByTimeStopStr[] = "FilterByTimeStop";
 constexpr char PathToBinaryStr[] = "BinaryEventPath";
 constexpr char TOFBiasStr[] = "TimeOfFlightBias";
 constexpr char CalibrateTOFStr[] = "CalibrateTOFBias";
+constexpr char LambdaOnTwoStr[] = "LambdaOnTwoMode";
 
 // Common pairing of limits
 using TimeLimits = std::pair<double, double>;
@@ -501,6 +502,9 @@ void LoadPLN::init() {
   declareProperty(CalibrateTOFStr, false,
                   "Calibrate the TOF correction from the elastic pulse.");
 
+  declareProperty(LambdaOnTwoStr, false,
+      "Instrument is operating in Lambda on Two mode.");
+
   declareProperty(FilterByTimeStartStr, 0.0,
                   "Only include events after the provided start time, in "
                   "seconds (relative to the start of the run).");
@@ -807,6 +811,11 @@ void LoadPLN::loadParameters(const std::string &hdfFile,
     m_startRun = startTime.toISO8601String();
   }
 
+  // Add support for instrument running in lambda on two mode
+  bool const lambdaOnTwoMode = getProperty(LambdaOnTwoStr);
+  double lambdaFactor = (lambdaOnTwoMode ? 0.5 : 1.0);
+  logm.addProperty("LambdaOnTwoMode", (lambdaOnTwoMode ? 1 : 0));
+
   MapNeXusToSeries<double>(entry, "instrument/fermi_chopper/mchs", 0.0, logm,
                            m_startRun, "FermiChopperFreq", 1.0 / 60,
                            m_datasetIndex);
@@ -814,7 +823,7 @@ void LoadPLN::loadParameters(const std::string &hdfFile,
                            m_startRun, "OverlapChopperFreq", 1.0 / 60,
                            m_datasetIndex);
   MapNeXusToSeries<double>(entry, "instrument/crystal/wavelength", 0.0, logm,
-                           m_startRun, "Wavelength", 1.0, m_datasetIndex);
+                           m_startRun, "Wavelength", lambdaFactor, m_datasetIndex);
   MapNeXusToSeries<double>(entry, "instrument/detector/stth", 0.0, logm,
                            m_startRun, "DetectorTankAngle", 1.0,
                            m_datasetIndex);
