@@ -85,9 +85,9 @@ class FFTPresenter(object):
             Re_name_to_use = default_name[0]
         self.view.workspace = Re_name_to_use
         if original_Im_name in final_options:
-          Im_name_to_use = original_Im_name
+            Im_name_to_use = original_Im_name
         elif default_name:
-          Im_name_to_use = default_name[0]
+            Im_name_to_use = default_name[0]
         self.view.imaginary_workspace=Im_name_to_use
         return
 
