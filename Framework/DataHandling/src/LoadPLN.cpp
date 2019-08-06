@@ -503,7 +503,7 @@ void LoadPLN::init() {
                   "Calibrate the TOF correction from the elastic pulse.");
 
   declareProperty(LambdaOnTwoStr, false,
-      "Instrument is operating in Lambda on Two mode.");
+                  "Instrument is operating in Lambda on Two mode.");
 
   declareProperty(FilterByTimeStartStr, 0.0,
                   "Only include events after the provided start time, in "
@@ -823,7 +823,8 @@ void LoadPLN::loadParameters(const std::string &hdfFile,
                            m_startRun, "OverlapChopperFreq", 1.0 / 60,
                            m_datasetIndex);
   MapNeXusToSeries<double>(entry, "instrument/crystal/wavelength", 0.0, logm,
-                           m_startRun, "Wavelength", lambdaFactor, m_datasetIndex);
+                           m_startRun, "Wavelength", lambdaFactor,
+                           m_datasetIndex);
   MapNeXusToSeries<double>(entry, "instrument/detector/stth", 0.0, logm,
                            m_startRun, "DetectorTankAngle", 1.0,
                            m_datasetIndex);
