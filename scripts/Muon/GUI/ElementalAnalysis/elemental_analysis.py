@@ -31,6 +31,9 @@ from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 
+from Muon.GUI.ElementalAnalysis.LineSelector.LineSelectorPresenter import LineSelectorPresenter
+from Muon.GUI.ElementalAnalysis.LineSelector.LineSelectorView import LineSelectorView
+
 from Muon.GUI.Common import message_box
 
 import mantid.simpleapi as mantid
@@ -101,9 +104,20 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.peaks.electron.on_checkbox_checked(self.electrons_checked)
         self.peaks.electron.on_checkbox_unchecked(self.electrons_unchecked)
 
+        # Line type boxes
+        self.lines = LineSelectorPresenter(LineSelectorView())
+        self.lines.total.setChecked(True)
+        self.lines.total.on_checkbox_checked(self.line_total_checked)
+        self.lines.total.on_checkbox_unchecked(self.line_total_unchecked)
+        self.lines.prompt.on_checkbox_checked(self.line_prompt_checked)
+        self.lines.prompt.on_checkbox_unchecked(self.line_prompt_unchecked)
+        self.lines.delayed.on_checkbox_checked(self.line_delayed_checked)
+        self.lines.delayed.on_checkbox_unchecked(self.line_delayed_unchecked)
+
         # set up
         self.widget_list = QtWidgets.QVBoxLayout()
         self.widget_list.addWidget(self.peaks.view)
+        self.widget_list.addWidget(self.lines.view)
         self.widget_list.addWidget(self.detectors.view)
         self.widget_list.addWidget(self.load_widget.view)
 
@@ -282,7 +296,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.plotting.add_subplot(detector)
         for ws in mantid.mtd[name]:
             ws.setYUnit('Counts')
-            self.plotting.plot(detector, ws.getName())
+            if self.lines.total.isChecked() and 'Total' in ws.getName():
+                self.plotting.plot(detector, ws.getName())
+            if self.lines.prompt.isChecked() and 'Prompt' in ws.getName():
+                self.plotting.plot(detector, ws.getName())
+            if self.lines.delayed.isChecked() and 'Delayed' in ws.getName():
+                self.plotting.plot(detector, ws.getName())
         # add current selection of lines
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
@@ -428,3 +447,24 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def minor_peaks_unchecked(self):
         for element, selector in iteritems(self.element_widgets):
             self.checked_data(element, selector.secondary_checkboxes, False)
+
+    # Line total
+    def line_total_checked(self):
+        pass
+
+    def line_total_unchecked(self):
+        pass
+
+    # Line prompt
+    def line_prompt_checked(self):
+        pass
+
+    def line_prompt_unchecked(self):
+        pass
+
+    # Line delayed
+    def line_delayed_checked(self):
+        pass
+
+    def line_delayed_unchecked(self):
+        pass
