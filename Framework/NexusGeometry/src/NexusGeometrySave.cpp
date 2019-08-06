@@ -695,9 +695,24 @@ void saveNXDetector(const H5::Group &parentGroup,
     }
   }
 
+<<<<<<< HEAD
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeXYZPixeloffset(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
+=======
+    // write pixel_shape in NXdetector
+    /*
+    H5::Group pixelShape =
+        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
+
+    // get vertices and cylinders form cache.
+        compInfo.shape(index)
+
+        */
+    H5::StrType dependencyStrType = strTypeOfSize(dependency);
+    writeXYZPixeloffset(childGroup, compInfo, index);
+    writeNXDetectorNumber(childGroup, compInfo, detIds, index);
+>>>>>>> initial commit on nexus shape branch
 
   writeStrDataset(childGroup, BANK_NAME, detectorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
