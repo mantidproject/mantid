@@ -172,19 +172,6 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 }
 
 /*
-<<<<<<< HEAD
-=======
-TODO: DOCUMENTATION
-*/
-inline void writeCylinders(H5::Group &grp, const Geometry::IObject &shape) {}
-
-/*
-TODO: DOCUMENTATION
-*/
-inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
-
-/*
->>>>>>> refactor saveInstrument for shape, and test helper
  * Function: writeXYZPixeloffset. TODO: DOCUMENTATION
  */
 inline void writeXYZPixeloffset(H5::Group &grp,
@@ -571,21 +558,6 @@ void saveNXSource(const H5::Group &parentGroup,
     }
   }
 
-<<<<<<< HEAD
-=======
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
-
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &shape = compInfo.shape(index);
-
-    writeCylinders(pixelShapeGroup, shape);
-    writeVertices(pixelShapeGroup, shape);
-  }
-
->>>>>>> refactor saveInstrument for shape, and test helper
   writeStrDataset(childGroup, NAME, sourceName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
@@ -652,29 +624,10 @@ void saveNXMonitor(const H5::Group &parentGroup,
       writeOrientation(transformations, rotation, rotationDependency);
     }
   }
-<<<<<<< HEAD
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, compInfo, detIds, index);
 
-=======
-
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
-
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &shape = compInfo.shape(index);
-
-    writeCylinders(pixelShapeGroup, shape);
-    writeVertices(pixelShapeGroup, shape);
-  }
-
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeNXMonitorNumber(childGroup, compInfo, detIds, index);
-
->>>>>>> refactor saveInstrument for shape, and test helper
   writeStrDataset(childGroup, BANK_NAME, monitorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
@@ -743,7 +696,6 @@ void saveNXDetector(const H5::Group &parentGroup,
   }
 
 <<<<<<< HEAD
-<<<<<<< HEAD
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeXYZPixeloffset(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
@@ -752,33 +704,16 @@ void saveNXDetector(const H5::Group &parentGroup,
     /*
     H5::Group pixelShape =
         simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-=======
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
->>>>>>> refactor saveInstrument for shape, and test helper
 
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
+    // get vertices and cylinders form cache.
+        compInfo.shape(index)
 
-<<<<<<< HEAD
         */
     H5::StrType dependencyStrType = strTypeOfSize(dependency);
     writeXYZPixeloffset(childGroup, compInfo, index);
     writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 >>>>>>> initial commit on nexus shape branch
 
-=======
-    const auto &shape = compInfo.shape(index);
-
-    writeCylinders(pixelShapeGroup, shape);
-    writeVertices(pixelShapeGroup, shape);
-  }
-
-  H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeXYZPixeloffset(childGroup, compInfo, index);
-  writeNXDetectorNumber(childGroup, compInfo, detIds, index);
-
->>>>>>> refactor saveInstrument for shape, and test helper
   writeStrDataset(childGroup, BANK_NAME, detectorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
