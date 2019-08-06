@@ -24,6 +24,7 @@ Muon Analysis 2
 ###############
 
 - When loading PSI data if the groups given are poorly stored in the file, it should now produce unique names in the grouping tab for groups.
+- The FFT tab now uses the group pair selection to make a guess at the users selection for workspaces. 
 
 Algorithms
 ----------

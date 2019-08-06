@@ -73,6 +73,31 @@ class FFTPresenterTest(unittest.TestCase):
                                                                    'MUSR22725; Group; bottom; Asymmetry; MA',
                                                                    'MUSR22725; Group; fwd; Asymmetry; MA',
                                                                    'MUSR22725; Pair Asym; test_pair; MA'])
+        self.assertEqual(self.view.workspace,'MUSR22725; Group; fwd; Asymmetry; MA' )    
+
+    def test_keep_selection_for_getWorkspaceNames(self):
+        # load some data and then make a selection
+        self.presenter.getWorkspaceNames()
+        self.view.workspace = 'MUSR22725; Group; bkwd; Asymmetry; MA'
+        self.view.imaginary_workspace = 'MUSR22725; Group; bottom; Asymmetry; MA'
+        # update names
+        self.presenter.getWorkspaceNames()
+
+        self.assertEqual(self.view.workspace,'MUSR22725; Group; bkwd; Asymmetry; MA' )    
+        self.assertEqual(self.view.imaginary_workspace,'MUSR22725; Group; bottom; Asymmetry; MA' )    
+
+    def test_selection_removed_genWorkspaceName(self):
+        # load some data and then make a selection
+        self.presenter.getWorkspaceNames()
+        self.view.workspace = 'MUSR22725; Group; bkwd; Asymmetry; MA'
+        self.view.imaginary_workspace = 'MUSR22725; Group; bottom; Asymmetry; MA'
+        # remove bottom group
+        self.context.group_pair_context.remove_group("bottom")
+        # update names
+        self.presenter.getWorkspaceNames()
+
+        self.assertEqual(self.view.workspace,'MUSR22725; Group; bkwd; Asymmetry; MA' )    
+        self.assertEqual(self.view.imaginary_workspace,'MUSR22725; Group; fwd; Asymmetry; MA' )    
 
     def test_handle_use_raw_data_changed_when_no_rebin_set(self):
         self.view.set_raw_checkbox_state(False)
