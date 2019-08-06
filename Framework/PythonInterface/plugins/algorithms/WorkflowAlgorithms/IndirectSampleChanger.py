@@ -66,6 +66,14 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
                                                 validator=FloatArrayLengthValidator(2)),
                              doc='Energy range for the total energy component.')
 
+        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='Position',
+                             doc='Name of the sample environment log entry')
+
+        sample_environment_log_values = ['last_value', 'average']
+        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+                             StringListValidator(sample_environment_log_values),
+                             doc='Value selection of the sample environment log entry')
+
         self.declareProperty(name='MSDFit', defaultValue=False,
                              doc='Perform an MSDFit. Do not use with GroupingMethod as "All"')
 
@@ -118,8 +126,8 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
         self._inelastic_range = self.getProperty('InelasticRange').value
         self._total_range = self.getProperty('TotalRange').value
 
-        self._sample_log_name = 'Position'
-        self._sample_log_value = 'last_value'
+        self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
+        self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
         self._msd_fit = self.getProperty('MsdFit').value
         self._width_fit = self.getProperty('WidthFit').value

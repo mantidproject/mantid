@@ -265,8 +265,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         run = workspace.getRun()
 
-        if 'SAMP_POSN' in run:
-            self._sample_log_name = _extract_sensor_name(run, workspace.getInstrument(), 'SAMP_POSN')
+        position_logs = ['position', 'samp_posn']
+        if self._sample_log_name.lower() in position_logs:
+            self._sample_log_name = _extract_sensor_name(self._sample_log_name, run, workspace.getInstrument())
 
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
@@ -307,29 +308,46 @@ def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_
     return None, None
 
 
-def _extract_sensor_name(run, instrument, default_value):
-    if instrument.hasParameter("Workflow.TemperatureSensorNames"):
+def _extract_sensor_name(sample_log_name, run, instrument):
+    position = _extract_position_from_run(sample_log_name, run, instrument)
+    if position is not None:
+        default_names = ['Bot_Can_Top', 'Middle_Can_Top', 'Top_Can_Top']
         sensor_names = instrument.getStringParameter("Workflow.TemperatureSensorNames")[0].split(',')
-        position = _extract_position_from_run(instrument, run)
 
-        if position is not None:
-
-            if position < len(sensor_names) and sensor_names[position] in run:
-                return sensor_names[position]
-            else:
-                logger.warning('Invalid position ({}) found in workspace.'.format(position))
+        if position < len(sensor_names) and sensor_names[position] in run:
+            return sensor_names[position]
+        elif position < len(default_names):
+            logger.warning("Position {0} not found within the instrument parameters, "
+                           "using default '{1}'.".format(position, default_names[position]))
+            return default_names[position]
         else:
-            logger.information('Position not found in sample logs.')
-    return default_value
+            logger.warning('Invalid position ({}) found in workspace.'.format(position))
+    else:
+        logger.information('Position not found in sample logs, when using log name {}.'.format(sample_log_name))
+    return ''
 
 
-def _extract_position_from_run(instrument, run):
-    if instrument.hasParameter("Workflow.SamplePositions"):
-        sample_position = instrument.getStringParameter("Workflow.SamplePositions")[0].split(',')
-        if 'SAMP_POSN' in run:
-            position = str(run['SAMP_POSN'].value[-1])
-            return sample_position.index(position)
+def _extract_position_from_run(sample_log_name, run, instrument):
+    if sample_log_name in run:
+        if sample_log_name.lower() == 'position':
+            return _index_of_position(run[sample_log_name].value[-1])
+        elif sample_log_name.lower() == 'samp_posn':
+            return _index_of_samp_posn(run[sample_log_name].value[-1], instrument)
     return None
+
+
+def _index_of_position(position_log_value):
+    if isinstance(position_log_value, str):
+        return {'B': 0, 'M': 1, 'T': 2}.get(position_log_value[0], None)
+    return int(position_log_value)
+
+
+def _index_of_samp_posn(samp_posn_log_value, instrument):
+    if instrument.hasParameter("Workflow.SamplePositions"):
+        sample_positions = instrument.getStringParameter("Workflow.SamplePositions")[0].split(',')
+        if samp_posn_log_value in sample_positions:
+            return sample_positions.index(samp_posn_log_value)
+    return 0
 
 
 def _set_numeric_y_axis(workspace, length, unit, get_axis_value):

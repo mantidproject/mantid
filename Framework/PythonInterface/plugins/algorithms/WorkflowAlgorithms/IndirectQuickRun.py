@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-locals
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, FileFinder, NumericAxis,
-                        Progress)
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, FileFinder, MatrixWorkspace,
+                        NumericAxis, Progress)
 from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, GroupWorkspaces, mtd, IndirectTwoPeakFit, LoadLog,
                               SaveNexusProcessed)
 from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty, IntArrayMandatoryValidator, IntArrayProperty,
@@ -19,45 +19,6 @@ import os
 
 def exists_in_ads(workspace_name):
     return AnalysisDataService.doesExist(workspace_name)
-
-
-def get_log_filename(instrument_name, run_number):
-    zero_padding = '0' * (config.getFacility().instrument(instrument_name).zeroPadding(int(run_number)) -
-                          len(run_number))
-
-    run_name = instrument_name + zero_padding + run_number
-    return run_name.upper() + '.log'
-
-
-def get_log_from_run(run, log_name, method):
-    value_action = {'last_value': lambda x: x[len(x) - 1],
-                    'average': lambda x: x.mean()
-                    }
-    log_values = run[log_name].value
-    value = value_action[method](log_values)
-    return value
-
-
-def get_log_from_file(file_path, workspace_name, run, log_name):
-    if file_path != '':
-        LoadLog(Workspace=workspace_name, Filename=file_path, EnableLogging=False)
-        if log_name in run:
-            log_value = run[log_name].value
-            return log_value[len(log_value) - 1]
-    logger.warning('The log {0} was not found in the file: {1}'.format(log_name, file_path))
-    return None
-
-
-def get_instrument_prefix(workspace_name, run_number):
-    instrument = mtd[workspace_name].getInstrument().getName()
-    if instrument != '':
-        for facility in config.getFacilities():
-            try:
-                instrument = facility.instrument(instrument).filePrefix(int(run_number)).lower()
-                break
-            except RuntimeError:
-                continue
-    return instrument
 
 
 def save_workspace(workspace_name, filename):
@@ -98,6 +59,8 @@ class IndirectQuickRun(DataProcessorAlgorithm):
     _ipf_filename = None
     _plot = False
     _save = False
+
+    _temperatures = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect;Workflow\\MIDAS'
@@ -252,6 +215,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         self._group_energy_window_scan_output()
 
         if self._width_fit:
+            self._temperatures = self._get_temperatures()
             self._perform_width_fit()
 
         if self._plot:
@@ -289,25 +253,33 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
         group_workspaces(energy_window_scan_workspaces, self._scan_ws + '_q')
 
+    def _get_temperatures(self):
+        elf_workspace_name = self._scan_ws + '_total_elf'
+
+        if exists_in_ads(elf_workspace_name):
+            elf_workspace = mtd[elf_workspace_name]
+            if isinstance(elf_workspace, MatrixWorkspace):
+                return elf_workspace.dataX(0)
+        return None
+
     def _perform_width_fit(self):
         input_workspace_names = mtd[self._output_ws].getNames()
         x = mtd[input_workspace_names[0]].readX(0)
 
         # Perform the two peak fits on the input workspaces
-        result_workspaces, chi_workspaces, temperatures, run_numbers = self._perform_two_peak_fits(input_workspace_names,
-                                                                                                   x[0], x[len(x) - 1])
+        result_workspaces, chi_workspaces, run_numbers = self._perform_two_peak_fits(input_workspace_names, x[0],
+                                                                                     x[len(x) - 1])
 
         # Find the units of the x axis
-        number_of_temperatures = len(temperatures)
-        x_axis_is_temperature = len(input_workspace_names) == number_of_temperatures
+        x_axis_is_temperature = len(input_workspace_names) == len(self._temperatures)
 
         # Create the width workspace
         width_name = self._output_ws + '_Width1'
-        self._create_width_workspace(result_workspaces, temperatures, run_numbers, width_name, x_axis_is_temperature)
+        self._create_width_workspace(result_workspaces, self._temperatures, run_numbers, width_name, x_axis_is_temperature)
 
         # Create the diffusion workspace
         diffusion_name = self._output_ws + '_Diffusion'
-        self._create_diffusion_workspace(mtd[width_name], temperatures, run_numbers, diffusion_name, x_axis_is_temperature)
+        self._create_diffusion_workspace(mtd[width_name], self._temperatures, run_numbers, diffusion_name, x_axis_is_temperature)
 
         # Group the width fit workspaces
         group_workspaces(result_workspaces + chi_workspaces + [width_name] + [diffusion_name], self._output_ws + '_Width_Fit')
@@ -315,7 +287,6 @@ class IndirectQuickRun(DataProcessorAlgorithm):
     def _perform_two_peak_fits(self, workspace_names, x_min, x_max):
         result_workspaces = []
         chi_workspaces = []
-        temperatures = []
         run_numbers = []
         for workspace_name in workspace_names:
             number_of_histograms = mtd[workspace_name].getNumberHistograms()
@@ -323,11 +294,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
             progress_tracker = Progress(self, 0.3, 1.0, number_of_histograms+1)
             progress_tracker.report('Finding temperature for {0}...'.format(workspace_name))
 
-            # Get the sample temperature
-            temperature = self._get_temperature(workspace_name[:-3] + 'red')
-            if temperature is not None:
-                temperatures.append(temperature)
-            else:
+            if self._temperatures is None:
                 run_number = str(mtd[workspace_name].getRunNumber())
                 run_numbers.append(run_number)
 
@@ -342,7 +309,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
 
             result_workspaces.append(result + '_Result')
             chi_workspaces.append(result + '_ChiSq')
-        return result_workspaces, chi_workspaces, temperatures, run_numbers
+        return result_workspaces, chi_workspaces, run_numbers
 
     def _create_width_workspace(self, result_workspaces, temperatures, run_numbers, output_name, x_axis_is_temperature):
         self._extract(result_workspaces[0], 0, output_name)
@@ -384,29 +351,6 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         unit = ('Temperature', 'K') if x_axis_is_temperature else ('Run No', 'last 3 digits')
         x_axis = mtd[output_name].getAxis(0).setUnit("Label")
         x_axis.setLabel(unit[0], unit[1])
-
-    def _get_temperature(self, workspace_name):
-        """
-        Gets the sample temperature for a given workspace.
-
-        @param workspace_name Name of workspace
-        @returns Temperature in Kelvin or None if not found
-        """
-        run_number = str(mtd[workspace_name].getRunNumber())
-        instrument_prefix = get_instrument_prefix(workspace_name, run_number)
-
-        log_filename = get_log_filename(instrument_prefix, run_number)
-        return self._get_temperature_from_log(workspace_name, mtd[workspace_name].getRun(), log_filename)
-
-    def _get_temperature_from_log(self, workspace_name, run, log_filename):
-        if self._sample_log_name in run:
-            # Look for temperature in logs of workspace
-            return get_log_from_run(run, self._sample_log_name, self._sample_log_value)
-        else:
-            # Logs are not in workspace, try loading from file
-            logger.information('Log parameter not found in workspace. Searching for log file.')
-            file_path = FileFinder.getFullPath(log_filename)
-            return get_log_from_file(file_path, workspace_name, run, self._sample_log_name)
 
     def _extract(self, input_ws, index, output_ws):
         extract_alg = self.createChildAlgorithm("ExtractSingleSpectrum", enableLogging=False)
