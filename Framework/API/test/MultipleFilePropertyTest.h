@@ -650,6 +650,20 @@ public:
     TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.nxs"));
   }
 
+  void test_multipleFiles_ranges_without_spaces() {
+    MultipleFileProperty p("Filename");
+    p.setValue("1-5,3-4");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00003.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][3], dummyFile("TSC00004.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][4], dummyFile("TSC00005.nxs"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00003.nxs"));
+    TS_ASSERT_EQUALS(fileNames[1][1], dummyFile("TSC00004.nxs"));
+  }
+
   void test_multipleFiles_ranges_with_spaces() {
     MultipleFileProperty p("Filename");
     p.setValue("1-5, 3-4");
