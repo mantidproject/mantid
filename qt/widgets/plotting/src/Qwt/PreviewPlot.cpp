@@ -30,6 +30,8 @@ Mantid::Kernel::Logger g_log("PreviewPlot");
 bool isNegative(double v) { return v <= 0.0; }
 } // namespace
 
+const QString PreviewPlot::g_yAxisMenuName = "Y Axis Menu";
+
 PreviewPlot::PreviewPlot(QWidget *parent, bool init)
     : API::MantidWidget(parent),
       m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
@@ -839,6 +841,12 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
 
   QAction *menuAction = new QAction(menuName, menu);
   menuAction->setMenu(menu);
+
+  // sets the name of the Y Axis menu so it can be accessed in the future
+  if (menuName == "Y Axis") {
+    menuAction->setObjectName(g_yAxisMenuName);
+  }
+
   m_contextMenu->addAction(menuAction);
 
   return group->actions();
@@ -989,9 +997,18 @@ void PreviewPlot::handleAxisTypeSelect() {
 }
 
 /**
+ *
  * Removes the Y-Axis option from the context menu as the Sample Transmission
  * Calculator does not need it.
+ *
+ * @throw Runtime error thrown if the Y Axis action can't be found by its object
+ * name
  */
 void PreviewPlot::disableYAxisMenu() {
-  m_contextMenu->actions().at(4)->setVisible(false);
+  auto menu = m_contextMenu->findChild<QAction *>(g_yAxisMenuName);
+
+  if (menu == NULL)
+    throw std::runtime_error("There was a problem with object naming.");
+  else
+    menu->setVisible(false);
 }

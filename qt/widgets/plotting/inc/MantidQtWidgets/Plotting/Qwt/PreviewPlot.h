@@ -221,6 +221,8 @@ private:
   QMap<QString, QwtSymbol::Style> m_curveSymbol;
 
   friend class DisplayCurveFit;
+
+  static const QString g_yAxisMenuName;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
