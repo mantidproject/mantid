@@ -35,7 +35,7 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     def setUp(self):
         self.gui.plot_window = None
-        self.gui.color_index = 0
+        self.gui.used_colors = {}
         self.gui.element_lines = {}
         self.has_raise_ValueError_been_called_once = False
 
@@ -44,24 +44,42 @@ class ElementalAnalysisTest(unittest.TestCase):
             self.has_raise_ValueError_been_called_once = True
             raise ValueError()
 
+    def test_that_get_color_returns_C0_as_first_color(self):
+        self.assertEqual('C0', self.gui.get_color('bla'))
+
     def test_that_default_colour_cycle_is_used(self):
         cycle = len(matplotlib.rcParams['axes.prop_cycle'])
         self.assertEqual(cycle, self.gui.num_colors)
 
         expected = ['C%d' % i for i in range(cycle)]
-        returned = [self.gui.get_color() for _ in range(cycle)]
+        returned = [self.gui.get_color('el_{}'.format(i)) for i in range(cycle)]
         self.assertEqual(expected, returned)
 
-    def test_color_is_increased_every_time_get_color_is_called(self):
-        self.assertEqual(self.gui.color_index, 0)
-        self.gui.get_color()
-        self.assertEqual(self.gui.color_index, 1)
+    def test_that_get_color_returns_the_same_color_for_the_same_element(self):
+        self.assertEqual(self.gui.used_colors, {})
 
-    def test_that_color_index_wraps_around_when_end_reached(self):
-        self.gui.color_index = self.gui.num_colors - 1
-        self.gui.get_color()
+        colors = [self.gui.get_color('Cu') for _ in range(10)]
+        colors += [self.gui.get_color('Fe') for _ in range(10)]
+        colors = sorted(list(set(colors)))
 
-        self.assertEqual(self.gui.color_index, 0)
+        self.assertEqual(colors, ['C0', 'C1'])
+
+    def test_that_get_color_returns_a_color_if_it_has_been_freed(self):
+        elements = ['Cu', 'Fe', 'Ni']
+        colors = [self.gui.get_color(el) for el in elements]
+
+        self.assertEqual(colors, ['C0', 'C1', 'C2'])
+
+        del self.gui.used_colors['Fe']
+
+        new_col = self.gui.get_color('O')
+        self.assertEqual(new_col, 'C1')
+
+    def test_that_get_color_wraps_around_when_all_colors_in_cycle_have_been_used(self):
+        [self.gui.get_color(i) for i in range(self.gui.num_colors)]
+
+        self.assertEqual(self.gui.get_color('Cu'), 'C0')
+        self.assertEqual(self.gui.get_color('Fe'), 'C1')
 
     def test_that_closing_with_no_plot_will_not_throw(self):
         self.gui.plot_window = None
