@@ -283,8 +283,8 @@ used.
 
   void
   test_NXclass_without_name_is_assigned_unique_default_name_for_each_group() {
-    // this test will try to save and unnameed instrument with multiple unnamed
-    // detector banks, to vefiry that the unique group names which
+    // this test will try to save and unnamed instrument with multiple unnamed
+    // detector banks, to verify that the unique group names which
     // saveInstrument provides for each NXclass do not throw a H5 error due to
     // duplication of group names. If any group in the same tree path share the
     // same name, HDF5 will throw a group exception. In this test, we expect no

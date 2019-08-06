@@ -627,7 +627,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
       std::ostringstream bankname;
       bankname << "";
 
-      RectangularDetector *bank = new RectangularDetector(bankname.str());
+      auto *bank = new RectangularDetector(bankname.str());
       bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
                        pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
                        pixelSpacing, (banknum - 1) * pixels * pixels, true,
@@ -654,7 +654,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
       // Make a new bank
       std::ostringstream bankname;
       bankname << "bank" << banknum;
-      RectangularDetector *bank = new RectangularDetector(bankname.str());
+      auto *bank = new RectangularDetector(bankname.str());
       bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
                        pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
                        pixelSpacing, (banknum - 1) * pixels * pixels, true,
@@ -805,28 +805,28 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
   instrument->setName("test-instrument-with-monitor");
 
   // A source
-  ObjComponent *source = new ObjComponent("source");
+  auto *source = new ObjComponent("source");
   source->setPos(V3D(-10, 0, 0));
   source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(source);
   instrument->markAsSource(source);
 
   // A sample
-  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  auto *sample = new ObjComponent("some-surface-holder");
   sample->setPos(V3D(0, 0, 0));
   sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
   // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  auto *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
   det->setPos(V3D(0, 0, 10));
   det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(det);
   instrument->markAsDetector(det);
 
   // A monitor
-  Detector *mon = new Detector("test-monitor", 2 /*detector id*/, nullptr);
+  auto *mon = new Detector("test-monitor", 2 /*detector id*/, nullptr);
   mon->setPos(monitorPos);
   mon->setRot(monitorRot);
   mon->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));

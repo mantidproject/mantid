@@ -37,10 +37,10 @@ ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
 }
 
 std::string getObjName(const H5::H5Object &obj) {
-  std::string obj_name(""); // object name to return
+  std::string obj_name; // object name to return
 
   // Preliminary call to get the size of the object name
-  ssize_t name_size = H5Iget_name(obj.getId(), NULL, static_cast<size_t>(0));
+  ssize_t name_size = H5Iget_name(obj.getId(), nullptr, static_cast<size_t>(0));
 
   // If H5Iget_name failed, throw exception
   if (name_size < 0) {

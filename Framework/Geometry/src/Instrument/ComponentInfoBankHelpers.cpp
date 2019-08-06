@@ -91,7 +91,7 @@ Eigen::Vector3d
 offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
                    const size_t ancestorIdx, const size_t currentIdx) {
 
-  if (!(ancestorIdx > currentIdx)) {
+  if ((ancestorIdx <= currentIdx)) {
     throw std::invalid_argument(
         "Index of ancestor component is not higher than current Index.");
   }

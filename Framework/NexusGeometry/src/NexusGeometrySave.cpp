@@ -18,7 +18,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
@@ -27,9 +26,9 @@
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <cmath>
-#include <iostream>
 #include <memory>
 #include <string>
+
 namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
@@ -118,7 +117,7 @@ inline H5::StrType strTypeOfSize(const std::string &str) {
  */
 inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
                             const std::string &dSetVal,
-                            H5::DataSpace dataSpace = SCALAR) {
+                            const H5::DataSpace &dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(dSetVal);
   H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
   dSet.write(dSetVal, dataType);
@@ -134,7 +133,7 @@ inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
  */
 inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
                               const std::string &attrVal,
-                              H5::DataSpace dataSpace = SCALAR) {
+                              const H5::DataSpace &dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(attrVal);
   H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
@@ -151,7 +150,7 @@ inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
  */
 inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
                               const std::string &attrVal,
-                              H5::DataSpace dataSpace = SCALAR) {
+                              const H5::DataSpace &dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(attrVal);
   auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
   attribute.write(dataType, attrVal);
@@ -171,7 +170,7 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
  */
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
-                                size_t idx) {
+                                const size_t idx) {
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
   auto childrenDetectors = compInfo.detectorsInSubtree(idx);
@@ -205,7 +204,7 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   hsize_t dims[static_cast<hsize_t>(1)];
   dims[0] = nDetectorsInBank;
 
-  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   if (!xIsZero) {
     xPixelOffset =
@@ -259,7 +258,7 @@ void writeNXDetectorNumber(H5::Group &grp,
   hsize_t dims[static_cast<hsize_t>(1)];
   dims[0] = nDetectorsInBank;
 
-  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   detectorNumber =
       grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
@@ -301,7 +300,7 @@ void writeNXMonitorNumber(H5::Group &grp,
   hsize_t dims[static_cast<hsize_t>(1)];
   dims[0] = nMonitorsInBank;
 
-  H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   // these DataSets are duplicates of each other. written to the group to
   // handle the naming inconsistency. probably temporary.
@@ -355,7 +354,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   auto unitVec = position.normalized();
   std::vector<double> stdNormPos = toStdVector(unitVec);
 
-  dspace = H5Screate_simple(drank, ddims, NULL);
+  dspace = H5Screate_simple(drank, ddims, nullptr);
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
   location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
 
@@ -363,7 +362,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   hsize_t adims[static_cast<hsize_t>(3)];
   adims[0] = 3;
 
-  aspace = H5Screate_simple(arank, adims, NULL);
+  aspace = H5Screate_simple(arank, adims, nullptr);
   vector =
       location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE, aspace);
   vector.write(H5::PredType::NATIVE_DOUBLE, stdNormPos.data());
@@ -439,7 +438,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
   std::vector<double> stdNormAxis = toStdVector(axisOfRotation);
 
-  dspace = H5Screate_simple(rank, ddims, NULL);
+  dspace = H5Screate_simple(rank, ddims, nullptr);
   orientation =
       grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
   orientation.write(&angle, H5::PredType::NATIVE_DOUBLE, dspace);
@@ -448,7 +447,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   hsize_t adims[static_cast<hsize_t>(3)];
   adims[0] = static_cast<hsize_t>(3);
 
-  aspace = H5Screate_simple(arank, adims, NULL);
+  aspace = H5Screate_simple(arank, adims, nullptr);
   vector =
       orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE, aspace);
   vector.write(H5::PredType::NATIVE_DOUBLE, stdNormAxis.data());
@@ -484,7 +483,7 @@ H5::Group NXInstrument(const H5::Group &parent,
 
   std::string nameInCache = compInfo.name(compInfo.root());
   std::string instrName =
-      nameInCache == "" ? "unspecified_instrument" : nameInCache;
+      nameInCache.empty() ? "unspecified_instrument" : nameInCache;
   H5::Group childGroup = parent.createGroup(instrName);
 
   writeStrDataset(childGroup, NAME, instrName);
@@ -510,7 +509,7 @@ void saveNXSample(const H5::Group &parentGroup,
 
   std::string nameInCache = compInfo.name(compInfo.sample());
   std::string sampleName =
-      nameInCache == "" ? "unspecified_sample" : nameInCache;
+      nameInCache.empty() ? "unspecified_sample" : nameInCache;
 
   H5::Group childGroup = parentGroup.createGroup(sampleName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
@@ -533,7 +532,7 @@ void saveNXSource(const H5::Group &parentGroup,
 
   std::string nameInCache = compInfo.name(index);
   std::string sourceName =
-      nameInCache == "" ? "unspecified_source" : nameInCache;
+      nameInCache.empty() ? "unspecified_source" : nameInCache;
 
   std::string dependency = NO_DEPENDENCY;
 
@@ -589,7 +588,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   // if the component is unnamed sets the name as unspecified with the
   // location of the component in the cache
   std::string nameInCache = compInfo.name(index);
-  std::string monitorName = nameInCache == ""
+  std::string monitorName = nameInCache.empty()
                                 ? "unspecified_monitor_" + std::to_string(index)
                                 : nameInCache;
 
@@ -652,8 +651,8 @@ void saveNXDetector(const H5::Group &parentGroup,
   // location of the component in the cache
   std::string nameInCache = compInfo.name(index);
   std::string detectorName =
-      nameInCache == "" ? "unspecified_detector_at_" + std::to_string(index)
-                        : nameInCache;
+      nameInCache.empty() ? "unspecified_detector_at_" + std::to_string(index)
+                          : nameInCache;
 
   Eigen::Vector3d position =
       Mantid::Kernel::toVector3d(compInfo.position(index));
@@ -731,10 +730,10 @@ void saveInstrument(
   if (!isValidExt) {
 
     // string of valid extensions to output in exception
-    std::string extensions = "";
+    std::string extensions;
     std::for_each(
         nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-        [&extensions](const std::string &s) { extensions += " " + s; });
+        [&extensions](const std::string &str) { extensions += " " + str; });
     throw std::invalid_argument("invalid extension for file: '" +
                                 ext.generic_string() +
                                 "'. Expected any of: " + extensions);
