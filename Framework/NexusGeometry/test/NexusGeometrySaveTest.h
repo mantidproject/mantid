@@ -296,7 +296,7 @@ used.
 
     // unnamed ("") instrument with multiple unnamed detector banks ("")
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        2 /*number of banks*/, 2 /*number of pixels*/, true);
+        2 /*number of banks*/, 2 /*number of pixels*/, 0.008, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
@@ -1036,17 +1036,18 @@ found in the Instrument cache.
     TS_ASSERT(hasOrientation); // assert orientation dataset exists.
     TS_ASSERT(hasLocation);    // assert location dataset exists.
 
-    bool sourceDependencyIsLocation =
+    bool sourceDependencyIsOrientation =
         tester.dataSetHasStrValue(DEPENDS_ON /*dataset name*/,
                                   toNXPathString(transformationsPath) + "/" +
                                       ORIENTATION /*value in dataset*/,
                                   sourcePath /*where the dataset lives*/);
-    TS_ASSERT(sourceDependencyIsLocation);
-
+    TS_ASSERT(sourceDependencyIsOrientation);
+    auto x = toNXPathString(transformationsPath) + "/" +
+             LOCATION /*dAttribute value*/;
     bool orientationDependencyIsLocation = tester.hasAttributeInDataSet(
         ORIENTATION /*dataset name*/, DEPENDS_ON /*dAttribute name*/,
         toNXPathString(transformationsPath) + "/" +
-            LOCATION /*attribute value*/,
+            LOCATION /*dAttribute value*/,
         transformationsPath
         /*where the dataset lives*/);
     TS_ASSERT(orientationDependencyIsLocation);

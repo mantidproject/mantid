@@ -14,7 +14,12 @@
  *@date 22/07/2019
  */
 
-#include "MantidNexusGeometry/NexusGeometrySave.h"
+#include "MantidGeometry/Objects/CSGObject.h"    // need?
+#include "MantidGeometry/Objects/IObject.h"      // need?
+#include "MantidGeometry/Objects/MeshObject.h"   // need?
+#include "MantidGeometry/Objects/ShapeFactory.h" // need?
+#include "MantidGeometry/Rendering/ShapeInfo.h"  // need?
+
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -22,6 +27,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
+#include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
@@ -52,13 +58,13 @@ inline std::vector<double> toStdVector(const V3D &data) {
 }
 
 /*
- * Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector into
- * std::vector<double> vector. Used by saveInstrument to write array-type
+ * Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector
+ * into std::vector<double> vector. Used by saveInstrument to write array-type
  * datasets to file.
  *
  * @param data : Eigen::Vector3d vector containing data values
- * @return std::vector<double> vector containing data values in Eigen::Vector3d
- * format
+ * @return std::vector<double> vector containing data values in
+ * Eigen::Vector3d format
  */
 inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
   return toStdVector(Kernel::toV3D(data));
@@ -141,8 +147,8 @@ inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
 
 /*
  * Function: writeStrAttribute
- * Overload function which writes a StrType HDF attribute and attribute value to
- * a HDF dataset.
+ * Overload function which writes a StrType HDF attribute and attribute value
+ * to a HDF dataset.
  *
  * @param dSet : HDF dataset object.
  * @param attrname : attribute name.
@@ -166,7 +172,17 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 }
 
 /*
- * Function: writeXYZPixeloffset. Writes the x X
+TODO: DOCUMENTATION
+*/
+// inline void writeCylinders(H5::Group &grp, const Geometry::IObject &shape) {}
+
+/*
+TODO: DOCUMENTATION
+*/
+// inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
+
+/*
+ * Function: writeXYZPixeloffset. TODO: DOCUMENTATION
  */
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
@@ -267,13 +283,13 @@ void writeNXDetectorNumber(H5::Group &grp,
 
 /*
  * Function: writeNXDetectorNumber
- * For use with NXmonitor group. write 'detector_id's of an NXmonitor, which is
- * a specific type of NXdetector, to its group.
+ * For use with NXmonitor group. write 'detector_id's of an NXmonitor, which
+ * is a specific type of NXdetector, to its group.
  *
  * @param grp : NXmonitor group (HDF group)
  * @param compInfo : componentInfo object.
- * @param monitorIDs : std::vector<int> container of all monitorIDs to be stored
- * into dataset 'detector_id' (or 'detector_number'. naming convention
+ * @param monitorIDs : std::vector<int> container of all monitorIDs to be
+ * stored into dataset 'detector_id' (or 'detector_number'. naming convention
  * inconsistency?).
  * @idx : size_t index of monitor in compInfo.
  */
@@ -282,8 +298,8 @@ void writeNXMonitorNumber(H5::Group &grp,
                           const std::vector<int> &monitorIDs,
                           const size_t idx) {
 
-  // these DataSets are duplicates of each other. written to the NXmonitor group
-  // to handle the naming inconsistency. probably temporary.
+  // these DataSets are duplicates of each other. written to the NXmonitor
+  // group to handle the naming inconsistency. probably temporary.
   H5::DataSet detectorNumber, detector_id;
 
   std::vector<int> monitorDetIDs;
@@ -315,16 +331,7 @@ void writeNXMonitorNumber(H5::Group &grp,
 /*
  * Function: writeLocation
  * For use with NXdetector group. Writes absolute position of detector bank to
- *dataset and metadata as attributes:
- *
- * =>	norm of position vector stored as value in NXtransformation dataset
- *		'location'.
- * =>	normalised position vector stored as array in attribute 'vector'.
- * =>	units of measurement stored as string value in attribute 'units'.
- * =>	type of transformation stored as string value in attribute
- *		'transformation_type'.
- * =>	dependency of transformation stored as string value in attribute
- *		'depends_on'.
+ * dataset and metadata as attributes.
  *
  * @param grp : NXdetector group : (HDF group)
  * @param compInfo : componentInfo object.
@@ -386,36 +393,22 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
 /*
  * Function: writeOrientation
- * For use with NXdetector group. Writes the absolute rotation of detector bank
- *to dataset and metadata as attributes:
- *
- * =>	magnitude of angle of rotation stored as value in NXtransformation
- *dataset 'location'.
- * =>	axis of rotation as unit vector stored as array in attribute 'vector'.
- * =>	units of measurement stored as string value in attribute 'units'.
- * =>	type of transformation stored as string value in attribute
- *		'transformation_type'.
- * =>	dependency of transformation stored as string value in attribute
- *		'depends_on'.
+ * For use with NXdetector group. Writes the absolute rotation of detector
+ * bank to dataset and metadata as attributes.
  *
  * @param grp : NXdetector group : (HDF group)
  * @param compInfo : componentInfo object.
  * @param idx : size_t index of bank in component Info.
- * @param noTranslation : bool flag specifying if the save method calling
- * writeOrientation also wrote a translation. If true, then no translation was
- * written to file, and the dependency for the orientation dataset is itself.
- *
- * Compliant to the Mantid Instrument Definition file, if a translation exists,
- * it precedes a rotation.
+ * @param dependency : dependency of the orientation dataset:
+ * Compliant to the Mantid Instrument Definition file, if a translation
+ * exists, it precedes a rotation.
  * https://docs.mantidproject.org/nightly/concepts/InstrumentDefinitionFile.html
  */
 inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
-                             bool noTranslation) {
+                             const std::string &dependency) {
 
-  // dependency for orientation defaults to self-dependent. If Location dataset
-  // exists, the orientation will depend on it instead.
-  std::string dependency =
-      !noTranslation ? H5_OBJ_NAME(grp) + "/" + LOCATION : NO_DEPENDENCY;
+  // dependency for orientation defaults to self-dependent. If Location
+  // dataset exists, the orientation will depend on it instead.
 
   double angle;
 
@@ -471,9 +464,9 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
 
 /*
  * Function: NXInstrument
- * for NXentry parent (root group). Produces an NXinstrument group in the parent
- * group, and writes Nexus compliant datasets and metadata stored in attributes
- * to the new group.
+ * for NXentry parent (root group). Produces an NXinstrument group in the
+ * parent group, and writes Nexus compliant datasets and metadata stored in
+ * attributes to the new group.
  *
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
@@ -518,9 +511,9 @@ void saveNXSample(const H5::Group &parentGroup,
 
 /*
  * Function: saveNXSource
- * For NXentry (root group). Produces an NXsource group in the parent group, and
- * writes the Nexus compliant datasets and metadata stored in attributes to the
- * new group.
+ * For NXentry (root group). Produces an NXsource group in the parent group,
+ * and writes the Nexus compliant datasets and metadata stored in attributes
+ * to the new group.
  *
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
@@ -552,20 +545,41 @@ void saveNXSource(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first dependency in the chain. first check
-    // translation in component is non-zero, and set dependency to location
-    // if true and write location. Then check if orientation in component is
-    // non-zero, replace dependency with orientation if true. If neither
-    // orientation nor location are non-zero, component is self dependent.
+    // self, ".", is the default first NXdetector dependency in the chain. first
+    // check translation in NXdetector is non-zero, and set dependency to
+    // location if true and write location. Then check if orientation in
+    // NXdetector is non-zero, replace dependency with orientation if true. If
+    // neither orientation nor location are non-zero, NXdetector is self
+    // dependent.
     if (!locationIsOrigin) {
       dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
       writeLocation(transformations, position);
     }
     if (!orientationIsZero) {
       dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-      writeOrientation(transformations, rotation, locationIsOrigin);
+
+      // If location dataset is written to group also, then dependency for
+      // orientation dataset containg the rotation transformation will be
+      // location. Else dependency for orientation is self.
+      std::string rotationDependency =
+          locationIsOrigin ? NO_DEPENDENCY
+                           : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+      writeOrientation(transformations, rotation, rotationDependency);
     }
   }
+  /*
+  // write pixel_shape in NXdetector
+  if (compInfo.hasValidShape(index)) {
+
+    H5::Group pixelShapeGroup =
+        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
+
+    const auto &shape = compInfo.shape(index);
+
+    writeCylinders(pixelShapeGroup, shape);
+    writeVertices(pixelShapeGroup, shape);
+  }
+  */
   writeStrDataset(childGroup, NAME, sourceName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
@@ -610,26 +624,46 @@ void saveNXMonitor(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first dependency in the chain. first check
-    // translation in component is non-zero, and set dependency to location
-    // if true and write location. Then check if orientation in component is
-    // non-zero, replace dependency with orientation if true. If neither
-    // orientation nor location are non-zero, component is self dependent.
+    // self, ".", is the default first NXdetector dependency in the chain. first
+    // check translation in NXdetector is non-zero, and set dependency to
+    // location if true and write location. Then check if orientation in
+    // NXdetector is non-zero, replace dependency with orientation if true. If
+    // neither orientation nor location are non-zero, NXdetector is self
+    // dependent.
     if (!locationIsOrigin) {
       dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
       writeLocation(transformations, position);
     }
     if (!orientationIsZero) {
       dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-      writeOrientation(transformations, rotation, locationIsOrigin);
+
+      // If location dataset is written to group also, then dependency for
+      // orientation dataset containg the rotation transformation will be
+      // location. Else dependency for orientation is self.
+      std::string rotationDependency =
+          locationIsOrigin ? NO_DEPENDENCY
+                           : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+      writeOrientation(transformations, rotation, rotationDependency);
     }
-
-    H5::StrType dependencyStrType = strTypeOfSize(dependency);
-    writeNXMonitorNumber(childGroup, compInfo, detIds, index);
-
-    writeStrDataset(childGroup, BANK_NAME, monitorName);
-    writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
+  /*
+  // write pixel_shape in NXdetector
+  if (compInfo.hasValidShape(index)) {
+
+    H5::Group pixelShapeGroup =
+        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
+
+    const auto &shape = compInfo.shape(index);
+
+    writeCylinders(pixelShapeGroup, shape);
+    writeVertices(pixelShapeGroup, shape);
+  }
+  */
+  H5::StrType dependencyStrType = strTypeOfSize(dependency);
+  writeNXMonitorNumber(childGroup, compInfo, detIds, index);
+
+  writeStrDataset(childGroup, BANK_NAME, monitorName);
+  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*
@@ -672,27 +706,47 @@ void saveNXDetector(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first dependency in the chain. first check
-    // translation in component is non-zero, and set dependency to location
-    // if true and write location. Then check if orientation in component is
-    // non-zero, replace dependency with orientation if true. If neither
-    // orientation nor location are non-zero, component is self dependent.
+    // self, ".", is the default first NXdetector dependency in the chain. first
+    // check translation in NXdetector is non-zero, and set dependency to
+    // location if true and write location. Then check if orientation in
+    // NXdetector is non-zero, replace dependency with orientation if true. If
+    // neither orientation nor location are non-zero, NXdetector is self
+    // dependent.
     if (!locationIsOrigin) {
       dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
       writeLocation(transformations, position);
     }
     if (!orientationIsZero) {
       dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
-      writeOrientation(transformations, rotation, locationIsOrigin);
+
+      // If location dataset is written to group also, then dependency for
+      // orientation dataset containg the rotation transformation will be
+      // location. Else dependency for orientation is self.
+      std::string rotationDependency =
+          locationIsOrigin ? NO_DEPENDENCY
+                           : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+      writeOrientation(transformations, rotation, rotationDependency);
     }
-
-    H5::StrType dependencyStrType = strTypeOfSize(dependency);
-    writeXYZPixeloffset(childGroup, compInfo, index);
-    writeNXDetectorNumber(childGroup, compInfo, detIds, index);
-
-    writeStrDataset(childGroup, BANK_NAME, detectorName);
-    writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
+  /*
+  // write pixel_shape in NXdetector
+  if (compInfo.hasValidShape(index)) {
+
+    H5::Group pixelShapeGroup =
+        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
+
+    const auto &shape = compInfo.shape(index);
+
+    writeCylinders(pixelShapeGroup, shape);
+    writeVertices(pixelShapeGroup, shape);
+  }
+  */
+  H5::StrType dependencyStrType = strTypeOfSize(dependency);
+  writeXYZPixeloffset(childGroup, compInfo, index);
+  writeNXDetectorNumber(childGroup, compInfo, detIds, index);
+
+  writeStrDataset(childGroup, BANK_NAME, detectorName);
+  writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
 /*

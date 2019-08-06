@@ -214,8 +214,8 @@ createTestInstrumentRectangular(int num_banks, int pixels,
 
 Mantid::Geometry::Instrument_sptr
 createTestInstrumentRectangular2(int num_banks, int pixels,
-                                 bool nameless = false,
-                                 double pixelSpacing = 0.008);
+                                 double pixelSpacing = 0.008,
+                                 bool nameless = false);
 
 /// Creates a mimimal valid virtual instrument.
 Mantid::Geometry::Instrument_sptr

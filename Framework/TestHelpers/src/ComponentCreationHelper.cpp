@@ -608,8 +608,8 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
  * @param pixelSpacing : padding between pixels
  */
 Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
-                                                 bool nameless,
-                                                 double pixelSpacing) {
+                                                 double pixelSpacing,
+                                                 bool nameless) {
 
   auto instrName = nameless ? "" : "basic_rect";
   auto testInst = boost::make_shared<Instrument>(instrName);

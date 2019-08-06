@@ -21,8 +21,9 @@ const H5std_string NX_CLASS = "NX_class";
 const H5std_string NX_SAMPLE = "NXsample";
 const H5std_string NX_DETECTOR = "NXdetector";
 const H5std_string NX_MONITOR = "NXmonitor";
-const H5std_string NX_OFF_GEOMETRY = "NXoff_geometry";
 const H5std_string NX_ENTRY = "NXentry";
+const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
+const H5std_string NX_OFF = "NXoff_geometry";
 const H5std_string NX_INSTRUMENT = "NXinstrument";
 const H5std_string NX_CHAR = "NX_CHAR";
 const H5std_string NX_SOURCE = "NXsource";
@@ -60,9 +61,6 @@ const H5std_string VECTOR = "vector";
 const double DEGREES_IN_SEMICIRCLE = 180.0;
 const double PRECISION = 1e-5;
 const double PI = M_PI;
-
-const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
-const H5std_string NX_OFF = "NXoff_geometry";
 
 const H5std_string DEFAULT_ROOT_PATH = "raw_data_1";
 const H5::DataSpace SCALAR(H5S_SCALAR);
