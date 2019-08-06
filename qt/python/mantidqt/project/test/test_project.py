@@ -106,6 +106,15 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(self.project.save.call_count, 1)
         self.assertEqual(self.project._offer_save_message_box.call_count, 1)
 
+    def test_offer_save_does_nothing_if_save_is_cancelled(self):
+        self.project._offer_save_message_box = mock.MagicMock(return_value=QMessageBox.Yes)
+        self.project.save = mock.MagicMock(return_value=True)
+
+        # Add something to the ads so __saved is set to false
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+
+        self.assertEqual(self.project.offer_save(None), True)
+
     def test_adding_to_ads_calls_any_change_handle(self):
         self.project.anyChangeHandle = mock.MagicMock()
         CreateSampleWorkspace(OutputWorkspace="ws1")
