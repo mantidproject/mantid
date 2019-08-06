@@ -19,17 +19,20 @@ from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from qtpy.QtCore import QObject, Qt
-from qtpy.QtWidgets import QApplication, QLabel
+from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataServiceObserver
+from mantid.kernel import logger
 from mantid.plots import MantidAxes
 from mantid.py3compat import text_type
+from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.plotscriptgenerator import generate_script
 from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 
@@ -182,6 +185,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
             self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
+            self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
+                self.generate_plot_script_clipboard)
+            self.toolbar.sig_generate_plot_script_file_triggered.connect(
+                self.generate_plot_script_file)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -253,6 +260,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
         if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
             self._set_fit_enabled(False)
+        if not any(isinstance(ax, MantidAxes) for ax in self.canvas.figure.get_axes()):
+            self._set_generate_plot_script_enabled(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -334,11 +343,41 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         action.setEnabled(on)
         action.setVisible(on)
 
+    def generate_plot_script_clipboard(self):
+        script = generate_script(self.canvas.figure, exclude_headers=True)
+        QApplication.clipboard().setText(script)
+        logger.notice("Plotting script copied to clipboard.")
+
+    def generate_plot_script_file(self):
+        script = generate_script(self.canvas.figure)
+        filepath = open_a_file_dialog(
+            parent=self.canvas,
+            default_suffix=".py",
+            file_filter="Python Files (*.py)",
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile
+        )
+        if filepath:
+            try:
+                with open(filepath, 'w') as f:
+                    f.write(script)
+            except IOError as io_error:
+                logger.error("Could not write file: {}\n{}"
+                             "".format(filepath, io_error))
+
+    def _set_generate_plot_script_enabled(self, enabled):
+        action = self.toolbar._actions['generate_plot_script']
+        action.setEnabled(enabled)
+        action.setVisible(enabled)
+        # Also hide the separator between this and "Fit" button
+        for i, toolbar_action in enumerate(self.toolbar.actions()):
+            if toolbar_action == action:
+                self.toolbar.actions()[i+1].setVisible(enabled)
+
 
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
-
 
 def new_figure_manager(num, *args, **kwargs):
     """Create a new figure manager instance"""
