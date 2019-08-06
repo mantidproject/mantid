@@ -13,6 +13,18 @@ from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
 
 
 class NameGeneratorTest(unittest.TestCase):
+    def exception_produced(self, element, name, err_value, err_type):
+        with self.assertRaises(TypeError) as err:
+            gen_name(element, name)
+            if sys.version_info[:2] < (3, 0):
+                self.assertEqual(str(err.exception),
+                                 "{} expected element to be 'str', found '<type '{}'>' instead"
+                                 .format(err_value, err_type))
+            else:
+                self.assertEqual(str(err.exception),
+                                 "{} expected element to be 'str', found '<class '{}'>' instead"
+                                 .format(err_value, err_type))
+
     def test_that_gen_name_returns_name_if_it_contains_element(self):
         element_name = 'name2'
         name = 'name1name2name3nam4'
@@ -31,32 +43,9 @@ class NameGeneratorTest(unittest.TestCase):
         element3 = (3.0, 'string')
         name = 'valid_name'
 
-        with self.assertRaises(TypeError) as err:
-            gen_name(element1, name)
-        if sys.version_info[:2] < (3, 0):
-            self.assertEqual(str(err.exception),
-                             "'None' expected element to be 'str', found '<type 'NoneType'>' instead")
-        else:
-            self.assertEqual(str(err.exception),
-                             "'None' expected element to be 'str', found '<class 'NoneType'>' instead")
-
-        with self.assertRaises(TypeError) as err:
-            gen_name(element2, name)
-        if sys.version_info[:2] < (3, 0):
-            self.assertEqual(str(err.exception),
-                             "'1' expected element to be 'str', found '<type 'int'>' instead")
-        else:
-            self.assertEqual(str(err.exception),
-                             "'1' expected element to be 'str', found '<class 'int'>' instead")
-
-        with self.assertRaises(TypeError) as err:
-            gen_name(element3, name)
-        if sys.version_info[:2] < (3, 0):
-            self.assertEqual(str(err.exception),
-                             "'(3.0, 'string')' expected element to be 'str', found '<type 'tuple'>' instead")
-        else:
-            self.assertEqual(str(err.exception),
-                             "'(3.0, 'string')' expected element to be 'str', found '<class 'tuple'>' instead")
+        self.exception_produced(element1, name, str(element1), 'NoneType')
+        self.exception_produced(element2, name, str(element2), 'int')
+        self.exception_produced(element3, name, str(element3), 'tuple')
 
     def test_that_gen_name_with_non_string_name_throws(self):
         element = 'valid element'
@@ -64,28 +53,9 @@ class NameGeneratorTest(unittest.TestCase):
         name2 = 1
         name3 = (3.0, 'string')
 
-        with self.assertRaises(TypeError) as err:
-            gen_name(element, name1)
-        if sys.version_info[:2] < (3, 0):
-            self.assertEqual(str(err.exception), "'None' expected name to be 'str', found '<type 'NoneType'>' instead")
-        else:
-            self.assertEqual(str(err.exception), "'None' expected name to be 'str', found '<class 'NoneType'>' instead")
-
-        with self.assertRaises(TypeError) as err:
-            gen_name(element, name2)
-        if sys.version_info[:2] < (3, 0):
-            self.assertEqual(str(err.exception), "'1' expected name to be 'str', found '<type 'int'>' instead")
-        else:
-            self.assertEqual(str(err.exception), "'1' expected name to be 'str', found '<class 'int'>' instead")
-
-        with self.assertRaises(TypeError) as err:
-            gen_name(element, name3)
-        if sys.version_info[:2] < (3, 0):
-            self.assertEqual(str(err.exception),
-                             "'(3.0, 'string')' expected name to be 'str', found '<type 'tuple'>' instead")
-        else:
-            self.assertEqual(str(err.exception),
-                             "'(3.0, 'string')' expected name to be 'str', found '<class 'tuple'>' instead")
+        self.exception_produced(element, name1, str(name1), 'NoneType')
+        self.exception_produced(element, name2, str(name2), 'int')
+        self.exception_produced(element, name3, str(name3), 'tuple')
 
     def test_that_gen_name_with_unicode_string_does_not_throw(self):
         element = u'element'

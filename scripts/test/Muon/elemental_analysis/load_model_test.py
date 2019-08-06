@@ -100,15 +100,15 @@ class CoLoadModel(unittest.TestCase):
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_model.lutils.replace_workspace_name_suffix')
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_model.mantid')
     def test_that_add_runs_renames_output_ws_and_adds_correctly(self, mock_mantid, mock_replace_ws):
-        l = 'left_ws_1'
-        r = 'right-ws'
-        suff = 'my-suff'
-        mock_replace_ws.return_value = 'left_ws_my-suff'
-        ret = self.model.add_runs(l, r, suff)
+        left_ws = 'left_ws_1'
+        right_ws = 'right-ws'
+        suffix = 'my-suffix'
+        mock_replace_ws.return_value = 'left_ws_my-suffix'
+        added_runs = self.model.add_runs(left_ws, right_ws, suffix)
 
-        mock_replace_ws.assert_called_with(l, suff)
-        mock_mantid.Plus.assert_called_with(l, r, OutputWorkspace='left_ws_my-suff')
-        self.assertEqual(ret, 'left_ws_my-suff')
+        mock_replace_ws.assert_called_with(left_ws, suffix)
+        mock_mantid.Plus.assert_called_with(left_ws, right_ws, OutputWorkspace='left_ws_my-suffix')
+        self.assertEqual(added_runs, 'left_ws_my-suffix')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_model.lutils')
     def test_that_co_load_run_calls_right_functions(self, mock_lutils):

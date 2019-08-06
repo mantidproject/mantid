@@ -87,10 +87,10 @@ class PeriodicListTest(unittest.TestCase):
         self.plist.setSelectedElements(['H', 'Li'])
 
         assert all([item.setSelected.call_count == 1 for item in self.plist.tree_items])
-        item1.setSelected.assert_called_with(True)
-        item3.setSelected.assert_called_with(True)
-        item2.setSelected.assert_called_with(False)
-        item4.setSelected.assert_called_with(False)
+        item1.setSelected.assert_called_with(True)   # H
+        item2.setSelected.assert_called_with(False)  # He
+        item3.setSelected.assert_called_with(True)   # Li
+        item4.setSelected.assert_called_with(False)  # Be
 
 
 if __name__ == '__main__':

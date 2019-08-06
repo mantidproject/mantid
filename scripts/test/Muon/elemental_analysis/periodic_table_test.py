@@ -10,6 +10,7 @@ import unittest
 
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
+from testhelpers import assertRaisesNothing
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTableItem, PeriodicTable
 
@@ -33,7 +34,7 @@ class PeriodicTableTest(unittest.TestCase):
         self.ptable._eltButtons['Cu'].setEnabled.assert_called_with(True)
 
     def test_that_enableElementButton_does_not_throw_with_bad_data(self):
-        self.ptable.enableElementButton('this-element-does-not-exist')
+        assertRaisesNothing(self, self.ptable.enableElementButton, 'this-element-does-not-exist')
 
     def test_that_disableElementButton_enables_element(self):
         self.ptable._eltButtons['Cu'].setEnabled = mock.Mock()
@@ -42,7 +43,7 @@ class PeriodicTableTest(unittest.TestCase):
         self.ptable._eltButtons['Cu'].setEnabled.assert_called_with(False)
 
     def test_that_disableElementButton_does_not_throw_with_bad_data(self):
-        self.ptable.disableElementButton('this-element-does-not-exist')
+        assertRaisesNothing(self, self.ptable.disableElementButton, 'this-element-does-not-exist')
 
     def test_that_isElementButtonEnabled_calls_right_function(self):
         self.ptable._eltButtons['Cu'].isEnabled = mock.Mock()
@@ -53,7 +54,7 @@ class PeriodicTableTest(unittest.TestCase):
         self.assertEqual(res, True)
 
     def test_that_isElementButtonEnabled_does_not_throw_with_bad_data(self):
-        self.ptable.isElementButtonEnabled('this-element-does-not-exist')
+        assertRaisesNothing(self, self.ptable.isElementButtonEnabled, 'this-element-does-not-exist')
 
     def test_addElement_adds_the_correct_element(self):
         self.ptable.gridLayout.addWidget = mock.Mock()

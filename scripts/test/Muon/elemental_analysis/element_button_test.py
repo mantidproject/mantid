@@ -29,9 +29,11 @@ class _ElementButtonTest(unittest.TestCase):
 
     def test_that_is_current_returns_correct_value(self):
         self.assertEqual(self.element.current, self.element.isCurrent())
+        self.assertEqual(False, self.element.isCurrent())
 
     def test_that_is_selected_returns_correct_value(self):
         self.assertEqual(self.element.selected, self.element.isSelected())
+        self.assertEqual(False, self.element.isSelected())
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table._ElementButton._setBrush')
     def test_that_set_selected_updates_value_and_calls_setBrush(self, mock_setBrush):
@@ -104,10 +106,12 @@ class _ElementButtonTest(unittest.TestCase):
         self.element.isCurrent = mock.Mock()
         self.element.isCurrent.return_value = True
         self.element.paintEvent(mock.Mock())
+        # If element is current, width should be set to 5
         mock_setWidth.assert_called_with(5)
 
         self.element.isCurrent.return_value = False
         self.element.paintEvent(mock.Mock())
+        # If element is not current width should be set to 1
         mock_setWidth.assert_called_with(1)
 
     def test_that_enterEvent_calls_the_correct_function(self):

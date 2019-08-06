@@ -75,11 +75,11 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.plot_window.closeEvent.call_count, 1)
 
     def test_that_gen_label_does_not_throw_with_non_float_x_values(self):
-        self.gui._gen_label('name', 'not_a_float', 'Cu')
-        self.gui._gen_label('name', u'not_a_float', 'Cu')
-        self.gui._gen_label('name', None, 'Cu')
-        self.gui._gen_label('name', ('not', 'a', 'float'), 'Cu')
-        self.gui._gen_label('name', ['not', 'a', 'float'], 'Cu')
+        assertRaisesNothing(self, self.gui._gen_label, 'name', 'not_a_float', 'Cu')
+        assertRaisesNothing(self, self.gui._gen_label, 'name', u'not_a_float', 'Cu')
+        assertRaisesNothing(self, self.gui._gen_label, 'name', None, 'Cu')
+        assertRaisesNothing(self, self.gui._gen_label, 'name', ('not', 'a', 'float'), 'Cu')
+        assertRaisesNothing(self, self.gui._gen_label, 'name', ['not', 'a', 'float'], 'Cu')
 
     def test_gen_label_output_is_Label_type(self):
         name = "string"
@@ -123,13 +123,10 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
-    def test_that_plot_line_calls_plot_line_once_if_window_not_none(self, mock_plot_line_once,
-                                                                    mock_gen_label):
+    def test_that_plot_line_calls_plot_line_once_if_window_not_none(self, mock_plot_line_once, mock_gen_label):
         self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
         self.gui.plotting = MultiPlotWidget(mock.Mock())
-        mock_get_subplots = mock.Mock()
-        mock_get_subplots.return_value = ['plot1']
-        self.gui.plotting.get_subplots = mock_get_subplots
+        self.gui.plotting.get_subplots = mock.Mock(return_value=['plot1'])
         mock_gen_label.return_value = 'name of the label'
         self.gui._plot_line('name', 1.0, 'C0', None)
 
@@ -144,28 +141,23 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     def test_that_rm_line_returns_if_plot_window_is_none(self):
         self.gui.plotting = MultiPlotWidget(mock.Mock())
-        mock_get_subplots = mock.Mock()
-        mock_get_subplots.return_value = ['plot1', 'plot2', 'plot3']
-        self.gui.plotting.get_subplots = mock_get_subplots
+        self.gui.plotting.get_subplots = mock.Mock(return_value=['plot1', 'plot2', 'plot3'])
         self.gui.plot_window = None
 
         self.gui._rm_line('line')
 
-        self.assertEqual(mock_get_subplots.call_count, 0)
+        self.assertEqual(self.gui.plotting.get_subplots.call_count, 0)
 
     def test_that_rm_line_calls_correct_function_if_window_not_none(self):
         self.gui.plotting = MultiPlotWidget(mock.Mock())
-        mock_get_subplots = mock.Mock()
-        mock_get_subplots.return_value = ['plot1', 'plot2', 'plot3']
-        self.gui.plotting.get_subplots = mock_get_subplots
-        mock_rm_vline_and_annotate = mock.Mock()
-        self.gui.plotting.rm_vline_and_annotate = mock_rm_vline_and_annotate
+        self.gui.plotting.get_subplots = mock.Mock(return_value=['plot1', 'plot2', 'plot3'])
+        self.gui.plotting.rm_vline_and_annotate = mock.Mock()
         self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
         self.gui._rm_line('line')
 
-        self.assertEqual(mock_get_subplots.call_count, 1)
-        self.assertEqual(mock_rm_vline_and_annotate.call_count, 3)
-        mock_rm_vline_and_annotate.assert_called_with('plot3', 'line')
+        self.assertEqual(self.gui.plotting.get_subplots.call_count, 1)
+        self.assertEqual(self.gui.plotting.rm_vline_and_annotate.call_count, 3)
+        self.gui.plotting.rm_vline_and_annotate.assert_called_with('plot3', 'line')
 
     def test_that_generate_element_widgets_creates_widget_once_for_each_element(self):
         # TODO remove -2 on element number once json file has been restructured
@@ -174,18 +166,14 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
     def test_table_left_clicked_adds_lines_if_element_selected(self, mock_add_element_lines):
-        self.gui.ptable.is_selected = mock.Mock()
-        self.gui.ptable.is_selected.return_value = True
-        test_item = mock.Mock()
-        self.gui._add_element_lines(test_item)
+        self.gui.ptable.is_selected = mock.Mock(return_value=True)
+        self.gui._add_element_lines(mock.Mock())
         self.assertEqual(mock_add_element_lines.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines')
     def test_table_left_clicked_removed_lines_if_element_not_selected(self, mock_remove_element_lines):
-        self.gui.ptable.is_selected = mock.Mock()
-        self.gui.ptable.is_selected.return_value = False
-        test_item = mock.Mock()
-        self.gui.table_left_clicked(test_item)
+        self.gui.ptable.is_selected = mock.Mock(return_value=False)
+        self.gui.table_left_clicked(mock.Mock())
         self.assertEqual(mock_remove_element_lines.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.get_color')
@@ -229,12 +217,11 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(mock_MultiPlotWindow.call_count, 0)
 
     def test_loading_finished_returns_nothing_if_no_run_loaded(self):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = None
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
         self.gui.detectors = mock.Mock()
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
-        for i in self.gui.detectors.detectors:
-            i.isChecked.return_value = True
+        for detector in self.gui.detectors.detectors:
+            detector.isChecked.return_value = True
         self.gui.plot_window = mock.Mock()
         self.gui.plotting = mock.Mock()
 
@@ -242,30 +229,28 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
 
     def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = ['run1', 'run2', 'run3']
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
-        for i in self.gui.detectors.detectors:
-            i.isChecked.return_value = True
+        for detector in self.gui.detectors.detectors:
+            detector.isChecked.return_value = True
         self.gui.plot_window = None
         self.gui.plotting = mock.Mock()
         self.gui.plotting.get_subplots.return_value = ['1', '2', '3']
 
         self.gui.loading_finished()
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
-        for j in self.gui.detectors.detectors:
-            self.assertEqual(j.setChecked.call_count, 1)
+        for detector in self.gui.detectors.detectors:
+            self.assertEqual(detector.setChecked.call_count, 1)
 
     def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(self):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = ['run1', 'run2', 'run3']
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.detectors.detectors = [mock.Mock(), mock.Mock(), mock.Mock(), mock.Mock()]
-        for i in self.gui.detectors.detectors:
-            i.isChecked.return_value = False
+        for detector in self.gui.detectors.detectors:
+            detector.isChecked.return_value = False
         self.gui.plot_window = mock.Mock()
 
         self.gui.loading_finished()
@@ -305,8 +290,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_update_peak_data_element_is_selected(self,
                                                   mock_remove_element_lines,
                                                   mock_add_element_lines):
-        self.gui.ptable.is_selected = mock.Mock()
-        self.gui.ptable.is_selected.return_value = True
+        self.gui.ptable.is_selected = mock.Mock(return_value=True)
         self.gui._update_peak_data('test_element')
         mock_remove_element_lines.assert_called_with('test_element')
         mock_add_element_lines.assert_called_with('test_element')
@@ -316,96 +300,96 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_update_peak_data_element_is_not_selected(self,
                                                       mock_remove_element_lines,
                                                       mock_add_element_lines):
-        self.gui.ptable.is_selected = mock.Mock()
-        self.gui.ptable.is_selected.return_value = False
+        self.gui.ptable.is_selected = mock.Mock(return_value=False)
         self.gui._update_peak_data('test_element')
         mock_remove_element_lines.assert_called_with('test_element')
         self.assertEqual(mock_add_element_lines.call_count, 0)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
     def test_add_plot_does_nothing_is_no_loaded_run(self, mock_load_run):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        mock_checkbox = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = None
-        self.gui.add_plot(mock_checkbox)
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
+        self.gui.add_plot(mock.Mock())
         self.assertEqual(mock_load_run.call_count, 0)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
     def test_add_plot_loads_run_and_electron_peaks_not_plotted(self, mock_load_run, add_peak_data):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = 2695
-        self.gui.peaks.electron.isChecked = mock.Mock()
-        self.gui.peaks.electron.isChecked.return_value = False
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.peaks.electron.isChecked = mock.Mock(return_value=False)
         mock_checkbox = mock.Mock()
         mock_checkbox.name = 'GE1'
+
         self.gui.add_plot(mock_checkbox)
+
         mock_load_run.assert_called_with('GE1', 2695)
         self.assertEqual(add_peak_data.call_count, 0)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
     def test_add_plot_loads_run_and_electron_peaks_plotted(self, mock_load_run, add_peak_data):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = 2695
-        self.gui.peaks.electron.isChecked = mock.Mock()
-        self.gui.peaks.electron.isChecked.return_value = True
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
+        self.gui.peaks.electron.isChecked = mock.Mock(return_value=True)
         mock_checkbox = mock.Mock()
         mock_checkbox.name = 'GE1'
+
         self.gui.add_plot(mock_checkbox)
+
         mock_load_run.assert_called_with('GE1', 2695)
         add_peak_data.assert_called_with('e-', 'GE1', data=self.gui.electron_peaks)
 
     def test_del_plot_does_nothing_if_no_loaded_run(self):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = None
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
         self.gui.plotting.remove_subplot = mock.Mock()
         mock_checkbox = mock.Mock()
         mock_checkbox.name = 'GE1'
+
         self.gui.del_plot(mock_checkbox)
+
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
 
     def test_del_plot_removes_subplot_only_if_other_subplots_exist(self):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = 2695
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         self.gui.plotting.remove_subplot = mock.Mock()
-        self.gui.plotting.get_subplots = mock.Mock()
-        self.gui.plotting.get_subplots.return_value = True
+        self.gui.plotting.get_subplots = mock.Mock(return_value=True)
         self.gui.plot_window = 'plot_window'
         mock_checkbox = mock.Mock()
         mock_checkbox.name = 'GE1'
+
         self.gui.del_plot(mock_checkbox)
+
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 1)
         self.assertEqual(self.gui.plot_window, 'plot_window')
 
     def test_del_plot_closes_plot_if_no_subplots_left(self):
-        self.gui.load_widget.last_loaded_run = mock.Mock()
-        self.gui.load_widget.last_loaded_run.return_value = 2695
+        self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
         self.gui.plotting.remove_subplot = mock.Mock()
-        self.gui.plotting.get_subplots = mock.Mock()
-        self.gui.plotting.get_subplots.return_value = False
+        self.gui.plotting.get_subplots = mock.Mock(return_value=False)
         self.gui.plot_window = mock.Mock()
         mock_checkbox = mock.Mock()
         mock_checkbox.name = 'GE1'
+
         self.gui.del_plot(mock_checkbox)
+
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
 
     def test_subplotRemoved_changes_state_only_if_other_subplots_exist(self):
         self.gui.detectors.setStateQuietly = mock.Mock()
-        self.gui.plotting.get_subplots = mock.Mock()
-        self.gui.plotting.get_subplots.return_value = True
+        self.gui.plotting.get_subplots = mock.Mock(return_value=True)
         self.gui.plot_window = 'plot_window'
+
         self.gui.subplotRemoved('name')
+
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, 'plot_window')
 
     def test_subplotRemoved_closes_plot_if_no_other_subplots_exist(self):
         self.gui.detectors.setStateQuietly = mock.Mock()
-        self.gui.plotting.get_subplots = mock.Mock()
-        self.gui.plotting.get_subplots.return_value = False
+        self.gui.plotting.get_subplots = mock.Mock(return_value=False)
         self.gui.plot_window = mock.Mock()
+
         self.gui.subplotRemoved('name')
+
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
 
@@ -441,42 +425,42 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_warning.assert_called_with(warning_text)
 
     def test_gamms_checked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
+        # TODO remove -2 on element number after merging #26444
         elem = len(self.gui.ptable.peak_data)-2
         self.gui.checked_data = mock.Mock()
         self.gui.gammas_checked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_gamms_unchecked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
+        # TODO remove -2 on element number after merging #26444
         elem = len(self.gui.ptable.peak_data)-2
         self.gui.checked_data = mock.Mock()
         self.gui.gammas_unchecked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_major_checked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
+        # TODO remove -2 on element number after merging #26444
         elem = len(self.gui.ptable.peak_data)-2
         self.gui.checked_data = mock.Mock()
         self.gui.major_peaks_checked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_major_unchecked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
+        # TODO remove -2 on element number after merging #26444
         elem = len(self.gui.ptable.peak_data)-2
         self.gui.checked_data = mock.Mock()
         self.gui.major_peaks_unchecked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_minor_checked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
+        # TODO remove -2 on element number after merging #26444
         elem = len(self.gui.ptable.peak_data)-2
         self.gui.checked_data = mock.Mock()
         self.gui.minor_peaks_checked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_minor_unchecked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
+        # TODO remove -2 on element number after merging #26444
         elem = len(self.gui.ptable.peak_data)-2
         self.gui.checked_data = mock.Mock()
         self.gui.minor_peaks_unchecked()
@@ -491,6 +475,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_update_peak_data.assert_called_with('Cu')
 
     def test_get_electron_peaks_returns_a_dict_with_correct_length(self):
+        # TODO: modify this after merging #26444
         peaks = len(self.gui.ptable.peak_data["Electrons"])
         electron_dict = self.gui._get_electron_peaks()
         self.assertEqual(len(electron_dict), peaks)

@@ -50,10 +50,14 @@ class PeakSelectorViewTest(unittest.TestCase):
         self.assertEqual(self.view.new_data.keys(), self.element_data['Primary'].keys())
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view.Checkbox')
-    def test_setup_checkboxes_sets_check_to_correct_bool(self, mock_Checkbox):
+    def test_setup_checkboxes_sets_check_to_true(self, mock_Checkbox):
         self.view.list.addWidget = mock.Mock()
         checkbox = self.view._setup_checkbox("{}: {}".format("K(2->1)", 8.22), True)
         checkbox.setChecked.assert_called_with(True)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view.Checkbox')
+    def test_setup_checkboxes_sets_check_to_false(self, mock_Checkbox):
+        self.view.list.addWidget = mock.Mock()
         checkbox = self.view._setup_checkbox("{}: {}".format("K(2->1)", 8.22), False)
         checkbox.setChecked.assert_called_with(False)
 
