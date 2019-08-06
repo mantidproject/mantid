@@ -94,8 +94,9 @@ class DetectorInfoTest(unittest.TestCase):
         """ See if the returned value is a double (float in Python). """
         info = self._ws.detectorInfo()
         self.assertEqual(type(info.azimuthal(0)), float)
-        x, y, _ = info.position(0)
-        self.assertEqual(np.arctan2(y, x), info.azimuthal(0))
+        for i in range(info.size()):
+            x, y, _ = info.position(i)
+            self.assertEqual(np.arctan2(y, x), info.azimuthal(i))
 
     def test_createWorkspaceAndDetectorInfo(self):
     	""" Try to create a workspace and see if DetectorInfo object
