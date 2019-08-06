@@ -11,7 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 from numpy import ndarray
 
 from mantid.api import AlgorithmManager, AnalysisDataService as ads
-from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE
+from mantid.kernel import UsageService
+from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE, ALG_PROPERTIES_TO_IGNORE
 
 
 def convert_value_to_arg_string(value):
@@ -63,6 +64,8 @@ def get_workspace_history_list(workspace):
     alg.initialize()
     alg.setProperty("InputWorkspace", workspace)
     alg.setProperty("IgnoreTheseAlgs", ALGS_TO_IGNORE)
+    alg.setProperty("IgnoreTheseAlgProperties", ALG_PROPERTIES_TO_IGNORE)
+    alg.setPropertyValue("StartTimestamp", UsageService.getStartTime().toISO8601String())
     alg.execute()
     history = alg.getPropertyValue("ScriptText")
     return history.split('\n')[5:]  # trim the header and import
@@ -84,6 +87,6 @@ def get_workspace_history_commands(fig):
                 ws_history = [ws_history[-1]]
             history_commands += ['{} = {}'.format(ws_name, cmd) for cmd in ws_history]
             history_commands.append('')  # Blank line to separate each workspace's history
-        except KeyError:   # Raised if workspace is not in ADS
+        except KeyError:  # Raised if workspace is not in ADS
             pass
     return history_commands
