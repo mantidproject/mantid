@@ -12,6 +12,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class MockMainWindowView : public IMainWindowView {
 public:
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
@@ -25,6 +26,7 @@ public:
   MOCK_CONST_METHOD0(batches, std::vector<IBatchView *>());
   ~MockMainWindowView() override{};
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

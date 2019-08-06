@@ -12,6 +12,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class MockMainWindowPresenter : public IMainWindowPresenter {
 public:
   MOCK_METHOD1(settingsChanged, void(int));
@@ -22,6 +23,7 @@ public:
 
   ~MockMainWindowPresenter() override{};
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

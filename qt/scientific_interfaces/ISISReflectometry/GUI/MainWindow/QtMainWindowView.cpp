@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtMainWindowView.h"
 #include "Common/IndexOf.h"
+#include "GUI/Batch/BatchPresenterFactory.h"
 #include "GUI/Batch/QtBatchView.h"
 #include "GUI/Common/Plotter.h"
 #include <QMessageBox>

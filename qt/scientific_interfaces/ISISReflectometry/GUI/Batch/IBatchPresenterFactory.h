@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class IBatchPresenter;
 class IBatchView;
 
@@ -19,6 +20,7 @@ public:
   virtual ~IBatchPresenterFactory() = default;
   virtual std::unique_ptr<IBatchPresenter> make(IBatchView *view) = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_IBATCHPRESENTERFACTORY_H
