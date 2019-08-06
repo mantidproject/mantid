@@ -33,6 +33,8 @@ MainWindowPresenter::MainWindowPresenter(
     addNewBatch(batchView);
 }
 
+MainWindowPresenter::~MainWindowPresenter() = default;
+
 void MainWindowPresenter::notifyNewBatchRequested() {
   auto *newBatchView = m_view->newBatch();
   addNewBatch(newBatchView);

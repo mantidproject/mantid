@@ -7,7 +7,6 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H
 
-#include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "IMainWindowPresenter.h"
@@ -17,6 +16,7 @@
 #include "ui_MainWindowWidget.h"
 
 #include <QCloseEvent>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,6 +34,7 @@ class QtMainWindowView : public MantidQt::API::UserSubWindow,
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+
   void subscribe(MainWindowSubscriber *notifyee) override;
 
   static std::string name() { return "ISIS Reflectometry"; }

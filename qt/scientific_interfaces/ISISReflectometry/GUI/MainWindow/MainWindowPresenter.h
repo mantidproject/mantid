@@ -34,6 +34,7 @@ public:
   MainWindowPresenter(
       IMainWindowView *view, IMessageHandler *messageHandler,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
+  ~MainWindowPresenter();
 
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
