@@ -101,18 +101,17 @@ Cost functions
           .format(peak2['centre'], peak2['error centre'],
                   peak2['height'], peak2['error height'],
                   peak2['sigma'], peak2['error sigma']))
-    print('Chi2 cost: {}'.format(cost.column(0)[0]))
-    print('Poisson cost: {}'.format(cost.column(1)[0]))
+    print('Chi2 cost: {:.3f}'.format(cost.column(0)[0]))
+    print('Poisson cost: {:.3f}'.format(cost.column(1)[0]))
 
 Output (the number on your machine may differ slightly from these:
 
 .. testoutput:: SimpleGaussianFit
-       :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
-    Peak 1: centre=25.00+/-0.11, height=35.00+/-0.47, sigma=10.00+/-0.09
+    Peak 1: centre=25.00+/-0.11, height=35.00+/-0.47, sigma=10.00+/-0.08
     Peak 2: centre=75.00+/-0.10, height=20.00+/-0.49, sigma=5.00+/-0.07
-    Chi2 cost: 0.0...
-    Poisson cost: 46444.7226...
+    Chi2 cost: 0.000
+    Poisson cost: 46444.723
 
 .. categories::
 .. sourcelink::

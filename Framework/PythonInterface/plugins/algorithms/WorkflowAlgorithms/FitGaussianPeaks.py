@@ -211,6 +211,8 @@ class FitGaussianPeaks(PythonAlgorithm):
     def estimate_single_parameters(self, xvals, yvals, centre, win_size):
         lside = max(0, centre - win_size)
         rside = min(len(yvals), centre + win_size)
+        if rside - lside < 5:
+            rside = 5 + lside
         x_range = xvals[lside:rside]
         y_range = yvals[lside:rside]
         p_est = scipy.optimize.leastsq(

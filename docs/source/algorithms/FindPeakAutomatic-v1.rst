@@ -75,44 +75,79 @@ The most important to this effect are:
 
         return height * np.exp(-exp_val * exp_val)
 
+
+    np.random.seed(1234)
+
     # Creating two peaks on an exponential background with gaussian noise
-    x_values = np.linspace(0, 100, 1001)
-    centre = [25, 75]
-    height = [35, 20]
+    x_values = np.linspace(0, 1000, 1001)
+    centre = [250, 750]
+    height = [350, 200]
     width = [3, 2]
     y_values = gaussian(x_values, centre[0], height[0], width[0])
     y_values += gaussian(x_values, centre[1], height[1], width[1])
-    y_values += np.abs(40*np.exp(-0.05*x_values) + np.random.randn(len(x_values)))
-    data_ws = CreateWorkspace(DataX=x_values, DataY=y_values, DataE=np.sqrt(y_values))
+    y_values_low_noise = y_values + np.abs(400 * np.exp(-0.005 * x_values)) + 30 + 0.1*np.random.randn(len(x_values))
+    y_values_high_noise = y_values + np.abs(400 * np.exp(-0.005 * x_values)) + 30 + 10*np.random.randn(len(x_values))
+    low_noise_ws = CreateWorkspace(DataX=x_values, DataY=y_values_low_noise, DataE=np.sqrt(y_values_low_noise))
+    high_noise_ws = CreateWorkspace(DataX=x_values, DataY=y_values_high_noise, DataE=np.sqrt(y_values_high_noise))
 
-    # Fitting the data
-    FindPeakAutomatic(InputWorkspace=data_ws,
-                      AcceptanceThreshold=0.8,
-                      SmoothWindow=70,
+    # Fitting the data with low noise
+    FindPeakAutomatic(InputWorkspace=low_noise_ws,
+                      AcceptanceThreshold=0.2,
+                      SmoothWindow=30,
+                      EstimatePeakSigma=2,
+                      MaxPeakSigma=5,
                       PlotPeaks=False,
                       PeakPropertiesTableName='properties',
                       RefitPeakPropertiesTableName='refit_properties')
     peak_properties = mtd['properties']
-    refitted_peak_properties = mtd['refit_properties']
+    peak_low1 = peak_properties.row(0)
+    peak_low2 = peak_properties.row(1)
 
-    peak1 = peak_properties.row(0)
-    peak2 = peak_properties.row(1)
+    # Fitting the data with strong noise
+    FindPeakAutomatic(InputWorkspace=high_noise_ws,
+                      AcceptanceThreshold=0.2,
+                      SmoothWindow=30,
+                      EstimatePeakSigma=2,
+                      MaxPeakSigma=5,
+                      PlotPeaks=False,
+                      PeakPropertiesTableName='properties',
+                      RefitPeakPropertiesTableName='refit_properties')
+    peak_properties = mtd['properties']
+    peak_high1 = peak_properties.row(0)
+    peak_high2 = peak_properties.row(1)
+
+    print('Low noise')
     print('Peak 1: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
-          .format(peak1['centre'], peak1['error centre'],
-                  peak1['height'], peak1['error height'],
-                  peak1['sigma'], peak1['error sigma']))
+          .format(peak_low1['centre'], peak_low1['error centre'],
+                  peak_low1['height'], peak_low1['error height'],
+                  peak_low1['sigma'], peak_low1['error sigma']))
     print('Peak 2: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
-          .format(peak2['centre'], peak2['error centre'],
-                  peak2['height'], peak2['error height'],
-                  peak2['sigma'], peak2['error sigma']))
+          .format(peak_low2['centre'], peak_low2['error centre'],
+                  peak_low2['height'], peak_low2['error height'],
+                  peak_low2['sigma'], peak_low2['error sigma']))
+    print()
+
+    print('Strong noise')
+    print('Peak 1: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
+          .format(peak_high1['centre'], peak_high1['error centre'],
+                  peak_high1['height'], peak_high1['error height'],
+                  peak_high1['sigma'], peak_high1['error sigma']))
+    print('Peak 2: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
+          .format(peak_high2['centre'], peak_high2['error centre'],
+                  peak_high2['height'], peak_high2['error height'],
+                  peak_high2['sigma'], peak_high2['error sigma']))
 
 Output:
 
 .. testoutput:: GaussianPeaksExponentialBackground
 
-    Peak 1: centre=25.25+/-0.09, height=34.44+/-1.05, sigma=3.03+/-0.08
-    Peak 2: centre=74.97+/-0.07, height=20.12+/-0.77, sigma=2.20+/-0.05
+    Low noise
+    Peak 1: centre=250.01+/-0.09, height=352.47+/-10.91, sigma=3.06+/-0.08
+    Peak 2: centre=750.00+/-0.09, height=200.03+/-9.13, sigma=2.01+/-0.07
 
+    Strong noise
+    Peak 1: centre=250.00+/-0.09, height=360.33+/-10.83, sigma=3.11+/-0.08
+    Peak 2: centre=749.90+/-0.08, height=194.86+/-7.82, sigma=2.47+/-0.07
 
 .. categories::
 .. sourcelink::
