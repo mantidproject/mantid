@@ -96,7 +96,7 @@ public:
 private:
   void clearData();
   void setModel();
-  //QString buildFunctionString() const;
+  // QString buildFunctionString() const;
   boost::optional<QString> getLor1Prefix() const;
   boost::optional<QString> getLor2Prefix() const;
   boost::optional<QString> getDeltaPrefix() const;

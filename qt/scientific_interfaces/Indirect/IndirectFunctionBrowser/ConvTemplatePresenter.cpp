@@ -43,12 +43,13 @@ void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
 }
 
 void ConvTemplatePresenter::setDeltaFunction(bool on) {
-   if (on == m_model.hasDeltaFunction()) return;
-   m_model.setDeltaFunction(on);
-   setErrorsEnabled(false);
-   updateViewParameterNames();
-   updateViewParameters();
-   emit functionStructureChanged();
+  if (on == m_model.hasDeltaFunction())
+    return;
+  m_model.setDeltaFunction(on);
+  setErrorsEnabled(false);
+  updateViewParameterNames();
+  updateViewParameters();
+  emit functionStructureChanged();
 }
 
 void ConvTemplatePresenter::setNumberOfDatasets(int n) {

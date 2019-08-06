@@ -353,8 +353,7 @@ void ConvFunctionModel::updateMultiDatasetParameters(
   auto const globalParameterNames = getGlobalParameters();
   for (auto &&name : globalParameterNames) {
     auto valueColumn = paramTable.getColumn((name).toStdString());
-    auto errorColumn =
-        paramTable.getColumn((name + "_Err").toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
     m_model.setParameter(name, valueColumn->toDouble(0));
     m_model.setParameterError(name, errorColumn->toDouble(0));
   }
@@ -362,8 +361,7 @@ void ConvFunctionModel::updateMultiDatasetParameters(
   auto const localParameterNames = getLocalParameters();
   for (auto &&name : localParameterNames) {
     auto valueColumn = paramTable.getColumn((name).toStdString());
-    auto errorColumn =
-        paramTable.getColumn((name + "_Err").toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
         m_model.setLocalParameterValue(name, static_cast<int>(i),
