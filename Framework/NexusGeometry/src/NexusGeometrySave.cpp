@@ -9,7 +9,7 @@
  * NexusGeometrySave
  *
  * Save Beamline NXInstrument from Memory to disk
- *
+ * TODO DOCUMENTATION
  *@author Takudzwa Makoni, RAL (UKRI), ISIS
  *@date 22/07/2019
  */
@@ -779,9 +779,8 @@ void saveInstrument(
   NexusGeometrySave::saveNXSample(rootGroup, compInfo);
 
   // save NXdetectors
-  for (size_t index = compInfo.root() - 1; index > 0; --index) {
-    if (compInfo.isDetector(index))
-      break;
+
+  for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
       if (reporter != nullptr)
         reporter->report();

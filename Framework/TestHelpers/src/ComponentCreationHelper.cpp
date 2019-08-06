@@ -603,12 +603,16 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
  * Pixels are 4 mm wide.
  *
  * @param num_banks: number of rectangular banks to create
- * @param pixels :: number of pixels in each direction.
- * @param pixelSpacing :: padding between pixels
+ * @param pixels : number of pixels in each direction.
+ * @param nameless : components are unnamed if true.
+ * @param pixelSpacing : padding between pixels
  */
 Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
+                                                 bool nameless,
                                                  double pixelSpacing) {
-  auto testInst = boost::make_shared<Instrument>("basic_rect");
+
+  auto instrName = nameless ? "" : "basic_rect";
+  auto testInst = boost::make_shared<Instrument>(instrName);
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
@@ -617,33 +621,61 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
-  for (int banknum = 1; banknum <= num_banks; banknum++) {
-    // Make a new bank
-    std::ostringstream bankname;
-    bankname << "bank" << banknum;
+  if (nameless) {
+    for (int banknum = 1; banknum <= num_banks; banknum++) {
+      // Make a new bank
+      std::ostringstream bankname;
+      bankname << "";
 
-    RectangularDetector *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
-                     pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
-                     pixelSpacing, (banknum - 1) * pixels * pixels, true,
-                     pixels);
+      RectangularDetector *bank = new RectangularDetector(bankname.str());
+      bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, (banknum - 1) * pixels * pixels, true,
+                       pixels);
 
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
-      for (int y = 0; y < pixels; y++) {
-        boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
-          // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
-      }
+      // Mark them all as detectors
+      for (int x = 0; x < pixels; x++)
+        for (int y = 0; y < pixels; y++) {
+          boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+          if (detector)
+            // Mark it as a detector (add to the instrument cache)
+            testInst->markAsDetector(detector.get());
+        }
 
-    testInst->add(bank);
-    // Place the center.
-    bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
-    // rotate detector 90 degrees along vertical
-    bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+      testInst->add(bank);
+      // Place the center.
+      bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
+      // rotate detector 90 degrees along vertical
+      bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+    }
+  } else {
+
+    for (int banknum = 1; banknum <= num_banks; banknum++) {
+      // Make a new bank
+      std::ostringstream bankname;
+      bankname << "bank" << banknum;
+      RectangularDetector *bank = new RectangularDetector(bankname.str());
+      bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, (banknum - 1) * pixels * pixels, true,
+                       pixels);
+
+      // Mark them all as detectors
+      for (int x = 0; x < pixels; x++)
+        for (int y = 0; y < pixels; y++) {
+          boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+          if (detector)
+            // Mark it as a detector (add to the instrument cache)
+            testInst->markAsDetector(detector.get());
+        }
+
+      testInst->add(bank);
+      // Place the center.
+      bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
+      // rotate detector 90 degrees along vertical
+      bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+    }
   }
-
   addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
   addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 

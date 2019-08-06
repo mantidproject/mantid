@@ -8,7 +8,6 @@
 #define MANTIDNEXUSGEOMETRY_NEXUSGEOMETRYDEFINITIONS_H
 
 #include <H5Cpp.h>
-#include <algorithm>
 #include <string>
 
 namespace Mantid {
@@ -65,6 +64,7 @@ const double PI = M_PI;
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
 
+const H5std_string DEFAULT_ROOT_PATH = "raw_data_1";
 const H5::DataSpace SCALAR(H5S_SCALAR);
 
 } // namespace NexusGeometry

@@ -7,7 +7,7 @@
 
 /*
  * NexusGeometrySave
- *
+ * TODO DOCUMENTATION
  * Save Beamline NXInstrument from Memory to disk
  *
  *@author Takudzwa Makoni, ISIS RAL

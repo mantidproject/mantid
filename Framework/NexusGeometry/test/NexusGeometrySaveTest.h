@@ -7,6 +7,7 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
+#include "FileResource.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -17,365 +18,21 @@
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "NexusFileReader.h"
 
-#include <H5Cpp.h>
-#include <algorithm>
-#include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <fstream>
 #include <gmock/gmock.h>
-#include <iostream>
-#include <memory>
-#include <set>
 
 using namespace Mantid::NexusGeometry;
 
 //---------------------------------------------------------------
 namespace {
 
-const std::string DEFAULT_ROOT_PATH = "raw_data_1";
-using FullH5Path = std::vector<std::string>;
-
-// get path as string. Used for the dependency tests.
-std::string toH5PathString(FullH5Path &path) {
-  std::string pathString = "";
-  for (const std::string &grp : path) {
-    pathString += "/" + grp;
-  }
-  return pathString;
-}
-
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(doReport, void(const std::string &));
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
-};
-
-//  local Class used for validation of the structure of a nexus file as needed
-//  for the unit tests.
-class HDF5FileTestUtility {
-
-public:
-  HDF5FileTestUtility(const std::string &fullPath) {
-    boost::filesystem::path tmp = fullPath;
-
-    if (!boost::filesystem::exists(tmp)) {
-      throw std::invalid_argument("no such file.\n");
-    } else {
-      m_file.openFile(fullPath, H5F_ACC_RDONLY);
-    }
-  }
-
-  /* safely open a HDF5 group path with additional helpful
-   debug information to output where open fails) */
-  H5::Group openfullH5Path(const FullH5Path &pathList) const {
-
-    H5::Group child;
-    H5::Group parent = m_file.openGroup(pathList[0]);
-
-    for (size_t i = 1; i < pathList.size(); ++i) {
-      child = parent.openGroup(pathList[i]);
-      parent = child;
-    }
-    return child;
-  }
-
-  // moves down the index through groups starting at root, and if
-  // child has expected CLASS_TYPE, and is in parent group with expected parent
-
-  bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
-                                    const std::string &childNX_CLASS_TYPE) {
-
-    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_PATH);
-
-    // if specified parent NX class type is NX entry, check the top level of
-    // file structure only. (dont take extra step to look for parent group)
-    if (parentNX_CLASS_TYPE == NX_ENTRY) {
-
-      for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
-        if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
-          std::string childPath = rootGroup.getObjnameByIdx(i);
-          // Open the sub group
-          H5::Group childGroup = rootGroup.openGroup(childPath);
-          // Test attribute at current index for NX_class
-          H5::Attribute attribute = childGroup.openAttribute(NX_CLASS);
-          std::string attrVal;
-          attribute.read(attribute.getDataType(), attrVal);
-          if (attrVal == childNX_CLASS_TYPE) {
-            return true;
-          }
-        }
-      }
-    }
-
-    // Iterate over children of root group, and determine if a group
-    for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
-      if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
-        std::string childPath = rootGroup.getObjnameByIdx(i);
-        // Open the sub group
-        H5::Group childGroup = rootGroup.openGroup(childPath);
-        // check current child group going down from root has the specified
-        // NX_CLASS parent group
-        H5::Attribute parentAttribute = childGroup.openAttribute(NX_CLASS);
-        std::string parentAttrVal;
-        parentAttribute.read(parentAttribute.getDataType(), parentAttrVal);
-        if (parentAttrVal == parentNX_CLASS_TYPE) {
-          for (hsize_t i = 0; i < childGroup.getNumObjs(); ++i) {
-            if (childGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
-              std::string grandchildPath = childGroup.getObjnameByIdx(i);
-              // Open the sub group
-              H5::Group grandchildGroup = childGroup.openGroup(grandchildPath);
-              // check NX class
-              H5::Attribute grandchildAttribute =
-                  grandchildGroup.openAttribute(NX_CLASS);
-              std::string grandchildAttrVal;
-              grandchildAttribute.read(grandchildAttribute.getDataType(),
-                                       grandchildAttrVal);
-              if (childNX_CLASS_TYPE == grandchildAttrVal) {
-                return true;
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return false;
-  } // namespace
-
-  double readDoubleFromDataset(const std::string &datasetName,
-                               const FullH5Path &pathToGroup) {
-    double value;
-    int rank = 1;
-    hsize_t dims[(hsize_t)1];
-    dims[0] = (hsize_t)1;
-
-    H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
-
-    // open dataset and read.
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-    H5::DataSet dataset = parentGroup.openDataSet(datasetName);
-    dataset.read(&value, H5::PredType::NATIVE_DOUBLE, space);
-    return value;
-  }
-
-  // HERE
-  std::vector<double>
-  readDoubleVectorFrom_d_Attribute(const std::string &attrName,
-                                   const std::string &datasetName,
-                                   const FullH5Path &pathToGroup) {
-
-    // open dataset and read.
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-    H5::DataSet dataset = parentGroup.openDataSet(datasetName);
-
-    H5::Attribute attribute = dataset.openAttribute(attrName);
-
-    H5::DataType dataType = attribute.getDataType();
-    H5::DataSpace dataSpace = attribute.getSpace();
-
-    std::vector<double> value;
-    value.resize(dataSpace.getSelectNpoints());
-
-    attribute.read(dataType, value.data());
-
-    return value;
-  }
-
-  // HERE
-  bool hasDatasetWithNXAttribute(const std::string &pathToGroup,
-                                 const std::string &nx_attributeVal) {
-
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
-      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
-        std::string dSetName = parentGroup.getObjnameByIdx(i);
-        H5::DataSet dSet = parentGroup.openDataSet(dSetName);
-        if (dSet.attrExists(NX_CLASS)) {
-          H5::Attribute attribute = dSet.openAttribute(NX_CLASS);
-          std::string attributeValue;
-          attribute.read(attribute.getDataType(), attributeValue);
-          if (attributeValue == nx_attributeVal)
-            return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  // HERE
-  bool hasDatasetWithAttribute(const std::string &pathToGroup,
-                               const std::string &attributeVal,
-                               const std::string &attrName) {
-
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
-      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
-        std::string dSetName = parentGroup.getObjnameByIdx(i);
-        H5::DataSet dSet = parentGroup.openDataSet(dSetName);
-        if (dSet.attrExists(NX_CLASS)) {
-          H5::Attribute attribute = dSet.openAttribute(attrName);
-          std::string attributeValue;
-          attribute.read(attribute.getDataType(), attributeValue);
-          if (attributeValue == attributeVal)
-            return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool hasDataset(const std::string dsetName, const FullH5Path &pathToGroup) {
-
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-
-    auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
-      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
-        std::string dataSetName = parentGroup.getObjnameByIdx(i);
-        if (dsetName == dataSetName) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  bool groupHasNxClass(const std::string &attrVal,
-                       const std::string &pathToGroup) const {
-
-    H5::Attribute attribute;
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    attribute = parentGroup.openAttribute(NX_CLASS);
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-  // HERE
-  bool dataSetHasStrValue(
-      const std::string &dataSetName, const std::string &dataSetValue,
-      const FullH5Path &pathToGroup /*where the dataset lives*/) const {
-
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-
-    try {
-      H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
-      std::string dataSetVal;
-      auto type = dataSet.getDataType();
-      dataSet.read(dataSetVal, type);
-      dataSetVal.resize(type.getSize());
-      return dataSetVal == dataSetValue;
-    } catch (H5::DataSetIException &) {
-      return false;
-    }
-  }
-
-  // check if dataset or group has name-specific attribute
-  bool hasAttributeInGroup(const std::string &attrName,
-                           const std::string &attrVal,
-                           const FullH5Path &pathToGroup) {
-
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-
-    H5::Attribute attribute = parentGroup.openAttribute(attrName);
-    std::string attributeValue;
-    auto type = attribute.getDataType();
-    attribute.read(type, attributeValue);
-    attributeValue.resize(type.getSize());
-    return attributeValue == attrVal;
-  }
-
-  bool hasNXAttributeInGroup(const std::string &attrVal,
-                             const FullH5Path &pathToGroup) {
-
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-
-    H5::Attribute attribute = parentGroup.openAttribute(NX_CLASS);
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-  bool hasAttributeInDataSet(
-      const std::string dataSetName, const std::string &attrName,
-      const std::string &attrVal,
-      const FullH5Path &pathToGroup /*where the dataset lives*/) {
-
-    H5::Attribute attribute;
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
-    attribute = dataSet.openAttribute(attrName);
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-  bool hasNXAttributeInDataSet(const std::string dataSetName,
-                               const std::string &attrVal,
-                               const FullH5Path &pathToGroup) {
-    H5::Attribute attribute;
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
-    attribute = dataSet.openAttribute(NX_CLASS);
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-private:
-  H5::H5File m_file;
-
-}; // HDF5FileTestUtility
-
-// RAII: Gives a clean file destination and removes the file when
-// handle is out of scope. Must be stack allocated.
-class ScopedFileHandle {
-
-public:
-  ScopedFileHandle(const std::string &fileName) {
-
-    const auto temp_dir = boost::filesystem::temp_directory_path();
-    auto temp_full_path = temp_dir;
-    temp_full_path /= fileName;
-
-    // Check proposed location and throw std::invalid argument if file does
-    // not exist. otherwise set m_full_path to location.
-
-    if (boost::filesystem::is_directory(temp_dir)) {
-      m_full_path = temp_full_path;
-
-    } else {
-      throw std::invalid_argument("failed to load temp directory: " +
-                                  temp_dir.generic_string());
-    }
-  }
-
-  std::string fullPath() const { return m_full_path.generic_string(); }
-
-  ~ScopedFileHandle() {
-
-    // file is removed at end of file handle's lifetime
-    if (boost::filesystem::is_regular_file(m_full_path)) {
-      boost::filesystem::remove(m_full_path);
-    }
-  }
-
-private:
-  boost::filesystem::path m_full_path; // full path to file
-
-  // prevent heap allocation for ScopedFileHandle
-protected:
-  static void *operator new(std::size_t); // prevent heap allocation of scalar.
-  static void *operator new[](std::size_t); // prevent heap allocation of array.
 };
 
 } // namespace
@@ -546,7 +203,7 @@ used.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert the group at the root H5 path is NXentry
     TS_ASSERT(tester.groupHasNxClass(NX_ENTRY, DEFAULT_ROOT_PATH));
@@ -571,7 +228,7 @@ used.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check the output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert that inside a group with attribute NXentry, which as per the
     // previous test we know to be the root group, there exists a group of
@@ -606,10 +263,10 @@ used.
                                       DEFAULT_ROOT_PATH); // saves instrument
 
     // test utility to check the output file.
-    HDF5FileTestUtility testUtility(destinationFile);
+    NexusFileReader testUtility(destinationFile);
 
     // full H5 path to the NXinstrument group
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test_instrument_name"};
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test_instrument_name"};
 
     // assert no exception thrown on open of instrument group in file with
     // manually set name.
@@ -638,8 +295,8 @@ used.
     std::string destinationFile = fileResource.fullPath();
 
     // unnamed ("") instrument with multiple unnamed detector banks ("")
-    auto instrument = ComponentCreationHelper::createTestUnnamedRectangular2(
-        2 /*number of banks*/, 2 /*number of pixels*/);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        2 /*number of banks*/, 2 /*number of pixels*/, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
@@ -665,7 +322,7 @@ used.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert that inside a group with attribute NXinstrument, which as per the
     // previous test we know to be the instrument group, there exists a group of
@@ -687,7 +344,7 @@ used.
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     TS_ASSERT(compInfo.hasSample());
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
@@ -743,10 +400,10 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // instance of test utility to check saved file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {
+    FullNXPath path = {
         DEFAULT_ROOT_PATH,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
@@ -804,10 +461,10 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // instance of test utility to check saved file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -861,10 +518,10 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // instance of test utility to check saved file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // get magnitude of vector in dataset
@@ -917,10 +574,10 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // instance of test utility to check saved file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -943,8 +600,8 @@ found in the Instrument cache.
     TS_ASSERT(rotationInFile.isApprox(sourceRotationCopy));
   }
 
-
-  void test_an_nx_class_location_is_not_written_when_component_position_is_at_origin() { 
+  void
+  test_an_nx_class_location_is_not_written_when_component_position_is_at_origin() {
 
     /*
     test scenario: pass into saveInstrument an instrument with zero source
@@ -975,10 +632,10 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // instance of test utility to check saved file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // assertations
@@ -1014,7 +671,7 @@ found in the Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to access NXtransformations group with test utility
-    FullH5Path path = {
+    FullNXPath path = {
         DEFAULT_ROOT_PATH,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
@@ -1024,7 +681,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert rotation not written to file
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
@@ -1054,7 +711,7 @@ found in the Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
@@ -1062,7 +719,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert that no dataset named 'orientation' exists in output file
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
@@ -1096,7 +753,7 @@ found in the Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullH5Path path = {DEFAULT_ROOT_PATH, "test-instrument", "source",
+    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument", "source",
                        TRANSFORMATIONS};
 
     // call saveinstrument passing test instrument as parameter
@@ -1104,7 +761,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert dataset 'orientation' doesnt exist
     bool hasRotation = tester.hasDataset(ORIENTATION, path);
@@ -1149,8 +806,8 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // instance of test utility to check saved file
-    HDF5FileTestUtility tester(destinationFile);
-    FullH5Path path = {
+    NexusFileReader tester(destinationFile);
+    FullNXPath path = {
         DEFAULT_ROOT_PATH,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/};
@@ -1223,11 +880,11 @@ found in the Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FullH5Path transformationsPath = {
+    FullNXPath transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
-    FullH5Path sourcePath = transformationsPath;
+    FullNXPath sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
@@ -1235,7 +892,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert what there is no 'location' dataset in NXtransformations, but
     // there is the dataset 'orientation', confirming that saveInstrument has
@@ -1248,7 +905,7 @@ found in the Instrument cache.
     // assert that the NXsource depends on dataset 'orientation' in the
     // transformationsPath, since the dataset exists.
     bool sourceDependencyIsOrientation = tester.dataSetHasStrValue(
-        DEPENDS_ON, toH5PathString(transformationsPath) + "/" + ORIENTATION,
+        DEPENDS_ON, toNXPathString(transformationsPath) + "/" + ORIENTATION,
         sourcePath);
     TS_ASSERT(sourceDependencyIsOrientation);
 
@@ -1289,11 +946,11 @@ found in the Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FullH5Path transformationsPath = {
+    FullNXPath transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
-    FullH5Path sourcePath = transformationsPath;
+    FullNXPath sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
@@ -1301,7 +958,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility for checking file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert what there is no 'orientation' dataset in NXtransformations, but
     // there is the dataset 'location', confirming that saveInstrument has
@@ -1315,7 +972,7 @@ found in the Instrument cache.
     // transformationsPath, since the dataset exists.
     bool sourceDependencyIsLocation = tester.dataSetHasStrValue(
         DEPENDS_ON /*dataset name*/,
-        toH5PathString(transformationsPath) + "/" + LOCATION /*dataset value*/,
+        toNXPathString(transformationsPath) + "/" + LOCATION /*dataset value*/,
         sourcePath /*where the dataset lives*/);
     TS_ASSERT(sourceDependencyIsLocation);
 
@@ -1358,12 +1015,12 @@ found in the Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // path to NXtransformations subgoup in NXsource
-    FullH5Path transformationsPath = {
+    FullNXPath transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
-    FullH5Path sourcePath = transformationsPath;
+    FullNXPath sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter
@@ -1371,7 +1028,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility for checking output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert both location and orientation exists
     bool hasLocation = tester.hasDataset(LOCATION, transformationsPath);
@@ -1381,14 +1038,14 @@ found in the Instrument cache.
 
     bool sourceDependencyIsLocation =
         tester.dataSetHasStrValue(DEPENDS_ON /*dataset name*/,
-                                  toH5PathString(transformationsPath) + "/" +
+                                  toNXPathString(transformationsPath) + "/" +
                                       ORIENTATION /*value in dataset*/,
                                   sourcePath /*where the dataset lives*/);
     TS_ASSERT(sourceDependencyIsLocation);
 
     bool orientationDependencyIsLocation = tester.hasAttributeInDataSet(
         ORIENTATION /*dataset name*/, DEPENDS_ON /*dAttribute name*/,
-        toH5PathString(transformationsPath) + "/" +
+        toNXPathString(transformationsPath) + "/" +
             LOCATION /*attribute value*/,
         transformationsPath
         /*where the dataset lives*/);
@@ -1429,12 +1086,12 @@ found in the Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // path to NXtransformations subgoup in NXsource
-    FullH5Path transformationsPath = {
+    FullNXPath transformationsPath = {
         DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
-    FullH5Path sourcePath = transformationsPath;
+    FullNXPath sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter
@@ -1442,7 +1099,7 @@ found in the Instrument cache.
                                       DEFAULT_ROOT_PATH);
 
     // test utility to check output file
-    HDF5FileTestUtility tester(destinationFile);
+    NexusFileReader tester(destinationFile);
 
     // assert source is self dependent
     bool sourceDependencyIsSelf =

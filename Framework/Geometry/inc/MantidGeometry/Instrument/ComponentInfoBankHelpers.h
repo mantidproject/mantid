@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/EigenConversionHelpers.h"
+#include <Eigen/Core>
 
 namespace Mantid {
 namespace Geometry {

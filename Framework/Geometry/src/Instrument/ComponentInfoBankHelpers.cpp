@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel//EigenConversionHelpers.h"
 
 using Mantid::Beamline::ComponentType;
 
