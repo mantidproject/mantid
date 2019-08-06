@@ -136,7 +136,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if element in self.used_colors:
             return self.used_colors[element]
 
-        occurrences = [self.used_colors.values().count('C{}'.format(i)) for i in range(self.num_colors)]
+        occurrences = [list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)]
 
         color_index = occurrences.index(min(occurrences))
 
