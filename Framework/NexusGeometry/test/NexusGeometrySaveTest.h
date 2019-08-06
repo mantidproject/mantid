@@ -59,9 +59,9 @@ IO PRECONDITIONS TESTS
 DESCRIPTION:
 
 The following tests are written to document the behaviour of the SaveInstrument
-method when a valid and invalid beamline Instrument are attempted to be saved
+method when a valid and invalid beamline Instrument is attempted to be saved
 out from memory to file. Included also are tests that document the behaviour
-when a valid (.nxs, .hdf5 ) or invalid output file extension is attempted to
+when a valid (.nxs, .hdf5 ) or invalid output file extension is attempted to be
 used.
 
 ====================================================================

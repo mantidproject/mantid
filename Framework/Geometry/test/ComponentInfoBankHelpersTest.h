@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidKernel//EigenConversionHelpers.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
 #include <boost/make_shared.hpp>
