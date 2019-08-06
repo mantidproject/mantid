@@ -397,7 +397,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     m_receivedEventBuffer.reserve(oldBufferSize + nEvents);
 
     /* Store the buffered events */
-    std::transform(detData.begin(), detData.end(), detData.begin(),
+    std::transform(detData.begin(), detData.end(), tofData.begin(),
                    std::back_inserter(m_receivedEventBuffer),
                    [&](uint64_t detId, uint64_t tof) -> BufferedEvent {
                      const auto workspaceIndex =
@@ -452,7 +452,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
 
         // nanoseconds to microseconds
         spectrum->addEventQuickly(
-            TofEvent(static_cast<double>(event.tof) * 1e3, pulse.pulseTime));
+            TofEvent(static_cast<double>(event.tof) * 1e-3, pulse.pulseTime));
       }
     }
   }
