@@ -268,12 +268,18 @@ class FindPeakAutomatic(PythonAlgorithm):
                                   DataE=np.concatenate((raw_error, raw_error)),
                                   NSpec=2)
 
-        # Find all the peaks
-        raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
-        flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
-        prominence = params['prominences']
-        flat_peaks = sorted(zip(flat_peaks, prominence), key=lambda x: x[1], reverse=True)
-        flat_peaks = [pid for pid, prom in flat_peaks if pid in raw_peaks]
+        # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt
+        # however this will not do an equally good job as it cannot sort by prominence (also added in 1.1.0)
+        major, minor, _ = scipy.__version__.split('.')
+        if int(major) >= 1 and int(minor) >= 1:
+            raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
+            flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
+            prominence = params['prominences']
+            flat_peaks = sorted(zip(flat_peaks, prominence), key=lambda x: x[1], reverse=True)
+            flat_peaks = [pid for pid, prom in flat_peaks if pid in raw_peaks]
+        else:
+            flat_peaks = scipy.signal.find_peaks_cwt(flat_yvals, widths=[0.1])
+            flat_peaks = sorted(flat_peaks, key=lambda pid: flat_yvals[pid], reverse=True)
 
         return self.find_good_peaks(raw_xvals, flat_peaks,
                                     acceptance=acceptance,
