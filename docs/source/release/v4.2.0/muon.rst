@@ -32,5 +32,6 @@ Improvements
 ############
 
 - :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` has been improved to correctly load data other than data from Dolly at the SmuS/PSI.
+- When there is a T0 for each spectrum, :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` chooses the max value out of the array instead of the first value.
 
 :ref:`Release 4.2.0 <v4.2.0>`
