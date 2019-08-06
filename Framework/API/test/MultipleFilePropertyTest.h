@@ -626,7 +626,7 @@ public:
 
   void test_multipleFiles_inconsistent_spaces() {
     MultipleFileProperty p("Filename");
-    p.setValue("1,2, 3,4, 5");
+    p.setValue("1,2, 3  ,  4, 5");
 
     std::vector<std::vector<std::string>> fileNames = p();
 
