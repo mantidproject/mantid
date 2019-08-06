@@ -8,6 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+import re
 from numpy import ndarray
 
 from mantid.api import AlgorithmManager, AnalysisDataService as ads
@@ -82,11 +83,17 @@ def get_workspace_history_commands(fig):
     for ws_name in plotted_workspaces:
         try:
             workspace = ads.retrieve(ws_name)
+            ws_var_name = clean_variable_name(ws_name)
             ws_history = get_workspace_history_list(workspace)
             if ws_history[-1].startswith('Load('):
                 ws_history = [ws_history[-1]]
-            history_commands += ['{} = {}'.format(ws_name, cmd) for cmd in ws_history]
+            history_commands += ['{} = {}'.format(ws_var_name, cmd) for cmd in ws_history]
             history_commands.append('')  # Blank line to separate each workspace's history
         except KeyError:  # Raised if workspace is not in ADS
             pass
     return history_commands
+
+
+def clean_variable_name(name):
+    """Converts a string into a valid Python variable name"""
+    return re.sub('\W|^(?=\d)', '_', name)

@@ -10,7 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.container import ErrorbarContainer
 
-from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
+from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, get_ax_from_curve
 
 BASE_CREATE_LINE_COMMAND = "plot({})"
@@ -35,7 +35,8 @@ def generate_plot_command(artist):
 
 def get_plot_command_pos_args(artist):
     ax = get_ax_from_curve(artist)
-    return [ax.get_artists_workspace_and_spec_num(artist)[0]]
+    ws_name = ax.get_artists_workspace_and_spec_num(artist)[0].name()
+    return [clean_variable_name(ws_name)]
 
 
 def get_plot_command_kwargs(artist):

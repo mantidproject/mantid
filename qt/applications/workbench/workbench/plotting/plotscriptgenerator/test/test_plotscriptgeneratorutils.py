@@ -8,13 +8,17 @@
 
 import unittest
 
+from ast import parse
 from numpy import array
 
 from mantid.py3compat.mock import patch, Mock
 from mantid.simpleapi import CreateSampleWorkspace
-from workbench.plotting.plotscriptgenerator.utils import (
-    convert_args_to_string, get_workspace_history_list,
-    get_plotted_workspaces_names, get_workspace_history_commands)
+from testhelpers import assertRaisesNothing
+from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string,
+                                                          get_workspace_history_list,
+                                                          get_plotted_workspaces_names,
+                                                          get_workspace_history_commands,
+                                                          clean_variable_name)
 
 EXPECTED_SCRIPT = """Load(Filename=r'MAR11060.raw', OutputWorkspace='ws')
 
@@ -30,11 +34,19 @@ from mantid.simpleapi import *
 
 
 class PlotScriptGeneratorUtilsTest(unittest.TestCase):
-
     def test_convert_args_to_string_returns_correct_string(self):
-        kwargs_dict = {'key0': 'val0', 'key1': [2, 'str'], 'key2': 1,
-                       'key3': {'a': 1.1, 'b': {'c': ['str2', 1.1]}},
-                       'ndarray': array([1.1, 1.2])}
+        kwargs_dict = {
+            'key0': 'val0',
+            'key1': [2, 'str'],
+            'key2': 1,
+            'key3': {
+                'a': 1.1,
+                'b': {
+                    'c': ['str2', 1.1]
+                }
+            },
+            'ndarray': array([1.1, 1.2])
+        }
         expected_str = ("key0='val0', key1=[2, 'str'], key2=1, key3={'a': 1.1, "
                         "'b': {'c': ['str2', 1.1]}}, ndarray=[1.1, 1.2]")
         self.assertEqual(expected_str, convert_args_to_string(None, kwargs_dict))
@@ -47,22 +59,25 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
         self.assertEqual(EXPECTED_SCRIPT.split('\n'), output)
 
     def test_get_plotted_workspace_names_returns_list_of_workspace_names(self):
-        mock_axes = [Mock(tracked_workspaces={'test_ws': None}),
-                     Mock(tracked_workspaces={'test_ws1': None})]
+        mock_axes = [
+            Mock(tracked_workspaces={'test_ws': None}),
+            Mock(tracked_workspaces={'test_ws1': None})
+        ]
         mock_fig = Mock(get_axes=lambda: mock_axes)
         plotted_workspaces = get_plotted_workspaces_names(mock_fig)
         self.assertEqual(['test_ws', 'test_ws1'], sorted(plotted_workspaces))
 
     @patch('workbench.plotting.plotscriptgenerator.utils.ads')
     @patch('workbench.plotting.plotscriptgenerator.utils.get_plotted_workspaces_names')
-    def test_get_workspace_history_commands_returns_correct_list(
-            self, mock_get_workspace_names, mock_ads):
+    def test_get_workspace_history_commands_returns_correct_list(self, mock_get_workspace_names,
+                                                                 mock_ads):
         mock_get_workspace_names.return_value = ['ws_name', 'ws_name1', 'ws_name2']
         mock_ads.retrieve = lambda x: CreateSampleWorkspace(OutputWorkspace=x)
         expected_output = [
             "ws_name = CreateSampleWorkspace(OutputWorkspace='ws_name')", "",
             "ws_name1 = CreateSampleWorkspace(OutputWorkspace='ws_name1')", "",
-            "ws_name2 = CreateSampleWorkspace(OutputWorkspace='ws_name2')", ""]
+            "ws_name2 = CreateSampleWorkspace(OutputWorkspace='ws_name2')", ""
+        ]
         actual_output = get_workspace_history_commands(None)
         self.assertEqual(expected_output, actual_output)
 
@@ -70,15 +85,24 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
     @patch('workbench.plotting.plotscriptgenerator.utils.ads')
     @patch('workbench.plotting.plotscriptgenerator.utils.get_plotted_workspaces_names')
     def test_get_workspace_history_commands_only_contains_load_command_if_load_was_last_command(
-            self,  mock_get_workspace_names, mock_ads, mock_get_workspace_history):
+            self, mock_get_workspace_names, mock_ads, mock_get_workspace_history):
         mock_get_workspace_names.return_value = ['ws']
         mock_get_workspace_history.return_value = [
-            "Some command",
-            "Some other command",
-            "Load(myFile)"]
+            "Some command", "Some other command", "Load(myFile)"
+        ]
         expected_output = ["ws = Load(myFile)", '']
         actual_output = get_workspace_history_commands(None)
         self.assertEqual(expected_output, actual_output)
+
+    def test_clean_variable_name_returns_valid_variable_names(self):
+        invalid_variable_names = ["2GEM_log", "GEM-log", "GEM*log", "GEM+log"]
+        for var_name in invalid_variable_names:
+            clean_name = clean_variable_name(var_name)
+            try:
+                parse("{} = None".format(clean_name))
+            except (SyntaxError, TypeError, ValueError):
+                msg = "Invalid variable name: {}".format(clean_name)
+                self.fail(msg)
 
 
 if __name__ == '__main__':
