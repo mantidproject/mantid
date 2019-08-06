@@ -64,7 +64,7 @@ class FindPeakAutomatic(PythonAlgorithm):
         self.declareProperty('EstimatePeakSigma', 3.0,
                              doc='A rough estimate of the standard deviation of the gaussian used to fit the peaks',
                              validator=FloatBoundedValidator(lower=0.0))
-        self.declareProperty('MinPeakSigma', 0.0,
+        self.declareProperty('MinPeakSigma', 0.5,
                              doc='Minimum value for the standard deviation of a peak',
                              validator=FloatBoundedValidator(lower=0.0))
         self.declareProperty('MaxPeakSigma', 30.0,
@@ -88,8 +88,8 @@ class FindPeakAutomatic(PythonAlgorithm):
         self.use_poisson_cost = True if self.getPropertyValue('UsePoissonCost') == '1' else False
         plot_peaks = True if self.getPropertyValue('PlotPeaks') == '1' else False
         self.peak_width_estimate = int(self.getPropertyValue('EstimatePeakSigma'))
-        self.min_sigma = int(self.getPropertyValue('MinPeakSigma'))
-        self.max_sigma = int(self.getPropertyValue('MaxPeakSigma'))
+        self.min_sigma = float(self.getPropertyValue('MinPeakSigma'))
+        self.max_sigma = float(self.getPropertyValue('MaxPeakSigma'))
 
         # Load the data and clean from Nans
         input_ws_name = self.getPropertyValue('InputWorkspace')
