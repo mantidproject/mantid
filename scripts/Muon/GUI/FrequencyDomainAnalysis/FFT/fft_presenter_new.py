@@ -59,14 +59,37 @@ class FFTPresenter(object):
         self.view.deactivateButton()
 
     def getWorkspaceNames(self):
-        name = self.view.workspace
+        # get current values
+        original_Re_name = self.view.workspace
+        original_Im_name = self.view.imaginary_workspace
         final_options = self.load.get_workspace_names_for_FFT_analysis(self.view.use_raw_data)
 
+        # update view
         self.view.addItems(final_options)
         self.view.removeRe('PhaseQuad')
         self.removePhaseFromIM(final_options)
 
-        self.view.workspace = name
+        # make intelligent guess of what user wants
+        group_pair_context = self.load.group_pair_context[self.load.group_pair_context.selected]
+        Re_name_to_use = None
+        Im_name_to_use = None
+        default_name = None
+        # will need to check this exists before using it
+        if group_pair_context:
+            default_name = group_pair_context.get_asymmetry_workspace_names(
+                    self.load.data_context.current_runs)
+        # if the original selection is available we should use it
+        if original_Re_name in final_options:
+            Re_name_to_use = original_Re_name
+        elif default_name:
+            Re_name_to_use = default_name[0]
+        self.view.workspace = Re_name_to_use
+        if original_Im_name in final_options:
+          Im_name_to_use = original_Im_name
+        elif default_name:
+          Im_name_to_use = default_name[0]
+        self.view.imaginary_workspace=Im_name_to_use
+        return
 
     def handle_use_raw_data_changed(self):
         if not self.view.use_raw_data and not self.load._do_rebin():
