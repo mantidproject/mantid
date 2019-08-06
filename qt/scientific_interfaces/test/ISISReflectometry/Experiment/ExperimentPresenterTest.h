@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"

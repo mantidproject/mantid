@@ -12,12 +12,12 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>

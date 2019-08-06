@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFLMANDATORY" valid-from="forever">
+
+<component-link name="REFLMANDATORY" >
+
+  <!-- Wavelength range -->
+
+  <parameter name="LambdaMin">
+    <value val="1.5"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="17.0"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>

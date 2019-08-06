@@ -8,9 +8,9 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

@@ -18,7 +18,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/Policies/AsType.h"
+#include "MantidPythonInterface/core/Policies/AsType.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h" // These are still concerned with workspace creation so attach them here
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

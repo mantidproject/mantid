@@ -73,6 +73,10 @@ public:
   getUniqueWindows(const std::vector<std::string> &wsNames) const;
   /// Get all workspaces from the ADS
   std::vector<Mantid::API::Workspace_sptr> getWorkspaces() const;
+  /// Check if the size of the project is > than the warning size.
+  bool needsSizeWarning(const std::vector<std::string> &wsNames);
+  /// Find the size of a project from a list of workspace names.
+  virtual size_t getProjectSize(const std::vector<std::string> &wsNames);
 
 private:
   /// Create a workspace info object for this workspace

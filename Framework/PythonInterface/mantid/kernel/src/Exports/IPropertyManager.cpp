@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
