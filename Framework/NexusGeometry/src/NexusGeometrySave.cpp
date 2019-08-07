@@ -241,6 +241,7 @@ inline void writeXYZPixeloffset(H5::Group &grp,
  *
  * @param detectorIDs : std::vector<int> container of all detectorIDs to be
  * stored into dataset 'detector_number'.
+ * @param compInfo : instrument cache with component info.
  * @idx : size_t index of bank in compInfo.
  */
 void writeNXDetectorNumber(H5::Group &grp,
@@ -281,7 +282,6 @@ void writeNXDetectorNumber(H5::Group &grp,
  * is a specific type of pixel, to its group.
  *
  * @param grp : NXmonitor group (HDF group)
- * @param compInfo : componentInfo object.
  * @param monitorID : monitor ID to be
  * stored into dataset 'detector_id' (or 'detector_number'. naming convention
  * inconsistency?).
