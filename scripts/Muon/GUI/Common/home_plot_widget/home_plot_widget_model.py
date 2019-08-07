@@ -102,8 +102,7 @@ class HomePlotWidgetModel(object):
         else:
             print(workspaces, "moo")
             self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, plot_kwargs={'distribution': True,
-                                                                                                    'autoscale_on_update': False},
-                                    errors=True)
+                                    'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
         self.plot_figure.canvas.set_window_title(window_title)
