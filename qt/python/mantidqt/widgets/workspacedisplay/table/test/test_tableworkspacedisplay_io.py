@@ -10,8 +10,9 @@ from __future__ import (absolute_import, print_function)
 
 import unittest
 
-from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import Load
+from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
 from mantidqt.widgets.workspacedisplay.table import StatusBarView
 
@@ -32,16 +33,18 @@ class TableWorkspaceDisplayEncoderTest(unittest.TestCase):
         self.assertEqual(TABLEWORKSPACEDISPLAY_DICT, self.encoder.encode(self.view))
 
 
+# matplotlib is not used so patch it out to avoid tkinter errors on older matplotlib versions
+@mock.patch('matplotlib.pyplot._backend_selection')
 @start_qapplication
 class TableWorkspaceDisplayDecoderTest(unittest.TestCase):
     def setUp(self):
         self.ws = Load("SavedTableWorkspace.nxs", OutputWorkspace="ws")
         self.decoder = TableWorkspaceDisplayDecoder()
 
-    def test_decoder_returns_view(self):
+    def test_decoder_returns_view(self, _):
         self.assertEqual(self.decoder.decode(TABLEWORKSPACEDISPLAY_DICT).__class__, StatusBarView)
 
-    def test_decoder_returns_custom_features(self):
+    def test_decoder_returns_custom_features(self, _):
         view = self.decoder.decode(TABLEWORKSPACEDISPLAY_DICT)
         self.assertEqual(self.ws.name(), view.presenter.model.ws.name())
         self.assertEqual(TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y"], view.presenter.model.marked_columns.as_y)
