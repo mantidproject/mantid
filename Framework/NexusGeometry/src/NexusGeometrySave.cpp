@@ -14,12 +14,7 @@
  * @date 07/08/2019
  */
 
-#include "MantidGeometry/Objects/CSGObject.h"    // need?
-#include "MantidGeometry/Objects/IObject.h"      // need?
-#include "MantidGeometry/Objects/MeshObject.h"   // need?
-#include "MantidGeometry/Objects/ShapeFactory.h" // need?
-#include "MantidGeometry/Rendering/ShapeInfo.h"  // need?
-
+#include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -27,7 +22,6 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
-#include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
@@ -314,9 +308,7 @@ void writeNXDetectorNumber(H5::Group &grp,
  * stored into dataset 'detector_id' (or 'detector_number'. naming convention
  * inconsistency?).
  */
-void writeNXMonitorNumber(H5::Group &grp,
-                          const Geometry::ComponentInfo &compInfo,
-                          const int monitorID) {
+void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
 
   // these DataSets are duplicates of each other. written to the NXmonitor
   // group to handle the naming inconsistency. probably temporary.
@@ -664,7 +656,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeNXMonitorNumber(childGroup, compInfo, monitorId);
+  writeNXMonitorNumber(childGroup, monitorId);
 
   writeStrDataset(childGroup, BANK_NAME, monitorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
