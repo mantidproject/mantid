@@ -17,16 +17,18 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTabl
 
 @start_qapplication
 class PeriodicComboTest(unittest.TestCase):
+    NUMBER_ELEMENTS = 109
+
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')
     def test_that_init_defaults_to_all_elements_in_periodic_table_with_details(self, mock_insert_item):
         PeriodicCombo()
-        self.assertEqual(mock_insert_item.call_count, 109)
+        self.assertEqual(mock_insert_item.call_count, self.NUMBER_ELEMENTS)
         mock_insert_item.assert_called_with(108, 'Mt (109) - meitnerium')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')
     def test_that_init_defaults_to_all_elements_in_periodic_table_without_details(self, mock_insert_item):
         PeriodicCombo(detailed=False)
-        self.assertEqual(mock_insert_item.call_count, 109)
+        self.assertEqual(mock_insert_item.call_count, self.NUMBER_ELEMENTS)
         mock_insert_item.assert_called_with(108, 'Mt (109)')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QComboBox.insertItem')

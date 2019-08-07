@@ -160,8 +160,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plotting.rm_vline_and_annotate.assert_called_with('plot3', 'line')
 
     def test_that_generate_element_widgets_creates_widget_once_for_each_element(self):
-        # TODO remove -2 on element number once json file has been restructured
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.assertEqual(len(self.gui.element_widgets), elem)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._add_element_lines')
@@ -322,18 +321,15 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_load_run.assert_called_with('GE1', 2695)
         self.assertEqual(add_peak_data.call_count, 0)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.load_run')
-    def test_add_plot_loads_run_and_electron_peaks_plotted(self, mock_load_run, add_peak_data):
+    def test_add_plot_loads_run(self, mock_load_run):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
-        self.gui.peaks.electron.isChecked = mock.Mock(return_value=True)
         mock_checkbox = mock.Mock()
         mock_checkbox.name = 'GE1'
 
         self.gui.add_plot(mock_checkbox)
 
         mock_load_run.assert_called_with('GE1', 2695)
-        add_peak_data.assert_called_with('e-', 'GE1', data=self.gui.electron_peaks)
 
     def test_del_plot_does_nothing_if_no_loaded_run(self):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
@@ -423,43 +419,37 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_warning.assert_called_with(warning_text)
 
     def test_gamms_checked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number after merging #26444
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.gammas_checked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_gamms_unchecked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number after merging #26444
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.gammas_unchecked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_major_checked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number after merging #26444
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.major_peaks_checked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_major_unchecked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number after merging #26444
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.major_peaks_unchecked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_minor_checked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number after merging #26444
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.minor_peaks_checked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_minor_unchecked_calls_checked_data_for_each_element(self):
-        # TODO remove -2 on element number after merging #26444
-        elem = len(self.gui.ptable.peak_data)-2
+        elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.minor_peaks_unchecked()
         self.assertEqual(self.gui.checked_data.call_count, elem)
@@ -472,13 +462,9 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertTrue(all(map(lambda m: m.setChecked.call_count == 1, selection)))
         mock_update_peak_data.assert_called_with('Cu')
 
-    def test_get_electron_peaks_returns_a_dict_with_correct_length(self):
-        # TODO: modify this after merging #26444
-        peaks = len(self.gui.ptable.peak_data["Electrons"])
-        electron_dict = self.gui._get_electron_peaks()
-        self.assertEqual(len(electron_dict), peaks)
-        for _, peak in electron_dict.items():
-            float(peak)
+    def test_that_ptable_contains_no_peak_not_part_of_an_element(self):
+        self.assertTrue('Electrons' not in self.gui.ptable.peak_data)
+        self.assertTrue('Gammas' not in self.gui.ptable.peak_data)
 
 
 if __name__ == '__main__':
