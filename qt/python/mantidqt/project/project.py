@@ -93,9 +93,9 @@ class Project(AnalysisDataServiceObserver):
         :return: QMessaageBox.Yes or QMessageBox.No or QMessageBox.Cancel; The value is the value selected by the user.
         """
         return QMessageBox().question(None, "Overwrite project?",
-                                    "Would you like to overwrite the selected project?",
-                                    QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
-                                    QMessageBox.Yes)
+                                      "Would you like to overwrite the selected project?",
+                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                      QMessageBox.Yes)
 
     def _save_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
