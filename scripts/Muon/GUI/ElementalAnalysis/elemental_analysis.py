@@ -119,7 +119,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.electron_peaks = {}
         self._generate_element_widgets()
 
-    # Return the first unused colour, if all used then restart from the beginning of the cycle
     def get_color(self, element):
         """
         When requesting the colour for a new element, return the first unused colour of the matplotlib
