@@ -10,8 +10,9 @@ from __future__ import (absolute_import, unicode_literals)
 
 from mantid.plots import MantidAxes
 
+from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.plugins.editor import DEFAULT_CONTENT
-from workbench.plotting.plotscriptgenerator.axes import generate_add_subplot_command
+from workbench.plotting.plotscriptgenerator.axes import generate_add_subplot_command, generate_axis_limit_commands
 from workbench.plotting.plotscriptgenerator.figure import generate_figure_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands
@@ -48,6 +49,8 @@ def generate_script(fig, exclude_headers=False):
                                        generate_add_subplot_command(ax)))
         for artist in ax.get_tracked_artists():
             plot_commands.append("{}.{}".format(AXES_VARIABLE, generate_plot_command(artist)))
+        axis_limit_cmds = generate_axis_limit_commands(ax)
+        plot_commands += ["{}.{}".format(AXES_VARIABLE, cmd) for cmd in axis_limit_cmds]
         if ax.legend_:
             plot_commands.append("{}.legend().draggable()".format(AXES_VARIABLE))
     if not plot_commands:

@@ -29,8 +29,7 @@ EXAMPLE_SCIRPT = ("{}"
                   "fig = plt.figure(dpi=100.0, figsize=(6.4, 4.8), num='')\n"
                   "ax = fig.add_subplot(1, 1, 1, frame_on=True, label='', projection='mantid', "
                   "sharex=None, sharey=None, title='', visible=True, xlabel='', "
-                  "xlim=(14.5, 25.5), xscale='linear', ylabel='', "
-                  "ylim=(0.07999999999999997, 0.52), yscale='linear')\n"
+                  "xscale='linear', ylabel='', yscale='linear')\n"
                   "ax.errorbar(test_ws, alpha=0.5, barsabove=True, capsize=1.6, capthick=1.2, "
                   "color='r', distribution=False, drawstyle='steps', ecolor='#ff0000', "
                   "elinewidth=1.5, errorevery=1, fillstyle='left', label='test label', "
@@ -38,6 +37,8 @@ EXAMPLE_SCIRPT = ("{}"
                   "markerfacecolor='y', markerfacecoloralt='k', markersize=1.3, markevery=2, "
                   "solid_capstyle='butt', solid_joinstyle='round', specNum=1, visible=False, "
                   "zorder=1.4)\n"
+                  "ax.set_xlim((14.5, 25.5))\n"
+                  "ax.set_ylim((0.07999999999999997, 0.52))\n"
                   "plt.show()".format(DEFAULT_CONTENT))
 
 
@@ -67,8 +68,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         ax.errorbar(self.test_ws, specNum=2)
         output = generate_script(fig)
         num_lines = len(output.split('\n'))
-        # Expect 11 lines from DEFAULT_CONTENT, 4 for workspace retrieval and 5 for plotting
-        expected_num_lines = 20
+        # Expect 11 lines from DEFAULT_CONTENT, 4 for workspace retrieval and 7 for plotting
+        expected_num_lines = 22
         err_message = ("Expected to output {} lines, found {}.\nOutput:\n{}"
                        "".format(expected_num_lines, num_lines, output))
         self.assertEqual(expected_num_lines, num_lines, msg=err_message)
@@ -89,7 +90,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_plot_cmd.return_value = "ax.plot(...)"
         mock_retrieval_cmd.return_value = ["ADS.retrieve(...)"]
         mock_fig = Mock(
-            get_axes=lambda: [Mock(spec=MantidAxes, legend_=True, get_tracked_artists=lambda: [])])
+            get_axes=lambda: [Mock(spec=MantidAxes, legend_=True, get_tracked_artists=lambda: [],
+                                   get_lines=lambda: [Mock(), Mock()])])
         self.assertIn('.legend().draggable()', generate_script(mock_fig))
 
     @patch('workbench.plotting.plotscriptgenerator.generate_workspace_retrieval_commands')
@@ -103,7 +105,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_plot_cmd.return_value = "ax.plot(...)"
         mock_retrieval_cmd.return_value = ["ADS.retrieve(...)"]
         mock_fig = Mock(
-            get_axes=lambda: [Mock(spec=MantidAxes, legend_=False, get_tracked_artists=lambda: [])])
+            get_axes=lambda: [Mock(spec=MantidAxes, legend_=False, get_tracked_artists=lambda: [],
+                                   get_lines=lambda: [Mock(), Mock()])])
         self.assertNotIn('.legend()', generate_script(mock_fig))
 
 

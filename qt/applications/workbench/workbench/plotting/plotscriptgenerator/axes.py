@@ -9,12 +9,11 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from mantid.plots.utility import get_axes_index
-from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
+from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, convert_value_to_arg_string
 
 BASE_CREATE_AX_COMMAND = "add_subplot({})"
 ADD_SUBPLOT_KWARGS = [  # kwargs passed to the "add_subplot" command
-    'frame_on', 'label', 'title', 'visible', 'xlabel', 'xlim', 'xscale',
-    'ylabel', 'ylim', 'yscale']
+    'frame_on', 'label', 'title', 'visible', 'xlabel', 'xscale', 'ylabel', 'yscale']
 
 
 def get_add_subplot_pos_args(ax):
@@ -37,3 +36,12 @@ def generate_add_subplot_command(ax):
         convert_args_to_string(get_add_subplot_pos_args(ax),
                                get_add_subplot_kwargs(ax)))
     return command
+
+
+def generate_axis_limit_commands(ax):
+    """Generate commands to set the axes' limits"""
+    commands = []
+    for axis in ['x', 'y']:
+        lims = getattr(ax, "get_{}lim".format(axis))()
+        commands.append("set_{}lim({})".format(axis, convert_value_to_arg_string(lims)))
+    return commands
