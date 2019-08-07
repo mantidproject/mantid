@@ -361,8 +361,8 @@ The following tests document that saveInstrument will find and write detectors
 and other Instrument components to file in Nexus format, and where there exists
 transformations in ComponentInfo and DetectorInfo, SaveInstrument will generate
 'NXtransformations' groups to contain the corresponding component
-rotations/translations, and pixel offsets in any 'NXdetector' or 'NXmonitor'
-found in the Instrument cache.
+rotations/translations, and pixel offsets in any 'NXdetector' found in the
+Instrument cache.
 
 ====================================================================
 */
@@ -432,14 +432,14 @@ found in the Instrument cache.
   test_rotation_of_NXmonitor_written_to_file_is_same_as_in_component_info() {
 
     /*
-        test scenario: pass into saveInstrument an instrument with manually set
-        non-zero rotation in a monitor. Expectation: test utilty will search
-       file for orientaion dataset, read the magnitude of the angle, and the
-       axis vector. The output quaternion from file will be compared to the
-       input quaternion manually set. Asserts that they are approximately equal,
-        indicating that saveinstrument has correctly written the orientation
-       data.
-        */
+    test scenario: pass into saveInstrument an instrument with manually set
+    non-zero rotation in a monitor. Expectation: test utilty will search
+    file for orientaion dataset, read the magnitude of the angle, and the
+    axis vector. The output quaternion from file will be compared to the
+    input quaternion manually set. Asserts that they are approximately equal,
+    indicating that saveinstrument has correctly written the orientation
+    data.
+    */
 
     // RAII file resource for test file destination
     ScopedFileHandle fileResource(
