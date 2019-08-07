@@ -79,7 +79,6 @@ class HomePlotWidgetModel(object):
         except RuntimeError:
             return
         if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
-            print(workspaces, "moo", workspace_list)
 
             self.plot_figure.clear()
             self.plotted_workspaces = []
@@ -100,7 +99,6 @@ class HomePlotWidgetModel(object):
             axis.set_xlim(xlim)
             axis.set_ylim(ylim)
         else:
-            print(workspaces, "moo")
             self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, plot_kwargs={'distribution': True,
                                     'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
