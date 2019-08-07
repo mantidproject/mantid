@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 /*
- * NexusGeometrySave
+ * NexusGeometrySave:
+ * Saves geometry and metadata from memory
+ * to disk in Nexus file format for Instrument 2.0.
  *
- * Save Beamline NXInstrument from Memory to disk
- * TODO DOCUMENTATION
- *@author Takudzwa Makoni, RAL (UKRI), ISIS
- *@date 22/07/2019
+ * @author Takudzwa Makoni, RAL (UKRI), ISIS
+ * @date 07/08/2019
  */
 
 #include "MantidGeometry/Objects/CSGObject.h"    // need?
@@ -174,7 +174,6 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
 TODO: DOCUMENTATION
 */
-
 inline void writeCylinder(H5::Group &grp, const Geometry::IObject &cylinder) {
 
   const auto geometry = cylinder.shapeInfo();
@@ -194,6 +193,14 @@ inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
 
 /*
  * Function: writeXYZPixeloffset. TODO: DOCUMENTATION
+ * Function: writeXYZPixeloffset
+ * write the x, y, and z offset of the pixels from the parent detector bank as
+ * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or z
+ * are approximately zero, skips writing that dataset to file.
+ * @param grp : HDF5 parent group
+ * @param compInfo : Component Info Instrument cache
+ * @param idx : index of bank in cache.
+
  */
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
@@ -272,12 +279,16 @@ void writeNXDetectorNumber(H5::Group &grp,
   H5::DataSet detectorNumber;
 
   std::vector<int> bankDetIDs; // IDs of detectors beloning to bank
-  std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx);
+  std::vector<size_t> bankDetectors =
+      compInfo.detectorsInSubtree(idx); // Indexes of children detectors in bank
   bankDetIDs.reserve(bankDetectors.size());
 
-  for (size_t &index : bankDetectors) {
-    bankDetIDs.push_back(detectorIDs[index]);
-  }
+  // write the ID for each child detector to std::vector to be written to
+  // dataset
+  std::for_each(bankDetectors.begin(), bankDetectors.end(),
+                [&bankDetIDs, &detectorIDs](const size_t index) {
+                  bankDetIDs.push_back(detectorIDs[index]);
+                });
 
   const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
 
@@ -293,39 +304,27 @@ void writeNXDetectorNumber(H5::Group &grp,
 }
 
 /*
- * Function: writeNXDetectorNumber
+ * Function: writeNXMonitorNumber
  * For use with NXmonitor group. write 'detector_id's of an NXmonitor, which
- * is a specific type of NXdetector, to its group.
+ * is a specific type of pixel, to its group.
  *
  * @param grp : NXmonitor group (HDF group)
  * @param compInfo : componentInfo object.
- * @param monitorIDs : std::vector<int> container of all monitorIDs to be
+ * @param monitorID : monitor ID to be
  * stored into dataset 'detector_id' (or 'detector_number'. naming convention
  * inconsistency?).
- * @idx : size_t index of monitor in compInfo.
  */
 void writeNXMonitorNumber(H5::Group &grp,
                           const Geometry::ComponentInfo &compInfo,
-                          const std::vector<int> &monitorIDs,
-                          const size_t idx) {
+                          const int monitorID) {
 
   // these DataSets are duplicates of each other. written to the NXmonitor
   // group to handle the naming inconsistency. probably temporary.
   H5::DataSet detectorNumber, detector_id;
 
-  std::vector<int> monitorDetIDs;
-  std::vector<size_t> bankDetectors = compInfo.detectorsInSubtree(idx);
-  monitorDetIDs.reserve(bankDetectors.size());
-
-  for (size_t &index : bankDetectors) {
-    monitorDetIDs.push_back(monitorIDs[index]);
-  }
-
-  const auto nMonitorsInBank = static_cast<hsize_t>(monitorDetIDs.size());
-
   int rank = 1;
   hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = nMonitorsInBank;
+  dims[0] = static_cast<hsize_t>(1);
 
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
@@ -333,10 +332,10 @@ void writeNXMonitorNumber(H5::Group &grp,
   // handle the naming inconsistency. probably temporary.
   detectorNumber =
       grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(monitorDetIDs.data(), H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(&monitorID, H5::PredType::NATIVE_INT, space);
 
   detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
-  detector_id.write(monitorDetIDs.data(), H5::PredType::NATIVE_INT, space);
+  detector_id.write(&monitorID, H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -364,26 +363,30 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
   H5::StrType strSize;
 
-  int drank = 1;
-  hsize_t ddims[static_cast<hsize_t>(1)];
-  ddims[0] = static_cast<hsize_t>(1);
+  int drank = 1;                          // rank of dataset
+  hsize_t ddims[static_cast<hsize_t>(1)]; // dimensions of dataset
+  ddims[0] = static_cast<hsize_t>(1);     // datapoints in dataset dimension 0
 
-  norm = position.norm();
-  auto unitVec = position.normalized();
-  std::vector<double> stdNormPos = toStdVector(unitVec);
+  norm = position.norm();               // norm od the position vector
+  auto unitVec = position.normalized(); // unit vector of the position vector
+  std::vector<double> stdNormPos =
+      toStdVector(unitVec); // convert to std::vector
 
-  dspace = H5Screate_simple(drank, ddims, nullptr);
-  location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE, dspace);
-  location.write(&norm, H5::PredType::NATIVE_DOUBLE, dspace);
+  dspace = H5Screate_simple(drank, ddims, nullptr); // dataspace for dataset
+  location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE,
+                               dspace); // dataset location
+  location.write(&norm, H5::PredType::NATIVE_DOUBLE,
+                 dspace); // write norm to location
 
-  int arank = 1;
-  hsize_t adims[static_cast<hsize_t>(3)];
-  adims[0] = 3;
+  int arank = 1;                          // rank of attribute
+  hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
+  adims[0] = 3;                           // datapoints in attribute dimension 0
 
-  aspace = H5Screate_simple(arank, adims, nullptr);
-  vector =
-      location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE, aspace);
-  vector.write(H5::PredType::NATIVE_DOUBLE, stdNormPos.data());
+  aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
+  vector = location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
+                                    aspace); // attribute vector
+  vector.write(H5::PredType::NATIVE_DOUBLE,
+               stdNormPos.data()); // write unit vector to vector
 
   // units attribute
   strSize = strTypeOfSize(METRES);
@@ -434,27 +437,30 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
 
   H5::StrType strSize;
 
-  int rank = 1;
-  hsize_t ddims[static_cast<hsize_t>(1)];
-  ddims[0] = static_cast<hsize_t>(1);
+  int drank = 1;                          // rank of dataset
+  hsize_t ddims[static_cast<hsize_t>(1)]; // dimensions of dataset
+  ddims[0] = static_cast<hsize_t>(1);     // datapoints in dataset dimension 0
 
-  angle = std::acos(rotation.w()) * (360.0 / PI);
-  Eigen::Vector3d axisOfRotation = rotation.vec().normalized();
-  std::vector<double> stdNormAxis = toStdVector(axisOfRotation);
+  angle = std::acos(rotation.w()) * (360.0 / PI); // angle magnitude
+  Eigen::Vector3d axisOfRotation = rotation.vec().normalized(); // angle axis
+  std::vector<double> stdNormAxis =
+      toStdVector(axisOfRotation); // convert to std::vector
 
-  dspace = H5Screate_simple(rank, ddims, nullptr);
-  orientation =
-      grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE, dspace);
-  orientation.write(&angle, H5::PredType::NATIVE_DOUBLE, dspace);
+  dspace = H5Screate_simple(drank, ddims, nullptr); // dataspace for dataset
+  orientation = grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE,
+                                  dspace); // dataset orientation
+  orientation.write(&angle, H5::PredType::NATIVE_DOUBLE,
+                    dspace); // write angle magnitude to orientation
 
-  int arank = 1;
-  hsize_t adims[static_cast<hsize_t>(3)];
-  adims[0] = static_cast<hsize_t>(3);
+  int arank = 1;                          // rank of attribute
+  hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
+  adims[0] = static_cast<hsize_t>(3);     // datapoints in attibute dimension 0
 
-  aspace = H5Screate_simple(arank, adims, nullptr);
-  vector =
-      orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE, aspace);
-  vector.write(H5::PredType::NATIVE_DOUBLE, stdNormAxis.data());
+  aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
+  vector = orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
+                                       aspace); // attribute vector
+  vector.write(H5::PredType::NATIVE_DOUBLE,
+               stdNormAxis.data()); // write angle axis to vector
 
   // units attribute
   strSize = strTypeOfSize(DEGREES);
@@ -556,11 +562,11 @@ void saveNXSource(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first NXdetector dependency in the chain. first
-    // check translation in NXdetector is non-zero, and set dependency to
+    // self, ".", is the default first NXsource dependency in the chain. first
+    // check translation in NXsource is non-zero, and set dependency to
     // location if true and write location. Then check if orientation in
-    // NXdetector is non-zero, replace dependency with orientation if true. If
-    // neither orientation nor location are non-zero, NXdetector is self
+    // NXsource is non-zero, replace dependency with orientation if true. If
+    // neither orientation nor location are non-zero, NXsource is self
     // dependent.
     if (!locationIsOrigin) {
       dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
@@ -584,8 +590,8 @@ void saveNXSource(const H5::Group &parentGroup,
 }
 
 /*
- * Function: saveNXMonitors
- * For NXinstrument parent (component info root). Produces a set of NXmonitor
+ * Function: saveNXMonitor
+ * For NXinstrument parent (component info root). Produces an NXmonitor
  * groups from Component info, and saves it in the parent
  * group, along with the Nexus compliant datasets, and metadata stored in
  * attributes to the new group.
@@ -595,8 +601,8 @@ void saveNXSource(const H5::Group &parentGroup,
  * @param detInfo : DetectorInfo object.
  */
 void saveNXMonitor(const H5::Group &parentGroup,
-                   const Geometry::ComponentInfo &compInfo,
-                   const std::vector<int> &detIds, const size_t index) {
+                   const Geometry::ComponentInfo &compInfo, const int monitorId,
+                   const size_t index) {
 
   // if the component is unnamed sets the name as unspecified with the
   // location of the component in the cache
@@ -623,11 +629,11 @@ void saveNXMonitor(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first NXdetector dependency in the chain. first
-    // check translation in NXdetector is non-zero, and set dependency to
+    // self, ".", is the default first NXmonitor dependency in the chain. first
+    // check translation in NXmonitor is non-zero, and set dependency to
     // location if true and write location. Then check if orientation in
-    // NXdetector is non-zero, replace dependency with orientation if true. If
-    // neither orientation nor location are non-zero, NXdetector is self
+    // NXmonitor is non-zero, replace dependency with orientation if true. If
+    // neither orientation nor location are non-zero, NXmonitor is self
     // dependent.
     if (!locationIsOrigin) {
       dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
@@ -658,7 +664,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeNXMonitorNumber(childGroup, compInfo, detIds, index);
+  writeNXMonitorNumber(childGroup, compInfo, monitorId);
 
   writeStrDataset(childGroup, BANK_NAME, monitorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
@@ -846,7 +852,6 @@ void saveInstrument(
   NexusGeometrySave::saveNXSample(rootGroup, compInfo);
 
   // save NXdetectors
-
   for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
       if (reporter != nullptr)
@@ -860,7 +865,8 @@ void saveInstrument(
     if (detInfo.isMonitor(index)) {
       if (reporter != nullptr)
         reporter->report();
-      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
+      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds[index],
+                                       index);
     }
   }
 

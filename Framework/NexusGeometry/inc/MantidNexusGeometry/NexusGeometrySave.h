@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 /*
- * NexusGeometrySave
- * TODO DOCUMENTATION
- * Save Beamline NXInstrument from Memory to disk
+ * NexusGeometrySave:
+ * Saves geometry and metadata from memory
+ * to disk in Nexus file format for Instrument 2.0.
  *
- *@author Takudzwa Makoni, ISIS RAL
- *@date 22/07/2019
+ * @author Takudzwa Makoni, RAL (UKRI), ISIS
+ * @date 07/08/2019
  */
 
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
