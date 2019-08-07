@@ -59,6 +59,10 @@ from mantid.plots import plotfunctions3D
 from mantid.plots.scales import PowerScale, SquareScale
 
 
+BIN_AXIS = 0
+SPEC_AXIS = 1
+
+
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
@@ -81,7 +85,7 @@ class _WorkspaceArtists(object):
 
     """
     def __init__(self, artists, data_replace_cb, is_normalized, workspace_name=None,
-                 spec_num=None):
+                 spec_num=None, is_spec=True):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
@@ -89,20 +93,25 @@ class _WorkspaceArtists(object):
         :param is_normalized: bool specifying whether the line being plotted is a distribution
         :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
+        :param is_spec: True if spec_num represents a spectrum rather than a bin
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
         self.workspace_name = workspace_name
         self.spec_num = spec_num
+        self.is_spec = is_spec
         self.workspace_index = self._get_workspace_index()
         self.is_normalized = is_normalized
 
     def _get_workspace_index(self):
-        """Get the workspace index of the workspace artist"""
+        """Get the workspace index (spectrum or bin index) of the workspace artist"""
         if self.spec_num is None or self.workspace_name is None:
             return None
         try:
-            return ads.retrieve(self.workspace_name).getIndexFromSpectrumNumber(self.spec_num)
+            if self.is_spec:
+                return ads.retrieve(self.workspace_name).getIndexFromSpectrumNumber(self.spec_num)
+            else:
+                return self.spec_num
         except KeyError:  # Return None if the workspace is not in the ADS
             return None
 
@@ -259,16 +268,26 @@ class MantidAxes(Axes):
         return mantid_axes
 
     @staticmethod
+    def is_axis_of_type(axis_type, kwargs):
+        if kwargs.get('axis', None) is not None:
+            return kwargs.get('axis', None) == axis_type
+        return axis_type == SPEC_AXIS
+
+    @staticmethod
     def get_spec_num_from_wksp_index(workspace, wksp_index):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 
     @staticmethod
-    def get_spec_number(workspace, kwargs):
+    def get_spec_number_or_bin(workspace, kwargs):
         if kwargs.get('specNum', None) is not None:
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
-            return MantidAxes.get_spec_num_from_wksp_index(workspace,
-                                                           kwargs['wkspIndex'])
+            # If wanting to plot a bin
+            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+                return kwargs['wkspIndex']
+            # If wanting to plot a spectrum
+            else:
+                return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
             return None
 
@@ -289,7 +308,7 @@ class MantidAxes(Axes):
                         return ws_artists.is_normalized
 
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
-                               spec_num=None, is_normalized=None):
+                               spec_num=None, is_normalized=None, is_spec=True):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -301,6 +320,7 @@ class MantidAxes(Axes):
         :param is_normalized: bool. The line being plotted is normalized by bin width
             This can be from either a distribution workspace or a workspace being
             plotted as a distribution
+        :param is_spec: bool. True if spec_num represents a spectrum, and False if it is a bin index
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -312,7 +332,7 @@ class MantidAxes(Axes):
 
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
                                                  is_normalized, name,
-                                                 spec_num))
+                                                 spec_num, is_spec))
             self.check_axes_distribution_consistency()
         return artists
 
@@ -582,7 +602,7 @@ class MantidAxes(Axes):
                 return artists
 
             workspace = args[0]
-            spec_num = self.get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
@@ -596,7 +616,7 @@ class MantidAxes(Axes):
 
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
-                _data_update, spec_num, is_normalized)
+                _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
 
             self.set_autoscaley_on(True)
             return artist
@@ -699,7 +719,7 @@ class MantidAxes(Axes):
                 return container_new
 
             workspace = args[0]
-            spec_num = self.get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
                                                                **kwargs)
 
@@ -708,7 +728,7 @@ class MantidAxes(Axes):
 
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
-                _data_update, spec_num, is_normalized)
+                _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
 
             self.set_autoscaley_on(True)
             return artist

@@ -176,7 +176,8 @@ bool DataSelector::isValid() {
     if (isValid && m_autoLoad) {
       auto const wsName = getCurrentDataName().toStdString();
 
-      if (!wsName.empty() && !doesExistInADS(wsName)) {
+      isValid = !wsName.empty();
+      if (isValid && !doesExistInADS(wsName)) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
         auto const filepath =

@@ -26,6 +26,20 @@ CorrectionsTab::CorrectionsTab(QWidget *parent)
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
+void CorrectionsTab::setOutputPlotOptionsPresenter(
+    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+  m_plotOptionsPresenter = std::move(presenter);
+}
+
+void CorrectionsTab::setOutputPlotOptionsWorkspaces(
+    std::vector<std::string> const &outputWorkspaces) {
+  m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
+}
+
+void CorrectionsTab::clearOutputPlotOptionsWorkspaces() {
+  m_plotOptionsPresenter->clearWorkspaces();
+}
+
 /**
  * Loads the tab's settings.
  *
@@ -44,15 +58,6 @@ void CorrectionsTab::loadTabSettings(const QSettings &settings) {
  */
 void CorrectionsTab::filterInputData(bool filter) {
   setFileExtensionsByName(filter);
-}
-
-/**
- * Allows the user to turn the plotting of error bars off and on
- *
- * @param errorBars :: true if you want output plots to have error bars
- */
-void CorrectionsTab::setPlotErrorBars(bool errorBars) {
-  IndirectTab::setPlotErrorBars(errorBars);
 }
 
 /**
