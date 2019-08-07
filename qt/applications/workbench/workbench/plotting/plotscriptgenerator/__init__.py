@@ -42,7 +42,7 @@ def generate_script(fig, exclude_headers=False):
     """
     plot_commands = []
     for ax in fig.get_axes():
-        if not isinstance(ax, MantidAxes):
+        if not isinstance(ax, MantidAxes) or not curve_in_ax(ax):
             continue
         plot_commands.append("{} = {}.{}"
                              "".format(AXES_VARIABLE, FIG_VARIABLE,

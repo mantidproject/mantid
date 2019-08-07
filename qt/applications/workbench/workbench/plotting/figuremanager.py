@@ -29,6 +29,7 @@ from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
@@ -260,7 +261,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.canvas.draw_idle()
         if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
             self._set_fit_enabled(False)
-        if not any(isinstance(ax, MantidAxes) for ax in self.canvas.figure.get_axes()):
+
+        # For plot-to-script button to show, we must have a MantidAxes with lines in it
+        if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
+                   for ax in self.canvas.figure.get_axes()):
             self._set_generate_plot_script_enabled(False)
 
     def destroy(self, *args):
