@@ -265,6 +265,9 @@ void ProjectSaveView::save(bool checked) {
   auto filePath = m_ui.projectPath->text();
   auto compress = filePath.endsWith(".gz");
 
+  m_ui.btnSave->setEnabled(false);
+  m_ui.btnSave->setText("Saving");
+
   m_serialiser.save(filePath, wsNames, windowNames, interfaces, compress);
   emit projectSaved();
 
