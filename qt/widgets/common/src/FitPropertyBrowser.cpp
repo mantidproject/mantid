@@ -1077,13 +1077,19 @@ std::string FitPropertyBrowser::defaultFunctionType() const {
   return m_defaultFunction;
 }
 
-// Get the default function name
+// Set the default function name
 void FitPropertyBrowser::setDefaultFunctionType(const std::string &fnType) {
   m_defaultFunction = fnType;
 }
 
 /// Get the default peak type
-std::string FitPropertyBrowser::defaultPeakType() const {
+std::string FitPropertyBrowser::defaultPeakType() {
+  // If the default peak is not in registered peaks, default to Gaussian
+  if (m_registeredPeaks.indexOf(QString::fromStdString(m_defaultPeak)) == -1) {
+    g_log.warning("Could not find peak function: '" + m_defaultPeak +
+                  "'. Defaulting to Gaussian.");
+    setDefaultPeakType("Gaussian");
+  }
   return m_defaultPeak;
 }
 /// Set the default peak type
