@@ -265,13 +265,11 @@ void ProjectSaveView::save(bool checked) {
   auto filePath = m_ui.projectPath->text();
   auto compress = filePath.endsWith(".gz");
 
-  m_ui.btnSave->setEnabled(false);
-  m_ui.btnSave->setText("Saving");
+  close();
 
   m_serialiser.save(filePath, wsNames, windowNames, interfaces, compress);
   emit projectSaved();
 
-  close();
   // Set the result code after calling close() because
   // close() sets it to QDialog::Rejected
   setResult(QDialog::Accepted);
