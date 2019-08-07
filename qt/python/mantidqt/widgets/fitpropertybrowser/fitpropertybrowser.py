@@ -22,6 +22,22 @@ from .interactive_tool import FitInteractiveTool
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
 
+def get_spectra_bounds(spectra):
+    """
+    Gets the lower and upper bounds to use for the range marker tool.
+    @param spectra: A dictionary with workspace names as keys and list of spectrum numbers as values.
+    """
+    for workspace_name, spec_list in spectra.items():
+        if AnalysisDataService.doesExist(workspace_name):
+            workspace = AnalysisDataService.retrieve(workspace_name)
+            try:
+                x_data = workspace.dataX(spec_list[0])
+                return [x_data[0], x_data[-1]]
+            except RuntimeError or IndexError:
+                return None
+    return None
+
+
 class FitPropertyBrowserBase(BaseBrowser):
 
     def __init__(self, parent=None):
@@ -87,22 +103,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 pass
         return allowed_spectra
 
-    @static_method
-    def _get_spectra_bounds(self, spectra):
-        """
-        Gets the lower and upper bounds to use for the range marker tool.
-        @param spectra: A dictionary with workspace names as keys and list of spectrum numbers as values.
-        """
-        for workspace_name, spec_list in spectra.items():
-            if AnalysisDataService.doesExist(workspace_name):
-                workspace = AnalysisDataService.retrieve(workspace_name)
-                try:
-                    x_data = workspace.dataX(spec_list[0])
-                    return [x_data[0], x_data[-1]]
-                except RuntimeError or IndexError:
-                    return None
-        return None
-
     def _get_selected_workspace_artist(self):
         ws_artists_list = self.get_axes().tracked_workspaces[self.workspaceName()]
         for ws_artists in ws_artists_list:
@@ -137,11 +137,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                            "fit to.")
             return
 
-        spectra_bounds = self._get_spectra_bounds(allowed_spectra)
-
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
                                        current_peak_type=self.defaultPeakType(),
-                                       fit_bounds=spectra_bounds)
+                                       fit_bounds=get_spectra_bounds(allowed_spectra))
         self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
