@@ -169,8 +169,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             list_of_output_workspaces_to_plot = []
 
         for workspace_name in list_of_output_workspaces_to_plot:
-            self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Fit')
-            self._model.add_workspace_to_plot(workspace_name, 3, workspace_name + ': Diff')
+            self._model.add_workspace_to_plot(workspace_name, 1, workspace_name + ': Fit')
+            self._model.add_workspace_to_plot(workspace_name, 2, workspace_name + ': Diff')
 
         self._model.force_redraw()
 
