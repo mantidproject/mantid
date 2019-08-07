@@ -71,12 +71,12 @@ void addSingleValue(const Json::Value &val, std::vector<float> &fillArray) {
   fillArray.push_back(val.asFloat());
 }
 
-void addSingleValue(const Json::Value &val, std::vector<int32_t> &fillArray) {
-  fillArray.push_back(val.asInt());
+void addSingleValue(const Json::Value &val, std::vector<uint32_t> &fillArray) {
+  fillArray.push_back(val.asUInt());
 }
 
-void addSingleValue(const Json::Value &val, std::vector<int64_t> &fillArray) {
-  fillArray.push_back(val.asInt64());
+void addSingleValue(const Json::Value &val, std::vector<uint64_t> &fillArray) {
+  fillArray.push_back(val.asUInt64());
 }
 
 /// Recursively fills JSON array data trees which are usually arranges as arrays
@@ -140,10 +140,10 @@ void extractDatasetValues(const Json::Value &datasetParent,
 }
 
 void extractShapeInformation(const Json::Value &shape,
-                             std::vector<int32_t> &cylinders,
-                             std::vector<int32_t> &faces,
+                             std::vector<uint32_t> &cylinders,
+                             std::vector<uint32_t> &faces,
                              std::vector<Eigen::Vector3d> &vertices,
-                             std::vector<int32_t> &windingOrder,
+                             std::vector<uint32_t> &windingOrder,
                              bool &isOffGeometry) {
   auto attributes = shape[ATTRIBUTES][0];
   auto name = shape["name"].asString();
@@ -154,11 +154,11 @@ void extractShapeInformation(const Json::Value &shape,
   if (attributes[VALUES] == NX_OFF) {
     for (const auto &child : children) {
       if (child[NAME] == "faces")
-        extractDatasetValues<int32_t>(child, faces);
+        extractDatasetValues<uint32_t>(child, faces);
       else if (child[NAME] == "vertices")
         extractDatasetValues<float>(child, verts);
       else if (child[NAME] == "winding_order")
-        extractDatasetValues<int32_t>(child, windingOrder);
+        extractDatasetValues<uint32_t>(child, windingOrder);
     }
 
     if (windingOrder.size() != verts.size() / 3)
@@ -171,7 +171,7 @@ void extractShapeInformation(const Json::Value &shape,
   if (attributes[VALUES] == NX_CYLINDER) {
     for (const auto &child : children) {
       if (child[NAME] == "cylinders")
-        extractDatasetValues<int32_t>(child, cylinders);
+        extractDatasetValues<uint32_t>(child, cylinders);
       else if (child[NAME] == "vertices")
         extractDatasetValues<float>(child, verts);
     }
@@ -191,9 +191,9 @@ void extractShapeInformation(const Json::Value &shape,
 
 bool validateShapeInformation(const bool &isOffGeometry,
                               const std::vector<Eigen::Vector3d> &vertices,
-                              const std::vector<int32_t> &cylinders,
-                              const std::vector<int32_t> &faces,
-                              const std::vector<int32_t> &windingOrder) {
+                              const std::vector<uint32_t> &cylinders,
+                              const std::vector<uint32_t> &faces,
+                              const std::vector<uint32_t> &windingOrder) {
   if ((isOffGeometry &&
        (vertices.empty() || faces.empty() || windingOrder.empty())) ||
       (!isOffGeometry && (vertices.empty() || cylinders.empty())))
@@ -280,6 +280,17 @@ Json::Value getRoot(const std::string &jsonGeometry) {
   return root;
 }
 
+std::string extractInstrumentName(const Json::Value &instrument) {
+  std::string name;
+  const auto &children = instrument[CHILDREN];
+  for (const auto &child : children) {
+    if (child[NAME] == NAME)
+      name = child["values"].asString();
+  }
+
+  return name;
+}
+
 } // namespace
 
 namespace Mantid {
@@ -331,6 +342,8 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   auto instrument = get(entryChildren, NX_INSTRUMENT);
   if (instrument.isNull())
     throw std::invalid_argument("No instrument found in json.");
+
+  m_name = extractInstrumentName(instrument);
 
   m_jsonDetectorBanks = getAllDetectors(instrument);
   if (m_jsonDetectorBanks.empty())
@@ -393,21 +406,21 @@ void JSONGeometryParser::extractTransformations(
  */
 void JSONGeometryParser::extractDetectorContent() {
   for (const auto &detector : m_jsonDetectorBanks) {
-    std::vector<int64_t> detIDs;
+    std::vector<uint64_t> detIDs;
     std::vector<double> x;
     std::vector<double> y;
     std::vector<double> z;
-    std::vector<int> cylinders;
-    std::vector<int> faces;
+    std::vector<uint32_t> cylinders;
+    std::vector<uint32_t> faces;
     std::vector<Eigen::Vector3d> vertices;
-    std::vector<int> windingOrder;
+    std::vector<uint32_t> windingOrder;
     bool isOffGeometry = false;
 
     auto children = detector[CHILDREN];
 
     for (const auto &child : children) {
       if (child[NAME] == DETECTOR_IDS)
-        extractDatasetValues<int64_t>(child, detIDs);
+        extractDatasetValues<uint64_t>(child, detIDs);
       else if (child[NAME] == X_PIXEL_OFFSET)
         extractDatasetValues<double>(child, x);
       else if (child[NAME] == Y_PIXEL_OFFSET)
@@ -468,7 +481,7 @@ void JSONGeometryParser::extractMonitorContent() {
       if (child[NAME] == NAME)
         mon.name = val.asString();
       else if (child[NAME] == DETECTOR_ID)
-        mon.detectorID = val.asInt64();
+        mon.detectorID = val.asUInt64();
       else if (child[NAME] == "events")
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")
@@ -512,7 +525,7 @@ void JSONGeometryParser::extractChopperContent() {
       else if (child[NAME] == "radius")
         chop.radius = val.asDouble();
       else if (child[NAME] == "slits")
-        chop.slits = val.asInt64();
+        chop.slits = val.asUInt64();
       else if (child[NAME] == "top_dead_center")
         extractChopperTDC(child, chop);
     }
@@ -536,8 +549,7 @@ void JSONGeometryParser::parse(const std::string &jsonGeometry) {
   extractDetectorContent();
 }
 
-inline double
-JSONGeometryParser::degreesToRadians(const double degrees) noexcept {
+double JSONGeometryParser::degreesToRadians(const double degrees) noexcept {
   return degrees * PI / DEGREES_IN_SEMICIRCLE;
 }
 } // namespace NexusGeometry

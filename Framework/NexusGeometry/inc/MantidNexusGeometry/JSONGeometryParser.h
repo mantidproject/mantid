@@ -22,7 +22,7 @@ struct Chopper {
   std::vector<double> slitEdges;
   double radius;
   double slitHeight;
-  int64_t slits;
+  uint64_t slits;
   std::string tdcTopic;
   std::string tdcSource;
   std::string tdcWriterModule;
@@ -31,7 +31,7 @@ struct Chopper {
 struct Monitor {
   std::string componentName;
   std::string name;
-  int64_t detectorID;
+  uint64_t detectorID;
   // monitor stream
   std::string eventStreamTopic;
   std::string eventStreamSource;
@@ -45,9 +45,9 @@ struct Monitor {
   Eigen::Quaterniond orientation;
   // monitor shape
   std::vector<Eigen::Vector3d> vertices;
-  std::vector<int32_t> cylinders;
-  std::vector<int32_t> faces;
-  std::vector<int32_t> windingOrder;
+  std::vector<uint32_t> cylinders;
+  std::vector<uint32_t> faces;
+  std::vector<uint32_t> windingOrder;
   bool isOffGeometry;
 };
 
@@ -62,8 +62,9 @@ public:
   JSONGeometryParser() = delete;
   JSONGeometryParser(const std::string &json);
   ~JSONGeometryParser() = default;
+  const std::string &name() noexcept { return m_name; }
   size_t numberOfBanks() noexcept { return m_jsonDetectorBanks.size(); }
-  const std::vector<int64_t> &detectorIDs(const size_t index) const noexcept {
+  const std::vector<uint64_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
   }
 
@@ -102,19 +103,19 @@ public:
     return m_pixelShapeVertices[index];
   }
 
-  const std::vector<int32_t> &faces(size_t index) const noexcept {
+  const std::vector<uint32_t> &faces(size_t index) const noexcept {
     return m_pixelShapeFaces[index];
   }
 
-  const std::vector<int32_t> &windingOrder(size_t index) const noexcept {
+  const std::vector<uint32_t> &windingOrder(size_t index) const noexcept {
     return m_pixelShapeWindingOrder[index];
   }
 
-  const std::vector<int32_t> &cylinders(size_t index) const noexcept {
+  const std::vector<uint32_t> &cylinders(size_t index) const noexcept {
     return m_pixelShapeCylinders[index];
   }
 
-  inline double degreesToRadians(const double degrees) noexcept;
+  double degreesToRadians(const double degrees) noexcept;
 
 private:
   /// Parse geometry provided with a string representing geometry.
@@ -132,6 +133,7 @@ private:
                               Eigen::Quaterniond &orientation);
 
 private:
+  std::string m_name;
   Json::Value m_root;
   Json::Value m_instrument;
   Json::Value m_sample;
@@ -144,15 +146,15 @@ private:
   // detector information
   std::vector<Json::Value> m_jsonDetectorBanks;
   std::vector<std::string> m_detectorBankNames;
-  std::vector<std::vector<int64_t>> m_detIDs;
+  std::vector<std::vector<uint64_t>> m_detIDs;
   std::vector<std::vector<double>> m_x;
   std::vector<std::vector<double>> m_y;
   std::vector<std::vector<double>> m_z;
   // pixel shapes
-  std::vector<std::vector<int32_t>> m_pixelShapeFaces;
-  std::vector<std::vector<int32_t>> m_pixelShapeCylinders;
+  std::vector<std::vector<uint32_t>> m_pixelShapeFaces;
+  std::vector<std::vector<uint32_t>> m_pixelShapeCylinders;
   std::vector<std::vector<Eigen::Vector3d>> m_pixelShapeVertices;
-  std::vector<std::vector<int32_t>> m_pixelShapeWindingOrder;
+  std::vector<std::vector<uint32_t>> m_pixelShapeWindingOrder;
   std::vector<bool> m_isOffGeometry;
 
   std::vector<Eigen::Vector3d> m_translations;

@@ -27,6 +27,7 @@ void initialiseRoot(Json::Value &root, const std::string &name);
 Json::Value &addNXEntry(Json::Value &root, const std::string &name);
 Json::Value &addNXSample(Json::Value &entry, const std::string &name);
 Json::Value &addNXInstrument(Json::Value &entry, const std::string &name);
+void addNXInstrumentName(Json::Value &instrument, const std::string &name);
 Json::Value &addNXMonitor(Json::Value &entry, const std::string &name);
 void addNXMonitorName(Json::Value &monitor, const std::string &name);
 void addNXMonitorDetectorID(Json::Value &monitor, const int64_t detectorID);

@@ -144,11 +144,12 @@ public:
   void test_load_full_instrument_simple_off_pixel_shape() {
     std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleOFF();
     JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<int64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -164,9 +165,9 @@ public:
                                                  {0.001, 0.001, 0},
                                                  {-0.001, 0.001, 0}};
     assertVectors(parser.vertices(0), testVerticesVec);
-    std::vector<int32_t> testFacesVec{0};
+    std::vector<uint32_t> testFacesVec{0};
     TS_ASSERT_EQUALS(testFacesVec, parser.faces(0));
-    std::vector<int32_t> testWindingOrderVec{0, 1, 2, 3};
+    std::vector<uint32_t> testWindingOrderVec{0, 1, 2, 3};
     TS_ASSERT_EQUALS(testWindingOrderVec, parser.windingOrder(0));
     const auto &cylinders = parser.cylinders(0);
     TS_ASSERT(cylinders.empty());
@@ -176,11 +177,12 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleCylindrical();
     JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<int64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -194,7 +196,7 @@ public:
     std::vector<Eigen::Vector3d> testVerticesVec{
         {-0.001, 0, 0}, {0.001, 0.00405, 0}, {0.001, 0, 0}};
     assertVectors(parser.vertices(0), testVerticesVec);
-    std::vector<int32_t> testCylindersVec{0, 1, 2};
+    std::vector<uint32_t> testCylindersVec{0, 1, 2};
     TS_ASSERT_EQUALS(parser.cylinders(0), testCylindersVec);
     const auto &windingOrder = parser.windingOrder(0);
     TS_ASSERT(windingOrder.empty());
@@ -206,6 +208,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleWithChopper();
     JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     // validate choppers
     const auto &choppers = parser.choppers();
@@ -224,7 +227,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<int64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -238,7 +241,7 @@ public:
     std::vector<Eigen::Vector3d> testVerticesVec{
         {-0.001, 0, 0}, {0.001, 0.00405, 0}, {0.001, 0, 0}};
     assertVectors(parser.vertices(0), testVerticesVec);
-    std::vector<int32_t> testCylindersVec{0, 1, 2};
+    std::vector<uint32_t> testCylindersVec{0, 1, 2};
     TS_ASSERT_EQUALS(parser.cylinders(0), testCylindersVec);
     const auto &windingOrder = parser.windingOrder(0);
     TS_ASSERT(windingOrder.empty());
@@ -250,6 +253,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitorNoShape();
     JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     // validate monitors
     const auto &monitors = parser.monitors();
@@ -277,7 +281,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<int64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -291,7 +295,7 @@ public:
     std::vector<Eigen::Vector3d> testVerticesVec{
         {-0.001, 0, 0}, {0.001, 0.00405, 0}, {0.001, 0, 0}};
     assertVectors(parser.vertices(0), testVerticesVec);
-    std::vector<int32_t> testCylindersVec{0, 1, 2};
+    std::vector<uint32_t> testCylindersVec{0, 1, 2};
     TS_ASSERT_EQUALS(parser.cylinders(0), testCylindersVec);
     const auto &windingOrder = parser.windingOrder(0);
     TS_ASSERT(windingOrder.empty());
@@ -303,6 +307,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
     JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     // validate monitors
     const auto &monitors = parser.monitors();
@@ -331,7 +336,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<int64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -345,7 +350,7 @@ public:
     std::vector<Eigen::Vector3d> testVerticesVec{
         {-0.001, 0, 0}, {0.001, 0.00405, 0}, {0.001, 0, 0}};
     assertVectors(parser.vertices(0), testVerticesVec);
-    std::vector<int32_t> testCylindersVec{0, 1, 2};
+    std::vector<uint32_t> testCylindersVec{0, 1, 2};
     TS_ASSERT_EQUALS(parser.cylinders(0), testCylindersVec);
     const auto &windingOrder = parser.windingOrder(0);
     TS_ASSERT(windingOrder.empty());

@@ -74,12 +74,6 @@ Json::Value createNX(const std::string &name, const std::string &NXClass) {
   return nx;
 }
 
-Json::Value createEmptyBank(int bankNum) {
-  std::string bankName = "detector_" + std::to_string(bankNum);
-  Json::Value bank = createNX(bankName, "NXdetector");
-  return bank;
-}
-
 void appendToChildren(Json::Value &parent, const Json::Value &child) {
   Json::Value &children = parent["children"];
   children[children.size()] = child;
@@ -88,7 +82,7 @@ void appendToChildren(Json::Value &parent, const Json::Value &child) {
 void resizeValues(Json::Value &values, size_t size) {
   if (values.empty()) {
     values.resize(static_cast<Json::ArrayIndex>(size));
-    for (uint32_t i = 0; i < values.size(); ++i)
+    for (Json::ArrayIndex i = 0; i < values.size(); ++i)
       values[i].resize(0);
   } else {
     for (auto &val : values) {
@@ -108,8 +102,8 @@ void fillValues(Json::Value &values, const std::vector<T> &fillArray,
     for (auto &val : values)
       fillValues(val, fillArray, start, size);
   } else {
-    for (int i = 0; i < size; ++i) {
-      values[i] = fillArray[start + i];
+    for (size_t i = 0; i < size; ++i) {
+      values[static_cast<int>(i)] = fillArray[start + i];
     }
     start += size;
   }
@@ -197,6 +191,13 @@ Json::Value &addNXSample(Json::Value &entry, const std::string &name) {
 Json::Value &addNXInstrument(Json::Value &entry, const std::string &name) {
   return addNX(entry, name, "NXinstrument");
 }
+
+void addNXInstrumentName(Json::Value &instrument, const std::string &name) {
+  auto instrumentName = createEmptyDataset("name", "string");
+  instrumentName["values"] = name;
+  appendToChildren(instrument, instrumentName);
+}
+
 Json::Value &addNXMonitor(Json::Value &entry, const std::string &name) {
   return addNX(entry, name, "NXmonitor");
 }
@@ -724,6 +725,7 @@ std::string getFullJSONInstrumentSimpleOFF() {
   JSONInstrumentBuilder::addNXSample(entry, "sample");
   auto &instrument =
       JSONInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONInstrumentBuilder::addNXInstrumentName(instrument, "SimpleInstrument");
   auto &detectorBank =
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
@@ -757,6 +759,7 @@ std::string getFullJSONInstrumentSimpleCylindrical() {
   JSONInstrumentBuilder::addNXSample(entry, "sample");
   auto &instrument =
       JSONInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONInstrumentBuilder::addNXInstrumentName(instrument, "SimpleInstrument");
   auto &detectorBank =
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
@@ -789,6 +792,7 @@ std::string getFullJSONInstrumentSimpleWithChopper() {
   JSONInstrumentBuilder::addNXSample(entry, "sample");
   auto &instrument =
       JSONInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONInstrumentBuilder::addNXInstrumentName(instrument, "SimpleInstrument");
 
   auto &chopper = JSONInstrumentBuilder::addNXChopper(instrument, "chopper_1");
   JSONInstrumentBuilder::addNXChopperName(
@@ -832,6 +836,7 @@ std::string getFullJSONInstrumentSimpleWithMonitorNoShape() {
   JSONInstrumentBuilder::addNXSample(entry, "sample");
   auto &instrument =
       JSONInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONInstrumentBuilder::addNXInstrumentName(instrument, "SimpleInstrument");
 
   auto &monitor = JSONInstrumentBuilder::addNXMonitor(instrument, "monitor_1");
   JSONInstrumentBuilder::addNXMonitorName(monitor, "Helium-3 monitor");
@@ -882,6 +887,7 @@ std::string getFullJSONInstrumentSimpleWithMonitor() {
   JSONInstrumentBuilder::addNXSample(entry, "sample");
   auto &instrument =
       JSONInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONInstrumentBuilder::addNXInstrumentName(instrument, "SimpleInstrument");
 
   auto &monitor = JSONInstrumentBuilder::addNXMonitor(instrument, "monitor_1");
   JSONInstrumentBuilder::addNXMonitorName(monitor, "Helium-3 monitor");
@@ -937,6 +943,7 @@ std::string getFullJSONInstrumentSimpleWithZPixelOffset() {
   JSONInstrumentBuilder::addNXSample(entry, "sample");
   auto &instrument =
       JSONInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONInstrumentBuilder::addNXInstrumentName(instrument, "SimpleInstrument");
   auto &detectorBank =
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
