@@ -20,10 +20,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "NexusFileReader.h"
 
-#include "MantidKernel/ConfigService.h"              //TODO: DELETE LATER
-#include "MantidNexusGeometry/NexusGeometryParser.h" //TODO: DELETE LATER
-#include <Poco/Glob.h>                               //TODO: DELETE LATER
-
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -42,15 +38,6 @@ public:
 } // namespace
 
 //---------------------------------------------------------------------
-
-// TODO::DELETE LATER.
-class MockLogger : public Mantid::NexusGeometry::Logger {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(warning, void(const std::string &));
-  MOCK_METHOD1(error, void(const std::string &));
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 
@@ -1124,49 +1111,6 @@ found in the Instrument cache.
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath),
                      H5::GroupIException &)
   }
-
-  void
-  test_load_instrument_from_file_to_parser_and_resave_via_saveInstrument_produces_same_output_DELETE_LATER() {
-    /*
-        temporary test to chek NexusGeometrySave::saveInstrument output against
-       NexusGeometryParser::createInstrument output, by checking two files:
-
-       Test scenario:
-
-       Load example hdf5/nxs file into createInstrument => pass returned
-       Instrument back into saveInstrument => verify example file matches output
-       from saveInstrument.
-
-           Is the output file from saveInstrument valid by
-       Nexus standards? Is there anything missing/not written correctly? note:
-       exclude any shape/mesh features in file.
-
-     */
-
-    // test file to compare against
-    H5std_string nexusFilename = "unit_testing/SMALLFAKE_example_geometry.hdf5";
-    const auto fullPath = Mantid::Kernel::ConfigService::Instance().getFullPath(
-        nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
-
-    // load example file into createInstrument
-    std::unique_ptr<Logger> logger = std::make_unique<MockLogger>();
-    auto loadedInstrument =
-        NexusGeometryParser::createInstrument(fullPath, std::move(logger));
-    auto instr =
-        Mantid::Geometry::InstrumentVisitor::makeWrappers(*loadedInstrument);
-
-    // output from saveInstrument will be saved as below in temp directory
-    ScopedFileHandle fileResource(
-        "create_and_save_instrument_comparison_test.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    // Pass the loadedInstrument into saveInsrtument, which will save the data
-    // back to disk from memory. The output file will be saved in the temp
-    // directory. Add a breakpoint before end of scope to acess file resource
-    // before deletion.
-    NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
-  } // breakpoint here
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
