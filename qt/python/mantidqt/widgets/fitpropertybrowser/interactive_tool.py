@@ -28,7 +28,7 @@ class FitInteractiveTool(QObject):
 
     default_background = 'LinearBackground'
 
-    def __init__(self, canvas, toolbar_manager, current_peak_type):
+    def __init__(self, canvas, toolbar_manager, current_peak_type, fit_bounds=None):
         """
         Create an instance of FitInteractiveTool.
         :param canvas: A MPL canvas to draw on.
@@ -36,6 +36,7 @@ class FitInteractiveTool(QObject):
             the state of the plot toolbar. It is necessary to disable this
             tool's editing when zoom/pan is enabled by the user.
         :param current_peak_type: A name of a peak fit function to create by default.
+        :param fit_bounds: The limits of the fit.
         """
         super(FitInteractiveTool, self).__init__()
         self.canvas = canvas
@@ -47,8 +48,11 @@ class FitInteractiveTool(QObject):
         # The fitting range: [StartX, EndX]
         start_x = xlim[0] + dx
         end_x = xlim[1] - dx
+        if fit_bounds is None:
+            fit_bounds = [start_x, end_x]
         # The interactive range marker drawn on the canvas as vertical lines that represent the fitting range.
-        self.fit_range = RangeMarker(canvas, 'green', start_x, end_x, 'XMinMax', '--')
+        self.fit_range = RangeMarker(canvas, 'green', fit_bounds[0], fit_bounds[1], 'XMinMax', '--')
+        self.fit_range.set_range(start_x, end_x)
         self.fit_range.range_changed.connect(self.fit_range_changed)
 
         # A list of interactive peak markers
