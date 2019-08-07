@@ -125,7 +125,7 @@ The most important to this effect are:
           .format(peak_low2['centre'], peak_low2['error centre'],
                   peak_low2['height'], peak_low2['error height'],
                   peak_low2['sigma'], peak_low2['error sigma']))
-    print()
+    print('')
 
     print('Strong noise')
     print('Peak 1: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
