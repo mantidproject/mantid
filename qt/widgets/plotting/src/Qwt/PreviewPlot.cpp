@@ -1008,7 +1008,7 @@ void PreviewPlot::disableYAxisMenu() {
   auto menu = m_contextMenu->findChild<QAction *>(g_yAxisMenuName);
 
   if (menu == NULL)
-    throw std::runtime_error("There was a problem with object naming.");
+    throw std::runtime_error("Y Axis menu object could not be retrieved.");
   else
     menu->setVisible(false);
 }
