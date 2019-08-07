@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 /*
- * NexusGeometrySave:
- * Saves geometry and metadata from memory
+ * NexusGeometrySave::saveInstrument :
+ * Save methods to save geometry and metadata from memory
  * to disk in Nexus file format for Instrument 2.0.
  *
  * @author Takudzwa Makoni, RAL (UKRI), ISIS
@@ -266,6 +266,7 @@ inline void writeXYZPixeloffset(H5::Group &grp,
  *
  * @param detectorIDs : std::vector<int> container of all detectorIDs to be
  * stored into dataset 'detector_number'.
+ * @param compInfo : instrument cache with component info.
  * @idx : size_t index of bank in compInfo.
  */
 void writeNXDetectorNumber(H5::Group &grp,
@@ -338,7 +339,7 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
  * dataset and metadata as attributes.
  *
  * @param grp : NXdetector group : (HDF group)
- * @param compInfo : componentInfo object.
+ * @param position : Eigen::Vector3d position of component in instrument cache.
  */
 inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
@@ -405,8 +406,8 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
  * bank to dataset and metadata as attributes.
  *
  * @param grp : NXdetector group : (HDF group)
- * @param compInfo : componentInfo object.
- * @param idx : size_t index of bank in component Info.
+ * @param rotation : Eigen::Quaterniond rotation of component in instrument
+ * cache.
  * @param dependency : dependency of the orientation dataset:
  * Compliant to the Mantid Instrument Definition file, if a translation
  * exists, it precedes a rotation.
@@ -481,6 +482,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
  *
  * @param parent : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
+ * @return NXinstrument group, to be passed into children save methods.
  */
 H5::Group NXInstrument(const H5::Group &parent,
                        const Geometry::ComponentInfo &compInfo) {
@@ -592,7 +594,8 @@ void saveNXSource(const H5::Group &parentGroup,
  *
  * @param parentGroup : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
- * @param detInfo : DetectorInfo object.
+ * @param monitorID :  ID of the specific monitor.
+ * @param index :  index of the specific monitor in the Instrument cache.
  */
 void saveNXMonitor(const H5::Group &parentGroup,
                    const Geometry::ComponentInfo &compInfo, const int monitorId,
@@ -666,14 +669,15 @@ void saveNXMonitor(const H5::Group &parentGroup,
 
 /*
  * Function: saveNXDetectors
- * For NXinstrument parent (component info root). Produces a set of NXdetctor
- * groups from Component info detector banks, and saves it in the parent
- * group, along with the Nexus compliant datasets, and metadata stored in
- * attributes to the new group.
+ * For NXinstrument parent (component info root). Save method which produces a
+ * set of NXdetctor groups from Component info detector banks, and saves it in
+ * the parent group, along with the Nexus compliant datasets, and metadata
+ * stored in attributes to the new group.
  *
  * @param parentGroup : parent group in which to write the NXinstrument group.
  * @param compInfo : componentInfo object.
- * @param detInfo : DetectorInfo object.
+ * @param detIDs : global detector IDs, from which those specific to the
+ * NXdetector will be extracted.
  */
 void saveNXDetector(const H5::Group &parentGroup,
                     const Geometry::ComponentInfo &compInfo,
@@ -764,12 +768,13 @@ void saveNXDetector(const H5::Group &parentGroup,
 }
 
 /*
- * Function: Saveinstrument
- * writes the instrument from memory to disk in Nexus format.
+ * Function: saveInstrument
+ * calls the save methods to write components to file after exception checking.
+ * Produces a Nexus format file containing the Instrument geometry and metadata.
  *
  * @param compInfo : componentInfo object.
  * @param fullPath : save destination as full path.
- * @param reporter : report to progressBase.
+ * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
@@ -825,14 +830,14 @@ void saveInstrument(
     throw std::invalid_argument("No source was found in the Instrument cache.");
   }
 
+  // IDs of all detectors in Instrument cache
   const auto detIds = detInfo.detectorIDs();
 
-  // open file
   H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
   H5::Group rootGroup, instrument;
 
-  // create NXentry (file root)
+  // create and capture NXentry (file root)
   rootGroup = file.createGroup(rootPath);
   NexusGeometrySave::writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
 
