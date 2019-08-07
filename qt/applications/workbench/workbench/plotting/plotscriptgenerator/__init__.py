@@ -14,7 +14,7 @@ from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import generate_add_subplot_command
 from workbench.plotting.plotscriptgenerator.figure import generate_figure_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
-from workbench.plotting.plotscriptgenerator.utils import get_workspace_history_commands
+from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "ax"
@@ -53,7 +53,7 @@ def generate_script(fig, exclude_headers=False):
     if not plot_commands:
         return
     cmds = [] if exclude_headers else [DEFAULT_CONTENT]
-    cmds += get_workspace_history_commands(fig)
+    cmds += generate_workspace_retrieval_commands(fig) + ['']
     cmds.append("{} = {}".format(FIG_VARIABLE, generate_figure_command(fig)))
     cmds += plot_commands
     cmds.append("plt.show()")

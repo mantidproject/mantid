@@ -22,10 +22,11 @@ from workbench.plotting.plotscriptgenerator.test.test_plotscriptgeneratorlines i
 
 EXAMPLE_SCIRPT = ("{}"
                   "\n"
-                  "test_ws = CreateWorkspace(OutputWorkspace='test_ws', "
-                  "DataX='10,20,30,10,20,30', DataY='2,3,4,5', DataE='1,2,3,4', NSpec=2)\n"
+                  "from mantid.api import AnalysisDataService as ADS\n"
                   "\n"
-                  "fig = plt.figure(dpi=100.0, figsize=(6.4, 4.8))\n"
+                  "test_ws = ADS.retrieve('test_ws')\n"
+                  "\n"
+                  "fig = plt.figure(dpi=100.0, figsize=(6.4, 4.8), num='')\n"
                   "ax = fig.add_subplot(1, 1, 1, frame_on=True, label='', projection='mantid', "
                   "sharex=None, sharey=None, title='', visible=True, xlabel='', "
                   "xlim=(14.5, 25.5), xscale='linear', ylabel='', "
@@ -66,8 +67,8 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         ax.errorbar(self.test_ws, specNum=2)
         output = generate_script(fig)
         num_lines = len(output.split('\n'))
-        # Expect 11 lines from DEFAULT_CONTENT, 2 for loading workspace and 5 for plotting
-        expected_num_lines = 18
+        # Expect 11 lines from DEFAULT_CONTENT, 4 for workspace retrieval and 5 for plotting
+        expected_num_lines = 20
         err_message = ("Expected to output {} lines, found {}.\nOutput:\n{}"
                        "".format(expected_num_lines, num_lines, output))
         self.assertEqual(expected_num_lines, num_lines, msg=err_message)
@@ -76,31 +77,31 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_fig = Mock(get_axes=lambda: [Mock(spec=Axes)])
         self.assertEqual(None, generate_script(mock_fig))
 
-    @patch('workbench.plotting.plotscriptgenerator.get_workspace_history_commands')
+    @patch('workbench.plotting.plotscriptgenerator.generate_workspace_retrieval_commands')
     @patch('workbench.plotting.plotscriptgenerator.generate_plot_command')
     @patch('workbench.plotting.plotscriptgenerator.generate_figure_command')
     @patch('workbench.plotting.plotscriptgenerator.generate_add_subplot_command')
     def test_generate_script_adds_legend_command_if_legend_present(self, mock_add_subplot_cmd,
                                                                    mock_figure_cmd, mock_plot_cmd,
-                                                                   mock_ws_hist_cmd):
+                                                                   mock_retrieval_cmd):
         mock_add_subplot_cmd.return_value = "fig.add_subplot(...)"
         mock_figure_cmd.return_value = "plt.figure(...)"
         mock_plot_cmd.return_value = "ax.plot(...)"
-        mock_ws_hist_cmd.return_value = ["Load(...)"]
+        mock_retrieval_cmd.return_value = ["ADS.retrieve(...)"]
         mock_fig = Mock(
             get_axes=lambda: [Mock(spec=MantidAxes, legend_=True, get_tracked_artists=lambda: [])])
         self.assertIn('.legend().draggable()', generate_script(mock_fig))
 
-    @patch('workbench.plotting.plotscriptgenerator.get_workspace_history_commands')
+    @patch('workbench.plotting.plotscriptgenerator.generate_workspace_retrieval_commands')
     @patch('workbench.plotting.plotscriptgenerator.generate_plot_command')
     @patch('workbench.plotting.plotscriptgenerator.generate_figure_command')
     @patch('workbench.plotting.plotscriptgenerator.generate_add_subplot_command')
     def test_generate_script_does_not_add_legend_command_if_legend_present(
-            self, mock_add_subplot_cmd, mock_figure_cmd, mock_plot_cmd, mock_ws_hist_cmd):
+            self, mock_add_subplot_cmd, mock_figure_cmd, mock_plot_cmd, mock_retrieval_cmd):
         mock_add_subplot_cmd.return_value = "fig.add_subplot(...)"
         mock_figure_cmd.return_value = "plt.figure(...)"
         mock_plot_cmd.return_value = "ax.plot(...)"
-        mock_ws_hist_cmd.return_value = ["Load(...)"]
+        mock_retrieval_cmd.return_value = ["ADS.retrieve(...)"]
         mock_fig = Mock(
             get_axes=lambda: [Mock(spec=MantidAxes, legend_=False, get_tracked_artists=lambda: [])])
         self.assertNotIn('.legend()', generate_script(mock_fig))
