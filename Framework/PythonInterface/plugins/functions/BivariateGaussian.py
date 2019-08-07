@@ -7,7 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
-from matplotlib.mlab import bivariate_normal
+try:
+    from matplotlib.mlab import bivariate_normal
+except ImportError:
+    bivariate_normal = None  # mark that it doesn't exist
 
 
 class BivariateGaussian(IFunction1D):
@@ -225,4 +228,5 @@ class BivariateGaussian(IFunction1D):
                 jacobian.set(i,k,dF/dc[k])
 
 
-FunctionFactory.subscribe(BivariateGaussian)
+if bivariate_normal:
+    FunctionFactory.subscribe(BivariateGaussian)
