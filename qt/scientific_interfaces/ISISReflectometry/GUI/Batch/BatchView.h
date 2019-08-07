@@ -67,6 +67,7 @@ private:
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 
   friend class Encoder;
+  friend class Decoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

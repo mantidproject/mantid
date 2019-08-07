@@ -94,9 +94,15 @@ void BatchPresenter::notifyRestoreDefaultsRequested() {
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
-void BatchPresenter::notifyReductionResumed() { resumeReduction(); }
+void BatchPresenter::notifyReductionResumed() {
+  m_mainPresenter->notifyProcessingResumed();
+  resumeReduction();
+}
 
-void BatchPresenter::notifyReductionPaused() { pauseReduction(); }
+void BatchPresenter::notifyReductionPaused() {
+  m_mainPresenter->notifyProcessingPaused();
+  pauseReduction();
+}
 
 void BatchPresenter::notifyAutoreductionResumed() { resumeAutoreduction(); }
 

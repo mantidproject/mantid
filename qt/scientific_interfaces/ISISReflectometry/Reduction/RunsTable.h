@@ -52,6 +52,7 @@ private:
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
 
   friend class Encoder;
+  friend class Decoder;
 };
 
 template <typename T>

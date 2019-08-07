@@ -15,6 +15,7 @@
 #else
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QTextStream>
 #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -48,7 +49,8 @@ public:
 
   QString encode(const QMap<QString, QVariant> &map) {
     QScriptEngine engine;
-    engine.evaluate("function toString() { return JSON.stringify(this) }");
+    engine.evaluate(
+        "function toString() { return JSON.stringify(this, null, 4) }");
 
     QScriptValue toString = engine.globalObject().property("toString");
     QScriptValue obj = encodeInner(map, &engine);
@@ -132,11 +134,37 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
   QString json(jsonFile.readAll());
   return JSON.decode(json);
 #else
-  QFile jsonFile(filename);
-  jsonFile.open(QFile::ReadOnly);
-  QJsonDocument jsonDocument;
-  jsonDocument.fromJson(jsonFile.readAll());
-  return jsonDocument.object().toVariantMap();
+  /* https://stackoverflow.com/questions/19822211/qt-parsing-json-using-qjsondocument-qjsonobject-qjsonarray
+   * is the source for a large portion of the source code for the Qt5
+   * implementation of this function, from user alanwsx and edited by BSMP.
+   */
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly)) {
+    throw std::runtime_error("Failed to open " + filename.toStdString());
+  }
+
+  // step 2
+  QTextStream text(&file);
+  QString json;
+  json = text.readAll();
+  file.close();
+  QByteArray jsonByteArray = json.toLocal8Bit();
+
+  // step 3
+  auto jsonDoc = QJsonDocument::fromJson(jsonByteArray);
+  if (jsonDoc.isNull()) {
+    throw std::runtime_error("Failed to create JSON doc.");
+  }
+  if (!jsonDoc.isObject()) {
+    throw std::runtime_error("JSON is not an object.");
+  }
+
+  QJsonObject jsonObj = jsonDoc.object();
+  if (jsonObj.isEmpty()) {
+    throw std::runtime_error("JSON object is empty.");
+  }
+
+  return jsonObj.toVariantMap();
 
 #endif
 }

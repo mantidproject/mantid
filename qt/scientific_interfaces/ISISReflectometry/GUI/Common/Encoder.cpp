@@ -10,17 +10,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-QMap<QString, QVariant> Encoder::encode(const MainWindowView &gui) {
-  QMap<QString, QVariant> map;
-  QList<QVariant> batches;
-  for (const auto &batchView : gui.m_batchViews) {
-    batches.append(QVariant(
-        encodeBatch(dynamic_cast<const BatchView *>(batchView), gui, true)));
-  }
-  map.insert(QString("batches"), QVariant(batches));
-  return map;
-}
-
 BatchPresenter *Encoder::findBatchPresenter(const BatchView *gui,
                                             const MainWindowView &mwv) {
   for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
@@ -30,6 +19,17 @@ BatchPresenter *Encoder::findBatchPresenter(const BatchView *gui,
     }
   }
   return nullptr;
+}
+
+QMap<QString, QVariant> Encoder::encode(const MainWindowView &gui) {
+  QMap<QString, QVariant> map;
+  QList<QVariant> batches;
+  for (const auto &batchView : gui.m_batchViews) {
+    batches.append(QVariant(
+        encodeBatch(dynamic_cast<const BatchView *>(batchView), gui, true)));
+  }
+  map.insert(QString("batches"), QVariant(batches));
+  return map;
 }
 
 QMap<QString, QVariant> Encoder::encodeBatch(const BatchView *gui,
@@ -121,9 +121,9 @@ Encoder::encodeRows(const MantidQt::CustomInterfaces::Group &group) {
   QList<QVariant> rows;
   for (const auto &row : group.m_rows) {
     if (row) {
-      rows.append(encodeRow(row.get()));
+      rows.append(QVariant(encodeRow(row.get())));
     } else {
-      rows.append(QList<QVariant>());
+      rows.append(QVariant(QMap<QString, QVariant>()));
     }
   }
   return rows;
@@ -229,10 +229,10 @@ QMap<QString, QVariant> Encoder::encodeEvent(const EventView *gui) {
   map.insert(QString("uniformEvenButton"),
              QVariant(gui->m_ui.uniformEvenButton->isChecked()));
   map.insert(QString("uniformEvenEdit"),
-             QVariant(gui->m_ui.uniformEvenEdit->text()));
+             QVariant(gui->m_ui.uniformEvenEdit->value()));
   map.insert(QString("uniformButton"),
              QVariant(gui->m_ui.uniformButton->isChecked()));
-  map.insert(QString("uniformEdit"), QVariant(gui->m_ui.uniformEdit->text()));
+  map.insert(QString("uniformEdit"), QVariant(gui->m_ui.uniformEdit->value()));
 
   // Custom Slicing
   map.insert(QString("customButton"),
@@ -253,15 +253,17 @@ QMap<QString, QVariant> Encoder::encodeInstrument(const InstrumentView *gui) {
   map.insert(QString("intMonCheckBox"),
              QVariant(gui->m_ui.intMonCheckBox->isChecked()));
   map.insert(QString("monIntMinEdit"),
-             QVariant(gui->m_ui.monIntMinEdit->text()));
+             QVariant(gui->m_ui.monIntMinEdit->value()));
   map.insert(QString("monIntMaxEdit"),
-             QVariant(gui->m_ui.monIntMaxEdit->text()));
-  map.insert(QString("monBgMinEdit"), QVariant(gui->m_ui.monBgMinEdit->text()));
-  map.insert(QString("monBgMaxEdit"), QVariant(gui->m_ui.monBgMaxEdit->text()));
-  map.insert(QString("lamMinEdit"), QVariant(gui->m_ui.lamMinEdit->text()));
-  map.insert(QString("lamMaxEdit"), QVariant(gui->m_ui.lamMaxEdit->text()));
+             QVariant(gui->m_ui.monIntMaxEdit->value()));
+  map.insert(QString("monBgMinEdit"),
+             QVariant(gui->m_ui.monBgMinEdit->value()));
+  map.insert(QString("monBgMaxEdit"),
+             QVariant(gui->m_ui.monBgMaxEdit->value()));
+  map.insert(QString("lamMinEdit"), QVariant(gui->m_ui.lamMinEdit->value()));
+  map.insert(QString("lamMaxEdit"), QVariant(gui->m_ui.lamMaxEdit->value()));
   map.insert(QString("I0MonitorIndex"),
-             QVariant(gui->m_ui.I0MonitorIndex->text()));
+             QVariant(gui->m_ui.I0MonitorIndex->value()));
   map.insert(QString("correctDetectorsCheckBox"),
              QVariant(gui->m_ui.correctDetectorsCheckBox->isChecked()));
   map.insert(
@@ -285,9 +287,9 @@ QMap<QString, QVariant> Encoder::encodeExperiment(const ExperimentView *gui) {
   map.insert(QString("perAngleDefaults"),
              QVariant(encodePerAngleDefaults(gui->m_ui.optionsTable)));
   map.insert(QString("startOverlapEdit"),
-             QVariant(gui->m_ui.startOverlapEdit->text()));
+             QVariant(gui->m_ui.startOverlapEdit->value()));
   map.insert(QString("endOverlapEdit"),
-             QVariant(gui->m_ui.endOverlapEdit->text()));
+             QVariant(gui->m_ui.endOverlapEdit->value()));
   map.insert(QString("transStitchParamsEdit"),
              QVariant(gui->m_ui.transStitchParamsEdit->text()));
   map.insert(QString("transScaleRHSCheckBox"),
@@ -310,7 +312,7 @@ Encoder::encodePerAngleDefaults(const QTableWidget *tab) {
   map.insert(QString("rowsNum"), QVariant(rowsNum));
   map.insert(QString("columnsNum"), QVariant(columnNum));
   map.insert(QString("rows"),
-             QVariant(encodePerAngleDefaultsRow(tab, rowsNum - 1, columnNum)));
+             QVariant(encodePerAngleDefaultsRows(tab, rowsNum, columnNum)));
   return map;
 }
 
@@ -329,7 +331,8 @@ QList<QVariant> Encoder::encodePerAngleDefaultsRow(const QTableWidget *tab,
                                                    int columnsNum) {
   QList<QVariant> row;
   for (auto columnIndex = 0; columnIndex < columnsNum; ++columnIndex) {
-    row.append(QVariant(tab->item(rowIndex, columnIndex)->text()));
+    auto text = tab->item(rowIndex, columnIndex)->text();
+    row.append(QVariant(text));
   }
   return row;
 }

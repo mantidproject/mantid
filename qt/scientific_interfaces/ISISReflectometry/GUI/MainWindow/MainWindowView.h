@@ -51,6 +51,8 @@ public:
                     const std::string &title) override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
+  void batchProcessingResumed() override;
+  void batchProcessingPaused() override;
 
 public slots:
   void helpPressed();
@@ -73,6 +75,7 @@ private:
   std::vector<IBatchView *> m_batchViews;
 
   friend class Encoder;
+  friend class Decoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -111,6 +111,7 @@ private:
   InstrumentViewSubscriber *m_notifyee;
 
   friend class Encoder;
+  friend class Decoder;
 };
 
 } // namespace CustomInterfaces

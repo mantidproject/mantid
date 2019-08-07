@@ -164,6 +164,7 @@ private:
   const IPlotter &m_plotter;
 
   friend class Encoder;
+  friend class Decoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

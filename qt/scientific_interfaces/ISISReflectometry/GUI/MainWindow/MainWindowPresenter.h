@@ -37,6 +37,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
+  void notifyProcessingResumed() override;
+  void notifyProcessingPaused() override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -55,6 +57,7 @@ private:
   std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
 
   friend class Encoder;
+  friend class Decoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

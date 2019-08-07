@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
+#include "../Common/Decoder.h"
 #include "../Common/Encoder.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
@@ -59,12 +60,22 @@ void MainWindowPresenter::notifyAutoreductionResumed() {
   for (auto batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
+  m_view->batchProcessingResumed();
 }
 
 void MainWindowPresenter::notifyAutoreductionPaused() {
   for (auto batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
+  m_view->batchProcessingPaused();
+}
+
+void MainWindowPresenter::notifyProcessingResumed() {
+  m_view->batchProcessingResumed();
+}
+
+void MainWindowPresenter::notifyProcessingPaused() {
+  m_view->batchProcessingPaused();
 }
 
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
@@ -106,6 +117,8 @@ void MainWindowPresenter::showHelp() {
 
 void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
   auto filename = QFileDialog::getSaveFileName();
+  if (filename == "")
+    return;
   Encoder encoder;
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   auto map = encoder.encodeBatch(batchPresenter, m_view, false);
@@ -113,11 +126,13 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
-  //   auto filename = QFileDialog::getOpenFileName();
-  //   auto map = MantidQt::API::loadJSONFromFile(filename);
-  UNUSED_ARG(tabIndex)
-  // ISISReflectometryDecoder decoder;
-  // decoder.decodeBatch(m_batchPresenters[tabIndex].get(), m_view, false);
+  auto filename = QFileDialog::getOpenFileName();
+  if (filename == "")
+    return;
+  auto map = MantidQt::API::loadJSONFromFile(filename);
+  IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
+  Decoder decoder;
+  decoder.decodeBatch(batchPresenter, m_view, map);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

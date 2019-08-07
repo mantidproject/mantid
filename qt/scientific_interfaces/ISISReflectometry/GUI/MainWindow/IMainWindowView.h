@@ -37,6 +37,8 @@ public:
   virtual IBatchView *newBatch() = 0;
   virtual void removeBatch(int index) = 0;
   virtual std::vector<IBatchView *> batches() const = 0;
+  virtual void batchProcessingResumed() = 0;
+  virtual void batchProcessingPaused() = 0;
 
   virtual ~IMainWindowView() = default;
 };

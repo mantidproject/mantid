@@ -69,6 +69,7 @@ private:
   std::vector<boost::optional<Row>> m_rows;
 
   friend class Encoder;
+  friend class Decoder;
 };
 
 template <typename ModificationListener>

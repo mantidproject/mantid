@@ -79,6 +79,7 @@ private:
   std::map<Action, QAction *> m_actions;
 
   friend class Encoder;
+  friend class Decoder;
 };
 
 class RunsTableViewFactory {

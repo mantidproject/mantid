@@ -116,6 +116,7 @@ private:
   QBasicTimer m_timer;
 
   friend class Encoder;
+  friend class Decoder;
 
 private slots:
   void on_actionSearch_triggered();

@@ -176,5 +176,15 @@ bool MainWindowView::askUserYesNo(const std::string &prompt,
 
   return false;
 }
+
+void MainWindowView::batchProcessingResumed() {
+  m_ui.saveBatch->setEnabled(false);
+  m_ui.loadBatch->setEnabled(false);
+}
+
+void MainWindowView::batchProcessingPaused() {
+  m_ui.saveBatch->setEnabled(true);
+  m_ui.loadBatch->setEnabled(true);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

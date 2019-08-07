@@ -180,6 +180,7 @@ private:
   void updateViewWhenMonitorStopped();
 
   friend class Encoder;
+  friend class Decoder;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

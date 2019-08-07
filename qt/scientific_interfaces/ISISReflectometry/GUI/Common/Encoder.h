@@ -29,7 +29,6 @@ namespace CustomInterfaces {
 
 class Encoder {
 public:
-  Encoder() {}
   QMap<QString, QVariant> encode(const MainWindowView &gui);
   QMap<QString, QVariant>
   encodeBatch(const BatchView *gui, const MainWindowView &mwv,
