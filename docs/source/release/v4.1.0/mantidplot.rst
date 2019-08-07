@@ -21,6 +21,6 @@ Bugfixes
 * Help documentation for the manage user directories interface now correctly displays when launched from the interface.
 * Fix for the Instrument View pick tab miniplot where the x axis label was not updated when a new unit was selected.
 * The ErrorReporter window is now resizeable
-* Save dialog is now closed while a project is being saved, stopping the same project being needlessly saved multiple times.
+* Save button is now disabled while a project is being saved, stopping the same project being needlessly saved multiple times.
 
 :ref:`Release 4.1.0 <v4.1.0>`
