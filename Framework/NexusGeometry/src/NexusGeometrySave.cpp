@@ -172,16 +172,6 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 }
 
 /*
-TODO: DOCUMENTATION
-*/
-// inline void writeCylinders(H5::Group &grp, const Geometry::IObject &shape) {}
-
-/*
-TODO: DOCUMENTATION
-*/
-// inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
-
-/*
  * Function: writeXYZPixeloffset. TODO: DOCUMENTATION
  */
 inline void writeXYZPixeloffset(H5::Group &grp,
@@ -567,19 +557,7 @@ void saveNXSource(const H5::Group &parentGroup,
       writeOrientation(transformations, rotation, rotationDependency);
     }
   }
-  /*
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
 
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &shape = compInfo.shape(index);
-
-    writeCylinders(pixelShapeGroup, shape);
-    writeVertices(pixelShapeGroup, shape);
-  }
-  */
   writeStrDataset(childGroup, NAME, sourceName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
@@ -646,19 +624,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
       writeOrientation(transformations, rotation, rotationDependency);
     }
   }
-  /*
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
 
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &shape = compInfo.shape(index);
-
-    writeCylinders(pixelShapeGroup, shape);
-    writeVertices(pixelShapeGroup, shape);
-  }
-  */
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, compInfo, detIds, index);
 
@@ -728,19 +694,7 @@ void saveNXDetector(const H5::Group &parentGroup,
       writeOrientation(transformations, rotation, rotationDependency);
     }
   }
-  /*
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
 
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &shape = compInfo.shape(index);
-
-    writeCylinders(pixelShapeGroup, shape);
-    writeVertices(pixelShapeGroup, shape);
-  }
-  */
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeXYZPixeloffset(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
