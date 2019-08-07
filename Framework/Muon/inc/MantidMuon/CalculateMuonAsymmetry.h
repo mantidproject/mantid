@@ -72,6 +72,7 @@ private:
   std::vector<double> getNormConstants(std::vector<std::string> wsNames);
   std::map<std::string, std::string> validateInputs() override;
   double getNormValue(API::CompositeFunction_sptr &func);
+  void addNormalizedFits(size_t numberOfFits, const std::vector<double>);
 };
 
 } // namespace Algorithms

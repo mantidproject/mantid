@@ -203,6 +203,26 @@ void CalculateMuonAsymmetry::exec() {
     API::MatrixWorkspace_sptr normWS =
         API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             wsNames[j]);
+
+    normWS->mutableY(0) = ws->y(0) / norms[j];
+    normWS->mutableY(0) -= 1.0;
+    normWS->mutableE(0) = ws->e(0) / norms[j];
+    API::AnalysisDataService::Instance().addOrReplace(normWS->getName(), normWS);
+
+    MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm",
+                                      std::to_string(norms[j]));
+  }
+  // update table with new norm
+  std::vector<std::string> methods(wsNames.size(), "Calculated");
+  API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
+  if (table) {
+
+    updateNormalizationTable(table, wsNames, norms, methods);
+  }
+}
+
+void CalculateMuonAsymmetry::addNormalizedFits(size_t numberOfFits, const std::vector<double> norms){
+  for (size_t j = 0; j < numberOfFits; j++) {
     API::Workspace_sptr fitWorkspace = getProperty("OutputWorkspace");
     API::MatrixWorkspace_sptr fitWorkspaceActual;
     if (fitWorkspace->isGroup()) {
@@ -218,14 +238,10 @@ void CalculateMuonAsymmetry::exec() {
     API::IAlgorithm_sptr appendSpectra = createChildAlgorithm("AppendSpectra");
 
     extractSpectra->setProperty("InputWorkspace", fitWorkspaceActual);
-    extractSpectra->setProperty("WorkspaceIndex", 2);
+    extractSpectra->setProperty("WorkspaceIndex", 1);
     extractSpectra->execute();
     API::MatrixWorkspace_sptr unnormalisedFit =
         extractSpectra->getProperty("OutputWorkspace");
-
-    normWS->mutableY(0) = ws->y(0) / norms[j];
-    normWS->mutableY(0) -= 1.0;
-    normWS->mutableE(0) = ws->e(0) / norms[j];
 
     unnormalisedFit->mutableY(0) = fitWorkspaceActual->y(1) / norms[j];
     unnormalisedFit->mutableY(0) -= 1.0;
@@ -248,17 +264,8 @@ void CalculateMuonAsymmetry::exec() {
     } else {
       setProperty("OutputWorkspace", appendedFitWorkspace);
     }
-
-    MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm",
-                                      std::to_string(norms[j]));
   }
-  // update table with new norm
-  std::vector<std::string> methods(wsNames.size(), "Calculated");
-  API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
-  if (table) {
 
-    updateNormalizationTable(table, wsNames, norms, methods);
-  }
 }
 
 /**
@@ -267,7 +274,6 @@ void CalculateMuonAsymmetry::exec() {
  * @param wsNames ::  names of workspaces to fit to
  * @return normalization constants
  */
-
 std::vector<double> CalculateMuonAsymmetry::getNormConstants(
     const std::vector<std::string> wsNames) {
   std::vector<double> norms;
