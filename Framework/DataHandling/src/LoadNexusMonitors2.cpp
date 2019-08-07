@@ -541,7 +541,12 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
         file.openData("monitor_number");
-        file.getData(&info.detNum);
+        int64_t detNum;
+        file.getData(&detNum);
+        if (detNum > std::numeric_limits<detid_t>::max()) {
+          throw std::runtime_error("Monitor number too larger to represent");
+        }
+        info.detNum = static_cast<detid_t>(detNum);
         file.closeData();
       } else {
         // default creates it from monitor name
