@@ -241,11 +241,17 @@ double DetectorInfo::azimuthal(const size_t index) const {
   }
 
   const auto sampleDetVec = position(index) - samplePos;
-  const auto horizontal =
+  const auto beamLineNormalized = Kernel::normalize(beamLine);
+
+  // generate the vertical axis
+  const auto origHorizontal =
       m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
+
+  // generate the horizontal axis perpendicular to the other two
+  const auto horizontal = vertical.cross_prod(beamLineNormalized);
 
   const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
-  const auto vertical = Kernel::normalize(beamLine).cross_prod(horizontal);
   const double dotVertical = sampleDetVec.scalar_prod(vertical);
 
   return atan2(dotVertical, dotHorizontal);
@@ -264,11 +270,17 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   }
 
   const auto sampleDetVec = position(index) - samplePos;
-  const auto horizontal =
+  const auto beamLineNormalized = Kernel::normalize(beamLine);
+
+  // generate the vertical axis
+  const auto origHorizontal =
       m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
+
+  // generate the horizontal axis perpendicular to the other two
+  const auto horizontal = vertical.cross_prod(beamLineNormalized);
 
   const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
-  const auto vertical = Kernel::normalize(beamLine).cross_prod(horizontal);
   const double dotVertical = sampleDetVec.scalar_prod(vertical);
 
   return atan2(dotVertical, dotHorizontal);
