@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 /*
- * NexusGeometrySave:
- * Saves geometry and metadata from memory
+ * NexusGeometrySave::saveInstrument :
+ * Save methods to save geometry and metadata from memory
  * to disk in Nexus file format for Instrument 2.0.
  *
  * @author Takudzwa Makoni, RAL (UKRI), ISIS
