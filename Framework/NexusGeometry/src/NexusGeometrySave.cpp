@@ -14,6 +14,10 @@
  * @date 07/08/2019
  */
 
+
+#include "MantidGeometry/Objects/IObject.h"     
+#include "MantidGeometry/Rendering/ShapeInfo.h"  
+
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
@@ -194,7 +198,6 @@ inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
  * @param grp : HDF5 parent group
  * @param compInfo : Component Info Instrument cache
  * @param idx : index of bank in cache.
-
  */
 inline void writeXYZPixeloffset(H5::Group &grp,
                                 const Geometry::ComponentInfo &compInfo,
@@ -303,7 +306,6 @@ void writeNXDetectorNumber(H5::Group &grp,
  * is a specific type of pixel, to its group.
  *
  * @param grp : NXmonitor group (HDF group)
- * @param compInfo : componentInfo object.
  * @param monitorID : monitor ID to be
  * stored into dataset 'detector_id' (or 'detector_number'. naming convention
  * inconsistency?).
