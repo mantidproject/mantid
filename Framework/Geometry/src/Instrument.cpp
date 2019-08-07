@@ -107,8 +107,7 @@ Instrument::Instrument(const Instrument &instr)
     // Now check whether the current component is the source or sample.
     // As the majority of components will be detectors, we will rarely get to
     // here
-    if (const ObjComponent *obj =
-            dynamic_cast<const ObjComponent *>(it->get())) {
+    if (const auto *obj = dynamic_cast<const ObjComponent *>(it->get())) {
       const std::string objName = obj->getName();
       // This relies on the source and sample having a unique name.
       // I think the way our instrument definition files work ensures this is
@@ -388,7 +387,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
  */
 boost::shared_ptr<const IComponent>
 Instrument::getComponentByID(const IComponent *id) const {
-  const IComponent *base = static_cast<const IComponent *>(id);
+  const auto *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
         boost::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
@@ -724,7 +723,7 @@ void Instrument::removeDetector(IDetector *det) {
 
   // Remove it from the parent assembly (and thus the instrument). Evilness
   // required here unfortunately.
-  CompAssembly *parentAssembly = dynamic_cast<CompAssembly *>(
+  auto *parentAssembly = dynamic_cast<CompAssembly *>(
       const_cast<IComponent *>(det->getBareParent()));
   if (parentAssembly) // Should always be true, but check just in case
   {
@@ -802,8 +801,7 @@ Instrument::getPlottable() const {
     // Get a reference to the underlying vector, casting away the constness so
     // that we
     // can modify it to get our result rather than creating another long vector
-    std::vector<IObjComponent_const_sptr> &res =
-        const_cast<std::vector<IObjComponent_const_sptr> &>(*objs);
+    auto &res = const_cast<std::vector<IObjComponent_const_sptr> &>(*objs);
     const std::vector<IObjComponent_const_sptr>::size_type total = res.size();
     for (std::vector<IObjComponent_const_sptr>::size_type i = 0; i < total;
          ++i) {
@@ -825,12 +823,12 @@ void Instrument::appendPlottable(
     const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
   for (int i = 0; i < ca.nelements(); i++) {
     IComponent *c = ca[i].get();
-    CompAssembly *a = dynamic_cast<CompAssembly *>(c);
+    auto *a = dynamic_cast<CompAssembly *>(c);
     if (a)
       appendPlottable(*a, lst);
     else {
-      Detector *d = dynamic_cast<Detector *>(c);
-      ObjComponent *o = dynamic_cast<ObjComponent *>(c);
+      auto *d = dynamic_cast<Detector *>(c);
+      auto *o = dynamic_cast<ObjComponent *>(c);
       if (d)
         lst.push_back(IObjComponent_const_sptr(d, NoDeleting()));
       else if (o)

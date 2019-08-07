@@ -77,9 +77,9 @@ class MuonContextTest(unittest.TestCase):
         self.assertEquals(Counter(AnalysisDataService.getObjectNames()),
                           Counter(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
                                    '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
-                                   'EMU19489 Groups MA', 'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                   'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
                                    'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
-                                   'EMU19489; Group; fwd; Counts; MA', 'Muon Data']))
+                                   'EMU19489; Group; fwd; Counts; MA']))
 
     def test_that_show_all_calculates_and_shows_all_groups_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -91,19 +91,18 @@ class MuonContextTest(unittest.TestCase):
                           Counter(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
                                    '__EMU19489; Group; bwd; Asymmetry; Rebin; MA_unnorm',
                                    '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
-                                   '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm', 'EMU19489 Groups MA',
+                                   '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm',
                                    'EMU19489 MA',
                                    'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
                                    'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
                                    'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
-                                   'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA',
-                                   'Muon Data']))
+                                   'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA']))
 
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
         self.context.show_all_pairs()
 
         self.assertEquals(Counter(AnalysisDataService.getObjectNames()),
-                          Counter(['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA', 'Muon Data']))
+                          Counter(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA']))
 
     def test_that_show_all_calculates_and_shows_all_pairs_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -112,8 +111,8 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_pairs()
 
         self.assertEquals(Counter(AnalysisDataService.getObjectNames()),
-                          Counter(['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA',
-                                   'EMU19489; Pair Asym; long; Rebin; MA', 'Muon Data']))
+                          Counter(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA',
+                                   'EMU19489; Pair Asym; long; Rebin; MA']))
 
     def test_update_current_data_sets_current_run_in_data_context(self):
         self.context.update_current_data()
@@ -130,7 +129,7 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_raw_data()
 
         self.assertEquals(Counter(AnalysisDataService.getObjectNames()),
-                          Counter(['EMU19489 MA', 'EMU19489 Raw Data MA', 'EMU19489_raw_data MA', 'Muon Data']))
+                          Counter(['EMU19489 MA', 'EMU19489_raw_data MA']))
 
     def test_that_first_good_data_returns_correctly_when_from_file_chosen_option(self):
         self.gui_context.update({'FirstGoodDataFromFile': True})

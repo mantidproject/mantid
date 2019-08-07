@@ -12,12 +12,12 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
@@ -252,7 +252,7 @@ object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
   }
   // Create our output array
   Py_intptr_t length = len(npCoords);
-  Mantid::signal_t *signalValues = new Mantid::signal_t[length];
+  auto *signalValues = new Mantid::signal_t[length];
 
   // Convert coords to a vector
   std::vector<Mantid::coord_t> coords =

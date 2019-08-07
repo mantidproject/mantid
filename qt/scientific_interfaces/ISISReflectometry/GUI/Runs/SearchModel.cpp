@@ -57,7 +57,7 @@ std::vector<SearchResult> const &SearchModel::results() const {
 }
 
 void SearchModel::setError(int i, std::string const &error) {
-  m_runDetails[i].issues = error;
+  m_runDetails[i].setError(error);
   emit dataChanged(index(i, 0), index(i, 2));
 }
 
@@ -134,7 +134,7 @@ QVariant SearchModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::ToolTipRole) {
       // setting the tool tips for any unsuccessful transfers
       if (runHasError(run)) {
-        auto errorMessage = "Invalid transfer: " + run.issues;
+        auto errorMessage = "Invalid transfer: " + run.error();
         return QString::fromStdString(errorMessage);
       }
     } else if (role == Qt::BackgroundRole) {
@@ -148,13 +148,13 @@ QVariant SearchModel::data(const QModelIndex &index, int role) const {
   }
   /*SETTING DATA FOR RUNS*/
   if (colNumber == 0)
-    return QString::fromStdString(run.runNumber);
+    return QString::fromStdString(run.runNumber());
 
   if (colNumber == 1)
-    return QString::fromStdString(run.description);
+    return QString::fromStdString(run.description());
 
   if (colNumber == 2)
-    return QString::fromStdString(run.location);
+    return QString::fromStdString(run.location());
 
   return QVariant();
 }
@@ -211,7 +211,7 @@ void SearchModel::clear() {
 @return : true if there is at least one error for this run
 */
 bool SearchModel::runHasError(const SearchResult &run) const {
-  return !(run.issues.empty());
+  return !(run.error().empty());
 }
 
 SearchResult const &SearchModel::getRowData(int index) const {

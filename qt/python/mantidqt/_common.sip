@@ -412,6 +412,8 @@ public:
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    void normaliseData(bool on);
+    QMenu *getFitMenu() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -440,6 +442,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+
 };
 
 // ---------------------------------

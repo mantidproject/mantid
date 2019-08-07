@@ -27,6 +27,8 @@ namespace CustomInterfaces {
 ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
@@ -129,7 +131,6 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(pbRunFinished()));
   // Handles running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -253,13 +254,8 @@ void ISISDiagnostics::algorithmComplete(bool error) {
     return;
   }
 
-  for (size_t i = 0; i < sliceOutputGroup->size(); i++) {
-    QString wsName =
-        QString::fromStdString(sliceOutputGroup->getItem(i)->getName());
-  }
   // Enable plot and save buttons
   m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
 
   // Update the preview plots
   sliceAlgDone(false);
@@ -445,6 +441,8 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
   // Set workspace for Python export as the first result workspace
   m_pythonExportWsName = sliceWs->getName();
 
+  setOutputPlotOptionsWorkspaces(sliceOutputGroup->getNames());
+
   // Plot result spectrum
   m_uiForm.ppSlicePreview->clear();
   m_uiForm.ppSlicePreview->addSpectrum("Slice", sliceWs, 0);
@@ -502,16 +500,6 @@ void ISISDiagnostics::pbRunFinished() {
 void ISISDiagnostics::runClicked() { runTab(); }
 
 /**
- * Handles mantid plotting
- */
-void ISISDiagnostics::plotClicked() {
-  setPlotIsPlotting(true);
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-  setPlotIsPlotting(false);
-}
-
-/**
  * Handles saving workspace
  */
 void ISISDiagnostics::saveClicked() {
@@ -524,19 +512,8 @@ void ISISDiagnostics::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void ISISDiagnostics::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
 void ISISDiagnostics::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
-}
-
-void ISISDiagnostics::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
 }
 
 void ISISDiagnostics::updateRunButton(bool enabled,
@@ -547,14 +524,7 @@ void ISISDiagnostics::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void ISISDiagnostics::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces

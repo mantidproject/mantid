@@ -165,7 +165,7 @@ void CreateMDWorkspace::exec() {
     throw std::invalid_argument(
         "MinRecursionDepth and MaxRecursionDepth must be positive.");
 
-  size_t ndims = static_cast<size_t>(ndims_prop);
+  auto ndims = static_cast<size_t>(ndims_prop);
 
   std::vector<double> extents = getProperty("Extents");
   std::string dimensions_string = getPropertyValue("Names");

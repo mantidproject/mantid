@@ -310,8 +310,8 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
   auto detShape = ComponentCreationHelper::createCappedCylinder(
       R0, h, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
-  int NY = int(ceil(2 * R_max / h) + 1);
-  int NX = int(ceil(2 * R_max / R0) + 1);
+  auto NY = int(ceil(2 * R_max / h) + 1);
+  auto NX = int(ceil(2 * R_max / R0) + 1);
   double y_bl = NY * h;
   double x_bl = NX * R0;
 
@@ -541,7 +541,7 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
-  RectangularDetector *bank = new RectangularDetector(bankName);
+  auto *bank = new RectangularDetector(bankName);
   bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
                    pixelSpacing, idStart, true, pixels);
 
@@ -698,8 +698,8 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
 
 CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
 
-  double width_d = double(width);
-  double height_d = double(height);
+  auto width_d = double(width);
+  auto height_d = double(height);
   static int bankNo = 1;
   auto bank = new CompAssembly("Bank" + std::to_string(bankNo++));
   static size_t id = 1;

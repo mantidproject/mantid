@@ -73,7 +73,7 @@ void MaxMin::exec() {
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra

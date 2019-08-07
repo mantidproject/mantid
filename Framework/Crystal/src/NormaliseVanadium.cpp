@@ -59,9 +59,8 @@ void NormaliseVanadium::exec() {
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();

@@ -150,7 +150,7 @@ gsl_function PeakFunctionIntegrator::getGSLFunction(
 }
 
 double gsl_peak_wrapper(double x, void *parameters) {
-  IPeakFunction *peakFunction = reinterpret_cast<IPeakFunction *>(parameters);
+  auto *peakFunction = reinterpret_cast<IPeakFunction *>(parameters);
 
   if (!peakFunction) {
     throw std::runtime_error(

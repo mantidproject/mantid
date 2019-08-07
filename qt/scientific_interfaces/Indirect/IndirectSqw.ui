@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>602</width>
-    <height>525</height>
+    <width>956</width>
+    <height>610</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -485,67 +485,18 @@
        <height>56</height>
       </size>
      </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>56</height>
-      </size>
-     </property>
      <property name="title">
       <string>Output</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>7</number>
+      </property>
       <item>
-       <widget class="QLabel" name="lbWorkspaceIndex">
-        <property name="text">
-         <string>Workspace Index:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spWorkspaceIndex">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>23</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbPlotSpectrum">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>23</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Plot Spectrum</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbPlotContour">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>23</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Plot Contour</string>
-        </property>
-       </widget>
+       <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
       </item>
       <item>
        <spacer name="horizontalSpacer_1">
@@ -591,6 +542,12 @@
    <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/ContourPreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <extends>QWidget</extends>
+   <header>IndirectPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

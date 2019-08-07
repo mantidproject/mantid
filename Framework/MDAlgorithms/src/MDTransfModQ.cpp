@@ -320,7 +320,7 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   if (m_Emode == Kernel::DeltaEMode::Direct ||
       m_Emode == Kernel::DeltaEMode::Indirect) {
     // energy needed in inelastic case
-    volatile double Ei =
+    volatile auto Ei =
         ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>(
             "Ei");
     m_Ei = Ei;

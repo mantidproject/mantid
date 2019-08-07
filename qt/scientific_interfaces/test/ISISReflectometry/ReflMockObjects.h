@@ -76,6 +76,7 @@ public:
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
   MOCK_METHOD0(anyBatchAutoreductionResumed, void());
   MOCK_METHOD0(anyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(reductionPaused, void());
 
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
@@ -87,6 +88,7 @@ public:
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
+  MOCK_CONST_METHOD0(instrumentName, std::string());
 
   // Calls we don't care about
   void acceptMainPresenter(IMainWindowPresenter *) override{};

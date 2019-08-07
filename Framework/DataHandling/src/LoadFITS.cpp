@@ -814,7 +814,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
   auto it = fileInfo.headerKeys.find(m_sampleRotation);
   ws->mutableRun().removeLogData("Rotation", true);
   if (fileInfo.headerKeys.end() != it) {
-    double rot = boost::lexical_cast<double>(it->second);
+    auto rot = boost::lexical_cast<double>(it->second);
     if (rot >= 0) {
       ws->mutableRun().addLogData(
           new PropertyWithValue<double>("Rotation", rot));
@@ -857,7 +857,7 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   const size_t nrows(fileInfo.axisPixelLengths[1]),
       ncols(fileInfo.axisPixelLengths[0]);
   // Treat buffer as a series of bytes
-  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
+  auto *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
@@ -916,7 +916,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
   readInBuffer(fileInfo, buffer, len);
 
   // create pointer of correct data type to void pointer of the buffer:
-  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
+  auto *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
   std::vector<char> buf(bytespp);
   char *tmp = buf.data();
   size_t start = 0;

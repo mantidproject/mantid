@@ -17,7 +17,7 @@
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
 #endif
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>

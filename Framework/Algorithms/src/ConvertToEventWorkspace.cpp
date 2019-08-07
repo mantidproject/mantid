@@ -60,7 +60,7 @@ void ConvertToEventWorkspace::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS))
   for (int iwi = 0; iwi < int(inWS->getNumberHistograms()); iwi++) {
     PARALLEL_START_INTERUPT_REGION
-    size_t wi = size_t(iwi);
+    auto wi = size_t(iwi);
 
     // The input spectrum (a histogram)
     const auto &inSpec = inWS->getSpectrum(wi);

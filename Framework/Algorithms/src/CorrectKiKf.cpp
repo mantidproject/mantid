@@ -74,7 +74,7 @@ void CorrectKiKf::exec() {
 
   const size_t size = inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = static_cast<int>(inputWS->size() / size);
+  const auto numberOfSpectra = static_cast<int>(inputWS->size() / size);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
   bool negativeEnergyWarning = false;
 
@@ -214,7 +214,7 @@ void CorrectKiKf::execEvent() {
   // Get the parameter map
   const ParameterMap &pmap = outputWS->constInstrumentParameters();
 
-  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  auto numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
   const auto &spectrumInfo = inputWS->spectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))

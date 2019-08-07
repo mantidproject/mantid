@@ -53,7 +53,7 @@ Detector::Detector(const std::string &name, int id,
  */
 detid_t Detector::getID() const {
   if (m_map) {
-    const Detector *d = dynamic_cast<const Detector *>(m_base);
+    const auto *d = dynamic_cast<const Detector *>(m_base);
     if (d) {
       return d->getID();
     }

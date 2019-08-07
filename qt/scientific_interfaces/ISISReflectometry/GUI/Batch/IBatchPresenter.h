@@ -40,6 +40,7 @@ public:
   virtual void notifySettingsChanged() = 0;
   virtual void anyBatchAutoreductionResumed() = 0;
   virtual void anyBatchAutoreductionPaused() = 0;
+  virtual void reductionPaused() = 0;
 
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
@@ -50,6 +51,7 @@ public:
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
+  virtual std::string instrumentName() const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

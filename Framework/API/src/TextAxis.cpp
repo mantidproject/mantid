@@ -82,7 +82,7 @@ bool TextAxis::operator==(const Axis &axis2) const {
   if (length() != axis2.length()) {
     return false;
   }
-  const TextAxis *spec2 = dynamic_cast<const TextAxis *>(&axis2);
+  const auto *spec2 = dynamic_cast<const TextAxis *>(&axis2);
   if (!spec2) {
     return false;
   }

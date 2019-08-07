@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
 #define MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -39,7 +39,7 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
-    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "ParameterFile");
+    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
     TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
@@ -57,7 +57,7 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
-    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "ParameterFile");
+    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
     TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");

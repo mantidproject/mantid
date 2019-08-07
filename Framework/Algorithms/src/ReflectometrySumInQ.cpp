@@ -102,7 +102,7 @@ void shareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  const int xSize = static_cast<int>(outputX.size());
+  const auto xSize = static_cast<int>(outputX.size());
   for (auto outIdx = startIter - outputX.begin(); outIdx < xSize - 1;
        ++outIdx) {
     const double binStart = outputX[outIdx];
@@ -302,7 +302,7 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
 
   const auto &spectrumInfo = inWS->spectrumInfo();
   const double beamCentre = getProperty(Prop::BEAM_CENTRE);
-  const size_t beamCentreIndex = static_cast<size_t>(beamCentre);
+  const auto beamCentreIndex = static_cast<size_t>(beamCentre);
   bool beamCentreFound{false};
   for (const auto i : indices) {
     if (spectrumInfo.isMonitor(i)) {
@@ -348,7 +348,7 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
   if (std::abs(wavelengthRange.max - wavelengthRange.min) < binWidth) {
     throw std::runtime_error("Given wavelength range too small.");
   }
-  const int numBins = static_cast<int>(
+  const auto numBins = static_cast<int>(
       std::ceil((wavelengthRange.max - wavelengthRange.min) / binWidth));
   // Construct the histogram with these X values. Y and E values are zero.
   const HistogramData::BinEdges bins(
@@ -555,14 +555,14 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
     // do an overall sum in quadrature.)
     std::vector<double> projectedE(outputE.size(), 0.0);
     // Process each value in the spectrum
-    const int ySize = static_cast<int>(inputCounts.size());
+    const auto ySize = static_cast<int>(inputCounts.size());
     for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
       // Do the summation in Q
       processValue(inputIdx, twoThetaRange, refAngles, inputBinEdges,
                    inputCounts, inputStdDevs, *IvsLam, projectedE);
     }
     // Sum errors in quadrature
-    const int eSize = static_cast<int>(outputE.size());
+    const auto eSize = static_cast<int>(outputE.size());
     for (int outIdx = 0; outIdx < eSize; ++outIdx) {
       outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
     }

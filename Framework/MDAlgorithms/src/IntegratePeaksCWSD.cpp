@@ -242,7 +242,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
         continue;
 
       uint16_t run_number = mditer->getInnerRunIndex(iev);
-      int run_number_i = static_cast<int>(run_number);
+      auto run_number_i = static_cast<int>(run_number);
 
       /* debug: record raw signals
       if (run_number_i % 1000 == testrunnumber)
@@ -286,8 +286,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
         current_run_number = run_number_i;
         // update monitor counts
         if (m_normalizeByMonitor) {
-          std::map<int, signal_t>::const_iterator m_finder =
-              run_monitor_map.find(current_run_number);
+          auto m_finder = run_monitor_map.find(current_run_number);
           if (m_finder != run_monitor_map.end())
             current_monitor_counts = m_finder->second;
           else {
@@ -469,8 +468,7 @@ IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
         mdws->getExperimentInfo(static_cast<uint16_t>(i_run));
     int runnumber = expinfo->getRunNumber();
     // FIXME - This is a hack for HB3A's run number issue
-    std::map<int, double>::iterator miter =
-        m_runPeakCountsMap.find(runnumber % 1000);
+    auto miter = m_runPeakCountsMap.find(runnumber % 1000);
     double peakcount(0);
     if (miter != m_runPeakCountsMap.end()) {
       peakcount = miter->second;
@@ -523,7 +521,7 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts() {
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string mon_str = expinfo->run().getProperty("monitor")->value();
-    signal_t monitor = static_cast<signal_t>(std::stod(mon_str));
+    auto monitor = static_cast<signal_t>(std::stod(mon_str));
     run_monitor_map.insert(std::make_pair(run_number, monitor));
     g_log.information() << "From MD workspace add run " << run_number
                         << ", monitor = " << monitor << "\n";
@@ -592,8 +590,7 @@ void IntegratePeaksCWSD::normalizePeaksIntensities() {
        count_iter != m_runPeakCountsMap.end(); ++count_iter) {
     int run_number_i = count_iter->first;
     // get monitor value
-    std::map<int, signal_t>::iterator mon_iter =
-        m_runNormMap.find(run_number_i);
+    auto mon_iter = m_runNormMap.find(run_number_i);
     // normalize peak intensities stored in m_runNormMap
     if (mon_iter != m_runNormMap.end()) {
       signal_t monitor_i = mon_iter->second;

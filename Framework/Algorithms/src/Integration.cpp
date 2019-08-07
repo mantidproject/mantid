@@ -105,7 +105,7 @@ void Integration::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr localworkspace = this->getInputWorkspace();
 
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartWorkspaceIndex' is in range 0-numberOfSpectra

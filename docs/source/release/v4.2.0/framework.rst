@@ -14,6 +14,7 @@ Concepts
 
 Algorithms
 ----------
+* ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
 
 Data Objects
 ------------

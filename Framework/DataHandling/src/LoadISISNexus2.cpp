@@ -604,7 +604,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
 
       // The spec_min - spec_max range needs to be added to the spec list
       for (int64_t i = spec_min; i < spec_max + 1; ++i) {
-        specnum_t spec_num = static_cast<specnum_t>(i);
+        auto spec_num = static_cast<specnum_t>(i);
         spec_list.push_back(spec_num);
         std::sort(spec_list.begin(), spec_list.end());
         // supplied range converted into the list, so no more supplied range
@@ -695,7 +695,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     auto generator = dataBlockComposite.getGenerator();
     int64_t hist = 0;
     for (; !generator->isDone(); generator->next()) {
-      specnum_t spec_num = static_cast<specnum_t>(generator->getValue());
+      auto spec_num = static_cast<specnum_t>(generator->getValue());
       m_wsInd2specNum_map.emplace(hist, spec_num);
       ++hist;
     }
@@ -1194,7 +1194,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
     // Iterate over each monitor and create a data block for each monitor
     for (const auto &monitor : monitors) {
-      int64_t monID = static_cast<int64_t>(monitor.first);
+      auto monID = static_cast<int64_t>(monitor.first);
       auto monTemp = DataBlock(chans);
       monTemp.setMinSpectrumID(monID);
       monTemp.setMaxSpectrumID(monID);

@@ -299,9 +299,9 @@ public slots:
   double yEnd() { return y_end; };
 
   //! Returns the step of the X axis
-  double dx() { return fabs(x_end - x_start) / (double)(numCols() - 1); };
+  double dx() { return fabs(x_end - x_start) / ((double)(numCols()) - 1.0); };
   //! Returns the step of the Y axis
-  double dy() { return fabs(y_end - y_start) / (double)(numRows() - 1); };
+  double dy() { return fabs(y_end - y_start) / ((double)(numRows()) - 1.0); };
 
   //! Returns the bounding rect of the matrix coordinates
   QwtDoubleRect boundingRect();

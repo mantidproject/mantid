@@ -21,7 +21,7 @@ Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 
 #### Reviewer ####
 
-Please comment on the following ([full description](http://developer.mantidproject.org/IndividualTicketTesting/)):
+Please comment on the following ([full description](http://developer.mantidproject.org/ReviewingAPullRequest.html)):
 
 ##### Code Review #####
 

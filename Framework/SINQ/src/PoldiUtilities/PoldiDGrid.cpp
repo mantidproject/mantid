@@ -77,7 +77,7 @@ std::pair<int, int> PoldiDGrid::calculateDRange() {
  * @return Resolution in Angstrom corresponding to
  */
 double PoldiDGrid::calculateDeltaD() {
-  int centralElement = static_cast<int>(m_detector->centralElement());
+  auto centralElement = static_cast<int>(m_detector->centralElement());
 
   return Conversions::TOFtoD(m_deltaT,
                              m_chopper->distanceFromSample() +

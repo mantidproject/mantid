@@ -21,8 +21,8 @@ public:
     ON_CALL(*this, getSummationType())
         .WillByDefault(testing::Return("SumInLambda"));
     ON_CALL(*this, getReductionType()).WillByDefault(testing::Return("Normal"));
-    ON_CALL(*this, getPolarizationCorrectionType())
-        .WillByDefault(testing::Return("None"));
+    ON_CALL(*this, getPolarizationCorrectionOption())
+        .WillByDefault(testing::Return(false));
     ON_CALL(*this, getFloodCorrectionType())
         .WillByDefault(testing::Return("Workspace"));
     ON_CALL(*this, getDebugOption()).WillByDefault(testing::Return(false));
@@ -59,8 +59,6 @@ public:
   MOCK_METHOD0(showStitchParametersInvalid, void());
   MOCK_METHOD0(enablePolarizationCorrections, void());
   MOCK_METHOD0(disablePolarizationCorrections, void());
-  MOCK_METHOD0(enablePolarizationCorrectionInputs, void());
-  MOCK_METHOD0(disablePolarizationCorrectionInputs, void());
   MOCK_METHOD0(enableFloodCorrectionInputs, void());
   MOCK_METHOD0(disableFloodCorrectionInputs, void());
   MOCK_CONST_METHOD0(getTransmissionStartOverlap, double());
@@ -75,16 +73,8 @@ public:
   MOCK_METHOD0(showTransmissionRangeInvalid, void(void));
   MOCK_METHOD0(showTransmissionStitchParamsValid, void(void));
   MOCK_METHOD0(showTransmissionStitchParamsInvalid, void(void));
-  MOCK_CONST_METHOD0(getPolarizationCorrectionType, std::string());
-  MOCK_METHOD1(setPolarizationCorrectionType, void(std::string const &));
-  MOCK_CONST_METHOD0(getCRho, double());
-  MOCK_METHOD1(setCRho, void(double));
-  MOCK_CONST_METHOD0(getCAlpha, double());
-  MOCK_METHOD1(setCAlpha, void(double));
-  MOCK_CONST_METHOD0(getCAp, double());
-  MOCK_METHOD1(setCAp, void(double));
-  MOCK_CONST_METHOD0(getCPp, double());
-  MOCK_METHOD1(setCPp, void(double));
+  MOCK_CONST_METHOD0(getPolarizationCorrectionOption, bool());
+  MOCK_METHOD1(setPolarizationCorrectionOption, void(bool));
   MOCK_CONST_METHOD0(getFloodCorrectionType, std::string());
   MOCK_METHOD1(setFloodCorrectionType, void(std::string const &));
   MOCK_CONST_METHOD0(getFloodWorkspace, std::string());

@@ -59,7 +59,7 @@ void SmoothData::exec() {
 
   // Check that the number of points in the smoothing isn't larger than the
   // spectrum length
-  const int vecSize = static_cast<int>(inputWorkspace->blocksize());
+  const auto vecSize = static_cast<int>(inputWorkspace->blocksize());
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace =
@@ -175,7 +175,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
   // current point. Note that the statistical error will be reduced by
   // sqrt(npts) because more
   // data is now contributing to each point.
-  const int vecSize = static_cast<int>(histogram.size());
+  const auto vecSize = static_cast<int>(histogram.size());
   for (int k = halfWidth + 1; k < vecSize - halfWidth; ++k) {
     const int kp = k + halfWidth;
     const int km = k - halfWidth - 1;

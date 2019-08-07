@@ -91,7 +91,7 @@ void IntegrateEPP::exec() {
   std::vector<double> begins(inWS->getNumberHistograms(), 0.0);
   std::vector<double> ends(begins.size(), 0.0);
   for (size_t i = 0; i < eppWS->rowCount(); ++i) {
-    const std::string &fitStatus = statusCol->cell<std::string>(i);
+    const auto &fitStatus = statusCol->cell<std::string>(i);
     if (fitStatus != "success") {
       continue;
     }

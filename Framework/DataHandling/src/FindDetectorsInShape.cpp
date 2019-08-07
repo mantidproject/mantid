@@ -57,7 +57,7 @@ void FindDetectorsInShape::exec() {
 
   // progress
   detid2det_map::size_type objCmptCount = detectorInfo.size();
-  int iprogress_step = static_cast<int>(objCmptCount / 100);
+  auto iprogress_step = static_cast<int>(objCmptCount / 100);
   if (iprogress_step == 0)
     iprogress_step = 1;
   int iprogress = 0;

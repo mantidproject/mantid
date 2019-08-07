@@ -124,7 +124,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     throw Kernel::Exception::FileError(
         "Unable to read " + setName + " dataset info:", m_filename);
   }
-  int nq = static_cast<int>(dims[0]); // number of q-vectors
+  auto nq = static_cast<int>(dims[0]); // number of q-vectors
   std::vector<double> buf(nq * 3);
 
   herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
@@ -189,7 +189,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                          const HistogramData::Points &qvmod,
                          const std::vector<int> &sorting_indexes) {
 
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto nq = static_cast<int>(qvmod.size()); // number of q-vectors
   std::vector<double> buf(nq * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
@@ -249,10 +249,10 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
     return;
   }
-  int nnt = static_cast<int>(dims[1]); // number of non-negative time points
-  int nt = 2 * nnt - 1;                // number of time points
+  auto nnt = static_cast<int>(dims[1]); // number of non-negative time points
+  int nt = 2 * nnt - 1;                 // number of time points
 
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto nq = static_cast<int>(qvmod.size()); // number of q-vectors
   std::vector<double> buf(nq * nnt * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {

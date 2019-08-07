@@ -12,7 +12,7 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
+#include "MantidPythonInterface/core/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::IMDWorkspace_sptr;

@@ -1416,14 +1416,14 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // create parameter's value as a sum of all tokens with index 3 or larger
     // this allow a parameter's value to contain ";"
     std::string paramValue = tokens[3];
-    int size = static_cast<int>(tokens.count());
+    auto size = static_cast<int>(tokens.count());
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[i];
 
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
     if (paramName == "masked") {
-      bool value = getParam<bool>(paramType, paramValue);
+      auto value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
         const auto componentIndex =
@@ -1544,7 +1544,7 @@ template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_sptr
 IPropertyManager::getValue<Mantid::API::ExperimentInfo_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -1561,7 +1561,7 @@ template <>
 MANTID_API_DLL Mantid::API::ExperimentInfo_const_sptr
 IPropertyManager::getValue<Mantid::API::ExperimentInfo_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::ExperimentInfo_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

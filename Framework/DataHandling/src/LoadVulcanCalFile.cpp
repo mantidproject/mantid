@@ -344,7 +344,7 @@ void LoadVulcanCalFile::readOffsetFile(
     double offset;
     if (!(iss >> pid >> offset))
       continue;
-    detid_t detid = static_cast<detid_t>(pid);
+    auto detid = static_cast<detid_t>(pid);
     map_detoffset.emplace(detid, offset);
   }
 }
@@ -400,7 +400,7 @@ void LoadVulcanCalFile::processOffsets(
 
   for (auto bankindex : vec_banks) {
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
-      detid_t detindex =
+      auto detindex =
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
       auto miter = map_verify.find(detindex);
       if (miter == map_verify.end())
@@ -588,9 +588,9 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
                                     GroupingWorkspace_sptr groupWS,
                                     OffsetsWorkspace_sptr offsetsWS,
                                     MaskWorkspace_sptr maskWS) {
-  bool doGroup = bool(groupWS);
-  bool doOffsets = bool(offsetsWS);
-  bool doMask = bool(maskWS);
+  auto doGroup = bool(groupWS);
+  auto doOffsets = bool(offsetsWS);
+  auto doMask = bool(maskWS);
 
   bool hasUnmasked(false);
   bool hasGrouped(false);

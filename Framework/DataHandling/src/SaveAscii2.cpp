@@ -126,7 +126,7 @@ void SaveAscii2::init() {
 void SaveAscii2::exec() {
   // Get the workspace
   m_ws = getProperty("InputWorkspace");
-  int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
+  auto nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
