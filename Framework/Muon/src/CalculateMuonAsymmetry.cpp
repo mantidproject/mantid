@@ -203,10 +203,43 @@ void CalculateMuonAsymmetry::exec() {
     API::MatrixWorkspace_sptr normWS =
         API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
             wsNames[j]);
+    API::Workspace_sptr fitWorkspace = getProperty("OutputWorkspace");
+    API::MatrixWorkspace_sptr fitWorkspaceActual;
+    if (fitWorkspace->isGroup()){
+        fitWorkspaceActual = boost::dynamic_pointer_cast<API::MatrixWorkspace>(boost::static_pointer_cast<API::WorkspaceGroup>(fitWorkspace)->getItem(0));
+    } else {
+        fitWorkspaceActual = boost::dynamic_pointer_cast<API::MatrixWorkspace>(fitWorkspace);
+    }
+    API::IAlgorithm_sptr extractSpectra = createChildAlgorithm("ExtractSingleSpectrum");
+    API::IAlgorithm_sptr appendSpectra = createChildAlgorithm("AppendSpectra");
+
+    extractSpectra->setProperty("InputWorkspace", fitWorkspaceActual);
+    extractSpectra->setProperty("WorkspaceIndex", 2);
+    extractSpectra->execute();
+    API::MatrixWorkspace_sptr unnormalisedFit = extractSpectra->getProperty("OutputWorkspace");
 
     normWS->mutableY(0) = ws->y(0) / norms[j];
     normWS->mutableY(0) -= 1.0;
     normWS->mutableE(0) = ws->e(0) / norms[j];
+
+    unnormalisedFit->mutableY(0) = fitWorkspaceActual->y(1) / norms[j];
+    unnormalisedFit->mutableY(0) -= 1.0;
+    unnormalisedFit->mutableE(0) = fitWorkspaceActual->e(1) / norms[j];
+
+    appendSpectra->setProperty("InputWorkspace1", fitWorkspaceActual);
+    appendSpectra->setProperty("InputWorkspace2", unnormalisedFit);
+    appendSpectra->execute();
+    API::MatrixWorkspace_sptr appendedFitWorkspace = appendSpectra->getProperty("OutputWorkspace");
+
+    if (fitWorkspace->isGroup()){
+      std::string workspaceName = fitWorkspaceActual->getName();
+      auto fitWorkspaceGroupPointer = boost::static_pointer_cast<API::WorkspaceGroup>(fitWorkspace);
+      fitWorkspaceGroupPointer->removeItem(0);
+      API::AnalysisDataService::Instance().addOrReplace(workspaceName, appendedFitWorkspace);
+      fitWorkspaceGroupPointer->addWorkspace(appendedFitWorkspace);
+    } else {
+        setProperty("OutputWorkspace", appendedFitWorkspace);
+    }
 
     MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm",
                                       std::to_string(norms[j]));
