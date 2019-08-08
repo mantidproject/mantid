@@ -24,12 +24,12 @@ template <class T> std::string getType() {
 }
 
 template <class T> Json::Value convertToJsonValue(const T value) {
-  if (std::is_same<T, double>::value || std::is_same<T, float>::value)
-    return Json::Value(value);
+  if (std::is_same<T, int64_t>::value)
+    return Json::Value(static_cast<Json::Int64>(value));
   else if (std::is_same<T, int32_t>::value)
     return Json::Value(static_cast<Json::Int>(value));
-  else if (std::is_same<T, int64_t>::value)
-    return Json::Value(static_cast<Json::Int64>(value));
+  else if (std::is_same<T, double>::value || std::is_same<T, float>::value)
+    return Json::Value(value);
 }
 
 Json::Value createNXAttributes(const std::string &NXClass) {
