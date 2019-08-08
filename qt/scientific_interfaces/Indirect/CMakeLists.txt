@@ -274,18 +274,41 @@ set(
   CalculatePaalmanPings.cpp
   ContainerSubtraction.cpp
   CorrectionsTab.cpp
+  ConvFit.cpp
+  ConvFitAddWorkspaceDialog.cpp
+  ConvFitDataPresenter.cpp
+  ConvFitDataTablePresenter.cpp
+  ConvFitModel.cpp
   DensityOfStates.cpp
+  Elwin.cpp
   ILLEnergyTransfer.cpp
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndirectAddWorkspaceDialog.cpp
   IndirectBayes.cpp
   IndirectBayesTab.cpp
   IndirectCorrections.cpp
+  IndirectDataAnalysis.cpp
+  IndirectDataAnalysisTab.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
+  IndirectDataTablePresenter.cpp
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
+  IndirectEditResultsDialog.cpp
+  IndirectFitAnalysisTab.cpp
+  IndirectFitData.cpp
+  IndirectFitDataPresenter.cpp
+  IndirectFitDataView.cpp
+  IndirectFitOutput.cpp
+  IndirectFitOutputOptionsModel.cpp
+  IndirectFitOutputOptionsPresenter.cpp
+  IndirectFitOutputOptionsView.cpp
+  IndirectFitPlotModel.cpp
+  IndirectFitPlotPresenter.cpp
+  IndirectFitPlotView.cpp
+  IndirectFittingModel.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
@@ -303,6 +326,8 @@ set(
   IndirectSettingsView.cpp
   IndirectSimulation.cpp
   IndirectSimulationTab.cpp
+  IndirectSpectrumSelectionPresenter.cpp
+  IndirectSpectrumSelectionView.cpp
   IndirectSqw.cpp
   IndirectSymmetrise.cpp
   IndirectTab.cpp
@@ -310,6 +335,16 @@ set(
   IndirectToolsTab.cpp
   IndirectTransmission.cpp
   IndirectTransmissionCalc.cpp
+  Iqt.cpp
+  IqtFit.cpp
+  IqtFitModel.cpp
+  JumpFit.cpp
+  JumpFitAddWorkspaceDialog.cpp
+  JumpFitDataPresenter.cpp
+  JumpFitDataTablePresenter.cpp
+  JumpFitModel.cpp
+  MSDFit.cpp
+  MSDFitModel.cpp
   Quasi.cpp
   ResNorm.cpp
   Stretch.cpp
@@ -321,19 +356,40 @@ set(
   ApplyAbsorptionCorrections.h
   CalculatePaalmanPings.h
   ContainerSubtraction.h
+  ConvFitAddWorkspaceDialog.h
+  ConvFitDataPresenter.h
+  ConvFitDataTablePresenter.h
+  ConvFit.h
   CorrectionsTab.h
   DensityOfStates.h
+  Elwin.h
   ILLEnergyTransfer.h
   ISISCalibration.h
   ISISDiagnostics.h
   ISISEnergyTransfer.h
+  IAddWorkspaceDialog.h
+  IIndirectFitDataView.h
+  IIndirectFitOutputOptionsView.h
+  IIndirectFitPlotView.h
   IIndirectSettingsView.h
+  IndirectAddWorkspaceDialog.h
   IndirectBayes.h
   IndirectBayesTab.h
   IndirectCorrections.h
+  IndirectDataAnalysis.h
+  IndirectDataAnalysisTab.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
+  IndirectDataTablePresenter.h
   IndirectDiffractionReduction.h
+  IndirectEditResultsDialog.h
+  IndirectFitAnalysisTab.h
+  IndirectFitDataPresenter.h
+  IndirectFitDataView.h
+  IndirectFitOutputOptionsPresenter.h
+  IndirectFitOutputOptionsView.h
+  IndirectFitPlotPresenter.h
+  IndirectFitPlotView.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h
@@ -348,6 +404,8 @@ set(
   IndirectSettingsView.h
   IndirectSimulation.h
   IndirectSimulationTab.h
+  IndirectSpectrumSelectionPresenter.h
+  IndirectSpectrumSelectionView.h
   IndirectSqw.h
   IndirectSymmetrise.h
   IndirectTab.h
@@ -355,6 +413,14 @@ set(
   IndirectToolsTab.h
   IndirectTransmission.h
   IndirectTransmissionCalc.h
+  IqtFit.h
+  Iqt.h
+  JumpFitAddWorkspaceDialog.h
+  JumpFitDataPresenter.h
+  JumpFitDataTablePresenter.h
+  JumpFit.h
+  LazyAsyncRunner.h
+  MSDFit.h
   Quasi.h
   ResNorm.h
   Stretch.h
@@ -362,10 +428,20 @@ set(
 
 set(
   INC_FILES
+  ConvFitModel.h
   IndirectDataValidationHelper.h
+  IndirectFitData.h
+  IndirectFitOutput.h
+  IndirectFitOutputOptionsModel.h
+  IndirectFitPlotModel.h
+  IndirectFitPlotPresenter.h
+  IndirectFittingModel.h
   IndirectPlotOptionsModel.h
   IndirectSettingsHelper.h
   IPythonRunner.h
+  IqtFitModel.h
+  JumpFitModel.h
+  MSDFitModel.h
 )
 
 set(
@@ -374,15 +450,24 @@ set(
   ApplyAbsorptionCorrections.ui
   CalculatePaalmanPings.ui
   ContainerSubtraction.ui
+  ConvFit.ui
+  ConvFitAddWorkspaceDialog.ui
   DensityOfStates.ui
+  Elwin.ui
   ILLEnergyTransfer.ui
   ISISCalibration.ui
   ISISDiagnostics.ui
   ISISEnergyTransfer.ui
+  IndirectAddWorkspaceDialog.ui
   IndirectBayes.ui
   IndirectCorrections.ui
+  IndirectDataAnalysis.ui
   IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
+  IndirectEditResultsDialog.ui
+  IndirectFitDataView.ui
+  IndirectFitOutputOptions.ui
+  IndirectFitPreviewPlot.ui
   IndirectInstrumentConfig.ui
   IndirectInterfaceSettings.ui
   IndirectLoadILL.ui
@@ -392,11 +477,17 @@ set(
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
+  IndirectSpectrumSelector.ui
   IndirectSqw.ui
   IndirectSymmetrise.ui
   IndirectTools.ui
   IndirectTransmission.ui
   IndirectTransmissionCalc.ui
+  Iqt.ui
+  IqtFit.ui
+  JumpFit.ui
+  JumpFitAddWorkspaceDialog.ui
+  MSDFit.ui
   Quasi.ui
   ResNorm.ui
   Stretch.ui
