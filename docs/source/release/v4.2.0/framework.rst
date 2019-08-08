@@ -14,8 +14,8 @@ Concepts
 
 Algorithms
 ----------
-* ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
-* Whitespace is now ignored when setting the Filename parameter in python scripts.
+* :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
+* Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load`.
 
 Data Objects
 ------------
