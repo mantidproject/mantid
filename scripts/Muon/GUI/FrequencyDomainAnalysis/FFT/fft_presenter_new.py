@@ -70,13 +70,13 @@ class FFTPresenter(object):
         self.removePhaseFromIM(final_options)
 
         # make intelligent guess of what user wants
-        group_pair_context = self.load.group_pair_context[self.load.group_pair_context.selected]
+        current_group_pair = self.load.group_pair_context[self.load.group_pair_context.selected]
         Re_name_to_use = None
         Im_name_to_use = None
         default_name = None
         # will need to check this exists before using it
-        if group_pair_context:
-            default_name = group_pair_context.get_asymmetry_workspace_names(
+        if current_group_pair:
+            default_name = current_group_pair.get_asymmetry_workspace_names(
                     self.load.data_context.current_runs)
         # if the original selection is available we should use it
         if original_Re_name in final_options:
