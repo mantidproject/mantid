@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QRUNSTABLEVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QRUNSTABLEVIEW_H_
 #include "Common/DllConfig.h"
 #include "IRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
@@ -91,4 +91,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
+#endif // MANTID_CUSTOMINTERFACES_QRUNSTABLEVIEW_H_

@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
-#define MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_QBATCHVIEW_H
+#define MANTID_ISISREFLECTOMETRY_QBATCHVIEW_H
 
 #include "GUI/Event/QEventView.h"
 #include "GUI/Experiment/QExperimentView.h"
@@ -68,4 +68,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_BATCHVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_QBATCHVIEW_H */

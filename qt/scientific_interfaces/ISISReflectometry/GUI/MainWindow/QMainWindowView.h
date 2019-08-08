@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
-#define MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_QMAINWINDOWVIEW_H
+#define MANTID_ISISREFLECTOMETRY_QMAINWINDOWVIEW_H
 
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
@@ -72,4 +72,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_MAINWINDOWVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_QMAINWINDOWVIEW_H */
