@@ -83,4 +83,5 @@ def _get_mantid_specific_plot_kwargs(artist):
     if artist not in ax.get_tracked_artists():
         return dict()
     return {'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
-            'distribution': not ax.get_artist_normalization_state(artist)}
+            'distribution': not ax.get_artist_normalization_state(artist),
+            'update_axes_labels': False}

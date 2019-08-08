@@ -50,7 +50,7 @@ ERRORBAR_ONLY_KWARGS = {
 }
 ERRORBAR_KWARGS = copy(LINE2D_KWARGS)
 ERRORBAR_KWARGS.update(ERRORBAR_ONLY_KWARGS)
-MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': False}
+MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': False, 'update_axes_labels': False}
 
 
 class PlotScriptGeneratorLinesTest(unittest.TestCase):
