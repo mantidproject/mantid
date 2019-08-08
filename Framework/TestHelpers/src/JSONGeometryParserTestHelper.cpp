@@ -23,6 +23,15 @@ template <class T> std::string getType() {
   return "unknown";
 }
 
+template <class T> Json::Value convertToJsonValue(const T value) {
+  if (std::is_same<T, double>::value || std::is_same<T, float>::value)
+    return Json::Value(value);
+  else if (std::is_same<T, int32_t>::value)
+    return Json::Value(static_cast<Json::Int>(value));
+  else if (std::is_same<T, int64_t>::value)
+    return Json::Value(static_cast<Json::Int64>(value));
+}
+
 Json::Value createNXAttributes(const std::string &NXClass) {
   Json::Value attributes;
   attributes[0]["name"] = "NX_class";
@@ -103,8 +112,7 @@ void fillValues(Json::Value &values, const std::vector<T> &fillArray,
       fillValues<T>(val, fillArray, start, size);
   } else {
     for (size_t i = 0; i < size; ++i) {
-      values[static_cast<int>(i)] =
-          Json::Value(static_cast<T>(fillArray[start + i]));
+      values[static_cast<int>(i)] = convertToJsonValue<T>(fillArray[start + i]);
     }
     start += size;
   }
@@ -126,7 +134,7 @@ void addDataset(Json::Value &parent, const std::string &name,
   }
 
   auto leafSize = static_cast<size_t>(arrayShape[arrayShape.size() - 1]);
-  dataset["dataset"]["size"][i] = Json::Value(static_cast<Json::Int>(leafSize));
+  dataset["dataset"]["size"][i] = convertToJsonValue<int64_t>(leafSize);
   size_t start = 0;
   fillValues<T>(dataset["values"], data, start, leafSize);
 
@@ -210,7 +218,7 @@ void addNXMonitorName(Json::Value &monitor, const std::string &name) {
 
 void addNXMonitorDetectorID(Json::Value &monitor, const int64_t detectorID) {
   auto monitorDetID = createEmptyDataset("detector_id", "int64");
-  monitorDetID["values"] = Json::Value(static_cast<Json::Int64>(detectorID));
+  monitorDetID["values"] = convertToJsonValue<int64_t>(detectorID);
   appendToChildren(monitor, monitorDetID);
 }
 
@@ -258,7 +266,7 @@ void addNXChopperSlitHeight(Json::Value &chopper, const double slitHeight) {
 
 void addNXChopperSlits(Json::Value &chopper, const int64_t value) {
   auto chopperFullName = createEmptyDataset("slits", "int64");
-  chopperFullName["values"] = Json::Value(static_cast<Json::Int64>(value));
+  chopperFullName["values"] = convertToJsonValue<int64_t>(value);
   appendToChildren(chopper, chopperFullName);
 }
 
