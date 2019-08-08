@@ -152,8 +152,8 @@ public:
     double lastGoodData = std::stod(alg.getPropertyValue("LastGoodData"));
     double timeZero = std::stod(alg.getPropertyValue("TimeZero"));
 
-    TS_ASSERT_DELTA(firstGoodData, 0.170, 0.001);
-    TS_ASSERT_DELTA(lastGoodData, 10.000, 0.001);
+    TS_ASSERT_DELTA(firstGoodData, 0.166, 0.001);
+    TS_ASSERT_DELTA(lastGoodData, 9.99, 0.001);
     TS_ASSERT_DELTA(timeZero, 0.160, 0.001);
   }
 
