@@ -205,7 +205,8 @@ void CalculateMuonAsymmetry::exec() {
             wsNames[j]);
 
     normalizeWorkspace(normWS, ws, 0, norms[j]);
-    API::AnalysisDataService::Instance().addOrReplace(normWS->getName(), normWS);
+    API::AnalysisDataService::Instance().addOrReplace(normWS->getName(),
+                                                      normWS);
 
     MuonAlgorithmHelper::addSampleLog(normWS, "analysis_asymmetry_norm",
                                       std::to_string(norms[j]));
@@ -226,7 +227,8 @@ void CalculateMuonAsymmetry::exec() {
  * @param norms :: a vector of normalisation values
  * @return normalization constants
  */
-void CalculateMuonAsymmetry::addNormalizedFits(size_t numberOfFits, const std::vector<double> norms){
+void CalculateMuonAsymmetry::addNormalizedFits(
+    size_t numberOfFits, const std::vector<double> norms) {
   for (size_t j = 0; j < numberOfFits; j++) {
     API::Workspace_sptr fitWorkspace = getProperty("OutputWorkspace");
     API::MatrixWorkspace_sptr fitWorkspaceActual;
@@ -268,7 +270,6 @@ void CalculateMuonAsymmetry::addNormalizedFits(size_t numberOfFits, const std::v
       setProperty("OutputWorkspace", appendedFitWorkspace);
     }
   }
-
 }
 
 /**
@@ -412,20 +413,24 @@ double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
   return flat->getParameter("A0");
 }
 /**
- * Normalize a single spectrum workpace based on a specified index from another workspace and a N0 value. The unormalized
- * from here is N0(1+f) where f is the desired normalized function.
+ * Normalize a single spectrum workpace based on a specified index from another
+ * workspace and a N0 value. The unormalized from here is N0(1+f) where f is the
+ * desired normalized function.
  * @param normalizedWorkspace :: workspace to store normalised data
  * @param unormalizedWorkspace :: workspace to normalise from
  * @param workspaceIndex :: index of raw data in unormalizedWorkspace
  * @param N0 :: normalization value
  * @return normalization constant
  */
-void CalculateMuonAsymmetry::normalizeWorkspace(const API::MatrixWorkspace_sptr &normalizedWorkspace,
-                                                const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace,
-                                                size_t workspaceIndex, double N0){
-                        normalizedWorkspace->mutableY(0) = unnormalizedWorkspace->y(workspaceIndex) / N0;
-                        normalizedWorkspace->mutableY(0) -= 1.0;
-                        normalizedWorkspace->mutableE(0) = unnormalizedWorkspace->e(workspaceIndex) / N0;
-                        }
+void CalculateMuonAsymmetry::normalizeWorkspace(
+    const API::MatrixWorkspace_sptr &normalizedWorkspace,
+    const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace,
+    size_t workspaceIndex, double N0) {
+  normalizedWorkspace->mutableY(0) =
+      unnormalizedWorkspace->y(workspaceIndex) / N0;
+  normalizedWorkspace->mutableY(0) -= 1.0;
+  normalizedWorkspace->mutableE(0) =
+      unnormalizedWorkspace->e(workspaceIndex) / N0;
+}
 } // namespace Algorithms
 } // namespace Mantid
