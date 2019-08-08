@@ -1111,6 +1111,21 @@ Instrument cache.
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath),
                      H5::GroupIException &)
   }
+
+  void test_cylindrical_instrument() {
+
+	  // create RAII file resource for testing
+    ScopedFileHandle fileResource(
+        "test_cylindrical.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+  
+  auto cylindricalInstrument = ComponentCreationHelper::
+        createCylInstrumentWithVerticalOffsetsSpecified(
+            2, std::vector<double>{1, 2, 3}, 2, 1, 2, 1, 2);
+  auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*cylindricalInstrument);
+
+  NexusGeometrySave::saveInstrument(instr, destinationFile, DEFAULT_ROOT_PATH);
+  }
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

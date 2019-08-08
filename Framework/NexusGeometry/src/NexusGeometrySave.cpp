@@ -14,11 +14,9 @@
  * @date 07/08/2019
  */
 
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 
-#include "MantidGeometry/Objects/IObject.h"     
-#include "MantidGeometry/Rendering/ShapeInfo.h"  
-
-#include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -26,6 +24,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
+#include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
@@ -74,7 +73,7 @@ inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
  * by SaveInstrument methods to determine whether or not to write a dataset to
  * file.
  *
- * @param data : std::vector<T> data
+ * @param data : std::vector<double> data
  * @param precision : double precision specifier
  * @return true if all elements are approx zero, else false.
  */
@@ -172,25 +171,53 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
 TODO: DOCUMENTATION
 */
-inline void writeCylinder(H5::Group &grp, const Geometry::IObject &cylinder) {
+inline void writePixelShape(H5::Group &grp,
+                            const std::vector<size_t> &cylinderIndices) {
 
-  const auto geometry = cylinder.shapeInfo();
-  auto points = geometry.points();
-  auto radius = geometry.radius();
-  auto innerRadius = geometry.innerRadius();
-  auto height = geometry.height();
+  H5::DataSet cylinders, vertices;
 
-  // write a matrix dataset where the 'axes' are the points, and the entries are
-  // the vertices.
+  const auto &nCylinders = static_cast<hsize_t>(cylinderIndices.size());
+
+  // prepare the data
+  std::vector<double> cylinderData(nCylinders * 3);
+  for (size_t i = 0; i < nCylinders * 3; i += 3) {
+    for (int j = 0; j < 3; ++j) {
+      cylinderData[i + j] = 2.0; // testing output
+    }
+  }
+
+  int crank = 2;
+  hsize_t cdims[static_cast<hsize_t>(2)];
+  cdims[0] = nCylinders;
+  cdims[1] = 3;
+  H5::DataSpace cspace = H5Screate_simple(crank, cdims, nullptr);
+
+  // cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_DOUBLE,
+  // cspace);
+  cylinders.write(cylinderData.data(), H5::PredType::NATIVE_DOUBLE, cspace);
+
+  // vertices
+
+  // prepare the data
+  std::vector<double> verticesData(9); // 3x3 vertices
+  for (size_t i = 0; i < 9; i += 3) {
+    for (int j = 0; j < 3; ++j) {
+      verticesData[i + j] = 3.0; // testing output
+    }
+  }
+
+  int vrank = 2;
+  hsize_t vdims[static_cast<hsize_t>(2)];
+  vdims[0] = 3;
+  vdims[1] = 3;
+  H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
+
+  vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
+  vertices.write(verticesData.data(), H5::PredType::NATIVE_DOUBLE, vspace);
+  writeStrAttribute(vertices, UNITS, METRES);
 }
 
 /*
-TODO: DOCUMENTATION
-*/
-inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
-
-/*
- * Function: writeXYZPixeloffset. TODO: DOCUMENTATION
  * Function: writeXYZPixeloffset
  * write the x, y, and z offset of the pixels from the parent detector bank as
  * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or z
@@ -199,29 +226,103 @@ inline void writeVertices(H5::Group &grp, const Geometry::IObject &shape) {}
  * @param compInfo : Component Info Instrument cache
  * @param idx : index of bank in cache.
  */
-inline void writeXYZPixeloffset(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo,
-                                const size_t idx) {
+inline void writePixelData(H5::Group &grp,
+                           const Geometry::ComponentInfo &compInfo,
+                           const size_t idx) {
 
-  H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
-  auto childrenDetectors = compInfo.detectorsInSubtree(idx);
+  // write pixel offset
+
+  H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset; // pixel offset datasets
+  auto childrenDetectors =
+      compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
+  const auto nChildrenDetectors = childrenDetectors.size(); // number of pixels
+
+  std::vector<size_t> shapeIndices;
+
+  shapeIndices.reserve(
+      nChildrenDetectors); // expect all detectors have valid shape before check
+
+  bool shapesAreHomogeneous{false}; // false before check
+  bool allHaveShapes{false};        // false before check
+  bool someHaveShapes{false};       // false before check
+
+  // prevents undefined behaviour when passing empty container. If children
+  // detectors empty, shapesAreHomogeneous and hasShapes remains false.
+  if (!childrenDetectors.empty()) {
+
+    // shape type of the first detector in children detectors
+    auto &firstShape = compInfo.shape(childrenDetectors.front());
+    auto firstShapeType = firstShape.shapeInfo().shape();
+
+    // return true if all shape types are equal to the first shape type in
+    // children detectors.
+    shapesAreHomogeneous = std::all_of(
+        childrenDetectors.begin(), childrenDetectors.end(),
+        [&compInfo, &shapeIndices, &firstShapeType](const size_t &idx) {
+          auto &shapeObj = compInfo.shape(idx);
+          auto shapeType = shapeObj.shapeInfo().shape();
+          return (shapeType == firstShapeType);
+        });
+
+    // Implicitly, only if shapesAreHomogenous is true, and first pixel shape
+    // is type 'NOSHAPE', then allHaveShapes is false. Else true.
+    allHaveShapes = !(shapesAreHomogeneous &&
+                      (static_cast<int>(firstShapeType) == 0 /*NOSHAPE*/));
+
+    // Implicitly, either if first pixel shape is valid shape, or first pixel
+    // shape is 'NOSHAPE' and shapesAreHomogeneous is False. then some pixels
+    // have a valid shape.
+    someHaveShapes =
+        (static_cast<int>(firstShapeType) != 0 /*is valid shape*/ ||
+         (static_cast<int>(firstShapeType) == 0 && !shapesAreHomogeneous));
+
+  }
 
   std::vector<double> posx;
   std::vector<double> posy;
   std::vector<double> posz;
 
-  posx.reserve(childrenDetectors.size());
-  posy.reserve(childrenDetectors.size());
-  posz.reserve(childrenDetectors.size());
+  posx.reserve(nChildrenDetectors);
+  posy.reserve(nChildrenDetectors);
+  posz.reserve(nChildrenDetectors);
 
-  for (const size_t &i : childrenDetectors) {
+  // only need to write pixel shape group once in this case
+  if (allHaveShapes && shapesAreHomogeneous) {
 
-    auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
-        compInfo, idx, i);
+    H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
 
-    posx.push_back(offset[0]);
-    posy.push_back(offset[1]);
-    posz.push_back(offset[2]);
+    for (std::vector<size_t>::iterator it = childrenDetectors.begin();
+         it != childrenDetectors.end(); ++it) {
+
+      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+          compInfo, idx, *it);
+
+      posx.push_back(offset[0]);
+      posy.push_back(offset[1]);
+      posz.push_back(offset[2]);
+
+      if (compInfo.hasValidShape(*it)) {
+        // get index of all cylinders in shape. if cylinders found:
+        std::vector<size_t> cylinders{
+            1, 2, 3, 4}; // may or may not be cylinders or eve the same shape
+        // writePixelShape(pixelShapeGroup, cylinders);
+      }
+
+      // check pixel shape(s). If all equal, only needs to write once.
+    }
+  } else 
+  
+  if (someHaveShapes){
+    for (std::vector<size_t>::iterator it = childrenDetectors.begin();
+         it != childrenDetectors.end(); ++it) {
+
+      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+          compInfo, idx, *it);
+
+      posx.push_back(offset[0]);
+      posy.push_back(offset[1]);
+      posz.push_back(offset[2]);
+    }
   }
 
   bool xIsZero = isApproxZero(posx, PRECISION);
@@ -649,17 +750,6 @@ void saveNXMonitor(const H5::Group &parentGroup,
     }
   }
 
-  // write shape in NXmonitor
-  if (compInfo.hasValidShape(index)) {
-
-    H5::Group shapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &shape = compInfo.shape(index);
-    writeCylinder(shapeGroup, shape);
-    writeVertices(shapeGroup, shape);
-  }
-
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, monitorId);
 
@@ -731,36 +821,8 @@ void saveNXDetector(const H5::Group &parentGroup,
     }
   }
 
-  // write pixel_shape in NXdetector
-  if (compInfo.hasValidShape(index)) {
-
-    H5::Group pixelShapeGroup =
-        simpleNXSubGroup(childGroup, PIXEL_SHAPE, NX_CYLINDER);
-
-    const auto &detectorShape = compInfo.shape(index);
-    const auto shapetype = detectorShape.shapeInfo().shape();
-
-    // is this one even necessary with hasValidShape check?
-    if (static_cast<int>(shapetype) == 0 /*NOSHAPE*/) {
-      // do something
-    } else if (static_cast<int>(shapetype) == 1 /*CUBOID*/) {
-      // do something
-    } else if (static_cast<int>(shapetype) == 2 /*HEXAHEDRON*/) {
-      // do something
-    } else if (static_cast<int>(shapetype) == 3 /*SPHERE*/) {
-      // do something
-    } else if (static_cast<int>(shapetype) == 4 /*CYLINDER*/) {
-      writeCylinder(pixelShapeGroup, detectorShape);
-    } else if (static_cast<int>(shapetype) == 5 /*CONE*/) {
-      // do something
-    } else if (static_cast<int>(shapetype) == 6 /*HOLLOWCYLINDER*/) {
-      // do something
-    }
-    writeVertices(pixelShapeGroup, detectorShape);
-  }
-
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeXYZPixeloffset(childGroup, compInfo, index);
+  writePixelData(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
 
   writeStrDataset(childGroup, BANK_NAME, detectorName);
