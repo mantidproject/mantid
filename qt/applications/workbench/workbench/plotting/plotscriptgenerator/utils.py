@@ -11,6 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 import re
 from numpy import ndarray
 
+from mantid.py3compat import is_text_string
+
 
 def convert_value_to_arg_string(value):
     """
@@ -18,7 +20,7 @@ def convert_value_to_arg_string(value):
     which can be passed to a function. It is recursive so works on objects
     such as lists.
     """
-    if isinstance(value, str) or isinstance(value, unicode):
+    if is_text_string(value):
         return "'{}'".format(value)
     if isinstance(value, list) or isinstance(value, ndarray):
         return "[{}]".format(', '.join([convert_value_to_arg_string(v) for v in value]))
