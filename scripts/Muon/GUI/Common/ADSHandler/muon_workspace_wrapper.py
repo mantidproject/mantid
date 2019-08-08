@@ -6,10 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
 from __future__ import (absolute_import, division, print_function)
-
-from mantid.simpleapi import mtd
-from mantid import api
-from mantid.api import Workspace
+from mantid.api import Workspace, AnalysisDataService, WorkspaceGroup
 
 
 def add_directory_structure(dirs):
@@ -24,13 +21,13 @@ def add_directory_structure(dirs):
         raise ValueError("Group names must be unique")
 
     for directory in dirs:
-        if not mtd.doesExist(directory):
-            workspace_group = api.WorkspaceGroup()
-            mtd.addOrReplace(directory, workspace_group)
-        elif not isinstance(mtd[directory], api.WorkspaceGroup):
-            mtd.remove(directory)
-            workspace_group = api.WorkspaceGroup()
-            mtd.addOrReplace(directory, workspace_group)
+        if not AnalysisDataService.doesExist(directory):
+            workspace_group = WorkspaceGroup()
+            AnalysisDataService.addOrReplace(directory, workspace_group)
+        elif not isinstance(AnalysisDataService.retrieve(directory), WorkspaceGroup):
+            AnalysisDataService.remove(directory)
+            workspace_group = WorkspaceGroup()
+            AnalysisDataService.addOrReplace(directory, workspace_group)
         else:
             # exists and is a workspace group
             pass
@@ -41,8 +38,8 @@ def add_directory_structure(dirs):
         if i == 0:
             previous_dir = directory
             continue
-        if not mtd[previous_dir].__contains__(directory):
-            mtd[previous_dir].add(directory)
+        if not AnalysisDataService.retrieve(previous_dir).__contains__(directory):
+            AnalysisDataService.retrieve(previous_dir).add(directory)
         previous_dir = directory
 
 
@@ -100,7 +97,7 @@ class MuonWorkspaceWrapper(object):
     def workspace(self):
         """The Workspace object."""
         if not self.is_hidden:
-            return mtd[self._workspace_name]
+            return AnalysisDataService.retrieve(self._workspace_name)
         else:
             return self._workspace
 
@@ -114,8 +111,8 @@ class MuonWorkspaceWrapper(object):
     @workspace.setter
     def workspace(self, value):
         if not self.is_hidden:
-            if mtd.doesExist(self._workspace_name):
-                mtd.remove(self._workspace_name)
+            if AnalysisDataService.doesExist(self._workspace_name):
+                AnalysisDataService.remove(self._workspace_name)
             self._is_in_ads = False
         if isinstance(value, Workspace):
             self._workspace = value
@@ -136,14 +133,14 @@ class MuonWorkspaceWrapper(object):
 
         if len(self.name) > 0 and self.is_hidden:
             # add workspace to ADS
-            mtd.addOrReplace(self._workspace_name, self._workspace)
+            AnalysisDataService.addOrReplace(self._workspace_name, self._workspace)
 
             if self._directory_structure != "":
                 self.add_directory_structure()
                 # Add to the appropriate group
                 group = self._directory_structure.split("/")[-1]
-                if not mtd[group].__contains__(self._workspace_name):
-                    mtd[group].add(self._workspace_name)
+                if not AnalysisDataService.retrieve(group).__contains__(self._workspace_name):
+                    AnalysisDataService.retrieve(group).add(self._workspace_name)
 
             self._workspace = None
             self._is_in_ads = True
@@ -155,9 +152,9 @@ class MuonWorkspaceWrapper(object):
         """
         Remove the workspace from the ADS and store it in the class instance
         """
-        if mtd.doesExist(self._workspace_name):
-            self._workspace = mtd[self._workspace_name]
-            mtd.remove(self._workspace_name)
+        if AnalysisDataService.doesExist(self._workspace_name):
+            self._workspace = AnalysisDataService.retrieve(self._workspace_name)
+            AnalysisDataService.remove(self._workspace_name)
 
         self._is_in_ads = False
 
