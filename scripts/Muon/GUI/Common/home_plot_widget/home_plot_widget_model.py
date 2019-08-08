@@ -79,11 +79,12 @@ class HomePlotWidgetModel(object):
         except RuntimeError:
             return
         if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
+
             self.plot_figure.clear()
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
             self.plotted_fit_workspaces = []
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
+            self.plot_figure = plot(workspaces,wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
@@ -92,15 +93,14 @@ class HomePlotWidgetModel(object):
             xlim = axis.get_xlim()
             ylim = axis.get_ylim()
             self._remove_all_data_workspaces_from_plot()
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
+            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             axis = self.plot_figure.gca()
             axis.set_xlim(xlim)
             axis.set_ylim(ylim)
         else:
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True,
-                                                                                                    'autoscale_on_update': False},
-                                    errors=True)
+            self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, plot_kwargs={'distribution': True,
+                                    'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
         self.plot_figure.canvas.set_window_title(window_title)
