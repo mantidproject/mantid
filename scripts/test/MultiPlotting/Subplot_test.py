@@ -14,7 +14,6 @@ from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot import subplot
 
 
-
 def rm_logic(name):
     if name == "two":
         return False
@@ -23,7 +22,6 @@ def rm_logic(name):
 
 @start_qapplication
 class SubplotTest(unittest.TestCase):
-
     def setUp(self):
         context = PlottingContext()
         self.subplot = subplot(context)
@@ -35,7 +33,7 @@ class SubplotTest(unittest.TestCase):
         self.subplot._get_rm_window = mock.Mock()
         self.subplot._createSelectWindow = mock.MagicMock()
 
-    def test_rmOnePlotNewWindow(self):
+    def test_rm_one_plot_new_window(self):
         self.subplot._rm_window = None
         self.subplot._selector_window = None
 
@@ -48,7 +46,7 @@ class SubplotTest(unittest.TestCase):
         self.assertEqual(self.subplot._get_rm_window.call_count, 1)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
 
-    def test_rmOnePlotOldWindow(self):
+    def test_rm_one_plot_old_window(self):
         self.subplot._rm_window = mock.Mock()
         self.subplot._selector_window = None
 
@@ -61,7 +59,7 @@ class SubplotTest(unittest.TestCase):
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
 
-    def test_rmTwoPlotsNewWindow(self):
+    def test_rm_two_plots_new_window(self):
         self.subplot._rm_window = None
         self.subplot._selector_window = None
 
@@ -75,7 +73,7 @@ class SubplotTest(unittest.TestCase):
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
-    def test_rmTwoPlotsOldSelectWindow(self):
+    def test_rm_two_plots_old_select_window(self):
         self.subplot._rm_window = None
         self.subplot._selector_window = mock.Mock()
 
@@ -89,7 +87,7 @@ class SubplotTest(unittest.TestCase):
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
-    def test_rmTwoPlotsoldRmWindow(self):
+    def test_rm_two_plots_old_rm_window(self):
         self.subplot._rm_window = mock.Mock()
         self.subplot._selector_window = None
 
@@ -117,10 +115,7 @@ class SubplotTest(unittest.TestCase):
 
         self.subplot._apply_rm(names)
 
-        self.assertEqual(
-            self.subplot._context.subplots[
-                "test"].removeLine.call_count,
-            3)
+        self.assertEqual(self.subplot._context.subplots["test"].removeLine.call_count, 3)
         self.assertEqual(self.subplot._close_rm_window.call_count, 1)
 
     def test_apply_rmNone(self):
@@ -130,10 +125,7 @@ class SubplotTest(unittest.TestCase):
 
         self.subplot._apply_rm(names)
 
-        self.assertEqual(
-            self.subplot._context.subplots[
-                "test"].removeLine.call_count,
-            0)
+        self.assertEqual(self.subplot._context.subplots["test"].removeLine.call_count, 0)
         self.assertEqual(self.subplot._close_rm_window.call_count, 1)
 
     def test_apply_rmSome(self):
@@ -143,21 +135,18 @@ class SubplotTest(unittest.TestCase):
 
         self.subplot._apply_rm(names)
 
-        self.assertEqual(
-            self.subplot._context.subplots[
-                "test"].removeLine.call_count,
-            2)
+        self.assertEqual(self.subplot._context.subplots["test"].removeLine.call_count, 2)
         self.assertEqual(self.subplot._close_rm_window.call_count, 1)
 
     def test_addSubplot(self):
-         self.subplot._update = mock.Mock()
-         gridspec = GridSpec(2,2)
-         self.subplot._context.update_gridspec = mock.Mock()
-         self.subplot._context._gridspec = gridspec
+        self.subplot._update = mock.Mock()
+        gridspec = GridSpec(2, 2)
+        self.subplot._context.update_gridspec = mock.Mock()
+        self.subplot._context._gridspec = gridspec
 
-         self.subplot.add_subplot("test",3)
-         self.subplot._context.update_gridspec.assert_called_with(4)
-         self.assertEqual(self.subplot._update.call_count,1)
+        self.subplot.add_subplot("test", 3)
+        self.subplot._context.update_gridspec.assert_called_with(4)
+        self.assertEqual(self.subplot._update.call_count, 1)
 
     def test_replaced_ws_false(self):
         one = mock.Mock()
@@ -166,13 +155,11 @@ class SubplotTest(unittest.TestCase):
         self.subplot._context.subplots["two"] = two
         self.subplot.canvas.draw = mock.Mock()
         ws = mock.Mock()
-        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = False)
-        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = False)
+        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value=False)
+        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value=False)
 
         self.subplot._replaced_ws(ws)
-        self.assertEqual(self.subplot.canvas.draw.call_count,0)
-
-
+        self.assertEqual(self.subplot.canvas.draw.call_count, 0)
 
     def test_replaced_ws(self):
         one = mock.Mock()
@@ -181,13 +168,11 @@ class SubplotTest(unittest.TestCase):
         self.subplot._context.subplots["two"] = two
         self.subplot.canvas.draw = mock.Mock()
         ws = mock.Mock()
-        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = False)
-        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = True)
+        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value=False)
+        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value=True)
 
         self.subplot._replaced_ws(ws)
-        self.assertEqual(self.subplot.canvas.draw.call_count,1)
-
-
+        self.assertEqual(self.subplot.canvas.draw.call_count, 1)
 
     def test_replaced_ws_true(self):
         one = mock.Mock()
@@ -196,11 +181,23 @@ class SubplotTest(unittest.TestCase):
         self.subplot._context.subplots["two"] = two
         self.subplot.canvas.draw = mock.Mock()
         ws = mock.Mock()
-        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value = True)
-        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value = True)
+        self.subplot._context.subplots["one"].replace_ws = mock.Mock(return_value=True)
+        self.subplot._context.subplots["two"].replace_ws = mock.Mock(return_value=True)
 
         self.subplot._replaced_ws(ws)
-        self.assertEqual(self.subplot.canvas.draw.call_count,2)
+        self.assertEqual(self.subplot.canvas.draw.call_count, 2)
+
+    def test_that_connect_rm_signal_calls_the_correct_function(self):
+        self.subplot.rmLineSignal = mock.Mock()
+        self.subplot.connect_rm_line_signal("slot value")
+
+        self.subplot.rmLineSignal.connect.assert_called_with("slot value")
+
+    def test_that_disconnect_rm_signal_calls_the_correct_function(self):
+        self.subplot.rmLineSignal = mock.Mock()
+        self.subplot.disconnect_rm_line_signal()
+
+        self.assertEqual(1, self.subplot.rmLineSignal.disconnect.call_count)
 
 
 if __name__ == "__main__":

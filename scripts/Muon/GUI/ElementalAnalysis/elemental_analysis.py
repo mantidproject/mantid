@@ -170,7 +170,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
-    # general functions
+# general functions
+
     def _gen_label(self, name, x_value_in, element=None):
         if element is None:
             return
@@ -461,18 +462,13 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 if _type in ws.getName():
                     self.plotting.plot(subplot, ws.getName())
 
-    def is_any_line_checked(self):
-        if self.lines.total.isChecked():
-            return True
-        if self.lines.prompt.isChecked():
-            return True
-        if self.lines.delayed.isChecked():
-            return True
-        return False
-
     def remove_line_type(self, run, _type):
         # If no line type is selected do not allow plotting
-        if not self.is_any_line_checked():
+        if not any([
+                self.lines.total.isChecked(),
+                self.lines.prompt.isChecked(),
+                self.lines.delayed.isChecked()
+        ]):
             for detector in self.detectors.detectors:
                 detector.setEnabled(False)
 

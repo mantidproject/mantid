@@ -59,7 +59,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     """ plotting """
-
     def add_subplot(self, name):
         self.plots.add_subplot(name, len(self.quickEdit.get_subplots()))
 
@@ -139,7 +138,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
-
     def _if_empty_close(self):
         if not self._context.subplots:
             self.closeSignal.emit()

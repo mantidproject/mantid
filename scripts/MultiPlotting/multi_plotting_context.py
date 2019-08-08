@@ -9,16 +9,13 @@ from __future__ import absolute_import, print_function
 from MultiPlotting.gridspec_engine import gridspecEngine
 from MultiPlotting.subplot.subplot_context import subplotContext
 
-
 import mantid.simpleapi as mantid
-
 
 xBounds = "xBounds"
 yBounds = "yBounds"
 
 
 class PlottingContext(object):
-
     def __init__(self, gridspec_engine=gridspecEngine()):
         self.context = {}
         self.subplots = {}
@@ -111,4 +108,7 @@ class PlottingContext(object):
         return self.subplots[subplot].size == 0
 
     def get_lines(self, subplot_name):
-        return self.subplots[subplot_name].lines
+        try:
+            return self.subplots[subplot_name].lines
+        except KeyError:
+            return []

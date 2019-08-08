@@ -57,7 +57,6 @@ class subplot(QtWidgets.QWidget):
     """ this is called when the zoom
     or pan are used. We want to send a
     signal to update the axis ranges """
-
     def draw_event_callback(self, event):
         self.figure.tight_layout()
         for subplot in self.plotObjects.keys():
@@ -111,8 +110,9 @@ class subplot(QtWidgets.QWidget):
     def add_subplot(self, subplotName, number):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
-        self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName, projection='mantid')
+        self.plotObjects[subplotName] = self.figure.add_subplot(gridspec[number],
+                                                                label=subplotName,
+                                                                projection='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()
@@ -203,7 +203,10 @@ class subplot(QtWidgets.QWidget):
     def _create_rm_window(self, subplotName):
         line_names = list(self._context.subplots[subplotName].lines.keys())
         vline_names = self._context.subplots[subplotName].vlines
-        return RemovePlotWindow(lines=line_names, vlines=vline_names, subplot=subplotName, parent=self)
+        return RemovePlotWindow(lines=line_names,
+                                vlines=vline_names,
+                                subplot=subplotName,
+                                parent=self)
 
     def _get_rm_window(self, subplotName):
         # always close selector after making a selection
