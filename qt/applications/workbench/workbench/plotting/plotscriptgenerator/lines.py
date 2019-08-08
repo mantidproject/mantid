@@ -58,7 +58,7 @@ def _get_errorbar_specific_plot_kwargs(err_container):
     props = CurveProperties._get_errorbars_props_from_curve(err_container, {})
     props.pop('hide_errors')
     try:
-        props['barsabove'] = err_container[2][0].zorder > err_container[0].zorder
+        props['barsabove'] = err_container[2][0].zorder >= err_container[0].zorder
     except TypeError:  # Error when indexing err_container[0] when it has no line
         pass
     return props
