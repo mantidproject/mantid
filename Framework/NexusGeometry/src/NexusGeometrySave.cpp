@@ -170,7 +170,7 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 
 /*
 TODO: DOCUMENTATION
-*/
+
 inline void writePixelShape(H5::Group &grp,
                             const std::vector<size_t> &cylinderIndices) {
 
@@ -216,6 +216,7 @@ inline void writePixelShape(H5::Group &grp,
   vertices.write(verticesData.data(), H5::PredType::NATIVE_DOUBLE, vspace);
   writeStrAttribute(vertices, UNITS, METRES);
 }
+*/
 
 /*
  * Function: writeXYZPixeloffset
@@ -275,7 +276,6 @@ inline void writePixelData(H5::Group &grp,
     someHaveShapes =
         (static_cast<int>(firstShapeType) != 0 /*is valid shape*/ ||
          (static_cast<int>(firstShapeType) == 0 && !shapesAreHomogeneous));
-
   }
 
   std::vector<double> posx;
@@ -310,9 +310,9 @@ inline void writePixelData(H5::Group &grp,
 
       // check pixel shape(s). If all equal, only needs to write once.
     }
-  } else 
-  
-  if (someHaveShapes){
+  } else
+
+      if (someHaveShapes) {
     for (std::vector<size_t>::iterator it = childrenDetectors.begin();
          it != childrenDetectors.end(); ++it) {
 
