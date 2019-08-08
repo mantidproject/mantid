@@ -546,7 +546,6 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
           throw std::runtime_error("Monitor number too larger to represent");
         }
         info.detNum = static_cast<detid_t>(detNum);
-        file.closeData();
       } else {
         // default creates it from monitor name
         Poco::Path monPath(entry_name);
