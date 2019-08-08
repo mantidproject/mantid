@@ -137,7 +137,7 @@ void ExtractSpectra::exec() {
 
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
-  int size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  auto size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
@@ -296,10 +296,10 @@ void ExtractSpectra::checkProperties() {
 
     if (m_workspaceIndexList.empty()) {
       int minSpec_i = getProperty("StartWorkspaceIndex");
-      size_t minSpec = static_cast<size_t>(minSpec_i);
+      auto minSpec = static_cast<size_t>(minSpec_i);
       const size_t numberOfSpectra = m_inputWorkspace->indexInfo().globalSize();
       int maxSpec_i = getProperty("EndWorkspaceIndex");
-      size_t maxSpec = static_cast<size_t>(maxSpec_i);
+      auto maxSpec = static_cast<size_t>(maxSpec_i);
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
       if (maxSpec < minSpec) {

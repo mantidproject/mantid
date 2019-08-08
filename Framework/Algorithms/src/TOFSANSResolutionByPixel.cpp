@@ -131,7 +131,7 @@ void TOFSANSResolutionByPixel::exec() {
     g_log.information() << "The collimation length is  " << LCollim << '\n';
   }
 
-  const int numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
   const auto &spectrumInfo = inWS->spectrumInfo();

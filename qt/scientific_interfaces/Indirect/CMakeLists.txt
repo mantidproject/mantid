@@ -48,8 +48,13 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -105,7 +110,10 @@ set(
   IndirectFitPlotModel.h
   IndirectFitPlotPresenter.h
   IndirectFittingModel.h
+  IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
   IndirectToolsTab.h
+  IPythonRunner.h
   IqtFitModel.h
   IndirectFunctionBrowser/ConvFunctionModel.h
   IndirectFunctionBrowser/IqtFunctionModel.h
@@ -158,6 +166,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -222,6 +233,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
@@ -303,8 +315,13 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -341,6 +358,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -359,6 +379,9 @@ set(
 set(
   INC_FILES
   IndirectDataValidationHelper.h
+  IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
+  IPythonRunner.h
 )
 
 set(
@@ -380,6 +403,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
@@ -421,7 +445,8 @@ mtd_add_qt_library(
     MantidQtWidgetsPlotting
     MantidQtWidgetsMplCpp
     MantidQtIcons
-  INSTALL_DIR_BASE ${PLUGINS_DIR}
+  INSTALL_DIR_BASE
+    ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt5

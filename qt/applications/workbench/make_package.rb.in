@@ -253,8 +253,29 @@ Qt_linking_dir = find_linking_directories(pyqt5_patterns, 'Qt.*.framework/Versio
 # We only need one copy of openssl
 `install_name_tool -change @loader_path/../../../libssl.1.0.0.dylib @loader_path/../../../../MacOS/libssl.dylib Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork`
 `install_name_tool -change @loader_path/../../../libcrypto.1.0.0.dylib @loader_path/../../../../MacOS/libcrypto.dylib Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork`
-# `rm Contents/Frameworks/libssl.1.0.0.dylib`
-# `rm Contents/Frameworks/libcrypto.1.0.0.dylib`
+
+# Fix up paths inside QtWebEngineProcess inside embedded bundle
+webengine_proc = "Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess"
+otool_out = `otool -L #{webengine_proc}`
+first_dep = Pathname.new(otool_out.split("\n")[1].split()[0])
+dep_link_path = ""
+first_dep.descend { |element|
+    if element.to_path().include? "framework"
+        dep_link_path = element.dirname().to_path()
+        break
+    end
+}
+
+if dep_link_path == ""
+  puts "Unable to determine hard-coded link paths for QtWebEngineProcess"
+  exit 1
+end
+
+webengine_deps = ["QtWebEngineCore", "QtQuick", "QtGui", "QtCore", "QtQml", "QtNetwork", "QtWebChannel", "QtPositioning"]
+webengine_deps.each do |lib_name|
+  puts "Fixing web engine depenency #{lib_name}"
+  `install_name_tool -change #{dep_link_path}/#{lib_name}.framework/Versions/5/#{lib_name} @loader_path/../../../../../../../#{lib_name}.framework/Versions/5/#{lib_name} #{webengine_proc}`
+end
 
 #change id of all libraries that match patterns
 def change_id(patterns, lib_path)

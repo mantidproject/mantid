@@ -10,17 +10,18 @@
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 from __future__ import (absolute_import, unicode_literals)
 
-import sys
-from functools import wraps
-
 # 3rdparty imports
 import matplotlib
+import numpy as np
+import sys
+from functools import wraps
 from matplotlib._pylab_helpers import Gcf
+from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
-from matplotlib.axes import Axes
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtWidgets import QApplication, QLabel
+
 # local imports
 from mantid.api import AnalysisDataServiceObserver
 from mantid.plots import MantidAxes
@@ -141,6 +142,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
+
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
@@ -217,6 +219,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # This will be called whenever the current axes is changed
             if self.toolbar is not None:
                 self.toolbar.update()
+
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
@@ -258,7 +261,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) != FigureType.Line:
+        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar]:
             self._set_fit_enabled(False)
 
     def destroy(self, *args):
@@ -286,8 +289,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # line is run, leading to a useless AttributeError.
 
     def launch_plot_options(self):
-        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure,
-                                                             parent=self.window)
+        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
 
     def grid_toggle(self):
         """
@@ -373,7 +375,6 @@ def new_figure_manager_given_figure(num, figure):
 
 if __name__ == '__main__':
     # testing code
-    import numpy as np
 
     qapp = QApplication([' '])
     qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)

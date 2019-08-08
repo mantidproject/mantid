@@ -143,7 +143,8 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
     return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
-        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
+        alg.getProperty("OutputNormalisedCovarianceMatrix").value
 
 
 def run_simultaneous_Fit(parameters_dict, alg):
@@ -165,7 +166,7 @@ def run_simultaneous_Fit(parameters_dict, alg):
 
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
         alg.getProperty('OutputStatus').value, alg.getProperty(
-            'OutputChi2overDoF').value
+            'OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").value
 
 
 def run_CalculateMuonAsymmetry(parameters_dict, alg):
@@ -176,7 +177,7 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value,\
         alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
-        alg.getProperty('ChiSquared').value
+        alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").value
 
 
 def run_AppendSpectra(ws1, ws2):

@@ -188,6 +188,8 @@ void LoadNexusMonitors2::exec() {
       throw std::invalid_argument(
           m_filename + " does not contain an entry named " + m_top_entry_name);
     }
+    file.openGroup(m_top_entry_name, "NXentry"); // Open as will need to be
+    // open for subsequent operations
   }
   prog1.report();
 

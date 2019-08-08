@@ -81,7 +81,7 @@ void AlgorithmDockWidget::updateProgress(void *alg, const double p,
       } else {
         int hours = static_cast<int>(estimatedTime / 3600);
         int min = static_cast<int>((estimatedTime - hours * 3600) / 60);
-        mess << hours << "h" << std::setfill('0') << std::setw(2) << min << "h";
+        mess << hours << "h" << std::setfill('0') << std::setw(2) << min << "m";
       }
       mess << ")";
     }

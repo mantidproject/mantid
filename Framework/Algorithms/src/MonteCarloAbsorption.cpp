@@ -227,9 +227,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
       useSparseInstrument ? simulationWS : inputWS;
   // Cache information about the workspace that will be used repeatedly
   auto instrument = instrumentWS.getInstrument();
-  const int64_t nhists =
-      static_cast<int64_t>(instrumentWS.getNumberHistograms());
-  const int nbins = static_cast<int>(simulationWS.blocksize());
+  const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
+  const auto nbins = static_cast<int>(simulationWS.blocksize());
 
   EFixedProvider efixed(instrumentWS);
   auto beamProfile = createBeamProfile(*instrument, inputWS.sample());

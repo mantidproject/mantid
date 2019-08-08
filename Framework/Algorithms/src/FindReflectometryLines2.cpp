@@ -170,7 +170,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   double const height = *maxValueIt;
   // determine initial centre: index of the maximum value
   size_t const maxIndex = std::distance(Ys.cbegin(), maxValueIt);
-  double const centreIndex = static_cast<double>(maxIndex);
+  auto const centreIndex = static_cast<double>(maxIndex);
   int const startIndex = getProperty(Prop::START_INDEX);
   double const centreByMax = static_cast<double>(startIndex) + centreIndex;
   g_log.debug() << "Line maximum position: " << centreByMax << '\n';
@@ -188,7 +188,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
                        "value as line center.\n";
     return centreByMax;
   }
-  double const fwhm =
+  auto const fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
                 << '\n';

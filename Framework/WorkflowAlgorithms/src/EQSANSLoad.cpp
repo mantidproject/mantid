@@ -123,8 +123,7 @@ void EQSANSLoad::init() {
 double getRunPropertyDbl(MatrixWorkspace_sptr inputWS,
                          const std::string &pname) {
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              pname + " as a floating point numeric value.");
@@ -286,10 +285,8 @@ void EQSANSLoad::getSourceSlitSize() {
 
   const std::string slit1Name = "vBeamSlit";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(slit1Name);
-  Mantid::Kernel::TimeSeriesProperty<double> *dp =
-      dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  Mantid::Kernel::TimeSeriesProperty<int> *ip =
-      dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  auto *dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  auto *ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
   int slit1;
   if (dp)
     slit1 = static_cast<int>(dp->getStatistics().mean);
@@ -593,8 +590,7 @@ void EQSANSLoad::exec() {
 
     const std::string dzName = "detectorZ";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(dzName);
-    Mantid::Kernel::TimeSeriesProperty<double> *dp =
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    auto *dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
     if (!dp)
       throw std::runtime_error("Could not cast (interpret) the property " +
                                dzName + " as a time series property value.");

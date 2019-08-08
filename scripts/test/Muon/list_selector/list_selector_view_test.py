@@ -7,13 +7,14 @@
 
 import unittest
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtCore
 
 from Muon.GUI.Common.list_selector.list_selector_view import ListSelectorView
 
 
-class TestListSelectorView(GuiTest):
+@start_qapplication
+class TestListSelectorView(unittest.TestCase):
     def setUp(self):
         self.view = ListSelectorView()
 

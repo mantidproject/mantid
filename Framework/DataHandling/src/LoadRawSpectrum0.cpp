@@ -73,7 +73,7 @@ void LoadRawSpectrum0::exec() {
   // Get the time channel array(s) and store in a vector inside a shared pointer
   auto timeChannelsVec = getTimeChannels(m_noTimeRegimes, m_lengthIn);
 
-  double histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
+  auto histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
   int64_t histCurrent = -1;
 
   // Create the 2D workspace for the output
@@ -109,7 +109,7 @@ void LoadRawSpectrum0::exec() {
         runObj.removeLogData(prevPeriod.str());
         runObj.removeLogData("current_period");
         // add current period data
-        int period_number = static_cast<int>(period + 1);
+        auto period_number = static_cast<int>(period + 1);
         createPeriodLogs(period_number, localWorkspace);
       }
       // skip all spectra except the first one in each period

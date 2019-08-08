@@ -16,8 +16,8 @@ import unittest
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import numpy as np
-from numpy.testing import assert_almost_equal
 from qtpy.QtCore import Qt
+from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
@@ -125,17 +125,18 @@ class FigureInteractionTest(unittest.TestCase):
                    autospec=True):
             with patch.object(interactor.toolbar_manager, 'is_tool_active',
                               lambda: False):
-                interactor.on_mouse_button_press(mouse_event)
-                self.assertEqual(0, qmenu_call1.addSeparator.call_count)
-                self.assertEqual(0, qmenu_call1.addAction.call_count)
-                expected_qmenu_calls = [call(),
-                                        call("Axes", qmenu_call1),
-                                        call("Normalization", qmenu_call1)]
-                self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
-                # 4 actions in Axes submenu
-                self.assertEqual(4, qmenu_call2.addAction.call_count)
-                # 2 actions in Normalization submenu
-                self.assertEqual(2, qmenu_call3.addAction.call_count)
+                with patch.object(interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                    interactor.on_mouse_button_press(mouse_event)
+                    self.assertEqual(0, qmenu_call1.addSeparator.call_count)
+                    self.assertEqual(0, qmenu_call1.addAction.call_count)
+                    expected_qmenu_calls = [call(),
+                                            call("Axes", qmenu_call1),
+                                            call("Normalization", qmenu_call1)]
+                    self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
+                    # 4 actions in Axes submenu
+                    self.assertEqual(4, qmenu_call2.addAction.call_count)
+                    # 2 actions in Normalization submenu
+                    self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
         self._test_toggle_normalization(errorbars_on=False)

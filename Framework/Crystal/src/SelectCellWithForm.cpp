@@ -69,7 +69,7 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
                                  q_vectors, fit_error);
   IndexingUtils::Optimize_UB(newUB1, miller_ind, q_vectors, sigabc);
 
-  int nindexed_old = static_cast<int>(q_vectors.size());
+  auto nindexed_old = static_cast<int>(q_vectors.size());
   int nindexed_new =
       IndexingUtils::NumberIndexed(newUB1, q_vectors0, tolerance);
   bool latErrorsValid = true;

@@ -52,7 +52,7 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
                                         Progress &prog) {
 
   // workspace independent determination of length
-  const int histnumber = static_cast<int>(inWS->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inWS->getNumberHistograms());
 
   auto x = Kernel::make_cow<HistogramData::HistogramX>(OutXValues_scaled);
 

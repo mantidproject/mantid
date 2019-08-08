@@ -8,7 +8,9 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
 #include "IndirectDataAnalysis.h"
+#include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -58,14 +60,21 @@ public:
   /// Constructor
   IndirectDataAnalysisTab(QWidget *parent = nullptr);
 
+  /// Set the presenter for the output plotting options
+  void setOutputPlotOptionsPresenter(
+      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  /// Set the active workspaces used in the plotting options
+  void setOutputPlotOptionsWorkspaces(
+      std::vector<std::string> const &outputWorkspaces);
+  /// Clear the workspaces held by the output plotting options
+  void clearOutputPlotOptionsWorkspaces();
+
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
-  /// Allows the user to turn the plotting of error bars off and on
-  void setPlotErrorBars(bool errorBars);
 
 protected:
   /// Function to run a string as python code
@@ -154,6 +163,7 @@ private:
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
+  virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
@@ -162,6 +172,7 @@ private:
   int m_selectedSpectrum;
   int m_minSpectrum;
   int m_maxSpectrum;
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 
 } // namespace IDA

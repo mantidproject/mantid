@@ -7,14 +7,15 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.home_plot_widget.home_plot_widget_presenter import HomePlotWidgetPresenter
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
 
 
-class HomeTabPlotPresenterTest(GuiTest):
+@start_qapplication
+class HomeTabPlotPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
         self.plotting_window_model = mock.MagicMock()

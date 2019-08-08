@@ -69,6 +69,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _fit_option = None
     _group_by = None
     _pulse_chopper = None
+    _group_detectors = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -164,6 +165,12 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.setPropertyGroup('SampleCoordinates', bats_options)
         self.setPropertyGroup('PulseChopper', bats_options)
 
+        self.declareProperty(name='GroupDetectors', defaultValue=True,
+                             doc='Group the pixels using the range, tube-by-tube (default) or in a custom way; \n'
+                                 'it is not recommended to group the detectors at this stage, \n'
+                                 'in order to get absorption corrections right, \n'
+                                 'however the default value is True for backwards compatibility.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -204,6 +211,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._fit_option = self.getPropertyValue('ElasticPeakFitting')
         self._group_by = self.getProperty('GroupPixelsBy').value
         self._pulse_chopper = self.getPropertyValue('PulseChopper')
+        self._group_detectors = self.getProperty('GroupDetectors').value
 
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == N_PIXELS_PER_TUBE):
             self._use_map_file = True
@@ -379,13 +387,13 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 _extract_workspace(self._ws, left, 0, int(size/2))
                 _extract_workspace(self._ws, right, int(size/2), size)
                 DeleteWorkspace(self._ws)
-                self._reduce_one_wing(left)
-                self._reduce_one_wing(right)
+                self._reduce_one_wing_doppler(left)
+                self._reduce_one_wing_doppler(right)
                 GroupWorkspaces(InputWorkspaces=[left,right],OutputWorkspace=self._red_ws)
 
             elif self._mirror_sense == 16:    # one wing
 
-                self._reduce_one_wing(self._ws)
+                self._reduce_one_wing_doppler(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
 
         self.setProperty('OutputWorkspace',self._red_ws)
@@ -593,6 +601,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=int(N_PIXELS_PER_TUBE/2))
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
+        if self._group_detectors:
+            self._do_group_detectors(ws)
         GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
 
@@ -608,9 +618,19 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 pattern += str(start)+'-'+str(end)+','
         return pattern[:-1]
 
-    def _reduce_one_wing(self, ws):
+    def _do_group_detectors(self, ws):
         """
-        Reduces given workspace assuming it is one wing already
+        Groups the pixels either tube by tube (default), or by user given range or by user given grouping file
+        @param ws : the workspace to group
+        """
+        if self._use_map_file:
+            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file)
+        else:
+            self._group_detectors_with_range(ws)
+
+    def _reduce_one_wing_doppler(self, ws):
+        """
+        Reduces given workspace in doppler mode assuming it is one wing already
         @param ws :: input workspace name
         """
 
@@ -618,10 +638,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=mon, WorkspaceIndex=0)
 
-        if self._use_map_file:
-            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file)
-        else:
-            self._group_detectors_with_range(ws)
+        if self._group_detectors:
+            self._do_group_detectors(ws)
 
         xmin, xmax = self._monitor_zero_range(mon)
 

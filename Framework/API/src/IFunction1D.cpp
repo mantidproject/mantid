@@ -44,7 +44,7 @@ void IFunction1D::function(const FunctionDomain &domain,
                 histoDomain->getPointerAt(0), histoDomain->size());
     return;
   }
-  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  const auto *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
   if (!d1d) {
     throw std::invalid_argument("Unexpected domain in IFunction1D");
   }
@@ -60,7 +60,7 @@ void IFunction1D::functionDeriv(const FunctionDomain &domain,
                           histoDomain->getPointerAt(0), histoDomain->size());
     return;
   }
-  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  const auto *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
   if (!d1d) {
     throw std::invalid_argument("Unexpected domain in IFunction1D");
   }
@@ -69,7 +69,7 @@ void IFunction1D::functionDeriv(const FunctionDomain &domain,
 
 void IFunction1D::derivative(const FunctionDomain &domain,
                              FunctionValues &values, const size_t order) const {
-  const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
+  const auto *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
   if (!d1d) {
     throw std::invalid_argument("Unexpected domain in IFunction1D");
   }

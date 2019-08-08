@@ -46,6 +46,7 @@ class CodeEditorTabWidget(QTabWidget):
         plus_button = QPushButton(self)
         plus_button.setObjectName(self.NEW_EDITOR_PLUS_BTN_OBJECT_NAME)
         plus_button.clicked.connect(parent.plus_button_clicked)
+        plus_button.setShortcut('Ctrl+N')
         plus_button.setIcon(get_icon("mdi.plus", "black", 1.2))
         self.setCornerWidget(plus_button, Qt.TopLeftCorner)
 

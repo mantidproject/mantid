@@ -843,7 +843,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     double cd1 = powerSpec[i] / noise;
     double cd2 = log(cd1);
     wf[i] = cd1 / (1.0 + cd1);
-    double j = static_cast<double>(i + 1);
+    auto j = static_cast<double>(i + 1);
     xx += j * j;
     xy += j * cd2;
     ym += cd2;
@@ -858,7 +858,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     }
 
     // high frequency filter values: smooth decreasing function
-    double ri0f = static_cast<double>(i0 + 1);
+    auto ri0f = static_cast<double>(i0 + 1);
     double xm = (1.0 + ri0f) / 2;
     ym /= ri0f;
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
@@ -871,8 +871,8 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     // second part of the filter
     double c0, c1, c2, c3;
     {
-      double x0 = double(i0 + 1);
-      double x1 = double(n + 1);
+      auto x0 = double(i0 + 1);
+      auto x1 = double(n + 1);
       double sigma = g_tolerance / noise / 10;
       double s = sigma / (1.0 - sigma);
       double m1 = log(s);
@@ -907,7 +907,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
 
     for (size_t i = i0; i < n; ++i) {
       // double s = exp(a1*static_cast<double>(i+1)+b1);
-      double s = double(i + 1);
+      auto s = double(i + 1);
       s = c0 + s * (c1 + s * (c2 + s * c3));
       if (s > 100.0) {
         wf[i] = 1.0;

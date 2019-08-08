@@ -153,8 +153,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   // Normalize the dark current and data to counting time
   double scaling_factor = 1.0;
   if (inputWS->run().hasProperty("duration")) {
-    double duration = inputWS->run().getPropertyValueAsType<double>("duration");
-    double dark_duration =
+    auto duration = inputWS->run().getPropertyValueAsType<double>("duration");
+    auto dark_duration =
         darkWS->run().getPropertyValueAsType<double>("duration");
     ;
     scaling_factor = duration / dark_duration;
@@ -166,9 +166,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     double dark_duration = dp->getStatistics().duration;
     scaling_factor = duration / dark_duration;
   } else if (inputWS->run().hasProperty("timer")) {
-    double duration = inputWS->run().getPropertyValueAsType<double>("timer");
-    double dark_duration =
-        darkWS->run().getPropertyValueAsType<double>("timer");
+    auto duration = inputWS->run().getPropertyValueAsType<double>("timer");
+    auto dark_duration = darkWS->run().getPropertyValueAsType<double>("timer");
     ;
     scaling_factor = duration / dark_duration;
   } else {
@@ -202,15 +201,15 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Scale the dark counts to the bin width and perform subtraction
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  const int numberOfDarkSpectra =
+  const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numberOfDarkSpectra =
       static_cast<int>(scaledDarkWS->getNumberHistograms());
   if (numberOfSpectra != numberOfDarkSpectra) {
     g_log.error() << "Incompatible number of pixels between sample run and "
                      "dark current\n";
   }
-  const int nBins = static_cast<int>(inputWS->readY(0).size());
-  const int xLength = static_cast<int>(inputWS->readX(0).size());
+  const auto nBins = static_cast<int>(inputWS->readY(0).size());
+  const auto xLength = static_cast<int>(inputWS->readX(0).size());
   if (xLength != nBins + 1) {
     g_log.error() << "The input workspaces are expected to be histograms\n";
   }

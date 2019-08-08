@@ -16,7 +16,6 @@ Functionality for unpacking mantid objects for plotting with matplotlib.
 from __future__ import (absolute_import, division, print_function)
 
 from collections import Iterable
-
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
 from matplotlib.colors import Colormap
@@ -27,6 +26,9 @@ from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
+
+from mantid.plots import helperfunctions, plotfunctions
+from mantid.plots import plotfunctions3D
 
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
@@ -45,6 +47,7 @@ except ImportError:
     # where there are multiple versions of matplotlib installed across the
     # system.
     import sys
+
     del sys.modules['mpl_toolkits']
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 
@@ -54,6 +57,10 @@ from mantid.plots import helperfunctions, plotfunctions
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots import plotfunctions3D
 from mantid.plots.scales import PowerScale, SquareScale
+
+
+BIN_AXIS = 0
+SPEC_AXIS = 1
 
 
 def plot_decorator(func):
@@ -68,6 +75,7 @@ def plot_decorator(func):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
         return func_value
+
     return wrapper
 
 
@@ -76,19 +84,36 @@ class _WorkspaceArtists(object):
     from a workspace. It allows for removal and replacement of said artists
 
     """
-    def __init__(self, artists, data_replace_cb, is_normalized,
-                 spec_num=None):
+    def __init__(self, artists, data_replace_cb, is_normalized, workspace_name=None,
+                 spec_num=None, is_spec=True):
         """
         Initialize an instance
         :param artists: A reference to a list of artists "attached" to a workspace
         :param data_replace_cb: A reference to a callable with signature (artists, workspace) -> new_artists
         :param is_normalized: bool specifying whether the line being plotted is a distribution
+        :param workspace_name: String. The name of the associated workspace
         :param spec_num: The spectrum number of the spectrum used to plot the artist
+        :param is_spec: True if spec_num represents a spectrum rather than a bin
         """
         self._set_artists(artists)
         self._data_replace_cb = data_replace_cb
+        self.workspace_name = workspace_name
         self.spec_num = spec_num
+        self.is_spec = is_spec
+        self.workspace_index = self._get_workspace_index()
         self.is_normalized = is_normalized
+
+    def _get_workspace_index(self):
+        """Get the workspace index (spectrum or bin index) of the workspace artist"""
+        if self.spec_num is None or self.workspace_name is None:
+            return None
+        try:
+            if self.is_spec:
+                return ads.retrieve(self.workspace_name).getIndexFromSpectrumNumber(self.spec_num)
+            else:
+                return self.spec_num
+        except KeyError:  # Return None if the workspace is not in the ADS
+            return None
 
     def remove(self, axes):
         """
@@ -243,16 +268,26 @@ class MantidAxes(Axes):
         return mantid_axes
 
     @staticmethod
+    def is_axis_of_type(axis_type, kwargs):
+        if kwargs.get('axis', None) is not None:
+            return kwargs.get('axis', None) == axis_type
+        return axis_type == SPEC_AXIS
+
+    @staticmethod
     def get_spec_num_from_wksp_index(workspace, wksp_index):
         return workspace.getSpectrum(wksp_index).getSpectrumNo()
 
     @staticmethod
-    def get_spec_number(workspace, kwargs):
+    def get_spec_number_or_bin(workspace, kwargs):
         if kwargs.get('specNum', None) is not None:
             return kwargs['specNum']
         elif kwargs.get('wkspIndex', None) is not None:
-            return MantidAxes.get_spec_num_from_wksp_index(workspace,
-                                                           kwargs['wkspIndex'])
+            # If wanting to plot a bin
+            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+                return kwargs['wkspIndex']
+            # If wanting to plot a spectrum
+            else:
+                return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
             return None
 
@@ -265,8 +300,15 @@ class MantidAxes(Axes):
                         return ads.retrieve(ws_name), ws_artists.spec_num
         raise ValueError("Artist: '{}' not tracked by axes.".format(artist))
 
+    def get_artist_normalization_state(self, artist):
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ws_artists.is_normalized
+
     def track_workspace_artist(self, workspace, artists, data_replace_cb=None,
-                               spec_num=None, is_normalized=None):
+                               spec_num=None, is_normalized=None, is_spec=True):
         """
         Add the given workspace's name to the list of workspaces
         displayed on this Axes instance
@@ -278,6 +320,7 @@ class MantidAxes(Axes):
         :param is_normalized: bool. The line being plotted is normalized by bin width
             This can be from either a distribution workspace or a workspace being
             plotted as a distribution
+        :param is_spec: bool. True if spec_num represents a spectrum, and False if it is a bin index
         :returns: The artists variable as it was passed in.
         """
         name = workspace.name()
@@ -288,8 +331,8 @@ class MantidAxes(Axes):
             artist_info = self.tracked_workspaces.setdefault(name, [])
 
             artist_info.append(_WorkspaceArtists(artists, data_replace_cb,
-                                                 is_normalized,
-                                                 spec_num))
+                                                 is_normalized, name,
+                                                 spec_num, is_spec))
             self.check_axes_distribution_consistency()
         return artists
 
@@ -361,13 +404,6 @@ class MantidAxes(Axes):
             if is_empty:
                 is_empty_list.append(workspace_name)
 
-        # Catch any artists that are not tracked
-        for artist in self.artists + self.lines + self.containers + self.images:
-            if unary_predicate(artist):
-                artist.remove()
-                if isinstance(artist, ErrorbarContainer):
-                    self.containers.remove(artist)
-
         for workspace_name in is_empty_list:
             self.tracked_workspaces.pop(workspace_name)
 
@@ -423,15 +459,17 @@ class MantidAxes(Axes):
         For keywords related to workspaces, see :func:`plotfunctions.plot` or
         :func:`plotfunctions.errorbar`
         """
+        kwargs['distribution'] = not self.get_artist_normalization_state(artist)
+
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         self.remove_artists_if(lambda art: art == artist)
         workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
+
         if errorbars:
-            new_artist = self.errorbar(workspace, wkspIndex=workspace_index,
-                                       **kwargs)
+            new_artist = self.errorbar(workspace, wkspIndex=workspace_index, **kwargs)
         else:
-            new_artist = self.plot(workspace, wkspIndex=workspace_index,
-                                   **kwargs)
+            new_artist = self.plot(workspace, wkspIndex=workspace_index, **kwargs)
         return new_artist
 
     def relim(self, visible_only=True):
@@ -458,8 +496,10 @@ class MantidAxes(Axes):
         Checks the known artist containers to see if anything exists within them
         :return: True if no artists exist, false otherwise
         """
+
         def _empty(container):
             return len(container) == 0
+
         return (_empty(axes.lines) and _empty(axes.images) and
                 _empty(axes.collections) and _empty(axes.containers))
 
@@ -562,7 +602,7 @@ class MantidAxes(Axes):
                 return artists
 
             workspace = args[0]
-            spec_num = self.get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(
                 workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or workspace.isDistribution()
@@ -576,7 +616,7 @@ class MantidAxes(Axes):
 
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
-                _data_update, spec_num, is_normalized)
+                _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
 
             self.set_autoscaley_on(True)
             return artist
@@ -679,7 +719,7 @@ class MantidAxes(Axes):
                 return container_new
 
             workspace = args[0]
-            spec_num = self.get_spec_number(workspace, kwargs)
+            spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             is_normalized, kwargs = get_normalize_by_bin_width(workspace, self,
                                                                **kwargs)
 
@@ -688,7 +728,7 @@ class MantidAxes(Axes):
 
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
-                _data_update, spec_num, is_normalized)
+                _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
 
             self.set_autoscaley_on(True)
             return artist
@@ -787,6 +827,7 @@ class MantidAxes(Axes):
             def _update_data(artists, workspace):
                 return self._redraw_colorplot(plotfunctions.imshow,
                                               artists, workspace, **kwargs)
+
             workspace = args[0]
             return self.track_workspace_artist(workspace,
                                                plotfunctions.imshow(self, *args, **kwargs),
@@ -812,6 +853,7 @@ class MantidAxes(Axes):
                                                   artists, workspace, **new_kwargs)
                 return self._redraw_colorplot(plotfunctions_func,
                                               artists, workspace, **kwargs)
+
             workspace = args[0]
             # We return the last mesh so the return type is a single artist like the standard Axes
             artists = self.track_workspace_artist(workspace,
@@ -1009,6 +1051,27 @@ class MantidAxes(Axes):
         mappable.colorbar = cb
         mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
         cb.update_normal(mappable)
+
+    def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):
+        """
+        Finds a curve from the same workspace and index, then removes it from the creation args.
+
+        :param workspace_name: Name of the workspace from which the curve was plotted
+        :type workspace_name: str
+        :param workspace_index: Index in the workspace that contained the data
+        :type workspace_index: int
+        :param spec_num: Spectrum number that contained the data. Used if the workspace was plotted using specNum kwarg.
+                         Workspace index has priority if both are provided.
+        :type spec_num: int
+        :raises ValueError: if the curve does not exist in the creation_args of the axis
+        :returns: None
+        """
+        for index, creation_arg in enumerate(self.creation_args):  # type: int, dict
+            if workspace_name == creation_arg["workspaces"]:
+                if creation_arg.get("wkspIndex", -1) == workspace_index or creation_arg.get("specNum", -1) == spec_num:
+                    del self.creation_args[index]
+                    return
+        raise ValueError("Curve does not have existing creation args")
 
 
 class MantidAxes3D(Axes3D):

@@ -11,6 +11,7 @@
 
 #include "IndexTypes.h"
 #include "IndirectFitPlotModel.h"
+#include "IndirectPlotter.h"
 
 #include "IIndirectFitPlotView.h"
 #include "LazyAsyncRunner.h"
@@ -23,7 +24,8 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IIndirectFitPlotView *view);
+                           IIndirectFitPlotView *view,
+                           IPyRunner *pythonRunner = nullptr);
 
   DatasetIndex getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
@@ -101,7 +103,7 @@ private:
   void updateBackgroundSelector();
   void emitSelectedFitDataChanged();
 
-  std::string getPlotString(WorkspaceIndex spectrum) const;
+  void plotSpectrum(WorkspaceIndex spectrum) const;
 
   std::unique_ptr<IndirectFitPlotModel> m_model;
   IIndirectFitPlotView *m_view;
@@ -109,6 +111,7 @@ private:
   bool m_plotGuessInSeparateWindow;
   MantidQt::API::PythonRunner m_pythonRunner;
   QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;
+  std::unique_ptr<IndirectPlotter> m_plotter;
 };
 
 } // namespace IDA

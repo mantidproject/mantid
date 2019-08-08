@@ -14,7 +14,7 @@ import platform
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Gem
+from isis_powder import Gem, SampleDetails
 
 DIRS = config['datasearch.directories'].split(';')
 
@@ -70,20 +70,17 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusTestMixin(object):
     focus_results = None
     existing_config = config['datasearch.directories']
 
     def requiredFiles(self):
         return _gen_required_files()
 
-    def runTest(self):
+    def doTest(self, absorb_corrections):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus()
-
-    def validate(self):
-        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
+        self.focus_results = run_focus(absorb_corrections)
 
     def cleanup(self):
         try:
@@ -92,6 +89,24 @@ class FocusTest(systemtesting.MantidSystemTest):
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
+
+
+class FocusTestNoAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        self.doTest(absorb_corrections=False)
+
+    def validate(self):
+        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
+
+
+class FocusTestWithAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        self.doTest(absorb_corrections=True)
+
+    def validate(self):
+        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty_abscorr.nxs"
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
@@ -149,7 +164,7 @@ def run_vanadium_calibration():
     return splined_ws
 
 
-def run_focus():
+def run_focus(absorb_corrections):
     run_number = 83605
     sample_empty = 83608  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
@@ -161,8 +176,15 @@ def run_focus():
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(mode="PDF")
+    if absorb_corrections:
+
+        sample = SampleDetails(height=5.0, radius=0.3, center=[0,0,0], shape='cylinder')
+        sample.set_material(chemical_formula='(Li7)14 Mg1.05 Si2 S12.05',
+                            number_density=0.001641)
+        inst_object.set_sample_details(sample=sample, mode="Rietveld")
+
     return inst_object.focus(run_number=run_number, input_mode="Individual", vanadium_normalisation=True,
-                             do_absorb_corrections=False, sample_empty=sample_empty,
+                             do_absorb_corrections=absorb_corrections, multiple_scattering=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
 
 

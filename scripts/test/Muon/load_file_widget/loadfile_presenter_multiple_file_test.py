@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 import six
 
@@ -45,7 +45,8 @@ class IteratorWithException:
     next = __next__
 
 
-class LoadFileWidgetPresenterMultipleFileModeTest(GuiTest):
+@start_qapplication
+class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
     def run_test_with_and_without_threading(test_function):
         def run_twice(self):
             test_function(self)

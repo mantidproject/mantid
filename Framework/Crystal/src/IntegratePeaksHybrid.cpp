@@ -250,7 +250,7 @@ void IntegratePeaksHybrid::exec() {
                              "the image. This could be down to your Threshold "
                              "settings.\n";
     } else {
-      const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
+      const auto labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();
       ICluster::ClusterIntegratedValues integratedValues =
           cluster->integrate(localImage);

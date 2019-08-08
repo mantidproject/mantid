@@ -35,8 +35,6 @@ private slots:
   void sqwAlgDone(bool error);
 
   void runClicked();
-  void plotSpectrumClicked();
-  void plotContourClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -53,15 +51,8 @@ private:
 
   std::size_t getOutWsNumberOfSpectra() const;
 
-  void setPlotSpectrumIndexMax(int maximum);
-
   void setRunEnabled(bool enabled);
-  void setPlotSpectrumEnabled(bool enabled);
-  void setPlotContourEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
-  void setPlotSpectrumIsPlotting(bool plotting);
-  void setPlotContourIsPlotting(bool plotting);
 
   Ui::IndirectSqw m_uiForm;
 };

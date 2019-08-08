@@ -418,7 +418,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
 
   //! Find data range that satisfies prominence criterion: im < ipk < ip will be
   // nearest points that satisfy this
-  int64_t im = static_cast<int64_t>(iPeak - 1);
+  auto im = static_cast<int64_t>(iPeak - 1);
   for (; im >= 0; --im) {
     const double ratio = (Ys[im] - bkg_val) / peakY;
     const double ratio_err =
@@ -543,7 +543,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   double hby2 = 0.5 * peak_y[ipk_int];
   double xp_hh(0);
 
-  int64_t nyvals = static_cast<int64_t>(peak_y.size());
+  auto nyvals = static_cast<int64_t>(peak_y.size());
   if (peak_y[nyvals - 1] < hby2) {
     int64_t ip1(0), ip2(0);
     for (int64_t i = ipk_int; i < nyvals; ++i) {
@@ -745,7 +745,7 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
     double err_hi = e[mu] * (x[mu - 1] - xneff);
     integral_err += err_lo * err_lo + err_hi * err_hi;
   } else {
-    for (int i = static_cast<int>(ml); i < mu; ++i) {
+    for (auto i = static_cast<int>(ml); i < mu; ++i) {
       integral_val += (s[i + 1] + s[i]) * (x[i + 1] - x[i]);
       if (i < mu - 1) {
         double ierr = e[i + 1] * (x[i + 2] - x[i]);

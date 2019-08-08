@@ -368,8 +368,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
       if (_d0 >= m_d0Min && _d0 <= m_d0Max && _d1 >= m_d1Min &&
           _d1 <= m_d1Max) // Check that the calculated ki and kf are in range
       {
-        const int outIndexX = static_cast<int>((gradD0 * _d0) + cxToIndex);
-        const int outIndexZ = static_cast<int>((gradD1 * _d1) + cyToIndex);
+        const auto outIndexX = static_cast<int>((gradD0 * _d0) + cxToIndex);
+        const auto outIndexZ = static_cast<int>((gradD1 * _d1) + cyToIndex);
 
         ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
         ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];

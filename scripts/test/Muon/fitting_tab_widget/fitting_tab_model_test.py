@@ -10,10 +10,11 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class FittingTabModelTest(GuiTest):
+@start_qapplication
+class FittingTabModelTest(unittest.TestCase):
     def setUp(self):
         self.model = FittingTabModel(setup_context())
 
@@ -27,8 +28,8 @@ class FittingTabModelTest(GuiTest):
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_workspaces MA/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc; Workspace'
         self.model.function_name = 'GausOsc'
 
         name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function,
@@ -40,7 +41,7 @@ class FittingTabModelTest(GuiTest):
     def test_create_parameter_table_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_parameter_tables MA/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters; GausOsc'
         self.model.function_name = 'GausOsc'
 
@@ -57,7 +58,7 @@ class FittingTabModelTest(GuiTest):
         parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
 
-        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
+        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared, covariance_matrix = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
             parameter_dict)
 
         self.assertAlmostEqual(parameter_table.row(0)['Value'], 5.0)
@@ -85,7 +86,7 @@ class FittingTabModelTest(GuiTest):
             ' n = 0, A0 = 0,$domains = i;name = Polynomial, n = 0, A0 = 0,'
             '$domains = i;name = Polynomial, n = 0, A0 = 0,$domains = i;'
             'name = Polynomial, n = 0, A0 = 0,$domains = i')
-        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_workspaces MA/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; Polynomial/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
         self.model.function_name = 'Polynomial'
 

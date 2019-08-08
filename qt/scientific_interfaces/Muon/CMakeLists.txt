@@ -188,15 +188,15 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
-					 ${PYTHON_LIBRARIES}
+                     ${PYTHON_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-					 MantidQtWidgetsMplCpp
+     		     MantidQtWidgetsMplCpp
                      MantidQtWidgetsPlotting
                    INSTALL_DIR_BASE
-                     ${PLUGINS_DIR}
+                     ${WORKBENCH_PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
                      @loader_path/../../plugins/qt5

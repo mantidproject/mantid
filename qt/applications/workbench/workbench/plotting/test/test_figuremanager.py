@@ -12,12 +12,21 @@ try:
 except ImportError:
     from mock import MagicMock, patch
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
 
 
-class FigureManagerWorkbenchTest(GuiTest):
+class MockLine2d(object):
+    def __init__(self, y):
+        self.y = y
+
+    def get_ydata(self):
+        return self.y
+
+
+@start_qapplication
+class FigureManagerWorkbenchTest(unittest.TestCase):
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_construction(self, mock_qappthread):

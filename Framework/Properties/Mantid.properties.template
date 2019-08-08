@@ -234,3 +234,7 @@ projectRecovery.secondsBetween = 60
 
 # The number of checkpoints to retain in the recovery folder
 projectRecovery.numberOfCheckpoints = 5
+
+# The size of the project before a warning is given in bytes.
+# 10 GB = 10737418240 bytes
+projectSaving.warningSize = 10737418240

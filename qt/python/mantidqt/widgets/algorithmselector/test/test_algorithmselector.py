@@ -10,16 +10,16 @@
 from __future__ import absolute_import
 
 from collections import Counter, namedtuple
-
-import qtpy
-from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
+import qtpy
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
-from mantidqt.utils.qt.testing import select_item_in_combo_box, select_item_in_tree, GuiTest
+from mantid.py3compat.mock import Mock, patch, call
+from mantidqt.utils.qt.testing import (select_item_in_combo_box,
+                                       select_item_in_tree, start_qapplication)
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
@@ -79,7 +79,8 @@ createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'
 
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
-class WidgetTest(GuiTest):
+@start_qapplication
+class WidgetTest(unittest.TestCase):
 
     # def setUp(self):
     #     self.getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors

@@ -18,10 +18,11 @@ if sys.version_info.major < 2:
     from unittest import mock
 else:
     import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class MuonDataContextTest(GuiTest):
+@start_qapplication
+class MuonDataContextTest(unittest.TestCase):
     def setUp(self):
         setup_context_for_tests(self)
         self.gui_variable_observer = Observer()

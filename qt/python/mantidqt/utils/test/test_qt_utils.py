@@ -22,11 +22,12 @@ try:
 except ImportError:
     NEW_STYLE_SIGNAL = True
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt import add_actions, create_action
 
 
-class CreateActionTest(GuiTest):
+@start_qapplication
+class CreateActionTest(unittest.TestCase):
 
     def test_parent_and_name_only_required(self):
         class Parent(QObject):
@@ -75,7 +76,8 @@ class CreateActionTest(GuiTest):
         self.assertEqual(Qt.WindowShortcut, action.shortcutContext())
 
 
-class AddActionsTest(GuiTest):
+@start_qapplication
+class AddActionsTest(unittest.TestCase):
 
     def test_add_actions_with_qmenu_target(self):
         test_act_1 = create_action(None, "Test Action 1")

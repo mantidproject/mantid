@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTable as silxPT, PeriodicTableItem
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
@@ -17,7 +17,8 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import Pe
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 
 
-class PeriodicTablePresenterTest(GuiTest):
+@start_qapplication
+class PeriodicTablePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self._model = mock.create_autospec(PeriodicTableModel)

@@ -187,7 +187,7 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
     complex<double> cr = r;
 
     for (size_t k = 0; k < 150; ++k) {
-      double dk = double(k);
+      auto dk = double(k);
       cr = -cr * dk * z / ((dk + 2.0) * (dk + 2.0));
       e1 += cr;
       if (abs(cr) < abs(e1) * 1.0E-15) {

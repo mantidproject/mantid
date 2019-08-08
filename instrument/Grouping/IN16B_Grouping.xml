@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<detector-grouping instrument="IN16B"> 
-  <group name="psd1"> <ids val="2-129"/> </group> 
-  <group name="psd2"> <ids val="130-257"/> </group> 
-  <group name="psd3"> <ids val="258-385"/> </group> 
-  <group name="psd4"> <ids val="386-513"/> </group> 
-  <group name="psd5"> <ids val="514-641"/> </group> 
-  <group name="psd6"> <ids val="642-769"/> </group> 
-  <group name="psd7"> <ids val="770-897"/> </group> 
-  <group name="psd8"> <ids val="898-1025"/> </group> 
-  <group name="psd9"> <ids val="1026-1153"/> </group> 
-  <group name="psd10"> <ids val="1154-1281"/> </group> 
-  <group name="psd11"> <ids val="1282-1409"/> </group> 
-  <group name="psd12"> <ids val="1410-1537"/> </group> 
-  <group name="psd13"> <ids val="1538-1665"/> </group> 
-  <group name="psd14"> <ids val="1666-1793"/> </group> 
-  <group name="psd15"> <ids val="1794-1921"/> </group> 
-  <group name="psd16"> <ids val="1922-2049"/> </group> 
+<detector-grouping instrument="IN16B">
+  <group name="psd1"> <detids val="1-128"/> </group>
+  <group name="psd2"> <detids val="129-256"/> </group>
+  <group name="psd3"> <detids val="257-384"/> </group>
+  <group name="psd4"> <detids val="385-512"/> </group>
+  <group name="psd5"> <detids val="513-640"/> </group>
+  <group name="psd6"> <detids val="641-768"/> </group>
+  <group name="psd7"> <detids val="769-896"/> </group>
+  <group name="psd8"> <detids val="897-1024"/> </group>
+  <group name="psd9"> <detids val="1025-1152"/> </group>
+  <group name="psd10"> <detids val="1153-1280"/> </group>
+  <group name="psd11"> <detids val="1281-1408"/> </group>
+  <group name="psd12"> <detids val="1409-1536"/> </group>
+  <group name="psd13"> <detids val="1537-1664"/> </group>
+  <group name="psd14"> <detids val="1665-1792"/> </group>
+  <group name="psd15"> <detids val="1793-1920"/> </group>
+  <group name="psd16"> <detids val="1921-2048"/> </group>
 
-  <group name="tube1"> <ids val="2050"/> </group>
-  <group name="tube2"> <ids val="2051"/> </group>
+  <group name="tube1"> <detids val="2049"/> </group>
+  <group name="tube2"> <detids val="2050"/> </group>
 
   <!-- There are 2 SD active, though 8 slots available
-  <group name="tube3"><ids val="2052"/></group>
-  <group name="tube4"><ids val="2053"/> </group>
-  <group name="tube5"><ids val="2054"/></group>
-  <group name="tube6"><ids val="2055"/> </group>
-  <group name="tube7"><ids val="2056"/></group>
-  <group name="tube8"><ids val="2057"/> </group>
+  <group name="tube3"><detids val="2051"/></group>
+  <group name="tube4"><detids val="2052"/> </group>
+  <group name="tube5"><detids val="2053"/></group>
+  <group name="tube6"><detids val="2054"/> </group>
+  <group name="tube7"><detids val="2055"/></group>
+  <group name="tube8"><detids val="2056"/> </group>
   -->
 </detector-grouping>

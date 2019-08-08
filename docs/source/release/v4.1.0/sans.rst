@@ -5,8 +5,6 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-:ref:`Release 4.1.0 <v4.1.0>`
-
 ISIS SANS Interface
 -------------------
 
@@ -43,7 +41,10 @@ Bug Fixes
 - The algorithm :ref:`Load <algm-Load>` can now load NXcanSAS files.
 - You can now process in **memory** mode with no file type buttons selected. A warning box will open if you process with no file types while in **file** or **both** mode, and processing will not continue.
 - A bug in which the final column in a batch file was sometimes ignored if empty, and therefore impossible to load, has been fixed.
+- The differences between non-compatibility and compatibility modes has been minimised. Compatibility mode can now be turned off in the settings tab. When off, workspaces stay as EventWorkspaces until the penultimate stage of **SANSReductionCore**. Bin masking is not performed until workspace has been converted to a histogram.
+- When adding files, bad proton charges in run logs are identified and automatically corrected.
 - A bug in which a row was added if the only row is the table was erased, has been fixed.
+- An issue where adding runs in overlay mode where one or more runs had a bad proton charge led to incorrect data has been fixed. The erroneous proton charge is replaced with an estimated result. Note that currently only the proton charge log is corrected so many of the other logs particularly when filtered by period are still corrupted in the resulting added file.
 - A bug with the centre of mass beam centre calculation that prevented it running has been fixed.
 - A bug preventing the beam centre finder from plotting workspaces in the workbench has been fixed.
 
@@ -61,3 +62,5 @@ Improved
 ########
 - Added support for ``BIOSANS``, ``EQSANS``, and ``GPSANS`` to :ref:`MaskBTP <algm-MaskBTP>`. This includes an additional parameter ``Components`` to mask a particular list of instrument components.
 
+
+:ref:`Release 4.1.0 <v4.1.0>`

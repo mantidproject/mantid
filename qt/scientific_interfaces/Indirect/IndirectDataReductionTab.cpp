@@ -34,6 +34,16 @@ IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI,
 
 IndirectDataReductionTab::~IndirectDataReductionTab() {}
 
+void IndirectDataReductionTab::setOutputPlotOptionsPresenter(
+    std::unique_ptr<IndirectPlotOptionsPresenter> presenter) {
+  m_plotOptionsPresenter = std::move(presenter);
+}
+
+void IndirectDataReductionTab::setOutputPlotOptionsWorkspaces(
+    std::vector<std::string> const &outputWorkspaces) {
+  m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
+}
+
 void IndirectDataReductionTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
@@ -41,6 +51,7 @@ void IndirectDataReductionTab::runTab() {
     emit updateRunButton(false, "disable", "Running...",
                          "Running data reduction...");
     try {
+      m_plotOptionsPresenter->clearWorkspaces();
       run();
     } catch (std::exception const &ex) {
       m_tabRunning = false;
@@ -68,23 +79,13 @@ void IndirectDataReductionTab::tabExecutionComplete(bool error) {
 }
 
 /**
- * Loads an empty instrument into a workspace (__empty_INST) unless the
- * workspace already exists.
+ * Gets the current instrument workspace
  *
- * If an analyser and reflection are supplied then the corresponding IPF is also
- * loaded.
- *
- * @param instrumentName Name of the instrument to load
- * @param analyser Analyser being used (optional)
- * @param reflection Relection being used (optional)
  * @returns Pointer to instrument workspace
  */
 Mantid::API::MatrixWorkspace_sptr
-IndirectDataReductionTab::loadInstrumentIfNotExist(std::string instrumentName,
-                                                   std::string analyser,
-                                                   std::string reflection) {
-  return m_idrUI->loadInstrumentIfNotExist(instrumentName, analyser,
-                                           reflection);
+IndirectDataReductionTab::instrumentWorkspace() const {
+  return m_idrUI->instrumentWorkspace();
 }
 
 /**
@@ -174,9 +175,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   std::map<std::string, double> ranges;
 
   // Get the instrument
-  auto instWs = loadInstrumentIfNotExist(
-      instName.toStdString(), analyser.toStdString(), reflection.toStdString());
-  auto inst = instWs->getInstrument();
+  auto inst = instrumentWorkspace()->getInstrument();
 
   // Get the analyser component
   auto comp = inst->getComponentByName(analyser.toStdString());
@@ -288,15 +287,6 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
  */
 void IndirectDataReductionTab::filterInputData(bool filter) {
   setFileExtensionsByName(filter);
-}
-
-/**
- * Allows the user to turn the plotting of error bars off and on
- *
- * @param errorBars :: true if you want output plots to have error bars
- */
-void IndirectDataReductionTab::setPlotErrorBars(bool errorBars) {
-  IndirectTab::setPlotErrorBars(errorBars);
 }
 
 } // namespace CustomInterfaces

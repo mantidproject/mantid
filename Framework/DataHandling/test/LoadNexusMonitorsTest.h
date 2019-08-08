@@ -77,6 +77,20 @@ public:
                      WS->run().getProperty("Filename")->value());
   }
 
+  void test_with_custom_top_level_entry_name() {
+    LoadNexusMonitors2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Filename", "LARMOR00003368.nxs");
+    alg.setProperty(
+        "NXentryName",
+        "raw_data_1"); // Actual entry name, provided as custom entry
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+  }
+
   void testExecEvent() {
     Mantid::API::FrameworkManager::Instance();
     LoadNexusMonitors ld;

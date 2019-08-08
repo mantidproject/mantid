@@ -244,7 +244,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
       pRootElem->getElementsByTagName("correction");
   for (unsigned long i = 0; i < correctionNodeList->length(); ++i) {
     // For each correction element
-    Element *corr = dynamic_cast<Element *>(correctionNodeList->item(i));
+    auto *corr = dynamic_cast<Element *>(correctionNodeList->item(i));
     if (corr) {
       DateAndTime start(corr->getAttribute("valid-from"));
       DateAndTime end(corr->getAttribute("valid-to"));

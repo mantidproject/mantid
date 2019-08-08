@@ -364,14 +364,16 @@ void Quasi::plotCurrentPreview() {
     auto fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
     checkADSForPlotSaveWorkspace(fitName, false);
     fitName.pop_back();
-    QString QfitWS = QString::fromStdString(fitName + "_");
-    QfitWS += QString::number(m_previewSpec);
+    auto fitWS = fitName + "_";
+    fitWS += std::to_string(m_previewSpec);
     if (program == "Lorentzians")
-      plotSpectra(QfitWS, {0, 1, 2, 3, 4});
+      m_plotter->plotSpectra(fitWS, "0-4");
     else
-      plotSpectra(QfitWS, {0, 1, 2});
+      m_plotter->plotSpectra(fitWS, "0-2");
   } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
+    m_plotter->plotSpectra(
+        m_uiForm.dsSample->getCurrentDataName().toStdString(),
+        std::to_string(m_previewSpec));
   }
 }
 
@@ -522,21 +524,19 @@ void Quasi::plotClicked() {
     auto const probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     // Check workspace exists
     IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
-    QString const QprobWS = QString::fromStdString(probWS);
-    IndirectTab::plotSpectrum(QprobWS, 1, 2);
+    m_plotter->plotSpectra(probWS, "1-2");
   }
 
   auto const resultWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int const numSpectra = (int)resultWS->getNumberHistograms();
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
-  QString const QresultWS = QString::fromStdString(resultName);
   auto const paramNames = {"Amplitude", "FWHM", "Beta"};
   for (std::string const &paramName : paramNames) {
 
     if (plot == paramName || plot == "All") {
-      std::vector<int> spectraIndices = {};
-      for (int i = 0; i < numSpectra; i++) {
+      std::vector<std::size_t> spectraIndices = {};
+      for (auto i = 0u; i < static_cast<std::size_t>(numSpectra); i++) {
         auto axisLabel = resultWS->getAxis(1)->label(i);
 
         auto const found = axisLabel.find(paramName);
@@ -545,10 +545,15 @@ void Quasi::plotClicked() {
 
           if (program == "Lorentzians") {
             if (spectraIndices.size() == 3) {
-              IndirectTab::plotSpectra(QresultWS, spectraIndices);
+              auto const workspaceIndices =
+                  std::to_string(spectraIndices[0]) + "," +
+                  std::to_string(spectraIndices[1]) + "," +
+                  std::to_string(spectraIndices[1]);
+              m_plotter->plotSpectra(resultName, workspaceIndices);
             }
           } else
-            IndirectTab::plotSpectrum(QresultWS, spectraIndices[0]);
+            m_plotter->plotSpectra(resultName,
+                                   std::to_string(spectraIndices[0]));
         }
       }
     }

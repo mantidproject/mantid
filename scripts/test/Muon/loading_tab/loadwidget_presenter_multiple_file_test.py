@@ -9,7 +9,7 @@ import unittest
 from mantid import ConfigService
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
@@ -25,7 +25,8 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPr
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 
 
-class LoadRunWidgetPresenterMultipleFileTest(GuiTest):
+@start_qapplication
+class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()

@@ -194,7 +194,7 @@ void ConvertToYSpace::exec() {
   retrieveInputs();
   createOutputWorkspace();
 
-  const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t nreports = nhist;
   auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
 

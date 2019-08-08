@@ -8,13 +8,13 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from json import dump
 import os
+from json import dump
 
-from mantid.api import AnalysisDataService as ADS
-from mantidqt.project.workspacesaver import WorkspaceSaver
-from mantidqt.project.plotssaver import PlotsSaver
 from mantid import logger
+from mantid.api import AnalysisDataService as ADS
+from mantidqt.project.plotssaver import PlotsSaver
+from mantidqt.project.workspacesaver import WorkspaceSaver
 
 
 class ProjectSaver(object):
@@ -111,8 +111,11 @@ class ProjectWriter(object):
         try:
             with open(self.file_name, "w+") as f:
                 dump(obj=to_save_dict, fp=f)
-        except Exception as e:
+        except KeyboardInterrupt:
             # Catch any exception and log it
-            if isinstance(e, KeyboardInterrupt):
-                raise
-            logger.warning("JSON project file unable to be opened/written to")
+            raise
+        except (IOError, OSError, WindowsError) as e:
+            logger.warning("JSON project file unable to be opened/written to.")
+            logger.debug("Full error: {}".format(e))
+        except Exception as e:
+            logger.warning("Unknown error occurred. Full detail: {}".format(e))

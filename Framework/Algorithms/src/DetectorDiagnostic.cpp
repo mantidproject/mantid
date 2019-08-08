@@ -624,7 +624,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
 
   for (const auto &hists : indexmap) {
     std::vector<double> medianInput;
-    const int nhists = static_cast<int>(hists.size());
+    const auto nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 

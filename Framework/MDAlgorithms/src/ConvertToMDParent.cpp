@@ -305,7 +305,7 @@ ConvertToMDParent::preprocessDetectorsPositions(
   // in direct or indirect mode input ws has to have input energy
   if (Emode == Kernel::DeltaEMode::Direct ||
       Emode == Kernel::DeltaEMode::Indirect) {
-    double m_Ei = TargTableWS->getLogs()->getPropertyValueAsType<double>("Ei");
+    auto m_Ei = TargTableWS->getLogs()->getPropertyValueAsType<double>("Ei");
     if (isNaN(m_Ei)) {
       // Direct mode needs Ei
       if (Emode == Kernel::DeltaEMode::Direct)
@@ -313,12 +313,12 @@ ConvertToMDParent::preprocessDetectorsPositions(
             "Input neutron's energy has to be defined in inelastic mode "));
 
       // Do we have at least something for Indirect?
-      float *eFixed = TargTableWS->getColDataArray<float>("eFixed");
+      auto *eFixed = TargTableWS->getColDataArray<float>("eFixed");
       if (!eFixed)
         throw(std::invalid_argument(
             "Input neutron's energy has to be defined in inelastic mode "));
 
-      uint32_t NDetectors =
+      auto NDetectors =
           TargTableWS->getLogs()->getPropertyValueAsType<uint32_t>(
               "ActualDetectorsNum");
       for (uint32_t i = 0; i < NDetectors; i++)

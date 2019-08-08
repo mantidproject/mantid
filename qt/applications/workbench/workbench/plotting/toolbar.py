@@ -23,6 +23,7 @@ from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
@@ -32,11 +33,11 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
-        ('Print','Print the figure', 'mdi.printer', 'print_figure', None),
+        ('Print', 'Print the figure', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
         ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),

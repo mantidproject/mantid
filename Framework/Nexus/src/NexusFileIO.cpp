@@ -527,7 +527,7 @@ template <typename ColumnT, typename NexusT>
 void NexusFileIO::writeTableColumn(int type, const std::string &interpret_as,
                                    const API::Column &col,
                                    const std::string &columnName) const {
-  const int nRows = static_cast<int>(col.size());
+  const auto nRows = static_cast<int>(col.size());
   int dims_array[1] = {nRows};
 
   auto toNexus = new NexusT[nRows];
@@ -648,7 +648,7 @@ int NexusFileIO::writeNexusTableWorkspace(
     return (2);
   NXopengroup(fileID, group_name, "NXdata");
 
-  int nRows = static_cast<int>(itableworkspace->rowCount());
+  auto nRows = static_cast<int>(itableworkspace->rowCount());
 
   for (size_t i = 0; i < itableworkspace->columnCount(); i++) {
     Column_const_sptr col = itableworkspace->getColumn(i);

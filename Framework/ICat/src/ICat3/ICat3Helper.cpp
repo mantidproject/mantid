@@ -203,7 +203,7 @@ void CICatHelper::saveInvestigationIncludesResponse(
         //
         savetoTableWorkspace((*datafile_citr)->id, t);
 
-        LONG64 fileSize =
+        auto fileSize =
             boost::lexical_cast<LONG64>(*(*datafile_citr)->fileSize);
         savetoTableWorkspace(&fileSize, t);
 

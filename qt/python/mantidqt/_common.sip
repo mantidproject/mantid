@@ -356,6 +356,7 @@ class ManageUserDirectories : QDialog {
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
   static void openUserDirsDialog(QWidget *parent);
+  void setHelpButtonVisible(const bool &visible /TransferThis/ );
 };
 
 // ---------------------------------
@@ -411,6 +412,8 @@ public:
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    void normaliseData(bool on);
+    QMenu *getFitMenu() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -439,6 +442,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+
 };
 
 // ---------------------------------

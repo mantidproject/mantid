@@ -13,10 +13,11 @@ from mantid.api import WorkspaceFactory
 from mantid.py3compat import mock
 from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class SpectraSelectionDialogTest(GuiTest):
+@start_qapplication
+class SpectraSelectionDialogTest(unittest.TestCase):
     _mock_get_icon = None
     _single_spec_ws = None
     _multi_spec_ws = None

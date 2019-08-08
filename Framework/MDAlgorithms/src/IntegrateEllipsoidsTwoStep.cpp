@@ -374,7 +374,7 @@ void IntegrateEllipsoidsTwoStep::qListFromEventWS(Integrate3DEvents &integrator,
 
   m_targWSDescr.m_PreprDetTable = table;
 
-  int numSpectra = static_cast<int>(wksp->getNumberHistograms());
+  auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -472,7 +472,7 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
   else
     m_targWSDescr.m_PreprDetTable = table;
 
-  int numSpectra = static_cast<int>(wksp->getNumberHistograms());
+  auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION

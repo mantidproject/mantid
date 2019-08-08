@@ -9,13 +9,11 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import unittest
-
 from matplotlib import use as mpl_use
+
 mpl_use('Agg')  # noqa
-from matplotlib import rcParams
 from matplotlib.pyplot import figure
 
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog import curvestabwidget as funcs
 
@@ -29,7 +27,7 @@ class CurvePropertiesTest(unittest.TestCase):
             'linestyle': '-.',
             'linewidth': 4,
             'drawstyle': 'steps',
-            'color': 'r',
+            'color': '#ff0000',
             'marker': 'v',
             'markersize': 10,
             'markeredgecolor': 'g',
@@ -89,20 +87,20 @@ class CurvePropertiesTest(unittest.TestCase):
         self.assertEqual('ax1', self.error_props.label)
 
     def test_get_plot_kwargs(self):
-        expected_dict = {'capsize': 0,
-                         'capthick': 1,
+        expected_dict = {'capsize': 0.0,
+                         'capthick': 1.0,
                          'color': '#ff0000',
                          'drawstyle': u'steps',
-                         'ecolor': convert_color_to_hex(rcParams['lines.color']),
-                         'elinewidth': 1,
+                         'ecolor': '#ff0000',
+                         'elinewidth': 1.0,
                          'errorevery': 1,
                          'label': 'ax0',
                          'linestyle': 'dashdot',
-                         'linewidth': 4,
+                         'linewidth': 4.0,
                          'marker': 'triangle_down',
                          'markeredgecolor': '#008000',
                          'markerfacecolor': '#000000',
-                         'markersize': 10,
+                         'markersize': 10.0,
                          'visible': False}
         self.assertEqual(expected_dict, self.props.get_plot_kwargs())
 

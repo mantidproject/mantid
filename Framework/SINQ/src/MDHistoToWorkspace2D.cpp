@@ -72,7 +72,7 @@ void MDHistoToWorkspace2D::exec() {
     outWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outWS->setYUnit("Counts");
 
-  coord_t *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
+  auto *pos = reinterpret_cast<coord_t *>(malloc(m_rank * sizeof(coord_t)));
   memset(pos, 0, m_rank * sizeof(coord_t));
   m_currentSpectra = 0;
   recurseData(inWS, outWS, 0, pos);

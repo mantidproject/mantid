@@ -414,7 +414,7 @@ size_t MDHistoWorkspace::getLinearIndexAtCoord(const coord_t *coords) const {
   size_t linearIndex = 0;
   for (size_t d = 0; d < numDimensions; d++) {
     coord_t x = coords[d] - m_origin[d];
-    size_t ix = size_t(x / m_boxLength[d]);
+    auto ix = size_t(x / m_boxLength[d]);
     if (ix >= m_indexMax[d] || (x < 0))
       return size_t(-1);
     linearIndex += ix * m_indexMaker[d];
@@ -560,7 +560,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
   for (size_t d = 0; d < nd; d++) {
     dirSign[d] = sgn(dir[d]);
   }
-  const size_t BADINDEX = size_t(-1);
+  const auto BADINDEX = size_t(-1);
 
   // Dimensions of the workspace
   boost::scoped_array<size_t> index(new size_t[nd]);
@@ -610,7 +610,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
 
       if (bin_centres && !(linearIndex == std::numeric_limits<size_t>::max() ||
                            this->getIsMaskedAt(linearIndex))) {
-        coord_t bin_centrePos =
+        auto bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
         line.x.push_back(bin_centrePos);
       } else if (!bin_centres)

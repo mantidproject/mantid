@@ -258,7 +258,7 @@ void InstrumentInfo::fillTechniques(const Poco::XML::Element *elem) {
     Poco::AutoPtr<Poco::XML::NodeList> pNL =
         pNL_technique->item(i)->childNodes();
     if (pNL->length() > 0) {
-      Poco::XML::Text *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
+      auto *txt = dynamic_cast<Poco::XML::Text *>(pNL->item(0));
       if (txt) {
         const std::string &tech = txt->getData();
         if (!tech.empty()) {

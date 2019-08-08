@@ -34,6 +34,7 @@ Bug Fixes
 
 - HRPD Absorption corrections now correctly takes into account the thickness of the slab.
 - Pearl no longer produces an output of NaN when long-mode is changed after focusing.
+- Fixed a bug where enabling absorption corrections on GEM raised an error.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` if fixed to load also single point scans.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` no longer errors out if the first chunk has no events
 
@@ -84,7 +85,5 @@ Bug Fixes
 - :ref:`MDNorm <algm-MDNorm>` now checks for consistent binning between the given parameters and the input accumulation workspaces if the latter are given.
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` now only calculates statistics for integer HKL (not satellite peaks) instead of combining. Statistics for satellite peaks will be added later.
 
-Imaging
--------
 
 :ref:`Release 4.1.0 <v4.1.0>`

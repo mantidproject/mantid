@@ -254,6 +254,7 @@ set(SRC_FILES
     src/ReflectometryMomentumTransfer.cpp
     src/ReflectometryReductionOne2.cpp
     src/ReflectometryReductionOneAuto2.cpp
+    src/ReflectometryReductionOneAuto3.cpp
     src/ReflectometrySumInQ.cpp
     src/ReflectometryWorkflowBase.cpp
     src/ReflectometryWorkflowBase2.cpp
@@ -600,6 +601,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
     inc/MantidAlgorithms/ReflectometryReductionOne2.h
     inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
+    inc/MantidAlgorithms/ReflectometryReductionOneAuto3.h
     inc/MantidAlgorithms/ReflectometrySumInQ.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
@@ -948,6 +950,7 @@ set(TEST_FILES
     ReflectometryMomentumTransferTest.h
     ReflectometryReductionOne2Test.h
     ReflectometryReductionOneAuto2Test.h
+    ReflectometryReductionOneAuto3Test.h
     ReflectometrySumInQTest.h
     RegroupTest.h
     RemoveBackgroundTest.h

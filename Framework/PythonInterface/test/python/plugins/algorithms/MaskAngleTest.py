@@ -12,6 +12,7 @@ from mantid.api import *
 from testhelpers import *
 from numpy import *
 
+
 class MaskAngleTest(unittest.TestCase):
 
     def testMaskAngle(self):
@@ -30,7 +31,7 @@ class MaskAngleTest(unittest.TestCase):
     def testMaskAnglePhi(self):
         w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
         AnalysisDataService.add('w',w)
-        masklist = MaskAngle(w,0,45,Angle='Phi')
+        MaskAngle(w,0,45,Angle='Phi')
         detInfo = w.detectorInfo()
         for i in arange(w.getNumberHistograms()):
             if i==0:
@@ -39,13 +40,24 @@ class MaskAngleTest(unittest.TestCase):
                 self.assertFalse(detInfo.isMasked(int(i)))
         DeleteWorkspace(w)
 
+    def testMaskAngleInPlane(self):
+        w_inplane = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
+        AnalysisDataService.add('w_inplane',w_inplane)
+        MaskAngle(w_inplane,-5,5,Angle='InPlane')
+        detInfo = w_inplane.detectorInfo()
+        print('num spectra = {}'.format(w_inplane.getNumberHistograms()))
+        for i in arange(w_inplane.getNumberHistograms()):
+            # the entire instrument is at an in-plane angle of zero degrees
+            self.assertTrue(detInfo.isMasked(int(i)), 'index={}'.format(i))
+        DeleteWorkspace(w_inplane)
+
     def testGroupMaskAngle(self):
         ws1=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('ws1',ws1)
+        AnalysisDataService.add('ws1GMA',ws1)
         ws2=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('ws2',ws2)
+        AnalysisDataService.add('ws2GMA',ws2)
 
-        group = GroupWorkspaces(['ws1', 'ws2'])
+        group = GroupWorkspaces(['ws1GMA', 'ws2GMA'])
         MaskAngle(group, 10, 20)
 
         for w in group:
@@ -70,10 +82,11 @@ class MaskAngleTest(unittest.TestCase):
 
     def testGroupFailNoInstrument(self):
         ws1=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
-        AnalysisDataService.add('ws1',ws1)
+        AnalysisDataService.add('ws1GFNI',ws1)
         ws2 = CreateWorkspace(arange(5), arange(5))
+        AnalysisDataService.add('ws2GFNI',ws2)
 
-        group = GroupWorkspaces(['ws1', 'ws2'])
+        group = GroupWorkspaces(['ws1GFNI', 'ws2GFNI'])
 
         try:
             MaskAngle(group, 10, 20)
@@ -91,7 +104,7 @@ class MaskAngleTest(unittest.TestCase):
         try:
             MaskAngle(w2,-100,20)
             self.fail("Should not have got here. Wrong angle.")
-        except ValueError:
+        except RuntimeError:
             pass
         finally:
             DeleteWorkspace('w2')

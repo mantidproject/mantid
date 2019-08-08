@@ -183,8 +183,8 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
   std::vector<double> tolerancesVector = createTolerancesVector(
       tokenizer.asVector().size(), tolerancesStringVector);
 
-  StringTokenizer::Iterator i = tokenizer.begin();
-  std::vector<double>::iterator j = tolerancesVector.begin();
+  auto i = tokenizer.begin();
+  auto j = tolerancesVector.begin();
 
   for (; i != tokenizer.end() && j != tolerancesVector.end(); ++i, ++j) {
     auto item = *i;

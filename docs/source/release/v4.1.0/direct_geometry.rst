@@ -39,6 +39,13 @@ Interfaces
 New features
 ############
 
+- Improvements to the MSlice interface:
+  - Added a Scale and Rebose operations.
+  - Option to copy a script to the clipboard.
+  - Added "keep open" option to figure quick plot options and plot configuration dialog.
+  - Added an option to use Integration to make a cut rather than Rebin2D or SofQW3.
+  - Various bug fixes around CLI.
+
 
 Improvements
 ############

@@ -67,6 +67,7 @@ set(TEST_FILES
     workbench/test/test_import.py
     workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
+    workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py

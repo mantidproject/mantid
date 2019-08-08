@@ -171,8 +171,7 @@ void CylinderAbsorption::initialiseCachedDistances() {
   if (m_sampleObject->shape() !=
       Geometry::detail::ShapeInfo::GeometryShape::CYLINDER)
     throw std::runtime_error("Sample shape is not a cylinder");
-  const Geometry::CSGObject *shape =
-      dynamic_cast<const Geometry::CSGObject *>(m_sampleObject);
+  const auto *shape = dynamic_cast<const Geometry::CSGObject *>(m_sampleObject);
   if (!shape)
     throw std::runtime_error(
         "Failed to convert shape from IObject to CSGObject");

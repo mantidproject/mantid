@@ -12,14 +12,17 @@ Mantid 4.1.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-**Due to support ending for windows 7 and 8. This is the last release to support Windows 7 or 8.  Releases following this may continue to work for these releases, but will not have been verified or tested by the development team on anythin earlier than Windows 10.
-This is also the final release that will support Ubuntu 16.04.**
+OS Support Changes:
 
+- **Due to support ending for Windows 7 and 8 this is the last release to support Windows 7 or 8.
+  Releases following this may continue to work for these releases, but will not have been verified or tested by the development team on anything earlier than Windows 10.**
+- **This is the final release that will support Ubuntu 16.04.**
+- **This is the final release that will support OSX Yosemite, OSX El Capitan and macOS Sierra.**
 
 We are proud to announce version 4.1.0 of Mantid.
 
 
-We have made significant improvements to support within the Mantid workbench for a number of techniques, adding serval technique specific user interfaces ported ver from Mantidplot.  It also includes a fresh new implmentation of the sliceviewer that merges in a lot of the popular functionality of the spectrum viewer into one capable tool.  This version also introduces the new muon interface that is the result of a long effort to rebuild the interface using modern design and engineering standards, resulting in a much more stable, extensible interface, but also just so much better to use.
+We have made significant improvements to support within the Mantid workbench for a number of techniques, adding several technique specific user interfaces ported over from Mantidplot.  It also includes a fresh new implementation of the sliceviewer that merges in a lot of the popular functionality of the spectrum viewer into one capable tool.  This version also introduces the new muon interface that is the result of a long effort to rebuild the interface using modern design and engineering standards, resulting in a much more stable, extensible interface, but also just so much better to use.
 
 This is just a few of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
@@ -64,7 +67,7 @@ Changes
   - :doc:`MantidPlot <mantidplot>`
 
   - :doc:`MantidWorkbench <mantidworkbench>`
-    
+
 - :doc:`Framework <framework>`
 - :doc:`Diffraction <diffraction>`
 - :doc:`Muon Analysis <muon>`
@@ -88,6 +91,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: http://forum.mantidproject.org
 
-.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A4.1+is%3Amerged
+.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release 4.1"+is%3Amerged
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v4.1.0

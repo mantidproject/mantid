@@ -108,7 +108,7 @@ void GroupingLoader::loadGroupingFromXML(const std::string &filename,
   grouping.groups.resize(groups->length());
 
   for (size_t ig = 0; ig < groups->length(); ig++) {
-    Element *pGroupElem =
+    auto *pGroupElem =
         static_cast<Element *>(groups->item(static_cast<long>(ig)));
 
     if (!pGroupElem->hasAttribute("name"))
@@ -134,7 +134,7 @@ void GroupingLoader::loadGroupingFromXML(const std::string &filename,
   grouping.pairAlphas.resize(pairs->length());
 
   for (size_t ip = 0; ip < pairs->length(); ip++) {
-    Element *pPairElem =
+    auto *pPairElem =
         static_cast<Element *>(pairs->item(static_cast<long>(ip)));
 
     if (!pPairElem->hasAttribute("name"))
