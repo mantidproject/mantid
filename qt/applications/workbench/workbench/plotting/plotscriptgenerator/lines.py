@@ -16,10 +16,10 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, g
 BASE_CREATE_LINE_COMMAND = "plot({})"
 BASE_ERRORBAR_COMMAND = "errorbar({})"
 PLOT_KWARGS = [
-    'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle',
-    'linewidth', 'marker', 'markeredgecolor', 'markeredgewidth',
-    'markerfacecolor', 'markerfacecoloralt', 'markersize', 'markevery',
-    'solid_capstyle', 'solid_joinstyle', 'visible', 'zorder']
+    'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle', 'linewidth', 'marker',
+    'markeredgecolor', 'markeredgewidth', 'markerfacecolor', 'markerfacecoloralt', 'markersize',
+    'markevery', 'solid_capstyle', 'solid_joinstyle', 'visible', 'zorder'
+]
 
 
 def generate_plot_command(artist):
@@ -82,6 +82,8 @@ def _get_mantid_specific_plot_kwargs(artist):
     ax = get_ax_from_curve(artist)
     if artist not in ax.get_tracked_artists():
         return dict()
-    return {'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
-            'distribution': not ax.get_artist_normalization_state(artist),
-            'update_axes_labels': False}
+    return {
+        'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
+        'distribution': not ax.get_artist_normalization_state(artist),
+        'update_axes_labels': False
+    }

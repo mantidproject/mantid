@@ -13,7 +13,8 @@ from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string,
 
 BASE_CREATE_AX_COMMAND = "add_subplot({})"
 ADD_SUBPLOT_KWARGS = [  # kwargs passed to the "add_subplot" command
-    'frame_on', 'label', 'title', 'visible', 'xlabel', 'xscale', 'ylabel', 'yscale']
+    'frame_on', 'label', 'title', 'visible', 'xlabel', 'xscale', 'ylabel', 'yscale'
+]
 
 
 def get_add_subplot_pos_args(ax):
@@ -33,8 +34,7 @@ def get_add_subplot_kwargs(ax):
 def generate_add_subplot_command(ax):
     """Generate command to create an axes"""
     command = BASE_CREATE_AX_COMMAND.format(
-        convert_args_to_string(get_add_subplot_pos_args(ax),
-                               get_add_subplot_kwargs(ax)))
+        convert_args_to_string(get_add_subplot_pos_args(ax), get_add_subplot_kwargs(ax)))
     return command
 
 
