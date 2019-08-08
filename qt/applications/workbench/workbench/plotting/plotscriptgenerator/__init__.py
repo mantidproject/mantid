@@ -29,7 +29,7 @@ def generate_script(fig, exclude_headers=False):
     from a Workspace. The format of the outputted script is as follows:
 
         <Default Workbench script contents (imports)>
-        <Workspace history to recreate Workspaces>
+        <Workspace retrieval from ADS>
         fig = plt.figure()
         ax = fig.add_subplot()
         ax.plot() or ax.errorbar()
