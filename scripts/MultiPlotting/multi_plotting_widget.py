@@ -94,6 +94,10 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def rm_vline(self, subplotName, name):
         self.plots.rm_vline(subplotName, name)
 
+    def remove_line(self, subplot_name, ws_name, spec=1):
+        name = '{}: spec {}'.format(ws_name, spec)
+        self.plots.remove_lines(subplot_name, [name])
+
     # gets initial values for quickEdit
     def set_all_values(self):
         names = self.quickEdit.get_selection()
@@ -122,8 +126,11 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def connectCloseSignal(self, slot):
         self.closeSignal.connect(slot)
 
-    def removeSubplotConnection(self, slot):
+    def remove_subplot_connection(self, slot):
         self.plots.connect_rm_subplot_signal(slot)
+
+    def remove_line_connection(self, slot):
+        self.plots.connect_rm_line_signal(slot)
 
     def disconnectCloseSignal(self):
         self.closeSignal.disconnect()

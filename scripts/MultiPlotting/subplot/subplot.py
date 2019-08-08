@@ -27,6 +27,7 @@ from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 class subplot(QtWidgets.QWidget):
     quickEditSignal = QtCore.Signal(object)
     rmSubplotSignal = QtCore.Signal(object)
+    rmLineSignal = QtCore.Signal(object)
 
     def __init__(self, context):
         super(subplot, self).__init__()
@@ -149,6 +150,12 @@ class subplot(QtWidgets.QWidget):
     def disconnect_rm_subplot_signal(self):
         self.rmSubplotSignal.disconnect()
 
+    def connect_rm_line_signal(self, slot):
+        self.rmLineSignal.connect(slot)
+
+    def disconnect_rm_line_signal(self):
+        self.rmLineSignal.disconnect()
+
     def set_y_autoscale(self, subplotNames, state):
         for subplotName in subplotNames:
             self._context.subplots[subplotName].change_auto(state)
@@ -203,25 +210,32 @@ class subplot(QtWidgets.QWidget):
         self._close_selector_window()
         # create the remove window
         self._rm_window = self._create_rm_window(subplotName=subplotName)
-        self._rm_window.applyRemoveSignal.connect(self._applyRm)
+        self._rm_window.applyRemoveSignal.connect(self._apply_rm)
         self._rm_window.closeEventSignal.connect(self._close_rm_window)
         self._rm_window.setMinimumSize(200, 200)
         self._rm_window.show()
 
-    def _applyRm(self, names):
-        remove_subplot = True
+    def remove_lines(self, subplot_name, line_names):
         # remove the lines from the subplot
-        for name in names:
-            if self._rm_window.getState(name):
-                self._context.subplots[
-                    self._rm_window.subplot].removeLine(name)
-            else:
-                remove_subplot = False
+        for name in line_names:
+            self._context.subplots[subplot_name].removeLine(name)
+
         # if all of the lines have been removed -> delete subplot
-        if remove_subplot:
-            self._remove_subplot(self._rm_window.subplot)
+        if not self._context.get_lines(subplot_name):
+            self._remove_subplot(subplot_name)
         else:
             self.canvas.draw()
+
+        self.rmLineSignal.emit([str(name) for name in line_names])
+
+    def _apply_rm(self, line_names):
+        to_close = []
+        for name in line_names:
+            if self._rm_window.getState(name):
+                to_close.append(name)
+
+        self.remove_lines(self._rm_window.subplot, to_close)
+
         # if no subplots then close plotting window
         if len(self._context.subplots.keys()) == 0:
             self._close_rm_window()

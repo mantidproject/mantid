@@ -26,19 +26,17 @@ class RemovePlotWindow(QtWidgets.QDialog):
         self.table.setColumnWidth(1, 50)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setHorizontalHeaderLabels(
-            ("Line name;Remove").split(";"))
+        self.table.setHorizontalHeaderLabels("Line name;Remove".split(";"))
         table_utils.setTableHeaders(self.table)
 
         self.widgets = {}
         for index, line in enumerate(all_lines):
             table_utils.setRowName(self.table, index, line)
-            tmp = {
-                "line": line,
-                "box": table_utils.addCheckBoxToTable(
-                    self.table,
-                    False,
-                    index)}
+            tmp = {"line": line,
+                   "box": table_utils.addCheckBoxToTable(
+                       self.table,
+                       False,
+                       index)}
             self.widgets[line] = tmp
 
         self.grid.addWidget(self.table)

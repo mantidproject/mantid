@@ -264,7 +264,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plotting = self.plot_window.multi_plot
             self.add_detector_to_plot(detector, name)
             self.plotting.set_all_values()
-            self.plotting.removeSubplotConnection(self.subplot_removed)
+            self.plotting.remove_subplot_connection(self.subplot_removed)
+            self.plotting.remove_line_connection(self.uncheck_on_removed)
             self.plot_window.show()
             # untick detectors if plot window is closed
             self.plot_window.windowClosedSignal.connect(self._unset_detectors)
@@ -319,13 +320,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             data = self.element_widgets[element].get_checked()
         color = self.get_color(element)
         for name, x_value in iteritems(data):
-            try:
-                x_value = float(x_value)
-            except ValueError:
-                continue
-            full_name = gen_name(element, name)
-            label = self._gen_label(full_name, x_value, element)
-            self._plot_line_once(subplot, x_value, label, color)
+            if isinstance(float, x_value):
+                full_name = gen_name(element, name)
+                label = self._gen_label(full_name, x_value, element)
+                self._plot_line_once(subplot, x_value, label, color)
 
     def _update_peak_data(self, element):
         if self.ptable.is_selected(element):
@@ -448,23 +446,78 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for element, selector in iteritems(self.element_widgets):
             self.checked_data(element, selector.secondary_checkboxes, False)
 
+    def add_line_by_type(self, run, _type):
+        # Ensure all detectors are enabled
+        for detector in self.detectors.detectors:
+            if not detector.isEnabled():
+                detector.setEnabled(True)
+
+        if self.plot_window is None:
+            return
+
+        # Plot the correct line type on all open subplots
+        for subplot in self.plotting.get_subplots():
+            for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
+                if _type in ws.getName():
+                    self.plotting.plot(subplot, ws.getName())
+
+    def is_any_line_checked(self):
+        if self.lines.total.isChecked():
+            return True
+        if self.lines.prompt.isChecked():
+            return True
+        if self.lines.delayed.isChecked():
+            return True
+        return False
+
+    def remove_line_type(self, run, _type):
+        # If no line type is selected do not allow plotting
+        if not self.is_any_line_checked():
+            for detector in self.detectors.detectors:
+                detector.setEnabled(False)
+
+        if self.plot_window is None:
+            return
+
+        # Remove the correct line type on all open subplots
+        for subplot in self.plotting.get_subplots():
+            for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
+                if _type in ws.getName():
+                    self.plotting.remove_line(subplot, ws.getName())
+
+    # When removing a line with the remove window uncheck the line here
+    def uncheck_on_removed(self, removed_lines):
+        for line in removed_lines:
+            if 'Total' in line:
+                self.lines.total.setChecked(False)
+            if 'Prompt' in line:
+                self.lines.prompt.setChecked(False)
+            if 'Delayed' in line:
+                self.lines.delayed.setChecked(False)
+
     # Line total
     def line_total_checked(self):
-        pass
+        self.lines.total.setChecked(True)
+        self.add_line_by_type(self.load_widget.last_loaded_run(), 'Total')
 
     def line_total_unchecked(self):
-        pass
+        self.lines.total.setChecked(False)
+        self.remove_line_type(self.load_widget.last_loaded_run(), 'Total')
 
     # Line prompt
     def line_prompt_checked(self):
-        pass
+        self.lines.prompt.setChecked(True)
+        self.add_line_by_type(self.load_widget.last_loaded_run(), 'Prompt')
 
     def line_prompt_unchecked(self):
-        pass
+        self.lines.prompt.setChecked(False)
+        self.remove_line_type(self.load_widget.last_loaded_run(), 'Prompt')
 
     # Line delayed
     def line_delayed_checked(self):
-        pass
+        self.lines.delayed.setChecked(True)
+        self.add_line_by_type(self.load_widget.last_loaded_run(), 'Delayed')
 
     def line_delayed_unchecked(self):
-        pass
+        self.lines.delayed.setChecked(False)
+        self.remove_line_type(self.load_widget.last_loaded_run(), 'Delayed')

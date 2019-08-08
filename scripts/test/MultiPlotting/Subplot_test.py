@@ -103,19 +103,19 @@ class SubplotTest(unittest.TestCase):
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
-    def setup_applyRm(self):
+    def setup_apply_rm(self):
         self.subplot._rm_window = mock.Mock()
         self.subplot._rm_window.subplot = "test"
         self.subplot._context.subplots["test"] = mock.MagicMock()
         self.subplot._remove_subplot = mock.Mock()
         self.subplot._close_rm_window = mock.Mock()
 
-    def test_applyRmAll(self):
+    def test_apply_rmAll(self):
         names = ["one", "two", "three"]
-        self.setup_applyRm()
+        self.setup_apply_rm()
         self.subplot._rm_window.getState = mock.Mock(return_value=True)
 
-        self.subplot._applyRm(names)
+        self.subplot._apply_rm(names)
 
         self.assertEqual(
             self.subplot._context.subplots[
@@ -123,12 +123,12 @@ class SubplotTest(unittest.TestCase):
             3)
         self.assertEqual(self.subplot._close_rm_window.call_count, 1)
 
-    def test_applyRmNone(self):
+    def test_apply_rmNone(self):
         names = ["one", "two", "three"]
-        self.setup_applyRm()
+        self.setup_apply_rm()
         self.subplot._rm_window.getState = mock.Mock(return_value=False)
 
-        self.subplot._applyRm(names)
+        self.subplot._apply_rm(names)
 
         self.assertEqual(
             self.subplot._context.subplots[
@@ -136,12 +136,12 @@ class SubplotTest(unittest.TestCase):
             0)
         self.assertEqual(self.subplot._close_rm_window.call_count, 1)
 
-    def test_applyRmSome(self):
+    def test_apply_rmSome(self):
         names = ["one", "two", "three"]
-        self.setup_applyRm()
+        self.setup_apply_rm()
         self.subplot._rm_window.getState = mock.Mock(side_effect=rm_logic)
 
-        self.subplot._applyRm(names)
+        self.subplot._apply_rm(names)
 
         self.assertEqual(
             self.subplot._context.subplots[
