@@ -179,8 +179,8 @@ void LoadPSIMuonBin::exec() {
 
   double timeZero = 0.0;
   if (m_header.realT0[0] != 0) {
-    timeZero = *std::max_element(
-        std::begin(m_header.realT0), std::end(m_header.realT0));
+    timeZero = *std::max_element(std::begin(m_header.realT0),
+                                 std::end(m_header.realT0));
   } else {
     timeZero = static_cast<double>(*std::max_element(
         std::begin(m_header.integerT0), std::end(m_header.integerT0)));
