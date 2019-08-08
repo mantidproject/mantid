@@ -22,22 +22,6 @@ from .interactive_tool import FitInteractiveTool
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
 
-def get_spectra_bounds(spectra):
-    """
-    Gets the lower and upper bounds to use for the range marker tool.
-    @param spectra: A dictionary with workspace names as keys and list of spectrum numbers as values.
-    """
-    for workspace_name, spec_list in spectra.items():
-        if AnalysisDataService.doesExist(workspace_name):
-            workspace = AnalysisDataService.retrieve(workspace_name)
-            try:
-                x_data = workspace.dataX(spec_list[0])
-                return [x_data[0], x_data[-1]]
-            except RuntimeError or IndexError:
-                return None
-    return None
-
-
 class FitPropertyBrowserBase(BaseBrowser):
 
     def __init__(self, parent=None):
@@ -138,8 +122,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             return
 
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
-                                       current_peak_type=self.defaultPeakType(),
-                                       fit_bounds=get_spectra_bounds(allowed_spectra))
+                                       current_peak_type=self.defaultPeakType())
         self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
@@ -147,10 +130,41 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.tool.add_background_requested.connect(self.add_function_slot)
         self.tool.add_other_requested.connect(self.add_function_slot)
-        self.set_fit_range(self.tool.fit_range.get_range())
         super(FitPropertyBrowser, self).show()
+
+        self.set_fit_bounds(self.get_fit_bounds())
+        self.set_fit_range(self.tool.fit_range.get_range())
+
         self.setPeakToolOn(True)
         self.canvas.draw()
+
+    def get_fit_bounds(self):
+        """
+        Gets the lower and upper bounds to use for the range marker tool
+        """
+        workspace_name = self.workspaceName()
+        if AnalysisDataService.doesExist(workspace_name):
+            return self.get_workspace_x_range(AnalysisDataService.retrieve(workspace_name))
+        return None
+
+    def get_workspace_x_range(self, workspace):
+        """
+        Gets the x limits of a matrix workspace
+        :param workspace: The workspace to get the limits from
+        """
+        try:
+            x_data = workspace.dataX(self.workspaceIndex())
+            return [x_data[0], x_data[-1]]
+        except RuntimeError or IndexError:
+            return None
+
+    def set_fit_bounds(self, fit_bounds):
+        """
+        Sets the bounds within which the range marker can be moved
+        :param fit_bounds: The bounds of the fit range
+        """
+        if fit_bounds is not None:
+            self.tool.fit_range.set_bounds(fit_bounds[0], fit_bounds[1])
 
     def set_fit_range(self, fit_range):
         """
