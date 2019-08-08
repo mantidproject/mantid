@@ -129,7 +129,7 @@ public:
   /// Set the default function type
   void setDefaultFunctionType(const std::string &fnType);
   /// Get the default peak type
-  std::string defaultPeakType() const;
+  std::string defaultPeakType();
   /// Set the default peak type
   void setDefaultPeakType(const std::string &fnType);
   /// Get the default background type
