@@ -31,17 +31,19 @@ public:
 
   void setColour(const QColor &colour);
   void setRange(const std::pair<double, double> &range);
-  void setRange(const double min, const double max);
   std::pair<double, double> getRange() const;
 
-  void setMinimum(const double min);
-  void setMaximum(const double max);
+  void setMinimum(double min);
+  void setMaximum(double max);
   double getMinimum() const;
   double getMaximum() const;
 
   void setVisible(bool visible);
 
   void detach();
+
+public slots:
+  void setRange(double min, double max);
 
 signals:
   void selectionChanged(double min, double max);

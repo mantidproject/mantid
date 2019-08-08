@@ -13,8 +13,6 @@
 
 #include <QFileInfo>
 
-#include <qwt_plot.h>
-
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -514,7 +512,7 @@ void Elwin::plotInput() {
 
 void Elwin::updateIntegrationRange() {
   setDefaultResolution(inputWorkspace(),
-                       m_uiForm.ppPlot->getCurveRange("Sample"));
+                       getXRangeFromWorkspace(inputWorkspace()));
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {

@@ -496,7 +496,7 @@ set(
 set(RES_FILES IndirectInterfaceResources.qrc)
 
 # XML is required to parse the settings file
-find_package(Qt5 COMPONENTS Xml REQUIRED)
+find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesIndirect
@@ -518,6 +518,7 @@ mtd_add_qt_library(
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
+    Qt5::Concurrent
     Qt5::Xml
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon

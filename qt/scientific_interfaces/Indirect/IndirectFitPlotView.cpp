@@ -112,9 +112,9 @@ void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {
-  auto selector = m_plotForm->ppPlotTop->getRangeSelector("Background");
+  auto selector = m_plotForm->ppPlotTop->getSingleSelector("Background");
   MantidQt::API::SignalBlocker blocker(selector);
-  selector->setMinimum(value);
+  selector->setPosition(value);
 }
 
 void IndirectFitPlotView::setFitRange(double minimum, double maximum) {
@@ -233,13 +233,13 @@ void IndirectFitPlotView::addFitRangeSelector() {
 }
 
 void IndirectFitPlotView::addBackgroundRangeSelector() {
-  auto backRangeSelector = m_plotForm->ppPlotTop->addRangeSelector(
-      "Background", MantidWidgets::RangeSelector::YSINGLE);
+  auto backRangeSelector = m_plotForm->ppPlotTop->addSingleSelector(
+      "Background", MantidWidgets::SingleSelector::YSINGLE);
   backRangeSelector->setVisible(false);
   backRangeSelector->setColour(Qt::darkGreen);
-  backRangeSelector->setRange(0.0, 1.0);
+  backRangeSelector->setLowerBound(0.0);
 
-  connect(backRangeSelector, SIGNAL(minValueChanged(double)), this,
+  connect(backRangeSelector, SIGNAL(valueChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
 }
 
@@ -258,7 +258,7 @@ void IndirectFitPlotView::addHWHMRangeSelector() {
 }
 
 void IndirectFitPlotView::setBackgroundRangeVisible(bool visible) {
-  m_plotForm->ppPlotTop->getRangeSelector("Background")->setVisible(visible);
+  m_plotForm->ppPlotTop->getSingleSelector("Background")->setVisible(visible);
 }
 
 void IndirectFitPlotView::setHWHMRangeVisible(bool visible) {

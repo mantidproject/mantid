@@ -14,8 +14,6 @@
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include <qwt_plot.h>
-
 #include <tuple>
 
 using namespace Mantid::API;
@@ -204,7 +202,7 @@ void Iqt::setup() {
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
-  connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
           SLOT(rsRangeChangedLazy(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRS(QtProperty *, double)));
@@ -475,7 +473,7 @@ void Iqt::plotInput(const QString &wsname) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+    auto const range = getXRangeFromWorkspace(workspace);
     double rounded_min(range.first);
     double rounded_max(range.second);
     const std::string instrName(workspace->getInstrument()->getName());
