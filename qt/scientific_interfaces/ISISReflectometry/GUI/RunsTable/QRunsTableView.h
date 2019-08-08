@@ -17,8 +17,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class RunsView;
-
 class MANTIDQT_ISISREFLECTOMETRY_DLL QRunsTableView : public QWidget,
                                                       public IRunsTableView {
   Q_OBJECT
