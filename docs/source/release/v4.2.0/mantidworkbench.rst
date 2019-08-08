@@ -17,6 +17,7 @@ Improvements
 
 Bugfixes
 ########
+- Clicking Cancel after attempting to save a project upon closing now keeps Workbench open instead of closing without saving.
 - Dialog windows no longer contain a useless ? button in their title bar.
 - Instrument view now keeps the saved rendering option when loading projects. 
 - Fixes an issue where choosing to not overwrite an existing project when attempting to save upon closing would cause Workbench to close without saving.

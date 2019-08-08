@@ -10,7 +10,7 @@
 #include <numeric>
 
 namespace {
-template <class T> constexpr std::string getType() {
+template <class T> std::string getType() {
   if (std::is_same<T, std::int64_t>::value)
     return "int64";
   if (std::is_same<T, std::int32_t>::value)
@@ -124,8 +124,8 @@ void addDataset(Json::Value &parent, const std::string &name,
     resizeValues(dataset["values"], s);
   }
 
-  size_t leafSize = static_cast<size_t>(arrayShape[arrayShape.size() - 1]);
-  dataset["dataset"]["size"][i] = leafSize;
+  auto leafSize = static_cast<size_t>(arrayShape[arrayShape.size() - 1]);
+  dataset["dataset"]["size"][i] = Json::Value(leafSize);
   size_t start = 0;
   fillValues(dataset["values"], data, start, leafSize);
 

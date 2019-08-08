@@ -18,6 +18,7 @@
 
 using namespace Mantid::Kernel;
 using Mantid::NexusGeometry::JSONGeometryParser;
+using Mantid::detid_t;
 
 class JSONGeometryParserTest : public CxxTest::TestSuite {
 public:
@@ -149,7 +150,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -182,7 +183,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -227,7 +228,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -281,7 +282,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);
@@ -336,7 +337,7 @@ public:
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
     TS_ASSERT_EQUALS(detIDs.size(), 4);
-    TS_ASSERT((detIDs == std::vector<uint64_t>{1, 2, 3, 4}));
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
     const auto &x = parser.xPixelOffsets(0);
     TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
     const auto &y = parser.yPixelOffsets(0);

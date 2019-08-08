@@ -75,8 +75,8 @@ void addSingleValue(const Json::Value &val, std::vector<uint32_t> &fillArray) {
   fillArray.push_back(val.asUInt());
 }
 
-void addSingleValue(const Json::Value &val, std::vector<uint64_t> &fillArray) {
-  fillArray.push_back(val.asUInt64());
+void addSingleValue(const Json::Value &val, std::vector<int32_t> &fillArray) {
+  fillArray.push_back(val.asInt());
 }
 
 /// Recursively fills JSON array data trees which are usually arranges as arrays
@@ -406,7 +406,7 @@ void JSONGeometryParser::extractTransformations(
  */
 void JSONGeometryParser::extractDetectorContent() {
   for (const auto &detector : m_jsonDetectorBanks) {
-    std::vector<uint64_t> detIDs;
+    std::vector<detid_t> detIDs;
     std::vector<double> x;
     std::vector<double> y;
     std::vector<double> z;
@@ -420,7 +420,7 @@ void JSONGeometryParser::extractDetectorContent() {
 
     for (const auto &child : children) {
       if (child[NAME] == DETECTOR_IDS)
-        extractDatasetValues<uint64_t>(child, detIDs);
+        extractDatasetValues<detid_t>(child, detIDs);
       else if (child[NAME] == X_PIXEL_OFFSET)
         extractDatasetValues<double>(child, x);
       else if (child[NAME] == Y_PIXEL_OFFSET)
@@ -481,7 +481,7 @@ void JSONGeometryParser::extractMonitorContent() {
       if (child[NAME] == NAME)
         mon.name = val.asString();
       else if (child[NAME] == DETECTOR_ID)
-        mon.detectorID = val.asUInt64();
+        mon.detectorID = val.asInt();
       else if (child[NAME] == "events")
         extractMonitorEventStream(child, mon);
       else if (child[NAME] == "waveforms")

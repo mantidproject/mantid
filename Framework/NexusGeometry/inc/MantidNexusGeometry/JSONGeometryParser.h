@@ -7,6 +7,7 @@
 #ifndef MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSER_H_
 #define MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSER_H_
 
+#include "MantidGeometry/IDTypes.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <Eigen/Geometry>
 #include <json/json.h>
@@ -31,7 +32,7 @@ struct Chopper {
 struct Monitor {
   std::string componentName;
   std::string name;
-  uint64_t detectorID;
+  detid_t detectorID;
   // monitor stream
   std::string eventStreamTopic;
   std::string eventStreamSource;
@@ -64,7 +65,7 @@ public:
   ~JSONGeometryParser() = default;
   const std::string &name() noexcept { return m_name; }
   size_t numberOfBanks() noexcept { return m_jsonDetectorBanks.size(); }
-  const std::vector<uint64_t> &detectorIDs(const size_t index) const noexcept {
+  const std::vector<detid_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
   }
 
@@ -146,7 +147,7 @@ private:
   // detector information
   std::vector<Json::Value> m_jsonDetectorBanks;
   std::vector<std::string> m_detectorBankNames;
-  std::vector<std::vector<uint64_t>> m_detIDs;
+  std::vector<std::vector<detid_t>> m_detIDs;
   std::vector<std::vector<double>> m_x;
   std::vector<std::vector<double>> m_y;
   std::vector<std::vector<double>> m_z;
