@@ -199,6 +199,55 @@ class SubplotTest(unittest.TestCase):
 
         self.assertEqual(1, self.subplot.rmLineSignal.disconnect.call_count)
 
+    @staticmethod
+    def rm_window_side_effect(name):
+        return True
+
+    def test_that_remove_line_calls_removeLine_the_correct_number_of_times(self):
+        subplot_name = "subplot"
+        lines = ["one", "two", "three"]
+        calls = [mock.call("one"), mock.call("two"), mock.call("three")]
+        self.subplot._context.subplots = {subplot_name: mock.Mock()}
+
+        self.subplot.remove_lines(subplot_name, lines)
+
+        self.subplot._context.subplots[subplot_name].removeLine.assert_has_calls(calls)
+
+    def test_that_remove_lines_removes_subplot_is_no_line_is_present(self):
+        subplot_name = "subplot"
+        self.subplot._context.get_lines = mock.Mock(return_value=[])
+        self.subplot._context.subplots = {subplot_name: mock.Mock()}
+        self.subplot._remove_subplot = mock.Mock()
+        self.subplot.canvas = mock.Mock()
+
+        self.subplot.remove_lines(subplot_name, ["one"])
+
+        self.assertEqual(1, self.subplot._remove_subplot.call_count)
+        self.assertEqual(0, self.subplot.canvas.draw.call_count)
+
+    def test_that_remove_lines_updates_canvas_without_closing_plot_if_lines_are_present(self):
+        subplot_name = "subplot"
+        self.subplot._context.get_lines = mock.Mock(return_value=["not empty"])
+        self.subplot._context.subplots = {subplot_name: mock.Mock()}
+        self.subplot._remove_subplot = mock.Mock()
+        self.subplot.canvas = mock.Mock()
+
+        self.subplot.remove_lines(subplot_name, ["one"])
+
+        self.assertEqual(0, self.subplot._remove_subplot.call_count)
+        self.assertEqual(1, self.subplot.canvas.draw.call_count)
+
+    def test_that_remove_lines_emits_signal(self):
+        subplot_name = "subplot"
+        self.subplot._context.get_lines = mock.Mock(return_value=["not empty"])
+        self.subplot._context.subplots = {subplot_name: mock.Mock()}
+        self.subplot.rmLineSignal = mock.Mock()
+        self.subplot.canvas = mock.Mock()
+
+        self.subplot.remove_lines(subplot_name, ["one"])
+
+        self.assertEqual(1, self.subplot.rmLineSignal.emit.call_count)
+        
 
 if __name__ == "__main__":
     unittest.main()
