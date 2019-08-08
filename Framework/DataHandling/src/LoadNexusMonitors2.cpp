@@ -540,9 +540,8 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       string_map_t inner_entries = file.getEntries(); // get list of entries
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
-        file.openData("monitor_number");
-        int64_t detNum;
-        file.getData(&detNum);
+        const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(
+            file, "monitor_number");
         if (detNum > std::numeric_limits<detid_t>::max()) {
           throw std::runtime_error("Monitor number too larger to represent");
         }
