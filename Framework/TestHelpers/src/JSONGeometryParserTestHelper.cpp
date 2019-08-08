@@ -103,7 +103,8 @@ void fillValues(Json::Value &values, const std::vector<T> &fillArray,
       fillValues<T>(val, fillArray, start, size);
   } else {
     for (size_t i = 0; i < size; ++i) {
-      values[static_cast<int>(i)] = fillArray[start + i];
+      values[static_cast<int>(i)] =
+          Json::Value(static_cast<T>(fillArray[start + i]));
     }
     start += size;
   }
@@ -209,7 +210,7 @@ void addNXMonitorName(Json::Value &monitor, const std::string &name) {
 
 void addNXMonitorDetectorID(Json::Value &monitor, const int64_t detectorID) {
   auto monitorDetID = createEmptyDataset("detector_id", "int64");
-  monitorDetID["values"] = Json::Value(detectorID);
+  monitorDetID["values"] = Json::Value(static_cast<Json::Int64>(detectorID));
   appendToChildren(monitor, monitorDetID);
 }
 
