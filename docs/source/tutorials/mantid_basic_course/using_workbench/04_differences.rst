@@ -24,11 +24,11 @@ Interfaces
 MantidPlot provides a range of different interfaces that still in the process of being implemented in Workbench. As of
 Mantid 4.1, the interfaces available through Workbench are:
 
-* Defraction
+* Diffraction
 
   - HFIR 4 Circle Reduction
   
-  - Powder Defraction Reduction
+  - Powder Diffraction Reduction
   
 * Direct
 
