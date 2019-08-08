@@ -120,22 +120,26 @@ class HomePlotWidgetModel(object):
             self.autoscale_y_to_data_in_view()
             self.plot_figure.canvas.draw()
 
-    def add_workspace_to_plot(self, workspace, specNum, label):
+    def add_workspace_to_plot(self, workspace_name, workspace_index, label):
         """
         Adds a plot line to the specified subplot
         :param workspace: Name of workspace to get plot data from
-        :param specNum: Spectrum number to plot from workspace
+        :param workspace_index: workspace index to plot from workspace
         :return:
         """
         try:
-            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
+            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
         except RuntimeError:
             return
 
-        self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True,
+        if all([workspace.getNumberHistograms() == 4 for workspace in workspaces]) and workspace_index == 1:
+            workspace_index = 3
+
+        self.plot_figure = plot(workspaces, wksp_indices=[workspace_index], fig=self.plot_figure, overplot=True,
                                 plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False, 'label': label})
 
-        self.plotted_fit_workspaces.append(workspace)
+        if workspace_name not in self._plotted_fit_workspaces:
+            self._plotted_fit_workspaces.append(workspace_name)
 
     def remove_workpace_from_plot(self, workspace_name):
         """
