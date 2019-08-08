@@ -100,7 +100,7 @@ void fillValues(Json::Value &values, const std::vector<T> &fillArray,
                 size_t &start, size_t size) {
   if (!values.isNull() && !values.empty()) {
     for (auto &val : values)
-      fillValues(val, fillArray, start, size);
+      fillValues<T>(val, fillArray, start, size);
   } else {
     for (size_t i = 0; i < size; ++i) {
       values[static_cast<int>(i)] = fillArray[start + i];
@@ -125,9 +125,9 @@ void addDataset(Json::Value &parent, const std::string &name,
   }
 
   auto leafSize = static_cast<size_t>(arrayShape[arrayShape.size() - 1]);
-  dataset["dataset"]["size"][i] = Json::Value(leafSize);
+  dataset["dataset"]["size"][i] = Json::Value(static_cast<Json::Int>(leafSize));
   size_t start = 0;
-  fillValues(dataset["values"], data, start, leafSize);
+  fillValues<T>(dataset["values"], data, start, leafSize);
 
   if (!attributesName.empty())
     dataset["attributes"][0] =
@@ -209,7 +209,7 @@ void addNXMonitorName(Json::Value &monitor, const std::string &name) {
 
 void addNXMonitorDetectorID(Json::Value &monitor, const int64_t detectorID) {
   auto monitorDetID = createEmptyDataset("detector_id", "int64");
-  monitorDetID["values"] = detectorID;
+  monitorDetID["values"] = Json::Value(detectorID);
   appendToChildren(monitor, monitorDetID);
 }
 
@@ -245,7 +245,7 @@ void addNXChopperRadius(Json::Value &chopper, const double radius) {
 
 void addNXChopperSlitEdges(Json::Value &chopper,
                            const std::vector<double> &edges) {
-  addDataset(chopper, "slit_edges", {2}, edges, "units", "mm");
+  addDataset<double>(chopper, "slit_edges", {2}, edges, "units", "mm");
 }
 
 void addNXChopperSlitHeight(Json::Value &chopper, const double slitHeight) {
@@ -257,7 +257,7 @@ void addNXChopperSlitHeight(Json::Value &chopper, const double slitHeight) {
 
 void addNXChopperSlits(Json::Value &chopper, const int64_t value) {
   auto chopperFullName = createEmptyDataset("slits", "int64");
-  chopperFullName["values"] = value;
+  chopperFullName["values"] = Json::Value(static_cast<Json::Int64 >(value));
   appendToChildren(chopper, chopperFullName);
 }
 
@@ -314,25 +314,25 @@ void addNXTransformationOrientation(Json::Value &nxTransformation,
 void addDetectorNumbers(Json::Value &nxDetector,
                         const std::vector<int32_t> &arrayShape,
                         const std::vector<int64_t> &values) {
-  addDataset(nxDetector, "detector_number", arrayShape, values);
+  addDataset<int64_t>(nxDetector, "detector_number", arrayShape, values);
 }
 
 void addXPixelOffset(Json::Value &nxDetector,
                      const std::vector<int32_t> &arrayShape,
                      const std::vector<double> &values) {
-  addDataset(nxDetector, "x_pixel_offset", arrayShape, values, "units", "m");
+  addDataset<double>(nxDetector, "x_pixel_offset", arrayShape, values, "units", "m");
 }
 
 void addYPixelOffset(Json::Value &nxDetector,
                      const std::vector<int32_t> &arrayShape,
                      const std::vector<double> &values) {
-  addDataset(nxDetector, "y_pixel_offset", arrayShape, values, "units", "m");
+  addDataset<double>(nxDetector, "y_pixel_offset", arrayShape, values, "units", "m");
 }
 
 void addZPixelOffset(Json::Value &nxDetector,
                      const std::vector<int32_t> &arrayShape,
                      const std::vector<double> &values) {
-  addDataset(nxDetector, "z_pixel_offset", arrayShape, values, "units", "m");
+  addDataset<double>(nxDetector, "z_pixel_offset", arrayShape, values, "units", "m");
 }
 
 Json::Value &addOffShape(Json::Value &nxDetector, const std::string &name) {
@@ -341,18 +341,18 @@ Json::Value &addOffShape(Json::Value &nxDetector, const std::string &name) {
 
 void addOffShapeFaces(Json::Value &shape, const std::vector<int> &arrayShape,
                       const std::vector<int> &indices) {
-  addDataset(shape, "faces", arrayShape, indices, "", "");
+  addDataset<int>(shape, "faces", arrayShape, indices, "", "");
 }
 
 void addOffShapeVertices(Json::Value &shape, const std::vector<int> &arrayShape,
                          const std::vector<double> &vertices) {
-  addDataset(shape, "vertices", arrayShape, vertices, "units", "m");
+  addDataset<double>(shape, "vertices", arrayShape, vertices, "units", "m");
 }
 
 void addOffShapeWindingOrder(Json::Value &shape,
                              const std::vector<int> &arrayShape,
                              const std::vector<int> &windingOrder) {
-  addDataset(shape, "winding_order", arrayShape, windingOrder, "", "");
+  addDataset<int>(shape, "winding_order", arrayShape, windingOrder, "", "");
 }
 
 Json::Value &addCylindricalShape(Json::Value &nxDetector,
@@ -363,13 +363,13 @@ Json::Value &addCylindricalShape(Json::Value &nxDetector,
 void addCylindricalShapeCylinders(Json::Value &shape,
                                   const std::vector<int> &arrayShape,
                                   const std::vector<int> &indices) {
-  addDataset(shape, "cylinders", arrayShape, indices);
+  addDataset<int>(shape, "cylinders", arrayShape, indices);
 }
 
 void addCylindricalShapeVertices(Json::Value &shape,
                                  const std::vector<int> &arrayShape,
                                  const std::vector<double> &vertices) {
-  addDataset(shape, "vertices", arrayShape, vertices, "units", "m");
+  addDataset<double>(shape, "vertices", arrayShape, vertices, "units", "m");
 }
 
 const std::string convertToString(const Json::Value &value) {
