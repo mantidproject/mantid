@@ -257,7 +257,7 @@ void addNXChopperSlitHeight(Json::Value &chopper, const double slitHeight) {
 
 void addNXChopperSlits(Json::Value &chopper, const int64_t value) {
   auto chopperFullName = createEmptyDataset("slits", "int64");
-  chopperFullName["values"] = Json::Value(static_cast<Json::Int64 >(value));
+  chopperFullName["values"] = Json::Value(static_cast<Json::Int64>(value));
   appendToChildren(chopper, chopperFullName);
 }
 
@@ -320,19 +320,22 @@ void addDetectorNumbers(Json::Value &nxDetector,
 void addXPixelOffset(Json::Value &nxDetector,
                      const std::vector<int32_t> &arrayShape,
                      const std::vector<double> &values) {
-  addDataset<double>(nxDetector, "x_pixel_offset", arrayShape, values, "units", "m");
+  addDataset<double>(nxDetector, "x_pixel_offset", arrayShape, values, "units",
+                     "m");
 }
 
 void addYPixelOffset(Json::Value &nxDetector,
                      const std::vector<int32_t> &arrayShape,
                      const std::vector<double> &values) {
-  addDataset<double>(nxDetector, "y_pixel_offset", arrayShape, values, "units", "m");
+  addDataset<double>(nxDetector, "y_pixel_offset", arrayShape, values, "units",
+                     "m");
 }
 
 void addZPixelOffset(Json::Value &nxDetector,
                      const std::vector<int32_t> &arrayShape,
                      const std::vector<double> &values) {
-  addDataset<double>(nxDetector, "z_pixel_offset", arrayShape, values, "units", "m");
+  addDataset<double>(nxDetector, "z_pixel_offset", arrayShape, values, "units",
+                     "m");
 }
 
 Json::Value &addOffShape(Json::Value &nxDetector, const std::string &name) {
