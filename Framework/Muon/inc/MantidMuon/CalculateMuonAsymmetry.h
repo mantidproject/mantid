@@ -73,6 +73,9 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   double getNormValue(API::CompositeFunction_sptr &func);
   void addNormalizedFits(size_t numberOfFits, const std::vector<double>);
+  void normalizeWorkspace(const API::MatrixWorkspace_sptr &normalizedWorkspace,
+                          const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace,
+                          size_t workspaceIndex, double N0);
 };
 
 } // namespace Algorithms
