@@ -222,7 +222,7 @@ void CalculateMuonAsymmetry::exec() {
 }
 
 /**
- * Adds a normalised fit asthe last spectra in the fitted workspace.
+ * Adds a normalised fit as the last spectra in the fitted workspace.
  * @param numberOfFits ::  The number of simultaneous fits performed
  * @param norms :: a vector of normalisation values
  * @return normalization constants
