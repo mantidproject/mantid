@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Strings.h"
 
 using namespace Mantid::API;
@@ -65,20 +66,73 @@ std::string formatIndicesString(std::string str) {
   return joinCompress(indices.begin(), indices.end());
 }
 
+void insertWorkspaceNames(std::vector<std::string> &allNames,
+                          std::string const &workspaceName) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+      auto const groupContents = group->getNames();
+      allNames.insert(allNames.end(), groupContents.begin(),
+                      groupContents.end());
+    } else if (auto const workspace =
+                   ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+      allNames.emplace_back(workspace->getName());
+    }
+  }
+}
+
+boost::optional<std::string>
+checkWorkspaceSpectrumSize(MatrixWorkspace_const_sptr workspace) {
+  if (workspace->y(0).size() < 2)
+    return "Plot Spectra failed: There is only one data point to plot in " +
+           workspace->getName() + ".";
+  return boost::none;
+}
+
+boost::optional<std::string>
+checkWorkspaceBinSize(MatrixWorkspace_const_sptr workspace) {
+  if (workspace->getNumberHistograms() < 2)
+    return "Plot Bins failed: There is only one data point to plot in " +
+           workspace->getName() + ".";
+  return boost::none;
+}
+
+std::map<std::string, std::string>
+constructActions(boost::optional<std::map<std::string, std::string>> const
+                     &availableActions) {
+  std::map<std::string, std::string> actions;
+  if (availableActions)
+    actions = availableActions.get();
+  if (actions.find("Plot Spectra") == actions.end())
+    actions["Plot Spectra"] = "Plot Spectra";
+  if (actions.find("Plot Bins") == actions.end())
+    actions["Plot Bins"] = "Plot Bins";
+  if (actions.find("Plot Contour") == actions.end())
+    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Plot Tiled") == actions.end())
+    actions["Plot Tiled"] = "Plot Tiled";
+  return actions;
+}
+
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectTab *parentTab)
-    : m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none),
-      m_plotter(std::make_unique<IndirectPlotter>(parentTab)) {}
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+    IPyRunner *pythonRunner,
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false),
+      m_workspaceIndices(boost::none), m_workspaceName(boost::none),
+      m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {}
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsModel::IndirectPlotOptionsModel(IndirectPlotter *plotter)
-    : m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
+IndirectPlotOptionsModel::IndirectPlotOptionsModel(
+    IndirectPlotter *plotter,
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
+    : m_actions(constructActions(availableActions)), m_fixedIndices(false),
+      m_workspaceIndices(boost::none), m_workspaceName(boost::none),
+      m_plotter(std::move(plotter)) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
@@ -98,6 +152,14 @@ boost::optional<std::string> IndirectPlotOptionsModel::workspace() const {
 
 void IndirectPlotOptionsModel::removeWorkspace() {
   m_workspaceName = boost::none;
+}
+
+std::vector<std::string> IndirectPlotOptionsModel::getAllWorkspaceNames(
+    std::vector<std::string> const &workspaceNames) const {
+  std::vector<std::string> allNames;
+  for (auto const &workspaceName : workspaceNames)
+    insertWorkspaceNames(allNames, workspaceName);
+  return allNames;
 }
 
 std::string
@@ -162,11 +224,9 @@ void IndirectPlotOptionsModel::plotSpectra() {
     m_plotter->plotSpectra(workspaceName.get(), indicesString.get());
 }
 
-void IndirectPlotOptionsModel::plotBins() {
-  auto const workspaceName = workspace();
-  auto const indicesString = indices();
-  if (workspaceName && indicesString)
-    m_plotter->plotBins(workspaceName.get(), indicesString.get());
+void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
+  if (auto const workspaceName = workspace())
+    m_plotter->plotBins(workspaceName.get(), binIndices);
 }
 
 void IndirectPlotOptionsModel::plotContour() {
@@ -179,6 +239,32 @@ void IndirectPlotOptionsModel::plotTiled() {
   auto const indicesString = indices();
   if (workspaceName && indicesString)
     m_plotter->plotTiled(workspaceName.get(), indicesString.get());
+}
+
+boost::optional<std::string>
+IndirectPlotOptionsModel::singleDataPoint(MantidAxis const &axisType) const {
+  if (auto const workspaceName = workspace())
+    return checkWorkspaceSize(workspaceName.get(), axisType);
+  return boost::none;
+}
+
+boost::optional<std::string>
+IndirectPlotOptionsModel::checkWorkspaceSize(std::string const &workspaceName,
+                                             MantidAxis const &axisType) const {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName)) {
+    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+      if (axisType == MantidAxis::Spectrum)
+        return checkWorkspaceSpectrumSize(workspace);
+      return checkWorkspaceBinSize(workspace);
+    }
+  }
+  return boost::none;
+}
+
+std::map<std::string, std::string>
+IndirectPlotOptionsModel::availableActions() const {
+  return m_actions;
 }
 
 } // namespace CustomInterfaces

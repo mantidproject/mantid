@@ -7,6 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSMODEL_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSMODEL_H_
 
+#include "IPythonRunner.h"
 #include "IndirectPlotter.h"
 
 #include "DllConfig.h"
@@ -20,13 +21,22 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsModel {
 public:
-  IndirectPlotOptionsModel(IndirectTab *parentTab = nullptr);
+  IndirectPlotOptionsModel(
+      IPyRunner *pythonRunner = nullptr,
+      boost::optional<std::map<std::string, std::string>> const
+          &availableActions = boost::none);
   /// Used by the unit tests so that m_plotter can be mocked
-  IndirectPlotOptionsModel(IndirectPlotter *plotter);
+  IndirectPlotOptionsModel(
+      IndirectPlotter *plotter,
+      boost::optional<std::map<std::string, std::string>> const
+          &availableActions = boost::none);
   virtual ~IndirectPlotOptionsModel();
 
   virtual bool setWorkspace(std::string const &workspaceName);
   virtual void removeWorkspace();
+
+  virtual std::vector<std::string>
+  getAllWorkspaceNames(std::vector<std::string> const &workspaceNames) const;
 
   boost::optional<std::string> workspace() const;
 
@@ -42,9 +52,14 @@ public:
   boost::optional<std::string> indices() const;
 
   virtual void plotSpectra();
-  virtual void plotBins();
+  virtual void plotBins(std::string const &binIndices);
   virtual void plotContour();
   virtual void plotTiled();
+
+  boost::optional<std::string>
+  singleDataPoint(MantidAxis const &axisType) const;
+
+  std::map<std::string, std::string> availableActions() const;
 
 private:
   bool validateSpectra(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -52,6 +67,11 @@ private:
   bool validateBins(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::string const &bins) const;
 
+  boost::optional<std::string>
+  checkWorkspaceSize(std::string const &workspaceName,
+                     MantidAxis const &axisType) const;
+
+  std::map<std::string, std::string> m_actions;
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;
   boost::optional<std::string> m_workspaceName;

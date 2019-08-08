@@ -39,15 +39,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
-    IndirectPlotOptionsView *view, IndirectTab *parent,
-    PlotWidget const &plotType, std::string const &fixedIndices)
+    IndirectPlotOptionsView *view, IPyRunner *pythonRunner,
+    PlotWidget const &plotType, std::string const &fixedIndices,
+    boost::optional<std::map<std::string, std::string>> const &availableActions)
     : QObject(nullptr),
       m_wsRemovedObserver(*this,
                           &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this,
                            &IndirectPlotOptionsPresenter::onWorkspaceReplaced),
-      m_view(view),
-      m_model(std::make_unique<IndirectPlotOptionsModel>(parent)) {
+      m_view(view), m_model(std::make_unique<IndirectPlotOptionsModel>(
+                        pythonRunner, availableActions)) {
   setupPresenter(plotType, fixedIndices);
 }
 
@@ -83,7 +84,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(
   connect(m_view, SIGNAL(plotTiledClicked()), this, SLOT(plotTiled()));
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
-  m_view->setPlotType(plotType);
+  m_view->setPlotType(plotType, m_model->availableActions());
   m_view->setIndices(QString::fromStdString(fixedIndices));
   m_model->setFixedIndices(fixedIndices);
 
@@ -101,8 +102,15 @@ void IndirectPlotOptionsPresenter::watchADS(bool on) {
   }
 }
 
+void IndirectPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
+  m_view->setPlotType(plotType, m_model->availableActions());
+}
+
 void IndirectPlotOptionsPresenter::setPlotting(bool plotting) {
-  m_view->setPlotButtonText(plotting ? "Plotting..." : "Plot Spectra");
+  m_view->setPlotButtonText(
+      plotting ? "Plotting..."
+               : QString::fromStdString(
+                     m_model->availableActions()["Plot Spectra"]));
   setOptionsEnabled(!plotting);
 }
 
@@ -138,8 +146,9 @@ void IndirectPlotOptionsPresenter::onWorkspaceReplaced(
 
 void IndirectPlotOptionsPresenter::setWorkspaces(
     std::vector<std::string> const &workspaces) {
-  m_view->setWorkspaces(workspaces);
-  workspaceChanged(workspaces.front());
+  auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
+  m_view->setWorkspaces(workspaceNames);
+  workspaceChanged(workspaceNames.front());
 }
 
 void IndirectPlotOptionsPresenter::setWorkspace(
@@ -181,19 +190,23 @@ void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
 }
 
 void IndirectPlotOptionsPresenter::plotSpectra() {
-  setPlotting(true);
-  m_model->plotSpectra();
-  setPlotting(false);
+  if (validateWorkspaceSize(MantidAxis::Spectrum)) {
+    setPlotting(true);
+    m_model->plotSpectra();
+    setPlotting(false);
+  }
 }
 
 void IndirectPlotOptionsPresenter::plotBins() {
-  auto const indicesString = m_view->selectedIndices().toStdString();
-  if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
-    setPlotting(true);
-    m_model->plotBins();
-    setPlotting(false);
-  } else {
-    m_view->displayWarning("Plot bins failed: Invalid bin indices provided.");
+  if (validateWorkspaceSize(MantidAxis::Bin)) {
+    auto const indicesString = m_view->selectedIndices().toStdString();
+    if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
+      setPlotting(true);
+      m_model->plotBins(indicesString);
+      setPlotting(false);
+    } else {
+      m_view->displayWarning("Plot Bins failed: Invalid bin indices provided.");
+    }
   }
 }
 
@@ -204,9 +217,21 @@ void IndirectPlotOptionsPresenter::plotContour() {
 }
 
 void IndirectPlotOptionsPresenter::plotTiled() {
-  setPlotting(true);
-  m_model->plotTiled();
-  setPlotting(false);
+  if (validateWorkspaceSize(MantidAxis::Spectrum)) {
+    setPlotting(true);
+    m_model->plotTiled();
+    setPlotting(false);
+  }
+}
+
+bool IndirectPlotOptionsPresenter::validateWorkspaceSize(
+    MantidAxis const &axisType) {
+  auto const errorMessage = m_model->singleDataPoint(axisType);
+  if (errorMessage) {
+    m_view->displayWarning(QString::fromStdString(errorMessage.get()));
+    return false;
+  }
+  return true;
 }
 
 } // namespace CustomInterfaces

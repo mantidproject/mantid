@@ -43,6 +43,7 @@ SampleTransmission::SampleTransmission(QWidget *parent)
  */
 void SampleTransmission::initLayout() {
   m_uiForm.setupUi(this);
+  m_uiForm.ppTransmission->disableYAxisMenu();
   connect(m_uiForm.pbCalculate, SIGNAL(clicked()), this, SLOT(calculate()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
 

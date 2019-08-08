@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
 #define MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

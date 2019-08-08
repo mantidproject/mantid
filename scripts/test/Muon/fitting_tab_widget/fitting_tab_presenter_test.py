@@ -618,6 +618,14 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.view.parameter_display_combo.setCurrentIndex(1)
 
+    def test_get_selected_groups_and_pairs_returns_correct_list(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        result = self.presenter._get_selected_groups_and_pairs()
+
+        self.assertEqual(result.sort(), ['top', 'bottom', 'fwd'].sort())
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

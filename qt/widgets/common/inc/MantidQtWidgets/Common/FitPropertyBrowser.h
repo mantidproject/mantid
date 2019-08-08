@@ -270,6 +270,10 @@ public:
   /// are met)
   void allowSequentialFits(bool allow) override;
 
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QMenu *getFitMenu() const { return m_fitMenu; }
+
   // Methods intended for testing only
 
   int sizeOfFunctionsGroup() const;

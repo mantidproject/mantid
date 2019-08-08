@@ -106,7 +106,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.element_widgets = {}
         self.element_lines = {}
-        self.electron_peaks = self._get_electron_peaks()
+        self.electron_peaks = {}
         self._generate_element_widgets()
 
     # Return an unused colour, if all used then start with the first one
@@ -156,13 +156,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:
-            if element in ["Gammas", "Electrons"]:
-                continue
             data = self.ptable.element_data(element)
-            try:
-                data["Gammas"] = self.ptable.peak_data["Gammas"][element]
-            except KeyError:
-                pass
             widget = PeakSelectorPresenter(PeakSelectorView(data, element))
             widget.on_finished(self._update_peak_data)
             self.element_widgets[element] = widget
@@ -173,8 +167,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def table_left_clicked(self, item):
         if self.ptable.is_selected(item.symbol):
-            self._add_element_lines(
-                item.symbol)
+            self._add_element_lines(item.symbol)
         else:
             self._remove_element_lines(item.symbol)
 
@@ -193,6 +186,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             except:
                 continue
             full_name = gen_name(element, name)
+            if full_name not in self.element_lines[element]:
+                self.element_lines[element].append(full_name)
             self._plot_line(full_name, x_value, color, element)
 
     def _remove_element_lines(self, element):
@@ -287,8 +282,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # not using load_last_run prevents two calls to last_loaded_run()
         if last_run is not None:
             self.load_run(detector, last_run)
-            if self.peaks.electron.isChecked():
-                self.add_peak_data("e-", detector, data=self.electron_peaks)
 
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:
@@ -338,24 +331,15 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def checked_data(self, element, selection, state):
         for checkbox in selection:
             checkbox.setChecked(state)
-        self._update_peak_data(
-            element,
-            self.element_widgets[element].get_checked())
-
-    # electron Peaks
-    def _get_electron_peaks(self):
-        # make a dict so we can label the peaks
-        electron_dict = {}
-        electron_peaks = self.ptable.peak_data["Electrons"].copy()
-        for peak, intensity in iteritems(electron_peaks):
-            electron_dict[str(peak)] = peak
-        return electron_dict
+        self._update_peak_data(element, self.element_widgets[element].get_checked())
 
     def electrons_checked(self):
-        self._add_element_lines("e-", self.electron_peaks)
+        for element, selector in iteritems(self.element_widgets):
+            self.checked_data(element, selector.electron_checkboxes, True)
 
     def electrons_unchecked(self):
-        self._remove_element_lines("e-")
+        for element, selector in iteritems(self.element_widgets):
+            self.checked_data(element, selector.electron_checkboxes, False)
 
     # gamma Peaks
     def gammas_checked(self):

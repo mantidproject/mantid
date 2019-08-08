@@ -22,4 +22,9 @@ Data Objects
 Python
 ------
 
+Bug Fixes
+---------
+* ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` bug fix for user provided top-level NXentry name 
+
 :ref:`Release 4.2.0 <v4.2.0>`
+

@@ -24,6 +24,7 @@ Muon Analysis 2
 ###############
 
 - When loading PSI data if the groups given are poorly stored in the file, it should now produce unique names in the grouping tab for groups.
+- When switching between data sets groups selected to fit are remembered.
 
 Algorithms
 ----------

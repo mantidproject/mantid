@@ -12,18 +12,6 @@ namespace {
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
 
-std::string createPlotString(const std::string &workspaceName,
-                             const std::string &spectra) {
-  std::string plotString = "from mantidplot import plotSpectrum\n";
-  return plotString + "plotSpectrum(['" + workspaceName + "'], " + spectra +
-         ")\n";
-}
-
-std::string createPlotString(const std::string &workspaceName,
-                             std::size_t spectrum) {
-  return createPlotString(workspaceName, std::to_string(spectrum));
-}
-
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
   explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
@@ -48,9 +36,11 @@ namespace IDA {
 using namespace Mantid::API;
 
 IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
-                                                   IIndirectFitPlotView *view)
+                                                   IIndirectFitPlotView *view,
+                                                   IPyRunner *pythonRunner)
     : m_model(new IndirectFitPlotModel(model)), m_view(view),
-      m_plotGuessInSeparateWindow(false) {
+      m_plotGuessInSeparateWindow(false),
+      m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
   connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
           SLOT(setActiveIndex(std::size_t)));
   connect(m_view, SIGNAL(selectedFitDataChanged(std::size_t)), this,
@@ -105,9 +95,6 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
           SLOT(setModelBackground(double)));
   connect(m_view, SIGNAL(backgroundChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
-
-  connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString &, bool)),
-          this, SIGNAL(runAsPythonScript(const QString &, bool)));
 
   updateRangeSelectors();
   updateAvailableSpectra();
@@ -195,8 +182,7 @@ void IndirectFitPlotPresenter::enablePlotGuessInSeparateWindow() {
   m_plotGuessInSeparateWindow = true;
   const auto inputAndGuess =
       m_model->appendGuessToInput(m_model->getGuessWorkspace());
-  const auto plotString = createPlotString(inputAndGuess->getName(), "[0,1]");
-  m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  m_plotter->plotSpectra(inputAndGuess->getName(), "0-1");
 }
 
 void IndirectFitPlotPresenter::disablePlotGuessInSeparateWindow() {
@@ -328,8 +314,7 @@ void IndirectFitPlotPresenter::updateFitRangeSelector() {
 void IndirectFitPlotPresenter::plotCurrentPreview() {
   const auto inputWorkspace = m_model->getWorkspace();
   if (inputWorkspace && !inputWorkspace->getName().empty()) {
-    const auto plotString = getPlotString(m_model->getActiveSpectrum());
-    m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+    plotSpectrum(m_model->getActiveSpectrum());
   } else
     m_view->displayMessage("Workspace not found - data may not be loaded.");
 }
@@ -402,12 +387,13 @@ void IndirectFitPlotPresenter::updateBackgroundSelector() {
     m_view->setBackgroundLevel(*background);
 }
 
-std::string
-IndirectFitPlotPresenter::getPlotString(std::size_t spectrum) const {
+void IndirectFitPlotPresenter::plotSpectrum(std::size_t spectrum) const {
   const auto resultWs = m_model->getResultWorkspace();
   if (resultWs)
-    return createPlotString(resultWs->getName(), "[0,1,2]");
-  return createPlotString(m_model->getWorkspace()->getName(), spectrum);
+    m_plotter->plotSpectra(resultWs->getName(), "0-2");
+  else
+    m_plotter->plotSpectra(m_model->getWorkspace()->getName(),
+                           std::to_string(spectrum));
 }
 
 void IndirectFitPlotPresenter::emitFitSingleSpectrum() {

@@ -7,6 +7,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTPLOTOPTIONSPRESENTER_H_
 
+#include "IPythonRunner.h"
+#include "IndirectInterface.h"
 #include "IndirectPlotOptionsModel.h"
 #include "IndirectPlotOptionsView.h"
 #include "IndirectTab.h"
@@ -24,16 +26,20 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
-                               IndirectTab *parent,
-                               PlotWidget const &plotType = PlotWidget::Spectra,
-                               std::string const &fixedIndices = "");
+  IndirectPlotOptionsPresenter(
+      IndirectPlotOptionsView *view, IPyRunner *pythonRunner,
+      PlotWidget const &plotType = PlotWidget::Spectra,
+      std::string const &fixedIndices = "",
+      boost::optional<std::map<std::string, std::string>> const
+          &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked
   IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
                                IndirectPlotOptionsModel *model,
                                PlotWidget const &plotType = PlotWidget::Spectra,
                                std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
+
+  void setPlotType(PlotWidget const &plotType);
 
   void setWorkspaces(std::vector<std::string> const &workspaces);
   void clearWorkspaces();
@@ -60,6 +66,8 @@ private:
 
   void setWorkspace(std::string const &plotWorkspace);
   void setIndices();
+
+  bool validateWorkspaceSize(MantidAxis const &axisType);
 
   // Observers for ADS Notifications
   Poco::NObserver<IndirectPlotOptionsPresenter,
