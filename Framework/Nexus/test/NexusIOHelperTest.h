@@ -168,7 +168,8 @@ public:
     TS_ASSERT_EQUALS(monitor_number, 1);
     TS_ASSERT_THROWS(Nioh::readNexusValue<int16_t>(file, "monitor_number"),
                      std::runtime_error &); // Downcasting forbidden
-    TS_ASSERT_THROWS_NOTHING(Nioh::readNexusValue<int64_t>(file, "monitor_number")); // Larger OK
+    TS_ASSERT_THROWS_NOTHING(
+        Nioh::readNexusValue<int64_t>(file, "monitor_number")); // Larger OK
     file.close();
   }
 };
