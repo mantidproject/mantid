@@ -517,9 +517,23 @@ void Elwin::updateIntegrationRange() {
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
   if (prop == m_properties["BackgroundSubtraction"]) {
-    m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange")->setVisible(val);
+    auto integrationRangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
+    auto backgroundRangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
+    backgroundRangeSelector->setVisible(val);
     m_properties["BackgroundStart"]->setEnabled(val);
     m_properties["BackgroundEnd"]->setEnabled(val);
+
+    disconnect(integrationRangeSelector,
+               SIGNAL(selectionChanged(double, double)),
+               backgroundRangeSelector, SLOT(setRange(double, double)));
+    if (!val) {
+      backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
+      connect(integrationRangeSelector,
+              SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
+              SLOT(setRange(double, double)));
+    }
   }
 }
 
@@ -532,11 +546,17 @@ void Elwin::minChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRS(QtProperty *, double)));
+
   if (from == integrationRangeSelector) {
     m_dblManager->setValue(m_properties["IntegrationStart"], val);
   } else if (from == backgroundRangeSelector) {
     m_dblManager->setValue(m_properties["BackgroundStart"], val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRS(QtProperty *, double)));
 }
 
 void Elwin::maxChanged(double val) {
@@ -548,11 +568,17 @@ void Elwin::maxChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRS(QtProperty *, double)));
+
   if (from == integrationRangeSelector) {
     m_dblManager->setValue(m_properties["IntegrationEnd"], val);
   } else if (from == backgroundRangeSelector) {
     m_dblManager->setValue(m_properties["BackgroundEnd"], val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRS(QtProperty *, double)));
 }
 
 void Elwin::updateRS(QtProperty *prop, double val) {
@@ -561,14 +587,28 @@ void Elwin::updateRS(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRS(QtProperty *, double)));
+
   if (prop == m_properties["IntegrationStart"])
-    integrationRangeSelector->setMinimum(val);
+    setRangeSelectorMin(m_properties["IntegrationStart"],
+                        m_properties["IntegrationEnd"],
+                        integrationRangeSelector, val);
   else if (prop == m_properties["IntegrationEnd"])
-    integrationRangeSelector->setMaximum(val);
+    setRangeSelectorMax(m_properties["IntegrationStart"],
+                        m_properties["IntegrationEnd"],
+                        integrationRangeSelector, val);
   else if (prop == m_properties["BackgroundStart"])
-    backgroundRangeSelector->setMinimum(val);
+    setRangeSelectorMin(m_properties["BackgroundStart"],
+                        m_properties["BackgroundEnd"], backgroundRangeSelector,
+                        val);
   else if (prop == m_properties["BackgroundEnd"])
-    backgroundRangeSelector->setMaximum(val);
+    setRangeSelectorMax(m_properties["BackgroundStart"],
+                        m_properties["BackgroundEnd"], backgroundRangeSelector,
+                        val);
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRS(QtProperty *, double)));
 }
 
 void Elwin::runClicked() {
@@ -601,6 +641,7 @@ QString Elwin::getOutputBasename() {
 void Elwin::setRunIsRunning(const bool &running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
+  m_uiForm.ppPlot->watchADS(!running);
 }
 
 void Elwin::setButtonsEnabled(const bool &enabled) {
