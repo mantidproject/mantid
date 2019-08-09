@@ -23,7 +23,7 @@ class AbinsAtomsDataTest(unittest.TestCase):
     def test_wrong_num_atoms(self):
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            wrong_tester = Atomsdata(num_atoms=-2)
+            wrong_tester = AtomsData(num_atoms=-2)
 
     # append
     def test_wrong_sort(self):
