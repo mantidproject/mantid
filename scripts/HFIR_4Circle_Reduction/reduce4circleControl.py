@@ -33,6 +33,7 @@ import os
 import numpy
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
+from HFIR_HFIR_4Circle_Reduction import fourcircle_utility
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
 from HFIR_4Circle_Reduction.peakprocesshelper import SinglePointPeakIntegration
@@ -1681,11 +1682,11 @@ class CWSCDReductionControl(object):
         return vec_2theta, vec_sigma
 
     def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
-        """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
+        """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains ONLY 1 peak
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
         :param allow_magnetic: flag to allow magnetic reflections
-        :return: boolean, object (list of HKL or error message)
+        :return: tuple: (1) boolean, (2) tuple (HKL: numpy array, None) | string (as error message)
         """
         # Check
         assert isinstance(ub_matrix, numpy.ndarray), 'UB matrix must be an ndarray'
@@ -1699,7 +1700,7 @@ class CWSCDReductionControl(object):
         # Find out the peak workspace
         status, pt_list = self.get_pt_numbers(exp_number, scan_number)
         assert status
-        peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_list)
+        peak_ws_name = fourcircle_utility.get_peak_ws_name(exp_number, scan_number, pt_list)
         peak_ws = AnalysisDataService.retrieve(peak_ws_name)
         assert peak_ws.getNumberPeaks() > 0
 
@@ -1726,13 +1727,15 @@ class CWSCDReductionControl(object):
         else:
             tol = 0.3
 
-        num_peak_index, error = mantidsimple.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
-                                                        Tolerance=tol,
-                                                        RoundHKLs=False)
+        index_result = mantidsimple.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
+                                               Tolerance=tol,
+                                               RoundHKLs=False)
+
+        num_peak_index = index_result[0]
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         if num_peak_index == 0:
-            return False, 'No peak can be indexed: {0}.'.format(error)
+            return False, 'No peak can be indexed'
         elif num_peak_index > 1:
             raise RuntimeError('Case for PeaksWorkspace containing more than 1 peak is not '
                                'considered. Contact developer for this issue.')
@@ -1746,7 +1749,7 @@ class CWSCDReductionControl(object):
         # delete temporary workspace
         mantidsimple.DeleteWorkspace(Workspace=temp_index_ws_name)
 
-        return True, (hkl, error)
+        return True, (hkl, None)
 
     def integrate_scan_peak(self, exp_number, scan_number, peak_centre, mask_name, normalization,
                             scale_factor, background_pt_tuple):
