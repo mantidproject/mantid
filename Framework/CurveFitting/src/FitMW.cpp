@@ -7,10 +7,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/ExcludeRangeFinder.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidCurveFitting/ExcludeRangeFinder.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"

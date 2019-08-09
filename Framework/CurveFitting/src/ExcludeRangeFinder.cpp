@@ -93,4 +93,3 @@ void ExcludeRangeFinder::findNextExcludedRange(double p) {
 }; // namespace CurveFitting
 
 } // namespace Mantid
-

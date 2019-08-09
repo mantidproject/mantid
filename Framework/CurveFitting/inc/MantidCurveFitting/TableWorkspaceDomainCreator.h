@@ -96,8 +96,8 @@ private:
       boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
       const boost::shared_ptr<API::FunctionDomain> &domain,
       boost::shared_ptr<API::FunctionValues> resultValues) const;
-	/// Check workspace is in the correct form
-	void setAndValidateWorkspace(API::Workspace_sptr ws) const;
+  /// Check workspace is in the correct form
+  void setAndValidateWorkspace(API::Workspace_sptr ws) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;
@@ -105,12 +105,12 @@ private:
   std::string m_startXPropertyName;
   /// Store endX property name
   std::string m_endXPropertyName;
-	/// Store XColumnName property name
-	std::string m_xColumnPropertyName;
-	/// Store YColumnName property name
-	std::string m_yColumnPropertyName;
-	/// Store errorColumnName property name
-	std::string m_errorColumnPropertyName;
+  /// Store XColumnName property name
+  std::string m_xColumnPropertyName;
+  /// Store YColumnName property name
+  std::string m_yColumnPropertyName;
+  /// Store errorColumnName property name
+  std::string m_errorColumnPropertyName;
 
   /// The input TableWorkspace
   mutable API::ITableWorkspace_sptr m_tableWorkspace;
@@ -129,12 +129,12 @@ private:
   std::string m_maxSizePropertyName;
   /// Store the Exclude property name
   std::string m_excludePropertyName;
-	/// Store the x column name
-	mutable double m_xColumnIndex;
-	/// Store the y column name
-	mutable double m_yColumnIndex;
-	/// Store the error column name
-	mutable double m_errorColumnIndex;
+  /// Store the x column name
+  mutable double m_xColumnIndex;
+  /// Store the y column name
+  mutable double m_yColumnIndex;
+  /// Store the error column name
+  mutable double m_errorColumnIndex;
 
   size_t m_startRowNo;
 };
