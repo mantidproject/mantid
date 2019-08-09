@@ -85,7 +85,7 @@ class FrequencyContext(object):
                         names.append(name)
                     # check Im part
                     if fft.Im and int(run) == int(fft.Im_run) and (fft.Im in group or fft.Im in pair) and name not in names:
-                         names.append(name)
+                        names.append(name)
                     # do phaseQuad - will only have one run
                     if int(run) == int(fft.Re_run) and phasequad and fft.phasequad:
                         names.append(name)
