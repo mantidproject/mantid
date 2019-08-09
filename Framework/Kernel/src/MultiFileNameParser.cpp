@@ -275,6 +275,12 @@ void Parser::split() {
   // (We shun the use of Poco::File here as it is unable to deal with certain
   // combinations of special characters, for example double commas.)
 
+  // Clear whitespace before getting extentions and directories.
+  m_multiFileName.erase(
+      std::remove_if( // ("Erase-remove" idiom.)
+          m_multiFileName.begin(), m_multiFileName.end(), isspace),
+      m_multiFileName.end());
+
   // Get the extension, if there is one.
   const size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos)
