@@ -9,7 +9,7 @@
 Description
 -----------
 
-Additional properties for a 1D function and a MatrixWorkspace
+Additional properties for a 1D function
 #############################################################
 
 If Function defines a one-dimensional function and InputWorkspace is a
@@ -26,16 +26,36 @@ additional properties:
 | EndX             | Input       | double    | End of the spectrum     | An X value in the last bin to be included in the fit                |
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
 
+If Function defines a one-dimensional function and InputWorkspace is a
+:ref:`TableWorkspace <TableWorkspace>` the algorithm will have these
+additional properties:
+
++------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
+| Name             | Direction   | Type      | Default                 | Description                                                                               |
++==================+=============+===========+=========================+===========================================================================================+
+| StartX           | Input       | double    | Start of the spectrum   | An X value in the first bin to be included in the fit                                     |
++------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
+| EndX             | Input       | double    | End of the spectrum     | An X value in the last bin to be included in the fit                                      |
++------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
+| XColumnName      | Input       | string    |                         | The name of the X column. If empty this will default to the first column                  |
++------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
+| YColumnName      | Input       | string    |                         | The name of the Y column. If empty this will default to the second column                 |
++------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
+| ErrorColumnName  | Input       | string    |                         | The name of the error column. If empty this will default to the third column if it exists |
++------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
+
+
 Overview
 ########
 
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
-Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` for
-fitting with a IFunction1D and :ref:`MDWorkspace <MDWorkspace>` for fitting with
-IFunctionMD. After Function and InputWorkspace properties are set the algorithm
-may decide that it needs more information from the caller to locate the fitting
-data. For example, if a spectrum in a MatrixWorkspace is to be fit with a 1D
+Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` and
+:ref:`TableWorkspace <TableWorkspace> for fitting with a IFunction1D and
+:ref:`MDWorkspace <MDWorkspace>` for fitting with IFunctionMD.
+After Function and InputWorkspace properties are set the algorithm may decide
+that it needs more information from the caller to locate the fitting data.
+For example, if a spectrum in a MatrixWorkspace is to be fit with a 1D
 function it will need to know at least the index of that spectrum. To request
 this information Fit dynamically creates relevant properties which the caller
 can set. Note that the dynamic properties depend both on the workspace
@@ -425,6 +445,51 @@ Output:
    Fitted sigma value is: 0.77
    Number of spectra in fitWorkspace is: 3
    The 20th y-value of the calculated pattern: 0.2361
+
+**Example - Fit a Gaussian to a Table Workspace:**
+
+.. testcode:: exTableFit
+
+    import math
+
+    #Create a table workspace with a gaussian curve and a flat background of 0.5
+    tableWS = CreateEmptyTableWorkspace()
+    tableWS.addColumn(type="double",name="X data")
+    tableWS.addColumn(type="double",name="Y data")
+    tableWS.addColumn(type="double",name="Errors")
+
+    for i in range(0,99):
+        xValue = i * 0.1
+        yValue = 10 * math.exp(-0.5 * (xValue - 5.0)**2 / 0.7**2 ) + 0.5
+        eValue = 0.5
+        tableWS.addRow ( {'X data': xValue, 'Y data': yValue, 'Errors': eValue} )
+
+    # Do the fitting
+    myFunc = 'name=Gaussian, PeakCentre=4, Height=8, Sigma=1'
+    fit_output = Fit(InputWorkspace=tableWS, StartX = 1, EndX=20, Output='fit', Function=myFunc)
+    paramTable = fit_output.OutputParameters
+    fitWorkspace = fit_output.OutputWorkspace
+
+    print("The fit was: {}".format(fit_output.OutputStatus))
+    print("chi-squared of fit is: {:.2f}".format(fit_output.OutputChi2overDoF))
+    print("Fitted Height value is: {:.2f}".format(paramTable.column(1)[0]))
+    print("Fitted centre value is: {:.2f}".format(paramTable.column(1)[1]))
+    print("Fitted sigma value is: {:.2f}".format(paramTable.column(1)[2]))
+    # fitWorkspace contains the data, the calculated and the difference patterns
+    print("Number of spectra in fitWorkspace is: {}".format(fitWorkspace.getNumberHistograms()))
+    print("The 20th y-value of the calculated pattern: {:.4f}".format(fitWorkspace.readY(1)[19]))
+
+Output:
+
+.. testoutput:: exTableFit
+
+    The fit was: success
+    chi-squared of fit is: 0.59
+    Fitted Height value is: 10.33
+    Fitted centre value is: 5.00
+    Fitted sigma value is: 0.75
+    Number of spectra in fitWorkspace is: 3
+    The 20th y-value of the calculated pattern: 0.2125
 
 **Example - Fit to two data sets simultaneously:**
 
