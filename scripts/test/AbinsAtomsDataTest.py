@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import logger
 import numpy as np
-from AbinsModules import AtomsDaTa
+from AbinsModules import AtomsData
 
 
 class AbinsAtomsDataTest(unittest.TestCase):
@@ -17,13 +17,13 @@ class AbinsAtomsDataTest(unittest.TestCase):
                              'mass': 28.085500}}
 
     def setUp(self):
-        self._tester = AtomsDaTa(num_atoms=2)
+        self._tester = AtomsData(num_atoms=2)
 
     # constructor
     def test_wrong_num_atoms(self):
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal
-            wrong_tester = AtomsDaTa(num_atoms=-2)
+            wrong_tester = Atomsdata(num_atoms=-2)
 
     # append
     def test_wrong_sort(self):

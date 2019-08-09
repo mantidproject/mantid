@@ -170,7 +170,7 @@ class GeneralAbInitioProgram(object):
                       "unit_cell": data["unit_cell"]
                       })
 
-        atoms = AbinsModules.AtomsDaTa(num_atoms=self._num_atoms)
+        atoms = AbinsModules.AtomsData(num_atoms=self._num_atoms)
         atoms.set(data["atoms"])
 
         result_data = AbinsModules.AbinsData()
