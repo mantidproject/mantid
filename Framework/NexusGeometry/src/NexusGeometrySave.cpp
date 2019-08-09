@@ -170,9 +170,10 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 
 /*
 TODO: DOCUMENTATION
-
+*/
 inline void writePixelShape(H5::Group &grp,
-                            const std::vector<size_t> &cylinderIndices) {
+                            const std::vector<size_t> &cylinderIndices,
+                            const std::vector<double> &vertexCoordinates) {
 
   H5::DataSet cylinders, vertices;
 
@@ -188,12 +189,11 @@ inline void writePixelShape(H5::Group &grp,
 
   int crank = 2;
   hsize_t cdims[static_cast<hsize_t>(2)];
-  cdims[0] = nCylinders;
-  cdims[1] = 3;
+  cdims[0] = static_cast<hsize_t>(nCylinders); // nCylinders;
+  cdims[1] = static_cast<hsize_t>(3);
   H5::DataSpace cspace = H5Screate_simple(crank, cdims, nullptr);
 
-  // cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_DOUBLE,
-  // cspace);
+  cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_DOUBLE, cspace);
   cylinders.write(cylinderData.data(), H5::PredType::NATIVE_DOUBLE, cspace);
 
   // vertices
@@ -208,15 +208,14 @@ inline void writePixelShape(H5::Group &grp,
 
   int vrank = 2;
   hsize_t vdims[static_cast<hsize_t>(2)];
-  vdims[0] = 3;
-  vdims[1] = 3;
+  vdims[0] = static_cast<hsize_t>(3);
+  vdims[1] = static_cast<hsize_t>(3);
   H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
   vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
   vertices.write(verticesData.data(), H5::PredType::NATIVE_DOUBLE, vspace);
   writeStrAttribute(vertices, UNITS, METRES);
 }
-*/
 
 /*
  * Function: writeXYZPixeloffset
@@ -234,65 +233,86 @@ inline void writePixelData(H5::Group &grp,
   // write pixel offset
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset; // pixel offset datasets
-  auto childrenDetectors =
+  auto pixels =
       compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
-  const auto nChildrenDetectors = childrenDetectors.size(); // number of pixels
+  const auto nPixels = pixels.size();   // number of pixels
 
-  std::vector<size_t> shapeIndices;
+  // prevents undefined behaviour when passing empty container into std::all_of.
+  // If children detectors empty, there is no data to write to bank. exits here.
+  if (pixels.empty())
+    return;
 
-  shapeIndices.reserve(
-      nChildrenDetectors); // expect all detectors have valid shape before check
+  bool shapesAreHomogeneous{false};         // all shapes equal
+  bool shapesAreValidAndHomogeneous{false}; // all shapes equal and valid shape
 
-  bool shapesAreHomogeneous{false}; // false before check
-  bool allHaveShapes{false};        // false before check
-  bool someHaveShapes{false};       // false before check
+  // shape type of the first detector in children detectors
+  auto &firstShape = compInfo.shape(pixels.front());
+  auto firstType = firstShape.shapeInfo().shape();
+  // auto firstGeometry = firstShape.shapeInfo.cylinderGeometry();
 
-  // prevents undefined behaviour when passing empty container. If children
-  // detectors empty, shapesAreHomogeneous and hasShapes remains false.
-  if (!childrenDetectors.empty()) {
+  // return true if all shape types are equal to the first shape type in
+  // children detectors.
+  shapesAreHomogeneous = std::all_of(
+      pixels.begin(), pixels.end(), [&compInfo, &firstType](const size_t &idx) {
+        auto &shapeObj = compInfo.shape(idx);
+        auto shapeInfo = shapeObj.shapeInfo();
+        auto type = shapeInfo.shape();
+        // Mantid::Geometry::detail::ShapeInfo::CylinderGeometry geometry =
+        // shapeInfo.cylinderGeometry(); <= debug assertation failure auto
+        // height = geometry.height(); <= pointer to member function error
+        // TODO: check also height, radii equal.
+        return (type == firstType);
+      });
 
-    // shape type of the first detector in children detectors
-    auto &firstShape = compInfo.shape(childrenDetectors.front());
-    auto firstShapeType = firstShape.shapeInfo().shape();
-
-    // return true if all shape types are equal to the first shape type in
-    // children detectors.
-    shapesAreHomogeneous = std::all_of(
-        childrenDetectors.begin(), childrenDetectors.end(),
-        [&compInfo, &shapeIndices, &firstShapeType](const size_t &idx) {
-          auto &shapeObj = compInfo.shape(idx);
-          auto shapeType = shapeObj.shapeInfo().shape();
-          return (shapeType == firstShapeType);
-        });
-
-    // Implicitly, only if shapesAreHomogenous is true, and first pixel shape
-    // is type 'NOSHAPE', then allHaveShapes is false. Else true.
-    allHaveShapes = !(shapesAreHomogeneous &&
-                      (static_cast<int>(firstShapeType) == 0 /*NOSHAPE*/));
-
-    // Implicitly, either if first pixel shape is valid shape, or first pixel
-    // shape is 'NOSHAPE' and shapesAreHomogeneous is False. then some pixels
-    // have a valid shape.
-    someHaveShapes =
-        (static_cast<int>(firstShapeType) != 0 /*is valid shape*/ ||
-         (static_cast<int>(firstShapeType) == 0 && !shapesAreHomogeneous));
-  }
+  // Implicitly, only if shapesAreHomogenous is true, and first pixel shape
+  // is not type 'NOSHAPE', then shapesAreValidAndHomogeneous is true. Else
+  // false.
+  shapesAreValidAndHomogeneous =
+      (shapesAreHomogeneous && (static_cast<int>(firstType) != 0 /*NOSHAPE*/));
 
   std::vector<double> posx;
   std::vector<double> posy;
   std::vector<double> posz;
 
-  posx.reserve(nChildrenDetectors);
-  posy.reserve(nChildrenDetectors);
-  posz.reserve(nChildrenDetectors);
+  posx.reserve(nPixels);
+  posy.reserve(nPixels);
+  posz.reserve(nPixels);
 
   // only need to write pixel shape group once in this case
-  if (allHaveShapes && shapesAreHomogeneous) {
+  if (shapesAreValidAndHomogeneous) {
 
     H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
+    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
+         ++it) {
 
-    for (std::vector<size_t>::iterator it = childrenDetectors.begin();
-         it != childrenDetectors.end(); ++it) {
+      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+          compInfo, idx, *it);
+
+      posx.push_back(offset[0]);
+      posy.push_back(offset[1]);
+      posz.push_back(offset[2]);
+    }
+
+    writePixelShape(pixelShapeGroup, std::vector<size_t>{0, 1, 2},
+                    std::vector<double>{1, 2, 3, 4, 5, 6, 7, 8,
+                                        9 /*9 vertex coordinates*/});
+    // TODO: get vertex coordinates of pixels.first()
+
+  } else
+
+      if (!shapesAreHomogeneous) {
+
+    // Implicitly, if shapesAreHomogeneous is False, there is at least 1 valid
+    // shape (that is not 'NOSHAPE') then shapes exist in pixels.
+    // then iterate through pixels to find those with valid shapes
+
+    // create pixel shape group
+    H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
+    std::vector<size_t> cylinderIndices;
+    cylinderIndices.reserve(nPixels);
+    std::vector<double> vertexCoordinates;
+    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
+         ++it) {
 
       auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
           compInfo, idx, *it);
@@ -301,20 +321,20 @@ inline void writePixelData(H5::Group &grp,
       posy.push_back(offset[1]);
       posz.push_back(offset[2]);
 
+      // TODO: get pixel verices for each pixel
       if (compInfo.hasValidShape(*it)) {
-        // get index of all cylinders in shape. if cylinders found:
-        std::vector<size_t> cylinders{
-            1, 2, 3, 4}; // may or may not be cylinders or eve the same shape
-        // writePixelShape(pixelShapeGroup, cylinders);
+        auto x = compInfo.shape(*it).shapeInfo().cylinderGeometry();
+        cylinderIndices.push_back(*it);
       }
-
-      // check pixel shape(s). If all equal, only needs to write once.
     }
-  } else
-
-      if (someHaveShapes) {
-    for (std::vector<size_t>::iterator it = childrenDetectors.begin();
-         it != childrenDetectors.end(); ++it) {
+    writePixelShape(pixelShapeGroup, cylinderIndices, vertexCoordinates);
+  } else {
+    // implicitly, if neither shapesAreValidAndHomogeneous nor
+    // shapesExistAndAreInhomogeneous are true. then there can be no valid
+    // shapes in the children detectors. Meaning all shapes are homogeneous and
+    // evaluate to 'NOSHAPE'.In this case, do not write pixel shape to file.
+    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
+         ++it) {
 
       auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
           compInfo, idx, *it);
@@ -324,6 +344,8 @@ inline void writePixelData(H5::Group &grp,
       posz.push_back(offset[2]);
     }
   }
+
+  // write pixel offset data
 
   bool xIsZero = isApproxZero(posx, PRECISION);
   bool yIsZero = isApproxZero(posy, PRECISION);
