@@ -892,7 +892,7 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
     auto const filename = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo const fileInfo(filename);
     auto const name = fileInfo.baseName().toStdString();
-    plotSpectrum(QString::fromStdString(name) + "_grp");
+    m_plotter->plotSpectra(name + "_grp", "0");
   }
   setPlotTimeIsPlotting(false);
 }
@@ -956,13 +956,13 @@ void ISISEnergyTransfer::plotWorkspace(std::string const &workspaceName,
                                        std::string const &plotType) {
 
   if (plotType == "Spectra") {
-    auto const numberOfHistograms =
-        getADSMatrixWorkspace(workspaceName)->getNumberHistograms();
-    IndirectTab::plotSpectrum(QString::fromStdString(workspaceName), 0,
-                              static_cast<int>(numberOfHistograms - 1));
-
+    auto const indices =
+        "0-" +
+        std::to_string(
+            getADSMatrixWorkspace(workspaceName)->getNumberHistograms() - 1);
+    m_plotter->plotSpectra(workspaceName, indices);
   } else if (plotType == "Contour") {
-    IndirectTab::plot2D(QString::fromStdString(workspaceName));
+    m_plotter->plotContour(workspaceName);
   }
 }
 

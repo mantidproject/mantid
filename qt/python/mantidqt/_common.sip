@@ -392,7 +392,7 @@ public:
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void setTextPlotGuess(const QString);
 
-    SIP_PYOBJECT defaultPeakType() const;
+    SIP_PYOBJECT defaultPeakType();
 %MethodCode
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());

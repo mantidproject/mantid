@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexusGeometry/JSONGeometryParser.h"
-#include "MantidNexusGeometry/Constants.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-using namespace Mantid::NexusGeometry::Constants;
-
 namespace {
+using namespace Mantid::NexusGeometry;
+
 // Json-specific Constants
 const std::string CHILDREN = "children";
 const std::string ATTRIBUTES = "attributes";

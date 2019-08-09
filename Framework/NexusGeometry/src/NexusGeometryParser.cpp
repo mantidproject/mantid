@@ -12,8 +12,8 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
-#include "MantidNexusGeometry/Constants.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
@@ -30,9 +30,7 @@
 
 namespace Mantid {
 namespace NexusGeometry {
-
 using namespace H5;
-using namespace Constants;
 
 // Anonymous namespace
 namespace {
@@ -604,8 +602,7 @@ private:
       shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
       isGroup = true;
     } catch (H5::Exception &) {
-      // TODO. Current assumption. Can we have pixels without specifying a
-      // shape?
+      // shape is not mandatory
       try {
         shapeGroup = detectorGroup.openGroup(SHAPE);
       } catch (H5::Exception &) {
@@ -713,7 +710,7 @@ public:
       // Get the pixel detIds
       auto detectorIds = getDetectorIds(detectorGroup);
 
-      try {
+      try { // detector shape is not mandatory.
         auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
         parseAndAddBank(shapeGroup, builder, detectorIds, bankName);
         continue;

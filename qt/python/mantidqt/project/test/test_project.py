@@ -15,6 +15,7 @@ import unittest
 from qtpy.QtWidgets import QMessageBox
 
 from mantid.api import AnalysisDataService as ADS
+from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from mantid.py3compat import mock
 from mantidqt.project.project import Project
@@ -169,6 +170,22 @@ class ProjectTest(unittest.TestCase):
         ADS.addToGroup("NewGroup", "ws3")
 
         self.assertEqual(1, self.project.anyChangeHandle.call_count)
+
+    def test_large_file_dialog_appears_for_large_file(self):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        self.project._get_project_size = mock.MagicMock(return_value=
+                                                        int(ConfigService.getString("projectSaving.warningSize")) + 1)
+        self.project._offer_large_size_confirmation = mock.MagicMock()
+        self.project._save()
+        self.assertEqual(self.project._offer_large_size_confirmation.call_count, 1)
+
+    def test_large_file_dialog_does_not_appear_for_small_file(self):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        self.project._get_project_size = mock.MagicMock(return_value=
+                                                        int(ConfigService.getString("projectSaving.warningSize")) - 1)
+        self.project._offer_large_size_confirmation = mock.MagicMock()
+        self.project._save()
+        self.assertEqual(self.project._offer_large_size_confirmation.call_count, 0)
 
 
 if __name__ == "__main__":

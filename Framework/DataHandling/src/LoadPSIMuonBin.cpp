@@ -179,9 +179,11 @@ void LoadPSIMuonBin::exec() {
 
   double timeZero = 0.0;
   if (m_header.realT0[0] != 0) {
-    timeZero = m_header.realT0[0];
+    timeZero = *std::max_element(std::begin(m_header.realT0),
+                                 std::end(m_header.realT0));
   } else {
-    timeZero = static_cast<double>(m_header.integerT0[0]);
+    timeZero = static_cast<double>(*std::max_element(
+        std::begin(m_header.integerT0), std::end(m_header.integerT0)));
   }
 
   // If timeZero is bigger than the largest bin assume it refers to a bin's
@@ -602,6 +604,16 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
       if (m_header.realT0[i] == 0)
         break;
       addToSampleLog("realT0 " + std::to_string(i), m_header.realT0[i],
+                     outputWorkspace);
+    }
+  }
+
+  if (m_header.integerT0[0] != 0) {
+    // 16 is the max size of integerT0
+    for (auto i = 0u; i < 16; ++i) {
+      if (m_header.integerT0[i] == 0)
+        break;
+      addToSampleLog("integerT0 " + std::to_string(i), m_header.integerT0[i],
                      outputWorkspace);
     }
   }

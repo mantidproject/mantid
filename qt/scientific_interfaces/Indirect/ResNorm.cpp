@@ -436,24 +436,26 @@ void ResNorm::previewSpecChanged(int value) {
 
 void ResNorm::plotCurrentPreview() {
 
-  QStringList plotWorkspaces;
+  std::vector<std::string> plotWorkspaces;
   std::vector<int> plotIndices;
 
   if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
-    plotWorkspaces << m_uiForm.dsVanadium->getCurrentDataName();
+    plotWorkspaces.emplace_back(
+        m_uiForm.dsVanadium->getCurrentDataName().toStdString());
     plotIndices.push_back(m_previewSpec);
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
-    plotWorkspaces << m_uiForm.dsResolution->getCurrentDataName();
+    plotWorkspaces.emplace_back(
+        m_uiForm.dsResolution->getCurrentDataName().toStdString());
     plotIndices.push_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
     std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
 
-    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName + "_scaled");
+    plotWorkspaces.emplace_back("__" + fitWsGroupName + "_scaled");
     plotIndices.push_back(0);
   }
-  plotMultipleSpectra(plotWorkspaces, plotIndices);
+  m_plotter->plotCorrespondingSpectra(plotWorkspaces, plotIndices);
 }
 
 void ResNorm::runClicked() {
@@ -488,10 +490,9 @@ void ResNorm::plotClicked() {
 
   QString const plotOptions = m_uiForm.cbPlot->currentText();
   if (plotOptions == "Intensity" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Intensity", "0");
   if (plotOptions == "Stretch" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
-
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Stretch", "0");
   setPlotResultIsPlotting(false);
 }
 
