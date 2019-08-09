@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QSAVEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QSAVEVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_
 
 #include "ISaveView.h"
 #include "ui_SaveWidget.h"
@@ -14,17 +14,17 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QSaveView : Provides an interface for the "Save ASCII" tab in the
+/** QtSaveView : Provides an interface for the "Save ASCII" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QSaveView : public QWidget,
-                                                 public ISaveView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtSaveView : public QWidget,
+                                                  public ISaveView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QSaveView(QWidget *parent = nullptr);
+  explicit QtSaveView(QWidget *parent = nullptr);
   /// Destructor
-  ~QSaveView() override;
+  ~QtSaveView() override;
 
   void subscribe(SaveViewSubscriber *notifyee) override;
 
@@ -111,4 +111,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_QSAVEVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTSAVEVIEW_H_ */

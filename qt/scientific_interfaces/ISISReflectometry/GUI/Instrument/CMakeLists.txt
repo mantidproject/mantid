@@ -1,4 +1,4 @@
-set(INSTRUMENT_SRC_FILES QInstrumentView.cpp InstrumentPresenter.cpp
+set(INSTRUMENT_SRC_FILES QtInstrumentView.cpp InstrumentPresenter.cpp
                          InstrumentOptionDefaults.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -8,11 +8,11 @@ set(INSTRUMENT_INC_FILES
     InstrumentPresenter.h
     IInstrumentPresenter.h
     IInstrumentView.h
-    QInstrumentView.h
+    QtInstrumentView.h
     InstrumentPresenter.h
     InstrumentOptionDefaults.h)
 
-set(INSTRUMENT_MOC_FILES QInstrumentView.h)
+set(INSTRUMENT_MOC_FILES QtInstrumentView.h)
 
 set(INSTRUMENT_UI_FILES InstrumentWidget.ui)
 

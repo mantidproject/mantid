@@ -1,6 +1,6 @@
 set(SAVE_SRC_FILES
     SavePresenter.cpp
-    QSaveView.cpp
+    QtSaveView.cpp
     AsciiSaver.cpp
     IAsciiSaver.cpp)
 
@@ -11,12 +11,12 @@ set(SAVE_INC_FILES
     SavePresenter.h
     ISavePresenter.h
     ISaveView.h
-    QSaveView.h
+    QtSaveView.h
     SavePresenterFactory.h
     AsciiSaver.h
     IAsciiSaver.h)
 
-set(SAVE_MOC_FILES QSaveView.h)
+set(SAVE_MOC_FILES QtSaveView.h)
 
 set(SAVE_UI_FILES SaveWidget.ui)
 

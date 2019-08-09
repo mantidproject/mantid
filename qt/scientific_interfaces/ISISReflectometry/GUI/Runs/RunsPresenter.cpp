@@ -13,7 +13,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
-#include "QCatalogSearcher.h"
+#include "QtCatalogSearcher.h"
 
 #include <algorithm>
 #include <fstream>
@@ -48,7 +48,7 @@ RunsPresenter::RunsPresenter(
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<QCatalogSearcher>(mainView)),
+      m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
       m_instruments(instruments),

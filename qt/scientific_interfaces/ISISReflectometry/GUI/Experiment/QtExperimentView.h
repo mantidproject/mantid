@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QEXPERIMENTVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QEXPERIMENTVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTEXPERIMENTVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTEXPERIMENTVIEW_H_
 
 #include "Common/DllConfig.h"
 #include "IExperimentView.h"
@@ -21,12 +21,12 @@ namespace CustomInterfaces {
 /** ExperiementView : Provides an interface for the "Experiement" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QExperimentView : public QWidget,
-                                                       public IExperimentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget,
+                                                        public IExperimentView {
   Q_OBJECT
 public:
-  QExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
-                  QWidget *parent = nullptr);
+  QtExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+                   QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
   void connectExperimentSettingsWidgets() override;
   void disconnectExperimentSettingsWidgets() override;
@@ -179,4 +179,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_QEXPERIMENTVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTEXPERIMENTVIEW_H_ */

@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "QRunsView.h"
+#include "QtRunsView.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
@@ -26,7 +26,7 @@ using namespace MantidQt::Icons;
  * @param parent :: The parent of this view
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
-QRunsView::QRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
+QtRunsView::QtRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
       m_searchNotifyee(nullptr), m_searchModel(),
       m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
@@ -35,24 +35,24 @@ QRunsView::QRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
   ui.tableSearchResults->setModel(&m_searchModel);
 }
 
-void QRunsView::subscribe(RunsViewSubscriber *notifyee) {
+void QtRunsView::subscribe(RunsViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void QRunsView::subscribeTimer(RunsViewTimerSubscriber *notifyee) {
+void QtRunsView::subscribeTimer(RunsViewTimerSubscriber *notifyee) {
   m_timerNotifyee = notifyee;
 }
 
-void QRunsView::subscribeSearch(RunsViewSearchSubscriber *notifyee) {
+void QtRunsView::subscribeSearch(RunsViewSearchSubscriber *notifyee) {
   m_searchNotifyee = notifyee;
 }
 
-IRunsTableView *QRunsView::table() const { return m_tableView; }
+IRunsTableView *QtRunsView::table() const { return m_tableView; }
 
 /**
 Initialise the Interface
 */
-void QRunsView::initLayout() {
+void QtRunsView::initLayout() {
   ui.setupUi(this);
 
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
@@ -92,7 +92,7 @@ void QRunsView::initLayout() {
  * according to whether processing is running or not.
  * @param isProcessing: Whether processing is running
  */
-void QRunsView::updateMenuEnabledState(bool isProcessing) {
+void QtRunsView::updateMenuEnabledState(bool isProcessing) {
   UNUSED_ARG(isProcessing)
 }
 
@@ -100,7 +100,7 @@ void QRunsView::updateMenuEnabledState(bool isProcessing) {
  * Sets the "Autoreduce" button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setAutoreduceButtonEnabled(bool enabled) {
+void QtRunsView::setAutoreduceButtonEnabled(bool enabled) {
 
   ui.buttonAutoreduce->setEnabled(enabled);
 }
@@ -109,7 +109,7 @@ void QRunsView::setAutoreduceButtonEnabled(bool enabled) {
  * Sets the "Autoreduce" button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setAutoreducePauseButtonEnabled(bool enabled) {
+void QtRunsView::setAutoreducePauseButtonEnabled(bool enabled) {
 
   ui.buttonAutoreducePause->setEnabled(enabled);
 }
@@ -118,7 +118,7 @@ void QRunsView::setAutoreducePauseButtonEnabled(bool enabled) {
  * Sets the "Transfer" button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setTransferButtonEnabled(bool enabled) {
+void QtRunsView::setTransferButtonEnabled(bool enabled) {
 
   ui.buttonTransfer->setEnabled(enabled);
 }
@@ -127,7 +127,7 @@ void QRunsView::setTransferButtonEnabled(bool enabled) {
  * Sets the "Instrument" combo box enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setInstrumentComboEnabled(bool enabled) {
+void QtRunsView::setInstrumentComboEnabled(bool enabled) {
 
   ui.comboSearchInstrument->setEnabled(enabled);
 }
@@ -136,7 +136,7 @@ void QRunsView::setInstrumentComboEnabled(bool enabled) {
  * Sets the search text box enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setSearchTextEntryEnabled(bool enabled) {
+void QtRunsView::setSearchTextEntryEnabled(bool enabled) {
 
   ui.textSearch->setEnabled(enabled);
 }
@@ -145,7 +145,7 @@ void QRunsView::setSearchTextEntryEnabled(bool enabled) {
  * Sets the search button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setSearchButtonEnabled(bool enabled) {
+void QtRunsView::setSearchButtonEnabled(bool enabled) {
 
   ui.buttonSearch->setEnabled(enabled);
 }
@@ -154,7 +154,7 @@ void QRunsView::setSearchButtonEnabled(bool enabled) {
  * Sets the start-monitor button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setStartMonitorButtonEnabled(bool enabled) {
+void QtRunsView::setStartMonitorButtonEnabled(bool enabled) {
 
   ui.buttonMonitor->setEnabled(enabled);
 }
@@ -163,7 +163,7 @@ void QRunsView::setStartMonitorButtonEnabled(bool enabled) {
  * Sets the stop-monitor enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
-void QRunsView::setStopMonitorButtonEnabled(bool enabled) {
+void QtRunsView::setStopMonitorButtonEnabled(bool enabled) {
 
   ui.buttonStopMonitor->setEnabled(enabled);
 }
@@ -175,8 +175,8 @@ available instruments in the table view
 @param defaultInstrumentIndex : The index of the instrument to have selected by
 default
 */
-void QRunsView::setInstrumentList(const std::vector<std::string> &instruments,
-                                  int defaultInstrumentIndex) {
+void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments,
+                                   int defaultInstrumentIndex) {
   ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
@@ -188,7 +188,7 @@ Set the range of the progress bar
 @param min : The minimum value of the bar
 @param max : The maxmimum value of the bar
 */
-void QRunsView::setProgressRange(int min, int max) {
+void QtRunsView::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
   ProgressableView::setProgressRange(min, max);
 }
@@ -197,44 +197,46 @@ void QRunsView::setProgressRange(int min, int max) {
 Set the status of the progress bar
 @param progress : The current value of the bar
 */
-void QRunsView::setProgress(int progress) {
+void QtRunsView::setProgress(int progress) {
   ui.progressBar->setValue(progress);
 }
 
 /**
  * Clear the progress
  */
-void QRunsView::clearProgress() { ui.progressBar->reset(); }
+void QtRunsView::clearProgress() { ui.progressBar->reset(); }
 
 /**
  * Resize the search results table columns
  */
-void QRunsView::resizeSearchResultsColumnsToContents() {
+void QtRunsView::resizeSearchResultsColumnsToContents() {
   ui.tableSearchResults->resizeColumnsToContents();
 }
 
 /**
  * Get the model containing the search results
  */
-ISearchModel const &QRunsView::searchResults() { return m_searchModel; }
+ISearchModel const &QtRunsView::searchResults() { return m_searchModel; }
 
-ISearchModel &QRunsView::mutableSearchResults() { return m_searchModel; }
+ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void QRunsView::onSearchComplete() { m_searchNotifyee->notifySearchComplete(); }
+void QtRunsView::onSearchComplete() {
+  m_searchNotifyee->notifySearchComplete();
+}
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void QRunsView::on_actionSearch_triggered() { m_notifyee->notifySearch(); }
+void QtRunsView::on_actionSearch_triggered() { m_notifyee->notifySearch(); }
 
 /**
 This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
-void QRunsView::on_actionAutoreduce_triggered() {
+void QtRunsView::on_actionAutoreduce_triggered() {
   m_notifyee->notifyAutoreductionResumed();
 }
 
@@ -242,19 +244,19 @@ void QRunsView::on_actionAutoreduce_triggered() {
 This slot conducts a search operation before notifying the presenter that the
 "pause autoreduce" button has been pressed
 */
-void QRunsView::on_actionAutoreducePause_triggered() {
+void QtRunsView::on_actionAutoreducePause_triggered() {
   m_notifyee->notifyAutoreductionPaused();
 }
 
 /**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
-void QRunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
+void QtRunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
 
 /**
 This slot shows the slit calculator
 */
-void QRunsView::onShowSlitCalculatorRequested() {
+void QtRunsView::onShowSlitCalculatorRequested() {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
@@ -264,7 +266,7 @@ void QRunsView::onShowSlitCalculatorRequested() {
 This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
-void QRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
+void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
   if (!ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
@@ -278,7 +280,7 @@ void QRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  * notifies the main presenter and updates the Slit Calculator
  * @param index : The index of the combo box
  */
-void QRunsView::onInstrumentChanged(int index) {
+void QtRunsView::onInstrumentChanged(int index) {
   ui.textSearch->clear();
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
@@ -290,11 +292,11 @@ void QRunsView::onInstrumentChanged(int index) {
 Get the selected instrument for searching
 @returns the selected instrument to search for
 */
-std::string QRunsView::getSearchInstrument() const {
+std::string QtRunsView::getSearchInstrument() const {
   return ui.comboSearchInstrument->currentText().toStdString();
 }
 
-void QRunsView::setSearchInstrument(std::string const &instrumentName) {
+void QtRunsView::setSearchInstrument(std::string const &instrumentName) {
   setSelected(*ui.comboSearchInstrument, instrumentName);
 }
 
@@ -302,7 +304,7 @@ void QRunsView::setSearchInstrument(std::string const &instrumentName) {
 Get the indices of the highlighted search result rows
 @returns a set of ints containing the selected row numbers
 */
-std::set<int> QRunsView::getSelectedSearchRows() const {
+std::set<int> QtRunsView::getSelectedSearchRows() const {
   std::set<int> rows;
   auto selectionModel = ui.tableSearchResults->selectionModel();
   if (selectionModel) {
@@ -317,7 +319,7 @@ std::set<int> QRunsView::getSelectedSearchRows() const {
 Get the indices of all search result rows
 @returns a set of ints containing the row numbers
 */
-std::set<int> QRunsView::getAllSearchRows() const {
+std::set<int> QtRunsView::getAllSearchRows() const {
   std::set<int> rows;
   if (!ui.tableSearchResults || !ui.tableSearchResults->model())
     return rows;
@@ -328,12 +330,12 @@ std::set<int> QRunsView::getAllSearchRows() const {
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-QRunsView::getAlgorithmRunner() const {
+QtRunsView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-QRunsView::getMonitorAlgorithmRunner() const {
+QtRunsView::getMonitorAlgorithmRunner() const {
   return m_monitorAlgoRunner;
 }
 
@@ -341,21 +343,21 @@ QRunsView::getMonitorAlgorithmRunner() const {
 Get the string the user wants to search for.
 @returns The search string
 */
-std::string QRunsView::getSearchString() const {
+std::string QtRunsView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
 
-void MantidQt::CustomInterfaces::QRunsView::on_buttonMonitor_clicked() {
+void MantidQt::CustomInterfaces::QtRunsView::on_buttonMonitor_clicked() {
   startMonitor();
 }
 
-void MantidQt::CustomInterfaces::QRunsView::on_buttonStopMonitor_clicked() {
+void MantidQt::CustomInterfaces::QtRunsView::on_buttonStopMonitor_clicked() {
   stopMonitor();
 }
 
 /** Start live data monitoring
  */
-void QRunsView::startMonitor() {
+void QtRunsView::startMonitor() {
   m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
   m_notifyee->notifyStartMonitor();
   connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
@@ -365,17 +367,17 @@ void QRunsView::startMonitor() {
 /**
 This slot notifies the presenter that the monitoring algorithm finished
 */
-void QRunsView::onStartMonitorComplete() {
+void QtRunsView::onStartMonitorComplete() {
   m_notifyee->notifyStartMonitorComplete();
 }
 
 /** Stop live data monitoring
  */
-void QRunsView::stopMonitor() { m_notifyee->notifyStopMonitor(); }
+void QtRunsView::stopMonitor() { m_notifyee->notifyStopMonitor(); }
 
 /** Set a combo box to the given value
  */
-void QRunsView::setSelected(QComboBox &box, std::string const &str) {
+void QtRunsView::setSelected(QComboBox &box, std::string const &str) {
   auto const index = box.findText(QString::fromStdString(str));
   if (index != -1)
     box.setCurrentIndex(index);
@@ -384,7 +386,7 @@ void QRunsView::setSelected(QComboBox &box, std::string const &str) {
 /**
    This slot is called each time the timer times out
 */
-void QRunsView::timerEvent(QTimerEvent *event) {
+void QtRunsView::timerEvent(QTimerEvent *event) {
   if (event->timerId() == m_timer.timerId()) {
     if (m_timerNotifyee)
       m_timerNotifyee->notifyTimerEvent();
@@ -395,12 +397,12 @@ void QRunsView::timerEvent(QTimerEvent *event) {
 
 /** start the timer
  */
-void QRunsView::startTimer(const int millisecs) {
+void QtRunsView::startTimer(const int millisecs) {
   m_timer.start(millisecs, this);
 }
 
 /** stop
  */
-void QRunsView::stopTimer() { m_timer.stop(); }
+void QtRunsView::stopTimer() { m_timer.stop(); }
 } // namespace CustomInterfaces
 } // namespace MantidQt

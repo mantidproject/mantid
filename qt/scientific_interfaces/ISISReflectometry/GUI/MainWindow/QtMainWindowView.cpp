@@ -4,9 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "QMainWindowView.h"
+#include "QtMainWindowView.h"
 #include "Common/IndexOf.h"
-#include "GUI/Batch/QBatchView.h"
+#include "GUI/Batch/QtBatchView.h"
 #include "GUI/Common/Plotter.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -27,20 +27,20 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 }
 } // namespace
 
-DECLARE_SUBWINDOW(QMainWindowView)
+DECLARE_SUBWINDOW(QtMainWindowView)
 
-QMainWindowView::QMainWindowView(QWidget *parent)
+QtMainWindowView::QtMainWindowView(QWidget *parent)
     : UserSubWindow(parent), m_notifyee(nullptr) {}
 
-IBatchView *QMainWindowView::newBatch() {
+IBatchView *QtMainWindowView::newBatch() {
   auto index = m_ui.mainTabs->count();
-  auto *newTab = new QBatchView(this);
+  auto *newTab = new QtBatchView(this);
   m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
   m_batchViews.emplace_back(newTab);
   return newTab;
 }
 
-void QMainWindowView::removeBatch(int batchIndex) {
+void QtMainWindowView::removeBatch(int batchIndex) {
   m_batchViews.erase(m_batchViews.begin() + batchIndex);
   m_ui.mainTabs->removeTab(batchIndex);
   if (m_ui.mainTabs->count() == 0) {
@@ -48,14 +48,14 @@ void QMainWindowView::removeBatch(int batchIndex) {
   }
 }
 
-std::vector<IBatchView *> QMainWindowView::batches() const {
+std::vector<IBatchView *> QtMainWindowView::batches() const {
   return m_batchViews;
 }
 
 /**
 Initialise the Interface
 */
-void QMainWindowView::initLayout() {
+void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
   // Until this is implemented we should hide this action
   m_ui.loadBatch->setEnabled(false);
@@ -104,26 +104,27 @@ void QMainWindowView::initLayout() {
   m_notifyee->notifyNewBatchRequested();
 }
 
-void QMainWindowView::onTabCloseRequested(int tabIndex) {
+void QtMainWindowView::onTabCloseRequested(int tabIndex) {
   m_notifyee->notifyCloseBatchRequested(tabIndex);
 }
 
-void QMainWindowView::onNewBatchRequested(bool) {
+void QtMainWindowView::onNewBatchRequested(bool) {
   m_notifyee->notifyNewBatchRequested();
 }
 
-void QMainWindowView::subscribe(MainWindowSubscriber *notifyee) {
+void QtMainWindowView::subscribe(MainWindowSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void QMainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
+void QtMainWindowView::helpPressed() { m_notifyee->notifyHelpPressed(); }
 
 /**
 Runs python code
 * @param pythonCode : [input] The code to run
 * @return : Result of the execution
 */
-std::string QMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
+std::string
+QtMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
 
   QString output = runPythonCode(QString::fromStdString(pythonCode), false);
   return output.toStdString();
@@ -133,7 +134,7 @@ std::string QMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
 Handles attempt to close main window
 * @param event : [input] The close event
 */
-void QMainWindowView::closeEvent(QCloseEvent *event) {
+void QtMainWindowView::closeEvent(QCloseEvent *event) {
   // Close only if reduction has been paused
   if (!m_presenter->isAnyBatchProcessing() ||
       m_presenter->isAnyBatchAutoreducing()) {
@@ -143,22 +144,22 @@ void QMainWindowView::closeEvent(QCloseEvent *event) {
   }
 }
 
-void QMainWindowView::giveUserCritical(const std::string &prompt,
-                                       const std::string &title) {
+void QtMainWindowView::giveUserCritical(const std::string &prompt,
+                                        const std::string &title) {
   QMessageBox::critical(this, QString::fromStdString(title),
                         QString::fromStdString(prompt), QMessageBox::Ok,
                         QMessageBox::Ok);
 }
 
-void QMainWindowView::giveUserInfo(const std::string &prompt,
-                                   const std::string &title) {
+void QtMainWindowView::giveUserInfo(const std::string &prompt,
+                                    const std::string &title) {
   QMessageBox::information(this, QString::fromStdString(title),
                            QString::fromStdString(prompt), QMessageBox::Ok,
                            QMessageBox::Ok);
 }
 
-bool QMainWindowView::askUserYesNo(const std::string &prompt,
-                                   const std::string &title) {
+bool QtMainWindowView::askUserYesNo(const std::string &prompt,
+                                    const std::string &title) {
   auto reply = QMessageBox::question(this, QString::fromStdString(title),
                                      QString::fromStdString(prompt),
                                      QMessageBox::Yes | QMessageBox::No);

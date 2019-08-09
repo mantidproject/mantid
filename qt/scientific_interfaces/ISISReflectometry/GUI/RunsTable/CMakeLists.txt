@@ -2,7 +2,7 @@ set(RUNS_TABLE_SRC_FILES
     RunsTablePresenter.cpp
     RunsTablePresenterFactory.cpp
     RegexRowFilter.cpp
-    QRunsTableView.cpp)
+    QtRunsTableView.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -10,12 +10,12 @@ set(RUNS_TABLE_SRC_FILES
 set(RUNS_TABLE_INC_FILES
     IRunsTablePresenter.h
     IRunsTableView.h
-    QRunsTableView.h
+    QtRunsTableView.h
     RegexRowFilter.h
     RunsTablePresenter.h
     RunsTablePresenterFactory.h)
 
-set(RUNS_TABLE_MOC_FILES QRunsTableView.h)
+set(RUNS_TABLE_MOC_FILES QtRunsTableView.h)
 
 set(RUNS_TABLE_UI_FILES RunsTableWidget.ui)
 

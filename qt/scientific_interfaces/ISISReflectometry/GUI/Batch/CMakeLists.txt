@@ -1,6 +1,6 @@
 set(BATCH_SRC_FILES
     BatchPresenter.cpp
-    QBatchView.cpp
+    QtBatchView.cpp
     BatchJobAlgorithm.cpp
     BatchJobRunner.cpp
     AlgorithmProperties.cpp
@@ -17,14 +17,14 @@ set(BATCH_INC_FILES
     IBatchJobRunner.h
     BatchPresenter.h
     BatchPresenterFactory.h
-    QBatchView.h
+    QtBatchView.h
     BatchJobAlgorithm.h
     BatchJobRunner.h
     AlgorithmProperties.h
     GroupProcessingAlgorithm.h
     RowProcessingAlgorithm.h)
 
-set(BATCH_MOC_FILES QBatchView.h)
+set(BATCH_MOC_FILES QtBatchView.h)
 
 set(BATCH_UI_FILES BatchWidget.ui)
 

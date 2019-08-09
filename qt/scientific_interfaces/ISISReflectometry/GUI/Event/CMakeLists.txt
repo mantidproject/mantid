@@ -1,4 +1,4 @@
-set(EVENT_SRC_FILES EventPresenter.cpp QEventView.cpp)
+set(EVENT_SRC_FILES EventPresenter.cpp QtEventView.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
@@ -7,10 +7,10 @@ set(EVENT_INC_FILES
     EventPresenter.h
     IEventPresenter.h
     IEventView.h
-    QEventView.h
+    QtEventView.h
     EventPresenterFactory.h)
 
-set(EVENT_MOC_FILES QEventView.h)
+set(EVENT_MOC_FILES QtEventView.h)
 
 set(EVENT_UI_FILES EventWidget.ui)
 

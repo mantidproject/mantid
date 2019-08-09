@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "QCatalogSearcher.h"
+#include "QtCatalogSearcher.h"
 #include "GUI/Runs/IRunsView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -37,19 +37,20 @@ void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
 }
 } // unnamed namespace
 
-QCatalogSearcher::QCatalogSearcher(IRunsView *view)
+QtCatalogSearcher::QtCatalogSearcher(IRunsView *view)
     : m_view(view), m_notifyee(nullptr), m_searchText(), m_instrument(),
       m_searchType(SearchType::NONE), m_searchInProgress(false) {
   m_view->subscribeSearch(this);
 }
 
-void QCatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
+void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
 ITableWorkspace_sptr
-QCatalogSearcher::search(const std::string &text, const std::string &instrument,
-                         ISearcher::SearchType searchType) {
+QtCatalogSearcher::search(const std::string &text,
+                          const std::string &instrument,
+                          ISearcher::SearchType searchType) {
   m_searchText = text;
   m_instrument = instrument;
   m_searchType = searchType;
@@ -61,16 +62,16 @@ QCatalogSearcher::search(const std::string &text, const std::string &instrument,
   return results;
 }
 
-void QCatalogSearcher::searchAsync() {
+void QtCatalogSearcher::searchAsync() {
   auto algSearch = createSearchAlgorithm(m_searchText);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
   m_searchInProgress = true;
 }
 
-bool QCatalogSearcher::startSearchAsync(const std::string &text,
-                                        const std::string &instrument,
-                                        SearchType searchType) {
+bool QtCatalogSearcher::startSearchAsync(const std::string &text,
+                                         const std::string &instrument,
+                                         SearchType searchType) {
   m_searchText = text;
   m_instrument = instrument;
   m_searchType = searchType;
@@ -87,7 +88,7 @@ bool QCatalogSearcher::startSearchAsync(const std::string &text,
   return true;
 }
 
-void QCatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
+void QtCatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
   stopObserving(alg);
   if (!hasActiveCatalogSession()) {
     m_notifyee->notifySearchFailed();
@@ -96,8 +97,8 @@ void QCatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
   }
 }
 
-void QCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
-                                   const std::string &what) {
+void QtCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
+                                    const std::string &what) {
   UNUSED_ARG(what)
   stopObserving(alg);
   if (!hasActiveCatalogSession()) {
@@ -105,7 +106,7 @@ void QCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg,
   }
 }
 
-void QCatalogSearcher::notifySearchComplete() {
+void QtCatalogSearcher::notifySearchComplete() {
   m_searchInProgress = false;
   auto algRunner = m_view->getAlgorithmRunner();
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
@@ -118,27 +119,27 @@ void QCatalogSearcher::notifySearchComplete() {
   m_notifyee->notifySearchComplete();
 }
 
-bool QCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
+bool QtCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
-SearchResult const &QCatalogSearcher::getSearchResult(int index) const {
+SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
   return results().getRowData(index);
 }
 
-void QCatalogSearcher::setSearchResultError(int index,
-                                            const std::string &errorMessage) {
+void QtCatalogSearcher::setSearchResultError(int index,
+                                             const std::string &errorMessage) {
   results().setError(index, errorMessage);
 }
 
-void QCatalogSearcher::reset() {
+void QtCatalogSearcher::reset() {
   m_searchText.clear();
   m_instrument.clear();
   m_searchType = SearchType::NONE;
   results().clear();
 }
 
-bool QCatalogSearcher::searchSettingsChanged(const std::string &text,
-                                             const std::string &instrument,
-                                             SearchType searchType) const {
+bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
+                                              const std::string &instrument,
+                                              SearchType searchType) const {
   return m_searchText != text || m_instrument != instrument ||
          searchType != m_searchType;
 }
@@ -148,7 +149,7 @@ bool hasActiveCatalogSession() {
   return !sessions.empty();
 }
 
-void QCatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
+void QtCatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
   API::InterfaceManager interfaceMgr;
   auto dlg = dynamic_cast<MantidQt::API::AlgorithmDialog *>(
       interfaceMgr.createDialog(alg));
@@ -159,7 +160,7 @@ void QCatalogSearcher::execLoginDialog(const IAlgorithm_sptr &alg) {
   dlg->activateWindow();
 }
 
-void QCatalogSearcher::dialogClosed() {
+void QtCatalogSearcher::dialogClosed() {
   if (!hasActiveCatalogSession()) {
     m_notifyee->notifySearchFailed();
   }
@@ -168,7 +169,7 @@ void QCatalogSearcher::dialogClosed() {
 /** Log in to the catalog
  * @returns : true if login succeeded
  */
-void QCatalogSearcher::logInToCatalog() {
+void QtCatalogSearcher::logInToCatalog() {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CatalogLogin");
   alg->initialize();
   alg->setProperty("KeepSessionAlive", true);
@@ -177,7 +178,7 @@ void QCatalogSearcher::logInToCatalog() {
   execLoginDialog(alg);
 }
 
-std::string QCatalogSearcher::activeSessionId() const {
+std::string QtCatalogSearcher::activeSessionId() const {
   auto sessions = CatalogManager::Instance().getActiveSessions();
   if (sessions.empty())
     throw std::runtime_error("You are not logged into any catalogs.");
@@ -186,7 +187,7 @@ std::string QCatalogSearcher::activeSessionId() const {
 }
 
 IAlgorithm_sptr
-QCatalogSearcher::createSearchAlgorithm(const std::string &text) {
+QtCatalogSearcher::createSearchAlgorithm(const std::string &text) {
   auto sessionId = activeSessionId();
 
   auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
@@ -200,7 +201,7 @@ QCatalogSearcher::createSearchAlgorithm(const std::string &text) {
   return algSearch;
 }
 
-ISearchModel &QCatalogSearcher::results() const {
+ISearchModel &QtCatalogSearcher::results() const {
   return m_view->mutableSearchResults();
 }
 } // namespace CustomInterfaces

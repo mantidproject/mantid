@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QEVENTVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QEVENTVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTEVENTVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTEVENTVIEW_H_
 
 #include "Common/QWidgetGroup.h"
 #include "IEventView.h"
@@ -15,15 +15,15 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QEventView : Provides an interface for the "Event Handling" widget
+/** QtEventView : Provides an interface for the "Event Handling" widget
 in
 the ISIS Reflectometry interface.
 */
-class QEventView : public QWidget, public IEventView {
+class QtEventView : public QWidget, public IEventView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QEventView(QWidget *parent = nullptr);
+  explicit QtEventView(QWidget *parent = nullptr);
   /// Returns time-slicing values
   void initUniformSliceTypeLayout();
   void initUniformEvenSliceTypeLayout();
@@ -82,4 +82,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_QEVENTVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTEVENTVIEW_H_ */

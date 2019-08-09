@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_QRUNSTABLEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QRUNSTABLEVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTRUNSTABLEVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTRUNSTABLEVIEW_H_
 #include "Common/DllConfig.h"
 #include "IRunsTableView.h"
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
@@ -17,12 +17,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL QRunsTableView : public QWidget,
-                                                      public IRunsTableView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsTableView : public QWidget,
+                                                       public IRunsTableView {
   Q_OBJECT
 public:
-  explicit QRunsTableView(std::vector<std::string> const &instruments,
-                          int defaultInstrumentIndex);
+  explicit QtRunsTableView(std::vector<std::string> const &instruments,
+                           int defaultInstrumentIndex);
   void subscribe(RunsTableViewSubscriber *notifyee) override;
   void setProgress(int value) override;
   void resetFilterBox() override;
@@ -80,7 +80,7 @@ private:
 class RunsTableViewFactory {
 public:
   explicit RunsTableViewFactory(std::vector<std::string> const &instruments);
-  QRunsTableView *operator()() const;
+  QtRunsTableView *operator()() const;
   int defaultInstrumentFromConfig() const;
   int indexOfElseFirst(std::string const &instrument) const;
 
@@ -89,4 +89,4 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_QRUNSTABLEVIEW_H_
+#endif // MANTID_CUSTOMINTERFACES_QTRUNSTABLEVIEW_H_

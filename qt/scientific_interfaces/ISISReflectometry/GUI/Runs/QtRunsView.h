@@ -4,15 +4,15 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QRUNSVIEW_H_
-#define MANTID_ISISREFLECTOMETRY_QRUNSVIEW_H_
+#ifndef MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
+#define MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
 
 #include "Common/DllConfig.h"
-#include "GUI/RunsTable/QRunsTableView.h"
+#include "GUI/RunsTable/QtRunsTableView.h"
 #include "IRunsView.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "QSearchModel.h"
+#include "QtSearchModel.h"
 
 #include "ui_RunsWidget.h"
 #include <QBasicTimer>
@@ -30,15 +30,15 @@ namespace CustomInterfaces {
 
 using MantidWidgets::SlitCalculator;
 
-/** QRunsView : Provides an interface for the "Runs" tab in the
+/** QtRunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QRunsView
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
     : public MantidQt::API::MantidWidget,
       public IRunsView {
   Q_OBJECT
 public:
-  QRunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QtRunsView(QWidget *parent, RunsTableViewFactory makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
@@ -103,14 +103,14 @@ private:
   RunsViewTimerSubscriber *m_timerNotifyee;
   RunsViewSearchSubscriber *m_searchNotifyee;
 
-  QSearchModel m_searchModel;
+  QtSearchModel m_searchModel;
 
   // the interface
   Ui::RunsWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
 
-  QRunsTableView *m_tableView;
+  QtRunsTableView *m_tableView;
 
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
@@ -132,4 +132,4 @@ private slots:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_ISISREFLECTOMETRY_QRUNSVIEW_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_ */

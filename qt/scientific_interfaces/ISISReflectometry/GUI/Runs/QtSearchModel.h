@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QSEARCHMODEL_H_
-#define MANTID_ISISREFLECTOMETRY_QSEARCHMODEL_H_
+#ifndef MANTID_ISISREFLECTOMETRY_QTSEARCHMODEL_H_
+#define MANTID_ISISREFLECTOMETRY_QTSEARCHMODEL_H_
 
 #include "Common/DllConfig.h"
 #include "ISearchModel.h"
@@ -20,14 +20,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** QSearchModel : Provides a QAbstractTableModel for a Mantid
+/** QtSearchModel : Provides a QAbstractTableModel for a Mantid
 ITableWorkspace of Reflectometry search results.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL QSearchModel : public QAbstractTableModel,
-                                                    public ISearchModel {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtSearchModel : public QAbstractTableModel,
+                                                     public ISearchModel {
   Q_OBJECT
 public:
-  QSearchModel();
+  QtSearchModel();
   void addDataFromTable(Mantid::API::ITableWorkspace_sptr tableWorkspace,
                         const std::string &instrument) override;
   // row and column counts
@@ -62,4 +62,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_ISISREFLECTOMETRY_QSEARCHMODEL_H_ */
+#endif /* MANTID_ISISREFLECTOMETRY_QTSEARCHMODEL_H_ */
