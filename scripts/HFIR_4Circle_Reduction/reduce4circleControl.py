@@ -33,7 +33,6 @@ import os
 import numpy
 
 from HFIR_4Circle_Reduction.fourcircle_utility import *
-from HFIR_HFIR_4Circle_Reduction import fourcircle_utility
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
 from HFIR_4Circle_Reduction.peakprocesshelper import SinglePointPeakIntegration
