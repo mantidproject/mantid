@@ -150,7 +150,7 @@ void addTransformationChild(
     const std::string &transformationType, const std::string &dependency,
     const std::string &units, const std::vector<int> &arrayShape,
     const std::vector<double> &values, const std::vector<double> &vec) {
-  addDataset(transformation, name, arrayShape, values, "units", units);
+  addDataset<double>(transformation, name, arrayShape, values, "units", units);
   auto index = transformation["children"].size() - 1;
   Json::Value &child = transformation["children"][index];
   child["attributes"][1] = createAttribute("vector", vec);
@@ -216,9 +216,9 @@ void addNXMonitorName(Json::Value &monitor, const std::string &name) {
   appendToChildren(monitor, monitorName);
 }
 
-void addNXMonitorDetectorID(Json::Value &monitor, const int64_t detectorID) {
-  auto monitorDetID = createEmptyDataset("detector_id", "int64");
-  monitorDetID["values"] = convertToJsonValue<int64_t>(detectorID);
+void addNXMonitorDetectorID(Json::Value &monitor, const int32_t detectorID) {
+  auto monitorDetID = createEmptyDataset("detector_id", "int32");
+  monitorDetID["values"] = convertToJsonValue<int32_t>(detectorID);
   appendToChildren(monitor, monitorDetID);
 }
 
@@ -264,10 +264,10 @@ void addNXChopperSlitHeight(Json::Value &chopper, const double slitHeight) {
   appendToChildren(chopper, chopperSlitHeight);
 }
 
-void addNXChopperSlits(Json::Value &chopper, const int64_t value) {
-  auto chopperFullName = createEmptyDataset("slits", "int64");
-  chopperFullName["values"] = convertToJsonValue<int64_t>(value);
-  appendToChildren(chopper, chopperFullName);
+void addNXChopperSlits(Json::Value &chopper, const int32_t value) {
+  auto chopperSlits = createEmptyDataset("slits", "int32");
+  chopperSlits["values"] = convertToJsonValue<int32_t>(value);
+  appendToChildren(chopper, chopperSlits);
 }
 
 void addNXChopperTopDeadCenter(Json::Value &chopper, const std::string &topic,
@@ -322,8 +322,8 @@ void addNXTransformationOrientation(Json::Value &nxTransformation,
 
 void addDetectorNumbers(Json::Value &nxDetector,
                         const std::vector<int32_t> &arrayShape,
-                        const std::vector<int64_t> &values) {
-  addDataset<int64_t>(nxDetector, "detector_number", arrayShape, values);
+                        const std::vector<int32_t> &values) {
+  addDataset<int32_t>(nxDetector, "detector_number", arrayShape, values);
 }
 
 void addXPixelOffset(Json::Value &nxDetector,
@@ -439,7 +439,7 @@ std::string getJSONGeometryNoXPixelOffset() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
 
   return JSONInstrumentBuilder::convertToString(root);
 }
@@ -455,7 +455,7 @@ std::string getJSONGeometryNoYPixelOffset() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
 
@@ -473,7 +473,7 @@ std::string getJSONGeometryNoPixelShape() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -492,7 +492,7 @@ std::string getJSONGeometryEmptyOffGeometry() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -512,7 +512,7 @@ std::string getJSONGeometryInvalidOffGeometry() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -537,7 +537,7 @@ std::string getJSONGeometryEmptyCylindricalGeometry() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -557,7 +557,7 @@ std::string getJSONGeometryInvalidCylindricalGeometry() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -582,7 +582,7 @@ std::string getJSONGeometryMissingTransformations() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -610,7 +610,7 @@ std::string getJSONGeometryMissingBeamDirectionOffset() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -641,7 +641,7 @@ std::string getJSONGeometryMissingOrientation() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -674,7 +674,7 @@ std::string getJSONGeometryMissingMonitorInformation() {
 
   JSONInstrumentBuilder::addNXMonitor(instrument, "monitor_1");
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -708,7 +708,7 @@ std::string getJSONGeometryMissingChopperInformation() {
 
   JSONInstrumentBuilder::addNXChopper(instrument, "chopper_1");
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -742,7 +742,7 @@ std::string getFullJSONInstrumentSimpleOFF() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -776,7 +776,7 @@ std::string getFullJSONInstrumentSimpleCylindrical() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -820,7 +820,7 @@ std::string getFullJSONInstrumentSimpleWithChopper() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -871,7 +871,7 @@ std::string getFullJSONInstrumentSimpleWithMonitorNoShape() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -927,7 +927,7 @@ std::string getFullJSONInstrumentSimpleWithMonitor() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
@@ -960,7 +960,7 @@ std::string getFullJSONInstrumentSimpleWithZPixelOffset() {
       JSONInstrumentBuilder::addNXDetector(instrument, "detector_1");
 
   JSONInstrumentBuilder::addDetectorNumbers(detectorBank, {2, 2},
-                                            std::vector<int64_t>{1, 2, 3, 4});
+                                            std::vector<int32_t>{1, 2, 3, 4});
   JSONInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
                                          {-0.299, -0.297, -0.299, -0.297});
   JSONInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},

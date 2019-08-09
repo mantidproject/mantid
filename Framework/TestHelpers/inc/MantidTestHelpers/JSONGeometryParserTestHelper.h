@@ -30,7 +30,7 @@ Json::Value &addNXInstrument(Json::Value &entry, const std::string &name);
 void addNXInstrumentName(Json::Value &instrument, const std::string &name);
 Json::Value &addNXMonitor(Json::Value &entry, const std::string &name);
 void addNXMonitorName(Json::Value &monitor, const std::string &name);
-void addNXMonitorDetectorID(Json::Value &monitor, const int64_t detectorID);
+void addNXMonitorDetectorID(Json::Value &monitor, const int32_t detectorID);
 void addNXMonitorEventStreamInfo(Json::Value &monitor, const std::string &topic,
                                  const std::string &source,
                                  const std::string &writerModule);
@@ -46,7 +46,7 @@ void addNXChopperSlitEdges(Json::Value &chopper,
                            const std::vector<double> &edges = {0.0, 23.0});
 void addNXChopperSlitHeight(Json::Value &chopper,
                             const double slitHeight = 150);
-void addNXChopperSlits(Json::Value &chopper, const int64_t value);
+void addNXChopperSlits(Json::Value &chopper, const int32_t value);
 void addNXChopperTopDeadCenter(Json::Value &chopper, const std::string &topic,
                                const std::string &source,
                                const std::string &writerModule);
@@ -73,7 +73,7 @@ void addNXTransformationOrientation(Json::Value &nxTransformation,
 
 void addDetectorNumbers(Json::Value &nxDetector,
                         const std::vector<int> &arrayShape,
-                        const std::vector<int64_t> &values);
+                        const std::vector<int32_t> &values);
 
 void addXPixelOffset(Json::Value &nxDetector,
                      const std::vector<int> &arrayShape,
