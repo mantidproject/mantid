@@ -176,8 +176,7 @@ class PeriodicTableItem(object):
         (e.g. "alkali metal", "noble gas"...)
     """
 
-    def __init__(self, symbol, Z, col, row, name, mass,
-                 subcategory=""):
+    def __init__(self, symbol, Z, col, row, name, mass, subcategory=""):
         self.symbol = symbol
         """Atomic symbol (e.g. H, He, Li...)"""
         self.Z = Z
@@ -199,10 +198,7 @@ class PeriodicTableItem(object):
         if idx == 6:
             _logger.warning("density not implemented in silx, returning 0.")
 
-        ret = [self.symbol, self.Z,
-               self.col, self.row,
-               self.name, self.mass,
-               0.]
+        ret = [self.symbol, self.Z, self.col, self.row, self.name, self.mass, 0.]
         return ret[idx]
 
     def __len__(self):
@@ -232,10 +228,8 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
     }
     """Dictionary defining RGB colors for each subcategory."""
 
-    def __init__(self, symbol, Z, col, row, name, mass,
-                 subcategory="", bgcolor=None):
-        PeriodicTableItem.__init__(self, symbol, Z, col, row, name, mass,
-                                   subcategory)
+    def __init__(self, symbol, Z, col, row, name, mass, subcategory="", bgcolor=None):
+        PeriodicTableItem.__init__(self, symbol, Z, col, row, name, mass, subcategory)
 
         self.bgcolor = self.COLORS.get(subcategory, "#FFFFFF")
         """Background color of element in the periodic table,
@@ -276,8 +270,8 @@ class _ElementButton(QtWidgets.QPushButton):
         """:class:`PeriodicTableItem` object represented by this button"""
 
         self.setText(item.symbol)
-        self.setFlat(1)
-        self.setCheckable(0)
+        self.setFlat(True)
+        self.setCheckable(False)
 
         self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                                  QtWidgets.QSizePolicy.Expanding))
@@ -298,7 +292,7 @@ class _ElementButton(QtWidgets.QPushButton):
             self.bgcolor = QtGui.QColor("#FFFFFF")
 
         self.brush = QtGui.QBrush()
-        self.__setBrush()
+        self._setBrush()
 
         self.clicked.connect(self.leftClickedSlot)
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -314,7 +308,7 @@ class _ElementButton(QtWidgets.QPushButton):
         :param b: boolean
         """
         self.current = b
-        self.__setBrush()
+        self._setBrush()
 
     def isCurrent(self):
         """
@@ -335,9 +329,9 @@ class _ElementButton(QtWidgets.QPushButton):
         :param b: boolean
         """
         self.selected = b
-        self.__setBrush()
+        self._setBrush()
 
-    def __setBrush(self):
+    def _setBrush(self):
         """Selected cells are yellow when not current.
         The current cell is dark yellow when selected or grey when not
         selected.
@@ -347,13 +341,11 @@ class _ElementButton(QtWidgets.QPushButton):
 
         if self.selected:
             self.brush = QtGui.QBrush(self.selected_color)
-
         elif self.bgcolor is not None:
             self.brush = QtGui.QBrush(self.bgcolor)
         else:
             self.brush = QtGui.QBrush()
-        palette.setBrush(self.backgroundRole(),
-                         self.brush)
+        palette.setBrush(self.backgroundRole(), self.brush)
         self.setPalette(palette)
         self.update()
 
@@ -489,7 +481,7 @@ class PeriodicTable(QtWidgets.QWidget):
             elements = _defaultTableItems
         # fill cells with elements
         for elmt in elements:
-            self.__addElement(elmt)
+            self._addElement(elmt)
         self.elements = elements
 
     def silentSetElementSelected(self, symbol, state):
@@ -516,7 +508,7 @@ class PeriodicTable(QtWidgets.QWidget):
         except KeyError:
             return None
 
-    def __addElement(self, elmt):
+    def _addElement(self, elmt):
         """Add one :class:`_ElementButton` widget into the grid,
         connect its signals to interact with the cursor"""
         b = _ElementButton(elmt, self)
@@ -642,7 +634,7 @@ class PeriodicCombo(QtWidgets.QComboBox):
     """
 
     def __init__(self, parent=None, detailed=True, elements=None):
-        QtGui.QComboBox.__init__(self, parent)
+        QtWidgets.QComboBox.__init__(self, parent)
 
         # add all elements from global list
         if elements is None:
@@ -654,9 +646,9 @@ class PeriodicCombo(QtWidgets.QComboBox):
                 txt = "%2s (%d)" % (elmt.symbol, elmt.Z)
             self.insertItem(i, txt)
 
-        self.currentIndexChanged[int].connect(self.__selectionChanged)
+        self.currentIndexChanged[int].connect(self._selectionChanged)
 
-    def __selectionChanged(self, idx):
+    def _selectionChanged(self, idx):
         """Emit :attr:`sigSelectionChanged`"""
         self.sigSelectionChanged.emit(_defaultTableItems[idx])
 
@@ -697,8 +689,7 @@ class PeriodicList(QtWidgets.QTreeWidget):
     :class:`PeriodicTableItem` objects.
     """
 
-    def __init__(self, parent=None, detailed=True,
-                 single=False, elements=None):
+    def __init__(self, parent=None, detailed=True, single=False, elements=None):
         QtWidgets.QTreeWidget.__init__(self, parent)
 
         self.detailed = detailed
@@ -713,16 +704,16 @@ class PeriodicList(QtWidgets.QTreeWidget):
         self.header().setStretchLastSection(False)
 
         self.setRootIsDecorated(0)
-        self.itemClicked.connect(self.__selectionChanged)
-        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection if single
-                              else QtGui.QAbstractItemView.ExtendedSelection)
-        self.__fill_widget(elements)
+        self.itemClicked.connect(self._selectionChanged)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single
+                              else QtWidgets.QAbstractItemView.ExtendedSelection)
+        self._fill_widget(elements)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
         if detailed:
             self.resizeColumnToContents(2)
 
-    def __fill_widget(self, elements):
+    def _fill_widget(self, elements):
         """Fill tree widget with elements """
         if elements is None:
             elements = _defaultTableItems
@@ -732,9 +723,9 @@ class PeriodicList(QtWidgets.QTreeWidget):
         previous_item = None
         for elmt in elements:
             if previous_item is None:
-                item = QtGui.QTreeWidgetItem(self)
+                item = QtWidgets.QTreeWidgetItem(self)
             else:
-                item = QtGui.QTreeWidgetItem(self, previous_item)
+                item = QtWidgets.QTreeWidgetItem(self, previous_item)
             item.setText(0, str(elmt.Z))
             item.setText(1, elmt.symbol)
             if self.detailed:
@@ -742,7 +733,7 @@ class PeriodicList(QtWidgets.QTreeWidget):
             self.tree_items.append(item)
             previous_item = item
 
-    def __selectionChanged(self, treeItem, column):
+    def _selectionChanged(self, treeItem, column):
         """Emit a :attr:`sigSelectionChanged` and send a list of
         :class:`PeriodicTableItem` objects."""
         self.sigSelectionChanged.emit(self.getSelection())
@@ -767,5 +758,4 @@ class PeriodicList(QtWidgets.QTreeWidget):
         if isinstance(symbolList[0], PeriodicTableItem):
             symbolList = [elmt.symbol for elmt in symbolList]
         for idx in range(len(self.tree_items)):
-            self.tree_items[idx].setSelected(
-                _defaultTableItems[idx].symbol in symbolList)
+            self.tree_items[idx].setSelected(_defaultTableItems[idx].symbol in symbolList)

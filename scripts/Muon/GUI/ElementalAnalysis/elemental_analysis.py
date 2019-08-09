@@ -9,8 +9,8 @@ from __future__ import absolute_import, print_function
 from qtpy import QtWidgets
 from copy import deepcopy
 import matplotlib as mpl
-
 from six import iteritems
+import sys
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
@@ -39,6 +39,17 @@ offset = 0.9
 
 
 def gen_name(element, name):
+    if sys.version_info[:2] < (3, 0):
+        if (not isinstance(element, str)) and (not isinstance(element, unicode)):
+            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
+        if (not isinstance(name, str)) and (not isinstance(name, unicode)):
+            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
+    else:
+        if not isinstance(element, str):
+            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
+        if not isinstance(name, str):
+            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
+
     if element in name:
         return name
     return element + " " + name
@@ -62,8 +73,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
         # load stuff
-        self.load_widget = LoadPresenter(
-            LoadView(), LoadModel(), CoLoadModel())
+        self.load_widget = LoadPresenter(LoadView(), LoadModel(), CoLoadModel())
         self.load_widget.on_loading_finished(self.loading_finished)
 
         # detectors
@@ -121,12 +131,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
-   # general functions
+    # general functions
     def _gen_label(self, name, x_value_in, element=None):
         if element is None:
             return
         # check x value is a float
-        x_value = 0.0
         try:
             x_value = float(x_value_in)
         except:
@@ -267,7 +276,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             label = self._gen_label(full_name, x_value, element)
             self._plot_line_once(subplot, x_value, label, color)
 
-    def _update_peak_data(self, element, data=None):
+    def _update_peak_data(self, element):
         if self.ptable.is_selected(element):
             # remove all of the lines for the element
             self._remove_element_lines(element)
@@ -331,7 +340,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def checked_data(self, element, selection, state):
         for checkbox in selection:
             checkbox.setChecked(state)
-        self._update_peak_data(element, self.element_widgets[element].get_checked())
+        self._update_peak_data(element)
 
     def electrons_checked(self):
         for element, selector in iteritems(self.element_widgets):
