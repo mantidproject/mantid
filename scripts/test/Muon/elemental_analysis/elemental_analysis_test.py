@@ -203,9 +203,11 @@ class ElementalAnalysisTest(unittest.TestCase):
         data = {'line1': 10.0, 'line2': 20.0, 'line3': 30.0}
         self.gui._add_element_lines('Cu', data)
         self.assertEqual(mock_plot_line.call_count, 3)
-        call_list = [mock.call(gen_name('Cu', 'line3'), 30.0, 'C0', 'Cu'),
-                     mock.call(gen_name('Cu', 'line2'), 20.0, 'C0', 'Cu'),
-                     mock.call(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')]
+        call_list = [
+            mock.call(gen_name('Cu', 'line3'), 30.0, 'C0', 'Cu'),
+            mock.call(gen_name('Cu', 'line2'), 20.0, 'C0', 'Cu'),
+            mock.call(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')
+        ]
         mock_plot_line.assert_has_calls(call_list, any_order=True)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
@@ -260,7 +262,8 @@ class ElementalAnalysisTest(unittest.TestCase):
             self.assertEqual(detector.setChecked.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
-    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(self, mock_QWidget):
+    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(
+            self, mock_QWidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
@@ -273,9 +276,9 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
-    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(self, mock_mantid, mock_add_peak_data):
-        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()],
-                           'name2': [mock.Mock(), mock.Mock()]}
+    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(
+            self, mock_mantid, mock_add_peak_data):
+        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()], 'name2': [mock.Mock(), mock.Mock()]}
         self.gui.plotting = mock.Mock()
 
         self.gui.add_detector_to_plot('GE1', 'name1')

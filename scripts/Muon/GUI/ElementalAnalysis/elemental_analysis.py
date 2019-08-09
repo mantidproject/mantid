@@ -38,17 +38,25 @@ import mantid.simpleapi as mantid
 offset = 0.9
 
 
+def is_string(value):
+    if isinstance(value, str):
+        return True
+    elif sys.version_info[:2] < (3, 0):
+        if isinstance(value, unicode):
+            return True
+
+    return False
+
+
 def gen_name(element, name):
-    if sys.version_info[:2] < (3, 0):
-        if (not isinstance(element, str)) and (not isinstance(element, unicode)):
-            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
-        if (not isinstance(name, str)) and (not isinstance(name, unicode)):
-            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
-    else:
-        if not isinstance(element, str):
-            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
-        if not isinstance(name, str):
-            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
+    msg = None
+    if not is_string(element):
+        msg = "'{}' expected element to be 'str', found '{}' instead".format(str(element), type(element))
+    if not is_string(name):
+        msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
+
+    if msg is not None:
+        raise TypeError(msg)
 
     if element in name:
         return name
@@ -56,7 +64,6 @@ def gen_name(element, name):
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
-
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         # set menu
@@ -156,7 +163,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # check x value is a float
         try:
             x_value = float(x_value_in)
-        except:
+        except ValueError:
             return
         if name not in self.element_lines[element]:
             self.element_lines[element].append(name)
@@ -210,7 +217,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
-            except:
+            except ValueError:
                 continue
             full_name = gen_name(element, name)
             if full_name not in self.element_lines[element]:
@@ -292,7 +299,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
-            except:
+            except ValueError:
                 continue
             full_name = gen_name(element, name)
             label = self._gen_label(full_name, x_value, element)
@@ -341,13 +348,14 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.ptable.set_peak_datafile(filename)
         # these are commneted out as they are a bug
         # see issue 25326
-        #self._clear_lines_after_data_file_selected()
+        # self._clear_lines_after_data_file_selected()
         try:
             self._generate_element_widgets()
         except ValueError:
-            message_box.warning('The file does not contain correctly formatted data, resetting to default data file.'
-                                'See "https://docs.mantidproject.org/nightly/interfaces/'
-                                'Muon%20Elemental%20Analysis.html" for more information.')
+            message_box.warning(
+                'The file does not contain correctly formatted data, resetting to default data file.'
+                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                'Muon%20Elemental%20Analysis.html" for more information.')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
 
@@ -356,7 +364,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.ptable.select_element(element)
             else:
                 self._remove_element_lines(element)
-        #self._generate_element_data()
+        # self._generate_element_data()
 
     # general checked data
     def checked_data(self, element, selection, state):
