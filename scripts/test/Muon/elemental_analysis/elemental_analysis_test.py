@@ -25,13 +25,13 @@ from MultiPlotting.label import Label
 @start_qapplication
 class ElementalAnalysisTest(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        super(ElementalAnalysisTest, self).setUpClass()
-        self.gui = ElementalAnalysisGui()
+    def setUpClass(cls):
+        super(ElementalAnalysisTest, cls).setUpClass()
+        cls.gui = ElementalAnalysisGui()
 
     @classmethod
-    def tearDownClass(self):
-        self.gui = None
+    def tearDownClass(cls):
+        cls.gui = None
 
     def setUp(self):
         self.gui.plot_window = None

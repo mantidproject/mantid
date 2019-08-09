@@ -163,7 +163,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # check x value is a float
         try:
             x_value = float(x_value_in)
-        except ValueError:
+        except:
             return
         if name not in self.element_lines[element]:
             self.element_lines[element].append(name)
