@@ -321,7 +321,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             data = self.element_widgets[element].get_checked()
         color = self.get_color(element)
         for name, x_value in iteritems(data):
-            if isinstance(float, x_value):
+            if isinstance(x_value, float):
                 full_name = gen_name(element, name)
                 label = self._gen_label(full_name, x_value, element)
                 self._plot_line_once(subplot, x_value, label, color)
@@ -464,13 +464,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def remove_line_type(self, run, _type):
         # If no line type is selected do not allow plotting
-        if not any([
-                self.lines.total.isChecked(),
-                self.lines.prompt.isChecked(),
-                self.lines.delayed.isChecked()
-        ]):
-            for detector in self.detectors.detectors:
-                detector.setEnabled(False)
+        self.uncheck_detectors_if_no_line_plotted()
 
         if self.plot_window is None:
             return
@@ -481,15 +475,31 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 if _type in ws.getName():
                     self.plotting.remove_line(subplot, ws.getName())
 
+    def uncheck_detectors_if_no_line_plotted(self):
+        if not any([
+                self.lines.total.isChecked(),
+                self.lines.prompt.isChecked(),
+                self.lines.delayed.isChecked()
+        ]):
+            for detector in self.detectors.detectors:
+                detector.setEnabled(False)
+
     # When removing a line with the remove window uncheck the line here
     def uncheck_on_removed(self, removed_lines):
         for line in removed_lines:
             if 'Total' in line:
+                self.lines.total.blockSignals(True)
                 self.lines.total.setChecked(False)
+                self.lines.total.blockSignals(False)
             if 'Prompt' in line:
+                self.lines.prompt.blockSignals(True)
                 self.lines.prompt.setChecked(False)
+                self.lines.prompt.blockSignals(False)
             if 'Delayed' in line:
+                self.lines.delayed.blockSignals(True)
                 self.lines.delayed.setChecked(False)
+                self.lines.delayed.blockSignals(False)
+        self.uncheck_detectors_if_no_line_plotted()
 
     # Line total
     def line_total_checked(self):

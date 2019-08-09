@@ -223,13 +223,13 @@ class subplot(QtWidgets.QWidget):
         for name in line_names:
             self._context.subplots[subplot_name].removeLine(name)
 
+        self.rmLineSignal.emit([str(name) for name in line_names])
+
         # if all of the lines have been removed -> delete subplot
         if not self._context.get_lines(subplot_name):
             self._remove_subplot(subplot_name)
         else:
             self.canvas.draw()
-
-        self.rmLineSignal.emit([str(name) for name in line_names])
 
     def _apply_rm(self, line_names):
         to_close = []
@@ -238,13 +238,7 @@ class subplot(QtWidgets.QWidget):
                 to_close.append(name)
 
         self.remove_lines(self._rm_window.subplot, to_close)
-
-        # if no subplots then close plotting window
-        if len(self._context.subplots.keys()) == 0:
-            self._close_rm_window()
-            # close plot window once auto grid done
-        else:
-            self._close_rm_window()
+        self._close_rm_window()
 
     def _close_rm_window(self):
         self._rm_window.close

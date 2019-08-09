@@ -288,10 +288,17 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
-    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(
-            self, mock_mantid, mock_add_peak_data):
-        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()], 'name2': [mock.Mock(), mock.Mock()]}
+    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(self, mock_mantid, mock_add_peak_data):
+        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock(), mock.Mock()],
+                           'name2': [mock.Mock(), mock.Mock(), mock.Mock()]}
         self.gui.plotting = mock.Mock()
+        self.gui.lines = mock.Mock()
+        self.gui.lines.total.isChecked.return_value = True
+        self.gui.lines.prompt.isChecked.return_value = False
+        self.gui.lines.delayed.isChecked.return_value = True
+        mock_mantid.mtd['name1'][0].getName.return_value = 'ws with Total'
+        mock_mantid.mtd['name1'][1].getName.return_value = 'ws with Delayed'
+        mock_mantid.mtd['name1'][2].getName.return_value = 'ws with Prompt'
 
         self.gui.add_detector_to_plot('GE1', 'name1')
         self.assertEqual(self.gui.plotting.add_subplot.call_count, 1)
@@ -400,7 +407,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
 
-    def test_subplotRemoved_changes_state_only_if_other_subplots_exist(self):
+    def test_subplot_removed_changes_state_only_if_other_subplots_exist(self):
         self.gui.detectors.setStateQuietly = mock.Mock()
         self.gui.plotting.get_subplots = mock.Mock(return_value=True)
         self.gui.plot_window = 'plot_window'
@@ -410,7 +417,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, 'plot_window')
 
-    def test_subplotRemoved_closes_plot_if_no_other_subplots_exist(self):
+    def test_subplot_removed_closes_plot_if_no_other_subplots_exist(self):
         self.gui.detectors.setStateQuietly = mock.Mock()
         self.gui.plotting.get_subplots = mock.Mock(return_value=False)
         self.gui.plot_window = mock.Mock()
