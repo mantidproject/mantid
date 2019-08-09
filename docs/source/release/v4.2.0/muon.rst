@@ -37,12 +37,14 @@ Improvements
 Interfaces
 ----------
 
-Muon Analysis 2
-###############
+Muon Analysis 2 and Frequency Domain Analysis
+#############################################
 
 - When loading PSI data if the groups given are poorly stored in the file, it should now produce unique names in the grouping tab for groups.
 - When switching between data sets groups selected to fit are remembered.
 - The FFT tab now uses the group pair selection to make a guess at the users selection for workspaces.
+- Can now plot FFT's of PhaseQuad data.
+- No longer produces an error if using multiple runs and the user plots all the FFT results when no imaginary data was used.
 
 Algorithms
 ----------

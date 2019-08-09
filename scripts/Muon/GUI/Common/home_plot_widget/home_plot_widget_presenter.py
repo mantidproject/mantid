@@ -131,6 +131,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.get_workspaces_to_plot(
             self.context.group_pair_context.selected, self._view.if_raw(),
             self._view.get_selected())
+            self._view.get_selected(), workspace_list)
         self._model.plot(workspace_list, self.get_plot_title(), self.get_domain(), self._force_redraw, self.context.window_title)
         self._force_redraw = False
 
@@ -197,7 +198,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             for run in self.context.data_context.current_runs:
                 runs += ", " + str(run[0])
             workspace_list = self.context.get_names_of_frequency_domain_workspaces_to_fit(
-                runs, current_group_pair, False, plot_type[len(FREQ_PLOT_TYPE):])
+                runs, current_group_pair, True, plot_type[len(FREQ_PLOT_TYPE):])
 
             return workspace_list
         except AttributeError:
