@@ -7,6 +7,10 @@
 #ifndef MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSER_H_
 #define MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSER_H_
 
+// Disable warnings generated from jsoncpp library related to inheriting
+// std::exception
+#pragma warning(disable : 4275)
+
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <Eigen/Geometry>
