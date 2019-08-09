@@ -78,13 +78,14 @@ public:
 public slots:
   void clearTopPreview() override;
   void clearBottomPreview() override;
-  void clear() override;
+  void clearPreviews() override;
   void setHWHMRange(double minimum, double maximum) override;
   void setHWHMMaximum(double minimum) override;
   void setHWHMMinimum(double maximum) override;
 
 private slots:
-  void emitPlotSpectrumChanged(int /*spectrum*/);
+  void emitDelayedPlotSpectrumChanged(int /*spectrum*/);
+  void emitPlotSpectrumChanged();
   void emitPlotSpectrumChanged(const QString &spectrum);
   void emitSelectedFitDataChanged(int /*index*/);
   void emitPlotGuessChanged(int /*doPlotGuess*/);

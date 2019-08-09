@@ -11,6 +11,7 @@
 #include <boost/numeric/conversion/cast.hpp>
 
 #include <QMessageBox>
+#include <QTimer>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,7 +24,8 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
           SLOT(emitSelectedFitDataChanged(int)));
   connect(m_plotForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitPlotSpectrumChanged(int)));
+          SLOT(emitDelayedPlotSpectrumChanged(int)));
+
   connect(m_plotForm->cbPlotSpectrum,
           SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(emitPlotSpectrumChanged(const QString &)));
@@ -200,7 +202,7 @@ void IndirectFitPlotView::clearBottomPreview() {
   m_plotForm->ppPlotBottom->clear();
 }
 
-void IndirectFitPlotView::clear() {
+void IndirectFitPlotView::clearPreviews() {
   clearTopPreview();
   clearBottomPreview();
 }
@@ -275,8 +277,15 @@ void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
     emit selectedFitDataChanged(boost::numeric_cast<std::size_t>(index));
 }
 
-void IndirectFitPlotView::emitPlotSpectrumChanged(int spectrum) {
-  emit plotSpectrumChanged(boost::numeric_cast<std::size_t>(spectrum));
+// Required due to a bug in qt causing the valueChanged signal to be emitted
+// twice due to the long amount of time taken to complete the necessary actions
+void IndirectFitPlotView::emitDelayedPlotSpectrumChanged(int spectrum) {
+  QTimer::singleShot(150, this, SLOT(emitPlotSpectrumChanged()));
+}
+
+void IndirectFitPlotView::emitPlotSpectrumChanged() {
+  emit plotSpectrumChanged(
+      boost::numeric_cast<std::size_t>(m_plotForm->spPlotSpectrum->value()));
 }
 
 void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {

@@ -158,12 +158,12 @@ void IndirectFitAnalysisTab::connectDataAndPlotPresenters() {
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
           SLOT(updatePlots()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), m_plotPresenter.get(),
-          SLOT(updateGuess()));
+          SLOT(updateGuessAvailability()));
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
           m_plotPresenter.get(), SLOT(updatePlots()));
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this,
           SLOT(setDataTableStartX(double)));
@@ -234,12 +234,12 @@ void IndirectFitAnalysisTab::connectFitBrowserAndPlotPresenter() {
           m_plotPresenter.get(), SLOT(updateRangeSelectors()));
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
           m_plotPresenter.get(), SLOT(updatePlots()));
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   connect(m_fitPropertyBrowser, SIGNAL(plotGuess()), m_plotPresenter.get(),
           SLOT(enablePlotGuessInSeparateWindow()));
@@ -770,7 +770,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
 
   connect(m_fitPropertyBrowser,
           SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-          m_plotPresenter.get(), SLOT(updateGuess()));
+          m_plotPresenter.get(), SLOT(updateGuessAvailability()));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(fitAlgorithmComplete(bool)));
 }
@@ -1092,7 +1092,7 @@ void IndirectFitAnalysisTab::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
 void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
   disconnect(m_fitPropertyBrowser,
              SIGNAL(parameterChanged(const Mantid::API::IFunction *)),
-             m_plotPresenter.get(), SLOT(updateGuess()));
+             m_plotPresenter.get(), SLOT(updateGuessAvailability()));
 
   setAlgorithmProperties(fitAlgorithm);
 

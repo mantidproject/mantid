@@ -59,6 +59,8 @@ public:
   void deleteExternalGuessWorkspace();
 
 private:
+  std::pair<double, double> getGuessRange() const;
+
   Mantid::API::MatrixWorkspace_sptr
   createInputAndGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWS,
                                Mantid::API::MatrixWorkspace_sptr guessWorkspace,

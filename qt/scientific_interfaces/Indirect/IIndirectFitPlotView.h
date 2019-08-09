@@ -80,7 +80,7 @@ public:
 public slots:
   virtual void clearTopPreview() = 0;
   virtual void clearBottomPreview() = 0;
-  virtual void clear() = 0;
+  virtual void clearPreviews() = 0;
   virtual void setHWHMRange(double minimum, double maximum) = 0;
   virtual void setHWHMMaximum(double minimum) = 0;
   virtual void setHWHMMinimum(double maximum) = 0;
