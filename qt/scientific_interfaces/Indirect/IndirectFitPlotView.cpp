@@ -36,6 +36,20 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this,
           SIGNAL(fitSelectedSpectrum()));
 
+  // Avoids squished plots for >qt5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  QHash<QString, QVariant> kwargs;
+  kwargs.insert("pad", 0);
+
+  m_plotForm->ppPlotTop->setTightLayout(kwargs);
+  m_plotForm->ppPlotBottom->setTightLayout(kwargs);
+
+  m_plotForm->ppPlotTop->setOverrideAxisLabel(
+      MantidQt::MantidWidgets::AxisID::XBottom, "");
+  m_plotForm->ppPlotBottom->setOverrideAxisLabel(
+      MantidQt::MantidWidgets::AxisID::YLeft, "");
+#endif
+
   m_plotForm->cbDataSelection->hide();
   addFitRangeSelector();
   addBackgroundRangeSelector();
@@ -243,6 +257,14 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
 
   connect(backRangeSelector, SIGNAL(valueChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
+  connect(backRangeSelector, SIGNAL(resetScientificBounds()), this,
+          SLOT(setBackgroundBounds()));
+}
+
+void IndirectFitPlotView::setBackgroundBounds() {
+  auto backRangeSelector =
+      m_plotForm->ppPlotTop->getSingleSelector("Background");
+  backRangeSelector->setLowerBound(0.0);
 }
 
 void IndirectFitPlotView::addHWHMRangeSelector() {

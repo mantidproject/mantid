@@ -44,6 +44,7 @@ public:
   void detach();
 
 signals:
+  void resetScientificBounds();
   void valueChanged(double position);
 
 private slots:

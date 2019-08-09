@@ -84,6 +84,8 @@ public slots:
   void setHWHMMinimum(double maximum) override;
 
 private slots:
+  void setBackgroundBounds();
+
   void emitDelayedPlotSpectrumChanged(int /*spectrum*/);
   void emitPlotSpectrumChanged();
   void emitPlotSpectrumChanged(const QString &spectrum);

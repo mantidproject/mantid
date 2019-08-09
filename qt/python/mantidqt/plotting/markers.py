@@ -749,7 +749,6 @@ class SingleMarker(QObject):
         """
         marker_moving = self.marker.is_marker_moving()
         inside_bounds, new_position = self.is_inside_bounds(x, y)
-
         if marker_moving and inside_bounds:
             return self.marker.mouse_move(x, y)
         elif marker_moving:
