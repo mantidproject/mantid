@@ -161,9 +161,9 @@ void MSDTemplatePresenter::updateViewParameters() {
           {MSDFunctionModel::ParamID::YI_MSD, &MSDTemplateBrowser::setYiMsd},
           {MSDFunctionModel::ParamID::YI_SIGMA,
            &MSDTemplateBrowser::setYiSigma}};
-  auto values = m_model.getCurrentValues();
-  auto errors = m_model.getCurrentErrors();
-  for (auto const name : values.keys()) {
+  const auto values = m_model.getCurrentValues();
+  const auto errors = m_model.getCurrentErrors();
+  for (auto const &name : values.keys()) {
     (m_view->*setters.at(name))(values[name], errors[name]);
   }
 }
@@ -224,7 +224,7 @@ void MSDTemplatePresenter::editLocalParameter(const QString &parName) {
   QStringList ties;
   QStringList constraints;
   const int n = wsNames.size();
-  for (int i = 0; i < n; ++i) {
+  for (auto i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
     const bool fixed = isLocalParameterFixed(parName, i);
@@ -244,10 +244,10 @@ void MSDTemplatePresenter::editLocalParameter(const QString &parName) {
 
 void MSDTemplatePresenter::editLocalParameterFinish(int result) {
   if (result == QDialog::Accepted) {
-    auto parName = m_editLocalParameterDialog->getParameterName();
-    auto values = m_editLocalParameterDialog->getValues();
-    auto fixes = m_editLocalParameterDialog->getFixes();
-    auto ties = m_editLocalParameterDialog->getTies();
+    const auto parName = m_editLocalParameterDialog->getParameterName();
+    const auto values = m_editLocalParameterDialog->getValues();
+    const auto fixes = m_editLocalParameterDialog->getFixes();
+    const auto ties = m_editLocalParameterDialog->getTies();
     assert(values.size() == getNumberOfDatasets());
     for (int i = 0; i < values.size(); ++i) {
       setLocalParameterValue(parName, i, values[i]);
@@ -270,17 +270,13 @@ void MSDTemplatePresenter::viewChangedParameterValue(const QString &parName,
   if (parName.isEmpty())
     return;
   if (m_model.isGlobal(parName)) {
-    auto const n = getNumberOfDatasets();
+    const auto n = getNumberOfDatasets();
     for (int i = 0; i < n; ++i) {
-      auto const oldValue = m_model.getLocalParameterValue(parName, i);
-      if (fabs(value - oldValue) > 1e-6) {
-        setErrorsEnabled(false);
-      }
       setLocalParameterValue(parName, i, value);
     }
   } else {
-    auto const i = m_model.currentDomainIndex();
-    auto const oldValue = m_model.getLocalParameterValue(parName, i);
+    const auto i = m_model.currentDomainIndex();
+    const auto oldValue = m_model.getLocalParameterValue(parName, i);
     if (fabs(value - oldValue) > 1e-6) {
       setErrorsEnabled(false);
     }

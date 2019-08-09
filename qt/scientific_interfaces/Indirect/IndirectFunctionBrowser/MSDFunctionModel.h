@@ -8,6 +8,7 @@
 #define MANTIDQT_INDIRECT_MSDFUNCTIONMODEL_H_
 
 #include "DllConfig.h"
+#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
@@ -72,6 +73,7 @@ public:
                             const QString &tie) override;
   void setLocalParameterConstraint(const QString &parName, int i,
                                    const QString &constraint) override;
+  QString setBackgroundA0(double value) override;
 
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void setFitType(const QString &name);
@@ -117,10 +119,12 @@ private:
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
 
-  MultiDomainFunctionModel m_model;
+  FunctionModel m_model;
   QString m_fitType;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
+  std::string m_resolutionName;
+  DatasetIndex m_resolutionIndex;
 };
 
 } // namespace IDA

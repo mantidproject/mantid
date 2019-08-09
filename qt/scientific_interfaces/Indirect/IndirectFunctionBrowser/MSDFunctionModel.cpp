@@ -42,7 +42,7 @@ void MSDFunctionModel::setFunction(IFunction_sptr fun) {
   if (!fun)
     return;
   if (fun->nFunctions() == 0) {
-    auto const name = fun->name();
+    const auto name = fun->name();
     if (name == "MsdGauss" || name == "MsdPeters" || name == "MsdYi") {
       m_fitType = QString::fromStdString(name);
     } else {
@@ -53,8 +53,8 @@ void MSDFunctionModel::setFunction(IFunction_sptr fun) {
   }
   bool isFitTypeSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
-    auto f = fun->getFunction(i);
-    auto const name = f->name();
+    const auto f = fun->getFunction(i);
+    const auto name = f->name();
     if (name == "MsdGauss" || name == "MsdPeters" || name == "MsdYi") {
       if (isFitTypeSet) {
         throw std::runtime_error("Function has wrong structure.");
@@ -81,9 +81,9 @@ void MSDFunctionModel::addFunction(const QString &prefix,
     throw std::runtime_error(
         "Function doesn't have member function with prefix " +
         prefix.toStdString());
-  auto fun =
+  const auto fun =
       FunctionFactory::Instance().createInitialized(funStr.toStdString());
-  auto const name = fun->name();
+  const auto name = fun->name();
   QString newPrefix;
   if (name == "MsdGauss" || name == "MsdPeters" || name == "MsdYi") {
     setFitType(QString::fromStdString(name));
@@ -114,7 +114,7 @@ void MSDFunctionModel::removeFunction(const QString &prefix) {
 }
 
 void MSDFunctionModel::setFitType(const QString &name) {
-  auto oldValues = getCurrentValues();
+  const auto oldValues = getCurrentValues();
   m_fitType = name;
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
@@ -122,7 +122,7 @@ void MSDFunctionModel::setFitType(const QString &name) {
 }
 
 void MSDFunctionModel::removeFitType() {
-  auto oldValues = getCurrentValues();
+  const auto oldValues = getCurrentValues();
   m_fitType.clear();
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
@@ -194,7 +194,7 @@ QStringList MSDFunctionModel::getLocalParameters() const {
 
 void MSDFunctionModel::setGlobalParameters(const QStringList &globals) {
   m_globals.clear();
-  for (auto const &name : globals) {
+  for (const auto &name : globals) {
     addGlobal(name);
   }
   auto newGlobals = makeGlobalList();
@@ -217,14 +217,14 @@ void MSDFunctionModel::setGlobal(const QString &parName, bool on) {
 }
 
 void MSDFunctionModel::addGlobal(const QString &parName) {
-  auto const pid = getParameterId(parName);
+  const auto pid = getParameterId(parName);
   if (pid && !m_globals.contains(*pid)) {
     m_globals.push_back(*pid);
   }
 }
 
 void MSDFunctionModel::removeGlobal(const QString &parName) {
-  auto const pid = getParameterId(parName);
+  const auto pid = getParameterId(parName);
   if (pid && m_globals.contains(*pid)) {
     m_globals.removeOne(*pid);
   }
@@ -232,8 +232,8 @@ void MSDFunctionModel::removeGlobal(const QString &parName) {
 
 QStringList MSDFunctionModel::makeGlobalList() const {
   QStringList globals;
-  for (auto const id : m_globals) {
-    auto const name = getParameterName(id);
+  for (const auto &id : m_globals) {
+    const auto name = getParameterName(id);
     if (name)
       globals << *name;
   }
@@ -246,22 +246,24 @@ void MSDFunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
 
 void MSDFunctionModel::updateMultiDatasetParameters(
     const ITableWorkspace &paramTable) {
-  auto const nRows = paramTable.rowCount();
+  const auto nRows = paramTable.rowCount();
   if (nRows == 0)
     return;
 
-  auto const globalParameterNames = getGlobalParameters();
+  const auto globalParameterNames = getGlobalParameters();
   for (auto &&name : globalParameterNames) {
-    auto valueColumn = paramTable.getColumn(name.toStdString());
-    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    const auto valueColumn = paramTable.getColumn(name.toStdString());
+    const auto errorColumn =
+        paramTable.getColumn((name + "_Err").toStdString());
     m_model.setParameter(name, valueColumn->toDouble(0));
     m_model.setParameterError(name, errorColumn->toDouble(0));
   }
 
-  auto const localParameterNames = getLocalParameters();
+  const auto localParameterNames = getLocalParameters();
   for (auto &&name : localParameterNames) {
-    auto valueColumn = paramTable.getColumn(name.toStdString());
-    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    const auto valueColumn = paramTable.getColumn(name.toStdString());
+    const auto errorColumn =
+        paramTable.getColumn((name + "_Err").toStdString());
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
         m_model.setLocalParameterValue(name, static_cast<int>(i),
@@ -269,7 +271,7 @@ void MSDFunctionModel::updateMultiDatasetParameters(
                                        errorColumn->toDouble(i));
       }
     } else {
-      auto const i = m_model.currentDomainIndex();
+      const auto i = m_model.currentDomainIndex();
       m_model.setLocalParameterValue(name, static_cast<int>(i),
                                      valueColumn->toDouble(0),
                                      errorColumn->toDouble(0));
@@ -357,34 +359,34 @@ void MSDFunctionModel::setLocalParameterFixed(const QString &parName, int i,
 }
 
 void MSDFunctionModel::setParameter(ParamID name, double value) {
-  auto const prefix = getPrefix(name);
+  const auto prefix = getPrefix(name);
   if (prefix) {
     m_model.setParameter(*prefix + g_paramName.at(name), value);
   }
 }
 
 boost::optional<double> MSDFunctionModel::getParameter(ParamID name) const {
-  auto const paramName = getParameterName(name);
+  const auto paramName = getParameterName(name);
   return paramName ? m_model.getParameter(*paramName)
                    : boost::optional<double>();
 }
 
 boost::optional<double>
 MSDFunctionModel::getParameterError(ParamID name) const {
-  auto const paramName = getParameterName(name);
+  const auto paramName = getParameterName(name);
   return paramName ? m_model.getParameterError(*paramName)
                    : boost::optional<double>();
 }
 
 boost::optional<QString>
 MSDFunctionModel::getParameterName(ParamID name) const {
-  auto const prefix = getPrefix(name);
+  const auto prefix = getPrefix(name);
   return prefix ? *prefix + g_paramName.at(name) : boost::optional<QString>();
 }
 
 boost::optional<QString>
 MSDFunctionModel::getParameterDescription(ParamID name) const {
-  auto const paramName = getParameterName(name);
+  const auto paramName = getParameterName(name);
   return paramName ? m_model.getParameterDescription(*paramName)
                    : boost::optional<QString>();
 }
@@ -445,7 +447,7 @@ QMap<int, std::string> MSDFunctionModel::getParameterDescriptionMap() const {
 }
 
 void MSDFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
-  for (auto const name : values.keys()) {
+  for (const auto &name : values.keys()) {
     setParameter(name, values[name]);
   }
 }
@@ -510,6 +512,8 @@ boost::optional<QString> MSDFunctionModel::getFitTypePrefix() const {
     return boost::optional<QString>();
   return "";
 }
+
+QString MSDFunctionModel::setBackgroundA0(double value) { return ""; }
 
 } // namespace IDA
 } // namespace CustomInterfaces

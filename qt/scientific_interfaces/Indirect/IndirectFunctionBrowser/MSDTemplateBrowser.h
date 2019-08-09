@@ -60,12 +60,14 @@ public:
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
-  void updateParameterDescriptions(
-      const QMap<int, std::string> &parameterNames) override;
+  void
+  updateParameterDescriptions(const QMap<int, std::string> &parameterNames);
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
+  void setBackgroundA0(double value) override {}
+  void setResolution(std::string const &name, DatasetIndex const &index) {}
 
 protected slots:
   void enumChanged(QtProperty *) override;

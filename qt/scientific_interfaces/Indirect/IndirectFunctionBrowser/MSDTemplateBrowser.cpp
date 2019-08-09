@@ -14,6 +14,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
+#include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
@@ -31,19 +32,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-
-namespace {
-class ScopedFalse {
-  bool &m_ref;
-  bool m_oldValue;
-
-public:
-  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
-    m_ref = false;
-  }
-  ~ScopedFalse() { m_ref = m_oldValue; }
-};
-} // namespace
 
 /**
  * Constructor
@@ -280,9 +268,9 @@ void MSDTemplateBrowser::updateParameterNames(
     const QMap<int, QString> &parameterNames) {
   m_actualParameterNames.clear();
   ScopedFalse _false(m_emitParameterValueChange);
-  for (auto const prop : m_parameterMap.keys()) {
-    auto const i = m_parameterMap[prop];
-    auto const name = parameterNames[i];
+  for (const auto &prop : m_parameterMap.keys()) {
+    const auto i = m_parameterMap[prop];
+    const auto name = parameterNames[i];
     m_actualParameterNames[prop] = name;
     if (!name.isEmpty()) {
       prop->setPropertyName(name);
@@ -293,8 +281,8 @@ void MSDTemplateBrowser::updateParameterNames(
 void MSDTemplateBrowser::updateParameterDescriptions(
     const QMap<int, std::string> &parameterDescriptions) {
   m_parameterDescriptions.clear();
-  for (auto const prop : m_parameterMap.keys()) {
-    auto const i = m_parameterMap[prop];
+  for (auto const &prop : m_parameterMap.keys()) {
+    const auto i = m_parameterMap[prop];
     m_parameterDescriptions[prop] = parameterDescriptions[i];
   }
 }
@@ -330,15 +318,15 @@ void MSDTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
 
 void MSDTemplateBrowser::setGlobalParametersQuiet(const QStringList &globals) {
   ScopedFalse _false(m_emitParameterValueChange);
-  auto parameterProperies = m_parameterMap.keys();
-  for (auto const prop : m_parameterMap.keys()) {
+  auto parameterProperties = m_parameterMap.keys();
+  for (const auto &prop : m_parameterMap.keys()) {
     auto const name = m_actualParameterNames[prop];
     if (globals.contains(name)) {
       m_parameterManager->setGlobal(prop, true);
-      parameterProperies.removeOne(prop);
+      parameterProperties.removeOne(prop);
     }
   }
-  for (auto const prop : parameterProperies) {
+  for (const auto &prop : parameterProperties) {
     if (!m_actualParameterNames[prop].isEmpty()) {
       m_parameterManager->setGlobal(prop, false);
     }

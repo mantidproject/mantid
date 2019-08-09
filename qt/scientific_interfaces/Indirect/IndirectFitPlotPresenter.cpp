@@ -9,7 +9,6 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
 using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
@@ -26,7 +25,7 @@ std::string createPlotString(const std::string &workspaceName,
   return createPlotString(workspaceName, std::to_string(spectrum.value));
 }
 
-struct UpdateAvailableSpectra : public boost::static_visitor<> {
+struct UpdateAvailableSpectra {
 public:
   explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
 
@@ -415,7 +414,7 @@ void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
     m_plotter->plotSpectra(resultWs->getName(), "0-2");
   else
     m_plotter->plotSpectra(m_model->getWorkspace()->getName(),
-                           std::to_string(spectrum));
+                           std::to_string(spectrum.value));
 }
 
 void IndirectFitPlotPresenter::emitFitSingleSpectrum() {

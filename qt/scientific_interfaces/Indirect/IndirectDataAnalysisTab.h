@@ -163,7 +163,6 @@ private:
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
-  virtual void setBrowserWorkspace() = 0;
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
