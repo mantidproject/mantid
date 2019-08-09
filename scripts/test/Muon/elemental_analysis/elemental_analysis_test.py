@@ -372,7 +372,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plotting.get_subplots = mock.Mock(return_value=True)
         self.gui.plot_window = 'plot_window'
 
-        self.gui.subplotRemoved('name')
+        self.gui.subplot_removed('name')
 
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, 'plot_window')
@@ -382,7 +382,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plotting.get_subplots = mock.Mock(return_value=False)
         self.gui.plot_window = mock.Mock()
 
-        self.gui.subplotRemoved('name')
+        self.gui.subplot_removed('name')
 
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
