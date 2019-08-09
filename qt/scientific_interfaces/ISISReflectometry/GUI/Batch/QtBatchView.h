@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
-#define MANTID_ISISREFLECTOMETRY_BATCHVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_QTBATCHVIEW_H
+#define MANTID_ISISREFLECTOMETRY_QTBATCHVIEW_H
 
-#include "GUI/Event/EventView.h"
-#include "GUI/Experiment/ExperimentView.h"
-#include "GUI/Instrument/InstrumentView.h"
-#include "GUI/Runs/RunsView.h"
-#include "GUI/Save/SaveView.h"
+#include "GUI/Event/QtEventView.h"
+#include "GUI/Experiment/QtExperimentView.h"
+#include "GUI/Instrument/QtInstrumentView.h"
+#include "GUI/Runs/QtRunsView.h"
+#include "GUI/Save/QtSaveView.h"
 #include "IBatchView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -23,10 +23,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class BatchView : public QWidget, public IBatchView {
+class QtBatchView : public QWidget, public IBatchView {
   Q_OBJECT
 public:
-  explicit BatchView(QWidget *parent);
+  explicit QtBatchView(QWidget *parent);
   void subscribe(BatchViewSubscriber *notifyee) override;
 
   IRunsView *runs() const override;
@@ -53,19 +53,19 @@ private:
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   void connectBatchAlgoRunnerSlots();
 
-  std::unique_ptr<RunsView> createRunsTab();
-  std::unique_ptr<EventView> createEventTab();
-  std::unique_ptr<SaveView> createSaveTab();
+  std::unique_ptr<QtRunsView> createRunsTab();
+  std::unique_ptr<QtEventView> createEventTab();
+  std::unique_ptr<QtSaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
   BatchViewSubscriber *m_notifyee;
-  std::unique_ptr<RunsView> m_runs;
-  std::unique_ptr<EventView> m_eventHandling;
-  std::unique_ptr<SaveView> m_save;
-  std::unique_ptr<ExperimentView> m_experiment;
-  std::unique_ptr<InstrumentView> m_instrument;
+  std::unique_ptr<QtRunsView> m_runs;
+  std::unique_ptr<QtEventView> m_eventHandling;
+  std::unique_ptr<QtSaveView> m_save;
+  std::unique_ptr<QtExperimentView> m_experiment;
+  std::unique_ptr<QtInstrumentView> m_instrument;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_BATCHVIEW_H */
+#endif /* MANTID_ISISREFLECTOMETRY_QTBATCHVIEW_H */
