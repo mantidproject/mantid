@@ -18,8 +18,10 @@ import plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic as _FindPeakAutom
 class FindPeakAutomaticTest(unittest.TestCase):
     data_ws = None
     peak_guess_table = None
-    peak_table_header = ['centre', 'error centre', 'height', 'error height',
-                         'sigma', 'error sigma', 'area', 'error area']
+    peak_table_header = [
+        'centre', 'error centre', 'height', 'error height', 'sigma', 'error sigma', 'area',
+        'error area'
+    ]
     alg_instance = None
     x_values = None
     y_values = None
@@ -72,7 +74,7 @@ class FindPeakAutomaticTest(unittest.TestCase):
     @staticmethod
     def _gaussian_peak(xvals, centre, height, sigma):
         exponent = (xvals - centre) / (np.sqrt(2) * sigma)
-        return height * np.exp(-exponent*exponent)
+        return height * np.exp(-exponent * exponent)
 
     @staticmethod
     def delete_if_present(workspace):
@@ -91,33 +93,23 @@ class FindPeakAutomaticTest(unittest.TestCase):
 
     def test_algorithm_with_negative_smooth_window_throws(self):
         with self.assertRaises(ValueError):
-            FindPeakAutomatic(InputWorkspace=self.data_ws,
-                              SmoothWindow=-5,
-                              PlotPeaks=False)
+            FindPeakAutomatic(InputWorkspace=self.data_ws, SmoothWindow=-5, PlotPeaks=False)
 
     def test_algorithm_with_negative_num_bad_peaks_to_consider_throws(self):
         with self.assertRaises(ValueError):
-            FindPeakAutomatic(InputWorkspace=self.data_ws,
-                              BadPeaksToConsider=-3,
-                              PlotPeaks=False)
+            FindPeakAutomatic(InputWorkspace=self.data_ws, BadPeaksToConsider=-3, PlotPeaks=False)
 
     def test_algorithm_with_negative_estimate_of_peak_sigma_throws(self):
         with self.assertRaises(ValueError):
-            FindPeakAutomatic(InputWorkspace=self.data_ws,
-                              EstimatePeakSigma=-3,
-                              PlotPeaks=False)
+            FindPeakAutomatic(InputWorkspace=self.data_ws, EstimatePeakSigma=-3, PlotPeaks=False)
 
     def test_algorithm_with_negative_min_peak_sigma_throws(self):
         with self.assertRaises(ValueError):
-            FindPeakAutomatic(InputWorkspace=self.data_ws,
-                              MinPeakSigma=-0.1,
-                              PlotPeaks=False)
+            FindPeakAutomatic(InputWorkspace=self.data_ws, MinPeakSigma=-0.1, PlotPeaks=False)
 
     def test_algorithm_with_negative_max_peak_sigma_throws(self):
         with self.assertRaises(ValueError):
-            FindPeakAutomatic(InputWorkspace=self.data_ws,
-                              MaxPeakSigma=-0.1,
-                              PlotPeaks=False)
+            FindPeakAutomatic(InputWorkspace=self.data_ws, MaxPeakSigma=-0.1, PlotPeaks=False)
 
     def test_that_single_erosion_returns_correct_result(self):
         yvals = np.array([-2, 3, 1, 0, 4])
@@ -154,8 +146,10 @@ class FindPeakAutomaticTest(unittest.TestCase):
     def test_that_erosion_with_zero_window_is_an_invariant(self):
         np.testing.assert_equal(self.y_values, self.alg_instance.erosion(self.y_values, 0))
 
-    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic._single_erosion')
-    def test_that_erosion_calls_single_erosion_the_correct_number_of_times(self, mock_single_erosion):
+    @mock.patch(
+        'plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic._single_erosion')
+    def test_that_erosion_calls_single_erosion_the_correct_number_of_times(
+            self, mock_single_erosion):
         times = len(self.y_values)
         win_size = 2
         call_list = []
@@ -170,8 +164,11 @@ class FindPeakAutomaticTest(unittest.TestCase):
     def test_that_dilation_with_zero_window_is_an_invariant(self):
         np.testing.assert_equal(self.y_values, self.alg_instance.dilation(self.y_values, 0))
 
-    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic._single_dilation')
-    def test_that_dilation_calls_single_erosion_the_correct_number_of_times(self, mock_single_dilation):
+    @mock.patch(
+        'plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic._single_dilation'
+    )
+    def test_that_dilation_calls_single_erosion_the_correct_number_of_times(
+            self, mock_single_dilation):
         times = len(self.y_values)
         win_size = 2
         call_list = []
@@ -184,8 +181,10 @@ class FindPeakAutomaticTest(unittest.TestCase):
         mock_single_dilation.assert_has_calls(call_list, any_order=True)
 
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.erosion')
-    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.dilation')
-    def test_that_opening_calls_correct_functions_in_correct_order(self, mock_dilation, mock_erosion):
+    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.dilation'
+                )
+    def test_that_opening_calls_correct_functions_in_correct_order(self, mock_dilation,
+                                                                   mock_erosion):
         win_size = 3
 
         self.alg_instance.opening(self.y_values, win_size)
@@ -197,9 +196,11 @@ class FindPeakAutomaticTest(unittest.TestCase):
         mock_dilation.assert_called_with(erosion_ret, win_size)
 
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.opening')
-    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.dilation')
+    @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.dilation'
+                )
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FindPeakAutomatic.FindPeakAutomatic.erosion')
-    def test_that_average_calls_right_functions_in_right_order(self, mock_erosion, mock_dilation, mock_opening):
+    def test_that_average_calls_right_functions_in_right_order(self, mock_erosion, mock_dilation,
+                                                               mock_opening):
         win_size = 3
 
         self.alg_instance.average(self.y_values, win_size)

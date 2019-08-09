@@ -24,58 +24,67 @@ class FitGaussianPeaks(PythonAlgorithm):
         return 'Fits a list of gaussian peaks returning the parameters and the value of a cost function.'
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty(name='InputWorkspace',
-                                               defaultValue='',
-                                               direction=Direction.Input),
-                             'Workspace with peaks to be identified')
-        self.declareProperty(ITableWorkspaceProperty(name='PeakGuessTable',
-                                                     defaultValue='peak_guess',
-                                                     direction=Direction.Input),
-                             'Table containing the guess for the peak position')
-        self.declareProperty('CentreTolerance', 1.0,
+        self.declareProperty(
+            WorkspaceProperty(name='InputWorkspace', defaultValue='', direction=Direction.Input),
+            'Workspace with peaks to be identified')
+        self.declareProperty(
+            ITableWorkspaceProperty(name='PeakGuessTable',
+                                    defaultValue='peak_guess',
+                                    direction=Direction.Input),
+            'Table containing the guess for the peak position')
+        self.declareProperty('CentreTolerance',
+                             1.0,
                              doc='Tolerance value used in looking for peak centre',
                              validator=FloatBoundedValidator(lower=0.0))
-        self.declareProperty('EstimatedPeakSigma', 3.0,
+        self.declareProperty('EstimatedPeakSigma',
+                             3.0,
                              doc='Estimate of the peak half width',
                              validator=FloatBoundedValidator(lower=0.0))
-        self.declareProperty('MinPeakSigma', 0.1,
+        self.declareProperty('MinPeakSigma',
+                             0.1,
                              doc='Minimum value for the standard deviation of a peak',
                              validator=FloatBoundedValidator(lower=0.0))
-        self.declareProperty('MaxPeakSigma', 30.0,
+        self.declareProperty('MaxPeakSigma',
+                             30.0,
                              doc='Maximum value for the standard deviation of a peak',
                              validator=FloatBoundedValidator(lower=0.0))
-        self.declareProperty('GeneralFitTolerance', 0.1,
+        self.declareProperty('GeneralFitTolerance',
+                             0.1,
                              doc='Tolerance for the constraint in the general fit',
                              validator=FloatBoundedValidator(lower=0.0))
-        self.declareProperty('RefitTolerance', 0.001,
+        self.declareProperty('RefitTolerance',
+                             0.001,
                              doc='Tolerance for the constraint in the refitting',
                              validator=FloatBoundedValidator(lower=0.0))
 
         # Output table
-        self.declareProperty(ITableWorkspaceProperty(name='PeakProperties',
-                                                     defaultValue='peak_table',
-                                                     direction=Direction.Output),
-                             'Table containing the properties of the peaks')
-        self.declareProperty(ITableWorkspaceProperty(name='RefitPeakProperties',
-                                                     defaultValue='refit_peak_table',
-                                                     direction=Direction.Output),
-                             'Table containing the properties of the peaks that had to be fitted twice as the first'
-                             'time the error was unreasonably large')
-        self.declareProperty(ITableWorkspaceProperty(name='FitCost',
-                                                     defaultValue='fit_cost',
-                                                     direction=Direction.Output),
-                             'Table containing the value of both chi2 and poisson cost functions for the fit')
+        self.declareProperty(
+            ITableWorkspaceProperty(name='PeakProperties',
+                                    defaultValue='peak_table',
+                                    direction=Direction.Output),
+            'Table containing the properties of the peaks')
+        self.declareProperty(
+            ITableWorkspaceProperty(name='RefitPeakProperties',
+                                    defaultValue='refit_peak_table',
+                                    direction=Direction.Output),
+            'Table containing the properties of the peaks that had to be fitted twice as the first'
+            'time the error was unreasonably large')
+        self.declareProperty(
+            ITableWorkspaceProperty(name='FitCost',
+                                    defaultValue='fit_cost',
+                                    direction=Direction.Output),
+            'Table containing the value of both chi2 and poisson cost functions for the fit')
 
     def PyExec(self):
-        self.centre_tolerance = float(self.getPropertyValue('CentreTolerance'))
-        self.estimate_sigma = float(self.getPropertyValue('EstimatedPeakSigma'))
-        self.min_sigma = float(self.getPropertyValue('MinPeakSigma'))
-        self.max_sigma = float(self.getPropertyValue('MaxPeakSigma'))
-        self.general_tolerance = float(self.getPropertyValue('GeneralFitTolerance'))
-        self.refit_tolerance = float(self.getPropertyValue('RefitTolerance'))
+        self.centre_tolerance = self.getProperty('CentreTolerance').value
+        self.estimate_sigma = self.getProperty('EstimatedPeakSigma').value
+        self.min_sigma = self.getProperty('MinPeakSigma').value
+        self.max_sigma = self.getProperty('MaxPeakSigma').value
+        self.general_tolerance = self.getProperty('GeneralFitTolerance').value
+        self.refit_tolerance = self.getProperty('RefitTolerance').value
 
         # Load the data and clean it from NaNs and infinities
-        raw_data_ws = CloneWorkspace(self.getPropertyValue('InputWorkspace'))
+        raw_data_ws = self.getProperty('InputWorkspace').value
         xvals = raw_data_ws.readX(0).copy()
         flat_yvals = raw_data_ws.readY(0).copy()
         baseline = raw_data_ws.readY(1).copy()
@@ -84,7 +93,7 @@ class FitGaussianPeaks(PythonAlgorithm):
 
         # Find the index of the peaks given as input
         # This is necessary as the FindPeakAlgorithm can introduce offset in the data
-        approx_peak_xvals = CloneWorkspace(self.getPropertyValue('PeakGuessTable')).column(0)[:]
+        approx_peak_xvals = self.getProperty('PeakGuessTable').value.column(0)[:]
         peakids = []
         for peakx in approx_peak_xvals:
             mask = np.logical_and(peakx - self.centre_tolerance <= xvals,
@@ -106,8 +115,18 @@ class FitGaussianPeaks(PythonAlgorithm):
         self.parse_fit_table(refitted_params, refit_peak_table, False)
 
         # Evaluate the total cost
-        chi2 = self.evaluate_cost(xvals, flat_yvals, baseline, peak_table, refit_peak_table, use_poisson=False)
-        poisson = self.evaluate_cost(xvals, flat_yvals, baseline, peak_table, refit_peak_table, use_poisson=True)
+        chi2 = self.evaluate_cost(xvals,
+                                  flat_yvals,
+                                  baseline,
+                                  peak_table,
+                                  refit_peak_table,
+                                  use_poisson=False)
+        poisson = self.evaluate_cost(xvals,
+                                     flat_yvals,
+                                     baseline,
+                                     peak_table,
+                                     refit_peak_table,
+                                     use_poisson=True)
         fit_cost = CreateEmptyTableWorkspace()
         fit_cost.addColumn(type='float', name='Chi2')
         fit_cost.addColumn(type='float', name='Poisson')
@@ -129,44 +148,46 @@ class FitGaussianPeaks(PythonAlgorithm):
         data_table.addColumn(type='float', name='error area')
         if param is not None:
             for i in range(param.rowCount() // 3):
-                height = param.row(3*i)
-                centre = param.row(3*i+1)
-                sigma = param.row(3*i+2)
+                height = param.row(3 * i)
+                centre = param.row(3 * i + 1)
+                sigma = param.row(3 * i + 2)
 
                 # Do not include peaks with high errors, they need to be refitted
                 if refit and (any(np.isnan([centre['Error'], height['Error'], sigma['Error']]))
-                              or centre['Value'] == 0.0 or centre['Error']/centre['Value'] > 1.0
-                              or height['Value'] == 0.0 or height['Error']/height['Value'] > 1.0
-                              or sigma['Value'] == 0.0 or sigma['Error']/sigma['Value'] > 1.0):
+                              or centre['Value'] == 0.0 or centre['Error'] / centre['Value'] > 1.0
+                              or height['Value'] == 0.0 or height['Error'] / height['Value'] > 1.0
+                              or sigma['Value'] == 0.0 or sigma['Error'] / sigma['Value'] > 1.0):
                     to_refit.append((centre['Value'], height['Value'], sigma['Value']))
                     continue
 
                 # Area defined by integral of gaussian peak of given height and width
-                area = np.sqrt(2*np.pi) * sigma['Value'] * height['Value']
-                err_area = np.power(sigma['Error']/sigma['Value'], 2)
-                err_area += np.power(height['Error']/height['Value'], 2)
+                area = np.sqrt(2 * np.pi) * sigma['Value'] * height['Value']
+                err_area = np.power(sigma['Error'] / sigma['Value'], 2)
+                err_area += np.power(height['Error'] / height['Value'], 2)
                 err_area = np.sqrt(err_area)
 
-                data_table.addRow([centre['Value'], centre['Error'], height['Value'], height['Error'],
-                                   sigma['Value'], sigma['Error'], area, err_area])
+                data_table.addRow([
+                    centre['Value'], centre['Error'], height['Value'], height['Error'],
+                    sigma['Value'], sigma['Error'], area, err_area
+                ])
 
         return to_refit
 
     def gaussian_peak(self, xvals, centre, height, sigma):
         exp_val = (xvals - centre) / (np.sqrt(2) * sigma)
 
-        return height * np.exp(-exp_val*exp_val)
+        return height * np.exp(-exp_val * exp_val)
 
     def gaussian_peak_background(self, params, xvals, yvals):
         A0, A1, centre, height, sigma = tuple(params)
-        return A0 + A1*xvals + self.gaussian_peak(xvals, centre, height, sigma) - yvals
+        return A0 + A1 * xvals + self.gaussian_peak(xvals, centre, height, sigma) - yvals
 
     def multi_peak(self, params, xvals, yvals):
         model = np.zeros(len(xvals))
         for i in range(len(params) // 3):
-            centre = params[3*i]
-            height = params[3*i+1]
-            sigma = params[3*i+2]
+            centre = params[3 * i]
+            height = params[3 * i + 1]
+            sigma = params[3 * i + 2]
             model += self.gaussian_peak(xvals, centre, height, sigma)
 
         return model - yvals
@@ -204,7 +225,7 @@ class FitGaussianPeaks(PythonAlgorithm):
             # The cost function takes the log of the model. Hence behaves badly with data close to 0.
             # Returning the data to the original form by adding the baseline will move it away from 0 and solve
             #   the problem.
-            return self.poisson_cost(yvals+baseline, model_yvals+baseline)
+            return self.poisson_cost(yvals + baseline, model_yvals + baseline)
         else:
             return self.function_difference(yvals, model_yvals)
 
@@ -217,10 +238,10 @@ class FitGaussianPeaks(PythonAlgorithm):
         y_range = yvals[lside:rside]
         p_est = scipy.optimize.leastsq(
             self.gaussian_peak_background,
-            x0=np.array([np.average(y_range), 0, xvals[centre], yvals[centre], self.estimate_sigma]),
-            args=(x_range, y_range)
-        )[0]
-        params = [p_est[2], p_est[0]+p_est[1]*p_est[2]+p_est[3], p_est[4]]
+            x0=np.array([np.average(y_range), 0, xvals[centre], yvals[centre],
+                         self.estimate_sigma]),
+            args=(x_range, y_range))[0]
+        params = [p_est[2], p_est[0] + p_est[1] * p_est[2] + p_est[3], p_est[4]]
 
         return params
 
@@ -251,19 +272,20 @@ class FitGaussianPeaks(PythonAlgorithm):
         if fit_constr.count('PeakCentre') == 1:
             fit_constr = fit_constr.replace('f0.', '')
 
-        _, _, _, param, fit_result, _, _ = Fit(Function=fit_func,
-                                               InputWorkspace=self.getPropertyValue('InputWorkspace'),
-                                               Output='fit_result',
-                                               Minimizer='Levenberg-MarquardtMD',
-                                               OutputCompositeMembers=True,
-                                               StartX=min(xvals),
-                                               EndX=max(xvals),
-                                               Constraints=fit_constr)
+        _, _, _, param, fit_result, _, _ = Fit(
+            Function=fit_func,
+            InputWorkspace=self.getPropertyValue('InputWorkspace'),
+            Output='fit_result',
+            Minimizer='Levenberg-MarquardtMD',
+            OutputCompositeMembers=True,
+            StartX=min(xvals),
+            EndX=max(xvals),
+            Constraints=fit_constr)
 
         return fit_result.readY(1).copy(), param
 
     def refit_peaks(self, bad_params):
-        xvals = CloneWorkspace(self.getPropertyValue('InputWorkspace')).readX(0).copy()
+        xvals = self.getProperty('InputWorkspace').value.readX(0).copy()
 
         if not bad_params:
             return np.zeros(len(xvals)), None
@@ -280,14 +302,15 @@ class FitGaussianPeaks(PythonAlgorithm):
         if fit_constr.count('PeakCentre') == 1:
             fit_constr = fit_constr.replace('f0.', '')
 
-        _, _, _, param, fit_result, _, _ = Fit(Function=fit_func,
-                                               InputWorkspace=self.getPropertyValue('InputWorkspace'),
-                                               Output='fit_result',
-                                               Minimizer='Levenberg-MarquardtMD',
-                                               OutputCompositeMembers=True,
-                                               StartX=min(xvals),
-                                               EndX=max(xvals),
-                                               Constraints=fit_constr)
+        _, _, _, param, fit_result, _, _ = Fit(
+            Function=fit_func,
+            InputWorkspace=self.getPropertyValue('InputWorkspace'),
+            Output='fit_result',
+            Minimizer='Levenberg-MarquardtMD',
+            OutputCompositeMembers=True,
+            StartX=min(xvals),
+            EndX=max(xvals),
+            Constraints=fit_constr)
 
         return fit_result.readY(1).copy(), param
 

@@ -19,8 +19,10 @@ import plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks as _FitGaussianPea
 class FitGaussianPeaksTest(unittest.TestCase):
     data_ws = None
     peak_guess_table = None
-    peak_table_header = ['centre', 'error centre', 'height', 'error height',
-                         'sigma', 'error sigma', 'area', 'error area']
+    peak_table_header = [
+        'centre', 'error centre', 'height', 'error height', 'sigma', 'error sigma', 'area',
+        'error area'
+    ]
     alg_instance = None
     x_values = None
     y_values = None
@@ -142,8 +144,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
                              RefitTolerance=-1.0)
 
     def test_that_algorithm_creates_correct_tables(self):
-        FitGaussianPeaks(InputWorkspace=self.data_ws,
-                         PeakGuessTable=self.peak_guess_table)
+        FitGaussianPeaks(InputWorkspace=self.data_ws, PeakGuessTable=self.peak_guess_table)
 
         self.assertIn('peak_table', mtd)
         self.assertIn('refit_peak_table', mtd)
@@ -209,7 +210,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
         params = [2.0, 0.5, 20, 10, 3]
 
         hyp = np.ones(len(self.x_values))
-        expected = params[0] + self.x_values*params[1]
+        expected = params[0] + self.x_values * params[1]
         expected += self.gaussian(self.x_values, *params[2:])
         expected -= hyp
         actual = self.alg_instance.gaussian_peak_background(params, self.x_values, hyp)
@@ -237,9 +238,10 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
     def test_that_poisson_cost_returns_expected_value(self):
         hyp = np.ones(len(self.x_values))
-        yvals = np.array([max(x, y) for x, y in zip(0.001*np.ones(len(self.x_values)), self.y_values)])
+        yvals = np.array(
+            [max(x, y) for x, y in zip(0.001 * np.ones(len(self.x_values)), self.y_values)])
 
-        expected = np.sum(-yvals + hyp*np.log(yvals))
+        expected = np.sum(-yvals + hyp * np.log(yvals))
         actual = self.alg_instance.poisson_cost(hyp, yvals)
 
         self.assertAlmostEqual(expected, actual)
@@ -254,7 +256,9 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
         _ = self.alg_instance.parse_fit_table(fit_table, data_table, refit=False)
 
-        cost = self.alg_instance.evaluate_cost(self.x_values, self.data_ws.readY(0), self.data_ws.readY(1),
+        cost = self.alg_instance.evaluate_cost(self.x_values,
+                                               self.data_ws.readY(0),
+                                               self.data_ws.readY(1),
                                                peak_param=data_table,
                                                refit_peak_param=refit_data_table,
                                                use_poisson=False)
@@ -273,13 +277,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
         _ = self.alg_instance.parse_fit_table(fit_table, data_table, refit=False)
 
-        cost = self.alg_instance.evaluate_cost(self.x_values, self.data_ws.readY(0), self.data_ws.readY(1),
+        cost = self.alg_instance.evaluate_cost(self.x_values,
+                                               self.data_ws.readY(0),
+                                               self.data_ws.readY(1),
                                                peak_param=data_table,
                                                refit_peak_param=refit_data_table,
                                                use_poisson=True)
         model = self.alg_instance.multi_peak(params, self.x_values, np.zeros(len(self.x_values)))
-        expected = self.alg_instance.poisson_cost(self.data_ws.readY(0)+self.data_ws.readY(1),
-                                                  model+self.data_ws.readY(1))
+        expected = self.alg_instance.poisson_cost(
+            self.data_ws.readY(0) + self.data_ws.readY(1), model + self.data_ws.readY(1))
 
         self.assertAlmostEqual(cost, expected, 3)
 
