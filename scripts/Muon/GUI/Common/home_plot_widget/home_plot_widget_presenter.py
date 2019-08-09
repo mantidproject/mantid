@@ -197,7 +197,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             for run in self.context.data_context.current_runs:
                 runs += ", " + str(run[0])
             workspace_list = self.context.get_names_of_frequency_domain_workspaces_to_fit(
-                runs, current_group_pair, False, plot_type[len(FREQ_PLOT_TYPE):])
+                runs, current_group_pair, True, plot_type[len(FREQ_PLOT_TYPE):])
 
             return workspace_list
         except AttributeError:

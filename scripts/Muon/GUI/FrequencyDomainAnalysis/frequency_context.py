@@ -22,10 +22,15 @@ class FFT(object):
 
     def __init__(self, ws_freq_name, Re_run, Re, Im_run, Im, phasequad):
         self.Re_run = Re_run
-        self.Im_run = Im_run
+
         self.ws_freq_name = ws_freq_name
         self.Re = Re
-        self.Im = Im
+        if Im == "" and Im_run == "":
+            self.Im = None
+            self.Im_run = None
+        else:
+            self.Im = Im
+            self.Im_run = Im_run
         self.phasequad = phasequad
 
 
@@ -75,11 +80,14 @@ class FrequencyContext(object):
         for name, fft in iteritems(self._FFT_freq):
             for runs in run_list:
                 for run in runs:
-                    if (int(run) == int(fft.Re_run) or int(run) == int(fft.Im_run)) and \
-                       (fft.Re in group or fft.Re in pair or fft.Im in group or fft.Im in pair) and name not in names:
+                    # check Re part
+                    if int(run) == int(fft.Re_run) and (fft.Re in group or fft.Re in pair) and name not in names:
+                        names.append(name)
+                    # check Im part
+                    if fft.Im and int(run) == int(fft.Im_run) and (fft.Im in group or fft.Im in pair) and name not in names:
                         names.append(name)
                     # do phaseQuad - will only have one run
-                    elif int(run) == int(fft.Re_run) and phasequad and fft.phasequad:
+                    if int(run) == int(fft.Re_run) and phasequad and fft.phasequad:
                         names.append(name)
         if frequency_type == "All":
             return names
