@@ -21,6 +21,7 @@ Bug Fixes
 #########
   * Fixed an issue where changeing the normalisation on a plot with autoscale disabled throws an exception.
   * Fixed an issue where warnings about adding workspaces to workspace groups multiple times were appearing in the log.
+  * Fixed an issue where logs in TF asymmetry mode were not being propogated to the results tab.
 
 Known Issues
 ############
