@@ -11,7 +11,6 @@ from mantid.api import AnalysisDataServiceObserver
 
 
 class SubplotADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, subplot):
         super(SubplotADSObserver, self).__init__()
         self._subplot = subplot

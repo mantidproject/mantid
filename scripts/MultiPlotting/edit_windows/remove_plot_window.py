@@ -32,11 +32,7 @@ class RemovePlotWindow(QtWidgets.QDialog):
         self.widgets = {}
         for index, line in enumerate(all_lines):
             table_utils.setRowName(self.table, index, line)
-            tmp = {"line": line,
-                   "box": table_utils.addCheckBoxToTable(
-                       self.table,
-                       False,
-                       index)}
+            tmp = {"line": line, "box": table_utils.addCheckBoxToTable(self.table, False, index)}
             self.widgets[line] = tmp
 
         self.grid.addWidget(self.table)

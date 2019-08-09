@@ -247,7 +247,7 @@ class SubplotTest(unittest.TestCase):
         self.subplot.remove_lines(subplot_name, ["one"])
 
         self.assertEqual(1, self.subplot.rmLineSignal.emit.call_count)
-        
+
 
 if __name__ == "__main__":
     unittest.main()

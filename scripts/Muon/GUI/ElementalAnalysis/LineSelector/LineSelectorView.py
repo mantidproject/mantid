@@ -21,9 +21,7 @@ class LineSelectorView(QtWidgets.QWidget):
         self.prompt = Checkbox("Plot Prompt")
         self.delayed = Checkbox("Plot Delayed")
 
-        self.line_checkboxes = [self.total,
-                                self.prompt,
-                                self.delayed]
+        self.line_checkboxes = [self.total, self.prompt, self.delayed]
         for line_type in self.line_checkboxes:
             self.list.addWidget(line_type)
         self.setLayout(self.list)
