@@ -33,6 +33,61 @@ ProcessBankData::ProcessBankData(
   m_cost = static_cast<double>(numEvents);
 }
 
+namespace {
+inline size_t getFirstPulseIndex(
+    const size_t event_index,
+    const boost::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
+  const auto event_index_begin = event_index_vec->cbegin();
+
+  if ((event_index >= *event_index_begin) &&
+      (event_index < *(event_index_begin + 1)))
+    return 0;
+
+  const auto event_index_end = event_index_vec->cend();
+  const auto event_index_iter =
+      std::lower_bound(event_index_begin, event_index_end, event_index);
+  if (event_index_iter == event_index_end) {
+    return event_index_vec->size() - 1;
+  } else {
+    const auto new_pulse_index =
+        std::distance(event_index_vec->cbegin(),
+                      event_index_iter); // TODO may need to subtract one
+    if (new_pulse_index != 0) {
+      // lower_bound returns the element greater than what we were looking for
+      return new_pulse_index - 1;
+    } else {
+      return new_pulse_index;
+    }
+  }
+}
+
+// this assumes that last_pulse_index is already to the point of including this
+// one so we only need to search forward
+inline size_t
+getPulseIndex(const size_t event_index, const size_t last_pulse_index,
+              const boost::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
+  const auto numPulses = event_index_vec->size();
+  if (last_pulse_index >= numPulses - 1)
+    return last_pulse_index;
+
+  // linear search is used because it is more likely that the next pulse index
+  // is the correct one to use the + last_pulse_index + 1 is because we are
+  // confirm that the next index is bigger, not the current
+  const auto event_index_end = event_index_vec->cend();
+  auto event_index_iter = event_index_vec->cbegin() + last_pulse_index;
+
+  while ((event_index < *event_index_iter) ||
+         (event_index >= *(event_index_iter + 1))) {
+    event_index_iter++;
+
+    // make sure not to go past the end
+    if (event_index_iter + 1 == event_index_end)
+      break;
+  }
+  return std::distance(event_index_vec->cbegin(), event_index_iter);
+}
+} // namespace
+
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
  */
@@ -53,7 +108,7 @@ void ProcessBankData::run() { // override {
 
     std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
     for (size_t i = 0; i < numEvents; i++) {
-      auto thisId = detid_t(event_id[i]);
+      const auto thisId = detid_t(event_id[i]);
       if (thisId >= m_min_id && thisId <= m_max_id)
         counts[thisId - m_min_id]++;
     }
@@ -81,18 +136,16 @@ void ProcessBankData::run() { // override {
   }
 
   // Default pulse time (if none are found)
-  Mantid::Types::Core::DateAndTime pulsetime;
-  int periodIndex = 0;
-  Mantid::Types::Core::DateAndTime lastpulsetime(0);
-
-  bool pulsetimesincreasing = true;
+  const bool pulsetimesincreasing = std::is_sorted(
+      thisBankPulseTimes->pulseTimes,
+      thisBankPulseTimes->pulseTimes + thisBankPulseTimes->numPulses);
 
   // Index into the pulse array
-  int pulse_i = 0;
+  size_t pulse_i = 0;
 
   // And there are this many pulses
-  auto numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
-  if (numPulses > static_cast<int>(event_index->size())) {
+  const auto numPulses = thisBankPulseTimes->numPulses;
+  if (numPulses > event_index->size()) {
     alg->getLogger().warning()
         << "Entry " << entry_name
         << "'s event_index vector is smaller than the event_time_zero field. "
@@ -105,58 +158,45 @@ void ProcessBankData::run() { // override {
   prog->report(entry_name + ": filling events");
 
   // Will we need to compress?
-  bool compress = (alg->compressTolerance >= 0);
+  const bool compress = (alg->compressTolerance >= 0);
 
   // Which detector IDs were touched? - only matters if compress is on
   std::vector<bool> usedDetIds;
   if (compress)
     usedDetIds.assign(m_max_id - m_min_id + 1, false);
 
+  size_t pulse_last = getFirstPulseIndex(startAt, event_index);
   // Go through all events in the list
-  for (std::size_t i = 0; i < numEvents; i++) {
+  for (std::size_t index_in_tof_array = startAt; index_in_tof_array < numEvents;
+       index_in_tof_array++) {
     //------ Find the pulse time for this event index ---------
-    if (pulse_i < numPulses - 1) {
-      bool breakOut = false;
-      // Go through event_index until you find where the index increases to
-      // encompass the current index. Your pulse = the one before.
-      while ((i + startAt < event_index->operator[](pulse_i)) ||
-             (i + startAt >= event_index->operator[](pulse_i + 1))) {
-        pulse_i++;
-        // Check once every new pulse if you need to cancel (checking on every
-        // event might slow things down more)
-        if (alg->getCancel())
-          breakOut = true;
-        if (pulse_i >= (numPulses - 1))
-          break;
-      }
-
-      // Save the pulse time at this index for creating those events
-      pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
-      int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
-      periodIndex = logPeriodNumber - 1;
-
-      // Determine if pulse times continue to increase
-      if (pulsetime < lastpulsetime)
-        pulsetimesincreasing = false;
-      else
-        lastpulsetime = pulsetime;
-
-      // Flag to break out of the event loop without using goto
-      if (breakOut)
+    pulse_i = getPulseIndex(index_in_tof_array, pulse_i, event_index);
+    if (pulse_i != pulse_last) {
+      // Check once every new pulse if you need to cancel (checking on every
+      // event might slow things down more)
+      if (alg->getCancel())
         break;
+      pulse_last = pulse_i;
     }
+
+    // Save the pulse time at this index for creating those events
+    const auto pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
+    const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
+    const auto periodIndex = logPeriodNumber - 1;
 
     // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
     // the event
-    detid_t detId = event_id[i];
+    const detid_t detId = event_id[index_in_tof_array];
     if (detId >= m_min_id && detId <= m_max_id) {
       // Create the tofevent
-      auto tof = static_cast<double>(event_time_of_flight[i]);
+      const auto tof =
+          static_cast<double>(event_time_of_flight[index_in_tof_array]);
       if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max)) {
         // Handle simulated data if present
         if (have_weight) {
-          auto weight = static_cast<double>(event_weight[i]);
-          double errorSq = weight * weight;
+          const auto weight =
+              static_cast<double>(event_weight[index_in_tof_array]);
+          const double errorSq = weight * weight;
           auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
