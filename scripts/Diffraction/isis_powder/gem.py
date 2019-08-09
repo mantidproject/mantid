@@ -209,6 +209,10 @@ class Gem(AbstractInst):
         return self._inst_settings.unit_to_keep
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
+        """
+        GEM uses a Vanadium-Niobium mix and doesn't need to strip any Vanadium Bragg peaks
+        before splining
+        """
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
 
