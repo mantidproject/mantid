@@ -68,9 +68,9 @@ void EQSANSCorrectFrame::exec() {
 
   auto ins = inputWS->getInstrument();
   auto sam = ins->getSample();
-  auto mod = ins->getSource():
+  auto mod = ins->getSource();
   const auto msd = mod->getDistance(*sam);
-  const auto det = ins->getComponentyByName("detector1");
+  const auto det = ins->getComponentByName("detector1");
   const auto mdd = mod->getDistance(*det);
 
   // Creates a function that correct TOF values
