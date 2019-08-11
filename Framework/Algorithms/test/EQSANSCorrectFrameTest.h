@@ -79,20 +79,21 @@ public:
       TS_ASSERT_EQUALS(events.size(), 1);
       TS_ASSERT_DELTA(events[0].tof(), tofs[i], 1.0E-03 * m_pulseWidth);
     }
-  }
 
-  // Path to each pixel
-  alg.setProperty("PathToPixel", true);
-  alg.execute();
-  std::vector<double> tofs = {7.05, 4.15, 5.05, 6.15};
-  const double pulseWidth(m_pulseWidth);
-  std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                 [&pulseWidth](double tof) { return tof * pulseWidth; });
-  const int numPixels(m_bankSize *m_bankSize);
-  for (int i = 0; i < numPixels; i++) {
-    std::vector<TofEvent> &events = m_ews->getSpectrum(i).getEvents();
-    TS_ASSERT_EQUALS(events.size(), 1);
-    TS_ASSERT_DELTA(events[0].tof(), tofs[i], 1.0E-03 * m_pulseWidth);
+
+    // Path to each pixel
+    alg.setProperty("PathToPixel", true);
+    alg.execute();
+    std::vector<double> tofs = {7.05, 4.15, 5.05, 6.15};
+    const double pulseWidth(m_pulseWidth);
+    std::transform(tofs.begin(), tofs.end(), tofs.begin(),
+                  [&pulseWidth](double tof) { return tof * pulseWidth; });
+    const int numPixels(m_bankSize *m_bankSize);
+    for (int i = 0; i < numPixels; i++) {
+      std::vector<TofEvent> &events = m_ews->getSpectrum(i).getEvents();
+      TS_ASSERT_EQUALS(events.size(), 1);
+      TS_ASSERT_DELTA(events[0].tof(), tofs[i], 1.0E-03 * m_pulseWidth);
+    }
   }
 }
 
