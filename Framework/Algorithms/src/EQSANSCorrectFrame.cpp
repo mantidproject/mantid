@@ -67,9 +67,9 @@ void EQSANSCorrectFrame::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
   const auto &ins = inputWS->getInstrument();
-  const auto msd = ins.getSample().getDistance(ins.getSource());  // mod. to sample
-  const auto &det = ins.getComponentyByName("detector1"); // center of detector panel
-  const auto mdd = det.getDistance(ins.getSource());  // moderator to detector dist.
+  const auto msd = ins.getSample().getDistance(ins.getSource());
+  const auto &det = ins.getComponentyByName("detector1");
+  const auto mdd = det.getDistance(ins.getSource());
 
   // Creates a function that correct TOF values
   struct correctTofFactory {
@@ -85,7 +85,8 @@ void EQSANSCorrectFrame::exec() {
       m_framesOffsetTime = frameWidth * nf;
     }
 
-    double operator()(const double tof, const double pathToPixelFactor=1.0) const {
+    double operator()(const double tof,
+                      const double pathToPixelFactor = 1.0) const {
       // shift times to the correct frame
       double newTOF = tof + m_framesOffsetTime;
       // TOF values smaller than that of the fastest neutrons have been
@@ -124,7 +125,7 @@ void EQSANSCorrectFrame::exec() {
 
     // Determine the factor by which to enlarge the minimum time-of-flight
     // if considering the path to the pixel instead of to the detector center
-    double pathToPixelFactor(1.0);  // factor for path to detector center
+    double pathToPixelFactor(1.0); // factor for path to detector center
     if (pathToPixel) {
       pathToPixelFactor = (msd + spectrumInfo.l2(ispec)) / mdd;
     }
