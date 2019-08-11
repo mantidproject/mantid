@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 
+#include <functional>
 #include <vector>
 
 namespace Mantid {
@@ -47,6 +48,10 @@ void EQSANSCorrectFrame::init() {
   declareProperty("FrameSkipping", false,
                   "If True, the data was taken in frame skipping mode",
                   Direction::Input);
+  declareProperty("PathToPixel", true,
+                  "If True, use path from moderator to individual pixel instead"
+                  "of to center of the detector panel",
+                  Direction::Input);
 }
 
 void EQSANSCorrectFrame::exec() {
@@ -58,7 +63,13 @@ void EQSANSCorrectFrame::exec() {
   const double minTOF = getProperty("MinTOF");
   const double frameWidth = getProperty("FrameWidth");
   const bool isFrameSkipping = getProperty("FrameSkipping");
+  const bool pathToPixel = getProperty("PathToPixel");
   const auto &spectrumInfo = inputWS->spectrumInfo();
+
+  const auto &ins = inputWS->getInstrument();
+  const auto msd = ins.getSample().getDistance(ins.getSource());  // mod. to sample
+  const auto &det = ins.getComponentyByName("detector1"); // center of detector panel
+  const auto mdd = det.getDistance(ins.getSource());  // moderator to detector dist.
 
   // Creates a function that correct TOF values
   struct correctTofFactory {
@@ -66,8 +77,7 @@ void EQSANSCorrectFrame::exec() {
     explicit correctTofFactory(double pulsePeriod, double minTOF,
                                double frameWidth, bool isFrameSkipping)
         : m_pulsePeriod(pulsePeriod), m_minTOF(minTOF),
-          m_frameWidth(frameWidth), m_minTOF_delayed(minTOF + pulsePeriod),
-          m_isFrameSkipping(isFrameSkipping) {
+          m_frameWidth(frameWidth), m_isFrameSkipping(isFrameSkipping) {
       // Find how many frame widths elapsed from the time the neutrons of the
       // lead pulse were emitted and the time the neutrons arrived to the
       // detector bank. This time must be added to the stored TOF values
@@ -75,15 +85,16 @@ void EQSANSCorrectFrame::exec() {
       m_framesOffsetTime = frameWidth * nf;
     }
 
-    double operator()(const double tof) const {
+    double operator()(const double tof, const double pathToPixelFactor=1.0) const {
       // shift times to the correct frame
       double newTOF = tof + m_framesOffsetTime;
       // TOF values smaller than that of the fastest neutrons have been
       // 'folded' by the data acquisition system. They must be shifted
-      if (newTOF < m_minTOF)
+      double minTOF = m_minTOF * pathToPixelFactor;
+      if (newTOF < minTOF)
         newTOF += m_frameWidth;
       // Events from the skipped pulse are delayed by one pulse period
-      if (m_isFrameSkipping && newTOF > m_minTOF_delayed)
+      if (m_isFrameSkipping && newTOF > minTOF + m_pulsePeriod)
         newTOF += m_pulsePeriod;
       return newTOF;
     }
@@ -92,7 +103,6 @@ void EQSANSCorrectFrame::exec() {
     double m_minTOF;
     double m_frameWidth;
     double m_framesOffsetTime;
-    double m_minTOF_delayed;
     bool m_isFrameSkipping;
   };
 
@@ -111,7 +121,17 @@ void EQSANSCorrectFrame::exec() {
     EventList &evlist = inputWS->getSpectrum(ispec);
     if (evlist.getNumberEvents() == 0)
       continue; // no events recorded in this spectrum
-    evlist.convertTof(correctTof);
+
+    // Determine the factor by which to enlarge the minimum time-of-flight
+    // if considering the path to the pixel instead of to the detector center
+    double pathToPixelFactor(1.0);  // factor for path to detector center
+    if (pathToPixel) {
+      pathToPixelFactor = (msd + spectrumInfo.l2(ispec)) / mdd;
+    }
+    auto tofCorrector =
+        std::bind(correctTof, std::placeholders::_1, pathToPixelFactor);
+
+    evlist.convertTof(tofCorrector);
     progress.report("Correct TOF frame");
     PARALLEL_END_INTERUPT_REGION
   }
