@@ -66,10 +66,10 @@ void EQSANSCorrectFrame::exec() {
   const bool pathToPixel = getProperty("PathToPixel");
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
-  const auto &ins = inputWS->getInstrument();
-  const auto msd = ins.getSample().getDistance(ins.getSource());
-  const auto &det = ins.getComponentyByName("detector1");
-  const auto mdd = det.getDistance(ins.getSource());
+  const auto ins = inputWS->getInstrument();
+  const auto msd = ins->getSample()->getDistance(ins->getSource());
+  const auto det = ins->getComponentyByName("detector1");
+  const auto mdd = det->getDistance(ins->getSource());
 
   // Creates a function that correct TOF values
   struct correctTofFactory {
