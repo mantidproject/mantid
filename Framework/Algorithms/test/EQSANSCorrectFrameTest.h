@@ -42,9 +42,8 @@ public:
     // insert one event in each pixel
     std::vector<double> tofs = {0.05, 0.15, 1.05, 1.15};
     const double pulseWidth(m_pulseWidth);
-    std::transform(
-        tofs.begin(), tofs.end(), tofs.begin(),
-        [&pulseWidth](double tof) { return tof * pulseWidth; });
+    std::transform(tofs.begin(), tofs.end(), tofs.begin(),
+                   [&pulseWidth](double tof) { return tof * pulseWidth; });
     const int numPixels(m_bankSize * m_bankSize);
     for (int i = 0; i < numPixels; i++) {
       EventList &evlist = m_ews->getSpectrum(i);
