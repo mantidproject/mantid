@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>RunsTableView</class>
-  <widget class="QWidget" name="RunsTableView">
+  <class>RunsTableWidget</class>
+  <widget class="QWidget" name="RunsTableWidget">
     <property name="geometry">
       <rect>
         <x>0</x>

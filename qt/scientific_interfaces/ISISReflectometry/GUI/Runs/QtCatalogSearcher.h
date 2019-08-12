@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
-#define MANTID_ISISREFLECTOMETRY_CATALOGSEARCHER_H
+#ifndef MANTID_ISISREFLECTOMETRY_QTCATALOGSEARCHER_H
+#define MANTID_ISISREFLECTOMETRY_QTCATALOGSEARCHER_H
 
 #include "GUI/Runs/IRunsView.h"
 #include "ISearcher.h"
@@ -17,19 +17,19 @@ namespace CustomInterfaces {
 
 class IMainWindowView;
 
-/** @class CatalogSearcher
+/** @class QtCatalogSearcher
 
-CatalogSearcher implements ISearcher to provide ICAT search
+QtCatalogSearcher implements ISearcher to provide ICAT search
 functionality.
 */
-class CatalogSearcher : public QObject,
-                        public ISearcher,
-                        public RunsViewSearchSubscriber,
-                        public Mantid::API::AlgorithmObserver {
+class QtCatalogSearcher : public QObject,
+                          public ISearcher,
+                          public RunsViewSearchSubscriber,
+                          public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 public:
-  explicit CatalogSearcher(IRunsView *m_view);
-  ~CatalogSearcher() override{};
+  explicit QtCatalogSearcher(IRunsView *m_view);
+  ~QtCatalogSearcher() override{};
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
@@ -77,4 +77,4 @@ private:
 bool hasActiveCatalogSession();
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif
+#endif /* MANTID_ISISREFLECTOMETRY_QTCATALOGSEARCHER_H */

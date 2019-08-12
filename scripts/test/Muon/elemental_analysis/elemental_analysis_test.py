@@ -25,17 +25,17 @@ from MultiPlotting.label import Label
 @start_qapplication
 class ElementalAnalysisTest(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        super(ElementalAnalysisTest, self).setUpClass()
-        self.gui = ElementalAnalysisGui()
+    def setUpClass(cls):
+        super(ElementalAnalysisTest, cls).setUpClass()
+        cls.gui = ElementalAnalysisGui()
 
     @classmethod
-    def tearDownClass(self):
-        self.gui = None
+    def tearDownClass(cls):
+        cls.gui = None
 
     def setUp(self):
         self.gui.plot_window = None
-        self.gui.color_index = 0
+        self.gui.used_colors = {}
         self.gui.element_lines = {}
         self.has_raise_ValueError_been_called_once = False
 
@@ -44,24 +44,42 @@ class ElementalAnalysisTest(unittest.TestCase):
             self.has_raise_ValueError_been_called_once = True
             raise ValueError()
 
+    def test_that_get_color_returns_C0_as_first_color(self):
+        self.assertEqual('C0', self.gui.get_color('bla'))
+
     def test_that_default_colour_cycle_is_used(self):
         cycle = len(matplotlib.rcParams['axes.prop_cycle'])
         self.assertEqual(cycle, self.gui.num_colors)
 
         expected = ['C%d' % i for i in range(cycle)]
-        returned = [self.gui.get_color() for _ in range(cycle)]
+        returned = [self.gui.get_color('el_{}'.format(i)) for i in range(cycle)]
         self.assertEqual(expected, returned)
 
-    def test_color_is_increased_every_time_get_color_is_called(self):
-        self.assertEqual(self.gui.color_index, 0)
-        self.gui.get_color()
-        self.assertEqual(self.gui.color_index, 1)
+    def test_that_get_color_returns_the_same_color_for_the_same_element(self):
+        self.assertEqual(self.gui.used_colors, {})
 
-    def test_that_color_index_wraps_around_when_end_reached(self):
-        self.gui.color_index = self.gui.num_colors - 1
-        self.gui.get_color()
+        colors = [self.gui.get_color('Cu') for _ in range(10)]
+        colors += [self.gui.get_color('Fe') for _ in range(10)]
+        colors = sorted(list(set(colors)))
 
-        self.assertEqual(self.gui.color_index, 0)
+        self.assertEqual(colors, ['C0', 'C1'])
+
+    def test_that_get_color_returns_a_color_if_it_has_been_freed(self):
+        elements = ['Cu', 'Fe', 'Ni']
+        colors = [self.gui.get_color(el) for el in elements]
+
+        self.assertEqual(colors, ['C0', 'C1', 'C2'])
+
+        del self.gui.used_colors['Fe']
+
+        new_col = self.gui.get_color('O')
+        self.assertEqual(new_col, 'C1')
+
+    def test_that_get_color_wraps_around_when_all_colors_in_cycle_have_been_used(self):
+        [self.gui.get_color(i) for i in range(self.gui.num_colors)]
+
+        self.assertEqual(self.gui.get_color('Cu'), 'C0')
+        self.assertEqual(self.gui.get_color('Fe'), 'C1')
 
     def test_that_closing_with_no_plot_will_not_throw(self):
         self.gui.plot_window = None
@@ -185,9 +203,11 @@ class ElementalAnalysisTest(unittest.TestCase):
         data = {'line1': 10.0, 'line2': 20.0, 'line3': 30.0}
         self.gui._add_element_lines('Cu', data)
         self.assertEqual(mock_plot_line.call_count, 3)
-        call_list = [mock.call(gen_name('Cu', 'line3'), 30.0, 'C0', 'Cu'),
-                     mock.call(gen_name('Cu', 'line2'), 20.0, 'C0', 'Cu'),
-                     mock.call(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')]
+        call_list = [
+            mock.call(gen_name('Cu', 'line3'), 30.0, 'C0', 'Cu'),
+            mock.call(gen_name('Cu', 'line2'), 20.0, 'C0', 'Cu'),
+            mock.call(gen_name('Cu', 'line1'), 10.0, 'C0', 'Cu')
+        ]
         mock_plot_line.assert_has_calls(call_list, any_order=True)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._rm_line')
@@ -242,7 +262,8 @@ class ElementalAnalysisTest(unittest.TestCase):
             self.assertEqual(detector.setChecked.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
-    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(self, mock_QWidget):
+    def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(
+            self, mock_QWidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors = mock.Mock()
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
@@ -255,9 +276,9 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_peak_data')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.mantid')
-    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(self, mock_mantid, mock_add_peak_data):
-        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()],
-                           'name2': [mock.Mock(), mock.Mock()]}
+    def test_add_detectors_to_plot_plots_all_given_ws_and_all_selected_elements(
+            self, mock_mantid, mock_add_peak_data):
+        mock_mantid.mtd = {'name1': [mock.Mock(), mock.Mock()], 'name2': [mock.Mock(), mock.Mock()]}
         self.gui.plotting = mock.Mock()
 
         self.gui.add_detector_to_plot('GE1', 'name1')

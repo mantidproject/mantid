@@ -28,7 +28,7 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
 
         self.tab_bar.onDetachTabSignal.connect(self.detach_tab)
         self.tab_bar.onMoveTabSignal.connect(self.move_tab)
-        self.tab_bar.detachedTabDropSignal.connect(self.detached_tab_drop)
+        # self.tab_bar.detachedTabDropSignal.connect(self.detached_tab_drop)
 
         self.setTabBar(self.tab_bar)
 

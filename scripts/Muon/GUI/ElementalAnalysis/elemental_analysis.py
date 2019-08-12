@@ -38,17 +38,25 @@ import mantid.simpleapi as mantid
 offset = 0.9
 
 
+def is_string(value):
+    if isinstance(value, str):
+        return True
+    elif sys.version_info[:2] < (3, 0):
+        if isinstance(value, unicode):
+            return True
+
+    return False
+
+
 def gen_name(element, name):
-    if sys.version_info[:2] < (3, 0):
-        if (not isinstance(element, str)) and (not isinstance(element, unicode)):
-            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
-        if (not isinstance(name, str)) and (not isinstance(name, unicode)):
-            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
-    else:
-        if not isinstance(element, str):
-            raise TypeError("'%s' expected element to be 'str', found '%s' instead" % (str(element), type(element)))
-        if not isinstance(name, str):
-            raise TypeError("'%s' expected name to be 'str', found '%s' instead" % (str(name), type(name)))
+    msg = None
+    if not is_string(element):
+        msg = "'{}' expected element to be 'str', found '{}' instead".format(str(element), type(element))
+    if not is_string(name):
+        msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
+
+    if msg is not None:
+        raise TypeError(msg)
 
     if element in name:
         return name
@@ -56,7 +64,6 @@ def gen_name(element, name):
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
-
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         # set menu
@@ -103,7 +110,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # plotting
         self.plot_window = None
         self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
-        self.color_index = 0
+        self.used_colors = {}
 
         # layout
         self.box = QtWidgets.QHBoxLayout()
@@ -119,10 +126,28 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.electron_peaks = {}
         self._generate_element_widgets()
 
-    # Return an unused colour, if all used then start with the first one
-    def get_color(self):
-        color = "C%d" % self.color_index
-        self.color_index = (self.color_index + 1) % self.num_colors
+    def get_color(self, element):
+        """
+        When requesting the colour for a new element, return the first unused colour of the matplotlib
+        default colour cycle (i.e. mpl.rcParams['axes.prop_cycle']).
+        If all colours are used, return the first among the least used ones.
+        That is if C0-4 are all used twice and C5-9 are used once, C5 will be returned.
+
+        When requesting the colour for an element that is already plotted return the colour of that element.
+        This prevents the same element from being displayed in different colours in separate plots
+
+        :param element: Chemical symbol of the element that one wants the colour of
+        :return: Matplotlib colour string: C0, C1, ..., C9 to be used as plt.plot(..., color='C3')
+        """
+        if element in self.used_colors:
+            return self.used_colors[element]
+
+        occurrences = [list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)]
+
+        color_index = occurrences.index(min(occurrences))
+
+        color = "C{}".format(color_index)
+        self.used_colors[element] = color
 
         return color
 
@@ -187,12 +212,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.element_lines[element] = []
 
         # Select a different color, if all used then use the first
-        color = self.get_color()
+        color = self.get_color(element)
 
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
-            except:
+            except ValueError:
                 continue
             full_name = gen_name(element, name)
             if full_name not in self.element_lines[element]:
@@ -207,6 +232,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             try:
                 self.element_lines[element].remove(name)
                 self._rm_line(name)
+                if not self.element_lines[element]:
+                    del self.element_lines[element]
+                    if element in self.used_colors:
+                        del self.used_colors[element]
             except:
                 continue
 
@@ -269,11 +298,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # if already selected add to just new plot
         if data is None:
             data = self.element_widgets[element].get_checked()
-        color = self.get_color()
+        color = self.get_color(element)
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
-            except:
+            except ValueError:
                 continue
             full_name = gen_name(element, name)
             label = self._gen_label(full_name, x_value, element)
@@ -322,13 +351,14 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.ptable.set_peak_datafile(filename)
         # these are commneted out as they are a bug
         # see issue 25326
-        #self._clear_lines_after_data_file_selected()
+        # self._clear_lines_after_data_file_selected()
         try:
             self._generate_element_widgets()
         except ValueError:
-            message_box.warning('The file does not contain correctly formatted data, resetting to default data file.'
-                                'See "https://docs.mantidproject.org/nightly/interfaces/'
-                                'Muon%20Elemental%20Analysis.html" for more information.')
+            message_box.warning(
+                'The file does not contain correctly formatted data, resetting to default data file.'
+                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                'Muon%20Elemental%20Analysis.html" for more information.')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
 
@@ -337,7 +367,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.ptable.select_element(element)
             else:
                 self._remove_element_lines(element)
-
         self._update_checked_data()
         #self._generate_element_data()
 

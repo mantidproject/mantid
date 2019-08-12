@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "EventView.h"
+#include "QtEventView.h"
 #include "EventPresenter.h"
 
 namespace MantidQt {
@@ -13,13 +13,13 @@ namespace CustomInterfaces {
 /** Constructor
  * @param parent :: [input] The parent of this widget
  */
-EventView::EventView(QWidget *parent) : QWidget(parent) { initLayout(); }
+QtEventView::QtEventView(QWidget *parent) : QWidget(parent) { initLayout(); }
 
-void EventView::subscribe(EventViewSubscriber *notifyee) {
+void QtEventView::subscribe(EventViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-void EventView::initLayout() {
+void QtEventView::initLayout() {
   m_ui.setupUi(this);
   initUniformSliceTypeLayout();
   initUniformEvenSliceTypeLayout();
@@ -33,7 +33,7 @@ void EventView::initLayout() {
       m_ui.customButton, m_ui.disabledSlicingButton);
 }
 
-void EventView::initUniformSliceTypeLayout() {
+void QtEventView::initUniformSliceTypeLayout() {
   m_uniformGroup = makeQWidgetGroup(m_ui.uniformEdit, m_ui.uniformLabel);
   connect(m_ui.uniformButton, SIGNAL(toggled(bool)), this,
           SLOT(onToggleUniform(bool)));
@@ -51,41 +51,41 @@ void EventView::initUniformSliceTypeLayout() {
           SLOT(onLogValueTypeChanged(QString const &)));
 }
 
-void EventView::onUniformEvenChanged(int numberOfSlices) {
+void QtEventView::onUniformEvenChanged(int numberOfSlices) {
   m_notifyee->notifyUniformSliceCountChanged(numberOfSlices);
 }
 
-void EventView::onUniformSecondsChanged(double numberOfSeconds) {
+void QtEventView::onUniformSecondsChanged(double numberOfSeconds) {
   m_notifyee->notifyUniformSecondsChanged(numberOfSeconds);
 }
 
-void EventView::onCustomChanged(QString const &listOfSlices) {
+void QtEventView::onCustomChanged(QString const &listOfSlices) {
   m_notifyee->notifyCustomSliceValuesChanged(listOfSlices.toStdString());
 }
 
-void EventView::onLogValuesChanged(QString const &listOfSliceBreakpoints) {
+void QtEventView::onLogValuesChanged(QString const &listOfSliceBreakpoints) {
   m_notifyee->notifyLogSliceBreakpointsChanged(
       listOfSliceBreakpoints.toStdString());
 }
 
-void EventView::onLogValueTypeChanged(QString const &logBlockName) {
+void QtEventView::onLogValueTypeChanged(QString const &logBlockName) {
   m_notifyee->notifyLogBlockNameChanged(logBlockName.toStdString());
 }
 
-void EventView::initUniformEvenSliceTypeLayout() {
+void QtEventView::initUniformEvenSliceTypeLayout() {
   m_uniformEvenGroup =
       makeQWidgetGroup(m_ui.uniformEvenEdit, m_ui.uniformEvenLabel);
   connect(m_ui.uniformEvenButton, SIGNAL(toggled(bool)), this,
           SLOT(onToggleUniformEven(bool)));
 }
 
-void EventView::initCustomSliceTypeLayout() {
+void QtEventView::initCustomSliceTypeLayout() {
   m_customGroup = makeQWidgetGroup(m_ui.customEdit, m_ui.customLabel);
   connect(m_ui.customButton, SIGNAL(toggled(bool)), this,
           SLOT(onToggleCustom(bool)));
 }
 
-void EventView::initLogValueSliceTypeLayout() {
+void QtEventView::initLogValueSliceTypeLayout() {
   m_logValueGroup =
       makeQWidgetGroup(m_ui.logValueTypeEdit, m_ui.logValueTypeLabel,
                        m_ui.logValueEdit, m_ui.logValueLabel);
@@ -93,7 +93,7 @@ void EventView::initLogValueSliceTypeLayout() {
           SLOT(onToggleLogValue(bool)));
 }
 
-void EventView::enableSliceType(SliceType sliceType) {
+void QtEventView::enableSliceType(SliceType sliceType) {
   switch (sliceType) {
   case SliceType::Uniform:
     m_uniformGroup.enable();
@@ -112,7 +112,7 @@ void EventView::enableSliceType(SliceType sliceType) {
   }
 }
 
-void EventView::disableSliceType(SliceType sliceType) {
+void QtEventView::disableSliceType(SliceType sliceType) {
   switch (sliceType) {
   case SliceType::Uniform:
     m_uniformGroup.disable();
@@ -131,15 +131,15 @@ void EventView::disableSliceType(SliceType sliceType) {
   }
 }
 
-std::string EventView::logBlockName() const {
+std::string QtEventView::logBlockName() const {
   return textFrom(m_ui.logValueTypeEdit);
 }
 
-std::string EventView::logBreakpoints() const {
+std::string QtEventView::logBreakpoints() const {
   return textFrom(m_ui.logValueEdit);
 }
 
-std::string EventView::customBreakpoints() const {
+std::string QtEventView::customBreakpoints() const {
   return textFrom(m_ui.customEdit);
 }
 
@@ -155,57 +155,61 @@ void showAsValid(QLineEdit &lineEdit) {
   lineEdit.setPalette(palette);
 }
 
-void EventView::showCustomBreakpointsInvalid() {
+void QtEventView::showCustomBreakpointsInvalid() {
   showAsInvalid(*m_ui.customEdit);
 }
 
-void EventView::showCustomBreakpointsValid() { showAsValid(*m_ui.customEdit); }
+void QtEventView::showCustomBreakpointsValid() {
+  showAsValid(*m_ui.customEdit);
+}
 
-void EventView::showLogBreakpointsInvalid() {
+void QtEventView::showLogBreakpointsInvalid() {
   showAsInvalid(*m_ui.logValueEdit);
 }
 
-void EventView::showLogBreakpointsValid() { showAsValid(*m_ui.logValueEdit); }
+void QtEventView::showLogBreakpointsValid() { showAsValid(*m_ui.logValueEdit); }
 
-int EventView::uniformSliceCount() const {
+int QtEventView::uniformSliceCount() const {
   return m_ui.uniformEvenEdit->value();
 }
 
-double EventView::uniformSliceLength() const {
+double QtEventView::uniformSliceLength() const {
   return m_ui.uniformEdit->value();
 }
 
-std::string EventView::textFrom(QLineEdit const *const widget) const {
+std::string QtEventView::textFrom(QLineEdit const *const widget) const {
   return widget->text().toStdString();
 }
 
-void EventView::disableSliceTypeSelection() {
+void QtEventView::disableSliceTypeSelection() {
   m_sliceTypeRadioButtons.disable();
 }
 
-void EventView::enableSliceTypeSelection() { m_sliceTypeRadioButtons.enable(); }
+void QtEventView::enableSliceTypeSelection() {
+  m_sliceTypeRadioButtons.enable();
+}
 
-void EventView::onToggleUniform(bool isChecked) {
+void QtEventView::onToggleUniform(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::Uniform);
 }
 
-void EventView::onToggleUniformEven(bool isChecked) {
+void QtEventView::onToggleUniformEven(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::UniformEven);
 }
 
-void EventView::onToggleCustom(bool isChecked) {
+void QtEventView::onToggleCustom(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::Custom);
 }
 
-void EventView::onToggleLogValue(bool isChecked) {
+void QtEventView::onToggleLogValue(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::LogValue);
 }
 
-void EventView::onToggleDisabledSlicing(bool isChecked) {
+void QtEventView::onToggleDisabledSlicing(bool isChecked) {
   if (isChecked)
     m_notifyee->notifySliceTypeChanged(SliceType::None);
 }
