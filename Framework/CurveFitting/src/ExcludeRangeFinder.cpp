@@ -90,6 +90,6 @@ void ExcludeRangeFinder::findNextExcludedRange(double p) {
   // and m_exclude[m_exclIndex] < p due to conditions at the calls
   // so the break statement will always be reached.
 }
-}; // namespace CurveFitting
+} // namespace CurveFitting
 
 } // namespace Mantid

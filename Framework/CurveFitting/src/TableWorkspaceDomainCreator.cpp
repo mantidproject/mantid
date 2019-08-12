@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -246,8 +246,8 @@ void TableWorkspaceDomainCreator::createDomain(
   // find the fitting interval: from -> to
   size_t endRowNo = 0;
   std::tie(m_startRowNo, endRowNo) = getXInterval();
-  auto from = XData[0] + m_startRowNo;
-  auto to = XData[0] + endRowNo;
+  auto from = static_cast<size_t>(XData[0]) + m_startRowNo;
+  auto to = static_cast<size_t>(XData[0]) + endRowNo;
   auto n = endRowNo - m_startRowNo;
 
   if (m_domainType != Simple) {
@@ -262,8 +262,8 @@ void TableWorkspaceDomainCreator::createDomain(
         size_t k = m + m_maxSize;
         if (k > n)
           k = n;
-        creator->setRange(XData[from + static_cast<double>(m)],
-                          XData[from + static_cast<double>(k) - 1.0]);
+        creator->setRange(XData[from + m],
+                          XData[from + k - 1.0]);
         seqDomain->addCreator(API::IDomainCreator_sptr(creator));
         m = k;
       }

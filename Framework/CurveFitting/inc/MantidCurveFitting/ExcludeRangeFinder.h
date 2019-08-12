@@ -18,7 +18,7 @@ checked value. A relevant region is the one which either includes the value or
 the nearest one with the left boundary greater than the value. The class also
 keeps the index of the region (its left boundary) for efficient search.
 */
-class MANTID_CURVEFITTING_DLL ExcludeRangeFinder {
+class DLLExport ExcludeRangeFinder {
 public:
   /// Constructor
   ExcludeRangeFinder(const std::vector<double> &exclude, double startX,
@@ -37,7 +37,7 @@ private:
   /// End of current excluded range
   double m_endExcludeRange;
   /// Reference to a list of exclusion ranges.
-  const std::vector<double> &m_exclude;
+  const std::vector<double> m_exclude;
   /// Size of m_exclude.
   const size_t m_size;
 };
