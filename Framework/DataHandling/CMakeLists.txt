@@ -91,6 +91,7 @@ set(SRC_FILES
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
     src/LoadOff.cpp
+    src/LoadNGEM.cpp
     src/LoadPDFgetNFile.cpp
     src/LoadPLN.cpp
     src/LoadPSIMuonBin.cpp
@@ -291,6 +292,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
     inc/MantidDataHandling/LoadOff.h
+    inc/MantidDataHandling/LoadNGEM.h
     inc/MantidDataHandling/LoadPDFgetNFile.h
     inc/MantidDataHandling/LoadPLN.h
     inc/MantidDataHandling/LoadPSIMuonBin.h
@@ -479,6 +481,7 @@ set(TEST_FILES
     LoadNexusMonitorsTest.h
     LoadNexusProcessedTest.h
     LoadNexusTest.h
+    LoadNGEMTest.h
     LoadPDFgetNFileTest.h
     LoadPLNTest.h
     LoadPSIMuonBinTest.h
