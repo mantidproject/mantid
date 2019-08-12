@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 
 #include "IndirectDataReductionTab.h"
+
 #include "MantidKernel/System.h"
 #include "ui_ISISEnergyTransfer.h"
 
@@ -56,8 +57,6 @@ private slots:
       bool error); //< Called when the Plot Raw algorithmm chain completes
   /// Handles running, plotting and saving
   void runClicked();
-  void plotSpectrumClicked();
-  void plotContourClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -90,13 +89,9 @@ private:
   void loadDetailedBalance(std::string const &filename);
 
   void setRunEnabled(bool enable);
-  void setPlotSpectrumEnabled(bool enable);
-  void setPlotContourEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
   void setSaveEnabled(bool enable);
   void setButtonsEnabled(bool enable);
-  void setPlotSpectrumIsPlotting(bool plotting);
-  void setPlotContourIsPlotting(bool plotting);
   void setPlotTimeIsPlotting(bool plotting);
 
   std::string m_outputGroupName;

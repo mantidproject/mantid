@@ -14,6 +14,8 @@ Concepts
 
 Algorithms
 ----------
+* :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
+* Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load <algm-Load>`.
 
 Data Objects
 ------------
@@ -21,4 +23,9 @@ Data Objects
 Python
 ------
 
+Bug Fixes
+---------
+* ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` bug fix for user provided top-level NXentry name 
+
 :ref:`Release 4.2.0 <v4.2.0>`
+

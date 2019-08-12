@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::WorkspaceProperty; // NOLINT

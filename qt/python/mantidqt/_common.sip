@@ -392,7 +392,7 @@ public:
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void setTextPlotGuess(const QString);
 
-    SIP_PYOBJECT defaultPeakType() const;
+    SIP_PYOBJECT defaultPeakType();
 %MethodCode
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());
@@ -412,6 +412,8 @@ public:
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    void normaliseData(bool on);
+    QMenu *getFitMenu() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -440,6 +442,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+
 };
 
 // ---------------------------------

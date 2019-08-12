@@ -9,8 +9,8 @@ from __future__ import absolute_import, print_function
 from qtpy import QtWidgets
 from copy import deepcopy
 import matplotlib as mpl
-
 from six import iteritems
+import sys
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
@@ -38,14 +38,32 @@ import mantid.simpleapi as mantid
 offset = 0.9
 
 
+def is_string(value):
+    if isinstance(value, str):
+        return True
+    elif sys.version_info[:2] < (3, 0):
+        if isinstance(value, unicode):
+            return True
+
+    return False
+
+
 def gen_name(element, name):
+    msg = None
+    if not is_string(element):
+        msg = "'{}' expected element to be 'str', found '{}' instead".format(str(element), type(element))
+    if not is_string(name):
+        msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
+
+    if msg is not None:
+        raise TypeError(msg)
+
     if element in name:
         return name
     return element + " " + name
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
-
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         # set menu
@@ -62,8 +80,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.ptable.register_table_rclicked(self.table_right_clicked)
 
         # load stuff
-        self.load_widget = LoadPresenter(
-            LoadView(), LoadModel(), CoLoadModel())
+        self.load_widget = LoadPresenter(LoadView(), LoadModel(), CoLoadModel())
         self.load_widget.on_loading_finished(self.loading_finished)
 
         # detectors
@@ -93,7 +110,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # plotting
         self.plot_window = None
         self.num_colors = len(mpl.rcParams['axes.prop_cycle'])
-        self.color_index = 0
+        self.used_colors = {}
 
         # layout
         self.box = QtWidgets.QHBoxLayout()
@@ -106,13 +123,31 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.element_widgets = {}
         self.element_lines = {}
-        self.electron_peaks = self._get_electron_peaks()
+        self.electron_peaks = {}
         self._generate_element_widgets()
 
-    # Return an unused colour, if all used then start with the first one
-    def get_color(self):
-        color = "C%d" % self.color_index
-        self.color_index = (self.color_index + 1) % self.num_colors
+    def get_color(self, element):
+        """
+        When requesting the colour for a new element, return the first unused colour of the matplotlib
+        default colour cycle (i.e. mpl.rcParams['axes.prop_cycle']).
+        If all colours are used, return the first among the least used ones.
+        That is if C0-4 are all used twice and C5-9 are used once, C5 will be returned.
+
+        When requesting the colour for an element that is already plotted return the colour of that element.
+        This prevents the same element from being displayed in different colours in separate plots
+
+        :param element: Chemical symbol of the element that one wants the colour of
+        :return: Matplotlib colour string: C0, C1, ..., C9 to be used as plt.plot(..., color='C3')
+        """
+        if element in self.used_colors:
+            return self.used_colors[element]
+
+        occurrences = [list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)]
+
+        color_index = occurrences.index(min(occurrences))
+
+        color = "C{}".format(color_index)
+        self.used_colors[element] = color
 
         return color
 
@@ -121,12 +156,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
-   # general functions
+    # general functions
     def _gen_label(self, name, x_value_in, element=None):
         if element is None:
             return
         # check x value is a float
-        x_value = 0.0
         try:
             x_value = float(x_value_in)
         except:
@@ -156,13 +190,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:
-            if element in ["Gammas", "Electrons"]:
-                continue
             data = self.ptable.element_data(element)
-            try:
-                data["Gammas"] = self.ptable.peak_data["Gammas"][element]
-            except KeyError:
-                pass
             widget = PeakSelectorPresenter(PeakSelectorView(data, element))
             widget.on_finished(self._update_peak_data)
             self.element_widgets[element] = widget
@@ -173,8 +201,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def table_left_clicked(self, item):
         if self.ptable.is_selected(item.symbol):
-            self._add_element_lines(
-                item.symbol)
+            self._add_element_lines(item.symbol)
         else:
             self._remove_element_lines(item.symbol)
 
@@ -185,14 +212,16 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.element_lines[element] = []
 
         # Select a different color, if all used then use the first
-        color = self.get_color()
+        color = self.get_color(element)
 
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
-            except:
+            except ValueError:
                 continue
             full_name = gen_name(element, name)
+            if full_name not in self.element_lines[element]:
+                self.element_lines[element].append(full_name)
             self._plot_line(full_name, x_value, color, element)
 
     def _remove_element_lines(self, element):
@@ -203,6 +232,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             try:
                 self.element_lines[element].remove(name)
                 self._rm_line(name)
+                if not self.element_lines[element]:
+                    del self.element_lines[element]
+                    if element in self.used_colors:
+                        del self.used_colors[element]
             except:
                 continue
 
@@ -262,17 +295,17 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # if already selected add to just new plot
         if data is None:
             data = self.element_widgets[element].get_checked()
-        color = self.get_color()
+        color = self.get_color(element)
         for name, x_value in iteritems(data):
             try:
                 x_value = float(x_value)
-            except:
+            except ValueError:
                 continue
             full_name = gen_name(element, name)
             label = self._gen_label(full_name, x_value, element)
             self._plot_line_once(subplot, x_value, label, color)
 
-    def _update_peak_data(self, element, data=None):
+    def _update_peak_data(self, element):
         if self.ptable.is_selected(element):
             # remove all of the lines for the element
             self._remove_element_lines(element)
@@ -287,8 +320,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # not using load_last_run prevents two calls to last_loaded_run()
         if last_run is not None:
             self.load_run(detector, last_run)
-            if self.peaks.electron.isChecked():
-                self.add_peak_data("e-", detector, data=self.electron_peaks)
 
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:
@@ -317,13 +348,14 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.ptable.set_peak_datafile(filename)
         # these are commneted out as they are a bug
         # see issue 25326
-        #self._clear_lines_after_data_file_selected()
+        # self._clear_lines_after_data_file_selected()
         try:
             self._generate_element_widgets()
         except ValueError:
-            message_box.warning('The file does not contain correctly formatted data, resetting to default data file.'
-                                'See "https://docs.mantidproject.org/nightly/interfaces/'
-                                'Muon%20Elemental%20Analysis.html" for more information.')
+            message_box.warning(
+                'The file does not contain correctly formatted data, resetting to default data file.'
+                'See "https://docs.mantidproject.org/nightly/interfaces/'
+                'Muon%20Elemental%20Analysis.html" for more information.')
             self.ptable.set_peak_datafile(None)
             self._generate_element_widgets()
 
@@ -332,30 +364,21 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.ptable.select_element(element)
             else:
                 self._remove_element_lines(element)
-        #self._generate_element_data()
+        # self._generate_element_data()
 
     # general checked data
     def checked_data(self, element, selection, state):
         for checkbox in selection:
             checkbox.setChecked(state)
-        self._update_peak_data(
-            element,
-            self.element_widgets[element].get_checked())
-
-    # electron Peaks
-    def _get_electron_peaks(self):
-        # make a dict so we can label the peaks
-        electron_dict = {}
-        electron_peaks = self.ptable.peak_data["Electrons"].copy()
-        for peak, intensity in iteritems(electron_peaks):
-            electron_dict[str(peak)] = peak
-        return electron_dict
+        self._update_peak_data(element)
 
     def electrons_checked(self):
-        self._add_element_lines("e-", self.electron_peaks)
+        for element, selector in iteritems(self.element_widgets):
+            self.checked_data(element, selector.electron_checkboxes, True)
 
     def electrons_unchecked(self):
-        self._remove_element_lines("e-")
+        for element, selector in iteritems(self.element_widgets):
+            self.checked_data(element, selector.electron_checkboxes, False)
 
     # gamma Peaks
     def gammas_checked(self):

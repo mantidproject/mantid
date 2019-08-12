@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>

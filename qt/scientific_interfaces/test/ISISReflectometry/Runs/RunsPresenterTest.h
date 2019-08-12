@@ -7,9 +7,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 #define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
@@ -48,7 +48,7 @@ public:
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
-        m_searchString("test search string") {
+        m_searchString("test search string"), m_searchResult("", "", "") {
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
