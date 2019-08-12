@@ -15,6 +15,9 @@
  */
 
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
+
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -171,19 +174,15 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
 TODO: DOCUMENTATION
 */
-inline void writePixelShape(H5::Group &grp,
-                            const std::vector<size_t> &cylinderIndices,
+inline void writePixelShape(H5::Group &grp, size_t nCylinders,
                             const std::vector<double> &vertexCoordinates) {
 
   H5::DataSet cylinders, vertices;
-
-  const auto &nCylinders = static_cast<hsize_t>(cylinderIndices.size());
-
   // prepare the data
-  std::vector<double> cylinderData(nCylinders * 3);
+  std::vector<int> cylinderData(nCylinders * 3);
   for (size_t i = 0; i < nCylinders * 3; i += 3) {
     for (int j = 0; j < 3; ++j) {
-      cylinderData[i + j] = 2.0; // testing output
+      cylinderData[i + j] = static_cast<int>(i + j); // testing output
     }
   }
 
@@ -193,18 +192,8 @@ inline void writePixelShape(H5::Group &grp,
   cdims[1] = static_cast<hsize_t>(3);
   H5::DataSpace cspace = H5Screate_simple(crank, cdims, nullptr);
 
-  cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_DOUBLE, cspace);
-  cylinders.write(cylinderData.data(), H5::PredType::NATIVE_DOUBLE, cspace);
-
-  // vertices
-
-  // prepare the data
-  std::vector<double> verticesData(9); // 3x3 vertices
-  for (size_t i = 0; i < 9; i += 3) {
-    for (int j = 0; j < 3; ++j) {
-      verticesData[i + j] = 3.0; // testing output
-    }
-  }
+  cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_INT, cspace);
+  cylinders.write(cylinderData.data(), H5::PredType::NATIVE_INT, cspace);
 
   int vrank = 2;
   hsize_t vdims[static_cast<hsize_t>(2)];
@@ -213,7 +202,7 @@ inline void writePixelShape(H5::Group &grp,
   H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
   vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
-  vertices.write(verticesData.data(), H5::PredType::NATIVE_DOUBLE, vspace);
+  vertices.write(vertexCoordinates.data(), H5::PredType::NATIVE_DOUBLE, vspace);
   writeStrAttribute(vertices, UNITS, METRES);
 }
 
@@ -247,28 +236,39 @@ inline void writePixelData(H5::Group &grp,
 
   // shape type of the first detector in children detectors
   auto &firstShape = compInfo.shape(pixels.front());
-  auto firstType = firstShape.shapeInfo().shape();
-  // auto firstGeometry = firstShape.shapeInfo.cylinderGeometry();
+  auto firstShapeInfo = firstShape.shapeInfo();
+  auto fType = firstShapeInfo.shape();
+  auto fHeight = firstShapeInfo.height();
+  auto fRadius = firstShapeInfo.radius();
 
-  // return true if all shape types are equal to the first shape type in
-  // children detectors.
-  shapesAreHomogeneous = std::all_of(
-      pixels.begin(), pixels.end(), [&compInfo, &firstType](const size_t &idx) {
+  // return true if all shape types, heights and radii are equal to the first
+  // shape in children detectors.
+  shapesAreHomogeneous =
+      std::all_of(pixels.begin(), pixels.end(), [&](const size_t &idx) {
         auto &shapeObj = compInfo.shape(idx);
+
+        if (auto *meshObject =
+                dynamic_cast<const Geometry::MeshObject *>(&firstShape)) {
+          // current implementation only considers solid shapes
+          return false;
+        }
+        if (auto *meshObject2d =
+                dynamic_cast<const Geometry::MeshObject2D *>(&firstShape)) {
+          // current implementation only considers solid shapes
+          return false;
+        }
         auto shapeInfo = shapeObj.shapeInfo();
         auto type = shapeInfo.shape();
-        // Mantid::Geometry::detail::ShapeInfo::CylinderGeometry geometry =
-        // shapeInfo.cylinderGeometry(); <= debug assertation failure auto
-        // height = geometry.height(); <= pointer to member function error
-        // TODO: check also height, radii equal.
-        return (type == firstType);
+        auto height = shapeInfo.height();
+        auto radius = shapeInfo.radius();
+        return (type == fType && height == fHeight && radius == fRadius);
       });
 
   // Implicitly, only if shapesAreHomogenous is true, and first pixel shape
   // is not type 'NOSHAPE', then shapesAreValidAndHomogeneous is true. Else
   // false.
   shapesAreValidAndHomogeneous =
-      (shapesAreHomogeneous && (static_cast<int>(firstType) != 0 /*NOSHAPE*/));
+      (shapesAreHomogeneous && (static_cast<int>(fType) != 0 /*NOSHAPE*/));
 
   std::vector<double> posx;
   std::vector<double> posy;
@@ -293,14 +293,28 @@ inline void writePixelData(H5::Group &grp,
       posz.push_back(offset[2]);
     }
 
-    writePixelShape(pixelShapeGroup, std::vector<size_t>{0, 1, 2},
-                    std::vector<double>{1, 2, 3, 4, 5, 6, 7, 8,
-                                        9 /*9 vertex coordinates*/});
-    // TODO: get vertex coordinates of pixels.first()
+    if (static_cast<int>(fType) == 4 /*CYLINDER*/) {
+      auto geometry = firstShapeInfo.cylinderGeometry();
+      auto &base = geometry.centreOfBottomBase;
+      auto &axis = geometry.axis;
+      auto &height = geometry.height;
+      auto &radius = geometry.radius;
 
-  } else
+      auto top = Kernel::toVector3d(base) + (height * Kernel::toVector3d(axis));
+      Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
+      // creat an arbitrary noncollinear vector
+      auto nonCollinear = rotation * Kernel::toVector3d(axis);
 
-      if (!shapesAreHomogeneous) {
+      // get vector that is othogonal to the cylinder axis
+      auto orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
+      auto edge = top + (radius * orthogonalV.normalized());
+
+      std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
+                                   top[2],  edge[0], edge[1], edge[2]};
+      writePixelShape(pixelShapeGroup, 1, vertices);
+    }
+
+  } else if (!shapesAreHomogeneous) {
 
     // Implicitly, if shapesAreHomogeneous is False, there is at least 1 valid
     // shape (that is not 'NOSHAPE') then shapes exist in pixels.
@@ -308,9 +322,9 @@ inline void writePixelData(H5::Group &grp,
 
     // create pixel shape group
     H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
-    std::vector<size_t> cylinderIndices;
-    cylinderIndices.reserve(nPixels);
-    std::vector<double> vertexCoordinates;
+    size_t nCylinders = 0;
+    std::vector<double> vertices;
+
     for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
          ++it) {
 
@@ -323,11 +337,41 @@ inline void writePixelData(H5::Group &grp,
 
       // TODO: get pixel verices for each pixel
       if (compInfo.hasValidShape(*it)) {
-        auto x = compInfo.shape(*it).shapeInfo().cylinderGeometry();
-        cylinderIndices.push_back(*it);
+        auto pixelShapeInfo = compInfo.shape(*it).shapeInfo();
+        auto type = pixelShapeInfo.shape();
+        if (static_cast<int>(type) == 4 /*CYLINDER*/) {
+          auto geometry = pixelShapeInfo.cylinderGeometry();
+          auto &base = geometry.centreOfBottomBase;
+          auto &axis = geometry.axis;
+          auto &height = geometry.height;
+          auto &radius = geometry.radius;
+
+          auto top =
+              Kernel::toVector3d(base) + (height * Kernel::toVector3d(axis));
+          Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
+          // creat an arbitrary noncollinear vector
+          auto nonCollinear = rotation * Kernel::toVector3d(axis);
+
+          // get vector that is othogonal to the cylinder axis
+          auto orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
+          auto edge = top + (radius * orthogonalV.normalized());
+
+          vertices.push_back(base[0]);
+          vertices.push_back(base[1]);
+          vertices.push_back(base[2]);
+          vertices.push_back(top[0]);
+          vertices.push_back(top[1]);
+          vertices.push_back(top[2]);
+          vertices.push_back(edge[0]);
+          vertices.push_back(edge[1]);
+          vertices.push_back(edge[2]);
+
+          nCylinders++;
+        }
       }
     }
-    writePixelShape(pixelShapeGroup, cylinderIndices, vertexCoordinates);
+    if (nCylinders != 0)
+      writePixelShape(pixelShapeGroup, nCylinders, vertices);
   } else {
     // implicitly, if neither shapesAreValidAndHomogeneous nor
     // shapesExistAndAreInhomogeneous are true. then there can be no valid

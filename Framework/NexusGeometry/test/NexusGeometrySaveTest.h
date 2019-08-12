@@ -20,6 +20,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "NexusFileReader.h"
 
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -1112,7 +1113,18 @@ Instrument cache.
                      H5::GroupIException &)
   }
 
-  void test_cylindrical_instrument() {
+  void test_homogeneous_cylindrical_instrument_vertices_written_to_file() {
+
+    /*
+     test scenario: A test instrument with cylindrical homogeneous pixel shapes
+     is passed into SaveInstrument to be saved. Written to file are the three
+     coordinates of the vertices which describe the cylinder: the centre of the
+     base along the cylinder axis, the centre of the top face along the cylinder
+     axis, and the edge of the cylinder from the top face that is orthogonal to
+     the axis. The hieght, radius and base centre are known upon creation of the
+     test instrument. This test will verify that the vertex coordinates in file
+     are concurrent with the known height, radius, and base position."
+    */
 
     // create RAII file resource for testing
     ScopedFileHandle fileResource("test_cylindrical.hdf5");
@@ -1124,8 +1136,31 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
         *cylindricalInstrument);
 
+    double cylinderHeight = 0.50;
+    double cylinderRadius = 0.25;
+
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
+    FullNXPath path{DEFAULT_ROOT_PATH, "instrument_with_tubes", "sixteenpack",
+                    PIXEL_SHAPE};
+
+    NexusFileReader tester(destinationFile);
+    double buffer[3][3];
+    tester.readDataSet3x3d(buffer, path, VERTICES);
+
+    Eigen::Vector3d base{buffer[0][0], buffer[0][1], buffer[0][2]};
+    Eigen::Vector3d top{buffer[1][0], buffer[1][1], buffer[1][2]};
+    Eigen::Vector3d edge{buffer[2][0], buffer[2][1], buffer[2][2]};
+
+    double radiusInFile = std::abs((top - edge).norm());
+    double heightInFile = std::abs((base - top).norm());
+
+    TS_ASSERT(std::abs(radiusInFile - cylinderRadius) <
+              1e5); // radii are approx equal
+    TS_ASSERT(std::abs(heightInFile - cylinderHeight) <
+              1e5); // heights are approx equal
+    TS_ASSERT(base.isApprox(
+        Eigen::Vector3d{0, 0, 0})); // base positions are approx equal
   }
 };
 
