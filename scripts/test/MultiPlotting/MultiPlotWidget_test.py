@@ -56,10 +56,10 @@ class MultiPlotWidgetTest(unittest.TestCase):
     def test_plot(self):
         with mock.patch("MultiPlotting.subplot.subplot.subplot.plot") as patch:
             ws = mock.MagicMock()
-            subplotName = "test"
-            specNum = 4
-            self.widget.plot(subplotName, ws, specNum)
-            patch.assert_called_with(subplotName, ws, specNum=specNum)
+            subplot_name = "test"
+            spec_num = 4
+            self.widget.plot(subplot_name, ws, color='C0', spec_num=spec_num)
+            patch.assert_called_with(subplot_name, ws, color='C0', spec_num=spec_num)
             self.assertEqual(patch.call_count, 1)
 
     def test_set_all_values(self):

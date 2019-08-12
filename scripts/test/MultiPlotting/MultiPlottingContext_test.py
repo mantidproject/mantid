@@ -30,29 +30,29 @@ class MultiPlottingContextTest(unittest.TestCase):
         self.context = PlottingContext()
 
     def test_add_line_1(self):
-        specNum = 4
+        spec_num = 4
         ws = mock.MagicMock()
         # add mock subplot
         subplot = mock.MagicMock()
         self.subplot = mock.create_autospec(subplotContext)
         with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
-            self.context.addLine("one", ws, specNum)
+            self.context.addLine("one", ws, spec_num, 'C0')
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(ws, specNum)
+            patch.assert_called_with(ws, spec_num, color='C0')
 
     def test_add_line_2(self):
-        specNum = 4
-        mockWS = mock.MagicMock()
-        ws = gen_ws(mockWS)
+        spec_num = 4
+        mock_ws = mock.MagicMock()
+        ws = gen_ws(mock_ws)
         # add mock subplot
         subplot = mock.MagicMock()
         self.subplot = mock.create_autospec(subplotContext)
         with mock.patch("MultiPlotting.subplot.subplot_context.subplotContext.addLine") as patch:
             self.context.addSubplot("one", subplot)
-            self.context.addLine("one", ws, specNum)
+            self.context.addLine("one", ws, spec_num, 'C0')
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(mockWS, specNum)
+            patch.assert_called_with(mock_ws, spec_num, color='C0')
 
     def test_update_layout(self):
         # add mocks
@@ -91,7 +91,7 @@ class MultiPlottingContextTest(unittest.TestCase):
             for name in names:
                 self.context.addSubplot(name, mock.Mock())
                 for k in range(0, no_lines):
-                    self.context.addLine(name, ws, 1)
+                    self.context.addLine(name, ws, 1, 'C0')
                 no_lines += 1
 
         for name in names:

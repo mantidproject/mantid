@@ -27,7 +27,7 @@ class PlottingContext(object):
     def addSubplot(self, name, subplot):
         self.subplots[name] = subplotContext(name, subplot)
 
-    def addLine(self, subplotName, workspace, specNum):
+    def addLine(self, subplot_name, workspace, spec_num, color):
         try:
             ws = None
             if isinstance(workspace, str):
@@ -38,7 +38,7 @@ class PlottingContext(object):
                 ws = workspace
 
             if ws is not None:
-                self.subplots[subplotName].addLine(ws, specNum)
+                self.subplots[subplot_name].addLine(ws, spec_num, color=color)
         except:
             return
 

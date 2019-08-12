@@ -299,11 +299,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for ws in mantid.mtd[name]:
             ws.setYUnit('Counts')
             if self.lines.total.isChecked() and 'Total' in ws.getName():
-                self.plotting.plot(detector, ws.getName())
+                self.plotting.plot(detector, ws.getName(), color='C0')
             if self.lines.prompt.isChecked() and 'Prompt' in ws.getName():
-                self.plotting.plot(detector, ws.getName())
+                self.plotting.plot(detector, ws.getName(), color='C1')
             if self.lines.delayed.isChecked() and 'Delayed' in ws.getName():
-                self.plotting.plot(detector, ws.getName())
+                self.plotting.plot(detector, ws.getName(), color='C2')
         # add current selection of lines
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
@@ -457,15 +457,19 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             return
 
         # Plot the correct line type on all open subplots
+        color = 'C3'
+        if _type == 'Total':
+            color = 'C0'
+        elif _type == 'Prompt':
+            color = 'C1'
+        elif _type == 'Delayed':
+            color = 'C2'
         for subplot in self.plotting.get_subplots():
             for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
                 if _type in ws.getName():
-                    self.plotting.plot(subplot, ws.getName())
+                    self.plotting.plot(subplot, ws.getName(), color=color)
 
     def remove_line_type(self, run, _type):
-        # If no line type is selected do not allow plotting
-        self.uncheck_detectors_if_no_line_plotted()
-
         if self.plot_window is None:
             return
 
@@ -474,6 +478,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
                 if _type in ws.getName():
                     self.plotting.remove_line(subplot, ws.getName())
+
+        # If no line type is selected do not allow plotting
+        self.uncheck_detectors_if_no_line_plotted()
 
     def uncheck_detectors_if_no_line_plotted(self):
         if not any([
