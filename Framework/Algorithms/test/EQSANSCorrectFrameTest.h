@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -31,7 +32,7 @@ public:
   // constructor
   EQSANSCorrectFrameTest()
       : m_pulseWidth(1.E6 / 60), m_frameWidth(2.E6 / 60), m_minTOF(4.1E6 / 60),
-        m_frameSkipping(true), m_bankSize(2) {
+        m_frameSkipping(true), m_bankSize(2){
 
     // bank contains m_bankSize^2 pixels
     const int numBanks = 1;
@@ -57,6 +58,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+
   void testExec() {
     Mantid::Algorithms::EQSANSCorrectFrame alg;
     alg.initialize();
@@ -64,38 +66,23 @@ public:
     alg.setProperty("MinTOF", m_minTOF);
     alg.setProperty("FrameWidth", m_frameWidth);
     alg.setProperty("FrameSkipping", m_frameSkipping);
+    alg.setProperty("DetectorName", "bank1");
+    const double pulseWidth(m_pulseWidth);
+    const int numPixels(m_bankSize * m_bankSize);
 
     // Path to center of detector
-    alg.setProperty("PathToPixel", false);
-    alg.execute();
-
-    std::vector<double> tofs = {7.05, 4.15, 5.05, 6.15};
-    const double pulseWidth(m_pulseWidth);
-    std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                   [&pulseWidth](double tof) { return tof * pulseWidth; });
-    const int numPixels(m_bankSize * m_bankSize);
-    for (int i = 0; i < numPixels; i++) {
-      std::vector<TofEvent> &events = m_ews->getSpectrum(i).getEvents();
-      TS_ASSERT_EQUALS(events.size(), 1);
-      TS_ASSERT_DELTA(events[0].tof(), tofs[i], 1.0E-03 * m_pulseWidth);
-    }
-
-
-    // Path to each pixel
     alg.setProperty("PathToPixel", true);
     alg.execute();
     std::vector<double> tofs = {7.05, 4.15, 5.05, 6.15};
-    const double pulseWidth(m_pulseWidth);
     std::transform(tofs.begin(), tofs.end(), tofs.begin(),
-                  [&pulseWidth](double tof) { return tof * pulseWidth; });
-    const int numPixels(m_bankSize *m_bankSize);
+                   [&pulseWidth](double tof) { return tof * pulseWidth; });
     for (int i = 0; i < numPixels; i++) {
       std::vector<TofEvent> &events = m_ews->getSpectrum(i).getEvents();
       TS_ASSERT_EQUALS(events.size(), 1);
       TS_ASSERT_DELTA(events[0].tof(), tofs[i], 1.0E-03 * m_pulseWidth);
+      std::cerr << events[0].tof() << " - " << tofs[i] << std::endl;
     }
   }
-}
 
 private : EventWorkspace_sptr m_ews;
 double m_pulseWidth;

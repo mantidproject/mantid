@@ -15,6 +15,7 @@
 
 #include <functional>
 #include <vector>
+#include <string>
 
 namespace Mantid {
 namespace Algorithms {
@@ -52,6 +53,7 @@ void EQSANSCorrectFrame::init() {
                   "If True, use path from moderator to individual pixel instead"
                   "of to center of the detector panel",
                   Direction::Input);
+  declareProperty("DetectorName", "detector1", "Name of the double panel");
 }
 
 void EQSANSCorrectFrame::exec() {
@@ -64,15 +66,15 @@ void EQSANSCorrectFrame::exec() {
   const double frameWidth = getProperty("FrameWidth");
   const bool isFrameSkipping = getProperty("FrameSkipping");
   const bool pathToPixel = getProperty("PathToPixel");
-  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const std::string detectorName = getProperty("DetectorName");
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   auto ins = inputWS->getInstrument();
   auto sam = ins->getSample();
   auto mod = ins->getSource();
   const auto msd = mod->getDistance(*sam);
-  const auto det = ins->getComponentByName("detector1");
+  const auto det = ins->getComponentByName(detectorName);
   const auto mdd = mod->getDistance(*det);
-
   // Creates a function that correct TOF values
   struct correctTofFactory {
 
