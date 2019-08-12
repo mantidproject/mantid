@@ -210,7 +210,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             except:
                 continue
 
-        if not self.element_lines[element]:
+        if element in self.element_lines and not self.element_lines[element]:
             del self.element_lines[element]
 
     # loading
