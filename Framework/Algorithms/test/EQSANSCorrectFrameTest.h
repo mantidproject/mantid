@@ -32,7 +32,7 @@ public:
   // constructor
   EQSANSCorrectFrameTest()
       : m_pulseWidth(1.E6 / 60), m_frameWidth(2.E6 / 60), m_minTOF(4.1E6 / 60),
-        m_frameSkipping(true), m_bankSize(2){
+        m_frameSkipping(true), m_bankSize(2) {
 
     // bank contains m_bankSize^2 pixels
     const int numBanks = 1;
@@ -57,7 +57,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
-
 
   void testExec() {
     Mantid::Algorithms::EQSANSCorrectFrame alg;
@@ -84,14 +83,14 @@ public:
     }
   }
 
-private : EventWorkspace_sptr m_ews;
-double m_pulseWidth;
-double m_frameWidth;
-double m_minTOF;
-bool m_frameSkipping;
-int m_bankSize;
-void cleanup() { return; }
-}
-;
+private:
+  EventWorkspace_sptr m_ews;
+  double m_pulseWidth;
+  double m_frameWidth;
+  double m_minTOF;
+  bool m_frameSkipping;
+  int m_bankSize;
+  void cleanup() { return; }
+};
 
 #endif // MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_

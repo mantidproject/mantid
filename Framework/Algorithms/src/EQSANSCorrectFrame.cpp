@@ -14,8 +14,8 @@
 #include "MantidKernel/EmptyValues.h"
 
 #include <functional>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
