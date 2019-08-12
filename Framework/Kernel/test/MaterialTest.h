@@ -85,6 +85,8 @@ public:
     TS_ASSERT_DELTA(material.incohScatterXSection(lambda),
                     material.incohScatterXSection(), 1e-04);
     TS_ASSERT_DELTA(material.absorbXSection(lambda), 5.93, 1e-02);
+    const double distance(0.05);
+    TS_ASSERT_DELTA(material.attenuation(distance, lambda), 0.01884, 1e-4);
   }
 
   // highly absorbing material
@@ -124,6 +126,8 @@ public:
 
     const double totXS = TiZr.totalScatterXSection();
     TS_ASSERT_DELTA(TiZr.totalScatterLengthSqrd(), 25. * totXS / M_PI, 1.e-4);
+    const double distance(0.05);
+    TS_ASSERT_DELTA(TiZr.attenuation(distance), 0., 1e-4);
   }
 
   /** Save then re-load from a NXS file */

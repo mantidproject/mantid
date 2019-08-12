@@ -243,11 +243,21 @@ double Material::absorbXSection(const double lambda) const {
   }
 }
 
+/**
+ * @param distance Distance (m) travelled
+ * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
+ * reference lambda)
+ * @return The dimensionless attenuation coefficient
+ */
+double Material::attenuation(const double distance, const double lambda) const {
+  return exp(-100 * numberDensity() *
+             (totalScatterXSection() + absorbXSection(lambda)) * distance);
+}
+
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
 // will cancel for mu to give units: cm^-1
 double Material::linearAbsorpCoef(const double lambda) const {
-  return absorbXSection(NeutronAtom::ReferenceLambda) * 100. * numberDensity() *
-         lambda / NeutronAtom::ReferenceLambda;
+  return absorbXSection(lambda) * 100. * numberDensity();
 }
 
 // This must match the values that come from the scalar version

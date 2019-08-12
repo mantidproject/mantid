@@ -103,6 +103,10 @@ public:
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Compute the attenuation at a given wavelegnth over the given distance
+  double attenuation(const double distance,
+                     const double lambda =
+                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
   /**
    * Returns the linear coefficient of absorption for the material in units of
