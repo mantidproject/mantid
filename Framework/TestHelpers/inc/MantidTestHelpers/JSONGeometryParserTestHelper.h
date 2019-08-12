@@ -7,6 +7,12 @@
 #ifndef MANTID_TESTHELPERS_JSONGEOMETRYPARSERTESTHELPER_H_
 #define MANTID_TESTHELPERS_JSONGEOMETRYPARSERTESTHELPER_H_
 
+#ifdef _MSC_VER
+// JSON: non-DLL-interface classkey 'identifier' used as base for
+// DLL-interface classkey 'identifier'
+#pragma warning(disable : 4275)
+#endif
+
 #include <string>
 #include <vector>
 
