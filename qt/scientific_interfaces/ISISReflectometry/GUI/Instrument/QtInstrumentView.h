@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_
-#define MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTINSTRUMENTVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTINSTRUMENTVIEW_H_
 
 #include "Common/DllConfig.h"
 #include "IInstrumentView.h"
@@ -17,15 +17,15 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** InstrumentView : Provides an interface for the "Instrument" tab in the
+/** QtInstrumentView : Provides an interface for the "Instrument" tab in the
 ISIS Reflectometry interface.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentView : public QWidget,
-                                                      public IInstrumentView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtInstrumentView : public QWidget,
+                                                        public IInstrumentView {
   Q_OBJECT
 public:
-  InstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
-                 QWidget *parent = nullptr);
+  QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+                   QWidget *parent = nullptr);
   void subscribe(InstrumentViewSubscriber *notifyee) override;
   void connectInstrumentSettingsWidgets() override;
   void disconnectInstrumentSettingsWidgets() override;
@@ -114,4 +114,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTINSTRUMENTVIEW_H_ */

@@ -499,6 +499,9 @@ class PeakMarker(QObject):
             self.left_width.mouse_move_start(x, y)
             self.right_width.mouse_move_start(x, y)
 
+        if self.centre_marker.is_moving or self.left_width.is_moving or self.right_width.is_moving:
+            QApplication.setOverrideCursor(Qt.SizeHorCursor)
+
     def mouse_move_stop(self):
         """
         Stop moving.
@@ -510,6 +513,7 @@ class PeakMarker(QObject):
             self.left_width.mouse_move_stop()
             self.right_width.mouse_move_stop()
         self.centre_marker.mouse_move_stop()
+        QApplication.restoreOverrideCursor()
 
     def mouse_move(self, x, y):
         """
@@ -695,6 +699,20 @@ class SingleMarker(QObject):
         if self.upper_bound < self.get_position():
             self.set_position(maximum)
 
+    def get_lower_bound(self):
+        """
+        Gets the minimum bound for the marker.
+        :return: The minimum bound for the marker.
+        """
+        return self.lower_bound
+
+    def get_upper_bound(self):
+        """
+        Gets the maximum bound for the marker.
+        :return: The maximum bound for the marker.
+        """
+        return self.upper_bound
+
     def is_inside_bounds(self, x, y):
         """
         Determines if the axis coords are within the bounds specified.
@@ -760,6 +778,9 @@ class RangeMarker(QObject):
     A marker used to mark out a vertical or horizontal range using two markers which correspond to a minimum and
     maximum of that range.
     """
+
+    range_changed = Signal(list)
+
     def __init__(self, canvas, color, minimum, maximum, range_type='XMinMax', line_style='-'):
         """
         Init the marker.
@@ -806,6 +827,14 @@ class RangeMarker(QObject):
         """
         self.set_lower_bound(minimum)
         self.set_upper_bound(maximum)
+
+    def get_bounds(self):
+        """
+        Gets the bounds within which the range marker is allowed to move. Note that the lower and upper bound for the
+        min and max markers is the same.
+        :return: the bounds within which the range marker is allowed to move.
+        """
+        return sorted([self.min_marker.get_lower_bound(), self.min_marker.get_upper_bound()])
 
     def set_lower_bound(self, minimum):
         """
@@ -886,11 +915,15 @@ class RangeMarker(QObject):
         :param y: An y mouse coordinate.
         :return: True if moved or False if stayed at the old position.
         """
+        moved = False
         if self.min_marker.is_marker_moving():
-            return self.min_marker.mouse_move(x, y)
+            moved = self.min_marker.mouse_move(x, y)
         elif self.max_marker.is_marker_moving():
-            return self.max_marker.mouse_move(x, y)
-        return False
+            moved = self.max_marker.mouse_move(x, y)
+
+        if moved:
+            self.range_changed.emit(self.get_range())
+        return moved
 
     def mouse_move_stop(self):
         """
