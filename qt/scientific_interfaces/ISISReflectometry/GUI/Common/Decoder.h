@@ -11,14 +11,14 @@
 #include "../../Reduction/ReductionJobs.h"
 #include "../../Reduction/ReductionWorkspaces.h"
 #include "../../Reduction/Row.h"
-#include "../Batch/BatchView.h"
-#include "../Experiment/ExperimentView.h"
-#include "../Instrument/InstrumentView.h"
-#include "../MainWindow/MainWindowView.h"
-#include "../Runs/RunsView.h"
+#include "../Batch/QtBatchView.h"
+#include "../Experiment/QtExperimentView.h"
+#include "../Instrument/QtInstrumentView.h"
+#include "../MainWindow/QtMainWindowView.h"
+#include "../Runs/QtRunsView.h"
+#include "../RunsTable/QtRunsTableView.h"
 #include "../RunsTable/RunsTablePresenter.h"
-#include "../RunsTable/RunsTableView.h"
-#include "../Save/SaveView.h"
+#include "../Save/QtSaveView.h"
 
 #include <QMap>
 #include <QString>
@@ -30,17 +30,17 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder {
 public:
-  void decode(const MainWindowView &gui, const QMap<QString, QVariant> &map);
-  void decodeBatch(const BatchView *gui, const MainWindowView &mwv,
+  void decode(const QtMainWindowView &gui, const QMap<QString, QVariant> &map);
+  void decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
                    QMap<QString, QVariant> &map,
                    const BatchPresenter *presenter = nullptr);
   void decodeBatch(const IBatchPresenter *presenter, const IMainWindowView *mwv,
                    QMap<QString, QVariant> &map);
 
 private:
-  BatchPresenter *findBatchPresenter(const BatchView *gui,
-                                     const MainWindowView &mww);
-  void decodeExperiment(const ExperimentView *gui,
+  BatchPresenter *findBatchPresenter(const QtBatchView *gui,
+                                     const QtMainWindowView &mww);
+  void decodeExperiment(const QtExperimentView *gui,
                         const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab,
                               const QMap<QString, QVariant> &map);
@@ -48,12 +48,12 @@ private:
                                  int columnsNum, const QList<QVariant> &list);
   void decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum,
                                   int columnsNum, const QList<QVariant> &list);
-  void decodeInstrument(const InstrumentView *gui,
+  void decodeInstrument(const QtInstrumentView *gui,
                         const QMap<QString, QVariant> &map);
-  void decodeRuns(RunsView *gui, ReductionJobs *redJobs,
+  void decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                   RunsTablePresenter *presenter,
                   const QMap<QString, QVariant> &map);
-  void decodeRunsTable(RunsTableView *gui, ReductionJobs *redJobs,
+  void decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                        RunsTablePresenter *presenter,
                        const QMap<QString, QVariant> &map);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
@@ -68,9 +68,9 @@ private:
   decodeTransmissionRunPair(const QMap<QString, QVariant> &map);
   ReductionWorkspaces
   decodeReductionWorkspace(const QMap<QString, QVariant> &map);
-  void decodeSave(const SaveView *gui, const QMap<QString, QVariant> &map);
-  void decodeEvent(const EventView *gui, const QMap<QString, QVariant> &map);
-  void updateRunsTableViewFromModel(RunsTableView *view,
+  void decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &map);
+  void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
+  void updateRunsTableViewFromModel(QtRunsTableView *view,
                                     const ReductionJobs *model);
   friend class CoderCommonTester;
 };

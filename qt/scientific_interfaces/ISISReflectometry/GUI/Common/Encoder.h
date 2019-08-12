@@ -11,13 +11,13 @@
 #include "../../Reduction/ReductionJobs.h"
 #include "../../Reduction/ReductionWorkspaces.h"
 #include "../../Reduction/Row.h"
-#include "../Batch/BatchView.h"
-#include "../Experiment/ExperimentView.h"
-#include "../Instrument/InstrumentView.h"
-#include "../MainWindow/MainWindowView.h"
-#include "../Runs/RunsView.h"
-#include "../RunsTable/RunsTableView.h"
-#include "../Save/SaveView.h"
+#include "../Batch/QtBatchView.h"
+#include "../Experiment/QtExperimentView.h"
+#include "../Instrument/QtInstrumentView.h"
+#include "../MainWindow/QtMainWindowView.h"
+#include "../Runs/QtRunsView.h"
+#include "../RunsTable/QtRunsTableView.h"
+#include "../Save/QtSaveView.h"
 
 #include <QMap>
 #include <QString>
@@ -29,9 +29,9 @@ namespace CustomInterfaces {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder {
 public:
-  QMap<QString, QVariant> encode(const MainWindowView &gui);
+  QMap<QString, QVariant> encode(const QtMainWindowView &gui);
   QMap<QString, QVariant>
-  encodeBatch(const BatchView *gui, const MainWindowView &mwv,
+  encodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
               bool projectSave = false,
               const BatchPresenter *presenter = nullptr);
   QMap<QString, QVariant> encodeBatch(const IBatchPresenter *presenter,
@@ -39,18 +39,18 @@ public:
                                       bool projectSave = false);
 
 private:
-  BatchPresenter *findBatchPresenter(const BatchView *gui,
-                                     const MainWindowView &mwv);
-  QMap<QString, QVariant> encodeExperiment(const ExperimentView *gui);
+  BatchPresenter *findBatchPresenter(const QtBatchView *gui,
+                                     const QtMainWindowView &mwv);
+  QMap<QString, QVariant> encodeExperiment(const QtExperimentView *gui);
   QMap<QString, QVariant> encodePerAngleDefaults(const QTableWidget *tab);
   QList<QVariant> encodePerAngleDefaultsRow(const QTableWidget *tab,
                                             int rowIndex, int columnsNum);
   QList<QVariant> encodePerAngleDefaultsRows(const QTableWidget *tab,
                                              int rowsNum, int columnsNum);
-  QMap<QString, QVariant> encodeInstrument(const InstrumentView *gui);
-  QMap<QString, QVariant> encodeRuns(const RunsView *gui, bool projectSave,
+  QMap<QString, QVariant> encodeInstrument(const QtInstrumentView *gui);
+  QMap<QString, QVariant> encodeRuns(const QtRunsView *gui, bool projectSave,
                                      const ReductionJobs *redJobs);
-  QMap<QString, QVariant> encodeRunsTable(const RunsTableView *gui,
+  QMap<QString, QVariant> encodeRunsTable(const QtRunsTableView *gui,
                                           bool projectSave,
                                           const ReductionJobs *redJobs);
   QList<QVariant> encodeRunsTableModel(const ReductionJobs *redJobs);
@@ -65,8 +65,8 @@ private:
   QMap<QString, QVariant>
   encodeReductionOptions(const ReductionOptionsMap &rom);
   QMap<QString, QVariant> encodeRow(const MantidQt::CustomInterfaces::Row &row);
-  QMap<QString, QVariant> encodeSave(const SaveView *gui);
-  QMap<QString, QVariant> encodeEvent(const EventView *gui);
+  QMap<QString, QVariant> encodeSave(const QtSaveView *gui);
+  QMap<QString, QVariant> encodeEvent(const QtEventView *gui);
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

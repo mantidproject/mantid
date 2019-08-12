@@ -30,9 +30,9 @@ public:
 
   void test_encodeBatch() {
     CoderCommonTester tester;
-    MantidQt::CustomInterfaces::MainWindowView mwv;
+    MantidQt::CustomInterfaces::QtMainWindowView mwv;
     mwv.initLayout();
-    auto gui = dynamic_cast<BatchView *>(mwv.batches()[0]);
+    auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     MantidQt::CustomInterfaces::Encoder encoder;
     auto map = encoder.encodeBatch(gui, mwv);
 

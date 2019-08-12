@@ -8,15 +8,15 @@
 #ifndef CODER_COMMON_TESTER_H_
 #define CODER_COMMON_TESTER_H_
 
-#include "../../../ISISReflectometry/GUI/Batch/BatchView.h"
+#include "../../../ISISReflectometry/GUI/Batch/QtBatchView.h"
 #include "../../../ISISReflectometry/GUI/Common/Decoder.h"
-#include "../../../ISISReflectometry/GUI/Experiment/ExperimentView.h"
-#include "../../../ISISReflectometry/GUI/Instrument/InstrumentView.h"
-#include "../../../ISISReflectometry/GUI/MainWindow/MainWindowView.h"
-#include "../../../ISISReflectometry/GUI/Runs/RunsView.h"
+#include "../../../ISISReflectometry/GUI/Experiment/QtExperimentView.h"
+#include "../../../ISISReflectometry/GUI/Instrument/QtInstrumentView.h"
+#include "../../../ISISReflectometry/GUI/MainWindow/QtMainWindowView.h"
+#include "../../../ISISReflectometry/GUI/Runs/QtRunsView.h"
+#include "../../../ISISReflectometry/GUI/RunsTable/QtRunsTableView.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
-#include "../../../ISISReflectometry/GUI/RunsTable/RunsTableView.h"
-#include "../../../ISISReflectometry/GUI/Save/SaveView.h"
+#include "../../../ISISReflectometry/GUI/Save/QtSaveView.h"
 #include "../../../ISISReflectometry/Reduction/Group.h"
 #include "../../../ISISReflectometry/Reduction/ReductionJobs.h"
 #include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
@@ -32,7 +32,7 @@ namespace CustomInterfaces {
 
 class CoderCommonTester {
 public:
-  void testBatch(const BatchView *gui, const MainWindowView &mwv,
+  void testBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
                  const QMap<QString, QVariant> &map) {
     Decoder batchFinder;
     auto batchPresenter = batchFinder.findBatchPresenter(gui, mwv);
@@ -52,7 +52,7 @@ public:
   }
 
 private:
-  void testExperiment(const ExperimentView *gui,
+  void testExperiment(const QtExperimentView *gui,
                       const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.analysisModeComboBox->currentIndex(),
                      map[QString("analysisModeComboBox")].toInt())
@@ -107,7 +107,7 @@ private:
     }
   }
 
-  void testInstrument(const InstrumentView *gui,
+  void testInstrument(const QtInstrumentView *gui,
                       const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.intMonCheckBox->isChecked(),
                      map[QString("intMonCheckBox")].toBool())
@@ -131,7 +131,7 @@ private:
                      map[QString("detectorCorrectionTypeComboBox")].toInt())
   }
 
-  void testRuns(const RunsView *gui, const ReductionJobs *redJobs,
+  void testRuns(const QtRunsView *gui, const ReductionJobs *redJobs,
                 const QMap<QString, QVariant> &map) {
     testRunsTable(gui->m_tableView, redJobs, map[QString("runsTable")].toMap());
     TS_ASSERT_EQUALS(gui->m_ui.comboSearchInstrument->currentIndex(),
@@ -140,7 +140,7 @@ private:
                      map[QString("textSearch")].toString())
   }
 
-  void testRunsTable(const RunsTableView *gui, const ReductionJobs *redJobs,
+  void testRunsTable(const QtRunsTableView *gui, const ReductionJobs *redJobs,
                      const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.filterBox->text(),
                      map[QString("filterBox")].toString())
@@ -261,7 +261,7 @@ private:
     TS_ASSERT_EQUALS(rom2, map)
   }
 
-  void testSave(const SaveView *gui, const QMap<QString, QVariant> &map) {
+  void testSave(const QtSaveView *gui, const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.savePathEdit->text(),
                      map[QString("savePathEdit")].toString())
     TS_ASSERT_EQUALS(gui->m_ui.prefixEdit->text(),
@@ -286,7 +286,7 @@ private:
                      map[QString("saveReductionResultsCheckBox")].toBool())
   }
 
-  void testEvent(const EventView *gui, const QMap<QString, QVariant> &map) {
+  void testEvent(const QtEventView *gui, const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(gui->m_ui.disabledSlicingButton->isChecked(),
                      map[QString("disabledSlicingButton")].toBool())
     TS_ASSERT_EQUALS(gui->m_ui.uniformEvenButton->isChecked(),

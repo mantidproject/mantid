@@ -57,9 +57,6 @@ Initialise the Interface
 */
 void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
-  // Until this is implemented we should hide this action
-  m_ui.loadBatch->setEnabled(false);
-  m_ui.loadBatch->setVisible(false);
 
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
@@ -116,11 +113,11 @@ void QtMainWindowView::onNewBatchRequested(bool) {
   m_notifyee->notifyNewBatchRequested();
 }
 
-void MainWindowView::onLoadBatchRequested(bool) {
+void QtMainWindowView::onLoadBatchRequested(bool) {
   m_notifyee->notifyLoadBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
-void MainWindowView::onSaveBatchRequested(bool) {
+void QtMainWindowView::onSaveBatchRequested(bool) {
   m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
@@ -181,12 +178,12 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
   return false;
 }
 
-void MainWindowView::batchProcessingResumed() {
+void QtMainWindowView::batchProcessingResumed() {
   m_ui.saveBatch->setEnabled(false);
   m_ui.loadBatch->setEnabled(false);
 }
 
-void MainWindowView::batchProcessingPaused() {
+void QtMainWindowView::batchProcessingPaused() {
   m_ui.saveBatch->setEnabled(true);
   m_ui.loadBatch->setEnabled(true);
 }

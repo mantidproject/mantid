@@ -72,6 +72,8 @@ public:
         map.insert(it.name(), QVariant());
       else if (it.value().isObject())
         map.insert(it.name(), QVariant(decodeInner(it.value())));
+      else if (it.value().isBool())
+        map.insert(it.name(), QVariant(it.value().toBool()));
     }
     return map;
   }
@@ -90,6 +92,8 @@ public:
         list.append(QVariant(it.value().toNumber()));
       else if (it.value().isString())
         list.append(QVariant(it.value().toString()));
+      else if (it.value().isBool())
+        list.append(QVariant(it.value().toBool()));
       else if (it.value().isNull())
         list.append(QVariant());
       else if (it.value().isObject())

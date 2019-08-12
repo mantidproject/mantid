@@ -10,8 +10,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-BatchPresenter *Encoder::findBatchPresenter(const BatchView *gui,
-                                            const MainWindowView &mwv) {
+BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
+                                            const QtMainWindowView &mwv) {
   for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
     auto presenter = std::dynamic_pointer_cast<BatchPresenter>(ipresenter);
     if (presenter->m_view == gui) {
@@ -21,19 +21,19 @@ BatchPresenter *Encoder::findBatchPresenter(const BatchView *gui,
   return nullptr;
 }
 
-QMap<QString, QVariant> Encoder::encode(const MainWindowView &gui) {
+QMap<QString, QVariant> Encoder::encode(const QtMainWindowView &gui) {
   QMap<QString, QVariant> map;
   QList<QVariant> batches;
   for (const auto &batchView : gui.m_batchViews) {
     batches.append(QVariant(
-        encodeBatch(dynamic_cast<const BatchView *>(batchView), gui, true)));
+        encodeBatch(dynamic_cast<const QtBatchView *>(batchView), gui, true)));
   }
   map.insert(QString("batches"), QVariant(batches));
   return map;
 }
 
-QMap<QString, QVariant> Encoder::encodeBatch(const BatchView *gui,
-                                             const MainWindowView &mwv,
+QMap<QString, QVariant> Encoder::encodeBatch(const QtBatchView *gui,
+                                             const QtMainWindowView &mwv,
                                              bool projectSave,
                                              const BatchPresenter *presenter) {
   auto batchPresenter = presenter;
@@ -68,12 +68,12 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IBatchPresenter *presenter,
                                              const IMainWindowView *mwv,
                                              bool projectSave) {
   auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
-  return encodeBatch(dynamic_cast<BatchView *>(batchPresenter->m_view),
-                     *dynamic_cast<const MainWindowView *>(mwv), projectSave,
+  return encodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
+                     *dynamic_cast<const QtMainWindowView *>(mwv), projectSave,
                      batchPresenter);
 }
 
-QMap<QString, QVariant> Encoder::encodeRuns(const RunsView *gui,
+QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
                                             bool projectSave,
                                             const ReductionJobs *redJobs) {
   QMap<QString, QVariant> map;
@@ -85,7 +85,7 @@ QMap<QString, QVariant> Encoder::encodeRuns(const RunsView *gui,
   return map;
 }
 
-QMap<QString, QVariant> Encoder::encodeRunsTable(const RunsTableView *gui,
+QMap<QString, QVariant> Encoder::encodeRunsTable(const QtRunsTableView *gui,
                                                  bool projectSave,
                                                  const ReductionJobs *redJobs) {
   QMap<QString, QVariant> map;
@@ -220,7 +220,7 @@ Encoder::encodeRow(const MantidQt::CustomInterfaces::Row &row) {
   return map;
 }
 
-QMap<QString, QVariant> Encoder::encodeEvent(const EventView *gui) {
+QMap<QString, QVariant> Encoder::encodeEvent(const QtEventView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("disabledSlicingButton"),
              QVariant(gui->m_ui.disabledSlicingButton->isChecked()));
@@ -248,7 +248,7 @@ QMap<QString, QVariant> Encoder::encodeEvent(const EventView *gui) {
   return map;
 }
 
-QMap<QString, QVariant> Encoder::encodeInstrument(const InstrumentView *gui) {
+QMap<QString, QVariant> Encoder::encodeInstrument(const QtInstrumentView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("intMonCheckBox"),
              QVariant(gui->m_ui.intMonCheckBox->isChecked()));
@@ -272,7 +272,7 @@ QMap<QString, QVariant> Encoder::encodeInstrument(const InstrumentView *gui) {
   return map;
 }
 
-QMap<QString, QVariant> Encoder::encodeExperiment(const ExperimentView *gui) {
+QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("analysisModeComboBox"),
              QVariant(gui->m_ui.analysisModeComboBox->currentIndex()));
@@ -337,7 +337,7 @@ QList<QVariant> Encoder::encodePerAngleDefaultsRow(const QTableWidget *tab,
   return row;
 }
 
-QMap<QString, QVariant> Encoder::encodeSave(const SaveView *gui) {
+QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("savePathEdit"), QVariant(gui->m_ui.savePathEdit->text()));
   map.insert(QString("prefixEdit"), QVariant(gui->m_ui.prefixEdit->text()));

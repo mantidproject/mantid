@@ -53,6 +53,9 @@ public:
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
 
+  void batchProcessingResumed() override;
+  void batchProcessingPaused() override;
+
 public slots:
   void helpPressed();
   void onTabCloseRequested(int tabIndex);

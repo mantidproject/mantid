@@ -9,10 +9,12 @@
 #include "Encoder.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
+#include <QApplication>
+
 namespace MantidQt {
 namespace CustomInterfaces {
-BatchPresenter *Decoder::findBatchPresenter(const BatchView *gui,
-                                            const MainWindowView &mwv) {
+BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
+                                            const QtMainWindowView &mwv) {
   for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
     auto presenter = std::dynamic_pointer_cast<BatchPresenter>(ipresenter);
     if (presenter->m_view == gui) {
@@ -22,13 +24,13 @@ BatchPresenter *Decoder::findBatchPresenter(const BatchView *gui,
   return nullptr;
 }
 
-void Decoder::decode(const MainWindowView &gui,
+void Decoder::decode(const QtMainWindowView &gui,
                      const QMap<QString, QVariant> &map) {
   UNUSED_ARG(gui);
   UNUSED_ARG(map);
 }
 
-void Decoder::decodeBatch(const BatchView *gui, const MainWindowView &mwv,
+void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
                           QMap<QString, QVariant> &map,
                           const BatchPresenter *presenter) {
   auto batchPresenter = presenter;
@@ -58,11 +60,12 @@ void Decoder::decodeBatch(const IBatchPresenter *presenter,
                           const IMainWindowView *mwv,
                           QMap<QString, QVariant> &map) {
   auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
-  decodeBatch(dynamic_cast<BatchView *>(batchPresenter->m_view),
-              *dynamic_cast<const MainWindowView *>(mwv), map, batchPresenter);
+  decodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
+              *dynamic_cast<const QtMainWindowView *>(mwv), map,
+              batchPresenter);
 }
 
-void Decoder::decodeExperiment(const ExperimentView *gui,
+void Decoder::decodeExperiment(const QtExperimentView *gui,
                                const QMap<QString, QVariant> &map) {
   gui->m_ui.analysisModeComboBox->setCurrentIndex(
       map[QString("analysisModeComboBox")].toInt());
@@ -123,7 +126,7 @@ void Decoder::decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex,
   }
 }
 
-void Decoder::decodeInstrument(const InstrumentView *gui,
+void Decoder::decodeInstrument(const QtInstrumentView *gui,
                                const QMap<QString, QVariant> &map) {
   gui->m_ui.intMonCheckBox->setChecked(map[QString("intMonCheckBox")].toBool());
   gui->m_ui.monIntMinEdit->setValue(map[QString("monIntMinEdit")].toDouble());
@@ -140,7 +143,7 @@ void Decoder::decodeInstrument(const InstrumentView *gui,
       map[QString("detectorCorrectionTypeComboBox")].toInt());
 }
 
-void Decoder::decodeRuns(RunsView *gui, ReductionJobs *redJobs,
+void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                          RunsTablePresenter *presenter,
                          const QMap<QString, QVariant> &map) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter,
@@ -169,7 +172,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
 }
 } // namespace HIDDEN_LOCAL
 
-void Decoder::updateRunsTableViewFromModel(RunsTableView *view,
+void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view,
                                            const ReductionJobs *model) {
   auto jobTreeView = view->m_jobs.get();
   auto groups = model->groups();
@@ -196,7 +199,7 @@ void Decoder::updateRunsTableViewFromModel(RunsTableView *view,
   }
 }
 
-void Decoder::decodeRunsTable(RunsTableView *gui, ReductionJobs *redJobs,
+void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                               RunsTablePresenter *presenter,
                               const QMap<QString, QVariant> &map) {
   MantidQt::API::SignalBlocker signalBlockerView(gui);
@@ -339,7 +342,7 @@ Decoder::decodeReductionWorkspace(const QMap<QString, QVariant> &map) {
   return redWs;
 }
 
-void Decoder::decodeSave(const SaveView *gui,
+void Decoder::decodeSave(const QtSaveView *gui,
                          const QMap<QString, QVariant> &map) {
   gui->m_ui.savePathEdit->setText(map[QString("savePathEdit")].toString());
   gui->m_ui.prefixEdit->setText(map[QString("prefixEdit")].toString());
@@ -359,7 +362,7 @@ void Decoder::decodeSave(const SaveView *gui,
       map[QString("saveReductionResultsCheckBox")].toBool());
 }
 
-void Decoder::decodeEvent(const EventView *gui,
+void Decoder::decodeEvent(const QtEventView *gui,
                           const QMap<QString, QVariant> &map) {
   gui->m_ui.disabledSlicingButton->setChecked(
       map[QString("disabledSlicingButton")].toBool());
