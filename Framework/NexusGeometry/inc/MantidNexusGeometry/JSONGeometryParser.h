@@ -9,7 +9,9 @@
 
 // Disable warnings generated from jsoncpp library related to inheriting
 // std::exception
+#ifdef _WIN32
 #pragma warning(disable : 4275)
+#endif
 
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexusGeometry/DllConfig.h"
