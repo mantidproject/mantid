@@ -1,6 +1,7 @@
 # Tests for Muon GUIs
 
 set ( TEST_PY_FILES
+   workspaceNaming_test.py
    FFTModel_test.py
    FFTPresenter_test.py
    fft_presenter_context_interaction_test.py
@@ -13,6 +14,7 @@ set ( TEST_PY_FILES
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
+   home_plot_widget_freq_test.py
    home_plot_widget_model_test.py
    home_runinfo_presenter_test.py
    list_selector/list_selector_view_test.py
@@ -42,6 +44,7 @@ set ( TEST_PY_FILES
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
    muon_context_test.py
+   muon_context_with_frequency_test.py
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py
@@ -88,6 +91,7 @@ set ( TEST_PY_FILES_QT4
    home_grouping_widget_test.py
    home_instrument_widget_test.py
    home_plot_widget_test.py
+   home_plot_widget_freq_test.py
    home_runinfo_presenter_test.py
    list_selector/list_selector_view_test.py
    list_selector/list_selector_presenter_test.py
