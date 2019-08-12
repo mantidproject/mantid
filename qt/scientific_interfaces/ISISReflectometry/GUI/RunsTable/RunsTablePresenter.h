@@ -165,6 +165,7 @@ private:
 
   friend class Encoder;
   friend class Decoder;
+  friend class CoderCommonTester;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

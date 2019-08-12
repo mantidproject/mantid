@@ -107,6 +107,7 @@ private:
 
   friend class Encoder;
   friend class Decoder;
+  friend class CoderCommonTester;
 
 protected:
   std::unique_ptr<IBatchJobRunner> m_jobRunner;

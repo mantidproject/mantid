@@ -63,6 +63,8 @@ public:
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
+  MOCK_METHOD0(notifyProcessingResumed, void());
+  MOCK_METHOD0(notifyProcessingPaused, void());
 
   ~MockMainWindowPresenter() override{};
 };

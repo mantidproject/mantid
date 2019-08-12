@@ -25,10 +25,11 @@ namespace CustomInterfaces {
 MainWindowView is the concrete main window view implementing the
 functionality defined by the interface IMainWindowView
 */
-class MainWindowView : public MantidQt::API::UserSubWindow,
-                       public IMainWindowView,
-                       public IMessageHandler,
-                       public IPythonRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowView
+    : public MantidQt::API::UserSubWindow,
+      public IMainWindowView,
+      public IMessageHandler,
+      public IPythonRunner {
   Q_OBJECT
 public:
   explicit MainWindowView(QWidget *parent = nullptr);
@@ -76,6 +77,9 @@ private:
 
   friend class Encoder;
   friend class Decoder;
+  friend class CoderCommonTester;
+  friend class DecoderTest;
+  friend class EncoderTest;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

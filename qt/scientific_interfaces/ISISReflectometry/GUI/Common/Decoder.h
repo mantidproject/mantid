@@ -28,7 +28,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class Decoder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder {
 public:
   void decode(const MainWindowView &gui, const QMap<QString, QVariant> &map);
   void decodeBatch(const BatchView *gui, const MainWindowView &mwv,
@@ -72,6 +72,7 @@ private:
   void decodeEvent(const EventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(RunsTableView *view,
                                     const ReductionJobs *model);
+  friend class CoderCommonTester;
 };
 
 } // namespace CustomInterfaces

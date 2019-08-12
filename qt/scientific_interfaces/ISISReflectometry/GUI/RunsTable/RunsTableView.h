@@ -80,6 +80,7 @@ private:
 
   friend class Encoder;
   friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 class RunsTableViewFactory {

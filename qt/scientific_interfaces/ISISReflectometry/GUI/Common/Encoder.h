@@ -27,7 +27,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class Encoder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder {
 public:
   QMap<QString, QVariant> encode(const MainWindowView &gui);
   QMap<QString, QVariant>

@@ -128,11 +128,10 @@ void saveJSONToFile(const QString &filename,
 
 QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  JSON JSON;
   QFile jsonFile(filename);
   jsonFile.open(QFile::ReadOnly);
   QString json(jsonFile.readAll());
-  return JSON.decode(json);
+  return loadJSONfromString(json);
 #else
   /* https://stackoverflow.com/questions/19822211/qt-parsing-json-using-qjsondocument-qjsonobject-qjsonarray
    * is the source for a large portion of the source code for the Qt5
@@ -148,9 +147,19 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
   QString json;
   json = text.readAll();
   file.close();
+
+  return loadJSONfromString(json);
+
+#endif
+}
+
+QMap<QString, QVariant> loadJSONfromString(const QString &json) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  JSON JSON;
+  return JSON.decode(json);
+#else
   QByteArray jsonByteArray = json.toLocal8Bit();
 
-  // step 3
   auto jsonDoc = QJsonDocument::fromJson(jsonByteArray);
   if (jsonDoc.isNull()) {
     throw std::runtime_error("Failed to create JSON doc.");
@@ -165,8 +174,8 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
   }
 
   return jsonObj.toVariantMap();
-
 #endif
 }
+
 } // namespace API
 } // namespace MantidQt

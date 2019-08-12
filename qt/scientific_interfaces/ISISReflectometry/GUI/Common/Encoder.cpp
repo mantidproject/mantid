@@ -150,13 +150,13 @@ QMap<QString, QVariant>
 Encoder::encodeTransmissionRunPair(const TransmissionRunPair &transRunPair) {
   QList<QVariant> firstTransRunNums;
   for (const auto firstTransRunNum :
-       transRunPair.m_firstTransmissionRunNumbers) {
+       transRunPair.firstTransmissionRunNumbers()) {
     firstTransRunNums.append(
         QVariant(QString::fromStdString(firstTransRunNum)));
   }
   QList<QVariant> secondTransRunNums;
   for (const auto secondTransRunNum :
-       transRunPair.m_secondTransmissionRunNumbers) {
+       transRunPair.secondTransmissionRunNumbers()) {
     secondTransRunNums.append(
         QVariant(QString::fromStdString(secondTransRunNum)));
   }

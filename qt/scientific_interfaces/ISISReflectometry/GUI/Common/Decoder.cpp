@@ -66,7 +66,7 @@ void Decoder::decodeExperiment(const ExperimentView *gui,
                                const QMap<QString, QVariant> &map) {
   gui->m_ui.analysisModeComboBox->setCurrentIndex(
       map[QString("analysisModeComboBox")].toInt());
-  gui->m_ui.debugCheckBox->setChecked(map[QString("debugCheckBox")].toBool());
+  gui->m_ui.debugCheckBox->setChecked(map[QString("debugCheckbox")].toBool());
   gui->m_ui.summationTypeComboBox->setCurrentIndex(
       map[QString("summationTypeComboBox")].toInt());
   gui->m_ui.reductionTypeComboBox->setCurrentIndex(
@@ -229,8 +229,9 @@ void Decoder::decodeRunsTable(RunsTableView *gui, ReductionJobs *redJobs,
   // Still need to do this for groups
   updateRunsTableViewFromModel(gui, redJobs);
 
-  // Apply styling
   if (projectSave) {
+    // Apply styling and restore completed state for output range values best
+    // way to achieve this is yet to be decided.
   }
 }
 

@@ -23,7 +23,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class BatchView : public QWidget, public IBatchView {
+class MANTIDQT_ISISREFLECTOMETRY_DLL BatchView : public QWidget,
+                                                 public IBatchView {
   Q_OBJECT
 public:
   explicit BatchView(QWidget *parent);
@@ -68,6 +69,7 @@ private:
 
   friend class Encoder;
   friend class Decoder;
+  friend class CoderCommonTester;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
