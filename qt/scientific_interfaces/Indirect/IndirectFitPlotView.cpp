@@ -58,6 +58,11 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
 
 IndirectFitPlotView::~IndirectFitPlotView() {}
 
+void IndirectFitPlotView::watchADS(bool watch) {
+  m_plotForm->ppPlotTop->watchADS(watch);
+  m_plotForm->ppPlotBottom->watchADS(watch);
+}
+
 std::string IndirectFitPlotView::getSpectrumText() const {
   return m_plotForm->cbPlotSpectrum->currentText().toStdString();
 }
@@ -257,8 +262,10 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
 
   connect(backRangeSelector, SIGNAL(valueChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   connect(backRangeSelector, SIGNAL(resetScientificBounds()), this,
           SLOT(setBackgroundBounds()));
+#endif
 }
 
 void IndirectFitPlotView::setBackgroundBounds() {

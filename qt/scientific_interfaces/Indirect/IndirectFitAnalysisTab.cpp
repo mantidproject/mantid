@@ -761,6 +761,7 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   setRunIsRunning(false);
+  m_plotPresenter->watchADS(true);
   m_plotPresenter->setFitSingleSpectrumIsFitting(false);
   enableFitButtons(true);
   enableOutputOptions(!error);
@@ -949,6 +950,7 @@ void IndirectFitAnalysisTab::singleFit() {
 void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
                                        std::size_t spectrum) {
   if (validate()) {
+    m_plotPresenter->watchADS(false);
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
@@ -962,6 +964,7 @@ void IndirectFitAnalysisTab::singleFit(std::size_t dataIndex,
  */
 void IndirectFitAnalysisTab::executeFit() {
   if (validate()) {
+    m_plotPresenter->watchADS(false);
     setRunIsRunning(true);
     enableFitButtons(false);
     enableOutputOptions(false);

@@ -24,6 +24,8 @@ public:
   IndirectFitPlotView(QWidget *parent = nullptr);
   virtual ~IndirectFitPlotView() override;
 
+  void watchADS(bool watch) override;
+
   std::size_t getSelectedSpectrum() const override;
   int getSelectedSpectrumIndex() const override;
   int getSelectedDataIndex() const override;

@@ -24,6 +24,8 @@ public:
   IIndirectFitPlotView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
   virtual ~IIndirectFitPlotView(){};
 
+  virtual void watchADS(bool watch) = 0;
+
   virtual std::size_t getSelectedSpectrum() const = 0;
   virtual int getSelectedSpectrumIndex() const = 0;
   virtual int getSelectedDataIndex() const = 0;

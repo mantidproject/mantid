@@ -27,6 +27,8 @@ public:
                            IIndirectFitPlotView *view,
                            IPyRunner *pythonRunner = nullptr);
 
+  void watchADS(bool watch);
+
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;
   int getSelectedSpectrumIndex() const;

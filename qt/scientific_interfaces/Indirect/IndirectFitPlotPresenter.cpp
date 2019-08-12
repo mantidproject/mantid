@@ -95,6 +95,8 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
   updateAvailableSpectra();
 }
 
+void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
+
 std::size_t IndirectFitPlotPresenter::getSelectedDataIndex() const {
   return m_model->getActiveDataIndex();
 }
