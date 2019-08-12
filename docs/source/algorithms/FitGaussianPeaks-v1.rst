@@ -93,11 +93,11 @@ Cost functions
 
     peak1 = parameters.row(0)
     peak2 = parameters.row(1)
-    print('Peak 1: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
+    print('Peak 1: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.1f}'
           .format(peak1['centre'], peak1['error centre'],
                   peak1['height'], peak1['error height'],
                   peak1['sigma'], peak1['error sigma']))
-    print('Peak 2: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.2f}'
+    print('Peak 2: centre={:.2f}+/-{:.2f}, height={:.2f}+/-{:.2f}, sigma={:.2f}+/-{:.1f}'
           .format(peak2['centre'], peak2['error centre'],
                   peak2['height'], peak2['error height'],
                   peak2['sigma'], peak2['error sigma']))
@@ -108,8 +108,8 @@ Output (the number on your machine may differ slightly from these:
 
 .. testoutput:: SimpleGaussianFit
 
-    Peak 1: centre=25.00+/-0.11, height=35.00+/-0.47, sigma=10.00+/-0.08
-    Peak 2: centre=75.00+/-0.10, height=20.00+/-0.49, sigma=5.00+/-0.07
+    Peak 1: centre=25.00+/-0.11, height=35.00+/-0.47, sigma=10.00+/-0.1
+    Peak 2: centre=75.00+/-0.10, height=20.00+/-0.49, sigma=5.00+/-0.1
     Chi2 cost: 0.000
     Poisson cost: 46444.723
 

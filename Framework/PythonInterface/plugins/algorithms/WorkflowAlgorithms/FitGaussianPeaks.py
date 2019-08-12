@@ -1,27 +1,41 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, DeleteWorkspace, CreateEmptyTableWorkspace, Fit)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, ITableWorkspaceProperty,
+                        Progress)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
+from mantid import mtd
 
 import numpy as np
 import scipy.optimize
 
 
-class FitGaussianPeaks(PythonAlgorithm):
-    cost_function = 'chi2'
-    centre_tolerance = 1.0
-    estimate_sigma = 3.0
-    min_sigma = 0.0
-    max_sigma = 30.0
-    general_tolerance = 0.1
-    refit_tolerance = 0.001
+class FitGaussianPeaks(DataProcessorAlgorithm):
+    _centre_tolerance = 1.0
+    _estimate_sigma = 3.0
+    _min_sigma = 0.0
+    _max_sigma = 30.0
+    _general_tolerance = 0.1
+    _refit_tolerance = 0.001
 
     def category(self):
-        return 'Muon'
+        return 'Optimization\\PeakFinding'
 
     def summary(self):
         return 'Fits a list of gaussian peaks returning the parameters and the value of a cost function.'
+
+    def seeAlso(self):
+        return ['FindPeakAutomatic', 'FindPeaks', 'FindPeaksMD', 'FindSXPeaks', 'FitPeak', 'FitPeaks']
+
+    def __init__(self):
+        DataProcessorAlgorithm.__init__(self)
 
     def PyInit(self):
         self.declareProperty(
@@ -75,32 +89,34 @@ class FitGaussianPeaks(PythonAlgorithm):
                                     direction=Direction.Output),
             'Table containing the value of both chi2 and poisson cost functions for the fit')
 
-    def PyExec(self):
-        self.centre_tolerance = self.getProperty('CentreTolerance').value
-        self.estimate_sigma = self.getProperty('EstimatedPeakSigma').value
-        self.min_sigma = self.getProperty('MinPeakSigma').value
-        self.max_sigma = self.getProperty('MaxPeakSigma').value
-        self.general_tolerance = self.getProperty('GeneralFitTolerance').value
-        self.refit_tolerance = self.getProperty('RefitTolerance').value
+    def validateInputs(self):
+        issues = {}
 
-        # Load the data and clean it from NaNs and infinities
-        raw_data_ws = self.getProperty('InputWorkspace').value
-        xvals = raw_data_ws.readX(0).copy()
-        flat_yvals = raw_data_ws.readY(0).copy()
-        baseline = raw_data_ws.readY(1).copy()
-        xvals = xvals[np.isfinite(flat_yvals)]
-        flat_yvals = flat_yvals[np.isfinite(flat_yvals)]
+        self._centre_tolerance = self.getProperty('CentreTolerance').value
+        self._estimate_sigma = self.getProperty('EstimatedPeakSigma').value
+        self._min_sigma = self.getProperty('MinPeakSigma').value
+        self._max_sigma = self.getProperty('MaxPeakSigma').value
+        self._general_tolerance = self.getProperty('GeneralFitTolerance').value
+        self._refit_tolerance = self.getProperty('RefitTolerance').value
+
+        if self._max_sigma < self._min_sigma:
+            issues['MinPeakSigma'] = 'Sigma bounds must be: MinPeakSigma <= MaxPeakSigma'
+            issues['MaxPeakSigma'] = 'Sigma bounds must be: MinPeakSigma <= MaxPeakSigma'
+
+        if self._estimate_sigma < self._min_sigma:
+            issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MinPeakSigma'
+
+        if self._estimate_sigma > self._max_sigma:
+            issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MaxPeakSigma'
+
+        return issues
+
+    def PyExec(self):
+        xvals, flat_yvals, baseline, errors = self._load_data()
 
         # Find the index of the peaks given as input
         # This is necessary as the FindPeakAlgorithm can introduce offset in the data
-        approx_peak_xvals = self.getProperty('PeakGuessTable').value.column(0)[:]
-        peakids = []
-        for peakx in approx_peak_xvals:
-            mask = np.logical_and(peakx - self.centre_tolerance <= xvals,
-                                  peakx + self.centre_tolerance >= xvals)
-            rel_id = np.argmax(flat_yvals[mask])
-            beg_id = np.argwhere(mask)[0, 0]
-            peakids.append(rel_id + beg_id)
+        peakids = self._recentre_peak_position(xvals, flat_yvals)
 
         # Fit all the peaks and find the best parameters
         _, param = self.general_fit(xvals, flat_yvals, peakids)
@@ -115,15 +131,49 @@ class FitGaussianPeaks(PythonAlgorithm):
         self.parse_fit_table(refitted_params, refit_peak_table, False)
 
         # Evaluate the total cost
+        fit_cost = self._evaluate_final_cost(xvals, flat_yvals, baseline, errors, peak_table, refit_peak_table)
+
+        self.setProperty('PeakProperties', peak_table)
+        self.setProperty('RefitPeakProperties', refit_peak_table)
+        self.setProperty('FitCost', fit_cost)
+
+        self.delete_if_present('tmp_fit_ws')
+
+    def _load_data(self):
+        raw_data_ws = self.getProperty('InputWorkspace').value
+        xvals = raw_data_ws.readX(0).copy()
+        flat_yvals = raw_data_ws.readY(0).copy()
+        baseline = raw_data_ws.readY(1).copy()
+        errors = raw_data_ws.readE(0).copy()
+        xvals = xvals[np.isfinite(flat_yvals)]
+        flat_yvals = flat_yvals[np.isfinite(flat_yvals)]
+
+        return xvals, flat_yvals, baseline, errors
+
+    def _recentre_peak_position(self, xvals, flat_yvals):
+        approx_peak_xvals = self.getProperty('PeakGuessTable').value.column(0)[:]
+        peakids = []
+        for peakx in approx_peak_xvals:
+            mask = np.logical_and(peakx - self._centre_tolerance <= xvals,
+                                  peakx + self._centre_tolerance >= xvals)
+            relative_id = np.argmax(flat_yvals[mask])
+            offset_id = np.argwhere(mask)[0, 0]
+            peakids.append(relative_id + offset_id)
+
+        return peakids
+
+    def _evaluate_final_cost(self, xvals, flat_yvals, baseline, errors, peak_table, refit_peak_table):
         chi2 = self.evaluate_cost(xvals,
                                   flat_yvals,
                                   baseline,
+                                  errors,
                                   peak_table,
                                   refit_peak_table,
                                   use_poisson=False)
         poisson = self.evaluate_cost(xvals,
                                      flat_yvals,
                                      baseline,
+                                     errors,
                                      peak_table,
                                      refit_peak_table,
                                      use_poisson=True)
@@ -132,9 +182,12 @@ class FitGaussianPeaks(PythonAlgorithm):
         fit_cost.addColumn(type='float', name='Poisson')
         fit_cost.addRow([chi2, poisson])
 
-        self.setProperty('PeakProperties', peak_table)
-        self.setProperty('RefitPeakProperties', refit_peak_table)
-        self.setProperty('FitCost', fit_cost)
+        return fit_cost
+
+    @staticmethod
+    def delete_if_present(workspace):
+        if workspace in mtd:
+            DeleteWorkspace(workspace)
 
     def parse_fit_table(self, param, data_table, refit=False):
         to_refit = []
@@ -162,13 +215,13 @@ class FitGaussianPeaks(PythonAlgorithm):
 
                 # Area defined by integral of gaussian peak of given height and width
                 area = np.sqrt(2 * np.pi) * sigma['Value'] * height['Value']
-                err_area = np.power(sigma['Error'] / sigma['Value'], 2)
-                err_area += np.power(height['Error'] / height['Value'], 2)
-                err_area = np.sqrt(err_area)
+                error_area = np.power(sigma['Error'] / sigma['Value'], 2)
+                error_area += np.power(height['Error'] / height['Value'], 2)
+                error_area = np.sqrt(error_area)
 
                 data_table.addRow([
                     centre['Value'], centre['Error'], height['Value'], height['Error'],
-                    sigma['Value'], sigma['Error'], area, err_area
+                    sigma['Value'], sigma['Error'], area, error_area
                 ])
 
         return to_refit
@@ -192,8 +245,17 @@ class FitGaussianPeaks(PythonAlgorithm):
 
         return model - yvals
 
-    def function_difference(self, yval1, yval2):
-        return np.sum(np.power(np.abs(yval1 - yval2), 2)) / len(yval1)
+    def function_difference(self, yval1, yval2, errors):
+        bad_idx = np.argwhere(errors <= 0)
+        for idx in bad_idx:
+            if yval1[idx[0]] > 0:
+                errors[idx[0]] = np.sqrt(yval1[idx[0]])
+            elif yval2[idx[0]] > 0:
+                errors[idx[0]] = np.sqrt(yval2[idx[0]])
+            else:
+                errors[idx[0]] = 1.0
+
+        return np.sum(np.power(np.abs(yval1 - yval2) / errors, 2)) / len(yval1)
 
     # Return the log of the product of the single probabilities as given by
     # p_i = exp(-model_i * data_i*ln(model_i))
@@ -207,7 +269,7 @@ class FitGaussianPeaks(PythonAlgorithm):
         y_log = np.log(np.abs(y_fit))
         return np.sum(-y_fit + y_data * y_log)
 
-    def evaluate_cost(self, xvals, yvals, baseline, peak_param, refit_peak_param, use_poisson):
+    def evaluate_cost(self, xvals, yvals, baseline, errors, peak_param, refit_peak_param, use_poisson):
         params = []
         for i in range(peak_param.rowCount()):
             row = peak_param.row(i)
@@ -227,7 +289,7 @@ class FitGaussianPeaks(PythonAlgorithm):
             #   the problem.
             return self.poisson_cost(yvals + baseline, model_yvals + baseline)
         else:
-            return self.function_difference(yvals, model_yvals)
+            return self.function_difference(yvals, model_yvals, errors)
 
     def estimate_single_parameters(self, xvals, yvals, centre, win_size):
         lside = max(0, centre - win_size)
@@ -236,19 +298,14 @@ class FitGaussianPeaks(PythonAlgorithm):
             rside = 5 + lside
         x_range = xvals[lside:rside]
         y_range = yvals[lside:rside]
+        # The function least_squares should not be used as it is not present in scipy < 1.1.0
+        # Using the mantid fitting function will not produce an equally good result here
         p_est = scipy.optimize.leastsq(
             self.gaussian_peak_background,
             x0=np.array([np.average(y_range), 0, xvals[centre], yvals[centre],
-                         self.estimate_sigma]),
+                         self._estimate_sigma]),
             args=(x_range, y_range))[0]
         params = [p_est[2], p_est[0] + p_est[1] * p_est[2] + p_est[3], p_est[4]]
-
-        return params
-
-    def estimate_parameters(self, xvals, yvals, peakids, win_size):
-        params = []
-        for pid in peakids:
-            params += list(self.estimate_single_parameters(xvals, yvals, pid, win_size))
 
         return params
 
@@ -259,15 +316,22 @@ class FitGaussianPeaks(PythonAlgorithm):
         fit_func = ''
         fit_constr = ''
         for i, pid in enumerate(peakids):
-            params = tuple(self.estimate_single_parameters(xvals, yvals, pid, 3))
-            fit_func += 'name=Gaussian,PeakCentre=%f,Height=%f,Sigma=%f;' % params
+            win_size = int(self._estimate_sigma * len(xvals) / (max(xvals) - min(xvals)))
+            if win_size < 2:
+                win_size = 2
+            centre, height, sigma = tuple(self.estimate_single_parameters(xvals, yvals, pid, win_size))
+            if sigma < self._min_sigma:
+                centre = xvals[pid]
+                height = yvals[pid]
+                sigma = self._estimate_sigma
+            fit_func += 'name=Gaussian,PeakCentre={},Height={},Sigma={};'.format(centre, height, sigma)
             fit_constr += '%f<f%d.PeakCentre<%f,%f<f%d.Height<%f,%f<f%d.Sigma<%d,' \
-                          % (xvals[pid] * (1-self.general_tolerance), i, xvals[pid] * (1+self.general_tolerance),
-                             yvals[pid] * (1-self.general_tolerance), i, yvals[pid] * (1+self.general_tolerance),
-                             self.min_sigma, i, self.max_sigma)
+                          % (xvals[pid] * (1 - self._general_tolerance), i, xvals[pid] * (1 + self._general_tolerance),
+                             yvals[pid] * (1 - self._general_tolerance), i, yvals[pid] * (1 + self._general_tolerance),
+                             self._min_sigma, i, self._max_sigma)
 
         if fit_func == '':
-            return yvals, self.function_difference(yvals, np.zeros(len(yvals)))
+            return yvals, self.function_difference(yvals, np.zeros(len(yvals)), np.sqrt(yvals))
 
         if fit_constr.count('PeakCentre') == 1:
             fit_constr = fit_constr.replace('f0.', '')
@@ -295,9 +359,9 @@ class FitGaussianPeaks(PythonAlgorithm):
         for i, (centre, height, width) in enumerate(bad_params):
             fit_func += 'name=Gaussian,PeakCentre=%f,Height=%f,Sigma=%f;' % (centre, height, width)
             fit_constr += '%f<f%d.PeakCentre<%f,%f<f%d.Height<%f,%f<f%d.Sigma<%d,' \
-                          % (centre * (1-self.refit_tolerance), i, centre * (1+self.refit_tolerance),
-                             height * (1-self.refit_tolerance), i, height * (1+self.refit_tolerance),
-                             self.min_sigma, i, self.max_sigma)
+                          % (centre * (1 - self._refit_tolerance), i, centre * (1 + self._refit_tolerance),
+                             height * (1 - self._refit_tolerance), i, height * (1 + self._refit_tolerance),
+                             self._min_sigma, i, self._max_sigma)
 
         if fit_constr.count('PeakCentre') == 1:
             fit_constr = fit_constr.replace('f0.', '')

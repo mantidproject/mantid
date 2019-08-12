@@ -1,35 +1,47 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, RenameWorkspace, DeleteWorkspace,
+                              CreateEmptyTableWorkspace, FitGaussianPeaks)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, Progress)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
+from mantid import mtd
 
 import numpy as np
 import scipy.signal
 
 
-class FindPeakAutomatic(PythonAlgorithm):
-    start_index = 5
-    end_index = 1000
-    acceptance = 0.01
-    bad_peak_to_consider = 50
-    smooth_window = 5
-    use_gaussian_smoothing = False
-    use_mantid_fit = False
-    use_poisson_cost = False
-    fit_to_baseline = False
-    peak_width_estimate = 5
-    min_sigma = 0.0
-    max_sigma = 30.0
+class FindPeakAutomatic(DataProcessorAlgorithm):
+    _acceptance = 0.01
+    _bad_peak_to_consider = 50
+    _smooth_window = 5
+    _use_poisson_cost = False
+    _fit_to_baseline = False
+    _estimate_peak_sigma = 5
+    _min_sigma = 0.0
+    _max_sigma = 30.0
+    _plot_peaks = None
+    _plot_baseline = None
 
     def category(self):
-        return 'Muon'
+        return 'Optimization\\PeakFinding'
 
     def summary(self):
         return 'Locates and estimated parameters for all the peaks in an emission spectra'
 
     def seeAlso(self):
-        return ['FitGaussianPeaks']
+        return [
+            'FitGaussianPeaks', 'FindPeaks', 'FindPeaksMD', 'FindSXPeaks', 'FitPeak', 'FitPeaks'
+        ]
+
+    def __init__(self):
+        DataProcessorAlgorithm.__init__(self)
 
     def PyInit(self):
         # Input workspace
@@ -83,6 +95,8 @@ class FindPeakAutomatic(PythonAlgorithm):
                              validator=FloatBoundedValidator(lower=0.0))
         self.declareProperty('PlotPeaks', False,
                              'Plot the position of the peaks found by the algorithm')
+        self.declareProperty('PlotBaseline', False,
+                             'Plot the baseline as calculated by the algorithm')
 
         # Output table
         self.declareProperty(name='PeakPropertiesTableName',
@@ -95,21 +109,73 @@ class FindPeakAutomatic(PythonAlgorithm):
             'Name of the table containing the properties of the peaks that had to be fitted twice '
             'as the first time the error was unreasonably large')
 
-    def PyExec(self):
-        self.acceptance = self.getProperty('AcceptanceThreshold').value
-        self.smooth_window = self.getProperty('SmoothWindow').value
-        self.bad_peak_to_consider = self.getProperty('BadPeaksToConsider').value
-        self.use_poisson_cost = self.getProperty('UsePoissonCost').value
-        self.fit_to_baseline = self.getProperty('FitToBaseline').value
-        plot_peaks = self.getProperty('PlotPeaks').value
-        self.peak_width_estimate = self.getProperty('EstimatePeakSigma').value
-        self.min_sigma = self.getProperty('MinPeakSigma').value
-        self.max_sigma = self.getProperty('MaxPeakSigma').value
+    def validateInputs(self):
+        issues = {}
 
+        self._acceptance = self.getProperty('AcceptanceThreshold').value
+        self._smooth_window = self.getProperty('SmoothWindow').value
+        self._bad_peak_to_consider = self.getProperty('BadPeaksToConsider').value
+        self._use_poisson_cost = self.getProperty('UsePoissonCost').value
+        self._fit_to_baseline = self.getProperty('FitToBaseline').value
+        self._plot_peaks = self.getProperty('PlotPeaks').value
+        self._plot_baseline = self.getProperty('PlotBaseline').value
+        self._estimate_peak_sigma = self.getProperty('EstimatePeakSigma').value
+        self._min_sigma = self.getProperty('MinPeakSigma').value
+        self._max_sigma = self.getProperty('MaxPeakSigma').value
+
+        if self._max_sigma < self._min_sigma:
+            issues['MinPeakSigma'] = 'Sigma bounds must be: MinPeakSigma <= MaxPeakSigma'
+            issues['MaxPeakSigma'] = 'Sigma bounds must be: MinPeakSigma <= MaxPeakSigma'
+
+        if self._estimate_peak_sigma < self._min_sigma:
+            issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MinPeakSigma'
+
+        if self._estimate_peak_sigma > self._max_sigma:
+            issues['EstimatePeakSigma'] = 'EstimatePeakSigma must be greater than MaxPeakSigma'
+
+        return issues
+
+    def PyExec(self):
+        # Progress reporter for algorithm initialization
+        prog_reporter = Progress(self, start=0.0, end=0.1, nreports=4)
+
+        raw_xvals, raw_yvals, raw_error, raw_data_ws, error_ws = self.load_data(prog_reporter)
+
+        # Convert the data to point data
+        prog_reporter.report('Converting to point data')
+        raw_data_ws = ConvertToPointData(error_ws)
+        raw_xvals = raw_data_ws.readX(0).copy()
+        raw_yvals = raw_data_ws.readY(0).copy()
+
+        raw_xvals, raw_yvals, raw_error = self.crop_data(raw_xvals, raw_yvals, raw_error,
+                                                         prog_reporter)
+
+        # Find the best peaks
+        (peakids, peak_table,
+         refit_peak_table), baseline = self.process(raw_xvals,
+                                                    raw_yvals,
+                                                    raw_error,
+                                                    acceptance=self._acceptance,
+                                                    average_window=self._smooth_window,
+                                                    bad_peak_to_consider=self._bad_peak_to_consider,
+                                                    use_poisson=self._use_poisson_cost,
+                                                    peak_width_estimate=self._estimate_peak_sigma,
+                                                    fit_to_baseline=self._fit_to_baseline,
+                                                    prog_reporter=prog_reporter)
+
+        if self._plot_peaks:
+            self.plot_peaks(raw_xvals, raw_yvals, baseline, peakids)
+
+        self.set_output_properties(raw_data_ws)
+
+        self.delete_temporary_workspaces()
+
+    def load_data(self, prog_reporter):
         # Load the data and clean from Nans
         raw_data_ws = self.getProperty('InputWorkspace').value
         raw_xvals = raw_data_ws.readX(0).copy()
         raw_yvals = raw_data_ws.readY(0).copy()
+        prog_reporter.report('Loaded data')
 
         # If the data does not have errors use poisson statistics create an workspace with added errors
         raw_error = raw_data_ws.readE(0).copy()
@@ -123,40 +189,28 @@ class FindPeakAutomatic(PythonAlgorithm):
         else:
             error_ws = raw_data_ws
 
-        # Convert the data to point data
-        raw_data_ws = ConvertToPointData(error_ws)
-        raw_xvals = raw_data_ws.readX(0).copy()
-        raw_yvals = raw_data_ws.readY(0).copy()
+        return raw_xvals, raw_yvals, raw_error, raw_data_ws, error_ws
 
+    def crop_data(self, raw_xvals, raw_yvals, raw_error, prog_reporter):
         # Crop the data as required by the user
-        self.start_index = min(np.argwhere(raw_xvals > self.getProperty('StartXValue').value))[0]
-        self.end_index = max(np.argwhere(raw_xvals < self.getProperty('EndXValue').value))[0]
-        raw_xvals = raw_xvals[np.isfinite(raw_yvals)][self.start_index:self.end_index]
-        raw_error = raw_error[np.isfinite(raw_yvals)][self.start_index:self.end_index]
-        raw_yvals = raw_yvals[np.isfinite(raw_yvals)][self.start_index:self.end_index]
+        start_index = min(np.argwhere(raw_xvals > self.getProperty('StartXValue').value))[0]
+        end_index = max(np.argwhere(raw_xvals < self.getProperty('EndXValue').value))[0]
+        raw_xvals = raw_xvals[np.isfinite(raw_yvals)][start_index:end_index]
+        raw_error = raw_error[np.isfinite(raw_yvals)][start_index:end_index]
+        raw_yvals = raw_yvals[np.isfinite(raw_yvals)][start_index:end_index]
+        prog_reporter.report('Cropped data')
 
-        # Find the best peaks
-        peakids, peak_table, refit_peak_table = self.process(
-            raw_xvals,
-            raw_yvals,
-            raw_error,
-            acceptance=self.acceptance,
-            average_window=self.smooth_window,
-            bad_peak_to_consider=self.bad_peak_to_consider,
-            use_poisson=self.use_poisson_cost,
-            peak_width_estimate=self.peak_width_estimate,
-            fit_to_baseline=self.fit_to_baseline)
+        return raw_xvals, raw_yvals, raw_error
 
-        # Plot results if required
-        if plot_peaks:
-            import matplotlib.pyplot as plt
-            plt.plot(raw_xvals, raw_yvals)
-            plt.scatter(raw_xvals[peakids], raw_yvals[peakids], marker='x', c='r')
-            plt.show()
+    def plot_peaks(self, raw_xvals, raw_yvals, baseline, peakids):
+        import matplotlib.pyplot as plt
+        plt.plot(raw_xvals, raw_yvals)
+        if self._plot_baseline:
+            plt.plot(raw_xvals, baseline)
+        plt.scatter(raw_xvals[peakids], raw_yvals[peakids], marker='x', c='r')
+        plt.show()
 
-        # Set the output properties
-        peak_table_name = ''
-        refit_peak_table_name = ''
+    def set_output_properties(self, raw_data_ws):
         if self.getPropertyValue('PeakPropertiesTableName') == '':
             peak_table_name = '{}_{}'.format(raw_data_ws.getName(), 'properties')
         else:
@@ -168,7 +222,7 @@ class FindPeakAutomatic(PythonAlgorithm):
         RenameWorkspace('peak_table', peak_table_name)
         RenameWorkspace('refit_peak_table', refit_peak_table_name)
 
-        # Delete temporary workspaces
+    def delete_temporary_workspaces(self):
         self.delete_if_present('ret')
         self.delete_if_present('peak_table')
         self.delete_if_present('refit_peak_table')
@@ -184,84 +238,86 @@ class FindPeakAutomatic(PythonAlgorithm):
         if workspace in mtd:
             DeleteWorkspace(workspace)
 
-    def _single_erosion(self, yvals, centre, half_win):
-        if half_win == 0:
+    def _single_erosion(self, yvals, centre, half_window_size):
+        if half_window_size == 0:
             return yvals[centre]
 
-        left_id = max(0, centre - half_win)
-        right_id = min(len(yvals), centre + half_win + 1)
+        left_id = max(0, centre - half_window_size)
+        right_id = min(len(yvals), centre + half_window_size + 1)
 
         return np.min(yvals[left_id:right_id])
 
-    def _single_dilation(self, yvals, centre, half_win):
-        if half_win == 0:
+    def _single_dilation(self, yvals, centre, half_window_size):
+        if half_window_size == 0:
             return yvals[centre]
 
-        left_id = max(0, centre - half_win)
-        right_id = min(len(yvals), centre + half_win + 1)
+        left_id = max(0, centre - half_window_size)
+        right_id = min(len(yvals), centre + half_window_size + 1)
 
         return np.max(yvals[left_id:right_id])
 
-    def erosion(self, yvals, half_win):
+    def erosion(self, yvals, half_window_size):
         new_yvals = yvals.copy()
         for i in range(len(yvals)):
-            new_yvals[i] = self._single_erosion(yvals, i, half_win)
+            new_yvals[i] = self._single_erosion(yvals, i, half_window_size)
 
         return new_yvals
 
-    def dilation(self, yvals, half_win):
+    def dilation(self, yvals, half_window_size):
         new_yvals = yvals.copy()
         for i in range(len(yvals)):
-            new_yvals[i] = self._single_dilation(yvals, i, half_win)
+            new_yvals[i] = self._single_dilation(yvals, i, half_window_size)
 
         return new_yvals
 
-    def opening(self, yvals, half_win):
-        return self.dilation(self.erosion(yvals, half_win), half_win)
+    def opening(self, yvals, half_window_size):
+        return self.dilation(self.erosion(yvals, half_window_size), half_window_size)
 
-    def average(self, yvals, half_win):
-        ret = self.dilation(self.opening(yvals, half_win), half_win)
-        ret += self.erosion(self.opening(yvals, half_win), half_win)
-        return ret / 2
+    def average(self, yvals, half_window_size):
+        average = self.dilation(self.opening(yvals, half_window_size), half_window_size)
+        average += self.erosion(self.opening(yvals, half_window_size), half_window_size)
+        return average / 2
 
     def generate_peak_guess_table(self, xvals, peakids):
         peak_table = CreateEmptyTableWorkspace()
         peak_table.addColumn(type='float', name='centre')
-        for pid in sorted(peakids):
-            peak_table.addRow([xvals[pid]])
+        for peak_idx in sorted(peakids):
+            peak_table.addRow([xvals[peak_idx]])
 
         return peak_table
 
     def find_good_peaks(self, xvals, peakids, acceptance, bad_peak_to_consider, use_poisson, fit_ws,
                         peak_width_estimate):
+        prog_reporter = Progress(self, start=0.1, end=1.0, nreports=2 + len(peakids))
+
         actual_peaks = []
         skipped = 0
         cost_idx = 1 if use_poisson else 0
-        ret = FitGaussianPeaks(InputWorkspace=fit_ws,
-                               PeakGuessTable=self.generate_peak_guess_table(xvals, []),
-                               CentreTolerance=1.0,
-                               EstimatedPeakSigma=peak_width_estimate,
-                               MinPeakSigma=self.min_sigma,
-                               MaxPeakSigma=self.max_sigma,
-                               GeneralFitTolerance=0.1,
-                               RefitTolerance=0.001)
-        peak_table, refit_peak_table, cost = ret
+        peak_table, refit_peak_table, cost = FitGaussianPeaks(
+            InputWorkspace=fit_ws,
+            PeakGuessTable=self.generate_peak_guess_table(xvals, []),
+            CentreTolerance=1.0,
+            EstimatedPeakSigma=peak_width_estimate,
+            MinPeakSigma=self._min_sigma,
+            MaxPeakSigma=self._max_sigma,
+            GeneralFitTolerance=0.1,
+            RefitTolerance=0.001)
         old_cost = cost.column(cost_idx)[0]
+        prog_reporter.report('Fitting null hypothesis')
 
-        for pid in peakids:
-            ret = FitGaussianPeaks(InputWorkspace=fit_ws,
-                                   PeakGuessTable=self.generate_peak_guess_table(
-                                       xvals, actual_peaks + [pid]),
-                                   CentreTolerance=1.0,
-                                   EstimatedPeakSigma=peak_width_estimate,
-                                   MinPeakSigma=self.min_sigma,
-                                   MaxPeakSigma=self.max_sigma,
-                                   GeneralFitTolerance=0.1,
-                                   RefitTolerance=0.001)
-            peak_table, refit_peak_table, cost = ret
+        for idx, peak_idx in enumerate(peakids):
+            peak_table, refit_peak_table, cost = FitGaussianPeaks(
+                InputWorkspace=fit_ws,
+                PeakGuessTable=self.generate_peak_guess_table(xvals, actual_peaks + [peak_idx]),
+                CentreTolerance=1.0,
+                EstimatedPeakSigma=peak_width_estimate,
+                MinPeakSigma=self._min_sigma,
+                MaxPeakSigma=self._max_sigma,
+                GeneralFitTolerance=0.1,
+                RefitTolerance=0.001)
             new_cost = cost.column(cost_idx)[0]
             if use_poisson:
-                # test if p_new > p_old, but working with logs
+                # if p_new > p_old, but uses logs
                 cost_change = new_cost - old_cost
                 good_peak_condition = cost_change > np.log(acceptance)
             else:
@@ -272,24 +328,27 @@ class FindPeakAutomatic(PythonAlgorithm):
                 break
             if good_peak_condition:
                 skipped = 0
-                actual_peaks.append(pid)
+                actual_peaks.append(peak_idx)
                 old_cost = new_cost
             else:
                 skipped += 1
+            prog_reporter.report('Iteration {}, {} peaks found'.format(idx + 1, len(actual_peaks)))
 
-        ret = FitGaussianPeaks(InputWorkspace=fit_ws,
-                               PeakGuessTable=self.generate_peak_guess_table(xvals, actual_peaks),
-                               CentreTolerance=1.0,
-                               EstimatedPeakSigma=peak_width_estimate,
-                               MinPeakSigma=self.min_sigma,
-                               MaxPeakSigma=self.max_sigma,
-                               GeneralFitTolerance=0.1,
-                               RefitTolerance=0.001)
-        peak_table, refit_peak_table, cost = ret
+        peak_table, refit_peak_table, cost = FitGaussianPeaks(
+            InputWorkspace=fit_ws,
+            PeakGuessTable=self.generate_peak_guess_table(xvals, actual_peaks),
+            CentreTolerance=1.0,
+            EstimatedPeakSigma=peak_width_estimate,
+            MinPeakSigma=self._min_sigma,
+            MaxPeakSigma=self._max_sigma,
+            GeneralFitTolerance=0.1,
+            RefitTolerance=0.001)
+        prog_reporter.report('Fitting done')
         return actual_peaks, peak_table, refit_peak_table
 
     def process(self, raw_xvals, raw_yvals, raw_error, acceptance, average_window,
-                bad_peak_to_consider, use_poisson, peak_width_estimate, fit_to_baseline):
+                bad_peak_to_consider, use_poisson, peak_width_estimate, fit_to_baseline,
+                prog_reporter):
         # Remove background
         rough_base = self.average(raw_yvals, average_window)
         baseline = rough_base + self.average(raw_yvals - rough_base, average_window)
@@ -302,6 +361,7 @@ class FindPeakAutomatic(PythonAlgorithm):
                                   DataY=np.concatenate((flat_yvals, baseline)),
                                   DataE=np.concatenate((raw_error, raw_error)),
                                   NSpec=2)
+        prog_reporter.report('Removed background')
 
         # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt
         # however this will not do an equally good job as it cannot sort by prominence (also added in 1.1.0)
@@ -312,12 +372,12 @@ class FindPeakAutomatic(PythonAlgorithm):
             prominence = params['prominences']
             flat_peaks = sorted(zip(flat_peaks, prominence), key=lambda x: x[1], reverse=True)
             if fit_to_baseline:
-                flat_peaks = [pid for pid, prom in flat_peaks if pid]
+                flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx]
             else:
-                flat_peaks = [pid for pid, prom in flat_peaks if pid in raw_peaks]
+                flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx in raw_peaks]
         else:
             flat_peaks = scipy.signal.find_peaks_cwt(flat_yvals, widths=np.array([0.1]))
-            flat_peaks = sorted(flat_peaks, key=lambda pid: flat_yvals[pid], reverse=True)
+            flat_peaks = sorted(flat_peaks, key=lambda peak_idx: flat_yvals[peak_idx], reverse=True)
 
         return self.find_good_peaks(raw_xvals,
                                     flat_peaks,
@@ -325,7 +385,7 @@ class FindPeakAutomatic(PythonAlgorithm):
                                     bad_peak_to_consider=bad_peak_to_consider,
                                     use_poisson=use_poisson,
                                     fit_ws=flat_ws,
-                                    peak_width_estimate=peak_width_estimate)
+                                    peak_width_estimate=peak_width_estimate), baseline
 
 
 AlgorithmFactory.subscribe(FindPeakAutomatic())
