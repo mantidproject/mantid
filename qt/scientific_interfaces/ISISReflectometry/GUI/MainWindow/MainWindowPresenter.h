@@ -35,6 +35,10 @@ public:
       IMainWindowView *view, IMessageHandler *messageHandler,
       std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
   ~MainWindowPresenter();
+  MainWindowPresenter(MainWindowPresenter const &) = delete;
+  MainWindowPresenter(MainWindowPresenter &&);
+  MainWindowPresenter &operator=(MainWindowPresenter const &) = delete;
+  MainWindowPresenter &operator=(MainWindowPresenter &&);
 
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
