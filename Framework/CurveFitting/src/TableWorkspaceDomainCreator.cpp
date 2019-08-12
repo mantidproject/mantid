@@ -262,7 +262,8 @@ void TableWorkspaceDomainCreator::createDomain(
         size_t k = m + m_maxSize;
         if (k > n)
           k = n;
-        creator->setRange(XData[from + static_cast<double>(m)], XData[from + static_cast<double>(k) - 1.0]);
+        creator->setRange(XData[from + static_cast<double>(m)],
+                          XData[from + static_cast<double>(k) - 1.0]);
         seqDomain->addCreator(API::IDomainCreator_sptr(creator));
         m = k;
       }
