@@ -179,10 +179,10 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view,
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
     // Update view for groups
     auto group = groups[groupIndex];
-    // MantidQt::MantidWidgets::Batch::RowLocation location(
-    //     {static_cast<int>(groupIndex)});
-    // MantidQt::MantidWidgets::Batch::Cell groupCell(group.name());
-    // jobTreeView->setCellAt({location}, 0, groupCell);
+    MantidQt::MantidWidgets::Batch::RowLocation location(
+        {static_cast<int>(groupIndex)});
+    MantidQt::MantidWidgets::Batch::Cell groupCell(group.name());
+    jobTreeView->setCellAt({location}, 0, groupCell);
 
     // Update view for rows
     auto rows = groups[groupIndex].rows();

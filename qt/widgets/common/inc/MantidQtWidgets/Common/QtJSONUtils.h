@@ -25,7 +25,7 @@ QMap<QString, QVariant>
     EXPORT_OPT_MANTIDQT_COMMON loadJSONFromFile(const QString &filename);
 
 QMap<QString, QVariant>
-    EXPORT_OPT_MANTIDQT_COMMON loadJSONfromString(const QString &json);
+    EXPORT_OPT_MANTIDQT_COMMON loadJSONFromString(const QString &json);
 
 } // namespace API
 } // namespace MantidQt

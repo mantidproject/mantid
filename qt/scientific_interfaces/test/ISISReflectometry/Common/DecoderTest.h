@@ -99,7 +99,7 @@ public:
 
   void test_decodeBatch() {
     CoderCommonTester tester;
-    auto map = MantidQt::API::loadJSONfromString(JSON_STRING);
+    auto map = MantidQt::API::loadJSONFromString(JSON_STRING);
     MantidQt::CustomInterfaces::QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);

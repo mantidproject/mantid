@@ -38,6 +38,8 @@ public:
         obj.setProperty(i.key(), i.value().toInt());
       else if (i.value().type() == QVariant::Double)
         obj.setProperty(i.key(), i.value().toDouble());
+      else if (i.value().type() == QVariant::Bool)
+        obj.setProperty(i.key(), i.value().toBool());
       else if (i.value().type() == QVariant::List)
         obj.setProperty(i.key(),
                         qScriptValueFromSequence(engine, i.value().toList()));
@@ -135,7 +137,7 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
   QFile jsonFile(filename);
   jsonFile.open(QFile::ReadOnly);
   QString json(jsonFile.readAll());
-  return loadJSONfromString(json);
+  return loadJSONFromString(json);
 #else
   /* https://stackoverflow.com/questions/19822211/qt-parsing-json-using-qjsondocument-qjsonobject-qjsonarray
    * is the source for a large portion of the source code for the Qt5
@@ -152,12 +154,12 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
   json = text.readAll();
   file.close();
 
-  return loadJSONfromString(json);
+  return loadJSONFromString(json);
 
 #endif
 }
 
-QMap<QString, QVariant> loadJSONfromString(const QString &json) {
+QMap<QString, QVariant> loadJSONFromString(const QString &json) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   JSON JSON;
   return JSON.decode(json);
