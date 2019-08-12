@@ -1,4 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
@@ -207,10 +206,15 @@ inline void writePixelShape(H5::Group &grp, size_t nCylinders,
 }
 
 /*
- * Function: writeXYZPixeloffset
+ * Function: writePixelData
  * write the x, y, and z offset of the pixels from the parent detector bank as
  * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or z
- * are approximately zero, skips writing that dataset to file.
+ * are approximately zero, skips writing that dataset to file. Also write the
+ * pixel shape group to file, if there are valid* shapes.
+ *
+ * *current implementation is that only 'CYLINDER' type shape is considered
+ * 'valid'.
+ *
  * @param grp : HDF5 parent group
  * @param compInfo : Component Info Instrument cache
  * @param idx : index of bank in cache.
@@ -231,7 +235,8 @@ inline void writePixelData(H5::Group &grp,
   if (pixels.empty())
     return;
 
-  bool shapesAreHomogeneous{false};         // all shapes equal
+  bool cylindersExist{false};       // for checking if any cylinder types exist
+  bool shapesAreHomogeneous{false}; // all shapes equal
   bool shapesAreValidAndHomogeneous{false}; // all shapes equal and valid shape
 
   // shape type of the first detector in children detectors
@@ -250,25 +255,25 @@ inline void writePixelData(H5::Group &grp,
         if (auto *meshObject =
                 dynamic_cast<const Geometry::MeshObject *>(&firstShape)) {
           // current implementation only considers solid shapes
-          return false;
+          throw std::runtime_error("MeshObject Type pixel shape is not "
+                                   "implemented for a detector bank");
         }
         if (auto *meshObject2d =
                 dynamic_cast<const Geometry::MeshObject2D *>(&firstShape)) {
           // current implementation only considers solid shapes
-          return false;
+          throw std::runtime_error("MeshObject2D Type pixel shape is not "
+                                   "implemented for a detector bank");
         }
+
         auto shapeInfo = shapeObj.shapeInfo();
         auto type = shapeInfo.shape();
         auto height = shapeInfo.height();
         auto radius = shapeInfo.radius();
-        return (type == fType && height == fHeight && radius == fRadius);
+        // if at least one cylinder is found, change flag to true.
+        if (static_cast<int>(type) == 4 /*CYLINDER*/)
+          cylindersExist = true;
+        return (type == fType && height == fHeight && radius);
       });
-
-  // Implicitly, only if shapesAreHomogenous is true, and first pixel shape
-  // is not type 'NOSHAPE', then shapesAreValidAndHomogeneous is true. Else
-  // false.
-  shapesAreValidAndHomogeneous =
-      (shapesAreHomogeneous && (static_cast<int>(fType) != 0 /*NOSHAPE*/));
 
   std::vector<double> posx;
   std::vector<double> posy;
@@ -278,8 +283,22 @@ inline void writePixelData(H5::Group &grp,
   posy.reserve(nPixels);
   posz.reserve(nPixels);
 
-  // only need to write pixel shape group once in this case
-  if (shapesAreValidAndHomogeneous) {
+  if (!cylindersExist) {
+    // if no cylinders exist do not write pixel shape data
+    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
+         ++it) {
+
+      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
+          compInfo, idx, *it);
+
+      posx.push_back(offset[0]);
+      posy.push_back(offset[1]);
+      posz.push_back(offset[2]);
+    }
+  } else
+      // else, if cylinders exist and shapes are homogenous, write cylinder data
+      // to pixel group only once.
+      if (shapesAreHomogeneous) {
 
     H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
     for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
@@ -293,32 +312,31 @@ inline void writePixelData(H5::Group &grp,
       posz.push_back(offset[2]);
     }
 
-    if (static_cast<int>(fType) == 4 /*CYLINDER*/) {
-      auto geometry = firstShapeInfo.cylinderGeometry();
-      auto &base = geometry.centreOfBottomBase;
-      auto &axis = geometry.axis;
-      auto &height = geometry.height;
-      auto &radius = geometry.radius;
+    auto geometry = firstShapeInfo.cylinderGeometry();
+    auto &base = geometry.centreOfBottomBase;
+    auto &axis = geometry.axis;
+    auto &height = geometry.height;
+    auto &radius = geometry.radius;
 
-      auto top = Kernel::toVector3d(base) + (height * Kernel::toVector3d(axis));
-      Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
-      // creat an arbitrary noncollinear vector
-      auto nonCollinear = rotation * Kernel::toVector3d(axis);
+    auto top = Kernel::toVector3d(base) + (height * Kernel::toVector3d(axis));
+    Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
+    // creat an arbitrary noncollinear vector
+    auto nonCollinear = rotation * Kernel::toVector3d(axis);
 
-      // get vector that is othogonal to the cylinder axis
-      auto orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
-      auto edge = top + (radius * orthogonalV.normalized());
+    // get vector that is othogonal to the cylinder axis
+    auto orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
+    auto edge = top + (radius * orthogonalV.normalized());
 
-      std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
-                                   top[2],  edge[0], edge[1], edge[2]};
-      writePixelShape(pixelShapeGroup, 1, vertices);
-    }
+    std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
+                                 top[2],  edge[0], edge[1], edge[2]};
+    writePixelShape(pixelShapeGroup, 1, vertices);
 
-  } else if (!shapesAreHomogeneous) {
+  } else {
 
-    // Implicitly, if shapesAreHomogeneous is False, there is at least 1 valid
-    // shape (that is not 'NOSHAPE') then shapes exist in pixels.
-    // then iterate through pixels to find those with valid shapes
+    // Implicitly, if shapesAreHomogeneous is false and cylindersExist is true,
+    // there is at least 1 valid* shape (that is 'CYLINDER' under current
+    // implementation). Then iterate through pixels to find those with valid
+    // shapes
 
     // create pixel shape group
     H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
@@ -339,6 +357,7 @@ inline void writePixelData(H5::Group &grp,
       if (compInfo.hasValidShape(*it)) {
         auto pixelShapeInfo = compInfo.shape(*it).shapeInfo();
         auto type = pixelShapeInfo.shape();
+        // only write if shape is cylinder
         if (static_cast<int>(type) == 4 /*CYLINDER*/) {
           auto geometry = pixelShapeInfo.cylinderGeometry();
           auto &base = geometry.centreOfBottomBase;
@@ -372,21 +391,6 @@ inline void writePixelData(H5::Group &grp,
     }
     if (nCylinders != 0)
       writePixelShape(pixelShapeGroup, nCylinders, vertices);
-  } else {
-    // implicitly, if neither shapesAreValidAndHomogeneous nor
-    // shapesExistAndAreInhomogeneous are true. then there can be no valid
-    // shapes in the children detectors. Meaning all shapes are homogeneous and
-    // evaluate to 'NOSHAPE'.In this case, do not write pixel shape to file.
-    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
-         ++it) {
-
-      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
-          compInfo, idx, *it);
-
-      posx.push_back(offset[0]);
-      posy.push_back(offset[1]);
-      posz.push_back(offset[2]);
-    }
   }
 
   // write pixel offset data

@@ -1094,7 +1094,7 @@ Instrument cache.
 
     // path to NXsource group
     FullNXPath sourcePath = transformationsPath;
-    sourcePath.pop_back(); // source path is one level abve transformationsPath
+    sourcePath.pop_back(); // source path is one level above transformationsPath
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1155,10 +1155,10 @@ Instrument cache.
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
 
-    TS_ASSERT(std::abs(radiusInFile - cylinderRadius) <
-              1e5); // radii are approx equal
-    TS_ASSERT(std::abs(heightInFile - cylinderHeight) <
-              1e5); // heights are approx equal
+    TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
+                    1e5); // radii are approx equal
+    TS_ASSERT_DELTA(heightInFile, cylinderHeight,
+                    1e5); // heights are approx equal
     TS_ASSERT(base.isApprox(
         Eigen::Vector3d{0, 0, 0})); // base positions are approx equal
   }
