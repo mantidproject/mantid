@@ -33,11 +33,10 @@ class bounds(object):
 
 
 def data():
-    values = {}
-    values["one"] = bounds([5, 20], [5, 10])
-    values["two"] = bounds([6, 10], [0, 9])
-    values["three"] = bounds([-1, 11], [7, 8])
-    values["four"] = bounds([4, 12], [4, 50])
+    values = {"one": bounds([5, 20], [5, 10]),
+              "two": bounds([6, 10], [0, 9]),
+              "three": bounds([-1, 11], [7, 8]),
+              "four": bounds([4, 12], [4, 50])}
     return values
 
 
@@ -48,8 +47,7 @@ class MultiPlotWidgetTest(unittest.TestCase):
         self.widget = MultiPlotWidget(context)
 
     def test_add_subplot(self):
-        with mock.patch(
-                "MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
+        with mock.patch("MultiPlotting.QuickEdit.quickEdit_widget.QuickEditWidget.add_subplot") as qe_patch:
             self.widget.add_subplot("test")
             self.assertEqual(qe_patch.call_count, 1)
 
