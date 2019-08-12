@@ -61,8 +61,8 @@ constructKwargs(boost::optional<std::vector<int>> spectrumNums,
                 boost::optional<Python::Object> fig,
                 boost::optional<QHash<QString, QVariant>> plotKwargs,
                 boost::optional<QHash<QString, QVariant>> axProperties,
-                boost::optional<std::string> windowTitle, bool errors,
-                bool overplot) {
+                boost::optional<std::string> windowTitle,
+                boost::optional<bool> errors, boost::optional<bool> overplot) {
   // Make sure to decide whether spectrum numbers or workspace indices
   Python::Dict kwargs;
 
@@ -76,8 +76,10 @@ constructKwargs(boost::optional<std::vector<int>> spectrumNums,
         "with the other being boost::none.");
   }
 
-  kwargs["errors"] = errors;
-  kwargs["overplot"] = overplot;
+  if (errors)
+    kwargs["errors"] = errors.get();
+  if (overplot)
+    kwargs["overplot"] = overplot.get();
   if (fig)
     kwargs["fig"] = fig.get();
   if (plotKwargs)
@@ -138,6 +140,27 @@ Python::Object plot(const QStringList &workspaces,
               std::move(wkspIndices), std::move(fig), std::move(plotKwargs),
               std::move(axProperties), std::move(windowTitle), errors,
               overplot);
+}
+
+Python::Object
+plotsubplots(const QStringList &workspaces,
+             boost::optional<std::vector<int>> spectrumNums,
+             boost::optional<std::vector<int>> wkspIndices,
+             boost::optional<Python::Object> fig,
+             boost::optional<QHash<QString, QVariant>> plotKwargs,
+             boost::optional<QHash<QString, QVariant>> axProperties,
+             boost::optional<std::string> windowTitle, bool errors) {
+  GlobalInterpreterLock lock;
+
+  try {
+    const auto args = constructArgs(workspaces);
+    const auto kwargs =
+        constructKwargs(spectrumNums, wkspIndices, fig, plotKwargs,
+                        axProperties, windowTitle, errors, boost::none);
+    return functionsModule().attr("plotsubplots")(*args, **kwargs);
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
 }
 
 Python::Object pcolormesh(const QStringList &workspaces,

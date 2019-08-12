@@ -309,14 +309,19 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
 void IndirectPlotter::plotTiled(std::string const &workspaceName,
                                 std::string const &workspaceIndices) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
+    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+    UNUSED_ARG(errorBars);
     runPythonCode(createPlotTiledString(
         workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
-    UNUSED_ARG(workspaceName);
-    UNUSED_ARG(workspaceIndices);
-    std::runtime_error(
-        "Tiled plotting for the Workbench has not been implemented.");
+    QHash<QString, QVariant> plotKwargs;
+    if (errorBars)
+      plotKwargs["capsize"] = 3;
+    plotsubplots(QStringList(QString::fromStdString(workspaceName)),
+                 boost::none, createIndicesVector<int>(workspaceIndices),
+                 boost::none, plotKwargs, boost::none,
+                 "Tiled Plot: " + workspaceName, errorBars);
 #endif
   }
 }

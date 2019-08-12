@@ -261,6 +261,77 @@ def use_imshow(ws):
 
 
 @manage_workspace_names
+def plotsubplots(workspaces, spectrum_nums=None, wksp_indices=None, errors=False, fig=None,
+                 plot_kwargs=None, ax_properties=None, window_title=None):
+    """
+    Create a figure with multiple subplots. Each workspace index/spectrum is given it's own subplot. Specifying two or
+    more workspaces will plot the same spectra/workspace indices from each of the workspaces.
+
+    :param workspaces: A list of workspace handles or strings
+    :param spectrum_nums: A list of spectrum number identifiers (generally start from 1)
+    :param wksp_indices: A list of workspace indexes (starts from 0)
+    :param errors: If true then error bars are added for each subplot
+    :param fig: If not None then use this Figure object to plot
+    :param plot_kwargs: Arguments that will be passed onto the plot function
+    :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
+    :param window_title: A string denoting the name of the GUI window which holds the graph
+    :return: The figure containing the plots
+    """
+    _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)
+
+    # Setup variables required for plotting, and get the figure and axes used for plotting
+    if plot_kwargs is None:
+        plot_kwargs = {}
+
+    if spectrum_nums is not None:
+        kw, nums = 'specNum', spectrum_nums
+    else:
+        kw, nums = 'wkspIndex', wksp_indices
+
+    if fig is None:
+        fig, axes, _, number_of_columns = _create_subplots(len(workspaces)*len(nums), fig=fig)
+    else:
+        axes = fig.gca()
+
+    # Perform the plotting of subplots
+    row_index, column_index = 0, 0
+    for workspace in workspaces:
+        for num in nums:
+            plot_kwargs[kw] = num
+
+            ax = axes[row_index][column_index]
+            if ax_properties:
+                ax.set(**ax_properties)
+
+            if not isinstance(ax, MantidAxes):
+                # Convert to a MantidAxes if it isn't already. Ignore legend since
+                # a new one will be drawn later
+                ax = MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
+
+            ax.set_title(workspace.name())
+
+            if errors:
+                ax.errorbar(workspace, **plot_kwargs)
+            else:
+                ax.plot(workspace, **plot_kwargs)
+
+            if column_index < number_of_columns - 1:
+                column_index += 1
+            else:
+                row_index += 1
+                column_index = 0
+
+            ax.legend().draggable()
+
+    # Adjust locations to ensure the plots don't overlap
+    fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
+    fig.canvas.set_window_title(figure_title(workspaces[0], fig.number) if window_title is None else window_title)
+    fig.canvas.draw()
+    fig.show()
+    return fig
+
+
+@manage_workspace_names
 def pcolormesh(workspaces, fig=None):
     """
     Create a figure containing pcolor subplots

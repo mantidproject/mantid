@@ -14,27 +14,21 @@
 #include <QTimer>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtIcons/Icon.h"
 
-constexpr auto SETTINGS_ICON = "mdi.settings";
-#endif
+#include <QBuffer>
+#include <QByteArray>
+#include <QFile>
+#include <QResource>
 
 namespace {
+constexpr auto SPLITTER_ICON = "mdi.drag-horizontal";
 
-QString const MINIPLOT_STYLESHEET =
-    " QSplitter::handle { background-color: qlineargradient(x1:0, y1:0, x2:0, "
-    "y2:1, stop:0 #616161, stop: 0.5 #505050, stop: 0.6 #434343, stop:1 "
-    "#656565); }";
-
-QIcon icon() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  return QIcon(":/configure.png");
-#else
-  return MantidQt::Icons::getIcon(SETTINGS_ICON);
-#endif
-}
+QIcon icon() { return MantidQt::Icons::getIcon(SPLITTER_ICON); }
 
 } // namespace
+#endif
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -59,9 +53,19 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this,
           SIGNAL(fitSelectedSpectrum()));
 
-  // m_plotForm->splitter->setStyleSheet(MINIPLOT_STYLESHEET);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  auto defaultSaveDirectory = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory"));
+  QString filename = defaultSaveDirectory + "/pixmapFile.png";
+  auto pixmap = icon().pixmap(QSize(24, 24)).save(filename);
 
-  // m_plotForm->splitter->handle(0)->setStyleSheet(MINIPLOT_STYLESHEET);
+  bool success = QResource::registerResource(filename, ":/qsplitter");
+  m_plotForm->pbFitSingle->setIcon(QIcon(":/qsplitter"));
+#endif
+
+  // m_plotForm->splitter->setStyleSheet(
+  //    "QSplitter::handle { image: url(:/qsplitter-handle); }");
 
   // Avoids squished plots for >qt5
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
