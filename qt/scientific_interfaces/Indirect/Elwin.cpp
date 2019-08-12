@@ -183,7 +183,7 @@ void Elwin::setup() {
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(plotInput()));
+          SLOT(handlePreviewSpectrumChanged()));
 
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
@@ -508,6 +508,10 @@ void Elwin::plotInput() {
                                            "IntegrationEnd");
 
   setDefaultSampleLog(inputWorkspace());
+}
+
+void Elwin::handlePreviewSpectrumChanged() {
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
 }
 
 void Elwin::updateIntegrationRange() {

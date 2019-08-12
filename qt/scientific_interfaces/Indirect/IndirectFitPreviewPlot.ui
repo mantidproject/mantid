@@ -51,9 +51,12 @@
        <item row="0" column="0">
         <widget class="QSplitter" name="splitter">
          <property name="styleSheet">
-          <string notr="true">QSplitter::handle {
-background: transparent;
-}</string>
+          <string notr="true">QSplitter::handle { 
+background-color: #e8e8e8;
+border-radius: 2px;
+}
+
+</string>
          </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>

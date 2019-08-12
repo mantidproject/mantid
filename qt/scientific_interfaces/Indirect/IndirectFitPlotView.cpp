@@ -13,6 +13,29 @@
 #include <QMessageBox>
 #include <QTimer>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtIcons/Icon.h"
+
+constexpr auto SETTINGS_ICON = "mdi.settings";
+#endif
+
+namespace {
+
+QString const MINIPLOT_STYLESHEET =
+    " QSplitter::handle { background-color: qlineargradient(x1:0, y1:0, x2:0, "
+    "y2:1, stop:0 #616161, stop: 0.5 #505050, stop: 0.6 #434343, stop:1 "
+    "#656565); }";
+
+QIcon icon() {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  return QIcon(":/configure.png");
+#else
+  return MantidQt::Icons::getIcon(SETTINGS_ICON);
+#endif
+}
+
+} // namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -35,6 +58,10 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
           SIGNAL(plotCurrentPreview()));
   connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this,
           SIGNAL(fitSelectedSpectrum()));
+
+  // m_plotForm->splitter->setStyleSheet(MINIPLOT_STYLESHEET);
+
+  // m_plotForm->splitter->handle(0)->setStyleSheet(MINIPLOT_STYLESHEET);
 
   // Avoids squished plots for >qt5
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
