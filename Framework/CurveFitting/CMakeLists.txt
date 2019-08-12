@@ -63,6 +63,11 @@ set(SRC_FILES
     src/Functions/CrystalElectricField.cpp
     src/Functions/CrystalFieldControl.cpp
     src/Functions/CrystalFieldFunction.cpp
+    src/Functions/CrystalFieldPeaks.cpp
+    src/Functions/CrystalFieldPeaksBase.cpp
+    src/Functions/CrystalFieldMultiSpectrum.cpp
+    src/Functions/CrystalFieldPeakUtils.cpp
+    src/Functions/CrystalFieldSpectrum.cpp
     src/Functions/CrystalFieldHeatCapacity.cpp
     src/Functions/CrystalFieldMagnetisation.cpp
     src/Functions/CrystalFieldMoment.cpp

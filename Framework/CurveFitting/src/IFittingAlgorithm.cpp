@@ -40,7 +40,13 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
                                     IDomainCreator::DomainType domainType) {
 
   IDomainCreator *creator = nullptr;
-  Workspace_sptr ws = manager->getProperty("InputWorkspace");
+  Workspace_sptr ws;
+
+  try {
+    ws = manager->getProperty("InputWorkspace");
+  } catch (...) {
+    // InputWorkspace is not needed for some fit function so continue
+  }
 
   // ILatticeFunction requires API::LatticeDomain.
   if (dynamic_cast<const ILatticeFunction *>(fun)) {

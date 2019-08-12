@@ -147,9 +147,8 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
     TableWorkspaceDomainCreator::DomainType domainType)
     : IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName),
                      domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_startRowNo(EMPTY_DBL()),
-      m_maxSize(0), m_xColumnIndex(0), m_yColumnIndex(1),
-      m_errorColumnIndex(2) {
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(0),
+      m_xColumnIndex(0), m_yColumnIndex(1), m_errorColumnIndex(2) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -164,9 +163,8 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
 TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
     TableWorkspaceDomainCreator::DomainType domainType)
     : IDomainCreator(nullptr, std::vector<std::string>(), domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_startRowNo(EMPTY_DBL()),
-      m_maxSize(10), m_xColumnIndex(0), m_yColumnIndex(1),
-      m_errorColumnIndex(2) {}
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10),
+      m_xColumnIndex(0), m_yColumnIndex(1), m_errorColumnIndex(2) {}
 
 /**
  * Declare properties that specify the dataset within the workspace to fit to.
@@ -264,7 +262,7 @@ void TableWorkspaceDomainCreator::createDomain(
         size_t k = m + m_maxSize;
         if (k > n)
           k = n;
-        creator->setRange(XData[from + m], XData[from + k - 1]);
+        creator->setRange(XData[from + static_cast<double>(m)], XData[from + static_cast<double>(k) - 1.0]);
         seqDomain->addCreator(API::IDomainCreator_sptr(creator));
         m = k;
       }
@@ -734,7 +732,7 @@ void TableWorkspaceDomainCreator::setParameters() const {
     const std::string yColName = m_manager->getProperty(m_yColumnPropertyName);
     const std::string eColName =
         m_manager->getProperty(m_errorColumnPropertyName);
-    for (auto i = 0; i < columnNames.size(); ++i) {
+    for (size_t i = 0; i < columnNames.size(); ++i) {
       if (columnNames[i] == xColName)
         m_xColumnIndex = i;
       else if (columnNames[i] == yColName)

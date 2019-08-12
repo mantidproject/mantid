@@ -130,11 +130,11 @@ private:
   /// Store the Exclude property name
   std::string m_excludePropertyName;
   /// Store the x column name
-  mutable double m_xColumnIndex;
+  mutable size_t m_xColumnIndex;
   /// Store the y column name
-  mutable double m_yColumnIndex;
+  mutable size_t m_yColumnIndex;
   /// Store the error column name
-  mutable double m_errorColumnIndex;
+  mutable size_t m_errorColumnIndex;
 
   size_t m_startRowNo;
 };
