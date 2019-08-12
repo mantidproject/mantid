@@ -15,7 +15,6 @@
 namespace Mantid {
 namespace Geometry {
 
-
 /** ShapeInfo : Stores shape types and information relevant to drawing the
 shape. For cylinders, spheres and cones, height and radius are stored. Points
 are stored in the winding order shown in the IDF here
