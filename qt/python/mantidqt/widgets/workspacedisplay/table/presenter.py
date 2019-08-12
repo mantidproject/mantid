@@ -139,6 +139,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         table.setRowCount(num_rows)
 
         num_cols = self.model.get_number_of_columns()
+        table.setColumnCount(num_cols)
 
         # the table should be editable if the ws is not PeaksWS
         editable = not self.model.is_peaks_workspace()
