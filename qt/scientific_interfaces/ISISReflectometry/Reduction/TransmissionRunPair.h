@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 /** @class TransmissionRunPair
 
     The TransmissionRunPair model holds information about the two possible
@@ -41,6 +42,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(TransmissionRunPair const &lhs,
                                                TransmissionRunPair const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(TransmissionRunPair const &lhs,
                                                TransmissionRunPair const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_TRANSMISSIONRUNPAIR_H_

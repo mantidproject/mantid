@@ -15,8 +15,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using MantidQt::MantidWidgets::Batch::Cell;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 using MantidQt::MantidWidgets::Batch::RowPath;

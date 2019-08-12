@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 // Changing the palette for spin boxes doesn't work but we can
@@ -382,5 +383,6 @@ std::string QtInstrumentView::getDetectorCorrectionType() const {
 void QtInstrumentView::setDetectorCorrectionType(std::string const &value) {
   setSelected(*m_ui.detectorCorrectionTypeComboBox, value);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IExperimentOptionDefaults {
 public:
@@ -30,6 +31,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ExperimentOptionDefaults
 public:
   Experiment get(Mantid::Geometry::Instrument_const_sptr instrument) override;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTOPTIONDEFAULTS_H

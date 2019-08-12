@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 // Changing the palette for spin boxes doesn't work but we can
@@ -711,5 +712,6 @@ void showOptionLoadErrors(
     std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
     std::vector<MissingInstrumentParameterValue> const &missingValues);
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

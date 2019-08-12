@@ -12,6 +12,7 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 enum class PolarizationCorrectionType { None, ParameterFile };
 
 inline PolarizationCorrectionType
@@ -58,6 +59,7 @@ operator==(PolarizationCorrections const &lhs,
 MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator!=(PolarizationCorrections const &lhs,
            PolarizationCorrections const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_POLARIZATIONCORRECTIONS_H_

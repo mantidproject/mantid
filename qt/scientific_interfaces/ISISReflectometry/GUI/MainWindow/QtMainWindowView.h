@@ -19,6 +19,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class QtMainWindowView
 
@@ -70,6 +71,7 @@ private:
   std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTMAINWINDOWVIEW_H */

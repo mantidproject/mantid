@@ -20,6 +20,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenter
     : public IRunsTablePresenter,
@@ -163,6 +164,7 @@ private:
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_

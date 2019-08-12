@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IMainWindowView;
 
@@ -75,6 +76,7 @@ private:
   void searchAsync();
 };
 bool hasActiveCatalogSession();
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTCATALOGSEARCHER_H */

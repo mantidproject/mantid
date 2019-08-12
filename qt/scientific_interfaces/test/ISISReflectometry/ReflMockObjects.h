@@ -35,7 +35,7 @@
 #include <boost/shared_ptr.hpp>
 #include <gmock/gmock.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace Mantid::API;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE

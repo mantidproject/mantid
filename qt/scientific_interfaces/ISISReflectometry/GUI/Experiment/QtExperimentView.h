@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** ExperiementView : Provides an interface for the "Experiement" tab in the
 ISIS Reflectometry interface.
@@ -176,6 +177,7 @@ private:
   ExperimentViewSubscriber *m_notifyee;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

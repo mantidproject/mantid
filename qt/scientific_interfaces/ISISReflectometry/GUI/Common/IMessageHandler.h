@@ -10,6 +10,7 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 /** @class IMessageHandler
 
 IMessageHandler is an interface for passing messages to the user
@@ -24,6 +25,7 @@ public:
   virtual bool askUserYesNo(const std::string &prompt,
                             const std::string &title) = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

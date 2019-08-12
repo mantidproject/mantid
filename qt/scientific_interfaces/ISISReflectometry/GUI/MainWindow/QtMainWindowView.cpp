@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 
@@ -168,5 +169,6 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
 
   return false;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

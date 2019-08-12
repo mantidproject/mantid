@@ -23,6 +23,7 @@ using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
 } // namespace API
 
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchViewSubscriber {
 public:
@@ -57,6 +58,7 @@ public:
   virtual void executeAlgorithmQueue() = 0;
   virtual void cancelAlgorithmQueue() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IBATCHVIEW_H */

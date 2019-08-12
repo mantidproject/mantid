@@ -11,6 +11,7 @@
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class MonitorCorrections
 
@@ -39,6 +40,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(MonitorCorrections const &lhs,
                                                MonitorCorrections const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(MonitorCorrections const &lhs,
                                                MonitorCorrections const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_MONITORCORRECTIONS_H_

@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IPlotter {
 public:
@@ -21,6 +22,7 @@ public:
   reflectometryPlot(const std::vector<std::string> &workspaces) const = 0;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

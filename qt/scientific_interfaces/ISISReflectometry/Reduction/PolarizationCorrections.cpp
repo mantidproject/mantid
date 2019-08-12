@@ -7,6 +7,7 @@
 #include "PolarizationCorrections.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 PolarizationCorrections::PolarizationCorrections(
     PolarizationCorrectionType correctionType)
@@ -25,5 +26,6 @@ bool operator==(PolarizationCorrections const &lhs,
                 PolarizationCorrections const &rhs) {
   return lhs.correctionType() == rhs.correctionType();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param view :: [input] The view we are managing
@@ -99,5 +100,6 @@ void MainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("ISIS Reflectometry"));
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

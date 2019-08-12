@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /**
  * The BatchJobAlgorithm class overrides ConfiguredAlgorithm so that
@@ -41,6 +42,7 @@ private:
 };
 
 using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

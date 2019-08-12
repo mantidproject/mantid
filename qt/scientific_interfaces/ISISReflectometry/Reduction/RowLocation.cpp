@@ -10,6 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename T>
 void sortAndRemoveDuplicatesInplace(std::vector<T> &items) {
@@ -68,5 +69,6 @@ bool containsPath(
       [&path](MantidQt::MantidWidgets::Batch::RowLocation const &location)
           -> bool { return location.path() == path; });
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

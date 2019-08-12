@@ -16,6 +16,7 @@
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class PerThetaDefaultsValidator
 
@@ -50,6 +51,7 @@ private:
 ValidationResult<PerThetaDefaults, std::vector<int>>
 validatePerThetaDefaults(PerThetaDefaults::ValueArray const &cellText);
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAUTSVALIDATOR_H_

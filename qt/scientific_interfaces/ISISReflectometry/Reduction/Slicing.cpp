@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 UniformSlicingByTime::UniformSlicingByTime(double secondsPerSlice)
     : m_secondsPerSlice(secondsPerSlice) {}
@@ -115,5 +116,6 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   }
   return os;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

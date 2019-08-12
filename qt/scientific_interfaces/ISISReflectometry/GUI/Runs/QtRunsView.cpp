@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::Icons;
@@ -347,13 +348,9 @@ std::string QtRunsView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
 
-void MantidQt::CustomInterfaces::QtRunsView::on_buttonMonitor_clicked() {
-  startMonitor();
-}
+void QtRunsView::on_buttonMonitor_clicked() { startMonitor(); }
 
-void MantidQt::CustomInterfaces::QtRunsView::on_buttonStopMonitor_clicked() {
-  stopMonitor();
-}
+void QtRunsView::on_buttonStopMonitor_clicked() { stopMonitor(); }
 
 /** Start live data monitoring
  */
@@ -404,5 +401,6 @@ void QtRunsView::startTimer(const int millisecs) {
 /** stop
  */
 void QtRunsView::stopTimer() { m_timer.stop(); }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

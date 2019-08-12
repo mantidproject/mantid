@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IRunsPresenter;
 class RunsTable;
@@ -45,6 +46,7 @@ public:
   virtual void instrumentChanged(std::string const &instrumentName) = 0;
   virtual void settingsChanged() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABLEPRESENTER_H */

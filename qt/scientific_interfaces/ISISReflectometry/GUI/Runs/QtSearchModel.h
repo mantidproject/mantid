@@ -19,6 +19,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** QtSearchModel : Provides a QAbstractTableModel for a Mantid
 ITableWorkspace of Reflectometry search results.
@@ -59,6 +60,7 @@ private:
   bool runHasError(const SearchResult &run) const;
   void mergeNewResults(std::vector<SearchResult> const &source);
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
