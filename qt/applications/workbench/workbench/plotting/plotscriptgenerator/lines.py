@@ -10,8 +10,9 @@ from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.container import ErrorbarContainer
 
-from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
+from mantid.plots.helperfunctions import errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, get_ax_from_curve
+from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
 
 BASE_CREATE_LINE_COMMAND = "plot({})"
 BASE_ERRORBAR_COMMAND = "errorbar({})"
@@ -25,7 +26,7 @@ PLOT_KWARGS = [
 def generate_plot_command(artist):
     pos_args = get_plot_command_pos_args(artist)
     kwargs = get_plot_command_kwargs(artist)
-    if isinstance(artist, ErrorbarContainer):
+    if isinstance(artist, ErrorbarContainer) and not errorbars_hidden(artist):
         base_command = BASE_ERRORBAR_COMMAND
     else:
         base_command = BASE_CREATE_LINE_COMMAND
@@ -41,7 +42,14 @@ def get_plot_command_pos_args(artist):
 
 def get_plot_command_kwargs(artist):
     if isinstance(artist, ErrorbarContainer):
-        kwargs = _get_plot_command_kwargs_from_errorbar_container(artist)
+        # We can't hide error bars using an argument in ax.errorbar() (visible
+        # only affects the connecting line) so use the ax.plot command if
+        # errorbars are hidden
+        if errorbars_hidden(artist):
+            kwargs = _get_plot_command_kwargs_from_line2d(artist[0])
+            kwargs['label'] = artist.get_label()
+        else:
+            kwargs = _get_plot_command_kwargs_from_errorbar_container(artist)
     else:
         kwargs = _get_plot_command_kwargs_from_line2d(artist)
     kwargs.update(_get_mantid_specific_plot_kwargs(artist))

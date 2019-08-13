@@ -12,11 +12,14 @@ import matplotlib
 matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 from copy import copy
+from matplotlib.container import ErrorbarContainer
 
+from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator.lines import (_get_plot_command_kwargs_from_line2d,
                                                           _get_errorbar_specific_plot_kwargs,
-                                                          generate_plot_command)
+                                                          generate_plot_command,
+                                                          get_plot_command_kwargs)
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
 
 LINE2D_KWARGS = {
@@ -50,6 +53,12 @@ ERRORBAR_ONLY_KWARGS = {
 ERRORBAR_KWARGS = copy(LINE2D_KWARGS)
 ERRORBAR_KWARGS.update(ERRORBAR_ONLY_KWARGS)
 MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': False, 'update_axes_labels': False}
+
+ERRORBARS_HIDDEN_FUNC = 'workbench.plotting.plotscriptgenerator.lines.errorbars_hidden'
+GET_MANTID_PLOT_KWARGS = 'workbench.plotting.plotscriptgenerator.lines._get_mantid_specific_plot_kwargs'
+GET_PLOT_CMD_KWARGS_LINE2D = 'workbench.plotting.plotscriptgenerator.lines._get_plot_command_kwargs_from_line2d'
+GET_PLOT_CMD_KWARGS_ERRORBAR = ('workbench.plotting.plotscriptgenerator.lines.'
+                                '_get_plot_command_kwargs_from_errorbar_container')
 
 
 class PlotScriptGeneratorLinesTest(unittest.TestCase):
@@ -98,6 +107,29 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         expected_command = ("errorbar({}, {})".format(self.test_ws.name(),
                                                       convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
+
+    @patch(GET_MANTID_PLOT_KWARGS)
+    @patch(GET_PLOT_CMD_KWARGS_ERRORBAR)
+    @patch(GET_PLOT_CMD_KWARGS_LINE2D)
+    def test_get_plot_command_kwargs_calls_get_plot_command_kwargs_2d_if_errorbars_hidden(
+            self, mock_plot_cmd_2d, mock_plot_cmd_err, mock_mantid_spec_cmd):
+        mock_error_line = Mock()
+        mock_artist = Mock(spec=ErrorbarContainer, __getitem__=lambda x, y: mock_error_line)
+        with patch(ERRORBARS_HIDDEN_FUNC, lambda x: True):
+            get_plot_command_kwargs(mock_artist)
+        self.assertEqual(0, mock_plot_cmd_err.call_count)
+        mock_plot_cmd_2d.assert_called_once_with(mock_error_line)
+
+    @patch(GET_MANTID_PLOT_KWARGS)
+    @patch(GET_PLOT_CMD_KWARGS_ERRORBAR)
+    @patch(GET_PLOT_CMD_KWARGS_LINE2D)
+    def test_get_plot_command_kwargs_calls_get_errorbar_command_kwargs_if_errorbars_visible(
+            self, mock_plot_cmd_2d, mock_plot_cmd_err, mock_mantid_spec_cmd):
+        mock_artist = Mock(spec=ErrorbarContainer)
+        with patch(ERRORBARS_HIDDEN_FUNC, lambda x: False):
+            get_plot_command_kwargs(mock_artist)
+        self.assertEqual(0, mock_plot_cmd_2d.call_count)
+        mock_plot_cmd_err.assert_called_once_with(mock_artist)
 
 
 if __name__ == '__main__':
