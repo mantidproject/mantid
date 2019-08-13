@@ -50,7 +50,7 @@ public:
       m_file.openFile(fullPath, H5F_ACC_RDONLY);
     }
   }
-  template <int rows, int cols>
+  template <hsize_t rows, hsize_t cols>
   void readDataSetMultidimensional(double buffer[rows][cols],
                                    FullNXPath &pathToGroup,
                                    std::string dataSetName) {

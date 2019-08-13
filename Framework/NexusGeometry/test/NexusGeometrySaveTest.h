@@ -1145,7 +1145,7 @@ Instrument cache.
                     PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
-    double buffer[3][3];
+    double buffer[static_cast<hsize_t>(3)][static_cast<hsize_t>(3)];
     tester.readDataSetMultidimensional<3, 3>(buffer, path, VERTICES);
 
     Eigen::Vector3d base{buffer[0][0], buffer[0][1], buffer[0][2]};
@@ -1192,7 +1192,7 @@ Instrument cache.
                     PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
-    double buffer[12][3];
+    double buffer[static_cast<hsize_t>(12)][static_cast<hsize_t>(3)];
     tester.readDataSetMultidimensional<12, 3>(buffer, path, VERTICES);
 
     Eigen::Vector3d base1{buffer[0][0], buffer[0][1], buffer[0][2]};
