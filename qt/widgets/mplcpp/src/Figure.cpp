@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 
-using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::callMethodNoCheck;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
