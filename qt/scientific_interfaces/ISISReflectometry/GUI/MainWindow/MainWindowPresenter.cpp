@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
-#include "../Common/Decoder.h"
-#include "../Common/Encoder.h"
+#include "GUI/Common/Decoder.h"
+#include "GUI/Common/Encoder.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
@@ -61,23 +61,19 @@ void MainWindowPresenter::notifyAutoreductionResumed() {
   for (auto batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
-  m_view->batchProcessingResumed();
 }
 
 void MainWindowPresenter::notifyAutoreductionPaused() {
   for (auto batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
-  m_view->batchProcessingPaused();
 }
 
-void MainWindowPresenter::notifyProcessingResumed() {
-  m_view->batchProcessingResumed();
-}
+// Called on autoreduction normal reduction
+void MainWindowPresenter::reductionResumed() { disableSaveAndLoadBatch(); }
 
-void MainWindowPresenter::notifyProcessingPaused() {
-  m_view->batchProcessingPaused();
-}
+// Called on autoreduction normal reduction
+void MainWindowPresenter::reductionPaused() { enableSaveAndLoadBatch(); }
 
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
@@ -134,6 +130,14 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
   Decoder decoder;
   decoder.decodeBatch(batchPresenter, m_view, map);
+}
+
+void MainWindowPresenter::disableSaveAndLoadBatch() {
+  m_view->disableSaveAndLoadBatch();
+}
+
+void MainWindowPresenter::enableSaveAndLoadBatch() {
+  m_view->enableSaveAndLoadBatch();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

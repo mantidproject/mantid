@@ -54,8 +54,8 @@ public:
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
 
-  void batchProcessingResumed() override;
-  void batchProcessingPaused() override;
+  void disableSaveAndLoadBatch() override;
+  void enableSaveAndLoadBatch() override;
 
 public slots:
   void helpPressed();

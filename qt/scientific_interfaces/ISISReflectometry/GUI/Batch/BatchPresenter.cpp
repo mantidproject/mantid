@@ -95,15 +95,9 @@ void BatchPresenter::notifyRestoreDefaultsRequested() {
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
-void BatchPresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyProcessingResumed();
-  resumeReduction();
-}
+void BatchPresenter::notifyReductionResumed() { resumeReduction(); }
 
-void BatchPresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyProcessingPaused();
-  pauseReduction();
-}
+void BatchPresenter::notifyReductionPaused() { pauseReduction(); }
 
 void BatchPresenter::notifyAutoreductionResumed() { resumeAutoreduction(); }
 
@@ -192,6 +186,7 @@ void BatchPresenter::reductionResumed() {
   m_experimentPresenter->reductionResumed();
   m_instrumentPresenter->reductionResumed();
   m_runsPresenter->reductionResumed();
+  m_mainPresenter->reductionResumed();
 }
 
 void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
@@ -205,6 +200,7 @@ void BatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
+  m_mainPresenter->reductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
     notifyAutoreductionCompleted();

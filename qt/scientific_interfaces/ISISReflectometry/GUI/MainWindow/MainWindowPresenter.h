@@ -38,8 +38,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
-  void notifyProcessingResumed() override;
-  void notifyProcessingPaused() override;
+  void reductionResumed() override;
+  void reductionPaused() override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -51,6 +51,8 @@ public:
 private:
   void showHelp();
   void addNewBatch(IBatchView *batchView);
+  void disableSaveAndLoadBatch();
+  void enableSaveAndLoadBatch();
 
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;

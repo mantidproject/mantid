@@ -136,8 +136,8 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QFile jsonFile(filename);
   jsonFile.open(QFile::ReadOnly);
-  QString json(jsonFile.readAll());
-  return loadJSONFromString(json);
+  QString jsonString(jsonFile.readAll());
+  return loadJSONFromString(jsonString);
 #else
   /* https://stackoverflow.com/questions/19822211/qt-parsing-json-using-qjsondocument-qjsonobject-qjsonarray
    * is the source for a large portion of the source code for the Qt5
@@ -150,21 +150,21 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
 
   // step 2
   QTextStream text(&file);
-  QString json;
-  json = text.readAll();
+  QString jsonString;
+  jsonString = text.readAll();
   file.close();
 
-  return loadJSONFromString(json);
+  return loadJSONFromString(jsonString);
 
 #endif
 }
 
-QMap<QString, QVariant> loadJSONFromString(const QString &json) {
+QMap<QString, QVariant> loadJSONFromString(const QString &jsonString) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   JSON JSON;
-  return JSON.decode(json);
+  return JSON.decode(jsonString);
 #else
-  QByteArray jsonByteArray = json.toLocal8Bit();
+  QByteArray jsonByteArray = jsonString.toLocal8Bit();
 
   auto jsonDoc = QJsonDocument::fromJson(jsonByteArray);
   if (jsonDoc.isNull()) {

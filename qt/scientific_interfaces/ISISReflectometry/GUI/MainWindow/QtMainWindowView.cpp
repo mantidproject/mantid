@@ -179,12 +179,12 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
   return false;
 }
 
-void QtMainWindowView::batchProcessingResumed() {
+void QtMainWindowView::disableSaveAndLoadBatch() {
   m_ui.saveBatch->setEnabled(false);
   m_ui.loadBatch->setEnabled(false);
 }
 
-void QtMainWindowView::batchProcessingPaused() {
+void QtMainWindowView::enableSaveAndLoadBatch() {
   m_ui.saveBatch->setEnabled(true);
   m_ui.loadBatch->setEnabled(true);
 }

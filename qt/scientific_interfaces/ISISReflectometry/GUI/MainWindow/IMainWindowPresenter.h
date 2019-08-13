@@ -26,8 +26,8 @@ public:
   virtual bool isAnyBatchAutoreducing() const = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
-  virtual void notifyProcessingResumed() = 0;
-  virtual void notifyProcessingPaused() = 0;
+  virtual void reductionResumed() = 0;
+  virtual void reductionPaused() = 0;
   virtual ~IMainWindowPresenter() = default;
 };
 } // namespace ISISReflectometry
