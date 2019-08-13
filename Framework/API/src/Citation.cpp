@@ -12,22 +12,20 @@
 namespace Mantid {
 namespace API {
 
-/**
-  This function is designed for construction and validation for loading, however
-  will inherently work with getCitation.
+/*
+  There are some strict parameters that the function arguements must adhere to.
 
   - description is always optional (this isn't needed for citation, but gives
-  insight as to why this citation is relevant)
+    insight as to why this citation is relevant)
   - if bibtex is provided endnote must also be provided, and vice-versa (BibTex
-  and Endnote contain essentially the same information, they can both be created
-  if one can be. BibTex and Endnote do not imply a DOI is minted)
-   - if doi is provided, url, bibtex and endnote must all be provided (BibTex
-  and Endnote can be generated from DOIs)
-    - if none of doi, bibtex or endnote are provided, url must be provided
-  (there must be something there, even if this isn't citable a URL is better
-  than nothing)
+    and Endnote contain essentially the same information, they can both be
+    created if one can be. BibTex and Endnote do not imply a DOI is minted)
+  - if doi is provided, url, bibtex and endnote must all be provided (BibTex
+    and Endnote can be generated from DOIs)
+  - if none of doi, bibtex or endnote are provided, url must be provided
+    (there must be something there, even if this isn't citable a URL is better
+    than nothing)
  */
-
 Citation::Citation(const std::string &doi, const std::string &bibtex,
                    const std::string &endnote, const std::string &url,
                    const std::string &description)

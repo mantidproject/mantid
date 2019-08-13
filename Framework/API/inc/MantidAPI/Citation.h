@@ -18,23 +18,22 @@
 namespace Mantid {
 namespace API {
 
-/*
- * To construct a citation class give it properly formatted bibtex and endnote
- * in it's aptly named fields.
- *
- * Citation citation("doi", "@misc{Nobody06,\nauthor = "Nobody Jr",\ntitle = "My
- * Article",\nyear = "2006" }", "TY  - JOUR\nAU  - Shannon, Claude E.\nPY  -
- * 1948/07//\nTI  - A Mathematical Theory of Communication\nT2  - Bell System
- * Technical Journal\nSP  - 379\nEP  - 423\nVL  - 27\nER  -", "url",
- * "description")
- *
- * Alternatively point the citation constructor at a file and give it the nexus
- * group name following NXCite.
- */
-
 class MANTID_API_DLL Citation {
 public:
+  /**
+   * This constructor will load the data from the given file using the given
+   * group as the NeXus Group in which the NXCite is contained.
+   */
   Citation(::NeXus::File *file, const std::string &group);
+
+  /**
+   * An example Constructor will look like this:
+   * Citation citation("doi", "@misc{Nobody06,\nauthor = "Nobody Jr",\ntitle =
+   * "My Article",\nyear = "2006" }", "TY  - JOUR\nAU  - Shannon, Claude E.\nPY
+   * - 1948/07//\nTI  - A Mathematical Theory of Communication\nT2  - Bell
+   * System Technical Journal\nSP  - 379\nEP  - 423\nVL  - 27\nER  -", "url",
+   * "description")
+   */
   Citation(const std::string &doi = "", const std::string &bibtex = "",
            const std::string &endnote = "", const std::string &url = "",
            const std::string &description = "");
@@ -48,10 +47,11 @@ public:
   const std::string &bibtex() const;
   const std::string &endnote() const;
 
-  void loadNexus(::NeXus::File *file, const std::string &group);
   void saveNexus(::NeXus::File *file, const std::string &group);
 
 private:
+  void loadNexus(::NeXus::File *file, const std::string &group);
+
   std::string m_doi;
   std::string m_bibtex;
   std::string m_endnote;
