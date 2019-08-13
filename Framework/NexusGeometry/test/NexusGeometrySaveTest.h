@@ -1148,9 +1148,16 @@ Instrument cache.
     double buffer[static_cast<hsize_t>(3)][static_cast<hsize_t>(3)];
     tester.readDataSetMultidimensional<3, 3>(buffer, path, VERTICES);
 
-    Eigen::Vector3d base{buffer[0][0], buffer[0][1], buffer[0][2]};
-    Eigen::Vector3d top{buffer[1][0], buffer[1][1], buffer[1][2]};
-    Eigen::Vector3d edge{buffer[2][0], buffer[2][1], buffer[2][2]};
+    const auto h0 = static_cast<hsize_t>(0);
+    const auto h1 = static_cast<hsize_t>(1);
+    const auto h2 = static_cast<hsize_t>(2);
+    const auto h3 = static_cast<hsize_t>(3);
+    const auto h4 = static_cast<hsize_t>(4);
+    const auto h5 = static_cast<hsize_t>(5);
+
+    Eigen::Vector3d base{buffer[h0][h0], buffer[h0][h1], buffer[h0][h2]};
+    Eigen::Vector3d top{buffer[h1][h0], buffer[h1][h1], buffer[h1][h2]};
+    Eigen::Vector3d edge{buffer[h2][h0], buffer[h2][h1], buffer[h2][h2]};
 
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
