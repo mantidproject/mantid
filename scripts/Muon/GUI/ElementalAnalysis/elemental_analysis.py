@@ -349,9 +349,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         filename = str(filename)
         if filename:
             self.ptable.set_peak_datafile(filename)
-        # these are commneted out as they are a bug
-        # see issue 25326
-        # self._clear_lines_after_data_file_selected()
+
         try:
             self._generate_element_widgets()
         except ValueError:
@@ -368,7 +366,6 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             else:
                 self._remove_element_lines(element)
         self._update_checked_data()
-        #self._generate_element_data()
 
     def _update_checked_data(self):
         if self.peaks.major.isChecked():
