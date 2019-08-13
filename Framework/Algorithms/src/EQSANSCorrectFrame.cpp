@@ -71,7 +71,9 @@ void EQSANSCorrectFrame::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto msd = spectrumInfo.l1(); // moderator-sample-distance
   auto ins = inputWS->getInstrument();
-  auto mdd = msd + ins->getComponentByName(detectorName)->getDistance(*(ins->getSample()));
+  auto mdd =
+      msd +
+      ins->getComponentByName(detectorName)->getDistance(*(ins->getSample()));
 
   // Creates a function that correct TOF values
   struct correctTofFactory {
