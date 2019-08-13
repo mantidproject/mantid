@@ -278,14 +278,21 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
 
   const auto sampleDetVec = position(index) - samplePos;
   const auto beamLineNormalized = Kernel::normalize(beamLine);
-
+  
   // generate the vertical axis
   const auto origHorizontal =
       m_instrument->getReferenceFrame()->vecPointingHorizontal();
   const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
+  if (vertical.scalar_prod(
+          m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+    throw std::runtime_error(
+        "Failed to create up axis orthogonal to the beam direction");
 
   // generate the horizontal axis perpendicular to the other two
   const auto horizontal = vertical.cross_prod(beamLineNormalized);
+  if (origHorizontal.scalar_prod(horizontal) <= 0.)
+    throw std::runtime_error(
+        "Failed to create horizontal axis orthogonal to the beam direction");
 
   const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
   const double dotVertical = sampleDetVec.scalar_prod(vertical);
