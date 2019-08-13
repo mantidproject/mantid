@@ -88,7 +88,7 @@ public slots:
 private slots:
   void setBackgroundBounds();
 
-  void emitDelayedPlotSpectrumChanged(int /*spectrum*/);
+  void emitDelayedPlotSpectrumChanged();
   void emitPlotSpectrumChanged();
   void emitPlotSpectrumChanged(const QString &spectrum);
   void emitSelectedFitDataChanged(int /*index*/);

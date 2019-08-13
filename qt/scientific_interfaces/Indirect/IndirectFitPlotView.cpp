@@ -24,7 +24,7 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
           SLOT(emitSelectedFitDataChanged(int)));
   connect(m_plotForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(emitDelayedPlotSpectrumChanged(int)));
+          SLOT(emitDelayedPlotSpectrumChanged()));
 
   connect(m_plotForm->cbPlotSpectrum,
           SIGNAL(currentIndexChanged(const QString &)), this,
@@ -308,7 +308,7 @@ void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
 
 // Required due to a bug in qt causing the valueChanged signal to be emitted
 // twice due to the long amount of time taken to complete the necessary actions
-void IndirectFitPlotView::emitDelayedPlotSpectrumChanged(int spectrum) {
+void IndirectFitPlotView::emitDelayedPlotSpectrumChanged() {
   QTimer::singleShot(150, this, SLOT(emitPlotSpectrumChanged()));
 }
 
