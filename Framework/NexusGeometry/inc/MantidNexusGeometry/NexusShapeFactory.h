@@ -33,6 +33,10 @@ namespace NexusShapeFactory {
 DLLExport std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef);
 
+DLLExport std::unique_ptr<const Geometry::IObject>
+createCylinder(const std::vector<uint32_t> &cylinderPoints,
+               const std::vector<Eigen::Vector3d> &vertices);
+
 /// Creates a triangular mesh shape based on ready triangulated polygons
 DLLExport std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint32_t> &&triangularFaces,
