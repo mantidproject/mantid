@@ -282,7 +282,7 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
     number.emplace_back(runNumber.toString().toStdString());
   }
-  boost::optional<double> scaleFactor = boost::none;
+  boost::optional<double> scaleFactor{boost::none};
   if (map[QString("scaleFactorPresent")].toBool()) {
     scaleFactor = map[QString("scaleFactor")].toDouble();
   }
@@ -297,9 +297,9 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
 }
 
 RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
-  boost::optional<double> min = boost::none;
-  boost::optional<double> step = boost::none;
-  boost::optional<double> max = boost::none;
+  boost::optional<double> min{boost::none};
+  boost::optional<double> step{boost::none};
+  boost::optional<double> max{boost::none};
   if (map[QString("minPresent")].toBool()) {
     min = map[QString("min")].toDouble();
   }
