@@ -50,7 +50,6 @@ def get_plot_command_kwargs(artist):
 
 def _get_plot_command_kwargs_from_line2d(line):
     props = {key: line.properties()[key] for key in PLOT_KWARGS}
-    props['specNum'] = line.axes.get_artists_workspace_and_spec_num(line)[1]
     return props
 
 

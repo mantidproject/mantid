@@ -373,7 +373,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         action = self.toolbar._actions['generate_plot_script']
         action.setEnabled(enabled)
         action.setVisible(enabled)
-        # Also hide the separator between this and "Fit" button
+        # Show/hide the separator between this button and the "Fit" button
         for i, toolbar_action in enumerate(self.toolbar.actions()):
             if toolbar_action == action:
                 self.toolbar.actions()[i+1].setVisible(enabled)

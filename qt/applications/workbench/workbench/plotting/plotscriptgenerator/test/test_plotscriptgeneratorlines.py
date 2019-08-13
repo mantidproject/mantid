@@ -38,7 +38,6 @@ LINE2D_KWARGS = {
     'solid_joinstyle': 'round',
     'visible': False,
     'zorder': 1.4,
-    'specNum': 1
 }
 ERRORBAR_ONLY_KWARGS = {
     'ecolor': '#ff0000',
@@ -70,7 +69,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         plt.close()
 
     def test_get_plot_command_kwargs_from_line2d_returns_correct_dict(self):
-        line = self.ax.plot(self.test_ws, **LINE2D_KWARGS)[0]
+        line = self.ax.plot(self.test_ws, specNum=1, **LINE2D_KWARGS)[0]
         ret = _get_plot_command_kwargs_from_line2d(line)
         self.assertEqual(LINE2D_KWARGS, ret)
 
@@ -86,7 +85,7 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
     def test_get_errorbar_specific_plot_kwargs_returns_correct_dict(self):
         kwargs = copy(ERRORBAR_KWARGS)
         kwargs.pop('markeredgewidth')
-        err_cont = self.ax.errorbar(self.test_ws, **kwargs)
+        err_cont = self.ax.errorbar(self.test_ws, specNum=1, **kwargs)
         output = _get_errorbar_specific_plot_kwargs(err_cont)
         self.assertEqual(ERRORBAR_ONLY_KWARGS, output)
 
