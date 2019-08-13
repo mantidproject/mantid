@@ -1203,10 +1203,10 @@ Instrument cache.
     Eigen::Vector3d top2{buffer[12], buffer[13], buffer[14]};
     Eigen::Vector3d edge2{buffer[15], buffer[16], buffer[17]};
 
-	Eigen::Vector3d radiusVector1 = (top1 - edge1);
+    Eigen::Vector3d radiusVector1 = (top1 - edge1);
     Eigen::Vector3d heightVector1 = (base1 - top1);
 
-	Eigen::Vector3d radiusVector2 = (top2 - edge2);
+    Eigen::Vector3d radiusVector2 = (top2 - edge2);
     Eigen::Vector3d heightVector2 = (base2 - top2);
 
     double radiusInFile1 = radiusVector1.norm();
