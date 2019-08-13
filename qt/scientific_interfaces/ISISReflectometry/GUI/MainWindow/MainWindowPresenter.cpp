@@ -18,6 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param view :: [input] The view we are managing
@@ -134,5 +135,6 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   Decoder decoder;
   decoder.decodeBatch(batchPresenter, m_view, map);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

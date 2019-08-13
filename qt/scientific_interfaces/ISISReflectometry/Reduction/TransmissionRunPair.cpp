@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 TransmissionRunPair::TransmissionRunPair()
     : m_firstTransmissionRunNumbers(), m_secondTransmissionRunNumbers() {}
@@ -58,5 +59,6 @@ bool operator!=(TransmissionRunPair const &lhs,
   return !(lhs == rhs);
 }
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

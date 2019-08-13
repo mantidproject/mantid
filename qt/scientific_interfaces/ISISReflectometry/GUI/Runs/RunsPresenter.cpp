@@ -30,6 +30,7 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param mainView :: [input] The view we're managing
@@ -528,5 +529,6 @@ void RunsPresenter::errorHandle(const IAlgorithm *alg,
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

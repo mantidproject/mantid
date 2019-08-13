@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IMainWindowView;
 class IMessageHandler;
@@ -60,6 +61,7 @@ private:
   friend class Decoder;
   friend class CoderCommonTester;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_MAINWINDOWPRESENTER_H */

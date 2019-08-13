@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** QtSaveView : Provides an interface for the "Save ASCII" tab in the
 ISIS Reflectometry interface.
@@ -111,6 +112,8 @@ private:
   friend class Decoder;
   friend class CoderCommonTester;
 };
+
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -12,6 +12,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MockInstrumentView : public IInstrumentView {
 public:
@@ -49,6 +50,7 @@ public:
   MOCK_METHOD0(enableDetectorCorrectionType, void());
   MOCK_METHOD0(disableDetectorCorrectionType, void());
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

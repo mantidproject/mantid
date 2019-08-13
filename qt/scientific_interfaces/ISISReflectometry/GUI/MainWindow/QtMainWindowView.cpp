@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 
@@ -187,5 +188,6 @@ void QtMainWindowView::batchProcessingPaused() {
   m_ui.saveBatch->setEnabled(true);
   m_ui.loadBatch->setEnabled(true);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

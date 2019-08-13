@@ -7,6 +7,7 @@
 #include "MonitorCorrections.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 MonitorCorrections::MonitorCorrections(
     size_t monitorIndex, bool integrate,
@@ -37,5 +38,6 @@ bool operator==(MonitorCorrections const &lhs, MonitorCorrections const &rhs) {
          lhs.backgroundRange() == rhs.backgroundRange() &&
          lhs.integralRange() == rhs.integralRange();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

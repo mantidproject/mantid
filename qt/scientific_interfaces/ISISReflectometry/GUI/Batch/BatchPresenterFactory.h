@@ -19,6 +19,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class BatchPresenterFactory {
 public:
   BatchPresenterFactory(
@@ -60,6 +61,7 @@ private:
   InstrumentPresenterFactory m_instrumentPresenterFactory;
   SavePresenterFactory m_savePresenterFactory;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_BATCHPRESENTERFACTORY_H

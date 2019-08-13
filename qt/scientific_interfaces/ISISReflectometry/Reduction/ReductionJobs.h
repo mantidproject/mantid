@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class ReductionJobs
 
@@ -116,6 +117,7 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
     listener.groupRemoved(0);
   }
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

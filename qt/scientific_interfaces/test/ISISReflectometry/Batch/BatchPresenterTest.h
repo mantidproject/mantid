@@ -17,8 +17,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using testing::AtLeast;
 using testing::Mock;

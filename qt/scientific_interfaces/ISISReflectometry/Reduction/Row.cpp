@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Row::Row( // cppcheck-suppress passedByValue
     std::vector<std::string> runNumbers, double theta,
@@ -117,5 +118,6 @@ bool operator==(Row const &lhs, Row const &rhs) {
          lhs.reducedWorkspaceNames() == rhs.reducedWorkspaceNames() &&
          lhs.reductionOptions() == rhs.reductionOptions();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class EventPresenter
 
@@ -58,6 +59,7 @@ private:
   IEventView *m_view;
   SliceType m_sliceType;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

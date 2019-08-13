@@ -10,6 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Experiment::Experiment()
     : m_analysisMode(AnalysisMode::PointDetector),
@@ -124,5 +125,6 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.stitchParameters() == rhs.stitchParameters() &&
          lhs.perThetaDefaults() == rhs.perThetaDefaults();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

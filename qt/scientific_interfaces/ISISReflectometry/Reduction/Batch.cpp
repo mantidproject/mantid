@@ -7,6 +7,7 @@
 #include "Batch.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Batch::Batch(Experiment const &experiment, Instrument const &instrument,
              RunsTable &runsTable, Slicing const &slicing)
@@ -45,5 +46,6 @@ boost::optional<Item &>
 Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Group
 
@@ -99,6 +100,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Group const &lhs,
                                                Group const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Group const &lhs,
                                                Group const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

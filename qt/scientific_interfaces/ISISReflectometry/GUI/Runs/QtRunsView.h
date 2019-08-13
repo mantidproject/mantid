@@ -27,6 +27,7 @@ class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using MantidWidgets::SlitCalculator;
 
@@ -133,6 +134,7 @@ private slots:
   void onShowSearchContextMenuRequested(const QPoint &pos);
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

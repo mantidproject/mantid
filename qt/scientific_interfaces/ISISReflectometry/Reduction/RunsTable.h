@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class RunsTable
 
@@ -64,6 +65,7 @@ bool RunsTable::isInSelection(
   auto const path = m_reductionJobs.getPath(item);
   return containsPath(selectedRowLocations, path);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLE_H_

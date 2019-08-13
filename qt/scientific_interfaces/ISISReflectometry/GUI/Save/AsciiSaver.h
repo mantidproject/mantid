@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class AsciiSaver : public IAsciiSaver {
 public:
   static Mantid::API::IAlgorithm_sptr algorithmForFormat(NamedFormat format);
@@ -43,6 +44,7 @@ private:
             std::vector<std::string> const &logParameters,
             FileFormatOptions const &fileFormat) const;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_ASCIISAVER_H

@@ -22,6 +22,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtBatchView : public QWidget,
                                                    public IBatchView {
@@ -71,6 +72,7 @@ private:
   friend class Decoder;
   friend class CoderCommonTester;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTBATCHVIEW_H */

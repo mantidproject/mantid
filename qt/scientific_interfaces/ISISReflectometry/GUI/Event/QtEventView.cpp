@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param parent :: [input] The parent of this widget
@@ -214,5 +215,6 @@ void QtEventView::onToggleDisabledSlicing(bool isChecked) {
     m_notifyee->notifySliceTypeChanged(SliceType::None);
 }
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

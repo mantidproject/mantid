@@ -15,6 +15,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MockRunsTablePresenter : public IRunsTablePresenter {
 public:
@@ -34,6 +35,7 @@ public:
   MOCK_METHOD1(instrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

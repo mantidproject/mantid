@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RangeInLambda {
 public:
@@ -30,6 +31,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(RangeInLambda const &lhs,
                                                RangeInLambda const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInLambda const &lhs,
                                                RangeInLambda const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_

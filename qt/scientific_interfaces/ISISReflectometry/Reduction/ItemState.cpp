@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 ItemState::ItemState()
     : m_state(State::ITEM_NOT_STARTED), m_message(boost::none),
@@ -48,5 +49,6 @@ void ItemState::reset() {
   m_state = State::ITEM_NOT_STARTED;
   m_message = std::string();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
