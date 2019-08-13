@@ -278,7 +278,7 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
 
   const auto sampleDetVec = position(index) - samplePos;
   const auto beamLineNormalized = Kernel::normalize(beamLine);
-  
+
   // generate the vertical axis
   const auto origHorizontal =
       m_instrument->getReferenceFrame()->vecPointingHorizontal();
