@@ -724,3 +724,20 @@ def errorbars_hidden(err_container):
         for line in lines:
             hidden = hidden and (not line.get_visible())
     return hidden
+
+
+def set_errorbars_hidden(container, hide):
+    """
+    Set the visibility on all lines in an ErrorbarContainer.
+
+    :param hide: Whether or not to hide the errors.
+    :type hide: bool
+    """
+    if not isinstance(container, ErrorbarContainer):
+        return
+    # hide gets inverted below, as matplotlib uses `visible`, which has the opposite logic:
+    # if hide is True, visible must be False, and vice-versa
+    for bar_lines in container[1:]:
+        if bar_lines:
+            for line in bar_lines:
+                line.set_visible(not hide)

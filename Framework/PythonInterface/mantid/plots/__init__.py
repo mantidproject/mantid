@@ -53,7 +53,6 @@ from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
 from mantid.plots.scales import PowerScale, SquareScale
 
-
 BIN_AXIS = 0
 SPEC_AXIS = 1
 

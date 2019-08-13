@@ -202,6 +202,21 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         self.assertTrue(hasattr(new_curve, 'errorbar_data'))
         self.assertEqual(4, len(new_curve[2][0].get_segments()))
 
+    def test_curve_errorbars_are_hidden_on_apply_properties_when_hide_curve_is_ticked(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        ax.errorbar([0, 1, 2, 4], [0, 1, 2, 4], yerr=[0.1, 0.2, 0.3, 0.4],
+                    label='errorbar_plot')
+        mock_view_props = Mock(get_plot_kwargs=lambda: {'visible': False},
+                               hide_errors=False, hide=True,
+                               __getitem__=lambda s, x: False)
+        mock_view = Mock(get_selected_ax_name=lambda: "(0, 0)",
+                         get_selected_curve_name=lambda: "errorbar_plot",
+                         get_properties=lambda: mock_view_props)
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        presenter.apply_properties()
+        self.assertFalse(ax.containers[0][2][0].get_visible())
+
 
 if __name__ == '__main__':
     unittest.main()
