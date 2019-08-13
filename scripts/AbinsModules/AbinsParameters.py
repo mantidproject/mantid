@@ -18,14 +18,11 @@ value dictionaries through the Python API if possible. e.g.::
 """
 
 # Instruments constants  #############################
-
 instruments = {
     'fwhm': 3.0,  # approximate value for the full width at half maximum for Gaussian experimental resolutions
-
     'TwoDMap': {
         'delta_width': 0.1,  # width of narrow Gaussian which approximates Dirac delta
-        }
-
+        },
     'TOSCA': {
         #    TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
@@ -40,13 +37,13 @@ instruments = {
 
 # Names of groups in HDF5 cache/output file ################
 hdf_groups = {
-    'ab_initio_group': 'ABData',  # AbinsData (i.e. input from phonon calculation)
-    'powder_data_group': 'Powder',  # PowderData
-    'crystal_data_group': 'SingleCrystal',  # SingleCrystalData
-    's_data_group': 'S'  # dynamical structure factor
+    'ab_initio_data': 'ABData',  # AbinsData (i.e. input from phonon calculation)
+    'powder_data': 'Powder',  # PowderData
+    'crystal_data': 'SingleCrystal',  # SingleCrystalData
+    's_data': 'S'  # dynamical structure factor
     }
 
-# Abins internal parameters ##########################
+# Parameters related to sampling density and numerical cutoffs ##########################
 sampling = {
     'pkt_per_peak': 50,  # number of points for each peak broadened by the experimental resolution
     'max_wavenumber': 4100.0,  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
@@ -56,7 +53,17 @@ sampling = {
     's_absolute_threshold': 10e-8  # low cutoff for S intentisty (absolute value)
     }
 
+# Parameters related to performance optimisation that do NOT impact calculation results
 performance = {
     'optimal_size': 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
     'threads': 3  # number of threads used in parallel calculations
     }
+
+all_parameters = {'instruments': instruments,
+                  'hdf_groups': hdf_groups,
+                  'sampling': sampling,
+                  'performance': performance}
+
+non_performance_parameters = {'instruments': instruments,
+                              'hdf_groups': hdf_groups,
+                              'sampling': sampling}

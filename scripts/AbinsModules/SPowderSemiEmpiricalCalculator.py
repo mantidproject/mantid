@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
+from AbinsModules import AbinsParameters
 import gc
 try:
     # noinspection PyUnresolvedReferences
@@ -95,7 +96,7 @@ class SPowderSemiEmpiricalCalculator(object):
         self._clerk = AbinsModules.IOmodule(
             input_filename=filename,
             group_name=("{s_data_group}/{instrument}/{sample_form}/{temperature}K").format(
-                s_data_group=AbinsModules.AbinsParameters.s_data_group,
+                s_data_group=AbinsParameters.hdf_groups['s_data'],
                 instrument=self._instrument,
                 sample_form=self._sample_form,
                 temperature=self._temperature))
@@ -108,15 +109,15 @@ class SPowderSemiEmpiricalCalculator(object):
 
         step = bin_width
         self._bin_width = bin_width
-        start = AbinsModules.AbinsParameters.min_wavenumber + step
-        stop = AbinsModules.AbinsParameters.max_wavenumber + step
+        start = AbinsParameters.sampling['min_wavenumber'] + step
+        stop = AbinsParameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
         self._freq_size = self._bins.size - 1
         self._frequencies = self._bins[:-1]
 
         # set initial threshold for s for each atom
         self._num_atoms = len(self._abins_data.get_atoms_data().extract())
-        s_threshold = AbinsModules.AbinsParameters.s_relative_threshold
+        s_threshold = AbinsParameters.sampling['s_relative_threshold']
         self._s_threshold_ref = np.asarray([s_threshold for _ in range(self._num_atoms)])
         self._s_current_threshold = np.copy(self._s_threshold_ref)
         self._max_s_previous_order = np.asarray([0.0 for _ in range(self._num_atoms)])
@@ -158,7 +159,7 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: large enough s, and corresponding freq, coeff and also if calculation is stable
         """
         s_max = np.max(s)
-        threshold = max(s_max * self._s_current_threshold[atom], AbinsModules.AbinsParameters.s_absolute_threshold)
+        threshold = max(s_max * self._s_current_threshold[atom], AbinsParameters.sampling['s_absolute_threshold'])
         small_s = AbinsModules.AbinsConstants.SMALL_S
 
         if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
@@ -327,7 +328,7 @@ class SPowderSemiEmpiricalCalculator(object):
         self._prepare_data(k_point=q_indx)
 
         if PATHOS_FOUND:
-            p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.threads)
+            p_local = ProcessingPool(nodes=AbinsParameters.performance['threads'])
             result = p_local.map(self._calculate_s_powder_one_atom, atoms)
         else:
             result = [self._calculate_s_powder_one_atom(atom=atom) for atom in atoms]
@@ -344,7 +345,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         # load powder data for one k
         clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsModules.AbinsParameters.powder_data_group)
+                                      group_name=AbinsParameters.hdf_groups['powder_data'])
         powder_data = clerk.load(list_of_datasets=["powder_data"])
         self._a_tensors = powder_data["datasets"]["powder_data"]["a_tensors"][k_point]
         self._b_tensors = powder_data["datasets"]["powder_data"]["b_tensors"][k_point]
@@ -353,7 +354,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # load dft data for one k point
         clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsModules.AbinsParameters.ab_initio_group)
+                                      group_name=AbinsParameters.hdf_groups['ab_initio_data'])
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
         frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
@@ -406,7 +407,7 @@ class SPowderSemiEmpiricalCalculator(object):
                            self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
-            if local_freq.size * self._fundamentals_freq.size > AbinsModules.AbinsParameters.optimal_size:
+            if local_freq.size * self._fundamentals_freq.size > AbinsParameters.performance['optimal_size']:
 
                 chunked_fundamentals, chunked_fundamentals_coeff = self._prepare_chunks(local_freq=local_freq,
                                                                                         order=order, s=s)
@@ -447,7 +448,7 @@ class SPowderSemiEmpiricalCalculator(object):
         """
         fund_size = self._fundamentals_freq.size
         l_size = local_freq.size
-        opt_size = float(AbinsModules.AbinsParameters.optimal_size)
+        opt_size = float(AbinsParameters.performance['optimal_size'])
 
         chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsModules.AbinsConstants.MAX_ORDER - order))))
         chunk_num = int(np.ceil(float(fund_size) / chunk_size))

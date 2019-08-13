@@ -41,16 +41,18 @@ class AbinsCalculateQToscaTest(unittest.TestCase):
     # Use case: TOSCA instrument
     def test_TOSCA(self):
 
+        tosca_params = AbinsParameters.instruments['TOSCA']
+
         # calculate Q for TOSCA
         extracted_raw_data = self._raw_data.extract()
 
         # convert frequencies to cm^-1 in order to compare
         freq = extracted_raw_data["frequencies"]["0"][AbinsConstants.FIRST_OPTICAL_PHONON:] / \
                AbinsConstants.CM1_2_HARTREE
-        k2_i = (freq + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.WAVENUMBER_TO_INVERSE_A
-        k2_f = AbinsParameters.tosca_final_neutron_energy * AbinsConstants.WAVENUMBER_TO_INVERSE_A
+        k2_i = (freq + tosca_params['final_neutron_energy']) * AbinsConstants.WAVENUMBER_TO_INVERSE_A
+        k2_f = tosca_params['final_neutron_energy'] * AbinsConstants.WAVENUMBER_TO_INVERSE_A
         # noinspection PyTypeChecker
-        correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * AbinsParameters.tosca_cos_scattering_angle
+        correct_q_data = k2_i + k2_f - 2 * np.power(k2_i * k2_f, 0.5) * tosca_params['cos_scattering_angle']
 
         q2 = self._tosca_instrument.calculate_q_powder(freq)
 
