@@ -1146,7 +1146,7 @@ Instrument cache.
 
     NexusFileReader tester(destinationFile);
     double buffer[3][3];
-    tester.readDataSet3x3d(buffer, path, VERTICES);
+    tester.readDataSetMultidimensional<3, 3>(buffer, path, VERTICES);
 
     Eigen::Vector3d base{buffer[0][0], buffer[0][1], buffer[0][2]};
     Eigen::Vector3d top{buffer[1][0], buffer[1][1], buffer[1][2]};
@@ -1156,11 +1156,64 @@ Instrument cache.
     double heightInFile = std::abs((base - top).norm());
 
     TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
-                    1e5); // radii are approx equal
+                    1e-5); // radii are approx equal
     TS_ASSERT_DELTA(heightInFile, cylinderHeight,
-                    1e5); // heights are approx equal
+                    1e-5); // heights are approx equal
     TS_ASSERT(base.isApprox(
         Eigen::Vector3d{0, 0, 0})); // base positions are approx equal
+  }
+
+  void test_inhomogeneous_cylindrical_instrument_vertices_written_to_file() {
+
+    /*
+     test scenario: A test instrument with cylindrical inhomogeneous pixel
+     shapes is passed into SaveInstrument to be saved. Written to file are the
+     four sets (or 12 rows) of coordinates of the vertices for four tubes which
+     describe the cylinder: the centre of the base along the cylinder axis, the
+     centre of the top face along the cylinder axis, and the edge of the
+     cylinder from the top face that is orthogonal to the axis. This test will
+     access the height and radius of the first two cylinders, and  verify that
+     they are different."
+    */
+
+    // create RAII file resource for testing
+    ScopedFileHandle fileResource("test_inhomogeneous_cylindrical.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    auto cylindricalInstrument = ComponentCreationHelper::
+        createCylInstrumentWithVerticalOffsetsSpecified(
+            2, std::vector<double>{1, 2, 3}, 2, 1, 2, 1, 2, true);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
+        *cylindricalInstrument);
+
+    double cylinderHeight = 0.50;
+    double cylinderRadius = 0.25;
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+    FullNXPath path{DEFAULT_ROOT_PATH, "instrument_with_tubes", "sixteenpack",
+                    PIXEL_SHAPE};
+
+    NexusFileReader tester(destinationFile);
+    double buffer[12][3];
+    tester.readDataSetMultidimensional<12, 3>(buffer, path, VERTICES);
+
+    Eigen::Vector3d base1{buffer[0][0], buffer[0][1], buffer[0][2]};
+    Eigen::Vector3d top1{buffer[1][0], buffer[1][1], buffer[1][2]};
+    Eigen::Vector3d edge1{buffer[2][0], buffer[2][1], buffer[2][2]};
+
+    Eigen::Vector3d base2{buffer[3][0], buffer[3][1], buffer[3][2]};
+    Eigen::Vector3d top2{buffer[4][0], buffer[4][1], buffer[4][2]};
+    Eigen::Vector3d edge2{buffer[5][0], buffer[5][1], buffer[5][2]};
+
+    double radiusInFile = std::abs((top1 - edge1).norm());
+    double heightInFile = std::abs((base1 - top1).norm());
+
+    double radiusInFile2 = std::abs((top2 - edge2).norm());
+    double heightInFile2 = std::abs((base2 - top2).norm());
+
+    TS_ASSERT_DIFFERS(radiusInFile, radiusInFile2);
+    TS_ASSERT_DIFFERS(heightInFile, heightInFile2);
   }
 };
 

@@ -49,21 +49,23 @@ public:
       m_file.openFile(fullPath, H5F_ACC_RDONLY);
     }
   }
-
-  void readDataSet3x3d(double arr[3][3], FullNXPath &pathToGroup,
-                       std::string dataSetName) {
+  template <int rows, int cols>
+  void readDataSetMultidimensional(double buffer[rows][cols],
+                                   FullNXPath &pathToGroup,
+                                   std::string dataSetName) {
 
     int rank = 2;
+
     size_t dims[static_cast<size_t>(2)];
-    dims[0] = static_cast<size_t>(3);
-    dims[1] = static_cast<size_t>(3);
+    dims[0] = static_cast<size_t>(rows);
+    dims[1] = static_cast<size_t>(cols);
 
     H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
     // open dataset and read.
     H5::Group parentGroup = openfullH5Path(pathToGroup);
     H5::DataSet dataset = parentGroup.openDataSet(dataSetName);
-    dataset.read(arr, H5::PredType::NATIVE_DOUBLE, space);
+    dataset.read(buffer, H5::PredType::NATIVE_DOUBLE, space);
   }
 
   /* safely open a HDF5 group path with additional helpful

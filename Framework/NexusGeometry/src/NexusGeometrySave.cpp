@@ -196,7 +196,7 @@ inline void writePixelShape(H5::Group &grp, size_t nCylinders,
 
   int vrank = 2;
   hsize_t vdims[static_cast<hsize_t>(2)];
-  vdims[0] = static_cast<hsize_t>(3);
+  vdims[0] = static_cast<hsize_t>(3 * nCylinders);
   vdims[1] = static_cast<hsize_t>(3);
   H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
@@ -291,9 +291,9 @@ inline void writePixelData(H5::Group &grp,
       auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
           compInfo, idx, *it);
 
-      posx.push_back(offset[0]);
-      posy.push_back(offset[1]);
-      posz.push_back(offset[2]);
+      posx.push_back(offset[0]); // x pixel offset
+      posy.push_back(offset[1]); // y pixel offset
+      posz.push_back(offset[2]); // z pixel offset
     }
   } else
       // else, if cylinders exist and shapes are homogenous, write cylinder data
