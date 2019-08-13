@@ -428,8 +428,9 @@ createCylInstrumentWithVerticalOffsetsSpecified(
       for (size_t j = 0; j < nDetsPerTube; ++j) {
 
         auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-            cylRadius + j + i, cylHeight + j + i, V3D(0.0, 0.0, 0.0),
-            V3D(0., 1.0, 0.), "pixel-shape");
+            cylRadius + static_cast<double>(j) + static_cast<double>(i),
+            cylHeight + static_cast<double>(j) + static_cast<double>(i),
+            V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
 
         auto id = static_cast<int>(i * nDetsPerTube + j);
         Detector *physicalPixel =
