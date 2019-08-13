@@ -76,7 +76,7 @@ public:
     H5::Group child;
     H5::Group parent = m_file.openGroup(pathList[0]);
 
-    for (hsize_t i = 1; i < pathList.size(); ++i) {
+    for (size_t i = 1; i < pathList.size(); ++i) {
       child = parent.openGroup(pathList[i]);
       parent = child;
     }
@@ -95,7 +95,7 @@ public:
     // file structure only. (dont take extra step to look for parent group)
     if (parentNX_CLASS_TYPE == NX_ENTRY) {
 
-      for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+      for (size_t i = 0; i < rootGroup.getNumObjs(); ++i) {
         if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
           std::string childPath = rootGroup.getObjnameByIdx(i);
           // Open the sub group
@@ -112,7 +112,7 @@ public:
     }
 
     // Iterate over children of root group, and determine if a group
-    for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+    for (size_t i = 0; i < rootGroup.getNumObjs(); ++i) {
       if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
         std::string childPath = rootGroup.getObjnameByIdx(i);
         // Open the sub group
@@ -123,7 +123,7 @@ public:
         std::string parentAttrVal;
         parentAttribute.read(parentAttribute.getDataType(), parentAttrVal);
         if (parentAttrVal == parentNX_CLASS_TYPE) {
-          for (hsize_t i = 0; i < childGroup.getNumObjs(); ++i) {
+          for (size_t i = 0; i < childGroup.getNumObjs(); ++i) {
             if (childGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
               std::string grandchildPath = childGroup.getObjnameByIdx(i);
               // Open the sub group
@@ -191,7 +191,7 @@ public:
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
+    for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
         H5::DataSet dSet = parentGroup.openDataSet(dSetName);
@@ -214,7 +214,7 @@ public:
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
+    for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
         H5::DataSet dSet = parentGroup.openDataSet(dSetName);
@@ -235,7 +235,7 @@ public:
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
     auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
+    for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dataSetName = parentGroup.getObjnameByIdx(i);
         if (dsetName == dataSetName) {
