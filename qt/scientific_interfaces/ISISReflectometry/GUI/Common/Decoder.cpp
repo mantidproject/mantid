@@ -285,34 +285,65 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
     number.emplace_back(runNumber.toString().toStdString());
   }
-  boost::optional<double> scaleFactor;
-  if (map[QString("scaleFactorPresent")].toBool()) {
+  bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
+  double scaleFactor = 0;
+  if (scaleFactorPresent) {
     scaleFactor = map[QString("scaleFactor")].toDouble();
   }
 
-  MantidQt::CustomInterfaces::ISISReflectometry::Row row(
-      number, map[QString("theta")].toDouble(),
-      decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
-      decodeRangeInQ(map[QString("qRange")].toMap()), scaleFactor,
-      decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
-  return row;
+  if (scaleFactorPresent) {
+    return MantidQt::CustomInterfaces::ISISReflectometry::Row(
+        number, map[QString("theta")].toDouble(),
+        decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
+        decodeRangeInQ(map[QString("qRange")].toMap()), scaleFactor,
+        decodeReductionOptions(map[QString("reductionOptions")].toMap()),
+        decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+  } else {
+    return MantidQt::CustomInterfaces::ISISReflectometry::Row(
+        number, map[QString("theta")].toDouble(),
+        decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
+        decodeRangeInQ(map[QString("qRange")].toMap()), boost::none,
+        decodeReductionOptions(map[QString("reductionOptions")].toMap()),
+        decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+  }
 }
 
 RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
-  boost::optional<double> min;
-  boost::optional<double> step;
-  boost::optional<double> max;
-  if (map[QString("minPresent")].toBool()) {
+  double min = 0;
+  double step = 0;
+  double max = 0;
+  bool minPresent = map[QString("minPresent")].toBool();
+  bool maxPresent = map[QString("maxPresent")].toBool();
+  bool stepPresent = map[QString("stepPresent")].toBool();
+  if (minPresent) {
     min = map[QString("min")].toDouble();
   }
-  if (map[QString("maxPresent")].toBool()) {
+  if (maxPresent) {
     max = map[QString("max")].toDouble();
   }
-  if (map[QString("stepPresent")].toBool()) {
+  if (stepPresent) {
     step = map[QString("step")].toDouble();
   }
-  return RangeInQ(min, step, max);
+  // Preffered implementation is using boost::optional<double> instead of bool
+  // and double but older versions of GCC seem to be complaining about
+  // -Wmaybe-uninitialized
+  if (minPresent && maxPresent && stepPresent) {
+    return RangeInQ(min, step, max);
+  } else if (minPresent && maxPresent) {
+    return RangeInQ(min, boost::none, max);
+  } else if (minPresent && stepPresent) {
+    return RangeInQ(min, step);
+  } else if (minPresent) {
+    return RangeInQ(min);
+  } else if (stepPresent && maxPresent) {
+    return RangeInQ(boost::none, step, max);
+  } else if (stepPresent) {
+    return RangeInQ(boost::none, step);
+  } else if (maxPresent) {
+    return RangeInQ(boost::none, boost::none, max);
+  } else {
+    return RangeInQ();
+  }
 }
 
 TransmissionRunPair
