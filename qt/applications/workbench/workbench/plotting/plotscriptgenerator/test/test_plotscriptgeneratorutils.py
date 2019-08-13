@@ -9,6 +9,7 @@
 import unittest
 
 from ast import parse
+from collections import OrderedDict
 from numpy import array
 
 from mantid.py3compat.mock import patch, Mock
@@ -21,7 +22,7 @@ from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string
 class PlotScriptGeneratorUtilsTest(unittest.TestCase):
 
     def test_convert_args_to_string_returns_correct_string(self):
-        kwargs_dict = {
+        kwargs_dict = OrderedDict({
             'key0': 'val0',
             'key1': [2, 'str'],
             'key2': 1,
@@ -32,7 +33,7 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
                 }
             },
             'ndarray': array([1.1, 1.2])
-        }
+        })
         expected_str = ("key0='val0', key1=[2, 'str'], key2=1, key3={'a': 1.1, "
                         "'b': {'c': ['str2', 1.1]}}, ndarray=[1.1, 1.2]")
         self.assertEqual(expected_str, convert_args_to_string(None, kwargs_dict))
