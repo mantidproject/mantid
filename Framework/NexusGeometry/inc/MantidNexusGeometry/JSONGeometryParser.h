@@ -64,6 +64,20 @@ public:
   JSONGeometryParser(const std::string &json);
   ~JSONGeometryParser() = default;
   const std::string &name() noexcept { return m_name; }
+  const std::string &sampleName() const noexcept { return m_sampleName; }
+  const std::string &sourceName() const noexcept { return m_sourceName; }
+  const Eigen::Vector3d &samplePosition() const noexcept {
+    return m_samplePosition;
+  }
+  const Eigen::Quaterniond &sampleOrientation() const noexcept {
+    return m_sampleOrientation;
+  }
+  const Eigen::Vector3d &sourcePosition() const noexcept {
+    return m_sourcePosition;
+  }
+  const Eigen::Quaterniond &sourceOrientation() const noexcept {
+    return m_sourceOrientation;
+  }
   size_t numberOfBanks() noexcept { return m_jsonDetectorBanks.size(); }
   const std::vector<detid_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
@@ -122,6 +136,8 @@ private:
   /// Parse geometry provided with a string representing geometry.
   void parse(const std::string &jsonGeometry);
   void validateAndRetrieveGeometry(const std::string &jsonGeometry);
+  void extractSampleContent();
+  void extractSourceContent();
   void extractDetectorContent();
   void extractMonitorContent();
   void extractChopperContent();
@@ -136,6 +152,13 @@ private:
   Json::Value m_root;
   Json::Value m_instrument;
   Json::Value m_sample;
+  Json::Value m_source;
+  std::string m_sampleName;
+  std::string m_sourceName;
+  Eigen::Vector3d m_samplePosition;
+  Eigen::Quaterniond m_sampleOrientation;
+  Eigen::Vector3d m_sourcePosition;
+  Eigen::Quaterniond m_sourceOrientation;
   // monitor information
   std::vector<Json::Value> m_jsonMonitors;
   std::vector<Monitor> m_monitors;

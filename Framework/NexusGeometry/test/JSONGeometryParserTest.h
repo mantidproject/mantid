@@ -154,6 +154,12 @@ public:
     std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleOFF();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
+    TS_ASSERT_EQUALS(parser.sampleName(), "sample");
+    TS_ASSERT_EQUALS(parser.samplePosition(), Eigen::Vector3d(0, 0, 0));
+    auto angleAxis = Eigen::AngleAxisd(parser.sampleOrientation());
+    TS_ASSERT_EQUALS(angleAxis.angle(), 0);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(1, 0, 0));
+    TS_ASSERT_EQUALS(parser.sourceName(), "Unspecified");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
@@ -165,7 +171,7 @@ public:
     TS_ASSERT((y == std::vector<double>{-0.299, -0.299, -0.297, -0.297}));
     const auto &translation = parser.translation(0);
     TS_ASSERT_EQUALS(translation, Eigen::Vector3d(0.971, 0, -0.049));
-    auto angleAxis = Eigen::AngleAxisd(parser.orientation(0));
+    angleAxis = Eigen::AngleAxisd(parser.orientation(0));
     TS_ASSERT_DELTA(angleAxis.angle(), parser.degreesToRadians(90), TOLERANCE);
     TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(0, 1, 0));
     TS_ASSERT(parser.isOffGeometry(0));

@@ -325,6 +325,11 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   if (sample.isNull())
     throw std::invalid_argument("No sample found in json.");
 
+  m_source = get(entryChildren, NX_SOURCE);
+  if (m_source.isNull())
+    g_log.notice() << "No source information found in json instrument."
+                   << std::endl;
+
   auto instrument = get(entryChildren, NX_INSTRUMENT);
   if (instrument.isNull())
     throw std::invalid_argument("No instrument found in json.");
@@ -339,15 +344,39 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
 
   m_jsonChoppers = getAllChoppers(instrument);
 
-  for (const auto &detector : m_jsonDetectorBanks)
-    m_detectorBankNames.push_back(detector[NAME].asString());
-
   m_root = root;
   m_sample = sample;
   m_instrument = instrument;
 }
 
-/** Extract detailed information
+void JSONGeometryParser::extractSampleContent() {
+  const auto &children = m_sample[CHILDREN];
+  m_samplePosition = Eigen::Vector3d(0, 0, 0);
+  m_sampleOrientation =
+      Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(1, 0, 0)));
+  m_sampleName = m_sample[NAME].asString();
+  for (const auto &child : children) {
+    if (child[NAME] == TRANSFORMATIONS)
+      extractTransformations(child, m_samplePosition, m_sampleOrientation);
+  }
+}
+
+void JSONGeometryParser::extractSourceContent() {
+  m_sourceName = "Unspecified";
+  m_sourcePosition = Eigen::Vector3d(0, 0, 0);
+  m_sourceOrientation =
+      Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(1, 0, 0)));
+  if (!m_source.isNull()) {
+    m_sourceName = m_source[NAME].asCString();
+    const auto &children = m_source[CHILDREN];
+    for (const auto &child : children) {
+      if (child[NAME] == TRANSFORMATIONS)
+        extractTransformations(child, m_sourcePosition, m_sourceOrientation);
+    }
+  }
+}
+
+/** Extract detailed transformation information
  */
 void JSONGeometryParser::extractTransformationDataset(
     const Json::Value &transformation, double &value, Eigen::Vector3d &axis) {
@@ -435,6 +464,7 @@ void JSONGeometryParser::extractDetectorContent() {
       throw std::invalid_argument(
           "Insufficient pixel shape information found in " + name + ".");
 
+    m_detectorBankNames.emplace_back(name);
     m_detIDs.emplace_back(std::move(detIDs));
     m_x.emplace_back(std::move(x));
     m_y.emplace_back(std::move(y));
@@ -532,6 +562,8 @@ void JSONGeometryParser::parse(const std::string &jsonGeometry) {
   // Throws when there are issues with the geometry. Performs shallow test for
   // NXEntry, NXSample, NXInstrument and all NXDetector instances.
   validateAndRetrieveGeometry(jsonGeometry);
+  extractSampleContent();
+  extractSourceContent();
   extractMonitorContent();
   extractChopperContent();
   extractDetectorContent();
