@@ -1209,11 +1209,11 @@ Instrument cache.
 	Eigen::Vector3d radiusVector2 = (top2 - edge2);
     Eigen::Vector3d heightVector2 = (base2 - top2);
 
-    double radiusInFile1 = std::abs(radiusVector1.norm());
-    double heightInFile1 = std::abs(heightVector1.norm());
+    double radiusInFile1 = radiusVector1.norm();
+    double heightInFile1 = heightVector1.norm();
 
-    double radiusInFile2 = std::abs(radiusVector2.norm());
-    double heightInFile2 = std::abs(heightVector2.norm());
+    double radiusInFile2 = radiusVector2.norm();
+    double heightInFile2 = heightVector2.norm();
 
     TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
     TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
