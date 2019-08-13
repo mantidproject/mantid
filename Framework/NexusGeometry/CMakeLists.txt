@@ -3,6 +3,7 @@ set(SRC_FILES
     src/InstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
     src/NexusGeometrySave.cpp
+    src/JSONGeometryParser.cpp
     src/NexusShapeFactory.cpp
     src/TubeBuilder.cpp
     src/TubeHelpers.cpp
@@ -14,6 +15,7 @@ set(INC_FILES
     inc/MantidNexusGeometry/InstrumentBuilder.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/NexusGeometrySave.h
+    inc/MantidNexusGeometry/JSONGeometryParser.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
     inc/MantidNexusGeometry/TubeHelpers.h
@@ -24,6 +26,7 @@ set(TEST_FILES
     InstrumentBuilderTest.h
     NexusGeometryParserTest.h
     NexusGeometrySaveTest.h
+    JSONGeometryParserTest.h
     NexusShapeFactoryTest.h
     TubeBuilderTest.h
     TubeHelpersTest.h)
