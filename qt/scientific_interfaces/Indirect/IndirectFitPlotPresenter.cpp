@@ -252,8 +252,8 @@ void IndirectFitPlotPresenter::plotLines() {
   if (auto const resultWorkspace = m_model->getResultWorkspace()) {
     plotFit(resultWorkspace);
     updatePlotRange(m_model->getResultRange());
-  } else {
-    plotInput(m_model->getWorkspace());
+  } else if (auto const inputWorkspace = m_model->getWorkspace()) {
+    plotInput(inputWorkspace);
     updatePlotRange(m_model->getWorkspaceRange());
   }
 }
