@@ -8,7 +8,6 @@
 #ifndef MANTID_API_CITATION_CITATION_H_
 #define MANTID_API_CITATION_CITATION_H_
 
-#include "MantidAPI/CitationConstructorHelpers.h"
 #include "MantidAPI/DllConfig.h"
 
 #include <string>
@@ -19,9 +18,22 @@
 namespace Mantid {
 namespace API {
 
+/**
+ * To construct a citation class give it properly formatted bibtex and endnote
+ * in it's aptly named fields.
+ *
+ * Citation citation("doi", "@misc{Nobody06,\nauthor = "Nobody Jr",\ntitle = "My
+ * Article",\nyear = "2006" }", "TY  - JOUR\nAU  - Shannon, Claude E.\nPY  -
+ * 1948/07//\nTI  - A Mathematical Theory of Communication\nT2  - Bell System
+ * Technical Journal\nSP  - 379\nEP  - 423\nVL  - 27\nER  -", "url",
+ * "description")
+ *
+ * Alternatively point the citation constructor at a file and give it the nexus
+ * group name following NXCite.
+ */
+
 class MANTID_API_DLL Citation {
 public:
-  Citation(const BaseCitation &cite);
   Citation(::NeXus::File *file, const std::string &group);
   Citation(const std::string &doi = "", const std::string &bibtex = "",
            const std::string &endnote = "", const std::string &url = "",

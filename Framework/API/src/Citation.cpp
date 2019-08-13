@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/Citation.h"
-#include "MantidAPI/CitationConstructorHelpers.h"
 
 #include <nexus/NeXusFile.hpp>
 
@@ -59,10 +58,6 @@ Citation::Citation(::NeXus::File *file, const std::string &group) {
   loadNexus(file, group);
 }
 
-Citation::Citation(const BaseCitation &cite)
-    : Citation(cite.m_doi, cite.toBibTex(), cite.toEndNote(), cite.m_url,
-               cite.m_description) {}
-
 bool Citation::operator==(const Citation &rhs) const {
   return m_bibtex == rhs.m_bibtex && m_description == rhs.m_description &&
          m_doi == rhs.m_doi && m_endnote == rhs.m_endnote && m_url == rhs.m_url;
@@ -80,8 +75,6 @@ void Citation::loadNexus(::NeXus::File *file, const std::string &group) {
   file->readData("description", m_description);
   file->readData("doi", m_doi);
   file->readData("endnote", m_endnote);
-  // Since it remove the whitespace and it intends to restore it's state
-  m_endnote += " \n";
   file->readData("bibtex", m_bibtex);
   file->closeGroup();
 }

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAPI/Citation.h"
-#include "MantidAPI/CitationConstructorHelpers.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/python/class.hpp>
@@ -28,7 +27,6 @@ void export_Citation() {
                                 const std::string &, const std::string &,
                                 const std::string &>>())
       .def(init<NeXus::File *, const std::string &>())
-      .def(init<const BaseCitation &>())
       .def("description", &description, arg("self"),
            "Returns the description on the citation object")
       .def("url", &url, arg("self"), "Returns the url on the citation object")
