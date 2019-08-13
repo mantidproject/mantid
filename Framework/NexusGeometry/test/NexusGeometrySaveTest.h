@@ -1195,13 +1195,20 @@ Instrument cache.
     double buffer[static_cast<hsize_t>(12)][static_cast<hsize_t>(3)];
     tester.readDataSetMultidimensional<12, 3>(buffer, path, VERTICES);
 
-    Eigen::Vector3d base1{buffer[0][0], buffer[0][1], buffer[0][2]};
-    Eigen::Vector3d top1{buffer[1][0], buffer[1][1], buffer[1][2]};
-    Eigen::Vector3d edge1{buffer[2][0], buffer[2][1], buffer[2][2]};
+    const auto h0 = static_cast<hsize_t>(0);
+    const auto h1 = static_cast<hsize_t>(1);
+    const auto h2 = static_cast<hsize_t>(2);
+    const auto h3 = static_cast<hsize_t>(3);
+    const auto h4 = static_cast<hsize_t>(4);
+    const auto h5 = static_cast<hsize_t>(5);
 
-    Eigen::Vector3d base2{buffer[3][0], buffer[3][1], buffer[3][2]};
-    Eigen::Vector3d top2{buffer[4][0], buffer[4][1], buffer[4][2]};
-    Eigen::Vector3d edge2{buffer[5][0], buffer[5][1], buffer[5][2]};
+    Eigen::Vector3d base1{buffer[h0][h0], buffer[h0][h1], buffer[h0][h2]};
+    Eigen::Vector3d top1{buffer[h1][h0], buffer[h1][h1], buffer[h1][h2]};
+    Eigen::Vector3d edge1{buffer[h2][h0], buffer[h2][h1], buffer[h2][h2]};
+
+    Eigen::Vector3d base2{buffer[h3][h0], buffer[h3][h1], buffer[h3][h2]};
+    Eigen::Vector3d top2{buffer[h4][h0], buffer[h4][h1], buffer[h4][h2]};
+    Eigen::Vector3d edge2{buffer[h5][h0], buffer[h5][h1], buffer[h5][h2]};
 
     double radiusInFile = std::abs((top1 - edge1).norm());
     double heightInFile = std::abs((base1 - top1).norm());
