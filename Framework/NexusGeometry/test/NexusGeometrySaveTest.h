@@ -1186,9 +1186,6 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
         *cylindricalInstrument);
 
-    double cylinderHeight = 0.50;
-    double cylinderRadius = 0.25;
-
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
     FullNXPath path{DEFAULT_ROOT_PATH, "instrument_with_tubes", "sixteenpack",

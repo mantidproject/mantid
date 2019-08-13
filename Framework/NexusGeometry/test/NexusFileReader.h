@@ -17,11 +17,12 @@
 #include <vector>
 
 /*
- TODO: DOCUMENTATION
-
- *@author Takudzwa Makoni, RAL (UKRI), ISIS
- *@date 06/08/2019
-*/
+ * NexusFileReader: Test utility for unit testing in
+ * NexusGeometrySave::saveInstrument
+ *
+ * @author Takudzwa Makoni, RAL (UKRI), ISIS
+ * @date 06/08/2019
+ */
 
 namespace Mantid {
 namespace NexusGeometry {

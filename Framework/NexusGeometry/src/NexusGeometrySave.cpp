@@ -186,18 +186,18 @@ inline void writePixelShape(H5::Group &grp, size_t nCylinders,
   }
 
   int crank = 2;
-  hsize_t cdims[static_cast<hsize_t>(2)];
-  cdims[0] = static_cast<hsize_t>(nCylinders); // nCylinders;
-  cdims[1] = static_cast<hsize_t>(3);
+  size_t cdims[static_cast<size_t>(2)];
+  cdims[0] = static_cast<size_t>(nCylinders); // nCylinders;
+  cdims[1] = static_cast<size_t>(3);
   H5::DataSpace cspace = H5Screate_simple(crank, cdims, nullptr);
 
   cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_INT, cspace);
   cylinders.write(cylinderData.data(), H5::PredType::NATIVE_INT, cspace);
 
   int vrank = 2;
-  hsize_t vdims[static_cast<hsize_t>(2)];
-  vdims[0] = static_cast<hsize_t>(3 * nCylinders);
-  vdims[1] = static_cast<hsize_t>(3);
+  size_t vdims[static_cast<size_t>(2)];
+  vdims[0] = static_cast<size_t>(3 * nCylinders);
+  vdims[1] = static_cast<size_t>(3);
   H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
   vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
@@ -400,10 +400,10 @@ inline void writePixelData(H5::Group &grp,
   bool zIsZero = isApproxZero(posz, PRECISION);
 
   auto bankName = compInfo.name(idx);
-  const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
+  const auto nDetectorsInBank = static_cast<size_t>(posx.size());
 
   int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
+  size_t dims[static_cast<size_t>(1)];
   dims[0] = nDetectorsInBank;
 
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
@@ -459,10 +459,10 @@ void writeNXDetectorNumber(H5::Group &grp,
                   bankDetIDs.push_back(detectorIDs[index]);
                 });
 
-  const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
+  const auto nDetectorsInBank = static_cast<size_t>(bankDetIDs.size());
 
   int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
+  size_t dims[static_cast<size_t>(1)];
   dims[0] = nDetectorsInBank;
 
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
@@ -489,8 +489,8 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
   H5::DataSet detectorNumber, detector_id;
 
   int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = static_cast<hsize_t>(1);
+  size_t dims[static_cast<size_t>(1)];
+  dims[0] = static_cast<size_t>(1);
 
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
@@ -529,9 +529,9 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
   H5::StrType strSize;
 
-  int drank = 1;                          // rank of dataset
-  hsize_t ddims[static_cast<hsize_t>(1)]; // dimensions of dataset
-  ddims[0] = static_cast<hsize_t>(1);     // datapoints in dataset dimension 0
+  int drank = 1;                        // rank of dataset
+  size_t ddims[static_cast<size_t>(1)]; // dimensions of dataset
+  ddims[0] = static_cast<size_t>(1);    // datapoints in dataset dimension 0
 
   norm = position.norm();               // norm od the position vector
   auto unitVec = position.normalized(); // unit vector of the position vector
@@ -544,9 +544,9 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   location.write(&norm, H5::PredType::NATIVE_DOUBLE,
                  dspace); // write norm to location
 
-  int arank = 1;                          // rank of attribute
-  hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
-  adims[0] = 3;                           // datapoints in attribute dimension 0
+  int arank = 1;                        // rank of attribute
+  size_t adims[static_cast<size_t>(3)]; // dimensions of attribute
+  adims[0] = 3;                         // datapoints in attribute dimension 0
 
   aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
   vector = location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
@@ -603,9 +603,9 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
 
   H5::StrType strSize;
 
-  int drank = 1;                          // rank of dataset
-  hsize_t ddims[static_cast<hsize_t>(1)]; // dimensions of dataset
-  ddims[0] = static_cast<hsize_t>(1);     // datapoints in dataset dimension 0
+  int drank = 1;                        // rank of dataset
+  size_t ddims[static_cast<size_t>(1)]; // dimensions of dataset
+  ddims[0] = static_cast<size_t>(1);    // datapoints in dataset dimension 0
 
   angle = std::acos(rotation.w()) * (360.0 / PI); // angle magnitude
   Eigen::Vector3d axisOfRotation = rotation.vec().normalized(); // angle axis
@@ -618,9 +618,9 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   orientation.write(&angle, H5::PredType::NATIVE_DOUBLE,
                     dspace); // write angle magnitude to orientation
 
-  int arank = 1;                          // rank of attribute
-  hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
-  adims[0] = static_cast<hsize_t>(3);     // datapoints in attibute dimension 0
+  int arank = 1;                        // rank of attribute
+  size_t adims[static_cast<size_t>(3)]; // dimensions of attribute
+  adims[0] = static_cast<size_t>(3);    // datapoints in attibute dimension 0
 
   aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
   vector = orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
