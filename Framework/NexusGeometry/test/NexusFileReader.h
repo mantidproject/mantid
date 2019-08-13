@@ -57,9 +57,9 @@ public:
 
     int rank = 2;
 
-    size_t dims[static_cast<size_t>(2)];
-    dims[0] = static_cast<size_t>(rows);
-    dims[1] = static_cast<size_t>(cols);
+    hsize_t dims[static_cast<hsize_t>(2)];
+    dims[0] = static_cast<hsize_t>(rows);
+    dims[1] = static_cast<hsize_t>(cols);
 
     H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
@@ -76,7 +76,7 @@ public:
     H5::Group child;
     H5::Group parent = m_file.openGroup(pathList[0]);
 
-    for (size_t i = 1; i < pathList.size(); ++i) {
+    for (hsize_t i = 1; i < pathList.size(); ++i) {
       child = parent.openGroup(pathList[i]);
       parent = child;
     }
@@ -95,7 +95,7 @@ public:
     // file structure only. (dont take extra step to look for parent group)
     if (parentNX_CLASS_TYPE == NX_ENTRY) {
 
-      for (size_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+      for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
         if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
           std::string childPath = rootGroup.getObjnameByIdx(i);
           // Open the sub group
@@ -112,7 +112,7 @@ public:
     }
 
     // Iterate over children of root group, and determine if a group
-    for (size_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+    for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
       if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
         std::string childPath = rootGroup.getObjnameByIdx(i);
         // Open the sub group
@@ -123,7 +123,7 @@ public:
         std::string parentAttrVal;
         parentAttribute.read(parentAttribute.getDataType(), parentAttrVal);
         if (parentAttrVal == parentNX_CLASS_TYPE) {
-          for (size_t i = 0; i < childGroup.getNumObjs(); ++i) {
+          for (hsize_t i = 0; i < childGroup.getNumObjs(); ++i) {
             if (childGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
               std::string grandchildPath = childGroup.getObjnameByIdx(i);
               // Open the sub group
@@ -150,8 +150,8 @@ public:
                                const FullNXPath &pathToGroup) {
     double value;
     int rank = 1;
-    size_t dims[static_cast<size_t>(1)];
-    dims[0] = static_cast<size_t>(1);
+    hsize_t dims[static_cast<hsize_t>(1)];
+    dims[0] = static_cast<hsize_t>(1);
 
     H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
@@ -191,7 +191,7 @@ public:
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
-    for (size_t i = 0; i < numOfChildren; i++) {
+    for (hsize_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
         H5::DataSet dSet = parentGroup.openDataSet(dSetName);
@@ -214,7 +214,7 @@ public:
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
-    for (size_t i = 0; i < numOfChildren; i++) {
+    for (hsize_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
         H5::DataSet dSet = parentGroup.openDataSet(dSetName);
@@ -235,7 +235,7 @@ public:
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
     auto numOfChildren = parentGroup.getNumObjs();
-    for (size_t i = 0; i < numOfChildren; i++) {
+    for (hsize_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dataSetName = parentGroup.getObjnameByIdx(i);
         if (dsetName == dataSetName) {
