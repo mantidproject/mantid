@@ -9,6 +9,8 @@
 
 #include "MantidCurveFitting/DllConfig.h"
 
+#include <vector>
+
 namespace Mantid {
 namespace CurveFitting {
 
