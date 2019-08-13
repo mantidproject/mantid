@@ -10,6 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
                                             const QtMainWindowView &mwv) {
   for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
@@ -105,8 +106,8 @@ QList<QVariant> Encoder::encodeRunsTableModel(const ReductionJobs *redJobs) {
   return groups;
 }
 
-QMap<QString, QVariant>
-Encoder::encodeGroup(const MantidQt::CustomInterfaces::Group &group) {
+QMap<QString, QVariant> Encoder::encodeGroup(
+    const MantidQt::CustomInterfaces::ISISReflectometry::Group &group) {
   QMap<QString, QVariant> map;
   map.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
   map.insert(
@@ -116,8 +117,8 @@ Encoder::encodeGroup(const MantidQt::CustomInterfaces::Group &group) {
   return map;
 }
 
-QList<QVariant>
-Encoder::encodeRows(const MantidQt::CustomInterfaces::Group &group) {
+QList<QVariant> Encoder::encodeRows(
+    const MantidQt::CustomInterfaces::ISISReflectometry::Group &group) {
   QList<QVariant> rows;
   for (const auto &row : group.m_rows) {
     if (row) {
@@ -194,8 +195,8 @@ Encoder::encodeReductionOptions(const ReductionOptionsMap &rom) {
   return map;
 }
 
-QMap<QString, QVariant>
-Encoder::encodeRow(const MantidQt::CustomInterfaces::Row &row) {
+QMap<QString, QVariant> Encoder::encodeRow(
+    const MantidQt::CustomInterfaces::ISISReflectometry::Row &row) {
   QMap<QString, QVariant> map;
   QList<QVariant> runNumbers;
   for (const auto &runNumber : row.m_runNumbers) {
@@ -360,5 +361,6 @@ QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
              QVariant(gui->m_ui.saveReductionResultsCheckBox->isChecked()));
   return map;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

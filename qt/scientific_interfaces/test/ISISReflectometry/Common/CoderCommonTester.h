@@ -29,7 +29,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
+namespace ISISReflectometry {
 class CoderCommonTester {
 public:
   void testBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
@@ -154,8 +154,9 @@ private:
     }
   }
 
-  void testGroup(const MantidQt::CustomInterfaces::Group &group,
-                 const QMap<QString, QVariant> &map) {
+  void
+  testGroup(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group,
+            const QMap<QString, QVariant> &map) {
     TS_ASSERT_EQUALS(group.name(),
                      map[QString("name")].toString().toStdString())
     TS_ASSERT_EQUALS(
@@ -164,16 +165,19 @@ private:
     testRows(group, map[QString("rows")].toList());
   }
 
-  void testRows(const MantidQt::CustomInterfaces::Group &group,
-                const QList<QVariant> &list) {
+  void
+  testRows(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group,
+           const QList<QVariant> &list) {
     auto rows = group.rows();
     for (auto index = 0u; index < rows.size(); ++index) {
       testRow(rows[index], list[index].toMap());
     }
   }
 
-  void testRow(const boost::optional<MantidQt::CustomInterfaces::Row> &row,
-               const QMap<QString, QVariant> &map) {
+  void testRow(
+      const boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
+          &row,
+      const QMap<QString, QVariant> &map) {
     if (row) {
       auto runNumbers = row.get().runNumbers();
       auto runNumbersVariants = map[QString("runNumbers")].toList();
@@ -310,6 +314,7 @@ private:
   }
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

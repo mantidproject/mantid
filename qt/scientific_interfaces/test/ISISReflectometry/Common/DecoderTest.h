@@ -90,6 +90,7 @@ static QApplicationHolder MAIN_QAPPLICATION;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class DecoderTest : public CxxTest::TestSuite {
 public:
   static DecoderTest *createSuite() { return new DecoderTest(); }
@@ -100,15 +101,16 @@ public:
   void test_decodeBatch() {
     CoderCommonTester tester;
     auto map = MantidQt::API::loadJSONFromString(JSON_STRING);
-    MantidQt::CustomInterfaces::QtMainWindowView mwv;
+    QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
-    MantidQt::CustomInterfaces::Decoder decoder;
+    Decoder decoder;
     decoder.decodeBatch(gui, mwv, map);
 
     tester.testBatch(gui, mwv, map);
   }
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

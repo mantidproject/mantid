@@ -27,6 +27,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder {
 public:
@@ -57,11 +58,12 @@ private:
                        RunsTablePresenter *presenter,
                        const QMap<QString, QVariant> &map);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
-  MantidQt::CustomInterfaces::Group
+  MantidQt::CustomInterfaces::ISISReflectometry::Group
   decodeGroup(const QMap<QString, QVariant> &map);
-  std::vector<boost::optional<MantidQt::CustomInterfaces::Row>>
+  std::vector<
+      boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
   decodeRows(const QList<QVariant> &list);
-  boost::optional<MantidQt::CustomInterfaces::Row>
+  boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
   decodeRow(const QMap<QString, QVariant> &map);
   RangeInQ decodeRangeInQ(const QMap<QString, QVariant> &map);
   TransmissionRunPair
@@ -75,6 +77,7 @@ private:
   friend class CoderCommonTester;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -21,6 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class EncoderTest : public CxxTest::TestSuite {
 public:
   static EncoderTest *createSuite() { return new EncoderTest(); }
@@ -30,15 +31,16 @@ public:
 
   void test_encodeBatch() {
     CoderCommonTester tester;
-    MantidQt::CustomInterfaces::QtMainWindowView mwv;
+    QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
-    MantidQt::CustomInterfaces::Encoder encoder;
+    Encoder encoder;
     auto map = encoder.encodeBatch(gui, mwv);
 
     tester.testBatch(gui, mwv, map);
   }
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

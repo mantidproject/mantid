@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
                                             const QtMainWindowView &mwv) {
   for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
@@ -246,19 +247,21 @@ void Decoder::decodeRunsTableModel(ReductionJobs *jobs,
   }
 }
 
-MantidQt::CustomInterfaces::Group
+MantidQt::CustomInterfaces::ISISReflectometry::Group
 Decoder::decodeGroup(const QMap<QString, QVariant> &map) {
   auto rows = decodeRows(map["rows"].toList());
-  MantidQt::CustomInterfaces::Group group(
+  MantidQt::CustomInterfaces::ISISReflectometry::Group group(
       map[QString("name")].toString().toStdString(), rows);
   group.m_postprocessedWorkspaceName =
       map[QString("postprocessedWorkspaceName")].toString().toStdString();
   return group;
 }
 
-std::vector<boost::optional<MantidQt::CustomInterfaces::Row>>
+std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
 Decoder::decodeRows(const QList<QVariant> &list) {
-  std::vector<boost::optional<MantidQt::CustomInterfaces::Row>> rows;
+  std::vector<
+      boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
+      rows;
   for (const auto &rowMap : list) {
     rows.emplace_back(decodeRow(rowMap.toMap()));
   }
@@ -276,7 +279,7 @@ ReductionOptionsMap decodeReductionOptions(const QMap<QString, QVariant> &map) {
 }
 } // namespace
 
-boost::optional<MantidQt::CustomInterfaces::Row>
+boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
 Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   std::vector<std::string> number;
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
@@ -287,7 +290,7 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
     scaleFactor = map[QString("scaleFactor")].toDouble();
   }
 
-  MantidQt::CustomInterfaces::Row row(
+  MantidQt::CustomInterfaces::ISISReflectometry::Row row(
       number, map[QString("theta")].toDouble(),
       decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
       decodeRangeInQ(map[QString("qRange")].toMap()), scaleFactor,
@@ -380,5 +383,6 @@ void Decoder::decodeEvent(const QtEventView *gui,
       map[QString("logValueTypeEdit")].toString());
 }
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -26,6 +26,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder {
 public:
@@ -54,9 +55,10 @@ private:
                                           bool projectSave,
                                           const ReductionJobs *redJobs);
   QList<QVariant> encodeRunsTableModel(const ReductionJobs *redJobs);
-  QMap<QString, QVariant>
-  encodeGroup(const MantidQt::CustomInterfaces::Group &group);
-  QList<QVariant> encodeRows(const MantidQt::CustomInterfaces::Group &group);
+  QMap<QString, QVariant> encodeGroup(
+      const MantidQt::CustomInterfaces::ISISReflectometry::Group &group);
+  QList<QVariant>
+  encodeRows(const MantidQt::CustomInterfaces::ISISReflectometry::Group &group);
   QMap<QString, QVariant> encodeRangeInQ(const RangeInQ &rangeInQ);
   QMap<QString, QVariant>
   encodeTransmissionRunPair(const TransmissionRunPair &transRunPair);
@@ -64,10 +66,12 @@ private:
   encodeReductionWorkspace(const ReductionWorkspaces &redWs);
   QMap<QString, QVariant>
   encodeReductionOptions(const ReductionOptionsMap &rom);
-  QMap<QString, QVariant> encodeRow(const MantidQt::CustomInterfaces::Row &row);
+  QMap<QString, QVariant>
+  encodeRow(const MantidQt::CustomInterfaces::ISISReflectometry::Row &row);
   QMap<QString, QVariant> encodeSave(const QtSaveView *gui);
   QMap<QString, QVariant> encodeEvent(const QtEventView *gui);
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_ENCODER_H */
