@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace API {
 
-/**
+/*
  * To construct a citation class give it properly formatted bibtex and endnote
  * in it's aptly named fields.
  *
