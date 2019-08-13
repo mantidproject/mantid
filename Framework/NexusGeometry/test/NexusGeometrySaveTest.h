@@ -1145,19 +1145,12 @@ Instrument cache.
                     PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
-    double buffer[static_cast<hsize_t>(3)][static_cast<hsize_t>(3)];
-    tester.readDataSetMultidimensional<3, 3>(buffer, path, VERTICES);
+    std::vector<double> buffer;
+    tester.readDataSetMultidimensional<double>(buffer, path, VERTICES);
 
-    const auto h0 = static_cast<hsize_t>(0);
-    const auto h1 = static_cast<hsize_t>(1);
-    const auto h2 = static_cast<hsize_t>(2);
-    const auto h3 = static_cast<hsize_t>(3);
-    const auto h4 = static_cast<hsize_t>(4);
-    const auto h5 = static_cast<hsize_t>(5);
-
-    Eigen::Vector3d base{buffer[h0][h0], buffer[h0][h1], buffer[h0][h2]};
-    Eigen::Vector3d top{buffer[h1][h0], buffer[h1][h1], buffer[h1][h2]};
-    Eigen::Vector3d edge{buffer[h2][h0], buffer[h2][h1], buffer[h2][h2]};
+    Eigen::Vector3d base{buffer[0], buffer[1], buffer[2]};
+    Eigen::Vector3d top{buffer[3], buffer[4], buffer[5]};
+    Eigen::Vector3d edge{buffer[6], buffer[7], buffer[8]};
 
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
@@ -1199,23 +1192,16 @@ Instrument cache.
                     PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
-    double buffer[static_cast<hsize_t>(12)][static_cast<hsize_t>(3)];
-    tester.readDataSetMultidimensional<12, 3>(buffer, path, VERTICES);
+    std::vector<double> buffer;
+    tester.readDataSetMultidimensional<double>(buffer, path, VERTICES);
 
-    const auto h0 = static_cast<hsize_t>(0);
-    const auto h1 = static_cast<hsize_t>(1);
-    const auto h2 = static_cast<hsize_t>(2);
-    const auto h3 = static_cast<hsize_t>(3);
-    const auto h4 = static_cast<hsize_t>(4);
-    const auto h5 = static_cast<hsize_t>(5);
+    Eigen::Vector3d base1{buffer[0], buffer[1], buffer[2]};
+    Eigen::Vector3d top1{buffer[3], buffer[4], buffer[5]};
+    Eigen::Vector3d edge1{buffer[6], buffer[7], buffer[8]};
 
-    Eigen::Vector3d base1{buffer[h0][h0], buffer[h0][h1], buffer[h0][h2]};
-    Eigen::Vector3d top1{buffer[h1][h0], buffer[h1][h1], buffer[h1][h2]};
-    Eigen::Vector3d edge1{buffer[h2][h0], buffer[h2][h1], buffer[h2][h2]};
-
-    Eigen::Vector3d base2{buffer[h3][h0], buffer[h3][h1], buffer[h3][h2]};
-    Eigen::Vector3d top2{buffer[h4][h0], buffer[h4][h1], buffer[h4][h2]};
-    Eigen::Vector3d edge2{buffer[h5][h0], buffer[h5][h1], buffer[h5][h2]};
+    Eigen::Vector3d base2{buffer[9], buffer[10], buffer[11]};
+    Eigen::Vector3d top2{buffer[12], buffer[13], buffer[14]};
+    Eigen::Vector3d edge2{buffer[15], buffer[16], buffer[17]};
 
     double radiusInFile = std::abs((top1 - edge1).norm());
     double heightInFile = std::abs((base1 - top1).norm());
