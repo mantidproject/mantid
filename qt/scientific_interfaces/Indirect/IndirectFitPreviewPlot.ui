@@ -51,13 +51,13 @@
        <item row="0" column="0">
         <widget class="QSplitter" name="splitter">
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">QSplitter::handle { 
+background-color: #e8e8e8;
+border-radius: 2px;
+}</string>
          </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
-         </property>
-         <property name="handleWidth">
-          <number>20</number>
          </property>
          <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
           <property name="sizePolicy">
@@ -160,6 +160,9 @@
          <width>99</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="text">
+        <string>Fit Single Spectrum</string>
        </property>
       </widget>
      </item>

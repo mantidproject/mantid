@@ -16,8 +16,6 @@ Improved
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` is extended to support also the configurations with the first tube angle at 33.1 degrees.
 - :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` now offers the possibility to enable or disable the detector grouping both for Doppler and BATS modes. By default the pixels will be grouped tube by tube as before.
 
-:ref:`Release 4.2.0 <v4.2.0>`
-
 
 Data Analysis Interface
 ------------------------
@@ -71,3 +69,19 @@ Improvements
 - Improved the output plotting options so that it is now possible to choose a list of spectra
   for plotting. It also possible to do a contour plot using **Plot Contour**.
 - Improved the output plotting options so that they now show the workspace currently selected.
+
+
+The Workbench
+-------------
+
+- The Indirect Bayes GUI has been added to the Workbench.
+- The Indirect Data Analysis GUI has been added to the Workbench.
+
+.. figure:: ../../images/Indirect_Data_Analysis_IqtFit.PNG
+  :class: screenshot
+  :align: center
+  :figwidth: 90%
+  :alt: The Indirect Data Analysis GUI in the Workbench.
+
+
+:ref:`Release 4.2.0 <v4.2.0>`

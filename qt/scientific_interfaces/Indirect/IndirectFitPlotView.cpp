@@ -13,23 +13,6 @@
 #include <QMessageBox>
 #include <QTimer>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidKernel/ConfigService.h"
-#include "MantidQtIcons/Icon.h"
-
-#include <QBuffer>
-#include <QByteArray>
-#include <QFile>
-#include <QResource>
-
-namespace {
-constexpr auto SPLITTER_ICON = "mdi.drag-horizontal";
-
-QIcon icon() { return MantidQt::Icons::getIcon(SPLITTER_ICON); }
-
-} // namespace
-#endif
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -52,20 +35,6 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
           SIGNAL(plotCurrentPreview()));
   connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this,
           SIGNAL(fitSelectedSpectrum()));
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  auto defaultSaveDirectory = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "defaultsave.directory"));
-  QString filename = defaultSaveDirectory + "/pixmapFile.png";
-  auto pixmap = icon().pixmap(QSize(24, 24)).save(filename);
-
-  bool success = QResource::registerResource(filename, ":/qsplitter");
-  m_plotForm->pbFitSingle->setIcon(QIcon(":/qsplitter"));
-#endif
-
-  // m_plotForm->splitter->setStyleSheet(
-  //    "QSplitter::handle { image: url(:/qsplitter-handle); }");
 
   // Avoids squished plots for >qt5
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)

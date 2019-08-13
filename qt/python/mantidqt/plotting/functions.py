@@ -288,12 +288,15 @@ def plotsubplots(workspaces, spectrum_nums=None, wksp_indices=None, errors=False
     else:
         kw, nums = 'wkspIndex', wksp_indices
 
+    number_of_subplots = len(workspaces)*len(nums)
+
     if fig is None:
-        fig, axes, _, number_of_columns = _create_subplots(len(workspaces)*len(nums), fig=fig)
+        fig, axes, number_of_rows, number_of_columns = _create_subplots(number_of_subplots, fig=fig)
     else:
         axes = fig.gca()
 
     # Perform the plotting of subplots
+    subplot_count = 0
     row_index, column_index = 0, 0
     for workspace in workspaces:
         for num in nums:
@@ -322,6 +325,19 @@ def plotsubplots(workspaces, spectrum_nums=None, wksp_indices=None, errors=False
                 column_index = 0
 
             ax.legend().draggable()
+
+            subplot_count += 1
+
+    # Remove the empty subplots which are not used
+    while subplot_count < number_of_rows*number_of_columns:
+        ax = axes[row_index][column_index]
+        ax.axis('off')
+        if column_index < number_of_columns - 1:
+            column_index += 1
+        else:
+            row_index += 1
+            column_index = 0
+        subplot_count += 1
 
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
