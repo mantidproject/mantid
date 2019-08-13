@@ -84,7 +84,7 @@ public:
 
   bool hasCurve(const QString &lineName) const;
 
-  void setOverrideAxisLabel(AxisID const &axisID, char *label);
+  void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
 
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
@@ -139,7 +139,7 @@ private:
   void setScaleType(AxisID id, QString actionName);
   void toggleLegend(const bool checked);
 
-  boost::optional<char *> overrideAxisLabel(AxisID const &axisID);
+  boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
 
   // Canvas objects
@@ -147,7 +147,7 @@ private:
   // Map a line label to the boolean indicating whether error bars are shown
   QHash<QString, bool> m_lines;
   // Map an axis to an override axis label
-  QMap<AxisID, char *> m_axisLabels;
+  QMap<AxisID, char const *> m_axisLabels;
   // Range selector widgets
   QMap<QString, RangeSelector *> m_rangeSelectors;
   // Single selector's

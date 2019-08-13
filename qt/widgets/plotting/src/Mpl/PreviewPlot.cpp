@@ -256,7 +256,8 @@ void PreviewPlot::setTightLayout(QHash<QString, QVariant> const &args) {
  * @param axisID The axis ID (XBottom or YLeft).
  * @param label The override label.
  */
-void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char *label) {
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
+                                       char const *const label) {
   m_axisLabels[axisID] = label;
 }
 
@@ -265,9 +266,11 @@ void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char *label) {
  * @param axisID The axis ID (XBottom or YLeft).
  * @return True if the axis should display an axis label.
  */
-boost::optional<char *> PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
-  if (m_axisLabels.contains(axisID))
-    return m_axisLabels[axisID];
+boost::optional<char const *>
+PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
+  auto const iter = m_axisLabels.find(axisID);
+  if (iter != m_axisLabels.end())
+    return iter.value();
   return boost::none;
 }
 

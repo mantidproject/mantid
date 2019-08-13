@@ -44,10 +44,11 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   m_plotForm->ppPlotTop->setTightLayout(kwargs);
   m_plotForm->ppPlotBottom->setTightLayout(kwargs);
 
+  char const *const overrideLabel = "";
   m_plotForm->ppPlotTop->setOverrideAxisLabel(
-      MantidQt::MantidWidgets::AxisID::XBottom, "");
+      MantidQt::MantidWidgets::AxisID::XBottom, overrideLabel);
   m_plotForm->ppPlotBottom->setOverrideAxisLabel(
-      MantidQt::MantidWidgets::AxisID::YLeft, "");
+      MantidQt::MantidWidgets::AxisID::YLeft, overrideLabel);
 #endif
 
   m_plotForm->cbDataSelection->hide();
