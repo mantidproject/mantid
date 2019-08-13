@@ -121,8 +121,6 @@ public:
 private:
   /// Parse geometry provided with a string representing geometry.
   void parse(const std::string &jsonGeometry);
-  /// clear all geometry information
-  void reset() noexcept;
   void validateAndRetrieveGeometry(const std::string &jsonGeometry);
   void extractDetectorContent();
   void extractMonitorContent();

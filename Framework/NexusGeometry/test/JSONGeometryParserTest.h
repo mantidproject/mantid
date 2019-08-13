@@ -63,29 +63,31 @@ public:
 
   void test_parse_fail_if_no_detector_ids_in_json() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoDetectorIDs();
-    attemptParseInvalidArgument(json, "No detector ids found in json.");
+    attemptParseInvalidArgument(json, "No detector ids found in detector_1.");
   }
 
   void test_parse_fail_if_no_x_pixel_offset_in_json() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoXPixelOffset();
-    attemptParseInvalidArgument(json, "No x_pixel_offsets found in json.");
+    attemptParseInvalidArgument(json,
+                                "No x_pixel_offsets found in detector_1.");
   }
 
   void test_parse_fail_if_no_y_pixel_offset_in_json() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoYPixelOffset();
-    attemptParseInvalidArgument(json, "No y_pixel_offsets found in json.");
+    attemptParseInvalidArgument(json,
+                                "No y_pixel_offsets found in detector_1.");
   }
 
   void test_parse_fail_if_no_pixel_shape_in_json() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoPixelShape();
     attemptParseInvalidArgument(
-        json, "Insufficient pixel shape information found in json.");
+        json, "Insufficient pixel shape information found in detector_1.");
   }
 
   void test_parse_fail_for_empty_off_geometry_in_json() {
     std::string json = Mantid::TestHelpers::getJSONGeometryEmptyOffGeometry();
     attemptParseInvalidArgument(
-        json, "Insufficient pixel shape information found in json.");
+        json, "Insufficient pixel shape information found in detector_1.");
   }
 
   void test_parse_fail_for_invalid_off_geometry_in_json() {
@@ -98,7 +100,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getJSONGeometryEmptyCylindricalGeometry();
     attemptParseInvalidArgument(
-        json, "Insufficient pixel shape information found in json.");
+        json, "Insufficient pixel shape information found in detector_1.");
   }
 
   void test_parse_fail_for_invalid_cylindrical_geometry_in_json() {
@@ -111,21 +113,27 @@ public:
   void test_parse_fail_for_missing_transformation_dependency() {
     std::string json =
         Mantid::TestHelpers::getJSONGeometryMissingTransformations();
-    attemptParseInvalidArgument(json,
-                                "Could not find dependency in json provided.");
+    attemptParseInvalidArgument(json, "Could not find dependency "
+                                      "/entry/instrument/detector_1/"
+                                      "transformations/location in json "
+                                      "provided.");
   }
 
   void test_parse_fail_for_missing_transformation_beam_direction_offset() {
     std::string json =
         Mantid::TestHelpers::getJSONGeometryMissingBeamDirectionOffset();
-    attemptParseInvalidArgument(json,
-                                "Could not find dependency in json provided.");
+    attemptParseInvalidArgument(json, "Could not find dependency "
+                                      "/entry/instrument/detector_1/"
+                                      "transformations/beam_direction_offset "
+                                      "in json provided.");
   }
 
   void test_parse_fail_for_missing_transformation_orientation() {
     std::string json = Mantid::TestHelpers::getJSONGeometryMissingOrientation();
-    attemptParseInvalidArgument(json,
-                                "Could not find dependency in json provided.");
+    attemptParseInvalidArgument(json, "Could not find dependency "
+                                      "/entry/instrument/detector_1/"
+                                      "transformations/orientation in json "
+                                      "provided.");
   }
 
   void test_parse_fail_for_empty_chopper() {

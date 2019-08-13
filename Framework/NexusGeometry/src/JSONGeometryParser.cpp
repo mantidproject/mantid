@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexusGeometry/JSONGeometryParser.h"
+#include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 namespace {
 using namespace Mantid::NexusGeometry;
+Mantid::Kernel::Logger g_log("JSONGeometryParser");
 
 // Json-specific Constants
 const std::string CHILDREN = "children";
@@ -28,7 +30,7 @@ bool validateNXAttribute(const Json::Value &attributes,
 Json::Value get(const Json::Value &entry, const std::string &NXAttribute) {
   Json::Value item;
   for (const auto &child : entry) {
-    auto attributes = child[ATTRIBUTES];
+    const auto &attributes = child[ATTRIBUTES];
     if (!attributes.isNull() && validateNXAttribute(attributes, NXAttribute)) {
       item = child;
       break;
@@ -103,14 +105,14 @@ void recursiveFill(const Json::Value &jsonArray, std::vector<T> &fillArray) {
 void recursiveDependencySearch(const Json::Value &parent,
                                std::vector<std::string> &values) {
   auto name = parent[NAME].asString();
-  const auto &children = parent[CHILDREN];
 
   if (!values.empty() && parent[NAME] == values.back())
     values.pop_back();
 
-  if (children.isNull())
+  if (!parent.isMember(CHILDREN))
     return;
 
+  const auto &children = parent[CHILDREN];
   for (const auto &child : children)
     recursiveDependencySearch(child, values);
 }
@@ -218,22 +220,25 @@ void verifyDependency(const Json::Value &root, const Json::Value &dependency) {
 
   // Left over values suggests the dependency could not be found
   if (!values.empty())
-    throw std::invalid_argument("Could not find dependency in json provided.");
+    throw std::invalid_argument("Could not find dependency " + path +
+                                " in json provided.");
 }
 
-void getTransformationAttributeVector(const Json::Value &root,
-                                      const Json::Value &attributes,
-                                      std::vector<double> &vec) {
+Eigen::Vector3d getTransformationAxis(const Json::Value &root,
+                                      const Json::Value &attributes) {
+  std::vector<double> axis;
   for (const auto &attribute : attributes) {
     if (attribute[NAME] == DEPENDS_ON)
       verifyDependency(root, attribute);
     else if (attribute[NAME] == "vector") {
       const auto &values = attribute[VALUES];
-      vec.resize(values.size());
-      std::transform(values.begin(), values.end(), vec.begin(),
+      axis.resize(values.size());
+      std::transform(values.begin(), values.end(), axis.begin(),
                      [](const Json::Value &val) { return val.asDouble(); });
     }
   }
+
+  return Eigen::Vector3d(axis[0], axis[1], axis[2]);
 }
 
 void extractStream(const Json::Value &group, std::string &topic,
@@ -298,25 +303,6 @@ namespace NexusGeometry {
 
 JSONGeometryParser::JSONGeometryParser(const std::string &json) { parse(json); }
 
-void JSONGeometryParser::reset() noexcept {
-  m_jsonDetectorBanks.clear();
-  m_jsonChoppers.clear();
-  m_jsonMonitors.clear();
-  m_detectorBankNames.clear();
-  m_detIDs.clear();
-  m_monitors.clear();
-  m_pixelShapeCylinders.clear();
-  m_pixelShapeFaces.clear();
-  m_pixelShapeVertices.clear();
-  m_pixelShapeWindingOrder.clear();
-  m_translations.clear();
-  m_orientations.clear();
-  m_x.clear();
-  m_y.clear();
-  m_z.clear();
-  m_isOffGeometry.clear();
-}
-
 void JSONGeometryParser::validateAndRetrieveGeometry(
     const std::string &jsonGeometry) {
   auto root = getRoot(jsonGeometry);
@@ -367,9 +353,7 @@ void JSONGeometryParser::extractTransformationDataset(
     const Json::Value &transformation, double &value, Eigen::Vector3d &axis) {
   std::vector<double> values;
   extractDatasetValues(transformation, values);
-  std::vector<double> vec;
-  getTransformationAttributeVector(m_root, transformation[ATTRIBUTES], vec);
-  axis = Eigen::Vector3d(vec[0], vec[1], vec[2]);
+  axis = getTransformationAxis(m_root, transformation[ATTRIBUTES]);
   value = values[0];
 }
 
@@ -439,17 +423,17 @@ void JSONGeometryParser::extractDetectorContent() {
                                m_orientations.back());
       }
     }
-
+    auto name = detector[NAME].asString();
     if (detIDs.empty())
-      throw std::invalid_argument("No detector ids found in json.");
+      throw std::invalid_argument("No detector ids found in " + name + ".");
     if (x.empty())
-      throw std::invalid_argument("No x_pixel_offsets found in json.");
+      throw std::invalid_argument("No x_pixel_offsets found in " + name + ".");
     if (y.empty())
-      throw std::invalid_argument("No y_pixel_offsets found in json.");
+      throw std::invalid_argument("No y_pixel_offsets found in " + name + ".");
     if (!validateShapeInformation(isOffGeometry, vertices, cylinders, faces,
                                   windingOrder))
       throw std::invalid_argument(
-          "Insufficient pixel shape information found in json.");
+          "Insufficient pixel shape information found in " + name + ".");
 
     m_detIDs.emplace_back(std::move(detIDs));
     m_x.emplace_back(std::move(x));
@@ -494,6 +478,11 @@ void JSONGeometryParser::extractMonitorContent() {
       else if (child[NAME] == DEPENDS_ON)
         verifyDependency(m_root, child);
     }
+
+    if (validateShapeInformation(mon.isOffGeometry, mon.vertices, mon.cylinders,
+                                 mon.faces, mon.windingOrder))
+      g_log.notice() << "No valid shape information provided for mintor "
+                     << mon.componentName << std::endl;
 
     m_monitors.emplace_back(std::move(mon));
   }
@@ -540,7 +529,6 @@ hdf5 nexus structure.
 @throws std::invalid_argument if the geometry string is invalid.
 */
 void JSONGeometryParser::parse(const std::string &jsonGeometry) {
-  reset();
   // Throws when there are issues with the geometry. Performs shallow test for
   // NXEntry, NXSample, NXInstrument and all NXDetector instances.
   validateAndRetrieveGeometry(jsonGeometry);

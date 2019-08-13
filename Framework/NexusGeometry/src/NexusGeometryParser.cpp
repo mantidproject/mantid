@@ -34,8 +34,6 @@ using namespace H5;
 
 // Anonymous namespace
 namespace {
-const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
-const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 using FaceV = std::vector<Eigen::Vector3d>;
 
 struct Face {
