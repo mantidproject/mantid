@@ -1203,14 +1203,20 @@ Instrument cache.
     Eigen::Vector3d top2{buffer[12], buffer[13], buffer[14]};
     Eigen::Vector3d edge2{buffer[15], buffer[16], buffer[17]};
 
-    double radiusInFile = std::abs((top1 - edge1).norm());
-    double heightInFile = std::abs((base1 - top1).norm());
+	Eigen::Vector3d radiusVector1 = (top1 - edge1);
+    Eigen::Vector3d heightVector1 = (base1 - top1);
 
-    double radiusInFile2 = std::abs((top2 - edge2).norm());
-    double heightInFile2 = std::abs((base2 - top2).norm());
+	Eigen::Vector3d radiusVector2 = (top2 - edge2);
+    Eigen::Vector3d heightVector2 = (base2 - top2);
 
-    TS_ASSERT_DIFFERS(radiusInFile, radiusInFile2);
-    TS_ASSERT_DIFFERS(heightInFile, heightInFile2);
+    double radiusInFile1 = std::abs(radiusVector1.norm());
+    double heightInFile1 = std::abs(heightVector1.norm());
+
+    double radiusInFile2 = std::abs(radiusVector2.norm());
+    double heightInFile2 = std::abs(heightVector2.norm());
+
+    TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
+    TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
   }
 };
 
