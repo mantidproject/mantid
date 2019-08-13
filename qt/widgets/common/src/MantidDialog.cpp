@@ -19,11 +19,8 @@ using namespace MantidQt::API;
 /**
  * Default Constructor
  */
-MantidDialog::MantidDialog(QWidget *parent) : QDialog(parent), m_pyRunner() {
-  // remove redundant help button
-  Qt::WindowFlags flags =
-      Qt::WindowCloseButtonHint | Qt::WindowType::WindowTitleHint;
-  this->setWindowFlags(flags);
+MantidDialog::MantidDialog(QWidget *parent, Qt::WindowFlags flags)
+    : QDialog(parent, flags), m_pyRunner() {
   // re-emit the run Python code from m_pyRunner, to work this signal must reach
   // the slot in QtiPlot
   connect(&m_pyRunner, SIGNAL(runAsPythonScript(const QString &, bool)), this,
