@@ -414,7 +414,15 @@ if(ENABLE_CPACK)
            # rendering - oddly matplotlib-qt4 contains qt5 backend as well
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},python2-QtPy,boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
+        "${CPACK_RPM_PACKAGE_REQUIRES},"
+        "boost169-date-time,"
+        "boost169-regex,"
+        "boost169-serialization,"
+        "boost169-filesystem,"
+        "boost169-system,"
+        "boost169-python2,"
+        "python2-QtPy,"
+        "python2-matplotlib-qt4 >= 1.5.2"
         )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES

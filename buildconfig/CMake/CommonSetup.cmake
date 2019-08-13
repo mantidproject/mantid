@@ -43,8 +43,17 @@ set ( TESTING_TIMEOUT 300 CACHE STRING
 # target.
 ###########################################################################
 
+set ( BOOST_VERSION_REQUIRED 1.63.0 )
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost 1.53.0 REQUIRED date_time regex serialization filesystem system)
+# Unless specified see if the boost169 package is installed
+if ( EXISTS /usr/lib64/boost169 AND NOT (BOOST_LIBRARYDIR OR BOOST_INCLUDEDIR) )
+  message(STATUS "Using boost169 package in /usr/lib64/boost169")
+  set ( BOOST_INCLUDEDIR /usr/include/boost169 )
+  set ( BOOST_LIBRARYDIR /usr/lib64/boost169 )
+endif()
+find_package ( Boost ${BOOST_VERSION_REQUIRED} REQUIRED COMPONENTS
+               date_time regex serialization filesystem system)
+
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )

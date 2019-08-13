@@ -9,6 +9,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+
+#if BOOST_VERSION == 106900
+#ifndef BOOST_PENDING_INTEGER_LOG2_HPP
+#define BOOST_PENDING_INTEGER_LOG2_HPP
+#include <boost/integer/integer_log2.hpp>
+#endif /* BOOST_PENDING_INTEGER_LOG2_HPP */
+#endif /* BOOST_VERSION */
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
