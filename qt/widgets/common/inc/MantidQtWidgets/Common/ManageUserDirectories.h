@@ -18,7 +18,10 @@ class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories : public QDialog {
   Q_OBJECT
 
 public:
-  ManageUserDirectories(QWidget *parent = nullptr);
+  ManageUserDirectories(
+      QWidget *parent = nullptr,
+      Qt::WindowFlags flags = Qt::WindowCloseButtonHint |
+                              Qt::WindowType::WindowTitleHint);
   ~ManageUserDirectories() override;
   static void openUserDirsDialog(QWidget *parent);
   void setHelpButtonVisible(const bool &visible);

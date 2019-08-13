@@ -22,7 +22,10 @@ add custom scripts or custom Qt interfaces to a menu in MantidPlot.
 class ManageCustomMenus : public QDialog {
   Q_OBJECT
 public:
-  explicit ManageCustomMenus(QWidget *parent = nullptr);
+  explicit ManageCustomMenus(
+      QWidget *parent = nullptr,
+      Qt::WindowFlags flags = Qt::WindowCloseButtonHint |
+                              Qt::WindowType::WindowTitleHint);
 
 private:
   void initLayout();
