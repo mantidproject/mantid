@@ -10,7 +10,7 @@
 
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
-#include <Eigen/dense>
+#include <Eigen/Dense>
 #include <H5Cpp.h>
 #include <boost/filesystem.hpp>
 #include <string>
