@@ -1159,7 +1159,7 @@ Instrument cache.
                     1e-5); // radii are approx equal
     TS_ASSERT_DELTA(heightInFile, cylinderHeight,
                     1e-5); // heights are approx equal
-    //TS_ASSERT(base.isApprox(
+    // TS_ASSERT(base.isApprox(
     //    Eigen::Vector3d{0, 0, 0})); // base positions are approx equal
   }
 
@@ -1174,7 +1174,7 @@ Instrument cache.
      cylinder from the top face that is orthogonal to the axis. This test will
      access the height and radius of the first two cylinders, and verify that
      they are different."
-    
+    
 
     // create RAII file resource for testing
     ScopedFileHandle fileResource("test_inhomogeneous_cylindrical.hdf5");
@@ -1217,7 +1217,7 @@ Instrument cache.
 
     TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
     TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
-	*/
+        */
   }
 };
 
