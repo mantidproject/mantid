@@ -1174,8 +1174,7 @@ Instrument cache.
      cylinder from the top face that is orthogonal to the axis. This test will
      access the height and radius of the first two cylinders, and verify that
      they are different."
-    
-
+        */	  /*
     // create RAII file resource for testing
     ScopedFileHandle fileResource("test_inhomogeneous_cylindrical.hdf5");
     std::string destinationFile = fileResource.fullPath();
