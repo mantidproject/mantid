@@ -47,7 +47,6 @@ class HomeTabPlotModelTest(unittest.TestCase):
         self.assertEquals(self.model.plotted_workspaces_inverse_binning,{})
         self.assertEquals(self.model.plotted_fit_workspaces, [])
 
-
     @mock.patch('Muon.GUI.Common.home_plot_widget.home_plot_widget_model.plot')
     def test_plot_logic_force_new(self,mock_plot):
 

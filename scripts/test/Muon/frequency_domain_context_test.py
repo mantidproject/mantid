@@ -86,7 +86,6 @@ class MuonFreqContextTest(unittest.TestCase):
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]],group=["fwd","top"],pair=[],phasequad=False,frequency_type="Im")
         six.assertCountEqual(self,output,[])
 
-
     def test_get_freq_names_FFT_run(self):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
@@ -94,7 +93,6 @@ class MuonFreqContextTest(unittest.TestCase):
 
         output = self.context.get_frequency_workspace_names(run_list=[["62261","62262"]],group=["fwd","top"],pair=[],phasequad=False,frequency_type="FFT All")
         six.assertCountEqual(self,output,[FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD])
-
 
     def test_get_freq_names_FFT_group(self):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)

@@ -57,14 +57,12 @@ class HomeTabPlotPresenterFreqTest(unittest.TestCase):
         self.presenter.handle_plot_type_changed()
         self.assertEquals(self.context._frequency_context.plot_type, "")
 
-
     def test_get_workspace_to_plot(self):
         self.view.get_selected.return_value =  "Frequency Re"
         self.presenter.get_freq_workspaces_to_plot = mock.Mock()
 
         self.presenter.get_workspaces_to_plot("fwd",True, self.view.get_selected() )
         self.assertEquals(self.presenter.get_freq_workspaces_to_plot.call_count, 1)
-
 
     def test_get_workspaces_to_plot_freq(self):
         self.view.get_selected.return_value =  "Frequency Re"
@@ -74,7 +72,6 @@ class HomeTabPlotPresenterFreqTest(unittest.TestCase):
 
         self.assertEquals(self.context.get_names_of_frequency_domain_workspaces_to_fit.call_count, 1)
         self.context.get_names_of_frequency_domain_workspaces_to_fit.assert_called_once_with("62260", "fwd", True, "Re")
-
 
     def test_get_2_workspaces_to_plot_freq(self):
         self.view.get_selected.return_value =  "Frequency Re"
