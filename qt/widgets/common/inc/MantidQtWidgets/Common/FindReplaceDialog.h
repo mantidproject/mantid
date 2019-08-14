@@ -33,7 +33,9 @@ class EXPORT_OPT_MANTIDQT_COMMON FindReplaceDialog : public QDialog {
 
 public:
   /// Constructor
-  FindReplaceDialog(ScriptEditor *editor, Qt::WindowFlags fl = nullptr);
+  FindReplaceDialog(ScriptEditor *editor,
+                    Qt::WindowFlags fl = Qt::WindowCloseButtonHint |
+                                         Qt::WindowType::WindowTitleHint);
 
 protected:
   /// Create the layout

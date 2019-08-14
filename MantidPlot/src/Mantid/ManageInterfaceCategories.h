@@ -74,7 +74,9 @@ class ManageInterfaceCategories : public QDialog {
 
 public:
   /// Only constructor.  We insist on seeing the ApplicationWindow.
-  explicit ManageInterfaceCategories(ApplicationWindow *parent);
+  explicit ManageInterfaceCategories(ApplicationWindow *parent,
+      Qt::WindowFlags flags = Qt::WindowCloseButtonHint |
+                              Qt::WindowType::WindowTitleHint);
 
 private slots:
   /// Slot to open the help web page.
