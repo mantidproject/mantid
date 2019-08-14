@@ -239,6 +239,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             except:
                 continue
 
+        if element in self.element_lines and not self.element_lines[element]:
+            del self.element_lines[element]
+
     # loading
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
@@ -247,7 +250,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plotting = self.plot_window.multi_plot
             self.add_detector_to_plot(detector, name)
             self.plotting.set_all_values()
-            self.plotting.removeSubplotConnection(self.subplotRemoved)
+            self.plotting.removeSubplotConnection(self.subplot_removed)
             self.plot_window.show()
             # untick detectors if plot window is closed
             self.plot_window.windowClosedSignal.connect(self._unset_detectors)
@@ -328,7 +331,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.plot_window.close()
                 self.plot_window = None
 
-    def subplotRemoved(self, name):
+    def subplot_removed(self, name):
         # need to change the state without sending signal
         # as the plot has already been removed
         self.detectors.setStateQuietly(name, False)
@@ -346,9 +349,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         filename = str(filename)
         if filename:
             self.ptable.set_peak_datafile(filename)
-        # these are commneted out as they are a bug
-        # see issue 25326
-        # self._clear_lines_after_data_file_selected()
+
         try:
             self._generate_element_widgets()
         except ValueError:
@@ -364,7 +365,28 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
                 self.ptable.select_element(element)
             else:
                 self._remove_element_lines(element)
-        # self._generate_element_data()
+        self._update_checked_data()
+
+    def _update_checked_data(self):
+        if self.peaks.major.isChecked():
+            self.major_peaks_checked()
+        else:
+            self.major_peaks_unchecked()
+
+        if self.peaks.minor.isChecked():
+            self.minor_peaks_checked()
+        else:
+            self.minor_peaks_unchecked()
+
+        if self.peaks.gamma.isChecked():
+            self.gammas_checked()
+        else:
+            self.gammas_unchecked()
+
+        if self.peaks.electron.isChecked():
+            self.electrons_checked()
+        else:
+            self.electrons_unchecked()
 
     # general checked data
     def checked_data(self, element, selection, state):
