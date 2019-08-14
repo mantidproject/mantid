@@ -14,9 +14,6 @@
 
 namespace Mantid {
 namespace Geometry {
-class RectangularDetector;
-class StructuredDetector;
-class IObjComponent;
 
 /** ShapeInfo : Stores shape types and information relevant to drawing the
 shape. For cylinders, spheres and cones, height and radius are stored. Points

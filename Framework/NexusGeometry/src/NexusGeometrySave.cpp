@@ -387,6 +387,7 @@ inline void writePixelData(H5::Group &grp,
         }
       }
     }
+
     writePixelShape(pixelShapeGroup, nCylinders, vertices);
   }
 

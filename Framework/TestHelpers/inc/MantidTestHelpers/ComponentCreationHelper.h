@@ -166,6 +166,7 @@ createVectorOfCylindricalDetectors(const double R_min = 4.5,
  * @param xMax :: x-max for bank
  * @param yMin :: y-min for bank (use offsets to shift individual tubes)
  * @param yMax :: y-max for bank (use offsets to shift individual tubes)
+ * @param inhomogeneous :: cylinder heights are dissimilar if true
  * @return Instrument with single bank as described by parameters.
  */
 Mantid::Geometry::Instrument_sptr
