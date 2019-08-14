@@ -27,7 +27,7 @@ additional properties:
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------------------+
 
 If Function defines a one-dimensional function and InputWorkspace is a
-:ref:`TableWorkspace <TableWorkspace>` the algorithm will have these
+:ref:`Table Workspace <Table Workspaces>` the algorithm will have these
 additional properties:
 
 +------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
@@ -51,7 +51,7 @@ Overview
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
 Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` and
-:ref:`TableWorkspace <TableWorkspace> for fitting with a IFunction1D and
+:ref:`Table Workspace <Table Workspaces>` for fitting with a IFunction1D and
 :ref:`MDWorkspace <MDWorkspace>` for fitting with IFunctionMD.
 After Function and InputWorkspace properties are set the algorithm may decide
 that it needs more information from the caller to locate the fitting data.

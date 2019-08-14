@@ -246,8 +246,8 @@ void TableWorkspaceDomainCreator::createDomain(
   // find the fitting interval: from -> to
   size_t endRowNo = 0;
   std::tie(m_startRowNo, endRowNo) = getXInterval();
-  auto from = static_cast<size_t>(XData[0]) + m_startRowNo;
-  auto to = static_cast<size_t>(XData[0]) + endRowNo;
+  auto from = XData.begin() + m_startRowNo;
+  auto to = XData.begin() + endRowNo;
   auto n = endRowNo - m_startRowNo;
 
   if (m_domainType != Simple) {
@@ -262,7 +262,7 @@ void TableWorkspaceDomainCreator::createDomain(
         size_t k = m + m_maxSize;
         if (k > n)
           k = n;
-        creator->setRange(XData[from + m], XData[from + k - 1.0]);
+        creator->setRange(*(from + m), *(from + k - 1));
         seqDomain->addCreator(API::IDomainCreator_sptr(creator));
         m = k;
       }
@@ -273,8 +273,7 @@ void TableWorkspaceDomainCreator::createDomain(
   }
 
   // set function domain
-  domain.reset(new API::FunctionDomain1DVector(XData.begin() + from,
-                                               XData.begin() + to));
+  domain.reset(new API::FunctionDomain1DVector(from, to));
 
   if (!values) {
     values.reset(new API::FunctionValues(*domain));
