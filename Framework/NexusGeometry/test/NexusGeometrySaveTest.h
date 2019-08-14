@@ -1145,8 +1145,8 @@ Instrument cache.
                     PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
-    std::vector<double> buffer;
-    tester.readDataSetMultidimensional<double>(buffer, path, VERTICES);
+    std::vector<double> buffer =
+        tester.readDataSetMultidimensional<double>(path, VERTICES);
 
     Eigen::Vector3d base{buffer[0], buffer[1], buffer[2]};
     Eigen::Vector3d top{buffer[3], buffer[4], buffer[5]};
@@ -1192,8 +1192,8 @@ Instrument cache.
                     PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
-    std::vector<double> buffer;
-    tester.readDataSetMultidimensional<double>(buffer, path, VERTICES);
+    std::vector<double> buffer =
+        tester.readDataSetMultidimensional<double>(path, VERTICES);
 
     Eigen::Vector3d base1{buffer[0], buffer[1], buffer[2]};
     Eigen::Vector3d top1{buffer[3], buffer[4], buffer[5]};

@@ -18,7 +18,7 @@
 
 /*
  * NexusFileReader: Test utility for unit testing in
- * NexusGeometrySave::saveInstrument
+ * NexusGeometrySave::saveInstrument.
  *
  * @author Takudzwa Makoni, RAL (UKRI), ISIS
  * @date 06/08/2019
@@ -36,6 +36,40 @@ std::string toNXPathString(FullNXPath &path) {
   return pathString;
 }
 
+// ported from NexusGeometryParser, for validating storage type of dataset
+// before reading its contents into a container
+template <typename ExpectedT>
+void validateStorageType(const H5::DataSet &data) {
+
+  const auto typeClass = data.getTypeClass();
+  const size_t sizeOfType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data.
+  if (std::is_floating_point<ExpectedT>::value) {
+    if (H5T_FLOAT != typeClass) {
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a "
+                               "floating point number");
+    }
+    if (sizeOfType != sizeof(ExpectedT)) {
+      throw std::runtime_error(
+          "Storage type mismatch for floats. This operation "
+          "is dangerous. Nexus stored has byte size:" +
+          std::to_string(sizeOfType));
+    }
+  } else if (std::is_integral<ExpectedT>::value) {
+    if (H5T_INTEGER != typeClass) {
+      throw std::runtime_error(
+          "Storage type mismatch. Expecting to extract a integer");
+    }
+    if (sizeOfType > sizeof(ExpectedT)) {
+      // endianness not checked
+      throw std::runtime_error(
+          "Storage type mismatch for integer. Result "
+          "would result in truncation. Nexus stored has byte size:" +
+          std::to_string(sizeOfType));
+    }
+  }
+}
+
 // test utility used for validation of the structure of a nexus file as needed
 // for unit tests in Nexus Geometry.
 class NexusFileReader {
@@ -50,18 +84,24 @@ public:
       m_file.openFile(fullPath, H5F_ACC_RDONLY);
     }
   }
+
+  // read a multidimensional dataset and returns vector containing the data
   template <typename T>
-  void readDataSetMultidimensional(std::vector<T> &data,
-                                   FullNXPath &pathToGroup,
-                                   std::string dataSetName) {
+  std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
+                                             std::string dataSetName) {
+
+    std::vector<T> dataInFile;
 
     // open dataset and read.
     H5::Group parentGroup = openfullH5Path(pathToGroup);
     H5::DataSet dataset = parentGroup.openDataSet(dataSetName);
+
+    validateStorageType<T>(dataset);
     auto space = dataset.getSpace();
 
-    data.resize(space.getSelectNpoints());
-    dataset.read(data.data(), dataset.getDataType(), space);
+    dataInFile.resize(space.getSelectNpoints());
+    dataset.read(dataInFile.data(), dataset.getDataType(), space);
+    return dataInFile;
   }
 
   /* safely open a HDF5 group path with additional helpful
