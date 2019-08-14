@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 bool isEntirelyWhitespace(std::string const &string) {
   return std::all_of(string.cbegin(), string.cend(),
@@ -70,5 +71,6 @@ boost::optional<int> parseNonNegativeInt(std::string string) {
   else
     return boost::none;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

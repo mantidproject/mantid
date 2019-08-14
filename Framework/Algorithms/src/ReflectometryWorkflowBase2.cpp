@@ -624,8 +624,8 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(
                                "provide processing instructions manually or "
                                "set analysis mode to 'MultiDetectorAnalysis'.");
 
-    const int detStart = static_cast<int>(pointStart[0]);
-    const int detStop = static_cast<int>(pointStop[0]);
+    const auto detStart = static_cast<int>(pointStart[0]);
+    const auto detStop = static_cast<int>(pointStop[0]);
 
     auto instructions = std::to_string(detStart);
     if (detStart != detStop)

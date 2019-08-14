@@ -12,6 +12,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MockEventView : public IEventView {
 public:
@@ -33,6 +34,7 @@ public:
   MOCK_METHOD0(enableSliceTypeSelection, void());
   MOCK_METHOD0(disableSliceTypeSelection, void());
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

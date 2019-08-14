@@ -913,9 +913,11 @@ void PropertyHandler::updateAttributes() {
  * @param attribute :: An attribute of the function
  */
 void PropertyHandler::updateAttribute(QtProperty *attribute) {
-  auto const attributeValue =
-      function()->getAttribute(attribute->propertyName().toStdString());
-  setAttribute(attribute->propertyName(), attributeValue);
+  if (m_attributes.contains(attribute)) {
+    auto const attributeValue =
+        function()->getAttribute(attribute->propertyName().toStdString());
+    setAttribute(attribute->propertyName(), attributeValue);
+  }
 }
 
 /**

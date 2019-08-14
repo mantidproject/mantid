@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -60,17 +61,25 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
 }
 
-void updateTransmissionRangeProperties(
+void updateTransmissionStitchProperties(
     AlgorithmRuntimeProps &properties,
-    boost::optional<RangeInLambda> const &range) {
-  if (!range)
-    return;
+    TransmissionStitchOptions const &options) {
+  auto range = options.overlapRange();
+  if (range) {
+    if (range->minSet())
+      AlgorithmProperties::update("StartOverlap", range->min(), properties);
 
-  if (range->minSet())
-    AlgorithmProperties::update("StartOverlap", range->min(), properties);
+    if (range->maxSet())
+      AlgorithmProperties::update("EndOverlap", range->max(), properties);
+  }
 
-  if (range->maxSet())
-    AlgorithmProperties::update("EndOverlap", range->max(), properties);
+  if (!options.rebinParameters().empty()) {
+    AlgorithmProperties::update("Params", options.rebinParameters(),
+                                properties);
+  }
+
+  AlgorithmProperties::update("ScaleRHSWorkspace", options.scaleRHS(),
+                              properties);
 }
 
 void updatePolarizationCorrectionProperties(
@@ -79,18 +88,7 @@ void updatePolarizationCorrectionProperties(
   if (corrections.correctionType() == PolarizationCorrectionType::None)
     return;
 
-  AlgorithmProperties::update(
-      "PolarizationAnalysis",
-      polarizationCorrectionTypeToString(corrections.correctionType()),
-      properties);
-
-  if (corrections.correctionType() == PolarizationCorrectionType::PA ||
-      corrections.correctionType() == PolarizationCorrectionType::PNR) {
-    AlgorithmProperties::update("CRho", corrections.cRho(), properties);
-    AlgorithmProperties::update("CAlpha", corrections.cRho(), properties);
-    AlgorithmProperties::update("CAp", corrections.cRho(), properties);
-    AlgorithmProperties::update("CPp", corrections.cRho(), properties);
-  }
+  AlgorithmProperties::update("PolarizationAnalysis", true, properties);
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,
@@ -118,8 +116,8 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties,
                               properties);
   AlgorithmProperties::update("IncludePartialBins",
                               experiment.includePartialBins(), properties);
-  updateTransmissionRangeProperties(properties,
-                                    experiment.transmissionRunRange());
+  updateTransmissionStitchProperties(properties,
+                                     experiment.transmissionStitchOptions());
   updatePolarizationCorrectionProperties(properties,
                                          experiment.polarizationCorrections());
   updateFloodCorrectionProperties(properties, experiment.floodCorrections());
@@ -132,6 +130,9 @@ void updatePerThetaDefaultProperties(AlgorithmRuntimeProps &properties,
 
   updateTransmissionWorkspaceProperties(
       properties, perThetaDefaults->transmissionWorkspaceNames());
+  AlgorithmProperties::update(
+      "TransmissionProcessingInstructions",
+      perThetaDefaults->transmissionProcessingInstructions(), properties);
   updateMomentumTransferProperties(properties, perThetaDefaults->qRange());
   AlgorithmProperties::update("ScaleFactor", perThetaDefaults->scaleFactor(),
                               properties);
@@ -311,5 +312,6 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model) {
   updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
   return properties;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

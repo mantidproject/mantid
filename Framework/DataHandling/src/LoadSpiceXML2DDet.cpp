@@ -513,9 +513,9 @@ LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
 
   // read detector size (row and column)
   infile.read((char *)&buffer, sizeof(buffer));
-  size_t num_rows = static_cast<size_t>(buffer);
+  auto num_rows = static_cast<size_t>(buffer);
   infile.read((char *)&buffer, sizeof(buffer));
-  size_t num_cols = static_cast<size_t>(buffer);
+  auto num_cols = static_cast<size_t>(buffer);
   if (num_rows * num_cols != num_dets) {
     g_log.error() << "Input binary file " << binary_file_name
                   << " has inconsistent specification "
@@ -555,7 +555,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   for (size_t i = 0; i < numspec; ++i) {
     outws->mutableX(i)[0] = 0.;
     outws->mutableX(i)[1] = 1;
-    double counts = static_cast<double>(vec_counts[i]);
+    auto counts = static_cast<double>(vec_counts[i]);
     outws->mutableY(i)[0] = counts;
     if (counts > 0.5)
       outws->mutableE(i)[0] = sqrt(counts);

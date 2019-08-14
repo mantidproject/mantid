@@ -18,7 +18,7 @@ set PYTHONPATH=%_BIN_DIR%;%PYTHONPATH%@PARAVIEW_PYTHON_PATHS@
 
 :: Python drivers
 set _PYTHON_EXE=%PYTHONHOME%\python.exe
-set _JUPYTER_CMD=%PYTHONHOME%\Scripts\jupyter.cmd
+set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
 
 :: QtPy should use Qt4 by unless specified
 if "%QT_API%"=="" (
@@ -42,7 +42,7 @@ if "%1"=="--classic" (
 )
 
 :: Start ipython and pass through all arguments to it
-start "Mantid Python" /B /WAIT %_JUPYTER_CMD% %*
+start "Mantid Python" /B /WAIT %_IPYTHON_CMD% %*
 if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 goto TheEnd
 

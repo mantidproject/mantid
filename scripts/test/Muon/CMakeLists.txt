@@ -45,8 +45,6 @@ set ( TEST_PY_FILES
    muon_data_context_test.py
    muon_gui_context_test.py
    muon_group_pair_context_test.py
-   PeriodicTableModel_test.py
-   PeriodicTablePresenter_test.py
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
@@ -62,11 +60,21 @@ set ( TEST_PY_FILES
    utilities/run_string_utils_conversion_test.py
    help_widget_presenter_test.py
    xml_utils_test.py
+   elemental_analysis/elemental_analysis_test.py
+   elemental_analysis/name_generator_test.py
+   elemental_analysis/detectors_presenter_test.py
+   elemental_analysis/periodic_table_test.py
+   elemental_analysis/peak_selector_view_test.py
+   elemental_analysis/element_button_test.py
+   elemental_analysis/periodic_combo_test.py
+   elemental_analysis/periodic_list_test.py
+   elemental_analysis/periodic_table_item_test.py
+   elemental_analysis/lmodel_test.py
+   elemental_analysis/load_model_test.py
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
 set ( TEST_PY_FILES_QT4
-   LoadWidgetModel_test.py
    LoadWidgetPresenter_test.py
    LoadWidgetView_test.py
    FFTPresenter_test.py
@@ -102,11 +110,12 @@ set ( TEST_PY_FILES_QT4
    grouping_tab/pairing_table_alpha_test.py
    MaxEntPresenter_test.py
    max_ent_presenter_load_interaction_test.py
-   PeriodicTableModel_test.py
-   PeriodicTablePresenter_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
    help_widget_presenter_test.py
+   elemental_analysis/PeriodicTableModel_test.py
+   elemental_analysis/PeriodicTablePresenter_test.py
+   elemental_analysis/load_utils_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

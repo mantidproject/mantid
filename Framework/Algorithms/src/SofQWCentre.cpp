@@ -75,7 +75,7 @@ void SofQWCentre::exec() {
     // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
 
     const auto &detIDs = inputWorkspace->getSpectrum(i).getDetectorIDs();
-    double numDets_d = static_cast<double>(detIDs.size());
+    auto numDets_d = static_cast<double>(detIDs.size());
     const auto &Y = inputWorkspace->y(i);
     const auto &E = inputWorkspace->e(i);
     const auto &X = inputWorkspace->x(i);

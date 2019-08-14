@@ -56,14 +56,16 @@ MatrixWorkspace_sptr createHistoWS(size_t nBins, double startX, double endX,
 
 MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
                                    std::vector<double> const &values,
-                                   std::string const &paramsType) {
+                                   std::string const &paramsType,
+                                   std::string const &instrumentSuffix) {
   MatrixWorkspace_sptr workspace = createHistoWS(nBins, startX, endX, values);
 
+  auto filePrefix = std::string("unit_testing/REFL") + instrumentSuffix;
   auto instrumentLoader =
       AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
   instrumentLoader->initialize();
-  instrumentLoader->setPropertyValue("Filename",
-                                     "unit_testing/REFL_Definition.xml");
+  instrumentLoader->setPropertyValue(
+      "Filename", filePrefix + std::string("_Definition.xml"));
   instrumentLoader->setProperty("Workspace", workspace);
   instrumentLoader->setProperty("RewriteSpectraMap", OptionalBool(true));
   instrumentLoader->execute();
@@ -72,7 +74,8 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
     auto paramLoader =
         AlgorithmManager::Instance().createUnmanaged("LoadParameterFile");
     paramLoader->initialize();
-    paramLoader->setPropertyValue("Filename", "unit_testing/REFL_Parameters_" +
+    paramLoader->setPropertyValue("Filename", filePrefix +
+                                                  std::string("_Parameters_") +
                                                   paramsType + ".xml");
     paramLoader->setProperty("Workspace", workspace);
     paramLoader->execute();

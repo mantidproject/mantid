@@ -18,7 +18,7 @@ def generate_ax_name(ax):
     title of the axes (if there is one) and the position of the axes
     on the figure.
     """
-    title = ax.get_title().split('\n')[0].strip()
+    title = ax.get_title()
     position = "({}, {})".format(ax.rowNum, ax.colNum)
     if title:
         return "{}: {}".format(title, position)

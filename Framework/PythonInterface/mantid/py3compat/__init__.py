@@ -115,30 +115,6 @@ def to_text_string(obj, encoding=None):
             return str(obj, encoding)
 
 
-def encode_unicode_escape(string):
-    """
-    Encode escape characters such that they are shown
-    E.g.
-            'My
-             String'
-    becomes
-            'My\nString'
-    """
-    return string.encode('unicode-escape').decode()
-
-
-def decode_unicode_escape(string):
-    """
-        Encode backslash such that they become escape characters
-        E.g.
-                'My\nString'
-        becomes
-                'My
-                 String'
-        """
-    return string.encode().decode('unicode-escape')
-
-
 def qbytearray_to_str(qba):
     """Convert QByteArray object to str in a way compatible with Python 2/3"""
     return str(bytes(qba.toHex().data()).decode())

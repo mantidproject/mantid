@@ -20,7 +20,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "NexusFileReader.h"
 
-#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -1095,7 +1094,6 @@ Instrument cache.
     // path to NXsource group
     FullNXPath sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level above transformationsPath
-
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -1112,6 +1110,7 @@ Instrument cache.
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath),
                      H5::GroupIException &)
   }
+
 
   void test_homogeneous_cylindrical_instrument_vertices_written_to_file() {
 
@@ -1218,6 +1217,7 @@ Instrument cache.
     TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
     TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
   }
+
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

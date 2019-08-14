@@ -211,7 +211,8 @@ void LoadInstrument::exec() {
         instrument->parseTreeAndCacheBeamline();
       } else {
         Instrument_const_sptr ins =
-            NexusGeometry::NexusGeometryParser::createInstrument(filename);
+            NexusGeometry::NexusGeometryParser::createInstrument(
+                filename, NexusGeometry::makeLogger(&m_log));
         instrument = boost::const_pointer_cast<Instrument>(ins);
       }
       // Add to data service for later retrieval

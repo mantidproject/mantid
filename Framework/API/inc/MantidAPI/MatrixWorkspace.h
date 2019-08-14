@@ -546,8 +546,9 @@ public:
 
   void invalidateCachedSpectrumNumbers();
 
-  void cacheDetectorGroupings(const det2group_map &mapping) override;
-  size_t groupOfDetectorID(const detid_t detID) const override;
+  /// Invalidates the commons bins flag.  This is generally called when a method
+  /// could allow the X values to be changed.
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -563,10 +564,6 @@ protected:
   virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   virtual ISpectrum &getSpectrumWithoutInvalidation(const size_t index) = 0;
-
-  /// Invalidates the commons bins flag.  This is generally called when a method
-  /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 

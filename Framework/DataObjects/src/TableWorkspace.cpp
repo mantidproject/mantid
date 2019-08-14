@@ -326,7 +326,7 @@ template <>
 DLLExport DataObjects::TableWorkspace_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<DataObjects::TableWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -343,7 +343,7 @@ template <>
 DLLExport DataObjects::TableWorkspace_const_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<DataObjects::TableWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

@@ -60,7 +60,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
                                           MantidVecPtr &XValues_new,
                                           MantidVec &OutXValues_scaled,
                                           Progress &prog) {
-  const int histnumber = static_cast<int>(inWS->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inWS->getNumberHistograms());
 
   const double tofOffset = 0;
 

@@ -13,6 +13,7 @@
 #include <Poco/Path.h>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Mantid::API::IAlgorithm_sptr
 AsciiSaver::algorithmForFormat(NamedFormat format) {
@@ -145,5 +146,6 @@ void AsciiSaver::save(std::string const &saveDirectory,
     throw InvalidSavePath(saveDirectory);
   }
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

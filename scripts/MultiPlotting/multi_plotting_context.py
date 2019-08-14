@@ -32,23 +32,24 @@ class PlottingContext(object):
 
     def addLine(self, subplotName, workspace, specNum):
         try:
+            ws = None
             if isinstance(workspace, str):
                 ws = mantid.AnalysisDataService.retrieve(workspace)
-                self.subplots[subplotName].addLine(ws, specNum)
-
             elif len(workspace) > 1:
-                self.subplots[subplotName].addLine(
-                    workspace.OutputWorkspace, specNum)
+                ws = workspace.OutputWorkspace
             else:
-                self.subplots[subplotName].addLine(workspace, specNum)
+                ws = workspace
+
+            if ws is not None:
+                self.subplots[subplotName].addLine(ws, specNum)
         except:
             return
 
     def add_annotate(self, subplotName, label):
         self.subplots[subplotName].add_annotate(label)
 
-    def add_vline(self, subplotName, xvalue, name):
-        self.subplots[subplotName].add_vline(xvalue, name)
+    def add_vline(self, subplotName, xvalue, name, color):
+        self.subplots[subplotName].add_vline(xvalue, name, color=color)
 
     def removePlotLine(self, subplotName, name):
         try:

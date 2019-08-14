@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename Validated, typename Error = boost::blank>
 class ValidationResult {
@@ -69,6 +70,7 @@ ValidationResult<Validated, Error>::validElseNone() const {
   else
     return boost::none;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_RESULT_H

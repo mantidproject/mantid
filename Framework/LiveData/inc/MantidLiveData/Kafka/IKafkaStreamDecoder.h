@@ -137,7 +137,8 @@ protected:
   /// Subscriber for the data stream
   std::unique_ptr<IKafkaStreamSubscriber> m_dataStream;
   /// Mapping of spectrum number to workspace index.
-  spec2index_map m_specToIdx;
+  std::vector<size_t> m_specToIdx;
+  specnum_t m_specToIdxOffset;
   /// Start time of the run
   Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream

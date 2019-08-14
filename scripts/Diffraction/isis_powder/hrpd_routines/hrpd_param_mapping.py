@@ -33,5 +33,6 @@ attr_mapping = \
         ParamMapEntry(ext_name="user_name",                  int_name="user_name"),
         ParamMapEntry(ext_name="vanadium_normalisation",     int_name="do_van_norm"),
         ParamMapEntry(ext_name="vanadium_tof_cropping",      int_name="van_tof_cropping"),
+        ParamMapEntry(ext_name="vanadium_peaks_masking_file", int_name="masking_file_name"),
         ParamMapEntry(ext_name="window",                     int_name="tof_window", enum_class=HRPD_TOF_WINDOWS)
     ]

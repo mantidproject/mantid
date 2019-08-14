@@ -617,7 +617,7 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
     Rst.pop_front();
     if (T1) {
       // if an actual surface process :
-      SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
+      auto *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
         auto mf = Smap.find(KV->getKeyN());
@@ -846,7 +846,7 @@ int CSGObject::createSurfaceList(const int outFlag) {
       if (tmpC)
         TreeLine.push(tmpC);
     } else {
-      const SurfPoint *SurX = dynamic_cast<const SurfPoint *>(tmpA);
+      const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX) {
         m_SurList.push_back(SurX->getKey());
       }
@@ -929,7 +929,7 @@ void CSGObject::print() const {
     Rst.pop_front();
     if (T1) {
       Rcount++;
-      SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
+      auto *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV)
         Cells.push_back(KV->getKeyN());
       else {

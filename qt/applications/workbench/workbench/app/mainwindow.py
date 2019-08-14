@@ -22,6 +22,7 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 from mantid.py3compat import setswitchinterval
+from mantid.utils import is_required_version
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
@@ -41,7 +42,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, qVersion)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -52,7 +53,6 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
-from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
 
 # Pre-application setup
@@ -97,6 +97,9 @@ def qapplication():
         # Spin up the usage service and set the name for the usage reporting
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)
+
+        if is_required_version(required_version='5.10.0', version=qVersion()):
+            app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
     return app
 

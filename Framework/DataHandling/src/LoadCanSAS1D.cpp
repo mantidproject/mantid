@@ -163,7 +163,7 @@ void LoadCanSAS1D::exec() {
 MatrixWorkspace_sptr
 LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
                         std::string &runName) {
-  Element *workspaceElem = dynamic_cast<Element *>(workspaceData);
+  auto *workspaceElem = dynamic_cast<Element *>(workspaceData);
   check(workspaceElem, "<SASentry>");
   runName = workspaceElem->getAttribute("name");
 
@@ -206,7 +206,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   //"I" and "Idev" text nodes and fill X,Y,E vectors
   for (unsigned long index = 0; index < nBins; ++index) {
     Node *idataElem = idataElemList->item(index);
-    Element *elem = dynamic_cast<Element *>(idataElem);
+    auto *elem = dynamic_cast<Element *>(idataElem);
     if (elem) {
       // setting X vector
       std::string nodeVal;
@@ -354,7 +354,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
     Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
     for (unsigned int i = 0; i < terms->length(); ++i) {
       Node *term = terms->item(i);
-      Element *elem = dynamic_cast<Element *>(term);
+      auto *elem = dynamic_cast<Element *>(term);
       if (elem) {
         const std::string termName = elem->getAttribute("name");
         if (termName == "user_file") {

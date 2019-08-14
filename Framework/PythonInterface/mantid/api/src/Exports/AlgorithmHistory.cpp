@@ -7,7 +7,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyHistory.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

@@ -96,7 +96,7 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: http://forum.mantidproject.org
 
-.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A{milestone}+is%3Amerged
+.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A"Release {milestone}"+is%3Amerged
 
 .. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v{version}
 ''',

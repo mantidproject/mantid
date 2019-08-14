@@ -367,7 +367,7 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
     return archs;
 
   // determine if the user wants archive search for this facility
-  bool createArchiveSearch = bool(archiveOpt == "all");
+  auto createArchiveSearch = bool(archiveOpt == "all");
 
   // then see if the facility name appears in the list or if we just want the
   // default facility
@@ -593,7 +593,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
                                     ". The end of string value is longer than "
                                     "the instrument's zero padding");
       }
-      int runNumber = boost::lexical_cast<int>(run);
+      auto runNumber = boost::lexical_cast<int>(run);
       std::string runEnd = run;
       // Adds zero padding to end of range.
       runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
@@ -603,7 +603,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
         throw std::invalid_argument("Malformed range of runs: Part of the run "
                                     "has a non-digit character in it.");
 
-      int runEndNumber = boost::lexical_cast<int>(runEnd);
+      auto runEndNumber = boost::lexical_cast<int>(runEnd);
       if (runEndNumber < runNumber) {
         throw std::invalid_argument("Malformed range of runs: " + *h);
       }

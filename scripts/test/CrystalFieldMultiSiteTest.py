@@ -7,7 +7,9 @@
 import numpy as np
 import unittest
 
+import testhelpers
 from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
 
@@ -121,7 +123,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [12.474955, 1.190169, 0.122781, 0.042940, 10.837438]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
     def test_get_spectrum_ws(self):
         from mantid.simpleapi import CreateWorkspace
@@ -159,13 +161,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [12.474946, 1.190160, 0.122785, 0.042940, 10.837170]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
         x, y = cfms.getSpectrum(1, r)
         y = y / c_mbsr
         expected_y = [6.304662, 0.331218, 1.224681, 0.078540, 2.638049]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
     def test_get_spectrum_ws_multi_spectra(self):
         from mantid.simpleapi import CreateWorkspace
@@ -213,13 +215,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [3.904037, 0.744519, 0.274897, 0.175713, 0.106540]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
         x, y = cfms.getSpectrum(1, r)
         y = y / c_mbsr
         expected_y = [3.704726, 0.785600, 0.296255, 0.190176, 0.115650]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
     def test_fit_multi_ion_single_spectrum(self):
 

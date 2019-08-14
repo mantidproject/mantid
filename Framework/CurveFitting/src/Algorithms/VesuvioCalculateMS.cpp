@@ -218,7 +218,7 @@ void VesuvioCalculateMS::cacheInputs() {
   // -- Sample --
   int nmasses = getProperty("NoOfMasses");
   std::vector<double> sampleInfo = getProperty("AtomicProperties");
-  const int nInputAtomProps = static_cast<int>(sampleInfo.size());
+  const auto nInputAtomProps = static_cast<int>(sampleInfo.size());
   const int nExptdAtomProp(3);
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;

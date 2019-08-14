@@ -293,12 +293,12 @@ void FindSXPeaks::exec() {
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
   // Count the peaks so that we can resize the peak vector at the end.
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
-  for (int wsIndex = static_cast<int>(m_MinWsIndex);
+  for (auto wsIndex = static_cast<int>(m_MinWsIndex);
        wsIndex <= static_cast<int>(m_MaxWsIndex); ++wsIndex) {
     PARALLEL_START_INTERUPT_REGION
 
     // If no detector found / monitor, skip onto the next spectrum
-    const size_t wsIndexSize_t = static_cast<size_t>(wsIndex);
+    const auto wsIndexSize_t = static_cast<size_t>(wsIndex);
     if (!spectrumInfo.hasDetectors(wsIndexSize_t) ||
         spectrumInfo.isMonitor(wsIndexSize_t)) {
       continue;

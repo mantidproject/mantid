@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 /** @class IPythonRunner
 
 IPythonRunner is an interface for running python code
@@ -23,6 +24,7 @@ public:
   virtual ~IPythonRunner(){};
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

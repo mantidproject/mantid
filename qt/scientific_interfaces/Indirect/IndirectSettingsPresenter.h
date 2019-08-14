@@ -31,8 +31,6 @@ public:
 
   void loadSettings();
 
-  QVariant getSetting(std::string const &settingName);
-
 signals:
   void closeSettings();
   void applySettings();
@@ -44,6 +42,7 @@ private slots:
 
 private:
   void setUpPresenter();
+  void setDefaultRestrictData() const;
   void saveSettings();
 
   void setApplyingChanges(bool applyingChanges);

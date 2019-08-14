@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import FunctionFactory
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtWidgets
 
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
@@ -33,7 +33,8 @@ def wait_for_thread(thread_model):
         QtWidgets.QApplication.instance().processEvents()
 
 
-class FittingTabPresenterTest(GuiTest):
+@start_qapplication
+class FittingTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context()
         self.context.data_context.current_runs = [[62260]]
@@ -616,6 +617,14 @@ class FittingTabPresenterTest(GuiTest):
         self.view.function_browser.clear()
 
         self.view.parameter_display_combo.setCurrentIndex(1)
+
+    def test_get_selected_groups_and_pairs_returns_correct_list(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        result = self.presenter._get_selected_groups_and_pairs()
+
+        self.assertEqual(result.sort(), ['top', 'bottom', 'fwd'].sort())
 
 
 if __name__ == '__main__':

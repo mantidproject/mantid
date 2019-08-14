@@ -75,7 +75,7 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box,
     std::cerr << "Box has children\n";
     addDetectors(peak, box, boost::true_type());
   }
-  MDBox<MDE, nd> *mdBox = dynamic_cast<MDBox<MDE, nd> *>(&box);
+  auto *mdBox = dynamic_cast<MDBox<MDE, nd> *>(&box);
   if (!mdBox) {
     throw std::invalid_argument("FindPeaksMD::addDetectors - Unexpected Box "
                                 "type, cannot retrieve events");
@@ -499,7 +499,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     for (auto box : peakBoxes) {
       //  If no events from this experimental contribute to the box then skip
       if (nexp > 1) {
-        MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
+        auto *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
         typename std::vector<MDE> &events = mdbox->getEvents();
         if (std::none_of(events.cbegin(), events.cend(),
                          [&iexp, &nexp](MDE event) {

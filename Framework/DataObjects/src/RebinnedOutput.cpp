@@ -101,7 +101,7 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
 void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
   if (m_finalized && !force)
     return;
-  int nHist = static_cast<int>(this->getNumberHistograms());
+  auto nHist = static_cast<int>(this->getNumberHistograms());
   // Checks that the fractions are not all zeros.
   bool frac_all_zeros = true;
   for (int i = 0; i < nHist; ++i) {
@@ -140,7 +140,7 @@ void RebinnedOutput::finalize(bool hasSqrdErrs, bool force) {
 void RebinnedOutput::unfinalize(bool hasSqrdErrs, bool force) {
   if (!m_finalized && !force)
     return;
-  int nHist = static_cast<int>(this->getNumberHistograms());
+  auto nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);

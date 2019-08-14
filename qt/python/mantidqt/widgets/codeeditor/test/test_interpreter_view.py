@@ -9,12 +9,15 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.utils.qt.testing import GuiTest
+import unittest
+
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 
-class PythonFileInterpreterViewTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class PythonFileInterpreterViewTest(unittest.TestCase, QtWidgetFinder):
     def test_find_replace_dialog(self):
         w = PythonFileInterpreter()
 

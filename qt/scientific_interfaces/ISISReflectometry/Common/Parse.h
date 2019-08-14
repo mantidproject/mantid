@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double>
 parseDouble(std::string string);
@@ -56,6 +57,7 @@ parseList(std::string commaSeparatedValues, ParseItemFunction parseItem) {
     return std::vector<ParsedItem>();
   }
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PARSE_H_

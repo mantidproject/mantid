@@ -50,6 +50,10 @@ void ManageUserDirectories::initLayout() {
           SLOT(selectSaveDir()));
 }
 
+void ManageUserDirectories::setHelpButtonVisible(const bool &visible) {
+  m_uiForm.pbHelp->setVisible(visible);
+}
+
 void ManageUserDirectories::loadProperties() {
   m_userPropFile =
       QString::fromStdString(
@@ -208,7 +212,7 @@ void ManageUserDirectories::addDirectory() {
     input = m_uiForm.leDirectoryPathPython;
   }
 
-  if (input->text() != "") {
+  if (input && input->text() != "") {
     listWidget()->addItem(input->text());
     input->clear();
   }

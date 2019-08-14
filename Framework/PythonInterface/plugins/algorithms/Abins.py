@@ -16,6 +16,7 @@ except ImportError:
 import numpy as np
 import six
 import os
+import re
 
 from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, \
     WorkspaceGroup
@@ -96,8 +97,7 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             # validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS)
-                             validator=StringListValidator(["TOSCA"]),
+                             validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -206,22 +206,50 @@ class Abins(PythonAlgorithm):
         all_atms_smbls.sort()
 
         if len(self._atoms) == 0:  # case: all atoms
-            atoms_symbol = all_atms_smbls
+            atom_symbols = all_atms_smbls
+            atom_numbers = []
         else:  # case selected atoms
-            if len(self._atoms) != len(set(self._atoms)):  # only different types
-                raise ValueError("Not all user defined atoms are unique.")
+            # Specific atoms are identified with prefix and integer index, e.g 'atom_5'. Other items are element symbols
+            # A regular expression match is used to make the underscore separator optional and check the index format
+            prefix = AbinsModules.AbinsConstants.ATOM_PREFIX
+            atom_symbols = [item for item in self._atoms if item[:len(prefix)] != prefix]
+            if len(atom_symbols) != len(set(atom_symbols)):  # only different types
+                raise ValueError("User atom selection (by symbol) contains repeated species. This is not permitted as "
+                                 "Abins cannot create multiple workspaces with the same name.")
 
-            for atom_symbol in self._atoms:
+            numbered_atom_test = re.compile('^' + prefix + r'_?(\d+)$')
+            atom_numbers = [numbered_atom_test.findall(item) for item in self._atoms]  # Matches will be lists of str
+            atom_numbers = [int(match[0]) for match in atom_numbers if match]  # Remove empty matches, cast rest to int
+
+            if len(atom_numbers) != len(set(atom_numbers)):
+                raise ValueError("User atom selection (by number) contains repeated atom. This is not permitted as Abins"
+                                 " cannot create multiple workspaces with the same name.")
+
+            for atom_symbol in atom_symbols:
                 if atom_symbol not in all_atms_smbls:
-                    raise ValueError("User defined atom not present in the system.")
-            atoms_symbol = self._atoms
+                    raise ValueError("User defined atom selection (by element) '%s': not present in the system." %
+                                     atom_symbol)
+
+            for atom_number in atom_numbers:
+                if atom_number < 1 or atom_number > num_atoms:
+                    raise ValueError("Invalid user atom selection (by number) '%s%s': out of range (%s - %s)" %
+                                     (prefix, atom_number, 1, num_atoms))
+
+            # Final sanity check that everything in "atoms" field was understood
+            if len(atom_symbols) + len(atom_numbers) < len(self._atoms):
+                elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
+                numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
+                raise ValueError("Not all user atom selections ('atoms' option) were understood." +
+                                 elements_report + numbers_report)
+
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
         workspaces = []
         if self._sample_form == "Powder":
-            workspaces.extend(self._create_partial_s_per_type_workspaces(atoms_symbols=atoms_symbol, s_data=s_data))
+            workspaces.extend(self._create_partial_s_per_type_workspaces(atoms_symbols=atom_symbols, s_data=s_data))
+            workspaces.extend(self._create_partial_s_per_type_workspaces(atom_numbers=atom_numbers, s_data=s_data))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
         # 6) Create a workspace with sum of all atoms if required
@@ -232,7 +260,7 @@ class Abins(PythonAlgorithm):
                     total_atom_workspaces.append(ws)
             total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces)
             workspaces.insert(0, total_workspace)
-            prog_reporter.report("Workspace with total S  has been constructed.")
+            prog_reporter.report("Workspace with total S has been constructed.")
 
         # 7) add experimental data if available to the collection of workspaces
         if self._experimental_file != "":
@@ -253,25 +281,15 @@ class Abins(PythonAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
-    def _create_workspaces(self, atoms_symbols=None, s_data=None):
+    def _get_masses_table(self, num_atoms):
         """
-        Creates workspaces for all types of atoms. Creates both partial and total workspaces for all types of atoms.
+        Collect masses associated with each element in self._extracted_ab_initio_data
 
-        :param atoms_symbols: list of atom types for which S should be created
-        :param s_data: dynamical factor data of type SData
-        :returns: workspaces for list of atoms types, S for the particular type of atom
+        :param num_atoms: Number of atoms in the system. (Saves time working out iteration.)
+        :type: int
+
+        :returns: Mass data in form ``{el1: [m1, ...], ... }``
         """
-        s_data_extracted = s_data.extract()
-        shape = [self._num_quantum_order_events]
-        shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
-
-        s_atom_data = np.zeros(shape=tuple(shape), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        shape.pop(0)
-
-        num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
-        temp_s_atom_data = np.copy(s_atom_data)
-
-        result = []
         masses = {}
         for i in range(num_atoms):
             symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
@@ -280,21 +298,100 @@ class Abins(PythonAlgorithm):
                 masses[symbol] = set()
             masses[symbol].add(mass)
 
-        one_m = AbinsModules.AbinsConstants.ONLY_ONE_MASS
-        eps = AbinsModules.AbinsConstants.MASS_EPS
         # convert set to list to fix order
         for s in masses:
             masses[s] = sorted(list(set(masses[s])))
 
-        for symbol in atoms_symbols:
+        return masses
 
-            sub = len(masses[symbol]) > one_m or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > eps
-            for m in masses[symbol]:
-                result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
-                                                element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
-                                                s_atom_data=s_atom_data, substitution=sub))
+    def _create_workspaces(self, atoms_symbols=None, atom_numbers=None, s_data=None):
+        """
+        Creates workspaces for all types of atoms. Creates both partial and total workspaces for given types of atoms.
 
+        :param atoms_symbols: atom types (i.e. element symbols) for which S should be created.
+        :type iterable of str:
+
+        :param atom_numbers:
+            indices of individual atoms for which S should be created. (One-based numbering; 1 <= I <= NUM_ATOMS)
+        :type iterable of int:
+
+        :param s_data: dynamical factor data
+        :type AbinsModules.SData.SData
+
+        :returns: workspaces for list of atoms types, S for the particular type of atom
+        """
+        from AbinsModules.AbinsConstants import MASS_EPS, ONLY_ONE_MASS
+
+        s_data_extracted = s_data.extract()
+
+        # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
+        shape = [self._num_quantum_order_events]
+        shape.extend(list(s_data_extracted["atom_0"]["s"]["order_1"].shape))
+        s_atom_data = np.zeros(shape=tuple(shape), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        temp_s_atom_data = np.copy(s_atom_data)
+
+        num_atoms = len([key for key in s_data_extracted.keys() if "atom" in key])
+        masses = self._get_masses_table(num_atoms)
+
+        result = []
+
+        if atoms_symbols is not None:
+            for symbol in atoms_symbols:
+                sub = (len(masses[symbol]) > ONLY_ONE_MASS or
+                       abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
+                for m in masses[symbol]:
+                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
+                                                    element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
+                                                    s_atom_data=s_atom_data, substitution=sub))
+        if atom_numbers is not None:
+            for atom_number in atom_numbers:
+                result.extend(self._atom_number_s(atom_number=atom_number, s_data_extracted=s_data_extracted,
+                                                  s_atom_data=s_atom_data))
         return result
+
+    def _atom_number_s(self, atom_number=None, s_data_extracted=None, s_atom_data=None):
+        """
+        Helper function for calculating S for the given atomic index
+
+        :param atom_number: One-based index of atom in s_data e.g. 1 to select first element 'atom_1'
+        :type atom_number: int
+
+        :param s_data_extracted: Collection of precalculated S for all atoms and quantum orders, obtained from extract()
+            method of AbinsModules.SData.SData object.
+        :type s_data: dict
+
+        :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
+            information but is used in-place to save on time instantiating large arrays. First dimension is quantum
+            order; following dimensions should match arrays in s_data.
+        :type s_atom_data: numpy.ndarray
+
+        :param
+
+        :returns: mantid workspaces of S for atom (total) and individual quantum orders
+        :returntype: list of Workspace2D
+        """
+        atom_workspaces = []
+        s_atom_data.fill(0.0)
+        internal_atom_label = "atom_%s" % (atom_number - 1)
+        output_atom_label = "%s_%d" % (AbinsModules.AbinsConstants.ATOM_PREFIX, atom_number)
+        symbol = self._extracted_ab_initio_data[internal_atom_label]["symbol"]
+        z_number = Atom(symbol=symbol).z_number
+
+        for i, order in enumerate(range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                                        self._num_quantum_order_events + AbinsModules.AbinsConstants.S_LAST_INDEX)):
+
+            s_atom_data[i] = s_data_extracted[internal_atom_label]["s"]["order_%s" % order]
+
+        total_s_atom_data = np.sum(s_atom_data, axis=0)
+
+        atom_workspaces = []
+        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label,
+                                                      s_points=np.copy(total_s_atom_data),
+                                                      optional_name="_total", protons_number=z_number))
+        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label,
+                                                      s_points=np.copy(s_atom_data),
+                                                      protons_number=z_number))
+        return atom_workspaces
 
     def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, element_symbol=None, temp_s_atom_data=None,
                      s_atom_data=None, substitution=None):
@@ -304,20 +401,22 @@ class Abins(PythonAlgorithm):
         :param num_atoms: number of atoms in the system
         :param s_data_extracted: data with all S
         :param element_symbol: label for the type of atom
-        :param temp_s_atom_data: helper array to store S
-        :param s_atom_data: stores all S for the given type of atom
+        :param temp_s_atom_data: helper array to accumulate S (inner loop over quantum order); does not transport
+            information but is used in-place to save on time instantiating large arrays.
+        :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
+            information but is used in-place to save on time instantiating large arrays.
         :param substitution: True if isotope substitution and False otherwise
         """
+        from AbinsModules.AbinsConstants import MASS_EPS
+
         atom_workspaces = []
         s_atom_data.fill(0.0)
 
         element = Atom(symbol=element_symbol)
 
         for atom in range(num_atoms):
-
-            eps = AbinsModules.AbinsConstants.MASS_EPS
             if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == element_symbol and
-                    abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < eps):
+                    abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
@@ -354,18 +453,25 @@ class Abins(PythonAlgorithm):
 
         return atom_workspaces
 
-    def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
+    def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, atom_numbers=None, s_data=None):
         """
         Creates workspaces for all types of atoms. Each workspace stores quantum order events for S for the given
         type of atom. It also stores total workspace for the given type of atom.
 
-        :param atoms_symbols: list of atom types for which quantum order events of S  should be calculated
-        :param s_data: dynamical factor data of type SData
+        :param atoms_symbols: atom types (i.e. element symbols) for which S should be created.
+        :type iterable of str:
+
+        :param atom_numbers: indices of individual atoms for which S should be created
+        :type iterable of int:
+
+        :param s_data: dynamical factor data
+        :type AbinsModules.SData.SData
+
         :returns: workspaces for list of atoms types, each workspace contains  quantum order events of
                  S for the particular atom type
         """
 
-        return self._create_workspaces(atoms_symbols=atoms_symbols, s_data=s_data)
+        return self._create_workspaces(atoms_symbols=atoms_symbols, atom_numbers=atom_numbers, s_data=s_data)
 
     def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """

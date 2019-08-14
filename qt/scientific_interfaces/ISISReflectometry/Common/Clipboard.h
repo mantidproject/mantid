@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class Clipboard {
 public:
@@ -67,6 +68,7 @@ private:
 };
 
 bool containsGroups(Clipboard const &clipboard);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_CLIPBOARD_H_

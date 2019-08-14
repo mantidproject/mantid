@@ -20,6 +20,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Row
 
@@ -69,6 +70,7 @@ private:
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Row const &lhs, Row const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Row const &lhs, Row const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL Row mergedRow(Row const &rowA, Row const &rowB);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_RUN_H_

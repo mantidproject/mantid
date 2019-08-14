@@ -55,6 +55,29 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
+  void testExecWithArbitraryOrientaton() {
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+
+    std::string outputWS("factors");
+    Mantid::Algorithms::CylinderAbsorption atten;
+    configureAbsCommon(atten, testWS, outputWS, "2", "2", "0,0,1");
+    configureAbsSample(atten);
+
+    TS_ASSERT_THROWS_NOTHING(atten.execute());
+    TS_ASSERT(atten.isExecuted());
+
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_DELTA(result->readY(0).front(), 0.1535, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).back(), 0.0001, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0)[8], 0.0002, 0.0001);
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+
   void testWithoutSample() {
     // Create a small test workspace
     MatrixWorkspace_sptr testWS = createTestWorkspace();
@@ -120,6 +143,64 @@ public:
     TS_ASSERT_DELTA(result->readY(0).front(), 0.7210, 0.0001);
     TS_ASSERT_DELTA(result->readY(0).back(), 0.2052, 0.0001);
     TS_ASSERT_DELTA(result->readY(0)[8], 0.2356, 0.0001);
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  void testWithSetSampleInArbitraryDirection() {
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+
+    using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
+    using FloatProperty = Mantid::Kernel::PropertyWithValue<double>;
+    using FloatArrayProperty = Mantid::Kernel::ArrayProperty<double>;
+
+    // create the material
+    auto material = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    material->declareProperty(
+        std::make_unique<StringProperty>("ChemicalFormula", "V"), "");
+    material->declareProperty(
+        std::make_unique<FloatProperty>("SampleNumberDensity", 0.07192), "");
+
+    // create the geometry
+    auto geometry = boost::make_shared<Mantid::Kernel::PropertyManager>();
+    geometry->declareProperty(
+        std::make_unique<StringProperty>("Shape", "Cylinder"), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Height", 4), "");
+    geometry->declareProperty(std::make_unique<FloatProperty>("Radius", 0.4),
+                              "");
+    std::vector<double> center{0, 0, 0};
+    geometry->declareProperty(
+        std::make_unique<FloatArrayProperty>("Center", std::move(center)), "");
+    std::vector<double> cylinderAxis{0, 0, 1};
+    geometry->declareProperty(
+        std::make_unique<FloatArrayProperty>("Axis", cylinderAxis), "");
+
+    // set the sample information
+    Mantid::DataHandling::SetSample setsample;
+    setsample.initialize();
+    setsample.setProperty("InputWorkspace", testWS);
+    setsample.setProperty("Material", material);
+    setsample.setProperty("Geometry", geometry);
+    setsample.execute();
+    testWS = setsample.getProperty("InputWorkspace");
+
+    // run the actual algorithm
+    std::string outputWS("factors");
+    Mantid::Algorithms::CylinderAbsorption atten;
+    configureAbsCommon(atten, testWS, outputWS, "15", "15", "0,0,1");
+
+    // the geometry was set on the input workspace
+    TS_ASSERT_THROWS_NOTHING(atten.execute());
+    TS_ASSERT(atten.isExecuted());
+
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
+    TS_ASSERT_DELTA(result->readY(0).front(), 0.1535, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).back(), 0.0001, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0)[8], 0.0002, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -227,7 +308,10 @@ private:
   /// set what is used for all - intentionally skip the sample information
   void configureAbsCommon(Mantid::Algorithms::CylinderAbsorption &alg,
                           MatrixWorkspace_sptr &inputWS,
-                          const std::string &outputWSname) {
+                          const std::string &outputWSname,
+                          std::string numberOfSlices = "2",
+                          std::string numberOfAnnuli = "2",
+                          std::string cylinderAxis = "0,1,0") {
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -235,11 +319,15 @@ private:
         alg.setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outputWSname));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfSlices", "2"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NumberOfAnnuli", "2"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("NumberOfSlices", numberOfSlices));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("NumberOfAnnuli", numberOfAnnuli));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("NumberOfWavelengthPoints", "5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ExpMethod", "Normal"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("CylinderAxis", cylinderAxis));
   }
 
   void configureAbsSample(Mantid::Algorithms::CylinderAbsorption &alg) {

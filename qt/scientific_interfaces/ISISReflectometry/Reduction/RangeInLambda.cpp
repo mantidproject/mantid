@@ -8,6 +8,7 @@
 #include "MantidKernel/Tolerance.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 RangeInLambda::RangeInLambda(double min, double max) : m_min(min), m_max(max) {}
 
@@ -39,5 +40,6 @@ bool operator==(RangeInLambda const &lhs, RangeInLambda const &rhs) {
 bool operator!=(RangeInLambda const &lhs, RangeInLambda const &rhs) {
   return !(lhs == rhs);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

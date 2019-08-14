@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 std::vector<int> groupIndexesFromSelection(
     std::vector<MantidWidgets::Batch::RowLocation> const &selected);
@@ -28,6 +29,7 @@ int rowOf(MantidQt::MantidWidgets::Batch::RowLocation const &rowLocation);
 bool containsPath(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations,
     MantidQt::MantidWidgets::Batch::RowPath const &path);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_ROWLOCATION_H

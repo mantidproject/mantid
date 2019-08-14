@@ -53,7 +53,7 @@ void ProcessBankData::run() { // override {
 
     std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
     for (size_t i = 0; i < numEvents; i++) {
-      detid_t thisId = detid_t(event_id[i]);
+      auto thisId = detid_t(event_id[i]);
       if (thisId >= m_min_id && thisId <= m_max_id)
         counts[thisId - m_min_id]++;
     }
@@ -91,7 +91,7 @@ void ProcessBankData::run() { // override {
   int pulse_i = 0;
 
   // And there are this many pulses
-  int numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
+  auto numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
   if (numPulses > static_cast<int>(event_index->size())) {
     alg->getLogger().warning()
         << "Entry " << entry_name
@@ -151,11 +151,11 @@ void ProcessBankData::run() { // override {
     detid_t detId = event_id[i];
     if (detId >= m_min_id && detId <= m_max_id) {
       // Create the tofevent
-      double tof = static_cast<double>(event_time_of_flight[i]);
+      auto tof = static_cast<double>(event_time_of_flight[i]);
       if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max)) {
         // Handle simulated data if present
         if (have_weight) {
-          double weight = static_cast<double>(event_weight[i]);
+          auto weight = static_cast<double>(event_weight[i]);
           double errorSq = weight * weight;
           auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup

@@ -597,7 +597,10 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        self.gui_properties_handler.set_setting("user_file", "")
+        try:
+            self.gui_properties_handler.set_setting("user_file", "")
+        except AttributeError:
+            pass
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):

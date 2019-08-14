@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <class... Containers>
 auto zip_range(Containers &... containers)
@@ -20,6 +21,7 @@ auto zip_range(Containers &... containers)
   return {boost::make_zip_iterator(boost::make_tuple(containers.begin()...)),
           boost::make_zip_iterator(boost::make_tuple(containers.end()...))};
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_ZIPRANGE_H

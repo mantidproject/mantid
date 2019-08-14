@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class DetectorCorrectionType
 
@@ -60,6 +61,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(DetectorCorrections const &lhs,
                                                DetectorCorrections const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(DetectorCorrections const &lhs,
                                                DetectorCorrections const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_DETECTORCORRECTIONS_H_

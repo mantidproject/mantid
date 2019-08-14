@@ -7,7 +7,7 @@
 import unittest
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
@@ -19,7 +19,8 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class HomeTabRunInfoPresenterTest(GuiTest):
+@start_qapplication
+class HomeTabRunInfoPresenterTest(unittest.TestCase):
     def setUp(self):
         self.obj = QWidget()
         setup_context_for_tests(self)

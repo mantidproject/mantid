@@ -127,7 +127,6 @@ void IndirectInstrumentConfig::enableDiffraction(bool enabled) {
     forceDiffraction(false);
 
   m_removeDiffraction = !enabled;
-  updateInstrumentConfigurations(getInstrumentName());
 }
 
 /**
@@ -149,7 +148,6 @@ void IndirectInstrumentConfig::forceDiffraction(bool forced) {
     enableDiffraction(true);
 
   m_forceDiffraction = forced;
-  updateInstrumentConfigurations(getInstrumentName());
 }
 
 /**
@@ -397,8 +395,6 @@ void IndirectInstrumentConfig::filterDisabledInstruments() {
       ++i;
     }
   }
-
-  updateInstrumentConfigurations(getInstrumentName());
 }
 
 } /* namespace MantidWidgets */

@@ -42,11 +42,9 @@ class RunStringUtilsListToStringTest(unittest.TestCase):
         run_string = utils.run_list_to_string(run_list)
         self.assertEqual(run_string, "1-3,48-50")
 
-    def test_run_list_to_string_throws_if_more_than_100_runs(self):
+    def test_run_list_to_string_doesnt_throw_if_more_than_100_runs(self):
         run_list = [i for i in range(150)]
-        with self.assertRaises(IndexError) as context:
-            utils.run_list_to_string(run_list)
-        self.assertTrue("Too many runs (150) must be <100" in str(context.exception))
+        utils.run_list_to_string(run_list)
 
 
 class RunStringUtilsStringToListTest(unittest.TestCase):
@@ -115,6 +113,31 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         run_string = "1-3,48-50"
         run_list = [1, 2, 3, 48, 49, 50]
         self.assertEqual(utils.run_string_to_list(run_string), run_list)
+
+    def test_run_string_to_list_allows_large_number_runs(self):
+        run_string = '1-1001'
+        expected_list = list(range(1, 1002))
+        self.assertEqual(utils.run_string_to_list(run_string), expected_list)
+
+    def test_run_string_to_list_allows_trailing_comma_in_short_string(self):
+        run_string = '1,2,3,10-15,'
+        expected_list = [1, 2, 3, 10, 11, 12, 13, 14, 15]
+        self.assertEqual(utils.run_string_to_list(run_string), expected_list)
+
+    def test_run_string_to_list_allows_trailing_dash_in_short_string(self):
+        run_string = '1,2,3,10-15-'
+        expected_list = [1, 2, 3, 10, 11, 12, 13, 14, 15]
+        self.assertEqual(utils.run_string_to_list(run_string), expected_list)
+
+    def test_run_string_to_list_allows_trailing_comma_in_long_string(self):
+        run_string = '1,2,3,10-10010,'
+        expected_list = [1, 2, 3] + list(range(10, 10011))
+        self.assertEqual(utils.run_string_to_list(run_string), expected_list)
+
+    def test_run_string_to_list_allows_trailing_dash_in_long_string(self):
+        run_string = '1,2,3,10-10010-'
+        expected_list = [1, 2, 3] + list(range(10, 10011))
+        self.assertEqual(utils.run_string_to_list(run_string), expected_list)
 
     def test_run_string_allows_incomplete_upper_range(self):
         run_string = '62260-66'

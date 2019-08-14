@@ -7,16 +7,17 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERPROCESSINGTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERPROCESSINGTEST_H_
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using MantidQt::MantidWidgets::Batch::Cell;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 using MantidQt::MantidWidgets::Batch::RowPath;

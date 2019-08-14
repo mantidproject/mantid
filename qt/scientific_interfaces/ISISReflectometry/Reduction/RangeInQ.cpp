@@ -8,6 +8,7 @@
 #include <cassert>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 RangeInQ::RangeInQ(boost::optional<double> min, boost::optional<double> step,
                    boost::optional<double> max)
@@ -29,5 +30,6 @@ bool operator==(RangeInQ const &lhs, RangeInQ const &rhs) {
 bool operator!=(RangeInQ const &lhs, RangeInQ const &rhs) {
   return !(lhs == rhs);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

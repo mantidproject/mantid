@@ -814,7 +814,7 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
  */
 void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
                                             const string &prmfilename) {
-  int numbanks = static_cast<int>(banks.size());
+  auto numbanks = static_cast<int>(banks.size());
 
   FILE *pFile;
   pFile = fopen(prmfilename.c_str(), "w");

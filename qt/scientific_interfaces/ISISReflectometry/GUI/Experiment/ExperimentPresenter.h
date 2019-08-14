@@ -18,6 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class ExperimentValidationErrors {
 public:
@@ -79,6 +80,9 @@ private:
   PolarizationCorrections polarizationCorrectionsFromView();
   FloodCorrections floodCorrectionsFromView();
   boost::optional<RangeInLambda> transmissionRunRangeFromView();
+  std::string transmissionStitchParamsFromView();
+  TransmissionStitchOptions transmissionStitchOptionsFromView();
+
   std::map<std::string, std::string> stitchParametersFromView();
 
   ExperimentValidationResult updateModelFromView();
@@ -100,6 +104,7 @@ private:
   Experiment m_model;
   double m_thetaTolerance;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H

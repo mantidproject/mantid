@@ -1,7 +1,7 @@
 # Set the version number here for MantidVersion and the package filenames
 
 set ( VERSION_MAJOR 4 )
-set ( VERSION_MINOR 0 )
+set ( VERSION_MINOR 1 )
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to
 # a value (instead of using the count coming out of 'git describe')

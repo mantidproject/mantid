@@ -12,7 +12,7 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 from qtpy.QtCore import Qt, Signal, Slot
 
 from mantid import logger
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, AnalysisDataService
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
 
@@ -54,13 +54,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self._connect_signals()
 
     def _connect_signals(self):
-        self.startXChanged.connect(self.move_start_x)
-        self.endXChanged.connect(self.move_end_x)
+        self.xRangeChanged.connect(self.move_x_range)
         self.algorithmFinished.connect(self.fitting_done_slot)
         self.changedParameterOf.connect(self.peak_changed_slot)
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
+        # Update whether data needs to be normalised when a button on the Fit menu is clicked
+        self.getFitMenu().aboutToShow.connect(self._set_normalise_data_from_workspace_artist)
 
     def _add_spectra(self, spectra):
         """
@@ -86,6 +87,20 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 pass
         return allowed_spectra
 
+    def _get_selected_workspace_artist(self):
+        ws_artists_list = self.get_axes().tracked_workspaces[self.workspaceName()]
+        for ws_artists in ws_artists_list:
+            if ws_artists.workspace_index == self.workspaceIndex():
+                return ws_artists
+
+    def _set_normalise_data_from_workspace_artist(self):
+        """
+        Set if the data should be normalised before fitting using the
+        normalisation state of the active workspace artist.
+        """
+        ws_artist = self._get_selected_workspace_artist()
+        self.normaliseData(ws_artist.is_normalized)
+
     def closeEvent(self, event):
         """
         Emit self.closing signal used by figure manager to put the menu buttons in correct states
@@ -108,47 +123,81 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
                                        current_peak_type=self.defaultPeakType())
-        self.tool.fit_start_x_moved.connect(self.setStartX)
-        self.tool.fit_end_x_moved.connect(self.setEndX)
+        self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
         self.tool.peak_fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.tool.add_background_requested.connect(self.add_function_slot)
         self.tool.add_other_requested.connect(self.add_function_slot)
-        self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
         super(FitPropertyBrowser, self).show()
+
+        self.set_fit_bounds(self.get_fit_bounds())
+        self.set_fit_range(self.tool.fit_range.get_range())
+
         self.setPeakToolOn(True)
         self.canvas.draw()
+
+    def get_fit_bounds(self):
+        """
+        Gets the lower and upper bounds to use for the range marker tool
+        """
+        workspace_name = self.workspaceName()
+        if AnalysisDataService.doesExist(workspace_name):
+            return self.get_workspace_x_range(AnalysisDataService.retrieve(workspace_name))
+        return None
+
+    def get_workspace_x_range(self, workspace):
+        """
+        Gets the x limits of a matrix workspace
+        :param workspace: The workspace to get the limits from
+        """
+        try:
+            x_data = workspace.dataX(self.workspaceIndex())
+            return [x_data[0], x_data[-1]]
+        except RuntimeError or IndexError:
+            return None
+
+    def set_fit_bounds(self, fit_bounds):
+        """
+        Sets the bounds within which the range marker can be moved
+        :param fit_bounds: The bounds of the fit range
+        """
+        if fit_bounds is not None:
+            self.tool.fit_range.set_bounds(fit_bounds[0], fit_bounds[1])
+
+    def set_fit_range(self, fit_range):
+        """
+        Sets the range to fit in the FitPropertyBrowser
+        :param fit_range: The new fit range
+        """
+        self.setXRange(fit_range[0], fit_range[1])
 
     def hide(self):
         """
         Override the base class method. Hide the peak editing tool.
         """
         if self.tool is not None:
-            self.tool.fit_start_x_moved.disconnect()
-            self.tool.fit_end_x_moved.disconnect()
+            self.tool.fit_range_changed.disconnect()
             self.tool.disconnect()
             self.tool = None
             self.canvas.draw()
         super(FitPropertyBrowser, self).hide()
         self.setPeakToolOn(False)
 
-    def move_start_x(self, xd):
+    def move_x_range(self, start_x, end_x):
         """
-        Let the tool know that StartX has changed.
-        :param xd: New value of StartX
-        """
-        if self.tool is not None:
-            self.tool.move_start_x(xd)
-
-    def move_end_x(self, xd):
-        """
-        Let the tool know that EndX has changed.
-        :param xd: New value of EndX
+        Let the tool know that the Fit range has been changed in the FitPropertyBrowser.
+        :param start_x: New value of StartX
+        :param end_x: New value of EndX
         """
         if self.tool is not None:
-            self.tool.move_end_x(xd)
+            new_range = sorted([start_x, end_x])
+            bounds = self.tool.fit_range.get_bounds()
+            if bounds[0] <= new_range[0] and bounds[1] >= new_range[1]:
+                self.tool.set_fit_range(new_range[0], new_range[1])
+            else:
+                self.set_fit_range(self.tool.fit_range.get_range())
 
     def clear_fit_result_lines(self):
         """
@@ -187,29 +236,36 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Plot the guess curve.
         """
-        from mantidqt.plotting.functions import plot
         fun = self.getFittingFunction()
         ws_name = self.workspaceName()
         if fun == '' or ws_name == '':
             return
         ws_index = self.workspaceIndex()
+        startX = self.startX()
+        endX = self.endX()
         out_ws_name = '{}_guess'.format(ws_name)
+        try:
+            alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
+            alg.setChild(True)
+            alg.initialize()
+            alg.setProperty('Function', fun)
+            alg.setProperty('InputWorkspace', ws_name)
+            alg.setProperty('WorkspaceIndex', ws_index)
+            alg.setProperty('StartX', startX)
+            alg.setProperty('EndX', endX)
+            alg.setProperty('OutputWorkspace', out_ws_name)
+            alg.execute()
+        except RuntimeError:
+            return
 
-        alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
-        alg.setChild(True)
-        alg.initialize()
-        alg.setProperty('Function', fun)
-        alg.setProperty('InputWorkspace', ws_name)
-        alg.setProperty('WorkspaceIndex', ws_index)
-        alg.setProperty('OutputWorkspace', out_ws_name)
-        alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
-
-        plot([out_ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True, plot_kwargs={'label': out_ws_name})
-        for lin in self.get_lines():
-            if lin.get_label().startswith(out_ws_name):
-                self.guess_line = lin
-                self.setTextPlotGuess('Remove Guess')
+        # Setting distribution=True prevents the guess being normalised
+        self.guess_line = self.get_axes().plot(out_ws, wkspIndex=1,
+                                               label=out_ws_name,
+                                               distribution=True,
+                                               update_axes_labels=False)[0]
+        if self.guess_line:
+            self.setTextPlotGuess('Remove Guess')
         self.canvas.draw()
 
     def remove_guess(self):

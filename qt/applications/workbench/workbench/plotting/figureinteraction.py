@@ -15,17 +15,16 @@ from __future__ import (absolute_import, unicode_literals)
 from collections import OrderedDict
 from copy import copy
 from functools import partial
-
-# third party imports
-from mantid.py3compat import iteritems
-from mantidqt.plotting.figuretype import FigureType, figure_type
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu
 
-# local imports
+# third party imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import MantidAxes
+from mantid.py3compat import iteritems
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -62,6 +61,7 @@ class FigureInteraction(object):
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
+        self.errors_manager = FigureErrorsManager(self.canvas)
 
     @property
     def nevents(self):
@@ -125,12 +125,14 @@ class FigureInteraction(object):
             return
 
         menu = QMenu()
+
         if self.fit_browser.tool is not None:
             self.fit_browser.add_to_menu(menu)
             menu.addSeparator()
         self._add_axes_scale_menu(menu)
         if isinstance(event.inaxes, MantidAxes):
             self._add_normalization_option_menu(menu, event.inaxes)
+        self.errors_manager.add_error_bars_menu(menu, event.inaxes)
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu):
@@ -193,7 +195,8 @@ class FigureInteraction(object):
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
                 arg_set_copy = copy(arg_set)
-                [arg_set_copy.pop(key) for key in ['function', 'workspaces']]
+                [arg_set_copy.pop(key) for key in ['function', 'workspaces', 'autoscale_on_update']
+                 if key in arg_set_copy.keys()]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
                         arg_set['specNum'] = workspace.getSpectrum(

@@ -142,7 +142,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
   pQtransf->initialize(WSDescription);
 
   //
-  long nHist = static_cast<long>(inWS->getNumberHistograms());
+  auto nHist = static_cast<long>(inWS->getNumberHistograms());
   auto detIDMap =
       WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
 

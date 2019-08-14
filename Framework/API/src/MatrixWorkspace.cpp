@@ -381,7 +381,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
       // The detector ID
       const detid_t detId = *it;
       // By default: Spectrum number = index +  1
-      const specnum_t specNo = specnum_t(index + 1);
+      const auto specNo = specnum_t(index + 1);
 
       if (index < this->getNumberHistograms()) {
         auto &spec = getSpectrum(index);
@@ -402,7 +402,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -426,7 +426,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  */
 std::vector<size_t>
 MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -2119,22 +2119,6 @@ void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
   m_indexInfoNeedsUpdate = true;
 }
 
-/// Cache a lookup of grouped detIDs to member IDs. Always throws
-/// std::runtime_error since MatrixWorkspace supports detector grouping via
-/// spectra instead of the caching mechanism.
-void MatrixWorkspace::cacheDetectorGroupings(
-    const det2group_map & /*mapping*/) {
-  throw std::runtime_error("Cannot cache detector groupings in a "
-                           "MatrixWorkspace -- grouping must be defined via "
-                           "spectra");
-}
-
-/// Throws an exception. This method is only for MDWorkspaces.
-size_t MatrixWorkspace::groupOfDetectorID(const detid_t /*detID*/) const {
-  throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
-                           "for MatrixWorkspace, only for MDWorkspaces");
-}
-
 /** Update detector grouping for spectrum with given index.
  *
  * This method is called when the detector grouping stored in SpectrumDefinition
@@ -2232,7 +2216,7 @@ template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -2249,7 +2233,7 @@ template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

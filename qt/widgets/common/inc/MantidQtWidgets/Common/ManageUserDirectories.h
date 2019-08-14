@@ -21,6 +21,7 @@ public:
   ManageUserDirectories(QWidget *parent = nullptr);
   ~ManageUserDirectories() override;
   static void openUserDirsDialog(QWidget *parent);
+  void setHelpButtonVisible(const bool &visible);
 
 private:
   virtual void initLayout();

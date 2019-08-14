@@ -86,6 +86,8 @@ public:
 public slots:
   /// Called when an instrument configuration is selected
   void newInstrumentConfiguration();
+  /// Handles an instrument being selected
+  void updateInstrumentConfigurations(const QString &instrumentName);
 
 signals:
   /// Emitted when the instrument configuration is changed
@@ -94,8 +96,6 @@ signals:
                                       const QString &reflectionName);
 
 private slots:
-  /// Handles an instrument being selected
-  void updateInstrumentConfigurations(const QString &instrumentName);
   /// Updates the list of analysers when an instrument is selected
   bool updateAnalysersList(Mantid::API::MatrixWorkspace_sptr ws);
   /// Updates the list of reflections when an analyser is selected

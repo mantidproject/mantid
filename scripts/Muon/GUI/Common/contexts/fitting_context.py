@@ -268,13 +268,23 @@ class FitInformation(object):
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
             else:
-                return float(prop.value)
+                try:
+                    return float(prop.value)
+                except ValueError:
+                    return prop.valueAsStr
 
         values = [
             value_from_workspace(wksp_name)
             for wksp_name in self.output_workspace_names
         ]
-        return np.mean(values)
+        try:
+            return np.mean(values)
+        except TypeError:
+            # This will be a string
+            if len(values) == 1:
+                return values[0]
+            elif len(values) > 1:
+                return str(values[0]) + " to " + str(values[-1])
 
 
 class FittingContext(object):
@@ -351,9 +361,13 @@ class FittingContext(object):
         list_of_fits_to_remove = []
         for fit in self.fit_list:
             if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+                self._number_of_fits_cache = 0
                 list_of_fits_to_remove.append(fit)
 
         for fit in list_of_fits_to_remove:
+            index = self.fit_list.index(fit)
+            if index >= len(self.fit_list) - self._number_of_fits:
+                self._number_of_fits -= 1
             self.fit_list.remove(fit)
 
     def log_names(self, filter_fn=None):

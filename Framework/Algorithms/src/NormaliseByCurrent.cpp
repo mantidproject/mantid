@@ -68,7 +68,7 @@ double NormaliseByCurrent::extractCharge(
 
     // Fetch the charge property
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
-    ArrayProperty<double> *chargePropertyArray =
+    auto *chargePropertyArray =
         dynamic_cast<ArrayProperty<double> *>(chargeProperty);
     if (chargePropertyArray) {
       charge = chargePropertyArray->operator()()[periodNumber - 1];

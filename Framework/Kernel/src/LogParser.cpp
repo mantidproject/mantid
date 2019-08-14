@@ -199,7 +199,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   m_periods.reset(periods);
   m_status.reset(status);
 
-  const Kernel::TimeSeriesProperty<std::string> *icpLog =
+  const auto *icpLog =
       dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
     periods->addValue(Types::Core::DateAndTime(), 1);
@@ -251,7 +251,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
  *  @return times requested period was active
  */
 Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
-  Kernel::TimeSeriesProperty<int> *periods =
+  auto *periods =
       dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
@@ -326,8 +326,7 @@ bool LogParser::isICPEventLogNewStyle(
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
  */
 double timeMean(const Kernel::Property *p) {
-  const Kernel::TimeSeriesProperty<double> *dp =
-      dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
+  const auto *dp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
   if (!dp) {
     throw std::runtime_error("Property of a wrong type. Cannot be cast to a "
                              "TimeSeriesProperty<double>.");

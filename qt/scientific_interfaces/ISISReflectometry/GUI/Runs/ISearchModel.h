@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL ISearchModel {
 public:
@@ -27,6 +28,7 @@ public:
 
 /// Typedef for a shared pointer to \c SearchModel
 using ISearchModel_sptr = boost::shared_ptr<ISearchModel>;
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

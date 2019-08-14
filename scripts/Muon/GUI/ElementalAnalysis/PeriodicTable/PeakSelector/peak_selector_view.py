@@ -12,6 +12,18 @@ from six import iteritems
 from Muon.GUI.Common.checkbox import Checkbox
 
 
+# Check that the new data format contains at least A, Z, primary (they can be empty)
+def valid_data(peak_data):
+    data_label = peak_data.keys()
+    if any(['Z' not in data_label,
+            'A' not in data_label,
+            'Primary' not in data_label,
+            'Secondary' not in data_label]):
+        return False
+
+    return True
+
+
 class PeakSelectorView(QtWidgets.QListWidget):
     sig_finished_selection = QtCore.Signal(object, object)
 
@@ -20,23 +32,34 @@ class PeakSelectorView(QtWidgets.QListWidget):
         widget = QtWidgets.QWidget()
 
         self.new_data = {}
-        self.update_new_data(peak_data)
+        if not valid_data(peak_data):
+            raise ValueError
+
         self.element = element
+        self.update_new_data(peak_data)
         self.setWindowTitle(element)
         self.list = QtWidgets.QVBoxLayout(self)
 
+        # Gamma peaks might not be present, if so return empty list
         primary = peak_data["Primary"]
-        self.primary_checkboxes = self._create_checkbox_list(
-            "Primary", primary)
+        self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
         secondary = peak_data["Secondary"]
-        self.secondary_checkboxes = self._create_checkbox_list(
-            "Secondary", secondary, checked=False)
+        self.secondary_checkboxes = self._create_checkbox_list("Secondary", secondary, checked=False)
         try:
             gammas = peak_data["Gammas"]
-            self.gamma_checkboxes = self._create_checkbox_list(
-                "Gammas", gammas, checked=False)
+            self.gamma_checkboxes = self._create_checkbox_list("Gammas", gammas, checked=False)
         except KeyError:
             self.gamma_checkboxes = []
+        try:
+            # Electron data has the x position as key and relative intensity as value
+            electrons = peak_data["Electrons"]
+            electron_data = {}
+            for xpos, int in electrons.items():
+                name = '$e^-\quad$  {}'.format(xpos)
+                electron_data[name] = float(xpos)
+            self.electron_checkboxes = self._create_checkbox_list("Electrons", electron_data, checked=False)
+        except KeyError:
+            self.electron_checkboxes = []
 
         widget.setLayout(self.list)
         scroll = QtWidgets.QScrollArea()
@@ -64,6 +87,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
             if values is None:
                 data[el] = {}
         new_data = data["Primary"].copy()
+
         self.new_data = new_data
 
     def _setup_checkbox(self, name, checked):
@@ -79,9 +103,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         self.list.addWidget(_heading)
         checkboxes = []
         for peak_type, value in iteritems(checkbox_data):
-            checkboxes.append(
-                self._setup_checkbox(
-                    "{}: {}".format(peak_type, value), checked))
+            checkboxes.append(self._setup_checkbox("{}: {}".format(peak_type, value), checked))
         return checkboxes
 
     def _parse_checkbox_name(self, name):

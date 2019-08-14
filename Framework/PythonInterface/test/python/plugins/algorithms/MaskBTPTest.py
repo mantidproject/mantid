@@ -93,16 +93,20 @@ class MaskBTPTest(unittest.TestCase):
         #check whether some pixels are masked when they should
         w=mtd['CNCSMaskBTP']
         detInfo = w.detectorInfo()
-        self.assertTrue(detInfo.isMasked(29699)) #pixel1 (detID 29696)
-        self.assertTrue(detInfo.isMasked(29700)) #pixel2 (detID 29697)
-        self.assertTrue(detInfo.isMasked(29701)) #pixel3 (detID 29698)
-        self.assertFalse(detInfo.isMasked(29702)) #pixel4 (detID 29699)
-        self.assertTrue(detInfo.isMasked(29703)) #pixel5 (detID 29700)
+        detIds = detInfo.detectorIDs()
 
-        self.assertTrue(detInfo.isMasked(1023)) #bank1 (detID 1020)
-        self.assertFalse(detInfo.isMasked(3071)) #bank3, tube 8 (detID 3068)
+        # check for some to be masked
+        for id in (29696, 29697, 29698, #29699,
+                   29700, 1020, 4400):
+            index = int(where(detIds == id)[0][0])
+            self.assertTrue(detInfo.isMasked(index),
+                            msg='detId={}, index={} should not be masked'.format(id, index))
 
-        self.assertTrue(detInfo.isMasked(4403)) #bank5, tube 3 (detID 4400)
+        # check for some to not be masked
+        for id in [3071]:
+            index = int(where(detIds == id)[0][0])
+            self.assertFalse(detInfo.isMasked(index),
+                             msg='detId={}, index={} should not be masked'.format(id, index))
         DeleteWorkspace(w)
 
     def testSEQMaskBTP(self):

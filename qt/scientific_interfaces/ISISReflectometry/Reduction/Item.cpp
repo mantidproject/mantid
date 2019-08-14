@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Item::Item() : m_itemState(), m_skipped(false) {}
 
@@ -66,5 +67,6 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   }
   return false;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

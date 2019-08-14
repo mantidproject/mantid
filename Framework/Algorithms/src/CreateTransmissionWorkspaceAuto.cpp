@@ -154,9 +154,9 @@ void CreateTransmissionWorkspaceAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
+  auto wavelength_min = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
+  auto wavelength_max = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMin", instrument,

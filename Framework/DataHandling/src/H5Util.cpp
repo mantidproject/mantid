@@ -335,7 +335,7 @@ template <typename InputNumT, typename OutputNumT>
 OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
   InputNumT temp;
   attribute.read(dataType, &temp);
-  OutputNumT result = boost::numeric_cast<OutputNumT>(temp);
+  auto result = boost::numeric_cast<OutputNumT>(temp);
   return result;
 }
 

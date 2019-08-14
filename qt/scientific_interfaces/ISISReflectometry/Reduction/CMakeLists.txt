@@ -11,6 +11,7 @@ set(REDUCTION_SRC_FILES
     Slicing.cpp
     ParseReflectometryStrings.cpp
     TransmissionRunPair.cpp
+    TransmissionStitchOptions.cpp
     Batch.cpp
     DetectorCorrections.cpp
     Experiment.cpp
@@ -40,6 +41,7 @@ set(REDUCTION_INC_FILES
     ParseReflectometryStrings.h
     ProcessingInstructions.h
     TransmissionRunPair.h
+    TransmissionStitchOptions.h
     ValidatePerThetaDefaults.h
     AnalysisMode.h
     Batch.h

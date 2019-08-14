@@ -41,20 +41,20 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	
 	<INTERFACE id="CalculatePaalmanPings">
 		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw"/>
+		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red" container="_red"/>
 	</INTERFACE>
 	
 	<INTERFACE id="CalculateMonteCarlo">
 		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw"/>
+		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red" container="_red"/>
 	</INTERFACE>
 	
 	<INTERFACE id="ApplyCorrections">
 		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs" container="_red.nxs,_sqw.nxs" corrections="_Corrections.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red,_sqw" container="_red,_sqw" corrections="_Corrections"/>
+		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs" corrections="_Corrections.nxs"/>
+		<WORKSPACE-SUFFIXES sample="_red" container="_red" corrections="_Corrections"/>
 	</INTERFACE>
 	
 	<INTERFACE id="Elwin">
@@ -64,7 +64,7 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	</INTERFACE>
 	
 	<INTERFACE id="MSDFit">
-		<EXTENSIONS all=".nxs"/>
+		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_eq.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_eq"/>
 	</INTERFACE>
@@ -76,19 +76,19 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 	</INTERFACE>
 		
 	<INTERFACE id="IqtFit">
-		<EXTENSIONS all=".nxs"/>
+		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_iqt.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_iqt"/>
 	</INTERFACE>
 	
 	<INTERFACE id="ConvFit">
-		<EXTENSIONS all=".nxs,.dave"/>
+		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_red.nxs,_sqw.nxs,_sqw.dave" resolution="_res.nxs,_red.nxs,_sqw.nxs,_sqw.dave"/>
 		<WORKSPACE-SUFFIXES sample="_red,_sqw" resolution="_res,_red,_sqw"/>
 	</INTERFACE>
 	
 	<INTERFACE id="FQFit">
-		<EXTENSIONS all=".nxs"/>
+		<EXTENSIONS all=".nxs,.dave,.grp"/>
 		<FILE-SUFFIXES sample="_Result.nxs"/>
 		<WORKSPACE-SUFFIXES sample="_Result"/>
 	</INTERFACE>
