@@ -82,9 +82,10 @@ Eigen::Vector3d applyRotation(const Eigen::Vector3d &pos,
 void addMonitors(const JSONGeometryParser &parser, InstrumentBuilder &builder) {
   const auto &monitors = parser.monitors();
   for (const auto &monitor : monitors) {
+    auto shape = createMonitorShape(monitor);
     builder.addMonitor(std::to_string(monitor.detectorID), monitor.detectorID,
                        applyRotation(monitor.translation, monitor.orientation),
-                       createMonitorShape(monitor));
+                       shape);
   }
 }
 
