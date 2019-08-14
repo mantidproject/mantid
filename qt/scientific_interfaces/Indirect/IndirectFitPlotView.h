@@ -12,10 +12,51 @@
 #include "DllConfig.h"
 #include "IIndirectFitPlotView.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Plotting/PreviewPlot.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QIcon>
+#include <QPainter>
+#include <QSplitterHandle>
+#endif
+#include <QSplitter>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+// Used for painting an Icon onto the handle of the splitter on workbench
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+class SplitterHandle : public QSplitterHandle {
+public:
+  SplitterHandle(QIcon icon, Qt::Orientation orientation,
+                 QSplitter *parent = nullptr)
+      : QSplitterHandle(orientation, parent), m_icon(icon) {}
+
+  void paintEvent(QPaintEvent *e) {
+    QSplitterHandle::paintEvent(e);
+
+    QPainter painter(this);
+    m_icon.paint(&painter, std::round(this->size().width() / 2), -9, 24, 24);
+  }
+
+private:
+  QIcon m_icon;
+};
+
+class Splitter : public QSplitter {
+public:
+  Splitter(QIcon icon, QWidget *parent = nullptr)
+      : QSplitter(parent), m_icon(icon) {}
+
+  QSplitterHandle *createHandle() override {
+    return new SplitterHandle(m_icon, Qt::Vertical, this);
+  }
+
+private:
+  QIcon m_icon;
+};
+#endif
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotView : public IIndirectFitPlotView {
   Q_OBJECT
@@ -95,6 +136,17 @@ private slots:
   void emitPlotGuessChanged(int /*doPlotGuess*/);
 
 private:
+  void createSplitterWithPlots();
+  void createSplitter();
+  MantidWidgets::PreviewPlot *createTopPlot();
+  MantidWidgets::PreviewPlot *createBottomPlot();
+  MantidWidgets::PreviewPlot *
+  createPlot(MantidQt::MantidWidgets::PreviewPlot *plot,
+             QSize const &minimumSize, int horizontalStretch,
+             int verticalStretch) const;
+  void setPlotSizePolicy(MantidQt::MantidWidgets::PreviewPlot *plot,
+                         int horizontalStretch, int verticalStretch) const;
+
   std::string getSpectrumText() const;
 
   void addFitRangeSelector();
@@ -102,6 +154,9 @@ private:
   void addHWHMRangeSelector();
 
   std::unique_ptr<Ui::IndirectFitPreviewPlot> m_plotForm;
+  std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_topPlot;
+  std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
+  std::unique_ptr<QSplitter> m_splitter;
 };
 
 } // namespace IDA
