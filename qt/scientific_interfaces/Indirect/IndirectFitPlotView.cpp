@@ -100,10 +100,10 @@ PreviewPlot *IndirectFitPlotView::createBottomPlot() {
   return createPlot(m_bottomPlot.get(), QSize(0, 75), 0, 6);
 }
 
-PreviewPlot *IndirectFitPlotView::createPlot(PreviewPlot *plot,
-                                             QSize const &minimumSize,
-                                             int horizontalStretch,
-                                             int verticalStretch) const {
+PreviewPlot *
+IndirectFitPlotView::createPlot(PreviewPlot *plot, QSize const &minimumSize,
+                                unsigned char horizontalStretch,
+                                unsigned char verticalStretch) const {
   setPlotSizePolicy(plot, horizontalStretch, verticalStretch);
 
   plot->setMinimumSize(minimumSize);
@@ -118,9 +118,9 @@ PreviewPlot *IndirectFitPlotView::createPlot(PreviewPlot *plot,
   return plot;
 }
 
-void IndirectFitPlotView::setPlotSizePolicy(PreviewPlot *plot,
-                                            int horizontalStretch,
-                                            int verticalStretch) const {
+void IndirectFitPlotView::setPlotSizePolicy(
+    PreviewPlot *plot, unsigned char horizontalStretch,
+    unsigned char verticalStretch) const {
   QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
   sizePolicy.setHorizontalStretch(horizontalStretch);
   sizePolicy.setVerticalStretch(verticalStretch);

@@ -33,11 +33,11 @@ public:
                  QSplitter *parent = nullptr)
       : QSplitterHandle(orientation, parent), m_icon(icon) {}
 
-  void paintEvent(QPaintEvent *e) {
+  void paintEvent(QPaintEvent *e) override {
     QSplitterHandle::paintEvent(e);
 
     QPainter painter(this);
-    m_icon.paint(&painter, std::round(this->size().width() / 2), -9, 24, 24);
+    m_icon.paint(&painter, std::lround(this->size().width() / 2), -9, 24, 24);
   }
 
 private:
@@ -142,10 +142,11 @@ private:
   MantidWidgets::PreviewPlot *createBottomPlot();
   MantidWidgets::PreviewPlot *
   createPlot(MantidQt::MantidWidgets::PreviewPlot *plot,
-             QSize const &minimumSize, int horizontalStretch,
-             int verticalStretch) const;
+             QSize const &minimumSize, unsigned char horizontalStretch,
+             unsigned char verticalStretch) const;
   void setPlotSizePolicy(MantidQt::MantidWidgets::PreviewPlot *plot,
-                         int horizontalStretch, int verticalStretch) const;
+                         unsigned char horizontalStretch,
+                         unsigned char verticalStretch) const;
 
   std::string getSpectrumText() const;
 
