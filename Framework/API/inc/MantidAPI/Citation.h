@@ -27,12 +27,25 @@ public:
   Citation(::NeXus::File *file, const std::string &group);
 
   /**
-   * An example Constructor will look like this:
-   * Citation citation("doi", "@misc{Nobody06,\nauthor = "Nobody Jr",\ntitle =
-   * "My Article",\nyear = "2006" }", "TY  - JOUR\nAU  - Shannon, Claude E.\nPY
-   * - 1948/07//\nTI  - A Mathematical Theory of Communication\nT2  - Bell
-   * System Technical Journal\nSP  - 379\nEP  - 423\nVL  - 27\nER  -", "url",
-   * "description")
+   * There are some strict parameters that the function arguements must adhere
+   * to:
+   * - description is always optional (this isn't needed for citation, but gives
+   *   insight as to why this citation is relevant)
+   * - if bibtex is provided endnote must also be provided, and vice-versa
+   *   (BibTex and Endnote contain essentially the same information, they can
+   *   both be created if one can be. BibTex and Endnote do not imply a DOI is
+   *   minted)
+   * - if doi is provided, url, bibtex and endnote must all be provided (BibTex
+   *   and Endnote can be generated from DOIs)
+   * - if none of doi, bibtex or endnote are provided, url must be provided
+   *   (there must be something there, even if this isn't citable a URL is
+   *   better than nothing)
+   *
+   * @param doi - https://www.baylor.edu/lib/electrres/index.php?id=49231
+   * @param bibtex - https://www.economics.utoronto.ca/osborne/latex/BIBTEX.HTM
+   * @param endnote - https://en.wikipedia.org/wiki/RIS_(file_format)
+   * @param url - The website url for which the citation refers
+   * @param description - The description of the thing that is being cited
    */
   Citation(const std::string &doi = "", const std::string &bibtex = "",
            const std::string &endnote = "", const std::string &url = "",

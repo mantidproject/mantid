@@ -35,9 +35,6 @@ void export_Citation() {
            "Returns the bibtex formatted citation from the citation object")
       .def("endnote", &endnote, arg("self"),
            "Returns the endnote formatted citation from the citation object")
-      .def("loadNexus", &Citation::loadNexus,
-           (arg("self"), arg("file"), arg("group")),
-           "Load data into this object from a NeXus file")
       .def("saveNexus", &Citation::saveNexus,
            (arg("self"), arg("file"), arg("group")),
            "Save data from this object to a NeXus file")
