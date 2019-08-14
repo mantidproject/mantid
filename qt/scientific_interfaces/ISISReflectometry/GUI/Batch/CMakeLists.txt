@@ -15,6 +15,7 @@ set(BATCH_INC_FILES
     IBatchView.h
     IBatchJobAlgorithm.h
     IBatchJobRunner.h
+    IBatchPresenterFactory.h
     BatchPresenter.h
     BatchPresenterFactory.h
     QtBatchView.h

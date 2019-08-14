@@ -247,7 +247,7 @@ void BatchPresenter::autoreductionPaused() {
   m_instrumentPresenter->autoreductionPaused();
   m_runsPresenter->autoreductionPaused();
 
-  m_mainPresenter->notifyAutoreductionResumed();
+  m_mainPresenter->notifyAutoreductionPaused();
 }
 
 void BatchPresenter::autoreductionCompleted() {

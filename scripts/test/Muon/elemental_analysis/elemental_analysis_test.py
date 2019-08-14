@@ -117,7 +117,13 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui._gen_label(name, 1.0, element)
 
         self.assertIn(name, self.gui.element_lines[element])
-        mock_label.assert_called_with(str(name), 1.0, False, 0.9, True, rotation=-90, protected=True)
+        mock_label.assert_called_with(str(name),
+                                      1.0,
+                                      False,
+                                      0.9,
+                                      True,
+                                      rotation=-90,
+                                      protected=True)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.Label')
     def test_that_gen_label_name_is_not_duplicated_in_list_if_already_present(self, mock_label):
@@ -128,7 +134,13 @@ class ElementalAnalysisTest(unittest.TestCase):
 
         self.assertIn(name, self.gui.element_lines[element])
         self.assertEqual(self.gui.element_lines[element].count(name), 1)
-        mock_label.assert_called_with(str(name), 1.0, False, 0.9, True, rotation=-90, protected=True)
+        mock_label.assert_called_with(str(name),
+                                      1.0,
+                                      False,
+                                      0.9,
+                                      True,
+                                      rotation=-90,
+                                      protected=True)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once')
@@ -393,7 +405,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plotting.get_subplots = mock.Mock(return_value=True)
         self.gui.plot_window = 'plot_window'
 
-        self.gui.subplotRemoved('name')
+        self.gui.subplot_removed('name')
 
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, 'plot_window')
@@ -403,7 +415,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plotting.get_subplots = mock.Mock(return_value=False)
         self.gui.plot_window = mock.Mock()
 
-        self.gui.subplotRemoved('name')
+        self.gui.subplot_removed('name')
 
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
@@ -438,6 +450,42 @@ class ElementalAnalysisTest(unittest.TestCase):
                        'See "https://docs.mantidproject.org/nightly/interfaces/'\
                        'Muon%20Elemental%20Analysis.html" for more information.'
         mock_warning.assert_called_with(warning_text)
+
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
+    def test_select_data_file_calls_update_checked_data(self, mock_getOpenFileName, mock_warning):
+        mock_getOpenFileName.return_value = 'filename'
+        tmp = self.gui._update_checked_data
+        self.gui._update_checked_data = mock.Mock()
+        self.gui.select_data_file()
+
+        self.assertEqual(1, self.gui._update_checked_data.call_count)
+        self.gui._update_checked_data = tmp
+
+    def test_update_checked_data_calls_the_right_functions(self):
+        self.gui.peaks.major.isChecked = mock.Mock(return_value=True)
+        self.gui.peaks.minor.isChecked = mock.Mock(return_value=True)
+        self.gui.peaks.gamma.isChecked = mock.Mock(return_value=False)
+        self.gui.peaks.electron.isChecked = mock.Mock(return_value=True)
+        self.gui.major_peaks_checked = mock.Mock()
+        self.gui.major_peaks_unchecked = mock.Mock()
+        self.gui.minor_peaks_checked = mock.Mock()
+        self.gui.minor_peaks_unchecked = mock.Mock()
+        self.gui.gammas_checked = mock.Mock()
+        self.gui.gammas_unchecked = mock.Mock()
+        self.gui.electrons_checked = mock.Mock()
+        self.gui.electrons_unchecked = mock.Mock()
+
+        self.gui._update_checked_data()
+
+        self.assertEqual(1, self.gui.major_peaks_checked.call_count)
+        self.assertEqual(0, self.gui.major_peaks_unchecked.call_count)
+        self.assertEqual(1, self.gui.minor_peaks_checked.call_count)
+        self.assertEqual(0, self.gui.minor_peaks_unchecked.call_count)
+        self.assertEqual(0, self.gui.gammas_checked.call_count)
+        self.assertEqual(1, self.gui.gammas_unchecked.call_count)
+        self.assertEqual(1, self.gui.electrons_checked.call_count)
+        self.assertEqual(0, self.gui.electrons_unchecked.call_count)
 
     def test_gamms_checked_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)

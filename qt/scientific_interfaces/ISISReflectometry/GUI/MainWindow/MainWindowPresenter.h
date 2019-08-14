@@ -8,7 +8,7 @@
 #define MANTID_ISISREFLECTOMETRY_MAINWINDOWPRESENTER_H
 
 #include "Common/DllConfig.h"
-#include "GUI/Batch/BatchPresenterFactory.h"
+#include "GUI/Batch/IBatchPresenter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
 #include <memory>
@@ -17,6 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class IBatchPresenterFactory;
 class IMainWindowView;
 class IMessageHandler;
 
@@ -30,8 +31,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter
       public IMainWindowPresenter {
 public:
   /// Constructor
-  MainWindowPresenter(IMainWindowView *view, IMessageHandler *messageHandler,
-                      BatchPresenterFactory batchPresenterFactory);
+  MainWindowPresenter(
+      IMainWindowView *view, IMessageHandler *messageHandler,
+      std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory);
+  ~MainWindowPresenter();
+  MainWindowPresenter(MainWindowPresenter const &) = delete;
+  MainWindowPresenter(MainWindowPresenter &&);
+  MainWindowPresenter &operator=(MainWindowPresenter const &) = delete;
+  MainWindowPresenter &operator=(MainWindowPresenter &&);
 
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
@@ -48,16 +55,17 @@ public:
   void notifySaveBatchRequested(int batchIndex) override;
   void notifyLoadBatchRequested(int batchIndex) override;
 
+protected:
+  IMainWindowView *m_view;
+  IMessageHandler *m_messageHandler;
+  std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
+  std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
+
 private:
   void showHelp();
   void addNewBatch(IBatchView *batchView);
   void disableSaveAndLoadBatch();
   void enableSaveAndLoadBatch();
-
-  IMainWindowView *m_view;
-  IMessageHandler *m_messageHandler;
-  BatchPresenterFactory m_batchPresenterFactory;
-  std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
 
   friend class Encoder;
   friend class Decoder;

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtMainWindowView.h"
 #include "Common/IndexOf.h"
+#include "GUI/Batch/BatchPresenterFactory.h"
 #include "GUI/Batch/QtBatchView.h"
 #include "GUI/Common/Plotter.h"
 #include <QMessageBox>
@@ -93,7 +94,7 @@ void QtMainWindowView::initLayout() {
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
 
-  auto makeBatchPresenter = BatchPresenterFactory(
+  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
       std::move(makeExperimentPresenter), std::move(makeInstrumentPresenter),
       std::move(makeSaveSettingsPresenter));

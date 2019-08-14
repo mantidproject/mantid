@@ -13,7 +13,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
                                             const QtMainWindowView &mwv) {
-  for (auto ipresenter : mwv.m_presenter->m_batchPresenters) {
+  for (auto &ipresenter : mwv.m_presenter->m_batchPresenters) {
     auto presenter = std::dynamic_pointer_cast<BatchPresenter>(ipresenter);
     if (presenter->m_view == gui) {
       return presenter.get();

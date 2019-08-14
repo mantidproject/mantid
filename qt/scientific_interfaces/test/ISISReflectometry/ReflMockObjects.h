@@ -10,6 +10,7 @@
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "GUI/Batch/IBatchJobRunner.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/Event/IEventPresenter.h"
@@ -40,37 +41,20 @@ using namespace Mantid::API;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
-/**** Views ****/
-class MockMainWindowView : public IMainWindowView {
+/**** Factories ****/
+class MockBatchPresenterFactory : public IBatchPresenterFactory {
 public:
-  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserCritical,
-               void(const std::string &, const std::string &));
-  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  MOCK_METHOD0(newBatch, IBatchView *());
-  MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));
-  MOCK_METHOD1(removeBatch, void(int));
-  MOCK_CONST_METHOD0(batches, std::vector<IBatchView *>());
-  ~MockMainWindowView() override{};
+  MOCK_METHOD1(makeProxy, IBatchPresenter *(IBatchView *));
+  std::shared_ptr<IBatchPresenter> make(IBatchView *view) {
+    return std::shared_ptr<IBatchPresenter>(makeProxy(view));
+  }
 };
+
 /**** Presenters ****/
-
-class MockMainWindowPresenter : public IMainWindowPresenter {
-public:
-  MOCK_METHOD1(settingsChanged, void(int));
-  MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
-  MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
-  MOCK_METHOD0(notifyAutoreductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(reductionPaused, void());
-
-  ~MockMainWindowPresenter() override{};
-};
 
 class MockBatchPresenter : public IBatchPresenter {
 public:
+  MOCK_METHOD1(acceptMainPresenter, void(IMainWindowPresenter *));
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
@@ -91,9 +75,6 @@ public:
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
-
-  // Calls we don't care about
-  void acceptMainPresenter(IMainWindowPresenter *) override{};
 };
 
 class MockRunsPresenter : public IRunsPresenter {
