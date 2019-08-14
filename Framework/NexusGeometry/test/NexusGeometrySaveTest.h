@@ -1155,8 +1155,6 @@ Instrument cache.
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
 
-    TS_ASSERT_EQUALS(radiusInFile, cylinderRadius);
-
     TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
                     1e-5); // radii are approx equal
     TS_ASSERT_DELTA(heightInFile, cylinderHeight,
