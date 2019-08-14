@@ -1,4 +1,3 @@
-//
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
@@ -237,7 +236,6 @@ inline void writePixelData(H5::Group &grp,
 
   bool cylindersExist{false};       // for checking if any cylinder types exist
   bool shapesAreHomogeneous{false}; // all shapes equal
-  bool shapesAreValidAndHomogeneous{false}; // all shapes equal and valid shape
 
   // shape type of the first detector in children detectors
   auto &firstShape = compInfo.shape(pixels.front());
@@ -389,8 +387,7 @@ inline void writePixelData(H5::Group &grp,
         }
       }
     }
-    if (nCylinders != 0)
-      writePixelShape(pixelShapeGroup, nCylinders, vertices);
+    writePixelShape(pixelShapeGroup, nCylinders, vertices);
   }
 
   // write pixel offset data

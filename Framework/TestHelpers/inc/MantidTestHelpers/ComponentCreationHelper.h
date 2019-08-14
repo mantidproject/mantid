@@ -171,7 +171,8 @@ createVectorOfCylindricalDetectors(const double R_min = 4.5,
 Mantid::Geometry::Instrument_sptr
 createCylInstrumentWithVerticalOffsetsSpecified(
     size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
-    double xMin, double xMax, double yMin, double yMax);
+    double xMin, double xMax, double yMin, double yMax,
+    bool inhomogeneous = false);
 
 /** create instrument with cylindrical detectors located in specific angular
  * positions */

@@ -405,40 +405,71 @@ Instrument_sptr createTestInstrumentCylindrical(
 Mantid::Geometry::Instrument_sptr
 createCylInstrumentWithVerticalOffsetsSpecified(
     size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
-    double xMin, double xMax, double yMin, double yMax) {
+    double xMin, double xMax, double yMin, double yMax, bool inhomogeneous) {
   // Pixel shape
   const double ySpan = (yMax - yMin);
   const double xSpan = (xMax - xMin);
   const double tubeDiameter =
       xSpan / static_cast<double>(nTubes);   // No gaps between tubes
   const double cylRadius = tubeDiameter / 2; // No gaps between tubes
-  const double cylHeight = ySpan / static_cast<double>(nDetsPerTube);
+  double cylHeight = ySpan / static_cast<double>(nDetsPerTube);
   const double bankZPos = 2;
   const double sourceZPos = -10;
   const double sampleZPos = 0;
 
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
-      cylRadius, cylHeight, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
-      "pixel-shape");
   auto instrument = boost::make_shared<Instrument>("instrument_with_tubes");
   CompAssembly *bank = new CompAssembly("sixteenpack");
-  for (size_t i = 0; i < nTubes; ++i) {
-    ObjCompAssembly *tube = new ObjCompAssembly("tube" + std::to_string(i));
-    for (size_t j = 0; j < nDetsPerTube; ++j) {
 
-      auto id = static_cast<int>(i * nDetsPerTube + j);
-      Detector *physicalPixel =
-          new Detector("det-" + std::to_string(id), id, pixelShape, tube);
-      tube->add(physicalPixel);
-      physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
-      instrument->markAsDetector(physicalPixel);
+  if (inhomogeneous) {
+
+    for (size_t i = 0; i < nTubes; ++i) {
+
+      ObjCompAssembly *tube = new ObjCompAssembly("tube" + std::to_string(i));
+      for (size_t j = 0; j < nDetsPerTube; ++j) {
+
+        auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+            cylRadius + static_cast<double>(j) + static_cast<double>(i),
+            cylHeight + static_cast<double>(j) + static_cast<double>(i),
+            V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
+
+        auto id = static_cast<int>(i * nDetsPerTube + j);
+        Detector *physicalPixel =
+            new Detector("det-" + std::to_string(id), id, pixelShape, tube);
+        tube->add(physicalPixel);
+        physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
+        instrument->markAsDetector(physicalPixel);
+      }
+      tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
+                       -ySpan / 2 + verticalOffsets[i], 0));
+      tube->setOutline(tube->createOutline());
+      Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
+      bank->add(tube);
     }
-    tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
-                     -ySpan / 2 + verticalOffsets[i], 0));
-    tube->setOutline(tube->createOutline());
-    Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
-    bank->add(tube);
+
+  } else {
+
+    auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+        cylRadius, cylHeight, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
+        "pixel-shape");
+    for (size_t i = 0; i < nTubes; ++i) {
+      ObjCompAssembly *tube = new ObjCompAssembly("tube" + std::to_string(i));
+      for (size_t j = 0; j < nDetsPerTube; ++j) {
+
+        auto id = static_cast<int>(i * nDetsPerTube + j);
+        Detector *physicalPixel =
+            new Detector("det-" + std::to_string(id), id, pixelShape, tube);
+        tube->add(physicalPixel);
+        physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
+        instrument->markAsDetector(physicalPixel);
+      }
+      tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter,
+                       -ySpan / 2 + verticalOffsets[i], 0));
+      tube->setOutline(tube->createOutline());
+      Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
+      bank->add(tube);
+    }
   }
+
   bank->setPos(V3D(0, 0, bankZPos));
   instrument->add(bank);
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
