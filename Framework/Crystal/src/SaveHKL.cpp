@@ -235,13 +235,10 @@ void SaveHKL::exec() {
   m_radius = getProperty("Radius");            // in cm
   m_power_th = getProperty("PowerLambda");     // in cm
   const Material &sampleMaterial = peaksW->sample().getMaterial();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
+  if (sampleMaterial.totalScatterXSection() != 0.0) {
     double rho = sampleMaterial.numberDensity();
     if (m_smu == EMPTY_DBL())
-      m_smu =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-          rho;
+      m_smu = sampleMaterial.totalScatterXSection() * rho;
     if (m_amu == EMPTY_DBL())
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.notice() << "Sample number density = " << rho

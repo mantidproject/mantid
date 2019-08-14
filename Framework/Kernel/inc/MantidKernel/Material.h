@@ -88,17 +88,11 @@ public:
   /// Get the pressure
   double pressure() const;
   /// Get the coherent scattering cross section for a given wavelength in barns.
-  double
-  cohScatterXSection(const double lambda =
-                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double cohScatterXSection() const;
   /// Get the incoherent cross section for a given wavelength in barns.
-  double incohScatterXSection(
-      const double lambda =
-          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double incohScatterXSection() const;
   /// Return the total scattering cross section for a given wavelength in barns.
-  double totalScatterXSection(
-      const double lambda =
-          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double totalScatterXSection() const;
   /// Get the absorption cross section at a given wavelength in barns.
   double
   absorbXSection(const double lambda =
