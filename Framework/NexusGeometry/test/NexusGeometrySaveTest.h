@@ -1155,6 +1155,8 @@ Instrument cache.
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
 
+    TS_ASSERT_EQUALS(radiusInFile, cylinderRadius);
+
     TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
                     1e-5); // radii are approx equal
     TS_ASSERT_DELTA(heightInFile, cylinderHeight,
@@ -1172,7 +1174,7 @@ Instrument cache.
      describe the cylinder: the centre of the base along the cylinder axis, the
      centre of the top face along the cylinder axis, and the edge of the
      cylinder from the top face that is orthogonal to the axis. This test will
-     access the height and radius of the first two cylinders, and  verify that
+     access the height and radius of the first two cylinders, and verify that
      they are different."
     */
 

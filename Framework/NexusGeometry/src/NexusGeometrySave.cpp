@@ -262,7 +262,6 @@ inline void writePixelData(H5::Group &grp,
           throw std::runtime_error("MeshObject2D Type pixel shape is not "
                                    "implemented for a detector bank");
         }
-
         auto shapeInfo = shapeObj.shapeInfo();
         auto type = shapeInfo.shape();
         auto height = shapeInfo.height();
@@ -270,7 +269,7 @@ inline void writePixelData(H5::Group &grp,
         // if at least one cylinder is found, change flag to true.
         if (static_cast<int>(type) == 4 /*CYLINDER*/)
           cylindersExist = true;
-        return (type == fType && height == fHeight && radius);
+        return (type == fType && height == fHeight && fRadius == radius);
       });
 
   std::vector<double> posx;
