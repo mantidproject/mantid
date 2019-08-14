@@ -16,6 +16,7 @@
 #include "ui_MainWindowWidget.h"
 
 #include <QCloseEvent>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,6 +34,7 @@ class QtMainWindowView : public MantidQt::API::UserSubWindow,
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+
   void subscribe(MainWindowSubscriber *notifyee) override;
 
   static std::string name() { return "ISIS Reflectometry"; }

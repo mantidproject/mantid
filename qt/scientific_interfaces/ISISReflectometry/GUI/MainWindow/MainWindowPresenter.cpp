@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
+#include "GUI/Batch/IBatchPresenterFactory.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
@@ -24,13 +25,20 @@ namespace ISISReflectometry {
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
-    BatchPresenterFactory batchPresenterFactory)
+    std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
 }
+
+MainWindowPresenter::~MainWindowPresenter() = default;
+
+MainWindowPresenter::MainWindowPresenter(MainWindowPresenter &&) = default;
+
+MainWindowPresenter &MainWindowPresenter::
+operator=(MainWindowPresenter &&) = default;
 
 void MainWindowPresenter::notifyNewBatchRequested() {
   auto *newBatchView = m_view->newBatch();
@@ -53,21 +61,21 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 }
 
 void MainWindowPresenter::notifyAutoreductionResumed() {
-  for (auto batchPresenter : m_batchPresenters) {
+  for (auto &batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
 }
 
 void MainWindowPresenter::notifyAutoreductionPaused() {
-  for (auto batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionResumed();
+  for (auto &batchPresenter : m_batchPresenters) {
+    batchPresenter->anyBatchAutoreductionPaused();
   }
 }
 
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
 bool MainWindowPresenter::isAnyBatchProcessing() const {
-  for (auto batchPresenter : m_batchPresenters) {
+  for (auto &batchPresenter : m_batchPresenters) {
     if (batchPresenter->isProcessing())
       return true;
   }
@@ -75,7 +83,7 @@ bool MainWindowPresenter::isAnyBatchProcessing() const {
 }
 
 bool MainWindowPresenter::isAnyBatchAutoreducing() const {
-  for (auto batchPresenter : m_batchPresenters) {
+  for (auto &batchPresenter : m_batchPresenters) {
     if (batchPresenter->isAutoreducing())
       return true;
   }
@@ -83,7 +91,7 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
-  m_batchPresenters.emplace_back(m_batchPresenterFactory.make(batchView));
+  m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
 
   // starts in the paused state
