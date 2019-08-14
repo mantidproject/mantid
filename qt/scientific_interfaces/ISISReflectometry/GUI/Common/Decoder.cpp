@@ -180,10 +180,16 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view,
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
     // Update view for groups
     auto group = groups[groupIndex];
-    MantidQt::MantidWidgets::Batch::RowLocation location(
-        {static_cast<int>(groupIndex)});
-    MantidQt::MantidWidgets::Batch::Cell groupCell(group.name());
-    jobTreeView->setCellAt({location}, 0, groupCell);
+
+    auto modelName = group.name();
+    // If name doesn't contain "HiddenGroupName" update groupname as it
+    // represents a none user defined name
+    if (modelName.find("HiddenGroupName") == std::string::npos) {
+      MantidQt::MantidWidgets::Batch::RowLocation location(
+          {static_cast<int>(groupIndex)});
+      MantidQt::MantidWidgets::Batch::Cell groupCell(modelName);
+      jobTreeView->setCellAt({location}, 0, groupCell);
+    }
 
     // Update view for rows
     auto rows = groups[groupIndex].rows();
@@ -204,7 +210,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                               RunsTablePresenter *presenter,
                               const QMap<QString, QVariant> &map) {
   MantidQt::API::SignalBlocker signalBlockerView(gui);
-  gui->m_ui.filterBox->setText(map[QString("filterBox")].toString());
+
   bool projectSave = map[QString("projectSave")].toBool();
   auto runsTable = map[QString("runsTableModel")].toList();
 
@@ -237,6 +243,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
     // Apply styling and restore completed state for output range values best
     // way to achieve this is yet to be decided.
   }
+  gui->m_ui.filterBox->setText(map[QString("filterBox")].toString());
 }
 
 void Decoder::decodeRunsTableModel(ReductionJobs *jobs,
@@ -281,6 +288,10 @@ ReductionOptionsMap decodeReductionOptions(const QMap<QString, QVariant> &map) {
 
 boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
 Decoder::decodeRow(const QMap<QString, QVariant> &map) {
+  if (map.size() == 0) {
+    return boost::optional<
+        MantidQt::CustomInterfaces::ISISReflectometry::Row>();
+  }
   std::vector<std::string> number;
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
     number.emplace_back(runNumber.toString().toStdString());
