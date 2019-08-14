@@ -12,6 +12,7 @@
 #include <QSet>
 #include <QString>
 
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_ManageInterfaceCategories.h"
 
 class ApplicationWindow;
@@ -69,14 +70,12 @@ private:
  * which users can add or remove the various interface categories listed in the
  * "Interface" menu.
  */
-class ManageInterfaceCategories : public QDialog {
+class ManageInterfaceCategories : public MantidQt::API::MantidDialog {
   Q_OBJECT
 
 public:
   /// Only constructor.  We insist on seeing the ApplicationWindow.
-  explicit ManageInterfaceCategories(ApplicationWindow *parent,
-      Qt::WindowFlags flags = Qt::WindowCloseButtonHint |
-                              Qt::WindowType::WindowTitleHint);
+  explicit ManageInterfaceCategories(ApplicationWindow *parent);
 
 private slots:
   /// Slot to open the help web page.

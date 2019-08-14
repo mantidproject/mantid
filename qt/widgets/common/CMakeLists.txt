@@ -41,6 +41,7 @@ set(QT5_SRC_FILES
     src/LogValueSelector.cpp
     src/ManageUserDirectories.cpp
     src/MantidDesktopServices.cpp
+    src/MantidDialog.cpp
     src/MantidHelpInterface.cpp
     src/MantidHelpWindow.cpp
     src/MantidTreeModel.cpp
@@ -158,6 +159,7 @@ set(
   inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
+  inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidHelpWindow.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h

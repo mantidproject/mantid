@@ -89,8 +89,8 @@ namespace {
 Mantid::Kernel::Logger g_log("ConfigDialog");
 }
 
-ConfigDialog::ConfigDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl) {
+ConfigDialog::ConfigDialog(QWidget *parent)
+    : MantidDialog(parent) {
   // get current values from app window
   ApplicationWindow *app =
       dynamic_cast<ApplicationWindow *>(this->parentWidget());
