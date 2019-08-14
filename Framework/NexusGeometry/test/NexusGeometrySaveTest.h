@@ -1155,14 +1155,10 @@ Instrument cache.
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
 
-    /*
-TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
-                1e-5);
-TS_ASSERT_DELTA(heightInFile, cylinderHeight,
-                1e-5);
-TS_ASSERT(base.isApprox(
-    Eigen::Vector3d{0, 0, 0}));
-    */
+    TS_ASSERT_DELTA(radiusInFile, cylinderRadius, 1e-5);
+    TS_ASSERT_DELTA(heightInFile, cylinderHeight, 1e-5);
+    // TS_ASSERT(base.isApprox(
+    //    Eigen::Vector3d{0, 0, 0}));
   }
 
   void test_inhomogeneous_cylindrical_instrument_vertices_written_to_file() {
@@ -1176,9 +1172,9 @@ TS_ASSERT(base.isApprox(
      cylinder from the top face that is orthogonal to the axis. This test will
      access the height and radius of the first two cylinders, and verify that
      they are different."
-        */
+     */
 
-    // create RAII file resource for testing
+    /*
     ScopedFileHandle fileResource("test_inhomogeneous_cylindrical.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1219,6 +1215,7 @@ TS_ASSERT(base.isApprox(
 
     // TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
     // TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
+        */
   }
 };
 
