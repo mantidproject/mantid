@@ -34,33 +34,6 @@ ProcessBankData::ProcessBankData(
 }
 
 namespace {
-inline size_t getFirstPulseIndex(
-    const size_t event_index,
-    const boost::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
-  const auto event_index_begin = event_index_vec->cbegin();
-
-  if ((event_index >= *event_index_begin) &&
-      (event_index < *(event_index_begin + 1)))
-    return 0;
-
-  const auto event_index_end = event_index_vec->cend();
-  const auto event_index_iter =
-      std::lower_bound(event_index_begin, event_index_end, event_index);
-  if (event_index_iter == event_index_end) {
-    return event_index_vec->size() - 1;
-  } else {
-    const auto new_pulse_index =
-        std::distance(event_index_vec->cbegin(),
-                      event_index_iter); // TODO may need to subtract one
-    if (new_pulse_index != 0) {
-      // lower_bound returns the element greater than what we were looking for
-      return new_pulse_index - 1;
-    } else {
-      return new_pulse_index;
-    }
-  }
-}
-
 // this assumes that last_pulse_index is already to the point of including this
 // one so we only need to search forward
 inline size_t
@@ -165,7 +138,7 @@ void ProcessBankData::run() { // override {
   if (compress)
     usedDetIds.assign(m_max_id - m_min_id + 1, false);
 
-  size_t pulse_last = getFirstPulseIndex(startAt, event_index);
+  size_t pulse_last = getPulseIndex(startAt, pulse_i, event_index);
   // Go through all events in the list
   for (std::size_t index_in_tof_array = startAt; index_in_tof_array < numEvents;
        index_in_tof_array++) {
