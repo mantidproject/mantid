@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
 
@@ -100,7 +101,7 @@ const std::vector<Chopper> &JSONInstrumentBuilder::choppers() const {
   return m_parser.choppers();
 }
 
-Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() {
+Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {
   InstrumentBuilder builder(m_parser.name());
   for (size_t bank = 0; bank < m_parser.numberOfBanks(); ++bank) {
     auto bankName = m_parser.detectorName(bank);

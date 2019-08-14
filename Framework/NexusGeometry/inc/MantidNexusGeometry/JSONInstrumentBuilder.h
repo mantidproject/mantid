@@ -10,7 +10,6 @@
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -21,14 +20,13 @@ namespace NexusGeometry {
  */
 class MANTID_NEXUSGEOMETRY_DLL JSONInstrumentBuilder {
 public:
-  JSONInstrumentBuilder() = delete;
-  JSONInstrumentBuilder(const std::string &jsonGeometry);
+  explicit JSONInstrumentBuilder(const std::string &jsonGeometry);
   ~JSONInstrumentBuilder() = default;
 
   /// Choppers are not first-class citizens in mantid currently so forward this
   /// on from the parser
   const std::vector<Chopper> &choppers() const;
-  Geometry::Instrument_const_uptr buildGeometry();
+  Geometry::Instrument_const_uptr buildGeometry() const;
 
 private:
   JSONGeometryParser m_parser;

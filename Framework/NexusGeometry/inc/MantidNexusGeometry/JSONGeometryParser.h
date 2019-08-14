@@ -63,7 +63,7 @@ public:
   JSONGeometryParser() = delete;
   JSONGeometryParser(const std::string &json);
   ~JSONGeometryParser() = default;
-  const std::string &name() noexcept { return m_name; }
+  const std::string &name() const noexcept { return m_name; }
   const std::string &sampleName() const noexcept { return m_sampleName; }
   const std::string &sourceName() const noexcept { return m_sourceName; }
   const Eigen::Vector3d &samplePosition() const noexcept {
@@ -78,7 +78,7 @@ public:
   const Eigen::Quaterniond &sourceOrientation() const noexcept {
     return m_sourceOrientation;
   }
-  size_t numberOfBanks() noexcept { return m_jsonDetectorBanks.size(); }
+  size_t numberOfBanks() const noexcept { return m_jsonDetectorBanks.size(); }
   const std::vector<detid_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
   }
