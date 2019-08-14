@@ -120,7 +120,7 @@ void addCylindricalShapeVertices(Json::Value &shape,
                                      0});
 
 const std::string convertToString(const Json::Value &value);
-} // namespace JSONInstrumentBuilder
+} // namespace JSONTestInstrumentBuilder
 
 std::string getJSONGeometryNoSample();
 std::string getJSONGeometryNoInstrument();
