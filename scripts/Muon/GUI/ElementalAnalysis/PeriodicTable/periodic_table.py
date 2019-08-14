@@ -7,6 +7,10 @@
 from collections import OrderedDict
 import logging
 from qtpy import QtGui, QtWidgets, QtCore
+import json
+import copy
+
+from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 
 # coding: utf-8
 # /*##########################################################################
@@ -243,9 +247,6 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
 
 # Sometimes the mass of an element can be slightly different to the one in the peak data file, if so use that one
 def _correct_with_peak_data_file():
-    from periodic_table_model import PeriodicTableModel
-    import json
-    import copy
     with open(PeriodicTableModel().get_default_peak_data_file(), 'r') as data_file:
         data = json.load(data_file)
 
