@@ -952,7 +952,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     std::vector<double> instrumentUnused =
         m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
     if (!instrumentUnused.empty()) {
-      const int unused = static_cast<int>(instrumentUnused.front());
+      const auto unused = static_cast<int>(instrumentUnused.front());
       if (unused == 1)
         deleteBanks(m_ws, bankNames);
     }
@@ -1053,8 +1053,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     if (!instrumentT0.empty()) {
       const double mT0 = instrumentT0.front();
       if (mT0 != 0.0) {
-        int64_t numHistograms =
-            static_cast<int64_t>(m_ws->getNumberHistograms());
+        auto numHistograms = static_cast<int64_t>(m_ws->getNumberHistograms());
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_ws))
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
@@ -1228,13 +1227,13 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
         asmb2->getChildren(grandchildren, false);
 
         for (auto &row : grandchildren) {
-          Detector *d =
+          auto *d =
               dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
           if (d)
             inst->removeDetector(d);
         }
       }
-      IComponent *comp = dynamic_cast<IComponent *>(det.get());
+      auto *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
   }

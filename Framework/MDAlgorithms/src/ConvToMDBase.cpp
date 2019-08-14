@@ -75,10 +75,10 @@ size_t ConvToMDBase::initialize(
   m_NumThreads = -1;
   try {
     Kernel::Property *pProperty = m_InWS2D->run().getProperty("NUM_THREADS");
-    Kernel::PropertyWithValue<double> *thrProperty =
+    auto *thrProperty =
         dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);
     if (thrProperty) {
-      double nDThrheads = double(*(thrProperty));
+      auto nDThrheads = double(*(thrProperty));
       try {
         m_NumThreads = boost::lexical_cast<int>(nDThrheads);
         g_Log.information()

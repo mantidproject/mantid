@@ -61,9 +61,17 @@ def curve_hidden(curve):
 
 
 def set_errorbars_hidden(container, hide):
-    """Set all lines in an ErrorbarContainer to non-visible"""
+    """
+    Set the visibility on all lines in an ErrorbarContainer.
+
+    :param hide: Whether or not to hide the errors.
+    :type hide: bool
+    """
     if not isinstance(container, ErrorbarContainer):
         return
+
+    # hide gets inverted below, as matplotlib uses `visible`, which has the opposite logic:
+    # if hide is True, visible must be False, and vice-versa
     if container[1]:
         for caps in container[1]:
             caps.set_visible(not hide)
@@ -125,7 +133,7 @@ class CurveProperties(dict):
         return self[item]
 
     def get_plot_kwargs(self):
-        """Return curve properties that can be used a plot kwargs"""
+        """Return curve properties that can be used as plot kwargs"""
         kwargs = {}
         for k, v in self.items():
             if k not in ['hide', 'hide_errors']:
@@ -211,7 +219,7 @@ class CurveProperties(dict):
         props['errorevery'] = getattr(curve, 'errorevery', 1)
         try:
             caps = curve[1]
-            props['capsize'] = float(caps[0].get_markersize()/2)
+            props['capsize'] = float(caps[0].get_markersize() / 2)
             props['capthick'] = float(caps[0].get_markeredgewidth())
         except (IndexError, TypeError):
             props['capsize'] = 0.0
@@ -222,5 +230,6 @@ class CurveProperties(dict):
             props['ecolor'] = convert_color_to_hex(bars[0].get_color()[0])
         except (IndexError, TypeError):
             props['elinewidth'] = 1.0
-            props['ecolor'] = convert_color_to_hex(rcParams['lines.color'])
+            # if the errorbars don't have a default color, use the line's color
+            props['ecolor'] = curve.get_color()
         return props

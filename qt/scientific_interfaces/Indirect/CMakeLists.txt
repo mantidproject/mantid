@@ -26,6 +26,7 @@ set(
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
   IndirectDataTablePresenter.cpp
+  IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
   IndirectFitAnalysisTab.cpp
@@ -45,8 +46,13 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -83,13 +89,17 @@ set(
   QT4_INC_FILES
   ConvFitModel.h
   DllConfig.h
+  IndirectDataValidationHelper.h
   IndirectFitData.h
   IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
   IndirectFitPlotModel.h
   IndirectFitPlotPresenter.h
   IndirectFittingModel.h
+  IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
   IndirectToolsTab.h
+  IPythonRunner.h
   IqtFitModel.h
   JumpFitModel.h
   MSDFitModel.h
@@ -137,6 +147,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -194,6 +207,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
@@ -261,22 +275,38 @@ set(
   ContainerSubtraction.cpp
   CorrectionsTab.cpp
   DensityOfStates.cpp
+  ILLEnergyTransfer.cpp
+  ISISCalibration.cpp
+  ISISDiagnostics.cpp
+  ISISEnergyTransfer.cpp
   IndirectCorrections.cpp
+  IndirectDataReduction.cpp
+  IndirectDataReductionTab.cpp
+  IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
+  IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
   IndirectSimulation.cpp
   IndirectSimulationTab.cpp
+  IndirectSqw.cpp
+  IndirectSymmetrise.cpp
   IndirectTab.cpp
   IndirectTools.cpp
   IndirectToolsTab.cpp
+  IndirectTransmission.cpp
   IndirectTransmissionCalc.cpp
 )
 
@@ -288,26 +318,45 @@ set(
   ContainerSubtraction.h
   CorrectionsTab.h
   DensityOfStates.h
+  ILLEnergyTransfer.h
+  ISISCalibration.h
+  ISISDiagnostics.h
+  ISISEnergyTransfer.h
   IIndirectSettingsView.h
   IndirectCorrections.h
+  IndirectDataReduction.h
+  IndirectDataReductionTab.h
   IndirectDiffractionReduction.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h
   IndirectMolDyn.h
+  IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
   IndirectSettingsView.h
   IndirectSimulation.h
   IndirectSimulationTab.h
+  IndirectSqw.h
+  IndirectSymmetrise.h
   IndirectTab.h
   IndirectTools.h
   IndirectToolsTab.h
+  IndirectTransmission.h
   IndirectTransmissionCalc.h
 )
 
-set(INC_FILES)
+set(
+  INC_FILES
+  IndirectDataValidationHelper.h
+  IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
+  IPythonRunner.h
+)
 
 set(
   UI_FILES
@@ -316,16 +365,26 @@ set(
   CalculatePaalmanPings.ui
   ContainerSubtraction.ui
   DensityOfStates.ui
+  ILLEnergyTransfer.ui
+  ISISCalibration.ui
+  ISISDiagnostics.ui
+  ISISEnergyTransfer.ui
   IndirectCorrections.ui
+  IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
   IndirectInstrumentConfig.ui
   IndirectInterfaceSettings.ui
   IndirectLoadILL.ui
   IndirectMolDyn.ui
+  IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
+  IndirectSqw.ui
+  IndirectSymmetrise.ui
   IndirectTools.ui
+  IndirectTransmission.ui
   IndirectTransmissionCalc.ui
 )
 
@@ -360,7 +419,8 @@ mtd_add_qt_library(
     MantidQtWidgetsPlotting
     MantidQtWidgetsMplCpp
     MantidQtIcons
-  INSTALL_DIR_BASE ${PLUGINS_DIR}
+  INSTALL_DIR_BASE
+    ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../Contents/MacOS
     @loader_path/../../plugins/qt5

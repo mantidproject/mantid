@@ -77,7 +77,7 @@ void CreateFlatEventWorkspace::exec() {
   // How many times do we need to replicate the extracted background region in
   // order to fill up
   // the entire tof/x range covered by the data ?
-  int nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
+  auto nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
 
   g_log.debug() << "We will need to replicate the selected region " << nRegions
                 << " times.\n";

@@ -40,9 +40,9 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    MatrixWorkspace_sptr destWorkspace, int const &specMin,
                    int const &specMax, double const &xMin, double const &xMax,
                    int yInsertionIndex, int const &xInsertionIndex) {
-  int const xMinIndex =
+  auto const xMinIndex =
       static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0, 0.000001));
-  int const xMaxIndex =
+  auto const xMaxIndex =
       static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0, 0.000001));
 
   copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,

@@ -8,6 +8,7 @@
 #include "ThetaValuesValidationError.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 PerThetaDefaultsTableValidationError::PerThetaDefaultsTableValidationError(
     // cppcheck-suppress passedByValue
@@ -25,5 +26,6 @@ boost::optional<ThetaValuesValidationError>
 PerThetaDefaultsTableValidationError::fullTableError() const {
   return m_fullTableError;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

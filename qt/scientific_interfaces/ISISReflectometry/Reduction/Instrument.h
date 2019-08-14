@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Instrument
 
@@ -48,6 +49,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs,
                                                Instrument const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Instrument const &lhs,
                                                Instrument const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_INSTRUMENT_H_

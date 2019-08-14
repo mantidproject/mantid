@@ -33,7 +33,7 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
                                     const HistogramData::Histogram &rhs,
                                     HistogramData::HistogramY &YOut,
                                     HistogramData::HistogramE &EOut) {
-  const int bins = static_cast<int>(lhs.e().size());
+  const auto bins = static_cast<int>(lhs.e().size());
 
   for (int j = 0; j < bins; ++j) {
     // Get references to the input Y's
@@ -67,7 +67,7 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs,
 
   // Do the right-hand part of the error calculation just once
   const double rhsFactor = pow(rhsE / rhsY, 2);
-  const int bins = static_cast<int>(lhs.e().size());
+  const auto bins = static_cast<int>(lhs.e().size());
   for (int j = 0; j < bins; ++j) {
     // Get reference to input Y
     const double leftY = lhs.y()[j];

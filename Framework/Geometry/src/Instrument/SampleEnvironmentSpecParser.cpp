@@ -92,7 +92,7 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
   Node *node = nodeIter.nextNode();
   auto spec = std::make_unique<SampleEnvironmentSpec>(name);
   while (node) {
-    Element *childElement = static_cast<Element *>(node);
+    auto *childElement = static_cast<Element *>(node);
     if (node->nodeName() == MATERIALS_TAG) {
       parseMaterials(childElement);
     } else if (node->nodeName() == COMPONENTS_TAG) {
@@ -162,7 +162,7 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
   // Points at first <child>
   Node *node = nodeIter.nextNode();
   while (node) {
-    Element *childElement = static_cast<Element *>(node);
+    auto *childElement = static_cast<Element *>(node);
     const auto &nodeName = childElement->nodeName();
     if (nodeName == CONTAINERS_TAG) {
       parseAndAddContainers(spec, childElement);
@@ -185,7 +185,7 @@ void SampleEnvironmentSpecParser::parseAndAddContainers(
   nodeIter.nextNode();
   Node *node = nodeIter.nextNode();
   while (node) {
-    Element *childElement = static_cast<Element *>(node);
+    auto *childElement = static_cast<Element *>(node);
     if (childElement->nodeName() == CONTAINER_TAG) {
       spec->addContainer(parseContainer(childElement));
     }

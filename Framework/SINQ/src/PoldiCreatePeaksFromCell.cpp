@@ -53,7 +53,7 @@ std::map<std::string, std::string> PoldiCreatePeaksFromCell::validateInputs() {
   double dMin = getProperty("LatticeSpacingMin");
   Property *dMaxProperty = getProperty("LatticeSpacingMax");
 
-  double dMax = boost::lexical_cast<double>(dMaxProperty->value());
+  auto dMax = boost::lexical_cast<double>(dMaxProperty->value());
   if (!dMaxProperty->isDefault() && (dMax < dMin)) {
     errorMap["LatticeSpacingMax"] =
         std::string("LatticeSpacingMax is less than LatticeSpacingMin.");

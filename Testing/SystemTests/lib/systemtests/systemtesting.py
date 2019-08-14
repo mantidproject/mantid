@@ -12,11 +12,14 @@ or by importing them into MantidPlot.
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 """
 from __future__ import (absolute_import, division, print_function)
+
 # == for testing conda build of mantid-framework ==========
 import os
+
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
     import matplotlib
+
 # =========================================================
 from six import PY3
 import datetime
@@ -30,7 +33,6 @@ from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
 import platform
 import re
-import shutil
 import subprocess
 import shutil
 import sys
@@ -1193,7 +1195,6 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                     total_number_of_tests, maximum_name_length,
                     tests_done, process_number, lock, required_files_dict,
                     locked_files_dict):
-
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
@@ -1202,18 +1203,18 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                         escape_quotes=True, clean=options.clean)
 
     # Make sure the status is 1 to begin with as it will be replaced
-    res_array[process_number + 2*options.ncores] = 1
+    res_array[process_number + 2 * options.ncores] = 1
 
     # Begin loop: as long as there are still some test modules that
     # have not been run, keep looping
-    while (tests_left.value > 0):
+    while tests_left.value > 0:
         # Empty test list
         local_test_list = None
         # Get the lock to inspect the global list of tests
         lock.acquire()
         # Run through the list of test modules, starting from the ith
         # element where i is the process number.
-        for i in range(process_number,len(tests_lock)):
+        for i in range(process_number, len(tests_lock)):
             # If the lock for this particular module is 0, it means
             # this module has not yet been run and it will be chosen
             # for this particular loop
@@ -1243,9 +1244,9 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
         # then there is no test list
         if local_test_list:
 
-            if (not options.quiet):
+            if not options.quiet:
                 print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
-                       % (process_number, imodule, modname, len(local_test_list)))
+                      % (process_number, imodule, modname, len(local_test_list)))
                 sys.stdout.flush()
 
             # Create a TestManager, giving it a pre-compiled list_of_tests
@@ -1271,8 +1272,8 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
             # Update the test results in the array shared across cores
             res_array[process_number] += mgr._skippedTests
             res_array[process_number + options.ncores] += mgr._failedTests
-            res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
-                res_array[process_number + 2*options.ncores])
+            res_array[process_number + 2 * options.ncores] = min(int(reporter.reportStatus()), \
+                                                                 res_array[process_number + 2 * options.ncores])
 
             # Delete the TestManager
             del mgr
@@ -1291,5 +1292,3 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
 
     for key in local_dict.keys():
         stat_dict[key] = local_dict[key]
-
-    return

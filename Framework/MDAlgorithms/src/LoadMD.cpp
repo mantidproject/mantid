@@ -536,7 +536,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ------------------------------
   prog->report("Reading box structure from HDD.");
   MDBoxFlatTree FlatBoxTree;
-  int nDims = static_cast<int>(nd); // should be safe
+  auto nDims = static_cast<int>(nd); // should be safe
   FlatBoxTree.loadBoxStructure(m_filename, nDims, MDE::getTypeName());
 
   BoxController_sptr bc = ws->getBoxController();
@@ -593,7 +593,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     for (size_t i = 0; i < numBoxes; i++) {
       prog->report();
-      MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxTree[i]);
+      auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxTree[i]);
       if (!box)
         continue;
 

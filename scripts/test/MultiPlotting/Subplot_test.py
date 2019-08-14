@@ -8,7 +8,7 @@ import unittest
 from matplotlib.gridspec import GridSpec
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot import subplot
@@ -21,7 +21,8 @@ def rm_logic(name):
     return True
 
 
-class SubplotTest(GuiTest):
+@start_qapplication
+class SubplotTest(unittest.TestCase):
 
     def setUp(self):
         context = PlottingContext()
@@ -55,7 +56,7 @@ class SubplotTest(GuiTest):
         self.setup_rm()
         self.subplot._rm()
 
-        self.assertEqual(self.subplot._raise_rm_window.call_count, 1)
+        self.assertEqual(self.subplot._raise_rm_window.call_count, 0)
         self.assertEqual(self.subplot._raise_selector_window.call_count, 0)
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
         self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
@@ -84,9 +85,9 @@ class SubplotTest(GuiTest):
         self.subplot._rm()
 
         self.assertEqual(self.subplot._raise_rm_window.call_count, 0)
-        self.assertEqual(self.subplot._raise_selector_window.call_count, 1)
+        self.assertEqual(self.subplot._raise_selector_window.call_count, 0)
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
-        self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
+        self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
     def test_rmTwoPlotsoldRmWindow(self):
         self.subplot._rm_window = mock.Mock()
@@ -97,10 +98,10 @@ class SubplotTest(GuiTest):
         self.setup_rm()
         self.subplot._rm()
 
-        self.assertEqual(self.subplot._raise_rm_window.call_count, 1)
+        self.assertEqual(self.subplot._raise_rm_window.call_count, 0)
         self.assertEqual(self.subplot._raise_selector_window.call_count, 0)
         self.assertEqual(self.subplot._get_rm_window.call_count, 0)
-        self.assertEqual(self.subplot._createSelectWindow.call_count, 0)
+        self.assertEqual(self.subplot._createSelectWindow.call_count, 1)
 
     def setup_applyRm(self):
         self.subplot._rm_window = mock.Mock()

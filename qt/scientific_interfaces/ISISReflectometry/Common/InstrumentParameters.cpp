@@ -7,6 +7,7 @@
 #include "InstrumentParameters.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 InstrumentParameters::InstrumentParameters(
     Mantid::Geometry::Instrument_const_sptr instrument)
     : m_instrument(std::move(instrument)) {}
@@ -32,5 +33,6 @@ bool InstrumentParameters::hasMissingValues() const {
 std::string const &MissingInstrumentParameterValue::parameterName() const {
   return m_parameterName;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

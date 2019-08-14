@@ -8,8 +8,10 @@
 #define MANTID_ISISREFLECTOMETRY_THETAVALUESVALIDATIONERROR_H
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 enum class ThetaValuesValidationError { MultipleWildcards, NonUniqueTheta };
-}
+} // namespace ISISReflectometry
+} // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_THETAVALUESVALIDATIONERROR_H

@@ -327,8 +327,7 @@ const std::vector<std::string> AlgorithmProxy::categories() const {
 
   auto res = tokenizer.asVector();
 
-  const DeprecatedAlgorithm *depo =
-      dynamic_cast<const DeprecatedAlgorithm *>(this);
+  const auto *depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
   if (depo != nullptr) {
     res.emplace_back("Deprecated");
   }

@@ -157,7 +157,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
     const std::string nPeriodsLogEntryName = "nperiods";
     const Run &run = expInfo->run();
     if (run.hasProperty(nPeriodsLogEntryName)) {
-      const int nPeriods =
+      const auto nPeriods =
           run.getPropertyValueAsType<int>(nPeriodsLogEntryName);
       if (nPeriods == nWorkspaceEntries) {
         isMultiPeriod = true;
@@ -381,7 +381,7 @@ void LoadNexusProcessed::exec() {
 
   // Find out how many first level entries there are
   // Cast down to int as another property later on is an int
-  int nWorkspaceEntries = static_cast<int>((root.groups().size()));
+  auto nWorkspaceEntries = static_cast<int>((root.groups().size()));
 
   // Check for an entry number property
   int entrynumber = getProperty("EntryNumber");
@@ -484,8 +484,7 @@ void LoadNexusProcessed::exec() {
             p);
       } else // Fall-back for generic loading
       {
-        const double nWorkspaceEntries_d =
-            static_cast<double>(nWorkspaceEntries);
+        const auto nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
         local_workspace =
             loadEntry(root, basename + indexStr,
                       static_cast<double>(p - 1) / nWorkspaceEntries_d,
@@ -703,7 +702,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   // indices of events
   boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   // Create all the event lists
-  int64_t max = static_cast<int64_t>(m_filtered_spec_idxs.size());
+  auto max = static_cast<int64_t>(m_filtered_spec_idxs.size());
   Progress progress(this, progressStart, progressStart + progressRange, max);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t j = 0; j < max; ++j) {
@@ -1718,7 +1717,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     Mantid::Kernel::StringTokenizer tokenizer(
         axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     // We must cast the axis object to TextAxis so we may use ->setLabel
-    TextAxis *textAxis = static_cast<TextAxis *>(axis);
+    auto *textAxis = static_cast<TextAxis *>(axis);
     int i = 0;
     for (const auto &tokIter : tokenizer) {
       textAxis->setLabel(i, tokIter);

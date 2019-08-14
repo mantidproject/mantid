@@ -160,9 +160,8 @@ void AnvredCorrection::exec() {
       WorkspaceFactory::Instance().create(m_inputWS);
 
   // needs to be a signed because OpenMP gives an error otherwise
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
   if (specSize < 3)
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
@@ -253,8 +252,7 @@ void AnvredCorrection::cleanup() {
 
 void AnvredCorrection::execEvent() {
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   auto correctionFactors = create<EventWorkspace>(*m_inputWS);
   correctionFactors->sortAll(TOF_SORT, nullptr);

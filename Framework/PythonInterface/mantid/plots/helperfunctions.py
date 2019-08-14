@@ -585,7 +585,13 @@ def get_sample_log(workspace, **kwargs):
     if FullTime:
         x = times.astype(datetime.datetime)
     else:
-        t0 = times[0]
+        # Compute relative time, preserving t=0 at run start. Logs can record before
+        # run start and will have negative time offset
+        try:
+            t0 = run.startTime().to_datetime64().astype('datetime64[us]')
+        except RuntimeError:
+            mantid.kernel.logger.warning("Workspace has no start time. Assume t0 as first log time.")
+            t0 = times[0]
         if not StartFromLog:
             try:
                 t0 = run['proton_charge'].times.astype('datetime64[us]')[0]

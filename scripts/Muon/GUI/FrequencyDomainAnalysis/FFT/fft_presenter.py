@@ -129,6 +129,8 @@ class FFTPresenter(object):
             phaseTable["LastGoodData"] = self.view.getLastGoodData()
             phaseTable["Instrument"] = self.load.getInstrument()
             phaseTable["InputWorkspace"] = "MuonAnalysis"
+            phaseTable['MaskedDetectors'] = []
+
             if self.load.version == 2:
                 phaseTable["InputWorkspace"] = self.clean(
                     self.view.getInputWS())

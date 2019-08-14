@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class RunNotifierSubscriber {
 public:
@@ -29,6 +30,7 @@ public:
   virtual void startPolling() = 0;
   virtual void stopPolling() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

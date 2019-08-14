@@ -1077,13 +1077,19 @@ std::string FitPropertyBrowser::defaultFunctionType() const {
   return m_defaultFunction;
 }
 
-// Get the default function name
+// Set the default function name
 void FitPropertyBrowser::setDefaultFunctionType(const std::string &fnType) {
   m_defaultFunction = fnType;
 }
 
 /// Get the default peak type
-std::string FitPropertyBrowser::defaultPeakType() const {
+std::string FitPropertyBrowser::defaultPeakType() {
+  // If the default peak is not in registered peaks, default to Gaussian
+  if (m_registeredPeaks.indexOf(QString::fromStdString(m_defaultPeak)) == -1) {
+    g_log.warning("Could not find peak function: '" + m_defaultPeak +
+                  "'. Defaulting to Gaussian.");
+    setDefaultPeakType("Gaussian");
+  }
   return m_defaultPeak;
 }
 /// Set the default peak type
@@ -1892,8 +1898,25 @@ void FitPropertyBrowser::setEndX(double value) {
 }
 
 void FitPropertyBrowser::setXRange(double start, double end) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  disconnect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
+             SLOT(doubleChanged(QtProperty *)));
+#endif
+
   m_doubleManager->setValue(m_startX, start);
   m_doubleManager->setValue(m_endX, end);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  setWorkspace(m_compositeFunction);
+  m_doubleManager->setMinimum(m_endX, start);
+  m_doubleManager->setMaximum(m_startX, end);
+
+  getHandler()->setAttribute("StartX", start);
+  getHandler()->setAttribute("EndX", end);
+
+  connect(m_doubleManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(doubleChanged(QtProperty *)));
+#endif
 }
 
 ///

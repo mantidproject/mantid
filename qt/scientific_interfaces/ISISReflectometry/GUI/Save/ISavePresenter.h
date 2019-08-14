@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IBatchPresenter;
 
@@ -32,6 +33,7 @@ public:
   virtual void autoreductionPaused() = 0;
   virtual void autoreductionResumed() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_ISAVEPRESENTER_H */

@@ -16,21 +16,26 @@
 </parameter>
 
 <!-- Sample log merging behaviour -->
+<parameter name="sample_logs_sum" type="string">
+  <value val="time, duration" />
+</parameter>
 <parameter name="sample_logs_time_series" type="string">
-    <value val="sample.temperature, sample.pressure" />
+    <value val="sample.temperature, sample.pressure, sample.field" />
 </parameter>
 <parameter name="sample_logs_list" type="string">
-    <value val="run_number" />
+    <value val="run_number, start_time, end_time, SamS_Rot.offset_value, SamS_Rot.target_value, SamS_Rot.value, sample.setpoint_field, sample.setpoint_pressure, sample.setpoint_temperature" />
 </parameter>
 <parameter name="sample_logs_warn" type="string">
+    <value val="monitor.master_pickup, selector.rotation_speed, reactor_power, BG.phase, BG.setpoint_phase, BG.setpoint_rotation_gear, BG.rotation_speed, BG.reference_speed, PST.phase, PST.setpoint_phase, PST.setpoint_rotation_gear, PST.rotation_speed, PST.reference_speed, CH1.phase, CH1.setpoint_phase, CH1.setpoint_rotation_gear, CH1.rotation_speed, CH1.reference_speed, CH2.phase, CH2.setpoint_phase, CH2.setpoint_rotation_gear, CH2.rotation_speed, CH2.reference_speed, CH3.phase, CH3.setpoint_phase, CH3.setpoint_rotation_gear, CH3.rotation_speed, CH3.reference_speed, CH4.phase, CH4.setpoint_phase, CH4.setpoint_rotation_gear, CH4.rotation_speed, CH4.reference_speed" />
 </parameter>
 <parameter name="sample_logs_warn_tolerances" type="string">
+    <value val="0.5, 50, 1, 0.1, 0.1, 0.1, 5, 5, 0.1, 0.1, 0.1, 5, 5, 0.1, 0.1, 0.1, 5, 5, 0.1, 0.1, 0.1, 5, 5, 0.1, 0.1, 0.1, 5, 5, 0.1, 0.1, 0.1, 5, 5" />
 </parameter>
 <parameter name="sample_logs_fail" type="string">
-    <value val="Doppler.mirror_sense, acquisition_mode, Doppler.maximum_delta_energy" />
+    <value val="PSD.PSD angle 1, Doppler.mirror_sense, acquisition_mode, Doppler.maximum_delta_energy, wavelength, PSD.time_of_flight_0, PSD.time_of_flight_1, PSD.time_of_flight_2, PSD.wanted_t1_delay, PSD.wanted_t2_tofvalidation, monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2, monitor.wanted_t1_delay, monitor.wanted_t2_tofvalidation, SingleD.time_of_flight_0, SingleD.time_of_flight_1, SingleD.time_of_flight_2, SingleD.wanted_t1_delay, SingleD.wanted_t2_tofvalidation" />
 </parameter>
 <parameter name="sample_logs_fail_tolerances" type="string">
-    <value val="0, 0, 0.001" />
+    <value val="1, 0, 0, 0.001, 0.001, 0.001, 1, 1, 1, 1, 0.001, 1, 1, 1, 1, 0.001, 1, 1, 1, 1" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
@@ -42,7 +47,6 @@
 </parameter>
 <parameter name="Workflow.GroupingFile" type="string">
   <value val="IN16B_Grouping.xml" />
-  <!-- Note that equivalent IN16B_map.map file also exists. -->
 </parameter>
 <parameter name="EquatorialGroupingFile" type="string">
   <value val="IN16B_Grouping_Equatorial.xml" />

@@ -20,6 +20,7 @@ set(
   src/Plot.cpp
   src/RangeMarker.cpp
   src/ScalarMappable.cpp
+  src/SingleMarker.cpp
 )
 
 set(
@@ -46,6 +47,7 @@ set(
   inc/MantidQtWidgets/MplCpp/Plot.h
   inc/MantidQtWidgets/MplCpp/RangeMarker.h
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
+  inc/MantidQtWidgets/MplCpp/SingleMarker.h
 )
 
 set(UI_FILES inc/MantidQtWidgets/MplCpp/Colorbar.ui)

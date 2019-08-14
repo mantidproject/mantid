@@ -438,7 +438,7 @@ JSONValue initValueFromStream(istream &istr) {
   // We expect the stream to be at the start of the value.
 
   // Need to determine what kind of value it is.
-  char nextChar = static_cast<char>(istr.peek());
+  auto nextChar = static_cast<char>(istr.peek());
   if (nextChar == '"') // value is a string
   {
     // Read until we get the closing '"'
@@ -605,7 +605,7 @@ string readString(istream &istr) {
 // Note: This function is not used for strings.  See readString() for that.
 string readUntilCloseChar(istream &istr) {
   string value;
-  char next = static_cast<char>(istr.peek());
+  auto next = static_cast<char>(istr.peek());
   while ((next != ',') && (next != '}') && (next != ']')) {
     if (istr.eof()) {
       throw JSONParseException(

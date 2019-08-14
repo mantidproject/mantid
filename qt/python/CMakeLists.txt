@@ -46,7 +46,7 @@ if(ENABLE_WORKBENCH)
                    PythonInterface)
 
   if(ENABLE_MANTIDPLOT)
-    add_dependencies(mantidqt mantidqt_commonqt4)
+    add_dependencies(mantidqt mantidqt_commonqt4 mantidqt_iconsqt4)
   endif()
 
   if(MSVC)
@@ -60,7 +60,7 @@ if(ENABLE_WORKBENCH)
   endif()
 
   # Testing
-
+  add_dependencies(GUITests mantidqt)
   # ctest targets
   set(
     PYTHON_TEST_FILES
@@ -88,6 +88,7 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
+    mantidqt/widgets/test/test_fitpropertybrowserbase.py
     mantidqt/widgets/test/test_functionbrowser.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py

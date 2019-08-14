@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL UniformSlicingByTime {
 public:
@@ -97,6 +98,7 @@ using Slicing =
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isInvalid(Slicing const &slicing);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isValid(Slicing const &slicing);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool isNoSlicing(Slicing const &slicing);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

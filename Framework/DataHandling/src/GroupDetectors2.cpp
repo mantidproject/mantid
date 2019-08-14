@@ -59,7 +59,7 @@ void convertGroupsToMapFile(const std::vector<std::vector<int>> &groups,
   commands << groups.size() << "\n";
   for (auto &group : groups) {
     const int groupId = axis.spectraNo(group[0]);
-    const int groupSize = static_cast<int>(group.size());
+    const auto groupSize = static_cast<int>(group.size());
 
     // Comment the output for readability
     commands << "# Group " << groupId;
@@ -407,7 +407,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
                     << " spectra indices to be combined\n";
     }
     // check we don't have an index that is too high for the workspace
-    size_t maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
+    auto maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
     auto indices0 = m_GroupWsInds[0];
     auto it = indices0.begin();
     for (; it != indices0.end(); ++it) {
@@ -879,8 +879,8 @@ void GroupDetectors2::readSpectraIndexes(const std::string &line,
 
     std::vector<size_t>::const_iterator specN = specNums.begin();
     for (; specN != specNums.end(); ++specN) {
-      specnum_t spectrumNum = static_cast<specnum_t>(*specN);
-      spec2index_map::const_iterator ind = specs2index.find(spectrumNum);
+      auto spectrumNum = static_cast<specnum_t>(*specN);
+      auto ind = specs2index.find(spectrumNum);
       if (ind == specs2index.end()) {
         g_log.debug() << name() << ": spectrum number " << spectrumNum
                       << " referred to in the input file was not found in the "
@@ -1196,7 +1196,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
       }
 
       // the tokenizer will always return at least on string
-      const size_t rangeEnd = boost::lexical_cast<size_t>(*readPostion);
+      const auto rangeEnd = boost::lexical_cast<size_t>(*readPostion);
 
       // this is unanticipated and marked as an error, it would be easy to
       // change this to count down however

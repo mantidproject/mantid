@@ -327,7 +327,7 @@ void PDFFourierTransform::exec() {
   double rdelta = getProperty("DeltaR");
   if (isEmpty(rdelta))
     rdelta = M_PI / inputQ[qmax_index];
-  size_t sizer = static_cast<size_t>(rmax / rdelta);
+  auto sizer = static_cast<size_t>(rmax / rdelta);
 
   bool filter = getProperty("Filter");
 

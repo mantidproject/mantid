@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
-#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>

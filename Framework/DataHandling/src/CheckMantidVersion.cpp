@@ -174,7 +174,7 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
 
   for (; h != tokenizer.end(); ++h) {
     try {
-      int part = boost::lexical_cast<int>(*h);
+      auto part = boost::lexical_cast<int>(*h);
       retVal.push_back(part);
     } catch (const boost::bad_lexical_cast &) {
       g_log.error("Failed to convert the following string to an integer '" +

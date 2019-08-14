@@ -12,11 +12,12 @@ from __future__ import (absolute_import, unicode_literals)
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 
 
-class PythonFileInterpreterTest(GuiTest):
+@start_qapplication
+class PythonFileInterpreterTest(unittest.TestCase):
 
     def test_construction(self):
         w = PythonFileInterpreter()

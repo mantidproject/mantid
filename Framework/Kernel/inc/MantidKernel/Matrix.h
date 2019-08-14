@@ -11,6 +11,8 @@
 #include <cfloat>
 #include <iosfwd>
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 // Our aim with Matrix is to provide the definition for

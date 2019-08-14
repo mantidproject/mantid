@@ -16,8 +16,8 @@ import unittest
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import numpy as np
-from numpy.testing import assert_almost_equal
 from qtpy.QtCore import Qt
+from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
@@ -125,23 +125,24 @@ class FigureInteractionTest(unittest.TestCase):
                    autospec=True):
             with patch.object(interactor.toolbar_manager, 'is_tool_active',
                               lambda: False):
-                interactor.on_mouse_button_press(mouse_event)
-                self.assertEqual(0, qmenu_call1.addSeparator.call_count)
-                self.assertEqual(0, qmenu_call1.addAction.call_count)
-                expected_qmenu_calls = [call(),
-                                        call("Axes", qmenu_call1),
-                                        call("Normalization", qmenu_call1)]
-                self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
-                # 4 actions in Axes submenu
-                self.assertEqual(4, qmenu_call2.addAction.call_count)
-                # 2 actions in Normalization submenu
-                self.assertEqual(2, qmenu_call3.addAction.call_count)
+                with patch.object(interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                    interactor.on_mouse_button_press(mouse_event)
+                    self.assertEqual(0, qmenu_call1.addSeparator.call_count)
+                    self.assertEqual(0, qmenu_call1.addAction.call_count)
+                    expected_qmenu_calls = [call(),
+                                            call("Axes", qmenu_call1),
+                                            call("Normalization", qmenu_call1)]
+                    self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
+                    # 4 actions in Axes submenu
+                    self.assertEqual(4, qmenu_call2.addAction.call_count)
+                    # 2 actions in Normalization submenu
+                    self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
-        self._test_toggle_normalization(errorbars_on=False)
+        self._test_toggle_normalization(errorbars_on=False, plot_kwargs={'distribution': True})
 
     def test_toggle_normalization_with_errorbars(self):
-        self._test_toggle_normalization(errorbars_on=True)
+        self._test_toggle_normalization(errorbars_on=True, plot_kwargs={'distribution': True})
 
     def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
         fig = plot([self.ws], spectrum_nums=[1], errors=True,
@@ -155,6 +156,12 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
         plot([self.ws1], spectrum_nums=[1], errors=True, overplot=True, fig=fig)
         self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+
+    def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
+        self._test_toggle_normalization(errorbars_on=False, plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+
+    def test_normalization_toggle_with_no_autoscale_on_update_with_errors(self):
+        self._test_toggle_normalization(errorbars_on=True, plot_kwargs={'distribution': True, 'autoscale_on_update': False})
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
@@ -180,9 +187,9 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
-    def _test_toggle_normalization(self, errorbars_on):
+    def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
         fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
-                   plot_kwargs={'distribution': True})
+                   plot_kwargs=plot_kwargs)
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)

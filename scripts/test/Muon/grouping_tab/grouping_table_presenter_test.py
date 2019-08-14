@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
@@ -19,6 +19,7 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 maximum_number_of_groups = 20
 
+
 def group_name():
     name = []
     for i in range(maximum_number_of_groups + 1):
@@ -26,7 +27,8 @@ def group_name():
     return name
 
 
-class GroupingTablePresenterTest(GuiTest):
+@start_qapplication
+class GroupingTablePresenterTest(unittest.TestCase):
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

@@ -1089,14 +1089,13 @@ void IFunction::setMatrixWorkspace(
             paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
-          const Geometry::FitParameter &fitParam =
-              param->value<Geometry::FitParameter>();
+          const auto &fitParam = param->value<Geometry::FitParameter>();
 
           // check first if this parameter is actually specified for this
           // function
           if (name() == fitParam.getFunction()) {
             // update value
-            IFunctionWithLocation *testWithLocation =
+            auto *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() &&
@@ -1302,7 +1301,7 @@ void IFunction::convertValue(std::vector<double> &values,
     double twoTheta(0.0);
     if (!spectrumInfo.isMonitor(wsIndex))
       twoTheta = spectrumInfo.twoTheta(wsIndex);
-    int emode = static_cast<int>(ws->getEMode());
+    auto emode = static_cast<int>(ws->getEMode());
     double efixed(0.0);
     try {
       boost::shared_ptr<const Geometry::IDetector> det(
@@ -1604,10 +1603,9 @@ template <>
 MANTID_API_DLL boost::shared_ptr<Mantid::API::IFunction>
 IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction>>(
     const std::string &name) const {
-  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *prop =
-      dynamic_cast<
-          PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -1621,10 +1619,9 @@ template <>
 MANTID_API_DLL boost::shared_ptr<const Mantid::API::IFunction>
 IPropertyManager::getValue<boost::shared_ptr<const Mantid::API::IFunction>>(
     const std::string &name) const {
-  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *prop =
-      dynamic_cast<
-          PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

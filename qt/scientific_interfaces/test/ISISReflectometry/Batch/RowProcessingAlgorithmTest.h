@@ -6,14 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
 #define MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
@@ -39,11 +40,13 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
-    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "ParameterFile");
+    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
     TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
     TS_ASSERT_EQUALS(result["EndOverlap"], "9.200000");
+    TS_ASSERT_EQUALS(result["Params"], "-0.02");
+    TS_ASSERT_EQUALS(result["ScaleRHSWorkspace"], "1");
   }
 
   void testExperimentSettingsWithEmptyRow() {
@@ -55,7 +58,7 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
-    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "ParameterFile");
+    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
     TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
@@ -69,6 +72,7 @@ public:
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "22348, 22349");
     TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "22358, 22359");
+    TS_ASSERT_EQUALS(result["TransmissionProcessingInstructions"], "4");
     TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.009000");
     TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.030000");
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.300000");
@@ -83,6 +87,7 @@ public:
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "22345");
     TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "22346");
+    TS_ASSERT_EQUALS(result["TransmissionProcessingInstructions"], "5-6");
     TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.007000");
     TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.010000");
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.100000");

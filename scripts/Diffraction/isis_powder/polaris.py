@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import os
 
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
@@ -133,15 +132,6 @@ class Polaris(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
         return self._run_details_cached_obj[run_number_string_key]
-
-    def _spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
-        masking_file_name = self._inst_settings.masking_file_name
-        spline_coeff = self._inst_settings.spline_coeff
-        masking_file_path = os.path.join(self.calibration_dir, masking_file_name)
-        output = polaris_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_spectra,
-                                                            spline_number=spline_coeff,
-                                                            mask_path=masking_file_path)
-        return output
 
     def _switch_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "mode"):

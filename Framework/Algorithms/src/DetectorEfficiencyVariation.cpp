@@ -200,8 +200,8 @@ int DetectorEfficiencyVariation::doDetectorTests(
   // criterion for if the the first spectrum is lower than expected
   double lowest = average / variation;
 
-  const int numSpec = static_cast<int>(counts1->getNumberHistograms());
-  const int progStep = static_cast<int>(std::ceil(numSpec / 30.0));
+  const auto numSpec = static_cast<int>(counts1->getNumberHistograms());
+  const auto progStep = static_cast<int>(std::ceil(numSpec / 30.0));
 
   // Create a workspace for the output
   MaskWorkspace_sptr maskWS = this->generateEmptyMask(counts1);

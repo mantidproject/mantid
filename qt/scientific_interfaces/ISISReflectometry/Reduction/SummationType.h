@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** SummationType holds information about what type of summation should be
  * done in the reduction
@@ -36,6 +37,7 @@ inline std::string summationTypeToString(SummationType summationType) {
   }
   throw std::invalid_argument("Unexpected summation type");
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_SUMMATIONTYPE_H_

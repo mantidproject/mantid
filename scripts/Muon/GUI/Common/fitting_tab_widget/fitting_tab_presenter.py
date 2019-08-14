@@ -10,12 +10,14 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from mantid.api import MultiDomainFunction
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_group_or_pair_from_name
+from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 import re
 
 
 class FittingTabPresenter(object):
+
     def __init__(self, view, model, context):
         self.view = view
         self.model = model
@@ -38,6 +40,8 @@ class FittingTabPresenter(object):
             self.handle_gui_changes_made)
         self.selected_group_pair_observer = GenericObserver(
             self.handle_selected_group_pair_changed)
+        self.selected_plot_type_observer = GenericObserver(
+            self.handle_selected_plot_type_changed)
         self.input_workspace_observer = GenericObserver(
             self.handle_new_data_loaded)
         self.disable_tab_observer = GenericObserver(lambda: self.view.
@@ -45,7 +49,8 @@ class FittingTabPresenter(object):
         self.enable_tab_observer = GenericObserver(lambda: self.view.
                                                    setEnabled(True))
 
-        self.update_view_from_model_observer = GenericObserverWithArgPassing(self.update_view_from_model)
+        self.update_view_from_model_observer = GenericObserverWithArgPassing(
+            self.update_view_from_model)
 
     def handle_select_fit_data_clicked(self):
         selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
@@ -69,16 +74,37 @@ class FittingTabPresenter(object):
     def handle_selected_group_pair_changed(self):
         self.update_selected_workspace_guess()
 
+    def handle_selected_plot_type_changed(self):
+        self.update_selected_workspace_guess()
+
     def update_selected_workspace_guess(self):
-        if not self.manual_selection_made:
-            guess_selection = self.context.get_names_of_workspaces_to_fit(
+        if self.manual_selection_made:
+            guess_selection = self.selected_data
+            self.selected_data = guess_selection
+
+        elif self.context._frequency_context:
+            self.update_selected_frequency_workspace_guess()
+        else:
+            self.update_selected_time_workspace_guess()
+
+    def update_selected_frequency_workspace_guess(self):
+        guess_selection = self.context.get_names_of_workspaces_to_fit(
+            runs='All',
+            group_and_pair=self.context.group_pair_context.selected,
+            phasequad=True,
+            rebin=not self.view.fit_to_raw, freq=self.context._frequency_context.plot_type)
+        self.selected_data = guess_selection
+
+    def update_selected_time_workspace_guess(self):
+        group_and_pair = self._get_selected_groups_and_pairs()
+        guess_selection = []
+        for name in group_and_pair:
+            guess_selection += self.context.get_names_of_workspaces_to_fit(
                 runs='All',
-                group_and_pair=self.context.group_pair_context.selected,
+                group_and_pair=name,
                 phasequad=True,
                 rebin=not self.view.fit_to_raw)
-        else:
-            guess_selection = self.selected_data
-
+        guess_selection = self._check_data_exists(guess_selection)
         self.selected_data = guess_selection
 
     def handle_display_workspace_changed(self):
@@ -522,7 +548,8 @@ class FittingTabPresenter(object):
 
     def update_view_from_model(self, workspace_removed=None):
         if workspace_removed:
-            self.selected_data = [item for item in self.selected_data if item != workspace_removed]
+            self.selected_data = [
+                item for item in self.selected_data if item != workspace_removed]
         else:
             self.selected_data = []
 
@@ -546,3 +573,13 @@ class FittingTabPresenter(object):
             multi_domain_function.setDomainIndex(index, index)
 
         return multi_domain_function
+
+    def _get_selected_groups_and_pairs(self):
+        list_of_current_group_pairs = list(set([get_group_or_pair_from_name(name) for name in self.selected_data]))
+        if list_of_current_group_pairs:
+            return list_of_current_group_pairs
+        else:
+            return [self.context.group_pair_context.selected]
+
+    def _check_data_exists(self, guess_selection):
+        return [item for item in guess_selection if AnalysisDataService.doesExist(item)]

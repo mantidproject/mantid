@@ -328,8 +328,8 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
           static_cast<double>(abstimevec[i].totalNanoseconds() -
                               t0.totalNanoseconds()) *
           1.0E-9;
-      int index1 = static_cast<int>(deltapulsetimeSec1 * 60);
-      int index2 = static_cast<int>(deltapulsetimeSec2 * 60);
+      auto index1 = static_cast<int>(deltapulsetimeSec1 * 60);
+      auto index2 = static_cast<int>(deltapulsetimeSec2 * 60);
 
       ofs << "Error d(T) = " << tempdts << "   vs   Correct d(T) = " << dts
           << '\n';

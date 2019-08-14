@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /**
  * The BatchJobRunner class sets up algorithms to run based on the reduction
@@ -80,6 +81,7 @@ private:
       Row &row,
       std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algorithms);
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

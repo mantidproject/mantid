@@ -13,10 +13,11 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaultsTableValidator {
 public:
-  using ContentType = std::vector<std::array<std::string, 8>>;
+  using ContentType = std::vector<PerThetaDefaults::ValueArray>;
   using ResultType = ValidationResult<std::vector<PerThetaDefaults>,
                                       PerThetaDefaultsTableValidationError>;
 
@@ -44,6 +45,7 @@ public:
       std::vector<InvalidDefaultsError> &validationErrors,
       std::size_t rowCount) const;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H

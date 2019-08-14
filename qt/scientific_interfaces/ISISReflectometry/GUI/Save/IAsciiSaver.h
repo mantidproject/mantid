@@ -13,6 +13,7 @@
 #include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
 
@@ -75,6 +76,7 @@ public:
                     FileFormatOptions const &inputParameters) const = 0;
   virtual ~IAsciiSaver() = default;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_IASCIISAVER_H

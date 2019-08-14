@@ -128,7 +128,6 @@ class InstrumentWidgetModel(object):
         self._context.gui_context.update_and_send_signal(DeadTimeSource='FromFile')
 
     def set_user_dead_time_from_ADS(self, name):
-        self._context.gui_context['DeadTimeSource'] = 'FromADS'
         dtc = api.AnalysisDataService.retrieve(str(name))
         self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 

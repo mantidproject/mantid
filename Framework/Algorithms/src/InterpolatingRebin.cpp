@@ -76,7 +76,7 @@ void InterpolatingRebin::exec() {
   const int ntcnew = VectorHelper::createAxisFromRebinParams(
       rb_params, XValues_new.mutableRawData());
 
-  const int nHists = static_cast<int>(inputW->getNumberHistograms());
+  const auto nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes
   MatrixWorkspace_sptr outputW =
       create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
@@ -153,7 +153,7 @@ void InterpolatingRebin::outputYandEValues(
   // prepare to use GSL functions but don't let them terminate Mantid
   gsl_error_handler_t *old_handler = gsl_set_error_handler(nullptr);
 
-  const int histnumber = static_cast<int>(inputW->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inputW->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, histnumber);
   for (int hist = 0; hist < histnumber; ++hist) {
 

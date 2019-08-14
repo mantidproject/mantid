@@ -5,16 +5,17 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
+#include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
 
 #include <boost/algorithm/string.hpp>
 
+using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
@@ -147,6 +148,64 @@ double loadSampleLog(std::string const &filename,
                       defaultValue);
 }
 
+void convertSpectrumAxis(std::string const &inputWorkspace,
+                         std::string const &outputWorkspace,
+                         std::string const &target = "ElasticQ",
+                         std::string const &eMode = "Indirect") {
+  auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+  converter->initialize();
+  converter->setProperty("InputWorkspace", inputWorkspace);
+  converter->setProperty("OutputWorkspace", outputWorkspace);
+  converter->setProperty("Target", target);
+  converter->setProperty("EMode", eMode);
+  converter->execute();
+}
+
+void rebin(std::string const &inputWorkspace,
+           std::string const &outputWorkspace, std::string const &params) {
+  auto rebin = AlgorithmManager::Instance().create("Rebin");
+  rebin->initialize();
+  rebin->setProperty("InputWorkspace", inputWorkspace);
+  rebin->setProperty("OutputWorkspace", outputWorkspace);
+  rebin->setProperty("Params", params);
+  rebin->execute();
+}
+
+void save(std::string const &algorithmName, std::string const &workspaceName,
+          std::string const &outputName, int const version = -1,
+          std::string const &separator = "") {
+  auto saver = AlgorithmManager::Instance().create(algorithmName, version);
+  saver->initialize();
+  saver->setProperty("InputWorkspace", workspaceName);
+  saver->setProperty("Filename", outputName);
+  if (!separator.empty())
+    saver->setProperty("Separator", separator);
+  saver->execute();
+}
+
+void saveDaveGroup(std::string const &workspaceName,
+                   std::string const &outputName) {
+  auto const temporaryName = workspaceName + "_davegrp_save_temp";
+
+  convertSpectrumAxis(workspaceName, temporaryName);
+  save("SaveDaveGrp", temporaryName, outputName);
+  deleteWorkspace(temporaryName);
+}
+
+void saveAclimax(std::string const &workspaceName,
+                 std::string const &outputName,
+                 std::string const &xUnits = "DeltaE_inWavenumber") {
+  auto const bins = xUnits == "DeltaE_inWavenumber"
+                        ? "24, -0.005, 4000"
+                        : "3, -0.005, 500"; // cm-1 or meV
+
+  auto const temporaryName = workspaceName + "_aclimax_save_temp";
+
+  rebin(workspaceName, temporaryName, bins);
+  save("SaveAscii", temporaryName, outputName, -1, "Tab");
+  deleteWorkspace(temporaryName);
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -158,6 +217,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
                                        QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
   // SIGNAL/SLOT CONNECTIONS
   // Update instrument information when a new instrument config is selected
@@ -180,9 +241,10 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  connect(m_uiForm.dsCalibrationFile, SIGNAL(dataReady(QString const &)), this,
+          SLOT(handleDataReady(QString const &)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -191,6 +253,9 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
           this,
           SLOT(updateRunButton(bool, std::string const &, QString const &,
                                QString const &)));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsCalibrationFile->isOptional(true);
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -210,6 +275,21 @@ ISISEnergyTransfer::~ISISEnergyTransfer() {}
 
 void ISISEnergyTransfer::setup() {}
 
+/**
+ * Handles the event of data being loaded. Validates the loaded data.
+ *
+ */
+void ISISEnergyTransfer::handleDataReady(QString const &dataName) {
+  UNUSED_ARG(dataName);
+  UserInputValidator uiv;
+  validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
+                       DataType::Calib);
+
+  auto const errorMessage = uiv.generateErrorMessage();
+  if (!errorMessage.isEmpty())
+    showMessageBox(errorMessage);
+}
+
 bool ISISEnergyTransfer::validate() {
   UserInputValidator uiv;
 
@@ -219,10 +299,9 @@ bool ISISEnergyTransfer::validate() {
   }
 
   // Calibration file input
-  if (m_uiForm.ckUseCalib->isChecked() &&
-      !m_uiForm.dsCalibrationFile->isValid()) {
-    uiv.addErrorMessage("Calibration file/workspace is invalid.");
-  }
+  if (m_uiForm.ckUseCalib->isChecked())
+    validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration",
+                         DataType::Calib);
 
   QString groupingError = validateDetectorGrouping();
   if (!groupingError.isEmpty())
@@ -484,16 +563,10 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
       if (!m_uiForm.ckGroupOutput->isChecked())
         ungroupWorkspace(outputGroup->getName());
 
+      setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
+
       // Enable plotting and saving
-      m_uiForm.pbPlot->setEnabled(true);
-      m_uiForm.cbPlotType->setEnabled(true);
-      m_uiForm.pbSave->setEnabled(true);
-      m_uiForm.ckSaveAclimax->setEnabled(true);
-      m_uiForm.ckSaveASCII->setEnabled(true);
-      m_uiForm.ckSaveDaveGrp->setEnabled(true);
-      m_uiForm.ckSaveNexus->setEnabled(true);
-      m_uiForm.ckSaveNXSPE->setEnabled(true);
-      m_uiForm.ckSaveSPE->setEnabled(true);
+      setSaveEnabled(true);
     }
   }
 }
@@ -673,31 +746,6 @@ std::string ISISEnergyTransfer::getDetectorGroupingString() const {
 }
 
 /**
- * Converts the checkbox selection to a comma delimited list of save formats for
- * the ISISIndirectEnergyTransferWrapper algorithm.
- *
- * @return A vector of save formats
- */
-std::vector<std::string> ISISEnergyTransfer::getSaveFormats() {
-  std::vector<std::string> fileFormats;
-
-  if (m_uiForm.ckSaveNexus->isChecked())
-    fileFormats.emplace_back("nxs");
-  if (m_uiForm.ckSaveSPE->isChecked())
-    fileFormats.emplace_back("spe");
-  if (m_uiForm.ckSaveNXSPE->isChecked())
-    fileFormats.emplace_back("nxspe");
-  if (m_uiForm.ckSaveASCII->isChecked())
-    fileFormats.emplace_back("ascii");
-  if (m_uiForm.ckSaveAclimax->isChecked())
-    fileFormats.emplace_back("aclimax");
-  if (m_uiForm.ckSaveDaveGrp->isChecked())
-    fileFormats.emplace_back("davegrp");
-
-  return fileFormats;
-}
-
-/**
  * Plots raw time data from .raw file before any data conversion has been
  * performed.
  */
@@ -738,9 +786,11 @@ void ISISEnergyTransfer::plotRaw() {
 
   auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
   if (instName != "TOSCA") {
-    loadAlg->setProperty("LoadLogFiles", false);
-    loadAlg->setProperty("SpectrumMin", detectorMin);
-    loadAlg->setProperty("SpectrumMax", detectorMax);
+    if (loadAlg->existsProperty("LoadLogFiles")) {
+      loadAlg->setProperty("LoadLogFiles", false);
+    }
+    loadAlg->setPropertyValue("SpectrumMin", std::to_string(detectorMin));
+    loadAlg->setPropertyValue("SpectrumMax", std::to_string(detectorMax));
   }
   loadAlg->execute();
 
@@ -842,7 +892,7 @@ void ISISEnergyTransfer::plotRawComplete(bool error) {
     auto const filename = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo const fileInfo(filename);
     auto const name = fileInfo.baseName().toStdString();
-    plotSpectrum(QString::fromStdString(name) + "_grp");
+    m_plotter->plotSpectra(name + "_grp", "0");
   }
   setPlotTimeIsPlotting(false);
 }
@@ -902,52 +952,47 @@ void ISISEnergyTransfer::loadDetailedBalance(std::string const &filename) {
  */
 void ISISEnergyTransfer::runClicked() { runTab(); }
 
-/**
- * Handle mantid plotting of workspaces
- */
-void ISISEnergyTransfer::plotClicked() {
-  setPlotIsPlotting(true);
-  for (const auto &it : m_outputWorkspaces) {
-    if (checkADSForPlotSaveWorkspace(it, true)) {
-      const auto plotType = m_uiForm.cbPlotType->currentText();
-      QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
-      pyInput += "plot_reduction('";
-      pyInput += QString::fromStdString(it) + "', '";
-      pyInput += plotType + "')\n";
-      m_pythonRunner.runPythonCode(pyInput);
-    }
+void ISISEnergyTransfer::plotWorkspace(std::string const &workspaceName,
+                                       std::string const &plotType) {
+
+  if (plotType == "Spectra") {
+    auto const indices =
+        "0-" +
+        std::to_string(
+            getADSMatrixWorkspace(workspaceName)->getNumberHistograms() - 1);
+    m_plotter->plotSpectra(workspaceName, indices);
+  } else if (plotType == "Contour") {
+    m_plotter->plotContour(workspaceName);
   }
-  setPlotIsPlotting(false);
 }
 
 /**
  * Handle saving of workspaces
  */
 void ISISEnergyTransfer::saveClicked() {
-  auto saveFormats = getSaveFormats();
-  QString pyInput = "from IndirectReductionCommon import save_reduction\n";
-  pyInput += "save_reduction([";
-  for (const auto &it : m_outputWorkspaces) {
-    pyInput += "'" + QString::fromStdString(it) + "', ";
-  }
-  pyInput += "], [";
-  for (const auto &it : saveFormats) {
-    pyInput += "'" + QString::fromStdString(it) + "', ";
-  }
-  pyInput += "]";
-  if (m_uiForm.ckCm1Units->isChecked())
-    pyInput += ", 'DeltaE_inWavenumber'";
-  pyInput += ")\n";
-  m_pythonRunner.runPythonCode(pyInput);
+  for (auto const &workspaceName : m_outputWorkspaces)
+    if (doesExistInADS(workspaceName))
+      saveWorkspace(workspaceName);
+}
+
+void ISISEnergyTransfer::saveWorkspace(std::string const &workspaceName) {
+
+  if (m_uiForm.ckSaveNexus->isChecked())
+    save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
+  if (m_uiForm.ckSaveSPE->isChecked())
+    save("SaveSPE", workspaceName, workspaceName + ".spe");
+  if (m_uiForm.ckSaveNXSPE->isChecked())
+    save("SaveNXSPE", workspaceName, workspaceName + ".nxspe");
+  if (m_uiForm.ckSaveASCII->isChecked())
+    save("SaveAscii", workspaceName, workspaceName + ".dat", 2);
+  if (m_uiForm.ckSaveAclimax->isChecked())
+    saveAclimax(workspaceName, workspaceName + "_aclimax.dat");
+  if (m_uiForm.ckSaveDaveGrp->isChecked())
+    saveDaveGroup(workspaceName, workspaceName + ".grp");
 }
 
 void ISISEnergyTransfer::setRunEnabled(bool enable) {
   m_uiForm.pbRun->setEnabled(enable);
-}
-
-void ISISEnergyTransfer::setPlotEnabled(bool enable) {
-  m_uiForm.pbPlot->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
-  m_uiForm.cbPlotType->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
 }
 
 void ISISEnergyTransfer::setPlotTimeEnabled(bool enable) {
@@ -957,9 +1002,14 @@ void ISISEnergyTransfer::setPlotTimeEnabled(bool enable) {
 }
 
 void ISISEnergyTransfer::setSaveEnabled(bool enable) {
-  m_uiForm.pbSave->setEnabled(!m_outputWorkspaces.empty() ? enable : false);
-  m_uiForm.loSaveFormats->setEnabled(!m_outputWorkspaces.empty() ? enable
-                                                                 : false);
+  enable = !m_outputWorkspaces.empty() ? enable : false;
+  m_uiForm.pbSave->setEnabled(enable);
+  m_uiForm.ckSaveAclimax->setEnabled(enable);
+  m_uiForm.ckSaveASCII->setEnabled(enable);
+  m_uiForm.ckSaveDaveGrp->setEnabled(enable);
+  m_uiForm.ckSaveNexus->setEnabled(enable);
+  m_uiForm.ckSaveNXSPE->setEnabled(enable);
+  m_uiForm.ckSaveSPE->setEnabled(enable);
 }
 
 void ISISEnergyTransfer::updateRunButton(bool enabled,
@@ -970,26 +1020,21 @@ void ISISEnergyTransfer::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged") {
-    setPlotEnabled(enableOutputButtons == "enable");
-    setPlotTimeEnabled(enableOutputButtons == "enable");
-    setSaveEnabled(enableOutputButtons == "enable");
+    auto const enableButtons = enableOutputButtons == "enable";
+    setPlotTimeEnabled(enableButtons);
+    setSaveEnabled(enableButtons);
   }
-}
-
-void ISISEnergyTransfer::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setRunEnabled(!plotting);
-  setPlotEnabled(!plotting);
-  setPlotTimeEnabled(!plotting);
-  setSaveEnabled(!plotting);
 }
 
 void ISISEnergyTransfer::setPlotTimeIsPlotting(bool plotting) {
   m_uiForm.pbPlotTime->setText(plotting ? "Plotting..." : "Plot");
-  setRunEnabled(!plotting);
-  setPlotEnabled(!plotting);
-  setPlotTimeEnabled(!plotting);
-  setSaveEnabled(!plotting);
+  setButtonsEnabled(!plotting);
+}
+
+void ISISEnergyTransfer::setButtonsEnabled(bool enable) {
+  setRunEnabled(enable);
+  setPlotTimeEnabled(enable);
+  setSaveEnabled(enable);
 }
 
 } // namespace CustomInterfaces

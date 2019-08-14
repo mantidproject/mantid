@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.multi_plotting_widget import MultiPlotWidget
@@ -41,7 +41,8 @@ def data():
     return values
 
 
-class MultiPlotWidgetTest(GuiTest):
+@start_qapplication
+class MultiPlotWidgetTest(unittest.TestCase):
 
     def setUp(self):
         context = PlottingContext()

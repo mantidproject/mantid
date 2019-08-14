@@ -12,11 +12,13 @@
 #include "Common/InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include "Reduction/PerThetaDefaults.h"
 #include <map>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IExperimentView
 
@@ -63,10 +65,10 @@ public:
   virtual bool getDebugOption() const = 0;
   virtual void setDebugOption(bool enable) = 0;
 
-  virtual std::vector<std::array<std::string, 8>>
+  virtual std::vector<PerThetaDefaults::ValueArray>
   getPerAngleOptions() const = 0;
   virtual void
-      setPerAngleOptions(std::vector<std::array<std::string, 8>> rows) = 0;
+  setPerAngleOptions(std::vector<PerThetaDefaults::ValueArray> rows) = 0;
   virtual void showPerAngleOptionsAsInvalid(int row, int column) = 0;
   virtual void showPerAngleOptionsAsValid(int row) = 0;
   virtual void showAllPerAngleOptionsAsValid() = 0;
@@ -75,9 +77,6 @@ public:
 
   virtual void enablePolarizationCorrections() = 0;
   virtual void disablePolarizationCorrections() = 0;
-  virtual void enablePolarizationCorrectionInputs() = 0;
-  virtual void disablePolarizationCorrectionInputs() = 0;
-
   virtual void enableFloodCorrectionInputs() = 0;
   virtual void disableFloodCorrectionInputs() = 0;
 
@@ -85,19 +84,17 @@ public:
   virtual void setTransmissionStartOverlap(double start) = 0;
   virtual double getTransmissionEndOverlap() const = 0;
   virtual void setTransmissionEndOverlap(double end) = 0;
+  virtual std::string getTransmissionStitchParams() const = 0;
+  virtual void setTransmissionStitchParams(std::string const &params) = 0;
+  virtual bool getTransmissionScaleRHSWorkspace() const = 0;
+  virtual void setTransmissionScaleRHSWorkspace(bool enable) = 0;
   virtual void showTransmissionRangeInvalid() = 0;
   virtual void showTransmissionRangeValid() = 0;
+  virtual void showTransmissionStitchParamsInvalid() = 0;
+  virtual void showTransmissionStitchParamsValid() = 0;
 
-  virtual std::string getPolarizationCorrectionType() const = 0;
-  virtual void setPolarizationCorrectionType(std::string const &type) = 0;
-  virtual double getCRho() const = 0;
-  virtual void setCRho(double cRho) = 0;
-  virtual double getCAlpha() const = 0;
-  virtual void setCAlpha(double cAlpha) = 0;
-  virtual double getCAp() const = 0;
-  virtual void setCAp(double cAp) = 0;
-  virtual double getCPp() const = 0;
-  virtual void setCPp(double cPp) = 0;
+  virtual bool getPolarizationCorrectionOption() const = 0;
+  virtual void setPolarizationCorrectionOption(bool enable) = 0;
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;
@@ -121,6 +118,7 @@ public:
 
   virtual ~IExperimentView() = default;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTVIEW_H */

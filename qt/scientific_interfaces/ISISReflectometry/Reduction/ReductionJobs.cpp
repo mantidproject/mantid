@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs,
@@ -162,8 +163,7 @@ void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex,
 }
 
 void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
-                       double thetaTolerance, std::string const &groupName,
-                       bool (*rowChanged)(Row const &rowA, Row const &rowB)) {
+                       double thetaTolerance, std::string const &groupName) {
   auto &group = findOrMakeGroupWithName(jobs, groupName);
   auto indexOfRowToUpdate =
       group.indexOfRowWithTheta(row.theta(), thetaTolerance);
@@ -171,7 +171,7 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row,
   if (indexOfRowToUpdate.is_initialized()) {
     auto rowToUpdate = group[indexOfRowToUpdate.get()].get();
     auto newRowValue = mergedRow(rowToUpdate, row);
-    if (rowChanged(newRowValue, rowToUpdate))
+    if (newRowValue.runNumbers() != rowToUpdate.runNumbers())
       group.updateRow(indexOfRowToUpdate.get(), newRowValue);
   } else {
     group.insertRowSortedByAngle(row);
@@ -332,5 +332,6 @@ bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) {
 bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) {
   return lhs.groups() == rhs.groups();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

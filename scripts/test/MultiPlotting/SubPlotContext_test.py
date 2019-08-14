@@ -11,9 +11,7 @@ from MultiPlotting.subplot.subplot_context import subplotContext
 from mantid import plots
 
 
-
 class line(object):
-
     def __init__(self):
         self.label = "test"
 
@@ -31,7 +29,6 @@ class line(object):
 
 
 class label(object):
-
     def __init__(self, name, protected):
         self.text = name
         self.protected = protected
@@ -42,7 +39,6 @@ def errors():
 
 
 class SubPlotContextTest(unittest.TestCase):
-
     def setUp(self):
         name = "test"
         self.subplot = mock.MagicMock()
@@ -54,7 +50,7 @@ class SubPlotContextTest(unittest.TestCase):
             patch.return_value = tuple([line()])
             self.context.addLine(ws, 3)
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(self.subplot, ws, specNum=3)
+            patch.assert_called_with(self.subplot, ws, specNum=3, distribution=True)
 
     def test_add_line_errors(self):
         ws = mock.MagicMock()
@@ -67,11 +63,7 @@ class SubPlotContextTest(unittest.TestCase):
                 self.context.addLine(ws, 3)
                 self.assertEqual(plot.call_count, 1)
                 self.assertEqual(patch.call_count, 1)
-                patch.assert_called_with(
-                    self.subplot,
-                    ws,
-                    specNum=3,
-                    label=lines.get_label())
+                patch.assert_called_with(self.subplot, ws, specNum=3, label=lines.get_label())
 
     def test_redraw_errors(self):
         ws = mock.MagicMock()
@@ -88,13 +80,13 @@ class SubPlotContextTest(unittest.TestCase):
                 # redraw
                 self.context.redraw(lines.get_label())
                 self.assertEqual(patch.call_count, 2)
-                patch.assert_called_with(
-                    self.subplot,
-                    ws,
-                    specNum=3,
-                    color=lines.get_color(),
-                    marker=lines.get_marker(),
-                    label=lines.get_label())
+                patch.assert_called_with(self.subplot,
+                                         ws,
+                                         specNum=3,
+                                         color=lines.get_color(),
+                                         marker=lines.get_marker(),
+                                         label=lines.get_label(),
+                                         distribution=True)
 
     def test_redraw_no_errors(self):
         ws = mock.MagicMock()
@@ -103,17 +95,17 @@ class SubPlotContextTest(unittest.TestCase):
             patch.return_value = tuple([lines])
             self.context.addLine(ws, 3)
             self.assertEqual(patch.call_count, 1)
-            patch.assert_called_with(self.subplot, ws, specNum=3)
+            patch.assert_called_with(self.subplot, ws, specNum=3, distribution=True)
             # redraw
             self.context.redraw(lines.get_label())
             self.assertEqual(patch.call_count, 2)
-            patch.assert_called_with(
-                self.subplot,
-                ws,
-                specNum=3,
-                color=lines.get_color(),
-                marker=lines.get_marker(),
-                label=lines.get_label())
+            patch.assert_called_with(self.subplot,
+                                     ws,
+                                     specNum=3,
+                                     color=lines.get_color(),
+                                     marker=lines.get_marker(),
+                                     label=lines.get_label(),
+                                     distribution=True)
 
     def test_change_errors(self):
         self.context._lines = {"one": 1, "two": 2, "three": 3}
@@ -129,16 +121,16 @@ class SubPlotContextTest(unittest.TestCase):
 
     def test_vlines(self):
         self.context._labelObjects = {
-            "one": label("one", True), "two": label("two", False), "three": label("three", False)}
-        self.context._vLines = {
-            "two": mock.MagicMock(), "four": mock.MagicMock()}
+            "one": label("one", True),
+            "two": label("two", False),
+            "three": label("three", False)
+        }
+        self.context._vLines = {"two": mock.MagicMock(), "four": mock.MagicMock()}
         result = self.context.vlines
-        expect = ["two", "three","four"] 
+        expect = ["two", "three", "four"]
         for key in expect:
             self.assertIn(key, result)
         self.assertEqual(len(result), len(expect))
-
-
 
     def test_replaceWS(self):
         ws = mock.Mock()
@@ -153,19 +145,19 @@ class SubPlotContextTest(unittest.TestCase):
             self.context.addLine(ws2, 3)
         # check inital set up
         keys = self.context.ws.keys()
-        expect = [ws,ws2]
+        expect = [ws, ws2]
         for key in expect:
             self.assertIn(key, keys)
-        self.assertEqual(len(keys),len(expect))
+        self.assertEqual(len(keys), len(expect))
 
         # do the method
         redraw = self.context.replace_ws(ws)
-        self.assertEqual(redraw,True)
+        self.assertEqual(redraw, True)
         new_keys = self.context.ws.keys()
         for key in expect:
             self.assertIn(key, new_keys)
-        self.assertEqual(len(new_keys),len(expect))
-        self.assertEqual(self.context.ws[ws],["test"])
+        self.assertEqual(len(new_keys), len(expect))
+        self.assertEqual(self.context.ws[ws], ["test"])
 
     def test_getLinesFromWSName(self):
         ws = mock.Mock()
@@ -183,8 +175,6 @@ class SubPlotContextTest(unittest.TestCase):
         expect = ["test"]
         for key in expect:
             self.assertIn(key, "test")
- 
-
 
 
 if __name__ == "__main__":

@@ -88,9 +88,9 @@ void SaveNXSPE::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Number of spectra
-  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
   // Number of energy bins
-  const int64_t nBins = static_cast<int64_t>(inputWS->blocksize());
+  const auto nBins = static_cast<int64_t>(inputWS->blocksize());
 
   // Retrieve the filename from the properties
   std::string filename = getPropertyValue("Filename");
@@ -209,7 +209,7 @@ void SaveNXSPE::exec() {
   // Use an intermediate in-memory buffer to reduce the number
   // of calls to putslab, i.e disk writes but still write whole rows
   Dimensions slabStart(2, 0), slabSize(2, 0);
-  Dimensions::value_type chunkRows =
+  auto chunkRows =
       static_cast<Dimensions::value_type>(MAX_CHUNK_SIZE / 8 / nBins);
   if (nHist < chunkRows) {
     chunkRows = nHist;
@@ -286,8 +286,7 @@ void SaveNXSPE::exec() {
   spCalcDetPar->execute();
 
   //
-  FindDetectorsPar *pCalcDetPar =
-      dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+  auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
   if (!pCalcDetPar) { // "can not get pointer to FindDetectorsPar algorithm"
     throw(std::bad_cast());
   }

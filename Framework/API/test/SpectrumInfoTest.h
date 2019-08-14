@@ -463,33 +463,6 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
   }
 
-  void test_ExperimentInfo_grouped() {
-    ExperimentInfo expInfo(m_workspace);
-
-    // We cannot really test anything but a single group, since the grouping
-    // mechanism in ExperimentInfo is currently based on std::unordered_map, so
-    // we have no control over the order and thus cannot write asserts.
-    det2group_map mapping{{1, {1, 2}}};
-    expInfo.cacheDetectorGroupings(mapping);
-    const auto &spectrumInfo = expInfo.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
-
-    mapping = {{1, {1, 4}}};
-    expInfo.cacheDetectorGroupings(mapping);
-    const auto &spectrumInfo2 = expInfo.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo2.size(), 1);
-    TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
-  }
-
-  void test_cacheDetectorGroupings_fails_for_MatrixWorkspace() {
-    // This is actually testing a method of MatrixWorkspace but SpectrumInfo
-    // needs to be able to rely on this.
-    det2group_map mapping{{1, {1, 2}}};
-    TS_ASSERT_THROWS(m_workspace.cacheDetectorGroupings(mapping),
-                     const std::runtime_error &);
-  }
-
   /**
    * Tests for Iterator Functionality
    **/

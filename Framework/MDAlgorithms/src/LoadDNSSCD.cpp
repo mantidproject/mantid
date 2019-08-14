@@ -395,7 +395,7 @@ template <class T>
 void LoadDNSSCD::updateProperties(API::Run &run,
                                   std::map<std::string, T> &metadata,
                                   std::string time) {
-  typename std::map<std::string, T>::iterator it = metadata.begin();
+  auto it = metadata.begin();
   while (it != metadata.end()) {
     TimeSeriesProperty<T> *timeSeries(nullptr);
     std::string name(it->first);
@@ -564,7 +564,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
       const auto l2 = detectorVector.norm();
       auto tof2_elastic = 1e+06 * l2 / velocity;
       // geometric elastic channel
-      int echannel_geom =
+      auto echannel_geom =
           static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
       // rotate the signal array to get elastic peak at right position
       int ch_diff = echannel_geom - echannel_user;
@@ -577,7 +577,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
       }
       detid_t detid(ds.detID[i]);
       double theta = 0.5 * (ds.detID[i] * 5.0 - ds.deterota) * deg2rad;
-      int64_t nchannels = static_cast<int64_t>(ds.signal[i].size());
+      auto nchannels = static_cast<int64_t>(ds.signal[i].size());
       if ((theta > theta_min) && (theta < theta_max)) {
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
         for (int64_t channel = 0; channel < nchannels; channel++) {
@@ -738,7 +738,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
       const auto l2 = detectorVector.norm();
       auto tof2_elastic = 1e+06 * l2 / velocity;
       // geometric elastic channel
-      int echannel_geom =
+      auto echannel_geom =
           static_cast<int>(std::ceil(tof2_elastic / ds.chwidth));
       // rotate the signal array to get elastic peak at right position
       int ch_diff = echannel_geom - echannel_user;
@@ -752,7 +752,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
 
       detid_t detid(ds.detID[i]);
       double theta = 0.5 * (ds.detID[i] * 5.0 - ds.deterota);
-      int64_t nchannels = static_cast<int64_t>(ds.signal[i].size());
+      auto nchannels = static_cast<int64_t>(ds.signal[i].size());
       if ((theta > theta_min) && (theta < theta_max)) {
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_OutWS, *normWS))
         for (int64_t channel = 0; channel < nchannels; channel++) {

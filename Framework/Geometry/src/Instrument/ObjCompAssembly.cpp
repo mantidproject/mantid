@@ -54,7 +54,7 @@ ObjCompAssembly::ObjCompAssembly(const IComponent *base,
 ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference)
     : ObjComponent(n, reference) {
   if (reference) {
-    ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
+    auto *test = dynamic_cast<ICompAssembly *>(reference);
     if (test)
       test->add(this);
   }
@@ -69,7 +69,7 @@ ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
   // Need to do a deep copy
   comp_it it;
   for (it = group.begin(); it != group.end(); ++it) {
-    ObjComponent *c = dynamic_cast<ObjComponent *>((*it)->clone());
+    auto *c = dynamic_cast<ObjComponent *>((*it)->clone());
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
@@ -111,7 +111,7 @@ int ObjCompAssembly::add(IComponent *comp) {
         "ObjCompAssembly::add() called on a Parametrized object.");
 
   if (comp) {
-    ObjComponent *c = dynamic_cast<ObjComponent *>(comp);
+    auto *c = dynamic_cast<ObjComponent *>(comp);
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
@@ -137,7 +137,7 @@ int ObjCompAssembly::addCopy(IComponent *comp) {
 
   if (comp) {
     IComponent *newcomp = comp->clone();
-    ObjComponent *c = dynamic_cast<ObjComponent *>(newcomp);
+    auto *c = dynamic_cast<ObjComponent *>(newcomp);
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
@@ -164,7 +164,7 @@ int ObjCompAssembly::addCopy(IComponent *comp, const std::string &n) {
 
   if (comp) {
     IComponent *newcomp = comp->clone();
-    ObjComponent *c = dynamic_cast<ObjComponent *>(newcomp);
+    auto *c = dynamic_cast<ObjComponent *>(newcomp);
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
@@ -352,8 +352,7 @@ void ObjCompAssembly::testIntersectionWithChildren(
       searchQueue.push_back(comp);
     }
     // Check the physical object intersection
-    else if (IObjComponent *physicalObject =
-                 dynamic_cast<IObjComponent *>(comp.get())) {
+    else if (auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
       physicalObject->interceptSurface(testRay);
     } else {
     }

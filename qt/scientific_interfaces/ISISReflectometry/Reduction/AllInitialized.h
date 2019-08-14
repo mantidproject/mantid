@@ -10,6 +10,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename Param>
 bool allInitialized(boost::optional<Param> const &param) {
@@ -32,6 +33,7 @@ makeIfAllInitialized(boost::optional<Params> const &... params) {
     return boost::none;
 }
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_ALLINITIALIZED_H_

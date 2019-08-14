@@ -936,13 +936,13 @@ public:
     detid_t numDetectors = 3;
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
 
     locations =
         R"(<locations n-elements="3" name-count-start="5" name-count-increment="-7" name="det" />)";
 
     TS_ASSERT_THROWS(loadInstrLocations(locations, numDetectors, true),
-                     Exception::InstrumentDefinitionError);
+                     const Exception::InstrumentDefinitionError &);
   }
 
   void testLocationsStaticValues() {

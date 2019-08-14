@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
-#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
+#include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
