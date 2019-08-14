@@ -68,6 +68,9 @@ class FrequencyContext(object):
     def FFT_freq(self):
         return list(self._FFT_freq.keys())
 
+    def _is_it_match(self, run, group, pair, fft_run, fft_group_or_pair):
+        return int(run) == int(fft_run) and (fft_group_or_pair in group or fft_group_or_pair in pair)
+
     def get_frequency_workspace_names(self, run_list, group, pair, phasequad, frequency_type):
         # do MaxEnt first as it only has run number
         names = []
@@ -81,13 +84,15 @@ class FrequencyContext(object):
             for runs in run_list:
                 for run in runs:
                     # check Re part
-                    if int(run) == int(fft.Re_run) and (fft.Re in group or fft.Re in pair) and name not in names:
+                    if self._is_it_match(run, group, pair, fft.Re_run, fft.Re) and name not in names:
                         names.append(name)
                     # check Im part
-                    if fft.Im and int(run) == int(fft.Im_run) and (fft.Im in group or fft.Im in pair) and name not in names:
+                    if fft.Im_run and self._is_it_match(run, group, pair, fft.Im_run, fft.Im) and name not in names:
                         names.append(name)
                     # do phaseQuad - will only have one run
-                    if int(run) == int(fft.Re_run) and phasequad and fft.phasequad:
+                    if int(run) == int(fft.Re_run) and phasequad and fft.phasequad and name not in names:
+                        names.append(name)
+                    if fft.Im_run and int(run) == int(fft.Im_run) and phasequad and fft.phasequad and name not in names:
                         names.append(name)
         if frequency_type == "All":
             return names

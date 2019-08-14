@@ -51,6 +51,7 @@ set ( TEST_PY_FILES
    results_tab_widget/results_tab_model_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
+   transform_widget_new_test.py
    utilities/muon_group_test.py
    utilities/muon_pair_test.py
    utilities/load_utils_test.py
@@ -116,6 +117,7 @@ set ( TEST_PY_FILES_QT4
    max_ent_presenter_load_interaction_test.py
    results_tab_widget/results_tab_presenter_test.py
    transformWidget_test.py
+   transform_widget_new_test.py
    help_widget_presenter_test.py
    elemental_analysis/PeriodicTableModel_test.py
    elemental_analysis/PeriodicTablePresenter_test.py

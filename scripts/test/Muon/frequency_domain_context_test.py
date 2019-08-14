@@ -23,6 +23,9 @@ FFT_NAME_COMPLEX_RE= "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD; Im MUSR6226
 FFT_NAME_COMPLEX_IM= "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD; Im MUSR62261; Group; top; Asymmetry; FD_Im"
 FFT_NAME_COMPLEX_MOD= "FFT; Re MUSR62260; Group; fwd; Asymmmetry; FD; Im MUSR62261; Group; top; Asymmetry; FD_Mod"
 
+PHASEQUAD_NAME_IM = "FFT; Re MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; top; bkwd; Im MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; top; bkwd_Mod"
+PHASEQUAD_NAME_RE = "FFT; Re MUSR62261; PhaseQuad FD MUSR62260; PhaseTable FD; top; bkwd_Mod"
+
 class MuonFreqContextTest(unittest.TestCase):
     def setUp(self):
         self.context = FrequencyContext()
@@ -101,7 +104,34 @@ class MuonFreqContextTest(unittest.TestCase):
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]],group=["top"],pair=[],phasequad=False,frequency_type="FFT All")
         six.assertCountEqual(self,output,[FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD])
 
+    def test_get_freq_names_all(self):
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
 
+        output = self.context.get_frequency_workspace_names(run_list=[[62260],[62261]],group=["fwd"],pair=[],phasequad=False,frequency_type="All")
+        six.assertCountEqual(self,output,[FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
+
+    def test_get_freq_names_all_with_phasequad(self):
+        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261",Re= "", Im_run="", Im="",phasequad=True)
+        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261",Re= "", Im_run="62260", Im="",phasequad=True)
+
+        output = self.context.get_frequency_workspace_names(run_list=[[62260],[62261]],group=["fwd"],pair=[],phasequad=True,frequency_type="All")
+        six.assertCountEqual(self,output,[PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
+
+    def test_get_freq_names_all_with_phasequad_Re_run(self):
+        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261",Re= "", Im_run="", Im="",phasequad=True)
+        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261",Re= "", Im_run="62260", Im="",phasequad=True)
+
+        output = self.context.get_frequency_workspace_names(run_list=[[62261]],group=["fwd"],pair=[],phasequad=True,frequency_type="All")
+        six.assertCountEqual(self,output,[PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM])
+
+    def test_get_freq_names_all_with_phasequad_Im_run(self):
+        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261",Re= "", Im_run="", Im="",phasequad=True)
+        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261",Re= "", Im_run="62260", Im="",phasequad=True)
+
+        output = self.context.get_frequency_workspace_names(run_list=[[62260]],group=["fwd"],pair=[],phasequad=True,frequency_type="All")
+        six.assertCountEqual(self,output,[PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
 
 
 if __name__ == '__main__':
