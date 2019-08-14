@@ -1,9 +1,12 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
+#include "MantidNexusGeometry/JSONInstrumentBuilder.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace {
 Mantid::Kernel::Logger logger("IKafkaStreamDecoder");
@@ -70,29 +73,44 @@ boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
   return buffer;
 }
 
+template <typename T>
+void loadFromAlgorithm(const std::string &name,
+                       boost::shared_ptr<T> workspace) {
+  auto alg =
+      API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  // Do not put the workspace in the ADS
+  alg->setChild(true);
+  alg->initialize();
+  alg->setPropertyValue("InstrumentName", name);
+  alg->setProperty("Workspace", workspace);
+  alg->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
+  alg->execute();
+}
+
 /**
  * Run LoadInstrument for the given instrument name. If it cannot succeed it
  * does nothing to the internal workspace
  * @param name Name of an instrument to load
  * @param workspace A pointer to the workspace receiving the instrument
+ * @param parseJSON flag which will extract geometry from
  */
 template <typename T>
 void IKafkaStreamDecoder::loadInstrument(const std::string &name,
-                                         boost::shared_ptr<T> workspace) {
+                                         boost::shared_ptr<T> workspace,
+                                         const std::string &jsonGeometry) {
   if (name.empty()) {
     logger.warning("Empty instrument name found");
     return;
   }
   try {
-    auto alg =
-        API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
-    // Do not put the workspace in the ADS
-    alg->setChild(true);
-    alg->initialize();
-    alg->setPropertyValue("InstrumentName", name);
-    alg->setProperty("Workspace", workspace);
-    alg->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
-    alg->execute();
+    if (jsonGeometry.empty())
+      loadFromAlgorithm<T>(name, workspace);
+    else {
+      NexusGeometry::JSONInstrumentBuilder builder("\"nexus_structure\":{" +
+                                                   jsonGeometry + "}");
+      workspace->setInstrument(builder.buildGeometry());
+    }
+
   } catch (std::exception &exc) {
     logger.warning() << "Error loading instrument '" << name
                      << "': " << exc.what() << "\n";

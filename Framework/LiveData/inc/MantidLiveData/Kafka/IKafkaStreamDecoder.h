@@ -75,7 +75,8 @@ public:
   ///@{
   bool isCapturing() const noexcept { return m_capturing; }
   virtual bool hasData() const noexcept = 0;
-  int runNumber() const noexcept { return m_runNumber; }
+  std::string runId() const noexcept { return m_runId; }
+  int runNumber() const noexcept;
   virtual bool hasReachedEndOfRun() noexcept = 0;
   bool dataReset();
   ///@}
@@ -98,9 +99,10 @@ public:
 protected:
   struct RunStartStruct {
     std::string instrumentName;
-    int runNumber;
+    std::string runId;
     uint64_t startTime;
     size_t nPeriods;
+    std::string nexusStructure;
     int64_t runStartMsgOffset;
   };
 
@@ -146,7 +148,7 @@ protected:
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
   /// Run number
-  int m_runNumber;
+  std::string m_runId;
 
   /// Associated thread running the capture process
   std::thread m_thread;
@@ -194,7 +196,8 @@ protected:
                         const boost::shared_ptr<T> &parent);
 
   template <typename T>
-  void loadInstrument(const std::string &name, boost::shared_ptr<T> workspace);
+  void loadInstrument(const std::string &name, boost::shared_ptr<T> workspace,
+                      const std::string &jsonGeometry = "");
 
   void checkRunMessage(
       const std::string &buffer, bool &checkOffsets,

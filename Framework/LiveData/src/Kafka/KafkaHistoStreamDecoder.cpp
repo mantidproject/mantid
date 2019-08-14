@@ -221,7 +221,7 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     throw std::runtime_error(os.str());
   }
 
-  m_runNumber = runStartData.runNumber;
+  m_runId = runStartData.runId;
 
   // Create buffer
   auto histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
@@ -229,9 +229,11 @@ void KafkaHistoStreamDecoder::initLocalCaches(
       spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
 
   // Load the instrument if possible but continue if we can't
+  auto jsonGeometry = runStartData.nexusStructure;
   auto instName = runStartData.instrumentName;
   if (!instName.empty())
-    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer);
+    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
+                                             jsonGeometry);
   else
     g_log.warning(
         "Empty instrument name received. Continuing without instrument");
@@ -244,8 +246,7 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   auto timeString = m_runStart.toISO8601String();
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
-                         std::to_string(runStartData.runNumber));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
