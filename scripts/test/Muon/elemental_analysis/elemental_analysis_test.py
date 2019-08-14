@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -242,22 +242,22 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(mock_rm_line.call_count, 2)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
-    def test_load_run_opens_new_plot_window_if_none_open(self, mock_MultiPlotWindow):
+    def test_load_run_opens_new_plot_window_if_none_open(self, mock_multi_plot_window):
         self.gui.add_detector_to_plot = mock.Mock()
         self.gui.load_run('GE1', '2695')
-        self.assertEqual(mock_MultiPlotWindow.call_count, 1)
+        self.assertEqual(mock_multi_plot_window.call_count, 1)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow')
-    def test_load_run_does_not_open_new_plot_window_if_one_is_open(self, mock_MultiPlotWindow):
+    def test_load_run_does_not_open_new_plot_window_if_one_is_open(self, mock_multi_plot_window):
         self.gui.add_detector_to_plot = mock.Mock()
         self.gui.plot_window = MultiPlotWindow(str('2695'))
         self.gui.load_run('GE1', 2695)
-        self.assertEqual(mock_MultiPlotWindow.call_count, 0)
+        self.assertEqual(mock_multi_plot_window.call_count, 0)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
-    def test_loading_finished_returns_nothing_if_no_run_loaded(self, mock_QWidget):
+    def test_loading_finished_returns_nothing_if_no_run_loaded(self, mock_qwidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=None)
-        mock_QWidget.return_value = True
+        mock_qwidget.return_value = True
         self.gui.plot_window = mock.Mock()
         self.gui.plotting = mock.Mock()
 
@@ -265,14 +265,13 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.plotting.remove_subplot.call_count, 0)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
-    def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(
-            self, mock_QWidget):
+    def test_loading_finished_returns_correctly_if_no_plot_window_but_has_to_plot(self, mock_qwidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
         self.gui.plot_window = None
         self.gui.plotting = mock.Mock()
         self.gui.plotting.get_subplots.return_value = ['1', '2', '3']
-        mock_QWidget.return_value = True
+        mock_qwidget.return_value = True
 
         self.gui.loading_finished()
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 3)
@@ -281,10 +280,10 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.ElementalAnalysis.Detectors.detectors_view.QtWidgets.QWidget')
     def test_loading_finished_returns_correctly_if_no_to_plot_but_has_plot_window(
-            self, mock_QWidget):
+            self, mock_qwidget):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=['run1', 'run2', 'run3'])
         self.gui.detectors.getNames.return_value = ['1', '2', '3']
-        mock_QWidget.return_value = True
+        mock_qwidget.return_value = True
         self.gui.plot_window = mock.Mock()
 
         self.gui.loading_finished()
@@ -433,20 +432,24 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.assertEqual(self.gui.detectors.setStateQuietly.call_count, 1)
         self.assertEqual(self.gui.plot_window, None)
 
+    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.message_box.warning')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_set_peak_datafile_is_called_with_select_data_file(self,
-                                                                    mock_getOpenFileName,
-                                                                    mock_set_peak_datafile):
-        mock_getOpenFileName.return_value = 'filename'
+                                                                    mock_get_open_file_name,
+                                                                    mock_set_peak_datafile,
+                                                                    mock_warning):
+        mock_get_open_file_name.return_value = 'filename'
         self.gui.select_data_file()
         mock_set_peak_datafile.assert_called_with('filename')
+        self.assertEqual(0, mock_warning.call_count)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.PeriodicTablePresenter.set_peak_datafile')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
-    def test_that_select_data_file_uses_the_first_element_of_a_tuple_when_given_as_a_filename(
-            self, mock_getOpenFileName, mock_set_peak_datafile):
-        mock_getOpenFileName.return_value = ('string1', 'string2')
+    def test_that_select_data_file_uses_the_first_element_of_a_tuple_when_given_as_a_filename(self,
+                                                                                              mock_get_open_file_name,
+                                                                                              mock_set_peak_datafile):
+        mock_get_open_file_name.return_value = ('string1', 'string2')
         self.gui.select_data_file()
         mock_set_peak_datafile.assert_called_with('string1')
 
@@ -454,10 +457,10 @@ class ElementalAnalysisTest(unittest.TestCase):
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._generate_element_widgets')
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.QtWidgets.QFileDialog.getOpenFileName')
     def test_that_select_data_file_raises_warning_with_correct_text(self,
-                                                                    mock_getOpenFileName,
+                                                                    mock_get_open_file_name,
                                                                     mock_generate_element_widgets,
                                                                     mock_warning):
-        mock_getOpenFileName.return_value = 'filename'
+        mock_get_open_file_name.return_value = 'filename'
         mock_generate_element_widgets.side_effect = self.raise_ValueError_once
         self.gui.select_data_file()
         warning_text = 'The file does not contain correctly formatted data, resetting to default data file.'\

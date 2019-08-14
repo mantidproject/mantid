@@ -175,7 +175,6 @@ class PeriodicTableItem(object):
     :param str subcategory: Subcategory, based on physical properties
         (e.g. "alkali metal", "noble gas"...)
     """
-
     def __init__(self, symbol, Z, col, row, name, mass, subcategory=""):
         self.symbol = symbol
         """Atomic symbol (e.g. H, He, Li...)"""
@@ -227,7 +226,6 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
         "": "#FFFFFF"  # white
     }
     """Dictionary defining RGB colors for each subcategory."""
-
     def __init__(self, symbol, Z, col, row, name, mass, subcategory="", bgcolor=None):
         PeriodicTableItem.__init__(self, symbol, Z, col, row, name, mass, subcategory)
 
@@ -243,7 +241,28 @@ class ColoredPeriodicTableItem(PeriodicTableItem):
             self.bgcolor = bgcolor
 
 
-_defaultTableItems = [ColoredPeriodicTableItem(*info) for info in _elements]
+# Sometimes the mass of an element can be slightly different to the one in the peak data file, if so use that one
+def _correct_with_peak_data_file():
+    from periodic_table_model import PeriodicTableModel
+    import json
+    import copy
+    with open(PeriodicTableModel().get_default_peak_data_file(), 'r') as data_file:
+        data = json.load(data_file)
+
+    for i, element in enumerate(copy.deepcopy(_elements)):
+        data_element = data.get(element[0], None)
+        if data_element is not None and data_element['A'] is not None:
+            if abs(data_element['A'] - element[5]) > 1e-6:
+                if len(element) > 6:
+                    _elements[i] = (element[0], data_element['Z'], element[2], element[3],
+                                    element[4], data_element['A'], element[6])
+                else:
+                    _elements[i] = (element[0], data_element['Z'], element[2], element[3],
+                                    element[4], data_element['A'])
+
+
+_correct_with_peak_data_file()
+_default_table_items = [ColoredPeriodicTableItem(*info) for info in _elements]
 
 
 class _ElementButton(QtWidgets.QPushButton):
@@ -257,7 +276,6 @@ class _ElementButton(QtWidgets.QPushButton):
     """Signal emitted when the widget is left clicked"""
     sigElementRightClicked = QtCore.Signal(object)
     """Signal emitted when the widget is right clicked"""
-
     def __init__(self, item, parent=None):
         """
 
@@ -273,8 +291,8 @@ class _ElementButton(QtWidgets.QPushButton):
         self.setFlat(True)
         self.setCheckable(False)
 
-        self.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                                 QtWidgets.QSizePolicy.Expanding))
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
 
         self.selected = False
         self.current = False
@@ -447,9 +465,7 @@ class PeriodicTable(QtWidgets.QWidget):
         selected by clicking with the mouse. If *False* (default),
         selection is only possible with method :meth:`setSelection`.
     """
-
-    def __init__(self, parent=None, name="PeriodicTable", elements=None,
-                 selectable=False):
+    def __init__(self, parent=None, name="PeriodicTable", elements=None, selectable=False):
         self.selectable = selectable
         QtWidgets.QWidget.__init__(self, parent)
         self.setWindowTitle(name)
@@ -478,7 +494,7 @@ class PeriodicTable(QtWidgets.QWidget):
         ("H", "He", "Li"...)"""
 
         if elements is None:
-            elements = _defaultTableItems
+            elements = _default_table_items
         # fill cells with elements
         for elmt in elements:
             self._addElement(elmt)
@@ -632,13 +648,12 @@ class PeriodicCombo(QtWidgets.QComboBox):
     :class:`PeriodicTableItem` object representing selected
     element
     """
-
     def __init__(self, parent=None, detailed=True, elements=None):
         QtWidgets.QComboBox.__init__(self, parent)
 
         # add all elements from global list
         if elements is None:
-            elements = _defaultTableItems
+            elements = _default_table_items
         for i, elmt in enumerate(elements):
             if detailed:
                 txt = "%2s (%d) - %s" % (elmt.symbol, elmt.Z, elmt.name)
@@ -650,7 +665,7 @@ class PeriodicCombo(QtWidgets.QComboBox):
 
     def _selectionChanged(self, idx):
         """Emit :attr:`sigSelectionChanged`"""
-        self.sigSelectionChanged.emit(_defaultTableItems[idx])
+        self.sigSelectionChanged.emit(_default_table_items[idx])
 
     def getSelection(self):
         """Get selected element
@@ -658,7 +673,7 @@ class PeriodicCombo(QtWidgets.QComboBox):
         :return: Selected element
         :rtype: PeriodicTableItem
         """
-        return _defaultTableItems[self.currentIndex()]
+        return _default_table_items[self.currentIndex()]
 
     def setSelection(self, symbol):
         """Set selected item in combobox by giving the atomic symbol
@@ -668,7 +683,7 @@ class PeriodicCombo(QtWidgets.QComboBox):
         # accept PeriodicTableItem for getter/setter consistency
         if isinstance(symbol, PeriodicTableItem):
             symbol = symbol.symbol
-        symblist = [elmt.symbol for elmt in _defaultTableItems]
+        symblist = [elmt.symbol for elmt in _default_table_items]
         self.setCurrentIndex(symblist.index(symbol))
 
 
@@ -688,7 +703,6 @@ class PeriodicList(QtWidgets.QTreeWidget):
     this signal and sends a list of currently selected
     :class:`PeriodicTableItem` objects.
     """
-
     def __init__(self, parent=None, detailed=True, single=False, elements=None):
         QtWidgets.QTreeWidget.__init__(self, parent)
 
@@ -705,8 +719,8 @@ class PeriodicList(QtWidgets.QTreeWidget):
 
         self.setRootIsDecorated(0)
         self.itemClicked.connect(self._selectionChanged)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single
-                              else QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection if single else QtWidgets.
+                              QAbstractItemView.ExtendedSelection)
         self._fill_widget(elements)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)
@@ -716,7 +730,7 @@ class PeriodicList(QtWidgets.QTreeWidget):
     def _fill_widget(self, elements):
         """Fill tree widget with elements """
         if elements is None:
-            elements = _defaultTableItems
+            elements = _default_table_items
 
         self.tree_items = []
 
@@ -744,8 +758,10 @@ class PeriodicList(QtWidgets.QTreeWidget):
 
         :return: Selected elements
         :rtype: List[PeriodicTableItem]"""
-        return [_defaultTableItems[idx] for idx in range(len(self.tree_items))
-                if self.tree_items[idx].isSelected()]
+        return [
+            _default_table_items[idx] for idx in range(len(self.tree_items))
+            if self.tree_items[idx].isSelected()
+        ]
 
     # setSelection is a bad name (name of a QTreeWidget method)
     def setSelectedElements(self, symbolList):
@@ -758,4 +774,4 @@ class PeriodicList(QtWidgets.QTreeWidget):
         if isinstance(symbolList[0], PeriodicTableItem):
             symbolList = [elmt.symbol for elmt in symbolList]
         for idx in range(len(self.tree_items)):
-            self.tree_items[idx].setSelected(_defaultTableItems[idx].symbol in symbolList)
+            self.tree_items[idx].setSelected(_default_table_items[idx].symbol in symbolList)
