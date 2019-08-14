@@ -58,7 +58,7 @@ public:
 protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
-  std::vector<std::shared_ptr<IBatchPresenter>> m_batchPresenters;
+  std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
 private:

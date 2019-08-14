@@ -37,7 +37,7 @@ public:
         m_instrumentPresenterFactory(std::move(instrumentPresenterFactory)),
         m_savePresenterFactory(std::move(savePresenterFactory)) {}
 
-  std::shared_ptr<IBatchPresenter> make(IBatchView *view) override {
+  std::unique_ptr<IBatchPresenter> make(IBatchView *view) override {
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter =
@@ -50,7 +50,7 @@ public:
         experimentPresenter->experiment(), instrumentPresenter->instrument(),
         runsPresenter->mutableRunsTable(), eventPresenter->slicing());
 
-    return std::make_shared<BatchPresenter>(
+    return std::make_unique<BatchPresenter>(
         view, std::move(model), std::move(runsPresenter),
         std::move(eventPresenter), std::move(experimentPresenter),
         std::move(instrumentPresenter), std::move(savePresenter));

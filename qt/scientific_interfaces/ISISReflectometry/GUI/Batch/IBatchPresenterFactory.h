@@ -18,7 +18,7 @@ class IBatchView;
 class IBatchPresenterFactory {
 public:
   virtual ~IBatchPresenterFactory() = default;
-  virtual std::shared_ptr<IBatchPresenter> make(IBatchView *view) = 0;
+  virtual std::unique_ptr<IBatchPresenter> make(IBatchView *view) = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

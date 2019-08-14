@@ -45,8 +45,8 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockBatchPresenterFactory : public IBatchPresenterFactory {
 public:
   MOCK_METHOD1(makeProxy, IBatchPresenter *(IBatchView *));
-  std::shared_ptr<IBatchPresenter> make(IBatchView *view) {
-    return std::shared_ptr<IBatchPresenter>(makeProxy(view));
+  std::unique_ptr<IBatchPresenter> make(IBatchView *view) {
+    return std::unique_ptr<IBatchPresenter>(makeProxy(view));
   }
 };
 
