@@ -28,6 +28,7 @@ from mantid.kernel import logger, StringListValidator, Direction, StringArrayPro
 import AbinsModules
 from AbinsModules import AbinsParameters
 
+
 # noinspection PyPep8Naming,PyMethodMayBeStatic
 class Abins(PythonAlgorithm):
     _ab_initio_program = None
