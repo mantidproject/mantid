@@ -1128,6 +1128,7 @@ Instrument cache.
     */
 
     // create RAII file resource for testing
+    /*
     ScopedFileHandle fileResource("test_cylindrical.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1156,12 +1157,11 @@ Instrument cache.
     double radiusInFile = std::abs((top - edge).norm());
     double heightInFile = std::abs((base - top).norm());
 
-    /*
-TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
+        TS_ASSERT_DELTA(radiusInFile, cylinderRadius,
                 1e-5);
-TS_ASSERT_DELTA(heightInFile, cylinderHeight,
+        TS_ASSERT_DELTA(heightInFile, cylinderHeight,
                 1e-5);
-TS_ASSERT(base.isApprox(
+        TS_ASSERT(base.isApprox(
     Eigen::Vector3d{0, 0, 0}));
     */
   }
@@ -1180,6 +1180,7 @@ TS_ASSERT(base.isApprox(
     */
 
     // create RAII file resource for testing
+    /*
     ScopedFileHandle fileResource("test_inhomogeneous_cylindrical.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1218,8 +1219,9 @@ TS_ASSERT(base.isApprox(
     double radiusInFile2 = radiusVector2.norm();
     double heightInFile2 = heightVector2.norm();
 
-    // TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
-    // TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
+    TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
+    TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
+        */
   }
 };
 
