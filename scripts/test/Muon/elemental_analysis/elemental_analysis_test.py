@@ -477,43 +477,23 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui._update_checked_data = tmp
 
     def test_update_checked_data_calls_the_right_functions(self):
-        self.gui.peaks.major.isChecked = mock.Mock(return_value=True)
-        self.gui.peaks.minor.isChecked = mock.Mock(return_value=True)
-        self.gui.peaks.gamma.isChecked = mock.Mock(return_value=False)
-        self.gui.peaks.electron.isChecked = mock.Mock(return_value=True)
-        self.gui.major_peaks_checked = mock.Mock()
-        self.gui.major_peaks_unchecked = mock.Mock()
-        self.gui.minor_peaks_checked = mock.Mock()
-        self.gui.minor_peaks_unchecked = mock.Mock()
-        self.gui.gammas_checked = mock.Mock()
-        self.gui.gammas_unchecked = mock.Mock()
-        self.gui.electrons_checked = mock.Mock()
-        self.gui.electrons_unchecked = mock.Mock()
+        self.gui.major_peaks_changed = mock.Mock()
+        self.gui.minor_peaks_changed = mock.Mock()
+        self.gui.gammas_changed = mock.Mock()
+        self.gui.electrons_changed = mock.Mock()
 
         self.gui._update_checked_data()
 
-        self.assertEqual(1, self.gui.major_peaks_checked.call_count)
-        self.assertEqual(0, self.gui.major_peaks_unchecked.call_count)
-        self.assertEqual(1, self.gui.minor_peaks_checked.call_count)
-        self.assertEqual(0, self.gui.minor_peaks_unchecked.call_count)
-        self.assertEqual(0, self.gui.gammas_checked.call_count)
-        self.assertEqual(1, self.gui.gammas_unchecked.call_count)
-        self.assertEqual(1, self.gui.electrons_checked.call_count)
-        self.assertEqual(0, self.gui.electrons_unchecked.call_count)
+        self.assertEqual(1, self.gui.major_peaks_changed.call_count)
+        self.assertEqual(1, self.gui.minor_peaks_changed.call_count)
+        self.assertEqual(1, self.gui.gammas_changed.call_count)
+        self.assertEqual(1, self.gui.electrons_changed.call_count)
+        self.gui.major_peaks_changed.assert_called_with(self.gui.peaks.major)
+        self.gui.minor_peaks_changed.assert_called_with(self.gui.peaks.minor)
+        self.gui.gammas_changed.assert_called_with(self.gui.peaks.gamma)
+        self.gui.electrons_changed.assert_called_with(self.gui.peaks.electron)
 
-    def test_gamms_checked_calls_checked_data_for_each_element(self):
-        elem = len(self.gui.ptable.peak_data)
-        self.gui.checked_data = mock.Mock()
-        self.gui.gammas_changed()
-        self.assertEqual(self.gui.checked_data.call_count, elem)
-
-    def test_gamms_unchecked_calls_checked_data_for_each_element(self):
-        elem = len(self.gui.ptable.peak_data)
-        self.gui.checked_data = mock.Mock()
-        self.gui.gammas_unchecked()
-        self.assertEqual(self.gui.checked_data.call_count, elem)
-
-    def test_major_checked_calls_checked_data_for_each_element(self):
+    def test_major_changed_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
         self.gui.major_peaks_changed(self.gui.peaks.major)

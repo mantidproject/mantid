@@ -394,25 +394,10 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self._update_checked_data()
 
     def _update_checked_data(self):
-        if self.peaks.major.isChecked():
-            self.major_peaks_checked()
-        else:
-            self.major_peaks_unchecked()
-
-        if self.peaks.minor.isChecked():
-            self.minor_peaks_checked()
-        else:
-            self.minor_peaks_unchecked()
-
-        if self.peaks.gamma.isChecked():
-            self.gammas_checked()
-        else:
-            self.gammas_unchecked()
-
-        if self.peaks.electron.isChecked():
-            self.electrons_checked()
-        else:
-            self.electrons_unchecked()
+        self.major_peaks_changed(self.peaks.major)
+        self.minor_peaks_changed(self.peaks.minor)
+        self.gammas_changed(self.peaks.gamma)
+        self.electrons_changed(self.peaks.electron)
 
     # general checked data
     def checked_data(self, element, selection, state):
