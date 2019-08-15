@@ -9,8 +9,8 @@
 
 namespace Mantid {
 namespace DataHandling {
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveNexusGeometry)
@@ -18,7 +18,9 @@ DECLARE_ALGORITHM(SaveNexusGeometry)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string SaveNexusGeometry::name() const { return "SaveNexusGeometry"; }
+const std::string SaveNexusGeometry::name() const {
+  return "SaveNexusGeometry";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SaveNexusGeometry::version() const { return 1; }
@@ -37,14 +39,12 @@ const std::string SaveNexusGeometry::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SaveNexusGeometry::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
-                                                             Direction::Input),
-      "An input workspace.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
-                                                             Direction::Output),
-      "An output workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

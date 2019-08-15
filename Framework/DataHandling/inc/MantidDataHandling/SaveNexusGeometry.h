@@ -7,14 +7,14 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_
 #define MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 /** SaveNexusGeometry : TODO: DESCRIPTION
-*/
+ */
 class MANTID_DATAHANDLING_DLL SaveNexusGeometry : public API::Algorithm {
 public:
   const std::string name() const override;
