@@ -489,7 +489,8 @@ public:
 
   void testStartMonitor() {
     auto presenter = makePresenter();
-    expectGetLiveDataOptions();
+    auto options = AlgorithmRuntimeProps();
+    expectGetLiveDataOptions(options);
     auto algRunner = expectGetAlgorithmRunner();
     EXPECT_CALL(*algRunner, startAlgorithm(_)).Times(1);
     expectUpdateViewWhenMonitorStarting();
@@ -812,15 +813,11 @@ private:
         .WillRepeatedly(Return(false));
   }
 
-  void expectGetLiveDataOptions() {
+  void expectGetLiveDataOptions(AlgorithmRuntimeProps const &options) {
     auto const instrument = std::string("OFFSPEC");
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(1)
         .WillOnce(Return(instrument));
-    auto options = AlgorithmRuntimeProps{
-        {"InputWorkspace", "TOF_live"},
-        {"Instrument", instrument},
-        {"GetLieValueAlgorithm", "GetLiveInstrumentValue"}};
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
         .WillOnce(Return(options));
