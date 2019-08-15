@@ -5,9 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-locals
-from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, FileFinder, MatrixWorkspace,
-                        NumericAxis, Progress)
-from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, GroupWorkspaces, mtd, IndirectTwoPeakFit, LoadLog,
+from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, MatrixWorkspace, NumericAxis,
+                        Progress)
+from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, GroupWorkspaces, mtd, IndirectTwoPeakFit,
                               SaveNexusProcessed)
 from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty, IntArrayMandatoryValidator, IntArrayProperty,
                            Property, StringArrayProperty, StringListValidator)
