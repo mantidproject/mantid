@@ -372,8 +372,10 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
 
     // Remove the new row since populating it has failed
     self.removeRow(rowIndex);
+    self.modified();
     throw;
   }
+  self.modified();
 }
 
 /**
@@ -397,6 +399,7 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
   // Add a new row to populate with values
   const auto rowIndex = static_cast<int>(self.rowCount());
   self.appendRow();
+  self.modified();
 
   // Loop over sequence and set each column value in same order
   for (decltype(nitems) i = 0; i < nitems; ++i) {
@@ -419,9 +422,11 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
 
       // Remove the new row since populating it has failed
       self.removeRow(rowIndex);
+      self.modified();
       throw;
     }
   }
+  self.modified();
 }
 
 /**
