@@ -491,19 +491,17 @@ public:
     expectGetLiveDataOptions(options);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    assertPostProcessingPropertiesEqual(options, algRunner);
+    assertPostProcessingPropertiesContainOptions(options, algRunner);
     verifyAndClear();
   }
 
   void testStartMonitorSetsUserSpecifiedPostProcessingProperties() {
     auto presenter = makePresenter();
-    auto options = defaultLiveMonitorReductionOptions();
-    options["Prop1"] = "val1";
-    options["Prop2"] = "val2";
+    auto options = AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
     expectGetLiveDataOptions(options);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    assertPostProcessingPropertiesEqual(options, algRunner);
+    assertPostProcessingPropertiesContainOptions(options, algRunner);
     verifyAndClear();
   }
 
@@ -865,13 +863,25 @@ private:
       TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
   }
 
-  void assertPostProcessingPropertiesEqual(
+  void assertStartMonitorPropertiesEqual(
       AlgorithmRuntimeProps const &expected,
       boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     auto result = alg->getPropertyValue("PostProcessingProperties");
     auto expectedString = optionsToString(expected, false, ";");
     TS_ASSERT_EQUALS(result, expectedString);
+  }
+
+  void assertPostProcessingPropertiesContainOptions(
+      AlgorithmRuntimeProps &expected,
+      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+    auto alg = algRunner->algorithm();
+    auto resultString = alg->getPropertyValue("PostProcessingProperties");
+    auto result = parseKeyValueString(resultString, ";");
+    for (auto const &kvp : expected) {
+      TS_ASSERT(result.find(kvp.first) != result.end());
+      TS_ASSERT_EQUALS(result[kvp.first], expected[kvp.first]);
+    }
   }
 
   double m_thetaTolerance;

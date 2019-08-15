@@ -80,7 +80,8 @@ void trimWhitespaceQuotesAndEmptyValues(QStringList &values) {
    @throws std::runtime_error on an invalid input string
    @returns : a map of key/value pairs as strings
 */
-std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
+std::map<std::string, std::string>
+parseKeyValueString(const std::string &str, const std::string separator) {
   /*
     This is a bad example of using a tokenizer, and
     Mantid::Kernel::StringTokenizer should
@@ -92,7 +93,7 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
     yet possible with Mantid::Kernel::StringTokenizer.
   */
   boost::tokenizer<boost::escaped_list_separator<char>> tok(
-      str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+      str, boost::escaped_list_separator<char>("\\", separator, "\"'"));
   std::map<std::string, std::string> kvp;
 
   for (const auto &it : tok) {
@@ -130,7 +131,8 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
    @throws std::runtime_error on an invalid input string
    @returns : a map of key/value pairs as QStrings
 */
-std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
+std::map<QString, QString> parseKeyValueQString(const QString &qstr,
+                                                const std::string separator) {
   /*
     This is a bad example of using a tokenizer, and
     Mantid::Kernel::StringTokenizer should
@@ -143,7 +145,7 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
   */
   auto str = qstr.toStdString();
   boost::tokenizer<boost::escaped_list_separator<char>> tok(
-      str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+      str, boost::escaped_list_separator<char>("\\", separator, "\"'"));
   std::map<QString, QString> kvp;
 
   for (const auto &it : tok) {

@@ -60,6 +60,19 @@ public:
                      const std::runtime_error &);
     TS_ASSERT_THROWS(parseKeyValueQString("=,=,="), const std::runtime_error &);
   }
+
+  void testParseKeyValueStringWithCustomSeparator() {
+    std::map<std::string, std::string> kvp =
+        parseKeyValueString(R"(a=1;b=2)", ";");
+    TS_ASSERT_EQUALS(kvp["a"], "1");
+    TS_ASSERT_EQUALS(kvp["b"], "2");
+  }
+
+  void testParseKeyValueQStringWithCustomSeparator() {
+    std::map<QString, QString> kvp = parseKeyValueQString(R"(a=1;b=2)", ";");
+    TS_ASSERT_EQUALS(kvp["a"], "1");
+    TS_ASSERT_EQUALS(kvp["b"], "2");
+  }
 };
 
 #endif // MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
