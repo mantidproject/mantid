@@ -29,10 +29,7 @@ from Muon.GUI.Common.observer_pattern import GenericObservable
 @start_qapplication
 class Transform2Test(unittest.TestCase):
     def setUp(self):
-        #self.load = mock.MagicMock()
         self.context = setup_context(True)
-        #self.fft = FFTWidget(self.context)
-        #self.maxent = MaxEntWidget(self.acontext)
         # create widget
         self.widget = transform_widget.TransformWidget(self.context, FFTWidget, MaxEntWidget)
         self.widget._maxent._presenter = mock.MagicMock()#create_autospec(maxent_presenter_new.MaxEntPresenter, spec_set=True)

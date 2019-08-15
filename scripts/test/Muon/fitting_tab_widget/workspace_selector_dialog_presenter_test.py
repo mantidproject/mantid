@@ -57,7 +57,6 @@ class WorkspaceSelectorPresenterWithFrequencyTest(unittest.TestCase):
         self.set_combo("Time Domain")
         self.assertEquals(self.view.is_it_freq, "None")
 
-
     def test_is_it_freq_true(self):
         self.set_combo("Frequency Domain Re")
         self.assertEquals(self.view.is_it_freq, "Re")
