@@ -227,18 +227,30 @@ convertMapToString(const std::map<std::string, std::string> &optionsMap,
   return result;
 }
 
-std::string optionsToString(std::map<std::string, std::string> const &options) {
+void appendKeyValuePair(const std::pair<std::string, std::string> kvp,
+                        const bool quoteValues,
+                        std::ostringstream &resultStream) {
+  if (quoteValues)
+    resultStream << kvp.first << "='" << kvp.second << '\'';
+  else
+    resultStream << kvp.first << "=" << kvp.second;
+}
+
+std::string optionsToString(std::map<std::string, std::string> const &options,
+                            const bool quoteValues,
+                            const std::string separator) {
   if (!options.empty()) {
     std::ostringstream resultStream;
     auto optionsKvpIt = options.cbegin();
 
     auto const &firstKvp = (*optionsKvpIt);
-    resultStream << firstKvp.first << "='" << firstKvp.second << '\'';
+    appendKeyValuePair(firstKvp, quoteValues, resultStream);
     ++optionsKvpIt;
 
     for (; optionsKvpIt != options.cend(); ++optionsKvpIt) {
       auto kvp = (*optionsKvpIt);
-      resultStream << ", " << kvp.first << "='" << kvp.second << '\'';
+      resultStream << separator;
+      appendKeyValuePair(kvp, quoteValues, resultStream);
     }
 
     return resultStream.str();
