@@ -487,18 +487,27 @@ public:
     TS_ASSERT_EQUALS(result, expected);
   }
 
-  void testStartMonitor() {
+  void testStartMonitorStartsAlgorithmRunner() {
     auto presenter = makePresenter();
     auto options = AlgorithmRuntimeProps();
     expectGetLiveDataOptions(options);
     auto algRunner = expectGetAlgorithmRunner();
     EXPECT_CALL(*algRunner, startAlgorithm(_)).Times(1);
+    presenter.notifyStartMonitor();
+    verifyAndClear();
+  }
+
+  void testStartMonitorUpdatesView() {
+    auto presenter = makePresenter();
+    auto options = AlgorithmRuntimeProps();
+    expectGetLiveDataOptions(options);
+    expectGetAlgorithmRunner();
     expectUpdateViewWhenMonitorStarting();
     presenter.notifyStartMonitor();
     verifyAndClear();
   }
 
-  void testStopMonitor() {
+  void testStopMonitorUpdatesView() {
     auto presenter = makePresenter();
     presenter.m_monitorAlg =
         AlgorithmManager::Instance().createUnmanaged("MonitorLiveData");
