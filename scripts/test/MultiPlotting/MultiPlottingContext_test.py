@@ -111,7 +111,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         self.context.remove_line("plot", "line name")
 
         self.assertEqual(1, self.context.subplots["plot"].removeLine.call_count)
-        self.assertEqual(1, self.context.subplots["plot"].redraw_annotations.call_count)
+        self.assertEqual(0, self.context.subplots["plot"].redraw_annotations.call_count)
         self.context.subplots["plot"].removeLine.assert_called_with("line name")
 
     def test_that_get_lines_returns_empty_list_if_given_bad_name(self):

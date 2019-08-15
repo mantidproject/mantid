@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import print_function, absolute_import
 
+import copy
 import unittest
 
 from mantid.py3compat import mock
@@ -515,25 +516,25 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_major_checked_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.major_peaks_changed()
+        self.gui.major_peaks_changed(self.gui.peaks.major)
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
-    def test_major_unchecked_calls_checked_data_for_each_element(self):
+    def test_minor_changed_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.major_peaks_unchecked()
+        self.gui.minor_peaks_changed(self.gui.peaks.minor)
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
-    def test_minor_checked_calls_checked_data_for_each_element(self):
+    def test_gammas_changed_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.minor_peaks_changed()
+        self.gui.gammas_changed(self.gui.peaks.gamma)
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
-    def test_minor_unchecked_calls_checked_data_for_each_element(self):
+    def test_electrons_changed_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.minor_peaks_unchecked()
+        self.gui.electrons_changed(self.gui.peaks.electron)
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._update_peak_data')
@@ -638,15 +639,24 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     def test_that_uncheck_on_removed_uncheck_correct_lines(self):
         rem_lines = ['line Total', 'line Prompt', 'line 3']
+        tmp_detectors = copy.deepcopy(self.gui.detectors.detectors)
+        for detector in self.gui.detectors.detectors:
+            detector.isChecked.return_value = False
         self.gui.uncheck_on_removed(rem_lines)
+
         self.gui.lines.total.setChecked.assert_called_with(False)
         self.gui.lines.prompt.setChecked.assert_called_with(False)
         self.assertEqual(0, self.gui.lines.delayed.setChecked.call_count)
+
+        self.gui.detectors.detectors = tmp_detectors
 
     def test_that_uncheck_on_removed_blocks_signals_and_calls_right_function(self):
         rem_lines = ['line Total', 'line Prompt', 'line 3']
         calls = [mock.call(True), mock.call(False)]
         self.gui.uncheck_detectors_if_no_line_plotted = mock.Mock()
+        tmp_detectors = copy.deepcopy(self.gui.detectors.detectors)
+        for detector in self.gui.detectors.detectors:
+            detector.isChecked.return_value = False
 
         self.gui.uncheck_on_removed(rem_lines)
 
@@ -655,56 +665,38 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.lines.delayed.blockSignals.assert_has_calls([])
         self.assertEqual(1, self.gui.uncheck_detectors_if_no_line_plotted.call_count)
 
+        self.gui.detectors.detectors = tmp_detectors
+
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
     def test_line_total_checked_checks_line_and_calls_add_line_by_type(self, mock_add_line_by_type):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
-        self.gui.line_total_checked()
+        mock_line = mock.Mock()
+        mock_line.isChecked.return_value = True
+        self.gui.line_total_changed(mock_line)
 
         self.gui.lines.total.setChecked.assert_called_with(True)
         self.assertEqual(1, mock_add_line_by_type.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.remove_line_type')
-    def test_line_total_unchecked_unchecks_line_and_calls_add_line_by_type(
-            self, mock_remove_line_type):
-        self.gui.line_total_unchecked()
-
-        self.gui.lines.total.setChecked.assert_called_with(False)
-        self.assertEqual(1, mock_remove_line_type.call_count)
-
     @mock.patch(
         'Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
-    def test_line_prompt_checked_checks_line_and_calls_add_line_by_type(
-            self, mock_add_line_by_type):
+    def test_line_prompt_checked_checks_line_and_calls_add_line_by_type(self, mock_add_line_by_type):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
-        self.gui.line_prompt_checked()
+        mock_line = mock.Mock()
+        mock_line.isChecked.return_value = True
+        self.gui.line_prompt_changed(mock_line)
 
         self.gui.lines.prompt.setChecked.assert_called_with(True)
         self.assertEqual(1, mock_add_line_by_type.call_count)
 
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.remove_line_type')
-    def test_line_prompt_unchecked_unchecks_line_and_calls_add_line_by_type(
-            self, mock_remove_line_type):
-        self.gui.line_prompt_unchecked()
-
-        self.gui.lines.prompt.setChecked.assert_called_with(False)
-        self.assertEqual(1, mock_remove_line_type.call_count)
-
     @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.add_line_by_type')
-    def test_line_delayed_checked_checks_line_and_calls_add_line_by_type(
-            self, mock_add_line_by_type):
+    def test_line_delayed_checked_checks_line_and_calls_add_line_by_type(self, mock_add_line_by_type):
         self.gui.load_widget.last_loaded_run = mock.Mock(return_value=2695)
-        self.gui.line_delayed_checked()
+        mock_line = mock.Mock()
+        mock_line.isChecked.return_value = True
+        self.gui.line_delayed_changed(mock_line)
 
         self.gui.lines.delayed.setChecked.assert_called_with(True)
         self.assertEqual(1, mock_add_line_by_type.call_count)
-
-    @mock.patch('Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui.remove_line_type')
-    def test_line_delayed_unchecked_unchecks_line_and_calls_add_line_by_type(
-            self, mock_remove_line_type):
-        self.gui.line_delayed_unchecked()
-
-        self.gui.lines.delayed.setChecked.assert_called_with(False)
-        self.assertEqual(1, mock_remove_line_type.call_count)
 
 
 if __name__ == '__main__':
