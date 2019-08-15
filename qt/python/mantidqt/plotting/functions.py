@@ -134,13 +134,13 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
     :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
-    if fig and len(fig.axes) > 1:
-        LOGGER.warning("Cannot plot workspace on top of Matplotlib subplots.")
-        return None
+    # if fig and len(fig.axes) > 1:
+    #     LOGGER.warning("Cannot plot workspace on top of Matplotlib subplots.")
+    #     return None
 
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
-        selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn)
+        selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         selection = None
@@ -152,36 +152,52 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
 
     return plot(selection.workspaces, spectrum_nums=selection.spectra,
                 wksp_indices=selection.wksp_indices,
-                errors=errors, overplot=overplot, fig=fig)
+                errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type==selection.Tiled)
 
 
-def get_plot_fig(overplot=None, ax_properties=None, window_title=None):
+def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):
     """
     Create a blank figure and axes, with configurable properties.
     :param overplot: If true then plotting on figure will plot over previous plotting
     :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'} for log y-axis
     :param window_title: A string denoting the name of the GUI window which holds the graph
+    :param axes_num: The number of axes to create on the figure
+    :param fig: An optional figure object
     :return: Matplotlib fig and axes objects
     """
     import matplotlib.pyplot as plt
-    if overplot:
-        ax = plt.gca(projection=PROJECTION)
-        fig = ax.figure
+    if fig and overplot:
+        fig = fig
+    elif fig:
+        fig, _, _, _ = _create_subplots(axes_num, fig)
+    elif overplot:
+        # ax = plt.gca(projection=PROJECTION)
+        fig = plt.gcf()
     else:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection=PROJECTION)
+        fig, _, _, _ = _create_subplots(axes_num)
+
     if ax_properties:
-        ax.set(**ax_properties)
+        for axis in fig.axes:
+            axis.set(**ax_properties)
     if window_title:
         fig.canvas.set_window_title(window_title)
 
-    return fig, ax
+    return fig, fig.axes
+
+
+def get_number_of_rows_and_columns_for_tiled_plot(axes_num):
+    nrows = math.floor(math.sqrt(axes_num))
+    ncolumns = math.ceil(math.sqrt(axes_num))
+
+    if axes_num > nrows * ncolumns:
+        nrows += 1
+    return int(nrows), int(ncolumns)
 
 
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
-         window_title=None):
+         window_title=None, tiled=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -200,23 +216,37 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     """
     if plot_kwargs is None:
         plot_kwargs = {}
-    _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices)
+    _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
+
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
     else:
         kw, nums = 'wkspIndex', wksp_indices
 
-    if fig is None:
-        # get/create the axes to hold the plot
-        fig, ax = get_plot_fig(overplot, ax_properties, window_title)
+    num_axes = len(workspaces) * len(nums) if tiled else 1
+
+    fig, axes = get_plot_fig(overplot, ax_properties, window_title, num_axes, fig)
+
+    # Convert to a MantidAxes if it isn't already. Ignore legend since
+    # a new one will be drawn later
+    axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
+            for ax in axes]
+
+    if tiled:
+        for ws_index, ax in zip([(ws, index) for ws in workspaces for index in nums], axes):
+            _do_single_plot(ax, [ws_index[0]], errors, False, [ws_index[1]], kw, plot_kwargs)
     else:
-        ax = fig.gca()
+        ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
+        _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
 
-    if not isinstance(ax, MantidAxes):
-        # Convert to a MantidAxes if it isn't already. Ignore legend since
-        # a new one will be drawn later
-        ax = MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend])
+    if not overplot:
+        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    fig.canvas.draw()
+    fig.show()
+    return fig
 
+
+def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
     # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
     for ws in workspaces:
@@ -225,16 +255,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             plot_fn(ws, **plot_kwargs)
 
     ax.legend().draggable()
-    if not overplot:
+    if set_title:
         title = workspaces[0].name()
         ax.set_title(title)
-        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    fig.canvas.draw()
-    fig.show()
-    return fig
 
 
-def pcolormesh_from_names(names, fig=None):
+def pcolormesh_from_names(names, fig=None, ax=None):
     """
     Create a figure containing pcolor subplots
 
@@ -243,8 +269,15 @@ def pcolormesh_from_names(names, fig=None):
     :returns: The figure containing the plots
     """
     try:
-        return pcolormesh(AnalysisDataService.retrieveWorkspaces(names, unrollGroups=True),
-                          fig=fig)
+        if ax:
+            ax.clear()
+            pcolormesh_on_axis(ax, AnalysisDataService.retrieve(names[0]))
+            fig.canvas.draw()
+            fig.show()
+            return fig
+        else:
+            return pcolormesh(AnalysisDataService.retrieveWorkspaces(names, unrollGroups=True),
+                              fig=fig)
     except Exception as exc:
         LOGGER.warning(format(str(exc)))
         return None
@@ -282,13 +315,7 @@ def pcolormesh(workspaces, fig=None):
         ax = axes[row_idx][col_idx]
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
-            ax.set_title(ws.name())
-            if use_imshow(ws):
-                pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
-            else:
-                pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
-            for lbl in ax.get_xticklabels():
-                lbl.set_rotation(45)
+            pcm = pcolormesh_on_axis(ax, ws)
             if col_idx < ncols - 1:
                 col_idx += 1
             else:
@@ -305,6 +332,18 @@ def pcolormesh(workspaces, fig=None):
     fig.canvas.draw()
     fig.show()
     return fig
+
+
+def pcolormesh_on_axis(ax, ws):
+    ax.set_title(ws.name())
+    if use_imshow(ws):
+        pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
+    else:
+        pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
+    for lbl in ax.get_xticklabels():
+        lbl.set_rotation(45)
+
+    return pcm
 
 
 # ----------------- Compatability functions ---------------------
@@ -366,11 +405,15 @@ def _raise_if_not_sequence(value, seq_name, element_type=None):
         list(map(raise_if_not_type, value))
 
 
-def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
+def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled=False, overplot=False):
     """Raises a ValueError if any arguments have the incorrect types"""
     if spectrum_nums is not None and wksp_indices is not None:
         raise ValueError("Both spectrum_nums and wksp_indices supplied. "
                          "Please supply only 1.")
+
+    if tiled and overplot:
+        raise ValueError("Both tiled and overplot flags set to true. "
+                         "Please set only one to true.")
 
     _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
 
@@ -425,6 +468,8 @@ def _create_subplots(nplots, fig=None):
         fig = plt.figure()
     else:
         fig.clf()
+
+    # axes = fig.subplots(nrows=nrows, ncols=ncols, squeeze=False, subplot_kw={'projection': PROJECTION})
     # annoyling this repl
     nplots = nrows * ncols
     gs = GridSpec(nrows, ncols)

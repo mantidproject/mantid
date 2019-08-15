@@ -35,6 +35,7 @@ SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, 'spec
 
 class SpectraSelection(object):
     Individual = 0
+    Tiled = 1
 
     def __init__(self, workspaces):
         self.workspaces = workspaces
@@ -51,7 +52,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             if not isinstance(ws, MatrixWorkspace):
                 raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
 
-    def __init__(self, workspaces, parent=None, show_colorfill_btn=False):
+    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -64,6 +65,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.selection = None
         self._ui = None
         self._show_colorfill_button = show_colorfill_btn
+        self._overplot = overplot
 
         self._init_ui()
         self._set_placeholder_text()
@@ -75,6 +77,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     def on_plot_all_clicked(self):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
+        selection.plot_type = selection.Individual if self._ui.plotType.currentText() == 'Individual' else selection.Tiled
         self.selection = selection
         self.accept()
 
@@ -129,6 +132,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.wkspIndices.textChanged.connect(self._on_wkspindices_changed)
         ui.specNums.textChanged.connect(self._on_specnums_changed)
 
+        # combobox changed
+        ui.plotType.currentTextChanged.connect(self._on_plot_type_changed)
+
     def _on_wkspindices_changed(self):
         ui = self._ui
         ui.specNums.clear()
@@ -147,11 +153,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
+    def _on_plot_type_changed(self, new_text):
+        if self._overplot:
+            self._ui.plotType.setCurrentIndex(0)
+            return
+        if self.selection:
+            self.selection.plot_type = self.selection.Individual if new_text == 'Individual' else self.selection.Tiled
+
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
         if wksp_indices:
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
+            selection.plot_type = selection.Individual if self._ui.plotType.currentText() == 'Individual' else selection.Tiled
         else:
             selection = None
         self.selection = selection
@@ -161,6 +175,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
+            selection.plot_type = selection.Individual if self._ui.plotType.currentText() == 'Individual' else selection.Tiled
         else:
             selection = None
         self.selection = selection

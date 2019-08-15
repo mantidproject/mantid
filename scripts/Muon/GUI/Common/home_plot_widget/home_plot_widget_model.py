@@ -85,26 +85,28 @@ class HomePlotWidgetModel(object):
             self.plotted_workspaces_inverse_binning = {}
             self.plotted_fit_workspaces = []
             self.plot_figure = plot(workspaces,wksp_indices=[0], fig=self.plot_figure, window_title=title,
-                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
+                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True, tiled=True)
             self.set_x_lim(domain)
 
         elif self.plot_figure:
-            axis = self.plot_figure.gca()
-            xlim = axis.get_xlim()
-            ylim = axis.get_ylim()
+            # xlims = [ax.get_xlim for ax in self.plot_figure.axes]
+            # ylims = [ax.get_ylim for ax in self.plot_figure.axes]
             self._remove_all_data_workspaces_from_plot()
             self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
-                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
-            axis = self.plot_figure.gca()
-            axis.set_xlim(xlim)
-            axis.set_ylim(ylim)
+                                    plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True, tiled=True)
+            # if len(self.plot_figure.axes) == len(xlims):
+            #     for ax, xlim, ylim in zip(self.plot_figure.axes, xlims, ylims):
+            #         ax.set_xlim(xlim)
+            #         ax.set_ylim(ylim)
+            # else:
+            self.set_x_lim(domain)
         else:
             self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, plot_kwargs={'distribution': True,
-                                    'autoscale_on_update': False}, errors=True)
+                                    'autoscale_on_update': False}, errors=True, tiled=True)
             self.set_x_lim(domain)
 
         self.plot_figure.canvas.set_window_title(window_title)
-        self.plot_figure.gca().set_title(title)
+        # self.plot_figure.gca().set_title(title)
 
         self.plot_figure.canvas.window().closing.connect(self._clear_plot_references)
 
@@ -116,8 +118,9 @@ class HomePlotWidgetModel(object):
 
     def set_x_lim(self,domain):
         if domain == "Time":
-            self.plot_figure.gca().set_xlim(left=0.0, right=15.0)
-            self.autoscale_y_to_data_in_view()
+            for ax in self.plot_figure.axes:
+                ax.set_xlim(left=0.0, right=15.0)
+                self.autoscale_y_to_data_in_view(ax)
             self.plot_figure.canvas.draw()
 
     def add_workspace_to_plot(self, workspace_name, workspace_index, label):
@@ -172,8 +175,7 @@ class HomePlotWidgetModel(object):
 
         self.plot_figure.canvas.draw()
 
-    def autoscale_y_to_data_in_view(self):
-        axis = self.plot_figure.gca()
+    def autoscale_y_to_data_in_view(self, axis):
         xlim = axis.get_xlim()
         ylim = np.inf, -np.inf
         for line in axis.lines:
