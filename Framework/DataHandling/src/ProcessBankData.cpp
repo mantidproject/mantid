@@ -112,9 +112,12 @@ void ProcessBankData::run() { // override {
   const bool pulsetimesincreasing = std::is_sorted(
       thisBankPulseTimes->pulseTimes,
       thisBankPulseTimes->pulseTimes + thisBankPulseTimes->numPulses);
+  Mantid::Types::Core::DateAndTime pulsetime;
+  int periodIndex = 0;
+  Mantid::Types::Core::DateAndTime lastpulsetime(0);
 
   // Index into the pulse array
-  size_t pulse_i = 0;
+  size_t pulseIndex = 0;
 
   // And there are this many pulses
   const auto numPulses = thisBankPulseTimes->numPulses;
@@ -125,7 +128,7 @@ void ProcessBankData::run() { // override {
            "This is inconsistent, so we cannot find pulse times for this "
            "entry.\n";
     // This'll make the code skip looking for any pulse times.
-    pulse_i = numPulses + 1;
+    pulseIndex = numPulses + 1;
   }
 
   prog->report(entry_name + ": filling events");
@@ -138,41 +141,39 @@ void ProcessBankData::run() { // override {
   if (compress)
     usedDetIds.assign(m_max_id - m_min_id + 1, false);
 
-  size_t pulse_last = getPulseIndex(startAt, pulse_i, event_index);
   // Go through all events in the list
-  for (std::size_t index_in_tof_array = startAt; index_in_tof_array < numEvents;
-       index_in_tof_array++) {
+  for (std::size_t eventIndex = 0; eventIndex < numEvents; eventIndex++) {
     //------ Find the pulse time for this event index ---------
-    pulse_i = getPulseIndex(index_in_tof_array, pulse_i, event_index);
-    if (pulse_i != pulse_last) {
-      // Check once every new pulse if you need to cancel (checking on every
-      // event might slow things down more)
-      if (alg->getCancel())
-        break;
-      pulse_last = pulse_i;
-    }
+    if (pulseIndex < numPulses - 1) {
+      pulseIndex = getPulseIndex(eventIndex + startAt, pulseIndex, event_index);
 
-    // Save the pulse time at this index for creating those events
-    const auto pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
-    const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
-    const auto periodIndex = logPeriodNumber - 1;
+      // Save the pulse time at this index for creating those events
+      pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
+      const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulseIndex];
+      periodIndex = logPeriodNumber - 1;
+
+      // Determine if pulse times continue to increase
+      if (pulsetime >= lastpulsetime) {
+        lastpulsetime = pulsetime;
+        if (alg->getCancel())
+          break;
+      }
+    }
 
     // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
     // the event
-    const detid_t detId = event_id[index_in_tof_array];
+    const detid_t detId = event_id[eventIndex];
     if (detId >= m_min_id && detId <= m_max_id) {
       // Create the tofevent
-      const auto tof =
-          static_cast<double>(event_time_of_flight[index_in_tof_array]);
+      const auto tof = static_cast<double>(event_time_of_flight[eventIndex]);
       if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max)) {
         // Handle simulated data if present
         if (have_weight) {
-          const auto weight =
-              static_cast<double>(event_weight[index_in_tof_array]);
-          const double errorSq = weight * weight;
           auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
+            const auto weight = static_cast<double>(event_weight[eventIndex]);
+            const double errorSq = weight * weight;
             eventVector->emplace_back(tof, pulsetime, weight, errorSq);
           } else {
             ++my_discarded_events;
