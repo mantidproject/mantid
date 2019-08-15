@@ -71,7 +71,7 @@ public:
    * @param parent :: parent widget (must be the application window!=
    * @param fl :: window flags
    */
-  ConfigDialog(QWidget *parent);
+  explicit ConfigDialog(QWidget *parent);
   void setColumnSeparator(const QString &sep);
   void gotoMantidDirectories();
 
