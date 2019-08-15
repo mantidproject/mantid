@@ -20,8 +20,7 @@ using MantidQt::API::MantidDesktopServices;
  * functions.
  * @param parent :: pointer to the main MantidPlot ApplicationWindow object
  */
-ManageCustomMenus::ManageCustomMenus(
-    QWidget *parent)
+ManageCustomMenus::ManageCustomMenus(QWidget *parent)
     : MantidDialog(parent), m_scriptsTree(nullptr), m_menusTree(nullptr) {
   m_uiForm.setupUi(this);
   m_appWindow = static_cast<ApplicationWindow *>(parent);

@@ -15,7 +15,8 @@
 namespace MantidQt {
 namespace API {
 
-class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories : public MantidQt::API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 
 public:

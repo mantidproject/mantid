@@ -29,7 +29,8 @@ class QShowEvent;
  * Raises a dialog allowing the user to find/replace
  * text in the editor.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FindReplaceDialog : public MantidQt::API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON FindReplaceDialog
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 
 public:

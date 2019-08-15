@@ -18,8 +18,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-FindDialog::FindDialog(ScriptEditor *editor)
-    : FindReplaceDialog(editor) {
+FindDialog::FindDialog(ScriptEditor *editor) : FindReplaceDialog(editor) {
   setWindowTitle(tr("MantidPlot") + " - " + tr("Find"));
   initLayout();
 }
