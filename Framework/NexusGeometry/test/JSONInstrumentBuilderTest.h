@@ -8,9 +8,11 @@
 #define MANTID_NEXUSGEOMETRY_JSONINSTRUMENTBUILDERTEST_H_
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/JSONInstrumentBuilder.h"
 #include "MantidTestHelpers/JSONGeometryParserTestHelper.h"
 #include <cxxtest/TestSuite.h>
+#include <json/json.h>
 
 using namespace Mantid;
 using Mantid::NexusGeometry::JSONInstrumentBuilder;

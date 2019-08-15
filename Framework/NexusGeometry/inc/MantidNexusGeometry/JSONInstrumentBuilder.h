@@ -9,12 +9,14 @@
 
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidNexusGeometry/DllConfig.h"
-#include "MantidNexusGeometry/JSONGeometryParser.h"
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
+class JSONGeometryParser;
+struct Chopper;
 /** JSONInstrumentBuilder : Builds in-memory instrument from json string
  * representing Nexus instrument geometry.
  */
@@ -29,7 +31,7 @@ public:
   Geometry::Instrument_const_uptr buildGeometry() const;
 
 private:
-  JSONGeometryParser m_parser;
+  std::unique_ptr<JSONGeometryParser> m_parser;
 };
 
 } // namespace NexusGeometry

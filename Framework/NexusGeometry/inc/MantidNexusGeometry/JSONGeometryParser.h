@@ -10,9 +10,12 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <Eigen/Geometry>
-#include <json/json.h>
 #include <memory>
 #include <vector>
+
+namespace Json {
+class Value;
+}
 
 namespace Mantid {
 
@@ -78,7 +81,7 @@ public:
   const Eigen::Quaterniond &sourceOrientation() const noexcept {
     return m_sourceOrientation;
   }
-  size_t numberOfBanks() const noexcept { return m_jsonDetectorBanks.size(); }
+  size_t numberOfBanks() const noexcept { return m_detIDs.size(); }
   const std::vector<detid_t> &detectorIDs(const size_t index) const noexcept {
     return m_detIDs[index];
   }
@@ -149,10 +152,10 @@ private:
 
 private:
   std::string m_name;
-  Json::Value m_root;
-  Json::Value m_instrument;
-  Json::Value m_sample;
-  Json::Value m_source;
+  std::unique_ptr<Json::Value> m_root;
+  std::unique_ptr<Json::Value> m_instrument;
+  std::unique_ptr<Json::Value> m_sample;
+  std::unique_ptr<Json::Value> m_source;
   std::string m_sampleName;
   std::string m_sourceName;
   Eigen::Vector3d m_samplePosition;
@@ -160,13 +163,13 @@ private:
   Eigen::Vector3d m_sourcePosition;
   Eigen::Quaterniond m_sourceOrientation;
   // monitor information
-  std::vector<Json::Value> m_jsonMonitors;
+  std::vector<std::unique_ptr<Json::Value>> m_jsonMonitors;
   std::vector<Monitor> m_monitors;
   // chopper information
-  std::vector<Json::Value> m_jsonChoppers;
+  std::vector<std::unique_ptr<Json::Value>> m_jsonChoppers;
   std::vector<Chopper> m_choppers;
   // detector information
-  std::vector<Json::Value> m_jsonDetectorBanks;
+  std::vector<std::unique_ptr<Json::Value>> m_jsonDetectorBanks;
   std::vector<std::string> m_detectorBankNames;
   std::vector<std::vector<detid_t>> m_detIDs;
   std::vector<std::vector<double>> m_x;

@@ -12,6 +12,7 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
+#include <json/json.h>
 
 namespace {
 using namespace Mantid::Geometry;
@@ -95,29 +96,29 @@ void addMonitors(const JSONGeometryParser &parser, InstrumentBuilder &builder) {
 namespace Mantid {
 namespace NexusGeometry {
 JSONInstrumentBuilder::JSONInstrumentBuilder(const std::string &jsonGeometry)
-    : m_parser(jsonGeometry) {}
+    : m_parser(std::make_unique<JSONGeometryParser>(jsonGeometry)) {}
 
 const std::vector<Chopper> &JSONInstrumentBuilder::choppers() const {
-  return m_parser.choppers();
+  return m_parser->choppers();
 }
 
 Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {
-  InstrumentBuilder builder(m_parser.name());
-  for (size_t bank = 0; bank < m_parser.numberOfBanks(); ++bank) {
-    auto bankName = m_parser.detectorName(bank);
-    builder.addBank(bankName, m_parser.translation(bank),
-                    m_parser.orientation(bank));
-    auto shape = createShape(m_parser, bank);
-    auto pixelOffsets = getOffsets(m_parser, bank);
+  InstrumentBuilder builder(m_parser->name());
+  for (size_t bank = 0; bank < m_parser->numberOfBanks(); ++bank) {
+    auto bankName = m_parser->detectorName(bank);
+    builder.addBank(bankName, m_parser->translation(bank),
+                    m_parser->orientation(bank));
+    auto shape = createShape(*m_parser, bank);
+    auto pixelOffsets = getOffsets(*m_parser, bank);
     Eigen::Matrix<double, 3, Eigen::Dynamic> detectorPixels =
         Eigen::Affine3d::Identity() * pixelOffsets;
-    const auto &ids = m_parser.detectorIDs(bank);
-    if (m_parser.isOffGeometry(bank)) {
-      const auto &x = m_parser.xPixelOffsets(bank);
-      const auto &y = m_parser.yPixelOffsets(bank);
-      const auto &z = m_parser.zPixelOffsets(bank);
+    const auto &ids = m_parser->detectorIDs(bank);
+    if (m_parser->isOffGeometry(bank)) {
+      const auto &x = m_parser->xPixelOffsets(bank);
+      const auto &y = m_parser->yPixelOffsets(bank);
+      const auto &z = m_parser->zPixelOffsets(bank);
 
-      for (size_t i = 0; i < m_parser.detectorIDs(bank).size(); ++i) {
+      for (size_t i = 0; i < m_parser->detectorIDs(bank).size(); ++i) {
         builder.addDetectorToLastBank(bankName + "_" + std::to_string(i),
                                       ids[i], Eigen::Vector3d(x[i], y[i], z[i]),
                                       shape);
@@ -129,12 +130,12 @@ Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {
   }
 
   builder.addSample(
-      m_parser.sampleName(),
-      applyRotation(m_parser.samplePosition(), m_parser.sampleOrientation()));
+      m_parser->sampleName(),
+      applyRotation(m_parser->samplePosition(), m_parser->sampleOrientation()));
   builder.addSource(
-      m_parser.sourceName(),
-      applyRotation(m_parser.sourcePosition(), m_parser.sourceOrientation()));
-  addMonitors(m_parser, builder);
+      m_parser->sourceName(),
+      applyRotation(m_parser->sourcePosition(), m_parser->sourceOrientation()));
+  addMonitors(*m_parser, builder);
 
   return builder.createInstrument();
 }

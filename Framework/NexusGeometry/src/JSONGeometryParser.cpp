@@ -10,6 +10,9 @@
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <json/json.h>
+
+using Json::Value;
 
 namespace {
 using namespace Mantid::NexusGeometry;
@@ -296,6 +299,15 @@ std::string extractInstrumentName(const Json::Value &instrument) {
   return name;
 }
 
+std::vector<std::unique_ptr<Json::Value>>
+moveToUniquePtrVec(std::vector<Json::Value> &jsonVector) {
+  std::vector<std::unique_ptr<Json::Value>> ret;
+  for (auto &val : jsonVector)
+    ret.push_back(std::make_unique<Json::Value>(std::move(val)));
+
+  return ret;
+}
+
 } // namespace
 
 namespace Mantid {
@@ -325,8 +337,8 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   if (sample.isNull())
     throw std::invalid_argument("No sample found in json.");
 
-  m_source = get(entryChildren, NX_SOURCE);
-  if (m_source.isNull())
+  auto source = get(entryChildren, NX_SOURCE);
+  if (source.isNull())
     g_log.notice() << "No source information found in json instrument."
                    << std::endl;
 
@@ -336,25 +348,30 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
 
   m_name = extractInstrumentName(instrument);
 
-  m_jsonDetectorBanks = getAllDetectors(instrument);
-  if (m_jsonDetectorBanks.empty())
+  auto jsonDetectorBanks = getAllDetectors(instrument);
+  if (jsonDetectorBanks.empty())
     throw std::invalid_argument("No detectors found in json.");
+  ;
+  m_jsonDetectorBanks = moveToUniquePtrVec(jsonDetectorBanks);
 
-  m_jsonMonitors = getAllMonitors(instrument);
+  auto jsonMonitors = getAllMonitors(instrument);
+  auto jsonChoppers = getAllChoppers(instrument);
 
-  m_jsonChoppers = getAllChoppers(instrument);
+  m_jsonMonitors = moveToUniquePtrVec(jsonMonitors);
+  m_jsonChoppers = moveToUniquePtrVec(jsonChoppers);
 
-  m_root = root;
-  m_sample = sample;
-  m_instrument = instrument;
+  m_root = std::make_unique<Json::Value>(std::move(root));
+  m_source = std::make_unique<Json::Value>(std::move(source));
+  m_sample = std::make_unique<Json::Value>(std::move(sample));
+  m_instrument = std::make_unique<Json::Value>(std::move(instrument));
 }
 
 void JSONGeometryParser::extractSampleContent() {
-  const auto &children = m_sample[CHILDREN];
+  const auto &children = (*m_sample)[CHILDREN];
   m_samplePosition = Eigen::Vector3d(0, 0, 0);
   m_sampleOrientation =
       Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(1, 0, 0)));
-  m_sampleName = m_sample[NAME].asString();
+  m_sampleName = (*m_sample)[NAME].asString();
   for (const auto &child : children) {
     if (child[NAME] == TRANSFORMATIONS)
       extractTransformations(child, m_samplePosition, m_sampleOrientation);
@@ -366,9 +383,9 @@ void JSONGeometryParser::extractSourceContent() {
   m_sourcePosition = Eigen::Vector3d(0, 0, 0);
   m_sourceOrientation =
       Eigen::Quaterniond(Eigen::AngleAxisd(0, Eigen::Vector3d(1, 0, 0)));
-  if (!m_source.isNull()) {
-    m_sourceName = m_source[NAME].asCString();
-    const auto &children = m_source[CHILDREN];
+  if (!m_source->isNull()) {
+    m_sourceName = (*m_source)[NAME].asCString();
+    const auto &children = (*m_source)[CHILDREN];
     for (const auto &child : children) {
       if (child[NAME] == TRANSFORMATIONS)
         extractTransformations(child, m_sourcePosition, m_sourceOrientation);
@@ -382,7 +399,7 @@ void JSONGeometryParser::extractTransformationDataset(
     const Json::Value &transformation, double &value, Eigen::Vector3d &axis) {
   std::vector<double> values;
   extractDatasetValues(transformation, values);
-  axis = getTransformationAxis(m_root, transformation[ATTRIBUTES]);
+  axis = getTransformationAxis(*m_root, transformation[ATTRIBUTES]);
   value = values[0];
 }
 
@@ -429,7 +446,7 @@ void JSONGeometryParser::extractDetectorContent() {
     std::vector<uint32_t> windingOrder;
     bool isOffGeometry = false;
 
-    auto children = detector[CHILDREN];
+    auto children = (*detector)[CHILDREN];
 
     for (const auto &child : children) {
       if (child[NAME] == DETECTOR_IDS)
@@ -444,7 +461,7 @@ void JSONGeometryParser::extractDetectorContent() {
         extractShapeInformation(child, cylinders, faces, vertices, windingOrder,
                                 isOffGeometry);
       else if (child[NAME] == DEPENDS_ON)
-        verifyDependency(m_root, child);
+        verifyDependency(*m_root, child);
       else if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS)) {
         m_translations.emplace_back(Eigen::Vector3d());
         m_orientations.emplace_back(Eigen::Quaterniond());
@@ -452,7 +469,7 @@ void JSONGeometryParser::extractDetectorContent() {
                                m_orientations.back());
       }
     }
-    auto name = detector[NAME].asString();
+    auto name = (*detector)[NAME].asString();
     if (detIDs.empty())
       throw std::invalid_argument("No detector ids found in " + name + ".");
     if (x.empty())
@@ -482,14 +499,14 @@ void JSONGeometryParser::extractMonitorContent() {
     return;
 
   for (const auto &monitor : m_jsonMonitors) {
-    const auto &children = monitor[CHILDREN];
+    const auto &children = (*monitor)[CHILDREN];
 
     if (children.empty())
       throw std::invalid_argument(
           "Full monitor definition missing in json provided.");
 
     Monitor mon;
-    mon.componentName = monitor[NAME].asString();
+    mon.componentName = (*monitor)[NAME].asString();
     for (const auto &child : children) {
       const auto &val = child[VALUES];
       if (child[NAME] == NAME)
@@ -506,7 +523,7 @@ void JSONGeometryParser::extractMonitorContent() {
         extractShapeInformation(child, mon.cylinders, mon.faces, mon.vertices,
                                 mon.windingOrder, mon.isOffGeometry);
       else if (child[NAME] == DEPENDS_ON)
-        verifyDependency(m_root, child);
+        verifyDependency(*m_root, child);
     }
 
     if (validateShapeInformation(mon.isOffGeometry, mon.vertices, mon.cylinders,
@@ -526,13 +543,13 @@ void JSONGeometryParser::extractChopperContent() {
     return;
 
   for (const auto &chopper : m_jsonChoppers) {
-    const auto &children = chopper[CHILDREN];
+    const auto &children = (*chopper)[CHILDREN];
 
     if (children.empty())
       throw std::invalid_argument(
           "Full chopper definition missing in json provided.");
     Chopper chop;
-    chop.componentName = chopper[NAME].asString();
+    chop.componentName = (*chopper)[NAME].asString();
     for (const auto &child : children) {
       const auto &val = child[VALUES];
       if (child[NAME] == "name")
