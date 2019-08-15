@@ -51,25 +51,24 @@ class PlottingContext(object):
     def remove_line(self, subplot_name, name):
         try:
             self.subplots[subplot_name].removeLine(name)
-            self.subplots[subplot_name].redraw_annotations()
         except KeyError:
             return
 
-    def removePlotLine(self, subplotName, name):
+    def removePlotLine(self, subplot_name, name):
         try:
-            self.subplots[subplotName].removePlotLine(name)
+            self.subplots[subplot_name].removePlotLine(name)
         except KeyError:
             return
 
-    def removeLabel(self, subplotName, name):
+    def removeLabel(self, subplot_name, name):
         try:
-            self.subplots[subplotName].removeLabel(name)
+            self.subplots[subplot_name].removeLabel(name)
         except KeyError:
             return
 
-    def removeVLine(self, subplotName, name):
+    def removeVLine(self, subplot_name, name):
         try:
-            self.subplots[subplotName].removeVLine(name)
+            self.subplots[subplot_name].removeVLine(name)
         except KeyError:
             return
 

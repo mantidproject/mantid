@@ -46,13 +46,14 @@ class subplotContext(object):
         for label in list(self._labelObjects.keys()):
             self.add_annotate(self._labelObjects[label])
 
-    def addLine(self, ws, spec_num=1, distribution=True, color='C0'):
+    def addLine(self, ws, spec_num=1, distribution=True, color=None):
+        if color is None:
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
+        else:
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
+
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot,
-                                         ws,
-                                         specNum=spec_num,
-                                         distribution=distribution,
-                                         color=color)
+        line, = plots.plotfunctions.plot(self._subplot, ws, kwargs=plot_kwargs)
         label = line.get_label()
         if self._errors:
             line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,

@@ -188,16 +188,16 @@ class SubplotTest(unittest.TestCase):
         self.assertEqual(self.subplot.canvas.draw.call_count, 2)
 
     def test_that_connect_rm_signal_calls_the_correct_function(self):
-        self.subplot.sig_rm_line = mock.Mock()
+        self.subplot.signal_rm_line = mock.Mock()
         self.subplot.connect_rm_line_signal("slot value")
 
-        self.subplot.sig_rm_line.connect.assert_called_with("slot value")
+        self.subplot.signal_rm_line.connect.assert_called_with("slot value")
 
     def test_that_disconnect_rm_signal_calls_the_correct_function(self):
-        self.subplot.sig_rm_line = mock.Mock()
+        self.subplot.signal_rm_line = mock.Mock()
         self.subplot.disconnect_rm_line_signal()
 
-        self.assertEqual(1, self.subplot.sig_rm_line.disconnect.call_count)
+        self.assertEqual(1, self.subplot.signal_rm_line.disconnect.call_count)
 
     @staticmethod
     def rm_window_side_effect(name):
@@ -241,12 +241,12 @@ class SubplotTest(unittest.TestCase):
         subplot_name = "subplot"
         self.subplot._context.get_lines = mock.Mock(return_value=["not empty"])
         self.subplot._context.subplots = {subplot_name: mock.Mock()}
-        self.subplot.sig_rm_line = mock.Mock()
+        self.subplot.signal_rm_line = mock.Mock()
         self.subplot.canvas = mock.Mock()
 
         self.subplot.remove_lines(subplot_name, ["one"])
 
-        self.assertEqual(1, self.subplot.sig_rm_line.emit.call_count)
+        self.assertEqual(1, self.subplot.signal_rm_line.emit.call_count)
 
 
 if __name__ == "__main__":

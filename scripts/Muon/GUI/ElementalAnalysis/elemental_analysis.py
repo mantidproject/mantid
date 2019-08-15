@@ -67,6 +67,10 @@ def gen_name(element, name):
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
+    BLUE = 'C0'
+    ORANGE = 'C1'
+    GREEN = 'C2'
+
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         # set menu
@@ -107,12 +111,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # Line type boxes
         self.lines = LineSelectorPresenter(LineSelectorView())
         self.lines.total.setChecked(True)
-        self.lines.total.on_checkbox_checked(self.line_total_checked)
-        self.lines.total.on_checkbox_unchecked(self.line_total_unchecked)
-        self.lines.prompt.on_checkbox_checked(self.line_prompt_checked)
-        self.lines.prompt.on_checkbox_unchecked(self.line_prompt_unchecked)
-        self.lines.delayed.on_checkbox_checked(self.line_delayed_checked)
-        self.lines.delayed.on_checkbox_unchecked(self.line_delayed_unchecked)
+        self.lines.total.on_checkbox_checked(self.line_total_changed)
+        self.lines.total.on_checkbox_unchecked(self.line_total_changed)
+        self.lines.prompt.on_checkbox_checked(self.line_prompt_changed)
+        self.lines.prompt.on_checkbox_unchecked(self.line_prompt_changed)
+        self.lines.delayed.on_checkbox_checked(self.line_delayed_changed)
+        self.lines.delayed.on_checkbox_unchecked(self.line_delayed_changed)
 
         # set up
         self.widget_list = QtWidgets.QVBoxLayout()
@@ -299,11 +303,11 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         for ws in mantid.mtd[name]:
             ws.setYUnit('Counts')
             if self.lines.total.isChecked() and 'Total' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color='C0')
+                self.plotting.plot(detector, ws.getName(), color=self.BLUE)
             if self.lines.prompt.isChecked() and 'Prompt' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color='C1')
+                self.plotting.plot(detector, ws.getName(), color=self.ORANGE)
             if self.lines.delayed.isChecked() and 'Delayed' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color='C2')
+                self.plotting.plot(detector, ws.getName(), color=self.GREEN)
         # add current selection of lines
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
@@ -457,13 +461,12 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             return
 
         # Plot the correct line type on all open subplots
-        color = 'C3'
         if _type == 'Total':
-            color = 'C0'
+            color = self.BLUE
         elif _type == 'Prompt':
-            color = 'C1'
-        elif _type == 'Delayed':
-            color = 'C2'
+            color = self.ORANGE
+        else:
+            color = self.GREEN
         for subplot in self.plotting.get_subplots():
             for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
                 if _type in ws.getName():
@@ -509,28 +512,25 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.uncheck_detectors_if_no_line_plotted()
 
     # Line total
-    def line_total_checked(self):
-        self.lines.total.setChecked(True)
-        self.add_line_by_type(self.load_widget.last_loaded_run(), 'Total')
-
-    def line_total_unchecked(self):
-        self.lines.total.setChecked(False)
-        self.remove_line_type(self.load_widget.last_loaded_run(), 'Total')
+    def line_total_changed(self, line_total):
+        self.lines.total.setChecked(line_total.isChecked())
+        if line_total.isChecked():
+            self.add_line_by_type(self.load_widget.last_loaded_run(), 'Total')
+        else:
+            self.remove_line_type(self.load_widget.last_loaded_run(), 'Total')
 
     # Line prompt
-    def line_prompt_checked(self):
-        self.lines.prompt.setChecked(True)
-        self.add_line_by_type(self.load_widget.last_loaded_run(), 'Prompt')
-
-    def line_prompt_unchecked(self):
-        self.lines.prompt.setChecked(False)
-        self.remove_line_type(self.load_widget.last_loaded_run(), 'Prompt')
+    def line_prompt_changed(self, line_prompt):
+        self.lines.prompt.setChecked(line_prompt.isChecked())
+        if line_prompt.isChecked():
+            self.add_line_by_type(self.load_widget.last_loaded_run(), 'Prompt')
+        else:
+            self.remove_line_type(self.load_widget.last_loaded_run(), 'Prompt')
 
     # Line delayed
-    def line_delayed_checked(self):
-        self.lines.delayed.setChecked(True)
-        self.add_line_by_type(self.load_widget.last_loaded_run(), 'Delayed')
-
-    def line_delayed_unchecked(self):
-        self.lines.delayed.setChecked(False)
-        self.remove_line_type(self.load_widget.last_loaded_run(), 'Delayed')
+    def line_delayed_changed(self, line_delayed):
+        self.lines.delayed.setChecked(line_delayed.isChecked())
+        if line_delayed.isChecked():
+            self.add_line_by_type(self.load_widget.last_loaded_run(), 'Delayed')
+        else:
+            self.remove_line_type(self.load_widget.last_loaded_run(), 'Delayed')

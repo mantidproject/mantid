@@ -25,9 +25,9 @@ from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 
 class subplot(QtWidgets.QWidget):
-    sig_quick_edit = QtCore.Signal(object)
-    sig_rm_subplot = QtCore.Signal(object)
-    sig_rm_line = QtCore.Signal(object)
+    signal_quick_edit = QtCore.Signal(object)
+    signal_rm_subplot = QtCore.Signal(object)
+    signal_rm_line = QtCore.Signal(object)
 
     def __init__(self, context):
         super(subplot, self).__init__()
@@ -122,7 +122,7 @@ class subplot(QtWidgets.QWidget):
         self.canvas.draw()
 
     def emit_subplot_range(self, subplot_name):
-        self.sig_quick_edit.emit(subplot_name)
+        self.signal_quick_edit.emit(subplot_name)
         self._context.subplots[subplot_name].redraw_annotations()
 
     def set_plot_x_range(self, subplot_names, range):
@@ -139,22 +139,22 @@ class subplot(QtWidgets.QWidget):
             self.canvas.draw()
 
     def connect_quick_edit_signal(self, slot):
-        self.sig_quick_edit.connect(slot)
+        self.signal_quick_edit.connect(slot)
 
     def disconnect_quick_edit_signal(self):
-        self.sig_quick_edit.disconnect()
+        self.signal_quick_edit.disconnect()
 
     def connect_rm_subplot_signal(self, slot):
-        self.sig_rm_subplot.connect(slot)
+        self.signal_rm_subplot.connect(slot)
 
     def disconnect_rm_subplot_signal(self):
-        self.sig_rm_subplot.disconnect()
+        self.signal_rm_subplot.disconnect()
 
     def connect_rm_line_signal(self, slot):
-        self.sig_rm_line.connect(slot)
+        self.signal_rm_line.connect(slot)
 
     def disconnect_rm_line_signal(self):
-        self.sig_rm_line.disconnect()
+        self.signal_rm_line.disconnect()
 
     def set_y_autoscale(self, subplot_names, state):
         for subplotName in subplot_names:
@@ -223,7 +223,7 @@ class subplot(QtWidgets.QWidget):
         for name in line_names:
             self._context.subplots[subplot_name].removeLine(name)
 
-        self.sig_rm_line.emit([str(name) for name in line_names])
+        self.signal_rm_line.emit([str(name) for name in line_names])
 
         # if all of the lines have been removed -> delete subplot
         if not self._context.get_lines(subplot_name):
@@ -250,7 +250,7 @@ class subplot(QtWidgets.QWidget):
         self._context.delete(subplot_name)
         self._context.update_gridspec(len(list(self.plot_objects.keys())))
         self._update()
-        self.sig_rm_subplot.emit(subplot_name)
+        self.signal_rm_subplot.emit(subplot_name)
 
     def _rm_ws_from_plots(self, workspace_name):
         keys = deepcopy(self._context.subplots.keys())
