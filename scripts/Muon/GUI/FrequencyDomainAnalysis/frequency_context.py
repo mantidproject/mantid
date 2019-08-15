@@ -12,7 +12,6 @@ from six import iteritems
 class MaxEnt(object):
 
     def __init__(self, run, ws_freq):
-        print(run)
         self.run = run
         self.ws_freq = ws_freq
 

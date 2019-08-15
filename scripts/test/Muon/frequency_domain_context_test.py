@@ -40,7 +40,7 @@ class MuonFreqContextTest(unittest.TestCase):
         self.assertEquals(self.context.window_title, "Frequency Domain Analysis")
  
     def test_add_maxEnt(self):
-        self.assertEquals(self.context._maxEnt_freq.keys(),["MUSR62260_raw_data FD; MaxEnt"] )
+        self.assertEquals(list(self.context._maxEnt_freq.keys()),["MUSR62260_raw_data FD; MaxEnt"] )
         self.assertEquals(self.context._maxEnt_freq["MUSR62260_raw_data FD; MaxEnt"].run, "62260" )
         self.assertEquals(self.context._maxEnt_freq["MUSR62260_raw_data FD; MaxEnt"].ws_freq, self.ws_freq )
 
@@ -48,7 +48,7 @@ class MuonFreqContextTest(unittest.TestCase):
         self.assertEquals(self.context.maxEnt_freq, ["MUSR62260_raw_data FD; MaxEnt"])
 
     def test_add_FFT(self):
-        six.assertCountEqual(self,self.context._FFT_freq.keys(),[FFT_NAME_RE_2, FFT_NAME_RE_MOD] )
+        six.assertCountEqual(self,list(self.context._FFT_freq.keys()),[FFT_NAME_RE_2, FFT_NAME_RE_MOD] )
         self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].Re_run, "62260")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].Re, "fwd" )
         self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].Im, None )
@@ -59,7 +59,7 @@ class MuonFreqContextTest(unittest.TestCase):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260",Re= "top", Im_run="62261", Im="fwd",phasequad=False)
-        six.assertCountEqual(self,self.context._FFT_freq.keys(),[FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD] )
+        six.assertCountEqual(self,list(self.context._FFT_freq.keys()),[FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD] )
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Re_run, "62260")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Re, "top" )
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Im, "fwd" )
