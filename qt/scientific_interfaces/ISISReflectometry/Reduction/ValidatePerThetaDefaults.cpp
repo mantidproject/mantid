@@ -7,7 +7,6 @@
 #include "ValidatePerThetaDefaults.h"
 #include "AllInitialized.h"
 #include "Common/Parse.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
