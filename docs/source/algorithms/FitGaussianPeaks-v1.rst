@@ -23,17 +23,20 @@ It then performs the following steps:
 
 3.  Create a table where every row contains the parameters and error for a peak.
 
-4.  For some peaks the fit might produce unreasonably large errors (above 1e7). These peaks will not be included in the table.
-    Instead they will be refitted with tighter constraints that will return sensible values for the parameters most of the times.
+4.  For some peaks the fit might produce unreasonably large errors (above :math:`10^7`). These peaks will not be
+    included in the table.
+    Instead they will be refitted with tighter constraints that will return sensible values for the parameters
+    most of the times.
     These parameters will be inserted in a second table structured as the first.
 
-5.  The fit will be evaluated using unweighted chi2 and a poisson cost function (see below). For the Poisson fit, the
-    background is added. The result of the two are included in a third table.
+5.  The fit will be evaluated using unweighted :math:`\chi^2` and a poisson cost function (see below).
+    For the Poisson fit, the background is added.
+    The result of the two are included in a third table.
 
 Cost functions
 --------------
 
--  Chi2:
+-  :math:`\chi^2`:
     The result of the fit is compared with the data using the equation:
     :math:`{1 \over N} \sum_{i=1}^{N} {(m_i - d_i) \over \sigma_i}^2`
 
@@ -47,7 +50,7 @@ Cost functions
 
     Where :math:`m_i` is the i-th data point of the result of the fit and :math:`d_i` is the i-th
     data point of the data to be fitted.
-    This is the natural logarithm of the cost, calculated as: :math:`\prod_{i=1}^{N} \exp(-m_i + d_i \cdot \ln(m_i))`
+    This is the natural logarithm of the cost, calculated as: :math:`\prod_{i=1}^{N} \exp(-m_i + d_i \ln(m_i))`
 
 **Example - Finding two simple gaussian peaks.**
 

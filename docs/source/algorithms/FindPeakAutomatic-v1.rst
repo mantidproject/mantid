@@ -29,10 +29,12 @@ To do so the algorithm performs the following:
 7. The best peak found in step #4 and not yet considered is added to the list of peaks to be fitted.
    A fit is performed using the :ref:`Fit <algm-Fit>` algorithm and the cost function is evaluated on the result.
 
-8. If the newly calculated cost is compared to the previous best one. This is done differently for poisson and chi2 costs:
-   - *chi2*: if the new cost is lower than the previous best and the relative difference is reater than `AcceptanceThreshold`
+8. If the newly calculated cost is compared to the previous best one. This is done differently for poisson
+   and :math:`\chi^2` costs:
+
+   - :math:`\chi^2`: if the new cost is lower than the previous best and the relative difference is reater than `AcceptanceThreshold`
      the peak is considered valid.
-   - *poisson*: if the difference between the new cost and the previous best is greater than
+   - **poisson**: if the difference between the new cost and the previous best is greater than
      :math:`ln(AcceptanceThreshold)` the peak is considered valid
 
 9. If more than `BadPeaksToConsider` invalid peaks have been encountered since the last valid peak then the program
@@ -54,7 +56,7 @@ adjust some of them.
 The most important to this effect are:
 
 - `AcceptanceThreshold`, the value of this depends on the cost function used.
-  For chi2, reasonable values range between 0.0001-0.1. For poisson cost, reasonable value range between 1-100.
+  For :math:`\chi^2`, reasonable values range between 0.0001-0.1. For poisson cost, reasonable value range between 1-100.
   In both cases, higher values correspond to stronger constraints, and will lead to less peaks found. Conversely,
   lower values of the parameter will include more peaks, this causes the algorithm to slow down and to include more
   undesired peaks in the final output.
@@ -115,9 +117,9 @@ The most important to this effect are:
 
     # Fitting the data with strong noise
     FindPeakAutomatic(InputWorkspace=high_noise_ws,
-                      AcceptanceThreshold=0.02,
+                      AcceptanceThreshold=0.1,
                       SmoothWindow=30,
-                      EstimatePeakSigma=3,
+                      EstimatePeakSigma=2,
                       MaxPeakSigma=5,
                       PlotPeaks=False,
                       PeakPropertiesTableName='properties',

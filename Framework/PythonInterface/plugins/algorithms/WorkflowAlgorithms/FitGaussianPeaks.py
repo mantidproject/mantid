@@ -7,10 +7,9 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, DeleteWorkspace, CreateEmptyTableWorkspace, Fit)
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, ITableWorkspaceProperty,
-                        Progress)
-from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
+from mantid.simpleapi import (DeleteWorkspace, CreateEmptyTableWorkspace, Fit)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, ITableWorkspaceProperty)
+from mantid.kernel import (Direction, FloatBoundedValidator)
 from mantid import mtd
 
 import numpy as np
@@ -379,4 +378,4 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         return fit_result.readY(1).copy(), param
 
 
-AlgorithmFactory.subscribe(FitGaussianPeaks())
+AlgorithmFactory.subscribe(FitGaussianPeaks)

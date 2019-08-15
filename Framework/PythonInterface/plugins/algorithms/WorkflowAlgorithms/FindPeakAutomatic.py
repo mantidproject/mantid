@@ -388,4 +388,4 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
                                     peak_width_estimate=peak_width_estimate), baseline
 
 
-AlgorithmFactory.subscribe(FindPeakAutomatic())
+AlgorithmFactory.subscribe(FindPeakAutomatic)
