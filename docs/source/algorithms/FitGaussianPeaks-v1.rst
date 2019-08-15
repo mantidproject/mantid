@@ -12,8 +12,8 @@ The algorithm takes:
 
 - a table with a single column where each row contains the centre of the peak
 
--   a workspace containing the data to be fitted in the first spectra and a background for the data.
-    This is important to produce sensible results from the Poisson weight.
+- a workspace containing the data to be fitted in the first spectra and a background for the data.
+  This is important to produce sensible results from the Poisson weight.
 
 It then performs the following steps:
 
@@ -35,16 +35,18 @@ Cost functions
 
 -  Chi2:
     The result of the fit is compared with the data using the equation:
-    :math:`{1 \over N} \sum_{i=1}^{N} (m_i - d_i)^2`
+    :math:`{1 \over N} \sum_{i=1}^{N} {(m_i - d_i) \over \sigma_i}^2`
 
-    Where :math:`m_i` is the i-th element of the result of the fit and :math:`d_i` is the i-th element of the data to be fitted.
+    Where :math:`m_i` is the i-th data point of the result of the fit, :math:`d_i` is the i-th data point
+    of the data to be fitted and :math:`\sigma_i` is the error on the i-th data point.
 
 -  Poisson:
     The result of the fit and input data are filtered to remove zeros in the fitted data.
     They are then compared using the equation:
-    :math:`\sum_{i=1}^{N} (-m_i + d_i \cdot \ln(m_i))`
+    :math:`\sum_{i=1}^{N} (-m_i + d_i \ln(m_i))`
 
-    Where :math:`m_i` is the i-th element of the result of the fit and :math:`d_i` is the i-th element of the data to be fitted.
+    Where :math:`m_i` is the i-th data point of the result of the fit and :math:`d_i` is the i-th
+    data point of the data to be fitted.
     This is the natural logarithm of the cost, calculated as: :math:`\prod_{i=1}^{N} \exp(-m_i + d_i \cdot \ln(m_i))`
 
 **Example - Finding two simple gaussian peaks.**

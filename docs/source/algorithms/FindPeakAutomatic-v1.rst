@@ -18,52 +18,62 @@ To do so the algorithm performs the following:
 
 2. If no error value is provided the error is calculated as the square root of the y values.
 
-3. The morphological operations of erosion and dilation are used to calculate a background which
-   is then removed.
+3. The morphological operations of erosion and dilation are used to calculate a baseline. If the option
+   `FitToBaseline` is selected, the following steps will be performed on the baseline. Otherwise the baseline is
+   subtracted from the data.
 
-4. All points higher than the two neighbours are identified as potential peaks.
+4. All peaks (including noise) are identified and sorted by relative height with respect to the background.
 
-5. The list of possible peaks is identified and sorted by "prominence".
+6. The cost function is evaluated against a flat background (i.e. no peak hypothesis).
 
-6. The null hypothesis (i.e. no peaks present) is tested and its cost calculated.
+7. The best peak found in step #4 and not yet considered is added to the list of peaks to be fitted.
+   A fit is performed using the :ref:`Fit <algm-Fit>` algorithm and the cost function is evaluated on the result.
 
-7. The best peak not yet considered from #4 is added to the list of fitted peaks and the cost calculated.
+8. If the newly calculated cost is compared to the previous best one. This is done differently for poisson and chi2 costs:
+   - *chi2*: if the new cost is lower than the previous best and the relative difference is reater than `AcceptanceThreshold`
+     the peak is considered valid.
+   - *poisson*: if the difference between the new cost and the previous best is greater than
+     :math:`ln(AcceptanceThreshold)` the peak is considered valid
 
-8. If the cost after adding the peak improves on the cost without the peak by more than the `AcceptanceThreshold`
-   threshold then the peak is added to the list of true peaks. Otherwise the peak is considered bad and discarded.
-
-9. If more than `BadPeaksToConsider` have been encountered since the last good peak then the program terminates
-   and the list of peaks that best fit the data is returned. Otherwise the procedure is repeated from step #6.
+9. If more than `BadPeaksToConsider` invalid peaks have been encountered since the last valid peak then the program
+   terminates and the list of valid peaks is returned. Otherwise the procedure is repeated from step #6.
 
 To fit a list of peaks and calculate the cost algorithm :ref:`FitGaussianPeaks <algm-FitGaussianPeaks>`
 is used.
 If the option `PlotPeaks` is selected then after completing the algorithm a plot of the input data is generated
-and the peaks marked with red `x`.
+and the peaks marked with red `x`. If the option `PlotBaseline` is also selected then the baseline will also be shown.
+This is particularly useful when tuning the value of `SmoothWindow` (see below).
 
 Improving the fit
 -----------------
 
-The result of the fit is strongly dependent on the parameter chosen. Unfortunately these depend on the particular run
-one wishes to fit. Therefore, while the default choice will often generate reasonable answers it is often necessary to
+The result of the fit is strongly dependent on the parameter chosen. Unfortunately these depend on the particular data
+to be fitted. Therefore, while the default choice will often generate reasonable answers it is often necessary to
 adjust some of them.
 
 The most important to this effect are:
 
 - `AcceptanceThreshold`, the value of this depends on the cost function used.
   For chi2, reasonable values range between 0.0001-0.1. For poisson cost, reasonable value range between 1-100.
-  In both cases, higher values correspond to stronger constraints, and will lead to less peaks found.
+  In both cases, higher values correspond to stronger constraints, and will lead to less peaks found. Conversely,
+  lower values of the parameter will include more peaks, this causes the algorithm to slow down and to include more
+  undesired peaks in the final output.
 
-- `SmoothWindow`, this affects the background-finding. Low values of this parameter will only leave the narrowest peaks,
+- `SmoothWindow`, this affects the calculation of the baseline.
+  Setting the parameter to 0 leaves the data unchanged.
+  When subtracting a baseline found with low values of the parameter, all but the sharpest peaks will be removed,
   eliminating noise most effectively but also potentially getting rid of peaks of interest. Conversely, higher values
   will be less aggressive, leaving broader peaks and noise features to be fitted.
 
-- `BadPeaksToConsider`, if this parameter is too low, there is a possibility that valid peaks will be discarded because
+- `BadPeaksToConsider`, this is the number of invalid peaks that can be encountered since the last valid one before the
+  algorithm is terminated. If the parameter is too low, there is a possibility that valid peaks will be discarded because
   some noise features were previously encountered. However, higher values will strongly affect the performance and
   will tend to introduce unwanted noise in the final peak count.
 
 - `EstimatePeakSigma`, this is an initial guess for the standard deviation of the peaks in the data. It becomes
   especially important when trying to differentiate closely spaced features, where lower values of this parameter will
-  usually perform better that higher ones.
+  usually perform better than higher ones.
+
 
 **Example - Find two gaussian peaks on an exponential background with added noise**
 
@@ -105,9 +115,9 @@ The most important to this effect are:
 
     # Fitting the data with strong noise
     FindPeakAutomatic(InputWorkspace=high_noise_ws,
-                      AcceptanceThreshold=0.2,
+                      AcceptanceThreshold=0.02,
                       SmoothWindow=30,
-                      EstimatePeakSigma=2,
+                      EstimatePeakSigma=3,
                       MaxPeakSigma=5,
                       PlotPeaks=False,
                       PeakPropertiesTableName='properties',
