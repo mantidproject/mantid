@@ -60,3 +60,6 @@ class MarkerTabWidgetView(QWidget):
         self.set_size(curve_props.markersize)
         self.set_face_color(curve_props.markerfacecolor)
         self.set_edge_color(curve_props.markeredgecolor)
+
+    def set_plot_all_enabled(self, enable):
+        self.apply_to_all_button.setEnabled(enable)

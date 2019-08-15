@@ -43,6 +43,8 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict = {}
         self.populate_curve_combo_box_and_update_view()
 
+        self.check_number_of_curves()
+
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
             self.populate_curve_combo_box_and_update_view)
@@ -188,6 +190,9 @@ class CurvesTabWidgetPresenter:
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
+        self.check_number_of_curves()
+
+        ax = self.get_selected_ax()
         # Update the legend and redraw
         self.update_limits_and_legend(ax, self.legend_props)
         ax.figure.canvas.draw()
@@ -289,3 +294,14 @@ class CurvesTabWidgetPresenter:
         name = self._generate_curve_name(curve, curve.get_label())
         if name:
             self.curve_names_dict[name] = curve
+
+    def check_number_of_curves(self):
+        if len(self.curve_names_dict) > 1:
+            self.view.line.set_plot_all_enabled(True)
+            self.view.marker.set_plot_all_enabled(True)
+            self.view.errorbars.multiple_curves = True
+        else:
+            self.view.line.set_plot_all_enabled(False)
+            self.view.marker.set_plot_all_enabled(False)
+            self.view.errorbars.set_plot_all_enabled(False)
+            self.view.errorbars.multiple_curves = False
