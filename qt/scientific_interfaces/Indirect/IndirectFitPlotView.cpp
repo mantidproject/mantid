@@ -18,8 +18,6 @@
 
 namespace {
 
-char constexpr *const OVERRIDE_LABEL = "";
-
 QHash<QString, QVariant> tightLayoutKwargs() {
   QHash<QString, QVariant> kwargs;
   kwargs.insert("pad", 0);
@@ -60,8 +58,9 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
 
   // Avoids squished plots for >qt5
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, OVERRIDE_LABEL);
-  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, OVERRIDE_LABEL);
+  char const *const overrideLabel = "";
+  m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
+  m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
 #endif
 
   m_plotForm->cbDataSelection->hide();

@@ -37,7 +37,8 @@ public:
     QSplitterHandle::paintEvent(e);
 
     QPainter painter(this);
-    m_icon.paint(&painter, std::lround(this->size().width() / 2), -9, 24, 24);
+    auto const xPos = static_cast<int>(std::round(this->size().width() / 2));
+    m_icon.paint(&painter, xPos, -9, 24, 24);
   }
 
 private:
