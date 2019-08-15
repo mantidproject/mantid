@@ -10,57 +10,68 @@ from __future__ import (absolute_import, unicode_literals)
 
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
+from qtpy.QtGui import QPixmap, QIcon, QImage
 from qtpy.QtWidgets import QWidget
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 
-CMAPS = ['viridis', 'viridis_r', 'plasma', 'plasma_r', 'inferno', 'inferno_r',
-         'magma', 'magma_r', 'cividis', 'cividis_r', 'Greys', 'Greys_r',
-         'Purples', 'Purples_r', 'Blues', 'Blues_r', 'Greens', 'Greens_r',
-         'Oranges', 'Oranges_r', 'Reds', 'Reds_r', 'YlOrBr', 'YlOrBr_r',
-         'YlOrRd', 'YlOrRd_r', 'OrRd', 'OrRd_r', 'PuRd', 'PuRd_r', 'RdPu',
-         'RdPu_r', 'BuPu', 'BuPu_r', 'GnBu', 'GnBu_r', 'PuBu', 'PuBu_r',
-         'YlGnBu', 'YlGnBu_r', 'PuBuGn', 'PuBuGn_r', 'BuGn', 'BuGn_r', 'YlGn',
-         'YlGn_r', 'binary', 'binary_r', 'gist_yarg', 'gist_yarg_r',
-         'gist_gray', 'gist_gray_r', 'gray', 'gray_r', 'bone', 'bone_r',
-         'pink', 'pink_r', 'spring', 'spring_r', 'summer', 'summer_r',
-         'autumn', 'autumn_r', 'winter', 'winter_r', 'cool', 'cool_r',
-         'Wistia', 'Wistia_r', 'hot', 'hot_r', 'afmhot', 'afmhot_r',
-         'gist_heat', 'gist_heat_r', 'copper', 'copper_r', 'PiYG', 'PiYG_r',
-         'PRGn', 'PRGn_r', 'BrBG', 'BrBG_r', 'PuOr', 'PuOr_r', 'RdGy',
-         'RdGy_r', 'RdBu', 'RdBu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn',
-         'RdYlGn_r', 'Spectral', 'Spectral_r', 'coolwarm', 'coolwarm_r', 'bwr',
-         'bwr_r', 'seismic', 'seismic_r', 'twilight', 'twilight_r',
-         'twilight_shifted', 'twilight_shifted_r', 'hsv', 'hsv_r', 'Pastel1',
-         'Pastel1_r', 'Pastel2', 'Pastel2_r', 'Paired', 'Paired_r', 'Accent',
-         'Accent_r', 'Dark2', 'Dark2_r', 'Set1', 'Set1_r', 'Set2', 'Set2_r',
-         'Set3', 'Set3_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b',
-         'tab20b_r', 'tab20c', 'tab20c_r', 'flag', 'flag_r', 'prism',
-         'prism_r', 'ocean', 'ocean_r', 'gist_earth', 'gist_earth_r',
-         'terrain', 'terrain_r', 'gist_stern', 'gist_stern_r', 'gnuplot',
-         'gnuplot_r', 'gnuplot2', 'gnuplot2_r', 'CMRmap', 'CMRmap_r',
-         'cubehelix', 'cubehelix_r', 'brg', 'brg_r', 'gist_rainbow',
-         'gist_rainbow_r', 'rainbow', 'rainbow_r', 'jet', 'jet_r',
-         'nipy_spectral', 'nipy_spectral_r', 'gist_ncar', 'gist_ncar_r']
+CMAPS = [
+    'viridis', 'viridis_r', 'plasma', 'plasma_r', 'inferno', 'inferno_r', 'magma', 'magma_r',
+    'cividis', 'cividis_r', 'Greys', 'Greys_r', 'Purples', 'Purples_r', 'Blues', 'Blues_r',
+    'Greens', 'Greens_r', 'Oranges', 'Oranges_r', 'Reds', 'Reds_r', 'YlOrBr', 'YlOrBr_r', 'YlOrRd',
+    'YlOrRd_r', 'OrRd', 'OrRd_r', 'PuRd', 'PuRd_r', 'RdPu', 'RdPu_r', 'BuPu', 'BuPu_r', 'GnBu',
+    'GnBu_r', 'PuBu', 'PuBu_r', 'YlGnBu', 'YlGnBu_r', 'PuBuGn', 'PuBuGn_r', 'BuGn', 'BuGn_r',
+    'YlGn', 'YlGn_r', 'binary', 'binary_r', 'gist_yarg', 'gist_yarg_r', 'gist_gray', 'gist_gray_r',
+    'gray', 'gray_r', 'bone', 'bone_r', 'pink', 'pink_r', 'spring', 'spring_r', 'summer',
+    'summer_r', 'autumn', 'autumn_r', 'winter', 'winter_r', 'cool', 'cool_r', 'Wistia', 'Wistia_r',
+    'hot', 'hot_r', 'afmhot', 'afmhot_r', 'gist_heat', 'gist_heat_r', 'copper', 'copper_r', 'PiYG',
+    'PiYG_r', 'PRGn', 'PRGn_r', 'BrBG', 'BrBG_r', 'PuOr', 'PuOr_r', 'RdGy', 'RdGy_r', 'RdBu',
+    'RdBu_r', 'RdYlBu', 'RdYlBu_r', 'RdYlGn', 'RdYlGn_r', 'Spectral', 'Spectral_r', 'coolwarm',
+    'coolwarm_r', 'bwr', 'bwr_r', 'seismic', 'seismic_r', 'hsv', 'hsv_r', 'Pastel1', 'Pastel1_r',
+    'Pastel2', 'Pastel2_r', 'Paired', 'Paired_r', 'Accent', 'Accent_r', 'Dark2', 'Dark2_r', 'Set1',
+    'Set1_r', 'Set2', 'Set2_r', 'Set3', 'Set3_r', 'tab10', 'tab10_r', 'tab20', 'tab20_r', 'tab20b',
+    'tab20b_r', 'tab20c', 'tab20c_r', 'flag', 'flag_r', 'prism', 'prism_r', 'ocean', 'ocean_r',
+    'gist_earth', 'gist_earth_r', 'terrain', 'terrain_r', 'gist_stern', 'gist_stern_r', 'gnuplot',
+    'gnuplot_r', 'gnuplot2', 'gnuplot2_r', 'CMRmap', 'CMRmap_r', 'cubehelix', 'cubehelix_r', 'brg',
+    'brg_r', 'gist_rainbow', 'gist_rainbow_r', 'rainbow', 'rainbow_r', 'jet', 'jet_r',
+    'nipy_spectral', 'nipy_spectral_r', 'gist_ncar', 'gist_ncar_r'
+]
 
-INTERPOLATIONS = ['None', 'Nearest', 'Bilinear', 'Bicubic', 'Spline16',
-                  'Spline36', 'Hanning', 'Hamming', 'Hermite', 'Kaiser',
-                  'Quadric','Catrom', 'Gaussian', 'Bessel', 'Mitchell', 'Sinc',
-                  'Lanczos']
+INTERPOLATIONS = [
+    'None', 'Nearest', 'Bilinear', 'Bicubic', 'Spline16', 'Spline36', 'Hanning', 'Hamming',
+    'Hermite', 'Kaiser', 'Quadric', 'Catrom', 'Gaussian', 'Bessel', 'Mitchell', 'Sinc', 'Lanczos'
+]
 
-SCALES = {'Linear': Normalize,
-          'Logarithmic': LogNorm}
+SCALES = {'Linear': Normalize, 'Logarithmic': LogNorm}
+
+
+def create_colormap_img(cmap_name, save=False):
+    import matplotlib.pyplot as plt
+    try:
+        cmap = plt.get_cmap(cmap_name)
+    except ValueError:
+        print("Colormap '{}' not found!".format(cmap_name))
+        return
+
+    row_colours = np.zeros((256, 3), dtype=np.uint8)
+    for i in range(256):
+        rgba = cmap(i*cmap.N/255)
+        row_colours[i] = 255*np.array(rgba)[:3]
+
+    img_array = np.tile(row_colours, (100, 1, 1))
+    img = QImage(img_array.tobytes(), 256, 100, QImage.Format_RGB888)
+    if save:
+        img.save('D:\\ejo7321303\\Mantid\\Testing\\Colormaps\\'
+                  'colormap-{}.png'.format(cmap_name))
+    return img
 
 
 class ImagesTabWidgetView(QWidget):
-
     def __init__(self, parent=None):
         super(ImagesTabWidgetView, self).__init__(parent=parent)
 
-        self.ui = load_ui(__file__,
-                          'images_tab.ui',
-                          baseinstance=self)
+        self.ui = load_ui(__file__, 'images_tab.ui', baseinstance=self)
         self._populate_colormap_combo_box()
         self._populate_interpolation_combo_box()
         self._populate_scale_combo_box()
@@ -71,10 +82,8 @@ class ImagesTabWidgetView(QWidget):
             spin_box.setRange(0, np.finfo(np.float32).max)
 
         # Make sure min scale value always less than max
-        self.min_value_spin_box.valueChanged.connect(
-            self._check_max_min_consistency_min_changed)
-        self.max_value_spin_box.valueChanged.connect(
-            self._check_max_min_consistency_max_changed)
+        self.min_value_spin_box.valueChanged.connect(self._check_max_min_consistency_min_changed)
+        self.max_value_spin_box.valueChanged.connect(self._check_max_min_consistency_max_changed)
 
     def _check_max_min_consistency_min_changed(self):
         """Check min value smaller than max value after min_value changed"""
@@ -87,7 +96,15 @@ class ImagesTabWidgetView(QWidget):
             self.set_min_value(self.get_max_value() - 0.01)
 
     def _populate_colormap_combo_box(self):
-        self.colormap_combo_box.addItems(CMAPS)
+        from time import time
+        start = time()
+        for cmap_name in CMAPS:
+            img = create_colormap_img(cmap_name)
+            if img:
+                pixmap = QPixmap.fromImage(img)
+                self.colormap_combo_box.addItem(QIcon(pixmap), cmap_name)
+        print("Time taken to poulate colormap drop down: {}s"
+              "".format(time() - start))
 
     def _populate_interpolation_combo_box(self):
         self.interpolation_combo_box.addItems(INTERPOLATIONS)
@@ -128,7 +145,7 @@ class ImagesTabWidgetView(QWidget):
     def set_min_value(self, value):
         self.min_value_spin_box.setValue(value)
 
-    def get_max_value(self,):
+    def get_max_value(self):
         return self.max_value_spin_box.value()
 
     def set_max_value(self, value):
