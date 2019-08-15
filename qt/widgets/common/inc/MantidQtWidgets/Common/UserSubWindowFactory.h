@@ -14,9 +14,12 @@
 #include "DllOption.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidQtWidgets/Common/BaseDecoder.h"
+#include "MantidQtWidgets/Common/BaseEncoder.h"
 #include <QHash>
 #include <QSetIterator>
 #include <QStringList>
+#include <boost/optional.hpp>
 #include <set>
 
 namespace MantidQt {
@@ -48,7 +51,13 @@ public:
   QSet<QString> categories(const QString &interfaceName) const;
   QStringList keys() const;
 
+  QMap<QString, QVariant> encodeWindow(QWidget *window);
+  bool decodeWindow(QWidget *window, const QMap<QString, QVariant> &map,
+                    const std::string &decodeString);
+
   template <typename TYPE> void subscribe();
+  template <typename WindowType, typename EncoderType, typename DecoderType>
+  void subscribe(const std::string &decoderTag);
 
 protected:
   // Unhide the inherited create method
@@ -74,6 +83,15 @@ private:
   QHash<QString, QList<std::string>> m_badAliases;
   /// A map of interfaces to their categories.
   QHash<QString, QSet<QString>> m_categoryLookup;
+
+  // QHash doesn't seem to support std::unique_ptr<> as a valueso a std::map is
+  // used instead
+  std::map<std::string,
+           std::unique_ptr<Mantid::Kernel::AbstractInstantiator<BaseEncoder>>>
+      m_encoders;
+  std::map<std::string,
+           std::unique_ptr<Mantid::Kernel::AbstractInstantiator<BaseDecoder>>>
+      m_decoders;
 };
 
 template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
@@ -89,6 +107,19 @@ template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
     result.insert(category.trimmed());
   }
   m_categoryLookup[QString::fromStdString(realName)] = result;
+}
+
+template <typename WindowType, typename EncoderType, typename DecoderType>
+void UserSubWindowFactoryImpl::subscribe(const std::string &decoderTag) {
+  subscribe<WindowType>();
+  m_encoders.insert(
+      {WindowType::name(),
+       std::make_unique<
+           Mantid::Kernel::Instantiator<EncoderType, BaseEncoder>>()});
+  m_decoders.insert(
+      {decoderTag,
+       std::make_unique<
+           Mantid::Kernel::Instantiator<DecoderType, BaseDecoder>>()});
 }
 
 /**

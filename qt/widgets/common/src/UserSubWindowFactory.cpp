@@ -82,7 +82,7 @@ UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
 
 /// Default constructor
 UserSubWindowFactoryImpl::UserSubWindowFactoryImpl()
-    : m_aliasLookup(), m_badAliases() {}
+    : m_aliasLookup(), m_badAliases(), m_encoders(), m_decoders() {}
 
 /**
  * Create a user sub window by searching for an alias name
@@ -126,4 +126,29 @@ QStringList UserSubWindowFactoryImpl::keys() const {
     key_list.append(QString::fromStdString(key));
   }
   return key_list;
+}
+
+QMap<QString, QVariant>
+UserSubWindowFactoryImpl::encodeWindow(QWidget *window) {
+  auto subWindow = dynamic_cast<UserSubWindow *>(window);
+  if (subWindow) {
+    auto itemIt = m_encoders.find(subWindow->windowTitle().toStdString());
+    if (itemIt != m_encoders.end()) {
+      auto item = itemIt->second->createUnwrappedInstance();
+      return item->encode(window);
+    }
+  }
+  return {};
+}
+
+bool UserSubWindowFactoryImpl::decodeWindow(QWidget *window,
+                                            const QMap<QString, QVariant> &map,
+                                            const std::string &decodeString) {
+  auto itemIt = m_decoders.find(decodeString);
+  if (itemIt != m_decoders.end()) {
+    auto item = itemIt->second->createUnwrappedInstance();
+    item->decode(window, map);
+    return true;
+  }
+  return false;
 }

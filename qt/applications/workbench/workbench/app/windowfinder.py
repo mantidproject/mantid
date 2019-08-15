@@ -31,8 +31,8 @@ def find_all_windows_that_are_savable():
 
     windows = QApplication.topLevelWidgets()
     for window in windows:
-        encoder_class = EncoderFactory.find_encoder(window)
-        if encoder_class is not None:
-            list_of_windows_and_encoder.append((window, encoder_class))
+        encoder = EncoderFactory.find_encoder(window)
+        if encoder is not None:
+            list_of_windows_and_encoder.append((window, encoder))
 
     return list_of_windows_and_encoder

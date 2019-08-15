@@ -8,6 +8,8 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+from mantidqt.usersubwindowfactory import UserSubWindowFactory
+
 
 def default_encoder_compatability_check(obj, encoder_cls):
     return encoder_cls.has_tag(obj.__class__.__name__)
@@ -30,7 +32,12 @@ class EncoderFactory(object):
         elif len(obj_encoders) == 1:
             return obj_encoders[0]()
         else:
-            return None
+            # Search for a c++ interface if it's present
+            obj_encoders = UserSubWindowFactory.Instance().encodeWindow(obj)
+            if len(obj_encoders) == 0:
+                return None
+            else:
+                return obj_encoders
 
     @classmethod
     def register_encoder(cls, encoder, compatible_check=None):

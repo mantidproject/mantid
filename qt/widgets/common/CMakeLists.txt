@@ -217,6 +217,8 @@ set(
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES
     ${QT5_MOC_FILES}
+    inc/MantidQtWidgets/Common/BaseEncoder.h
+    inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
     inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h

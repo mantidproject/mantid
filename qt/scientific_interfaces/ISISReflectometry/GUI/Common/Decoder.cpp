@@ -25,14 +25,17 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
   return nullptr;
 }
 
-void Decoder::decode(const QtMainWindowView &gui,
-                     const QMap<QString, QVariant> &map) {
+void Decoder::decode(QWidget *gui, const QMap<QString, QVariant> &map) {
   UNUSED_ARG(gui);
   UNUSED_ARG(map);
 }
 
+QList<QString> Decoder::tags() {
+  return QList<QString>({QString("ISIS Reflectometry")});
+}
+
 void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
-                          QMap<QString, QVariant> &map,
+                          const QMap<QString, QVariant> &map,
                           const BatchPresenter *presenter) {
   auto batchPresenter = presenter;
   if (!batchPresenter) {
@@ -59,7 +62,7 @@ void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
 
 void Decoder::decodeBatch(const IBatchPresenter *presenter,
                           const IMainWindowView *mwv,
-                          QMap<QString, QVariant> &map) {
+                          const QMap<QString, QVariant> &map) {
   auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
   decodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
               *dynamic_cast<const QtMainWindowView *>(mwv), map,

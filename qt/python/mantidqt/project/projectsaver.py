@@ -76,15 +76,19 @@ class ProjectSaver(object):
         for interface, encoder in interfaces_to_save:
             # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
             try:
-                tag = encoder.tags[0]
-                encoded_dict = encoder.encode(interface, directory)
-                encoded_dict["tag"] = tag
-                interfaces.append(encoded_dict)
+                # Encoded using C++
+                if isinstance(encoder, dict):
+                    interfaces.append(encoder)
+                else:
+                    tag = encoder.tags[0]
+                    encoded_dict = encoder.encode(interface, directory)
+                    encoded_dict["tag"] = tag
+                    interfaces.append(encoded_dict)
             except Exception as e:
                 # Catch any exception and log it
                 if isinstance(e, KeyboardInterrupt):
                     raise
-                logger.warning("Project Saver: An interface could not be saver error: " + str(e))
+                logger.warning("Project Saver: An interface could not be saved, error: " + str(e))
 
         return interfaces
 
