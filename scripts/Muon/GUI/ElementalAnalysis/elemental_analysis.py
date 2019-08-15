@@ -54,7 +54,8 @@ def is_string(value):
 def gen_name(element, name):
     msg = None
     if not is_string(element):
-        msg = "'{}' expected element to be 'str', found '{}' instead".format(str(element), type(element))
+        msg = "'{}' expected element to be 'str', found '{}' instead".format(
+            str(element), type(element))
     if not is_string(name):
         msg = "'{}' expected name to be 'str', found '{}' instead".format(str(name), type(name))
 
@@ -99,14 +100,14 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # peaks boxes
         self.peaks = PeaksPresenter(PeaksView())
         self.peaks.major.setChecked(True)
-        self.peaks.major.on_checkbox_checked(self.major_peaks_checked)
-        self.peaks.major.on_checkbox_unchecked(self.major_peaks_unchecked)
-        self.peaks.minor.on_checkbox_checked(self.minor_peaks_checked)
-        self.peaks.minor.on_checkbox_unchecked(self.minor_peaks_unchecked)
-        self.peaks.gamma.on_checkbox_checked(self.gammas_checked)
-        self.peaks.gamma.on_checkbox_unchecked(self.gammas_unchecked)
-        self.peaks.electron.on_checkbox_checked(self.electrons_checked)
-        self.peaks.electron.on_checkbox_unchecked(self.electrons_unchecked)
+        self.peaks.major.on_checkbox_checked(self.major_peaks_changed)
+        self.peaks.major.on_checkbox_unchecked(self.major_peaks_changed)
+        self.peaks.minor.on_checkbox_checked(self.minor_peaks_changed)
+        self.peaks.minor.on_checkbox_unchecked(self.minor_peaks_changed)
+        self.peaks.gamma.on_checkbox_checked(self.gammas_changed)
+        self.peaks.gamma.on_checkbox_unchecked(self.gammas_changed)
+        self.peaks.electron.on_checkbox_checked(self.electrons_changed)
+        self.peaks.electron.on_checkbox_unchecked(self.electrons_changed)
 
         # Line type boxes
         self.lines = LineSelectorPresenter(LineSelectorView())
@@ -160,7 +161,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if element in self.used_colors:
             return self.used_colors[element]
 
-        occurrences = [list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)]
+        occurrences = [
+            list(self.used_colors.values()).count('C{}'.format(i)) for i in range(self.num_colors)
+        ]
 
         color_index = occurrences.index(min(occurrences))
 
@@ -317,6 +320,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.plot_window = None
         for name in self.detectors.getNames():
             self.detectors.setStateQuietly(name, False)
+        self.uncheck_detectors_if_no_line_plotted()
 
     # plotting
     def add_peak_data(self, element, subplot, data=None):
@@ -416,40 +420,21 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             checkbox.setChecked(state)
         self._update_peak_data(element)
 
-    def electrons_checked(self):
+    def electrons_changed(self, electron_peaks):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.electron_checkboxes, True)
+            self.checked_data(element, selector.electron_checkboxes, electron_peaks.isChecked())
 
-    def electrons_unchecked(self):
+    def gammas_changed(self, gamma_peaks):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.electron_checkboxes, False)
+            self.checked_data(element, selector.gamma_checkboxes, gamma_peaks.isChecked())
 
-    # gamma Peaks
-    def gammas_checked(self):
+    def major_peaks_changed(self, major_peaks):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.gamma_checkboxes, True)
+            self.checked_data(element, selector.primary_checkboxes, major_peaks.isChecked())
 
-    def gammas_unchecked(self):
+    def minor_peaks_changed(self, minor_peaks):
         for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.gamma_checkboxes, False)
-
-    # major peaks
-    def major_peaks_checked(self):
-        for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.primary_checkboxes, True)
-
-    def major_peaks_unchecked(self):
-        for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.primary_checkboxes, False)
-
-    # minor peaks
-    def minor_peaks_checked(self):
-        for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.secondary_checkboxes, True)
-
-    def minor_peaks_unchecked(self):
-        for element, selector in iteritems(self.element_widgets):
-            self.checked_data(element, selector.secondary_checkboxes, False)
+            self.checked_data(element, selector.secondary_checkboxes, minor_peaks.isChecked())
 
     def add_line_by_type(self, run, _type):
         # Ensure all detectors are enabled
@@ -474,6 +459,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     def remove_line_type(self, run, _type):
         if self.plot_window is None:
+            self.uncheck_detectors_if_no_line_plotted()
             return
 
         # Remove the correct line type on all open subplots
@@ -496,6 +482,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
     # When removing a line with the remove window uncheck the line here
     def uncheck_on_removed(self, removed_lines):
+        if sum([1 if detector.isChecked() else 0 for detector in self.detectors.detectors]) > 1:
+            return
+
         for line in removed_lines:
             if 'Total' in line:
                 self.lines.total.blockSignals(True)

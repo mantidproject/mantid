@@ -503,7 +503,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_gamms_checked_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.gammas_checked()
+        self.gui.gammas_changed()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_gamms_unchecked_calls_checked_data_for_each_element(self):
@@ -515,7 +515,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_major_checked_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.major_peaks_checked()
+        self.gui.major_peaks_changed()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_major_unchecked_calls_checked_data_for_each_element(self):
@@ -527,7 +527,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     def test_minor_checked_calls_checked_data_for_each_element(self):
         elem = len(self.gui.ptable.peak_data)
         self.gui.checked_data = mock.Mock()
-        self.gui.minor_peaks_checked()
+        self.gui.minor_peaks_changed()
         self.assertEqual(self.gui.checked_data.call_count, elem)
 
     def test_minor_unchecked_calls_checked_data_for_each_element(self):

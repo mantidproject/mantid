@@ -64,7 +64,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
         self.quickEdit.add_subplot(name)
 
-    def plot(self, subplot_name, ws, color, spec_num=1):
+    def plot(self, subplot_name, ws, color=None, spec_num=1):
         self.plots.plot(subplot_name, ws, color=color, spec_num=spec_num)
 
     def remove_subplot(self, name):

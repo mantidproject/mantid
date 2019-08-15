@@ -87,7 +87,7 @@ class subplot(QtWidgets.QWidget):
         self.canvas.draw()
 
     # plot a workspace, if a new subplot create it.
-    def plot(self, subplot_name, workspace, color, spec_num=1):
+    def plot(self, subplot_name, workspace, color=None, spec_num=1):
         new = False
         if subplot_name not in self._context.subplots.keys():
             self.add_subplot(subplot_name, len(list(self.plot_objects.keys())))
@@ -102,7 +102,7 @@ class subplot(QtWidgets.QWidget):
             self.canvas.draw()
 
     # adds plotted line to context and updates GUI
-    def _add_plotted_line(self, subplot_name, workspace, spec_num, color):
+    def _add_plotted_line(self, subplot_name, workspace, spec_num, color=None):
         """ Appends plotted lines to the related subplot list. """
         self._context.addLine(subplot_name, workspace, spec_num, color=color)
         self.canvas.draw()

@@ -48,19 +48,15 @@ class subplotContext(object):
 
     def addLine(self, ws, spec_num=1, distribution=True, color=None):
         if color is None:
-            plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution}
         else:
             plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
 
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, kwargs=plot_kwargs)
+        line, = plots.plotfunctions.plot(self._subplot, ws, **plot_kwargs)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
-                                                                      ws,
-                                                                      specNum=spec_num,
-                                                                      label=label,
-                                                                      color=color)
+            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, ws, **plot_kwargs)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
