@@ -485,24 +485,21 @@ public:
     verifyAndClear();
   }
 
-  void testLiveDataReductionOptions() {
-    auto presenter = makePresenter();
-    auto props = AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
-    EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
-        .Times(1)
-        .WillOnce(Return(props));
-    auto result =
-        presenter.liveDataReductionOptions("live_input_workspace", "INTER");
-    auto expected =
-        "GetLiveValueAlgorithm=GetLiveInstrumentValue;InputWorkspace="
-        "live_input_workspace;Instrument=INTER;Prop1=val1;Prop2="
-        "val2";
-    TS_ASSERT_EQUALS(result, expected);
-  }
-
-  void testStartMonitorSetsDefaultReductionAlgorithmProperties() {
+  void testStartMonitorSetsDefaultPostProcessingProperties() {
     auto presenter = makePresenter();
     auto options = defaultLiveMonitorReductionOptions();
+    expectGetLiveDataOptions(options);
+    auto algRunner = expectGetAlgorithmRunner();
+    presenter.notifyStartMonitor();
+    assertPostProcessingPropertiesEqual(options, algRunner);
+    verifyAndClear();
+  }
+
+  void testStartMonitorSetsUserSpecifiedPostProcessingProperties() {
+    auto presenter = makePresenter();
+    auto options = defaultLiveMonitorReductionOptions();
+    options["Prop1"] = "val1";
+    options["Prop2"] = "val2";
     expectGetLiveDataOptions(options);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();

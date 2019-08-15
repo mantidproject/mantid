@@ -122,9 +122,6 @@ protected:
   /// The algorithm used when the live data monitor is running
   Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
-  std::string liveDataReductionOptions(const std::string &inputWorkspace,
-                                       const std::string &instrument);
-
 private:
   /// The main view we're managing
   IRunsView *m_view;
@@ -168,6 +165,9 @@ private:
   void stopMonitor();
   void startMonitorComplete();
   std::string liveDataReductionAlgorithm();
+  std::string liveDataReductionOptions(const std::string &inputWorkspace,
+                                       const std::string &instrument);
+
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
   void handleError(const std::string &message, const std::exception &e);
