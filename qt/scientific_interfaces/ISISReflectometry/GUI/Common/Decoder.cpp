@@ -26,7 +26,7 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
   return nullptr;
 }
 
-void Decoder::decode(const QMap<QString, QVariant> &map) {
+QWidget *Decoder::decode(const QMap<QString, QVariant> &map) {
   auto userSubWindow =
       MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
   auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
@@ -41,7 +41,7 @@ void Decoder::decode(const QMap<QString, QVariant> &map) {
     decodeBatch(dynamic_cast<QtBatchView *>(mwv->m_batchViews[ii]), mwv,
                 batches[ii].toMap());
   }
-  mwv->show();
+  return mwv;
 }
 
 QList<QString> Decoder::tags() {

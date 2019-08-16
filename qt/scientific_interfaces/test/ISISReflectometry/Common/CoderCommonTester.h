@@ -32,18 +32,19 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 class CoderCommonTester {
 public:
-  void testMainWindowView(const QtMainWindowView &mwv,
+  void testMainWindowView(const QtMainWindowView *mwv,
                           const QMap<QString, QVariant> &map) {
     auto list = map[QString("batches")].toList();
-    for (auto batchIndex = 0u; batchIndex < mwv.m_batchViews.size();
+    for (auto batchIndex = 0u; batchIndex < mwv->m_batchViews.size();
          ++batchIndex) {
-      testBatch(mwv.m_batchViews[batchIndex], mwv, list[batchIndex].toMap());
+      testBatch(dynamic_cast<QtBatchView *>(mwv->m_batchViews[batchIndex]), mwv,
+                list[batchIndex].toMap());
     }
     TS_ASSERT_EQUALS(map[QString("tag")].toString().toStdString(),
                      "ISIS Reflectometry")
   }
 
-  void testBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
+  void testBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
                  const QMap<QString, QVariant> &map) {
     Decoder batchFinder;
     auto batchPresenter = batchFinder.findBatchPresenter(gui, mwv);

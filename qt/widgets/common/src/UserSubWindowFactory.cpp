@@ -146,7 +146,8 @@ bool UserSubWindowFactoryImpl::decodeWindow(const QMap<QString, QVariant> &map,
   auto itemIt = m_decoders.find(decodeString);
   if (itemIt != m_decoders.end()) {
     auto item = itemIt->second->createInstance();
-    item->decode(map);
+    auto widget = item->decode(map);
+    widget->show();
     return true;
   }
   return false;

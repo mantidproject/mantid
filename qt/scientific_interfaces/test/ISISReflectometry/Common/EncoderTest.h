@@ -29,15 +29,27 @@ public:
 
   void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
+  void test_encoder() {
+    CoderCommonTester tester;
+    QtMainWindowView mwv;
+    mwv.initLayout();
+    Encoder encoder;
+    auto map = encoder.encode(&mwv);
+
+    map.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
+
+    tester.testMainWindowView(&mwv, map);
+  }
+
   void test_encodeBatch() {
     CoderCommonTester tester;
     QtMainWindowView mwv;
     mwv.initLayout();
     auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
     Encoder encoder;
-    auto map = encoder.encodeBatch(gui, mwv);
+    auto map = encoder.encodeBatch(gui, &mwv);
 
-    tester.testBatch(gui, mwv, map);
+    tester.testBatch(gui, &mwv, map);
   }
 };
 } // namespace ISISReflectometry
