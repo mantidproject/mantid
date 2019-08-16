@@ -77,6 +77,10 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
   }
 }
 
+void MainWindowPresenter::notifyShowOptionsRequested() {}
+
+void MainWindowPresenter::notifyShowSlitCalculatorRequested() {}
+
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->notifyAnyBatchAutoreductionResumed();

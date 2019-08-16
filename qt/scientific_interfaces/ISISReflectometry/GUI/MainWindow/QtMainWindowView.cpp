@@ -62,6 +62,10 @@ void QtMainWindowView::initLayout() {
           SLOT(onLoadBatchRequested(bool)));
   connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
           SLOT(onSaveBatchRequested(bool)));
+  connect(m_ui.showOptions, SIGNAL(triggered(bool)), this,
+          SLOT(onShowOptionsRequested(bool)));
+  connect(m_ui.showSlitCalculator, SIGNAL(triggered(bool)), this,
+          SLOT(onShowSlitCalculatorRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -112,6 +116,14 @@ void QtMainWindowView::onLoadBatchRequested(bool) {
 
 void QtMainWindowView::onSaveBatchRequested(bool) {
   m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
+}
+
+void QtMainWindowView::onShowOptionsRequested(bool) {
+  m_notifyee->notifyShowOptionsRequested();
+}
+
+void QtMainWindowView::onShowSlitCalculatorRequested(bool) {
+  m_notifyee->notifyShowSlitCalculatorRequested();
 }
 
 void QtMainWindowView::subscribe(MainWindowSubscriber *notifyee) {

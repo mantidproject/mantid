@@ -60,6 +60,8 @@ public:
   void notifyCloseBatchRequested(int batchIndex) override;
   void notifySaveBatchRequested(int batchIndex) override;
   void notifyLoadBatchRequested(int batchIndex) override;
+  void notifyShowOptionsRequested() override;
+  void notifyShowSlitCalculatorRequested() override;
 
 protected:
   IMainWindowView *m_view;
