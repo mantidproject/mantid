@@ -7,7 +7,7 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
-#include "FileResource.h"
+#include "MantidTestHelpers/FileResource.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -18,7 +18,7 @@
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "NexusFileReader.h"
+#include "MantidTestHelpers/NexusFileReader.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

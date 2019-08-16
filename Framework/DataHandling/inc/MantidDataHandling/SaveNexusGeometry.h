@@ -4,6 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+
+/* SaveNexusGeometry : A thin Algorithm wrapper over
+ * NexusGeometry::saveInstrument allowing user to save the geometry from
+ * instrument attached to a workspace.
+ *
+ * @author Takudzwa Makoni, RAL (UKRI), ISIS
+ * @date 16/08/2019
+ */
 #ifndef MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_
 #define MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_
 
@@ -14,22 +22,12 @@ namespace Mantid {
 
 namespace DataHandling {
 
-/* SaveNexusGeometry : A thin Algorithm wrapper over
- * NexusGeometry::saveInstrument allowing user to save the geometry from
- * instrument attached to a workspace.
- */
 class MANTID_DATAHANDLING_DLL SaveNexusGeometry : public API::Algorithm {
 public:
-  const std::string name() const override { return "SaveNexusGeometry"; }
-  int version() const override { return 1; }
-  const std::string category() const override {
-    return "DataHandling\\Instrument";
-  }
-  const std::string summary() const override {
-    return "Reads the instrument from a workspace, and saves it to a Nexus "
-           "file with the full path file "
-           "destination and root name.";
-  }
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
   void init() override;
