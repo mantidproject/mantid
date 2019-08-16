@@ -9,12 +9,15 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
+
+#include <json/json.h>
 
 using namespace Mantid::Types;
 using namespace LogSchema;

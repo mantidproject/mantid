@@ -20,11 +20,14 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/hs00_event_histogram_generated.h"
 GNU_DIAG_ON("conversion")
+
+#include <json/json.h>
 
 using namespace HistoSchema;
 

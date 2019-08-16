@@ -13,13 +13,14 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 GNU_DIAG_OFF("conversion")
-#include "private/Schema/ba57_run_info_generated.h"
+#include "private/Schema/y2gw_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
@@ -29,6 +30,7 @@ GNU_DIAG_ON("conversion")
 #include <chrono>
 #include <numeric>
 #include <tbb/parallel_sort.h>
+#include <json/json.h>
 
 using namespace Mantid::Types;
 using namespace LogSchema;
