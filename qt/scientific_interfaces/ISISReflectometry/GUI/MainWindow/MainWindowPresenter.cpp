@@ -16,6 +16,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
+#include "MantidQtWidgets/Common/ISlitCalculator.h"
 #include "Reduction/Batch.h"
 
 #include <QFileDialog>
@@ -26,6 +27,7 @@ namespace ISISReflectometry {
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::MatrixWorkspace_sptr;
+using MantidWidgets::ISlitCalculator;
 
 // unnamed namespace
 namespace {
@@ -41,8 +43,10 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
+    std::unique_ptr<ISlitCalculator> slitCalculator,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler),
+      m_slitCalculator(std::move(slitCalculator)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)),
       m_instrument() {
   view->subscribe(this);

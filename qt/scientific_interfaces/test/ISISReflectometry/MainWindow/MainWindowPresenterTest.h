@@ -23,12 +23,13 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
+using MantidQt::MantidWidgets::ISlitCalculator;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
 
 class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
@@ -271,6 +272,7 @@ private:
   std::vector<IBatchView *> m_batchViews;
   std::vector<NiceMock<MockBatchPresenter> *> m_batchPresenters;
   NiceMock<MockBatchPresenterFactory> *m_makeBatchPresenter;
+  NiceMock<MockSlitCalculator> *m_slitCalculator;
 
   class MainWindowPresenterFriend : public MainWindowPresenter {
     friend class MainWindowPresenterTest;
@@ -278,13 +280,15 @@ private:
   public:
     MainWindowPresenterFriend(
         IMainWindowView *view, IMessageHandler *messageHandler,
+        std::unique_ptr<ISlitCalculator> slitCalculator,
         std::unique_ptr<IBatchPresenterFactory> makeBatchPresenter)
-        : MainWindowPresenter(view, messageHandler,
+        : MainWindowPresenter(view, messageHandler, std::move(slitCalculator),
                               std::move(makeBatchPresenter)) {}
   };
 
   MainWindowPresenterFriend makePresenter() {
-    // Make the batch presenter factory
+    auto slitCalculator = std::make_unique<NiceMock<MockSlitCalculator>>();
+    m_slitCalculator = slitCalculator.get();
     auto makeBatchPresenter =
         std::make_unique<NiceMock<MockBatchPresenterFactory>>();
     m_makeBatchPresenter = makeBatchPresenter.get();
@@ -298,6 +302,7 @@ private:
     }
     // Make the presenter
     auto presenter = MainWindowPresenterFriend(&m_view, &m_messageHandler,
+                                               std::move(slitCalculator),
                                                std::move(makeBatchPresenter));
     return presenter;
   }

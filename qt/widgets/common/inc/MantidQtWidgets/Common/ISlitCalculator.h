@@ -14,6 +14,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_COMMON ISlitCalculator {
 public:
+  virtual ~ISlitCalculator() = default;
   virtual void setCurrentInstrumentName(std::string instrumentName) = 0;
   virtual void processInstrumentHasBeenChanged() = 0;
 };

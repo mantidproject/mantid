@@ -11,6 +11,7 @@
 #include "GUI/Common/Decoder.h"
 #include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
+#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMessageBox>
 #include <QToolButton>
 
@@ -95,8 +96,10 @@ void QtMainWindowView::initLayout() {
       std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
+  auto slitCalculator = std::make_unique<SlitCalculator>(this);
   m_presenter = std::make_unique<MainWindowPresenter>(
-      this, messageHandler, std::move(makeBatchPresenter));
+      this, messageHandler, std::move(slitCalculator),
+      std::move(makeBatchPresenter));
 
   m_notifyee->notifyNewBatchRequested();
   m_notifyee->notifyNewBatchRequested();
