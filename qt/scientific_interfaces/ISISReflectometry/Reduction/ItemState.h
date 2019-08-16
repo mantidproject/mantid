@@ -32,7 +32,7 @@ enum class State {
 class MANTIDQT_ISISREFLECTOMETRY_DLL ItemState {
 public:
   ItemState();
-  ItemState(State state);
+  explicit ItemState(State state);
 
   State state() const;
   std::string message() const;
