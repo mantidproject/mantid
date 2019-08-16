@@ -58,5 +58,5 @@ class LineTabWidgetView(QWidget):
         self.set_width(curve_props.linewidth)
         self.set_color(curve_props.color)
 
-    def set_plot_all_enabled(self, enable):
+    def set_apply_to_all_enabled(self, enable):
         self.apply_to_all_button.setEnabled(enable)

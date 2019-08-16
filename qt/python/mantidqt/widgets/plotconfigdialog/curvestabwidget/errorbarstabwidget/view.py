@@ -33,8 +33,6 @@ class ErrorbarsTabWidgetView(QWidget):
             lambda: self.set_fields_enabled(not self.get_hide())
         )
 
-        self.multiple_curves = False
-
     def get_hide(self):
         return self.hide_errorbars_tickbox.checkState() == Qt.Checked
 
@@ -82,9 +80,6 @@ class ErrorbarsTabWidgetView(QWidget):
         self.error_every_spin_box.setEnabled(enable)
         self.color_selector_widget.setEnabled(enable)
 
-        if self.multiple_curves:
-            self.apply_to_all_button.setEnabled(enable)
-
     def update_fields(self, curve_props):
         self.set_hide(curve_props.hide_errors)
         self.set_width(curve_props.elinewidth)
@@ -93,5 +88,5 @@ class ErrorbarsTabWidgetView(QWidget):
         self.set_error_every(curve_props.errorevery)
         self.set_color(curve_props.ecolor)
 
-    def set_plot_all_enabled(self, enable):
+    def set_apply_to_all_enabled(self, enable):
         self.apply_to_all_button.setEnabled(enable)

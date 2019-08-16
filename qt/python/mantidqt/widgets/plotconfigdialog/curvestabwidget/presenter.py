@@ -52,6 +52,12 @@ class CurvesTabWidgetPresenter:
             self.update_view)
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve)
+        self.view.line.apply_to_all_button.clicked.connect(
+            self.line_apply_to_all)
+        self.view.marker.apply_to_all_button.clicked.connect(
+            self.marker_apply_to_all)
+        self.view.errorbars.apply_to_all_button.clicked.connect(
+            self.errorbars_apply_to_all)
 
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
@@ -296,12 +302,78 @@ class CurvesTabWidgetPresenter:
             self.curve_names_dict[name] = curve
 
     def check_number_of_curves(self):
+        """
+        Enables the Apply to All buttons in the line, marker, and errorbar tabs
+        if there is more than one curve.
+        """
         if len(self.curve_names_dict) > 1:
-            self.view.line.set_plot_all_enabled(True)
-            self.view.marker.set_plot_all_enabled(True)
-            self.view.errorbars.multiple_curves = True
+            self.view.line.set_apply_to_all_enabled(True)
+            self.view.marker.set_apply_to_all_enabled(True)
+            self.view.errorbars.set_apply_to_all_enabled(True)
         else:
-            self.view.line.set_plot_all_enabled(False)
-            self.view.marker.set_plot_all_enabled(False)
-            self.view.errorbars.set_plot_all_enabled(False)
-            self.view.errorbars.multiple_curves = False
+            self.view.line.set_apply_to_all_enabled(False)
+            self.view.marker.set_apply_to_all_enabled(False)
+            self.view.errorbars.set_apply_to_all_enabled(False)
+
+    def line_apply_to_all(self):
+        """
+        Applies the settings in the line tab for the current curve to all other curves.
+        """
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        line_style_index = self.view.line.line_style_combo_box.currentIndex()
+        draw_style_index = self.view.line.draw_style_combo_box.currentIndex()
+        width = self.view.line.line_width_spin_box.value()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.line.line_style_combo_box.setCurrentIndex(line_style_index)
+            self.view.line.draw_style_combo_box.setCurrentIndex(draw_style_index)
+            self.view.line.line_width_spin_box.setValue(width)
+
+            self.apply_properties()
+
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+
+    def marker_apply_to_all(self):
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        marker_style_index = self.view.marker.marker_style_combo_box.currentIndex()
+        marker_size = self.view.marker.marker_size_spin_box.value()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.marker.marker_style_combo_box.setCurrentIndex(marker_style_index)
+            self.view.marker.marker_size_spin_box.setValue(marker_size)
+
+            self.apply_properties()
+
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+
+    def errorbars_apply_to_all(self):
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        checked = self.view.errorbars.hide_errorbars_tickbox.isChecked()
+
+        if not checked:
+            width = self.view.errorbars.width_spin_box.value()
+            capsize = self.view.errorbars.capsize_spin_box.value()
+            cap_thickness = self.view.errorbars.cap_thickness_spin_box.value()
+            error_every = self.view.errorbars.error_every_spin_box.value()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.errorbars.hide_errorbars_tickbox.setChecked(checked)
+
+            if not checked:
+                self.view.errorbars.width_spin_box.setValue(width)
+                self.view.errorbars.capsize_spin_box.setValue(capsize)
+                self.view.errorbars.cap_thickness_spin_box.setValue(cap_thickness)
+                self.view.errorbars.error_every_spin_box.setValue(error_every)
+
+            self.apply_properties()
+
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
