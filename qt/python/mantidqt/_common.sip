@@ -247,7 +247,7 @@ public:
     QSet<QString> categories(const QString &interfaceName) const;
     QStringList keys() const;
     QMap<QString, QVariant> encodeWindow(QWidget *window);
-    bool decodeWindow(QWidget *window, const QMap<QString, QVariant> &map, const std::string &decodeString);
+    bool decodeWindow(const QMap<QString, QVariant> &map, const std::string &decodeString);
 
 private:
   UserSubWindowFactoryImpl();

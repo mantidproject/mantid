@@ -7,6 +7,7 @@
 
 #include "Decoder.h"
 #include "Encoder.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QApplication>
@@ -15,8 +16,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView &mwv) {
-  for (auto &ipresenter : mwv.m_presenter->m_batchPresenters) {
+                                            const QtMainWindowView *mwv) {
+  for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
       return presenter;
@@ -25,16 +26,29 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
   return nullptr;
 }
 
-void Decoder::decode(QWidget *gui, const QMap<QString, QVariant> &map) {
-  UNUSED_ARG(gui);
-  UNUSED_ARG(map);
+void Decoder::decode(const QMap<QString, QVariant> &map) {
+  auto userSubWindow =
+      MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
+  auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
+  auto batches = map["batches"].toList();
+  // Create the number of batches required.
+  for (auto batchIndex = mwv->batches().size();
+       batchIndex < static_cast<long unsigned int>(batches.size());
+       ++batchIndex) {
+    mwv->newBatch();
+  }
+  for (auto ii = 0; ii < batches.size(); ++ii) {
+    decodeBatch(dynamic_cast<QtBatchView *>(mwv->m_batchViews[ii]), mwv,
+                batches[ii].toMap());
+  }
+  mwv->show();
 }
 
 QList<QString> Decoder::tags() {
   return QList<QString>({QString("ISIS Reflectometry")});
 }
 
-void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
+void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
                           const QMap<QString, QVariant> &map,
                           const BatchPresenter *presenter) {
   auto batchPresenter = presenter;
@@ -65,8 +79,7 @@ void Decoder::decodeBatch(const IBatchPresenter *presenter,
                           const QMap<QString, QVariant> &map) {
   auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
   decodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-              *dynamic_cast<const QtMainWindowView *>(mwv), map,
-              batchPresenter);
+              dynamic_cast<const QtMainWindowView *>(mwv), map, batchPresenter);
 }
 
 void Decoder::decodeExperiment(const QtExperimentView *gui,

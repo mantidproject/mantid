@@ -35,9 +35,9 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder
     : public MantidQt::API::BaseDecoder {
 public:
-  void decode(QWidget *gui, const QMap<QString, QVariant> &map) override;
+  void decode(const QMap<QString, QVariant> &map) override;
   QList<QString> tags() override;
-  void decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
+  void decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
                    const QMap<QString, QVariant> &map,
                    const BatchPresenter *presenter = nullptr);
   void decodeBatch(const IBatchPresenter *presenter, const IMainWindowView *mwv,
@@ -45,7 +45,7 @@ public:
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui,
-                                     const QtMainWindowView &mww);
+                                     const QtMainWindowView *mww);
   void decodeExperiment(const QtExperimentView *gui,
                         const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab,

@@ -134,20 +134,19 @@ UserSubWindowFactoryImpl::encodeWindow(QWidget *window) {
   if (subWindow) {
     auto itemIt = m_encoders.find(subWindow->windowTitle().toStdString());
     if (itemIt != m_encoders.end()) {
-      auto item = itemIt->second->createUnwrappedInstance();
+      auto item = itemIt->second->createInstance();
       return item->encode(window);
     }
   }
   return {};
 }
 
-bool UserSubWindowFactoryImpl::decodeWindow(QWidget *window,
-                                            const QMap<QString, QVariant> &map,
+bool UserSubWindowFactoryImpl::decodeWindow(const QMap<QString, QVariant> &map,
                                             const std::string &decodeString) {
   auto itemIt = m_decoders.find(decodeString);
   if (itemIt != m_decoders.end()) {
-    auto item = itemIt->second->createUnwrappedInstance();
-    item->decode(window, map);
+    auto item = itemIt->second->createInstance();
+    item->decode(map);
     return true;
   }
   return false;

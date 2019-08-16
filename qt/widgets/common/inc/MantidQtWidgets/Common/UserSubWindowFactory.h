@@ -52,7 +52,7 @@ public:
   QStringList keys() const;
 
   QMap<QString, QVariant> encodeWindow(QWidget *window);
-  bool decodeWindow(QWidget *window, const QMap<QString, QVariant> &map,
+  bool decodeWindow(const QMap<QString, QVariant> &map,
                     const std::string &decodeString);
 
   template <typename TYPE> void subscribe();
