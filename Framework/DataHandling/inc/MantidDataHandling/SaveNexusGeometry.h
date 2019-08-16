@@ -11,16 +11,25 @@
 #include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
+
 namespace DataHandling {
 
-/** SaveNexusGeometry : TODO: DESCRIPTION
+/* SaveNexusGeometry : A thin Algorithm wrapper over
+ * NexusGeometry::saveInstrument allowing user to save the geometry from
+ * instrument attached to a workspace.
  */
 class MANTID_DATAHANDLING_DLL SaveNexusGeometry : public API::Algorithm {
 public:
-  const std::string name() const override;
-  int version() const override;
-  const std::string category() const override;
-  const std::string summary() const override;
+  const std::string name() const override { return "SaveNexusGeometry"; }
+  int version() const override { return 1; }
+  const std::string category() const override {
+    return "DataHandling\\Instrument";
+  }
+  const std::string summary() const override {
+    return "Reads the instrument from a workspace, and saves it to a Nexus "
+           "file with the full path file "
+           "destination and root name.";
+  }
 
 private:
   void init() override;
