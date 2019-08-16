@@ -227,7 +227,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                               const QMap<QString, QVariant> &map) {
   MantidQt::API::SignalBlocker signalBlockerView(gui);
 
-  bool projectSave = map[QString("projectSave")].toBool();
+  m_projectSave = map[QString("projectSave")].toBool();
   auto runsTable = map[QString("runsTableModel")].toList();
 
   // Clear
@@ -255,9 +255,11 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
   // Still need to do this for groups
   updateRunsTableViewFromModel(gui, redJobs);
 
-  if (projectSave) {
+  if (m_projectSave) {
     // Apply styling and restore completed state for output range values best
     // way to achieve this is yet to be decided.
+    presenter->notifyRowOutputsChanged();
+    presenter->notifyRowStateChanged();
   }
   gui->m_ui.filterBox->setText(map[QString("filterBox")].toString());
 }
@@ -275,6 +277,10 @@ Decoder::decodeGroup(const QMap<QString, QVariant> &map) {
   auto rows = decodeRows(map["rows"].toList());
   MantidQt::CustomInterfaces::ISISReflectometry::Group group(
       map[QString("name")].toString().toStdString(), rows);
+  if (m_projectSave) {
+    auto itemState = map[QString("itemState")].toInt();
+    group.setState(State(itemState));
+  }
   group.m_postprocessedWorkspaceName =
       map[QString("postprocessedWorkspaceName")].toString().toStdString();
   return group;
@@ -317,21 +323,30 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   if (scaleFactorPresent) {
     scaleFactor = map[QString("scaleFactor")].toDouble();
   }
-
   if (scaleFactorPresent) {
-    return MantidQt::CustomInterfaces::ISISReflectometry::Row(
+    auto row = MantidQt::CustomInterfaces::ISISReflectometry::Row(
         number, map[QString("theta")].toDouble(),
         decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
         decodeRangeInQ(map[QString("qRange")].toMap()), scaleFactor,
         decodeReductionOptions(map[QString("reductionOptions")].toMap()),
         decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+    if (m_projectSave) {
+      auto itemState = map[QString("itemState")].toInt();
+      row.setState(State(itemState));
+    }
+    return row;
   } else {
-    return MantidQt::CustomInterfaces::ISISReflectometry::Row(
+    auto row = MantidQt::CustomInterfaces::ISISReflectometry::Row(
         number, map[QString("theta")].toDouble(),
         decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
         decodeRangeInQ(map[QString("qRange")].toMap()), boost::none,
         decodeReductionOptions(map[QString("reductionOptions")].toMap()),
         decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+    if (m_projectSave) {
+      auto itemState = map[QString("itemState")].toInt();
+      row.setState(State(itemState));
+    }
+    return row;
   }
 }
 

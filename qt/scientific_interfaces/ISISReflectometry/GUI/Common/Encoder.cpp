@@ -116,6 +116,7 @@ QMap<QString, QVariant> Encoder::encodeGroup(
     const MantidQt::CustomInterfaces::ISISReflectometry::Group &group) {
   QMap<QString, QVariant> map;
   map.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
+  map.insert(QString("itemState"), QVariant(static_cast<int>(group.state())));
   map.insert(
       QString("postprocessedWorkspaceName"),
       QVariant(QString::fromStdString(group.m_postprocessedWorkspaceName)));
@@ -204,6 +205,7 @@ Encoder::encodeReductionOptions(const ReductionOptionsMap &rom) {
 QMap<QString, QVariant> Encoder::encodeRow(
     const MantidQt::CustomInterfaces::ISISReflectometry::Row &row) {
   QMap<QString, QVariant> map;
+  map.insert(QString("itemState"), QVariant(static_cast<int>(row.state())));
   QList<QVariant> runNumbers;
   for (const auto &runNumber : row.m_runNumbers) {
     runNumbers.append(QVariant(QString::fromStdString(runNumber)));

@@ -79,6 +79,7 @@ private:
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(QtRunsTableView *view,
                                     const ReductionJobs *model);
+  bool m_projectSave = false;
   friend class CoderCommonTester;
 };
 
