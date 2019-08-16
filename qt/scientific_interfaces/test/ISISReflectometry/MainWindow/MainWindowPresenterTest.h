@@ -12,6 +12,7 @@
 #include "../Batch/MockBatchView.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
 
 #include <cxxtest/TestSuite.h>
@@ -149,6 +150,18 @@ public:
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionPaused());
     presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
+  void testShowOptionsRequested() {
+    auto presenter = makePresenter();
+    presenter.notifyShowOptionsRequested();
+    verifyAndClear();
+  }
+
+  void testShowSlitCalculatorRequested() {
+    auto presenter = makePresenter();
+    presenter.notifyShowSlitCalculatorRequested();
     verifyAndClear();
   }
 
