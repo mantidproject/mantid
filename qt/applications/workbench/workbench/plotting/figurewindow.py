@@ -85,9 +85,12 @@ class FigureWindow(QMainWindow, ObservingView):
         """
         from matplotlib.backend_bases import LocationEvent
         workspace_names = event.mimeData().text().split('\n')
+
+        # This creates a matplotlib LocationEvent so that the axis in which the drop event occurred can be calculated
         x, y = self._canvas.mouseEventCoords(event.pos())
         location_event = LocationEvent('AxesGetterEvent', self._canvas, x, y)
         ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
+
         self._plot_on_here(workspace_names, ax)
         QMainWindow.dropEvent(self, event)
 

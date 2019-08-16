@@ -133,7 +133,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.specNums.textChanged.connect(self._on_specnums_changed)
 
         # combobox changed
-        ui.plotType.currentTextChanged.connect(self._on_plot_type_changed)
+        ui.plotType.currentIndexChanged.connect(self._on_plot_type_changed)
 
     def _on_wkspindices_changed(self):
         ui = self._ui
@@ -153,7 +153,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
-    def _on_plot_type_changed(self, new_text):
+    def _on_plot_type_changed(self, new_index):
+        new_text = self._ui.plotType.currentText()
         if self._overplot:
             self._ui.plotType.setCurrentIndex(0)
             return

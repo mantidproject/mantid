@@ -16,6 +16,8 @@ def get_spectra_selection(workspaces, parent_widget=None, show_colorfill_btn=Fal
 
     :param workspaces: A list of MatrixWorkspaces that will be plotted
     :param parent_widget: An optional parent_widget to use for the input selection dialog
+    :param show_colorfill_btn: An optional flag controlling whether the colorfill button should be shown
+    :param overplot: An optional flag detailing whether to overplot onto the current figure
     :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
     the request was cancelled
     :raises ValueError: if the workspaces are not of type MatrixWorkspace

@@ -154,7 +154,8 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
 def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=1, fig=None):
     """
     Create a blank figure and axes, with configurable properties.
-    :param overplot: If true then plotting on figure will plot over previous plotting
+    :param overplot: If true then plotting on figure will plot over previous plotting. If an axis object the overplotting
+    will be done on the axis passed in
     :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'} for log y-axis
     :param window_title: A string denoting the name of the GUI window which holds the graph
     :param axes_num: The number of axes to create on the figure
@@ -180,15 +181,6 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     return fig, fig.axes
 
 
-def get_number_of_rows_and_columns_for_tiled_plot(axes_num):
-    nrows = math.floor(math.sqrt(axes_num))
-    ncolumns = math.ceil(math.sqrt(axes_num))
-
-    if axes_num > nrows * ncolumns:
-        nrows += 1
-    return int(nrows), int(ncolumns)
-
-
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
          overplot=False, fig=None, plot_kwargs=None, ax_properties=None,
@@ -202,11 +194,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
     :param wksp_indices: A list of workspace indexes (starts from 0)
     :param errors: If true then error bars are added for each plot
-    :param overplot: If true then overplot over the current figure if one exists
+    :param overplot: If true then overplot over the current figure if one exists. If an axis object the overplotting
+    will be done on the axis passed in
     :param fig: If not None then use this Figure object to plot
     :param plot_kwargs: Arguments that will be passed onto the plot function
     :param ax_properties: A dict of axes properties. E.g. {'yscale': 'log'}
     :param window_title: A string denoting name of the GUI window which holds the graph
+    :param tiled: An optional flag controlling whether to do a tiled or overlayed plot
     :return: The figure containing the plots
     """
     if plot_kwargs is None:
@@ -261,11 +255,11 @@ def pcolormesh_from_names(names, fig=None, ax=None):
 
     :param names: A list of workspace names
     :param fig: An optional figure to contain the new plots. Its current contents will be cleared
+    :param ax: An optional axis instance on which to put new plots. It's current contents will be cleared
     :returns: The figure containing the plots
     """
     try:
         if ax:
-            ax.clear()
             pcolormesh_on_axis(ax, AnalysisDataService.retrieve(names[0]))
             fig.canvas.draw()
             fig.show()
@@ -330,6 +324,13 @@ def pcolormesh(workspaces, fig=None):
 
 
 def pcolormesh_on_axis(ax, ws):
+    """
+    Plot a pcolormesh plot of the given workspace on the given axis
+    :param ax: A matplotlib axes instance
+    :param ws: A mantid workspace instance
+    :return:
+    """
+    ax.clear()
     ax.set_title(ws.name())
     if use_imshow(ws):
         pcm = ax.imshow(ws, cmap=DEFAULT_CMAP, aspect='auto', origin='lower')
@@ -454,7 +455,7 @@ def _create_subplots(nplots, fig=None):
     nrows, ncols = square_side_len, square_side_len
     if square_side_len * square_side_len != nplots:
         # not a square number - square_side_len x square_side_len
-        # will be large enough but we could end up with an empt
+        # will be large enough but we could end up with an empty
         # row so chop that off
         if nplots <= (nrows - 1) * ncols:
             nrows -= 1

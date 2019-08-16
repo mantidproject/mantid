@@ -57,6 +57,7 @@ def figure_type(fig, ax=None):
     return by fig.gca()
 
     :param fig: A matplotlib figure instance
+    :param ax: A matplotlib axes instance
     :return: An enumeration defining the plot type
     """
     if len(fig.get_axes()) == 0:
