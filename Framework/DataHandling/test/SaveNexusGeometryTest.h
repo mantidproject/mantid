@@ -79,22 +79,25 @@ public:
     ScopedFileHandle fileResource("algorithm_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
-    MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            5, 5, 5);
+    Mantid::API::MatrixWorkspace_const_sptr inputWS = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(1,5,1);
 
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
+    
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
+    
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    /*
+	TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("SaveDestinationPath", destinationFile));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("FileRootName", "algorithm_test_data"));
+        alg.setPropertyValue("H5Path", "algorithm_test_data"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+	*/
   }
 };
 

@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -27,26 +28,25 @@ DECLARE_ALGORITHM(SaveNexusGeometry)
 /** Initialize the algorithm's properties.
  */
 void SaveNexusGeometry::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+  const std::vector<std::string> exts{".nxs", ".hdf5"};
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "workspace containing the Instrument.");
-  declareProperty(std::make_unique<WorkspaceProperty<std::string>>(
-                      "SaveDestination", "", Direction::Input),
-                  "full save destination path.");
-  declareProperty(std::make_unique<WorkspaceProperty<std::string>>(
-                      "FileRootName", "", Direction::Input),
-                  "name of file root.");
+
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, exts),
+      "full path save destination");
+
+  declareProperty("H5Path", "", "name of the H5 path save destination group.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveNexusGeometry::exec() {
-  boost::shared_ptr<API::MatrixWorkspace> workspace =
-      getProperty("InputWorkspace");
-  std::string destinationFile = getPropertyValue("SaveDestination");
-  std::string rootFileName = getPropertyValue("FileRootName");
-  auto &instrument = workspace->getInstrument();
+  API::MatrixWorkspace_const_sptr workspace = getProperty("InputWorkspace");
+  std::string destinationFile = getPropertyValue("FileName");
+  std::string rootFileName = getPropertyValue("H5Path");
+  const auto instrument = workspace->getInstrument();
   auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
   Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
       instr, destinationFile, rootFileName);
