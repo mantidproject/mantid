@@ -7,29 +7,39 @@
 #ifndef MANTID_ISISREFLECTOMETRY_DECODER_H
 #define MANTID_ISISREFLECTOMETRY_DECODER_H
 
-#include "../../Reduction/Group.h"
-#include "../../Reduction/ReductionJobs.h"
-#include "../../Reduction/ReductionWorkspaces.h"
-#include "../../Reduction/Row.h"
-#include "../Batch/BatchPresenter.h"
-#include "../Batch/QtBatchView.h"
-#include "../Experiment/QtExperimentView.h"
-#include "../Instrument/QtInstrumentView.h"
+#include "../../Common/DllConfig.h"
+#include "../../Reduction/ReductionOptionsMap.h"
 #include "../MainWindow/QtMainWindowView.h"
-#include "../Runs/QtRunsView.h"
-#include "../Runs/RunsPresenter.h"
-#include "../RunsTable/QtRunsTableView.h"
-#include "../RunsTable/RunsTablePresenter.h"
-#include "../Save/QtSaveView.h"
 
 #include <QMap>
 #include <QString>
 #include <QTableWidget>
 #include <QVariant>
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+class Group;
+class ReductionJobs;
+class ReductionWorkspaces;
+class Row;
+class BatchPresenter;
+class QtBatchView;
+class QtExperimentView;
+class QtInstrumentView;
+
+class QtRunsView;
+class RunsPresenter;
+class QtRunsTableView;
+class QtSaveView;
+class QtEventView;
+class RunsTablePresenter;
+class IBatchPresenter;
+class IMainWindowView;
+class RangeInQ;
+class TransmissionRunPair;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder {
 public:
