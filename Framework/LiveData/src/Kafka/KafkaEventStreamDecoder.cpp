@@ -20,17 +20,17 @@
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 GNU_DIAG_OFF("conversion")
-#include "private/Schema/y2gw_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
+#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <chrono>
+#include <json/json.h>
 #include <numeric>
 #include <tbb/parallel_sort.h>
-#include <json/json.h>
 
 using namespace Mantid::Types;
 using namespace LogSchema;

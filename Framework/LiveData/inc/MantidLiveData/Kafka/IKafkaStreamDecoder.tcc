@@ -1,12 +1,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
 #include "MantidNexusGeometry/JSONInstrumentBuilder.h"
-#include "MantidGeometry/Instrument.h"
 
 namespace {
 Mantid::Kernel::Logger logger("IKafkaStreamDecoder");
