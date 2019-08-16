@@ -29,6 +29,7 @@ public:
   ~SlitCalculator() override;
   void setCurrentInstrumentName(std::string instrumentName) override;
   void processInstrumentHasBeenChanged() override;
+  void show() override;
 
 protected:
   Ui::SlitCalculator ui;

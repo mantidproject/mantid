@@ -12,6 +12,7 @@
 #include "../Batch/MockBatchView.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/MockSlitCalculator.h"
 #include "MockMainWindowView.h"
 
@@ -154,14 +155,25 @@ public:
     verifyAndClear();
   }
 
-  void testShowOptionsRequested() {
+  void testShowOptionsOpensDialog() {
     auto presenter = makePresenter();
+    // TODO Add test when options dialog is impelemented
+    //EXPECT_CALL(*m_optionsDialog, show()).Times(1);
     presenter.notifyShowOptionsRequested();
     verifyAndClear();
   }
 
-  void testShowSlitCalculatorRequested() {
+  void testShowSlitCalculatorSetsInstrument() {
     auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "TEST_INSTRUMENT");
+    expectSlitCalculatorInstrumentUpdated();
+    presenter.notifyShowSlitCalculatorRequested();
+    verifyAndClear();
+  }
+
+  void testShowSlitCalculatorOpensDialog() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_slitCalculator, show()).Times(1);
     presenter.notifyShowSlitCalculatorRequested();
     verifyAndClear();
   }
@@ -237,11 +249,9 @@ public:
     verifyAndClear();
   }
 
-  void testUpdateInstrumentRequestedUpdatesInstrumentInChildPresenters() {
+  void testUpdateInstrumentUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
-    // must set the instrument to something valid first
-    presenter.notifyChangeInstrumentRequested("POLREF");
-    auto const instrument = presenter.instrumentName();
+    auto const instrument = setupInstrument(presenter, "POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
         .Times(1);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
@@ -250,17 +260,23 @@ public:
     verifyAndClear();
   }
 
-  void testUpdateInstrumentRequestedDoesNotChangeInstrumentName() {
+  void testUpdateInstrumentUpdatesInstrumentInSlitCalculator() {
     auto presenter = makePresenter();
-    // must set the instrument to something valid first
-    presenter.notifyChangeInstrumentRequested("POLREF");
-    auto const instrument = presenter.instrumentName();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    expectSlitCalculatorInstrumentUpdated();
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentDoesNotChangeInstrumentName() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
     presenter.notifyUpdateInstrumentRequested();
     TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
     verifyAndClear();
   }
 
-  void testUpdateInstrumentRequestedThrowsIfInstrumentNotSet() {
+  void testUpdateInstrumentThrowsIfInstrumentNotSet() {
     auto presenter = makePresenter();
     TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
     verifyAndClear();
@@ -313,6 +329,13 @@ private:
     for (auto batchPresenter : m_batchPresenters)
       TS_ASSERT(Mock::VerifyAndClearExpectations(batchPresenter));
     m_batchPresenters.clear();
+  }
+
+  std::string setupInstrument(MainWindowPresenterFriend &presenter,
+    std::string const& instrumentName) {
+    presenter.m_instrument =
+        boost::make_shared<Mantid::Geometry::Instrument>(instrumentName);
+    return presenter.instrumentName();
   }
 
   void expectBatchAdded(MockBatchPresenter *batchPresenter) {
@@ -379,6 +402,11 @@ private:
                                  "autoprocessing is in progress",
                                  "Error"))
         .Times(1);
+  }
+
+  void expectSlitCalculatorInstrumentUpdated() {
+    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument)).Times(1);
+    EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
   }
 
   void assertFirstBatchWasRemovedFromModel(

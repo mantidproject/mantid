@@ -17,6 +17,7 @@ public:
   virtual ~ISlitCalculator() = default;
   virtual void setCurrentInstrumentName(std::string instrumentName) = 0;
   virtual void processInstrumentHasBeenChanged() = 0;
+  virtual void show() = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

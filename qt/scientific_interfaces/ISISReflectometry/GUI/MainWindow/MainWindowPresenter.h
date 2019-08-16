@@ -71,12 +71,11 @@ protected:
   IMainWindowView *m_view;
   IMessageHandler *m_messageHandler;
   std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
 
 private:
   std::unique_ptr<MantidWidgets::ISlitCalculator> m_slitCalculator;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
-
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
 
   void showHelp();
   void addNewBatch(IBatchView *batchView);

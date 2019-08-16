@@ -46,9 +46,8 @@ MainWindowPresenter::MainWindowPresenter(
     std::unique_ptr<ISlitCalculator> slitCalculator,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler),
-      m_slitCalculator(std::move(slitCalculator)),
-      m_batchPresenterFactory(std::move(batchPresenterFactory)),
-      m_instrument() {
+      m_instrument(), m_slitCalculator(std::move(slitCalculator)),
+      m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -81,9 +80,15 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
   }
 }
 
-void MainWindowPresenter::notifyShowOptionsRequested() {}
+void MainWindowPresenter::notifyShowOptionsRequested() {
+  // TODO Show the options dialog when it is implemented
+}
 
-void MainWindowPresenter::notifyShowSlitCalculatorRequested() {}
+void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
+  m_slitCalculator->setCurrentInstrumentName(instrumentName());
+  m_slitCalculator->processInstrumentHasBeenChanged();
+  m_slitCalculator->show();
+}
 
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
@@ -232,8 +237,13 @@ void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
   m_instrument = instWorkspace->getInstrument();
 
+  // Notify child presenters
   for (auto &batchPresenter : m_batchPresenters)
     batchPresenter->notifyInstrumentChanged(instrumentName);
+
+  // Notify the slit calculator
+  m_slitCalculator->setCurrentInstrumentName(instrumentName);
+  m_slitCalculator->processInstrumentHasBeenChanged();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

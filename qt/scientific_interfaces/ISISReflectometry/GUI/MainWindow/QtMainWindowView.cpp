@@ -16,6 +16,9 @@
 #include <QToolButton>
 
 namespace MantidQt {
+
+using MantidWidgets::SlitCalculator;
+
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
