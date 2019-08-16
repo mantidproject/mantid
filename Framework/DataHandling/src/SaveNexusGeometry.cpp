@@ -33,8 +33,9 @@ void SaveNexusGeometry::init() {
                       "InputWorkspace", "", Direction::Input),
                   "workspace containing the Instrument.");
 
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save, exts),
-      "full path save destination");
+  declareProperty(std::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, exts),
+                  "full path save destination");
 
   declareProperty("H5Path", "", "name of the H5 path save destination group.");
 }
