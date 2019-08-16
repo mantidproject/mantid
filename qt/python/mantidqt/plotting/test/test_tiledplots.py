@@ -1,4 +1,4 @@
-#Mantid Repository : https://github.com/mantidproject/mantid
+# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
@@ -17,21 +17,15 @@ import matplotlib
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib import _pylab_helpers
 # local imports
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.kernel import config
-from mantid.plots import MantidAxes
 from mantid.py3compat import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
-from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                         manage_workspace_names, plot, plot_from_names, get_plot_fig,
-                                         pcolormesh_from_names, get_number_of_rows_and_columns_for_tiled_plot)
-import time
-from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.plotting.functions import (manage_workspace_names, plot_from_names, get_plot_fig)
+
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
 class FakeWorkspace(object):
@@ -166,6 +160,7 @@ class FunctionsTest(TestCase):
         self.get_spectra_selection_mock.return_value = selection
 
         return plot_from_names(names=names, errors=errors, overplot=overplot, fig=fig)
+
 
 if __name__ == '__main__':
     main()

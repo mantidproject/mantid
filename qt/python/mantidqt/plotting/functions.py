@@ -454,7 +454,7 @@ def _create_subplots(nplots, fig=None):
     nrows, ncols = square_side_len, square_side_len
     if square_side_len * square_side_len != nplots:
         # not a square number - square_side_len x square_side_len
-        # will be large enough but we could end up with an empty
+        # will be large enough but we could end up with an empt
         # row so chop that off
         if nplots <= (nrows - 1) * ncols:
             nrows -= 1

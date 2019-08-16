@@ -59,12 +59,10 @@ def figure_type(fig, ax=None):
     :param fig: A matplotlib figure instance
     :return: An enumeration defining the plot type
     """
-    from mantid.plots import MantidAxes
-
     if len(fig.get_axes()) == 0:
         return FigureType.Empty
     else:
-        ax_types = [axes_type(ax) for ax in fig.axes]
+        ax_types = [axes_type(axis) for axis in fig.axes]
         if any([type == FigureType.Image for type in ax_types]):
             return FigureType.Image
         elif ax:
