@@ -25,6 +25,10 @@ class ImageProperties(dict):
         props = dict()
         props['label'] = image.get_label()
         props['colormap'] = image.get_cmap().name
+        props['reverse_colormap'] = False
+        if props['colormap'].endswith('_r'):
+            props['colormap'] = props['colormap'][-2]
+            props['reverse_colormap'] = True
         props['vmin'] = image.get_array().min()
         props['vmax'] = image.get_array().max()
         if isinstance(image, QuadMesh):
@@ -42,6 +46,9 @@ class ImageProperties(dict):
         props = dict()
         props['label'] = view.get_label()
         props['colormap'] = view.get_colormap()
+        props['reverse_colormap'] = view.get_reverse_colormap()
+        if props['reverse_colormap']:
+            props['colormap'] += '_r'
         props['vmin'] = view.get_min_value()
         props['vmax'] = view.get_max_value()
         if view.interpolation_enabled():
