@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 /** @class CatalogRunNotifier
 
 CatalogRunNotifier implements IRunNotifier to provide functionality to
@@ -39,6 +40,7 @@ private:
   IRunsView *m_view;
   RunNotifierSubscriber *m_notifyee;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

@@ -38,7 +38,7 @@ class FittingTabModel(object):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix =\
             run_CalculateMuonAsymmetry(parameter_dict, alg)
-
+        CopyLogs(InputWorkspace=parameter_dict['ReNormalizedWorkspaceList'], OutputWorkspace=output_workspace, StoreInADS=False)
         self._handle_single_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
                                         fitting_parameters_table, output_workspace, output_workspace_group, covariance_matrix)
 
@@ -48,6 +48,11 @@ class FittingTabModel(object):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix =\
             run_CalculateMuonAsymmetry(parameter_dict, alg)
+        if len(parameter_dict['ReNormalizedWorkspaceList']) > 1:
+            for input_workspace, output in zip(parameter_dict['ReNormalizedWorkspaceList'], output_workspace.getNames()):
+                CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
+        else:
+            CopyLogs(InputWorkspace=parameter_dict['ReNormalizedWorkspaceList'][0], OutputWorkspace=output_workspace, StoreInADS=False)
 
         self._handle_simultaneous_fit_results(parameter_dict['ReNormalizedWorkspaceList'], function_object,
                                               fitting_parameters_table, output_workspace,

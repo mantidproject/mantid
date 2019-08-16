@@ -11,7 +11,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using MantidQt::CustomInterfaces::SearchResult;
+using MantidQt::CustomInterfaces::ISISReflectometry::SearchResult;
 
 class SearchResultTest : public CxxTest::TestSuite {
 public:

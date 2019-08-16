@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Batch
 
@@ -57,6 +58,7 @@ bool Batch::isInSelection(T const &item,
                               &selectedRowLocations) const {
   return m_runsTable.isInSelection(item, selectedRowLocations);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_BATCH_H_

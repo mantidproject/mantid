@@ -108,6 +108,9 @@ def main():
     sys.path.append(options.frameworkLoc)
     import systemtesting
 
+    # allow PythonInterface/test to be discoverable
+    sys.path.append(systemtesting.FRAMEWORK_PYTHONINTERFACE_TEST_DIR)
+
     #########################################################################
     # Configure mantid
     #########################################################################

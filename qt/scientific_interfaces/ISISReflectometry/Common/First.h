@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename T> boost::optional<T> first(std::vector<T> const &values) {
   if (values.size() > 0)
@@ -39,6 +40,7 @@ public:
       return boost::none;
   }
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_FIRST_H

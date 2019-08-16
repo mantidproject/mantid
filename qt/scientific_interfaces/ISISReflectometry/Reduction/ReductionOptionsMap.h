@@ -9,11 +9,13 @@
 #include <map>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 /** The ReductionOptionsMap holds information relating to the settings
  * in the Options column in the runs table. These are user-specified
  * options specified as key=value pairs.
  */
 using ReductionOptionsMap = std::map<std::string, std::string>;
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONOPTIONSMAP_H_

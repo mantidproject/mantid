@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IMainWindowView
 
@@ -38,6 +39,7 @@ public:
 
   virtual ~IMainWindowView() = default;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLWINDOWVIEW_H */

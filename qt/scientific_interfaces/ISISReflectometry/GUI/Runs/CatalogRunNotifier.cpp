@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 CatalogRunNotifier::CatalogRunNotifier(IRunsView *view) : m_view(view) {
   m_view->subscribeTimer(this);
@@ -27,5 +28,6 @@ void CatalogRunNotifier::notifyTimerEvent() {
   if (m_notifyee)
     m_notifyee->notifyCheckForNewRuns();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

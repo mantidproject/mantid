@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 enum class SliceType { None, UniformEven, Uniform, Custom, LogValue };
 
@@ -54,6 +55,7 @@ public:
   virtual void enableSliceTypeSelection() = 0;
   virtual void disableSliceTypeSelection() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_IREFLEVENTVIEW_H

@@ -21,6 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using namespace Mantid::API;
 
@@ -267,5 +268,6 @@ std::vector<std::string> SavePresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

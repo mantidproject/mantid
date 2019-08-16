@@ -12,7 +12,6 @@ from six import iteritems
 class MaxEnt(object):
 
     def __init__(self, run, ws_freq):
-        print(run)
         self.run = run
         self.ws_freq = ws_freq
 
@@ -22,10 +21,15 @@ class FFT(object):
 
     def __init__(self, ws_freq_name, Re_run, Re, Im_run, Im, phasequad):
         self.Re_run = Re_run
-        self.Im_run = Im_run
+
         self.ws_freq_name = ws_freq_name
         self.Re = Re
-        self.Im = Im
+        if Im == "" and Im_run == "":
+            self.Im = None
+            self.Im_run = None
+        else:
+            self.Im = Im
+            self.Im_run = Im_run
         self.phasequad = phasequad
 
 
@@ -63,6 +67,9 @@ class FrequencyContext(object):
     def FFT_freq(self):
         return list(self._FFT_freq.keys())
 
+    def _is_it_match(self, run, group, pair, fft_run, fft_group_or_pair):
+        return int(run) == int(fft_run) and (fft_group_or_pair in group or fft_group_or_pair in pair)
+
     def get_frequency_workspace_names(self, run_list, group, pair, phasequad, frequency_type):
         # do MaxEnt first as it only has run number
         names = []
@@ -75,11 +82,16 @@ class FrequencyContext(object):
         for name, fft in iteritems(self._FFT_freq):
             for runs in run_list:
                 for run in runs:
-                    if (int(run) == int(fft.Re_run) or int(run) == int(fft.Im_run)) and \
-                       (fft.Re in group or fft.Re in pair or fft.Im in group or fft.Im in pair) and name not in names:
+                    # check Re part
+                    if self._is_it_match(run, group, pair, fft.Re_run, fft.Re) and name not in names:
+                        names.append(name)
+                    # check Im part
+                    if fft.Im_run and self._is_it_match(run, group, pair, fft.Im_run, fft.Im) and name not in names:
                         names.append(name)
                     # do phaseQuad - will only have one run
-                    elif int(run) == int(fft.Re_run) and phasequad and fft.phasequad:
+                    if int(run) == int(fft.Re_run) and phasequad and fft.phasequad and name not in names:
+                        names.append(name)
+                    if fft.Im_run and int(run) == int(fft.Im_run) and phasequad and fft.phasequad and name not in names:
                         names.append(name)
         if frequency_type == "All":
             return names

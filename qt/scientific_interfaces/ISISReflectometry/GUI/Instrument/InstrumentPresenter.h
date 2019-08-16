@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class InstrumentPresenter
 
@@ -67,6 +68,7 @@ private:
   bool isProcessing() const;
   bool isAutoreducing() const;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H

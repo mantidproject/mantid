@@ -13,6 +13,7 @@
 #include <set>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace { // unnamed
 boost::optional<std::vector<std::string>>
@@ -194,5 +195,6 @@ parseTransmissionRuns(std::string const &firstTransmissionRun,
   }
 }
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

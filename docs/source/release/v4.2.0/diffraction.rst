@@ -12,6 +12,17 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+Improvements
+############
+
+- The HRPD scripts now mask out the Bragg peaks from the Vanadium.
+
+Bug Fixes
+#########
+
+- The values used to mask the prompt pulse on HRPD have been fixed.
+
+
 Engineering Diffraction
 -----------------------
 

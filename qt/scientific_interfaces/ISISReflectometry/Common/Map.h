@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename Container, typename Transform,
           typename Out = typename std::result_of<
@@ -42,6 +43,7 @@ std::string optionalToString(boost::optional<T> maybeValue) {
              })
       .get_value_or(std::string());
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_MAP_H

@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 auto PerThetaDefaultsTableValidator::
 operator()(ContentType const &perThetaDefaultsContent,
@@ -124,5 +125,6 @@ void PerThetaDefaultsTableValidator::appendThetaErrorForAllRows(
   for (auto row = 0u; row < rowCount; ++row)
     validationErrors.emplace_back(row, std::vector<int>({0}));
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

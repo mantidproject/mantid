@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidDefaultsError {
 public:
@@ -27,6 +28,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(InvalidDefaultsError const &lhs,
                                                InvalidDefaultsError const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(InvalidDefaultsError const &lhs,
                                                InvalidDefaultsError const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H

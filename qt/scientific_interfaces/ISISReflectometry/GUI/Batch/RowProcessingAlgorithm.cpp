@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -311,5 +312,6 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model) {
   updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
   return properties;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

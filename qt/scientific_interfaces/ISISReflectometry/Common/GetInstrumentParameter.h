@@ -12,6 +12,7 @@
 #include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 template <typename T> class InstrumentParameter;
 
 template <> class InstrumentParameter<std::string> {
@@ -131,6 +132,7 @@ auto getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
         std::declval<std::string const &>())) {
   return InstrumentParameter<T>::get(instrument, parameterName);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_GETINSTRUMENTPARAMETER_H

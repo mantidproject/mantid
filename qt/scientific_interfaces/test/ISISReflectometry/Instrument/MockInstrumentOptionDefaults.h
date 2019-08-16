@@ -12,12 +12,14 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MockInstrumentOptionDefaults : public IInstrumentOptionDefaults {
 public:
   MOCK_METHOD1(get,
                Instrument(Mantid::Geometry::Instrument_const_sptr instrument));
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

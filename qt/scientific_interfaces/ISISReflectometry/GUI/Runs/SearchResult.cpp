@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 SearchResult::SearchResult(const std::string &runNumber,
                            const std::string &desc, const std::string &loc)
@@ -55,5 +56,6 @@ bool operator==(SearchResult const &lhs, SearchResult const &rhs) {
 bool operator!=(SearchResult const &lhs, SearchResult const &rhs) {
   return !(lhs == rhs);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

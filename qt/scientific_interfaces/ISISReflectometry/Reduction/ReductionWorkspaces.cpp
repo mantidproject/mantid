@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 ReductionWorkspaces::ReductionWorkspaces(
     // cppcheck-suppress passedByValue
     std::vector<std::string> inputRunNumbers,
@@ -90,5 +91,6 @@ std::string postprocessedWorkspaceName(
           });
   return boost::algorithm::join(summedRunList, "_");
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -10,6 +10,7 @@
 #include <boost/optional.hpp>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 /** The ReductionType determines what type of reduction is to be performed
  * by the reduction algorithm
  */
@@ -37,6 +38,7 @@ inline std::string reductionTypeToString(ReductionType reductionType) {
   }
   throw std::invalid_argument("Unexpected reduction type");
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONTYPE_H_

@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
-from testhelpers import *
+from testhelpers import WorkspaceCreationHelper
 from numpy import *
 
 # tests run x10 slower with this on, but it may be useful to track down issues refactoring

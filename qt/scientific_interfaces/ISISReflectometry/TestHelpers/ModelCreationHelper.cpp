@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 namespace ModelCreationHelper {
 
 namespace { // unnamed
@@ -381,5 +382,6 @@ Instrument makeEmptyInstrument() {
       DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
 }
 } // namespace ModelCreationHelper
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

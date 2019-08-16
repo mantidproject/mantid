@@ -9,7 +9,6 @@ from copy import copy
 
 
 class subplotContext(object):
-
     def __init__(self, name, subplot):
         self.name = name
         self._subplot = subplot
@@ -34,11 +33,11 @@ class subplotContext(object):
         x_range = self._subplot.get_xlim()
         y_range = self._subplot.get_ylim()
         if label.in_x_range(x_range):
-            self._labels[label.text] = self._subplot.annotate(
-                label.text,
-                xy=(label.get_xval(x_range), label.get_yval(y_range)),
-                xycoords="axes fraction",
-                rotation=label.rotation)
+            self._labels[label.text] = self._subplot.annotate(label.text,
+                                                              xy=(label.get_xval(x_range),
+                                                                  label.get_yval(y_range)),
+                                                              xycoords="axes fraction",
+                                                              rotation=label.rotation)
 
     def redraw_annotations(self):
         for key in list(self._labels.keys()):
@@ -49,11 +48,16 @@ class subplotContext(object):
 
     def addLine(self, ws, specNum=1, distribution=True):
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, specNum=specNum, distribution=distribution)
+        line, = plots.plotfunctions.plot(self._subplot,
+                                         ws,
+                                         specNum=specNum,
+                                         distribution=distribution)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
-                self._subplot, ws, specNum=specNum, label=label)
+            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
+                                                                      ws,
+                                                                      specNum=specNum,
+                                                                      label=label)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
@@ -78,15 +82,25 @@ class subplotContext(object):
         del self._lines[label]
         # replot the line
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, self.get_ws(
-                label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
+            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
+                                                                      self.get_ws(label),
+                                                                      specNum=self.specNum[label],
+                                                                      color=colour,
+                                                                      marker=marker,
+                                                                      label=label,
+                                                                      distribution=distribution)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
             self._lines[label] = all_lines
         else:
-            line, = plots.plotfunctions.plot(self._subplot, self.get_ws(label), specNum=self.specNum[label],
-                                             color=colour, marker=marker, label=label, distribution=distribution)
+            line, = plots.plotfunctions.plot(self._subplot,
+                                             self.get_ws(label),
+                                             specNum=self.specNum[label],
+                                             color=colour,
+                                             marker=marker,
+                                             label=label,
+                                             distribution=distribution)
             self._lines[label] = [line]
 
     def replace_ws(self, ws):
