@@ -134,10 +134,6 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False)
     :param fig: If not None then use this figure object to plot
     :return: The figure containing the plot or None if selection was cancelled
     """
-    # if fig and len(fig.axes) > 1:
-    #     LOGGER.warning("Cannot plot workspace on top of Matplotlib subplots.")
-    #     return None
-
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
     try:
         selection = get_spectra_selection(workspaces, show_colorfill_btn=show_colorfill_btn, overplot=overplot)
@@ -171,7 +167,6 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     elif fig:
         fig, _, _, _ = _create_subplots(axes_num, fig)
     elif overplot:
-        # ax = plt.gca(projection=PROJECTION)
         fig = plt.gcf()
     else:
         fig, _, _, _ = _create_subplots(axes_num)
@@ -468,8 +463,6 @@ def _create_subplots(nplots, fig=None):
         fig = plt.figure()
     else:
         fig.clf()
-
-    # axes = fig.subplots(nrows=nrows, ncols=ncols, squeeze=False, subplot_kw={'projection': PROJECTION})
     # annoyling this repl
     nplots = nrows * ncols
     gs = GridSpec(nrows, ncols)
