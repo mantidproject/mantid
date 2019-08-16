@@ -333,6 +333,7 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
     if (m_projectSave) {
       auto itemState = map[QString("itemState")].toInt();
       row.setState(State(itemState));
+      row.setOutputQRange(decodeRangeInQ(map[QString("qRangeOutput")].toMap()));
     }
     return row;
   } else {
@@ -345,6 +346,7 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
     if (m_projectSave) {
       auto itemState = map[QString("itemState")].toInt();
       row.setState(State(itemState));
+      row.setOutputQRange(decodeRangeInQ(map[QString("qRangeOutput")].toMap()));
     }
     return row;
   }
