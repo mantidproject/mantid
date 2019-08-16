@@ -7,6 +7,7 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_
 #define MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -79,8 +80,11 @@ public:
     ScopedFileHandle fileResource("algorithm_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
-    Mantid::API::MatrixWorkspace_const_sptr inputWS = WorkspaceCreationHelper::
+    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
         create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().add("testWS", inputWS));
 
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
@@ -89,7 +93,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "testWS"));
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS_NOTHING(
