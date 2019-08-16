@@ -17,13 +17,14 @@ from copy import copy
 from functools import partial
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QActionGroup, QMenu
+from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import MantidAxes
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.plotting.markers import HorizontalMarker, VerticalMarker, SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
 from workbench.plotting.toolbar import ToolbarStateManager
@@ -57,11 +58,15 @@ class FigureInteraction(object):
         self._cids = []
         self._cids.append(canvas.mpl_connect('button_press_event',
                                              self.on_mouse_button_press))
+        self._cids.append(canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
+        self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
+        self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_event))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
+        self.markers = []
 
     @property
     def nevents(self):
@@ -84,6 +89,21 @@ class FigureInteraction(object):
             self._show_context_menu(event)
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             self._show_axis_editor(event)
+
+        # If left button clicked, start moving peaks
+        if event.button == 1:
+            change_cursor = False
+            for marker in self.markers:
+                marker.mouse_move_start(event.xdata, event.ydata)
+                change_cursor = marker.is_moving or change_cursor
+            if change_cursor:
+                QApplication.setOverrideCursor(QCursor(Qt.ClosedHandCursor))
+
+    def on_mouse_button_release(self, _):
+        """ Stop moving the markers when the mouse button is released """
+        for marker in self.markers:
+            marker.mouse_move_stop()
+        QApplication.restoreOverrideCursor()
 
     def _show_axis_editor(self, event):
         # We assume this is used for editing axis information e.g. labels
@@ -133,6 +153,8 @@ class FigureInteraction(object):
         if isinstance(event.inaxes, MantidAxes):
             self._add_normalization_option_menu(menu, event.inaxes)
         self.errors_manager.add_error_bars_menu(menu, event.inaxes)
+        self._add_marker_option_menu(menu, event)
+
         menu.exec_(QCursor.pos())
 
     def _add_axes_scale_menu(self, menu, ax):
@@ -173,6 +195,54 @@ class FigureInteraction(object):
             none_action.setChecked(True)
 
         menu.addMenu(norm_menu)
+
+    def _add_marker_option_menu(self, menu, event):
+        marker_menu = QMenu("Markers", menu)
+        marker_action_group = QActionGroup(marker_menu)
+        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, event.inaxes))
+        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata))
+
+        for action in [horizontal, vertical]:
+            marker_action_group.addAction(action)
+            action.setCheckable(True)
+            action.setChecked(False)
+
+        menu.addMenu(marker_menu)
+
+    def _add_horizontal_marker(self, y_pos, ax):
+        marker = HorizontalMarker(self.canvas, 'C2', y_pos, line_style='--')
+        marker.redraw()
+        self.markers.append(marker)
+
+    def _add_vertical_marker(self, x_pos):
+        marker = VerticalMarker(self.canvas, 'C2', x_pos, line_style='--')
+        marker.redraw()
+        self.markers.append(marker)
+
+    def draw_callback(self, _):
+        """ This is called at every canvas draw. Redraw the markers. """
+        for marker in self.markers:
+            marker.redraw()
+
+    def motion_event(self, event):
+        """ Move the marker if the mouse is moving and in range """
+        x = event.xdata
+        y = event.ydata
+        if x is None or y is None:
+            return
+
+        if not any([marker.is_moving for marker in self.markers]):
+            if any([marker.is_above(x, y) for marker in self.markers]):
+                QApplication.setOverrideCursor(Qt.OpenHandCursor)
+            else:
+                QApplication.restoreOverrideCursor()
+
+        should_move = False
+        for marker in self.markers:
+            should_move = marker.mouse_move(x, y) or should_move
+
+        if should_move:
+            self.canvas.draw()
 
     def _is_normalized(self, ax):
         artists = [art for art in ax.tracked_workspaces.values()]
