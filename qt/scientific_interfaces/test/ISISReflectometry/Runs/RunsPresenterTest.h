@@ -485,6 +485,17 @@ public:
     verifyAndClear();
   }
 
+  void testStartMonitorSetsAlgorithmProperties() {
+    auto presenter = makePresenter();
+    auto instrument = std::string("INTER");
+    expectGetLiveDataOptions(instrument);
+    auto algRunner = expectGetAlgorithmRunner();
+    presenter.notifyStartMonitor();
+    auto expected = defaultLiveMonitorAlgorithmOptions(instrument);
+    assertAlgorithmPropertiesContainOptions(expected, algRunner);
+    verifyAndClear();
+  }
+
   void testStartMonitorSetsDefaultPostProcessingProperties() {
     auto presenter = makePresenter();
     auto options = defaultLiveMonitorReductionOptions();
@@ -592,6 +603,19 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pythonRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
+  }
+
+  AlgorithmRuntimeProps
+  defaultLiveMonitorAlgorithmOptions(const std::string &instrument) {
+    return AlgorithmRuntimeProps{
+        {"Instrument", instrument},
+        {"OutputWorkspace", "IvsQ_binned_live"},
+        {"AccumulationWorkspace", "TOF_live"},
+        {"AccumulationMethod", "Replace"},
+        {"UpdateEvery", "20"},
+        {"PostProcessingAlgorithm", "ReflectometryReductionOneLiveData"},
+        {"RunTransitionBehavior", "Restart"},
+    };
   }
 
   AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(
@@ -842,6 +866,10 @@ private:
         .WillOnce(Return(options));
   }
 
+  void expectGetLiveDataOptions(std::string const &instrument) {
+    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument);
+  }
+
   boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
     auto algRunner = boost::make_shared<NiceMock<MockAlgorithmRunner>>();
@@ -857,19 +885,12 @@ private:
     expectGetAlgorithmRunner();
   }
 
-  void assertAlgorithmPropertiesEqual(IAlgorithm_sptr alg,
-                                      AlgorithmRuntimeProps const &options) {
-    for (auto &kvp : options)
-      TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
-  }
-
-  void assertStartMonitorPropertiesEqual(
+  void assertAlgorithmPropertiesContainOptions(
       AlgorithmRuntimeProps const &expected,
       boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    auto result = alg->getPropertyValue("PostProcessingProperties");
-    auto expectedString = optionsToString(expected, false, ";");
-    TS_ASSERT_EQUALS(result, expectedString);
+    for (auto const &kvp : expected)
+      TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
   }
 
   void assertPostProcessingPropertiesContainOptions(
