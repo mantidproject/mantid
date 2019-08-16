@@ -9,36 +9,72 @@
 #define MANTID_DATAHANDLING_LOADNGEM_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
 
-#define CID_VALUE 0x4F;
+#define CONTIN_ID_VALUE 0x4F;
 
-// Indicate time 0, the start of a new frame.
-struct T0FrameEvent {
-  uint8_t ID : 8;           // 0x4E Event ID
-  uint16_t frameLoss : 12;  // Frame loss count
-  uint32_t eventLoss : 20;  // Event loss count
-  uint8_t CID : 8;          // 0x4F Continuation Code
-  uint32_t eventCount : 32; // Event Count
-  uint32_t TOID : 24;       // T0 ID;
+/// Generic event to separate bits.
+struct GenericEvent {
+  uint64_t t0id : 24;      // T0 ID
+  uint64_t reserved2 : 32; // Reserved for non-generics
+  uint64_t contin : 8;     // 0x4F Continuation Code
+  uint64_t reserved1 : 56; // Reserved for non-generics
+  uint64_t id : 8;         // 0x4E Event ID
 };
 
+/// Indicate time 0, the start of a new frame.
+struct T0FrameEvent {
+  uint64_t t0id : 24;       // T0 ID
+  uint64_t eventCount : 32; // Event Count
+  uint64_t contin : 8;      // 0x4F Continuation Code
+  uint64_t eventLoss : 20;  // Event loss count
+  uint64_t frameLoss : 12;  // Frame loss count
+  uint64_t id : 8;          // 0x4E Event ID
+  static const int T0_ID = 0x4E;
+  bool check() const { return id == T0_ID && contin == CONTIN_ID_VALUE }
+};
+
+/// A detected event.
 struct CoincidenceEvent {
-  uint8_t ID : 8;             // 0x47 Event ID.
-  uint32_t timeOfFlight : 28; // Difference between T0 and detection (1ns)
-  uint8_t firstX : 7;         // X position of pixel detected first
-  uint8_t lastX : 7;          // X position of pixel detected last
-  uint8_t firstY : 7;         // Y position of pixel detected first
-  uint8_t lastY : 7;          // Y position of pixel detected last
-  uint8_t CID : 8;            // 0x4F Continuation Code
-  uint8_t timeDiffX : 6; // Time lag from first to last detection on X (5ns)
-  uint16_t clusterTimeX : 10; // Integrated time of the cluster on the X side
+  uint64_t t0id : 24;         // T0 ID
+  uint64_t clusterTimeY : 10; // Integrated time of the cluster on the Y side
                               // (5ns pixel)
-  uint8_t timeDiffY : 7; // Time lag from first to last detection on Y (5ns)
-  uint16_t clusterTimeX : 10; // Integrated time of the cluster on the Y side
+  uint64_t timeDiffY : 6; // Time lag from first to last detection on Y (5ns)
+  uint64_t clusterTimeX : 10; // Integrated time of the cluster on the X side
                               // (5ns pixel)
+  uint64_t timeDiffX : 6; // Time lag from first to last detection on X (5ns)
+  uint64_t contin : 8;    // 0x4F Continuation Code
+  uint64_t lastY : 7;     // Y position of pixel detected last
+  uint64_t lastX : 7;     // X position of pixel detected last
+  uint64_t firstY : 7;    // Y position of pixel detected first
+  uint64_t firstX : 7;    // X position of pixel detected first
+  uint64_t timeOfFlight : 28; // Difference between T0 and detection (1ns)
+  uint64_t id : 8;            // 0x47 Event ID.
+
+  int avgX() const { return (firstX + lastX) / 2; }
+  int avgY() const { return (firstY + lastY) / 2; }
+  static const int COINCIDENCE_ID = 0x47;
+  bool check() { return id == COINCIDENCE_ID && contin == CONTIN_ID_VALUE; }
+  int getPixel() const {
+    return avgX() + (avgY() << 7); // Increase Y significance by 7 bits to
+                                   // account for 128x128 grid.
+  }
+};
+
+/// Holds the 128 bit words from the detector.
+struct Split64 {
+  uint64_t words[2]; // An array of the two words created by the detector.
+};
+
+/// Is able to hold all versions of the data words in the same memory slot.
+union EventUnion {
+  GenericEvent generic;
+  T0FrameEvent tZero;
+  CoincidenceEvent coincidence;
+  Split64 splitWord;
 };
 
 class DLLExport LoadNGEM : public API::IFileLoader<Kernel::FileDescriptor> {
@@ -54,11 +90,11 @@ public:
   int version() const override { return 1; }
   /// Algorithm's category for identification.
   const std::string category() const override { return "DataHandling\\nGEM"; };
+  /// Should the loader load multiple files into one workspace.
+  bool loadMutipleAsOne() override { return false; }
 
   /// The confidence that an algorithm is able to load the file.
   int confidence(Kernel::FileDescriptor &descriptor) const override;
-  /// Load multiple files into one workspace.
-  bool loadMutipleAsOne() override;
 
 private:
   /// Initialise the algorithm.
@@ -66,7 +102,11 @@ private:
   /// Execute the algorithm.
   void exec() override;
   /// Byte swap a word to be correct on x86 and x64 architecture.
-  static uint64_t swap_uint64(uint64_t word);
+  uint64_t swapUint64(uint64_t word);
+  /// Helper function to convert big endian events.
+  void correctForBigEndian(const EventUnion &bigEndian,
+                           EventUnion &smallEndian);
+  DataObjects::EventWorkspace_sptr m_dataWorkspace;
 };
 
 } // namespace DataHandling

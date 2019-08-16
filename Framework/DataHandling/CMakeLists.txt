@@ -625,6 +625,8 @@ target_link_libraries(DataHandling
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       Nexus
+                      HistogramData
+                      DataObjects
                       ${NEXUS_LIBRARIES}
                       ${HDF5_LIBRARIES}
                       ${HDF5_HL_LIBRARIES}
