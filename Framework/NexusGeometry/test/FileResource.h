@@ -11,7 +11,6 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-
 /*
  RAII: Gives a clean file destination and removes the file when
  handle is out of scope. Must be stack allocated.
