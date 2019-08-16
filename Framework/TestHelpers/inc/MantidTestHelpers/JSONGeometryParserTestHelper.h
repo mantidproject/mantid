@@ -28,7 +28,7 @@ class V3D;
 
 namespace TestHelpers {
 
-namespace JSONInstrumentBuilder {
+namespace JSONTestInstrumentBuilder {
 void initialiseRoot(Json::Value &root, const std::string &name);
 Json::Value &addNXEntry(Json::Value &root, const std::string &name);
 Json::Value &addNXSample(Json::Value &entry, const std::string &name);
@@ -120,7 +120,7 @@ void addCylindricalShapeVertices(Json::Value &shape,
                                      0});
 
 const std::string convertToString(const Json::Value &value);
-} // namespace JSONInstrumentBuilder
+} // namespace JSONTestInstrumentBuilder
 
 std::string getJSONGeometryNoSample();
 std::string getJSONGeometryNoInstrument();

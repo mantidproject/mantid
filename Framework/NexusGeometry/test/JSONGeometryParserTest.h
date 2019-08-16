@@ -14,6 +14,7 @@
 #include <Poco/Glob.h>
 #include <cxxtest/TestSuite.h>
 #include <exception>
+#include <json/json.h>
 #include <string>
 
 using namespace Mantid::Kernel;
