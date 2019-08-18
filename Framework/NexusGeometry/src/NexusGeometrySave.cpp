@@ -250,14 +250,12 @@ inline void writePixelData(H5::Group &grp,
       std::all_of(pixels.begin(), pixels.end(), [&](const size_t &idx) {
         auto &shapeObj = compInfo.shape(idx);
 
-        if (auto *meshObject =
-                dynamic_cast<const Geometry::MeshObject *>(&firstShape)) {
+        if (dynamic_cast<const Geometry::MeshObject *>(&firstShape)) {
           // current implementation only considers solid shapes
           throw std::runtime_error("MeshObject Type pixel shape is not "
                                    "implemented for a detector bank");
         }
-        if (auto *meshObject2d =
-                dynamic_cast<const Geometry::MeshObject2D *>(&firstShape)) {
+        if (dynamic_cast<const Geometry::MeshObject2D *>(&firstShape)) {
           // current implementation only considers solid shapes
           throw std::runtime_error("MeshObject2D Type pixel shape is not "
                                    "implemented for a detector bank");
