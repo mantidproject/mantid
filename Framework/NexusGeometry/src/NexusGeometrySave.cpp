@@ -321,7 +321,8 @@ inline void writePixelData(H5::Group &grp,
 
     // get vector that is othogonal to the cylinder axis
     Eigen::Vector3d orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
-    Eigen::Vector3d edge = top + Eigen::Vector3d(radius * orthogonalV.normalized());
+    Eigen::Vector3d edge =
+        top + Eigen::Vector3d(radius * orthogonalV.normalized());
 
     std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
                                  top[2],  edge[0], edge[1], edge[2]};
@@ -366,10 +367,11 @@ inline void writePixelData(H5::Group &grp,
               Eigen::Vector3d(height * Kernel::toVector3d(axis));
           Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
           // creat an arbitrary noncollinear vector
-	  Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
+          Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
 
           // get vector that is othogonal to the cylinder axis
-	  Eigen::Vector3d orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
+          Eigen::Vector3d orthogonalV =
+              Kernel::toVector3d(axis).cross(nonCollinear);
           Eigen::Vector3d edge =
               top + Eigen::Vector3d(radius * orthogonalV.normalized());
 
