@@ -30,6 +30,7 @@ struct T0FrameEvent {
   uint64_t t0id : 24;       // T0 ID
   uint64_t eventCount : 32; // Event Count
   uint64_t contin : 8;      // 0x4F Continuation Code
+  uint64_t totalLoss : 24;  // Total loss count
   uint64_t eventLoss : 20;  // Event loss count
   uint64_t frameLoss : 12;  // Frame loss count
   uint64_t id : 8;          // 0x4E Event ID
@@ -106,6 +107,13 @@ private:
   /// Helper function to convert big endian events.
   void correctForBigEndian(const EventUnion &bigEndian,
                            EventUnion &smallEndian);
+  /// Add some information to the sample logs.
+  void addToSampleLog(const std::string &logName, const std::string &logText,
+                      DataObjects::EventWorkspace_sptr &ws);
+  void addToSampleLog(const std::string &logName, const int &logNumber,
+                      DataObjects::EventWorkspace_sptr &ws);
+  /// Check that a file to be loaded is in 128 bit words.
+  void verifyFileSize(FILE *&file);
   DataObjects::EventWorkspace_sptr m_dataWorkspace;
 };
 

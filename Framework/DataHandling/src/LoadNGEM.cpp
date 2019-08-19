@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/LoadNGEM.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <sys/stat.h>
 
@@ -64,6 +66,9 @@ void LoadNGEM::init() {
       std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The output workspace");
+  // Bin Width
+  declareProperty("BinWidth", 10.0,
+                  "The width of the time bins in the output.");
 }
 
 /**
@@ -71,6 +76,7 @@ void LoadNGEM::init() {
  */
 void LoadNGEM::exec() {
   const std::string filename = getPropertyValue("Filename");
+  const int NUM_OF_SPECTRA = 16384;
 
   // Create file reader
   FILE *file = fopen(filename.c_str(), "rb");
@@ -79,25 +85,21 @@ void LoadNGEM::exec() {
     throw std::runtime_error("File could not be found.");
   }
 
-  // Check that the file fits into 16 byte sections.
-  struct stat fileStatus;
-  if (fstat(fileno(file), &fileStatus) != 0 || fileStatus.st_size % 16 != 0) {
-    g_log.error() << "Invalid file size.\n" << fileStatus.st_size << "\n";
-    throw std::runtime_error("File size error.");
-  }
-
-  // int totalEvents = int(fileStatus.st_size / 16);
-  // int *events = new int[totalEvents];
+  verifyFileSize(file);
 
   EventUnion event, eventBigEndian;
   size_t loadStatus;
 
   int maxToF = -1;
   int minToF = 2147483647;
-  const int binWidth(10);
+  const double BIN_WIDTH(stod(getPropertyValue("BinWidth")));
+
+  int rawFrames = 0;
+  int goodFrames = 0;
+  std::vector<int> eventsPerFrame;
 
   std::vector<DataObjects::EventList> histograms;
-  histograms.resize(16384);
+  histograms.resize(NUM_OF_SPECTRA);
 
   while (!feof(file)) {
     // Load an event into the variable.
@@ -114,7 +116,7 @@ void LoadNGEM::exec() {
     // Correct for the big endian format.
     correctForBigEndian(eventBigEndian, event);
 
-    if (event.coincidence.check()) {
+    if (event.coincidence.check()) { // Check for coincidence event.
       int pixel = event.coincidence.getPixel();
       int tof =
           event.coincidence.timeOfFlight / 1000; // Convert to microseconds (us)
@@ -124,41 +126,74 @@ void LoadNGEM::exec() {
       } else if (tof < minToF) {
         minToF = tof;
       }
-
       histograms[pixel].addEventQuickly(Mantid::Types::Event::TofEvent(tof));
-      histograms[pixel].setDetectorID(pixel + 1);
+
+    } else if (event.tZero.check()) { // Check for T0 event.
+      ++rawFrames;
+      ++goodFrames;
+    } else { // Catch all other events and notify.
+      g_log.error() << "found unknown event type";
     }
   }
   fclose(file);
 
   std::vector<double> xAxis;
-  for (auto i = 0; i < (maxToF / binWidth); i++) {
-    xAxis.push_back(i * binWidth);
+  for (auto i = 0; i < (maxToF / BIN_WIDTH); i++) {
+    xAxis.push_back(i * BIN_WIDTH);
   }
 
   m_dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
-      16384,
+      NUM_OF_SPECTRA,
       Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(xAxis)));
 
   for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
     m_dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
+    m_dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
   }
-
   m_dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
+  m_dataWorkspace->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("TOF");
+  m_dataWorkspace->setYUnit("Counts");
+
+  addToSampleLog("raw_frames", rawFrames, m_dataWorkspace);
 
   setProperty("OutputWorkspace", m_dataWorkspace);
 }
 
-/**
- * @brief Correct an event to be compatible with x64 and x86.
- *
- * @param bigEndian The big endian to be converted.
- * @param smallEndian The small endian to be "filled"
- */
 void LoadNGEM::correctForBigEndian(const EventUnion &bigEndian,
                                    EventUnion &smallEndian) {
   smallEndian.splitWord.words[0] = swapUint64(bigEndian.splitWord.words[1]);
   smallEndian.splitWord.words[1] = swapUint64(bigEndian.splitWord.words[0]);
+}
+
+void LoadNGEM::addToSampleLog(const std::string &logName,
+                              const std::string &logText,
+                              DataObjects::EventWorkspace_sptr &ws) {
+  Mantid::API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
+  sampLogAlg->setProperty("Workspace", ws);
+  sampLogAlg->setProperty("LogType", "String");
+  sampLogAlg->setProperty("LogName", logName);
+  sampLogAlg->setProperty("LogText", logText);
+  sampLogAlg->executeAsChildAlg();
+}
+
+void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
+                              DataObjects::EventWorkspace_sptr &ws) {
+  Mantid::API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
+  sampLogAlg->setProperty("Workspace", ws);
+  sampLogAlg->setProperty("LogType", "Number");
+  sampLogAlg->setProperty("LogName", logName);
+  sampLogAlg->setProperty("LogText", std::to_string(logNumber));
+  sampLogAlg->executeAsChildAlg();
+}
+
+void LoadNGEM::verifyFileSize(FILE *&file) {
+  // Check that the file fits into 16 byte sections.
+  struct stat fileStatus;
+  if (fstat(fileno(file), &fileStatus) != 0 || fileStatus.st_size % 16 != 0) {
+    g_log.warning() << "Invalid file size. Data may be corrupted.\n"
+                    << fileStatus.st_size << "\n";
+  }
 }
 
 } // namespace DataHandling
