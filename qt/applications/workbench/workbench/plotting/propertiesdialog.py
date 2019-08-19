@@ -188,13 +188,14 @@ class SingleMarkerEditor(PropertiesEditorBase):
 
         self.ui.position.setText(str(self._position))
         self.ui.name.setText(str(self._name))
-        self.ui.style.setText(str(self._style))
+        self.ui.style.addItems(valid_style)
+        self.ui.style.setCurrentText(str(self._style))
 
     def changes_accepted(self):
         self.ui.errors.hide()
         self._position = float(self.ui.position.text())
         self._name = self.ui.name.text()
-        _style = self.ui.style.text()
+        _style = self.ui.style.currentText()
         if _style not in self.valid_style:
             raise ValueError("Invalid style '{}'.\nValid possibilities are: {}"
                              .format(_style, self.valid_style))

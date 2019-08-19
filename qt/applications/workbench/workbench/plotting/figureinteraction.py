@@ -302,17 +302,11 @@ class FigureInteraction(object):
 
         for i in range(marker_horizontal.rowCount()):
             row = marker_horizontal.row(i)
-            position = row['position']
-            name = row['name']
-            style = row['line style']
-            self._add_horizontal_marker(position, x0, x1, name, style)
+            self._add_horizontal_marker(row['position'], x0, x1, row['name'], row['line style'])
 
         for i in range(marker_vertical.rowCount()):
             row = marker_vertical.row(i)
-            position = row['position']
-            name = row['name']
-            style = row['line style']
-            self._add_vertical_marker(position, y0, y1, name, style)
+            self._add_vertical_marker(row['position'], y0, y1, row['name'], row['line style'])
 
     def _get_free_marker_name(self):
         used_numbers = []
