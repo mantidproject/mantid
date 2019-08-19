@@ -276,7 +276,8 @@ size_t ProcessBankData::getLastEventIndex(const size_t pulseIndex,
   if (pulseIndex + 1 >= numPulses)
     return numEvents;
 
-  const auto lastEventIndex = event_index->operator[](pulseIndex + 1) - startAt;
+  const size_t lastEventIndex =
+      event_index->operator[](pulseIndex + 1) - startAt;
 
   return std::min(lastEventIndex, numEvents);
 }
