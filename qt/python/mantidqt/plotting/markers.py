@@ -664,7 +664,9 @@ class SingleMarker(QObject):
         :return True if the value was changed.
         """
         if self.upper_bound >= position >= self.lower_bound:
+            self.remove_all_annotations()
             self.marker.set_position(position)
+            self.add_all_annotations()
             self.redraw()
             return True
         return False
@@ -763,6 +765,10 @@ class SingleMarker(QObject):
     def add_all_annotations(self):
         for label in self.annotations:
             self.add_annotate(label)
+
+    def remove_all_annotations(self):
+        for label in self.annotations:
+            self.remove_annotate(label)
 
     def mouse_move_start(self, x, y):
         """

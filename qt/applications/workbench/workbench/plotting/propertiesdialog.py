@@ -171,3 +171,31 @@ class YAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
         super(YAxisEditor, self).__init__(canvas, axes, 'y')
+
+
+class SingleMarkerEditor(PropertiesEditorBase):
+    def __init__(self, canvas, marker):
+        super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
+        self.ui.errors.hide()
+        self.ui.position.setValidator(QDoubleValidator())
+
+        self.canvas = canvas
+        self.marker = marker
+        self._position = 100.0
+        self._name = ''
+
+        self.ui.position.setText(str(self.marker.marker.get_position()))
+        self.ui.name.setText(str(self.marker.annotations.keys()[0]))
+
+    def changes_accepted(self):
+        self.ui.errors.hide()
+        self._position = float(self.ui.position.text())
+        self._name = self.ui.name.text()
+
+        self.marker.set_position(self._position)
+        self.canvas.draw()
+
+    def error_occurred(self, exc):
+        print('what')
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
