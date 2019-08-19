@@ -21,6 +21,7 @@ from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
+from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantid.plots import MantidAxes
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
@@ -260,6 +261,7 @@ class FigureInteraction(object):
         y0, y1 = event.inaxes.get_ylim()
         horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1))
         vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1))
+        export = marker_menu.addAction("Export", lambda: self._export_markers())
 
         for action in [horizontal, vertical]:
             marker_action_group.addAction(action)
@@ -267,6 +269,30 @@ class FigureInteraction(object):
             action.setChecked(False)
 
         menu.addMenu(marker_menu)
+
+    def _export_markers(self):
+        marker_horizontal = CreateEmptyTableWorkspace()
+        marker_vertical = CreateEmptyTableWorkspace()
+        marker_horizontal.addColumn(type='float', name='position')
+        marker_horizontal.addColumn(type='float', name='lower limit')
+        marker_horizontal.addColumn(type='float', name='upper limit')
+        marker_horizontal.addColumn(type='str', name='name')
+        marker_vertical.addColumn(type='float', name='position')
+        marker_vertical.addColumn(type='float', name='lower limit')
+        marker_vertical.addColumn(type='float', name='upper limit')
+        marker_vertical.addColumn(type='str', name='name')
+        for marker in self.markers:
+            if marker.marker_type == 'XSingle':
+                marker_vertical.addRow([marker.get_position(),
+                                        marker.get_lower_bound(),
+                                        marker.get_upper_bound(),
+                                        marker.name])
+            else:
+                marker_horizontal.addRow([marker.get_position(),
+                                          marker.get_lower_bound(),
+                                          marker.get_upper_bound(),
+                                          marker.name])
+
 
     def _get_free_marker_name(self):
         used_numbers = []
