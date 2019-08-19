@@ -456,7 +456,6 @@ public:
   setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
   boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
-  void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
 
   //=====================================================================================
