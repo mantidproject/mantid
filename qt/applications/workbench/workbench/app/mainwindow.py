@@ -63,7 +63,8 @@ plugins.setup_library_paths()
 from workbench.app.resources import qCleanupResources  # noqa
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
-from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
 
 
@@ -283,6 +284,9 @@ class MainWindow(QMainWindow):
             shortcut="Ctrl+S", shortcut_context=Qt.ApplicationShortcut)
         action_save_script_as = create_action(
             self, "Save Script as...", on_triggered=self.save_script_as)
+        action_generate_ws_script = create_action(
+            self, "Generate Script from Workspaces",
+            on_triggered=self.generate_script_from_workspaces)
         action_save_project = create_action(
             self, "Save Project", on_triggered=self.save_project)
         action_save_project_as = create_action(
@@ -297,8 +301,8 @@ class MainWindow(QMainWindow):
             shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_load_project, None,
                                   action_save_script, action_save_script_as,
-                                  action_save_project, action_save_project_as,
-                                  None, action_settings, None,
+                                  action_generate_ws_script, None, action_save_project,
+                                  action_save_project_as, None, action_settings, None,
                                   action_manage_directories, None, action_quit]
 
         # view menu
@@ -570,6 +574,10 @@ class MainWindow(QMainWindow):
 
     def save_script_as(self):
         self.editor.save_current_file_as()
+
+    def generate_script_from_workspaces(self):
+        script = "from mantid.simpleapi import *\n\n" + get_all_workspace_history_from_ads()
+        self.editor.open_script_in_new_tab(script)
 
     def save_project(self):
         self.project.save()
