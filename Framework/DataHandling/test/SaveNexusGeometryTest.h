@@ -12,8 +12,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/FileResource.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
@@ -101,7 +101,7 @@ public:
 
     WorkspaceCreationHelper::EPPTableRow row(
         1, 1, 1, WorkspaceCreationHelper::EPPTableRow::FitStatus::SUCCESS);
-    std::vector<WorkspaceCreationHelper::EPPTableRow> rows{ row };
+    std::vector<WorkspaceCreationHelper::EPPTableRow> rows{row};
     Mantid::API::ITableWorkspace_sptr inputWS =
         WorkspaceCreationHelper::createEPPTableWorkspace(rows);
 

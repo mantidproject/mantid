@@ -54,9 +54,9 @@ const std::string SaveNexusGeometry::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 
 const std::string SaveNexusGeometry::summary() const {
-  return "Reads the instrument from a workspace, and saves it to a Nexus "
-         "file with the full path file "
-         "destination and root name.";
+  return "Save the instrument from a workspace to a Nexus-format"
+         " HDF file. WARNING: shapes are NOT saved in the present version "
+         "(1.0).";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,17 +64,18 @@ const std::string SaveNexusGeometry::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SaveNexusGeometry::init() {
-  const std::vector<std::string> exts{".nxs", ".hdf5"};
+
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace containing the Instrument.");
 
-  declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, exts),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Save),
                   "Full path to save destination file");
 
   declareProperty("H5Path", "entry" /*default*/,
-                  "(optional) Name of the H5 root group. Default: 'entry'.");
+                  "(optional) Name of the H5 root group in which the "
+                  "Instrument is to be saved. Default name: 'entry'.");
 }
 
 //----------------------------------------------------------------------------------------------
