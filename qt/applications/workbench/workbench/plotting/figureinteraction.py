@@ -56,8 +56,7 @@ class FigureInteraction(object):
 
         canvas = fig_manager.canvas
         self._cids = []
-        self._cids.append(canvas.mpl_connect('button_press_event',
-                                             self.on_mouse_button_press))
+        self._cids.append(canvas.mpl_connect('button_press_event', self.on_mouse_button_press))
         self._cids.append(canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_event))
@@ -102,7 +101,7 @@ class FigureInteraction(object):
             self._show_axis_editor(event)
 
         # If left button clicked, start moving peaks
-        if event.button == 1:
+        if event.button == 1 and not self.toolbar_manager.is_tool_active():
             change_cursor = False
             for marker in self.markers:
                 if event.xdata is None or event.ydata is None:
@@ -112,13 +111,16 @@ class FigureInteraction(object):
             if change_cursor:
                 QApplication.setOverrideCursor(QCursor(Qt.ClosedHandCursor))
 
-    def on_mouse_button_release(self, _):
+    def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
-        for marker in self.markers:
-            if marker.is_marker_moving():
-                marker.add_all_annotations()
-            marker.mouse_move_stop()
-        QApplication.restoreOverrideCursor()
+        if self.toolbar_manager.is_tool_active():
+            self.redraw_annotations(event)
+        else:
+            for marker in self.markers:
+                if marker.is_marker_moving():
+                    marker.add_all_annotations()
+                marker.mouse_move_stop()
+            QApplication.restoreOverrideCursor()
 
     def _show_axis_editor(self, event):
         # We assume this is used for editing axis information e.g. labels
@@ -290,6 +292,8 @@ class FigureInteraction(object):
     def motion_event(self, event):
         if self.toolbar_manager.is_tool_active():
             self.redraw_annotations(event)
+            return
+
         """ Move the marker if the mouse is moving and in range """
         x = event.xdata
         y = event.ydata
@@ -310,13 +314,11 @@ class FigureInteraction(object):
             self.canvas.draw()
 
     def redraw_annotations(self, event):
-        if not hasattr(event, 'button') or event.button is None:
-            return
-
-        for marker in self.markers:
-            for label in marker.annotations:
-                marker.remove_annotate(label)
-            marker.add_all_annotations()
+        if hasattr(event, 'button') and event.button is not None:
+            for marker in self.markers:
+                for label in marker.annotations:
+                    marker.remove_annotate(label)
+                marker.add_all_annotations()
 
     def _is_normalized(self, ax):
         artists = [art for art in ax.tracked_workspaces.values()]
