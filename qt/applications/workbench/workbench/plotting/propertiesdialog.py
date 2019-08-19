@@ -174,26 +174,35 @@ class YAxisEditor(AxisEditor):
 
 
 class SingleMarkerEditor(PropertiesEditorBase):
-    def __init__(self, canvas, marker):
+    def __init__(self, canvas, marker, valid_style):
         super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
         self.ui.errors.hide()
         self.ui.position.setValidator(QDoubleValidator())
 
         self.canvas = canvas
         self.marker = marker
-        self._position = 100.0
-        self._name = ''
+        self._position = self.marker.marker.get_position()
+        self._name = self.marker.annotations.keys()[0]
+        self.valid_style = valid_style
+        self._style = self.marker.style
 
-        self.ui.position.setText(str(self.marker.marker.get_position()))
-        self.ui.name.setText(str(self.marker.annotations.keys()[0]))
+        self.ui.position.setText(str(self._position))
+        self.ui.name.setText(str(self._name))
+        self.ui.style.setText(str(self._style))
 
     def changes_accepted(self):
         self.ui.errors.hide()
         self._position = float(self.ui.position.text())
         self._name = self.ui.name.text()
+        _style = self.ui.style.text()
+        if _style not in self.valid_style:
+            raise ValueError("Invalid style '{}'.\nValid possibilities are: {}"
+                             .format(_style, self.valid_style))
+        self._style = _style
 
         self.marker.set_position(self._position)
         self.marker.set_name(self._name)
+        self.marker.set_style(self._style)
         self.canvas.draw()
 
     def error_occurred(self, exc):

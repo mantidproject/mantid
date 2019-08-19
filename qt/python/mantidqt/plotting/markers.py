@@ -638,6 +638,8 @@ class SingleMarker(QObject):
         self.canvas = canvas
         self.annotations = {}
         self.name = name
+        self.style = line_style
+        self.color = color
         if self.marker_type == 'XSingle':
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
         elif self.marker_type == 'YSingle':
@@ -656,6 +658,18 @@ class SingleMarker(QObject):
         Remove this marker from the canvas.
         """
         self.marker.remove()
+
+    def set_style(self, style):
+        position = self.marker.get_position()
+        self.style = style
+        if self.marker_type == 'XSingle':
+            self.marker.remove()
+            self.marker = VerticalMarker(self.canvas, self.color, position, line_style=style)
+        elif self.marker_type == 'YSingle':
+            self.marker.remove()
+            self.marker = HorizontalMarker(self.canvas, self.color, position, line_style=style)
+        else:
+            raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
 
     def set_color(self, color):
         """

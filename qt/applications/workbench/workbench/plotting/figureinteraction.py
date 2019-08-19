@@ -69,6 +69,7 @@ class FigureInteraction(object):
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
         self.vertical_markers = []
+        self.valid_lines = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
 
     @property
     def nevents(self):
@@ -262,8 +263,9 @@ class FigureInteraction(object):
         horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1))
         vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1))
         export = marker_menu.addAction("Export", lambda: self._export_markers())
+        _import = marker_menu.addAction("Import", lambda: self._import_markers(event.inaxes))
 
-        for action in [horizontal, vertical]:
+        for action in [horizontal, vertical, export, _import]:
             marker_action_group.addAction(action)
             action.setCheckable(True)
             action.setChecked(False)
@@ -274,25 +276,43 @@ class FigureInteraction(object):
         marker_horizontal = CreateEmptyTableWorkspace()
         marker_vertical = CreateEmptyTableWorkspace()
         marker_horizontal.addColumn(type='float', name='position')
-        marker_horizontal.addColumn(type='float', name='lower limit')
-        marker_horizontal.addColumn(type='float', name='upper limit')
         marker_horizontal.addColumn(type='str', name='name')
+        marker_horizontal.addColumn(type='str', name='line style')
         marker_vertical.addColumn(type='float', name='position')
-        marker_vertical.addColumn(type='float', name='lower limit')
-        marker_vertical.addColumn(type='float', name='upper limit')
         marker_vertical.addColumn(type='str', name='name')
+        marker_vertical.addColumn(type='str', name='line style')
         for marker in self.markers:
             if marker.marker_type == 'XSingle':
                 marker_vertical.addRow([marker.get_position(),
-                                        marker.get_lower_bound(),
-                                        marker.get_upper_bound(),
-                                        marker.name])
+                                        marker.name,
+                                        marker.style])
             else:
                 marker_horizontal.addRow([marker.get_position(),
-                                          marker.get_lower_bound(),
-                                          marker.get_upper_bound(),
-                                          marker.name])
+                                          marker.name,
+                                          marker.style])
 
+    def _import_markers(self, ax, marker_horizontal='marker_horizontal', marker_vertical='marker_vertical'):
+        for marker in self.markers:
+            marker.remove_all_annotations()
+            marker.remove()
+        marker_horizontal = ads.retrieve(marker_horizontal)
+        marker_vertical = ads.retrieve(marker_vertical)
+        x0, x1 = ax.get_xlim()
+        y0, y1 = ax.get_ylim()
+
+        for i in range(marker_horizontal.rowCount()):
+            row = marker_horizontal.row(i)
+            position = row['position']
+            name = row['name']
+            style = row['line style']
+            self._add_horizontal_marker(position, x0, x1, name, style)
+
+        for i in range(marker_vertical.rowCount()):
+            row = marker_vertical.row(i)
+            position = row['position']
+            name = row['name']
+            style = row['line style']
+            self._add_vertical_marker(position, y0, y1, name, style)
 
     def _get_free_marker_name(self):
         used_numbers = []
@@ -307,16 +327,20 @@ class FigureInteraction(object):
                 return "marker {}".format(proposed_number)
             proposed_number += 1
 
-    def _add_horizontal_marker(self, y_pos, lower, upper):
-        marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, name=self._get_free_marker_name(),
-                              marker_type='YSingle', line_style='--')
+    def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed'):
+        if name is None:
+            name = self._get_free_marker_name()
+        marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, name=name,
+                              marker_type='YSingle', line_style=line_style)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos, lower, upper):
-        marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, name=self._get_free_marker_name(),
-                              marker_type='XSingle', line_style='--')
+    def _add_vertical_marker(self, x_pos, lower, upper, name=None, line_style='dashed'):
+        if name is None:
+            name = self._get_free_marker_name()
+        marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, name=name,
+                              marker_type='XSingle', line_style=line_style)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
@@ -334,7 +358,7 @@ class FigureInteraction(object):
             editor.move(QCursor.pos())
             editor.exec_()
 
-        move_and_show(SingleMarkerEditor(self.canvas, marker))
+        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines))
 
     def draw_callback(self, _):
         """ This is called at every canvas draw. Redraw the markers. """
