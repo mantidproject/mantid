@@ -11,7 +11,6 @@ from qtpy.QtWidgets import QApplication
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-
 MARKER_SENSITIVITY = 3
 
 
@@ -44,8 +43,13 @@ class HorizontalMarker(QObject):
         self.x1 = x1
         x0, x1 = self._get_x0_x1()
         path = Path([(x0, y), (x1, y)], [Path.MOVETO, Path.LINETO])
-        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
-                               linewidth=line_width, linestyle=line_style, animated=True)
+        self.patch = PathPatch(path,
+                               facecolor='None',
+                               edgecolor=color,
+                               picker=picker_width,
+                               linewidth=line_width,
+                               linestyle=line_style,
+                               animated=True)
         self.axis.add_patch(self.patch)
         self.is_moving = False
 
@@ -615,7 +619,8 @@ class SingleMarker(QObject):
     """
         A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle', line_style='-'):
+    def __init__(self, canvas, color, position, lower_bound, upper_bound, name=None, marker_type='XSingle',
+                 line_style='-'):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -632,6 +637,7 @@ class SingleMarker(QObject):
         self.marker_type = marker_type
         self.canvas = canvas
         self.annotations = {}
+        self.name = name
         if self.marker_type == 'XSingle':
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
         elif self.marker_type == 'YSingle':
@@ -664,9 +670,9 @@ class SingleMarker(QObject):
         :return True if the value was changed.
         """
         if self.upper_bound >= position >= self.lower_bound:
-            self.remove_all_annotations()
+            self.remove_name()
             self.marker.set_position(position)
-            self.add_all_annotations()
+            self.add_name()
             self.redraw()
             return True
         return False
@@ -770,6 +776,18 @@ class SingleMarker(QObject):
         for label in self.annotations:
             self.remove_annotate(label)
 
+    def add_name(self):
+        self.add_annotate(self.name)
+
+    def remove_name(self):
+        self.remove_annotate(self.name)
+
+    def set_name(self, name):
+        self.remove_name()
+        del self.annotations[self.name]
+        self.name = name
+        self.add_name()
+
     def mouse_move_start(self, x, y):
         """
         Start moving this marker if (x, y) is above it. Ignore otherwise.
@@ -782,8 +800,7 @@ class SingleMarker(QObject):
             QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
 
         if self.is_marker_moving():
-            for label in self.annotations:
-                self.remove_annotate(label)
+            self.remove_name()
 
     def mouse_move(self, x, y=None):
         """

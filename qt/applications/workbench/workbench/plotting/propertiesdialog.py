@@ -193,9 +193,9 @@ class SingleMarkerEditor(PropertiesEditorBase):
         self._name = self.ui.name.text()
 
         self.marker.set_position(self._position)
+        self.marker.set_name(self._name)
         self.canvas.draw()
 
     def error_occurred(self, exc):
-        print('what')
         self.ui.errors.setText(str(exc).strip())
         self.ui.errors.show()

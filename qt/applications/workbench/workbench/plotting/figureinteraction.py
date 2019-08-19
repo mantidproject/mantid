@@ -24,7 +24,7 @@ from mantid.api import AnalysisDataService as ads
 from mantid.plots import MantidAxes
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.plotting.markers import HorizontalMarker, VerticalMarker, SingleMarker
+from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor
 from workbench.plotting.toolbar import ToolbarStateManager
@@ -101,7 +101,10 @@ class FigureInteraction(object):
             self._show_axis_editor(event)
 
         # If left button clicked, start moving peaks
-        if event.button == 1 and not self.toolbar_manager.is_tool_active():
+        if self.toolbar_manager.is_tool_active():
+            for marker in self.markers:
+                marker.remove_all_annotations()
+        elif event.button == 1:
             change_cursor = False
             for marker in self.markers:
                 if event.xdata is None or event.ydata is None:
@@ -114,11 +117,12 @@ class FigureInteraction(object):
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
         if self.toolbar_manager.is_tool_active():
-            self.redraw_annotations(event)
+            for marker in self.markers:
+                marker.add_all_annotations()
         else:
             for marker in self.markers:
                 if marker.is_marker_moving():
-                    marker.add_all_annotations()
+                    marker.add_name()
                 marker.mouse_move_stop()
             QApplication.restoreOverrideCursor()
 
@@ -135,21 +139,16 @@ class FigureInteraction(object):
 
         for ax in axes:
             if ax.title.contains(event)[0]:
-                print('title')
                 move_and_show(LabelEditor(canvas, ax.title))
             elif ax.xaxis.label.contains(event)[0]:
-                print('xaxis')
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
-                print('yaxis')
                 move_and_show(LabelEditor(canvas, ax.yaxis.label))
             elif (ax.xaxis.contains(event)[0] or
                   any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
-                print('xaxis editor')
                 move_and_show(XAxisEditor(canvas, ax))
             elif (ax.yaxis.contains(event)[0] or
                   any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
-                print('yaxis editor')
                 move_and_show(YAxisEditor(canvas, ax))
 
     def _show_markers_menu(self, markers, event):
@@ -169,7 +168,7 @@ class FigureInteraction(object):
         menu.exec_(QCursor.pos())
 
     def _single_marker_menu(self, menu, marker):
-        marker_menu = QMenu(marker.annotations.keys()[0], menu)
+        marker_menu = QMenu(marker.name, menu)
         marker_action_group = QActionGroup(marker_menu)
 
         delete = marker_menu.addAction("Delete", lambda: self._delete_marker(marker))
@@ -264,7 +263,12 @@ class FigureInteraction(object):
         menu.addMenu(marker_menu)
 
     def _get_free_marker_name(self):
-        used_numbers = [int(label.split(' ')[1]) for marker in self.markers for label in marker.annotations]
+        used_numbers = []
+        for marker in self.markers:
+            try:
+                used_numbers.append(int(marker.name.split(' ')[1]))
+            except:
+                continue
         proposed_number = 0
         while True:
             if proposed_number not in used_numbers:
@@ -272,29 +276,28 @@ class FigureInteraction(object):
             proposed_number += 1
 
     def _add_horizontal_marker(self, y_pos, lower, upper):
-        marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, marker_type='YSingle', line_style='--')
-        marker.add_annotate(self._get_free_marker_name())
+        marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, name=self._get_free_marker_name(),
+                              marker_type='YSingle', line_style='--')
+        marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
     def _add_vertical_marker(self, x_pos, lower, upper):
-        marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, marker_type='XSingle', line_style='--')
-        marker.add_annotate(self._get_free_marker_name())
+        marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, name=self._get_free_marker_name(),
+                              marker_type='XSingle', line_style='--')
+        marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
     def _delete_marker(self, marker):
         if marker in self.markers:
-            for label in marker.annotations:
-                marker.remove_annotate(label)
+            marker.remove_all_annotations()
             self.markers.remove(marker)
             self.canvas.draw()
 
     def _edit_marker(self, marker):
         QApplication.restoreOverrideCursor()
         canvas = self.canvas
-        figure = canvas.figure
-        axes = figure.get_axes()
 
         def move_and_show(editor):
             editor.move(QCursor.pos())
@@ -309,7 +312,6 @@ class FigureInteraction(object):
 
     def motion_event(self, event):
         if self.toolbar_manager.is_tool_active():
-            self.redraw_annotations(event)
             return
 
         """ Move the marker if the mouse is moving and in range """
@@ -334,8 +336,7 @@ class FigureInteraction(object):
     def redraw_annotations(self, event):
         if hasattr(event, 'button') and event.button is not None:
             for marker in self.markers:
-                for label in marker.annotations:
-                    marker.remove_annotate(label)
+                marker.remove_all_annotations()
                 marker.add_all_annotations()
 
     def _is_normalized(self, ax):
