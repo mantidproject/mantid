@@ -61,12 +61,14 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_event))
+        self._cids.append(canvas.mpl_connect('resize_event', self.redraw_annotations))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
         self.fit_browser = fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
+        self.vertical_markers = []
 
     @property
     def nevents(self):
@@ -94,14 +96,18 @@ class FigureInteraction(object):
         if event.button == 1:
             change_cursor = False
             for marker in self.markers:
+                if event.xdata is None or event.ydata is None:
+                    continue
                 marker.mouse_move_start(event.xdata, event.ydata)
-                change_cursor = marker.is_moving or change_cursor
+                change_cursor = marker.is_marker_moving() or change_cursor
             if change_cursor:
                 QApplication.setOverrideCursor(QCursor(Qt.ClosedHandCursor))
 
     def on_mouse_button_release(self, _):
         """ Stop moving the markers when the mouse button is released """
         for marker in self.markers:
+            if marker.is_marker_moving():
+                marker.add_all_annotations()
             marker.mouse_move_stop()
         QApplication.restoreOverrideCursor()
 
@@ -199,8 +205,10 @@ class FigureInteraction(object):
     def _add_marker_option_menu(self, menu, event):
         marker_menu = QMenu("Markers", menu)
         marker_action_group = QActionGroup(marker_menu)
-        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, event.inaxes))
-        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata))
+        x0, x1 = event.inaxes.get_xlim()
+        y0, y1 = event.inaxes.get_ylim()
+        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1))
+        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1))
 
         for action in [horizontal, vertical]:
             marker_action_group.addAction(action)
@@ -209,13 +217,15 @@ class FigureInteraction(object):
 
         menu.addMenu(marker_menu)
 
-    def _add_horizontal_marker(self, y_pos, ax):
-        marker = HorizontalMarker(self.canvas, 'C2', y_pos, line_style='--')
+    def _add_horizontal_marker(self, y_pos, lower, upper):
+        marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, marker_type='YSingle', line_style='--')
+        marker.add_annotate('marker {}'.format(len(self.markers)))
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos):
-        marker = VerticalMarker(self.canvas, 'C2', x_pos, line_style='--')
+    def _add_vertical_marker(self, x_pos, lower, upper):
+        marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, marker_type='XSingle', line_style='--')
+        marker.add_annotate('marker {}'.format(len(self.markers)))
         marker.redraw()
         self.markers.append(marker)
 
@@ -225,13 +235,15 @@ class FigureInteraction(object):
             marker.redraw()
 
     def motion_event(self, event):
+        if self.toolbar_manager.is_tool_active():
+            self.redraw_annotations(event)
         """ Move the marker if the mouse is moving and in range """
         x = event.xdata
         y = event.ydata
         if x is None or y is None:
             return
 
-        if not any([marker.is_moving for marker in self.markers]):
+        if not any([marker.is_marker_moving() for marker in self.markers]):
             if any([marker.is_above(x, y) for marker in self.markers]):
                 QApplication.setOverrideCursor(Qt.OpenHandCursor)
             else:
@@ -243,6 +255,15 @@ class FigureInteraction(object):
 
         if should_move:
             self.canvas.draw()
+
+    def redraw_annotations(self, event):
+        if not hasattr(event, 'button') or event.button is None:
+            return
+
+        for marker in self.markers:
+            for label in marker.annotations:
+                marker.remove_annotate(label)
+            marker.add_all_annotations()
 
     def _is_normalized(self, ax):
         artists = [art for art in ax.tracked_workspaces.values()]

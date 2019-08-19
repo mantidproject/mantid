@@ -37,6 +37,7 @@ class HorizontalMarker(QObject):
         :param line_style: An MPL line style value.
         """
         super(HorizontalMarker, self).__init__()
+        self.canvas = canvas
         self.axis = canvas.figure.get_axes()[0]
         self.y = y
         self.x0 = x0
@@ -194,7 +195,8 @@ class VerticalMarker(QObject):
         :param line_style: An MPL line style value.
         """
         super(VerticalMarker, self).__init__()
-        self.ax = canvas.figure.get_axes()[0]
+        self.canvas = canvas
+        self.axis = canvas.figure.get_axes()[0]
         self.x = x
         self.y0 = y0
         self.y1 = y1
@@ -202,7 +204,7 @@ class VerticalMarker(QObject):
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
         self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
                                linewidth=line_width, linestyle=line_style, animated=True)
-        self.ax.add_patch(self.patch)
+        self.axis.add_patch(self.patch)
         self.is_moving = False
 
     def _get_y0_y1(self):
@@ -211,7 +213,7 @@ class VerticalMarker(QObject):
         :return: Tuple y0, y1.
         """
         if self.y0 is None or self.y1 is None:
-            y0, y1 = self.ax.get_ylim()
+            y0, y1 = self.axis.get_ylim()
         if self.y0 is not None:
             y0 = self.y0
         if self.y1 is not None:
@@ -232,7 +234,7 @@ class VerticalMarker(QObject):
         vertices = self.patch.get_path().vertices
         vertices[0] = self.x, y0
         vertices[1] = self.x, y1
-        self.ax.draw_artist(self.patch)
+        self.axis.draw_artist(self.patch)
 
     def set_color(self, color):
         """
@@ -628,6 +630,8 @@ class SingleMarker(QObject):
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
         self.marker_type = marker_type
+        self.canvas = canvas
+        self.annotations = {}
         if self.marker_type == 'XSingle':
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
         elif self.marker_type == 'YSingle':
@@ -729,6 +733,37 @@ class SingleMarker(QObject):
                 return False, self.lower_bound
         return True, position
 
+    def add_annotate(self, text):
+        if text is None:
+            return
+
+        x_lower, x_upper = self.marker.axis.get_xlim()
+        y_lower, y_upper = self.marker.axis.get_ylim()
+        if self.marker_type == 'YSingle':
+            rotation = 0
+            x_pos = 0.86
+            y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
+        else:
+            rotation = -90
+            x_pos = self.relative(self.marker.x, x_lower, x_upper)
+            y_pos = 0.95
+
+        self.annotations[text] = self.marker.axis.annotate(text,
+                                                           xy=(x_pos, y_pos),
+                                                           xycoords="axes fraction",
+                                                           rotation=rotation)
+        self.canvas.draw()
+
+    def remove_annotate(self, label):
+        if label not in self.annotations:
+            return
+
+        self.annotations[label].remove()
+
+    def add_all_annotations(self):
+        for label in self.annotations:
+            self.add_annotate(label)
+
     def mouse_move_start(self, x, y):
         """
         Start moving this marker if (x, y) is above it. Ignore otherwise.
@@ -739,6 +774,10 @@ class SingleMarker(QObject):
         if self.marker.is_above(x, y) and inside_bounds:
             self.marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
+
+        if self.is_marker_moving():
+            for label in self.annotations:
+                self.remove_annotate(label)
 
     def mouse_move(self, x, y=None):
         """
@@ -771,6 +810,15 @@ class SingleMarker(QObject):
         :return: True if the marker is being moved.
         """
         return self.marker.is_marker_moving()
+
+    def is_above(self, x, y):
+        return self.marker.is_above(x, y)
+
+    def relative(self, value, lower, upper):
+        if not lower <= value <= upper:
+            return 0.0
+
+        return (value - lower) / (upper - lower)
 
 
 class RangeMarker(QObject):
