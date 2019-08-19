@@ -11,6 +11,10 @@ User Interface
 
 - The zoom icon in the SliceViewer and plot toolbars have been replaced with clearer icons.
 
+New
+###
+- Added a 'Generate Script from Workspaces' button to Workbench under the File menu bar.
+
 Improvements
 ############
 - The keyboard shortcut Ctrl+N now opens a new tab in the script editor.
