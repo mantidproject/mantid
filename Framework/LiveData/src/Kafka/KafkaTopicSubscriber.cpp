@@ -121,8 +121,8 @@ KafkaTopicSubscriber::getTopicPartitions() {
   for (const auto &topicName : m_topicNames) {
     auto iter = std::find_if(topics->cbegin(), topics->cend(),
                              [topicName](const TopicMetadata *tpc) {
-      return tpc->topic() == topicName;
-    });
+                               return tpc->topic() == topicName;
+                             });
     auto matchedTopic = *iter;
     auto partitionMetadata = matchedTopic->partitions();
     auto numberOfPartitions = partitionMetadata->size();
@@ -142,9 +142,9 @@ KafkaTopicSubscriber::getTopicPartitions() {
  * @return map with key of topic name and value of vector of offsets for its
  * partitions
  */
-std::unordered_map<std::string, std::vector<int64_t> >
+std::unordered_map<std::string, std::vector<int64_t>>
 KafkaTopicSubscriber::getCurrentOffsets() {
-  std::unordered_map<std::string, std::vector<int64_t> > currentOffsets;
+  std::unordered_map<std::string, std::vector<int64_t>> currentOffsets;
   std::vector<RdKafka::TopicPartition *> partitions;
   auto error = m_consumer->assignment(partitions);
   if (error != RdKafka::ERR_NO_ERROR) {
@@ -157,14 +157,14 @@ KafkaTopicSubscriber::getCurrentOffsets() {
                              "current partition positions.");
   }
   for (auto topicPartition : partitions) {
-    std::vector<int64_t> offsetList = { topicPartition->offset() };
+    std::vector<int64_t> offsetList = {topicPartition->offset()};
     auto result = currentOffsets.emplace(
         std::make_pair(topicPartition->topic(), offsetList));
     if (!result.second) {
       // If we could not emplace a new pair then the key already exists, so
       // append the offset to the vector belonging to the existing topic key
-      currentOffsets[topicPartition->topic()]
-          .push_back(topicPartition->offset());
+      currentOffsets[topicPartition->topic()].push_back(
+          topicPartition->offset());
     }
   }
   return currentOffsets;
@@ -197,8 +197,8 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
   auto partitions = getTopicPartitions();
   std::for_each(partitions.cbegin(), partitions.cend(),
                 [time](RdKafka::TopicPartition *partition) {
-    partition->set_offset(time);
-  });
+                  partition->set_offset(time);
+                });
 
   // Convert the timestamps to partition offsets
   auto error = m_consumer->offsetsForTimes(partitions, 10000);
@@ -216,7 +216,8 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
                        << ", looked up offset as: " << partition->offset()
                        << ", current high watermark is: "
                        << getCurrentOffset(partition->topic(),
-                                           partition->partition()) << std::endl;
+                                           partition->partition())
+                       << std::endl;
     }
   }
 
@@ -299,8 +300,8 @@ void KafkaTopicSubscriber::checkTopicsExist() const {
   for (const auto &topicName : m_topicNames) {
     auto iter = std::find_if(topics->cbegin(), topics->cend(),
                              [topicName](const TopicMetadata *tpc) {
-      return tpc->topic() == topicName;
-    });
+                               return tpc->topic() == topicName;
+                             });
     if (iter == topics->cend()) {
       std::ostringstream os;
       os << "Failed to find topic '" << topicName << "' on broker";
@@ -375,9 +376,8 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
  * @param error : rdkafka error code
  * @param confOffset : offset to start receiving messages at
  */
-void
-KafkaTopicSubscriber::reportSuccessOrFailure(const RdKafka::ErrorCode &error,
-                                             int64_t confOffset) const {
+void KafkaTopicSubscriber::reportSuccessOrFailure(
+    const RdKafka::ErrorCode &error, int64_t confOffset) const {
   if (confOffset < 0) {
     std::ostringstream os;
     os << "No messages are yet available on the Kafka brokers for one "
@@ -461,7 +461,7 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
  * @return : map with topic names as key with a vector of offsets for the
  * partitions
  */
-std::unordered_map<std::string, std::vector<int64_t> >
+std::unordered_map<std::string, std::vector<int64_t>>
 KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
   auto partitions = getTopicPartitions();
   for (auto partition : partitions) {
@@ -477,15 +477,16 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
   // Preallocate map
   auto metadata = queryMetadata();
   auto topics = metadata->topics();
-  std::unordered_map<std::string, std::vector<int64_t> > partitionOffsetMap;
-  std::for_each(topics->cbegin(), topics->cend(),
-                [&partitionOffsetMap, this](const TopicMetadata *tpc) {
-    if (std::find(m_topicNames.cbegin(), m_topicNames.cend(), tpc->topic()) !=
-        m_topicNames.cend()) {
-      partitionOffsetMap.insert(
-          { tpc->topic(), std::vector<int64_t>(tpc->partitions()->size()) });
-    }
-  });
+  std::unordered_map<std::string, std::vector<int64_t>> partitionOffsetMap;
+  std::for_each(
+      topics->cbegin(), topics->cend(),
+      [&partitionOffsetMap, this](const TopicMetadata *tpc) {
+        if (std::find(m_topicNames.cbegin(), m_topicNames.cend(),
+                      tpc->topic()) != m_topicNames.cend()) {
+          partitionOffsetMap.insert(
+              {tpc->topic(), std::vector<int64_t>(tpc->partitions()->size())});
+        }
+      });
 
   // Get the offsets from the topic partitions and add them to map
   for (auto partition : partitions) {

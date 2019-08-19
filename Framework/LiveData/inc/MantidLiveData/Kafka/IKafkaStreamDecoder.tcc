@@ -106,12 +106,11 @@ void IKafkaStreamDecoder::loadInstrument(const std::string &name,
     if (jsonGeometry.empty())
       loadFromAlgorithm<T>(name, workspace);
     else {
-      NexusGeometry::JSONInstrumentBuilder builder("{\"nexus_structure\":" +
-                                                   jsonGeometry + "}");
+      NexusGeometry::JSONInstrumentBuilder builder(
+          "{\"nexus_structure\":" + jsonGeometry + "}");
       workspace->setInstrument(builder.buildGeometry());
     }
-  }
-  catch (std::exception &exc) {
+  } catch (std::exception &exc) {
     logger.warning() << "Error loading instrument '" << name
                      << "': " << exc.what() << "\n";
   }

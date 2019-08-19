@@ -299,9 +299,9 @@ std::string extractInstrumentName(const Json::Value &instrument) {
   return name;
 }
 
-std::vector<std::unique_ptr<Json::Value> >
+std::vector<std::unique_ptr<Json::Value>>
 moveToUniquePtrVec(std::vector<Json::Value> &jsonVector) {
-  std::vector<std::unique_ptr<Json::Value> > ret;
+  std::vector<std::unique_ptr<Json::Value>> ret;
   for (auto &val : jsonVector)
     ret.push_back(std::make_unique<Json::Value>(std::move(val)));
 
@@ -405,10 +405,9 @@ void JSONGeometryParser::extractTransformationDataset(
 
 /** Extract all detector transformations.
  */
-void
-JSONGeometryParser::extractTransformations(const Json::Value &transformations,
-                                           Eigen::Vector3d &translation,
-                                           Eigen::Quaterniond &orientation) {
+void JSONGeometryParser::extractTransformations(
+    const Json::Value &transformations, Eigen::Vector3d &translation,
+    Eigen::Quaterniond &orientation) {
   Eigen::Vector3d location(0, 0, 0);
   Eigen::Vector3d beamDirectionOffset(0, 0, 0);
   Eigen::Vector3d orientationVector(0, 0, 0);
