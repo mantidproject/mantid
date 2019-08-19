@@ -37,7 +37,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
             MatrixWorkspaceProperty('InputWorkspace', '',
                                     direction=Direction.Input,
                                     # TODO find out what validator is best for this
-                                    validator=CommonBinsValidator()),
+                                    #validator=CommonBinsValidator(),
+                                    ),
             doc='Input workspace to be fit.')
 
         self.declareProperty(
@@ -54,7 +55,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
             name='BinningForCalc',
             defaultValue='',
             validator=StringMandatoryValidator(),
-            # optional=PropertyMode.Optional,
             doc='Bin range for calculation.')
 
         self.declareProperty(
@@ -68,8 +68,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
         self._binning_for_fit = self.getProperty('BinningForFit').value
-        self._fit_spectrum_with = self.getPropertyValue('FitSpectrumWith').value
-        self._binning_for_calc = self.getPropertyValue('BinningForCalc').value
+        self._fit_spectrum_with = self.getPropertyValue('FitSpectrumWith')
+        self._binning_for_calc = self.getPropertyValue('BinningForCalc')
         if self._binning_for_calc is None:
             x = mtd[self._input_ws].readX(0)
             binning = [str(i) for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
@@ -92,6 +92,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
         incident_index = 0
         x_fit = np.array(mtd['fit'].readX(incident_index))
         y_fit = np.array(mtd['fit'].readY(incident_index))
+        mtd['fit'].delete()
 
         if len(x_fit) != len(y_fit):
             x_fit = x_fit[:-1]
@@ -124,13 +125,14 @@ class FitIncidentSpectrum(PythonAlgorithm):
             UnitX='Wavelength',
             NSpec=2,
             Distribution=False)
-
+        mtd['fit'].remove
+        mtd['fit_prime'].remove
         return mtd[self._output_ws]
 
-    def fitCubicSplineWithGaussConv(x_fit, y_fit, x, sigma=3):
+    def fitCubicSplineWithGaussConv(self, x_fit, y_fit, x, sigma=3):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
-        def moving_average(y, sigma=sigma):
-            b = signal.gaussian(39, sigma)
+        def moving_average(y, sig=sigma):
+            b = signal.gaussian(39, sig)
             average = ndimage.filters.convolve1d(y, b / b.sum())
             var = ndimage.filters.convolve1d(np.power(y - average, 2), b / b.sum())
             return average, var
@@ -142,13 +144,13 @@ class FitIncidentSpectrum(PythonAlgorithm):
         fit_prime = spline_fit_prime(x)
         return fit, fit_prime
 
-    def fitCubicSpline(x_fit, y_fit, x, s=1e15):
+    def fitCubicSpline(self, x_fit, y_fit, x, s=1e15):
         tck = interpolate.splrep(x_fit, y_fit, s=s)
         fit = interpolate.splev(x, tck, der=0)
         fit_prime = interpolate.splev(x, tck, der=1)
         return fit, fit_prime
 
-    def fitCubicSplineViaMantidSplineSmoothing(InputWorkspace, ParamsInput, ParamsOutput, **kwargs):
+    def fitCubicSplineViaMantidSplineSmoothing(self, InputWorkspace, ParamsInput, ParamsOutput, **kwargs):
         Rebin(
             InputWorkspace=InputWorkspace,
             OutputWorkspace='fit',
@@ -172,7 +174,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             PreserveEvents=True)
         return mtd['fit'].readY(0), mtd['fit_prime_1'].readY(0)
 
-    def fitHowellsFunction(x_fit, y_fit, x):
+    def fitHowellsFunction(self, x_fit, y_fit, x):
         # Fit with analytical function from HowellsEtAl
         def calc_HowellsFunction(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
             term1 = phi_max * ((lam_t**4.) / lambdas**5.) * \
