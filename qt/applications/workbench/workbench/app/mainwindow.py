@@ -285,7 +285,7 @@ class MainWindow(QMainWindow):
         action_save_script_as = create_action(
             self, "Save Script as...", on_triggered=self.save_script_as)
         action_generate_ws_script = create_action(
-            self, "Generate Script from Workspaces",
+            self, "Generate script from workspaces",
             on_triggered=self.generate_script_from_workspaces)
         action_save_project = create_action(
             self, "Save Project", on_triggered=self.save_project)
