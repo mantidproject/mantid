@@ -9,14 +9,17 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import os
+from threading import Thread
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
+from qtpy.QtWidgets import QApplication
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantid.kernel import ConfigService
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 
 class Project(AnalysisDataServiceObserver):
@@ -65,7 +68,8 @@ class Project(AnalysisDataServiceObserver):
 
             if answer == QMessageBox.Yes:
                 # Actually save
-                self._save()
+                task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
+                task.start()
             elif answer == QMessageBox.No:
                 # Save with a new name
                 return self.save_as()
@@ -85,7 +89,8 @@ class Project(AnalysisDataServiceObserver):
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
-        self._save()
+        task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
+        task.start()
 
     @staticmethod
     def _offer_overwriting_gui():
@@ -142,10 +147,16 @@ class Project(AnalysisDataServiceObserver):
         if file_ext != ".mtdproj":
             QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
 
-        project_loader = ProjectLoader(self.project_file_ext)
-        project_loader.load_project(file_name)
+        self._load(file_name)
+
         self.last_project_location = file_name
         self.__saved = True
+
+    def _load(self, file_name):
+        project_loader = ProjectLoader(self.project_file_ext)
+        task = BlockingAsyncTaskWithCallback(target=project_loader.load_project, args=[file_name],
+                                             blocking_cb=QApplication.processEvents)
+        task.start()
 
     def _load_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
