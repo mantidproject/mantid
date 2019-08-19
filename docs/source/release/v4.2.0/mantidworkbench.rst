@@ -14,7 +14,7 @@ User Interface
 Improvements
 ############
 - The keyboard shortcut Ctrl+N now opens a new tab in the script editor.
-
+- Project Save and Load will no longer freeze when saving and loading large amounts of workspaces and/or interfaces.
 - Attempting to save files that are larger than (by default) 10GB now results in a dialog box to inform the user that it may take a long time and gives them the opportunity to cancel.
 
 Bugfixes
