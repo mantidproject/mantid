@@ -89,6 +89,11 @@ public:
 
   void test_invalid_workspace_throws() {
 
+    /*
+    test runtime error is thrown when a workspae without an Instrument is passed
+    into the Input workspace property.
+    */
+
     ScopedFileHandle fileResource(
         "algorithm_no_h5_path_provided_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
@@ -117,32 +122,12 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_invalid_fileName_throws() {
-    ScopedFileHandle fileResource(
-        "algorithm_invalid_fileName_provided_test_file.hdf5");
-    auto badDestinationPath = "false_directory\\" + fileResource.fullPath();
-    // Create test workspace
-    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
-        create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
-
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
-                                                                  inputWS));
-    SaveNexusGeometry alg;
-    // Don't put output in ADS by default
-
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "testWS"));
-    TS_ASSERT_THROWS(alg.setPropertyValue("FileName", badDestinationPath),
-                     Poco::PathSyntaxException &);
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
-    TS_ASSERT(!alg.isExecuted());
-  }
-
   void test_valid_fileName_with_invalid_extension_propagates_throw() {
+    /*
+    test saveInstrument propagates invalid_argument in executuion of algorithm
+    when invalid file extension is passed into fileName property.
+    */
+
     ScopedFileHandle fileResource(
         "algorithm_invalid_extension_provided_test_file.txt");
     auto destinationFile = fileResource.fullPath();
