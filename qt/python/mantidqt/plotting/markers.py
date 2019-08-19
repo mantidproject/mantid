@@ -745,28 +745,39 @@ class SingleMarker(QObject):
         if text is None:
             return
 
+        marker_in_scope = True
         x_lower, x_upper = self.marker.axis.get_xlim()
         y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
             rotation = 0
             x_pos = 0.86
             y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
+            if not y_lower <= self.marker.y <= y_upper:
+                marker_in_scope = False
         else:
             rotation = -90
             x_pos = self.relative(self.marker.x, x_lower, x_upper)
             y_pos = 0.95
+            if not x_lower <= self.marker.x <= x_upper:
+                marker_in_scope = False
 
-        self.annotations[text] = self.marker.axis.annotate(text,
-                                                           xy=(x_pos, y_pos),
-                                                           xycoords="axes fraction",
-                                                           rotation=rotation)
+        if marker_in_scope:
+            self.annotations[text] = self.marker.axis.annotate(text,
+                                                               xy=(x_pos, y_pos),
+                                                               xycoords="axes fraction",
+                                                               rotation=rotation)
+        else:
+            self.annotations[text] = None
         self.canvas.draw()
 
     def remove_annotate(self, label):
-        if label not in self.annotations:
+        if label not in self.annotations or self.annotations[label] is None:
             return
 
-        self.annotations[label].remove()
+        try:
+            self.annotations[label].remove()
+        except:
+            return
 
     def add_all_annotations(self):
         for label in self.annotations:

@@ -85,26 +85,32 @@ class FigureInteraction(object):
         """Respond to a MouseEvent where a button was pressed"""
         # local variables to avoid constant self lookup
         canvas = self.canvas
+        x_pos = event.xdata
+        y_pos = event.ydata
+        if x_pos is not None and y_pos is not None:
+            marker_selected = [marker for marker in self.markers if marker.is_above(x_pos, y_pos)]
+        else:
+            marker_selected = []
+
         if (event.button == canvas.buttond.get(Qt.RightButton) and
                 not self.toolbar_manager.is_tool_active()):
-            x_pos = event.xdata
-            y_pos = event.ydata
-            if x_pos is None or y_pos is None:
-                return
-
-            marker_selected = [marker for marker in self.markers if marker.is_above(x_pos, y_pos)]
             if not marker_selected:
                 self._show_context_menu(event)
             else:
                 self._show_markers_menu(marker_selected, event)
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
-            self._show_axis_editor(event)
+            if not marker_selected:
+                self._show_axis_editor(event)
+            else:
+                for marker in marker_selected:
+                    self._edit_marker(marker)
+                marker_selected = None
 
         # If left button clicked, start moving peaks
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
                 marker.remove_all_annotations()
-        elif event.button == 1:
+        elif event.button == 1 and marker_selected is not None:
             change_cursor = False
             for marker in self.markers:
                 if event.xdata is None or event.ydata is None:
@@ -267,7 +273,7 @@ class FigureInteraction(object):
         for marker in self.markers:
             try:
                 used_numbers.append(int(marker.name.split(' ')[1]))
-            except:
+            except IndexError:
                 continue
         proposed_number = 0
         while True:
@@ -297,7 +303,6 @@ class FigureInteraction(object):
 
     def _edit_marker(self, marker):
         QApplication.restoreOverrideCursor()
-        canvas = self.canvas
 
         def move_and_show(editor):
             editor.move(QCursor.pos())

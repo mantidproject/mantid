@@ -59,8 +59,14 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager = MagicMock()
         fig_manager.canvas = MagicMock()
         interactor = FigureInteraction(fig_manager)
-        fig_manager.canvas.mpl_connect.assert_called_once_with('button_press_event',
-                                                               interactor.on_mouse_button_press)
+        expected_call = [
+            call('button_press_event', interactor.on_mouse_button_press),
+            call('button_release_event', interactor.on_mouse_button_release),
+            call('draw_event', interactor.draw_callback),
+            call('motion_notify_event', interactor.motion_event),
+            call('resize_event', interactor.redraw_annotations),
+        ]
+        fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
 
     def test_disconnect_called_for_each_registered_handler(self):
         fig_manager = MagicMock()
@@ -112,6 +118,8 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager.fit_browser.tool = None
         interactor = FigureInteraction(fig_manager)
         mouse_event = self._create_mock_right_click()
+        mouse_event.inaxes.get_xlim.return_value = (1, 2)
+        mouse_event.inaxes.get_ylim.return_value = (1, 2)
         mocked_figure_type.return_value = FigureType.Line
 
         # Expect a call to QMenu() for the outer menu followed by two more calls
@@ -119,7 +127,8 @@ class FigureInteractionTest(unittest.TestCase):
         qmenu_call1 = MagicMock()
         qmenu_call2 = MagicMock()
         qmenu_call3 = MagicMock()
-        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3]
+        qmenu_call4 = MagicMock()
+        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
 
         with patch('workbench.plotting.figureinteraction.QActionGroup',
                    autospec=True):
@@ -131,11 +140,14 @@ class FigureInteractionTest(unittest.TestCase):
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
                     expected_qmenu_calls = [call(),
                                             call("Axes", qmenu_call1),
-                                            call("Normalization", qmenu_call1)]
+                                            call("Normalization", qmenu_call1),
+                                            call("Markers", qmenu_call1)]
                     self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
                     # 4 actions in Axes submenu
                     self.assertEqual(4, qmenu_call2.addAction.call_count)
                     # 2 actions in Normalization submenu
+                    self.assertEqual(2, qmenu_call3.addAction.call_count)
+                    # 2 actions in Markers submenu
                     self.assertEqual(2, qmenu_call3.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
