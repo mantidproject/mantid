@@ -129,19 +129,19 @@ class FigureInteraction(object):
         if self.fit_browser.tool is not None:
             self.fit_browser.add_to_menu(menu)
             menu.addSeparator()
-        self._add_axes_scale_menu(menu)
+        self._add_axes_scale_menu(menu, event.inaxes)
         if isinstance(event.inaxes, MantidAxes):
             self._add_normalization_option_menu(menu, event.inaxes)
         self.errors_manager.add_error_bars_menu(menu, event.inaxes)
         menu.exec_(QCursor.pos())
 
-    def _add_axes_scale_menu(self, menu):
+    def _add_axes_scale_menu(self, menu, ax):
         """Add the Axes scale options menu to the given menu"""
         axes_menu = QMenu("Axes", menu)
         axes_actions = QActionGroup(axes_menu)
-        current_scale_types = self._get_axes_scale_types()
+        current_scale_types = (ax.get_xscale(), ax.get_yscale())
         for label, scale_types in iteritems(AXES_SCALE_MENU_OPTS):
-            action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types))
+            action = axes_menu.addAction(label, partial(self._quick_change_axes,scale_types, ax))
             if current_scale_types == scale_types:
                 action.setCheckable(True)
                 action.setChecked(True)
@@ -231,7 +231,7 @@ class FigureInteraction(object):
             return True
         return False
 
-    def _get_axes_scale_types(self):
+    def _get_axes_scale_types(self, ax):
         """Return a 2-tuple containing the axis scale types if all Axes on the figure are the same
          otherwise we return None. It assumes a figure with atleast 1 Axes object"""
         all_axes = self.canvas.figure.get_axes()
@@ -244,19 +244,18 @@ class FigureInteraction(object):
 
         return scale_types
 
-    def _quick_change_axes(self, scale_types):
+    def _quick_change_axes(self, scale_types, ax):
         """
         Perform a change of axes on the figure to that given by the option
         :param scale_types: A 2-tuple of strings giving matplotlib axes scale types
         """
-        for axes in self.canvas.figure.get_axes():
             # Recompute the limits of the data. If the scale is set to log
             # on either axis, Fit enabled & then disabled, then the axes are
             # not rescaled properly because the vertical marker artists were
             # included in the last computation of the data limits and
             # set_xscale/set_yscale only autoscale the view
-            axes.relim()
-            axes.set_xscale(scale_types[0])
-            axes.set_yscale(scale_types[1])
+        ax.relim()
+        ax.set_xscale(scale_types[0])
+        ax.set_yscale(scale_types[1])
 
         self.canvas.draw_idle()
