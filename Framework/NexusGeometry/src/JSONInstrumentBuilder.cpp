@@ -114,14 +114,10 @@ Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {
         Eigen::Affine3d::Identity() * pixelOffsets;
     const auto &ids = m_parser->detectorIDs(bank);
     if (m_parser->isOffGeometry(bank)) {
-      const auto &x = m_parser->xPixelOffsets(bank);
-      const auto &y = m_parser->yPixelOffsets(bank);
-      const auto &z = m_parser->zPixelOffsets(bank);
-
-      for (size_t i = 0; i < m_parser->detectorIDs(bank).size(); ++i) {
+      for (size_t i = 0; i < ids.size(); ++i) {
+        Eigen::Vector3d relativePos = detectorPixels.col(i);
         builder.addDetectorToLastBank(bankName + "_" + std::to_string(i),
-                                      ids[i], Eigen::Vector3d(x[i], y[i], z[i]),
-                                      shape);
+                                      ids[i], relativePos, shape);
       }
     } else {
       auto tubes = TubeHelpers::findAndSortTubes(*shape, detectorPixels, ids);
