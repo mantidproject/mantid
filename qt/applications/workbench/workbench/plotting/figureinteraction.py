@@ -88,7 +88,16 @@ class FigureInteraction(object):
         canvas = self.canvas
         if (event.button == canvas.buttond.get(Qt.RightButton) and
                 not self.toolbar_manager.is_tool_active()):
-            self._show_context_menu(event)
+            x_pos = event.xdata
+            y_pos = event.ydata
+            if x_pos is None or y_pos is None:
+                return
+
+            marker_selected = [marker for marker in self.markers if marker.is_above(x_pos, y_pos)]
+            if not marker_selected:
+                self._show_context_menu(event)
+            else:
+                self._show_markers_menu(marker_selected, event)
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             self._show_axis_editor(event)
 
@@ -135,6 +144,35 @@ class FigureInteraction(object):
             elif (ax.yaxis.contains(event)[0] or
                   any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
                 move_and_show(YAxisEditor(canvas, ax))
+
+    def _show_markers_menu(self, markers, event):
+        if not event.inaxes:
+            return
+
+        fig_type = figure_type(self.canvas.figure)
+        if fig_type == FigureType.Empty or fig_type == FigureType.Image:
+            return
+
+        menu = QMenu()
+        QApplication.restoreOverrideCursor()
+
+        for marker in markers:
+            self._single_marker_menu(menu, marker)
+
+        menu.exec_(QCursor.pos())
+
+    def _single_marker_menu(self, menu, marker):
+        marker_menu = QMenu(marker.annotations.keys()[0], menu)
+        marker_action_group = QActionGroup(marker_menu)
+
+        delete = marker_menu.addAction("Delete", lambda: self._delete_marker(marker))
+
+        for action in [delete]:
+            marker_action_group.addAction(action)
+            action.setCheckable(True)
+            action.setChecked(False)
+
+        menu.addMenu(marker_menu)
 
     def _show_context_menu(self, event):
         """Display a relevant context menu on the canvas
@@ -217,17 +255,32 @@ class FigureInteraction(object):
 
         menu.addMenu(marker_menu)
 
+    def _get_free_marker_name(self):
+        used_numbers = [int(label.split(' ')[1]) for marker in self.markers for label in marker.annotations]
+        proposed_number = 0
+        while True:
+            if proposed_number not in used_numbers:
+                return "marker {}".format(proposed_number)
+            proposed_number += 1
+
     def _add_horizontal_marker(self, y_pos, lower, upper):
         marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, marker_type='YSingle', line_style='--')
-        marker.add_annotate('marker {}'.format(len(self.markers)))
+        marker.add_annotate(self._get_free_marker_name())
         marker.redraw()
         self.markers.append(marker)
 
     def _add_vertical_marker(self, x_pos, lower, upper):
         marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, marker_type='XSingle', line_style='--')
-        marker.add_annotate('marker {}'.format(len(self.markers)))
+        marker.add_annotate(self._get_free_marker_name())
         marker.redraw()
         self.markers.append(marker)
+
+    def _delete_marker(self, marker):
+        if marker in self.markers:
+            for label in marker.annotations:
+                marker.remove_annotate(label)
+            self.markers.remove(marker)
+            self.canvas.draw()
 
     def draw_callback(self, _):
         """ This is called at every canvas draw. Redraw the markers. """
