@@ -43,7 +43,7 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict = {}
         self.populate_curve_combo_box_and_update_view()
 
-        self.check_number_of_curves()
+        self.set_apply_to_all_buttons_enabled()
 
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
@@ -196,7 +196,7 @@ class CurvesTabWidgetPresenter:
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
-        self.check_number_of_curves()
+        self.set_apply_to_all_buttons_enabled()
 
         ax = self.get_selected_ax()
         # Update the legend and redraw
@@ -301,7 +301,7 @@ class CurvesTabWidgetPresenter:
         if name:
             self.curve_names_dict[name] = curve
 
-    def check_number_of_curves(self):
+    def set_apply_to_all_buttons_enabled(self):
         """
         Enables the Apply to All buttons in the line, marker, and errorbar tabs
         if there is more than one curve.
