@@ -112,9 +112,9 @@ class FunctionsTest(TestCase):
         fig = self._create_plot(names=workspaces, errors=False, overplot=False)
 
         self.assertEqual(len(fig.axes), 2)
-        self.assertEqual(fig.axes[0].tracked_workspaces.keys(), ['test_ws'])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(fig.axes[1].tracked_workspaces.keys(), ['test_ws_2'])
+        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()), ['test_ws_2'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws_2']], [0])
 
     def test_tiled_plot_from_multiple_workspaces_with_errors(self):
@@ -123,9 +123,9 @@ class FunctionsTest(TestCase):
         fig = self._create_plot(names=workspaces, errors=True, overplot=False)
 
         self.assertEqual(len(fig.axes), 2)
-        self.assertEqual(fig.axes[0].tracked_workspaces.keys(), ['test_ws'])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(fig.axes[1].tracked_workspaces.keys(), ['test_ws_2'])
+        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()), ['test_ws_2'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws_2']], [0])
 
     def test_overplotting_onto_a_tiled_plot(self):
@@ -136,9 +136,9 @@ class FunctionsTest(TestCase):
                                 plot_type=SpectraSelection.Individual, fig=fig)
 
         self.assertEqual(len(fig.axes), 2)
-        self.assertEqual(fig.axes[0].tracked_workspaces.keys(), ['test_ws'])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(fig.axes[1].tracked_workspaces.keys(), ['test_ws', 'test_ws_2'])
+        self.assertEqual(list(fig.axes[1].tracked_workspaces.keys()).sort(), ['test_ws', 'test_ws_2'].sort())
         self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws_2']], [0])
         self.assertEqual([artist.workspace_index for artist in fig.axes[1].tracked_workspaces['test_ws']], [0, 1])
 
@@ -148,9 +148,9 @@ class FunctionsTest(TestCase):
         fig = self._create_plot(names=workspaces, errors=True, overplot=False, wksp_indices=[0, 1])
 
         self.assertEqual(len(fig.axes), 4)
-        self.assertEqual(fig.axes[0].tracked_workspaces.keys(), ['test_ws'])
+        self.assertEqual(list(fig.axes[0].tracked_workspaces.keys()), ['test_ws'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[0].tracked_workspaces['test_ws']], [0])
-        self.assertEqual(fig.axes[2].tracked_workspaces.keys(), ['test_ws_2'])
+        self.assertEqual(list(fig.axes[2].tracked_workspaces.keys()), ['test_ws_2'])
         self.assertEqual([artist.workspace_index for artist in fig.axes[2].tracked_workspaces['test_ws_2']], [0])
 
     def _create_plot(self, names, errors, overplot, wksp_indices=None, plot_type=SpectraSelection.Tiled, fig=None):
