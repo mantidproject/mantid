@@ -14,14 +14,13 @@
  */
 #include "MantidDataHandling/SaveNexusGeometry.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidNexusGeometry/NexusGeometrySave.h"
-
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidNexusGeometry/NexusGeometrySave.h"
 
 #include <memory>
 #include <utility>
@@ -86,19 +85,12 @@ void SaveNexusGeometry::exec() {
   std::string destinationFile = getPropertyValue("FileName");
   std::string rootFileName = getPropertyValue("H5Path");
 
-  const auto instrument = workspace->getInstrument();
-
-  auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
-  /*
-  const std::pair<std::unique_ptr<Mantid::Geometry::ComponentInfo>,
-                  std::unique_ptr<Geometry::DetectorInfo>>
-      instrument= std::make_pair(std::make_unique<Geometry::ComponentInfo>(
-      workspace->componentInfo()),
-  std::make_unique<Geometry::DetectorInfo>(workspace->detectorInfo()));
-  */
+  auto ws = workspace.get();
+  const auto &compInfo = ws->componentInfo();
+  const auto &detInfo = ws->detectorInfo();
 
   Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-      instr, destinationFile, rootFileName);
+      compInfo, detInfo, destinationFile, rootFileName);
 }
 
 } // namespace DataHandling

@@ -7,7 +7,6 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
-#include "MantidTestHelpers/FileResource.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -18,6 +17,7 @@
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/NexusFileReader.h"
 
 #include <cxxtest/TestSuite.h>
@@ -340,7 +340,8 @@ used.
         V3D(0, 0, 10) /*bank position*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto const &compInfo = (*instr.first);
+    // instrument cache
+    auto &compInfo = (*instr.first);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -1109,7 +1110,7 @@ Instrument cache.
 
     // assert the group NXtransformations doesnt exist in file
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath),
-                     H5::GroupIException &)
+                     H5::GroupIException &);
   }
 };
 

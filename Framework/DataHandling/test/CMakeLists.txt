@@ -1,7 +1,6 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM 
-				      ${CXXTEST_INCLUDE_DIR}
-					  ${GMOCK_INCLUDE_DIR})
+				      ${CXXTEST_INCLUDE_DIR})
 
   include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build this helper
@@ -32,8 +31,7 @@ if(CXXTEST_FOUND)
                         Nexus
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES}
-						${GMOCK_LIBRARIES})
+                        ${HDF5_HL_LIBRARIES})
   add_dependencies(DataHandlingTest Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests DataHandlingTest)
   # Test data

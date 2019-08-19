@@ -17,22 +17,10 @@
 
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
-//#include <gmock/gmock.h>
 
 using Mantid::DataHandling::SaveNexusGeometry;
 using MatrixWorkspace_sptr = boost::shared_ptr<Mantid::API::MatrixWorkspace>;
 using Workspace_sptr = boost::shared_ptr<Mantid::API::Workspace>;
-
-namespace {
-/*
-class MockProgressBase : public Mantid::Kernel::ProgressBase {
-public:
-// GNU_DIAG_OFF_SUGGEST_OVERRIDE
-MOCK_METHOD1(doReport, void(const std::string &));
-// GNU_DIAG_OFF_SUGGEST_OVERRIDE
-};
-*/
-} // namespace
 
 class SaveNexusGeometryTest : public CxxTest::TestSuite {
 public:
@@ -112,8 +100,6 @@ public:
     Mantid::API::ITableWorkspace_sptr inputWS =
         WorkspaceCreationHelper::createEPPTableWorkspace(rows);
 
-    // TS_ASSERT_THROWS_NOTHING(
-    //  Mantid::API::AnalysisDataService::Instance().add("testWS", inputWS));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
                                                                   inputWS));
@@ -128,6 +114,56 @@ public:
                      std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_invalid_fileName_throws() {
+    ScopedFileHandle fileResource(
+        "algorithm_invalid_fileName_provided_test_file.hdf5");
+    auto badDestinationPath = "false_directory\\" + fileResource.fullPath();
+    // Create test workspace
+    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
+                                                                  inputWS));
+    SaveNexusGeometry alg;
+    // Don't put output in ADS by default
+
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "testWS"));
+    TS_ASSERT_THROWS(alg.setPropertyValue("FileName", badDestinationPath),
+                     Poco::PathSyntaxException &);
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_valid_fileName_with_invalid_extension_propagates_throw() {
+    ScopedFileHandle fileResource(
+        "algorithm_invalid_extension_provided_test_file.txt");
+    auto destinationFile = fileResource.fullPath();
+    // Create test workspace
+    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
+                                                                  inputWS));
+    SaveNexusGeometry alg;
+    // Don't put output in ADS by default
+
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "testWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument &);
     TS_ASSERT(!alg.isExecuted());
   }
 };
