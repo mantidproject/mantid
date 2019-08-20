@@ -21,14 +21,13 @@ from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
-from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantid.plots import MantidAxes
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
-                                                 MarkerTablePicker, GlobalMarkerEditor)
+                                                 GlobalMarkerEditor)
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -38,6 +37,8 @@ AXES_SCALE_MENU_OPTS = OrderedDict([
     ("Lin x/Log y", ("linear", "log")),
     ("Log x/Lin y", ("log", "linear"))]
 )
+VALID_LINE_STYLE = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
+VALID_COLORS = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
 
 
 class FigureInteraction(object):
@@ -62,17 +63,20 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect('button_release_event', self.on_mouse_button_release))
         self._cids.append(canvas.mpl_connect('draw_event', self.draw_callback))
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_event))
-        self._cids.append(canvas.mpl_connect('resize_event', self.redraw_annotations))
+        self._cids.append(canvas.mpl_connect('resize_event', self.mpl_redraw_annotations))
+        self._cids.append(canvas.mpl_connect('figure_leave_event', self.on_leave))
+        self._cids.append(canvas.mpl_connect('axis_leave_event', self.on_leave))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
+        self.toolbar_manager.home_button_connect(self.redraw_annotations)
         self.fit_browser = fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
         self.vertical_markers = []
-        self.valid_lines = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
-        self.valid_colors = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
-        self.default_marker = 'marker'
+        self.valid_lines = VALID_LINE_STYLE
+        self.valid_colors = VALID_COLORS
+        self.default_marker_name = 'marker'
 
     @property
     def nevents(self):
@@ -92,10 +96,21 @@ class FigureInteraction(object):
         canvas = self.canvas
         x_pos = event.xdata
         y_pos = event.ydata
+        self._set_hover_cursor(x_pos, y_pos)
         if x_pos is not None and y_pos is not None:
             marker_selected = [marker for marker in self.markers if marker.is_above(x_pos, y_pos)]
         else:
             marker_selected = []
+
+        # If left button clicked, start moving peaks
+        if self.toolbar_manager.is_tool_active():
+            for marker in self.markers:
+                marker.remove_all_annotations()
+        elif event.button == 1 and marker_selected is not None:
+            for marker in marker_selected:
+                if len(marker_selected) > 1:
+                    marker.set_move_cursor(Qt.ClosedHandCursor, x_pos, y_pos)
+                marker.mouse_move_start(x_pos, y_pos)
 
         if (event.button == canvas.buttond.get(Qt.RightButton) and
                 not self.toolbar_manager.is_tool_active()):
@@ -107,35 +122,33 @@ class FigureInteraction(object):
             if not marker_selected:
                 self._show_axis_editor(event)
             elif len(marker_selected) == 1:
-                for marker in marker_selected:
-                    self._edit_marker(marker)
-                marker_selected = None
+                self._edit_marker(marker_selected[0])
 
-        # If left button clicked, start moving peaks
-        if self.toolbar_manager.is_tool_active():
-            for marker in self.markers:
-                marker.remove_all_annotations()
-        elif event.button == 1 and marker_selected is not None:
-            change_cursor = False
-            for marker in self.markers:
-                if event.xdata is None or event.ydata is None:
-                    continue
-                marker.mouse_move_start(event.xdata, event.ydata)
-                change_cursor = marker.is_marker_moving() or change_cursor
-            if change_cursor:
-                QApplication.setOverrideCursor(QCursor(Qt.ClosedHandCursor))
-
-    def on_mouse_button_release(self, _):
+    def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
                 marker.add_all_annotations()
         else:
-            for marker in self.markers:
-                if marker.is_marker_moving():
-                    marker.add_name()
-                marker.mouse_move_stop()
-            QApplication.restoreOverrideCursor()
+            x_pos = event.xdata
+            y_pos = event.ydata
+            self._set_hover_cursor(x_pos, y_pos)
+
+            self.stop_markers(x_pos, y_pos)
+
+    def on_leave(self, event):
+        QApplication.restoreOverrideCursor()
+        self.stop_markers(event.xdata, event.ydata)
+
+    def stop_markers(self, x_pos, y_pos):
+        if x_pos is None or y_pos is None:
+            return
+
+        for marker in self.markers:
+            if marker.is_marker_moving():
+                marker.set_move_cursor(None, x_pos, y_pos)
+                marker.add_all_annotations()
+            marker.mouse_move_stop()
 
     def _show_axis_editor(self, event):
         # We assume this is used for editing axis information e.g. labels
@@ -166,12 +179,12 @@ class FigureInteraction(object):
         if not event.inaxes:
             return
 
+        QApplication.restoreOverrideCursor()
         fig_type = figure_type(self.canvas.figure)
         if fig_type == FigureType.Empty or fig_type == FigureType.Image:
             return
 
         menu = QMenu()
-        QApplication.restoreOverrideCursor()
 
         for marker in markers:
             self._single_marker_menu(menu, marker)
@@ -187,8 +200,6 @@ class FigureInteraction(object):
 
         for action in [delete, edit]:
             marker_action_group.addAction(action)
-            action.setCheckable(True)
-            action.setChecked(False)
 
         menu.addMenu(marker_menu)
 
@@ -199,7 +210,7 @@ class FigureInteraction(object):
         if not event.inaxes:
             # the current context menus are ony relevant for axes
             return
-        QApplication.restoreOverrideCursor()
+        pass
 
         fig_type = figure_type(self.canvas.figure)
         if fig_type == FigureType.Empty or fig_type == FigureType.Image:
@@ -267,57 +278,11 @@ class FigureInteraction(object):
         horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1))
         vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1))
         edit = marker_menu.addAction("Edit", lambda: self._global_edit_markers())
-        export = marker_menu.addAction("Export", lambda: self._export_markers())
-        _import = marker_menu.addAction("Import", lambda: self._import_markers(event.inaxes))
 
-        for action in [horizontal, vertical, export, _import, edit]:
+        for action in [horizontal, vertical, edit]:
             marker_action_group.addAction(action)
-            action.setCheckable(True)
-            action.setChecked(False)
 
         menu.addMenu(marker_menu)
-
-    def _export_markers(self):
-        marker_table = CreateEmptyTableWorkspace()
-        marker_table.addColumn(type='float', name='position')
-        marker_table.addColumn(type='str', name='name')
-        marker_table.addColumn(type='str', name='line style')
-        marker_table.addColumn(type='str', name='color')
-        marker_table.addColumn(type='str', name='marker type')
-        for marker in self.markers:
-            color = [name for name, symbol in self.valid_colors.items() if symbol == marker.color][0]
-            marker_table.addRow([marker.get_position(),
-                                 marker.name,
-                                 marker.style,
-                                 color,
-                                 'vertical' if marker.marker_type == 'XSingle' else 'horizontal'])
-
-    def _import_markers(self, ax):
-        def move_and_show(editor):
-            editor.move(QCursor.pos())
-            editor.exec_()
-
-        ws_list = ads.getObjectNames()
-
-        markers = []
-        move_and_show(MarkerTablePicker(self.canvas, ws_list, markers))
-
-        x0, x1 = ax.get_xlim()
-        y0, y1 = ax.get_ylim()
-        present_marker_name = [marker.name for marker in self.markers]
-
-        for position, name, style, color, marker_type in markers:
-            # Avoid loading the same marker twice
-            if name in present_marker_name:
-                continue
-
-            # Add the marker
-            if marker_type == 'horizontal':
-                self._add_horizontal_marker(position, y0, y1, name, style, self.valid_colors[color])
-            elif marker_type == 'vertical':
-                self._add_vertical_marker(position, x0, x1, name, style, self.valid_colors[color])
-            else:
-                raise RuntimeError("Incorrect SingleMarker type provided. Types are vertical or horizontal.")
 
     def _global_edit_markers(self):
         def move_and_show(editor):
@@ -331,14 +296,14 @@ class FigureInteraction(object):
         for marker in self.markers:
             try:
                 word1, word2 = marker.name.split(' ')
-                if word1 == self.default_marker:
+                if word1 == self.default_marker_name:
                     used_numbers.append(int(word2))
             except ValueError:
                 continue
         proposed_number = 0
         while True:
             if proposed_number not in used_numbers:
-                return "{} {}".format(self.default_marker, proposed_number)
+                return "{} {}".format(self.default_marker_name, proposed_number)
             proposed_number += 1
 
     def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed', color='C2'):
@@ -362,6 +327,7 @@ class FigureInteraction(object):
     def _delete_marker(self, marker):
         if marker in self.markers:
             marker.remove_all_annotations()
+            marker.marker.remove()
             self.markers.remove(marker)
             self.canvas.draw()
 
@@ -370,7 +336,23 @@ class FigureInteraction(object):
             editor.move(QCursor.pos())
             editor.exec_()
 
+        QApplication.restoreOverrideCursor()
         move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors))
+
+    def _set_hover_cursor(self, x_pos, y_pos):
+        if x_pos is None or y_pos is None:
+            QApplication.restoreOverrideCursor()
+            return
+
+        is_moving = any([marker.is_marker_moving() for marker in self.markers])
+        hovering_over = sum([1 for marker in self.markers if marker.is_above(x_pos, y_pos)])
+        if not is_moving:
+            if hovering_over == 1:
+                QApplication.setOverrideCursor(Qt.PointingHandCursor)
+            elif hovering_over > 1:
+                QApplication.setOverrideCursor(Qt.CrossCursor)
+            else:
+                QApplication.restoreOverrideCursor()
 
     def draw_callback(self, _):
         """ This is called at every canvas draw. Redraw the markers. """
@@ -384,27 +366,21 @@ class FigureInteraction(object):
         """ Move the marker if the mouse is moving and in range """
         x = event.xdata
         y = event.ydata
-        if x is None or y is None:
-            return
+        self._set_hover_cursor(x, y)
 
-        if not any([marker.is_marker_moving() for marker in self.markers]):
-            if any([marker.is_above(x, y) for marker in self.markers]):
-                QApplication.setOverrideCursor(Qt.OpenHandCursor)
-            else:
-                QApplication.restoreOverrideCursor()
-
-        should_move = False
-        for marker in self.markers:
-            should_move = marker.mouse_move(x, y) or should_move
+        should_move = any([marker.mouse_move(x, y) for marker in self.markers])
 
         if should_move:
             self.canvas.draw()
 
-    def redraw_annotations(self, event):
+    def redraw_annotations(self):
+        for marker in self.markers:
+            marker.remove_all_annotations()
+            marker.add_all_annotations()
+
+    def mpl_redraw_annotations(self, event):
         if hasattr(event, 'button') and event.button is not None:
-            for marker in self.markers:
-                marker.remove_all_annotations()
-                marker.add_all_annotations()
+            self.redraw_annotations()
 
     def _is_normalized(self, ax):
         artists = [art for art in ax.tracked_workspaces.values()]

@@ -21,7 +21,8 @@ class HorizontalMarker(QObject):
 
     y_moved = Signal(float)
 
-    def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-'):
+    def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-',
+                 move_cursor=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -52,6 +53,7 @@ class HorizontalMarker(QObject):
                                animated=True)
         self.axis.add_patch(self.patch)
         self.is_moving = False
+        self.move_cursor = move_cursor
 
     def _get_x0_x1(self):
         """
@@ -173,8 +175,14 @@ class HorizontalMarker(QObject):
         if self.x1 is not None and x > self.x1:
             return None
         if self.is_moving or self.is_above(x, y):
-            return QCursor(Qt.SizeVerCursor)
+            return self.move_cursor if self.move_cursor is not None else QCursor(Qt.SizeVerCursor)
         return None
+
+    def set_move_cursor(self, cursor, x_pos, y_pos):
+        if cursor is not None:
+            cursor = QCursor(cursor)
+        self.move_cursor = cursor
+        self.override_cursor(x_pos, y_pos)
 
 
 class VerticalMarker(QObject):
@@ -184,7 +192,8 @@ class VerticalMarker(QObject):
 
     x_moved = Signal(float)
 
-    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-'):
+    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-',
+                 move_cursor=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -210,6 +219,7 @@ class VerticalMarker(QObject):
                                linewidth=line_width, linestyle=line_style, animated=True)
         self.axis.add_patch(self.patch)
         self.is_moving = False
+        self.move_cursor = move_cursor
 
     def _get_y0_y1(self):
         """
@@ -324,7 +334,7 @@ class VerticalMarker(QObject):
         :param y: A y coordinate.
         :return: QCursor or None.
         """
-        return QCursor(Qt.SizeHorCursor)
+        return self.move_cursor if self.move_cursor is not None else QCursor(Qt.SizeHorCursor)
 
     def override_cursor(self, x, y):
         """
@@ -340,6 +350,12 @@ class VerticalMarker(QObject):
         if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
+
+    def set_move_cursor(self, cursor, x_pos, y_pos):
+        if cursor is not None:
+            cursor = QCursor(cursor)
+        self.move_cursor = cursor
+        self.override_cursor(x_pos, y_pos)
 
 
 class CentreMarker(VerticalMarker):
@@ -769,20 +785,23 @@ class SingleMarker(QObject):
             y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
             if not y_lower <= self.marker.y <= y_upper:
                 marker_in_scope = False
-            alignment = 'right'
+            horizontal = 'right'
+            vertical = 'bottom'
         else:
             rotation = -90
             x_pos = self.relative(self.marker.x, x_lower, x_upper)
             y_pos = 0.95
             if not x_lower <= self.marker.x <= x_upper:
                 marker_in_scope = False
-            alignment = 'left'
+            horizontal = 'left'
+            vertical = 'top'
 
         if marker_in_scope:
             self.annotations[text] = self.marker.axis.annotate(text,
                                                                xy=(x_pos, y_pos),
                                                                xycoords="axes fraction",
-                                                               ha=alignment,
+                                                               ha=horizontal,
+                                                               va=vertical,
                                                                rotation=rotation)
         else:
             self.annotations[text] = None
@@ -864,13 +883,19 @@ class SingleMarker(QObject):
         return self.marker.is_marker_moving()
 
     def is_above(self, x, y):
-        return self.marker.is_above(x, y)
+        if self.marker.is_above(x, y):
+            return True
+        else:
+            return False
 
     def relative(self, value, lower, upper):
         if not lower <= value <= upper:
             return 0.0
 
         return (value - lower) / (upper - lower)
+
+    def set_move_cursor(self, cursor, x_pos, y_pos):
+        self.marker.set_move_cursor(cursor, x_pos, y_pos)
 
 
 class RangeMarker(QObject):

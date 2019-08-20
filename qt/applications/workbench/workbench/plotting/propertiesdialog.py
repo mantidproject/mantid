@@ -15,7 +15,7 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from qtpy.QtGui import QDoubleValidator, QIcon
-from qtpy.QtWidgets import QDialog, QWidget, QBoxLayout
+from qtpy.QtWidgets import QDialog, QWidget
 
 from mantid.api import AnalysisDataService as ads
 
@@ -182,7 +182,7 @@ class MarkerEditor(QWidget):
         self.colors = valid_colors
 
         self.widget.style.addItems(valid_style)
-        self.widget.color.addItems(valid_colors.keys())
+        self.widget.color.addItems(list(valid_colors.keys()))
 
     def set_defaults(self, marker):
         _color = [name for name, symbol in self.colors.items() if symbol == marker.color][0]
@@ -252,32 +252,3 @@ class GlobalMarkerEditor(PropertiesEditorBase):
 
     def update_marker_data(self, idx):
         self._widget.set_defaults(self.markers[idx])
-
-
-class MarkerTablePicker(PropertiesEditorBase):
-    def __init__(self, canvas, workspace_list, _markers):
-        super(MarkerTablePicker, self).__init__('markertablepicker.ui', canvas)
-        self.ui.errors.hide()
-
-        # Remove all workspaces that are not ITableWorkspace
-        from mantid.api import ITableWorkspace
-        self.workspace_list = [ws for ws in workspace_list if isinstance(ads.retrieve(ws), ITableWorkspace)]
-
-        self._markers = _markers
-
-        self.ui.markers.addItems(self.workspace_list)
-        if 'marker_table' in self.workspace_list:
-            self.ui.markers.setCurrentText('marker_table')
-
-    def changes_accepted(self):
-        markers = self.ui.markers.currentText()
-        markers = ads.retrieve(markers)
-        for i in range(markers.rowCount()):
-            row = markers.row(i)
-            self._markers.append(
-                (row['position'], row['name'], row['line style'], row['color'], row['marker type'])
-            )
-
-    def error_occurred(self, exc):
-        self.ui.errors.setText(str(exc).strip())
-        self.ui.errors.show()
