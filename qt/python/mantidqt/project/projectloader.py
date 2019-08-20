@@ -72,17 +72,8 @@ class ProjectLoader(object):
 
     def load_interfaces(self, directory):
         for interface in self.project_reader.interface_list:
-            # Find decoder
-            decoder = self.decoder_factory.find_decoder(interface["tag"], interface)
-
-            # If the interface was recreated by C++
-            if decoder is True:
-                continue
-
-            # Decode and Show the interface
             try:
-                decoded_interface = decoder.decode(interface, directory)
-                decoded_interface.show()
+                self.decoder_factory.decode(interface["tag"], interface, directory)
             except Exception as e:
                 # Catch any exception and log it for the encoder
                 if isinstance(e, KeyboardInterrupt):

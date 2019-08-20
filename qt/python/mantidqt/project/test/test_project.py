@@ -26,7 +26,7 @@ class FakeGlobalFigureManager(object):
         pass
 
 
-def fake_window_finding_function():
+def fake_window_finding_function(_):
     return []
 
 

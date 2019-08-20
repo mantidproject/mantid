@@ -21,7 +21,7 @@ def find_plot_windows():
     return GlobalFigureManager.figs
 
 
-def find_all_windows_that_are_savable():
+def find_all_windows_that_are_savable(directory):
     """
     Finds all windows and then checks if they have an encoder, if they do return them in a list of windows and encoders.
     :return: List of Lists of Windows and Encoders; Window at index 0 and Encoder at index 1 in each sub-list.
@@ -31,8 +31,7 @@ def find_all_windows_that_are_savable():
 
     windows = QApplication.topLevelWidgets()
     for window in windows:
-        encoder = EncoderFactory.find_encoder(window)
-        if encoder is not None:
-            list_of_windows_and_encoder.append((window, encoder))
-
+        encodeded_interface = EncoderFactory.encode(window, directory)
+        if encodeded_interface is not None:
+            list_of_windows_and_encoder.append((window, encodeded_interface))
     return list_of_windows_and_encoder

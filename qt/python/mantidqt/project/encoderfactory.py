@@ -32,12 +32,25 @@ class EncoderFactory(object):
         elif len(obj_encoders) == 1:
             return obj_encoders[0]()
         else:
-            # Search for a c++ interface if it's present
-            obj_encoders = UserSubWindowFactory.Instance().encodeWindow(obj)
-            if len(obj_encoders) == 0:
+            return None
+
+    @classmethod
+    def encode(cls, obj, directory):
+        encoder = cls.find_encoder(obj)
+        if encoder is None:
+            # These are C++ so the tag is already in the dictionary
+            dic = UserSubWindowFactory.Instance().encodeWindow(obj)
+            if len(dic) == 0:
                 return None
             else:
-                return obj_encoders
+                return dic
+        else:
+            # These are python so we add the tag in the factory
+            tag = encoder.tags[0]
+            dic = encoder.encode(obj, directory)
+            dic["tag"] = tag
+            return dic
+
 
     @classmethod
     def register_encoder(cls, encoder, compatible_check=None):
