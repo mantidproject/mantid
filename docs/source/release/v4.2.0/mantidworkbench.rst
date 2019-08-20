@@ -13,7 +13,7 @@ User Interface
 
 New
 ###
-- Added a 'Generate Script from Workspaces' button to Workbench under the File menu bar.
+- Added a 'Generate Recovery Script' button to Workbench under the File menu bar, it generates a script that is essentially what project recovery uses. However it is only the script and does not include the workspace clean up and other features Project Recovery offers.
 
 Improvements
 ############

@@ -16,9 +16,6 @@ from workbench.utils.workspacehistorygeneration import get_workspace_history_lis
 
 def generate_commands(script):
     script_lines = script.split("\n")
-    # Remove empty string from list
-    if len(script_lines) > 1:
-        script_lines.pop()
     commands = []
     for script_line in script_lines:
         line_contents = script_line.split(" # ")

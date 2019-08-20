@@ -51,35 +51,15 @@ def convert_list_to_string(to_convert, add_new_line=True, fix_comments=False):
 
 
 def guarantee_unique_lines(script):
-    all_lines = []
-    script_string_io = StringIO.StringIO(script)
-    tokens = tokenize.generate_tokens(script_string_io.readline)
-    line = None
-    for t in tokens:
-        # Start a new line when we see a name
-        if line is None and t[0] == tokenize.NAME:
-            line = [t]
-        # End the line when we see a logical line ending
-        elif t[0] == tokenize.NEWLINE:
-            # Only care about the line if it has a comment
-            have_comment = any(x[0] == tokenize.COMMENT for x in line)
-            if have_comment:
-                # line[-1][1][1:] is the comment string, with the preceeding hash stripped off;
-                # line[0][4] is the command and the comment
-                all_lines.append((line[-1][4], line[-1][1][1:]))
-            line = []
-        # Everything in between we care about
-        elif line is not None:
-            line.append(t)
-    unique_lines = list(set(all_lines))
-
-    def sorting_order_workspace_history(x):
-        time, _, exec_count = x[1].split()
-        return time, int(exec_count)
-
-    unique_lines.sort(key=sorting_order_workspace_history)
-
-    return convert_list_to_string(unique_lines, add_new_line=False, fix_comments=True)
+    alg_name = "OrderWorkspaceHistory"
+    alg = AlgorithmManager.createUnmanaged(alg_name, 1)
+    alg.setChild(True)
+    alg.setLogging(False)
+    alg.initialize()
+    alg.setPropertyValue("InputString", script)
+    alg.execute()
+    script = alg.getPropertyValue("OutputString")
+    return script
 
 
 def get_all_workspace_history_from_ads():
