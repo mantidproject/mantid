@@ -23,47 +23,80 @@ If no name is given, the root group will have a default nme of 'entry'
 Usage
 -----
 
-**Example - SaveNexusGeometry**
+**Example - basic example using SaveNexusGeometry, with default H5 root group**
 
-.. testcode:: SaveNexusGeometryExample
+.. testcode:: SaveNexusGeometryExampleDefault
 
-   # create sample workspace
-ws1 = CreateSampleWorkspace()
-instr1 = ws1.getInstrument()
-compInfo = ws1.componentInfo()
-detInfo = ws1.detectorInfo()
+	import os
 
-   # save Instrument in workspace with default H5 root name 'entry'
-print("===========================")
-#SaveNexusGeometry(workspace=ws1, FileName1="somePathToFile.nxs")
-FileName1 = "path/to/someTestFile.nxs"
-#SaveNexusGeometry(workspace=ws2, FileName="somePathToFile", H5Path="testRoot")
-print("the Instrument {0} was saved to location {1}".format(instr1.getName(), FileName1))
+	ws = CreateSampleWorkspace()
+	compInfo = ws.componentInfo()
+	detInfo = ws.detectorInfo()
+	file_name  = "example_save_Nexus_geometry_1.nxs"
+	path = os.path.join(os.path.expanduser("~"), file_name)
 
-  # save instrument in workspace with specified H5 root group name
-print("===========================")
-ws2 = CreateSampleWorkspace();
-instr2 = ws2.getInstrument()
-detInfo2 = ws2.detectorInfo()
-compInfo2 = ws2.componentInfo()
+	SaveNexusGeometry(ws, path)
+	print(os.path.isfile(path))
 
-FileName2 = "path/to/someTestFile.hdf5"
-#SaveNexusGeometry(workspace=ws2, FileName="somePathToFile", H5Path="testRoot")
-print("the Instrument {0} was saved to location {1}".format(instr2.getName(), FileName2))
 
 
 Output:
 
 .. testoutput:: SaveNexusGeometryExample
+	
+	True
 
-	CreateSampleWorkspace started
-	CreateSampleWorkspace successful, Duration 0.00 seconds
-	===========================
-	the Instrument basic_rect was saved to location path/to/someTestFile.nxs
-	===========================
-	CreateSampleWorkspace started
-	CreateSampleWorkspace successful, Duration 0.00 seconds
-	the Instrument basic_rect was saved to location path/to/someTestFile.hdf5
+.. testcleanup:: SaveNexusGeometryExample
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles([file_name])
+
+
+**Example - basic example using SaveNexusGeometry, with specific H5 root group**
+
+.. testcode:: SaveNexusGeometryExampleOption
+
+	import os
+
+	ws = CreateSampleWorkspace()
+	compInfo = ws.componentInfo()
+	detInfo = ws.detectorInfo()
+	file_name  = "example_save_Nexus_geometry_2.nxs"
+	path = os.path.join(os.path.expanduser("~"), file_name)
+
+	SaveNexusGeometry(ws, path)
+	print(os.path.isfile(path))
+
+
+
+Output:
+
+.. testoutput:: SaveNexusGeometryExample
+	
+	True
+
+.. testcleanup:: SaveNexusGeometryExample
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles([file_name])
+
+
 
 .. categories::
 
