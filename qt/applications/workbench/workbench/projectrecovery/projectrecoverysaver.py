@@ -58,8 +58,14 @@ class ProjectRecoverySaver(object):
         self.pr.thread_on = False
 
         try:
+            # Create directory for save location
+            recovery_dir = os.path.join(self.pr.recovery_directory_pid,
+                                        datetime.datetime.now().strftime('%d-%m-%YT%H-%M-%S'))
+            if not os.path.exists(recovery_dir):
+                os.makedirs(recovery_dir)
+
             # Get the interfaces_list
-            interfaces_list = find_all_windows_that_are_savable()
+            interfaces_list = find_all_windows_that_are_savable(recovery_dir)
 
             # Check if there is anything to be saved or not
             if len(ADS.getObjectNames()) == 0 and len(interfaces_list) == 0:
@@ -167,7 +173,7 @@ class ProjectRecoverySaver(object):
         plots = self.gfm.figs
 
         if interfaces_list is None:
-            interfaces_list = find_all_windows_that_are_savable()
+            interfaces_list = find_all_windows_that_are_savable(directory)
 
         file_name = os.path.join(directory, (os.path.basename(directory) + self.pr.recovery_file_ext))
         project_saver.save_project(file_name=file_name, workspace_to_save=None, plots_to_save=plots,

@@ -80,7 +80,7 @@ class InstrumentViewDecoderTest(unittest.TestCase):
 
     def test_decoder_is_in_decoder_factory(self):
         # Shows that the decoder has been registered on import of something from mantidqt.widget.instrumentview
-        found_decoder = DecoderFactory.find_decoder("InstrumentView", {})
+        found_decoder = DecoderFactory.find_decoder("InstrumentView")
         self.assertIs(InstrumentViewDecoder, found_decoder.__class__)
 
     def test_decoder_decode_function_returns_none_when_obj_is_none(self):
