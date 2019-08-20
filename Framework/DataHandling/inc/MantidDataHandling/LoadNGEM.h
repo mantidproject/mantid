@@ -98,6 +98,8 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
+  /// Main data workspace.
+  DataObjects::EventWorkspace_sptr m_dataWorkspace;
   /// Initialise the algorithm.
   void init() override;
   /// Execute the algorithm.
@@ -114,7 +116,7 @@ private:
                       DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
   void verifyFileSize(FILE *&file);
-  DataObjects::EventWorkspace_sptr m_dataWorkspace;
+  void createCountWorkspace(const std::vector<double> &frameEventCounts);
 };
 
 } // namespace DataHandling
