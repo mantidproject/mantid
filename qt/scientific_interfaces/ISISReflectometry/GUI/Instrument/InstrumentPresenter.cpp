@@ -36,7 +36,6 @@ InstrumentPresenter::InstrumentPresenter(
 
 void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  notifySettingsChanged();
 }
 
 void InstrumentPresenter::notifySettingsChanged() {

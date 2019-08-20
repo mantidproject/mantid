@@ -126,8 +126,7 @@ void RunsPresenter::notifyTransfer() {
 
 void RunsPresenter::notifyInstrumentChangedRequested() {
   auto const instrumentName = m_view->getSearchInstrument();
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
+  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
 void RunsPresenter::notifyInstrumentChangedRequested(

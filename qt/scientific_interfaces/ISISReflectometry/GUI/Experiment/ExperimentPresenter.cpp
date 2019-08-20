@@ -30,7 +30,6 @@ ExperimentPresenter::ExperimentPresenter(
 
 void ExperimentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  notifySettingsChanged();
 }
 
 Experiment const &ExperimentPresenter::experiment() const { return m_model; }

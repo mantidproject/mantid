@@ -77,8 +77,7 @@ bool BatchPresenter::requestClose() const { return true; }
 
 void BatchPresenter::notifyInstrumentChangedRequested(
     const std::string &instrumentName) {
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
+  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
 void BatchPresenter::notifyInstrumentChanged(
@@ -267,9 +266,7 @@ Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
 }
 
 std::string BatchPresenter::instrumentName() const {
-  if (m_mainPresenter)
-    return m_mainPresenter->instrumentName();
-  return std::string();
+  return m_mainPresenter->instrumentName();
 }
 
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
