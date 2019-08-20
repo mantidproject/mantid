@@ -16,6 +16,7 @@ import unittest
 import matplotlib
 matplotlib.use('AGG')  # noqa
 import numpy as np
+import matplotlib.pyplot as plt
 from qtpy.QtCore import Qt
 from testhelpers import assert_almost_equal
 
@@ -54,7 +55,14 @@ class FigureInteractionTest(unittest.TestCase):
         cls.ws.delete()
         cls.ws1.delete()
 
-    # Success tests
+    def setUp(self):
+        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, MantidAxes
+
+    def tearDown(self):
+        plt.close('all')
+        del self.fig
+        del self.ax
+
     def test_construction_registers_handler_for_button_press_event(self):
         fig_manager = MagicMock()
         fig_manager.canvas = MagicMock()
@@ -212,6 +220,10 @@ class FigureInteractionTest(unittest.TestCase):
         assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
         self.assertEqual("Counts", ax.get_ylabel())
 
+    def _test_context_menu_change_axis_scale_is_axis_aware(self):
+
+
 
 if __name__ == '__main__':
     unittest.main()
+

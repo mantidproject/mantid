@@ -141,7 +141,7 @@ class FigureInteraction(object):
         axes_actions = QActionGroup(axes_menu)
         current_scale_types = (ax.get_xscale(), ax.get_yscale())
         for label, scale_types in iteritems(AXES_SCALE_MENU_OPTS):
-            action = axes_menu.addAction(label, partial(self._quick_change_axes,scale_types, ax))
+            action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
             if current_scale_types == scale_types:
                 action.setCheckable(True)
                 action.setChecked(True)
@@ -231,18 +231,18 @@ class FigureInteraction(object):
             return True
         return False
 
-    def _get_axes_scale_types(self, ax):
-        """Return a 2-tuple containing the axis scale types if all Axes on the figure are the same
-         otherwise we return None. It assumes a figure with atleast 1 Axes object"""
-        all_axes = self.canvas.figure.get_axes()
-        scale_types = (all_axes[0].get_xscale(), all_axes[0].get_yscale())
-        for axes in all_axes[1:]:
-            other_scales = (axes.get_xscale(), axes.get_yscale())
-            if scale_types != other_scales:
-                scale_types = None
-                break
-
-        return scale_types
+    # def _get_axes_scale_types(self, ax):
+    #     """Return a 2-tuple containing the axis scale types if all Axes on the figure are the same
+    #      otherwise we return None. It assumes a figure with atleast 1 Axes object"""
+    #     all_axes = self.canvas.figure.get_axes()
+    #     scale_types = (all_axes[0].get_xscale(), all_axes[0].get_yscale())
+    #     for axes in all_axes[1:]:
+    #         other_scales = (axes.get_xscale(), axes.get_yscale())
+    #         if scale_types != other_scales:
+    #             scale_types = None
+    #             break
+    #
+    #     return scale_types
 
     def _quick_change_axes(self, scale_types, ax):
         """
