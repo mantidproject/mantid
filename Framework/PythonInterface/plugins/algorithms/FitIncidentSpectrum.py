@@ -7,10 +7,9 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 from scipy import signal, ndimage, interpolate, optimize
-from mantid import mtd
 from mantid.api import AlgorithmFactory, CommonBinsValidator, MatrixWorkspaceProperty, PythonAlgorithm, PropertyMode
 from mantid.kernel import Direction, StringListValidator, StringMandatoryValidator
-from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing
+from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing, AnalysisDataService
 
 
 class FitIncidentSpectrum(PythonAlgorithm):
@@ -71,7 +70,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
         self._fit_spectrum_with = self.getPropertyValue('FitSpectrumWith')
         self._binning_for_calc = self.getPropertyValue('BinningForCalc')
         if self._binning_for_calc is None:
-            x = mtd[self._input_ws].readX(0)
+            x = AnalysisDataService.retrieve(self._input_ws).readX(0)
             binning = [str(i) for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
             self.binning_for_calc = ",".join(binning)
 
@@ -90,9 +89,9 @@ class FitIncidentSpectrum(PythonAlgorithm):
             Params=self._binning_for_fit,
             PreserveEvents=True)
         incident_index = 0
-        x_fit = np.array(mtd['fit'].readX(incident_index))
-        y_fit = np.array(mtd['fit'].readY(incident_index))
-        mtd['fit'].delete()
+        x_fit = np.array(AnalysisDataService.retrieve('fit').readX(incident_index))
+        y_fit = np.array(AnalysisDataService.retrieve('fit').readY(incident_index))
+        AnalysisDataService.retrieve('fit').delete()
 
         if len(x_fit) != len(y_fit):
             x_fit = x_fit[:-1]
@@ -125,7 +124,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             UnitX='Wavelength',
             NSpec=2,
             Distribution=False)
-        return mtd[self._output_ws]
+        return AnalysisDataService.retrieve(self._output_ws)
 
     def fitCubicSplineWithGaussConv(self, x_fit, y_fit, x, sigma=3):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
@@ -170,7 +169,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             OutputWorkspace='fit_prime_1',
             Params=ParamsOutput,
             PreserveEvents=True)
-        return mtd['fit'].readY(0), mtd['fit_prime_1'].readY(0)
+        return AnalysisDataService.retrieve('fit').readY(0), AnalysisDataService.retrieve('fit_prime_1').readY(0)
 
     def fitHowellsFunction(self, x_fit, y_fit, x):
         # Fit with analytical function from HowellsEtAl
