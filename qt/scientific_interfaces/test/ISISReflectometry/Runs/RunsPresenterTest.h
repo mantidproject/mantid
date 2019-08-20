@@ -70,12 +70,13 @@ public:
     verifyAndClear();
   }
 
-  void testCreatePresenterSetsInstrumentList() {
+  void testInitInstrumentListUpdatesView() {
     auto const defaultInstrumentIndex = 0;
+    auto presenter = makePresenter();
     EXPECT_CALL(m_view,
                 setInstrumentList(m_instruments, defaultInstrumentIndex))
         .Times(1);
-    auto presenter = makePresenter();
+    presenter.initInstrumentList();
     verifyAndClear();
   }
 

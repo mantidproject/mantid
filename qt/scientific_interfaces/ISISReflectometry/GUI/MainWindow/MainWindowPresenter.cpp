@@ -130,15 +130,21 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
   m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
+  initNewBatch(m_batchPresenters.back().get());
+}
+
+void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter) {
+
+  batchPresenter->initInstrumentList();
 
   // starts in the paused state
-  m_batchPresenters.back()->reductionPaused();
+  batchPresenter->reductionPaused();
 
   // Ensure autoreduce button is enabled/disabled correctly for the new batch
   if (isAnyBatchAutoreducing())
-    m_batchPresenters.back()->anyBatchAutoreductionResumed();
+    batchPresenter->anyBatchAutoreductionResumed();
   else
-    m_batchPresenters.back()->anyBatchAutoreductionPaused();
+    batchPresenter->anyBatchAutoreductionPaused();
 }
 
 void MainWindowPresenter::showHelp() {

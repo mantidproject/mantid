@@ -77,8 +77,9 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  // Must do this after setting main presenter or notifications don't get
-  // through
+}
+
+void RunsPresenter::initInstrumentList() {
   m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
 }
 

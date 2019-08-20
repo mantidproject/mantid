@@ -55,6 +55,7 @@ public:
 
   // IBatchPresenter overrides
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;
+  void initInstrumentList() override;
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
   void notifyAutoreductionResumed() override;

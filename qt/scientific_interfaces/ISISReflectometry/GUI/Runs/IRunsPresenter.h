@@ -25,6 +25,7 @@ class IRunsPresenter {
 public:
   virtual ~IRunsPresenter() = default;
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
+  virtual void initInstrumentList() = 0;
   virtual RunsTable const &runsTable() const = 0;
   virtual RunsTable &mutableRunsTable() = 0;
 

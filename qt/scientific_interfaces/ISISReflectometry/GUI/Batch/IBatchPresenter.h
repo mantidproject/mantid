@@ -30,6 +30,7 @@ public:
   virtual ~IBatchPresenter() = default;
 
   virtual void acceptMainPresenter(IMainWindowPresenter *mainPresenter) = 0;
+  virtual void initInstrumentList() = 0;
 
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;

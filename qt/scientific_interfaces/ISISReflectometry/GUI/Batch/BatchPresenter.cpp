@@ -69,6 +69,10 @@ void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
+void BatchPresenter::initInstrumentList() {
+  m_runsPresenter->initInstrumentList();
+}
+
 bool BatchPresenter::requestClose() const { return true; }
 
 void BatchPresenter::notifyInstrumentChangedRequested(

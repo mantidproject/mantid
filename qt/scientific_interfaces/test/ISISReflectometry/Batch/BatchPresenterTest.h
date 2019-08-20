@@ -54,6 +54,13 @@ public:
     verifyAndClear();
   }
 
+  void testInitInstrumentListUpdatesRunsPresenter() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, initInstrumentList()).Times(1);
+    presenter.initInstrumentList();
+    verifyAndClear();
+  }
+
   void testMainPresenterUpdatedWhenInstrumentChangedRequested() {
     auto presenter = makePresenter();
     auto const instrument = std::string("POLREF");
