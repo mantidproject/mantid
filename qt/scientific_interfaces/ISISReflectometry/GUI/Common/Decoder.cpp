@@ -256,8 +256,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
   updateRunsTableViewFromModel(gui, redJobs);
 
   if (m_projectSave) {
-    // Apply styling and restore completed state for output range values best
-    // way to achieve this is yet to be decided.
+    // Apply styling and restore completed state for output range values
     presenter->notifyRowOutputsChanged();
     presenter->notifyRowStateChanged();
   }

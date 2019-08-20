@@ -87,10 +87,10 @@ private:
   // QHash doesn't seem to support std::unique_ptr<> as a valueso a std::map is
   // used instead
   std::map<std::string,
-           std::unique_ptr<Mantid::Kernel::AbstractInstantiator<BaseEncoder>>>
+           std::shared_ptr<Mantid::Kernel::AbstractInstantiator<BaseEncoder>>>
       m_encoders;
   std::map<std::string,
-           std::unique_ptr<Mantid::Kernel::AbstractInstantiator<BaseDecoder>>>
+           std::shared_ptr<Mantid::Kernel::AbstractInstantiator<BaseDecoder>>>
       m_decoders;
 };
 
@@ -114,11 +114,11 @@ void UserSubWindowFactoryImpl::subscribe(const std::string &decoderTag) {
   subscribe<WindowType>();
   m_encoders.insert(
       {WindowType::name(),
-       std::make_unique<
+       std::make_shared<
            Mantid::Kernel::Instantiator<EncoderType, BaseEncoder>>()});
   m_decoders.insert(
       {decoderTag,
-       std::make_unique<
+       std::make_shared<
            Mantid::Kernel::Instantiator<DecoderType, BaseDecoder>>()});
 }
 
