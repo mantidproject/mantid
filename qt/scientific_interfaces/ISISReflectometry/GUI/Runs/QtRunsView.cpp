@@ -179,7 +179,6 @@ void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments,
   m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
-  m_ui.comboSearchInstrument->setCurrentIndex(defaultInstrumentIndex);
 }
 
 /**

@@ -81,6 +81,7 @@ void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
 
 void RunsPresenter::initInstrumentList() {
   m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
+  m_view->setSearchInstrument(m_mainPresenter->instrumentName());
 }
 
 RunsTable const &RunsPresenter::runsTable() const {

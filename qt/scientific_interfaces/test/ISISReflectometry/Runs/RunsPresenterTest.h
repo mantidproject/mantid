@@ -80,6 +80,18 @@ public:
     verifyAndClear();
   }
 
+  void testInitInstrumentListSetsCorrectInstrumentInView() {
+    auto const defaultInstrumentIndex = 0;
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    EXPECT_CALL(m_mainPresenter, instrumentName())
+        .Times(1)
+        .WillOnce(Return(instrument));
+    EXPECT_CALL(m_view, setSearchInstrument(instrument)).Times(1);
+    presenter.initInstrumentList();
+    verifyAndClear();
+  }
+
   void testCreatePresenterUpdatesView() {
     expectUpdateViewWhenMonitorStopped();
     auto presenter = makePresenter();
