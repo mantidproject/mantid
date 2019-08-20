@@ -51,7 +51,6 @@ class EncoderFactory(object):
             dic["tag"] = tag
             return dic
 
-
     @classmethod
     def register_encoder(cls, encoder, compatible_check=None):
         """
