@@ -15,7 +15,7 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from qtpy.QtGui import QDoubleValidator, QIcon
-from qtpy.QtWidgets import QDialog
+from qtpy.QtWidgets import QDialog, QWidget, QBoxLayout
 
 from mantid.api import AnalysisDataService as ads
 
@@ -174,49 +174,84 @@ class YAxisEditor(AxisEditor):
         super(YAxisEditor, self).__init__(canvas, axes, 'y')
 
 
+class MarkerEditor(QWidget):
+    def __init__(self, filename, valid_style, valid_colors):
+        super(MarkerEditor, self).__init__()
+        self.widget = load_ui(__file__, filename, baseinstance=self)
+        self.widget.position.setValidator(QDoubleValidator())
+        self.colors = valid_colors
+
+        self.widget.style.addItems(valid_style)
+        self.widget.color.addItems(valid_colors.keys())
+
+    def set_defaults(self, marker):
+        _color = [name for name, symbol in self.colors.items() if symbol == marker.color][0]
+        self.widget.name.setText(str(marker.name))
+        self.widget.position.setText(str(marker.get_position()))
+        self.widget.style.setCurrentText(str(marker.style))
+        self.widget.color.setCurrentText(_color)
+
+    def update_marker(self, marker):
+        old_name = str(marker.name)
+        try:
+            marker.set_name(self.widget.name.text())
+        except:
+            marker.set_name(old_name)
+            raise RuntimeError("Invalid label '{}'".format(self.widget.name.text()))
+
+        marker.set_position(float(self.widget.position.text()))
+        marker.set_style(self.widget.style.currentText())
+        marker.set_color(self.colors.get(self.widget.color.currentText(), 'C2'))
+
+
 class SingleMarkerEditor(PropertiesEditorBase):
     def __init__(self, canvas, marker, valid_style, valid_colors):
         super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
         self.ui.errors.hide()
-        self.ui.position.setValidator(QDoubleValidator())
 
-        self.canvas = canvas
+        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors)
+        layout = self.ui.layout()
+        layout.replaceWidget(self.ui.placeHolder, self._widget)
+        self.ui.placeHolder.setParent(None)
+
         self.marker = marker
-        self._position = self.marker.marker.get_position()
-        self._name = self.marker.annotations.keys()[0]
-        self.valid_style = valid_style
-        self.valid_colors = valid_colors
-        self._style = self.marker.style
-        self._color = [name for name, symbol in self.valid_colors.items() if symbol == self.marker.color][0]
-
-        self.ui.position.setText(str(self._position))
-        self.ui.name.setText(str(self._name))
-        self.ui.style.addItems(valid_style)
-        self.ui.style.setCurrentText(str(self._style))
-        self.ui.color.addItems(list(self.valid_colors.keys()))
-        if self._color in self.valid_colors:
-            self.ui.color.setCurrentText(self._color)
+        self._widget.set_defaults(self.marker)
 
     def changes_accepted(self):
         self.ui.errors.hide()
-        self._position = float(self.ui.position.text())
-        self._name = self.ui.name.text()
-        _style = self.ui.style.currentText()
-        if _style not in self.valid_style:
-            raise ValueError("Invalid style '{}'.\nValid possibilities are: {}"
-                             .format(_style, self.valid_style))
-        self._style = _style
-        self._color = self.ui.color.currentText()
-
-        self.marker.set_position(self._position)
-        self.marker.set_name(self._name)
-        self.marker.set_style(self._style)
-        self.marker.set_color(self.valid_colors.get(self._color, 'C2'))
-        self.canvas.draw()
+        self._widget.update_marker(self.marker)
 
     def error_occurred(self, exc):
         self.ui.errors.setText(str(exc).strip())
         self.ui.errors.show()
+
+
+class GlobalMarkerEditor(PropertiesEditorBase):
+    def __init__(self, canvas, markers, valid_style, valid_colors):
+        super(GlobalMarkerEditor, self).__init__('globalmarkereditor.ui', canvas)
+        self.ui.errors.hide()
+        self.ui.marker.currentIndexChanged.connect(self.update_marker_data)
+
+        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors)
+        layout = self.ui.layout()
+        layout.replaceWidget(self.ui.placeHolder, self._widget)
+        self.ui.placeHolder.setParent(None)
+
+        self.markers = sorted(markers, key=lambda x: x.name)
+        self._names = [str(_marker.name) for _marker in self.markers]
+        self.ui.marker.addItems(self._names)
+
+    def changes_accepted(self):
+        self.ui.errors.hide()
+        idx = self.ui.marker.currentIndex()
+        self._widget.update_marker(self.markers[idx])
+
+    def error_occurred(self, exc):
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
+
+    def update_marker_data(self, idx):
+        self._widget.set_defaults(self.markers[idx])
 
 
 class MarkerTablePicker(PropertiesEditorBase):

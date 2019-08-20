@@ -28,7 +28,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
-                                                 MarkerTablePicker)
+                                                 MarkerTablePicker, GlobalMarkerEditor)
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -72,6 +72,7 @@ class FigureInteraction(object):
         self.vertical_markers = []
         self.valid_lines = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
         self.valid_colors = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
+        self.default_marker = 'marker'
 
     @property
     def nevents(self):
@@ -105,7 +106,7 @@ class FigureInteraction(object):
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
             if not marker_selected:
                 self._show_axis_editor(event)
-            else:
+            elif len(marker_selected) == 1:
                 for marker in marker_selected:
                     self._edit_marker(marker)
                 marker_selected = None
@@ -124,7 +125,7 @@ class FigureInteraction(object):
             if change_cursor:
                 QApplication.setOverrideCursor(QCursor(Qt.ClosedHandCursor))
 
-    def on_mouse_button_release(self, event):
+    def on_mouse_button_release(self, _):
         """ Stop moving the markers when the mouse button is released """
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
@@ -198,6 +199,7 @@ class FigureInteraction(object):
         if not event.inaxes:
             # the current context menus are ony relevant for axes
             return
+        QApplication.restoreOverrideCursor()
 
         fig_type = figure_type(self.canvas.figure)
         if fig_type == FigureType.Empty or fig_type == FigureType.Image:
@@ -264,10 +266,11 @@ class FigureInteraction(object):
         y0, y1 = event.inaxes.get_ylim()
         horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1))
         vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1))
+        edit = marker_menu.addAction("Edit", lambda: self._global_edit_markers())
         export = marker_menu.addAction("Export", lambda: self._export_markers())
         _import = marker_menu.addAction("Import", lambda: self._import_markers(event.inaxes))
 
-        for action in [horizontal, vertical, export, _import]:
+        for action in [horizontal, vertical, export, _import, edit]:
             marker_action_group.addAction(action)
             action.setCheckable(True)
             action.setChecked(False)
@@ -316,17 +319,26 @@ class FigureInteraction(object):
             else:
                 raise RuntimeError("Incorrect SingleMarker type provided. Types are vertical or horizontal.")
 
+    def _global_edit_markers(self):
+        def move_and_show(editor):
+            editor.move(QCursor.pos())
+            editor.exec_()
+
+        move_and_show(GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
+
     def _get_free_marker_name(self):
         used_numbers = []
         for marker in self.markers:
             try:
-                used_numbers.append(int(marker.name.split(' ')[1]))
-            except IndexError:
+                word1, word2 = marker.name.split(' ')
+                if word1 == self.default_marker:
+                    used_numbers.append(int(word2))
+            except ValueError:
                 continue
         proposed_number = 0
         while True:
             if proposed_number not in used_numbers:
-                return "marker {}".format(proposed_number)
+                return "{} {}".format(self.default_marker, proposed_number)
             proposed_number += 1
 
     def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed', color='C2'):
@@ -354,8 +366,6 @@ class FigureInteraction(object):
             self.canvas.draw()
 
     def _edit_marker(self, marker):
-        QApplication.restoreOverrideCursor()
-
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
