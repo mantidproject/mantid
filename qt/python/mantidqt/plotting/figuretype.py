@@ -39,32 +39,34 @@ def axes_type(ax):
     :param ax: A matplotlib.axes.Axes instance
     :return: An enumeration defining the plot type
     """
-    try:
-        nrows, ncols, _ = ax.get_geometry()
-    except AttributeError:
-        nrows, ncols = 1, 1
-
     axtype = FigureType.Other
-    if nrows == 1 and ncols == 1:
-        # an errorbar plot also has len(lines) > 0
-        if len(ax.containers) > 0 and isinstance(ax.containers[0], ErrorbarContainer):
-            axtype = FigureType.Errorbar
-        elif len(ax.lines) > 0:
-            axtype = FigureType.Line
-        elif len(ax.images) > 0 or len(ax.collections) > 0:
-            axtype = FigureType.Image
+
+    # an errorbar plot also has len(lines) > 0
+    if len(ax.containers) > 0 and isinstance(ax.containers[0], ErrorbarContainer):
+        axtype = FigureType.Errorbar
+    elif len(ax.lines) > 0:
+        axtype = FigureType.Line
+    elif len(ax.images) > 0 or len(ax.collections) > 0:
+        axtype = FigureType.Image
 
     return axtype
 
 
-def figure_type(fig):
+def figure_type(fig, ax=None):
     """Return the type of the figure. It inspects the axes
     return by fig.gca()
 
     :param fig: A matplotlib figure instance
+    :param ax: A matplotlib axes instance
     :return: An enumeration defining the plot type
     """
     if len(fig.get_axes()) == 0:
         return FigureType.Empty
     else:
-        return axes_type(fig.gca())
+        ax_types = [axes_type(axis) for axis in fig.axes]
+        if any([type == FigureType.Image for type in ax_types]):
+            return FigureType.Image
+        elif ax:
+            return axes_type(ax)
+        else:
+            return axes_type(fig.gca())
