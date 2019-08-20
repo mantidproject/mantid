@@ -171,11 +171,10 @@ void QtRunsView::setStopMonitorButtonEnabled(bool enabled) {
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available
-@param defaultInstrumentIndex : The index of the instrument to have selected by
 default
 */
-void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments,
-                                   int defaultInstrumentIndex) {
+void QtRunsView::setInstrumentList(
+    const std::vector<std::string> &instruments) {
   m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));

@@ -71,23 +71,8 @@ public:
   }
 
   void testInitInstrumentListUpdatesView() {
-    auto const defaultInstrumentIndex = 0;
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view,
-                setInstrumentList(m_instruments, defaultInstrumentIndex))
-        .Times(1);
-    presenter.initInstrumentList();
-    verifyAndClear();
-  }
-
-  void testInitInstrumentListSetsCorrectInstrumentInView() {
-    auto const defaultInstrumentIndex = 0;
-    auto presenter = makePresenter();
-    auto const instrument = std::string("POLREF");
-    EXPECT_CALL(m_mainPresenter, instrumentName())
-        .Times(1)
-        .WillOnce(Return(instrument));
-    EXPECT_CALL(m_view, setSearchInstrument(instrument)).Times(1);
+    EXPECT_CALL(m_view, setInstrumentList(m_instruments)).Times(1);
     presenter.initInstrumentList();
     verifyAndClear();
   }
@@ -594,15 +579,12 @@ private:
                         const RunsTablePresenterFactory &makeRunsTablePresenter,
                         double thetaTolerance,
                         std::vector<std::string> const &instruments,
-                        int defaultInstrumentIndex,
                         IMessageHandler *messageHandler)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
-                        thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler) {}
+                        thetaTolerance, instruments, messageHandler) {}
   };
 
   RunsPresenterFriend makePresenter() {
-    auto const defaultInstrumentIndex = 0;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     IPythonRunner *pythonRunner = new MockPythonRunner();
     Plotter plotter(pythonRunner);
@@ -611,9 +593,9 @@ private:
 #endif
     auto makeRunsTablePresenter = RunsTablePresenterFactory(
         m_instruments, m_thetaTolerance, std::move(plotter));
-    auto presenter = RunsPresenterFriend(
-        &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
-        m_instruments, defaultInstrumentIndex, &m_messageHandler);
+    auto presenter =
+        RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter,
+                            m_thetaTolerance, m_instruments, &m_messageHandler);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());

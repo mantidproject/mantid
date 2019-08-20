@@ -59,7 +59,7 @@ public:
                 const RunsTablePresenterFactory &makeRunsTablePresenter,
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
-                int defaultInstrumentIndex, IMessageHandler *messageHandler);
+                IMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -136,8 +136,6 @@ private:
   IMessageHandler *m_messageHandler;
   /// The list of instruments
   std::vector<std::string> m_instruments;
-  /// The default index in the instrument list
-  int m_defaultInstrumentIndex;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
 

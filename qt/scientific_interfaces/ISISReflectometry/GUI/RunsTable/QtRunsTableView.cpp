@@ -16,8 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
-                                 int defaultInstrumentIndex)
+QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
   m_ui.progressBar->setRange(0, 100);
@@ -32,7 +31,6 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
 
   for (auto &&instrument : m_instruments)
     m_ui.instrumentSelector->addItem(QString::fromStdString(instrument));
-  m_ui.instrumentSelector->setCurrentIndex(defaultInstrumentIndex);
 
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this,
           SLOT(onFilterChanged(QString const &)));
@@ -299,7 +297,7 @@ RunsTableViewFactory::RunsTableViewFactory(
     : m_instruments(instruments) {}
 
 QtRunsTableView *RunsTableViewFactory::operator()() const {
-  return new QtRunsTableView(m_instruments, defaultInstrumentFromConfig());
+  return new QtRunsTableView(m_instruments);
 }
 
 int RunsTableViewFactory::indexOfElseFirst(
@@ -309,11 +307,6 @@ int RunsTableViewFactory::indexOfElseFirst(
                    return instrument == inst;
                  })
       .get_value_or(0);
-}
-
-int RunsTableViewFactory::defaultInstrumentFromConfig() const {
-  return indexOfElseFirst(Mantid::Kernel::ConfigService::Instance().getString(
-      "default.instrument"));
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

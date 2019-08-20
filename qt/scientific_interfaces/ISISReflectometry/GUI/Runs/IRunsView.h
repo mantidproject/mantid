@@ -80,8 +80,8 @@ public:
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 int defaultInstrumentIndex) = 0;
+  virtual void
+  setInstrumentList(const std::vector<std::string> &instruments) = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;

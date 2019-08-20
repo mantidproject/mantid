@@ -87,11 +87,10 @@ void QtMainWindowView::initLayout() {
   auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, std::move(plotter));
 
-  auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto messageHandler = this;
   auto makeRunsPresenter =
       RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
-                           instruments, defaultInstrumentIndex, messageHandler);
+                           instruments, messageHandler);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();

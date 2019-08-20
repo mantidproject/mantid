@@ -128,14 +128,19 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
+  // Remember the instrument name so we can re-set it (it will otherwise
+  // get overridden by the instrument list default in the new batch)
+  auto const instrument = instrumentName();
   m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
-  initNewBatch(m_batchPresenters.back().get());
+  initNewBatch(m_batchPresenters.back().get(), instrument);
 }
 
-void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter) {
+void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
+                                       std::string const &instrument) {
 
   batchPresenter->initInstrumentList();
+  batchPresenter->notifyInstrumentChanged(instrument);
 
   // starts in the paused state
   batchPresenter->reductionPaused();

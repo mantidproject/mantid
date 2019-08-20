@@ -51,8 +51,7 @@ public:
   ISearchModel &mutableSearchResults() override;
 
   // Setter methods
-  void setInstrumentList(const std::vector<std::string> &instruments,
-                         int defaultInstrumentIndex) override;
+  void setInstrumentList(const std::vector<std::string> &instruments) override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
   void setAutoreducePauseButtonEnabled(bool enabled) override;

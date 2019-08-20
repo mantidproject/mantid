@@ -40,22 +40,18 @@ namespace ISISReflectometry {
  * summed in a reduction.
  * @param instruments The names of the instruments to show as options for the
  * search.
- * @param defaultInstrumentIndex The index of the instrument to have selected by
- * default.
  * @param messageHandler :: A handler to pass messages to the user
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
-    int defaultInstrumentIndex, IMessageHandler *messageHandler)
+    IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments),
-      m_defaultInstrumentIndex(defaultInstrumentIndex),
-      m_thetaTolerance(thetaTolerance) {
+      m_instruments(instruments), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -80,8 +76,7 @@ void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
 }
 
 void RunsPresenter::initInstrumentList() {
-  m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
-  m_view->setSearchInstrument(m_mainPresenter->instrumentName());
+  m_view->setInstrumentList(m_instruments);
 }
 
 RunsTable const &RunsPresenter::runsTable() const {
