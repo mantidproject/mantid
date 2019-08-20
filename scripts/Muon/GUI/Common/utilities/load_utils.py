@@ -8,22 +8,21 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import mantid.simpleapi as mantid
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, AnalysisDataService
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, UnGroupWorkspace
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-import copy
 
 
 class LoadUtils(object):
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
-    The current run is the same as the one in MonAnalysis
+    The current run is the same as the one in MuonAnalysis
     """
 
     def __init__(self, parent=None):
@@ -212,16 +211,18 @@ def load_workspace_from_filename(filename,
         alg, psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
-    workspace = alg.getProperty("OutputWorkspace").value
+    workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
     if is_workspace_group(workspace):
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in load_result["OutputWorkspace"]]
+        load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in workspace.getNames()]
         run = get_run_from_multi_period_data(workspace)
         if not psi_data:
-            load_result["DataDeadTimeTable"] = copy.copy(load_result["DeadTimeTable"][0])
-            load_result["DeadTimeTable"] = None
+            load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+            UnGroupWorkspace(load_result["DeadTimeTable"])
+            load_result["DeadTimeTable"] = None
+            UnGroupWorkspace(workspace.name())
         else:
             load_result["DataDeadTimeTable"] = None
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
@@ -258,14 +259,17 @@ def create_load_algorithm(filename, property_dictionary):
         alg.setProperties(property_dictionary)
 
     alg.initialize()
-    alg.setAlwaysStoreInADS(False)
-    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("OutputWorkspace", filename)
     alg.setProperty("Filename", filename)
+    alg.setProperty("DeadTimeTable", filename + '_deadtime_table')
     return alg, psi_data
 
 
 def _get_algorithm_properties(alg, property_dict):
-    return {key: alg.getProperty(key).value for key in alg.keys() if key in property_dict}
+    def _get_non_None_value(alg, key):
+        return alg.getProperty(key).value if alg.getProperty(key).value is not None else alg.getProperty(key).valueAsStr
+    return {key: _get_non_None_value(alg, key) for key in alg.keys() if key in property_dict}
 
 
 def get_table_workspace_names_from_ADS():

@@ -71,13 +71,19 @@ class MuonContext(object):
         return self._phase_context
 
     def calculate_group(self, group_name, run, rebin=False):
-        group_workspace = calculate_group_data(self, group_name, run, rebin)
-        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin)
+        run_as_string = run_list_to_string(run)
+        name = get_group_data_workspace_name(self, group_name, run_as_string, rebin=rebin)
+        asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=rebin)
+        asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=rebin)
+        group_workspace = calculate_group_data(self, group_name, run, rebin, name)
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin, asym_name, asym_name_unnorm)
 
         return group_workspace, group_asymmetry, group_asymmetry_unnormalised
 
     def calculate_pair(self, pair_name, run, rebin=False):
-        return calculate_pair_data(self, pair_name, run, rebin)
+        run_as_string = run_list_to_string(run)
+        name = get_pair_data_workspace_name(self, pair_name, run_as_string, rebin=rebin)
+        return calculate_pair_data(self, pair_name, run, rebin, name)
 
     def show_all_groups(self):
         self.calculate_all_groups()
@@ -188,13 +194,14 @@ class MuonContext(object):
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self,
-                                                                   run_string,
-                                                                   period=str(i + 1))
+                    name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string, self.data_context.is_multi_period(),
+                                                                   period=str(i + 1), workspace_suffix=self.workspace_suffix)
                     single_ws.show(name)
             else:
                 # Single period data
-                name = directory + get_raw_data_workspace_name(self, run_string)
+                name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
+                                                               self.data_context.is_multi_period(),
+                                                               workspace_suffix=self.workspace_suffix)
                 loaded_workspace[0].show(name)
 
     def _do_rebin(self):
@@ -224,9 +231,11 @@ class MuonContext(object):
         run_numbers = self.data_context.current_runs
         runs = [
             wsName.get_raw_data_workspace_name(
-                self,
+                self.data_context.instrument,
                 run_list_to_string(run_number),
-                period=str(period + 1))
+                self.data_context.is_multi_period(),
+                period=str(period + 1),
+                workspace_suffix=self.workspace_suffix)
             for run_number in run_numbers for period in range(self.data_context.num_periods(run_number))]
         return runs
 

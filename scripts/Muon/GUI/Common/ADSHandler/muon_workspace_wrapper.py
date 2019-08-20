@@ -7,6 +7,7 @@
 # pylint: disable=F0401
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import Workspace, AnalysisDataService, WorkspaceGroup
+from mantid.simpleapi import RenameWorkspace, GroupWorkspaces
 
 
 def add_directory_structure(dirs):
@@ -43,6 +44,15 @@ def add_directory_structure(dirs):
         previous_dir = directory
 
 
+def _add_workspace_to_group(group_name, workspace_name):
+    if AnalysisDataService.doesExist(group_name):
+        workspaces_to_group = AnalysisDataService.retrieve(group_name).getNames()
+    else:
+        workspaces_to_group = []
+    workspaces_to_group.append(workspace_name)
+    GroupWorkspaces(InputWorkspaces=workspaces_to_group, OutputWorkspace=group_name)
+
+
 class MuonWorkspaceWrapper(object):
     """
     A wrapper around a single workspace for use with MuonAnalysis.
@@ -60,14 +70,17 @@ class MuonWorkspaceWrapper(object):
     A basic muon workspace which is either the workspace or the name of the workspace in the ADS
     """
 
-    def __init__(self, workspace, name=''):
+    def __init__(self, workspace):
         self._is_in_ads = False
         self._workspace = None
         self._directory_structure = ""
         self._workspace_name = ""
 
-        self.workspace = workspace
-        self.name = name
+        if isinstance(workspace, Workspace):
+            self.workspace = workspace
+        else:
+            self.name = workspace
+            self._is_in_ads = True
 
     def __str__(self):
         return "MuonWorkspaceWrapper Object \n" \
@@ -87,7 +100,7 @@ class MuonWorkspaceWrapper(object):
     @property
     def name(self):
         """The current name of the workspace."""
-        return self._directory_structure + self._workspace_name
+        return self._directory_structure + '/' + self._workspace_name
 
     @property
     def workspace_name(self):
@@ -103,10 +116,16 @@ class MuonWorkspaceWrapper(object):
 
     @name.setter
     def name(self, full_name):
+        new_workspace_name = full_name.split("/")[-1]
+        if not new_workspace_name:
+            return
+
         if not self.is_hidden:
-            raise ValueError("Cannot change workspace name whilst it is in ADS")
+            if len(new_workspace_name) > 0 and self._workspace_name != str(new_workspace_name):
+                RenameWorkspace(InputWorkspace=self._workspace_name, OutputWorkspace=new_workspace_name)
+
         self._directory_structure = "/".join(full_name.split("/")[0:-1])
-        self._workspace_name = full_name.split("/")[-1]
+        self._workspace_name = new_workspace_name
 
     @workspace.setter
     def workspace(self, value):
@@ -125,28 +144,42 @@ class MuonWorkspaceWrapper(object):
         Show the workspace in the ADS inside the WorkspaceGroup structure specified in name
         name = dirs/../dirs/workspace_name
         """
-        if not self.is_hidden:
+
+        if not name:
             return
 
-        if len(name) > 0:
-            self.name = str(name)
+        self.name = str(name)
 
-        if len(self.name) > 0 and self.is_hidden:
+        # if not self.is_hidden:
+        #     return
+
+        if len(self.name) > 0: #and self.is_hidden:
             # add workspace to ADS
-            AnalysisDataService.addOrReplace(self._workspace_name, self._workspace)
+            if self.is_hidden:
+                AnalysisDataService.addOrReplace(self._workspace_name, self.workspace)
 
-            if self._directory_structure != "":
-                self.add_directory_structure()
-                # Add to the appropriate group
-                group = self._directory_structure.split("/")[-1]
-                if not AnalysisDataService.retrieve(group).__contains__(self._workspace_name):
-                    AnalysisDataService.retrieve(group).add(self._workspace_name)
+            self._add_to_appropriate_groups()
+
+            # if self._directory_structure != "":
+            #     self.add_directory_structure()
+            #     # Add to the appropriate group
+            #     group = self._directory_structure.split("/")[-1]
+            #     if not AnalysisDataService.retrieve(group).__contains__(self._workspace_name):
+            #         AnalysisDataService.retrieve(group).add(self._workspace_name)
 
             self._workspace = None
             self._is_in_ads = True
         else:
             raise ValueError("Cannot store workspace in ADS with name : ",
                              str(name))
+
+    def _add_to_appropriate_groups(self):
+        if not self._directory_structure:
+            return
+        workspace_list = reversed(self.name.split('/')[1:])
+        group_workspace_list = reversed(self.name.split('/')[:-1])
+        for workspace, workspace_group in zip(workspace_list, group_workspace_list):
+            _add_workspace_to_group(workspace_group, workspace)
 
     def hide(self):
         """
