@@ -404,6 +404,7 @@ public:
     verifyAndClear();
   }
 
+<<<<<<< HEAD
   void testTransferUpdatesTablePresenter() {
     auto presenter = makePresenter();
     auto expectedJobs = expectGetValidSearchResult();
@@ -413,7 +414,10 @@ public:
     verifyAndClear();
   }
 
+  void testInstrumentChanged() {
+=======
   void testInstrumentChangedRequestedGetsInstrumentAndNotifiesMainPresenter() {
+>>>>>>> Only reset search results when instrument changed
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectSearchInstrument(instrument);

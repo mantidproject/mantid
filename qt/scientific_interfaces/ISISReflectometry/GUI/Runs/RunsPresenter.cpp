@@ -125,7 +125,6 @@ void RunsPresenter::notifyTransfer() {
 
 void RunsPresenter::notifyInstrumentChangedRequested() {
   auto const instrumentName = m_view->getSearchInstrument();
-  m_searcher->reset();
   if (m_mainPresenter)
     m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
@@ -245,6 +244,7 @@ void RunsPresenter::autoreductionCompleted() {
 }
 
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }

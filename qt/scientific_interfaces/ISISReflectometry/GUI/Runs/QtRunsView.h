@@ -19,8 +19,6 @@
 
 namespace MantidQt {
 
-namespace MantidWidgets {
-} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }

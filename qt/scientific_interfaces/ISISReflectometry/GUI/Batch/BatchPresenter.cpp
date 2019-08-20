@@ -40,7 +40,8 @@ BatchPresenter::BatchPresenter(
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<ISavePresenter> savePresenter)
-    : m_view(view), m_runsPresenter(std::move(runsPresenter)),
+    : m_view(view), m_mainPresenter(),
+      m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
@@ -72,7 +73,8 @@ bool BatchPresenter::requestClose() const { return true; }
 
 void BatchPresenter::notifyInstrumentChangedRequested(
     const std::string &instrumentName) {
-  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
+  if (m_mainPresenter)
+    m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
 void BatchPresenter::notifyInstrumentChanged(
@@ -261,7 +263,9 @@ Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
 }
 
 std::string BatchPresenter::instrumentName() const {
-  return m_mainPresenter->instrumentName();
+  if (m_mainPresenter)
+    return m_mainPresenter->instrumentName();
+  return std::string();
 }
 
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
