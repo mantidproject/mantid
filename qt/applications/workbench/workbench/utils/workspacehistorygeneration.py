@@ -7,8 +7,6 @@
 #  This file is part of the mantidworkbench package
 
 import six
-import tokenize
-import StringIO
 
 from mantid.api import AlgorithmManager, AnalysisDataService as ADS
 from workbench.projectrecovery.projectrecoverysaver import ALGS_TO_IGNORE, ALG_PROPERTIES_TO_IGNORE
