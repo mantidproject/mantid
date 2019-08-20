@@ -32,13 +32,14 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 DECLARE_SUBWINDOW(QtMainWindowView)
 
 QtMainWindowView::QtMainWindowView(QWidget *parent)
-    : UserSubWindow(parent), m_notifyee(nullptr) {}
+    : UserSubWindow(parent), m_notifyee(nullptr), m_batchIndex(1) {}
 
 IBatchView *QtMainWindowView::newBatch() {
-  auto index = m_ui.mainTabs->count();
   auto *newTab = new QtBatchView(this);
-  m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
+  m_ui.mainTabs->addTab(newTab,
+                        QString("Batch ") + QString::number(m_batchIndex));
   m_batchViews.emplace_back(newTab);
+  ++m_batchIndex;
   return newTab;
 }
 
