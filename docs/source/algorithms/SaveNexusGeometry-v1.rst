@@ -42,11 +42,11 @@ Usage
 
 Output:
 
-.. testoutput:: SaveNexusGeometryExample
+.. testoutput:: SaveNexusGeometryExampleDefault
 	
 	True
 
-.. testcleanup:: SaveNexusGeometryExample
+.. testcleanup:: SaveNexusGeometryExampleDefault
 
     import os
     def removeFiles(files):
@@ -69,7 +69,7 @@ Output:
 	ws = CreateSampleWorkspace()
 	compInfo = ws.componentInfo()
 	detInfo = ws.detectorInfo()
-	file_name  = "example_save_Nexus_geometry_2.nxs"
+	file_name  = "example_save_Nexus_geometry_2.hdf5"
 	path = os.path.join(os.path.expanduser("~"), file_name)
 
 	SaveNexusGeometry(ws, path)
@@ -79,11 +79,11 @@ Output:
 
 Output:
 
-.. testoutput:: SaveNexusGeometryExample
+.. testoutput:: SaveNexusGeometryExampleOption
 	
 	True
 
-.. testcleanup:: SaveNexusGeometryExample
+.. testcleanup:: SaveNexusGeometryExampleOption
 
     import os
     def removeFiles(files):
