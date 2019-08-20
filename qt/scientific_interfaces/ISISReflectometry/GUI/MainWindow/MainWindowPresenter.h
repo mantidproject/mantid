@@ -11,6 +11,7 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "IMainWindowPresenter.h"
 #include "IMainWindowView.h"
+#include "MantidGeometry/Instrument.h"
 #include <memory>
 
 namespace MantidQt {
@@ -47,6 +48,11 @@ public:
   void notifyAutoreductionPaused() override;
   void reductionResumed() override;
   void reductionPaused() override;
+  void
+  notifyInstrumentChangedRequested(std::string const &instrumentName) override;
+  void notifyUpdateInstrumentRequested() override;
+  Mantid::Geometry::Instrument_const_sptr instrument() const override;
+  std::string instrumentName() const override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -62,8 +68,13 @@ protected:
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
 private:
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
+
   void showHelp();
   void addNewBatch(IBatchView *batchView);
+  void changeInstrument(std::string const &instrumentName);
+  void updateInstrument(const std::string &instrumentName);
+
   void disableSaveAndLoadBatch();
   void enableSaveAndLoadBatch();
 

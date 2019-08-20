@@ -65,6 +65,8 @@ public:
   MOCK_METHOD0(reductionPaused, void());
 
   MOCK_METHOD1(notifyInstrumentChangedRequested, void(const std::string &));
+  MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
+  MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());

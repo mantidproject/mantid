@@ -54,7 +54,16 @@ public:
     verifyAndClear();
   }
 
-  void testChildPresentersUpdatedWhenInstrumentChanged() {
+  void testMainPresenterUpdatedWhenInstrumentChangedRequested() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    EXPECT_CALL(m_mainPresenter, notifyInstrumentChangedRequested(instrument))
+        .Times(1);
+    presenter.notifyInstrumentChangedRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testChildPresentersAreUpdatedWhenInstrumentChanged() {
     auto presenter = makePresenter();
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(*m_runsPresenter, notifyInstrumentChanged(instrument)).Times(1);
@@ -62,7 +71,15 @@ public:
         .Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyInstrumentChanged(instrument))
         .Times(1);
-    presenter.notifyInstrumentChangedRequested(instrument);
+    presenter.notifyInstrumentChanged(instrument);
+    verifyAndClear();
+  }
+
+  void testMainPresenterUpdatedWhenUpdateInstrumentRequested() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    EXPECT_CALL(m_mainPresenter, notifyUpdateInstrumentRequested()).Times(1);
+    presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
 

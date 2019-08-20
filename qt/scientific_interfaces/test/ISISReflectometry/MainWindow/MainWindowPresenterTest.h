@@ -188,6 +188,54 @@ public:
     verifyAndClear();
   }
 
+  void testInstrumentChangedRequestedUpdatesInstrumentInModel() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    presenter.notifyInstrumentChangedRequested(instrument);
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testInstrumentChangedRequestedUpdatesInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyInstrumentChangedRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentRequestedUpdatesInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    // must set the instrument to something valid first
+    presenter.notifyInstrumentChangedRequested("POLREF");
+    auto const instrument = presenter.instrumentName();
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentRequestedDoesNotChangeInstrumentName() {
+    auto presenter = makePresenter();
+    // must set the instrument to something valid first
+    presenter.notifyInstrumentChangedRequested("POLREF");
+    auto const instrument = presenter.instrumentName();
+    presenter.notifyUpdateInstrumentRequested();
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentRequestedThrowsIfInstrumentNotSet() {
+    auto presenter = makePresenter();
+    TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockMainWindowView> m_view;
   NiceMock<MockMessageHandler> m_messageHandler;

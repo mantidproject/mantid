@@ -13,10 +13,6 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "IBatchView.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 namespace MantidQt {
@@ -24,14 +20,6 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
-using Mantid::API::AlgorithmManager;
-using Mantid::API::IAlgorithm_sptr;
-using Mantid::API::MatrixWorkspace_sptr;
-
-// unnamed namespace
-namespace {
-Mantid::Kernel::Logger g_log("Reflectometry GUI");
-}
 
 /** Constructor
  * @param view :: [input] The view we are managing
@@ -56,7 +44,7 @@ BatchPresenter::BatchPresenter(
       m_eventPresenter(std::move(eventPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
-      m_savePresenter(std::move(savePresenter)), m_instrument(),
+      m_savePresenter(std::move(savePresenter)),
       m_jobRunner(new BatchJobRunner(std::move(model))) {
 
   m_view->subscribe(this);
@@ -84,13 +72,18 @@ bool BatchPresenter::requestClose() const { return true; }
 
 void BatchPresenter::notifyInstrumentChangedRequested(
     const std::string &instrumentName) {
-  notifyInstrumentChanged(instrumentName);
+  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
-void BatchPresenter::notifyRestoreDefaultsRequested() {
-  // We need to reload the instrument parameters file so that we can get
-  // up-to-date defaults
-  updateInstrument(m_instrument->getName());
+void BatchPresenter::notifyInstrumentChanged(
+    const std::string &instrumentName) {
+  m_runsPresenter->notifyInstrumentChanged(instrumentName);
+  m_experimentPresenter->notifyInstrumentChanged(instrumentName);
+  m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
+}
+
+void BatchPresenter::notifyUpdateInstrumentRequested() {
+  m_mainPresenter->notifyUpdateInstrumentRequested();
 }
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
@@ -263,41 +256,12 @@ void BatchPresenter::anyBatchAutoreductionPaused() {
   m_runsPresenter->anyBatchAutoreductionPaused();
 }
 
-void BatchPresenter::notifyInstrumentChanged(
-    const std::string &instrumentName) {
-  updateInstrument(instrumentName);
-  m_runsPresenter->notifyInstrumentChanged(instrumentName);
-  m_experimentPresenter->notifyInstrumentChanged(instrumentName);
-  m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
-}
-
-void BatchPresenter::updateInstrument(const std::string &instrumentName) {
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrumentName);
-  g_log.information() << "Instrument changed to " << instrumentName;
-
-  // Load a workspace for this instrument so we can get the actual instrument
-  auto loadAlg =
-      AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
-  loadAlg->setChild(true);
-  loadAlg->initialize();
-  loadAlg->setProperty("InstrumentName", instrumentName);
-  loadAlg->setProperty("OutputWorkspace",
-                       "__Reflectometry_GUI_Empty_Instrument");
-  loadAlg->execute();
-  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
-  m_instrument = instWorkspace->getInstrument();
-}
-
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {
-  return m_instrument;
+  return m_mainPresenter->instrument();
 }
 
 std::string BatchPresenter::instrumentName() const {
-  if (m_instrument)
-    return m_instrument->getName();
-
-  return std::string();
+  return m_mainPresenter->instrumentName();
 }
 
 void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }

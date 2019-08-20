@@ -16,7 +16,6 @@
 #include "IBatchJobRunner.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
@@ -61,8 +60,10 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
-  void notifyInstrumentChangedRequested(const std::string &instName) override;
-  void notifyRestoreDefaultsRequested() override;
+  void
+  notifyInstrumentChangedRequested(const std::string &instrumentName) override;
+  void notifyInstrumentChanged(const std::string &instrumentName) override;
+  void notifyUpdateInstrumentRequested() override;
   void notifySettingsChanged() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
@@ -93,8 +94,6 @@ private:
   void pauseAutoreduction();
   void autoreductionPaused();
   void autoreductionCompleted();
-  void notifyInstrumentChanged(const std::string &instName);
-  void updateInstrument(const std::string &instName);
   void settingsChanged();
 
   IBatchView *m_view;
@@ -104,7 +103,6 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
 
   friend class Encoder;
   friend class Decoder;

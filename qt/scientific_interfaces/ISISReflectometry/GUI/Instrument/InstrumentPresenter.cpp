@@ -45,9 +45,9 @@ void InstrumentPresenter::notifySettingsChanged() {
 }
 
 void InstrumentPresenter::notifyRestoreDefaultsRequested() {
-  // Notify main presenter first to make sure instrument is up to date
-  m_mainPresenter->notifyRestoreDefaultsRequested();
-  restoreDefaults();
+  // Trigger a reload of the instrument to get up-to-date settings.
+  // After the instrument is updated, the defaults will be restored.
+  m_mainPresenter->notifyUpdateInstrumentRequested();
 }
 
 Instrument const &InstrumentPresenter::instrument() const { return m_model; }
