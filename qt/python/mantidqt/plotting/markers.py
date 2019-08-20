@@ -676,6 +676,7 @@ class SingleMarker(QObject):
         Set the colour of the marker.
         """
         self.marker.set_color(color)
+        self.color = color
 
     def set_position(self, position):
         """

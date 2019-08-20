@@ -17,6 +17,7 @@ from mantidqt.utils.qt import load_ui
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog
 
+from mantid.api import AnalysisDataService as ads
 
 SYMLOG_LIN_THRESHOLD = 0.01
 
@@ -174,7 +175,7 @@ class YAxisEditor(AxisEditor):
 
 
 class SingleMarkerEditor(PropertiesEditorBase):
-    def __init__(self, canvas, marker, valid_style):
+    def __init__(self, canvas, marker, valid_style, valid_colors):
         super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
         self.ui.errors.hide()
         self.ui.position.setValidator(QDoubleValidator())
@@ -184,12 +185,17 @@ class SingleMarkerEditor(PropertiesEditorBase):
         self._position = self.marker.marker.get_position()
         self._name = self.marker.annotations.keys()[0]
         self.valid_style = valid_style
+        self.valid_colors = valid_colors
         self._style = self.marker.style
+        self._color = [name for name, symbol in self.valid_colors.items() if symbol == self.marker.color][0]
 
         self.ui.position.setText(str(self._position))
         self.ui.name.setText(str(self._name))
         self.ui.style.addItems(valid_style)
         self.ui.style.setCurrentText(str(self._style))
+        self.ui.color.addItems(list(self.valid_colors.keys()))
+        if self._color in self.valid_colors:
+            self.ui.color.setCurrentText(self._color)
 
     def changes_accepted(self):
         self.ui.errors.hide()
@@ -200,11 +206,42 @@ class SingleMarkerEditor(PropertiesEditorBase):
             raise ValueError("Invalid style '{}'.\nValid possibilities are: {}"
                              .format(_style, self.valid_style))
         self._style = _style
+        self._color = self.ui.color.currentText()
 
         self.marker.set_position(self._position)
         self.marker.set_name(self._name)
         self.marker.set_style(self._style)
+        self.marker.set_color(self.valid_colors.get(self._color, 'C2'))
         self.canvas.draw()
+
+    def error_occurred(self, exc):
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
+
+
+class MarkerTablePicker(PropertiesEditorBase):
+    def __init__(self, canvas, workspace_list, _markers):
+        super(MarkerTablePicker, self).__init__('markertablepicker.ui', canvas)
+        self.ui.errors.hide()
+
+        # Remove all workspaces that are not ITableWorkspace
+        from mantid.api import ITableWorkspace
+        self.workspace_list = [ws for ws in workspace_list if isinstance(ads.retrieve(ws), ITableWorkspace)]
+
+        self._markers = _markers
+
+        self.ui.markers.addItems(self.workspace_list)
+        if 'marker_table' in self.workspace_list:
+            self.ui.markers.setCurrentText('marker_table')
+
+    def changes_accepted(self):
+        markers = self.ui.markers.currentText()
+        markers = ads.retrieve(markers)
+        for i in range(markers.rowCount()):
+            row = markers.row(i)
+            self._markers.append(
+                (row['position'], row['name'], row['line style'], row['color'], row['marker type'])
+            )
 
     def error_occurred(self, exc):
         self.ui.errors.setText(str(exc).strip())

@@ -27,7 +27,8 @@ from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
-from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor
+from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
+                                                 MarkerTablePicker)
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -70,6 +71,7 @@ class FigureInteraction(object):
         self.markers = []
         self.vertical_markers = []
         self.valid_lines = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
+        self.valid_colors = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
 
     @property
     def nevents(self):
@@ -273,40 +275,46 @@ class FigureInteraction(object):
         menu.addMenu(marker_menu)
 
     def _export_markers(self):
-        marker_horizontal = CreateEmptyTableWorkspace()
-        marker_vertical = CreateEmptyTableWorkspace()
-        marker_horizontal.addColumn(type='float', name='position')
-        marker_horizontal.addColumn(type='str', name='name')
-        marker_horizontal.addColumn(type='str', name='line style')
-        marker_vertical.addColumn(type='float', name='position')
-        marker_vertical.addColumn(type='str', name='name')
-        marker_vertical.addColumn(type='str', name='line style')
+        marker_table = CreateEmptyTableWorkspace()
+        marker_table.addColumn(type='float', name='position')
+        marker_table.addColumn(type='str', name='name')
+        marker_table.addColumn(type='str', name='line style')
+        marker_table.addColumn(type='str', name='color')
+        marker_table.addColumn(type='str', name='marker type')
         for marker in self.markers:
-            if marker.marker_type == 'XSingle':
-                marker_vertical.addRow([marker.get_position(),
-                                        marker.name,
-                                        marker.style])
-            else:
-                marker_horizontal.addRow([marker.get_position(),
-                                          marker.name,
-                                          marker.style])
+            color = [name for name, symbol in self.valid_colors.items() if symbol == marker.color][0]
+            marker_table.addRow([marker.get_position(),
+                                 marker.name,
+                                 marker.style,
+                                 color,
+                                 'vertical' if marker.marker_type == 'XSingle' else 'horizontal'])
 
-    def _import_markers(self, ax, marker_horizontal='marker_horizontal', marker_vertical='marker_vertical'):
-        for marker in self.markers:
-            marker.remove_all_annotations()
-            marker.remove()
-        marker_horizontal = ads.retrieve(marker_horizontal)
-        marker_vertical = ads.retrieve(marker_vertical)
+    def _import_markers(self, ax):
+        def move_and_show(editor):
+            editor.move(QCursor.pos())
+            editor.exec_()
+
+        ws_list = ads.getObjectNames()
+
+        markers = []
+        move_and_show(MarkerTablePicker(self.canvas, ws_list, markers))
+
         x0, x1 = ax.get_xlim()
         y0, y1 = ax.get_ylim()
+        present_marker_name = [marker.name for marker in self.markers]
 
-        for i in range(marker_horizontal.rowCount()):
-            row = marker_horizontal.row(i)
-            self._add_horizontal_marker(row['position'], x0, x1, row['name'], row['line style'])
+        for position, name, style, color, marker_type in markers:
+            # Avoid loading the same marker twice
+            if name in present_marker_name:
+                continue
 
-        for i in range(marker_vertical.rowCount()):
-            row = marker_vertical.row(i)
-            self._add_vertical_marker(row['position'], y0, y1, row['name'], row['line style'])
+            # Add the marker
+            if marker_type == 'horizontal':
+                self._add_horizontal_marker(position, y0, y1, name, style, self.valid_colors[color])
+            elif marker_type == 'vertical':
+                self._add_vertical_marker(position, x0, x1, name, style, self.valid_colors[color])
+            else:
+                raise RuntimeError("Incorrect SingleMarker type provided. Types are vertical or horizontal.")
 
     def _get_free_marker_name(self):
         used_numbers = []
@@ -321,19 +329,19 @@ class FigureInteraction(object):
                 return "marker {}".format(proposed_number)
             proposed_number += 1
 
-    def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed'):
+    def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed', color='C2'):
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(self.canvas, 'C2', y_pos, lower, upper, name=name,
+        marker = SingleMarker(self.canvas, color, y_pos, lower, upper, name=name,
                               marker_type='YSingle', line_style=line_style)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos, lower, upper, name=None, line_style='dashed'):
+    def _add_vertical_marker(self, x_pos, lower, upper, name=None, line_style='dashed', color='C2'):
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(self.canvas, 'C2', x_pos, lower, upper, name=name,
+        marker = SingleMarker(self.canvas, color, x_pos, lower, upper, name=name,
                               marker_type='XSingle', line_style=line_style)
         marker.add_name()
         marker.redraw()
@@ -352,7 +360,7 @@ class FigureInteraction(object):
             editor.move(QCursor.pos())
             editor.exec_()
 
-        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines))
+        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors))
 
     def draw_callback(self, _):
         """ This is called at every canvas draw. Redraw the markers. """
