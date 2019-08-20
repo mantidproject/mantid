@@ -83,15 +83,14 @@ class FitIncidentSpectrum(PythonAlgorithm):
         xlo, binsize, xhi = params
         x = np.arange(xlo, xhi, binsize)
 
-        Rebin(
+        rebinned = Rebin(
             self._input_ws,
-            OutputWorkspace='fit',
             Params=self._binning_for_fit,
-            PreserveEvents=True)
+            PreserveEvents=True,
+            StoreInADS=False)
         incident_index = 0
-        x_fit = np.array(AnalysisDataService.retrieve('fit').readX(incident_index))
-        y_fit = np.array(AnalysisDataService.retrieve('fit').readY(incident_index))
-        AnalysisDataService.retrieve('fit').delete()
+        x_fit = np.array(rebinned.readX(incident_index))
+        y_fit = np.array(rebinned.readY(incident_index))
 
         if len(x_fit) != len(y_fit):
             x_fit = x_fit[:-1]
@@ -115,16 +114,16 @@ class FitIncidentSpectrum(PythonAlgorithm):
             fit, fit_prime = self.fitCubicSplineWithGaussConv(x_fit, y_fit, x, sigma=0.5)
 
         # Create output workspace
-        CreateWorkspace(
+        output_workspace = CreateWorkspace(
             DataX=x,
             DataY=np.append(
                 fit,
                 fit_prime),
-            OutputWorkspace=self._output_ws,
             UnitX='Wavelength',
             NSpec=2,
-            Distribution=False)
-        return AnalysisDataService.retrieve(self._output_ws)
+            Distribution=False,
+            StoreInADS=False)
+        self.setProperty("OutputWorkspace", output_workspace)
 
     def fitCubicSplineWithGaussConv(self, x_fit, y_fit, x, sigma=3):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
