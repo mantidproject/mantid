@@ -440,6 +440,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                    'GroupWorkspaces', 'GroupWorkspaces']
         self._check_history(mtd['IvsQ_binned_12345_1'], history, False)
 
+    def test_TOF_input_workspace_groups_collapsed(self):
+        workspaces = [self._create_workspace(12345, 'TOF_'), self._create_workspace_group(67890, 2, 'TOF_')]
+        output_workspaces = ['TOF_12345', 'TOF_67890_1', 'TOF_67890_2']
+        self.assertEqual(self._collape_workspace_groups(workspaces), output_workspaces)
+
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
