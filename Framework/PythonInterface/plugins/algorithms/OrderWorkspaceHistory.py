@@ -9,7 +9,11 @@ from __future__ import absolute_import, division, print_function
 import os
 import tokenize
 import glob
-import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import mantid.api
 import mantid.kernel
@@ -85,7 +89,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                 with open(fn) as f:
                     all_lines.extend(self._get_all_lines_from_io(f.readline))
         else:
-            script_string_io = StringIO.StringIO(input_string)
+            script_string_io = StringIO(input_string)
             all_lines = self._get_all_lines_from_io(script_string_io.readline)
 
         # Cast as a set to remove duplicates
