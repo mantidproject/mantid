@@ -64,9 +64,9 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
             doc='Sample chemical formula used to determine cross-section term.')
 
         self.declareProperty(
-            name='DensityType', defaultValue = 'Mass Density',
+            name='DensityType', defaultValue='Mass Density',
             validator=StringListValidator(['Mass Density', 'Number Density']),
-            doc = 'Use of Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
+            doc='Use of Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
 
         self.declareProperty(
             name='Density',
@@ -102,9 +102,9 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
             name='XSectionType',
             defaultValue="AttenuationXSection",
             validator=StringListValidator(['AttenuationXSection', 'TotalXSection']),
-            doc = 'Use either the absorption  or total cross section in exponential term. \
+            doc='Use either the absorption  or total cross section in exponential term. \
                    The absorption cross section is for monitor-type corrections and \
-                   the total cross section is for transmission-type corrections' )
+                   the total cross section is for transmission-type corrections')
 
     def validateInputs(self):
         issues = dict()
@@ -216,7 +216,7 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
         xs_term = ref_absXS * self._efficiency_wavelength / TABULATED_WAVELENGTH
         if self._xsection_type == "TotalXSection":
             xs_term += material.totalScatterXSection()
-        self._area_density = - np.log( 1.0 - self._efficiency) / xs_term
+        self._area_density = - np.log(1.0 - self._efficiency) / xs_term
 
     def _calculate_area_density_from_density(self):
         """Calculates area density (atom/cm^2) using number density and thickness."""
@@ -229,7 +229,7 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
     def _calculate_alpha_absXS_term(self):
         """Calculates absorption XS alpha term = area_density * absXS / 1.7982"""
         material = self._output_ws.sample().getMaterial()
-        absXS = material.absorbXSection()  / TABULATED_WAVELENGTH
+        absXS = material.absorbXSection() / TABULATED_WAVELENGTH
         self._alpha_absXS = self._area_density * absXS
 
     def _calculate_alpha_scatXS_term(self):
