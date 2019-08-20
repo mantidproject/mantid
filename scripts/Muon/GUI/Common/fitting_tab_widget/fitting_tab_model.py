@@ -66,8 +66,8 @@ class FittingTabModel(object):
         return function_object, output_status, output_chi_squared
 
     def add_workspace_to_ADS(self, workspace, name, directory):
-        workspace_wrapper = MuonWorkspaceWrapper(workspace, directory + name)
-        workspace_wrapper.show()
+        workspace_wrapper = MuonWorkspaceWrapper(workspace)
+        workspace_wrapper.show(directory + name)
         return workspace_wrapper
 
     def create_fitted_workspace_name(self, input_workspace_name, function_name):

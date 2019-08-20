@@ -133,7 +133,7 @@ def run_MuonMaxent(parameters_dict, alg):
 
 def run_Fit(parameters_dict, alg):
     alg.initialize()
-    alg.setAlwaysStoreInADS(False)
+    alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
     pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
@@ -143,9 +143,9 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('StartX', parameters_dict['StartX'])
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
-    return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
+    return alg.getProperty("OutputWorkspace").valueAsStr, alg.getProperty("OutputParameters").valueAsStr, alg.getProperty(
         "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
-        alg.getProperty("OutputNormalisedCovarianceMatrix").value
+        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
 def run_simultaneous_Fit(parameters_dict, alg):
