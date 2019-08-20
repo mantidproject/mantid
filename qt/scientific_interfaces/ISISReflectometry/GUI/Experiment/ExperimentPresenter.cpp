@@ -113,7 +113,8 @@ void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
 
-void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
+void ExperimentPresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   restoreDefaults();
 }

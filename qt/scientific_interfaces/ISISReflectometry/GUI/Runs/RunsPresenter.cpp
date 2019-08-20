@@ -123,15 +123,16 @@ void RunsPresenter::notifyTransfer() {
   notifyRowStateChanged();
 }
 
-void RunsPresenter::notifyInstrumentChanged() {
+void RunsPresenter::notifyInstrumentChangedRequested() {
   auto const instrumentName = m_view->getSearchInstrument();
   m_searcher->reset();
   if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+    m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
-void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  m_mainPresenter->notifyInstrumentChanged(instrumentName);
+void RunsPresenter::notifyInstrumentChangedRequested(
+    std::string const &instrumentName) {
+  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
 void RunsPresenter::notifyReductionResumed() {
@@ -243,9 +244,9 @@ void RunsPresenter::autoreductionCompleted() {
   updateWidgetEnabledState();
 }
 
-void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_view->setSearchInstrument(instrumentName);
-  tablePresenter()->instrumentChanged(instrumentName);
+  tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }

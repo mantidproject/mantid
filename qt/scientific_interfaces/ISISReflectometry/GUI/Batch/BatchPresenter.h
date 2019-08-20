@@ -61,7 +61,7 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionCompleted() override;
-  void notifyInstrumentChanged(const std::string &instName) override;
+  void notifyInstrumentChangedRequested(const std::string &instName) override;
   void notifyRestoreDefaultsRequested() override;
   void notifySettingsChanged() override;
   void anyBatchAutoreductionResumed() override;
@@ -93,7 +93,7 @@ private:
   void pauseAutoreduction();
   void autoreductionPaused();
   void autoreductionCompleted();
-  void instrumentChanged(const std::string &instName);
+  void notifyInstrumentChanged(const std::string &instName);
   void updateInstrument(const std::string &instName);
   void settingsChanged();
 

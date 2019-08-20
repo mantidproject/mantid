@@ -36,7 +36,8 @@ public:
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
-  virtual void notifyInstrumentChanged(const std::string &instName) = 0;
+  virtual void
+  notifyInstrumentChangedRequested(const std::string &instName) = 0;
   virtual void notifyRestoreDefaultsRequested() = 0;
   virtual void notifySettingsChanged() = 0;
   virtual void anyBatchAutoreductionResumed() = 0;

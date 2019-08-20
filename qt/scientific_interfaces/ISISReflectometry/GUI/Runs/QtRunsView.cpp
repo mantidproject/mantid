@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMenu>
 #include <QMessageBox>
 
@@ -30,8 +29,7 @@ using namespace MantidQt::Icons;
 QtRunsView::QtRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
       m_searchNotifyee(nullptr), m_searchModel(),
-      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
-      m_timer() {
+      m_tableView(makeRunsTableView()), m_timer() {
   initLayout();
   m_ui.tableSearchResults->setModel(&m_searchModel);
 }
@@ -255,15 +253,6 @@ This slot notifies the presenter that the "transfer" button has been pressed
 void QtRunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
 
 /**
-This slot shows the slit calculator
-*/
-void QtRunsView::onShowSlitCalculatorRequested() {
-  m_calculator->setCurrentInstrumentName(
-      m_ui.comboSearchInstrument->currentText().toStdString());
-  m_calculator->show();
-}
-
-/**
 This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
@@ -282,11 +271,9 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  * @param index : The index of the combo box
  */
 void QtRunsView::onInstrumentChanged(int index) {
+  UNUSED_ARG(index);
   m_ui.textSearch->clear();
-  m_calculator->setCurrentInstrumentName(
-      m_ui.comboSearchInstrument->itemText(index).toStdString());
-  m_calculator->processInstrumentHasBeenChanged();
-  m_notifyee->notifyInstrumentChanged();
+  m_notifyee->notifyInstrumentChangedRequested();
 }
 
 /**

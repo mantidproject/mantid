@@ -32,7 +32,7 @@ public:
   MOCK_METHOD0(reductionResumed, void());
   MOCK_METHOD0(autoreductionPaused, void());
   MOCK_METHOD0(autoreductionResumed, void());
-  MOCK_METHOD1(instrumentChanged, void(std::string const &));
+  MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
 };
 } // namespace ISISReflectometry

@@ -67,7 +67,7 @@ public:
   void reductionResumed() override;
   void autoreductionPaused() override;
   void autoreductionResumed() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 
 protected:

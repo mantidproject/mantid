@@ -237,10 +237,10 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   }
 }
 
-void RunsTablePresenter::notifyInstrumentChanged() {
+void RunsTablePresenter::notifyInstrumentChangedRequested() {
   auto const instrumentName = m_view->getInstrumentName();
   if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+    m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
 }
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
@@ -280,7 +280,8 @@ void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
 
 void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
 
-void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsTablePresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   m_view->setInstrumentName(instrumentName);
 }
 

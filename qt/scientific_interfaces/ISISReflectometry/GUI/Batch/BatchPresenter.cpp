@@ -82,9 +82,9 @@ void BatchPresenter::acceptMainPresenter(IMainWindowPresenter *mainPresenter) {
 
 bool BatchPresenter::requestClose() const { return true; }
 
-void BatchPresenter::notifyInstrumentChanged(
+void BatchPresenter::notifyInstrumentChangedRequested(
     const std::string &instrumentName) {
-  instrumentChanged(instrumentName);
+  notifyInstrumentChanged(instrumentName);
 }
 
 void BatchPresenter::notifyRestoreDefaultsRequested() {
@@ -263,11 +263,12 @@ void BatchPresenter::anyBatchAutoreductionPaused() {
   m_runsPresenter->anyBatchAutoreductionPaused();
 }
 
-void BatchPresenter::instrumentChanged(const std::string &instrumentName) {
+void BatchPresenter::notifyInstrumentChanged(
+    const std::string &instrumentName) {
   updateInstrument(instrumentName);
-  m_runsPresenter->instrumentChanged(instrumentName);
-  m_experimentPresenter->instrumentChanged(instrumentName);
-  m_instrumentPresenter->instrumentChanged(instrumentName);
+  m_runsPresenter->notifyInstrumentChanged(instrumentName);
+  m_experimentPresenter->notifyInstrumentChanged(instrumentName);
+  m_instrumentPresenter->notifyInstrumentChanged(instrumentName);
 }
 
 void BatchPresenter::updateInstrument(const std::string &instrumentName) {

@@ -74,7 +74,8 @@ public:
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   int percentComplete() const override;
-  void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void
+  notifyInstrumentChangedRequested(std::string const &instrumentName) override;
   void notifyReductionResumed() override;
   void notifyReductionPaused() override;
   void notifyRowStateChanged() override;
@@ -90,7 +91,7 @@ public:
   void autoreductionCompleted() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
   // RunsViewSubscriber overrides
@@ -98,7 +99,7 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyTransfer() override;
-  void notifyInstrumentChanged() override;
+  void notifyInstrumentChangedRequested() override;
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;

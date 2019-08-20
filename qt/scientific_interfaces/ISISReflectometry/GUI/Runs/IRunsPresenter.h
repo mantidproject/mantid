@@ -28,7 +28,8 @@ public:
   virtual RunsTable const &runsTable() const = 0;
   virtual RunsTable &mutableRunsTable() = 0;
 
-  virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
+  virtual void
+  notifyInstrumentChangedRequested(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyRowStateChanged() = 0;
@@ -44,7 +45,7 @@ public:
   virtual void autoreductionResumed() = 0;
   virtual void anyBatchAutoreductionResumed() = 0;
   virtual void anyBatchAutoreductionPaused() = 0;
-  virtual void instrumentChanged(std::string const &instrumentName) = 0;
+  virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void settingsChanged() = 0;
 
   virtual bool isProcessing() const = 0;

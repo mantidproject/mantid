@@ -87,7 +87,7 @@ void QtRunsTableView::onFilterChanged(QString const &filter) {
 
 void QtRunsTableView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
-  m_notifyee->notifyInstrumentChanged();
+  m_notifyee->notifyInstrumentChangedRequested();
 }
 
 std::string QtRunsTableView::getInstrumentName() const {

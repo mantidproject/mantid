@@ -102,7 +102,7 @@ public:
   void testInstrumentChangedClearsPreviousResults() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
-    presenter.notifyInstrumentChanged();
+    presenter.notifyInstrumentChangedRequested();
     verifyAndClear();
   }
 
@@ -424,8 +424,9 @@ public:
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectSearchInstrument(instrument);
-    EXPECT_CALL(m_mainPresenter, notifyInstrumentChanged(instrument)).Times(1);
-    presenter.notifyInstrumentChanged();
+    EXPECT_CALL(m_mainPresenter, notifyInstrumentChangedRequested(instrument))
+        .Times(1);
+    presenter.notifyInstrumentChangedRequested();
     verifyAndClear();
   }
 

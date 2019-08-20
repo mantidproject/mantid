@@ -38,7 +38,7 @@ public:
   RunsTable const &runsTable() const override;
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
@@ -49,7 +49,7 @@ public:
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
   void notifyFilterChanged(std::string const &filterValue) override;
-  void notifyInstrumentChanged() override;
+  void notifyInstrumentChangedRequested() override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
   void notifyPlotSelectedPressed() override;
