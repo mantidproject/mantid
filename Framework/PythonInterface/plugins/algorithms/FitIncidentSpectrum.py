@@ -125,8 +125,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
             UnitX='Wavelength',
             NSpec=2,
             Distribution=False)
-        mtd['fit'].remove
-        mtd['fit_prime'].remove
         return mtd[self._output_ws]
 
     def fitCubicSplineWithGaussConv(self, x_fit, y_fit, x, sigma=3):
