@@ -14,6 +14,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialogButtonBox
 
 from mantid.api import MatrixWorkspace
+
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
 
@@ -77,7 +78,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     def on_plot_all_clicked(self):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
-        selection.plot_type = selection.Individual if self._ui.plotType.currentText() == 'Individual' else selection.Tiled
+        selection.plot_type = self._ui.plotType.currentIndex()
         self.selection = selection
         self.accept()
 
@@ -154,19 +155,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
     def _on_plot_type_changed(self, new_index):
-        new_text = self._ui.plotType.currentText()
         if self._overplot:
             self._ui.plotType.setCurrentIndex(0)
             return
         if self.selection:
-            self.selection.plot_type = self.selection.Individual if new_text == 'Individual' else self.selection.Tiled
+            self.selection.plot_type = new_index
 
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
         if wksp_indices:
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
-            selection.plot_type = selection.Individual if self._ui.plotType.currentText() == 'Individual' else selection.Tiled
+            selection.plot_type = self._ui.plotType.currentIndex()
+            selection = None
         else:
             selection = None
         self.selection = selection
@@ -176,7 +177,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
-            selection.plot_type = selection.Individual if self._ui.plotType.currentText() == 'Individual' else selection.Tiled
+            selection.plot_type = self._ui.plotType.currentIndex()
         else:
             selection = None
         self.selection = selection

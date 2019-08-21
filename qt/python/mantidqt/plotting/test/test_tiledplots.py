@@ -52,7 +52,7 @@ def set_figure_as_current_figure(initial_fig):
     _pylab_helpers.Gcf._activeQue.append(fig_manager)
 
 
-class FunctionsTest(TestCase):
+class TiledPlotsTest(TestCase):
 
     _test_ws = None
     _test_ws_2 = None
