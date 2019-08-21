@@ -21,17 +21,8 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
                                    CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
+from sans.gui_logic.plotting import get_plotting_module
 from sans.state.data import StateData
-
-from qtpy import PYQT4
-if PYQT4:
-    try:
-        from mantidplot import graph, plotSpectrum
-        IN_MANTIDPLOT = True
-    except ImportError:
-        IN_MANTIDPLOT = False
-else:
-    from mantidqt.plotting.functions import plot
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -172,10 +163,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         if not event_slice_optimisation and plot_results:
             # Plot results is intended to show the result of each workspace/slice as it is reduced
             # as we reduce in bulk, it is not possible to plot live results while in event_slice mode
-            if PYQT4:
-                plot_workspace(reduction_package, output_graph)
-            elif output_graph:
-                plot_workspace_matplotlib(reduction_package, output_graph)
+            plot_workspace(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
@@ -243,12 +231,29 @@ def load_workspaces_from_states(state):
 # ----------------------------------------------------------------------------------------------------------------------
 def plot_workspace(reduction_package, output_graph):
     """
+    Plotting continuous output. Decides on the backend to use based on availability
+
+    :param reduction_package: An object containing the reduced workspaces
+    :param output_graph: Name to the plot window
+    """
+    plotting_module = get_plotting_module()
+    if hasattr(plotting_module, 'graph'):
+        plot_workspace_mantidplot(reduction_package, output_graph, plotting_module)
+    else:
+        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+
+
+def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
+    """
     Plotting continuous output when on MantidPlot
     This function should be deleted if and when MantidPlot is no longer a part of Mantid
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: Name to the plot window
+    :param plotting_module: The MantidPlot plotting module
     """
+    plotSpectrum, graph = plotting_module.plotSpectrum, plotting_module.graph
+
     if reduction_package.reduction_mode == ISISReductionMode.All:
         graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
                                     window=graph(output_graph), clearWindow=True)
@@ -266,13 +271,16 @@ def plot_workspace(reduction_package, output_graph):
         graph_handle.activeLayer().logLogAxes()
 
 
-def plot_workspace_matplotlib(reduction_package, output_graph):
+def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
     """
     Continuous plotting using a matplotlib backend.
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: A matplotlib fig
+    :param plotting_module: The mantidqt plotting module
     """
+    plot = plotting_module.plot
+
     plot_kwargs = {"scalex": True,
                    "scaley": True}
     if reduction_package.reduction_mode == ISISReductionMode.All:
