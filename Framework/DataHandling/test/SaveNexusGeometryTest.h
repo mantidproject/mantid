@@ -46,7 +46,8 @@ public:
         create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
 
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().add("testWS", inputWS));
+        Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
+                                                                  inputWS));
 
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
@@ -61,12 +62,15 @@ public:
         alg.setPropertyValue("H5Path", "algorithm_test_data"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
   void
   test_execution_succesful_when_no_h5_root_provided_and_default_root_is_used() {
 
-    ScopedFileHandle fileResource("algorithm_invalid_workspace_file.hdf5");
+    ScopedFileHandle fileResource("algorithm_no_h5_root_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
     Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
@@ -85,6 +89,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
   void test_invalid_workspace_throws() {
@@ -95,7 +102,7 @@ public:
     */
 
     ScopedFileHandle fileResource(
-        "algorithm_no_h5_path_provided_test_file.hdf5");
+        "algorithm_no_instrument_in_workspace_provided_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
 
@@ -120,6 +127,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
   void test_valid_fileName_with_invalid_extension_propagates_throw() {
@@ -150,6 +160,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS(alg.execute(), std::invalid_argument &);
     TS_ASSERT(!alg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 };
 
