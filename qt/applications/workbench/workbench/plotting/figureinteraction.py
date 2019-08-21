@@ -210,7 +210,6 @@ class FigureInteraction(object):
         if not event.inaxes:
             # the current context menus are ony relevant for axes
             return
-        pass
 
         fig_type = figure_type(self.canvas.figure)
         if fig_type == FigureType.Empty or fig_type == FigureType.Image:

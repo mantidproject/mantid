@@ -17,8 +17,6 @@ from mantidqt.utils.qt import load_ui
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
-from mantid.api import AnalysisDataService as ads
-
 SYMLOG_LIN_THRESHOLD = 0.01
 
 
