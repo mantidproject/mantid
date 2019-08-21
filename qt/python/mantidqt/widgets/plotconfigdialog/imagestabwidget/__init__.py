@@ -25,8 +25,7 @@ class ImageProperties(dict):
         props = dict()
         props['label'] = image.get_label()
         props['colormap'] = image.get_cmap().name
-        props['vmin'] = image.get_array().min()
-        props['vmax'] = image.get_array().max()
+        props['vmin'], props['vmax'] = image.get_clim()
         if isinstance(image, QuadMesh):
             props['interpolation'] = None
         else:
