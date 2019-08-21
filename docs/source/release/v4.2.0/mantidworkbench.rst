@@ -19,6 +19,7 @@ Improvements
 
 Bugfixes
 ########
+- Pressing the tab key while in the axis quick editor now selects each input field in the correct order.
 - Clicking Cancel after attempting to save a project upon closing now keeps Workbench open instead of closing without saving.
 - Dialog windows no longer contain a useless ? button in their title bar.
 - Instrument view now keeps the saved rendering option when loading projects. 
