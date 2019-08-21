@@ -12,7 +12,8 @@ from mantid.plots import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.plugins.editor import DEFAULT_CONTENT
-from workbench.plotting.plotscriptgenerator.axes import generate_add_subplot_command, generate_axis_limit_commands
+from workbench.plotting.plotscriptgenerator.axes import (
+    generate_add_subplot_command, generate_axis_limit_commands, generate_axis_label_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_figure_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
@@ -49,10 +50,17 @@ def generate_script(fig, exclude_headers=False):
                                        generate_add_subplot_command(ax)))
         for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
             plot_commands.append("{}.{}".format(AXES_VARIABLE, generate_plot_command(artist)))
+
+        # Get ax.set_x/ylim() commands
         axis_limit_cmds = generate_axis_limit_commands(ax)
         plot_commands += ["{}.{}".format(AXES_VARIABLE, cmd) for cmd in axis_limit_cmds]
+        # Get ax.set_x/ylabel() commands
+        axis_label_cmds = generate_axis_label_commands(ax)
+        plot_commands += ["{}.{}".format(AXES_VARIABLE, cmd) for cmd in axis_label_cmds]
+
         if ax.legend_:
             plot_commands.append("{}.legend().draggable()".format(AXES_VARIABLE))
+
     if not plot_commands:
         return
     cmds = [] if exclude_headers else [DEFAULT_CONTENT]

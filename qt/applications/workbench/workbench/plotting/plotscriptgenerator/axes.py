@@ -12,8 +12,10 @@ from mantid.plots.utility import get_axes_index
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, convert_value_to_arg_string
 
 BASE_CREATE_AX_COMMAND = "add_subplot({})"
+BASE_AXIS_LABEL_COMMAND = "set_{}label('{}')"
+BASE_AXIS_SCALE_COMMAND = "set_{}lim({})"
 ADD_SUBPLOT_KWARGS = [  # kwargs passed to the "add_subplot" command
-    'frame_on', 'label', 'title', 'visible', 'xlabel', 'xscale', 'ylabel', 'yscale'
+    'frame_on', 'label', 'title', 'visible', 'xscale', 'yscale'
 ]
 
 
@@ -43,5 +45,14 @@ def generate_axis_limit_commands(ax):
     commands = []
     for axis in ['x', 'y']:
         lims = getattr(ax, "get_{}lim".format(axis))()
-        commands.append("set_{}lim({})".format(axis, convert_value_to_arg_string(lims)))
+        commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, convert_value_to_arg_string(lims)))
+    return commands
+
+
+def generate_axis_label_commands(ax):
+    commands = []
+    for axis in ['x', 'y']:
+        label = getattr(ax, 'get_{}label'.format(axis))()
+        if label:
+            commands.append(BASE_AXIS_LABEL_COMMAND.format(axis, label))
     return commands
