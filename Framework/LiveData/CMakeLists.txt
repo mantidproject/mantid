@@ -80,6 +80,7 @@ if(LIBRDKAFKA_FOUND)
       src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h
       src/Kafka/private/Schema/is84_isis_events_generated.h
       src/Kafka/private/Schema/y2gw_run_info_generated.h
+      src/Kafka/private/Schema/tdct_timestamps_generated.h
       src/Kafka/private/Schema/hs00_event_histogram_generated.h)
   set(TEST_FILES
       ${TEST_FILES}

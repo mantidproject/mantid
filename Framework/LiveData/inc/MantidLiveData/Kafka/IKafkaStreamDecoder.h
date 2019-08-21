@@ -59,7 +59,8 @@ public:
                       const std::string &streamTopic,
                       const std::string &runInfoTopic,
                       const std::string &spDetTopic,
-                      const std::string &sampleEnvTopic);
+                      const std::string &sampleEnvTopic,
+                      const std::string &chopperTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
@@ -124,6 +125,8 @@ protected:
   /// Populate cache workspaces with data from messages
   virtual void sampleDataFromMessage(const std::string &buffer) = 0;
 
+  void writeChopperInfoToWorkspaceLogs(Mantid::API::Run &mutableRun);
+
   /// For LoadLiveData to extract the cached data
   virtual API::Workspace_sptr extractDataImpl() = 0;
 
@@ -134,6 +137,7 @@ protected:
   const std::string m_runInfoTopic;
   const std::string m_spDetTopic;
   const std::string m_sampleEnvTopic;
+  const std::string m_chopperTopic;
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Subscriber for the data stream
@@ -147,6 +151,8 @@ protected:
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
+  /// Subscriber for the chopper timestamp stream
+  std::unique_ptr<IKafkaStreamSubscriber> m_chopperStream;
   /// Run number
   std::string m_runId;
 
