@@ -51,7 +51,7 @@ public:
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
 
-    alg.setChild(true);
+    alg.setChild(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
 
@@ -77,7 +77,7 @@ public:
                                                                   inputWS));
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
-    alg.setChild(true);
+    alg.setChild(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
 
@@ -111,7 +111,7 @@ public:
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
 
-    alg.setChild(true);
+    alg.setChild(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
@@ -141,7 +141,7 @@ public:
     SaveNexusGeometry alg;
     // Don't put output in ADS by default
 
-    alg.setChild(true);
+    alg.setChild(false);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
