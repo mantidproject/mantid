@@ -326,8 +326,8 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
 
   auto nexusChildren = nexusStructure[CHILDREN];
 
-  auto entry = nexusChildren[0]; // expect children to be array type
-  if (entry.isNull() || !validateNXAttribute(entry[ATTRIBUTES], NX_ENTRY))
+  auto entry = get(nexusChildren, NX_ENTRY); // expect children to be array type
+  if (entry.isNull())
     throw std::invalid_argument(
         "No nexus \"entry\" child found in nexus_structure json.");
 
@@ -354,10 +354,13 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   ;
   m_jsonDetectorBanks = moveToUniquePtrVec(jsonDetectorBanks);
 
-  auto jsonMonitors = getAllMonitors(instrument);
+  auto instrMonitors = moveToUniquePtrVec(getAllMonitors(instrument));
+  auto entryMonitors = moveToUniquePtrVec(getAllMonitors(entry));
   auto jsonChoppers = getAllChoppers(instrument);
 
-  m_jsonMonitors = moveToUniquePtrVec(jsonMonitors);
+  m_jsonMonitors = std::move(instrMonitors);
+  std::move(entryMonitors.begin(), entryMonitors.end(),
+            std::back_inserter(m_jsonMonitors));
   m_jsonChoppers = moveToUniquePtrVec(jsonChoppers);
 
   m_root = std::make_unique<Json::Value>(std::move(root));
@@ -500,20 +503,18 @@ void JSONGeometryParser::extractMonitorContent() {
 
   for (const auto &monitor : m_jsonMonitors) {
     const auto &children = (*monitor)[CHILDREN];
-
-    if (children.empty()) {
-      g_log.notice() << "Full monitor definition missing in json provided."
-                     << std::endl;
-      continue;
-    }
+    auto name = (*monitor)[NAME].asString();
+    if (children.empty())
+      throw std::invalid_argument("Full monitor definition for " + name +
+                                  " missing in json provided.");
 
     Monitor mon;
-    mon.componentName = (*monitor)[NAME].asString();
+    mon.componentName = name;
     for (const auto &child : children) {
       const auto &val = child[VALUES];
       if (child[NAME] == NAME)
         mon.name = val.asString();
-      else if (child[NAME] == DETECTOR_ID)
+      else if (child[NAME] == DETECTOR_ID || child[NAME] == "detector_number")
         mon.detectorID = val.asInt();
       else if (child[NAME] == "events")
         extractMonitorEventStream(child, mon);
@@ -530,7 +531,7 @@ void JSONGeometryParser::extractMonitorContent() {
 
     if (validateShapeInformation(mon.isOffGeometry, mon.vertices, mon.cylinders,
                                  mon.faces, mon.windingOrder))
-      g_log.notice() << "No valid shape information provided for mintor "
+      g_log.notice() << "No valid shape information provided for monitor "
                      << mon.componentName << std::endl;
 
     m_monitors.emplace_back(std::move(mon));

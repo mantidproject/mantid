@@ -12,6 +12,7 @@
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
+#include <boost/make_shared.hpp>
 #include <json/json.h>
 
 namespace {
@@ -29,6 +30,9 @@ IObject_const_sptr createShape(const JSONGeometryParser &parser,
 }
 
 IObject_const_sptr createMonitorShape(const Monitor &monitor) {
+  if (monitor.vertices.empty())
+    return nullptr;
+
   if (monitor.isOffGeometry)
     return NexusShapeFactory::createFromOFFMesh(
         monitor.faces, monitor.windingOrder, monitor.vertices);
@@ -85,7 +89,10 @@ void addMonitors(const JSONGeometryParser &parser, InstrumentBuilder &builder) {
   const auto &monitors = parser.monitors();
   for (const auto &monitor : monitors) {
     auto shape = createMonitorShape(monitor);
-    builder.addMonitor(std::to_string(monitor.detectorID), monitor.detectorID,
+    auto name = monitor.componentName.empty()
+                    ? std::to_string(monitor.detectorID)
+                    : monitor.componentName;
+    builder.addMonitor(name, monitor.detectorID,
                        applyRotation(monitor.translation, monitor.orientation),
                        shape);
   }

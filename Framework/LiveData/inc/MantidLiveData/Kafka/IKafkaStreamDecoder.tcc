@@ -111,8 +111,10 @@ void IKafkaStreamDecoder::loadInstrument(const std::string &name,
       workspace->setInstrument(builder.buildGeometry());
     }
   } catch (std::exception &exc) {
-    logger.warning() << "Error loading instrument '" << name
-                     << "': " << exc.what() << "\n";
+    logger.warning() << "Error loading instrument '" << name << "': \""
+                     << exc.what()
+                     << "\". The streamed data will have no associated "
+                        "instrument geometry. \n";
   }
 }
 } // namespace LiveData
