@@ -55,14 +55,6 @@ class FigureInteractionTest(unittest.TestCase):
         cls.ws.delete()
         cls.ws1.delete()
 
-    def setUp(self):
-        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, MantidAxes
-
-    def tearDown(self):
-        plt.close('all')
-        del self.fig
-        del self.ax
-
     def test_construction_registers_handler_for_button_press_event(self):
         fig_manager = MagicMock()
         fig_manager.canvas = MagicMock()
@@ -220,8 +212,22 @@ class FigureInteractionTest(unittest.TestCase):
         assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
         self.assertEqual("Counts", ax.get_ylabel())
 
-    def _test_context_menu_change_axis_scale_is_axis_aware(self):
+    def test_context_menu_change_axis_scale_is_axis_aware(self):
+        fig = plot([self.ws, self.ws1], spectrum_nums=[1, 1], tiled=True)
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        scale_types = ("log", "log")
 
+        ax = fig.axes[0]
+        ax1 = fig.axes[1]
+        current_scale_types = (ax.get_xscale(), ax.get_yscale())
+        current_scale_types1 = (ax1.get_xscale(), ax1.get_yscale())
+        self.assertEqual(current_scale_types, current_scale_types1)
+
+        fig_interactor._quick_change_axes(scale_types, ax)
+        current_scale_types2 = (ax.get_xscale(), ax.get_yscale())
+        self.assertNotEqual(current_scale_types2, current_scale_types1)
 
 
 if __name__ == '__main__':
