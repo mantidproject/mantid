@@ -11,7 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialogButtonBox
+from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
 from mantid.api import MatrixWorkspace
 
@@ -73,20 +73,33 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._setup_connections()
 
     def on_ok_clicked(self):
-        self.accept()
+        if self._check_number_of_plots(self.selection):
+            self.accept()
 
     def on_plot_all_clicked(self):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
         selection.plot_type = self._ui.plotType.currentIndex()
-        self.selection = selection
-        self.accept()
+        if self._check_number_of_plots(selection):
+            self.selection = selection
+            self.accept()
 
     def on_colorfill_clicked(self):
         self.selection = 'colorfill'
         self.accept()
 
     # ------------------- Private -------------------------
+
+    def _check_number_of_plots(self, selection):
+        index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
+        if selection.plot_type == SpectraSelection.Tiled and len(selection.workspaces) * index_length > 25:
+            response = QMessageBox.warning(self, 'Mantid Workbench',
+                                           'You are attempting to create a tiled plot with more than 25 subplots,'
+                                           'this is not recommended as it may lead to performance issues.'
+                                           ' Do you wish to continue?', QMessageBox.Ok | QMessageBox.Cancel)
+            return response == QMessageBox.Ok
+
+        return True
 
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
@@ -167,7 +180,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
             selection.plot_type = self._ui.plotType.currentIndex()
-            selection = None
         else:
             selection = None
         self.selection = selection

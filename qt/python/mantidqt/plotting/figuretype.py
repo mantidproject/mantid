@@ -69,4 +69,4 @@ def figure_type(fig, ax=None):
         elif ax:
             return axes_type(ax)
         else:
-            return axes_type(fig.gca())
+            return axes_type(fig.axes[0])

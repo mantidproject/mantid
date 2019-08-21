@@ -222,14 +222,21 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             for ax in axes]
 
     if tiled:
-        for ws_index, ax in zip([(ws, index) for ws in workspaces for index in nums], axes):
-            _do_single_plot(ax, [ws_index[0]], errors, False, [ws_index[1]], kw, plot_kwargs)
+        ws_index = [(ws, index) for ws in workspaces for index in nums]
+        for index, ax in enumerate(axes):
+            if index < len(ws_index):
+                _do_single_plot(ax, [ws_index[index][0]], errors, False, [ws_index[index][1]], kw, plot_kwargs)
+            else:
+                ax.axis('off')
     else:
         ax = overplot if isinstance(overplot, MantidAxes) else axes[0]
+        ax.axis('on')
         _do_single_plot(ax, workspaces, errors, not overplot, nums, kw, plot_kwargs)
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    # This updates the toolbar so the home button now takes you back to this point
+    fig.canvas.manager.toolbar.update()
     fig.canvas.draw()
     fig.show()
     return fig
