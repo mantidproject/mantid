@@ -8,8 +8,10 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from matplotlib import rcParams
 from matplotlib.container import ErrorbarContainer
 
+from mantid.kernel import config
 from mantid.plots.helperfunctions import errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, get_ax_from_curve
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
@@ -19,8 +21,32 @@ BASE_ERRORBAR_COMMAND = "errorbar({})"
 PLOT_KWARGS = [
     'alpha', 'color', 'drawstyle', 'fillstyle', 'label', 'linestyle', 'linewidth', 'marker',
     'markeredgecolor', 'markeredgewidth', 'markerfacecolor', 'markerfacecoloralt', 'markersize',
-    'markevery', 'solid_capstyle', 'solid_joinstyle', 'visible', 'zorder'
-]
+    'markevery', 'solid_capstyle', 'solid_joinstyle', 'visible', 'zorder']
+
+mpl_default_kwargs = {
+    'alpha': None,
+    'barsabove': False,
+    'capsize': rcParams['errorbar.capsize'],
+    'capthick': rcParams['lines.linewidth'],
+    'color': rcParams['lines.color'],
+    'distribution': config['graph1d.autodistribution'] != 'On',
+    'drawstyle': 'default',
+    'ecolor': rcParams['lines.color'],
+    'elinewidth': rcParams['lines.linewidth'],
+    'errorevery': 1,
+    'fillstyle': rcParams['markers.fillstyle'],
+    'label': '',
+    'linestyle': rcParams['lines.linestyle'],
+    'linewidth': rcParams['lines.linewidth'],
+    'marker': rcParams['lines.marker'],
+    'markeredgewidth': rcParams['lines.markeredgewidth'],
+    'markerfacecoloralt': 'none',
+    'markersize': rcParams['lines.markersize'],
+    'markevery': None,
+    'solid_capstyle': rcParams['lines.solid_capstyle'],
+    'solid_joinstyle': rcParams['lines.solid_joinstyle'],
+    'visible': True
+}
 
 
 def generate_plot_command(artist):
@@ -53,6 +79,23 @@ def get_plot_command_kwargs(artist):
     else:
         kwargs = _get_plot_command_kwargs_from_line2d(artist)
     kwargs.update(_get_mantid_specific_plot_kwargs(artist))
+    return _remove_kwargs_if_default(kwargs)
+
+
+def _remove_kwargs_if_default(kwargs):
+    """Remove kwargs from the given dict if they're the default values"""
+    for kwarg, default_value in mpl_default_kwargs.items():
+        try:
+            if kwargs[kwarg] == default_value:
+                kwargs.pop(kwarg)
+        except KeyError:
+            pass
+    for color in ['markeredgecolor', 'markerfacecolor', 'ecolor']:
+        try:
+            if kwargs[color] == kwargs['color']:
+                kwargs.pop(color)
+        except KeyError:
+            pass
     return kwargs
 
 
@@ -91,6 +134,5 @@ def _get_mantid_specific_plot_kwargs(artist):
         return dict()
     return {
         'specNum': ax.get_artists_workspace_and_spec_num(artist)[1],
-        'distribution': not ax.get_artist_normalization_state(artist),
-        'update_axes_labels': False
+        'distribution': not ax.get_artist_normalization_state(artist)
     }

@@ -37,22 +37,19 @@ LINE2D_KWARGS = {
     'markerfacecoloralt': 'k',
     'markersize': 1.3,
     'markevery': 2,
-    'solid_capstyle': 'butt',
-    'solid_joinstyle': 'round',
     'visible': False,
     'zorder': 1.4,
 }
 ERRORBAR_ONLY_KWARGS = {
     'ecolor': '#ff0000',
-    'elinewidth': 1.5,
-    'capsize': 1.6,
-    'capthick': 1.7,
-    'barsabove': True,
-    'errorevery': 1
+    'elinewidth': 1.6,
+    'capsize': 1.7,
+    'capthick': 1.8,
+    'barsabove': True
 }
 ERRORBAR_KWARGS = copy(LINE2D_KWARGS)
 ERRORBAR_KWARGS.update(ERRORBAR_ONLY_KWARGS)
-MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': False, 'update_axes_labels': False}
+MANTID_ONLY_KWARGS = {'specNum': 1, 'distribution': True}
 
 ERRORBARS_HIDDEN_FUNC = 'workbench.plotting.plotscriptgenerator.lines.errorbars_hidden'
 GET_MANTID_PLOT_KWARGS = 'workbench.plotting.plotscriptgenerator.lines._get_mantid_specific_plot_kwargs'
@@ -77,10 +74,11 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
     def tearDown(self):
         plt.close()
 
-    def test_get_plot_command_kwargs_from_line2d_returns_correct_dict(self):
+    def test_get_plot_command_kwargs_from_line2d_returns_dict_with_correct_properties(self):
         line = self.ax.plot(self.test_ws, specNum=1, **LINE2D_KWARGS)[0]
-        ret = _get_plot_command_kwargs_from_line2d(line)
-        self.assertEqual(LINE2D_KWARGS, ret)
+        plot_commands_dict = _get_plot_command_kwargs_from_line2d(line)
+        for key, value in LINE2D_KWARGS.items():
+            self.assertEqual(value, plot_commands_dict[key])
 
     def test_generate_plot_command_returns_correct_string_for_line2d(self):
         kwargs = copy(LINE2D_KWARGS)
@@ -91,12 +89,13 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
                                                   convert_args_to_string(None, kwargs)))
         self.assertEqual(expected_command, output)
 
-    def test_get_errorbar_specific_plot_kwargs_returns_correct_dict(self):
-        kwargs = copy(ERRORBAR_KWARGS)
-        kwargs.pop('markeredgewidth')
-        err_cont = self.ax.errorbar(self.test_ws, specNum=1, **kwargs)
-        output = _get_errorbar_specific_plot_kwargs(err_cont)
-        self.assertEqual(ERRORBAR_ONLY_KWARGS, output)
+    def test_get_errorbar_specific_plot_kwargs_returns_dict_with_correct_properties(self):
+        errorbar_kwargs = copy(ERRORBAR_KWARGS)
+        errorbar_kwargs.pop('markeredgewidth')
+        err_cont = self.ax.errorbar(self.test_ws, specNum=1, **errorbar_kwargs)
+        plot_commands_dict = _get_errorbar_specific_plot_kwargs(err_cont)
+        for key, value in ERRORBAR_ONLY_KWARGS.items():
+            self.assertEqual(value, plot_commands_dict[key])
 
     def test_generate_plot_command_returns_correct_string_for_errorbar_container(self):
         kwargs = copy(ERRORBAR_KWARGS)
