@@ -11,6 +11,9 @@ Reflectometry Changes
 
 ISIS Reflectometry Interface
 ----------------------------
+New
+###
+- Batch Save/Load: full saving the runs table and all of the related settings for a batch is now possible.
 
 Improved
 ########
@@ -24,6 +27,7 @@ New
 ###
 
 - :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v3>` has been rewritten and updated to version 3. In the new version the polarization correction properties have been removed from the algorithm input and are now taken from the parameter file. A checkbox has been added to indicate whether the corrections should be applied.
+
 
 Bug fixes
 #########

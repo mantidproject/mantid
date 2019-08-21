@@ -59,15 +59,16 @@ Initialise the Interface
 */
 void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
-  // Until this is implemented we should hide this action
-  m_ui.loadBatch->setEnabled(false);
-  m_ui.loadBatch->setVisible(false);
 
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
           SLOT(onTabCloseRequested(int)));
   connect(m_ui.newBatch, SIGNAL(triggered(bool)), this,
           SLOT(onNewBatchRequested(bool)));
+  connect(m_ui.loadBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onLoadBatchRequested(bool)));
+  connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onSaveBatchRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -112,6 +113,14 @@ void QtMainWindowView::onTabCloseRequested(int tabIndex) {
 
 void QtMainWindowView::onNewBatchRequested(bool) {
   m_notifyee->notifyNewBatchRequested();
+}
+
+void QtMainWindowView::onLoadBatchRequested(bool) {
+  m_notifyee->notifyLoadBatchRequested(m_ui.mainTabs->currentIndex());
+}
+
+void QtMainWindowView::onSaveBatchRequested(bool) {
+  m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
 void QtMainWindowView::subscribe(MainWindowSubscriber *notifyee) {
@@ -169,6 +178,16 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
     return true;
 
   return false;
+}
+
+void QtMainWindowView::disableSaveAndLoadBatch() {
+  m_ui.saveBatch->setEnabled(false);
+  m_ui.loadBatch->setEnabled(false);
+}
+
+void QtMainWindowView::enableSaveAndLoadBatch() {
+  m_ui.saveBatch->setEnabled(true);
+  m_ui.loadBatch->setEnabled(true);
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

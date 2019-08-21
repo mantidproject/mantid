@@ -180,6 +180,10 @@ private:
   void updateViewWhenMonitorStarting();
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
