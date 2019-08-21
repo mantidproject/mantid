@@ -15,7 +15,7 @@ from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import generate_add_subplot_command, generate_axis_limit_commands
 from workbench.plotting.plotscriptgenerator.figure import generate_figure_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
-from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands
+from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "ax"
@@ -47,7 +47,7 @@ def generate_script(fig, exclude_headers=False):
         plot_commands.append("{} = {}.{}"
                              "".format(AXES_VARIABLE, FIG_VARIABLE,
                                        generate_add_subplot_command(ax)))
-        for artist in ax.get_tracked_artists():
+        for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
             plot_commands.append("{}.{}".format(AXES_VARIABLE, generate_plot_command(artist)))
         axis_limit_cmds = generate_axis_limit_commands(ax)
         plot_commands += ["{}.{}".format(AXES_VARIABLE, cmd) for cmd in axis_limit_cmds]

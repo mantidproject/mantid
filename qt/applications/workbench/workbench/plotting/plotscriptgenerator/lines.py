@@ -45,7 +45,8 @@ mpl_default_kwargs = {
     'markevery': None,
     'solid_capstyle': rcParams['lines.solid_capstyle'],
     'solid_joinstyle': rcParams['lines.solid_joinstyle'],
-    'visible': True
+    'visible': True,
+    'zorder': 2
 }
 
 

@@ -10,6 +10,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 import re
 from numpy import ndarray
+from matplotlib.container import ErrorbarContainer
 
 from mantid.py3compat import is_text_string
 
@@ -66,3 +67,14 @@ def generate_workspace_retrieval_commands(fig):
 def clean_variable_name(name):
     """Converts a string into a valid Python variable name"""
     return re.sub('\W|^(?=\d)', '_', name)
+
+
+def sorted_lines_in(ax, artists):
+    lines = ax.lines
+    err_containers = [cont for cont in ax.containers
+                      if isinstance(cont, ErrorbarContainer)]
+    sorted_lines = []
+    for line in lines + err_containers:
+        if line in artists:
+            sorted_lines.append(line)
+    return sorted_lines

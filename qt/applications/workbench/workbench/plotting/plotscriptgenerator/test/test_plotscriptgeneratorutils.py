@@ -16,7 +16,8 @@ from mantid.py3compat.mock import patch, Mock
 from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string,
                                                           get_plotted_workspaces_names,
                                                           clean_variable_name,
-                                                          generate_workspace_retrieval_commands)
+                                                          generate_workspace_retrieval_commands,
+                                                          sorted_line_artists)
 
 
 class PlotScriptGeneratorUtilsTest(unittest.TestCase):
