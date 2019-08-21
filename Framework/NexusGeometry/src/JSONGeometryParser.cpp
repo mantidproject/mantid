@@ -354,13 +354,13 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   ;
   m_jsonDetectorBanks = moveToUniquePtrVec(jsonDetectorBanks);
 
-  auto instrMonitors = moveToUniquePtrVec(getAllMonitors(instrument));
-  auto entryMonitors = moveToUniquePtrVec(getAllMonitors(entry));
+  auto instrMonitors = getAllMonitors(instrument);
+  auto entryMonitors = getAllMonitors(entry);
+  instrMonitors.insert(instrMonitors.end(),
+                       std::make_move_iterator(entryMonitors.begin()),
+                       std::make_move_iterator(entryMonitors.end()));
+  m_jsonMonitors = moveToUniquePtrVec(instrMonitors);
   auto jsonChoppers = getAllChoppers(instrument);
-
-  m_jsonMonitors = std::move(instrMonitors);
-  std::move(entryMonitors.begin(), entryMonitors.end(),
-            std::back_inserter(m_jsonMonitors));
   m_jsonChoppers = moveToUniquePtrVec(jsonChoppers);
 
   m_root = std::make_unique<Json::Value>(std::move(root));
