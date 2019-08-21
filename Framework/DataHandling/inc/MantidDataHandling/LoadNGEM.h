@@ -49,17 +49,17 @@ struct CoincidenceEvent {
   uint64_t timeDiffX : 6; // Time lag from first to last detection on X (5ns)
   uint64_t contin : 8;    // 0x4F Continuation Code
   uint64_t lastY : 7;     // Y position of pixel detected last
-  uint64_t lastX : 7;     // X position of pixel detected last
   uint64_t firstY : 7;    // Y position of pixel detected first
+  uint64_t lastX : 7;     // X position of pixel detected last
   uint64_t firstX : 7;    // X position of pixel detected first
   uint64_t timeOfFlight : 28; // Difference between T0 and detection (1ns)
   uint64_t id : 8;            // 0x47 Event ID.
 
-  int avgX() const { return (firstX + lastX) / 2; }
-  int avgY() const { return (firstY + lastY) / 2; }
+  uint64_t avgX() const { return (firstX + lastX) / 2; }
+  uint64_t avgY() const { return (firstY + lastY) / 2; }
   static const int COINCIDENCE_ID = 0x47;
   bool check() { return id == COINCIDENCE_ID && contin == CONTIN_ID_VALUE; }
-  int getPixel() const {
+  uint64_t getPixel() const {
     return avgX() + (avgY() << 7); // Increase Y significance by 7 bits to
                                    // account for 128x128 grid.
   }

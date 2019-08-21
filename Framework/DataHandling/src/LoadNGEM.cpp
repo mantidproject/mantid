@@ -140,7 +140,7 @@ void LoadNGEM::exec() {
 
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCount;
-      int pixel = event.coincidence.getPixel();
+      uint64_t pixel = event.coincidence.getPixel();
       int tof =
           event.coincidence.timeOfFlight / 1000; // Convert to microseconds (us)
 
