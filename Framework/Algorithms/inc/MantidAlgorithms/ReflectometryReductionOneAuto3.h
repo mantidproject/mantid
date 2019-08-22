@@ -91,10 +91,10 @@ private:
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr
   rebinAndScale(Mantid::API::MatrixWorkspace_sptr inputWS,
-                RebinParams const &params);
+                const RebinParams &params);
   /// Crop a workspace in Q
   MatrixWorkspace_sptr cropQ(MatrixWorkspace_sptr inputWS,
-                             RebinParams const &params);
+                             const RebinParams &params);
   /// Populate algorithmic correction properties
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,
@@ -102,14 +102,14 @@ private:
   /// Get a polarization efficiencies workspace.
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
   getPolarizationEfficiencies();
-  void applyPolarizationCorrection(std::string const &outputIvsLam);
+  void applyPolarizationCorrection(const std::string &outputIvsLam);
   API::MatrixWorkspace_sptr getFloodWorkspace();
-  void applyFloodCorrection(API::MatrixWorkspace_sptr const &flood,
+  void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood,
                             const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue, bool &isDefault);
-  void setOutputWorkspaces(WorkspaceNames const &outputGroupNames,
+  void setOutputWorkspaces(const WorkspaceNames &outputGroupNames,
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
                            std::vector<std::string> &IvsQGroup);
