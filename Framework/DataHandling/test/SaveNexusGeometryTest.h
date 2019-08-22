@@ -10,17 +10,18 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <Poco/Glob.h>
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::DataHandling::SaveNexusGeometry;
-using MatrixWorkspace_sptr = boost::shared_ptr<Mantid::API::MatrixWorkspace>;
-using Workspace_sptr = boost::shared_ptr<Mantid::API::Workspace>;
 
 class SaveNexusGeometryTest : public CxxTest::TestSuite {
 public:
@@ -42,17 +43,14 @@ public:
     ScopedFileHandle fileResource("algorithm_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
-    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
-        create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
+    Mantid::API::IEventWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(1, 5);
 
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
                                                                   inputWS));
-
     SaveNexusGeometry alg;
-    // Don't put output in ADS by default
 
-    alg.setChild(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
 
@@ -73,15 +71,14 @@ public:
     ScopedFileHandle fileResource("algorithm_no_h5_root_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
-    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
-        create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
+    Mantid::API::IEventWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(1, 5);
 
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",
                                                                   inputWS));
     SaveNexusGeometry alg;
-    // Don't put output in ADS by default
-    alg.setChild(false);
+
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized());
 
@@ -142,8 +139,8 @@ public:
         "algorithm_invalid_extension_provided_test_file.txt");
     auto destinationFile = fileResource.fullPath();
     // Create test workspace
-    Mantid::API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::
-        create2DDetectorScanWorkspaceWithFullInstrument(1, 5, 1);
+    Mantid::API::IEventWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(5, 5);
 
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS",

@@ -65,6 +65,8 @@ const std::string SaveNexusGeometry::summary() const {
  */
 void SaveNexusGeometry::init() {
 
+  // TODO resolve linkererror for experimentinfo, replace MatrixWorkspace with
+  // base class ExperimentInfo
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace containing the Instrument.");
