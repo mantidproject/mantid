@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
@@ -140,6 +141,7 @@ bool Stretch::validate() {
  * script that runs Stretch
  */
 void Stretch::run() {
+  m_uiForm.ppPlot->watchADS(false);
 
   // Workspace input
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
@@ -204,6 +206,8 @@ void Stretch::algorithmComplete(const bool &error) {
       populateContourWorkspaceComboBox();
     else
       setPlotContourEnabled(false);
+
+    m_uiForm.ppPlot->watchADS(true);
   }
 }
 
@@ -304,6 +308,7 @@ void Stretch::plotContourClicked() {
       m_uiForm.cbPlotContour->currentText().toStdString();
   if (checkADSForPlotSaveWorkspace(workspaceName, true))
     m_plotter->plotContour(workspaceName);
+
   setPlotContourIsPlotting(false);
 }
 
@@ -326,13 +331,15 @@ void Stretch::loadSettings(const QSettings &settings) {
  */
 void Stretch::handleSampleInputReady(const QString &filename) {
   try {
+    m_uiForm.ppPlot->clear();
     m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
+    return;
   }
 
   // update the maximum and minimum range bar positions
-  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
@@ -387,7 +394,11 @@ void Stretch::plotCurrentPreview() {
  * @param min :: The new value of the lower guide
  */
 void Stretch::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -396,7 +407,11 @@ void Stretch::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Stretch::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -406,16 +421,21 @@ void Stretch::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void Stretch::updateProperties(QtProperty *prop, double val) {
-  UNUSED_ARG(val);
-
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
 
-  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(m_dblManager->value(m_properties["EMin"]),
-                            m_dblManager->value(m_properties["EMax"]));
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     bounds);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
+  if (prop == m_properties["EMin"]) {
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
+  } else if (prop == m_properties["EMax"]) {
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 void Stretch::setRunEnabled(bool enabled) {
