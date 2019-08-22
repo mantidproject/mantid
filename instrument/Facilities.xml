@@ -896,7 +896,7 @@
     <zeropadding size="8" />
     <technique>ESS Test Beamline</technique>
     <livedata default="event">
-      <connection name="event" address="hinata:9092" listener="KafkaEventListener" />
+      <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
     </livedata>
   </instrument>
 </facility>
