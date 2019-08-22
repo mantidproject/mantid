@@ -11,6 +11,7 @@ from Muon.GUI.Common.observer_pattern import GenericObservable, GenericObserver
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
+from mantid.api import AnalysisDataService
 
 
 COUNTS_PLOT_TYPE = 'Counts'
@@ -39,6 +40,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.plot_type_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
+        self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.plot_type_changed_notifier = GenericObservable()
 
         self._force_redraw = False
@@ -254,3 +256,15 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         if self._model.plot_figure is not None:
             from matplotlib import pyplot as plt
             plt.close(self._model.plot_figure)
+
+    def handle_plot_guess_changed(self):
+        if self._model.plot_figure is None:
+            return
+
+        if self.context.fitting_context.plot_guess:
+            self._model.add_workspace_to_plot(self.context.fitting_context.guess_ws,
+                                              workspace_index=0,
+                                              label='guess')
+        else:
+            self._model.remove_workpace_from_plot(self.context.fitting_context.guess_ws)
+

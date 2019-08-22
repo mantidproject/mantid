@@ -301,8 +301,11 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self.plot_guess_notifier = Observable()
         self._number_of_fits = 0
         self._number_of_fits_cache = 0
+        self._plot_guess = False
+        self._guess = None
 
     def __len__(self):
         """
@@ -335,6 +338,11 @@ class FittingContext(object):
         self.fit_list.append(fit)
         self._number_of_fits += 1
         self.new_fit_notifier.notify_subscribers()
+
+    def bangalla(self, plot_guess, guess_ws):
+        self.plot_guess = plot_guess
+        self.guess_ws = guess_ws
+        self.plot_guess_notifier.notify_subscribers(plot_guess)
 
     def fit_function_names(self):
         """
@@ -398,6 +406,22 @@ class FittingContext(object):
     def number_of_fits(self, value):
         self._number_of_fits_cache = self._number_of_fits
         self._number_of_fits = value
+
+    @property
+    def plot_guess(self):
+        return self._plot_guess
+
+    @plot_guess.setter
+    def plot_guess(self, value):
+        self._plot_guess = value
+
+    @property
+    def guess_ws(self):
+        return self._guess
+
+    @guess_ws.setter
+    def guess_ws(self, value):
+        self._guess = value
 
 
 # Private functions

@@ -217,6 +217,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.fit_to_raw_data_checkbox.setCheckState(state)
 
     @property
+    def plot_guess(self):
+        return self.plot_guess_checkbox.isChecked()
+
+    @plot_guess.setter
+    def plot_guess(self, value):
+        state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
+        self.plot_guess_checkbox.setCheckState(state)
+
+    @property
     def tf_asymmetry_mode(self):
         return self.tf_asymmetry_mode_checkbox.isChecked()
 
@@ -224,14 +233,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def tf_asymmetry_mode(self, value):
         state = QtCore.Qt.Checked if value else QtCore.Qt.Unchecked
         self.tf_asymmetry_mode_checkbox.setCheckState(state)
-
-    @property
-    def group_name(self):
-        return str(self.ads_group_name_textbox.text())
-
-    @group_name.setter
-    def group_name(self, value):
-        self.ads_group_name_textbox.setText(value)
 
     @property
     def function_name(self):

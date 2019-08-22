@@ -139,6 +139,9 @@ class FittingTabPresenter(object):
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
 
+    def handle_plot_guess_changed(self):
+        self.model.send_message_to_context(self.view.plot_guess, self._fit_function)
+
     def fitting_domain_type_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
             multi_domain_function = self.create_multi_domain_function(self._fit_function)
@@ -184,8 +187,7 @@ class FittingTabPresenter(object):
                     calculation_function)
             elif fit_type == self.view.simultaneous_fit:
                 self._number_of_fits_cached = 1
-                simultaneous_fit_parameters = self.get_multi_domain_fit_parameters(
-                )
+                simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_fit,
@@ -194,11 +196,9 @@ class FittingTabPresenter(object):
                     calculation_function)
             elif fit_type == self.view.sequential_fit:
                 self._number_of_fits_cached = len(self.selected_data)
-                sequential_fit_parameters = self.get_multi_domain_fit_parameters(
-                )
+                sequential_fit_parameters = self.get_multi_domain_fit_parameters()
                 calculation_function = functools.partial(self.model.do_sequential_fit, sequential_fit_parameters)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                self.calculation_thread = self.create_thread(calculation_function)
 
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
@@ -215,23 +215,20 @@ class FittingTabPresenter(object):
             if fit_type == self.view.single_fit:
                 single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
                 calculation_function = functools.partial(
-                    self.model.do_single_tf_fit, single_fit_parameters, self.view.group_name)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                    self.model.do_single_tf_fit, single_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
             elif fit_type == self.view.simultaneous_fit:
                 simultaneous_fit_parameters = self.get_multi_domain_tf_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_tf_fit,
-                    simultaneous_fit_parameters, global_parameters, self.view.group_name)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                    simultaneous_fit_parameters, global_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
             elif fit_type == self.view.sequential_fit:
                 sequential_fit_parameters = self.get_sequential_tf_fit_parameters()
                 calculation_function = functools.partial(
-                    self.model.do_sequential_tf_fit, sequential_fit_parameters, self.view.group_name)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                    self.model.do_sequential_tf_fit, sequential_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
 
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
@@ -464,7 +461,7 @@ class FittingTabPresenter(object):
             'Function': self.view.fit_object,
             'Minimizer': self.view.minimizer,
             'EvaluationType': self.view.evaluation_type,
-            'FitGroupName': self.view.group_name
+            'FitGroupName': ''  # todo: change this
         }
 
     @property

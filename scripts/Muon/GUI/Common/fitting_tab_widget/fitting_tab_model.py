@@ -196,6 +196,13 @@ class FittingTabModel(object):
             parameter_workspace, self.function_name,
             input_workspace, output_workspace_name, global_parameters)
 
+    def send_message_to_context(self, plot_guess, fit_funtion):
+        if fit_funtion == '':
+            return
+        # todo: create guess workspace
+        guess_ws = None
+        self.context.fitting_context.bangalla(plot_guess, guess_ws)
+
     def calculate_tf_function(self, algorithm_parameters):
         return ConvertFitFunctionForMuonTFAsymmetry(StoreInADS=False, **algorithm_parameters)
 
