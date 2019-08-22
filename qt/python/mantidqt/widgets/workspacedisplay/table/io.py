@@ -18,7 +18,7 @@ class TableWorkspaceDisplayAttributes(object):
     _tags = ["TableWorkspaceDisplayView"]
 
 
-class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes, BaseEncoder):
+class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
     def __init__(self):
         super(TableWorkspaceDisplayEncoder, self).__init__()
 
@@ -42,7 +42,7 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes, BaseEncoder)
         return cls._tags
 
 
-class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes, BaseDecoder):
+class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
     def __init__(self):
         super(TableWorkspaceDisplayDecoder, self).__init__()
 

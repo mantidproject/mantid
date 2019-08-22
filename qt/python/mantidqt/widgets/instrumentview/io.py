@@ -30,7 +30,7 @@ class InstrumentViewAttributes(object):
     _tags = ["InstrumentView", "InstrumentWidget"]
 
 
-class InstrumentViewDecoder(InstrumentViewAttributes, BaseDecoder):
+class InstrumentViewDecoder(InstrumentViewAttributes):
     def __init__(self):
         super(InstrumentViewDecoder, self).__init__()
         self.widget_decoder = _InstrumentWidgetDecoder()
@@ -67,7 +67,7 @@ class InstrumentViewDecoder(InstrumentViewAttributes, BaseDecoder):
         return cls._tags
 
 
-class InstrumentViewEncoder(InstrumentViewAttributes, BaseEncoder):
+class InstrumentViewEncoder(InstrumentViewAttributes):
     def __init__(self):
         super(InstrumentViewEncoder, self).__init__()
         self.widget_encoder = _InstrumentWidgetEncoder()
