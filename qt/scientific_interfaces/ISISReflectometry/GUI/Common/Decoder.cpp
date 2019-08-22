@@ -333,7 +333,8 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
     number.emplace_back(runNumber.toString().toStdString());
   }
-  boost::optional<double> maybeScaleFactor = boost::none;
+  boost::optional<double> maybeScaleFactor =
+      boost::make_optional<double>(false, 0.0);
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
   if (scaleFactorPresent) {
     maybeScaleFactor = map[QString("scaleFactor")].toDouble();

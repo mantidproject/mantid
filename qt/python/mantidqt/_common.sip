@@ -273,7 +273,7 @@ public:
     QSet<QString> categories(const QString &interfaceName) const;
     QStringList keys() const;
     BaseEncoder *findEncoder(QWidget *window);
-    BaseDecoder *findDecoder(const std::string decodeString);
+    BaseDecoder *findDecoder(const std::string &decodeString);
 
 
 private:

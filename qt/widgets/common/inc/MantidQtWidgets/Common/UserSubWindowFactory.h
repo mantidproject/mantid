@@ -52,7 +52,7 @@ public:
   QStringList keys() const;
 
   BaseEncoder *findEncoder(QWidget *window);
-  BaseDecoder *findDecoder(const std::string decodeString);
+  BaseDecoder *findDecoder(const std::string &decodeString);
 
   template <typename TYPE> void subscribe();
   template <typename WindowType, typename EncoderType, typename DecoderType>

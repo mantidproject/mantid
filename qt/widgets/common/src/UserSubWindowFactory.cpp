@@ -128,6 +128,13 @@ QStringList UserSubWindowFactoryImpl::keys() const {
   return key_list;
 }
 
+/**
+ * Finds the Encoder for the given window and returns a raw pointer to it
+ *
+ * @param window Is the window that needs to have an encoder found for it.
+ * @return BaseEncoder* Need to return a raw pointer so sip can understand and
+ * then wrap the function for use in python
+ */
 BaseEncoder *UserSubWindowFactoryImpl::findEncoder(QWidget *window) {
   auto subWindow = dynamic_cast<UserSubWindow *>(window);
   if (subWindow) {
@@ -140,8 +147,15 @@ BaseEncoder *UserSubWindowFactoryImpl::findEncoder(QWidget *window) {
   return nullptr;
 }
 
+/**
+ * Finds the Decoder for the given window and returns a raw pointer to it
+ *
+ * @param decodeString Is the string from which the decoder should be found
+ * @return BaseDecoder* Need to return a raw pointer so sip can understand and
+ * then wrap the function for use in python
+ */
 BaseDecoder *
-UserSubWindowFactoryImpl::findDecoder(const std::string decodeString) {
+UserSubWindowFactoryImpl::findDecoder(const std::string &decodeString) {
   auto itemIt = m_decoders.find(decodeString);
   if (itemIt != m_decoders.end()) {
     auto item = itemIt->second->createUnwrappedInstance();
