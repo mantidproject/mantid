@@ -43,12 +43,10 @@ class AxesTabWidgetPresenter:
         ax = self.get_selected_ax()
         new_props = self.view.get_properties()
         self.set_ax_title(ax, new_props.title)
-        if new_props.xlim != self.current_view_props.xlim:
-            ax.set_xlim(new_props.xlim)
+        ax.set_xlim(new_props.xlim)
         ax.set_xlabel(new_props.xlabel)
         ax.set_xscale(new_props.xscale)
-        if new_props.ylim != self.current_view_props.ylim:
-            ax.set_ylim(new_props.ylim)
+        ax.set_ylim(new_props.ylim)
         ax.set_ylabel(new_props.ylabel)
         ax.set_yscale(new_props.yscale)
         self.update_view()
