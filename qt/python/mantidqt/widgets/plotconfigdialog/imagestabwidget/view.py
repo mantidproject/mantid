@@ -10,8 +10,10 @@ from __future__ import (absolute_import, unicode_literals)
 
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
+from matplotlib import cm
+from PIL import Image, ImageQt
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QPixmap, QIcon, QImage
+from qtpy.QtGui import QPixmap, QIcon
 from qtpy.QtWidgets import QWidget
 
 from mantidqt.utils.qt import load_ui
@@ -28,32 +30,18 @@ CMAPS = [
     'gist_stern', 'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'gist_rainbow', 'rainbow',
     'jet', 'nipy_spectral', 'gist_ncar'
 ]
-
 INTERPOLATIONS = [
     'None', 'Nearest', 'Bilinear', 'Bicubic', 'Spline16', 'Spline36', 'Hanning', 'Hamming',
     'Hermite', 'Kaiser', 'Quadric', 'Catrom', 'Gaussian', 'Bessel', 'Mitchell', 'Sinc', 'Lanczos'
 ]
-
 SCALES = {'Linear': Normalize, 'Logarithmic': LogNorm}
 
 
-def create_colormap_img(cmap_name, save=False):
-    import matplotlib.pyplot as plt
-    try:
-        cmap = plt.get_cmap(cmap_name)
-    except ValueError:
-        print("Colormap '{}' not found!".format(cmap_name))
-        return
-
-    row_colours = np.zeros((256, 3), dtype=np.uint8)
-    for i in range(256):
-        row_colours[i] = 255 * np.array(cmap(i * cmap.N / 255))[:3]
-
-    img_array = np.tile(row_colours, (100, 1, 1))
-    img = QImage(img_array.tobytes(), 256, 100, QImage.Format_RGB888)
-    if save:
-        img.save('D:\\ejo7321303\\Mantid\\Testing\\Colormaps\\' 'colormap-{}.png'.format(cmap_name))
-    return img
+def create_colormap_img(cmap_name, width=50, height=20):
+    gradient_array = np.tile(np.linspace(0, 1, width), (height, 1))
+    colormap = getattr(cm, cmap_name)
+    pil_img = Image.fromarray(colormap(gradient_array, bytes=True))
+    return ImageQt.ImageQt(pil_img)
 
 
 class ImagesTabWidgetView(QWidget):
@@ -85,14 +73,10 @@ class ImagesTabWidgetView(QWidget):
             self.set_min_value(self.get_max_value() - 0.01)
 
     def _populate_colormap_combo_box(self):
-        from time import time
-        start = time()
         for cmap_name in CMAPS:
-            img = create_colormap_img(cmap_name)
-            if img:
-                pixmap = QPixmap.fromImage(img)
-                self.colormap_combo_box.addItem(QIcon(pixmap), cmap_name)
-        print("Time taken to poulate colormap drop down: {}s" "".format(time() - start))
+            qt_img = create_colormap_img(cmap_name)
+            pixmap = QPixmap.fromImage(qt_img)
+            self.colormap_combo_box.addItem(QIcon(pixmap), cmap_name)
 
     def _populate_interpolation_combo_box(self):
         self.interpolation_combo_box.addItems(INTERPOLATIONS)
