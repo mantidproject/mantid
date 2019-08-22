@@ -459,17 +459,18 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_mixed_unit_input_workspace_groups_collapsed(self):
         self._create_workspace(13460, 'TOF_')
         self._create_workspace(13463, 'TOF_')
-        self._create_workspace(12345)
+        self._create_workspace_wavelength(12345)
         GroupWorkspaces('TOF_13463, 12345', OutputWorkspace='mixed_unit_group')
         args = self._default_options
-        args['InputRunList'] = '13460, 13463, 12345'
-        outputs = ['IvsQ_13460+13463+12345', 'IvsQ_binned_13460+13463+12345', 'TOF', 'TOF_13460+13463', 'TOF_13460',
-                   'TOF_13463']
+        args['InputRunList'] = '13460, mixed_unit_group'
+        outputs = ['IvsQ_13460+mixed_unit_group', 'IvsQ_binned_13460+mixed_unit_group', 'TOF', 'TOF_13460+13463', 'TOF_13460',
+                   'TOF_13463', '12345']
 
-        self._assert_run_algorithm_succeeds(args, outputs)
+        self._assert_run_algorithm_fails(args)
 
         workspace_names = AnalysisDataService.getObjectNames()
-        self.assertNotIn('mixed_unit_group', workspace_names)
+        self.assertIn('mixed_unit_group', workspace_names)
+        self.assertIn('12345', workspace_names)
         self.assertIn('TOF_13460', workspace_names)
         self.assertIn('TOF_13463', workspace_names)
 
@@ -479,19 +480,25 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         GroupWorkspaces('12345, 67890', OutputWorkspace='no_TOF_group')
         args = self._default_options
         args['InputRunList'] = '12345, 67890'
-        outputs = []
+        outputs = ['IvsQ_no_TOF_group', 'IvsQ_binned_no_TOF_group', '12345', '67890']
 
-        self._assert_run_algorithm_succeeds(args, outputs)
+        self._assert_run_algorithm_fails(args)
 
         workspace_names = AnalysisDataService.getObjectNames()
-        self.assertNotIn('no_TOF_group', workspace_names)
-        self.assertNotIn('12345', workspace_names)
-        self.assertNotIn('67890', workspace_names)
+        self.assertIn('no_TOF_group', workspace_names)
+        self.assertIn('12345', workspace_names)
+        self.assertIn('67890', workspace_names)
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
                                    BankPixelWidth=2, XMin=200, OutputWorkspace=name)
+        AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
+
+    def _create_workspace_wavelength(self, run_number, prefix='', suffix=''):
+        name = prefix + str(run_number) + suffix
+        ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
+                                   BankPixelWidth=2, XMin=200, XUnit="Wavelength", OutputWorkspace=name)
         AddSampleLog(Workspace=ws, LogName='run_number', LogText=str(run_number))
 
     def _create_event_workspace(self, run_number, prefix='', includeMonitors=True):
