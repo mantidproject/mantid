@@ -68,10 +68,7 @@
  <!-- delta = 56pixels * 0.00703/4 = 0.0984 -->
 <type name="detector_panel">
  <component type="panel">
-<location  x="0.00" z="0.98" y="-0.0984" axis-x="0" axis-y="1" axis-z="0" name="detector_panel" >  </location>
-  <parameter name="rot">
- <logfile id="gamma" eq="value"/>
- </parameter>
+<location  x="0.00" z="0.98" y="-0.0984" name="detector_panel" >  </location>
  </component>
  </type>
 
