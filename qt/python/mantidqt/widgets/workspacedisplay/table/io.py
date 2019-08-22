@@ -8,8 +8,6 @@
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
-from mantidqt.project.basedecoder import BaseDecoder
-from mantidqt.project.baseencoder import BaseEncoder
 
 
 class TableWorkspaceDisplayAttributes(object):

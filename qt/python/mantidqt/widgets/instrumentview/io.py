@@ -11,8 +11,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.utils.qt import import_qt
-from mantidqt.project.basedecoder import BaseDecoder
-from mantidqt.project.baseencoder import BaseEncoder
 
 # local imports
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
