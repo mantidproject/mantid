@@ -29,7 +29,7 @@ public:
   virtual void reductionResumed() = 0;
   virtual void reductionPaused() = 0;
   virtual void
-  notifyInstrumentChangedRequested(std::string const &instrumentName) = 0;
+  notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;

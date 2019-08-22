@@ -30,7 +30,7 @@ public:
   virtual RunsTable &mutableRunsTable() = 0;
 
   virtual void
-  notifyInstrumentChangedRequested(std::string const &instrumentName) = 0;
+  notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyReductionPaused() = 0;
   virtual void notifyRowStateChanged() = 0;

@@ -95,7 +95,7 @@ void MainWindowPresenter::reductionResumed() { disableSaveAndLoadBatch(); }
 // Called on autoreduction normal reduction
 void MainWindowPresenter::reductionPaused() { enableSaveAndLoadBatch(); }
 
-void MainWindowPresenter::notifyInstrumentChangedRequested(
+void MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
   // Re-load instrument with the new name
   updateInstrument(instrumentName);

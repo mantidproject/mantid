@@ -36,7 +36,7 @@ public:
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyTransfer() = 0;
-  virtual void notifyInstrumentChangedRequested() = 0;
+  virtual void notifyChangeInstrumentRequested() = 0;
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;

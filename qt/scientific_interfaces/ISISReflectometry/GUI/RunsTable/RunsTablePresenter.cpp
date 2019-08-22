@@ -237,9 +237,9 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   }
 }
 
-void RunsTablePresenter::notifyInstrumentChangedRequested() {
+void RunsTablePresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getInstrumentName();
-  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }

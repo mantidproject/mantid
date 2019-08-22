@@ -49,7 +49,7 @@ public:
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
   void notifyFilterChanged(std::string const &filterValue) override;
-  void notifyInstrumentChangedRequested() override;
+  void notifyChangeInstrumentRequested() override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
   void notifyPlotSelectedPressed() override;

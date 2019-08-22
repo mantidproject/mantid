@@ -271,7 +271,7 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
 void QtRunsView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
   m_ui.textSearch->clear();
-  m_notifyee->notifyInstrumentChangedRequested();
+  m_notifyee->notifyChangeInstrumentRequested();
 }
 
 /**

@@ -24,7 +24,7 @@ public:
   virtual void notifyDeleteRowRequested() = 0;
   virtual void notifyDeleteGroupRequested() = 0;
   virtual void notifyFilterChanged(std::string const &filterValue) = 0;
-  virtual void notifyInstrumentChangedRequested() = 0;
+  virtual void notifyChangeInstrumentRequested() = 0;
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
   virtual void notifyPlotSelectedPressed() = 0;

@@ -56,9 +56,9 @@ public:
     EXPECT_CALL(m_view, getInstrumentName())
         .Times(1)
         .WillOnce(Return(instrument));
-    EXPECT_CALL(m_mainPresenter, notifyInstrumentChangedRequested(instrument))
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
         .Times(1);
-    presenter.notifyInstrumentChangedRequested();
+    presenter.notifyChangeInstrumentRequested();
     verifyAndClearExpectations();
   }
 

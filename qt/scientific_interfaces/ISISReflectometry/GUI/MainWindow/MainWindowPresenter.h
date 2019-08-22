@@ -49,7 +49,7 @@ public:
   void reductionResumed() override;
   void reductionPaused() override;
   void
-  notifyInstrumentChangedRequested(std::string const &instrumentName) override;
+  notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;

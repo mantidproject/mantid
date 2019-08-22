@@ -415,18 +415,18 @@ public:
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectSearchInstrument(instrument);
-    EXPECT_CALL(m_mainPresenter, notifyInstrumentChangedRequested(instrument))
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
         .Times(1);
-    presenter.notifyInstrumentChangedRequested();
+    presenter.notifyChangeInstrumentRequested();
     verifyAndClear();
   }
 
   void testInstrumentChangedRequestedWithGivenNameNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
-    EXPECT_CALL(m_mainPresenter, notifyInstrumentChangedRequested(instrument))
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
         .Times(1);
-    presenter.notifyInstrumentChangedRequested(instrument);
+    presenter.notifyChangeInstrumentRequested(instrument);
     verifyAndClear();
   }
 

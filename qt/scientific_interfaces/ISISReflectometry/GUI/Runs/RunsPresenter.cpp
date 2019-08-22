@@ -120,14 +120,14 @@ void RunsPresenter::notifyTransfer() {
   notifyRowStateChanged();
 }
 
-void RunsPresenter::notifyInstrumentChangedRequested() {
+void RunsPresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getSearchInstrument();
-  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void RunsPresenter::notifyInstrumentChangedRequested(
+void RunsPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
-  m_mainPresenter->notifyInstrumentChangedRequested(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void RunsPresenter::notifyReductionResumed() {
