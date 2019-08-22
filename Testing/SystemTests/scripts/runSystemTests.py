@@ -10,14 +10,14 @@ from __future__ import (absolute_import, division, print_function)
 
 import optparse
 import os
-# If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-# Remove this when everything is switched to qtpy
-import sip
 import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
 
 try:
+   # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+   # Remove this when everything is switched to qtpy
+    import sip
     sip.setapi('QString', 2)
     sip.setapi('QVariant', 2)
     sip.setapi('QDate', 2)
@@ -25,7 +25,7 @@ try:
     sip.setapi('QTextStream', 2)
     sip.setapi('QTime', 2)
     sip.setapi('QUrl', 2)
-except AttributeError:
+except (AttributeError, ImportError):
     # PyQt < v4.6
     pass
 
@@ -100,6 +100,8 @@ def main():
                       help="Turn on archive search for file finder.")
     parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds", action="store_true",
                       help="Skip tests that are not run in pull request builds")
+    parser.add_option("", "--ignore-failed-imports", dest="ignore_failed_imports", action="store_true",
+                      help="Skip tests that do not import correctly rather raising an error.")
     parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
                         loglevel="information", ncores=1, quiet=False, output_on_failure=False, clean=False)
     (options, args) = parser.parse_args()
@@ -147,7 +149,8 @@ def main():
                                      quiet=options.quiet,
                                      testsInclude=options.testsInclude,
                                      testsExclude=options.testsExclude,
-                                     exclude_in_pr_builds=options.exclude_in_pr_builds)
+                                     exclude_in_pr_builds=options.exclude_in_pr_builds,
+                                     ignore_failed_imports=options.ignore_failed_imports)
 
     test_counts, test_list, test_stats, files_required_by_test_module, data_file_lock_status = \
         tmgr.generateMasterTestList()

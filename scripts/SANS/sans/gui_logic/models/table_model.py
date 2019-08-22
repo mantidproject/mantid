@@ -19,7 +19,6 @@ import re
 from sans.common.constants import ALL_PERIODS
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
-from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 from sans.gui_logic.presenter.create_file_information import create_file_information
 from ui.sans_isis.work_handler import WorkHandler
 
@@ -378,6 +377,8 @@ class OptionsColumnModel(object):
 
     @staticmethod
     def get_hint_strategy():
+        from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+
         return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
                                   "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
                                   "PhiMin": 'The min angle of the detector to accept.'
@@ -485,6 +486,8 @@ class SampleShapeColumnModel(object):
 
     @staticmethod
     def get_hint_strategy():
+        from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+
         return BasicHintStrategy({"Cylinder": "",
                                   "Disc": "",
                                   "FlatPlate": ""})

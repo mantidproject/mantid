@@ -775,9 +775,9 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc=None, runner=None, output=[TextResultReporter()],
-                 quiet=False, testsInclude=None, testsExclude=None, showSkipped=False,
-                 exclude_in_pr_builds=None, output_on_failure=False, clean=False,
-                 process_number=0, ncores=1, list_of_tests=None):
+                 quiet=False, testsInclude=None, testsExclude=None, ignore_failed_imports=False,
+                 showSkipped=False, exclude_in_pr_builds=None, output_on_failure=False,
+                 clean=False, process_number=0, ncores=1, list_of_tests=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -794,6 +794,7 @@ class TestManager(object):
         self._testsInclude=testsInclude
         self._testsExclude=testsExclude
         self._exclude_in_pr_builds=exclude_in_pr_builds
+        self._ignore_failed_imports = ignore_failed_imports
 
         self._passedTests = 0
         self._skippedTests = 0
@@ -803,7 +804,6 @@ class TestManager(object):
         self._tests = list_of_tests
 
     def generateMasterTestList(self):
-
         # If given option is a directory
         if os.path.isdir(self._testDir):
             test_dir = os.path.abspath(self._testDir).replace('\\', '/')
@@ -820,7 +820,10 @@ class TestManager(object):
             all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
 
         if not all_loaded:
-            sys.exit("\nUnable to load all test modules. Cannot continue.")
+            if  self._ignore_failed_imports:
+                print('\nUnable to load all test modules. Continuing as requested.')
+            else:
+                sys.exit('\nUnable to load all test modules. Cannot continue.')
 
         # Gather statistics on full test list
         test_stats = [0, 0, 0]
@@ -1015,6 +1018,8 @@ class TestManager(object):
             import traceback
             traceback.print_exc()
             module_loaded = False
+            # append a test with a blank name to indicate it was skipped
+            tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
         finally:
             pyfile.close()
 
