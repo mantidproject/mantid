@@ -36,9 +36,9 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
                 or vanadium measurements.'
 
     def seeAlso(self):
-        return [ "He3TubeEfficiency", "CalculateSampleTransmission",
-                 "DetectorEfficiencyCor", "DetectorEfficiencyCorUser",
-                 "CalculateEfficiency", "ComputeCalibrationCoefVan" ]
+        return ["He3TubeEfficiency", "CalculateSampleTransmission",
+                "DetectorEfficiencyCor", "DetectorEfficiencyCorUser",
+                "CalculateEfficiency", "ComputeCalibrationCoefVan"]
 
     def PyInit(self):
         self.declareProperty(

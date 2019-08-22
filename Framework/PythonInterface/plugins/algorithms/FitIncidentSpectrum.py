@@ -23,7 +23,9 @@ class FitIncidentSpectrum(PythonAlgorithm):
         return 'FitIncidentSpectrum'
 
     def summary(self):
-        return ''
+        return 'Calculate a fit for an incident spectrum using different methods.' \
+               'Outputs a workspace containing the functionalized fit and its first' \
+               'derivative.'
 
     def seeAlso(self):
         return [""]
@@ -36,32 +38,37 @@ class FitIncidentSpectrum(PythonAlgorithm):
             MatrixWorkspaceProperty('InputWorkspace', '',
                                     direction=Direction.Input,
                                     # TODO find out what validator is best for this
-                                    #validator=CommonBinsValidator(),
+                                    # validator=CommonBinsValidator(),
                                     ),
-            doc='Input workspace to be fit.')
+            doc='Incident spectrum to be fit.')
 
         self.declareProperty(
             MatrixWorkspaceProperty('OutputWorkspace', '',
                                     direction=Direction.Output),
-            doc='Output workspace for fit.')
+            doc='Output workspace containing the fit and it\'s first derivative.')
 
         self.declareProperty(
             name='BinningForFit',
             defaultValue='0.15,0.05,3.2',
-            doc='Bin range for fitting.')
+            doc='Bin range for fitting given as a comma separated string in the format \"[Start],[Increment],[End]\".')
 
         self.declareProperty(
             name='BinningForCalc',
-            defaultValue='',
+            defaultValue='0.15,0.05,3.2',
             validator=StringMandatoryValidator(),
-            doc='Bin range for calculation.')
+            doc='Bin range for calculation given as a comma separated string in the format '
+                '\"[Start],[Increment],[End]\".')
 
         self.declareProperty(
             name='FitSpectrumWith',
             defaultValue='GaussConvCubicSpline',
             validator=StringListValidator(['GaussConvCubicSpline', 'CubicSpline', 'CubicSplineViaMantid',
                                            'HowellsFunction']),
-            doc='The method for fitting the data')
+            doc='The method for fitting the incident spectrum:'
+                'GaussConvCubicSpline'
+                'CubicSpline'
+                'CubicSplineViaMantid'
+                'HowellsFunction')
 
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
@@ -76,13 +83,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
     def PyExec(self):
         self._setup()
-        try:
-            params = [float(x) for x in self._binning_for_calc.split(',')]
-        except AttributeError:
-            params = [float(x) for x in self._binning_for_calc]
-        xlo, binsize, xhi = params
-        x = np.arange(xlo, xhi, binsize)
-
+        x = self.parse_binning_for_calc(self._binning_for_calc)
         rebinned = Rebin(
             self._input_ws,
             Params=self._binning_for_fit,
@@ -97,10 +98,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         if self._fit_spectrum_with == 'CubicSpline':
             # Fit using cubic spline
-            fit, fit_prime = self.fitCubicSpline(x_fit, y_fit, x, s=1e7)
+            fit, fit_prime = self.fit_cubic_spline(x_fit, y_fit, x, s=1e7)
         elif self._fit_spectrum_with == 'CubicSplineViaMantid':
             # Fit using cubic spline via Mantid
-            fit, fit_prime = self.fitCubicSplineViaMantidSplineSmoothing(
+            fit, fit_prime = self.fit_cubic_spline_via_mantid_spline_smoothing(
                 self._input_ws,
                 ParamsInput=self._binning_for_fit,
                 ParamsOutput=self._binning_for_calc,
@@ -108,24 +109,31 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 MaxNumberOfBreaks=0)
         elif self._fit_spectrum_with == 'HowellsFunction':
             # Fit using Howells function
-            fit, fit_prime = self.fitHowellsFunction(x_fit, y_fit, x)
+            fit, fit_prime = self.fit_howells_function(x_fit, y_fit, x)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
-            fit, fit_prime = self.fitCubicSplineWithGaussConv(x_fit, y_fit, x, sigma=0.5)
+            fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x, sigma=0.5)
 
         # Create output workspace
         output_workspace = CreateWorkspace(
             DataX=x,
-            DataY=np.append(
-                fit,
-                fit_prime),
+            DataY=np.append(fit, fit_prime),
             UnitX='Wavelength',
             NSpec=2,
             Distribution=False,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
-    def fitCubicSplineWithGaussConv(self, x_fit, y_fit, x, sigma=3):
+    def parse_binning_for_calc(self, binning_for_calc):
+        try:
+            params = [float(x) for x in binning_for_calc.split(',')]
+        except AttributeError:
+            params = [float(x) for x in binning_for_calc]
+        xlo, binsize, xhi = params
+        return np.arange(xlo, xhi, binsize)
+
+
+    def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, sigma=3):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
         def moving_average(y, sig=sigma):
             b = signal.gaussian(39, sig)
@@ -140,13 +148,13 @@ class FitIncidentSpectrum(PythonAlgorithm):
         fit_prime = spline_fit_prime(x)
         return fit, fit_prime
 
-    def fitCubicSpline(self, x_fit, y_fit, x, s=1e15):
+    def fit_cubic_spline(self, x_fit, y_fit, x, s=1e15):
         tck = interpolate.splrep(x_fit, y_fit, s=s)
         fit = interpolate.splev(x, tck, der=0)
         fit_prime = interpolate.splev(x, tck, der=1)
         return fit, fit_prime
 
-    def fitCubicSplineViaMantidSplineSmoothing(self, InputWorkspace, ParamsInput, ParamsOutput, **kwargs):
+    def fit_cubic_spline_via_mantid_spline_smoothing(self, InputWorkspace, ParamsInput, ParamsOutput, **kwargs):
         Rebin(
             InputWorkspace=InputWorkspace,
             OutputWorkspace='fit',
@@ -170,16 +178,16 @@ class FitIncidentSpectrum(PythonAlgorithm):
             PreserveEvents=True)
         return AnalysisDataService.retrieve('fit').readY(0), AnalysisDataService.retrieve('fit_prime_1').readY(0)
 
-    def fitHowellsFunction(self, x_fit, y_fit, x):
+    def fit_howells_function(self, x_fit, y_fit, x):
         # Fit with analytical function from HowellsEtAl
-        def calc_HowellsFunction(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
+        def calc_howells_function(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
             term1 = phi_max * ((lam_t**4.) / lambdas**5.) * \
                 np.exp(-(lam_t / lambdas)**2.)
             term2 = (phi_epi / (lambdas**(1. + 2. * a))) * \
                 (1. / (1 + np.exp((lambdas - lam_1) / lam_2)))
             return term1 + term2
 
-        def calc_HowellsFunction1stDerivative(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
+        def calc_howells_function_1st_derivative(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
             term1 = (((2 * lam_t**2) / lambdas**2) - 5.) * (1. / lambdas) * \
                 phi_max * ((lam_t**4.) / lambdas**5.) * np.exp(-(lam_t / lambdas)**2.)
             term2 = ((1 + 2 * a) / lambdas) \
@@ -189,9 +197,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         params = [1., 1., 1., 0., 1., 1.]
         params, convergence = optimize.curve_fit(
-            calc_HowellsFunction, x_fit, y_fit, params)
-        fit = calc_HowellsFunction(x, *params)
-        fit_prime = calc_HowellsFunction1stDerivative(x, *params)
+            calc_howells_function, x_fit, y_fit, params)
+        fit = calc_howells_function(x, *params)
+        fit_prime = calc_howells_function_1st_derivative(x, *params)
         return fit, fit_prime
+
 
 AlgorithmFactory.subscribe(FitIncidentSpectrum)
