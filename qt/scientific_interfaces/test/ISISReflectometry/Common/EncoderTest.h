@@ -34,7 +34,7 @@ public:
     QtMainWindowView mwv;
     mwv.initLayout();
     Encoder encoder;
-    auto map = encoder.encode(&mwv);
+    auto map = encoder.encode(&mwv, "");
 
     map.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
 

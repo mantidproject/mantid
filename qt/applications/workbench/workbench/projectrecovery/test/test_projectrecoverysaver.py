@@ -25,6 +25,13 @@ if sys.version_info.major >= 3:
     unicode = str
 
 
+class FakeEncoder(object):
+    def encode(self, _, __):
+        return {}
+    def tags(self):
+        return ["FakeEncoder"]
+
+
 class ProjectRecoverySaverTest(unittest.TestCase):
     def setUp(self):
         self.working_directory = tempfile.mkdtemp()
@@ -70,7 +77,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
     @mock.patch('workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable')
     def test_recovery_save_with_just_interfaces(self, windows_that_are_savable):
         CreateSampleWorkspace(OutputWorkspace="ws")
-        windows_that_are_savable.return_value = [[{}, {}]]
+        windows_that_are_savable.return_value = [[FakeEncoder(), FakeEncoder()]]
         self.pr_saver._spin_off_another_time_thread = mock.MagicMock()
         ADS.clear()
 
@@ -131,7 +138,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
     @mock.patch('workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable')
     def test_recovery_save_with_both_workspace_and_interfaces(self, windows_that_are_savable):
         CreateSampleWorkspace(OutputWorkspace="ws")
-        windows_that_are_savable.return_value = [[{}, {}]]
+        windows_that_are_savable.return_value = [[FakeEncoder(), FakeEncoder()]]
         self.pr_saver._spin_off_another_time_thread = mock.MagicMock()
 
         self.pr_saver.gfm = mock.MagicMock()

@@ -26,7 +26,9 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
   return nullptr;
 }
 
-QWidget *Decoder::decode(const QMap<QString, QVariant> &map) {
+QWidget *Decoder::decode(const QMap<QString, QVariant> &map,
+                         const std::string &directory) {
+  UNUSED_ARG(directory)
   auto userSubWindow =
       MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
   auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
@@ -317,38 +319,23 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
     number.emplace_back(runNumber.toString().toStdString());
   }
+  boost::optional<double> maybeScaleFactor = boost::none;
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
-  double scaleFactor = 0;
   if (scaleFactorPresent) {
-    scaleFactor = map[QString("scaleFactor")].toDouble();
+    maybeScaleFactor = map[QString("scaleFactor")].toDouble();
   }
-  if (scaleFactorPresent) {
-    auto row = MantidQt::CustomInterfaces::ISISReflectometry::Row(
-        number, map[QString("theta")].toDouble(),
-        decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
-        decodeRangeInQ(map[QString("qRange")].toMap()), scaleFactor,
-        decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-        decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
-    if (m_projectSave) {
-      auto itemState = map[QString("itemState")].toInt();
-      row.setState(State(itemState));
-      row.setOutputQRange(decodeRangeInQ(map[QString("qRangeOutput")].toMap()));
-    }
-    return row;
-  } else {
-    auto row = MantidQt::CustomInterfaces::ISISReflectometry::Row(
-        number, map[QString("theta")].toDouble(),
-        decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
-        decodeRangeInQ(map[QString("qRange")].toMap()), boost::none,
-        decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-        decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
-    if (m_projectSave) {
-      auto itemState = map[QString("itemState")].toInt();
-      row.setState(State(itemState));
-      row.setOutputQRange(decodeRangeInQ(map[QString("qRangeOutput")].toMap()));
-    }
-    return row;
+  auto row = MantidQt::CustomInterfaces::ISISReflectometry::Row(
+      number, map[QString("theta")].toDouble(),
+      decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
+      decodeRangeInQ(map[QString("qRange")].toMap()), maybeScaleFactor,
+      decodeReductionOptions(map[QString("reductionOptions")].toMap()),
+      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+  if (m_projectSave) {
+    auto itemState = map[QString("itemState")].toInt();
+    row.setState(State(itemState));
+    row.setOutputQRange(decodeRangeInQ(map[QString("qRangeOutput")].toMap()));
   }
+  return row;
 }
 
 RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {

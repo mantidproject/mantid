@@ -35,7 +35,8 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder
     : public MantidQt::API::BaseDecoder {
 public:
-  QWidget *decode(const QMap<QString, QVariant> &map) override;
+  QWidget *decode(const QMap<QString, QVariant> &map,
+                  const std::string &directory) override;
   QList<QString> tags() override;
   void decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
                    const QMap<QString, QVariant> &map,

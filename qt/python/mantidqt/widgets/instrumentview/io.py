@@ -11,6 +11,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.utils.qt import import_qt
+from mantidqt.project.basedecoder import BaseDecoder
+from mantidqt.project.baseencoder import BaseEncoder
 
 # local imports
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
@@ -25,10 +27,10 @@ _InstrumentWidgetDecoder = import_qt('._instrumentview', 'mantidqt.widgets.instr
 class InstrumentViewAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
-    tags = ["InstrumentView", "InstrumentWidget"]
+    _tags = ["InstrumentView", "InstrumentWidget"]
 
 
-class InstrumentViewDecoder(InstrumentViewAttributes):
+class InstrumentViewDecoder(InstrumentViewAttributes, BaseDecoder):
     def __init__(self):
         super(InstrumentViewDecoder, self).__init__()
         self.widget_decoder = _InstrumentWidgetDecoder()
@@ -61,11 +63,11 @@ class InstrumentViewDecoder(InstrumentViewAttributes):
         return instrument_view
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags
 
 
-class InstrumentViewEncoder(InstrumentViewAttributes):
+class InstrumentViewEncoder(InstrumentViewAttributes, BaseEncoder):
     def __init__(self):
         super(InstrumentViewEncoder, self).__init__()
         self.widget_encoder = _InstrumentWidgetEncoder()
@@ -96,5 +98,5 @@ class InstrumentViewEncoder(InstrumentViewAttributes):
         return encoded_instrumentview
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags

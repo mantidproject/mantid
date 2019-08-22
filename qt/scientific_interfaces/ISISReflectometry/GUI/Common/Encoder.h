@@ -34,7 +34,8 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder
     : public MantidQt::API::BaseEncoder {
 public:
-  QMap<QString, QVariant> encode(const QWidget *window) override;
+  QMap<QString, QVariant> encode(const QWidget *window,
+                                 const std::string &directory) override;
   QList<QString> tags() override;
   QMap<QString, QVariant>
   encodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,

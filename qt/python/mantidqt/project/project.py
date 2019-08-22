@@ -119,14 +119,11 @@ class Project(AnalysisDataServiceObserver):
             result = self._offer_large_size_confirmation()
         if result is None or result != QMessageBox.Cancel:
             plots_to_save = self.plot_gfm.figs
-            try:
-                interfaces_to_save = self.interface_populating_function(self.last_project_location)
-                project_saver = ProjectSaver(self.project_file_ext)
-                project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                           plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
-                self.__saved = True
-            except Exception as e:
-                logger.warning("Project Save: Could not save interfaces due to error - " + str(e))
+            interfaces_to_save = self.interface_populating_function()
+            project_saver = ProjectSaver(self.project_file_ext)
+            project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
+                                       plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
+            self.__saved = True
 
     @staticmethod
     def _get_project_size(workspace_names):

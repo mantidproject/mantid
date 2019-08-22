@@ -72,8 +72,10 @@ class ProjectLoader(object):
 
     def load_interfaces(self, directory):
         for interface in self.project_reader.interface_list:
+            decoder = self.decoder_factory.find_decoder(interface["tag"])
             try:
-                self.decoder_factory.decode(interface["tag"], interface, directory)
+                decoded_interface = decoder.decode(interface, directory)
+                decoded_interface.show()
             except Exception as e:
                 # Catch any exception and log it for the encoder
                 if isinstance(e, KeyboardInterrupt):

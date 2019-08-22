@@ -51,9 +51,8 @@ public:
   QSet<QString> categories(const QString &interfaceName) const;
   QStringList keys() const;
 
-  QMap<QString, QVariant> encodeWindow(QWidget *window);
-  bool decodeWindow(const QMap<QString, QVariant> &map,
-                    const std::string &decodeString);
+  BaseEncoder *findEncoder(QWidget *window);
+  BaseDecoder *findDecoder(const std::string decodeString);
 
   template <typename TYPE> void subscribe();
   template <typename WindowType, typename EncoderType, typename DecoderType>

@@ -22,22 +22,9 @@ class DecoderFactory(object):
         :return: Decoder object; The object of a decoder for the tag that was passed. Or None if none were found.
         """
         for decoder in cls.decoder_list:
-            if tag in decoder.tags:
+            if tag in decoder.tags():
                 return decoder()
-        return None
-
-    @classmethod
-    def decode(cls, tag, dic, directory=None):
-        decoder = cls.find_decoder(tag)
-        if decoder is None:
-            # Check if it could be a C++ interface
-            object_reinstated = UserSubWindowFactory.Instance().decodeWindow(dic, tag)
-            if object_reinstated is False:
-                raise ValueError("Unable to find decode tag: " + tag +
-                                 " Is the project from an older version of Mantid?")
-        else:
-            widget = decoder.decode(dic, directory)
-            widget.show()
+        return UserSubWindowFactory.Instance().findDecoder(tag)
 
     @classmethod
     def register_decoder(cls, decoder):

@@ -8,15 +8,17 @@
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+from mantidqt.project.basedecoder import BaseDecoder
+from mantidqt.project.baseencoder import BaseEncoder
 
 
 class TableWorkspaceDisplayAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
-    tags = ["TableWorkspaceDisplayView"]
+    _tags = ["TableWorkspaceDisplayView"]
 
 
-class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
+class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes, BaseEncoder):
     def __init__(self):
         super(TableWorkspaceDisplayEncoder, self).__init__()
 
@@ -36,11 +38,11 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
         return {"as_x": marked_columns.as_x, "as_y": marked_columns.as_y, "as_y_err": as_y_err}
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags
 
 
-class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
+class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes, BaseDecoder):
     def __init__(self):
         super(TableWorkspaceDisplayDecoder, self).__init__()
 
@@ -63,5 +65,5 @@ class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
         return pres.container
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags

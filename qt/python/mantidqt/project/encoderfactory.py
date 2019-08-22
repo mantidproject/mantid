@@ -12,7 +12,10 @@ from mantidqt.usersubwindowfactory import UserSubWindowFactory
 
 
 def default_encoder_compatability_check(obj, encoder_cls):
-    return encoder_cls.has_tag(obj.__class__.__name__)
+    for tag in encoder_cls.tags():
+        if tag == obj.__class__.__name__:
+            return True
+    return False
 
 
 class EncoderFactory(object):
@@ -26,30 +29,15 @@ class EncoderFactory(object):
         :return: Encoder or None; Returns the Encoder of the obj or None.
         """
         obj_encoders = [encoder for encoder, compatible in cls.encoder_list if compatible(obj, encoder)]
+
         if len(obj_encoders) > 1:
             raise RuntimeError("EncoderFactory: One or more encoder type claims to work with the passed obj: "
                                + obj.__class__.__name__)
         elif len(obj_encoders) == 1:
             return obj_encoders[0]()
         else:
-            return None
-
-    @classmethod
-    def encode(cls, obj, directory):
-        encoder = cls.find_encoder(obj)
-        if encoder is None:
-            # These are C++ so the tag is already in the dictionary
-            dic = UserSubWindowFactory.Instance().encodeWindow(obj)
-            if len(dic) == 0:
-                return None
-            else:
-                return dic
-        else:
-            # These are python so we add the tag in the factory
-            tag = encoder.tags[0]
-            dic = encoder.encode(obj, directory)
-            dic["tag"] = tag
-            return dic
+            # attempt C++!
+            return UserSubWindowFactory.Instance().findEncoder(obj)
 
     @classmethod
     def register_encoder(cls, encoder, compatible_check=None):

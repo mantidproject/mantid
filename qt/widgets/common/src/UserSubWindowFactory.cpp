@@ -128,27 +128,24 @@ QStringList UserSubWindowFactoryImpl::keys() const {
   return key_list;
 }
 
-QMap<QString, QVariant>
-UserSubWindowFactoryImpl::encodeWindow(QWidget *window) {
+BaseEncoder *UserSubWindowFactoryImpl::findEncoder(QWidget *window) {
   auto subWindow = dynamic_cast<UserSubWindow *>(window);
   if (subWindow) {
     auto itemIt = m_encoders.find(subWindow->windowTitle().toStdString());
     if (itemIt != m_encoders.end()) {
-      auto item = itemIt->second->createInstance();
-      return item->encode(window);
+      auto item = itemIt->second->createUnwrappedInstance();
+      return item;
     }
   }
-  return {};
+  return nullptr;
 }
 
-bool UserSubWindowFactoryImpl::decodeWindow(const QMap<QString, QVariant> &map,
-                                            const std::string &decodeString) {
+BaseDecoder *
+UserSubWindowFactoryImpl::findDecoder(const std::string decodeString) {
   auto itemIt = m_decoders.find(decodeString);
   if (itemIt != m_decoders.end()) {
-    auto item = itemIt->second->createInstance();
-    auto widget = item->decode(map);
-    widget->show();
-    return true;
+    auto item = itemIt->second->createUnwrappedInstance();
+    return item;
   }
-  return false;
+  return nullptr;
 }

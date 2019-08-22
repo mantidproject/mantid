@@ -174,7 +174,7 @@ public:
     CoderCommonTester tester;
     Decoder decoder;
     auto map = MantidQt::API::loadJSONFromString(MAINWINDOW_JSON_STRING);
-    auto widget = decoder.decode(map);
+    auto widget = decoder.decode(map, "");
 
     tester.testMainWindowView(dynamic_cast<QtMainWindowView *>(widget), map);
   }
