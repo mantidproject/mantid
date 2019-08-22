@@ -29,6 +29,11 @@ Engineering Diffraction
 Single Crystal Diffraction
 --------------------------
 
+Improvements
+############
+
+- :ref:`SaveHKL <algm-SaveHKL>` now saves the tbar and transmission values for shapes and materials provided by :ref:`SetSample <algm-SetSample>`.
+
 Imaging
 -------
 
