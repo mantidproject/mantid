@@ -13,20 +13,22 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 GNU_DIAG_OFF("conversion")
-#include "private/Schema/ba57_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
+#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <chrono>
+#include <json/json.h>
 #include <numeric>
 #include <tbb/parallel_sort.h>
 
@@ -48,7 +50,7 @@ const std::string RUN_NUMBER_PROPERTY = "run_number";
 const std::string RUN_START_PROPERTY = "run_start";
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "ba57";
+const std::string RUN_MESSAGE_ID = "y2gw";
 const std::string EVENT_MESSAGE_ID = "ev42";
 const std::string SAMPLE_MESSAGE_ID = "f142";
 
@@ -543,7 +545,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
     throw std::runtime_error(os.str());
   }
 
-  m_runNumber = runStartData.runNumber;
+  m_runId = runStartData.runId;
 
   // Create buffer
   auto eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
@@ -551,9 +553,11 @@ void KafkaEventStreamDecoder::initLocalCaches(
       spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
 
   // Load the instrument if possible but continue if we can't
+  auto jsonGeometry = runStartData.nexusStructure;
   auto instName = runStartData.instrumentName;
   if (!instName.empty())
-    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer);
+    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                jsonGeometry);
   else
     g_log.warning(
         "Empty instrument name received. Continuing without instrument");
@@ -566,8 +570,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
   auto timeString = m_runStart.toISO8601String();
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
-                         std::to_string(runStartData.runNumber));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
