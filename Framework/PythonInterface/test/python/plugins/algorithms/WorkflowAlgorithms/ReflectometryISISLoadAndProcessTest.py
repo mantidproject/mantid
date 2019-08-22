@@ -433,7 +433,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '12345'
         outputs = ['IvsQ_12345', 'IvsQ_12345_1', 'IvsQ_12345_2', 'IvsQ_binned_12345',
                    'IvsQ_binned_12345_2', 'IvsQ_binned_12345_1', 'IvsLam_12345',
-                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345_1', 'TOF_12345_2']
+                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF', 'TOF_12345_1', 'TOF_12345_2']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['CreateSampleWorkspace', 'AddSampleLog',  'CreateSampleWorkspace', 'AddSampleLog',
                    'GroupWorkspaces', 'ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
