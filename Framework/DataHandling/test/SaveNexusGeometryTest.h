@@ -7,10 +7,10 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_
 #define MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_
 
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
 #include "MantidKernel/ProgressBase.h"
