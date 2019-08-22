@@ -11,9 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 import numpy as np
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib import cm
-from PIL import Image, ImageQt
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QPixmap, QIcon
+from qtpy.QtGui import QPixmap, QIcon, QImage
 from qtpy.QtWidgets import QWidget
 
 from mantid.plots.utility import get_colormap_names
@@ -28,10 +27,11 @@ SCALES = {'Linear': Normalize, 'Logarithmic': LogNorm}
 
 
 def create_colormap_img(cmap_name, width=50, height=20):
-    gradient_array = np.tile(np.linspace(0, 1, width), (height, 1))
     colormap = getattr(cm, cmap_name)
-    pil_img = Image.fromarray(colormap(gradient_array, bytes=True))
-    return ImageQt.ImageQt(pil_img)
+    gradient_array = np.tile(np.linspace(0, 1, width), height)
+    img_array = (colormap(gradient_array)*255).astype(np.uint8)
+    q_img = QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)
+    return q_img
 
 
 class ImagesTabWidgetView(QWidget):
