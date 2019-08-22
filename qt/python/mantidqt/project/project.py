@@ -154,6 +154,7 @@ class Project(AnalysisDataServiceObserver):
         The event that is called when open project is clicked on the main window
         :return: None; if the user cancelled.
         """
+        self.__is_loading = True
         file_name = self._load_file_dialog()
         if file_name is None:
             # Cancel close dialogs
@@ -169,6 +170,7 @@ class Project(AnalysisDataServiceObserver):
 
         self.last_project_location = file_name
         self.__saved = True
+        self.__is_loading = False
 
     def _load(self, file_name):
         project_loader = ProjectLoader(self.project_file_ext)
