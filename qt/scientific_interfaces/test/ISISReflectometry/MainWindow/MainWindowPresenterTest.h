@@ -140,7 +140,7 @@ public:
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, anyBatchAutoreductionResumed());
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -148,7 +148,7 @@ public:
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused());
-    presenter.notifyAutoreductionPaused();
+    presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -285,7 +285,7 @@ private:
     EXPECT_CALL(*batchPresenter, acceptMainPresenter(_)).Times(1);
     EXPECT_CALL(*batchPresenter, initInstrumentList()).Times(1);
     EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(_)).Times(1);
-    EXPECT_CALL(*batchPresenter, reductionPaused()).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyReductionPaused()).Times(1);
     EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused()).Times(1);
   }
 

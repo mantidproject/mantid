@@ -104,13 +104,21 @@ void ExperimentPresenter::updateWidgetEnabledState() {
   updateFloodCorrectionEnabledState();
 }
 
-void ExperimentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyReductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
 void ExperimentPresenter::notifyInstrumentChanged(
     std::string const &instrumentName) {

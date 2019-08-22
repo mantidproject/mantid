@@ -44,10 +44,10 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
-  void reductionResumed() override;
-  void reductionPaused() override;
+  void notifyResumeAutoreductionRequested() override;
+  void notifyPauseAutoreductionRequested() override;
+  void notifyReductionResumed() override;
+  void notifyReductionPaused() override;
   void
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;

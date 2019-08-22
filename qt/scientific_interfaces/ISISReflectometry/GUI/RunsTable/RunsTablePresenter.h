@@ -42,8 +42,8 @@ public:
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
-  void notifyReductionResumed() override;
-  void notifyReductionPaused() override;
+  void notifyResumeReductionRequested() override;
+  void notifyPauseReductionRequested() override;
   void notifyInsertRowRequested() override;
   void notifyInsertGroupRequested() override;
   void notifyDeleteRowRequested() override;
@@ -55,10 +55,10 @@ public:
   void notifyPlotSelectedPressed() override;
   void notifyPlotSelectedStitchedOutputPressed() override;
   void notifyFillDown() override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
 
   // JobTreeViewSubscriber overrides
   void notifyCellTextChanged(

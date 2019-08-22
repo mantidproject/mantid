@@ -32,10 +32,10 @@ public:
   virtual void acceptMainPresenter(IMainWindowPresenter *mainPresenter) = 0;
   virtual void initInstrumentList() = 0;
 
-  virtual void notifyReductionPaused() = 0;
-  virtual void notifyReductionResumed() = 0;
-  virtual void notifyAutoreductionResumed() = 0;
-  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyPauseReductionRequested() = 0;
+  virtual void notifyResumeReductionRequested() = 0;
+  virtual void notifyResumeAutoreductionRequested() = 0;
+  virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
   virtual void
   notifyChangeInstrumentRequested(const std::string &instrumentName) = 0;
@@ -44,7 +44,7 @@ public:
   virtual void notifySettingsChanged() = 0;
   virtual void anyBatchAutoreductionResumed() = 0;
   virtual void anyBatchAutoreductionPaused() = 0;
-  virtual void reductionPaused() = 0;
+  virtual void notifyReductionPaused() = 0;
 
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;

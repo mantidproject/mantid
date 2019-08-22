@@ -205,12 +205,12 @@ void RunsTablePresenter::removeGroupsFromModel(
     removeGroup(m_model.mutableReductionJobs(), *it);
 }
 
-void RunsTablePresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyReductionResumed();
+void RunsTablePresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
-void RunsTablePresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyReductionPaused();
+void RunsTablePresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
 }
 
 void RunsTablePresenter::notifyInsertRowRequested() {
@@ -271,13 +271,19 @@ void RunsTablePresenter::updateWidgetEnabledState() {
                            !processing && !autoreducing);
 }
 
-void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
+void RunsTablePresenter::notifyAutoreductionResumed() {
+  notifyReductionResumed();
+}
 
-void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
+void RunsTablePresenter::notifyAutoreductionPaused() {
+  notifyReductionPaused();
+}
 
 void RunsTablePresenter::notifyInstrumentChanged(
     std::string const &instrumentName) {

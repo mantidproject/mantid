@@ -24,10 +24,10 @@ class IMainWindowPresenter {
 public:
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
-  virtual void notifyAutoreductionResumed() = 0;
-  virtual void notifyAutoreductionPaused() = 0;
-  virtual void reductionResumed() = 0;
-  virtual void reductionPaused() = 0;
+  virtual void notifyResumeAutoreductionRequested() = 0;
+  virtual void notifyPauseAutoreductionRequested() = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
   virtual void
   notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;

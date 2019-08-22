@@ -30,7 +30,7 @@ public:
 
   void testReductionResumed() {
     auto jobRunner = makeJobRunner();
-    jobRunner.reductionResumed();
+    jobRunner.notifyReductionResumed();
     auto const hasSelection = false;
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
@@ -41,14 +41,14 @@ public:
 
   void testReductionPaused() {
     auto jobRunner = makeJobRunner();
-    jobRunner.reductionPaused();
+    jobRunner.notifyReductionPaused();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), false);
     verifyAndClear();
   }
 
   void testAutoreductionResumed() {
     auto jobRunner = makeJobRunner();
-    jobRunner.autoreductionResumed();
+    jobRunner.notifyAutoreductionResumed();
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), true);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
@@ -58,7 +58,7 @@ public:
 
   void testAutoreductionPaused() {
     auto jobRunner = makeJobRunner();
-    jobRunner.autoreductionPaused();
+    jobRunner.notifyAutoreductionPaused();
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     verifyAndClear();
   }

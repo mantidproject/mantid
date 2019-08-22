@@ -38,15 +38,15 @@ public:
 
   void testNotifyReductionResumed() {
     auto presenter = makePresenter(m_view, ReductionJobs());
-    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(1);
-    presenter.notifyReductionResumed();
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested()).Times(1);
+    presenter.notifyResumeReductionRequested();
     verifyAndClearExpectations();
   }
 
   void testNotifyReductionPaused() {
     auto presenter = makePresenter(m_view, ReductionJobs());
-    EXPECT_CALL(m_mainPresenter, notifyReductionPaused()).Times(1);
-    presenter.notifyReductionPaused();
+    EXPECT_CALL(m_mainPresenter, notifyPauseReductionRequested()).Times(1);
+    presenter.notifyPauseReductionRequested();
     verifyAndClearExpectations();
   }
 

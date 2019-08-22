@@ -18,10 +18,10 @@ public:
   MOCK_METHOD1(settingsChanged, void(int));
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
-  MOCK_METHOD0(notifyAutoreductionPaused, void());
-  MOCK_METHOD0(reductionResumed, void());
-  MOCK_METHOD0(reductionPaused, void());
+  MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
+  MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
+  MOCK_METHOD0(notifyReductionResumed, void());
+  MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD1(notifyChangeInstrumentRequested, void(std::string const &));
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());

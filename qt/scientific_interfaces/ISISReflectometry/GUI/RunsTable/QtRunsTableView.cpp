@@ -239,11 +239,11 @@ void QtRunsTableView::onCollapseAllGroupsPressed(bool) {
 }
 
 void QtRunsTableView::onProcessPressed(bool) {
-  m_notifyee->notifyReductionResumed();
+  m_notifyee->notifyResumeReductionRequested();
 }
 
 void QtRunsTableView::onPausePressed(bool) {
-  m_notifyee->notifyReductionPaused();
+  m_notifyee->notifyPauseReductionRequested();
 }
 
 void QtRunsTableView::onInsertRowPressed(bool) {

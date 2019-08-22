@@ -209,7 +209,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.reductionPaused();
+    presenter.notifyReductionPaused();
 
     verifyAndClear();
   }
@@ -219,7 +219,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectProcessing();
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
 
     verifyAndClear();
   }
@@ -229,7 +229,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.autoreductionPaused();
+    presenter.notifyAutoreductionPaused();
 
     verifyAndClear();
   }
@@ -239,7 +239,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectAutoreducing();
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
 
     verifyAndClear();
   }

@@ -93,13 +93,17 @@ void BatchPresenter::notifyUpdateInstrumentRequested() {
 
 void BatchPresenter::notifySettingsChanged() { settingsChanged(); }
 
-void BatchPresenter::notifyReductionResumed() { resumeReduction(); }
+void BatchPresenter::notifyResumeReductionRequested() { resumeReduction(); }
 
-void BatchPresenter::notifyReductionPaused() { pauseReduction(); }
+void BatchPresenter::notifyPauseReductionRequested() { pauseReduction(); }
 
-void BatchPresenter::notifyAutoreductionResumed() { resumeAutoreduction(); }
+void BatchPresenter::notifyResumeAutoreductionRequested() {
+  resumeAutoreduction();
+}
 
-void BatchPresenter::notifyAutoreductionPaused() { pauseAutoreduction(); }
+void BatchPresenter::notifyPauseAutoreductionRequested() {
+  pauseAutoreduction();
+}
 
 void BatchPresenter::notifyAutoreductionCompleted() {
   autoreductionCompleted();
@@ -115,13 +119,13 @@ void BatchPresenter::notifyBatchComplete(bool error) {
     return;
   }
 
-  reductionPaused();
+  notifyReductionPaused();
 }
 
 void BatchPresenter::notifyBatchCancelled() {
-  reductionPaused();
+  notifyReductionPaused();
   // We also stop autoreduction if the user has cancelled
-  autoreductionPaused();
+  notifyAutoreductionPaused();
 }
 
 void BatchPresenter::notifyAlgorithmStarted(
@@ -165,40 +169,40 @@ bool BatchPresenter::startBatch(
 
 void BatchPresenter::resumeReduction() {
   // Update the model
-  m_jobRunner->reductionResumed();
+  m_jobRunner->notifyReductionResumed();
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
   if (algorithms.size() < 1) {
-    reductionPaused();
+    notifyReductionPaused();
     return;
   }
   // Start processing
-  reductionResumed();
+  notifyReductionResumed();
   startBatch(std::move(algorithms));
 }
 
-void BatchPresenter::reductionResumed() {
+void BatchPresenter::notifyReductionResumed() {
   // Notify child presenters
-  m_savePresenter->reductionResumed();
-  m_eventPresenter->reductionResumed();
-  m_experimentPresenter->reductionResumed();
-  m_instrumentPresenter->reductionResumed();
-  m_runsPresenter->reductionResumed();
-  m_mainPresenter->reductionResumed();
+  m_savePresenter->notifyReductionResumed();
+  m_eventPresenter->notifyReductionResumed();
+  m_experimentPresenter->notifyReductionResumed();
+  m_instrumentPresenter->notifyReductionResumed();
+  m_runsPresenter->notifyReductionResumed();
+  m_mainPresenter->notifyReductionResumed();
 }
 
 void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
 
-void BatchPresenter::reductionPaused() {
+void BatchPresenter::notifyReductionPaused() {
   // Update the model
-  m_jobRunner->reductionPaused();
+  m_jobRunner->notifyReductionPaused();
   // Notify child presenters
-  m_savePresenter->reductionPaused();
-  m_eventPresenter->reductionPaused();
-  m_experimentPresenter->reductionPaused();
-  m_instrumentPresenter->reductionPaused();
-  m_runsPresenter->reductionPaused();
-  m_mainPresenter->reductionPaused();
+  m_savePresenter->notifyReductionPaused();
+  m_eventPresenter->notifyReductionPaused();
+  m_experimentPresenter->notifyReductionPaused();
+  m_instrumentPresenter->notifyReductionPaused();
+  m_runsPresenter->notifyReductionPaused();
+  m_mainPresenter->notifyReductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
     notifyAutoreductionCompleted();
@@ -206,46 +210,46 @@ void BatchPresenter::reductionPaused() {
 
 void BatchPresenter::resumeAutoreduction() {
   // Update the model first to ensure the autoprocessing flag is set
-  m_jobRunner->autoreductionResumed();
+  m_jobRunner->notifyAutoreductionResumed();
   // The runs presenter starts autoreduction. This sets off a search to find
   // new runs, if there are any. When the search completes, we'll receive
-  // a separate callback to reductionResumed.
+  // a separate callback to notifyReductionResumed.
   if (m_runsPresenter->resumeAutoreduction())
-    autoreductionResumed();
+    notifyAutoreductionResumed();
   else
-    m_jobRunner->autoreductionPaused();
+    m_jobRunner->notifyAutoreductionPaused();
 }
 
-void BatchPresenter::autoreductionResumed() {
+void BatchPresenter::notifyAutoreductionResumed() {
   // Notify child presenters
-  m_savePresenter->autoreductionResumed();
-  m_eventPresenter->autoreductionResumed();
-  m_experimentPresenter->autoreductionResumed();
-  m_instrumentPresenter->autoreductionResumed();
-  m_runsPresenter->autoreductionResumed();
+  m_savePresenter->notifyAutoreductionResumed();
+  m_eventPresenter->notifyAutoreductionResumed();
+  m_experimentPresenter->notifyAutoreductionResumed();
+  m_instrumentPresenter->notifyAutoreductionResumed();
+  m_runsPresenter->notifyAutoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();
-  m_mainPresenter->notifyAutoreductionResumed();
+  m_mainPresenter->notifyResumeAutoreductionRequested();
 }
 
 void BatchPresenter::pauseAutoreduction() {
   // Update the model
-  m_jobRunner->autoreductionPaused();
+  m_jobRunner->notifyAutoreductionPaused();
   // Stop all processing
   pauseReduction();
   // Notify child presenters
-  autoreductionPaused();
+  notifyAutoreductionPaused();
 }
 
-void BatchPresenter::autoreductionPaused() {
+void BatchPresenter::notifyAutoreductionPaused() {
   // Notify child presenters
-  m_savePresenter->autoreductionPaused();
-  m_eventPresenter->autoreductionPaused();
-  m_experimentPresenter->autoreductionPaused();
-  m_instrumentPresenter->autoreductionPaused();
-  m_runsPresenter->autoreductionPaused();
+  m_savePresenter->notifyAutoreductionPaused();
+  m_eventPresenter->notifyAutoreductionPaused();
+  m_experimentPresenter->notifyAutoreductionPaused();
+  m_instrumentPresenter->notifyAutoreductionPaused();
+  m_runsPresenter->notifyAutoreductionPaused();
 
-  m_mainPresenter->notifyAutoreductionPaused();
+  m_mainPresenter->notifyPauseAutoreductionRequested();
 }
 
 void BatchPresenter::autoreductionCompleted() {

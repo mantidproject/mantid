@@ -178,29 +178,30 @@ public:
 
   void testNotifyReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
-    presenter.notifyReductionResumed();
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested())
+        .Times(AtLeast(1));
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testNotifyReductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyReductionPaused());
-    presenter.notifyReductionPaused();
+    EXPECT_CALL(m_mainPresenter, notifyPauseReductionRequested());
+    presenter.notifyPauseReductionRequested();
     verifyAndClear();
   }
 
   void testNotifyAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyAutoreductionResumed());
-    presenter.notifyAutoreductionResumed();
+    EXPECT_CALL(m_mainPresenter, notifyResumeAutoreductionRequested());
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
   void testNotifyAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyAutoreductionPaused());
-    presenter.notifyAutoreductionPaused();
+    EXPECT_CALL(m_mainPresenter, notifyPauseAutoreductionRequested());
+    presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -275,17 +276,17 @@ public:
   void testAutoreductionResumed() {
     auto presenter = makePresenter();
     expectWidgetsEnabledForAutoreducing();
-    EXPECT_CALL(*m_runsTablePresenter, autoreductionResumed()).Times(1);
-    presenter.autoreductionResumed();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAutoreductionResumed()).Times(1);
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
   void testAutoreductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(*m_runsTablePresenter, autoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyAutoreductionPaused()).Times(1);
     expectWidgetsEnabledForPaused();
-    presenter.autoreductionPaused();
+    presenter.notifyAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -337,7 +338,8 @@ public:
   void testNotifySearchResultsResumesReductionWhenAutoreducing() {
     auto presenter = makePresenter();
     expectIsAutoreducing();
-    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested())
+        .Times(AtLeast(1));
     presenter.notifySearchComplete();
     verifyAndClear();
   }

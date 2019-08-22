@@ -39,10 +39,10 @@ public:
 
   virtual void mergeAdditionalJobs(ReductionJobs const &jobs) = 0;
 
-  virtual void reductionPaused() = 0;
-  virtual void reductionResumed() = 0;
-  virtual void autoreductionPaused() = 0;
-  virtual void autoreductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void settingsChanged() = 0;
 };

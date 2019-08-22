@@ -99,22 +99,22 @@ public:
 
   void testModelUpdatedWhenReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, reductionResumed()).Times(1);
-    presenter.notifyReductionResumed();
+    EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testBatchIsExecutedWhenReductionResumed() {
     auto presenter = makePresenter();
     expectBatchIsExecuted();
-    presenter.notifyReductionResumed();
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenReductionResumed() {
     auto presenter = makePresenter();
     expectReductionResumed();
-    presenter.notifyReductionResumed();
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
@@ -151,27 +151,27 @@ public:
         .Times(AtLeast(1))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
-    presenter.notifyReductionResumed();
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testAutoreductionNotCompletedWhenReductionResumedWithRemainingJobs() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(0);
-    presenter.notifyReductionResumed();
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
-    presenter.notifyReductionPaused();
+    presenter.notifyPauseReductionRequested();
     verifyAndClear();
   }
 
   void testModelUpdatedWhenBatchCancelled() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, reductionPaused()).Times(1);
+    EXPECT_CALL(*m_jobRunner, notifyReductionPaused()).Times(1);
     presenter.notifyBatchCancelled();
     verifyAndClear();
   }
@@ -186,16 +186,16 @@ public:
 
   void testModelUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, autoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(0);
-    presenter.notifyAutoreductionResumed();
+    EXPECT_CALL(*m_jobRunner, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_jobRunner, notifyAutoreductionPaused()).Times(0);
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
   void testRunsPresenterCalledWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, resumeAutoreduction()).Times(1);
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -204,15 +204,15 @@ public:
     EXPECT_CALL(*m_runsPresenter, resumeAutoreduction())
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(1);
-    presenter.notifyAutoreductionResumed();
+    EXPECT_CALL(*m_jobRunner, notifyAutoreductionPaused()).Times(1);
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     expectAutoreductionResumed();
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -221,33 +221,33 @@ public:
     EXPECT_CALL(*m_runsPresenter, resumeAutoreduction())
         .Times(1)
         .WillOnce(Return(false));
-    EXPECT_CALL(*m_savePresenter, autoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_eventPresenter, autoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_experimentPresenter, autoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_instrumentPresenter, autoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_runsPresenter, autoreductionResumed()).Times(0);
-    presenter.notifyAutoreductionResumed();
+    EXPECT_CALL(*m_savePresenter, notifyAutoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_eventPresenter, notifyAutoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(0);
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
   void testModelUpdatedWhenAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_jobRunner, autoreductionPaused()).Times(1);
-    presenter.notifyAutoreductionPaused();
+    EXPECT_CALL(*m_jobRunner, notifyAutoreductionPaused()).Times(1);
+    presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
 
   void testBatchIsCancelledWhenAutoreductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, cancelAlgorithmQueue()).Times(1);
-    presenter.notifyAutoreductionPaused();
+    presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenAutoreductionPaused() {
     auto presenter = makePresenter();
     expectAutoreductionPaused();
-    presenter.notifyAutoreductionPaused();
+    presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -502,36 +502,36 @@ private:
   }
 
   void expectReductionResumed() {
-    EXPECT_CALL(*m_savePresenter, reductionResumed()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, reductionResumed()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, reductionResumed()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, reductionResumed()).Times(1);
-    EXPECT_CALL(*m_runsPresenter, reductionResumed()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyReductionResumed()).Times(1);
   }
 
   void expectReductionPaused() {
-    EXPECT_CALL(*m_savePresenter, reductionPaused()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, reductionPaused()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, reductionPaused()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, reductionPaused()).Times(1);
-    EXPECT_CALL(*m_runsPresenter, reductionPaused()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyReductionPaused()).Times(1);
   }
 
   void expectAutoreductionResumed() {
-    EXPECT_CALL(*m_savePresenter, autoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, autoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, autoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, autoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_runsPresenter, autoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
   }
 
   void expectAutoreductionPaused() {
-    EXPECT_CALL(*m_savePresenter, autoreductionPaused()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, autoreductionPaused()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, autoreductionPaused()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, autoreductionPaused()).Times(1);
-    EXPECT_CALL(*m_runsPresenter, autoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_runsPresenter, notifyAutoreductionPaused()).Times(1);
   }
 
   void expectBatchIsExecuted() {

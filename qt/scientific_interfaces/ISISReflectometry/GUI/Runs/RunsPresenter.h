@@ -77,18 +77,18 @@ public:
   int percentComplete() const override;
   void
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
-  void notifyReductionResumed() override;
-  void notifyReductionPaused() override;
+  void notifyResumeReductionRequested() override;
+  void notifyPauseReductionRequested() override;
   void notifyRowStateChanged() override;
   void notifyRowStateChanged(boost::optional<Item const &> item) override;
   void notifyRowOutputsChanged() override;
   void notifyRowOutputsChanged(boost::optional<Item const &> item) override;
 
-  void reductionPaused() override;
-  void reductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
   bool resumeAutoreduction() override;
-  void autoreductionResumed() override;
-  void autoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
   void autoreductionCompleted() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
@@ -97,8 +97,8 @@ public:
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
+  void notifyResumeAutoreductionRequested() override;
+  void notifyPauseAutoreductionRequested() override;
   void notifyTransfer() override;
   void notifyChangeInstrumentRequested() override;
   void notifyStartMonitor() override;

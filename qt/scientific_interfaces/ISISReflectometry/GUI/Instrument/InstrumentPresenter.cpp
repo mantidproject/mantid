@@ -99,13 +99,21 @@ void InstrumentPresenter::updateWidgetValidState() {
     m_view->showMonitorIntegralRangeInvalid();
 }
 
-void InstrumentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyReductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
 void InstrumentPresenter::notifyInstrumentChanged(
     std::string const &instrumentName) {

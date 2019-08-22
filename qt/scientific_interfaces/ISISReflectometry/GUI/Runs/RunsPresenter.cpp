@@ -111,7 +111,7 @@ void RunsPresenter::notifySearchComplete() {
 
 void RunsPresenter::notifySearchFailed() {
   if (isAutoreducing()) {
-    notifyAutoreductionPaused();
+    notifyPauseAutoreductionRequested();
   }
 }
 
@@ -130,20 +130,20 @@ void RunsPresenter::notifyChangeInstrumentRequested(
   m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void RunsPresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyReductionResumed();
+void RunsPresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
-void RunsPresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyReductionPaused();
+void RunsPresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
 }
 
-void RunsPresenter::notifyAutoreductionResumed() {
-  m_mainPresenter->notifyAutoreductionResumed();
+void RunsPresenter::notifyResumeAutoreductionRequested() {
+  m_mainPresenter->notifyResumeAutoreductionRequested();
 }
 
-void RunsPresenter::notifyAutoreductionPaused() {
-  m_mainPresenter->notifyAutoreductionPaused();
+void RunsPresenter::notifyPauseAutoreductionRequested() {
+  m_mainPresenter->notifyPauseAutoreductionRequested();
 }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
@@ -169,15 +169,15 @@ void RunsPresenter::notifyRowOutputsChanged(
   tablePresenter()->notifyRowOutputsChanged(item);
 }
 
-void RunsPresenter::reductionResumed() {
+void RunsPresenter::notifyReductionResumed() {
   updateWidgetEnabledState();
-  tablePresenter()->reductionResumed();
+  tablePresenter()->notifyReductionResumed();
   notifyRowStateChanged();
 }
 
-void RunsPresenter::reductionPaused() {
+void RunsPresenter::notifyReductionPaused() {
   updateWidgetEnabledState();
-  tablePresenter()->reductionPaused();
+  tablePresenter()->notifyReductionPaused();
 }
 
 /** Resume autoreduction. Clears any existing table data first and then
@@ -212,17 +212,17 @@ bool RunsPresenter::resumeAutoreduction() {
   return true;
 }
 
-void RunsPresenter::autoreductionResumed() {
+void RunsPresenter::notifyAutoreductionResumed() {
   updateWidgetEnabledState();
-  tablePresenter()->autoreductionResumed();
+  tablePresenter()->notifyAutoreductionResumed();
   m_progressView->setAsEndlessIndicator();
 }
 
-void RunsPresenter::autoreductionPaused() {
+void RunsPresenter::notifyAutoreductionPaused() {
   m_runNotifier->stopPolling();
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
-  tablePresenter()->autoreductionPaused();
+  tablePresenter()->notifyAutoreductionPaused();
 }
 
 void RunsPresenter::anyBatchAutoreductionResumed() {
@@ -286,7 +286,7 @@ void RunsPresenter::autoreduceNewRuns() {
   if (rowsToTransfer.size() > 0)
     transfer(rowsToTransfer, TransferMatch::Strict);
 
-  m_mainPresenter->notifyReductionResumed();
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
 bool RunsPresenter::isProcessing() const {

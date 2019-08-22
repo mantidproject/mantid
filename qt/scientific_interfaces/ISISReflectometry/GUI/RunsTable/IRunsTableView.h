@@ -17,8 +17,8 @@ namespace ISISReflectometry {
 class RunsTableViewSubscriber
     : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
 public:
-  virtual void notifyReductionResumed() = 0;
-  virtual void notifyReductionPaused() = 0;
+  virtual void notifyResumeReductionRequested() = 0;
+  virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyInsertRowRequested() = 0;
   virtual void notifyInsertGroupRequested() = 0;
   virtual void notifyDeleteRowRequested() = 0;

@@ -56,10 +56,10 @@ public:
   // IBatchPresenter overrides
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;
   void initInstrumentList() override;
-  void notifyReductionPaused() override;
-  void notifyReductionResumed() override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
+  void notifyPauseReductionRequested() override;
+  void notifyResumeReductionRequested() override;
+  void notifyResumeAutoreductionRequested() override;
+  void notifyPauseAutoreductionRequested() override;
   void notifyAutoreductionCompleted() override;
   void
   notifyChangeInstrumentRequested(const std::string &instrumentName) override;
@@ -68,7 +68,7 @@ public:
   void notifySettingsChanged() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
-  void reductionPaused() override;
+  void notifyReductionPaused() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -88,12 +88,12 @@ private:
   bool
   startBatch(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms);
   void resumeReduction();
-  void reductionResumed();
+  void notifyReductionResumed();
   void pauseReduction();
   void resumeAutoreduction();
-  void autoreductionResumed();
+  void notifyAutoreductionResumed();
   void pauseAutoreduction();
-  void autoreductionPaused();
+  void notifyAutoreductionPaused();
   void autoreductionCompleted();
   void settingsChanged();
 

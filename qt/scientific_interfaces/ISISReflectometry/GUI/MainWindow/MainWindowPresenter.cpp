@@ -77,23 +77,25 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
   }
 }
 
-void MainWindowPresenter::notifyAutoreductionResumed() {
+void MainWindowPresenter::notifyResumeAutoreductionRequested() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
 }
 
-void MainWindowPresenter::notifyAutoreductionPaused() {
+void MainWindowPresenter::notifyPauseAutoreductionRequested() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionPaused();
   }
 }
 
 // Called on autoreduction normal reduction
-void MainWindowPresenter::reductionResumed() { disableSaveAndLoadBatch(); }
+void MainWindowPresenter::notifyReductionResumed() {
+  disableSaveAndLoadBatch();
+}
 
 // Called on autoreduction normal reduction
-void MainWindowPresenter::reductionPaused() { enableSaveAndLoadBatch(); }
+void MainWindowPresenter::notifyReductionPaused() { enableSaveAndLoadBatch(); }
 
 void MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
@@ -143,7 +145,7 @@ void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
   batchPresenter->notifyInstrumentChanged(instrument);
 
   // starts in the paused state
-  batchPresenter->reductionPaused();
+  batchPresenter->notifyReductionPaused();
 
   // Ensure autoreduce button is enabled/disabled correctly for the new batch
   if (isAnyBatchAutoreducing())

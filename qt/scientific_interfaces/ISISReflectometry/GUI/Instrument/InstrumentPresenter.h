@@ -36,10 +36,10 @@ public:
 
   // IInstrumentPresenver overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 
