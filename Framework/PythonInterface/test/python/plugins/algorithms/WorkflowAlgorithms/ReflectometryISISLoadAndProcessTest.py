@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid import config
-from mantid.api import mtd
+from mantid.api import mtd, AnalysisDataService
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, CreateSampleWorkspace,
                               CropWorkspace, GroupWorkspaces, Rebin)
 from testhelpers import (assertRaisesNothing, create_algorithm)
@@ -433,7 +433,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['InputRunList'] = '12345'
         outputs = ['IvsQ_12345', 'IvsQ_12345_1', 'IvsQ_12345_2', 'IvsQ_binned_12345',
                    'IvsQ_binned_12345_2', 'IvsQ_binned_12345_1', 'IvsLam_12345',
-                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345_1', 'TOF_12345_2', 'TOF']
+                   'IvsLam_12345_1', 'IvsLam_12345_2', 'TOF_12345_1', 'TOF_12345_2']
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ['CreateSampleWorkspace', 'AddSampleLog',  'CreateSampleWorkspace', 'AddSampleLog',
                    'GroupWorkspaces', 'ReflectometryReductionOneAuto', 'ReflectometryReductionOneAuto',
@@ -441,9 +441,52 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._check_history(mtd['IvsQ_binned_12345_1'], history, False)
 
     def test_TOF_input_workspace_groups_collapsed(self):
-        workspaces = [self._create_workspace(12345, 'TOF_'), self._create_workspace_group(67890, 2, 'TOF_')]
-        output_workspaces = ['TOF_12345', 'TOF_67890_1', 'TOF_67890_2']
-        self.assertEqual(self._collape_workspace_groups(workspaces), output_workspaces)
+        self._create_workspace_group(13460, 2, 'TOF_')
+        self._create_workspace(13463, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '13460, 13463'
+        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13460_1',
+                   'TOF_13460_2', 'TOF_13463']
+
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        workspace_names = AnalysisDataService.getObjectNames()
+        self.assertNotIn('TOF_13460', workspace_names)
+        self.assertIn('TOF_13460_1', workspace_names)
+        self.assertIn('TOF_13460_2', workspace_names)
+        self.assertIn('TOF_13463', workspace_names)
+
+    def test_mixed_unit_input_workspace_groups_collapsed(self):
+        self._create_workspace(13460, 'TOF_')
+        self._create_workspace(13463, 'TOF_')
+        self._create_workspace(12345)
+        GroupWorkspaces('TOF_13463, 12345', OutputWorkspace='mixed_unit_group')
+        args = self._default_options
+        args['InputRunList'] = '13460, 13463, 12345'
+        outputs = ['IvsQ_13460+13463+12345', 'IvsQ_binned_13460+13463+12345', 'TOF', 'TOF_13460+13463', 'TOF_13460',
+                   'TOF_13463']
+
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        workspace_names = AnalysisDataService.getObjectNames()
+        self.assertNotIn('mixed_unit_group', workspace_names)
+        self.assertIn('TOF_13460', workspace_names)
+        self.assertIn('TOF_13463', workspace_names)
+
+    def test_no_TOF_input_workspace_groups_collapsed(self):
+        self._create_workspace(12345)
+        self._create_workspace(67890)
+        GroupWorkspaces('12345, 67890', OutputWorkspace='no_TOF_group')
+        args = self._default_options
+        args['InputRunList'] = '12345, 67890'
+        outputs = []
+
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        workspace_names = AnalysisDataService.getObjectNames()
+        self.assertNotIn('no_TOF_group', workspace_names)
+        self.assertNotIn('12345', workspace_names)
+        self.assertNotIn('67890', workspace_names)
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
