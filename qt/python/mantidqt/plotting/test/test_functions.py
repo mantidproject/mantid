@@ -281,6 +281,5 @@ class FunctionsTest(TestCase):
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
 
-
 if __name__ == '__main__':
     main()
