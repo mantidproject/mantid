@@ -22,9 +22,6 @@
        <origin val="beam" /> 
      </reference-frame>
      <offsets spherical="vectors" />
-     <!-- Comment "components-are-facing" out if you dont want the
-     components defined in this file to face a position by default -->    
-     <components-are-facing x="0.0" y="0.0" z="0.0" />
      <default-view view="cylindrical_y"/>
    </defaults>
    <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
@@ -68,80 +65,80 @@
      <algebra val="some-shape" />
    </type>
  
- <!-- bottom = 56pixels * 0.00703/4 = 0.0984 -->
+ <!-- delta = 56pixels * 0.00703/4 = 0.0984 -->
 <type name="detector_panel">
  <component type="panel">
-<location  x="0.00" z="0.98" y="0.0984" name="detector_panel" > <facing x="0" y="0" z="0"/> </location>
+<location  x="0.00" z="0.98" y="-0.0984" name="detector_panel" >  </location>
  </component>
  </type>
 
  <type name="panel">
  <properties />
  <component type="tube"> <!-- All tubes identical. 256 pixels not 512. pixel height = 0.00703/4 m,  tube width =, r (source - detector) 0.98m, 0.0225 radian spacing of tubes, 64 tubes in bank, eq plane = 56 pixels up. Detector rotation (gamma) as nx-log link. -->
-     <location r="0.98" t="0.0" name="tube0" />
-     <location r="0.98" t="0.0225" name="tube1" />
-     <location r="0.98" t="0.045" name="tube2" />
-     <location r="0.98" t="0.0675" name="tube3" />
-     <location r="0.98" t="0.09" name="tube4" />
-     <location r="0.98" t="0.11249999999999999" name="tube5" />
-     <location r="0.98" t="0.135" name="tube6" />
-     <location r="0.98" t="0.1575" name="tube7" />
-     <location r="0.98" t="0.18" name="tube8" />
-     <location r="0.98" t="0.20249999999999999" name="tube9" />
-     <location r="0.98" t="0.22499999999999998" name="tube10" />
-     <location r="0.98" t="0.2475" name="tube11" />
-     <location r="0.98" t="0.27" name="tube12" />
-     <location r="0.98" t="0.2925" name="tube13" />
-     <location r="0.98" t="0.315" name="tube14" />
-     <location r="0.98" t="0.33749999999999997" name="tube15" />
-     <location r="0.98" t="0.36" name="tube16" />
-     <location r="0.98" t="0.3825" name="tube17" />
-     <location r="0.98" t="0.40499999999999997" name="tube18" />
-     <location r="0.98" t="0.4275" name="tube19" />
-     <location r="0.98" t="0.44999999999999996" name="tube20" />
-     <location r="0.98" t="0.4725" name="tube21" />
-     <location r="0.98" t="0.495" name="tube22" />
-     <location r="0.98" t="0.5175" name="tube23" />
-     <location r="0.98" t="0.54" name="tube24" />
-     <location r="0.98" t="0.5625" name="tube25" />
-     <location r="0.98" t="0.585" name="tube26" />
-     <location r="0.98" t="0.6074999999999999" name="tube27" />
-     <location r="0.98" t="0.63" name="tube28" />
-     <location r="0.98" t="0.6525" name="tube29" />
-     <location r="0.98" t="0.6749999999999999" name="tube30" />
-     <location r="0.98" t="0.6975" name="tube31" />
-     <location r="0.98" t="0.72" name="tube32" />
-     <location r="0.98" t="0.7424999999999999" name="tube33" />
-     <location r="0.98" t="0.765" name="tube34" />
-     <location r="0.98" t="0.7875" name="tube35" />
-     <location r="0.98" t="0.8099999999999999" name="tube36" />
-     <location r="0.98" t="0.8325" name="tube37" />
-     <location r="0.98" t="0.855" name="tube38" />
-     <location r="0.98" t="0.8775" name="tube39" />
-     <location r="0.98" t="0.8999999999999999" name="tube40" />
-     <location r="0.98" t="0.9225" name="tube41" />
-     <location r="0.98" t="0.945" name="tube42" />
-     <location r="0.98" t="0.9674999999999999" name="tube43" />
-     <location r="0.98" t="0.99" name="tube44" />
-     <location r="0.98" t="1.0125" name="tube45" />
-     <location r="0.98" t="1.035" name="tube46" />
-     <location r="0.98" t="1.0574999999999999" name="tube47" />
-     <location r="0.98" t="1.08" name="tube48" />
-     <location r="0.98" t="1.1025" name="tube49" />
-     <location r="0.98" t="1.125" name="tube50" />
-     <location r="0.98" t="1.1475" name="tube51" />
-     <location r="0.98" t="1.17" name="tube52" />
-     <location r="0.98" t="1.1925" name="tube53" />
-     <location r="0.98" t="1.2149999999999999" name="tube54" />
-     <location r="0.98" t="1.2375" name="tube55" />
-     <location r="0.98" t="1.26" name="tube56" />
-     <location r="0.98" t="1.2825" name="tube57" />
-     <location r="0.98" t="1.305" name="tube58" />
-     <location r="0.98" t="1.3275" name="tube59" />
-     <location r="0.98" t="1.3499999999999999" name="tube60" />
-     <location r="0.98" t="1.3725" name="tube61" />
-     <location r="0.98" t="1.395" name="tube62" />
-     <location r="0.98" t="1.4175" name="tube63" />
+<location r="0.98" t="0.0" name="tube0" />
+<location r="0.98" t="1.2891550390443522" name="tube1" />
+<location r="0.98" t="2.5783100780887045" name="tube2" />
+<location r="0.98" t="3.8674651171330567" name="tube3" />
+<location r="0.98" t="5.156620156177409" name="tube4" />
+<location r="0.98" t="6.445775195221762" name="tube5" />
+<location r="0.98" t="7.7349302342661135" name="tube6" />
+<location r="0.98" t="9.024085273310465" name="tube7" />
+<location r="0.98" t="10.313240312354818" name="tube8" />
+<location r="0.98" t="11.60239535139917" name="tube9" />
+<location r="0.98" t="12.891550390443523" name="tube10" />
+<location r="0.98" t="14.180705429487874" name="tube11" />
+<location r="0.98" t="15.469860468532227" name="tube12" />
+<location r="0.98" t="16.759015507576578" name="tube13" />
+<location r="0.98" t="18.04817054662093" name="tube14" />
+<location r="0.98" t="19.337325585665283" name="tube15" />
+<location r="0.98" t="20.626480624709636" name="tube16" />
+<location r="0.98" t="21.91563566375399" name="tube17" />
+<location r="0.98" t="23.20479070279834" name="tube18" />
+<location r="0.98" t="24.493945741842694" name="tube19" />
+<location r="0.98" t="25.783100780887047" name="tube20" />
+<location r="0.98" t="27.072255819931396" name="tube21" />
+<location r="0.98" t="28.36141085897575" name="tube22" />
+<location r="0.98" t="29.6505658980201" name="tube23" />
+<location r="0.98" t="30.939720937064454" name="tube24" />
+<location r="0.98" t="32.2288759761088" name="tube25" />
+<location r="0.98" t="33.518031015153156" name="tube26" />
+<location r="0.98" t="34.80718605419751" name="tube27" />
+<location r="0.98" t="36.09634109324186" name="tube28" />
+<location r="0.98" t="37.385496132286214" name="tube29" />
+<location r="0.98" t="38.67465117133057" name="tube30" />
+<location r="0.98" t="39.96380621037492" name="tube31" />
+<location r="0.98" t="41.25296124941927" name="tube32" />
+<location r="0.98" t="42.542116288463625" name="tube33" />
+<location r="0.98" t="43.83127132750798" name="tube34" />
+<location r="0.98" t="45.12042636655233" name="tube35" />
+<location r="0.98" t="46.40958140559668" name="tube36" />
+<location r="0.98" t="47.698736444641035" name="tube37" />
+<location r="0.98" t="48.98789148368539" name="tube38" />
+<location r="0.98" t="50.27704652272974" name="tube39" />
+<location r="0.98" t="51.56620156177409" name="tube40" />
+<location r="0.98" t="52.85535660081844" name="tube41" />
+<location r="0.98" t="54.14451163986279" name="tube42" />
+<location r="0.98" t="55.433666678907144" name="tube43" />
+<location r="0.98" t="56.7228217179515" name="tube44" />
+<location r="0.98" t="58.01197675699585" name="tube45" />
+<location r="0.98" t="59.3011317960402" name="tube46" />
+<location r="0.98" t="60.590286835084555" name="tube47" />
+<location r="0.98" t="61.87944187412891" name="tube48" />
+<location r="0.98" t="63.16859691317326" name="tube49" />
+<location r="0.98" t="64.4577519522176" name="tube50" />
+<location r="0.98" t="65.74690699126197" name="tube51" />
+<location r="0.98" t="67.03606203030631" name="tube52" />
+<location r="0.98" t="68.32521706935067" name="tube53" />
+<location r="0.98" t="69.61437210839502" name="tube54" />
+<location r="0.98" t="70.90352714743938" name="tube55" />
+<location r="0.98" t="72.19268218648372" name="tube56" />
+<location r="0.98" t="73.48183722552808" name="tube57" />
+<location r="0.98" t="74.77099226457243" name="tube58" />
+<location r="0.98" t="76.06014730361679" name="tube59" />
+<location r="0.98" t="77.34930234266113" name="tube60" />
+<location r="0.98" t="78.63845738170549" name="tube61" />
+<location r="0.98" t="79.92761242074984" name="tube62" />
+<location r="0.98" t="81.2167674597942" name="tube63" />
  </component>
  
  </type>
