@@ -14,6 +14,7 @@ import unittest
 
 # third-party library imports
 import matplotlib
+
 matplotlib.use('AGG')  # noqa
 import numpy as np
 import matplotlib.pyplot as plt
@@ -158,10 +159,12 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
-        self._test_toggle_normalization(errorbars_on=False, plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+        self._test_toggle_normalization(errorbars_on=False,
+                                        plot_kwargs={'distribution': True, 'autoscale_on_update': False})
 
     def test_normalization_toggle_with_no_autoscale_on_update_with_errors(self):
-        self._test_toggle_normalization(errorbars_on=True, plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+        self._test_toggle_normalization(errorbars_on=True,
+                                        plot_kwargs={'distribution': True, 'autoscale_on_update': False})
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
@@ -232,4 +235,3 @@ class FigureInteractionTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
