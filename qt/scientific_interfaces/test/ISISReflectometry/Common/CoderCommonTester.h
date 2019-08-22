@@ -8,12 +8,14 @@
 #ifndef CODER_COMMON_TESTER_H_
 #define CODER_COMMON_TESTER_H_
 
+#include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
 #include "../../../ISISReflectometry/GUI/Batch/QtBatchView.h"
 #include "../../../ISISReflectometry/GUI/Common/Decoder.h"
 #include "../../../ISISReflectometry/GUI/Experiment/QtExperimentView.h"
 #include "../../../ISISReflectometry/GUI/Instrument/QtInstrumentView.h"
 #include "../../../ISISReflectometry/GUI/MainWindow/QtMainWindowView.h"
 #include "../../../ISISReflectometry/GUI/Runs/QtRunsView.h"
+#include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/QtRunsTableView.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "../../../ISISReflectometry/GUI/Save/QtSaveView.h"

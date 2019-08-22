@@ -6,7 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "Encoder.h"
+#include "../../Reduction/Group.h"
+#include "../../Reduction/ReductionJobs.h"
+#include "../../Reduction/ReductionWorkspaces.h"
+#include "../../Reduction/Row.h"
+#include "../Batch/BatchPresenter.h"
+#include "../Batch/QtBatchView.h"
+#include "../Experiment/QtExperimentView.h"
+#include "../Instrument/QtInstrumentView.h"
+#include "../MainWindow/QtMainWindowView.h"
+#include "../Runs/QtRunsView.h"
+#include "../Runs/RunsPresenter.h"
+#include "../RunsTable/QtRunsTableView.h"
 #include "../RunsTable/RunsTablePresenter.h"
+#include "../Save/QtSaveView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

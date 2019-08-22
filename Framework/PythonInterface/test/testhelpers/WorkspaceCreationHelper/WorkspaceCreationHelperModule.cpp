@@ -45,7 +45,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
-BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
+BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
   using namespace boost::python;
 
   // Doc string options - User defined, python arguments, C++ call signatures

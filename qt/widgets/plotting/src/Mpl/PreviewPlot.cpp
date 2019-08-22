@@ -130,6 +130,7 @@ void PreviewPlot::addSpectrum(const QString &lineName,
     axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
                   plotKwargs);
   } else {
+    m_lines[lineName] = false;
     axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
               plotKwargs);
   }
@@ -165,6 +166,7 @@ void PreviewPlot::addSpectrum(const QString &lineName, const QString &wsName,
 void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
   axes.removeArtists("lines", lineName);
+  m_lines.remove(lineName);
 }
 
 /**
@@ -499,6 +501,13 @@ void PreviewPlot::createActions() {
  */
 bool PreviewPlot::legendIsVisible() const {
   return m_contextLegend->isChecked();
+}
+
+/**
+ * @return True if the PreviewPlot has a line with the specified name
+ */
+bool PreviewPlot::hasCurve(const QString &lineName) const {
+  return m_lines.contains(lineName);
 }
 
 /**

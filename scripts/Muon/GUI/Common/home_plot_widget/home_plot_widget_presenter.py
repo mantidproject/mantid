@@ -194,8 +194,10 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         try:
             runs = ""
+            seperator = ""
             for run in self.context.data_context.current_runs:
-                runs += ", " + str(run[0])
+                runs += seperator + str(run[0])
+                seperator = ", "
             workspace_list = self.context.get_names_of_frequency_domain_workspaces_to_fit(
                 runs, current_group_pair, True, plot_type[len(FREQ_PLOT_TYPE):])
 

@@ -578,6 +578,7 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
+  inc/MantidQtWidgets/Common/MockAlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
   inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
