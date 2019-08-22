@@ -159,7 +159,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
-
 };
 
 #endif /* MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_ */
