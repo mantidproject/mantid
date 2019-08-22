@@ -59,6 +59,20 @@
      <algebra val="some-shape" />
    </type>
  
+  <!-- Monitor position -->
+  <component type="monitor" idlist="monitors">
+    <location z="-0.5" name="monitor" />
+  </component>
+
+  <type name="monitor" is="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.004" y="-0.004" z="-0.001" />
+      <left-front-top-point x="-0.004" y="0.004" z="-0.001" />
+      <left-back-bottom-point x="-0.004" y="-0.004" z="0.001" />
+      <right-front-bottom-point x="0.004" y="-0.004" z="-0.001" />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
  <!-- delta = 56pixels * 0.00703/4 = 0.0984 -->
 <type name="detector_panel">
  <component type="panel">
@@ -412,6 +426,11 @@
   </type>
  
    <!-- DETECTOR ID LISTS -->
+	   
+  <idlist idname="monitors">
+    <id val="0" />
+  </idlist>
+
   <idlist idname="detector_panel">
 <id start="100" end="355" />
 <id start="356" end="611" />
