@@ -12,7 +12,6 @@ import os
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
 
-from mantid import logger
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantid.kernel import ConfigService
 from mantidqt.io import open_a_file_dialog

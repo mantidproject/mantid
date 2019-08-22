@@ -28,6 +28,7 @@ if sys.version_info.major >= 3:
 class FakeEncoder(object):
     def encode(self, _, __):
         return {}
+
     def tags(self):
         return ["FakeEncoder"]
 
