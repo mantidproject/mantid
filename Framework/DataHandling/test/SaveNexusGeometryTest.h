@@ -11,13 +11,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/Glob.h>
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -161,6 +159,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
+
 };
 
 #endif /* MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_ */
