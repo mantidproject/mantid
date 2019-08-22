@@ -17,6 +17,8 @@ Improvements
 
 - Attempting to save files that are larger than (by default) 10GB now results in a dialog box to inform the user that it may take a long time and gives them the opportunity to cancel.
 
+- The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
+
 Bugfixes
 ########
 - Clicking Cancel after attempting to save a project upon closing now keeps Workbench open instead of closing without saving.
