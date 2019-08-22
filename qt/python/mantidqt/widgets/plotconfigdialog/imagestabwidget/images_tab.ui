@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>361</width>
-    <height>345</height>
+    <height>367</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -372,6 +372,7 @@
   <tabstop>select_image_combo_box</tabstop>
   <tabstop>label_line_edit</tabstop>
   <tabstop>colormap_combo_box</tabstop>
+  <tabstop>reverse_colormap_check_box</tabstop>
   <tabstop>min_value_spin_box</tabstop>
   <tabstop>max_value_spin_box</tabstop>
   <tabstop>interpolation_combo_box</tabstop>

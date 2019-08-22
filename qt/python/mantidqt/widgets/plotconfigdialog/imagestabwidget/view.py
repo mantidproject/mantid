@@ -30,8 +30,7 @@ def create_colormap_img(cmap_name, width=50, height=20):
     colormap = getattr(cm, cmap_name)
     gradient_array = np.tile(np.linspace(0, 1, width), height)
     img_array = (colormap(gradient_array)*255).astype(np.uint8)
-    q_img = QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)
-    return q_img
+    return QImage(img_array, width, height, QImage.Format_RGBA8888_Premultiplied)
 
 
 class ImagesTabWidgetView(QWidget):
