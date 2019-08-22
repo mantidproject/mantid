@@ -32,6 +32,9 @@ class Project(AnalysisDataServiceObserver):
         # Has the project been saved, to Access this call .saved
         self.__saved = True
 
+        self.__is_saving = False
+        self.__is_loading = False
+
         # Last save locations
         self.last_project_location = None
 
@@ -52,7 +55,15 @@ class Project(AnalysisDataServiceObserver):
     def __get_saved(self):
         return self.__saved
 
+    def __get_is_saving(self):
+        return self.__is_saving
+
+    def __get_is_loading(self):
+        return self.__is_loading
+
     saved = property(__get_saved)
+    is_saving = property(__get_is_saving)
+    is_loading = property(__get_is_loading)
 
     def save(self):
         """
@@ -107,6 +118,7 @@ class Project(AnalysisDataServiceObserver):
                                   file_filter="Project files ( *" + self.project_file_ext + ")")
 
     def _save(self):
+        self.__is_saving = True
         workspaces_to_save = AnalysisDataService.getObjectNames()
         # Calculate the size of the workspaces in the project.
         project_size = self._get_project_size(workspaces_to_save)
@@ -122,6 +134,13 @@ class Project(AnalysisDataServiceObserver):
             project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
                                        plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
             self.__saved = True
+        self.__is_saving = False
+
+    @staticmethod
+    def inform_user_not_possible():
+        return QMessageBox().information(None, "That action is not possible!",
+                                         "You cannot at present exit workbench whilst it is saving or loading a "
+                                         "project")
 
     @staticmethod
     def _get_project_size(workspace_names):

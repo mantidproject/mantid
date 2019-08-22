@@ -520,6 +520,11 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
+        if self.project.is_saving or self.project.is_loading:
+            event.ignore()
+            self.project.inform_user_not_possible()
+            return
+
         # Check whether or not to save project
         if not self.project.saved:
             # Offer save
