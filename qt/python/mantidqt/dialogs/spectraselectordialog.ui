@@ -73,6 +73,11 @@
          <string>Individual</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Tiled</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
