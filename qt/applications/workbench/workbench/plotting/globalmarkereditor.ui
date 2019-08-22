@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>382</width>
-    <height>136</height>
+    <height>205</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,11 +54,17 @@
     <widget class="QComboBox" name="marker"/>
    </item>
    <item row="2" column="0" colspan="2">
-    <widget class="QLabel" name="placeHolder">
-     <property name="text">
-      <string>TextLabel</string>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-    </widget>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

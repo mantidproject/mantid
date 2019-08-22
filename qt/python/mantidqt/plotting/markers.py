@@ -179,6 +179,7 @@ class HorizontalMarker(QObject):
         return None
 
     def set_move_cursor(self, cursor, x_pos, y_pos):
+        """Set the style of the cursor to use when the marker is moving"""
         if cursor is not None:
             cursor = QCursor(cursor)
         self.move_cursor = cursor
@@ -352,6 +353,7 @@ class VerticalMarker(QObject):
         return None
 
     def set_move_cursor(self, cursor, x_pos, y_pos):
+        """Set the style of the cursor to use when the marker is moving"""
         if cursor is not None:
             cursor = QCursor(cursor)
         self.move_cursor = cursor
@@ -676,6 +678,10 @@ class SingleMarker(QObject):
         self.marker.remove()
 
     def set_style(self, style):
+        """
+        Change the marker style.
+        :param style: a valid matplotlib style (e.g. 'solid', 'dotted'...)
+        """
         position = self.marker.get_position()
         self.style = style
         if self.marker_type == 'XSingle':
@@ -773,6 +779,10 @@ class SingleMarker(QObject):
         return True, position
 
     def add_annotate(self, text):
+        """
+        Add an annotation near the marker and redraw the canvas.
+        :param text: annotation text
+        """
         if text is None:
             return
 
@@ -808,6 +818,9 @@ class SingleMarker(QObject):
         self.canvas.draw()
 
     def remove_annotate(self, label):
+        """
+        Remove the label from the canvas
+        """
         if label not in self.annotations or self.annotations[label] is None:
             return
 
@@ -817,20 +830,25 @@ class SingleMarker(QObject):
             return
 
     def add_all_annotations(self):
+        """Add all previously added annotations"""
         for label in self.annotations:
             self.add_annotate(label)
 
     def remove_all_annotations(self):
+        """Remove all annotations from plot"""
         for label in self.annotations:
             self.remove_annotate(label)
 
     def add_name(self):
+        """Only add the annotation for the name of the marker"""
         self.add_annotate(self.name)
 
     def remove_name(self):
+        """Remove the annotation for the name of the marker"""
         self.remove_annotate(self.name)
 
     def set_name(self, name):
+        """Update the name of the marker by deleting the old one first"""
         self.remove_name()
         del self.annotations[self.name]
         self.name = name
@@ -883,6 +901,7 @@ class SingleMarker(QObject):
         return self.marker.is_marker_moving()
 
     def is_above(self, x, y):
+        """Check if the cursor is above the marker"""
         if self.marker.is_above(x, y):
             return True
         else:
@@ -895,6 +914,9 @@ class SingleMarker(QObject):
         return (value - lower) / (upper - lower)
 
     def set_move_cursor(self, cursor, x_pos, y_pos):
+        """
+        Set the style of cursor to be used while moving the marker
+        """
         self.marker.set_move_cursor(cursor, x_pos, y_pos)
 
 

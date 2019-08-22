@@ -137,10 +137,14 @@ class FigureInteraction(object):
             self.stop_markers(x_pos, y_pos)
 
     def on_leave(self, event):
+        """When leaving the axis or canvas, restore cursor to default one and stop moving the markers"""
         QApplication.restoreOverrideCursor()
         self.stop_markers(event.xdata, event.ydata)
 
     def stop_markers(self, x_pos, y_pos):
+        """
+        Stop all markers that are moving and draw the annotations
+        """
         if x_pos is None or y_pos is None:
             return
 
@@ -176,6 +180,13 @@ class FigureInteraction(object):
                 move_and_show(YAxisEditor(canvas, ax))
 
     def _show_markers_menu(self, markers, event):
+        """
+        This is opened when right-clicking on top of a marker.
+        The menu will have an entry for each marker near the cursor at the time of clicking.
+        The menu will allow deletion and single marker editing
+        :param markers: list of markers close to the cursor at the time of clicking
+        :param event: The MouseEvent that generated this call
+        """
         if not event.inaxes:
             return
 
@@ -192,6 +203,11 @@ class FigureInteraction(object):
         menu.exec_(QCursor.pos())
 
     def _single_marker_menu(self, menu, marker):
+        """
+        Entry in a menu that allows editing/deleting a single marker
+        :param menu: instance of QMenu to add this submenu to
+        :param marker: marker to be edited with the menu
+        """
         marker_menu = QMenu(marker.name, menu)
         marker_action_group = QActionGroup(marker_menu)
 
@@ -270,6 +286,14 @@ class FigureInteraction(object):
         menu.addMenu(norm_menu)
 
     def _add_marker_option_menu(self, menu, event):
+        """
+        Entry in main context menu to:
+         - add horizontal/vertical markers
+         - open a marker editor window.
+        The editor window allows editing of all currently plotted markers
+        :param menu: instance of QMenu to append this submenu to
+        :param event: mpl event that generated the call
+        """
         marker_menu = QMenu("Markers", menu)
         marker_action_group = QActionGroup(marker_menu)
         x0, x1 = event.inaxes.get_xlim()
@@ -284,6 +308,7 @@ class FigureInteraction(object):
         menu.addMenu(marker_menu)
 
     def _global_edit_markers(self):
+        """Open a window that allows editing of all currently plotted markers"""
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
@@ -291,6 +316,13 @@ class FigureInteraction(object):
         move_and_show(GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
 
     def _get_free_marker_name(self):
+        """
+        Generate a unique name for a new marker.
+        The name will have the form: "marker n"
+        Where n is the lowest positive integer that makes the name unique.
+        E.g. suppose there are markers: "marker 0", "marker 2", "marker 3"
+             the function will return "marker 1"
+        """
         used_numbers = []
         for marker in self.markers:
             try:
@@ -306,6 +338,15 @@ class FigureInteraction(object):
             proposed_number += 1
 
     def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed', color='C2'):
+        """
+        Add a horizontal marker to the plot and append it to the list of open markers
+        :param y_pos: position to plot the marker to
+        :param lower: x value to start the marker at
+        :param upper: x value to stop the marker at
+        :param name: label displayed beside the marker
+        :param line_style: 'solid', 'dashed', etc.
+        :param color: 'C0', 'C1', 'r', etc.
+        """
         if name is None:
             name = self._get_free_marker_name()
         marker = SingleMarker(self.canvas, color, y_pos, lower, upper, name=name,
@@ -315,6 +356,15 @@ class FigureInteraction(object):
         self.markers.append(marker)
 
     def _add_vertical_marker(self, x_pos, lower, upper, name=None, line_style='dashed', color='C2'):
+        """
+        Add a vertical marker to the plot and append it to the list of open markers
+        :param x_pos: position to plot the marker to
+        :param lower: y value to start the marker at
+        :param upper: y value to stop the marker at
+        :param name: label displayed beside the marker
+        :param line_style: 'solid', 'dashed', etc.
+        :param color: 'C0', 'C1', 'r', etc.
+        """
         if name is None:
             name = self._get_free_marker_name()
         marker = SingleMarker(self.canvas, color, x_pos, lower, upper, name=name,
@@ -324,6 +374,9 @@ class FigureInteraction(object):
         self.markers.append(marker)
 
     def _delete_marker(self, marker):
+        """
+        If marker currently plotted, remove its label and delete the marker.
+        """
         if marker in self.markers:
             marker.remove_all_annotations()
             marker.marker.remove()
@@ -331,6 +384,9 @@ class FigureInteraction(object):
             self.canvas.draw()
 
     def _edit_marker(self, marker):
+        """
+        Open a dialog window to edit the marker properties (position, name, line style, colour)
+        """
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
@@ -339,6 +395,13 @@ class FigureInteraction(object):
         move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors))
 
     def _set_hover_cursor(self, x_pos, y_pos):
+        """
+        If the cursor is above a single marker make it into a pointing hand.
+        If the cursor is above multiple markers (eg. an intersection) make it into a cross.
+        Otherwise set it to the default one.
+        :param x_pos: cursor x position
+        :param y_pos: cursor y position
+        """
         if x_pos is None or y_pos is None:
             QApplication.restoreOverrideCursor()
             return
@@ -359,10 +422,10 @@ class FigureInteraction(object):
             marker.redraw()
 
     def motion_event(self, event):
+        """ Move the marker if the mouse is moving and in range """
         if self.toolbar_manager.is_tool_active():
             return
 
-        """ Move the marker if the mouse is moving and in range """
         x = event.xdata
         y = event.ydata
         self._set_hover_cursor(x, y)
@@ -373,11 +436,13 @@ class FigureInteraction(object):
             self.canvas.draw()
 
     def redraw_annotations(self):
+        """Remove all annotations and add them again."""
         for marker in self.markers:
             marker.remove_all_annotations()
             marker.add_all_annotations()
 
     def mpl_redraw_annotations(self, event):
+        """Redraws all annotations when a mouse button was clicked"""
         if hasattr(event, 'button') and event.button is not None:
             self.redraw_annotations()
 
