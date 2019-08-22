@@ -28,6 +28,10 @@ New
 
 - :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v3>` has been rewritten and updated to version 3. In the new version the polarization correction properties have been removed from the algorithm input and are now taken from the parameter file. A checkbox has been added to indicate whether the corrections should be applied.
 
+Improved
+########
+
+- Grouping of groups has been avoided by adding individual workspaces from input group into the TOF group and removing the original group, ignoring any workspaces with x-axes that are not TOF.
 
 Bug fixes
 #########
