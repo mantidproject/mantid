@@ -125,7 +125,8 @@ protected:
   /// Populate cache workspaces with data from messages
   virtual void sampleDataFromMessage(const std::string &buffer) = 0;
 
-  void writeChopperInfoToWorkspaceLogs(Mantid::API::Run &mutableRun);
+  template <typename T = API::MatrixWorkspace>
+  void writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces);
 
   /// For LoadLiveData to extract the cached data
   virtual API::Workspace_sptr extractDataImpl() = 0;

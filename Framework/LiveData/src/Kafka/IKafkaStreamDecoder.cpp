@@ -6,19 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
-#include "MantidTypes/Core/DateAndTime.h"
-#include "MantidKernel/ArrayProperty.h"
 
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
-#include "private/Schema/y2gw_run_info_generated.h"
 #include "private/Schema/tdct_timestamps_generated.h"
+#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
@@ -451,45 +450,6 @@ int64_t IKafkaStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
   return offset;
 }
 
-void IKafkaStreamDecoder::writeChopperInfoToWorkspaceLogs(
-    API::Run &mutableRunInfo) {
-  std::string buffer;
-  int64_t offset;
-  int32_t partition;
-  std::string topicName;
-  m_chopperStream->consumeMessage(&buffer, offset, partition, topicName);
-
-  if (buffer.empty())
-    return;
-
-  if (flatbuffers::BufferHasIdentifier(
-          reinterpret_cast<const uint8_t *>(buffer.c_str()),
-          CHOPPER_MESSAGE_ID.c_str())) {
-    auto chopperMsg =
-        Gettimestamp(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-    const auto *timestamps = chopperMsg->timestamps();
-    std::vector<Types::Core::DateAndTime> mantidTimestamps;
-    mantidTimestamps.reserve(timestamps->size());
-    const int64_t nanoseconds1970To1990 = 631152000000000000L;
-    std::transform(timestamps->begin(), timestamps->end(),
-                   std::back_inserter(mantidTimestamps),
-                   [&nanoseconds1970To1990](const int64_t &timestamp) {
-                     return Types::Core::DateAndTime(
-                         static_cast<int64_t>(timestamp) -
-                         nanoseconds1970To1990);
-                   });
-    auto name = chopperMsg->name()->str();
-    Kernel::ArrayProperty<Core::DateAndTime> *property;
-    if (mutableRunInfo.hasProperty(name)) {
-      property = dynamic_cast<Kernel::ArrayProperty<Core::DateAndTime> *>(
-          mutableRunInfo.getProperty(name));
-    } else {
-      property = new Mantid::Kernel::ArrayProperty<Core::DateAndTime>(name);
-    }
-    *property = mantidTimestamps;
-  }
-}
-
 std::map<int32_t, std::set<int32_t>>
 IKafkaStreamDecoder::buildSpectrumToDetectorMap(const int32_t *spec,
                                                 const int32_t *udet,
@@ -510,58 +470,57 @@ IKafkaStreamDecoder::buildSpectrumToDetectorMap(const int32_t *spec,
   return spdetMap;
 }
 
-  void IKafkaStreamDecoder::checkRunMessage(
-      const std::string &buffer, bool &checkOffsets,
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
-    if (flatbuffers::BufferHasIdentifier(
-            reinterpret_cast<const uint8_t *>(buffer.c_str()),
-            RUN_MESSAGE_ID.c_str())) {
-      auto runMsg =
-          GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-      if (!checkOffsets && runMsg->info_type_type() == InfoTypes::RunStop) {
-        auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
-        auto stopTime = runStopMsg->stop_time();
-        g_log.debug() << "Received an end-of-run message with stop time = "
-                      << stopTime << std::endl;
-        stopOffsets = getStopOffsets(stopOffsets, reachedEnd, stopTime);
-        checkOffsets = true;
-        checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
-      }
-    }
-  }
-
-  void IKafkaStreamDecoder::checkRunEnd(
-      const std::string &topicName, bool &checkOffsets, const int64_t offset,
-      const int32_t partition,
-      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
-      std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
-    if (reachedEnd.count(topicName) &&
-        offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
-
-      reachedEnd[topicName][static_cast<size_t>(partition)] = true;
-
-      if (offset == stopOffsets[topicName][static_cast<size_t>(partition)]) {
-        g_log.debug() << "Reached end-of-run in " << topicName << " topic."
-                      << std::endl;
-        g_log.debug() << "topic: " << topicName << " offset: " << offset
-                      << " stopOffset: "
-                      << stopOffsets[topicName][static_cast<size_t>(partition)]
-                      << std::endl;
-      }
+void IKafkaStreamDecoder::checkRunMessage(
+    const std::string &buffer, bool &checkOffsets,
+    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+    std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
+  if (flatbuffers::BufferHasIdentifier(
+          reinterpret_cast<const uint8_t *>(buffer.c_str()),
+          RUN_MESSAGE_ID.c_str())) {
+    auto runMsg = GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+    if (!checkOffsets && runMsg->info_type_type() == InfoTypes::RunStop) {
+      auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
+      auto stopTime = runStopMsg->stop_time();
+      g_log.debug() << "Received an end-of-run message with stop time = "
+                    << stopTime << std::endl;
+      stopOffsets = getStopOffsets(stopOffsets, reachedEnd, stopTime);
+      checkOffsets = true;
       checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
     }
   }
+}
 
-  int IKafkaStreamDecoder::runNumber() const noexcept {
-    if (m_runId.empty() ||
-        (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
-           return std::isdigit(c);
-         }) == m_runId.end()))
-      return -1;
+void IKafkaStreamDecoder::checkRunEnd(
+    const std::string &topicName, bool &checkOffsets, const int64_t offset,
+    const int32_t partition,
+    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+    std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
+  if (reachedEnd.count(topicName) &&
+      offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
 
-    return std::atoi(m_runId.c_str());
+    reachedEnd[topicName][static_cast<size_t>(partition)] = true;
+
+    if (offset == stopOffsets[topicName][static_cast<size_t>(partition)]) {
+      g_log.debug() << "Reached end-of-run in " << topicName << " topic."
+                    << std::endl;
+      g_log.debug() << "topic: " << topicName << " offset: " << offset
+                    << " stopOffset: "
+                    << stopOffsets[topicName][static_cast<size_t>(partition)]
+                    << std::endl;
+    }
+    checkIfAllStopOffsetsReached(reachedEnd, checkOffsets);
   }
+}
+
+int IKafkaStreamDecoder::runNumber() const noexcept {
+  if (m_runId.empty() ||
+      (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
+         return std::isdigit(c);
+       }) == m_runId.end()))
+    return -1;
+
+  return std::atoi(m_runId.c_str());
+}
 } // namespace LiveData
 
 } // namespace Mantid

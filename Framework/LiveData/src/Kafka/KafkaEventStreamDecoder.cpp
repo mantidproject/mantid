@@ -258,6 +258,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       continue;
     }
 
+    writeChopperTimestampsToWorkspaceLogs(m_localEvents);
+
     const auto end = std::chrono::system_clock::now();
     const std::chrono::duration<double> dur = end - start;
     if (dur.count() >= 60) {

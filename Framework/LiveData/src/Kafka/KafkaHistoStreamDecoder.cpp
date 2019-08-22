@@ -60,7 +60,7 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic)
     : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic),
+                          sampleEnvTopic, ""),
       m_workspace() {}
 
 /**
