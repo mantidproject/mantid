@@ -20,6 +20,11 @@ Algorithms
 Data Objects
 ------------
 
+Live Data
+---------
+* Streaming of json geometry has been added to the KafkaLiveListener. User configuration is not required for this.
+  The streamer automatically picks up the geometry as a part of the run information and constructs the in-memory geometry without the need for an IDF.
+
 Python
 ------
 

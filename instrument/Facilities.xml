@@ -50,14 +50,6 @@
       <connection name="event" address="NDXENGINX:10000" listener="ISISLiveEventDataListener" />
     </livedata>
   </instrument>
-  
-  <instrument name="V20" shortname="V20" >
-    <zeropadding size="8" />
-    <technique>ESS Test Beamline</technique>
-    <livedata default="event">
-      <connection name="event" address="hinata:9092" listener="KafkaEventListener" />
-    </livedata>
-  </instrument>
 
   <instrument name="GEM">
     <technique>Neutron Diffraction</technique>
@@ -899,6 +891,13 @@
   </instrument>
   <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
+  </instrument>
+   <instrument name="V20_DENEX" shortname="V20_DENEX" >
+    <zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+    <livedata default="event">
+      <connection name="event" address="hinata:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
 </facility>
 
