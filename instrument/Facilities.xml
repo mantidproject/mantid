@@ -807,12 +807,16 @@
 </facility>
 
 <!--  Reactor Orphee (France) -->
-<facility name="LLB" FileExtensions=".nxs,.hdf">
+<facility name="LLB" FileExtensions=".nxs,.hdf,.xml">
   <timezone>Europe/Paris</timezone>
-
   <instrument name="MIBEMOL">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
+  </instrument>
+  <instrument name="5C1">
+    <technique>Neutron Diffraction</technique>
+    <technique>Powder Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
   </instrument>
 </facility>
 

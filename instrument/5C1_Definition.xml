@@ -34,33 +34,27 @@
  </component>
  
  <!-- source and sample-position components -->
-   <component type="undulator">
-     <location z="-40.0"> <facing val="none"/> </location>
+   <component type="monochromator">
+     <!-- We need to know what this is. We put sample at origin. This offset will need to be measured or known -->
+     <location z="-2.4"> <facing val="none"/> </location>
    </component>
-   <component type="nickel-holder">
+   <component type="sample-holder">
      <location> <facing val="none"/> </location>
    </component>
 
  
    <!-- DEFINITION OF TYPES -->
    <!-- Source types -->
-   <type name="undulator" is="Source">
+   <type name="monochromator" is="Source">
      <properties />
-     <cylinder id="some-shape">
-       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-       <axis x="0.0" y="0.0" z="1.0" /> 
-       <radius val="0.01" />
-       <height val="0.03" />
-     </cylinder> 
-     <algebra val="some-shape" />
    </type>
  
    <!-- Sample-position types -->
-   <type name="nickel-holder" is="SamplePos">
+   <type name="sample-holder" is="SamplePos">
      <properties />
      <sphere id="some-shape">
        <centre x="0.0"  y="0.0" z="0.0" />
-       <radius val="0.03" />
+       <radius val="0.003" />
      </sphere>
      <algebra val="some-shape" />
    </type>
@@ -75,6 +69,7 @@
  <type name="panel">
  <properties />
  <component type="tube"> <!-- All tubes identical. 256 pixels not 512. pixel height = 0.00703/4 m,  tube width =, r (source - detector) 0.98m, 0.0225 radian spacing of tubes, 64 tubes in bank, eq plane = 56 pixels up. Detector rotation (gamma) as nx-log link. -->
+	 <!-- t is angle in degrees -->
 <location r="0.98" t="0.0" name="tube0" />
 <location r="0.98" t="1.2891550390443522" name="tube1" />
 <location r="0.98" t="2.5783100780887045" name="tube2" />
@@ -140,9 +135,9 @@
 <location r="0.98" t="79.92761242074984" name="tube62" />
 <location r="0.98" t="81.2167674597942" name="tube63" />
  </component>
- 
  </type>
  
+ <!-- pixel step is 0.00703 / 4 = 0.0017575-->
  <type name="tube" outline="yes">
  <component type="pixel">
    <location y="0.0" name="pixel0"/>
@@ -405,7 +400,7 @@
  </type>
  
 
- <!-- TODO fix pixel width -->
+ <!-- Radius of tube could be refined. Currently assumed no gap between neighbouring tubes  -->
   <type name="pixel" is="detector">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
