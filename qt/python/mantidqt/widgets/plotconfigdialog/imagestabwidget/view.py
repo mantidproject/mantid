@@ -16,20 +16,10 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QPixmap, QIcon
 from qtpy.QtWidgets import QWidget
 
+from mantid.plots.utility import get_colormap_names
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 
-CMAPS = [
-    'viridis', 'plasma', 'inferno', 'magma', 'cividis', 'Greys', 'Purples', 'Blues', 'Greens',
-    'Oranges', 'Reds', 'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu', 'GnBu', 'PuBu', 'YlGnBu',
-    'PuBuGn', 'BuGn', 'YlGn', 'binary', 'gist_yarg', 'gist_gray', 'gray', 'bone', 'pink', 'spring',
-    'summer', 'autumn', 'winter', 'cool', 'Wistia', 'hot', 'afmhot', 'gist_heat', 'copper', 'PiYG',
-    'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu', 'RdYlBu', 'RdYlGn', 'Spectral', 'coolwarm', 'bwr',
-    'seismic', 'hsv', 'Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1', 'Set2', 'Set3',
-    'tab10', 'tab20', 'tab20b', 'tab20c', 'flag', 'prism', 'ocean', 'gist_earth', 'terrain',
-    'gist_stern', 'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg', 'gist_rainbow', 'rainbow',
-    'jet', 'nipy_spectral', 'gist_ncar'
-]
 INTERPOLATIONS = [
     'None', 'Nearest', 'Bilinear', 'Bicubic', 'Spline16', 'Spline36', 'Hanning', 'Hamming',
     'Hermite', 'Kaiser', 'Quadric', 'Catrom', 'Gaussian', 'Bessel', 'Mitchell', 'Sinc', 'Lanczos'
@@ -73,7 +63,7 @@ class ImagesTabWidgetView(QWidget):
             self.set_min_value(self.get_max_value() - 0.01)
 
     def _populate_colormap_combo_box(self):
-        for cmap_name in CMAPS:
+        for cmap_name in get_colormap_names():
             qt_img = create_colormap_img(cmap_name)
             pixmap = QPixmap.fromImage(qt_img)
             self.colormap_combo_box.addItem(QIcon(pixmap), cmap_name)
