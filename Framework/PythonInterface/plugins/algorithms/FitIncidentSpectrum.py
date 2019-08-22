@@ -48,42 +48,56 @@ class FitIncidentSpectrum(PythonAlgorithm):
             doc='Output workspace containing the fit and it\'s first derivative.')
 
         self.declareProperty(
-            name='BinningForFit',
-            defaultValue='0.15,0.05,3.2',
-            doc='Bin range for fitting given as a comma separated string in the format \"[Start],[Increment],[End]\".')
+            name='BinningForCalc',
+            defaultValue='',
+            doc='Bin range for calculation given as a comma separated string in the format '
+                '\"[Start],[Increment],[End]\". If empty use default binning.')
 
         self.declareProperty(
-            name='BinningForCalc',
-            defaultValue='0.15,0.05,3.2',
-            validator=StringMandatoryValidator(),
-            doc='Bin range for calculation given as a comma separated string in the format '
-                '\"[Start],[Increment],[End]\".')
+            name='BinningForFit',
+            defaultValue='',
+            doc='Bin range for fitting given as a comma separated string in the format '
+                '\"[Start],[Increment],[End]\". If empty use BinningForCalc.')
 
         self.declareProperty(
             name='FitSpectrumWith',
             defaultValue='GaussConvCubicSpline',
             validator=StringListValidator(['GaussConvCubicSpline', 'CubicSpline', 'CubicSplineViaMantid',
                                            'HowellsFunction']),
-            doc='The method for fitting the incident spectrum:'
-                'GaussConvCubicSpline'
-                'CubicSpline'
-                'CubicSplineViaMantid'
-                'HowellsFunction')
+            doc='The method for fitting the incident spectrum.')
+
+    def validateInputs(self):
+        issues = dict()
+
+        input_ws = self.getProperty('InputWorkspace').value
+
+        binning_for_calc = self.getProperty('BinningForCalc').value
+        if not binning_for_calc == "":
+            if self.parse_binning(binning_for_calc).size == 0:
+                issues['BinningForCalc'] = "Invalid parameters for bin range"
+        binning_for_fit = self.getProperty('BinningForFit').value
+        if not binning_for_fit == "":
+            if self.parse_binning(binning_for_fit).size == 0:
+                issues['BinningForFit'] = "Invalid parameters for bin range"
+
+        return issues
 
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
         self._binning_for_fit = self.getProperty('BinningForFit').value
-        self._fit_spectrum_with = self.getPropertyValue('FitSpectrumWith')
-        self._binning_for_calc = self.getPropertyValue('BinningForCalc')
-        if self._binning_for_calc is None:
-            x = AnalysisDataService.retrieve(self._input_ws).readX(0)
+        self._fit_spectrum_with = self.getProperty('FitSpectrumWith').value
+        self._binning_for_calc = self.getProperty('BinningForCalc').value
+        if self._binning_for_calc is "":
+            x = self._input_ws.readX(0)
             binning = [str(i) for i in [min(x), x[1] - x[0], max(x) + x[1] - x[0]]]
-            self.binning_for_calc = ",".join(binning)
+            self._binning_for_calc = ",".join(binning)
+        if self._binning_for_fit == "":
+            self._binning_for_fit = self._binning_for_calc
 
     def PyExec(self):
         self._setup()
-        x = self.parse_binning_for_calc(self._binning_for_calc)
+        x = self.parse_binning(self._binning_for_calc)
         rebinned = Rebin(
             self._input_ws,
             Params=self._binning_for_fit,
@@ -124,14 +138,13 @@ class FitIncidentSpectrum(PythonAlgorithm):
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
-    def parse_binning_for_calc(self, binning_for_calc):
+    def parse_binning(self, binning_for_calc):
         try:
             params = [float(x) for x in binning_for_calc.split(',')]
         except AttributeError:
             params = [float(x) for x in binning_for_calc]
         xlo, binsize, xhi = params
         return np.arange(xlo, xhi, binsize)
-
 
     def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, sigma=3):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
