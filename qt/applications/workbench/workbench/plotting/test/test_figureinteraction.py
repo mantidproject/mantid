@@ -17,7 +17,6 @@ import matplotlib
 
 matplotlib.use('AGG')  # noqa
 import numpy as np
-import matplotlib.pyplot as plt
 from qtpy.QtCore import Qt
 from testhelpers import assert_almost_equal
 
