@@ -39,7 +39,6 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         wksp = LoadEmptyInstrument(filename)
         print("saving '%s'" % filename)
         SaveNexusGeometry(wksp, filename)
-        
         if wksp is None:
             return False
 
@@ -51,7 +50,6 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
             print("Workspace takes no memory: Memory used=" + str(wksp.getMemorySize()))
             del wksp
             return False
-        
         if not os.path.isfile(filename):
             print("file '%s' was not saved" % filename)
             del wksp
@@ -60,9 +58,9 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         # cleanup
         del wksp
         try:
-          os.remove(filename)
+            os.remove(filename)
         except:
-          pass
+            pass
         return True
 
     def runTest(self):
