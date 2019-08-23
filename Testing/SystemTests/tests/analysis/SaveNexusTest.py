@@ -32,13 +32,15 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         files.sort()
         return files
 
-    def __loadSaveAndTest__(self, filename):
+    def __loadSaveAndTest__(self, filename, save_file_name):
         """Do all of the real work of loading and testing the file"""
         print("----------------------------------------")
         print("Loading '%s'" % filename)
         wksp = LoadEmptyInstrument(filename)
+        save_file_name = "system_test_save.nxs"
+        save_path = os.path.join(os.path.expanduser("~"), save_file_name)
         print("saving '%s'" % filename)
-        SaveNexusGeometry(wksp, filename)
+        SaveNexusGeometry(wksp, save_path)
         if wksp is None:
             return False
 
@@ -50,7 +52,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
             print("Workspace takes no memory: Memory used=" + str(wksp.getMemorySize()))
             del wksp
             return False
-        if not os.path.isfile(filename):
+        if not os.path.isfile(save_path):
             print("file '%s' was not saved" % filename)
             del wksp
             return False
@@ -58,7 +60,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         # cleanup
         del wksp
         try:
-            os.remove(filename)
+            os.remove(save_path)
         except:
             pass
         return True
