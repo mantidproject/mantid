@@ -339,10 +339,10 @@ class FittingContext(object):
         self._number_of_fits += 1
         self.new_fit_notifier.notify_subscribers()
 
-    def bangalla(self, plot_guess, guess_ws):
+    def notify_plot_guess_changed(self, plot_guess, guess_ws):
         self.plot_guess = plot_guess
         self.guess_ws = guess_ws
-        self.plot_guess_notifier.notify_subscribers(plot_guess)
+        self.plot_guess_notifier.notify_subscribers()
 
     def fit_function_names(self):
         """

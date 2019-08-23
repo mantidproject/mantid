@@ -262,9 +262,14 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
             return
 
         if self.context.fitting_context.plot_guess:
+            # Remove previous guess if present
+            if self.context.fitting_context.guess_ws in self._model.plotted_fit_workspaces:
+                self._model.remove_workpace_from_plot(self.context.fitting_context.guess_ws)
+
             self._model.add_workspace_to_plot(self.context.fitting_context.guess_ws,
-                                              workspace_index=0,
+                                              workspace_index=1,
                                               label='guess')
         else:
             self._model.remove_workpace_from_plot(self.context.fitting_context.guess_ws)
+        self._model.force_redraw()
 

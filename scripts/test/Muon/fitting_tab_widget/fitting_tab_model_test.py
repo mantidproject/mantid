@@ -32,8 +32,7 @@ class FittingTabModelTest(unittest.TestCase):
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc; Workspace'
         self.model.function_name = 'GausOsc'
 
-        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function,
-                                                                  'Fitting Output')
+        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -45,7 +44,7 @@ class FittingTabModelTest(unittest.TestCase):
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters; GausOsc'
         self.model.function_name = 'GausOsc'
 
-        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function, 'Fitting Output')
+        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -90,8 +89,7 @@ class FittingTabModelTest(unittest.TestCase):
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
         self.model.function_name = 'Polynomial'
 
-        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function,
-                                                                               'Fitting Output')
+        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)

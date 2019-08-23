@@ -140,7 +140,7 @@ class FittingTabPresenter(object):
                 'Display parameters for')
 
     def handle_plot_guess_changed(self):
-        self.model.send_message_to_context(self.view.plot_guess, self._fit_function)
+        self.model.change_plot_guess(self.view.plot_guess, self.get_parameters_for_single_fit())
 
     def fitting_domain_type_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
@@ -240,8 +240,7 @@ class FittingTabPresenter(object):
     def get_parameters_for_tf_single_fit_calculation(self):
         fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace, workspace_directory = self.model.create_fitted_workspace_name(self.view.display_workspace,
-                                                                                 self.view.fit_object,
-                                                                                 fit_group_name)
+                                                                                 self.view.fit_object)
 
         return {
             'InputFunction': self.view.fit_object,
@@ -256,9 +255,8 @@ class FittingTabPresenter(object):
 
     def get_multi_domain_tf_fit_parameters(self):
         fit_group_name = self.model.get_function_name(self.view.fit_object)
-        workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(self.view.display_workspace,
-                                                                                              self.view.fit_object,
-                                                                                              fit_group_name)
+        workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
+            self.view.display_workspace, self.view.fit_object)
 
         return {
                    'InputFunction': self.view.fit_object,
@@ -275,10 +273,8 @@ class FittingTabPresenter(object):
         fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace_name_list = []
         for workspace in self.selected_data:
-            workspace_name, workspace_directory = self.model.create_fitted_workspace_name(
-                workspace,
-                self.view.fit_object,
-                fit_group_name)
+            workspace_name, workspace_directory = self.model.create_fitted_workspace_name(workspace,
+                                                                                          self.view.fit_object)
             workspace_name_list.append(workspace_name)
 
         return {
@@ -321,6 +317,7 @@ class FittingTabPresenter(object):
 
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(True)
+        self.view.plot_guess_checkbox.setChecked(False)
 
     def handle_error(self, error):
         self.thread_success = False
@@ -460,8 +457,7 @@ class FittingTabPresenter(object):
         return {
             'Function': self.view.fit_object,
             'Minimizer': self.view.minimizer,
-            'EvaluationType': self.view.evaluation_type,
-            'FitGroupName': ''  # todo: change this
+            'EvaluationType': self.view.evaluation_type
         }
 
     @property
