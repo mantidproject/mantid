@@ -109,6 +109,10 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
          "properties";
 }
 
+/** Validate individual transmission runs
+ *
+ * @return :: void
+ */
 void ReflectometryReductionOneAuto3::getTransRun(
     std::map<std::string, std::string> results,
     WorkspaceGroup_sptr &workspaceGroup, const std::string &transRun) {
