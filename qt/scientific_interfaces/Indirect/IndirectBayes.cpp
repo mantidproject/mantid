@@ -19,6 +19,7 @@ IndirectBayes::IndirectBayes(QWidget *parent)
     : IndirectInterface(parent),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);

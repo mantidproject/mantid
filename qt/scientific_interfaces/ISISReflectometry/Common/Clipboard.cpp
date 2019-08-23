@@ -11,6 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}
 
@@ -41,7 +42,8 @@ bool Clipboard::isGroupLocation(int rootIndex) const {
     throw std::runtime_error("Attempted to access invalid value in clipboard");
 
   // Check if the root is a group
-  if (!MantidQt::CustomInterfaces::isGroupLocation(subtreeRoots()[rootIndex]))
+  if (!MantidQt::CustomInterfaces::ISISReflectometry::isGroupLocation(
+          subtreeRoots()[rootIndex]))
     return false;
 
   // If so, check if the first selected item in this root is the root itself
@@ -156,5 +158,6 @@ Clipboard::mutableSubtreeRoots() {
 bool containsGroups(Clipboard const &clipboard) {
   return containsGroups(clipboard.subtreeRoots());
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

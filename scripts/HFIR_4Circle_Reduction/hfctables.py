@@ -1930,7 +1930,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         else:
             self.update_cell_value(i_row, self._colIndexCalculatedHKL, hkl_str)
 
-        # set error
+        # If error message is shown, then write error message to Table cell
         if error is not None:
             i_col_error = UBMatrixPeakTable.UB_Peak_Table_Setup.index(('Error', 'float'))
             self.update_cell_value(i_row, i_col_error, error)

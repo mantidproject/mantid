@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IMainWindowPresenter;
 
@@ -53,6 +54,7 @@ public:
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IBATCHPRESENTER_H */

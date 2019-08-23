@@ -11,12 +11,13 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
+namespace AlgorithmProperties {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::Workspace_sptr;
 
-namespace AlgorithmProperties {
 std::string boolToString(bool value) { return value ? "1" : "0"; }
 
 void update(std::string const &property, std::string const &value,
@@ -77,5 +78,6 @@ std::string getOutputWorkspace(IAlgorithm_sptr algorithm,
   return workspaceName;
 }
 } // namespace AlgorithmProperties
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

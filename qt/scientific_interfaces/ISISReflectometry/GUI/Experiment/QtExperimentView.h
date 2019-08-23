@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** ExperiementView : Provides an interface for the "Experiement" tab in the
 ISIS Reflectometry interface.
@@ -174,8 +175,13 @@ private:
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

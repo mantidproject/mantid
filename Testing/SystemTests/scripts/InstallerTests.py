@@ -34,6 +34,8 @@ parser.add_argument('--archivesearch', dest='archivesearch', action='store_true'
                     help='Turn on archive search for file finder')
 parser.add_argument('--exclude-in-pull-requests', dest="exclude_in_pr_builds",action="store_true",
                     help="Skip tests that are not run in pull request builds")
+parser.add_argument('--ignore-failed-imports', dest="ignore_failed_imports", action="store_true",
+                    help="Skip tests that do not import correctly rather raising an error.")
 log_levels = ['error', 'warning', 'notice', 'information', 'debug']
 parser.add_argument('-l', dest='log_level', metavar='level', default='information',
                     choices=log_levels, help='Log level '+str(log_levels))
@@ -99,6 +101,8 @@ try:
         run_test_cmd += ' --archivesearch'
     if options.exclude_in_pr_builds:
         run_test_cmd += ' --exclude-in-pull-requests'
+    if options.ignore_failed_imports:
+        run_test_cmd += ' --ignore-failed-imports'
     if options.out2stdout:
         print("Executing command '{0}'".format(run_test_cmd))
         p = subprocess.Popen(run_test_cmd, shell=True) # no PIPE: print on screen for debugging

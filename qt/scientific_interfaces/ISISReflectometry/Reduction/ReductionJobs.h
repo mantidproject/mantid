@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class ReductionJobs
 
@@ -59,6 +60,8 @@ public:
 private:
   std::vector<Group> m_groups;
   size_t m_groupNameSuffix;
+
+  friend class Encoder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(ReductionJobs const &lhs,
@@ -114,6 +117,7 @@ void mergeJobsInto(ReductionJobs &intoHere, ReductionJobs const &fromHere,
     listener.groupRemoved(0);
   }
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

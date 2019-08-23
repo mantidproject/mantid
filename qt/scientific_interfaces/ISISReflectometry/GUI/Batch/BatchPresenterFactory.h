@@ -14,12 +14,15 @@
 #include "GUI/Runs/RunsPresenterFactory.h"
 #include "GUI/Save/SavePresenterFactory.h"
 #include "IBatchPresenter.h"
+#include "IBatchPresenterFactory.h"
 #include "IBatchView.h"
 #include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class BatchPresenterFactory {
+namespace ISISReflectometry {
+
+class BatchPresenterFactory : public IBatchPresenterFactory {
 public:
   BatchPresenterFactory(
       // cppcheck-suppress passedByValue
@@ -34,7 +37,7 @@ public:
         m_instrumentPresenterFactory(std::move(instrumentPresenterFactory)),
         m_savePresenterFactory(std::move(savePresenterFactory)) {}
 
-  std::unique_ptr<IBatchPresenter> make(IBatchView *view) {
+  std::unique_ptr<IBatchPresenter> make(IBatchView *view) override {
     auto runsPresenter = m_runsPresenterFactory.make(view->runs());
     auto eventPresenter = m_eventPresenterFactory.make(view->eventHandling());
     auto experimentPresenter =
@@ -60,6 +63,7 @@ private:
   InstrumentPresenterFactory m_instrumentPresenterFactory;
   SavePresenterFactory m_savePresenterFactory;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_BATCHPRESENTERFACTORY_H

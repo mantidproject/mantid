@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 RunsTablePresenterFactory::RunsTablePresenterFactory(
     std::vector<std::string> const &instruments, double thetaTolerance,
@@ -21,5 +22,6 @@ operator()(IRunsTableView *view) const {
   return std::make_unique<RunsTablePresenter>(
       view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsTableView : public QWidget,
                                                        public IRunsTableView {
@@ -75,6 +76,10 @@ private:
   std::vector<std::string> m_instruments;
   RunsTableViewSubscriber *m_notifyee;
   std::map<Action, QAction *> m_actions;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 class RunsTableViewFactory {
@@ -87,6 +92,7 @@ public:
 private:
   std::vector<std::string> m_instruments;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_QTRUNSTABLEVIEW_H_

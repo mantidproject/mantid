@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class Batch;
 class Row;
 class IConfiguredAlgorithm;
@@ -29,6 +30,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL AlgorithmRuntimeProps
 createAlgorithmRuntimeProps(Batch const &model, Row const &row);
 MANTIDQT_ISISREFLECTOMETRY_DLL AlgorithmRuntimeProps
 createAlgorithmRuntimeProps(Batch const &model);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 class Instrument_const_sptr;
 
 class IExperimentPresenter {
@@ -29,6 +30,7 @@ public:
   virtual void instrumentChanged(std::string const &instrumentName) = 0;
   virtual void restoreDefaults() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H */

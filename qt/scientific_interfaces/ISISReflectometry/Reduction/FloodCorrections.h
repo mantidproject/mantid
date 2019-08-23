@@ -11,6 +11,7 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 enum class FloodCorrectionType { Workspace, ParameterFile };
 
 inline FloodCorrectionType
@@ -60,6 +61,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(FloodCorrections const &lhs,
                                                FloodCorrections const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(FloodCorrections const &lhs,
                                                FloodCorrections const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_FLOODCORRECTIONS_H_

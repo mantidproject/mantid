@@ -18,6 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IExperimentView
 
@@ -117,6 +118,7 @@ public:
 
   virtual ~IExperimentView() = default;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTVIEW_H */

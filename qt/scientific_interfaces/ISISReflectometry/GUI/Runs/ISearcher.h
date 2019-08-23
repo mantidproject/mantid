@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class SearcherSubscriber {
 public:
@@ -46,6 +47,7 @@ public:
                                      const std::string &instrument,
                                      SearchType searchType) const = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif

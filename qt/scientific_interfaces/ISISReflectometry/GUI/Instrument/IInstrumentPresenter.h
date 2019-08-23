@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IBatchPresenter;
 
@@ -34,6 +35,7 @@ public:
   virtual void instrumentChanged(std::string const &instrumentName) = 0;
   virtual void restoreDefaults() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H */

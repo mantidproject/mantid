@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IRunsTableView;
 
@@ -31,6 +32,7 @@ protected:
   double m_thetaTolerance;
   Plotter m_plotter;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_

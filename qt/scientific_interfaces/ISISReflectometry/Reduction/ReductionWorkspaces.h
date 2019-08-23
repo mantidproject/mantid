@@ -17,6 +17,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class ReductionWorkspaces
 
@@ -46,6 +47,8 @@ private:
   std::string m_iVsLambda;
   std::string m_iVsQ;
   std::string m_iVsQBinned;
+
+  friend class Encoder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionWorkspaces const &lhs,
@@ -62,6 +65,7 @@ workspaceNames(std::vector<std::string> const &inputRunNumbers,
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceName(
     std::vector<std::vector<std::string> const *> const &summedRunNumbers);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_

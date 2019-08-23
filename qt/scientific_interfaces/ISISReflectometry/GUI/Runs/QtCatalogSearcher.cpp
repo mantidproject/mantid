@@ -18,6 +18,7 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace { // unnamed
 void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
@@ -204,5 +205,6 @@ QtCatalogSearcher::createSearchAlgorithm(const std::string &text) {
 ISearchModel &QtCatalogSearcher::results() const {
   return m_view->mutableSearchResults();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

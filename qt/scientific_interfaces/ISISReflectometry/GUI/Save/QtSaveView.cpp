@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param parent :: The parent of this view
@@ -39,7 +40,7 @@ void QtSaveView::initLayout() {
   connect(m_ui.refreshButton, SIGNAL(clicked()), this,
           SLOT(populateListOfWorkspaces()));
   connect(m_ui.saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
-  connect(m_ui.filterEdit, SIGNAL(textEdited(const QString &)), this,
+  connect(m_ui.filterEdit, SIGNAL(textChanged(const QString &)), this,
           SLOT(filterWorkspaceList()));
   connect(m_ui.listOfWorkspaces, SIGNAL(itemDoubleClicked(QListWidgetItem *)),
           this, SLOT(requestWorkspaceParams()));
@@ -288,5 +289,6 @@ void QtSaveView::cannotSaveWorkspaces() {
 void QtSaveView::cannotSaveWorkspaces(std::string const &fullError) {
   error("Error", fullError);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

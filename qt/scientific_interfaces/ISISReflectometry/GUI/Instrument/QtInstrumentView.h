@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** QtInstrumentView : Provides an interface for the "Instrument" tab in the
 ISIS Reflectometry interface.
@@ -109,8 +110,13 @@ private:
 
   Ui::InstrumentWidget m_ui;
   InstrumentViewSubscriber *m_notifyee;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

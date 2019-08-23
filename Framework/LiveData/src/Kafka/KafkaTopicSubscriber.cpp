@@ -21,6 +21,7 @@ using RdKafka::TopicMetadata;
 namespace {
 /// Timeout for message consume
 const int CONSUME_TIMEOUT_MS = 30000;
+const std::string MAX_MESSAGE_SIZE = "100000000";
 /// A reference to the static logger
 Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger logger("KafkaTopicSubscriber");
@@ -34,9 +35,9 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
-  conf->set("message.max.bytes", "25000000", errorMsg);
-  conf->set("fetch.message.max.bytes", "25000000", errorMsg);
-  conf->set("replica.fetch.max.bytes", "25000000", errorMsg);
+  conf->set("message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("fetch.message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("replica.fetch.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("offset.store.method", "none", errorMsg);

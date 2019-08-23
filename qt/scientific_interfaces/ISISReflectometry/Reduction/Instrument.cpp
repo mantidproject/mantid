@@ -7,6 +7,7 @@
 #include "Instrument.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Instrument::Instrument()
     : m_wavelengthRange(RangeInLambda(0.0, 0.0)),
@@ -67,5 +68,6 @@ bool operator==(Instrument const &lhs, Instrument const &rhs) {
          lhs.monitorCorrections() == rhs.monitorCorrections() &&
          lhs.detectorCorrections() == rhs.detectorCorrections();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

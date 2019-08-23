@@ -11,9 +11,10 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialogButtonBox
+from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
 from mantid.api import MatrixWorkspace
+
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
 
@@ -35,6 +36,7 @@ SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, 'spec
 
 class SpectraSelection(object):
     Individual = 0
+    Tiled = 1
 
     def __init__(self, workspaces):
         self.workspaces = workspaces
@@ -51,7 +53,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             if not isinstance(ws, MatrixWorkspace):
                 raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
 
-    def __init__(self, workspaces, parent=None, show_colorfill_btn=False):
+    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
         super(SpectraSelectionDialog, self).__init__(parent)
         self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -64,25 +66,40 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.selection = None
         self._ui = None
         self._show_colorfill_button = show_colorfill_btn
+        self._overplot = overplot
 
         self._init_ui()
         self._set_placeholder_text()
         self._setup_connections()
 
     def on_ok_clicked(self):
-        self.accept()
+        if self._check_number_of_plots(self.selection):
+            self.accept()
 
     def on_plot_all_clicked(self):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
-        self.selection = selection
-        self.accept()
+        selection.plot_type = self._ui.plotType.currentIndex()
+        if self._check_number_of_plots(selection):
+            self.selection = selection
+            self.accept()
 
     def on_colorfill_clicked(self):
         self.selection = 'colorfill'
         self.accept()
 
     # ------------------- Private -------------------------
+
+    def _check_number_of_plots(self, selection):
+        index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
+        if selection.plot_type == SpectraSelection.Tiled and len(selection.workspaces) * index_length > 25:
+            response = QMessageBox.warning(self, 'Mantid Workbench',
+                                           'You are attempting to create a tiled plot with more than 25 subplots,'
+                                           'this is not recommended as it may lead to performance issues.'
+                                           ' Do you wish to continue?', QMessageBox.Ok | QMessageBox.Cancel)
+            return response == QMessageBox.Ok
+
+        return True
 
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
@@ -129,6 +146,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.wkspIndices.textChanged.connect(self._on_wkspindices_changed)
         ui.specNums.textChanged.connect(self._on_specnums_changed)
 
+        # combobox changed
+        ui.plotType.currentIndexChanged.connect(self._on_plot_type_changed)
+
     def _on_wkspindices_changed(self):
         ui = self._ui
         ui.specNums.clear()
@@ -147,11 +167,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
+    def _on_plot_type_changed(self, new_index):
+        if self._overplot:
+            self._ui.plotType.setCurrentIndex(0)
+            return
+        if self.selection:
+            self.selection.plot_type = new_index
+
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
         if wksp_indices:
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
+            selection.plot_type = self._ui.plotType.currentIndex()
         else:
             selection = None
         self.selection = selection
@@ -161,6 +189,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
+            selection.plot_type = self._ui.plotType.currentIndex()
         else:
             selection = None
         self.selection = selection

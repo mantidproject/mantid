@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace { // unnamed
 
@@ -60,7 +61,7 @@ int BatchJobRunner::itemsInSelection(
 int BatchJobRunner::percentComplete() const {
   // If processing everything, get the percent from the whole table
   if (m_processAll)
-    return MantidQt::CustomInterfaces::percentComplete(
+    return MantidQt::CustomInterfaces::ISISReflectometry::percentComplete(
         m_batch.runsTable().reductionJobs());
 
   // If processing a selection but there is nothing to process, return 100%
@@ -287,6 +288,12 @@ BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
     item->renameOutputWorkspace(oldName, newName);
     return boost::optional<Item const &>(item.get());
   }
+  auto newItem = m_batch.getItemWithOutputWorkspaceOrNone(newName);
+  if (newItem.is_initialized()) {
+    newItem->resetState();
+    return boost::optional<Item const &>(newItem.get());
+  }
+
   return boost::none;
 }
 
@@ -294,5 +301,6 @@ void BatchJobRunner::notifyAllWorkspacesDeleted() {
   // All output workspaces will be deleted so reset all rows and groups
   m_batch.resetState();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

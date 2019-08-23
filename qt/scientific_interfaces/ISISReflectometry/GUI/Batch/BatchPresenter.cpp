@@ -21,6 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::AlgorithmManager;
@@ -185,6 +186,7 @@ void BatchPresenter::reductionResumed() {
   m_experimentPresenter->reductionResumed();
   m_instrumentPresenter->reductionResumed();
   m_runsPresenter->reductionResumed();
+  m_mainPresenter->reductionResumed();
 }
 
 void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
@@ -198,6 +200,7 @@ void BatchPresenter::reductionPaused() {
   m_experimentPresenter->reductionPaused();
   m_instrumentPresenter->reductionPaused();
   m_runsPresenter->reductionPaused();
+  m_mainPresenter->reductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
     notifyAutoreductionCompleted();
@@ -244,7 +247,7 @@ void BatchPresenter::autoreductionPaused() {
   m_instrumentPresenter->autoreductionPaused();
   m_runsPresenter->autoreductionPaused();
 
-  m_mainPresenter->notifyAutoreductionResumed();
+  m_mainPresenter->notifyAutoreductionPaused();
 }
 
 void BatchPresenter::autoreductionCompleted() {
@@ -353,5 +356,6 @@ void BatchPresenter::clearADSHandle() {
   m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

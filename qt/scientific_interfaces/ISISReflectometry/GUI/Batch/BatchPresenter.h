@@ -22,6 +22,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IBatchView;
 
@@ -105,9 +106,14 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
+
 protected:
   std::unique_ptr<IBatchJobRunner> m_jobRunner;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H */

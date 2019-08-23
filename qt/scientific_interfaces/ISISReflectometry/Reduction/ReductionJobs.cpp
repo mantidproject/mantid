@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs,
@@ -100,7 +101,7 @@ std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }
 
 std::string ReductionJobs::nextEmptyGroupName() {
-  std::string name = "Group" + std::to_string(m_groupNameSuffix);
+  std::string name = "HiddenGroupName" + std::to_string(m_groupNameSuffix);
   m_groupNameSuffix++;
   return name;
 }
@@ -331,5 +332,6 @@ bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) {
 bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) {
   return lhs.groups() == rhs.groups();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

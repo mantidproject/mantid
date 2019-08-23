@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
                                  int defaultInstrumentIndex)
@@ -33,7 +34,7 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
     m_ui.instrumentSelector->addItem(QString::fromStdString(instrument));
   m_ui.instrumentSelector->setCurrentIndex(defaultInstrumentIndex);
 
-  connect(m_ui.filterBox, SIGNAL(textEdited(QString const &)), this,
+  connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this,
           SLOT(onFilterChanged(QString const &)));
   connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onInstrumentChanged(int)));
@@ -314,5 +315,6 @@ int RunsTableViewFactory::defaultInstrumentFromConfig() const {
   return indexOfElseFirst(Mantid::Kernel::ConfigService::Instance().getString(
       "default.instrument"));
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

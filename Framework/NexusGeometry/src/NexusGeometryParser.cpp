@@ -30,12 +30,10 @@
 
 namespace Mantid {
 namespace NexusGeometry {
-
 using namespace H5;
 
 // Anonymous namespace
 namespace {
-
 using FaceV = std::vector<Eigen::Vector3d>;
 
 struct Face {

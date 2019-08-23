@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 enum class State {
   ITEM_NOT_STARTED,
@@ -51,6 +52,7 @@ private:
 
   bool requiresMessage() const;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_STATE_H_

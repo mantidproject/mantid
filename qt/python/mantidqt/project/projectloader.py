@@ -15,6 +15,7 @@ from mantidqt.project.workspaceloader import WorkspaceLoader
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantid import AnalysisDataService as ADS, logger
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 def _confirm_all_workspaces_loaded(workspaces_to_confirm):
@@ -66,7 +67,7 @@ class ProjectLoader(object):
 
             # Load interfaces
             if self.project_reader.interface_list is not None:
-                self.load_interfaces(directory=directory)
+                QAppThreadCall(self.load_interfaces)(directory)
 
         return workspace_success
 

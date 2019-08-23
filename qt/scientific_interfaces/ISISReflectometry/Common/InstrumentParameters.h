@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename T>
 boost::optional<T>
@@ -133,6 +134,7 @@ private:
   std::vector<InstrumentParameterTypeMissmatch> m_typeErrors;
   std::vector<MissingInstrumentParameterValue> m_missingValueErrors;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPARAMETERS_H

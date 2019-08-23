@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtMainWindowView.h"
 #include "Common/IndexOf.h"
+#include "GUI/Batch/BatchPresenterFactory.h"
 #include "GUI/Batch/QtBatchView.h"
 #include "GUI/Common/Plotter.h"
 #include <QMessageBox>
@@ -13,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace {
 
@@ -30,13 +32,14 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 DECLARE_SUBWINDOW(QtMainWindowView)
 
 QtMainWindowView::QtMainWindowView(QWidget *parent)
-    : UserSubWindow(parent), m_notifyee(nullptr) {}
+    : UserSubWindow(parent), m_notifyee(nullptr), m_batchIndex(1) {}
 
 IBatchView *QtMainWindowView::newBatch() {
-  auto index = m_ui.mainTabs->count();
   auto *newTab = new QtBatchView(this);
-  m_ui.mainTabs->addTab(newTab, QString("Batch ") + QString::number(index));
+  m_ui.mainTabs->addTab(newTab,
+                        QString("Batch ") + QString::number(m_batchIndex));
   m_batchViews.emplace_back(newTab);
+  ++m_batchIndex;
   return newTab;
 }
 
@@ -57,15 +60,16 @@ Initialise the Interface
 */
 void QtMainWindowView::initLayout() {
   m_ui.setupUi(this);
-  // Until this is implemented we should hide this action
-  m_ui.loadBatch->setEnabled(false);
-  m_ui.loadBatch->setVisible(false);
 
   connect(m_ui.helpButton, SIGNAL(clicked()), this, SLOT(helpPressed()));
   connect(m_ui.mainTabs, SIGNAL(tabCloseRequested(int)), this,
           SLOT(onTabCloseRequested(int)));
   connect(m_ui.newBatch, SIGNAL(triggered(bool)), this,
           SLOT(onNewBatchRequested(bool)));
+  connect(m_ui.loadBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onLoadBatchRequested(bool)));
+  connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
+          SLOT(onSaveBatchRequested(bool)));
 
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
@@ -91,7 +95,7 @@ void QtMainWindowView::initLayout() {
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
 
-  auto makeBatchPresenter = BatchPresenterFactory(
+  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
       std::move(makeExperimentPresenter), std::move(makeInstrumentPresenter),
       std::move(makeSaveSettingsPresenter));
@@ -110,6 +114,14 @@ void QtMainWindowView::onTabCloseRequested(int tabIndex) {
 
 void QtMainWindowView::onNewBatchRequested(bool) {
   m_notifyee->notifyNewBatchRequested();
+}
+
+void QtMainWindowView::onLoadBatchRequested(bool) {
+  m_notifyee->notifyLoadBatchRequested(m_ui.mainTabs->currentIndex());
+}
+
+void QtMainWindowView::onSaveBatchRequested(bool) {
+  m_notifyee->notifySaveBatchRequested(m_ui.mainTabs->currentIndex());
 }
 
 void QtMainWindowView::subscribe(MainWindowSubscriber *notifyee) {
@@ -168,5 +180,16 @@ bool QtMainWindowView::askUserYesNo(const std::string &prompt,
 
   return false;
 }
+
+void QtMainWindowView::disableSaveAndLoadBatch() {
+  m_ui.saveBatch->setEnabled(false);
+  m_ui.loadBatch->setEnabled(false);
+}
+
+void QtMainWindowView::enableSaveAndLoadBatch() {
+  m_ui.saveBatch->setEnabled(true);
+  m_ui.loadBatch->setEnabled(true);
+}
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

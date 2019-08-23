@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class RunsTable
 
@@ -50,6 +51,10 @@ private:
   double m_thetaTolerance;
   ReductionJobs m_reductionJobs;
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 template <typename T>
@@ -60,6 +65,7 @@ bool RunsTable::isInSelection(
   auto const path = m_reductionJobs.getPath(item);
   return containsPath(selectedRowLocations, path);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
