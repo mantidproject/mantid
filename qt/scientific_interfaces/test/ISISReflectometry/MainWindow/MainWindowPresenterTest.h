@@ -136,11 +136,27 @@ public:
     verifyAndClear();
   }
 
+  void testReductionResumedNotifiesAllBatchPresenters() {
+    auto presenter = makePresenter();
+    for (auto batchPresenter : m_batchPresenters)
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionResumed());
+    presenter.notifyAnyBatchReductionResumed();
+    verifyAndClear();
+  }
+
+  void testReductionPausedNotifiesAllBatchPresenters() {
+    auto presenter = makePresenter();
+    for (auto batchPresenter : m_batchPresenters)
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionPaused());
+    presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
   void testAutoreductionResumedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionResumed());
-    presenter.notifyResumeAutoreductionRequested();
+    presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -148,7 +164,7 @@ public:
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused());
-    presenter.notifyPauseAutoreductionRequested();
+    presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
 

@@ -90,6 +90,8 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void autoreductionCompleted() override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
@@ -139,6 +141,7 @@ private:
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
 
+  bool isAnyBatchProcessing() const;
   bool isAnyBatchAutoreducing() const;
 
   /// searching

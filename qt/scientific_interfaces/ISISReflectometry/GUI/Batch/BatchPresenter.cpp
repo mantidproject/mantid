@@ -188,7 +188,7 @@ void BatchPresenter::notifyReductionResumed() {
   m_experimentPresenter->notifyReductionResumed();
   m_instrumentPresenter->notifyReductionResumed();
   m_runsPresenter->notifyReductionResumed();
-  m_mainPresenter->notifyReductionResumed();
+  m_mainPresenter->notifyAnyBatchReductionResumed();
 }
 
 void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
@@ -202,7 +202,7 @@ void BatchPresenter::notifyReductionPaused() {
   m_experimentPresenter->notifyReductionPaused();
   m_instrumentPresenter->notifyReductionPaused();
   m_runsPresenter->notifyReductionPaused();
-  m_mainPresenter->notifyReductionPaused();
+  m_mainPresenter->notifyAnyBatchReductionPaused();
   // If autoreducing, notify
   if (isAutoreducing())
     notifyAutoreductionCompleted();
@@ -229,7 +229,7 @@ void BatchPresenter::notifyAutoreductionResumed() {
   m_runsPresenter->notifyAutoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();
-  m_mainPresenter->notifyResumeAutoreductionRequested();
+  m_mainPresenter->notifyAnyBatchAutoreductionResumed();
 }
 
 void BatchPresenter::pauseAutoreduction() {
@@ -249,12 +249,20 @@ void BatchPresenter::notifyAutoreductionPaused() {
   m_instrumentPresenter->notifyAutoreductionPaused();
   m_runsPresenter->notifyAutoreductionPaused();
 
-  m_mainPresenter->notifyPauseAutoreductionRequested();
+  m_mainPresenter->notifyAnyBatchAutoreductionPaused();
 }
 
 void BatchPresenter::autoreductionCompleted() {
   m_runsPresenter->autoreductionCompleted();
   m_runsPresenter->notifyRowStateChanged();
+}
+
+void BatchPresenter::notifyAnyBatchReductionResumed() {
+  m_runsPresenter->notifyAnyBatchReductionResumed();
+}
+
+void BatchPresenter::notifyAnyBatchReductionPaused() {
+  m_runsPresenter->notifyAnyBatchReductionPaused();
 }
 
 void BatchPresenter::notifyAnyBatchAutoreductionResumed() {
@@ -293,9 +301,18 @@ bool BatchPresenter::isAutoreducing() const {
 }
 
 /**
-   Checks whether or not autoprocessing is currently running in this batch
+   Checks whether or not processing is currently running in any batch
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being processed
+   */
+bool BatchPresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
+}
+
+/**
+   Checks whether or not autoprocessing is currently running in any batch
+   * i.e. whether we are polling for new runs
+   * @return : Bool on whether data is being autoprocessed
    */
 bool BatchPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();

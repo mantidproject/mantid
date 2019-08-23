@@ -111,10 +111,24 @@ public:
     verifyAndClear();
   }
 
-  void testChildPresentersUpdatedWhenReductionResumed() {
+  void testOtherPresentersUpdatedWhenReductionResumed() {
     auto presenter = makePresenter();
     expectReductionResumed();
     presenter.notifyResumeReductionRequested();
+    verifyAndClear();
+  }
+
+  void testChildPresentersUpdatedWhenAnyBatchReductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, notifyAnyBatchReductionResumed()).Times(1);
+    presenter.notifyAnyBatchReductionResumed();
+    verifyAndClear();
+  }
+
+  void testChildPresentersUpdatedWhenAnyBatchReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, notifyAnyBatchReductionPaused()).Times(1);
+    presenter.notifyAnyBatchReductionPaused();
     verifyAndClear();
   }
 
@@ -130,6 +144,16 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
     presenter.notifyAnyBatchAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testMainPresenterQueriedWhenCheckingAnyBatchProcessing() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
+        .Times(1)
+        .WillOnce(Return(true));
+    auto result = presenter.isAnyBatchProcessing();
+    TS_ASSERT_EQUALS(result, true);
     verifyAndClear();
   }
 
@@ -210,7 +234,7 @@ public:
     verifyAndClear();
   }
 
-  void testChildPresentersUpdatedWhenAutoreductionResumed() {
+  void testOtherPresentersUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter();
     expectAutoreductionResumed();
     presenter.notifyResumeAutoreductionRequested();
@@ -245,7 +269,7 @@ public:
     verifyAndClear();
   }
 
-  void testChildPresentersUpdatedWhenAutoreductionPaused() {
+  void testOtherPresentersUpdatedWhenAutoreductionPaused() {
     auto presenter = makePresenter();
     expectAutoreductionPaused();
     presenter.notifyPauseAutoreductionRequested();
@@ -508,6 +532,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(m_mainPresenter, notifyAnyBatchReductionResumed()).Times(1);
   }
 
   void expectReductionPaused() {
@@ -525,6 +550,7 @@ private:
     EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
+    EXPECT_CALL(m_mainPresenter, notifyAnyBatchAutoreductionResumed()).Times(1);
   }
 
   void expectAutoreductionPaused() {
@@ -533,6 +559,7 @@ private:
     EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionPaused()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionPaused()).Times(1);
+    EXPECT_CALL(m_mainPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
   }
 
   void expectBatchIsExecuted() {

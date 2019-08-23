@@ -225,6 +225,14 @@ void RunsPresenter::notifyAutoreductionPaused() {
   tablePresenter()->notifyAutoreductionPaused();
 }
 
+void RunsPresenter::notifyAnyBatchReductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsPresenter::notifyAnyBatchReductionPaused() {
+  updateWidgetEnabledState();
+}
+
 void RunsPresenter::notifyAnyBatchAutoreductionResumed() {
   updateWidgetEnabledState();
 }
@@ -295,6 +303,10 @@ bool RunsPresenter::isProcessing() const {
 
 bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsPresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
 }
 
 bool RunsPresenter::isAnyBatchAutoreducing() const {
@@ -386,7 +398,8 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->updateMenuEnabledState(isProcessing());
 
   // Update components
-  m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
+  m_view->setInstrumentComboEnabled(!isAnyBatchProcessing() &&
+                                    !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&

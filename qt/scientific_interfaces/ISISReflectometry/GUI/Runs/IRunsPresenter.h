@@ -44,6 +44,8 @@ public:
   virtual void notifyAutoreductionPaused() = 0;
   virtual void autoreductionCompleted() = 0;
   virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyAnyBatchReductionResumed() = 0;
+  virtual void notifyAnyBatchReductionPaused() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;

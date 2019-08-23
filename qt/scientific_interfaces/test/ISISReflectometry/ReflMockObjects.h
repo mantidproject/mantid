@@ -61,6 +61,8 @@ public:
   MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
   MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
+  MOCK_METHOD0(notifyAnyBatchReductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchReductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyReductionPaused, void());
@@ -72,6 +74,7 @@ public:
   MOCK_METHOD0(notifySettingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
@@ -99,6 +102,8 @@ public:
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(autoreductionCompleted, void());
+  MOCK_METHOD0(notifyAnyBatchReductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchReductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));

@@ -77,25 +77,33 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
   }
 }
 
-void MainWindowPresenter::notifyResumeAutoreductionRequested() {
+void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->notifyAnyBatchAutoreductionResumed();
   }
 }
 
-void MainWindowPresenter::notifyPauseAutoreductionRequested() {
+void MainWindowPresenter::notifyAnyBatchAutoreductionPaused() {
   for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->notifyAnyBatchAutoreductionPaused();
   }
 }
 
 // Called on autoreduction normal reduction
-void MainWindowPresenter::notifyReductionResumed() {
+void MainWindowPresenter::notifyAnyBatchReductionResumed() {
+  for (const auto &batchPresenter : m_batchPresenters) {
+    batchPresenter->notifyAnyBatchReductionResumed();
+  }
   disableSaveAndLoadBatch();
 }
 
 // Called on autoreduction normal reduction
-void MainWindowPresenter::notifyReductionPaused() { enableSaveAndLoadBatch(); }
+void MainWindowPresenter::notifyAnyBatchReductionPaused() {
+  for (const auto &batchPresenter : m_batchPresenters) {
+    batchPresenter->notifyAnyBatchReductionPaused();
+  }
+  enableSaveAndLoadBatch();
+}
 
 void MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
