@@ -128,7 +128,7 @@ void IKafkaStreamDecoder::loadInstrument(const std::string &name,
 /**
  * Add chopper timestamps to the mutable run info of all workspaces used to
  * buffer data from the kafka stream.
- * @param qorkspaces buffer workspaces storing kafka data.
+ * @param workspaces buffer workspaces storing kafka data.
  */
 template <typename T>
 void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
