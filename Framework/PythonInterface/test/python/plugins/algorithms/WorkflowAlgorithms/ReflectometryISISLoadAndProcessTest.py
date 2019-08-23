@@ -472,6 +472,19 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
         self._assert_run_algorithm_succeeds(args)
 
+    def test_group_TOF_workspaces(self):
+        self._create_workspace(13460, 'TOF_')
+        self._create_workspace(13463, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '13460, 13463'
+        args['GroupTOFWorkspaces'] = True
+        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13463']
+        self._assert_run_algorithm_succeeds(args, outputs)
+        workspace_names = AnalysisDataService.getObjectNames()
+        self.assertIn('TOF_13460', workspace_names)
+        self.assertIn('TOF_13463', workspace_names)
+        self.assertIn('TOF', workspace_names)
+
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
         ws = CreateSampleWorkspace(WorkspaceType='Histogram',NumBanks=1, NumMonitors=2,
