@@ -118,8 +118,7 @@ class FittingTabModelTest(unittest.TestCase):
         workspace = CreateWorkspace(x_data, y_data)
         parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace.name()],
                           'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint',
-                          'FitGroupName': 'SimulFit'}
+                          'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint'}
         global_parameters = ['A0']
         self.model.do_simultaneous_fit(parameter_dict, global_parameters)
 
@@ -138,8 +137,7 @@ class FittingTabModelTest(unittest.TestCase):
         workspace2 = CreateWorkspace(x_data, y_data)
         parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace1.name(), workspace2.name()],
                           'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint',
-                          'FitGroupName': 'SimulFit'}
+                          'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint'}
         self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
 
         fit_context = self.model.context.fitting_context

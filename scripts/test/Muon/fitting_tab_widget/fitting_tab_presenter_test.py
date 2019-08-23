@@ -88,8 +88,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
-             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint',
-             'FitGroupName': 'Fitting Results'})
+             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint'})
 
         self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']),
                          'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -102,7 +101,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(result, {'Function': mock.ANY,
                                   'InputWorkspace': 'Input Workspace Name',
                                   'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0,
-                                  'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'}
+                                  'EvaluationType': 'CentrePoint'}
                          )
 
     def test_for_single_fit_mode_when_display_workspace_changes_updates_fitting_browser_with_new_name(self):
