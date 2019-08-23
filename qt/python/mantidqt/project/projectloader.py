@@ -11,6 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import os
 
+from qtpy.QtCore import Qt
 from mantidqt.project.workspaceloader import WorkspaceLoader
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.decoderfactory import DecoderFactory
@@ -73,12 +74,10 @@ class ProjectLoader(object):
 
     def load_interfaces(self, directory):
         for interface in self.project_reader.interface_list:
-            # Find decoder
             decoder = self.decoder_factory.find_decoder(interface["tag"])
-
-            # Decode and Show the interface
             try:
                 decoded_interface = decoder.decode(interface, directory)
+                decoded_interface.setAttribute(Qt.WA_DeleteOnClose, True)
                 decoded_interface.show()
             except Exception as e:
                 # Catch any exception and log it for the encoder

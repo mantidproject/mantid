@@ -10,6 +10,7 @@
 #include "../../Common/DllConfig.h"
 #include "../../Reduction/ReductionOptionsMap.h"
 #include "../MainWindow/QtMainWindowView.h"
+#include "MantidQtWidgets/Common/BaseEncoder.h"
 
 #include <QMap>
 #include <QString>
@@ -39,11 +40,14 @@ class RangeInQ;
 class TransmissionRunPair;
 class QtEventView;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Encoder
+    : public MantidQt::API::BaseEncoder {
 public:
-  QMap<QString, QVariant> encode(const QtMainWindowView &gui);
+  QMap<QString, QVariant> encode(const QWidget *window,
+                                 const std::string &directory) override;
+  QList<QString> tags() override;
   QMap<QString, QVariant>
-  encodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
+  encodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
               bool projectSave = false,
               const BatchPresenter *presenter = nullptr);
   QMap<QString, QVariant> encodeBatch(const IBatchPresenter *presenter,
@@ -52,7 +56,7 @@ public:
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui,
-                                     const QtMainWindowView &mwv);
+                                     const QtMainWindowView *mwv);
   QMap<QString, QVariant> encodeExperiment(const QtExperimentView *gui);
   QMap<QString, QVariant> encodePerAngleDefaults(const QTableWidget *tab);
   QList<QVariant> encodePerAngleDefaultsRow(const QTableWidget *tab,

@@ -10,6 +10,7 @@
 #include "../../Common/DllConfig.h"
 #include "../../Reduction/ReductionOptionsMap.h"
 #include "../MainWindow/QtMainWindowView.h"
+#include "MantidQtWidgets/Common/BaseDecoder.h"
 
 #include <QMap>
 #include <QString>
@@ -29,7 +30,6 @@ class BatchPresenter;
 class QtBatchView;
 class QtExperimentView;
 class QtInstrumentView;
-
 class QtRunsView;
 class RunsPresenter;
 class QtRunsTableView;
@@ -41,18 +41,21 @@ class IMainWindowView;
 class RangeInQ;
 class TransmissionRunPair;
 
-class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder
+    : public MantidQt::API::BaseDecoder {
 public:
-  void decode(const QtMainWindowView &gui, const QMap<QString, QVariant> &map);
-  void decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
-                   QMap<QString, QVariant> &map,
+  QWidget *decode(const QMap<QString, QVariant> &map,
+                  const std::string &directory) override;
+  QList<QString> tags() override;
+  void decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
+                   const QMap<QString, QVariant> &map,
                    const BatchPresenter *presenter = nullptr);
   void decodeBatch(const IBatchPresenter *presenter, const IMainWindowView *mwv,
-                   QMap<QString, QVariant> &map);
+                   const QMap<QString, QVariant> &map);
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui,
-                                     const QtMainWindowView &mww);
+                                     const QtMainWindowView *mww);
   void decodeExperiment(const QtExperimentView *gui,
                         const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab,
@@ -86,6 +89,7 @@ private:
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(QtRunsTableView *view,
                                     const ReductionJobs *model);
+  bool m_projectSave = false;
   friend class CoderCommonTester;
 };
 

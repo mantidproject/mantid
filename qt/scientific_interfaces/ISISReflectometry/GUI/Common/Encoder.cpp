@@ -25,8 +25,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView &mwv) {
-  for (auto &ipresenter : mwv.m_presenter->m_batchPresenters) {
+                                            const QtMainWindowView *mwv) {
+  for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
       return presenter;
@@ -35,19 +35,27 @@ BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
   return nullptr;
 }
 
-QMap<QString, QVariant> Encoder::encode(const QtMainWindowView &gui) {
+QMap<QString, QVariant> Encoder::encode(const QWidget *gui,
+                                        const std::string &directory) {
+  UNUSED_ARG(directory)
+  auto mwv = dynamic_cast<const QtMainWindowView *>(gui);
   QMap<QString, QVariant> map;
+  map.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
   QList<QVariant> batches;
-  for (const auto &batchView : gui.m_batchViews) {
+  for (const auto &batchView : mwv->m_batchViews) {
     batches.append(QVariant(
-        encodeBatch(dynamic_cast<const QtBatchView *>(batchView), gui, true)));
+        encodeBatch(dynamic_cast<const QtBatchView *>(batchView), mwv, true)));
   }
   map.insert(QString("batches"), QVariant(batches));
   return map;
 }
 
+QList<QString> Encoder::tags() {
+  return QList<QString>({QString("ISIS Reflectometry")});
+}
+
 QMap<QString, QVariant> Encoder::encodeBatch(const QtBatchView *gui,
-                                             const QtMainWindowView &mwv,
+                                             const QtMainWindowView *mwv,
                                              bool projectSave,
                                              const BatchPresenter *presenter) {
   auto batchPresenter = presenter;
@@ -83,7 +91,7 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IBatchPresenter *presenter,
                                              bool projectSave) {
   auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
   return encodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-                     *dynamic_cast<const QtMainWindowView *>(mwv), projectSave,
+                     dynamic_cast<const QtMainWindowView *>(mwv), projectSave,
                      batchPresenter);
 }
 
@@ -123,6 +131,7 @@ QMap<QString, QVariant> Encoder::encodeGroup(
     const MantidQt::CustomInterfaces::ISISReflectometry::Group &group) {
   QMap<QString, QVariant> map;
   map.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
+  map.insert(QString("itemState"), QVariant(static_cast<int>(group.state())));
   map.insert(
       QString("postprocessedWorkspaceName"),
       QVariant(QString::fromStdString(group.m_postprocessedWorkspaceName)));
@@ -211,6 +220,7 @@ Encoder::encodeReductionOptions(const ReductionOptionsMap &rom) {
 QMap<QString, QVariant> Encoder::encodeRow(
     const MantidQt::CustomInterfaces::ISISReflectometry::Row &row) {
   QMap<QString, QVariant> map;
+  map.insert(QString("itemState"), QVariant(static_cast<int>(row.state())));
   QList<QVariant> runNumbers;
   for (const auto &runNumber : row.m_runNumbers) {
     runNumbers.append(QVariant(QString::fromStdString(runNumber)));

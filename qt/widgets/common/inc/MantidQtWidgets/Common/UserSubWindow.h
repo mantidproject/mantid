@@ -20,6 +20,15 @@
        0));                                                                    \
   }
 
+#define DECLARE_SUBWINDOW_AND_CODERS(classname, encodertype, decodertype,      \
+                                     decodertag)                               \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_subwindow_##classname(           \
+      ((MantidQt::API::UserSubWindowFactory::Instance()                        \
+            .subscribe<classname, encodertype, decodertype>(decodertag)),      \
+       0));                                                                    \
+  }
+
 //----------------------------------
 // Includes
 //----------------------------------

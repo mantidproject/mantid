@@ -14,6 +14,8 @@ ISIS Reflectometry Interface
 New
 ###
 - Batch Save/Load: full saving the runs table and all of the related settings for a batch is now possible.
+- Project Save and Load: full saving of runs table including styling and related settings on a batch by batch level. All batches are saved.
+- Integration with Project Recovery: GUI should now recover should recovery successfully recreate all workspaces
 
 Improved
 ########
