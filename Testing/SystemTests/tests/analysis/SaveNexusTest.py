@@ -32,7 +32,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         files.sort()
         return files
 
-    def __loadSaveAndTest__(self, filename, save_file_name):
+    def __loadSaveAndTest__(self, filename):
         """Do all of the real work of loading and testing the file"""
         print("----------------------------------------")
         print("Loading '%s'" % filename)
