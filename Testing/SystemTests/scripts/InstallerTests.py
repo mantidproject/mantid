@@ -32,6 +32,10 @@ parser.add_argument('-n',
                     dest='doInstall',
                     action='store_false',
                     help='Run tests without installing Mantid (it must be already installed)')
+parser.add_argument('-N', '--dry-run',
+                    dest='dry_run',
+                    action='store_true',
+                    help='Do not run tests just print what would be run.')
 parser.add_argument('-o',
                     dest='out2stdout',
                     action='store_true',
@@ -129,6 +133,8 @@ try:
         run_test_cmd += ' --exclude-in-pull-requests'
     if options.ignore_failed_imports:
         run_test_cmd += ' --ignore-failed-imports'
+    if options.dry_run:
+        run_test_cmd += ' --dry-run'
     if options.out2stdout:
         print("Executing command '{0}'".format(run_test_cmd))
         p = subprocess.Popen(run_test_cmd, shell=True)  # no PIPE: print on screen for debugging

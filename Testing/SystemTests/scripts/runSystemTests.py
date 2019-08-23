@@ -14,6 +14,7 @@ import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
 
+from six import itervalues
 try:
     # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
     # Remove this when everything is switched to qtpy
@@ -121,6 +122,10 @@ def main():
                         dest="output_on_failure",
                         action="store_true",
                         help="Print full log for failed tests.")
+    parser.add_argument('-N', '--dry-run',
+                        dest='dry_run',
+                        action='store_true',
+                        help='Do not run tests just print what would be run.')
     parser.add_argument("--showskipped",
                         dest="showskipped",
                         action="store_true",
@@ -222,76 +227,79 @@ def main():
         if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
             os.remove(os.path.join(mtdconf.saveDir, file))
 
-    # Multi-core processes --------------
-    # An array to hold the processes
-    processes = []
-    # A shared array to hold skipped and failed tests + status
-    results_array = Array('i', [0] * (3 * options.ncores))
-    # A manager to create a shared dict to store names of skipped and failed tests
-    manager = Manager()
-    # A shared dict to store names of skipped and failed tests
-    status_dict = manager.dict()
-    # A shared dict to store the global list of tests
-    tests_dict = manager.dict()
-    # A shared array with 0s and 1s to keep track of completed tests
-    tests_lock = Array('i', [0] * number_of_test_modules)
-    # A shared value to count the number of remaining test modules
-    tests_left = Value('i', number_of_test_modules)
-    # A shared value to count the number of completed tests
-    tests_done = Value('i', 0)
-    # A shared dict to store which data files are required by each test module
-    required_files_dict = manager.dict()
-    for key in files_required_by_test_module.keys():
-        required_files_dict[key] = files_required_by_test_module[key]
-    # A shared dict to store the locked status of each data file
-    locked_files_dict = manager.dict()
-    for key in data_file_lock_status.keys():
-        locked_files_dict[key] = data_file_lock_status[key]
+    if not options.dry_run:
+        # Multi-core processes --------------
+        # An array to hold the processes
+        processes = []
+        # A shared array to hold skipped and failed tests + status
+        results_array = Array('i', [0] * (3 * options.ncores))
+        # A manager to create a shared dict to store names of skipped and failed tests
+        manager = Manager()
+        # A shared dict to store names of skipped and failed tests
+        status_dict = manager.dict()
+        # A shared dict to store the global list of tests
+        tests_dict = manager.dict()
+        # A shared array with 0s and 1s to keep track of completed tests
+        tests_lock = Array('i', [0] * number_of_test_modules)
+        # A shared value to count the number of remaining test modules
+        tests_left = Value('i', number_of_test_modules)
+        # A shared value to count the number of completed tests
+        tests_done = Value('i', 0)
+        # A shared dict to store which data files are required by each test module
+        required_files_dict = manager.dict()
+        for key in files_required_by_test_module.keys():
+            required_files_dict[key] = files_required_by_test_module[key]
+        # A shared dict to store the locked status of each data file
+        locked_files_dict = manager.dict()
+        for key in data_file_lock_status.keys():
+            locked_files_dict[key] = data_file_lock_status[key]
 
-    # Store in reverse number of number of tests in each module into the shared dictionary
-    reverse_sorted_dict = [(k, test_counts[k])
-                           for k in sorted(test_counts, key=test_counts.get, reverse=True)]
-    counter = 0
-    for key, value in reverse_sorted_dict:
-        tests_dict[str(counter)] = test_list[key]
-        counter += 1
-        if not options.quiet:
-            print("Test module {} has {} tests:".format(key, value))
-            for t in test_list[key]:
-                print(" - {}".format(t._fqtestname))
-            print()
+        # Store in reverse number of number of tests in each module into the shared dictionary
+        reverse_sorted_dict = [(k, test_counts[k])
+                               for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+        counter = 0
+        for key, value in reverse_sorted_dict:
+            tests_dict[str(counter)] = test_list[key]
+            counter += 1
+            if not options.quiet:
+                print("Test module {} has {} tests:".format(key, value))
+                for t in test_list[key]:
+                    print(" - {}".format(t._fqtestname))
+                print()
 
-    # Define a lock
-    lock = Lock()
+        # Define a lock
+        lock = Lock()
 
-    # Prepare ncores processes
-    for ip in range(options.ncores):
-        processes.append(
-            Process(target=systemtesting.testThreadsLoop,
-                    args=(mtdconf.testDir, mtdconf.saveDir, mtdconf.dataDir, options, tests_dict,
-                          tests_lock, tests_left, results_array, status_dict, total_number_of_tests,
-                          maximum_name_length, tests_done, ip, lock, required_files_dict,
-                          locked_files_dict)))
-    # Start and join processes
-    try:
-        for p in processes:
-            p.start()
+        # Prepare ncores processes
+        for ip in range(options.ncores):
+            processes.append(
+                Process(target=systemtesting.testThreadsLoop,
+                        args=(mtdconf.testDir, mtdconf.saveDir, mtdconf.dataDir, options, tests_dict,
+                              tests_lock, tests_left, results_array, status_dict, total_number_of_tests,
+                              maximum_name_length, tests_done, ip, lock, required_files_dict,
+                              locked_files_dict)))
+        # Start and join processes
+        try:
+            for p in processes:
+                p.start()
 
-        for p in processes:
-            p.join()
-    except KeyboardInterrupt:
-        print("Killed via KeyboardInterrupt")
-        kill_children(processes)
-    except Exception as e:
-        print("Unexpected exception occured: {}".format(e))
-        kill_children(processes)
+            for p in processes:
+                p.join()
+        except KeyboardInterrupt:
+            print("Killed via KeyboardInterrupt")
+            kill_children(processes)
+        except Exception as e:
+            print("Unexpected exception occured: {}".format(e))
+            kill_children(processes)
 
-    # Gather results
-    skipped_tests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
-    failed_tests = sum(results_array[options.ncores:2 * options.ncores])
-    total_tests = test_stats[2]
-    # Find minimum of status: if min == 0, then success is False
-    success = bool(min(results_array[2 * options.ncores:3 * options.ncores]))
+        # Gather results
+        skipped_tests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
+        failed_tests = sum(results_array[options.ncores:2 * options.ncores])
+        total_tests = test_stats[2]
+        # Find minimum of status: if min == 0, then success is False
+        success = bool(min(results_array[2 * options.ncores:3 * options.ncores]))
+    else:
+        print("Dry run requested. Skipping execution")
 
     #########################################################################
     # Cleanup
@@ -305,10 +313,15 @@ def main():
     total_runtime = time.strftime("%H:%M:%S", time.gmtime(end_time - start_time))
 
     #########################################################################
-    # Output summary to terminal (skip if this was a cleanup run)
+    # Output summary to terminal
     #########################################################################
-
-    if not options.clean:
+    if options.dry_run:
+        print()
+        print("Tests that would be executed:")
+        for suites in itervalues(test_list):
+            for suite in suites:
+                print('  ' + suite.name)
+    elif not options.clean:
         nwidth = 80
         banner = "#" * nwidth
         print('\n' + banner)
