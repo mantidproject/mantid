@@ -11,7 +11,7 @@
 #include "MantidNexusGeometry/JSONInstrumentBuilder.h"
 
 GNU_DIAG_OFF("conversion")
-#include "private/Schema/tdct_timestamps_generated.h"
+#include "../src/Kafka/private/Schema/tdct_timestamps_generated.h"
 GNU_DIAG_ON("conversion")
 
 namespace {
