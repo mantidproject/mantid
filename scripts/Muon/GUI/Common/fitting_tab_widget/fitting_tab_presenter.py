@@ -238,7 +238,6 @@ class FittingTabPresenter(object):
             self.view.warning_popup(error)
 
     def get_parameters_for_tf_single_fit_calculation(self):
-        fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace, workspace_directory = self.model.create_fitted_workspace_name(self.view.display_workspace,
                                                                                  self.view.fit_object)
 
@@ -254,7 +253,6 @@ class FittingTabPresenter(object):
         }
 
     def get_multi_domain_tf_fit_parameters(self):
-        fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
             self.view.display_workspace, self.view.fit_object)
 
@@ -270,7 +268,6 @@ class FittingTabPresenter(object):
                }
 
     def get_sequential_tf_fit_parameters(self):
-        fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace_name_list = []
         for workspace in self.selected_data:
             workspace_name, workspace_directory = self.model.create_fitted_workspace_name(workspace,

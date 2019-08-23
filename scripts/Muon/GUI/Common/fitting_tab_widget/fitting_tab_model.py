@@ -9,9 +9,8 @@ from __future__ import (absolute_import, division, unicode_literals)
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit, run_CalculateMuonAsymmetry
 import mantid
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CopyLogs, EvaluateFunction,
-                              CreateWorkspace)
-from mantid.api import AlgorithmManager, AnalysisDataService
+from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CopyLogs, EvaluateFunction)
+from mantid.api import AnalysisDataService
 
 
 class FittingTabModel(object):
