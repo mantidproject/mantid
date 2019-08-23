@@ -58,9 +58,9 @@ namespace LiveData {
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
-    const std::string &sampleEnvTopic)
+    const std::string &sampleEnvTopic, const std::string &chopperTopic)
     : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, ""),
+                          sampleEnvTopic, chopperTopic),
       m_workspace() {}
 
 /**

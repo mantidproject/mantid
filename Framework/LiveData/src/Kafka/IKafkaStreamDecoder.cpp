@@ -87,9 +87,16 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
                             SubscribeAtOption::LATEST);
   }
 
-  if (!m_chopperTopic.empty())
-    m_chopperStream =
-        m_broker->subscribe({m_chopperTopic}, SubscribeAtOption::LATEST);
+  try {
+    if (!m_chopperTopic.empty())
+      m_chopperStream =
+          m_broker->subscribe({m_chopperTopic}, SubscribeAtOption::LATEST);
+  } catch (std::exception &) {
+    g_log.notice() << "Could not subscribe to topic " + m_chopperTopic +
+                          ". This topic does not exist. No chopper information "
+                          "will be written to the logs."
+                   << std::endl;
+  }
 
   // Get last two messages in run topic to ensure we get a runStart message
   m_runStream =
