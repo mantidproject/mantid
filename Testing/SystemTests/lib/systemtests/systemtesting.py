@@ -815,8 +815,8 @@ class TestManager(object):
 
         self._testDir = test_loc
         self._quiet = quiet
-        self._testsInclude = testsInclude
-        self._testsExclude = testsExclude
+        self._testsInclude = re.compile(testsInclude) if testsInclude is not None else None
+        self._testsExclude = re.compile(testsExclude) if testsExclude is not None else None
         self._exclude_in_pr_builds = exclude_in_pr_builds
         self._ignore_failed_imports = ignore_failed_imports
 
@@ -974,11 +974,11 @@ class TestManager(object):
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
-            if self._testsInclude not in suite.name:
+            if not self._testsInclude.search(suite.name):
                 suite.markAsSkipped("NotIncludedTest")
                 return False
         if self._testsExclude is not None:
-            if self._testsExclude in suite.name:
+            if self._testsExclude.search(suite.name):
                 suite.markAsSkipped("ExcludedTest")
                 return False
         return True
