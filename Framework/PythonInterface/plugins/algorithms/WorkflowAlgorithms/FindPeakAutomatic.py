@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, RenameWorkspace, DeleteWorkspace,
                               CreateEmptyTableWorkspace, FitGaussianPeaks)
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, Progress)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, Progress, ITableWorkspaceProperty)
 from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
 from mantid import mtd
 
@@ -99,15 +99,18 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
                              'Plot the baseline as calculated by the algorithm')
 
         # Output table
-        self.declareProperty(name='PeakPropertiesTableName',
-                             defaultValue='',
-                             doc='Name of the table containing the properties of the peaks')
         self.declareProperty(
-            name='RefitPeakPropertiesTableName',
-            defaultValue='',
-            doc=
-            'Name of the table containing the properties of the peaks that had to be fitted twice '
-            'as the first time the error was unreasonably large')
+            ITableWorkspaceProperty(name='PeakPropertiesTableName',
+                                    defaultValue='peak_table',
+                                    direction=Direction.Output),
+            doc='Name of the table containing the properties of the peaks')
+        self.declareProperty(
+            ITableWorkspaceProperty(
+                name='RefitPeakPropertiesTableName',
+                defaultValue='refit_peak_table',
+                direction=Direction.Output),
+            doc='Name of the table containing the properties of the peaks that had to be fitted twice '
+                'as the first time the error was unreasonably large')
 
     def validateInputs(self):
         issues = {}
@@ -146,9 +149,9 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         raw_data_ws = ConvertToPointData(error_ws)
         raw_xvals = raw_data_ws.readX(0).copy()
         raw_yvals = raw_data_ws.readY(0).copy()
+        print(raw_xvals, raw_yvals)
 
-        raw_xvals, raw_yvals, raw_error = self.crop_data(raw_xvals, raw_yvals, raw_error,
-                                                         prog_reporter)
+        raw_xvals, raw_yvals, raw_error = self.crop_data(raw_xvals, raw_yvals, raw_error, prog_reporter)
 
         # Find the best peaks
         (peakids, peak_table,
@@ -166,9 +169,9 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         if self._plot_peaks:
             self.plot_peaks(raw_xvals, raw_yvals, baseline, peakids)
 
-        self.set_output_properties(raw_data_ws)
+        self.set_output_properties(peak_table, refit_peak_table)
 
-        self.delete_temporary_workspaces()
+        #self.delete_temporary_workspaces()
 
     def load_data(self, prog_reporter):
         # Load the data and clean from Nans
@@ -210,22 +213,25 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         plt.scatter(raw_xvals[peakids], raw_yvals[peakids], marker='x', c='r')
         plt.show()
 
-    def set_output_properties(self, raw_data_ws):
-        if self.getPropertyValue('PeakPropertiesTableName') == '':
-            peak_table_name = '{}_{}'.format(raw_data_ws.getName(), 'properties')
+    def set_output_properties(self, peak_table, refit_peak_table):
+        input_ws_name = self.getPropertyValue('InputWorkspace')
+
+        if self.getPropertyValue('PeakPropertiesTableName') == 'peak_table':
+            peak_table_name = '{}_{}'.format(input_ws_name, 'properties')
         else:
             peak_table_name = self.getPropertyValue('PeakPropertiesTableName')
-        if self.getPropertyValue('RefitPeakPropertiesTableName') == '':
-            refit_peak_table_name = '{}_{}'.format(raw_data_ws.getName(), 'refit_properties')
+        if self.getPropertyValue('RefitPeakPropertiesTableName') == 'refit_peak_table':
+            refit_peak_table_name = '{}_{}'.format(input_ws_name, 'refit_properties')
         else:
             refit_peak_table_name = self.getPropertyValue('RefitPeakPropertiesTableName')
-        RenameWorkspace('peak_table', peak_table_name)
-        RenameWorkspace('refit_peak_table', refit_peak_table_name)
+
+        self.setPropertyValue('PeakPropertiesTableName', peak_table_name)
+        self.setProperty('PeakPropertiesTableName', peak_table)
+        self.setPropertyValue('RefitPeakPropertiesTableName', refit_peak_table_name)
+        self.setProperty('RefitPeakPropertiesTableName', refit_peak_table)
 
     def delete_temporary_workspaces(self):
         self.delete_if_present('ret')
-        self.delete_if_present('peak_table')
-        self.delete_if_present('refit_peak_table')
         self.delete_if_present('raw_data_ws')
         self.delete_if_present('flat_ws')
         self.delete_if_present('fit_result_NormalisedCovarianceMatrix')
