@@ -622,10 +622,10 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
 
 auto ReflectometryReductionOneAuto3::getRebinParams(
     MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
-    auto const qMin = getPropertyOrDefault("MomentumTransferMin",
-                                         inputWS->x(0).front());
-  auto const qMax = getPropertyOrDefault("MomentumTransferMax",
-                                         inputWS->x(0).back());
+  auto const qMin =
+      getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
+  auto const qMax =
+      getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
   return RebinParams(qMin, qMax, getQStep(inputWS, theta));
 }
 
