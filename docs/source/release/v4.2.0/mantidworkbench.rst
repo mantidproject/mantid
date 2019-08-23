@@ -20,6 +20,8 @@ Improvements
 
 - Changing the axis' scale, by right-clicking on a figure with multiple plots, changes only the plot that was clicked on.
 
+- The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
+
 Bugfixes
 ########
 - Pressing the tab key while in the axis quick editor now selects each input field in the correct order.
