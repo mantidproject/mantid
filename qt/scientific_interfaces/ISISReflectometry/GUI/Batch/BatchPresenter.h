@@ -66,8 +66,8 @@ public:
   void notifyInstrumentChanged(const std::string &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   void notifySettingsChanged() override;
-  void anyBatchAutoreductionResumed() override;
-  void anyBatchAutoreductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
   void notifyReductionPaused() override;
   bool requestClose() const override;
   bool isProcessing() const override;

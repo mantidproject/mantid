@@ -257,12 +257,12 @@ void BatchPresenter::autoreductionCompleted() {
   m_runsPresenter->notifyRowStateChanged();
 }
 
-void BatchPresenter::anyBatchAutoreductionResumed() {
-  m_runsPresenter->anyBatchAutoreductionResumed();
+void BatchPresenter::notifyAnyBatchAutoreductionResumed() {
+  m_runsPresenter->notifyAnyBatchAutoreductionResumed();
 }
 
-void BatchPresenter::anyBatchAutoreductionPaused() {
-  m_runsPresenter->anyBatchAutoreductionPaused();
+void BatchPresenter::notifyAnyBatchAutoreductionPaused() {
+  m_runsPresenter->notifyAnyBatchAutoreductionPaused();
 }
 
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const {

@@ -90,8 +90,8 @@ public:
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
   void autoreductionCompleted() override;
-  void anyBatchAutoreductionResumed() override;
-  void anyBatchAutoreductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 

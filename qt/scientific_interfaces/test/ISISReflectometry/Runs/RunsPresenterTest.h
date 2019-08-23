@@ -301,14 +301,14 @@ public:
   void testAutoreductionDisabledWhenAnotherBatchAutoreducing() {
     auto presenter = makePresenter();
     expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing();
-    presenter.anyBatchAutoreductionResumed();
+    presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClear();
   }
 
   void testAutoreductionDisabledWhenAnotherBatchNotAutoreducing() {
     auto presenter = makePresenter();
     expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing();
-    presenter.anyBatchAutoreductionPaused();
+    presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
 

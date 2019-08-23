@@ -225,11 +225,11 @@ void RunsPresenter::notifyAutoreductionPaused() {
   tablePresenter()->notifyAutoreductionPaused();
 }
 
-void RunsPresenter::anyBatchAutoreductionResumed() {
+void RunsPresenter::notifyAnyBatchAutoreductionResumed() {
   updateWidgetEnabledState();
 }
 
-void RunsPresenter::anyBatchAutoreductionPaused() {
+void RunsPresenter::notifyAnyBatchAutoreductionPaused() {
   updateWidgetEnabledState();
 }
 

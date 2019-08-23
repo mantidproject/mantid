@@ -139,7 +139,7 @@ public:
   void testAutoreductionResumedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, anyBatchAutoreductionResumed());
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionResumed());
     presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
@@ -147,7 +147,7 @@ public:
   void testAutoreductionPausedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused());
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused());
     presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
@@ -286,7 +286,7 @@ private:
     EXPECT_CALL(*batchPresenter, initInstrumentList()).Times(1);
     EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(_)).Times(1);
     EXPECT_CALL(*batchPresenter, notifyReductionPaused()).Times(1);
-    EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
   }
 
   void expectBatchCanBeClosed(int batchIndex) {

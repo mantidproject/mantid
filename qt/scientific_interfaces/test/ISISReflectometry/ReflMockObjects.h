@@ -61,8 +61,8 @@ public:
   MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
   MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
   MOCK_METHOD0(notifyAutoreductionCompleted, void());
-  MOCK_METHOD0(anyBatchAutoreductionResumed, void());
-  MOCK_METHOD0(anyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyReductionPaused, void());
 
   MOCK_METHOD1(notifyChangeInstrumentRequested, void(const std::string &));
@@ -99,8 +99,8 @@ public:
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(autoreductionCompleted, void());
-  MOCK_METHOD0(anyBatchAutoreductionPaused, void());
-  MOCK_METHOD0(anyBatchAutoreductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isProcessing, bool());

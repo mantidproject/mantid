@@ -79,13 +79,13 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 
 void MainWindowPresenter::notifyResumeAutoreductionRequested() {
   for (const auto &batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionResumed();
+    batchPresenter->notifyAnyBatchAutoreductionResumed();
   }
 }
 
 void MainWindowPresenter::notifyPauseAutoreductionRequested() {
   for (const auto &batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionPaused();
+    batchPresenter->notifyAnyBatchAutoreductionPaused();
   }
 }
 
@@ -149,9 +149,9 @@ void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
 
   // Ensure autoreduce button is enabled/disabled correctly for the new batch
   if (isAnyBatchAutoreducing())
-    batchPresenter->anyBatchAutoreductionResumed();
+    batchPresenter->notifyAnyBatchAutoreductionResumed();
   else
-    batchPresenter->anyBatchAutoreductionPaused();
+    batchPresenter->notifyAnyBatchAutoreductionPaused();
 }
 
 void MainWindowPresenter::showHelp() {

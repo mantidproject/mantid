@@ -120,15 +120,16 @@ public:
 
   void testChildPresentersUpdatedWhenAnyBatchAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, anyBatchAutoreductionResumed()).Times(1);
-    presenter.anyBatchAutoreductionResumed();
+    EXPECT_CALL(*m_runsPresenter, notifyAnyBatchAutoreductionResumed())
+        .Times(1);
+    presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenAnyBatchAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_runsPresenter, anyBatchAutoreductionPaused()).Times(1);
-    presenter.anyBatchAutoreductionPaused();
+    EXPECT_CALL(*m_runsPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
+    presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
 

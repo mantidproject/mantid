@@ -42,8 +42,8 @@ public:
   virtual void notifyInstrumentChanged(const std::string &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
   virtual void notifySettingsChanged() = 0;
-  virtual void anyBatchAutoreductionResumed() = 0;
-  virtual void anyBatchAutoreductionPaused() = 0;
+  virtual void notifyAnyBatchAutoreductionResumed() = 0;
+  virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyReductionPaused() = 0;
 
   /// Data processing check for all groups
