@@ -80,14 +80,14 @@ void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
   auto runsTablePresenter =
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
-  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
-             map[QString("runsView")].toMap());
   decodeEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
   decodeExperiment(gui->m_experiment.get(),
                    map[QString("experimentView")].toMap());
   decodeInstrument(gui->m_instrument.get(),
                    map[QString("instrumentView")].toMap());
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
+  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
+             map[QString("runsView")].toMap());
 }
 
 void Decoder::decodeBatch(const IBatchPresenter *presenter,
