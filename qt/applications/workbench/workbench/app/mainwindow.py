@@ -66,6 +66,8 @@ from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -576,8 +578,13 @@ class MainWindow(QMainWindow):
         self.editor.save_current_file_as()
 
     def generate_script_from_workspaces(self):
+        task = BlockingAsyncTaskWithCallback(target=self._generate_script_from_workspaces,
+                                             blocking_cb=QApplication.processEvents)
+        task.start()
+
+    def _generate_script_from_workspaces(self):
         script = "from mantid.simpleapi import *\n\n" + get_all_workspace_history_from_ads()
-        self.editor.open_script_in_new_tab(script)
+        QAppThreadCall(self.editor.open_script_in_new_tab)(script)
 
     def save_project(self):
         self.project.save()

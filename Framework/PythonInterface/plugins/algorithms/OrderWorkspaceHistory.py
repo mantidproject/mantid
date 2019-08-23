@@ -81,8 +81,6 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return all_lines
 
     def PyExec(self):
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=12312, stdoutToServer=True, stderrToServer=True)
         all_lines = []
         input_string = self.getPropertyValue("InputString")
 
