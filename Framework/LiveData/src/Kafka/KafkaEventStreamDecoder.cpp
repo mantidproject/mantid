@@ -24,7 +24,6 @@ GNU_DIAG_OFF("conversion")
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
-#include "private/Schema/tdct_timestamps_generated.h"
 #include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
@@ -54,7 +53,6 @@ const std::string RUN_START_PROPERTY = "run_start";
 const std::string RUN_MESSAGE_ID = "y2gw";
 const std::string EVENT_MESSAGE_ID = "ev42";
 const std::string SAMPLE_MESSAGE_ID = "f142";
-const std::string CHOPPER_MESSAGE_ID = "tdct";
 
 /**
  * Append sample log data to existing log or create a new log if one with

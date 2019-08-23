@@ -16,7 +16,6 @@
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
-#include "private/Schema/tdct_timestamps_generated.h"
 #include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
@@ -31,7 +30,6 @@ Mantid::Kernel::Logger g_log("IKafkaStreamDecoder");
 
 // File identifiers from flatbuffers schema
 const std::string RUN_MESSAGE_ID = "y2gw";
-const std::string CHOPPER_MESSAGE_ID = "tdct";
 
 const std::chrono::seconds MAX_LATENCY(1);
 } // namespace
