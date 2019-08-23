@@ -722,7 +722,6 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
  *
  * @param propertyName : the name of the property to get
  * @param defaultValue : the default value to use if the property is not set
- * @param isDefault [out] : true if the default value was used
  */
 double ReflectometryReductionOneAuto3::getPropertyOrDefault(
     const std::string &propertyName, const double defaultValue) {
