@@ -10,6 +10,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -71,6 +72,7 @@ const std::string L2("L2");
 const std::string POLAR("Polar");
 const std::string AZIMUTHAL("Azimuthal");
 const std::string PM_NAME("ReductionProperties");
+const std::string LORENTZ("LorentzCorrection");
 const std::string UNWRAP_REF("UnwrapRef");
 const std::string LOWRES_REF("LowResRef");
 const std::string LOWRES_SPEC_OFF("LowResSpectrumOffset");
@@ -198,6 +200,9 @@ void AlignAndFocusPowder::init() {
       "starting filtering. Ignored if WallClockTolerance is not specified. "
       "Default is start of run",
       Direction::Input);
+  declareProperty(PropertyNames::LORENTZ, false, "Multiply each spectrum by "
+                                                 "sin(theta) where theta is "
+                                                 "half of the Bragg angle");
   declareProperty(PropertyNames::UNWRAP_REF, 0.,
                   "Reference total flight path for frame "
                   "unwrapping. Zero skips the correction");
@@ -350,6 +355,7 @@ void AlignAndFocusPowder::exec() {
   auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
   LRef = getProperty(PropertyNames::UNWRAP_REF);
   DIFCref = getProperty(PropertyNames::LOWRES_REF);
+  const bool applyLorentz = getProperty(PropertyNames::LORENTZ);
   minwl = getProperty(PropertyNames::WL_MIN);
   maxwl = getProperty(PropertyNames::WL_MAX);
   if (maxwl == 0.)
@@ -590,6 +596,20 @@ void AlignAndFocusPowder::exec() {
     m_outputW = convertUnits(m_outputW, "dSpacing");
   }
   m_progress->report();
+
+  // ----------------- WACKY LORENTZ THING HERE
+  // TODO should call LorentzCorrection as a sub-algorithm
+  if (applyLorentz) {
+    g_log.information() << "Applying Lorentz correction started at "
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    const size_t numHist = m_outputEW->getNumberHistograms();
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    const auto &specInfo = m_outputEW->spectrumInfo();
+    for (size_t i = 0; i < numHist; ++i) {
+      const double sin_theta = std::sin(.5 * specInfo.twoTheta(i));
+      m_outputEW->getSpectrum(i) *= sin_theta;
+    }
+  }
 
   if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "TOF");
