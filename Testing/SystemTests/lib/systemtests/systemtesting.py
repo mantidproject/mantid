@@ -41,14 +41,18 @@ import time
 import unittest
 
 
+def santize_backslash(path):
+    """ Some windows paths can contain sequences such as \r, e.g. \release_systemtests
+        and need escaping to be able to add to the python path"""
+    return path.replace('\\', '\\\\')
+
+
 # Path to this file
-THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
-# Some windows paths can contain sequences such as \r, e.g. \release_systemtests
-# and need escaping to be able to add to the python path
-TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
+TESTING_FRAMEWORK_DIR = santize_backslash(os.path.dirname(os.path.realpath(__file__)))
 # Path to PythonInterface/test directory for testhelpers module
-FRAMEWORK_PYTHONINTERFACE_TEST_DIR = os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..",
-                                                                   "Framework", "PythonInterface", "test"))
+FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR,
+                                                                                     "..", "..", "..", "..",
+                                                                                     "Framework", "PythonInterface", "test")))
 
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
     raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
