@@ -13,5 +13,6 @@ Improved
 ########
 
 - Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>` to correct TOF by path to individual pixel
+- New CG2 definition file
 
 :ref:`Release 4.2.0 <v4.2.0>`
