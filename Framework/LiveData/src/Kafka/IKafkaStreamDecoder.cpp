@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
@@ -50,12 +52,14 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                                          const std::string &streamTopic,
                                          const std::string &runInfoTopic,
                                          const std::string &spDetTopic,
-                                         const std::string &sampleEnvTopic)
+                                         const std::string &sampleEnvTopic,
+                                         const std::string &chopperTopic)
     : m_broker(broker), m_streamTopic(streamTopic),
       m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
-      m_sampleEnvTopic(sampleEnvTopic), m_interrupt(false), m_specToIdx(),
-      m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(),
-      m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
+      m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic),
+      m_interrupt(false), m_specToIdx(), m_runStart(), m_runId(""), m_thread(),
+      m_capturing(false), m_exception(), m_extractWaiting(false),
+      m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 /**
  * Destructor.
@@ -81,6 +85,17 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
     m_dataStream =
         m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic},
                             SubscribeAtOption::LATEST);
+  }
+
+  try {
+    if (!m_chopperTopic.empty())
+      m_chopperStream =
+          m_broker->subscribe({m_chopperTopic}, SubscribeAtOption::LATEST);
+  } catch (std::exception &) {
+    g_log.notice() << "Could not subscribe to topic " + m_chopperTopic +
+                          ". This topic does not exist. No chopper information "
+                          "will be written to the logs."
+                   << std::endl;
   }
 
   // Get last two messages in run topic to ensure we get a runStart message

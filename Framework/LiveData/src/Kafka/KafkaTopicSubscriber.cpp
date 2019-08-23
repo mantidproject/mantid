@@ -58,6 +58,7 @@ const std::string KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX = "_eventSum";
 const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
 const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 const std::string KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX = "_sampleEnv";
+const std::string KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX = "_choppers";
 
 /**
  * Construct a topic subscriber
