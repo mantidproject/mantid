@@ -75,6 +75,7 @@ class ProjectLoader(object):
             decoder = self.decoder_factory.find_decoder(interface["tag"])
             try:
                 decoded_interface = decoder.decode(interface, directory)
+                decoded_interface.setAttribute(Qt.WA_DeleteOnClose, True)
                 decoded_interface.show()
             except Exception as e:
                 # Catch any exception and log it for the encoder
