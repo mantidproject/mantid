@@ -54,7 +54,7 @@ set_target_properties(NexusGeometry
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_NEXUS_GEOMETRY)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(NexusGeometry
                         PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif()

@@ -199,7 +199,7 @@ function (mtd_add_qt_target)
     set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${_all_defines}" )
   endif()
 
-  if (OSX_VERSION VERSION_GREATER 10.8)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()

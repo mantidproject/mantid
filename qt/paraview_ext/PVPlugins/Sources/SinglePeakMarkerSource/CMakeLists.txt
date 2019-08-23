@@ -15,7 +15,7 @@ target_link_libraries(MantidParaViewSinglePeakMarkerSourceSMPlugin
                       ${CORE_MANTIDLIBS}
                       VatesAPI)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidParaViewSinglePeakMarkerSourceSMPlugin
     PROPERTIES

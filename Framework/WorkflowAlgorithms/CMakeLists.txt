@@ -120,7 +120,7 @@ add_library(WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
 set_target_properties(WorkflowAlgorithms
                       PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(WorkflowAlgorithms
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

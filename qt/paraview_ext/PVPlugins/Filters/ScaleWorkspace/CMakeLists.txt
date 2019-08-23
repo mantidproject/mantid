@@ -16,7 +16,7 @@ target_link_libraries(MantidParaViewScaleWorkspaceSMPlugin
                       VatesAPI
                       ${vtkjsoncpp_LIBRARIES})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidParaViewScaleWorkspaceSMPlugin
     PROPERTIES

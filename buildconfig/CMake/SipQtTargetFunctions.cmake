@@ -100,7 +100,7 @@ function ( mtd_add_sip_module )
       LIBRARY_OUTPUT_DIRECTORY ${PARSED_MODULE_OUTPUT_DIR} )
   endif ()
 
-  if (OSX_VERSION VERSION_GREATER 10.8)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()

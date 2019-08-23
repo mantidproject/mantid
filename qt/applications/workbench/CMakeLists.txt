@@ -102,13 +102,9 @@ pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 # Install MantidWorkbench for OSX
-if( APPLE )
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set ( MAC_BUNDLE_EXECUTABLE MantidWorkbench )
-  if (OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-    set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
-  else()
-    set ( MAC_BUNDLE_IDENTIFIER "" )
-  endif()
+  set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidWorkbench" )
   set ( MAC_BUNDLE_ICON MantidWorkbench.icns )
   set ( MAC_BUNDLE_NAME MantidWorkbench )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in

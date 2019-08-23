@@ -19,7 +19,7 @@ target_link_libraries(MantidParaViewNexusPeaksReaderSMPlugin
                       ${NEXUS_LIBRARIES}
                       ${NEXUS_C_LIBRARIES})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidParaViewNexusPeaksReaderSMPlugin
     PROPERTIES

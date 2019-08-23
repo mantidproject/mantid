@@ -490,7 +490,7 @@ target_include_directories(Kernel SYSTEM
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
                                    ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Kernel
