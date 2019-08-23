@@ -146,6 +146,7 @@ class MultiFileEditor(PluginWidget):
 
     def open_script_in_new_tab(self, content):
         self.editors.append_new_editor(content=content)
+        self.editors.mark_current_tab_modified(True)
 
     def save_current_file(self):
         self.editors.save_current_file()

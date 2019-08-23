@@ -81,6 +81,8 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return all_lines
 
     def PyExec(self):
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=12312, stdoutToServer=True, stderrToServer=True)
         all_lines = []
         input_string = self.getPropertyValue("InputString")
 
@@ -89,6 +91,9 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                 with open(fn) as f:
                     all_lines.extend(self._get_all_lines_from_io(f.readline))
         else:
+            # In all scenarios we need a newline character at the end of a line however algorithm properties strip
+            # whitespace characters
+            input_string += "\n"
             script_string_io = StringIO(input_string)
             all_lines = self._get_all_lines_from_io(script_string_io.readline)
 
