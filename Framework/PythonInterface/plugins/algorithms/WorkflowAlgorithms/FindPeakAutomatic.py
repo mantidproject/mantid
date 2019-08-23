@@ -7,11 +7,11 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, RenameWorkspace, DeleteWorkspace,
+from mantid.simpleapi import (ConvertToPointData, CreateWorkspace, DeleteWorkspace,
                               CreateEmptyTableWorkspace, FitGaussianPeaks)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, Progress, ITableWorkspaceProperty)
 from mantid.kernel import (Direction, FloatBoundedValidator, IntBoundedValidator)
-from mantid import mtd
+from mantid import mtd, logger
 
 import numpy as np
 import scipy.signal
@@ -142,14 +142,13 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         # Progress reporter for algorithm initialization
         prog_reporter = Progress(self, start=0.0, end=0.1, nreports=4)
 
-        raw_xvals, raw_yvals, raw_error, raw_data_ws, error_ws = self.load_data(prog_reporter)
+        raw_xvals, raw_yvals, raw_error, error_ws = self.load_data(prog_reporter)
 
         # Convert the data to point data
         prog_reporter.report('Converting to point data')
-        raw_data_ws = ConvertToPointData(error_ws)
+        raw_data_ws = ConvertToPointData(error_ws, StoreInADS=False)
         raw_xvals = raw_data_ws.readX(0).copy()
         raw_yvals = raw_data_ws.readY(0).copy()
-        print(raw_xvals, raw_yvals)
 
         raw_xvals, raw_yvals, raw_error = self.crop_data(raw_xvals, raw_yvals, raw_error, prog_reporter)
 
@@ -171,28 +170,25 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
 
         self.set_output_properties(peak_table, refit_peak_table)
 
-        #self.delete_temporary_workspaces()
-
     def load_data(self, prog_reporter):
         # Load the data and clean from Nans
-        raw_data_ws = self.getProperty('InputWorkspace').value
-        raw_xvals = raw_data_ws.readX(0).copy()
-        raw_yvals = raw_data_ws.readY(0).copy()
+        raw_xvals = self.getProperty('InputWorkspace').value.readX(0).copy()
+        raw_yvals = self.getProperty('InputWorkspace').value.readY(0).copy()
         prog_reporter.report('Loaded data')
 
         # If the data does not have errors use poisson statistics create an workspace with added errors
-        raw_error = raw_data_ws.readE(0).copy()
+        raw_error = self.getProperty('InputWorkspace').value.readE(0).copy()
         if len(np.argwhere(raw_error > 0)) == 0:
             raw_error = np.sqrt(raw_yvals)
-            error_ws = '{}_with_errors'.format(raw_data_ws.getName())
+            error_ws = '{}_with_errors'.format(self.getPropertyValue('InputWorkspace'))
             CreateWorkspace(DataX=raw_xvals,
                             DataY=raw_yvals,
                             DataE=raw_error,
                             OutputWorkspace=error_ws)
         else:
-            error_ws = raw_data_ws
+            error_ws = self.getPropertyValue('InputWorkspace')
 
-        return raw_xvals, raw_yvals, raw_error, raw_data_ws, error_ws
+        return raw_xvals, raw_yvals, raw_error, error_ws
 
     def crop_data(self, raw_xvals, raw_yvals, raw_error, prog_reporter):
         # Crop the data as required by the user
@@ -229,15 +225,6 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         self.setProperty('PeakPropertiesTableName', peak_table)
         self.setPropertyValue('RefitPeakPropertiesTableName', refit_peak_table_name)
         self.setProperty('RefitPeakPropertiesTableName', refit_peak_table)
-
-    def delete_temporary_workspaces(self):
-        self.delete_if_present('ret')
-        self.delete_if_present('raw_data_ws')
-        self.delete_if_present('flat_ws')
-        self.delete_if_present('fit_result_NormalisedCovarianceMatrix')
-        self.delete_if_present('fit_result_Parameters')
-        self.delete_if_present('fit_result_Workspace')
-        self.delete_if_present('fit_cost')
 
     @staticmethod
     def delete_if_present(workspace):
@@ -285,7 +272,7 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         return average / 2
 
     def generate_peak_guess_table(self, xvals, peakids):
-        peak_table = CreateEmptyTableWorkspace()
+        peak_table = CreateEmptyTableWorkspace(StoreInADS=False)
         peak_table.addColumn(type='float', name='centre')
         for peak_idx in sorted(peakids):
             peak_table.addRow([xvals[peak_idx]])
@@ -299,6 +286,8 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         actual_peaks = []
         skipped = 0
         cost_idx = 1 if use_poisson else 0
+        prog_reporter.report('Starting fit')
+        logger.notice('Fitting null hypothesis')
         peak_table, refit_peak_table, cost = FitGaussianPeaks(
             InputWorkspace=fit_ws,
             PeakGuessTable=self.generate_peak_guess_table(xvals, []),
@@ -307,9 +296,9 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
             MinPeakSigma=self._min_sigma,
             MaxPeakSigma=self._max_sigma,
             GeneralFitTolerance=0.1,
-            RefitTolerance=0.001)
+            RefitTolerance=0.001,
+            StoreInADS=False)
         old_cost = cost.column(cost_idx)[0]
-        prog_reporter.report('Fitting null hypothesis')
 
         for idx, peak_idx in enumerate(peakids):
             peak_table, refit_peak_table, cost = FitGaussianPeaks(
@@ -320,7 +309,8 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
                 MinPeakSigma=self._min_sigma,
                 MaxPeakSigma=self._max_sigma,
                 GeneralFitTolerance=0.1,
-                RefitTolerance=0.001)
+                RefitTolerance=0.001,
+                StoreInADS=False)
             new_cost = cost.column(cost_idx)[0]
             if use_poisson:
                 # if p_new > p_old, but uses logs
@@ -332,13 +322,17 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
 
             if skipped > bad_peak_to_consider:
                 break
+            msg = ''
             if good_peak_condition:
+                msg = '** peak found, '
                 skipped = 0
                 actual_peaks.append(peak_idx)
                 old_cost = new_cost
             else:
                 skipped += 1
             prog_reporter.report('Iteration {}, {} peaks found'.format(idx + 1, len(actual_peaks)))
+            msg += '{} peaks in total. cost={:.2}, cost change={:.5}'
+            logger.information(msg.format(len(actual_peaks), new_cost, cost_change))
 
         peak_table, refit_peak_table, cost = FitGaussianPeaks(
             InputWorkspace=fit_ws,
@@ -348,8 +342,11 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
             MinPeakSigma=self._min_sigma,
             MaxPeakSigma=self._max_sigma,
             GeneralFitTolerance=0.1,
-            RefitTolerance=0.001)
+            RefitTolerance=0.001,
+            StoreInADS=False)
         prog_reporter.report('Fitting done')
+        logger.notice('Fitting done, {} good peaks and {} refitted peak found'
+                      .format(peak_table.rowCount(), refit_peak_table.rowCount()))
         return actual_peaks, peak_table, refit_peak_table
 
     def process(self, raw_xvals, raw_yvals, raw_error, acceptance, average_window,
@@ -366,7 +363,8 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         flat_ws = CreateWorkspace(DataX=np.concatenate((raw_xvals, raw_xvals)),
                                   DataY=np.concatenate((flat_yvals, baseline)),
                                   DataE=np.concatenate((raw_error, raw_error)),
-                                  NSpec=2)
+                                  NSpec=2,
+                                  StoreInADS=False)
         prog_reporter.report('Removed background')
 
         # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt

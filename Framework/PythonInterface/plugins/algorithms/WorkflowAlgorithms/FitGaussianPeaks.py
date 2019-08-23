@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 from mantid.simpleapi import (DeleteWorkspace, CreateEmptyTableWorkspace, Fit)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, ITableWorkspaceProperty)
 from mantid.kernel import (Direction, FloatBoundedValidator)
-from mantid import mtd
 
 import numpy as np
 import scipy.optimize
@@ -121,8 +120,8 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         _, param = self.general_fit(xvals, flat_yvals, peakids)
 
         # Create table of peak positions
-        peak_table = CreateEmptyTableWorkspace()
-        refit_peak_table = CreateEmptyTableWorkspace()
+        peak_table = CreateEmptyTableWorkspace(StoreInADS=False)
+        refit_peak_table = CreateEmptyTableWorkspace(StoreInADS=False)
         to_refit = self.parse_fit_table(param, peak_table, True)
 
         # Refit all the bad peaks by adding stronger constraints
@@ -136,14 +135,11 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         self.setProperty('RefitPeakProperties', refit_peak_table)
         self.setProperty('FitCost', fit_cost)
 
-        self.delete_if_present('tmp_fit_ws')
-
     def _load_data(self):
-        raw_data_ws = self.getProperty('InputWorkspace').value
-        xvals = raw_data_ws.readX(0).copy()
-        flat_yvals = raw_data_ws.readY(0).copy()
-        baseline = raw_data_ws.readY(1).copy()
-        errors = raw_data_ws.readE(0).copy()
+        xvals = self.getProperty('InputWorkspace').value.readX(0).copy()
+        flat_yvals = self.getProperty('InputWorkspace').value.readY(0).copy()
+        baseline = self.getProperty('InputWorkspace').value.readY(1).copy()
+        errors = self.getProperty('InputWorkspace').value.readE(0).copy()
         xvals = xvals[np.isfinite(flat_yvals)]
         flat_yvals = flat_yvals[np.isfinite(flat_yvals)]
 
@@ -176,17 +172,12 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
                                      peak_table,
                                      refit_peak_table,
                                      use_poisson=True)
-        fit_cost = CreateEmptyTableWorkspace()
+        fit_cost = CreateEmptyTableWorkspace(StoreInADS=False)
         fit_cost.addColumn(type='float', name='Chi2')
         fit_cost.addColumn(type='float', name='Poisson')
         fit_cost.addRow([chi2, poisson])
 
         return fit_cost
-
-    @staticmethod
-    def delete_if_present(workspace):
-        if workspace in mtd:
-            DeleteWorkspace(workspace)
 
     def parse_fit_table(self, param, data_table, refit=False):
         to_refit = []
@@ -337,13 +328,14 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
 
         _, _, _, param, fit_result, _, _ = Fit(
             Function=fit_func,
-            InputWorkspace=self.getPropertyValue('InputWorkspace'),
+            InputWorkspace=self.getProperty('InputWorkspace').value,
             Output='fit_result',
             Minimizer='Levenberg-MarquardtMD',
             OutputCompositeMembers=True,
             StartX=min(xvals),
             EndX=max(xvals),
-            Constraints=fit_constr)
+            Constraints=fit_constr,
+            StoreInADS=False)
 
         return fit_result.readY(1).copy(), param
 
@@ -367,13 +359,14 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
 
         _, _, _, param, fit_result, _, _ = Fit(
             Function=fit_func,
-            InputWorkspace=self.getPropertyValue('InputWorkspace'),
+            InputWorkspace=self.getProperty('InputWorkspace').value,
             Output='fit_result',
             Minimizer='Levenberg-MarquardtMD',
             OutputCompositeMembers=True,
             StartX=min(xvals),
             EndX=max(xvals),
-            Constraints=fit_constr)
+            Constraints=fit_constr,
+            StoreInADS=False)
 
         return fit_result.readY(1).copy(), param
 

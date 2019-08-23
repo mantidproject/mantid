@@ -55,6 +55,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
         self.peak_guess_table = peak_table
 
         self.alg_instance = _FitGaussianPeaks.FitGaussianPeaks()
+        self.alg_instance.initialize()
 
     def tearDown(self):
         self.delete_if_present('data_ws')
@@ -317,13 +318,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
             np.testing.assert_equal(yvals, [7, 8])
             mock_fit.assert_called_with(
                 Function='name=Gaussian,PeakCentre=1,Height=2,Sigma=3;',
-                InputWorkspace='ws',
+                InputWorkspace=None,
                 Output='fit_result',
                 Minimizer='Levenberg-MarquardtMD',
                 OutputCompositeMembers=True,
                 StartX=min(self.x_values),
                 EndX=max(self.x_values),
-                Constraints='0.900000<PeakCentre<1.100000,1.768245<Height<2.161188,0.000000<Sigma<30,')
+                Constraints='0.900000<PeakCentre<1.100000,1.768245<Height<2.161188,0.000000<Sigma<30,',
+                StoreInADS=False
+            )
 
     # Separating the cases 1/multiple peaks tests that the constraints are named correctly in both cases
     def test_fit_function_is_called_correctly_when_given_multiple_peaks(self):
@@ -340,14 +343,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
             mock_fit.assert_called_with(
                 Function='name=Gaussian,PeakCentre=1,Height=2,Sigma=3;'
                          'name=Gaussian,PeakCentre=1,Height=2,Sigma=3;',
-                InputWorkspace='ws',
+                InputWorkspace=None,
                 Output='fit_result',
                 Minimizer='Levenberg-MarquardtMD',
                 OutputCompositeMembers=True,
                 StartX=min(self.x_values),
                 EndX=max(self.x_values),
                 Constraints='0.900000<f0.PeakCentre<1.100000,1.768245<f0.Height<2.161188,0.000000<f0.Sigma<30,'
-                            '1.800000<f1.PeakCentre<2.200000,2.236669<f1.Height<2.733706,0.000000<f1.Sigma<30,'
+                            '1.800000<f1.PeakCentre<2.200000,2.236669<f1.Height<2.733706,0.000000<f1.Sigma<30,',
+                StoreInADS=False
             )
 
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.getProperty')
@@ -383,13 +387,15 @@ class FitGaussianPeaksTest(unittest.TestCase):
         np.testing.assert_equal(yvals, [7, 8])
         mock_fit.assert_called_with(
             Function='name=Gaussian,PeakCentre=1.000000,Height=2.000000,Sigma=3.000000;',
-            InputWorkspace='ws',
+            InputWorkspace=mock_get_property().value,
             Output='fit_result',
             Minimizer='Levenberg-MarquardtMD',
             OutputCompositeMembers=True,
             StartX=min(self.x_values),
             EndX=max(self.x_values),
-            Constraints='0.999000<PeakCentre<1.001000,1.998000<Height<2.002000,0.000000<Sigma<30,')
+            Constraints='0.999000<PeakCentre<1.001000,1.998000<Height<2.002000,0.000000<Sigma<30,',
+            StoreInADS=False
+        )
 
     # Separating the cases 1/multiple peaks tests that the constraints are named correctly in both cases
     @mock.patch('plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.Fit')
@@ -408,14 +414,16 @@ class FitGaussianPeaksTest(unittest.TestCase):
         mock_fit.assert_called_with(
             Function='name=Gaussian,PeakCentre=1.000000,Height=2.000000,Sigma=3.000000;'
             'name=Gaussian,PeakCentre=4.000000,Height=5.000000,Sigma=6.000000;',
-            InputWorkspace='ws',
+            InputWorkspace=mock_get_property().value,
             Output='fit_result',
             Minimizer='Levenberg-MarquardtMD',
             OutputCompositeMembers=True,
             StartX=min(self.x_values),
             EndX=max(self.x_values),
             Constraints='0.999000<f0.PeakCentre<1.001000,1.998000<f0.Height<2.002000,0.000000<f0.Sigma<30,'
-                        '3.996000<f1.PeakCentre<4.004000,4.995000<f1.Height<5.005000,0.000000<f1.Sigma<30,')
+                        '3.996000<f1.PeakCentre<4.004000,4.995000<f1.Height<5.005000,0.000000<f1.Sigma<30,',
+            StoreInADS=False
+        )
 
     def test_algorithm_does_not_need_refitting_when_given_good_data(self):
         peak_table, refit_peak_table, fit_cost = FitGaussianPeaks(

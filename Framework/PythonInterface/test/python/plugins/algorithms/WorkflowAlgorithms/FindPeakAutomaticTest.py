@@ -145,15 +145,13 @@ class FindPeakAutomaticTest(unittest.TestCase):
         FindPeakAutomatic(self.raw_ws)
 
         self.assertIn('{}_with_errors'.format(ws_name), mtd)
-        self.assertIn('raw_data_ws_{}'.format('properties'), mtd)
-        self.assertIn('raw_data_ws_{}'.format('refit_properties'), mtd)
+        self.assertIn('{}_{}'.format(self.raw_ws.getName(), 'properties'), mtd)
+        self.assertIn('{}_{}'.format(self.raw_ws.getName(), 'refit_properties'), mtd)
 
-    def test_algorithm_removes_temporary_workspaces(self):
+    def test_algorithm_does_not_create_temporary_workspaces(self):
         FindPeakAutomatic(self.raw_ws)
 
         self.assertNotIn('ret', mtd)
-        self.assertNotIn('peak_table', mtd)
-        self.assertNotIn('refit_peak_table', mtd)
         self.assertNotIn('raw_data_ws', mtd)
         self.assertNotIn('flat_ws', mtd)
         self.assertNotIn('fit_result_NormalisedCovarianceMatrix', mtd)
@@ -164,8 +162,8 @@ class FindPeakAutomaticTest(unittest.TestCase):
     def test_output_tables_are_correctly_formatted(self):
         FindPeakAutomatic(self.raw_ws, FitToBaseline=True)
 
-        peak_table = mtd['raw_data_ws_{}'.format('properties')]
-        refit_peak_table = mtd['raw_data_ws_{}'.format('refit_properties')]
+        peak_table = mtd['{}_{}'.format(self.raw_ws.getName(), 'properties')]
+        refit_peak_table = mtd['{}_{}'.format(self.raw_ws.getName(), 'refit_properties')]
         self.assertEqual(self.peak_table_header, peak_table.getColumnNames())
         self.assertEqual(self.peak_table_header, refit_peak_table.getColumnNames())
         self.assertEqual(2, peak_table.rowCount())
@@ -297,7 +295,7 @@ class FindPeakAutomaticTest(unittest.TestCase):
             tmp_table.addColumn(type='float', name='chi2')
             tmp_table.addColumn(type='float', name='poisson')
             tmp_table.addRow([10, 20])
-            mock_fit.return_value = (None, None, tmp_table)
+            mock_fit.return_value = (mock.MagicMock(), mock.MagicMock(), tmp_table)
             self.alg_instance.min_sigma = 1
             self.alg_instance.max_sigma = 10
             peakids = [
@@ -470,8 +468,8 @@ class FindPeakAutomaticTest(unittest.TestCase):
             MinPeakSigma=3,
             MaxPeakSigma=15,
         )
-        peak_table = mtd['raw_data_ws_{}'.format('properties')]
-        refit_peak_table = mtd['raw_data_ws_{}'.format('refit_properties')]
+        peak_table = mtd['{}_{}'.format(self.raw_ws.getName(), 'properties')]
+        refit_peak_table = mtd['{}_{}'.format(self.raw_ws.getName(), 'refit_properties')]
 
         self.assertEqual(2, peak_table.rowCount())
         self.assertEqual(0, refit_peak_table.rowCount())
