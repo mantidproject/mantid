@@ -59,6 +59,10 @@ public:
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
 
   // JobTreeViewSubscriber overrides
   void notifyCellTextChanged(
@@ -154,6 +158,8 @@ private:
 
   bool isProcessing() const;
   bool isAutoreducing() const;
+  bool isAnyBatchProcessing() const;
+  bool isAnyBatchAutoreducing() const;
 
   static auto constexpr DEPTH_LIMIT = 2;
 

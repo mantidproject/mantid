@@ -51,6 +51,9 @@ public:
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void settingsChanged() = 0;
 
+  virtual bool isAnyBatchProcessing() const = 0;
+  virtual bool isAnyBatchAutoreducing() const = 0;
+
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
   virtual int percentComplete() const = 0;

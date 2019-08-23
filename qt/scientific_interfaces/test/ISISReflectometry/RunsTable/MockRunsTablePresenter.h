@@ -32,6 +32,10 @@ public:
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchReductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchReductionResumed, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
+  MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(settingsChanged, void());
 };

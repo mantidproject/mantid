@@ -249,7 +249,8 @@ void RunsTablePresenter::updateWidgetEnabledState() {
   auto const autoreducing = isAutoreducing();
 
   m_view->setJobsTableEnabled(!processing && !autoreducing);
-  m_view->setInstrumentSelectorEnabled(!processing && !autoreducing);
+  m_view->setInstrumentSelectorEnabled(!isAnyBatchProcessing() &&
+                                       !isAnyBatchAutoreducing());
   m_view->setProcessButtonEnabled(!processing && !autoreducing);
   m_view->setActionEnabled(IRunsTableView::Action::Process,
                            !processing && !autoreducing);
@@ -278,11 +279,27 @@ void RunsTablePresenter::notifyReductionResumed() {
 void RunsTablePresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
 void RunsTablePresenter::notifyAutoreductionResumed() {
-  notifyReductionResumed();
+  updateWidgetEnabledState();
 }
 
 void RunsTablePresenter::notifyAutoreductionPaused() {
-  notifyReductionPaused();
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchReductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchReductionPaused() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
 }
 
 void RunsTablePresenter::notifyInstrumentChanged(
@@ -850,6 +867,14 @@ bool RunsTablePresenter::isProcessing() const {
 
 bool RunsTablePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsTablePresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
+}
+
+bool RunsTablePresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {

@@ -227,18 +227,22 @@ void RunsPresenter::notifyAutoreductionPaused() {
 
 void RunsPresenter::notifyAnyBatchReductionResumed() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchReductionResumed();
 }
 
 void RunsPresenter::notifyAnyBatchReductionPaused() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchReductionPaused();
 }
 
 void RunsPresenter::notifyAnyBatchAutoreductionResumed() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchAutoreductionResumed();
 }
 
 void RunsPresenter::notifyAnyBatchAutoreductionPaused() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchAutoreductionPaused();
 }
 
 void RunsPresenter::autoreductionCompleted() {

@@ -298,6 +298,38 @@ public:
     verifyAndClear();
   }
 
+  void testChildPresentersAreUpdatedWhenAnyBatchReductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionResumed())
+        .Times(1);
+    presenter.notifyAnyBatchReductionResumed();
+    verifyAndClear();
+  }
+
+  void testChildPresentersAreUpdatedWhenAnyBatchReductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionPaused())
+        .Times(1);
+    presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
+  void testChildPresentersAreUpdatedWhenAnyBatchAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionResumed())
+        .Times(1);
+    presenter.notifyAnyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testChildPresentersAreUpdatedWhenAnyBatchAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionPaused())
+        .Times(1);
+    presenter.notifyAnyBatchAutoreductionPaused();
+    verifyAndClear();
+  }
+
   void testChangingInstrumentIsDisabledWhenAnotherBatchReducing() {
     auto presenter = makePresenter();
     expectInstrumentComboIsDisabledWhenAnotherBatchReducing();
@@ -308,7 +340,7 @@ public:
   void testChangingInstrumentIsEnabledWhenNoBatchesAreReducing() {
     auto presenter = makePresenter();
     expectInstrumentComboIsEnabledWhenNoBatchesAreReducing();
-    presenter.notifyAnyBatchAutoreductionPaused();
+    presenter.notifyAnyBatchReductionPaused();
     verifyAndClear();
   }
 

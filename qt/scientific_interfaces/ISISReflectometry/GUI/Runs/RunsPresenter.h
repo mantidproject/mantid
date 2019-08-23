@@ -97,6 +97,9 @@ public:
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
+  bool isAnyBatchProcessing() const override;
+  bool isAnyBatchAutoreducing() const override;
+
   // RunsViewSubscriber overrides
   void notifySearch() override;
   void notifyResumeAutoreductionRequested() override;
@@ -140,9 +143,6 @@ private:
   std::vector<std::string> m_instruments;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
-
-  bool isAnyBatchProcessing() const;
-  bool isAnyBatchAutoreducing() const;
 
   /// searching
   bool search(ISearcher::SearchType searchType);
