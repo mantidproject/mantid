@@ -33,12 +33,12 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         return files
 
     def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
+        for ws in files:
+            try:
+                path = os.path.join(os.path.expanduser("~"), ws)
+                os.remove(path)
+            except:
+                pass
 
     def __loadSaveAndTest__(self, filename):
         """Do all of the real work of loading and testing the file"""
