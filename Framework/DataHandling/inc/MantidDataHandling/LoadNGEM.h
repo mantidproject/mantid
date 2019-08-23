@@ -34,8 +34,8 @@ struct T0FrameEvent {
   uint64_t eventLoss : 20;  // Event loss count
   uint64_t frameLoss : 12;  // Frame loss count
   uint64_t id : 8;          // 0x4E Event ID
-  static const int T0_ID = 0x4E;
-  bool check() const { return id == T0_ID && contin == CONTIN_ID_VALUE }
+  static const int T0_IDENTIFIER = 0x4E;
+  bool check() const { return id == T0_IDENTIFIER && contin == CONTIN_ID_VALUE }
 };
 
 /// A detected event.
@@ -57,8 +57,10 @@ struct CoincidenceEvent {
 
   uint64_t avgX() const { return (firstX + lastX) / 2; }
   uint64_t avgY() const { return (firstY + lastY) / 2; }
-  static const int COINCIDENCE_ID = 0x47;
-  bool check() { return id == COINCIDENCE_ID && contin == CONTIN_ID_VALUE; }
+  static const int COINCIDENCE_IDENTIFIER = 0x47;
+  bool check() {
+    return id == COINCIDENCE_IDENTIFIER && contin == CONTIN_ID_VALUE;
+  }
   uint64_t getPixel() const {
     return avgX() + (avgY() << 7); // Increase Y significance by 7 bits to
                                    // account for 128x128 grid.
@@ -115,8 +117,11 @@ private:
   void addToSampleLog(const std::string &logName, const int &logNumber,
                       DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
-  void verifyFileSize(FILE *&file);
+  size_t verifyFileSize(FILE *&file);
+  /// Create a workspace to store the number of counts per frame.
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
+  /// Load the instrument and attach to the data workspace.
+  void loadInstrument();
 };
 
 } // namespace DataHandling

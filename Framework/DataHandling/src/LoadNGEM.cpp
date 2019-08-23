@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -48,7 +49,7 @@ uint64_t LoadNGEM::swapUint64(uint64_t word) {
  */
 int LoadNGEM::confidence(Kernel::FileDescriptor &descriptor) const {
   if (descriptor.extension() == ".edb") {
-    return 90;
+    return 100;
   } else {
     return 0;
   }
@@ -73,11 +74,15 @@ void LoadNGEM::init() {
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
+  auto mustBePositiveDbl =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+
   // Bin Width
-  declareProperty("BinWidth", 10.0,
+  declareProperty("BinWidth", 10.0, mustBePositiveDbl,
                   "The width of the time bins in the output.");
 
-  declareProperty("MinEventsPerFrame", Mantid::EMPTY_INT(), mustBePositive,
+  declareProperty("MinEventsPerFrame", 0, mustBePositive,
                   "The minimum number of events required in a frame before a "
                   "it is considered 'good'.");
   declareProperty("MaxEventsPerFrame", Mantid::EMPTY_INT(), mustBePositive,
@@ -97,6 +102,8 @@ void LoadNGEM::exec() {
   progress(0);
   const std::string filename = getPropertyValue("Filename");
   const int NUM_OF_SPECTRA = 16384;
+  const int MIN_EVENTS_REQ = stoi(getPropertyValue("MinEventsPerFrame"));
+  const int MAX_EVENTS_REQ = stoi(getPropertyValue("MaxEventsPerFrame"));
 
   // Create file reader
   FILE *file = fopen(filename.c_str(), "rb");
@@ -105,7 +112,7 @@ void LoadNGEM::exec() {
     throw std::runtime_error("File could not be found.");
   }
 
-  verifyFileSize(file);
+  auto totalEvents = verifyFileSize(file) / 16;
 
   EventUnion event, eventBigEndian;
   size_t loadStatus;
@@ -117,10 +124,11 @@ void LoadNGEM::exec() {
   int rawFrames = 0;
   int goodFrames = 0;
   std::vector<double> frameEventCounts;
-  int eventCount = 0;
+  int eventCountInFrame = 0;
 
-  std::vector<DataObjects::EventList> histograms;
+  std::vector<DataObjects::EventList> histograms, histogramsInFrame;
   histograms.resize(NUM_OF_SPECTRA);
+  histogramsInFrame.resize(NUM_OF_SPECTRA);
   progress(0.04);
 
   while (!feof(file)) {
@@ -129,6 +137,7 @@ void LoadNGEM::exec() {
 
     // Check that the load was successful.
     if (loadStatus == 0) {
+      g_log.information() << "File loading complete!\n";
       break;
     } else if (loadStatus != 1) {
       g_log.error() << "Error while reading file.";
@@ -139,7 +148,7 @@ void LoadNGEM::exec() {
     correctForBigEndian(eventBigEndian, event);
 
     if (event.coincidence.check()) { // Check for coincidence event.
-      ++eventCount;
+      ++eventCountInFrame;
       uint64_t pixel = event.coincidence.getPixel();
       int tof =
           event.coincidence.timeOfFlight / 1000; // Convert to microseconds (us)
@@ -149,17 +158,41 @@ void LoadNGEM::exec() {
       } else if (tof < minToF) {
         minToF = tof;
       }
-      histograms[pixel].addEventQuickly(Mantid::Types::Event::TofEvent(tof));
+      histogramsInFrame[pixel].addEventQuickly(
+          Mantid::Types::Event::TofEvent(tof));
 
     } else if (event.tZero.check()) { // Check for T0 event.
-      frameEventCounts.emplace_back(eventCount);
-      eventCount = 0;
-      ++rawFrames;
-      ++goodFrames;
+      if (eventCountInFrame >= MIN_EVENTS_REQ &&
+          eventCountInFrame <= MAX_EVENTS_REQ) {
+        ++rawFrames;
+        // Add number of event counts to workspace.
+        frameEventCounts.emplace_back(eventCountInFrame);
+        ++goodFrames;
+
+        // Add histograms that match parameters to workspace
+        for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+          if (histogramsInFrame[i].getNumberEvents() > 0) {
+            histograms[i] += histogramsInFrame[i];
+            histogramsInFrame[i].clear();
+          }
+        }
+      }
+      eventCountInFrame = 0;
     } else { // Catch all other events and notify.
-      g_log.error() << "found unknown event type";
+      g_log.warning() << "Unexpected event type loaded.\n";
     }
   }
+  // Add the final set of events.
+  if (eventCountInFrame >= MIN_EVENTS_REQ &&
+      eventCountInFrame <= MAX_EVENTS_REQ) {
+    frameEventCounts.emplace_back(eventCountInFrame);
+    ++goodFrames;
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+      histograms[i] += histogramsInFrame[i];
+    }
+  }
+  ++rawFrames;
+
   fclose(file);
   progress(0.68);
 
@@ -177,6 +210,7 @@ void LoadNGEM::exec() {
   for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
     m_dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
     m_dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
+    m_dataWorkspace->getSpectrum(spectrumNo).setDetectorID(spectrumNo + 1);
   }
   m_dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
   m_dataWorkspace->getAxis(0)->unit() =
@@ -184,6 +218,9 @@ void LoadNGEM::exec() {
   m_dataWorkspace->setYUnit("Counts");
 
   addToSampleLog("raw_frames", rawFrames, m_dataWorkspace);
+  addToSampleLog("good_frames", goodFrames, m_dataWorkspace);
+
+  loadInstrument();
 
   setProperty("OutputWorkspace", m_dataWorkspace);
   progress(0.90);
@@ -220,13 +257,13 @@ void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
   sampLogAlg->executeAsChildAlg();
 }
 
-void LoadNGEM::verifyFileSize(FILE *&file) {
+size_t LoadNGEM::verifyFileSize(FILE *&file) {
   // Check that the file fits into 16 byte sections.
   struct stat fileStatus;
   if (fstat(fileno(file), &fileStatus) != 0 || fileStatus.st_size % 16 != 0) {
-    g_log.warning() << "Invalid file size. Data may be corrupted.\n"
-                    << fileStatus.st_size << "\n";
+    g_log.warning() << "Invalid file size. Data may be corrupted.\n";
   }
+  return fileStatus.st_size;
 }
 
 /**
@@ -262,6 +299,16 @@ void LoadNGEM::createCountWorkspace(
       "Counts of events per frame.");
   progress(1.00);
   this->setProperty("CountsWorkspace", countsWorkspace);
+}
+
+void LoadNGEM::loadInstrument() {
+  auto loadInstrument = this->createChildAlgorithm("LoadInstrument");
+  loadInstrument->setPropertyValue("InstrumentName", "NGEM");
+  loadInstrument->setProperty<Mantid::API::MatrixWorkspace_sptr>(
+      "Workspace", m_dataWorkspace);
+  loadInstrument->setProperty("RewriteSpectraMap",
+                              Mantid::Kernel::OptionalBool(false));
+  loadInstrument->execute();
 }
 
 } // namespace DataHandling
