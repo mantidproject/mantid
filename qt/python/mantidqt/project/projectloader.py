@@ -11,6 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import json
 import os
 
+from qtpy.QtCore import Qt
 from mantidqt.project.workspaceloader import WorkspaceLoader
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.decoderfactory import DecoderFactory
