@@ -27,7 +27,7 @@ class ImageProperties(dict):
         props['colormap'] = image.get_cmap().name
         props['reverse_colormap'] = False
         if props['colormap'].endswith('_r'):
-            props['colormap'] = props['colormap'][-2]
+            props['colormap'] = props['colormap'][:-2]
             props['reverse_colormap'] = True
         props['vmin'] = image.get_array().min()
         props['vmax'] = image.get_array().max()
