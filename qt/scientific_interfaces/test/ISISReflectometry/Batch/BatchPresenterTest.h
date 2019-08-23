@@ -61,7 +61,7 @@ public:
     verifyAndClear();
   }
 
-  void testMainPresenterUpdatedWhenInstrumentChangedRequested() {
+  void testMainPresenterUpdatedWhenChangeInstrumentRequested() {
     auto presenter = makePresenter();
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))

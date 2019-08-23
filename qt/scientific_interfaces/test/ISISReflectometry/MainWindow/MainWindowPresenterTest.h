@@ -188,7 +188,7 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedRequestedUpdatesInstrumentInModel() {
+  void testChangeInstrumentRequestedUpdatesInstrumentInModel() {
     auto presenter = makePresenter();
     auto const instrument = std::string("POLREF");
     presenter.notifyChangeInstrumentRequested(instrument);
@@ -196,7 +196,7 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedRequestedUpdatesInstrumentInChildPresenters() {
+  void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))

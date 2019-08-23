@@ -413,7 +413,7 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedRequestedGetsInstrumentAndNotifiesMainPresenter() {
+  void testChangeInstrumentRequestedGetsInstrumentAndNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectSearchInstrument(instrument);
@@ -423,7 +423,7 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedRequestedWithGivenNameNotifiesMainPresenter() {
+  void testChangeInstrumentRequestedWithGivenNameNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
