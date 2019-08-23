@@ -64,7 +64,8 @@ void LoadNGEM::init() {
   declareProperty(
       std::make_unique<Mantid::API::FileProperty>(
           "Filename", "", Mantid::API::FileProperty::Load, extentions),
-      "The name of the nGEM file to load.");
+      "The name of the nGEM file to load. Selecting multiple files will "
+      "combine them into one workspace.");
   // Output workspace
   declareProperty(
       std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
@@ -102,8 +103,8 @@ void LoadNGEM::exec() {
   progress(0);
   const std::string filename = getPropertyValue("Filename");
   const int NUM_OF_SPECTRA = 16384;
-  const int MIN_EVENTS_REQ = stoi(getPropertyValue("MinEventsPerFrame"));
-  const int MAX_EVENTS_REQ = stoi(getPropertyValue("MaxEventsPerFrame"));
+  const int minEventsReq = stoi(getPropertyValue("MinEventsPerFrame"));
+  const int maxEventsReq = stoi(getPropertyValue("MaxEventsPerFrame"));
 
   // Create file reader
   FILE *file = fopen(filename.c_str(), "rb");
@@ -112,7 +113,8 @@ void LoadNGEM::exec() {
     throw std::runtime_error("File could not be found.");
   }
 
-  auto totalEvents = verifyFileSize(file) / 16;
+  size_t totalNumEvents = verifyFileSize(file) / 16;
+  size_t numProcessedEvents = 0;
 
   EventUnion event, eventBigEndian;
   size_t loadStatus;
@@ -162,8 +164,8 @@ void LoadNGEM::exec() {
           Mantid::Types::Event::TofEvent(tof));
 
     } else if (event.tZero.check()) { // Check for T0 event.
-      if (eventCountInFrame >= MIN_EVENTS_REQ &&
-          eventCountInFrame <= MAX_EVENTS_REQ) {
+      if (eventCountInFrame >= minEventsReq &&
+          eventCountInFrame <= maxEventsReq) {
         ++rawFrames;
         // Add number of event counts to workspace.
         frameEventCounts.emplace_back(eventCountInFrame);
@@ -177,14 +179,20 @@ void LoadNGEM::exec() {
           }
         }
       }
+      // Progess Reporting
+      numProcessedEvents += eventCountInFrame;
+      progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111);
       eventCountInFrame = 0;
+      // Check for cancel flag.
+      if (this->getCancel()) {
+        return;
+      }
     } else { // Catch all other events and notify.
       g_log.warning() << "Unexpected event type loaded.\n";
     }
   }
   // Add the final set of events.
-  if (eventCountInFrame >= MIN_EVENTS_REQ &&
-      eventCountInFrame <= MAX_EVENTS_REQ) {
+  if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
     frameEventCounts.emplace_back(eventCountInFrame);
     ++goodFrames;
     for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
@@ -194,7 +202,7 @@ void LoadNGEM::exec() {
   ++rawFrames;
 
   fclose(file);
-  progress(0.68);
+  progress(0.90);
 
   // Create and fill main histogram data into an event workspace.
   std::vector<double> xAxis;
@@ -205,7 +213,6 @@ void LoadNGEM::exec() {
   m_dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA,
       Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(xAxis)));
-  progress(0.82);
 
   for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
     m_dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
@@ -223,7 +230,6 @@ void LoadNGEM::exec() {
   loadInstrument();
 
   setProperty("OutputWorkspace", m_dataWorkspace);
-  progress(0.90);
   if (this->getProperty("GenerateEventsPerFrame")) {
     createCountWorkspace(frameEventCounts);
   }
