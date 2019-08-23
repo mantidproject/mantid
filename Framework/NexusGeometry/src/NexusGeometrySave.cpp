@@ -235,10 +235,6 @@ inline void writePixelData(H5::Group &grp,
   if (pixels.empty())
     return;
 
-  bool cylindersAreHomogeneous{true};
-  bool meshObjs2dAreHomogeneous{true};
-  bool meshObjectsAreHomogeneous{true};
-
   std::vector<size_t> cylinders;
   std::vector<size_t> MeshObjects2D;
   std::vector<size_t> meshObjects;
@@ -279,8 +275,8 @@ inline void writePixelData(H5::Group &grp,
   // file.
   if (!cylinders.empty()) {
     // check if cylinders are homogeneous
-    cylindersAreHomogeneous = // TODO: check if needs refactor -  [&] needed in
-                              // lambda?
+    bool cylindersAreHomogeneous = // TODO: check if needs refactor -  [&]
+                                   // needed in lambda?
         std::all_of(cylinders.begin(), cylinders.end(), [&](const size_t &idx) {
           auto &shapeObj = compInfo.shape(idx);
           auto shapeInfo = shapeObj.shapeInfo();
@@ -327,7 +323,7 @@ inline void writePixelData(H5::Group &grp,
   // file.
   if (!meshObjects.empty()) {
     // check if mesh objects are homogeneous
-    meshObjectsAreHomogeneous = std::all_of(
+    bool meshObjectsAreHomogeneous = std::all_of(
         meshObjects.begin(), meshObjects.end(), [&](const size_t &idx) {
           // TODO: check meshobject parameters match the first
 
@@ -345,7 +341,7 @@ inline void writePixelData(H5::Group &grp,
   // file.
   if (!MeshObjects2D.empty()) {
     // check if 2D mesh objects are homogeneous
-    meshObjs2dAreHomogeneous = std::all_of(
+    bool meshObjs2dAreHomogeneous = std::all_of(
         MeshObjects2D.begin(), MeshObjects2D.end(), [&](const size_t &idx) {
           // TODO: check meshobject2d parameters match the first
 
