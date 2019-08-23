@@ -32,7 +32,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         files.sort()
         return files
 
-    def removeFiles(files):
+    def __removeFiles__(files):
         for ws in files:
             try:
                 path = os.path.join(os.path.expanduser("~"), ws)
@@ -67,7 +67,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
 
         # cleanup
         del wksp
-        removeFiles([save_file_name])
+        self.__removeFiles__([save_file_name])
 
     def runTest(self):
         """Main entry point for the test suite"""
