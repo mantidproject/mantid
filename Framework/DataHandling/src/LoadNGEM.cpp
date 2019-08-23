@@ -164,9 +164,9 @@ void LoadNGEM::exec() {
           Mantid::Types::Event::TofEvent(tof));
 
     } else if (event.tZero.check()) { // Check for T0 event.
+      ++rawFrames;
       if (eventCountInFrame >= minEventsReq &&
           eventCountInFrame <= maxEventsReq) {
-        ++rawFrames;
         // Add number of event counts to workspace.
         frameEventCounts.emplace_back(eventCountInFrame);
         ++goodFrames;
