@@ -8,15 +8,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import optparse
+import argparse
 import os
 import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
 
 try:
-   # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-   # Remove this when everything is switched to qtpy
+    # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
+    # Remove this when everything is switched to qtpy
     import sip
     sip.setapi('QString', 2)
     sip.setapi('QVariant', 2)
@@ -38,7 +38,6 @@ os.environ['MPLBACKEND'] = 'Agg'
 
 start_time = time.time()
 
-VERSION = "1.1"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
@@ -53,58 +52,108 @@ def kill_children(processes):
 
 
 def main():
-    info = ["This program will configure mantid run all of the system tests located in",
-            "the 'tests/analysis' directory.",
-            "This program will create a temporary 'Mantid.user.properties' file which",
-            "it will rename to 'Mantid.user.properties.systest' upon completion. The",
-            "current version of the code does not print to stdout while the test is",
-            "running, so the impatient user may ^C to kill the process. In this case",
-            "all of the tests that haven't been run will be marked as skipped in the", "full logs."]
+    info = [
+        "This program will configure mantid run all of the system tests located in",
+        "the 'tests/analysis' directory.",
+        "This program will create a temporary 'Mantid.user.properties' file which",
+        "it will rename to 'Mantid.user.properties.systest' upon completion. The",
+        "current version of the code does not print to stdout while the test is",
+        "running, so the impatient user may ^C to kill the process. In this case",
+        "all of the tests that haven't been run will be marked as skipped in the", "full logs."
+    ]
 
-    parser = optparse.OptionParser("Usage: %prog [options]", None,
-                                   optparse.Option, VERSION, 'error', ' '.join(info))
-    parser.add_option("", "--email", action="store_true",
-                      help="send an email with test status.")
-    parser.add_option("-x", "--executable", dest="executable",
-                      help="The executable path used to run each test. Default is the sys.executable")
-    parser.add_option("-a", "--exec-args", dest="execargs",
-                      help="Arguments passed to executable for each test Default=[]")
-    parser.add_option("", "--frameworkLoc",
-                      help="location of the system test framework (default=%s)" % DEFAULT_FRAMEWORK_LOC)
-    parser.add_option("", "--disablepropmake", action="store_false", dest="makeprop",
-                      help="By default this will move your properties file out of the "
-                           + "way and create a new one. This option turns off this behavior.")
-    parser.add_option("-R", "--tests-regex", dest="testsInclude",
-                      help="String specifying which tests to run. Simply uses 'string in testname'.")
-    parser.add_option("-E", "--excluderegex", dest="testsExclude",
-                      help="String specifying which tests to not run. Simply uses 'string in testname'.")
+    parser = argparse.ArgumentParser(description=' '.join(info))
+    parser.add_argument("--email", action="store_true", help="send an email with test status.")
+    parser.add_argument(
+        "-x",
+        "--executable",
+        dest="executable",
+        help="The executable path used to run each test. Default is the sys.executable")
+    parser.add_argument("-a",
+                        "--exec-args",
+                        dest="execargs",
+                        help="Arguments passed to executable for each test Default=[]")
+    parser.add_argument("--frameworkLoc",
+                        help="location of the system test framework (default=%s)" %
+                        DEFAULT_FRAMEWORK_LOC)
+    parser.add_argument("--disablepropmake",
+                        action="store_false",
+                        dest="makeprop",
+                        help="By default this will move your properties file out of the " +
+                        "way and create a new one. This option turns off this behavior.")
+    parser.add_argument(
+        "-R",
+        "--tests-regex",
+        dest="testsInclude",
+        help="String specifying which tests to run. Simply uses 'string in testname'.")
+    parser.add_argument(
+        "-E",
+        "--excluderegex",
+        dest="testsExclude",
+        help="String specifying which tests to not run. Simply uses 'string in testname'.")
     loglevelChoices = ["error", "warning", "notice", "information", "debug"]
-    parser.add_option("-l", "--loglevel", dest="loglevel",
-                      choices=loglevelChoices,
-                      help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
-    parser.add_option("-j", "--parallel", dest="ncores", action="store", type="int",
-                      help="The number of instances to run in parallel, like the -j option in ctest. Default is 1.")
-    parser.add_option("-q", "--quiet", dest="quiet", action="store_true",
-                      help="Prints detailed log to terminal.")
-    parser.add_option("-c", "--clean", dest="clean", action="store_true",
-                      help="Performs a cleanup of the data generated by the test suite (does not run the tests).")
-    parser.add_option("", "--output-on-failure", dest="output_on_failure", action="store_true",
-                      help="Print full log for failed tests.")
-    parser.add_option("", "--showskipped", dest="showskipped", action="store_true",
-                      help="List the skipped tests.")
-    parser.add_option("-d", "--datapaths", dest="datapaths",
-                      help="A semicolon-separated list of directories to search for data")
-    parser.add_option("-s", "--savedir", dest="savedir",
-                      help="A directory to use for the Mantid save path")
-    parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
-                      help="Turn on archive search for file finder.")
-    parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds", action="store_true",
-                      help="Skip tests that are not run in pull request builds")
-    parser.add_option("", "--ignore-failed-imports", dest="ignore_failed_imports", action="store_true",
-                      help="Skip tests that do not import correctly rather raising an error.")
-    parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
-                        loglevel="information", ncores=1, quiet=False, output_on_failure=False, clean=False)
-    (options, args) = parser.parse_args()
+    parser.add_argument("-l",
+                        "--loglevel",
+                        dest="loglevel",
+                        choices=loglevelChoices,
+                        help="Set the log level for test running: [" + ', '.join(loglevelChoices) +
+                        "]")
+    parser.add_argument(
+        "-j",
+        "--parallel",
+        dest="ncores",
+        action="store",
+        type=int,
+        help="The number of instances to run in parallel, like the -j option in ctest. Default is 1."
+    )
+    parser.add_argument("-q",
+                        "--quiet",
+                        dest="quiet",
+                        action="store_true",
+                        help="Prints detailed log to terminal.")
+    parser.add_argument(
+        "-c",
+        "--clean",
+        dest="clean",
+        action="store_true",
+        help="Performs a cleanup of the data generated by the test suite (does not run the tests).")
+    parser.add_argument("--output-on-failure",
+                        dest="output_on_failure",
+                        action="store_true",
+                        help="Print full log for failed tests.")
+    parser.add_argument("--showskipped",
+                        dest="showskipped",
+                        action="store_true",
+                        help="List the skipped tests.")
+    parser.add_argument("-d",
+                        "--datapaths",
+                        dest="datapaths",
+                        help="A semicolon-separated list of directories to search for data")
+    parser.add_argument("-s",
+                        "--savedir",
+                        dest="savedir",
+                        help="A directory to use for the Mantid save path")
+    parser.add_argument("--archivesearch",
+                        dest="archivesearch",
+                        action="store_true",
+                        help="Turn on archive search for file finder.")
+    parser.add_argument("--exclude-in-pull-requests",
+                        dest="exclude_in_pr_builds",
+                        action="store_true",
+                        help="Skip tests that are not run in pull request builds")
+    parser.add_argument("--ignore-failed-imports",
+                        dest="ignore_failed_imports",
+                        action="store_true",
+                        help="Skip tests that do not import correctly rather raising an error.")
+    parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC,
+                        executable=sys.executable,
+                        makeprop=True,
+                        loglevel="information",
+                        ncores=1,
+                        quiet=False,
+                        output_on_failure=False,
+                        clean=False)
+    options = parser.parse_args()
 
     # import the system testing framework
     sys.path.append(options.frameworkLoc)
@@ -200,7 +249,8 @@ def main():
         locked_files_dict[key] = data_file_lock_status[key]
 
     # Store in reverse number of number of tests in each module into the shared dictionary
-    reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+    reverse_sorted_dict = [(k, test_counts[k])
+                           for k in sorted(test_counts, key=test_counts.get, reverse=True)]
     counter = 0
     for key, value in reverse_sorted_dict:
         tests_dict[str(counter)] = test_list[key]
@@ -216,12 +266,12 @@ def main():
 
     # Prepare ncores processes
     for ip in range(options.ncores):
-        processes.append(Process(target=systemtesting.testThreadsLoop, args=(mtdconf.testDir, mtdconf.saveDir,
-                                                                             mtdconf.dataDir, options, tests_dict,
-                                                                             tests_lock, tests_left, results_array,
-                                                                             status_dict, total_number_of_tests,
-                                                                             maximum_name_length, tests_done, ip, lock,
-                                                                             required_files_dict, locked_files_dict)))
+        processes.append(
+            Process(target=systemtesting.testThreadsLoop,
+                    args=(mtdconf.testDir, mtdconf.saveDir, mtdconf.dataDir, options, tests_dict,
+                          tests_lock, tests_left, results_array, status_dict, total_number_of_tests,
+                          maximum_name_length, tests_done, ip, lock, required_files_dict,
+                          locked_files_dict)))
     # Start and join processes
     try:
         for p in processes:
