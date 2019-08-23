@@ -431,7 +431,14 @@
   <!--COMPONENT: DOUBLE FLAT PANEL-->
   <!---->
   <component idlist="pixel_ids" name="detector1" type="double-flat-panel">
-    <location x="0.0" y="0.0" z="0"/>
+    <location>
+      <parameter name="x">
+        <logfile eq="0.001*value" id="detector-translation"/>
+      </parameter>
+      <parameter name="z">
+        <logfile eq="0.001*value" id="sdd"/>
+      </parameter>
+    </location>
   </component>
   <!---->
   <!--LIST OF PIXEL IDs in DETECTOR-->
