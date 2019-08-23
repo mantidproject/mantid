@@ -79,7 +79,7 @@ inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
  * @return true if all elements are approx zero, else false.
  */
 inline bool isApproxZero(const std::vector<double> &data,
-                         const double &precision) {
+                         const double precision) {
 
   return std::all_of(data.begin(), data.end(),
                      [&precision](const double &element) {
@@ -87,8 +87,12 @@ inline bool isApproxZero(const std::vector<double> &data,
                      });
 }
 
+inline bool isApproxZero(const double data, const double precision) {
+  return std::abs(data) < precision;
+}
+
 // overload. return true if vector is approx to zero
-inline bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
+inline bool isApproxZero(const Eigen::Vector3d &data, const double precision) {
   return data.isApprox(Eigen::Vector3d(0, 0, 0), precision);
 }
 
@@ -172,8 +176,8 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
 TODO: DOCUMENTATION
 */
-inline void writePixelShape(H5::Group &grp, size_t nCylinders,
-                            const std::vector<double> &vertexCoordinates) {
+inline void writeCylinders(H5::Group &grp, size_t nCylinders,
+                           const std::vector<double> &vertexCoordinates) {
 
   H5::DataSet cylinders, vertices;
   // prepare the data
@@ -222,20 +226,22 @@ inline void writePixelData(H5::Group &grp,
                            const Geometry::ComponentInfo &compInfo,
                            const size_t idx) {
 
-  // write pixel offset
-
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset; // pixel offset datasets
   auto pixels =
       compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
   const auto nPixels = pixels.size();   // number of pixels
 
-  // prevents undefined behaviour when passing empty container into std::all_of.
   // If children detectors empty, there is no data to write to bank. exits here.
   if (pixels.empty())
     return;
 
-  bool cylindersExist{false};       // for checking if any cylinder types exist
-  bool shapesAreHomogeneous{false}; // all shapes equal
+  bool cylindersAreHomogeneous{true};
+  bool meshObjs2dAreHomogeneous{true};
+  bool meshObjectsAreHomogeneous{true};
+
+  std::vector<size_t> cylinders;
+  std::vector<size_t> MeshObjects2D;
+  std::vector<size_t> meshObjects;
 
   // shape type of the first detector in children detectors
   auto &firstShape = compInfo.shape(pixels.front());
@@ -246,29 +252,19 @@ inline void writePixelData(H5::Group &grp,
 
   // return true if all shape types, heights and radii are equal to the first
   // shape in children detectors.
-  shapesAreHomogeneous =
-      std::all_of(pixels.begin(), pixels.end(), [&](const size_t &idx) {
-        auto &shapeObj = compInfo.shape(idx);
 
-        if (dynamic_cast<const Geometry::MeshObject *>(&firstShape)) {
-          // current implementation only considers solid shapes
-          throw std::runtime_error("MeshObject Type pixel shape is not "
-                                   "implemented for a detector bank");
-        }
-        if (dynamic_cast<const Geometry::MeshObject2D *>(&firstShape)) {
-          // current implementation only considers solid shapes
-          throw std::runtime_error("MeshObject2D Type pixel shape is not "
-                                   "implemented for a detector bank");
-        }
-        auto shapeInfo = shapeObj.shapeInfo();
-        auto type = shapeInfo.shape();
-        auto height = shapeInfo.height();
-        auto radius = shapeInfo.radius();
-        // if at least one cylinder is found, change flag to true.
-        if (static_cast<int>(type) == 4 /*CYLINDER*/)
-          cylindersExist = true;
-        return (type == fType && height == fHeight && fRadius == radius);
-      });
+  std::for_each(pixels.begin(), pixels.end(), [&](const size_t &idx) {
+    auto &shapeObj = compInfo.shape(idx);
+    auto shapeInfo = shapeObj.shapeInfo();
+    auto type = shapeInfo.shape();
+    // if at least one cylinder is found, change flag to true.
+    if (static_cast<int>(type) == 4 /*CYLINDER*/)
+      cylinders.push_back(idx);
+    else if (dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
+      meshObjects.push_back(idx);
+    else if (dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
+      MeshObjects2D.push_back(idx);
+  });
 
   std::vector<double> posx;
   std::vector<double> posy;
@@ -278,126 +274,110 @@ inline void writePixelData(H5::Group &grp,
   posy.reserve(nPixels);
   posz.reserve(nPixels);
 
-  if (!cylindersExist) {
-    // if no cylinders exist do not write pixel shape data
-    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
-         ++it) {
+  // prevents undefined behaviour when passing empty container into std::all_of.
+  // If empty, there is no data to write. No associated group will be created in
+  // file.
+  if (!cylinders.empty()) {
+    // check if cylinders are homogeneous
+    cylindersAreHomogeneous = // TODO: check if needs refactor -  [&] needed in
+                              // lambda?
+        std::all_of(cylinders.begin(), cylinders.end(), [&](const size_t &idx) {
+          auto &shapeObj = compInfo.shape(idx);
+          auto shapeInfo = shapeObj.shapeInfo();
+          auto type = shapeInfo.shape();
+          auto height = shapeInfo.height();
+          auto radius = shapeInfo.radius();
+          return (type == fType && height == fHeight && fRadius == radius);
+        });
+    if (cylindersAreHomogeneous) {
 
-      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
-          compInfo, idx, *it);
+      // create associated group
+      H5::Group pixelShapeGroup =
+          simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
 
-      posx.push_back(offset[0]); // x pixel offset
-      posy.push_back(offset[1]); // y pixel offset
-      posz.push_back(offset[2]); // z pixel offset
+      // write cylinder only once, using the first index
+      auto geometry = firstShapeInfo.cylinderGeometry();
+      const Kernel::V3D &base = geometry.centreOfBottomBase;
+      const Kernel::V3D &axis = geometry.axis;
+      double &height = geometry.height;
+      double &radius = geometry.radius;
+
+      Eigen::Vector3d top = Kernel::toVector3d(base) +
+                            Eigen::Vector3d(height * Kernel::toVector3d(axis));
+      Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
+
+      // creat an arbitrary noncollinear vector
+      Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
+
+      // get vector that is othogonal to the cylinder axis
+      Eigen::Vector3d orthogonalV =
+          Kernel::toVector3d(axis).cross(nonCollinear);
+      Eigen::Vector3d edge =
+          top + Eigen::Vector3d(radius * orthogonalV.normalized());
+      std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
+                                   top[2],  edge[0], edge[1], edge[2]};
+      writeCylinders(pixelShapeGroup, 1, vertices);
+    } else {
+      // iterate and write each cylinder
     }
-  } else
-      // else, if cylinders exist and shapes are homogenous, write cylinder data
-      // to pixel group only once.
-      if (shapesAreHomogeneous) {
-
-    H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
-    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
-         ++it) {
-
-      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
-          compInfo, idx, *it);
-
-      posx.push_back(offset[0]);
-      posy.push_back(offset[1]);
-      posz.push_back(offset[2]);
-    }
-
-    auto geometry = firstShapeInfo.cylinderGeometry();
-    auto &base = geometry.centreOfBottomBase;
-    auto &axis = geometry.axis;
-    auto &height = geometry.height;
-    auto &radius = geometry.radius;
-
-    Eigen::Vector3d top = Kernel::toVector3d(base) +
-                          Eigen::Vector3d(height * Kernel::toVector3d(axis));
-    Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
-    // creat an arbitrary noncollinear vector
-    Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
-
-    // get vector that is othogonal to the cylinder axis
-    Eigen::Vector3d orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
-    Eigen::Vector3d edge =
-        top + Eigen::Vector3d(radius * orthogonalV.normalized());
-
-    std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
-                                 top[2],  edge[0], edge[1], edge[2]};
-    writePixelShape(pixelShapeGroup, 1, vertices);
-
-  } else {
-
-    // Implicitly, if shapesAreHomogeneous is false and cylindersExist is true,
-    // there is at least 1 valid* shape (that is 'CYLINDER' under current
-    // implementation). Then iterate through pixels to find those with valid
-    // shapes
-
-    // create pixel shape group
-    H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
-    size_t nCylinders = 0;
-    std::vector<double> vertices;
-
-    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
-         ++it) {
-
-      auto offset = Geometry::ComponentInfoBankHelpers::offsetFromAncestor(
-          compInfo, idx, *it);
-
-      posx.push_back(offset[0]);
-      posy.push_back(offset[1]);
-      posz.push_back(offset[2]);
-
-      // TODO: get pixel verices for each pixel
-      if (compInfo.hasValidShape(*it)) {
-        auto pixelShapeInfo = compInfo.shape(*it).shapeInfo();
-        auto type = pixelShapeInfo.shape();
-        // only write if shape is cylinder
-        if (static_cast<int>(type) == 4 /*CYLINDER*/) {
-          auto geometry = pixelShapeInfo.cylinderGeometry();
-          auto &base = geometry.centreOfBottomBase;
-          auto &axis = geometry.axis;
-          auto &height = geometry.height;
-          auto &radius = geometry.radius;
-
-          Eigen::Vector3d top =
-              Kernel::toVector3d(base) +
-              Eigen::Vector3d(height * Kernel::toVector3d(axis));
-          Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
-          // creat an arbitrary noncollinear vector
-          Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
-
-          // get vector that is othogonal to the cylinder axis
-          Eigen::Vector3d orthogonalV =
-              Kernel::toVector3d(axis).cross(nonCollinear);
-          Eigen::Vector3d edge =
-              top + Eigen::Vector3d(radius * orthogonalV.normalized());
-
-          vertices.push_back(base[0]);
-          vertices.push_back(base[1]);
-          vertices.push_back(base[2]);
-          vertices.push_back(top[0]);
-          vertices.push_back(top[1]);
-          vertices.push_back(top[2]);
-          vertices.push_back(edge[0]);
-          vertices.push_back(edge[1]);
-          vertices.push_back(edge[2]);
-
-          nCylinders++;
-        }
-      }
-    }
-
-    writePixelShape(pixelShapeGroup, nCylinders, vertices);
   }
 
-  // write pixel offset data
+  // prevents undefined behaviour when passing empty container into std::all_of.
+  // If empty, there is no data to write. No associated group will be created in
+  // file.
+  if (!meshObjects.empty()) {
+    // check if mesh objects are homogeneous
+    meshObjectsAreHomogeneous = std::all_of(
+        meshObjects.begin(), meshObjects.end(), [&](const size_t &idx) {
+          // TODO: check meshobject parameters match the first
 
-  bool xIsZero = isApproxZero(posx, PRECISION);
-  bool yIsZero = isApproxZero(posy, PRECISION);
-  bool zIsZero = isApproxZero(posz, PRECISION);
+          return 0; // TODO: add return statement
+        });
+    if (meshObjectsAreHomogeneous) {
+      // write mesh object only once, using the first index
+    } else {
+      // iterate and write each mesh object
+    }
+  }
+
+  // prevents undefined behaviour when passing empty container into std::all_of.
+  // If empty, there is no data to write. No associated group will be created in
+  // file.
+  if (!MeshObjects2D.empty()) {
+    // check if 2D mesh objects are homogeneous
+    meshObjs2dAreHomogeneous = std::all_of(
+        MeshObjects2D.begin(), MeshObjects2D.end(), [&](const size_t &idx) {
+          // TODO: check meshobject2d parameters match the first
+
+          return 0; // TODO: add return statement
+        });
+    if (meshObjs2dAreHomogeneous) {
+      // write mesh object 2d only once, using the first index
+    } else {
+      // iterate and write each mesh object
+    }
+  }
+
+  bool xIsZero{true}; // becomes false when atleast 1 non-zero x found
+  bool yIsZero{true}; // becomes false when atleast 1 non-zero y found
+  bool zIsZero{true}; // becomes false when atleast 1 non-zero z found
+  // get pixel offset data
+  for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
+       ++it) {
+    Eigen::Vector3d offset =
+        Geometry::ComponentInfoBankHelpers::offsetFromAncestor(compInfo, idx,
+                                                               *it);
+    if (!isApproxZero(offset[0], PRECISION))
+      xIsZero = false;
+    if (!isApproxZero(offset[1], PRECISION))
+      yIsZero = false;
+    if (!isApproxZero(offset[2], PRECISION))
+      zIsZero = false;
+
+    posx.push_back(offset[0]); // x pixel offset
+    posy.push_back(offset[1]); // y pixel offset
+    posz.push_back(offset[2]); // z pixel offset
+  }
 
   auto bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
