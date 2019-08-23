@@ -11,6 +11,10 @@ User Interface
 
 - The zoom icon in the SliceViewer and plot toolbars have been replaced with clearer icons.
 
+New
+###
+- Added a 'Generate Recovery Script' button to Workbench under the File menu bar, it generates a script that is essentially what project recovery uses. However it is only the script and does not include the workspace clean up and other features Project Recovery offers.
+
 Improvements
 ############
 - The keyboard shortcut Ctrl+N now opens a new tab in the script editor.
