@@ -37,9 +37,6 @@ public:
   bool processGroups() override;
 
 private:
-  void getTransRun(std::map<std::string, std::string> results,
-                   WorkspaceGroup_sptr &workspaceGroup,
-                   const std::string &transRun);
   // Utility class to store output workspace names
   struct WorkspaceNames {
     std::string iVsQ;
@@ -47,29 +44,20 @@ private:
     std::string iVsLam;
   };
 
-  class RebinParams {
-  public:
-    RebinParams(const double qMin, const bool qMinIsDefault, const double qMax,
-                const bool qMaxIsDefault, const boost::optional<double> qStep)
-        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax),
-          m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
+  struct RebinParams {
+    RebinParams(const double qMin, const double qMax,
+                const boost::optional<double> qStep)
+        : m_qMin(qMin), m_qMax(qMax),
+          m_qStep(qStep){};
 
-    double qMin() const { return m_qMin; };
-    bool qMinIsDefault() const { return m_qMinIsDefault; }
-    double qMax() const { return m_qMax; };
-    bool qMaxIsDefault() const { return m_qMaxIsDefault; }
-    double qStep() const { return *m_qStep; };
+    double m_qMin;
+    double m_qMax;
+    boost::optional<double> m_qStep;
+
     bool hasQStep() const { return m_qStep.is_initialized(); }
     std::vector<double> asVector() const {
-      return std::vector<double>{qMin(), qStep(), qMax()};
-    };
-
-  private:
-    double m_qMin;
-    bool m_qMinIsDefault;
-    double m_qMax;
-    bool m_qMaxIsDefault;
-    boost::optional<double> m_qStep;
+      return std::vector<double>{m_qMin, *m_qStep, m_qMax};
+    }
   };
 
   void init() override;
@@ -111,7 +99,7 @@ private:
                             const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
-                              const double defaultValue, bool &isDefault);
+                              const double defaultValue);
   void setOutputWorkspaces(const WorkspaceNames &outputGroupNames,
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
@@ -119,6 +107,9 @@ private:
   WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
                                          const std::string &runNumber,
                                          const size_t wsGroupNumber);
+  void getTransRun(std::map<std::string, std::string> results,
+                   WorkspaceGroup_sptr &workspaceGroup,
+                   const std::string &transRun);
 };
 
 } // namespace Algorithms

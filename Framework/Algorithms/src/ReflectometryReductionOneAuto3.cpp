@@ -111,7 +111,7 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
 
 void ReflectometryReductionOneAuto3::getTransRun(
     std::map<std::string, std::string> results,
-            WorkspaceGroup_sptr & workspaceGroup, const std::string &transRun) {
+    WorkspaceGroup_sptr &workspaceGroup, const std::string &transRun) {
   const std::string str = getPropertyValue(transRun);
   if (!str.empty()) {
     auto transGroup =
@@ -120,10 +120,10 @@ void ReflectometryReductionOneAuto3::getTransRun(
     if (!transGroup)
       return;
 
-    const bool polarizationCorrections =
-        getProperty("PolarizationAnalysis");
+    const bool polarizationCorrections = getProperty("PolarizationAnalysis");
 
-    if (workspaceGroup->size() != transGroup->size() && !polarizationCorrections) {
+    if (workspaceGroup->size() != transGroup->size() &&
+        !polarizationCorrections) {
       // If they are not the same size then we cannot associate a transmission
       // group member with every input group member.
       results[transRun] = transRun + " group must be the "
@@ -140,7 +140,7 @@ void ReflectometryReductionOneAuto3::getTransRun(
 std::map<std::string, std::string>
 ReflectometryReductionOneAuto3::validateInputs() {
   std::map<std::string, std::string> results;
-  
+
   // Validate transmission runs only if our input workspace is a group
   if (!checkGroups())
     return results;
@@ -414,7 +414,7 @@ void ReflectometryReductionOneAuto3::exec() {
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
   const auto params = getRebinParams(IvsQ, theta);
   auto IvsQC = IvsQ;
-  if (!(params.qMinIsDefault() && params.qMaxIsDefault()))
+  if (params.m_qMin && params.m_qMax)
     IvsQC = cropQ(IvsQ, params);
   setProperty("OutputWorkspace", IvsQC);
 
@@ -437,10 +437,10 @@ void ReflectometryReductionOneAuto3::exec() {
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
-  setProperty("MomentumTransferMin", params.qMin());
-  setProperty("MomentumTransferMax", params.qMax());
+  setProperty("MomentumTransferMin", params.m_qMin);
+  setProperty("MomentumTransferMax", params.m_qMax);
   if (params.hasQStep())
-    setProperty("MomentumTransferStep", -params.qStep());
+    setProperty("MomentumTransferStep", params.m_qStep);
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
 }
@@ -618,13 +618,11 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
 
 auto ReflectometryReductionOneAuto3::getRebinParams(
     MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
-  bool qMinIsDefault = true, qMaxIsDefault = true;
-  auto const qMin = getPropertyOrDefault("MomentumTransferMin",
-                                         inputWS->x(0).front(), qMinIsDefault);
+    auto const qMin = getPropertyOrDefault("MomentumTransferMin",
+                                         inputWS->x(0).front());
   auto const qMax = getPropertyOrDefault("MomentumTransferMax",
-                                         inputWS->x(0).back(), qMaxIsDefault);
-  return RebinParams(qMin, qMinIsDefault, qMax, qMaxIsDefault,
-                     getQStep(inputWS, theta));
+                                         inputWS->x(0).back());
+  return RebinParams(qMin, qMax, getQStep(inputWS, theta));
 }
 
 /** Get the binning step the final output workspace in Q
@@ -706,10 +704,10 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);
-  if (!params.qMinIsDefault())
-    algCrop->setProperty("XMin", params.qMin());
-  if (!params.qMaxIsDefault())
-    algCrop->setProperty("XMax", params.qMax());
+  if (params.m_qMin)
+    algCrop->setProperty("XMin", params.m_qMin);
+  if (params.m_qMax)
+    algCrop->setProperty("XMax", params.m_qMax);
   algCrop->execute();
   MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
   return IvsQ;
@@ -723,14 +721,12 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
  * @param isDefault [out] : true if the default value was used
  */
 double ReflectometryReductionOneAuto3::getPropertyOrDefault(
-    const std::string &propertyName, const double defaultValue,
-    bool &isDefault) {
+    const std::string &propertyName, const double defaultValue) {
   Property *property = getProperty(propertyName);
-  isDefault = property->isDefault();
-  if (isDefault)
-    return defaultValue;
-  else
+  if (property)
     return getProperty(propertyName);
+  else
+    return defaultValue;
 }
 
 /** Check if input workspace is a group
@@ -738,15 +734,9 @@ double ReflectometryReductionOneAuto3::getPropertyOrDefault(
 bool ReflectometryReductionOneAuto3::checkGroups() {
   const std::string wsName = getPropertyValue("InputWorkspace");
 
-  try {
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
-    if (ws)
-      return true;
-  } catch (...) {
-  }
-  return false;
-}
+  return (AnalysisDataService::Instance().doesExist(wsName) &&
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName));
+} // namespace Algorithms
 
 void ReflectometryReductionOneAuto3::setOutputWorkspaces(
     const WorkspaceNames &outputGroupNames,
