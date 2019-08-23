@@ -62,9 +62,10 @@ public:
 private:
   /// Initialize the algorithm
   void init() override;
+	///validate the inputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Run the algorithm
   void exec() override;
-
   /// Init the theta index
   void initAngularCachesNonPSD(const API::MatrixWorkspace &workspace);
   /// Get angles and calculate angular widths.

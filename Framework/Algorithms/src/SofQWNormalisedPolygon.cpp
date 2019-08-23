@@ -27,8 +27,8 @@
 
 #include <boost/math/special_functions/pow.hpp>
 
-using Mantid::Geometry::rad2deg;
 using boost::math::pow;
+using Mantid::Geometry::rad2deg;
 
 namespace {
 /**
@@ -311,12 +311,62 @@ void SofQWNormalisedPolygon::init() {
   SofQW::createCommonInputProperties(*this);
 }
 
+/** Checks that the input workspace and table have compatible dimensions
+ * @return a
+ * describing the problem with the property
+ */
+std::map<std::string, std::string> SofQWNormalisedPolygon::validateInputs() {
+  std::map<std::string, std::string> result;
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (!inputWS) {
+    result["InputWorkspace"] = "InputWorkspace is of Incorrect type. Please "
+                               "provide a MatrixWorkspace as the "
+                               "InputWorkspace";
+
+  }
+
+  API::ITableWorkspace_const_sptr tableWS =
+      getProperty("DetectorTwoThetaRanges");
+	//The table should have three columns
+  if (tableWS->columnCount() != 3) {
+    result["DetectorTwoThetaRanges"] =
+        "DetectorTwoThetaRanges requires 3 columns.";
+
+  }
+	//The first column should be of type int
+  if (!tableWS->getColumn(0)->isType<int>()) {
+    result["DetectorTwoThetaRanges"] =
+        "The first column of DetectorTwoThetaRanges should be of type int ";
+
+  }
+	//The second column should be of type double 
+  if (!tableWS->getColumn(1)->isType<double>()) {
+    result["DetectorTwoThetaRanges"] =
+        "The second column of DetectorTwoThetaRanges should be of type double ";
+
+  }
+	//The third column should be of type double.
+  if (!tableWS->getColumn(2)->isType<double>()) {
+    result["DetectorTwoThetaRanges"] =
+        "The third column of DetectorTwoThetaRanges should be of type double ";
+
+  }
+	//Table and workspace should have the same number of detectors.
+  if (tableWS->rowCount() != inputWS->getNumberHistograms()) {
+    result["DetectorTwoThetaRanges"] =
+        "The table and workspace do not have the same number of detectors.";
+
+	}
+
+    return result;
+
+}
+
 /**
  * Execute the algorithm.
  */
 void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);
 
