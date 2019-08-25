@@ -122,9 +122,11 @@ void MaxMin::exec() {
 
     if (MaxRange == EMPTY_DBL())
       highit = X.end();
-    else
+    else {
+      using std::placeholders::_1;
       highit = std::find_if(lowit, X.end(),
-                            std::bind2nd(std::greater<double>(), MaxRange));
+                            std::bind(std::greater<double>(), _1, MaxRange));
+    }
 
     // If range specified doesn't overlap with this spectrum then bail out
     if (lowit == X.end() || highit == X.begin() || lowit == highit)

@@ -64,10 +64,9 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
     return false;
 
   // If all rows are valid and complete then we're ready to postprocess
-  return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [&reprocessFailed](boost::optional<Row> const &row) {
-                       return row && row->success();
-                     });
+  return std::all_of(
+      m_rows.cbegin(), m_rows.cend(),
+      [](boost::optional<Row> const &row) { return row && row->success(); });
 }
 
 std::string Group::postprocessedWorkspaceName() const {

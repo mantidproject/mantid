@@ -510,9 +510,10 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
       g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift
                     << " microseconds\n";
       // Add on the shift for this vector
+      using std::placeholders::_1;
       std::transform(channelsVec->begin(), channelsVec->end(),
                      channelsVec->begin(),
-                     std::bind2nd(std::plus<double>(), shift));
+                     std::bind(std::plus<double>(), _1, shift));
       timeChannelsVec.push_back(channelsVec);
     }
     // In this case, also need to populate the map of spectrum-regime
