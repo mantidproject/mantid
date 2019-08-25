@@ -41,7 +41,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
                 pass
 
     def __loadSaveAndTest__(self, filename):
-        """Do all of the real work of loading and testing the file"""
+        """Do all of the real work of loading and saving the file"""
         print("----------------------------------------")
         print("Loading '%s'" % filename)
         wksp = LoadEmptyInstrument(filename)
