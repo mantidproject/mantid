@@ -59,20 +59,19 @@ This has to be a .json file formatted as:
           "L(4->2)": 900.7,
           "M(4->3)": 304.7,
           "6->5": 141
-          ...
         },
         "Secondary": {
           "K(2->1)": 3140.6,
           "L(8->2)": 1347.8,
           "M(10->3)": 567,
           "8->6": 122.2
-          ...
         },
-        "Gamma": {
-          ...
+        "Gammas": {
+          "72Ge(n,n')72Ge": 691,
+          "73Ge(n,g)74Ge": null,
+          "74Ge(n,n')74Ge": 595.7
         }
       }
-      ...
     }
 
 If some peaks are plotted, but the new file lacks data for them, the corresponding lines will disappear.
