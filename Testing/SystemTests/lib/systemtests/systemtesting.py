@@ -882,7 +882,7 @@ class TestManager(object):
         files_required_by_test_module = dict()
         data_file_lock_status = dict()
         # The extension most commonly used
-        extensions = [".nxs", ".raw", ".RAW"]
+        extensions = [".nxs", ".raw", ".RAW", ".dat"]
         # A regex check is used to iterate back from the position of '.nxs' and
         # check that the current character is still part of a variable name. This
         # is needed to find the start of the string, hence the total filename.
