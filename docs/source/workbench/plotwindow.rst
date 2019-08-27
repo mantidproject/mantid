@@ -32,9 +32,9 @@ Plot Window Context Menu
 Right-clicking within your plot will open the plot context menu.
 From this menu you can:
 
- - set the axes' scales to linear or logarithmic.
- - add or remove bin width normalization (by default the data is normalized)
- - add and edit vertical/horizontal markers
+- set the axes' scales to linear or logarithmic.
+- add or remove bin width normalization (by default the data is normalized)
+- add and edit vertical/horizontal markers
 
 .. image:: ../images/Workbench/PlotWindow/MarkerContextMenu.png
     :height: 400px
