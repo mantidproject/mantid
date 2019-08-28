@@ -206,40 +206,57 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 
 void KafkaHistoStreamDecoder::initLocalCaches(
     const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
-  if (rawMsgBuffer.empty()) {
-    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
-                             "Empty message received from spectrum-detector "
-                             "topic. Unable to continue");
-  }
-  auto spDetMsg = GetSpectraDetectorMapping(
-      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-  auto nudet = spDetMsg->detector_id()->size();
-  if (nudet != nspec) {
-    std::ostringstream os;
-    os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-          "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec="
-       << nspec << ", ndet=" << nudet;
-    throw std::runtime_error(os.str());
-  }
-
   m_runId = runStartData.runId;
 
-  // Create buffer
-  auto histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
-      "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
-      spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+  const auto jsonGeometry = runStartData.nexusStructure;
+  const auto instName = runStartData.instrumentName;
 
-  // Load the instrument if possible but continue if we can't
-  auto jsonGeometry = runStartData.nexusStructure;
-  auto instName = runStartData.instrumentName;
-  if (!instName.empty())
-    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
-                                             jsonGeometry);
-  else
-    g_log.warning(
-        "Empty instrument name received. Continuing without instrument");
+  DataObjects::Workspace2D_sptr histoBuffer;
+  if (rawMsgBuffer.empty()) {
+    /* Load the instrument to get the number of spectra :c */
+    auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+    loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
+    const auto nspec = ws->getInstrument()->getNumberDetectors();
+
+    // Create buffer
+    histoBuffer = boost::static_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
+    histoBuffer->setInstrument(ws->getInstrument());
+    histoBuffer->rebuildSpectraMapping();
+    histoBuffer->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("TOF");
+    histoBuffer->setYUnit("Counts");
+  } else {
+    auto spDetMsg = GetSpectraDetectorMapping(
+        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
+    auto nudet = spDetMsg->detector_id()->size();
+    if (nudet != nspec) {
+      std::ostringstream os;
+      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
+            "spectra/detector mapping. Expected matched length arrays but "
+            "found nspec="
+         << nspec << ", ndet=" << nudet;
+      throw std::runtime_error(os.str());
+    }
+
+    // Create buffer
+    histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
+        "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
+        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+
+    // Load the instrument if possible but continue if we can't
+    if (!instName.empty()) {
+      loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
+                                               jsonGeometry);
+      if (rawMsgBuffer.empty()) {
+        histoBuffer->rebuildSpectraMapping();
+      }
+    } else {
+      g_log.warning(
+          "Empty instrument name received. Continuing without instrument");
+    }
+  }
 
   auto &mutableRun = histoBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
