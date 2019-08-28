@@ -664,6 +664,13 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEquals(self.presenter.context.get_names_of_workspaces_to_fit.call_count,2)
         self.assertEquals(self.presenter.selected_data, "test")
 
+    def test_handle_plot_guess_changed_calls_correct_function(self):
+        self.presenter.get_parameters_for_single_fit = mock.Mock(return_value={})
+        self.presenter.view.plot_guess = True
+        self.presenter.handle_plot_guess_changed()
+
+        self.presenter.model.change_plot_guess.assert_called_with(True, {})
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

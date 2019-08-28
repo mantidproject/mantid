@@ -186,5 +186,68 @@ class FittingTabModelTest(unittest.TestCase):
 
         self.assertEqual(name_as_string, 'ExpDecayOsc,GausDecay,ExpDecayOsc,...')
 
+    def test_change_plot_guess_returns_when_given_bad_parameters(self):
+        self.model.context = mock.Mock()
+        self.model.change_plot_guess(True, {})
+
+        self.assertEqual(0, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
+
+    def test_change_plot_guess_notifies_of_change_when_function_removed_but_plot_guess_true(self):
+        self.model.context = mock.Mock()
+        self.model.change_plot_guess(True, {'Function': None, 'InputWorkspace': 'ws'})
+
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, None)
+
+    def test_change_plot_guess_evaluates_the_function(self):
+        self.model.context = mock.Mock()
+        with mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction') as mock_evaluate:
+            parameters = {'Function': 'func',
+                          'InputWorkspace': 'ws',
+                          'StartX': 0,
+                          'EndX': 1}
+            self.model.change_plot_guess(True, parameters)
+            mock_evaluate.assert_called_with(InputWorkspace='ws',
+                                             Function='func',
+                                             StartX=parameters['StartX'],
+                                             EndX=parameters['EndX'],
+                                             OutputWorkspace='ws_guess')
+
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.mantid')
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction')
+    def test_change_plot_guess_writes_log_and_returns_if_function_evaluation_fails(self, mock_evaluate, mock_mantid):
+        self.model.context = mock.Mock()
+        mock_evaluate.side_effect = RuntimeError()
+        parameters = {'Function': 'func',
+                      'InputWorkspace': 'ws',
+                      'StartX': 0,
+                      'EndX': 1}
+        self.model.change_plot_guess(True, parameters)
+        mock_evaluate.assert_called_with(InputWorkspace='ws',
+                                         Function='func',
+                                         StartX=parameters['StartX'],
+                                         EndX=parameters['EndX'],
+                                         OutputWorkspace='ws_guess')
+        mock_mantid.logger.error.assert_called_with('Could not evaluate the function.')
+        self.assertEqual(0, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
+
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.AnalysisDataService')
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction')
+    def test_change_plot_guess_notifies_subscribers_if_workspace_in_ads(self, mock_evaluate, mock_ads):
+        self.model.context = mock.Mock()
+        mock_ads.doesExist.return_value = True
+        parameters = {'Function': 'func',
+                      'InputWorkspace': 'ws',
+                      'StartX': 0,
+                      'EndX': 1}
+        self.model.change_plot_guess(True, parameters)
+        mock_evaluate.assert_called_with(InputWorkspace='ws',
+                                         Function='func',
+                                         StartX=parameters['StartX'],
+                                         EndX=parameters['EndX'],
+                                         OutputWorkspace='ws_guess')
+        self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, 'ws_guess')
+
+
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
