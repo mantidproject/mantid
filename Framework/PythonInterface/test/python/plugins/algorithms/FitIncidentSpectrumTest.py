@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
 from mantid.simpleapi import AnalysisDataService, FitIncidentSpectrum, CalculateEfficiencyCorrection, CloneWorkspace, ConvertToPointData, \
-    CreateSampleWorkspace, DeleteWorkspace, LoadAscii, Multiply, CreateWorkspace, Rebin, Divide, AlgorithmManager
+    CreateSampleWorkspace, DeleteWorkspace, LoadAscii, Multiply, CreateWorkspace, Rebin, Divide
 from testhelpers import run_algorithm
 
 
@@ -55,7 +55,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         term2 = phi_epi * delta_term / (wavelengths ** (1 + 2 * alpha))
         return term1 + term2
 
-    def test_fit_cubic_spline_with_gauss_conv_produces_fit_with_same_range_as_binning_for_fit(self):
+    def test_fit_cubic_spline_with_gauss_conv_produces_fit_with_same_range_as_binning_for_calc(self):
         binning_for_calc = "0.2,0.1,3.0"
         binning_for_fit = "0.2,0.1,4.0"
         alg_test = run_algorithm(
@@ -69,7 +69,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
-    def test_fit_cubic_spline_produces_fit_with_same_range_as_binning_for_fit(self):
+    def test_fit_cubic_spline_produces_fit_with_same_range_as_binning_for_calc(self):
         binning_for_calc = "0.2,0.1,3.0"
         binning_for_fit = "0.2,0.1,4.0"
         alg_test = run_algorithm(
@@ -83,7 +83,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
-    def test_fit_cubic_spline_via_mantid_produces_fit_with_same_range_as_binning_for_fit(self):
+    def test_fit_cubic_spline_via_mantid_produces_fit_with_same_range_as_binning_for_calc(self):
         binning_for_calc = "0.2,0.1,3.0"
         binning_for_fit = "0.2,0.1,4.0"
         alg_test = run_algorithm(
@@ -97,7 +97,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
-    def test_fit_howells_function_produces_fit_with_same_range_as_binning_for_fit(self):
+    def test_fit_howells_function_produces_fit_with_same_range_as_binning_for_calc(self):
         binning_for_calc = "0.2,0.1,3.0"
         binning_for_fit = "0.2,0.1,4.0"
         alg_test = run_algorithm(
@@ -110,6 +110,72 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+
+    def test_FitIncidentSpectrum_verification_raises_issue_when_calc_bin_too_low(self):
+        binning_for_calc = "0.0,0.1,4.0"
+        binning_for_fit = "0.2,0.1,4.0"
+        self.assertRaises(RuntimeError,
+                          FitIncidentSpectrum,
+                          InputWorkspace=self.incident_wksp,
+                          OutputWorkspace="fit_wksp",
+                          BinningForCalc=binning_for_calc,
+                          BinningForFit=binning_for_fit,
+                          FitSpectrumWith="GaussConvCubicSpline")
+
+    def test_FitIncidentSpectrum_verification_raises_issue_when_calc_bin_too_high(self):
+        binning_for_calc = "0.2,0.1,5.0"
+        binning_for_fit = "0.2,0.1,4.0"
+        self.assertRaises(RuntimeError,
+                          FitIncidentSpectrum,
+                          InputWorkspace=self.incident_wksp,
+                          OutputWorkspace="fit_wksp",
+                          BinningForCalc=binning_for_calc,
+                          BinningForFit=binning_for_fit,
+                          FitSpectrumWith="GaussConvCubicSpline")
+
+    def test_FitIncidentSpectrum_verification_raises_issue_when_fit_bin_too_low(self):
+        binning_for_calc = "0.2,0.1,4.0"
+        binning_for_fit = "0.0,0.1,4.0"
+        self.assertRaises(RuntimeError,
+                          FitIncidentSpectrum,
+                          InputWorkspace=self.incident_wksp,
+                          OutputWorkspace="fit_wksp",
+                          BinningForCalc=binning_for_calc,
+                          BinningForFit=binning_for_fit,
+                          FitSpectrumWith="GaussConvCubicSpline")
+
+    def test_FitIncidentSpectrum_verification_raises_issue_when_fit_bin_too_high(self):
+        binning_for_calc = "0.2,0.1,4.0"
+        binning_for_fit = "0.2,0.1,5.0"
+        self.assertRaises(RuntimeError,
+                          FitIncidentSpectrum,
+                          InputWorkspace=self.incident_wksp,
+                          OutputWorkspace="fit_wksp",
+                          BinningForCalc=binning_for_calc,
+                          BinningForFit=binning_for_fit,
+                          FitSpectrumWith="GaussConvCubicSpline")
+
+    def test_parse_binning_verification_for_invalid_bin_params_bin_for_calc(self):
+        binning_for_calc = "0.2,4.0,0.1"
+        binning_for_fit = "0.2,0.1,4.0"
+        self.assertRaises(RuntimeError,
+                          FitIncidentSpectrum,
+                          InputWorkspace=self.incident_wksp,
+                          OutputWorkspace="fit_wksp",
+                          BinningForCalc=binning_for_calc,
+                          BinningForFit=binning_for_fit,
+                          FitSpectrumWith="GaussConvCubicSpline")
+
+    def test_parse_binning_verification_for_invalid_bin_params_bin_for_fit(self):
+        binning_for_calc = "0.2,0.1,4.0"
+        binning_for_fit = "0.2,4.0,0.1"
+        self.assertRaises(RuntimeError,
+                          FitIncidentSpectrum,
+                          InputWorkspace=self.incident_wksp,
+                          OutputWorkspace="fit_wksp",
+                          BinningForCalc=binning_for_calc,
+                          BinningForFit=binning_for_fit,
+                          FitSpectrumWith="GaussConvCubicSpline")
 
 
 if __name__ == '__main__':

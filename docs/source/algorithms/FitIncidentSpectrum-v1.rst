@@ -9,7 +9,13 @@
 Description
 -----------
 
-This algorithm fits and functionalizes an incident spectrum and finds its first derivative
+This algorithm fits and functionalizes an incident spectrum and finds its first derivative.
+FitIncidentSpectrum is able to fit an incident spectrum using:
+
+1. CubicSpline: A fit using a cubic cline.
+2. CubicSplineViaMantid: A fit with cubic spline using the mantid SplineSmoothing algorithm.
+3. GaussConvCubicSpline: A fit with Cubic Spline using a Gaussian Convolution to get weights
+4. HowellsFunction: A fit with analytical function from Howells et. al.
 
 Usage
 -----
@@ -45,11 +51,9 @@ Usage
 
 
     # Spectrum function given in Milder et al. Eq (5)
-    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2,
-                         lambdaT):
+    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT):
         deltaTerm = 1. / (1. + np.exp((wavelengths - lambda1) / lambda2))
-        term1 = phiMax * (
-            lambdaT**4. / wavelengths**5.) * np.exp(-(lambdaT / wavelengths)**2.)
+        term1 = phiMax * (lambdaT**4. / wavelengths**5.) * np.exp(-(lambdaT / wavelengths)**2.)
         term2 = phiEpi * deltaTerm / (wavelengths**(1 + 2 * alpha))
         return term1 + term2
 
@@ -63,8 +67,7 @@ Usage
     lambdaT = 1.58
 
     # Add the incident spectrum to the workspace
-    corrected_spectrum = incidentSpectrum(
-        incident_wksp.readX(0), phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT)
+    corrected_spectrum = incidentSpectrum(incident_wksp.readX(0), phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT)
     incident_wksp.setY(0, corrected_spectrum)
 
     # Fit incident spectrum
@@ -73,13 +76,14 @@ Usage
     fit_gauss_conv_spline = prefix + "_gauss_conv_spline"
     FitIncidentSpectrum(
         InputWorkspace=incident_wksp,
-        OutputWorkspace=fit_gauss_conv_spline,
+        OutputWorkspace="incident_spectrum_fit_with_gauss_conv_spline",
         BinningForCalc=binning,
         BinningForFit=binning,
         FitSpectrumWith="GaussConvCubicSpline")
 
     # Retrieve workspaces
     wksp_fit_gauss_conv_spline = AnalysisDataService.retrieve(fit_gauss_conv_spline)
+    print(wksp_fit_gauss_conv_spline.readY(0))
 
 .. testcleanup:: ExFitIncidentSpectrum
 
@@ -95,7 +99,16 @@ Output:
 
 .. testoutput:: ExFitIncidentSpectrum
 
-   the fitted peak: centre=2.05, sigma=0.70
+    [5328.83700775 2330.08408285 1600.78200105 2543.59379589 3249.78956903
+     2797.87138465 2050.3366076  1417.4868309   965.23854845  659.79544224
+      456.54322031  320.88688262  229.29830975  166.5536716   122.89703604
+       92.0419568    69.89199835   53.75902111   41.84355559]
+
+References
+------------
+
+.. [1] W. S. Howells (1983) *On the Choice of Moderator for Liquids Diffractometer on a Pulsed Neutron Source*, Nuclear Instruments and Methods in Physics Research 223 141-146 `doi: 10.1016/0167-5087(84)90256-4 <https://doi.org/10.1016/0167-5087(84)90256-4>`__
+.. [2] D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
 
 .. categories::
 

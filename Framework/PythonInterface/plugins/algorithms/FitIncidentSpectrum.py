@@ -153,11 +153,12 @@ class FitIncidentSpectrum(PythonAlgorithm):
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
-    def parse_binning(self, binning_for_calc):
+    def parse_binning(self, binning):
+        # convert binning [min, width, max] into a np array
         try:
-            params = [float(x) for x in binning_for_calc.split(',')]
+            params = [float(x) for x in binning.split(',')]
         except AttributeError:
-            params = [float(x) for x in binning_for_calc]
+            params = [float(x) for x in binning]
         xlo, binsize, xhi = params
         return np.arange(xlo, xhi, binsize)
 
@@ -177,12 +178,14 @@ class FitIncidentSpectrum(PythonAlgorithm):
         return fit, fit_prime
 
     def fit_cubic_spline(self, x_fit, y_fit, x, s=1e15):
+        # Fit with Cubic Spline
         tck = interpolate.splrep(x_fit, y_fit, s=s)
         fit = interpolate.splev(x, tck, der=0)
         fit_prime = interpolate.splev(x, tck, der=1)
         return fit, fit_prime
 
     def fit_cubic_spline_via_mantid_spline_smoothing(self, InputWorkspace, ParamsInput, ParamsOutput, **kwargs):
+        # Fit with Cubic Spline using the mantid SplineSmoothing algorithm
         Rebin(
             InputWorkspace=InputWorkspace,
             OutputWorkspace='fit',

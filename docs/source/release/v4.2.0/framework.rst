@@ -15,6 +15,7 @@ Concepts
 Algorithms
 ----------
 * :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
+* :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>` will fit a curve to an incident spectrum returning the curve and it's first derivative.
 * Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load <algm-Load>`.
 
 Data Objects
