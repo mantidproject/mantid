@@ -29,6 +29,7 @@ class ProgressableView;
 } // namespace MantidWidgets
 
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 // Forward decs
 class IMessageHandler;
@@ -119,9 +120,8 @@ protected:
   std::unique_ptr<IRunNotifier> m_runNotifier;
   /// The search implementation
   std::unique_ptr<ISearcher> m_searcher;
-
-  std::string liveDataReductionOptions(const std::string &inputWorkspace,
-                                       const std::string &instrument);
+  /// The algorithm used when the live data monitor is running
+  Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
 private:
   /// The main view we're managing
@@ -136,8 +136,7 @@ private:
   std::vector<std::string> m_instruments;
   /// The default index in the instrument list
   int m_defaultInstrumentIndex;
-  /// The name to use for the live data workspace
-  Mantid::API::IAlgorithm_sptr m_monitorAlg;
+  /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
 
   bool isAnyBatchAutoreducing() const;
@@ -167,6 +166,9 @@ private:
   void stopMonitor();
   void startMonitorComplete();
   std::string liveDataReductionAlgorithm();
+  std::string liveDataReductionOptions(const std::string &inputWorkspace,
+                                       const std::string &instrument);
+
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
   void handleError(const std::string &message, const std::exception &e);
@@ -178,7 +180,12 @@ private:
   void updateViewWhenMonitorStarting();
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H */

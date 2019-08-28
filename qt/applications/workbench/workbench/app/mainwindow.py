@@ -22,6 +22,7 @@ from functools import partial
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
 from mantid.py3compat import setswitchinterval
+from mantid.utils import is_required_version
 from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.settings.presenter import SettingsPresenter
 
@@ -41,7 +42,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QPoint, QSize, qVersion)  # noqa
 from qtpy.QtGui import (QColor, QGuiApplication, QIcon, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -62,8 +63,11 @@ plugins.setup_library_paths()
 from workbench.app.resources import qCleanupResources  # noqa
 from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
-from workbench.app.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
+from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -96,6 +100,9 @@ def qapplication():
         # Spin up the usage service and set the name for the usage reporting
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)
+
+        if is_required_version(required_version='5.10.0', version=qVersion()):
+            app.setAttribute(Qt.AA_DisableWindowContextHelpButton)
 
     return app
 
@@ -279,6 +286,9 @@ class MainWindow(QMainWindow):
             shortcut="Ctrl+S", shortcut_context=Qt.ApplicationShortcut)
         action_save_script_as = create_action(
             self, "Save Script as...", on_triggered=self.save_script_as)
+        action_generate_ws_script = create_action(
+            self, "Generate Recovery Script",
+            on_triggered=self.generate_script_from_workspaces)
         action_save_project = create_action(
             self, "Save Project", on_triggered=self.save_project)
         action_save_project_as = create_action(
@@ -293,8 +303,8 @@ class MainWindow(QMainWindow):
             shortcut_context=Qt.ApplicationShortcut)
         self.file_menu_actions = [action_open, action_load_project, None,
                                   action_save_script, action_save_script_as,
-                                  action_save_project, action_save_project_as,
-                                  None, action_settings, None,
+                                  action_generate_ws_script, None, action_save_project,
+                                  action_save_project_as, None, action_settings, None,
                                   action_manage_directories, None, action_quit]
 
         # view menu
@@ -516,6 +526,11 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
+        if self.project.is_saving or self.project.is_loading:
+            event.ignore()
+            self.project.inform_user_not_possible()
+            return
+
         # Check whether or not to save project
         if not self.project.saved:
             # Offer save
@@ -566,6 +581,15 @@ class MainWindow(QMainWindow):
 
     def save_script_as(self):
         self.editor.save_current_file_as()
+
+    def generate_script_from_workspaces(self):
+        task = BlockingAsyncTaskWithCallback(target=self._generate_script_from_workspaces,
+                                             blocking_cb=QApplication.processEvents)
+        task.start()
+
+    def _generate_script_from_workspaces(self):
+        script = "from mantid.simpleapi import *\n\n" + get_all_workspace_history_from_ads()
+        QAppThreadCall(self.editor.open_script_in_new_tab)(script)
 
     def save_project(self):
         self.project.save()

@@ -15,6 +15,7 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class PerThetaDefaults
 
@@ -73,6 +74,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(PerThetaDefaults const &lhs,
                                                PerThetaDefaults const &rhs);
 PerThetaDefaults::ValueArray
 perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_

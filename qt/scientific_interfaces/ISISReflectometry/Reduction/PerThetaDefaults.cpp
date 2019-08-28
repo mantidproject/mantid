@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 PerThetaDefaults::PerThetaDefaults(
     boost::optional<double> theta,
@@ -84,5 +85,6 @@ perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults) {
     result[8] = *perThetaDefaults.processingInstructions();
   return result;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

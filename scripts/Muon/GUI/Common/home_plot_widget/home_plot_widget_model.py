@@ -79,11 +79,12 @@ class HomePlotWidgetModel(object):
         except RuntimeError:
             return
         if (force_redraw or self.plotted_workspaces == []) and self.plot_figure:
+
             self.plot_figure.clear()
             self.plotted_workspaces = []
             self.plotted_workspaces_inverse_binning = {}
             self.plotted_fit_workspaces = []
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
+            self.plot_figure = plot(workspaces,wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
@@ -92,15 +93,14 @@ class HomePlotWidgetModel(object):
             xlim = axis.get_xlim()
             ylim = axis.get_ylim()
             self._remove_all_data_workspaces_from_plot()
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], fig=self.plot_figure, window_title=title,
+            self.plot_figure = plot(workspaces, wksp_indices=[0], fig=self.plot_figure, window_title=title,
                                     plot_kwargs={'distribution': True, 'autoscale_on_update': False}, errors=True)
             axis = self.plot_figure.gca()
             axis.set_xlim(xlim)
             axis.set_ylim(ylim)
         else:
-            self.plot_figure = plot(workspaces, spectrum_nums=[1], window_title=title, plot_kwargs={'distribution': True,
-                                                                                                    'autoscale_on_update': False},
-                                    errors=True)
+            self.plot_figure = plot(workspaces, wksp_indices=[0], window_title=title, plot_kwargs={'distribution': True,
+                                    'autoscale_on_update': False}, errors=True)
             self.set_x_lim(domain)
 
         self.plot_figure.canvas.set_window_title(window_title)
@@ -120,22 +120,26 @@ class HomePlotWidgetModel(object):
             self.autoscale_y_to_data_in_view()
             self.plot_figure.canvas.draw()
 
-    def add_workspace_to_plot(self, workspace, specNum, label):
+    def add_workspace_to_plot(self, workspace_name, workspace_index, label):
         """
         Adds a plot line to the specified subplot
         :param workspace: Name of workspace to get plot data from
-        :param specNum: Spectrum number to plot from workspace
+        :param workspace_index: workspace index to plot from workspace
         :return:
         """
         try:
-            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace], unrollGroups=True)
+            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
         except RuntimeError:
             return
 
-        self.plot_figure = plot(workspaces, spectrum_nums=[specNum], fig=self.plot_figure, overplot=True,
+        if all([workspace.getNumberHistograms() == 4 for workspace in workspaces]) and workspace_index == 1:
+            workspace_index = 3
+
+        self.plot_figure = plot(workspaces, wksp_indices=[workspace_index], fig=self.plot_figure, overplot=True,
                                 plot_kwargs={'distribution': True, 'zorder': 4, 'autoscale_on_update': False, 'label': label})
 
-        self.plotted_fit_workspaces.append(workspace)
+        if workspace_name not in self._plotted_fit_workspaces:
+            self._plotted_fit_workspaces.append(workspace_name)
 
     def remove_workpace_from_plot(self, workspace_name):
         """

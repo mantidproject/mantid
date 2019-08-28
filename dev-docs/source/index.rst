@@ -49,6 +49,9 @@ Guides
 :doc:`Python3`
    Building with Python 3 (Linux only).
 
+`C++ Introduction <https://www.mantidproject.org/New_Starter_C%2B%2B_introduction>`_
+   Exercises for learning C++.
+
 ===================
 Development Process
 ===================

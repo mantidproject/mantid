@@ -72,7 +72,7 @@ void SCDCalibratePanels::exec() {
   }
   findU(peaksWs);
 
-  int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
+  auto nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeT0 = getProperty("ChangeT0");
   bool bankPanels = getProperty("CalibrateBanks");

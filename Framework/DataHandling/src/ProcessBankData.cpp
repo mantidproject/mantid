@@ -33,6 +33,33 @@ ProcessBankData::ProcessBankData(
   m_cost = static_cast<double>(numEvents);
 }
 
+namespace {
+// this assumes that last_pulse_index is already to the point of including this
+// one so we only need to search forward
+inline size_t
+getPulseIndex(const size_t event_index, const size_t last_pulse_index,
+              const boost::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
+  if (last_pulse_index + 1 >= event_index_vec->size())
+    return last_pulse_index;
+
+  // linear search is used because it is more likely that the next pulse index
+  // is the correct one to use the + last_pulse_index + 1 is because we are
+  // confirm that the next index is bigger, not the current
+  const auto event_index_end = event_index_vec->cend();
+  auto event_index_iter = event_index_vec->cbegin() + last_pulse_index;
+
+  while ((event_index < *event_index_iter) ||
+         (event_index >= *(event_index_iter + 1))) {
+    event_index_iter++;
+
+    // make sure not to go past the end
+    if (event_index_iter + 1 == event_index_end)
+      break;
+  }
+  return std::distance(event_index_vec->cbegin(), event_index_iter);
+}
+} // namespace
+
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
  */
@@ -53,7 +80,7 @@ void ProcessBankData::run() { // override {
 
     std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
     for (size_t i = 0; i < numEvents; i++) {
-      detid_t thisId = detid_t(event_id[i]);
+      const auto thisId = detid_t(event_id[i]);
       if (thisId >= m_min_id && thisId <= m_max_id)
         counts[thisId - m_min_id]++;
     }
@@ -81,121 +108,114 @@ void ProcessBankData::run() { // override {
   }
 
   // Default pulse time (if none are found)
-  Mantid::Types::Core::DateAndTime pulsetime;
-  int periodIndex = 0;
-  Mantid::Types::Core::DateAndTime lastpulsetime(0);
-
-  bool pulsetimesincreasing = true;
-
-  // Index into the pulse array
-  int pulse_i = 0;
+  const bool pulsetimesincreasing = std::is_sorted(
+      thisBankPulseTimes->pulseTimes,
+      thisBankPulseTimes->pulseTimes + thisBankPulseTimes->numPulses);
+  if (!std::is_sorted(event_index->cbegin(), event_index->cend()))
+    throw std::runtime_error("Event index is not sorted");
 
   // And there are this many pulses
-  int numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
-  if (numPulses > static_cast<int>(event_index->size())) {
-    alg->getLogger().warning()
-        << "Entry " << entry_name
-        << "'s event_index vector is smaller than the event_time_zero field. "
-           "This is inconsistent, so we cannot find pulse times for this "
-           "entry.\n";
-    // This'll make the code skip looking for any pulse times.
-    pulse_i = numPulses + 1;
-  }
-
+  const auto NUM_PULSES = thisBankPulseTimes->numPulses;
   prog->report(entry_name + ": filling events");
 
   // Will we need to compress?
-  bool compress = (alg->compressTolerance >= 0);
+  const bool compress = (alg->compressTolerance >= 0);
 
   // Which detector IDs were touched? - only matters if compress is on
   std::vector<bool> usedDetIds;
   if (compress)
     usedDetIds.assign(m_max_id - m_min_id + 1, false);
 
-  // Go through all events in the list
-  for (std::size_t i = 0; i < numEvents; i++) {
-    //------ Find the pulse time for this event index ---------
-    if (pulse_i < numPulses - 1) {
-      bool breakOut = false;
-      // Go through event_index until you find where the index increases to
-      // encompass the current index. Your pulse = the one before.
-      while ((i + startAt < event_index->operator[](pulse_i)) ||
-             (i + startAt >= event_index->operator[](pulse_i + 1))) {
-        pulse_i++;
-        // Check once every new pulse if you need to cancel (checking on every
-        // event might slow things down more)
-        if (alg->getCancel())
-          breakOut = true;
-        if (pulse_i >= (numPulses - 1))
-          break;
-      }
+  const double TOF_MIN = alg->filter_tof_min;
+  const double TOF_MAX = alg->filter_tof_max;
 
-      // Save the pulse time at this index for creating those events
-      pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
-      int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
-      periodIndex = logPeriodNumber - 1;
+  for (std::size_t pulseIndex = getPulseIndex(startAt, 0, event_index);
+       pulseIndex < NUM_PULSES; pulseIndex++) {
+    // Save the pulse time at this index for creating those events
+    const auto pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
+    const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulseIndex];
+    const int periodIndex = logPeriodNumber - 1;
 
-      // Determine if pulse times continue to increase
-      if (pulsetime < lastpulsetime)
-        pulsetimesincreasing = false;
-      else
-        lastpulsetime = pulsetime;
+    const auto firstEventIndex = getFirstEventIndex(pulseIndex);
+    if (firstEventIndex > numEvents)
+      break;
 
-      // Flag to break out of the event loop without using goto
-      if (breakOut)
-        break;
+    const auto lastEventIndex = getLastEventIndex(pulseIndex, NUM_PULSES);
+    if (firstEventIndex == lastEventIndex)
+      continue;
+    else if (firstEventIndex > lastEventIndex) {
+      std::stringstream msg;
+      msg << "Something went really wrong: " << firstEventIndex << " > "
+          << lastEventIndex << "| " << entry_name << " startAt=" << startAt
+          << " numEvents=" << event_index->size() << " RAWINDICES=["
+          << firstEventIndex + startAt << ",?)"
+          << " pulseIndex=" << pulseIndex << " of " << event_index->size();
+      throw std::runtime_error(msg.str());
     }
 
-    // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
-    // the event
-    detid_t detId = event_id[i];
-    if (detId >= m_min_id && detId <= m_max_id) {
-      // Create the tofevent
-      double tof = static_cast<double>(event_time_of_flight[i]);
-      if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max)) {
-        // Handle simulated data if present
-        if (have_weight) {
-          double weight = static_cast<double>(event_weight[i]);
-          double errorSq = weight * weight;
-          auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
-          // NULL eventVector indicates a bad spectrum lookup
-          if (eventVector) {
-            eventVector->emplace_back(tof, pulsetime, weight, errorSq);
+    for (std::size_t eventIndex = firstEventIndex; eventIndex < lastEventIndex;
+         ++eventIndex) {
+      // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
+      // the event
+      const detid_t detId = event_id[eventIndex];
+      if (detId >= m_min_id && detId <= m_max_id) {
+        // Create the tofevent
+        const auto tof = static_cast<double>(event_time_of_flight[eventIndex]);
+        // this is fancy for check if value is in range
+        if ((tof - TOF_MIN) * (tof - TOF_MAX) <= 0.) {
+          // Handle simulated data if present
+          if (have_weight) {
+            auto *eventVector =
+                m_loader.weightedEventVectors[periodIndex][detId];
+            // NULL eventVector indicates a bad spectrum lookup
+            if (eventVector) {
+              const auto weight = static_cast<double>(event_weight[eventIndex]);
+              const double errorSq = weight * weight;
+              eventVector->emplace_back(tof, pulsetime, weight, errorSq);
+            } else {
+              ++my_discarded_events;
+            }
           } else {
-            ++my_discarded_events;
+            // We have cached the vector of events for this detector ID
+            auto *eventVector = m_loader.eventVectors[periodIndex][detId];
+            // NULL eventVector indicates a bad spectrum lookup
+            if (eventVector) {
+              eventVector->emplace_back(tof, pulsetime);
+            } else {
+              ++my_discarded_events;
+            }
           }
-        } else {
-          // We have cached the vector of events for this detector ID
-          auto *eventVector = m_loader.eventVectors[periodIndex][detId];
-          // NULL eventVector indicates a bad spectrum lookup
-          if (eventVector) {
-            eventVector->emplace_back(tof, pulsetime);
-          } else {
-            ++my_discarded_events;
-          }
-        }
 
-        // Local tof limits
-        if (tof < my_shortest_tof) {
-          my_shortest_tof = tof;
-        }
-        // Skip any events that are the cause of bad DAS data (e.g. a negative
-        // number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
-        if (tof < 2e8) {
-          if (tof > my_longest_tof) {
-            my_longest_tof = tof;
-          }
-        } else
-          badTofs++;
+          // Skip any events that are the cause of bad DAS data (e.g. a negative
+          // number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
+          if (tof < 2e8) {
+            // tof limits from things observed here
+            if (tof > my_longest_tof) {
+              my_longest_tof = tof;
+            }
+            if (tof < my_shortest_tof) {
+              my_shortest_tof = tof;
+            }
+          } else
+            badTofs++;
 
-        // Track all the touched wi (only necessary when compressing events,
-        // for thread safety)
-        if (compress)
-          usedDetIds[detId - m_min_id] = true;
-      } // valid time-of-flight
+          // Track all the touched wi (only necessary when compressing events,
+          // for thread safety)
+          if (compress)
+            usedDetIds[detId - m_min_id] = true;
+        } // valid time-of-flight
 
-    } // valid detector IDs
-  }   //(for each event)
+      } // valid detector IDs
+    }   // for events in pulse
+    // check if cancelled after each pulse
+    if (alg->getCancel())
+      break;
+  } // for pulses
+
+  // Check for canceled algorithm
+  if (alg->getCancel()) {
+    return;
+  }
 
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
@@ -242,6 +262,25 @@ void ProcessBankData::run() { // override {
                            << "\n";
 #endif
 } // END-OF-RUN()
+
+size_t ProcessBankData::getFirstEventIndex(const size_t pulseIndex) const {
+  const auto firstEventIndex = event_index->operator[](pulseIndex);
+  if (firstEventIndex >= startAt)
+    return firstEventIndex - startAt;
+  else
+    return 0;
+}
+
+size_t ProcessBankData::getLastEventIndex(const size_t pulseIndex,
+                                          const size_t numPulses) const {
+  if (pulseIndex + 1 >= numPulses)
+    return numEvents;
+
+  const size_t lastEventIndex =
+      event_index->operator[](pulseIndex + 1) - startAt;
+
+  return std::min(lastEventIndex, numEvents);
+}
 
 /**
  * Get the workspace index for a given pixel ID. Throws if the pixel ID is

@@ -9,10 +9,11 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, convert_to_field, extract_single_spec
+from Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, convert_to_field, \
+    extract_single_spec
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
-    get_base_data_directory, get_group_or_pair_from_name
+    get_group_or_pair_from_name
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.observer_pattern import GenericObservable
@@ -58,14 +59,37 @@ class FFTPresenter(object):
         self.view.deactivateButton()
 
     def getWorkspaceNames(self):
-        name = self.view.workspace
+        # get current values
+        original_Re_name = self.view.workspace
+        original_Im_name = self.view.imaginary_workspace
         final_options = self.load.get_workspace_names_for_FFT_analysis(self.view.use_raw_data)
 
+        # update view
         self.view.addItems(final_options)
         self.view.removeRe('PhaseQuad')
         self.removePhaseFromIM(final_options)
 
-        self.view.workspace = name
+        # make intelligent guess of what user wants
+        current_group_pair = self.load.group_pair_context[self.load.group_pair_context.selected]
+        Re_name_to_use = None
+        Im_name_to_use = None
+        default_name = None
+        # will need to check this exists before using it
+        if current_group_pair:
+            default_name = current_group_pair.get_asymmetry_workspace_names(
+                    self.load.data_context.current_runs)
+        # if the original selection is available we should use it
+        if original_Re_name in final_options:
+            Re_name_to_use = original_Re_name
+        elif default_name:
+            Re_name_to_use = default_name[0]
+        self.view.workspace = Re_name_to_use
+        if original_Im_name in final_options:
+            Im_name_to_use = original_Im_name
+        elif default_name:
+            Im_name_to_use = default_name[0]
+        self.view.imaginary_workspace=Im_name_to_use
+        return
 
     def handle_use_raw_data_changed(self):
         if not self.view.use_raw_data and not self.load._do_rebin():
@@ -169,7 +193,8 @@ class FFTPresenter(object):
         if self.view.imaginary_data:
             if 'PhaseQuad' in self.view.workspace:
                 imaginary_workspace_input = real_workspace_input
-                imaginary_workspace_padding_parameters['InputWorkspace'] = real_workspace_padding_parameters['InputWorkspace']
+                imaginary_workspace_padding_parameters['InputWorkspace'] = real_workspace_padding_parameters[
+                    'InputWorkspace']
                 imaginary_workspace_index = 1
             else:
                 imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
@@ -187,23 +212,24 @@ class FFTPresenter(object):
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
         run = re.search('[0-9]+', input_workspace).group()
         Im_run = ""
-        if imaginary_input_workspace is not "":
+        if imaginary_input_workspace != "":
             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
         fft_workspace_name = get_fft_workspace_name(input_workspace, imaginary_input_workspace)
-        group = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument, self.load.workspace_suffix)
-        directory = get_base_data_directory(self.load, run) + group
-
+        directory = get_fft_workspace_group_name(fft_workspace_name, self.load.data_context.instrument,
+                                                 self.load.workspace_suffix)
         Re = get_group_or_pair_from_name(input_workspace)
         Im = get_group_or_pair_from_name(imaginary_input_workspace)
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
-        spectra = {"_"+FREQUENCY_EXTENSIONS["RE"]:0+shift, "_"+FREQUENCY_EXTENSIONS["IM"]:1+shift, "_"+FREQUENCY_EXTENSIONS["MOD"]:2+shift}
+        spectra = {"_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift, "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
+                   "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift}
         for spec_type in list(spectra.keys()):
-            extracted_ws = extract_single_spec(fft_workspace,spectra[spec_type])
+            extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type])
 
             if 'PhaseQuad' in self.view.workspace:
-                self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re,Im_run, Im, phasequad = True)
+                self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im,
+                                                     phasequad=True)
             else:
-                self.load._frequency_context.add_FFT(fft_workspace_name  + spec_type, run, Re,Im_run, Im)
+                self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im)
 
             muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws, directory + fft_workspace_name + spec_type)
             muon_workspace_wrapper.show()

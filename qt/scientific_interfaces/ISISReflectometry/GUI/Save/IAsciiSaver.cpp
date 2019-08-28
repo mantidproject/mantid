@@ -7,6 +7,7 @@
 #include "IAsciiSaver.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 InvalidSavePath::InvalidSavePath(std::string const &path)
     : std::runtime_error("The path" + path +
                          "does not exist or is not a directory."),
@@ -34,5 +35,6 @@ bool FileFormatOptions::shouldIncludeQResolution() const {
 std::string const &FileFormatOptions::separator() const { return m_separator; }
 std::string const &FileFormatOptions::prefix() const { return m_prefix; }
 NamedFormat FileFormatOptions::format() const { return m_format; }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

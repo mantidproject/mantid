@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class SavePresenterFactory {
 public:
@@ -23,6 +24,7 @@ public:
                                            std::make_unique<AsciiSaver>());
   }
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_SAVEPRESENTERFACTORY_H

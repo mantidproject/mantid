@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "Common/ZipRange.h"
 #include "Reduction/ReductionJobs.h"
 #include <cxxtest/TestSuite.h>
@@ -15,7 +16,8 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::_;
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace ModelCreationHelper;
 
 class MockModificationListener {
 public:
@@ -97,7 +99,7 @@ public:
   }
 
   void testMergeJobsIntoExistingWhenNameClashButNoRows() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A"));
     auto addition = ReductionJobs();
@@ -110,7 +112,7 @@ public:
   }
 
   void testMergeJobsIntoExistingWhenNameClashButRowsWithDifferentAngles() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
     auto addition = ReductionJobs();
@@ -124,7 +126,7 @@ public:
   }
 
   void testCallsInsertWhenAddingRow() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithAngle(0.1)}));
     auto addition = ReductionJobs();
@@ -140,7 +142,7 @@ public:
   }
 
   void testMergeJobsIntoExistingWhenNameClashAndRowsHaveSameAngles() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithNameAndAngle("C", 0.1)}));
     auto addition = ReductionJobs();
@@ -156,7 +158,7 @@ public:
   }
 
   void testCallsModifiedWhenMergingRow() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(Group("A", {rowWithNameAndAngle("C", 0.1)}));
     auto addition = ReductionJobs();
@@ -201,7 +203,7 @@ public:
   }
 
   void testMergeIntoSelfResultsInNoChange() {
-    MockModificationListener listener;
+    NiceMock<MockModificationListener> listener;
     auto target = ReductionJobs();
     target.appendGroup(
         Group("S1 SI/ D20 ", {rowWithNameAndAngle("47450", 0.7),
@@ -215,6 +217,122 @@ public:
 
     TS_ASSERT(haveEqualRunNumbers(target, addition))
     TS_ASSERT(Mock::VerifyAndClearExpectations(&listener));
+  }
+
+  void testMergeRowIntoNewGroup() {
+    auto jobs = ReductionJobs();
+    auto newGroupName = std::string("Test group 1");
+    auto newRow = makeRow("12345", 0.5);
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, newGroupName);
+    TS_ASSERT_EQUALS(jobs, oneGroupWithARowModel());
+  }
+
+  void testMergeRowIntoEmptyGroup() {
+    auto jobs = oneEmptyGroupModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto newRow = makeRow("12345", 0.5);
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, oneGroupWithARowModel());
+  }
+
+  void testMergeRowIntoSecondOfTwoGroups() {
+    auto jobs = twoEmptyGroupsModel();
+    auto existingGroupName = std::string("Test group 2");
+    auto newRow = makeRow("12346", 0.8);
+    auto expected = jobs;
+    expected.mutableGroups()[1].appendRow(newRow);
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, expected);
+  }
+
+  void testMergeDuplicateRowIntoEmptyGroupIsNotAdded() {
+    auto jobs = oneGroupWithARowModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto newRow = makeRow("12345", 0.5);
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, oneGroupWithARowModel());
+  }
+
+  void testMergeRowIntoNonEmptyGroup() {
+    auto jobs = oneGroupWithARowModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto newRow = makeRow("12346", 0.8);
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, oneGroupWithTwoRowsModel());
+  }
+
+  void testMergedRowGetsSortedByTheta() {
+    auto jobs = oneGroupWithARowModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto newRow = makeRow("02345", 0.2);
+    auto expected = jobs;
+    expected.mutableGroups()[0].insertRow(newRow, 0);
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, expected);
+  }
+
+  void testMergeRowWithExtraRunNumbersIntoExistingRow() {
+    auto jobs = oneGroupWithARowModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto updatedRow =
+        makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
+    auto expected = jobs;
+    expected.mutableGroups()[0].mutableRows()[0] = updatedRow;
+    mergeRowIntoGroup(jobs, updatedRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, expected);
+  }
+
+  void testMergeRowWithFewerRunNumbersIntoExistingRow() {
+    // Construct the original jobs with a row with multiple runs
+    auto jobs = oneEmptyGroupModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto existingRow =
+        makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
+    jobs.mutableGroups()[0].appendRow(existingRow);
+    // Try to merge a new row with one of the existing runs
+    auto newRow = makeRow("12346", 0.5);
+    // The results should not change
+    auto expected = jobs;
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, expected);
+  }
+
+  void
+  testMergeRowWithSomeExistingAndSomeAdditionalRunNumbersIntoExistingRow() {
+    // Construct the original jobs with a row with multiple runs
+    auto jobs = oneEmptyGroupModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto existingRow = makeRow(std::vector<std::string>{"12345", "12346"}, 0.5);
+    jobs.mutableGroups()[0].appendRow(existingRow);
+    // Try to merge a new row with one of the existing runs and one new one
+    auto newRow = makeRow(std::vector<std::string>{"12345", "12347"}, 0.5);
+    // The result should contain all runs
+    auto expectedRow =
+        makeRow(std::vector<std::string>{"12345", "12346", "12347"}, 0.5);
+    auto expected = jobs;
+    expected.mutableGroups()[0].mutableRows()[0] = expectedRow;
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, expected);
+  }
+
+  void testMergeRowWithExtraRunNumbersSortsRuns() {
+    // Construct the original jobs with a row with multiple runs
+    auto jobs = oneEmptyGroupModel();
+    auto existingGroupName = std::string("Test group 1");
+    auto existingRow = makeRow(std::vector<std::string>{"44444", "22222"}, 0.5);
+    jobs.mutableGroups()[0].appendRow(existingRow);
+    // Try to merge a new row with a run that will be ordered between the two
+    // existing ones
+    auto newRow = makeRow("33333");
+    // The result has all runs sorted (note that it also re-sorts existing
+    // ones, although in reality we would never have an unsorted list as a
+    // starting point)
+    auto expectedRow =
+        makeRow(std::vector<std::string>{"22222", "33333", "44444"}, 0.5);
+    auto expected = jobs;
+    expected.mutableGroups()[0].mutableRows()[0] = expectedRow;
+    mergeRowIntoGroup(jobs, newRow, m_thetaTolerance, existingGroupName);
+    TS_ASSERT_EQUALS(jobs, expected);
   }
 
 private:

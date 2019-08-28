@@ -141,9 +141,15 @@ class AbstractInst(object):
         :param focused_vanadium_banks: The list processed (and cropped) vanadium banks to take a spline of
         :return: The splined vanadium workspaces as a list
         """
-        # XXX: Although this could be moved to common if enough instruments spline the same way and have
-        # the instrument override the optional behaviour
-        raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
+        if self._inst_settings.masking_file_name is not None:
+            masking_file_path = os.path.join(self.calibration_dir,
+                                             self._inst_settings.masking_file_name)
+            bragg_mask_list = common.read_masking_file(masking_file_path)
+            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks,
+                                                                      mask_list=bragg_mask_list)
+        output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
+                                          num_splines=self._inst_settings.spline_coeff)
+        return output
 
     def _crop_banks_to_user_tof(self, focused_banks):
         """

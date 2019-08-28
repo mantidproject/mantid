@@ -238,7 +238,7 @@ namespace {
  * @return Value at the current parameter point
  */
 double costf(const gsl_vector *v, void *params) {
-  FunctionData *d = static_cast<FunctionData *>(params);
+  auto *d = static_cast<FunctionData *>(params);
 
   double lagrangian = (*d->userfunc)(d->n, v->data);
   for (size_t i = 0; i < d->eqmatrix->numRows(); ++i) {
@@ -262,7 +262,7 @@ double costf(const gsl_vector *v, void *params) {
  * @param df Holder for output  derivatives
  */
 void costdf(const gsl_vector *v, void *params, gsl_vector *df) {
-  FunctionData *d = static_cast<FunctionData *>(params);
+  auto *d = static_cast<FunctionData *>(params);
   double f0 = costf(v, params);
   gsl_vector *tmp = d->tmp;
   std::copy(v->data, v->data + d->n, tmp->data);

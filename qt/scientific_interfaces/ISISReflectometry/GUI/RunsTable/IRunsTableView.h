@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class RunsTableViewSubscriber
     : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
@@ -81,6 +82,7 @@ public:
   virtual void setProcessButtonEnabled(bool enable) = 0;
   virtual void setActionEnabled(Action action, bool enable) = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_

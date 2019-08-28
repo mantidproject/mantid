@@ -16,6 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -87,18 +88,7 @@ void updatePolarizationCorrectionProperties(
   if (corrections.correctionType() == PolarizationCorrectionType::None)
     return;
 
-  AlgorithmProperties::update(
-      "PolarizationAnalysis",
-      polarizationCorrectionTypeToString(corrections.correctionType()),
-      properties);
-
-  if (corrections.correctionType() == PolarizationCorrectionType::PA ||
-      corrections.correctionType() == PolarizationCorrectionType::PNR) {
-    AlgorithmProperties::update("CRho", corrections.cRho(), properties);
-    AlgorithmProperties::update("CAlpha", corrections.cRho(), properties);
-    AlgorithmProperties::update("CAp", corrections.cRho(), properties);
-    AlgorithmProperties::update("CPp", corrections.cRho(), properties);
-  }
+  AlgorithmProperties::update("PolarizationAnalysis", true, properties);
 }
 
 void updateFloodCorrectionProperties(AlgorithmRuntimeProps &properties,
@@ -322,5 +312,6 @@ AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model) {
   updatePerThetaDefaultProperties(properties, model.wildcardDefaults());
   return properties;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

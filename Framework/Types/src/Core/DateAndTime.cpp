@@ -146,8 +146,8 @@ DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime)
  */
 DateAndTime::DateAndTime(const double seconds, const double nanoseconds) {
   double nano = seconds * 1.e9 + nanoseconds;
-  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
+  constexpr auto minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr auto maximum = static_cast<double>(MAX_NANOSECONDS);
   if (nano > maximum)
     _nanoseconds = MAX_NANOSECONDS;
   else if (nano < minimum)
@@ -180,7 +180,7 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds) {
  * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
-  const int64_t seconds_64bit = static_cast<int64_t>(seconds);
+  const auto seconds_64bit = static_cast<int64_t>(seconds);
 
   if (seconds_64bit >= MAX_SECONDS)
     _nanoseconds = MAX_NANOSECONDS;
@@ -516,13 +516,6 @@ int DateAndTime::nanoseconds() const {
 int64_t DateAndTime::totalNanoseconds() const { return this->_nanoseconds; }
 
 //------------------------------------------------------------------------------------------------
-/** == operator
- * @param rhs :: DateAndTime to compare
- * @return true if equals
- */
-bool DateAndTime::operator==(const DateAndTime &rhs) const {
-  return _nanoseconds == rhs._nanoseconds;
-}
 
 /** == operator for boost::posix_time::ptime
  * @param rhs :: boost::posix_time::ptime to compare
@@ -553,14 +546,6 @@ bool DateAndTime::equals(const DateAndTime &rhs, const int64_t tol) const {
  */
 bool DateAndTime::operator!=(const DateAndTime &rhs) const {
   return _nanoseconds != rhs._nanoseconds;
-}
-
-/** < operator
- * @param rhs :: DateAndTime to compare
- * @return true if less than
- */
-bool DateAndTime::operator<(const DateAndTime &rhs) const {
-  return _nanoseconds < rhs._nanoseconds;
 }
 
 /** <= operator
@@ -718,7 +703,7 @@ double DateAndTime::secondsFromDuration(time_duration duration) {
  * Return a time_duration object with the given the number of seconds
  */
 time_duration DateAndTime::durationFromSeconds(double duration) {
-  long secs = static_cast<long>(duration);
+  auto secs = static_cast<long>(duration);
 
   // Limit the seconds to the range of long (avoid overflows)
   if (duration >= std::numeric_limits<int>::max())
@@ -730,7 +715,7 @@ time_duration DateAndTime::durationFromSeconds(double duration) {
 
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution
-  long fracsecs = long(1e9 * fmod(duration, 1.0));
+  auto fracsecs = long(1e9 * fmod(duration, 1.0));
   return boost::posix_time::time_duration(0, 0, static_cast<sec_type>(secs),
                                           fracsecs);
 #else

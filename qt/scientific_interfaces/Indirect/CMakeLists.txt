@@ -46,8 +46,13 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -91,7 +96,10 @@ set(
   IndirectFitPlotModel.h
   IndirectFitPlotPresenter.h
   IndirectFittingModel.h
+  IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
   IndirectToolsTab.h
+  IPythonRunner.h
   IqtFitModel.h
   JumpFitModel.h
   MSDFitModel.h
@@ -139,6 +147,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -196,6 +207,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
@@ -267,6 +279,8 @@ set(
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndirectBayes.cpp
+  IndirectBayesTab.cpp
   IndirectCorrections.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
@@ -277,8 +291,13 @@ set(
   IndirectLoadILL.cpp
   IndirectMolDyn.cpp
   IndirectMoments.cpp
+  IndirectPlotOptionsModel.cpp
+  IndirectPlotOptionsPresenter.cpp
+  IndirectPlotOptionsView.cpp
+  IndirectPlotter.cpp
   IndirectSassena.cpp
   IndirectSettings.cpp
+  IndirectSettingsHelper.cpp
   IndirectSettingsModel.cpp
   IndirectSettingsPresenter.cpp
   IndirectSettingsView.cpp
@@ -291,6 +310,9 @@ set(
   IndirectToolsTab.cpp
   IndirectTransmission.cpp
   IndirectTransmissionCalc.cpp
+  Quasi.cpp
+  ResNorm.cpp
+  Stretch.cpp
 )
 
 set(
@@ -306,6 +328,8 @@ set(
   ISISDiagnostics.h
   ISISEnergyTransfer.h
   IIndirectSettingsView.h
+  IndirectBayes.h
+  IndirectBayesTab.h
   IndirectCorrections.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
@@ -315,6 +339,9 @@ set(
   IndirectLoadILL.h
   IndirectMolDyn.h
   IndirectMoments.h
+  IndirectPlotOptionsPresenter.h
+  IndirectPlotOptionsView.h
+  IndirectPlotter.h
   IndirectSassena.h
   IndirectSettings.h
   IndirectSettingsPresenter.h
@@ -328,11 +355,17 @@ set(
   IndirectToolsTab.h
   IndirectTransmission.h
   IndirectTransmissionCalc.h
+  Quasi.h
+  ResNorm.h
+  Stretch.h
 )
 
 set(
   INC_FILES
   IndirectDataValidationHelper.h
+  IndirectPlotOptionsModel.h
+  IndirectSettingsHelper.h
+  IPythonRunner.h
 )
 
 set(
@@ -346,6 +379,7 @@ set(
   ISISCalibration.ui
   ISISDiagnostics.ui
   ISISEnergyTransfer.ui
+  IndirectBayes.ui
   IndirectCorrections.ui
   IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
@@ -354,6 +388,7 @@ set(
   IndirectLoadILL.ui
   IndirectMolDyn.ui
   IndirectMoments.ui
+  IndirectPlotOptions.ui
   IndirectSassena.ui
   IndirectSettings.ui
   IndirectSimulation.ui
@@ -362,6 +397,9 @@ set(
   IndirectTools.ui
   IndirectTransmission.ui
   IndirectTransmissionCalc.ui
+  Quasi.ui
+  ResNorm.ui
+  Stretch.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)

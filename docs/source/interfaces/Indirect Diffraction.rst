@@ -66,9 +66,11 @@ Spectra Min & Spectra Max
 Run
   Runs the processing configured on the current tab.
 
-Plot Type
-  Specify the type of plot to be created when the reduction is complete, either
-  a contour or spectra plot can be created.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
+
+Plot Contour
+  If enabled, it will plot the selected output workspace as a contour plot.
 
 Save Formats
   Select a range of save formats to save the reduced data as, in all cases the

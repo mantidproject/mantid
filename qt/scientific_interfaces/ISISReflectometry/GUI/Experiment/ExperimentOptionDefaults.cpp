@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 // unnamed namespace
 namespace {
@@ -110,5 +111,6 @@ Experiment ExperimentOptionDefaults::get(
     Mantid::Geometry::Instrument_const_sptr instrument) {
   return getExperimentDefaults(instrument);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

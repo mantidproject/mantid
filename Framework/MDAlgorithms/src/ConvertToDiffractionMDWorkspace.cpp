@@ -233,9 +233,9 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
     const V3D Q_dir = mat * Q_dir_lab_frame;
 
     // For speed we extract the components.
-    coord_t Q_dir_x = coord_t(Q_dir.X());
-    coord_t Q_dir_y = coord_t(Q_dir.Y());
-    coord_t Q_dir_z = coord_t(Q_dir.Z());
+    auto Q_dir_x = coord_t(Q_dir.X());
+    auto Q_dir_y = coord_t(Q_dir.Y());
+    auto Q_dir_z = coord_t(Q_dir.Z());
 
     // For lorentz correction, calculate  sin(theta))^2
     double sin_theta_squared = 0;
@@ -268,7 +268,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
 
     for (; it != it_end; it++) {
       // Get the wavenumber in ang^-1 using the previously calculated constant.
-      coord_t wavenumber =
+      auto wavenumber =
           coord_t(wavenumber_in_angstrom_times_tof_in_microsec / it->tof());
 
       // Q vector = K_final - K_initial = wavenumber * (output_direction -
@@ -287,8 +287,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
       if (LorentzCorrection) {
         // double lambda = 1.0/wavenumber;
         // (sin(theta))^2 / wavelength^4
-        float correct = float(sin_theta_squared * wavenumber * wavenumber *
-                              wavenumber * wavenumber);
+        auto correct = float(sin_theta_squared * wavenumber * wavenumber *
+                             wavenumber * wavenumber);
         // Push the MDLeanEvent but correct the weight.
         box->addEvent(MDE(float(it->weight() * correct),
                           float(it->errorSquared() * correct * correct),
@@ -328,7 +328,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   if (LorentzCorrection) {
     API::Run &run = m_inWS->mutableRun();
     if (run.hasProperty("LorentzCorrection")) {
-      bool lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
+      auto lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         LorentzCorrection = false;
         g_log.warning()
@@ -513,7 +513,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   const auto &specInfo = m_inWS->spectrumInfo();
   for (size_t wi = 0; wi < m_inWS->getNumberHistograms();) {
     // 1. Determine next chunk of spectra to process
-    int start = static_cast<int>(wi);
+    auto start = static_cast<int>(wi);
     for (; wi < m_inWS->getNumberHistograms(); ++wi) {
       // Get an idea of how many events we'll be adding
       size_t eventsAdding = m_inWS->blocksize();

@@ -1,4 +1,8 @@
-set(COMMON_SRC_FILES Plotter.cpp)
+set(COMMON_SRC_FILES 
+  Plotter.cpp
+  Encoder.cpp
+  Decoder.cpp
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(
@@ -7,9 +11,9 @@ set(
   IPythonRunner.h
   IPlotter.h
   Plotter.h
+  Encoder.h
+  Decoder.h
 )
-
-set(COMMON_MOC_FILES SearchModel.h)
 
 prepend(
   COMMON_SRC_FILES
@@ -20,11 +24,6 @@ prepend(
   COMMON_INC_FILES
   GUI/Common
   ${COMMON_INC_FILES}
-)
-prepend(
-  COMMON_MOC_FILES
-  GUI/Common
-  ${COMMON_MOC_FILES}
 )
 
 set(COMMON_SRC_FILES ${COMMON_SRC_FILES} PARENT_SCOPE)

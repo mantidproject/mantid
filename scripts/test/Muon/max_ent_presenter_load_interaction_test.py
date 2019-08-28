@@ -107,7 +107,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.presenter.add_maxent_workspace_to_ADS('MUSR22725_MaxEnt', maxent_workspace, mock.MagicMock())
 
         workspace_wrapper_mock.assert_called_once_with(maxent_workspace,
-                                                       'Muon Data/MUSR22725 MA/MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
+                                                       'MUSR22725 Maxent MA/MUSR22725_MaxEnt; MaxEnt')
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
 
     def test_get_output_options_defaults_returns_correctly(self):

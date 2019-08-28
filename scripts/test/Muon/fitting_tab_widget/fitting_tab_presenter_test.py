@@ -618,6 +618,53 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.view.parameter_display_combo.setCurrentIndex(1)
 
+    def test_get_selected_groups_and_pairs_returns_correct_list(self):
+        self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        result = self.presenter._get_selected_groups_and_pairs()
+
+        self.assertEqual(result.sort(), ['top', 'bottom', 'fwd'].sort())
+
+    def test_update_selected_ws_guess(self):
+        self.presenter.manual_selection_made = False
+        self.presenter.update_selected_time_workspace_guess = mock.Mock()
+        self.presenter.update_selected_workspace_guess()
+        self.assertEquals(self.presenter.update_selected_time_workspace_guess.call_count,1)
+
+    def test_update_selected_ws_guess_freq(self):
+        self.presenter.manual_selection_made = False
+        self.presenter.context._frequency_context = True
+        self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
+        self.presenter.update_selected_workspace_guess()
+        self.assertEquals(self.presenter.update_selected_frequency_workspace_guess.call_count,1)
+
+    def test_update_selected_ws_guess_non(self):
+        self.presenter.manual_selection_made = True
+        self.presenter.update_selected_time_workspace_guess = mock.Mock()
+        self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
+        before = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        self.presenter.selected_data = before
+
+        self.presenter.update_selected_workspace_guess()
+        self.assertEquals(self.presenter.update_selected_frequency_workspace_guess.call_count,0)
+        self.assertEquals(self.presenter.update_selected_time_workspace_guess.call_count,0)
+        self.assertEquals(self.presenter.selected_data, before)
+
+    def test_update_time_guess(self):
+        self.context.get_names_of_workspaces_to_fit = mock.Mock(return_value="test")
+        self.presenter._get_selected_groups_and_pairs = mock.Mock(return_value = ["fwd","bwd"])
+        self.presenter.clear_and_reset_gui_state = mock.Mock()
+        self.presenter._check_data_exists = mock.Mock(return_value="test")
+        output = self.presenter.update_selected_time_workspace_guess()
+
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd",phasequad= True, rebin=False)
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd",phasequad= True, rebin=False)
+        self.assertEquals(self.presenter.context.get_names_of_workspaces_to_fit.call_count,2)
+        self.assertEquals(self.presenter.selected_data, "test")
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

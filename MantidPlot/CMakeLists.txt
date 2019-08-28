@@ -93,7 +93,7 @@ set(QTIPLOT_SRCS
     src/PluginFit.cpp
     src/PolynomFitDialog.cpp
     src/PolynomialFit.cpp
-    src/Process.cpp
+    src/Processes.cpp
     src/ProjectRecovery.cpp
     src/ProjectSaveView.cpp
     src/ProjectSerialiser.cpp
@@ -302,7 +302,7 @@ set(QTIPLOT_HDRS
     src/PluginFit.h
     src/PolynomFitDialog.h
     src/PolynomialFit.h
-    src/Process.h
+    src/Processes.h
     src/ProjectRecovery.h
     src/ProjectSerialiser.h
     src/ProjectSaveView.h

@@ -286,7 +286,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
           val *= val;
           // Convert to int with slight rounding up. This is to avoid rounding
           // errors
-          int numEvents = int(val + 0.2);
+          auto numEvents = int(val + 0.2);
           if (numEvents < 1)
             numEvents = 1;
           if (numEvents > MaxEventsPerBin)
@@ -1652,7 +1652,7 @@ inline void EventList::compressFatEventsHelper(
   // pulsetime bin information - stored as int nanoseconds because it
   // is the implementation type for DateAndTime object
   const int64_t pulsetimeStart = timeStart.totalNanoseconds();
-  const int64_t pulsetimeDelta = static_cast<int64_t>(seconds * SEC_TO_NANO);
+  const auto pulsetimeDelta = static_cast<int64_t>(seconds * SEC_TO_NANO);
 
   // pulsetime information
   std::vector<DateAndTime> pulsetimes; // all the times for new event
@@ -2241,7 +2241,7 @@ void EventList::generateCountsHistogramPulseTime(const double &xMin,
     if (ev.tof() < TOF_min || ev.tof() >= TOF_max)
       continue;
 
-    size_t n_bin = static_cast<size_t>((pulsetime - xMin) / step);
+    auto n_bin = static_cast<size_t>((pulsetime - xMin) / step);
     Y[n_bin]++;
   }
 }
@@ -2289,7 +2289,7 @@ void EventList::generateCountsHistogramTimeAtSample(
     // Find the first bin
     size_t bin = 0;
 
-    double tAtSample = static_cast<double>(
+    auto tAtSample = static_cast<double>(
         calculateCorrectedFullTime(*itev, tofFactor, tofOffset));
     while (bin < x_size - 1) {
       // Within range?

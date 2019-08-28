@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IBatchJobRunner {
 public:
@@ -46,6 +47,7 @@ public:
   getAlgorithms() = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

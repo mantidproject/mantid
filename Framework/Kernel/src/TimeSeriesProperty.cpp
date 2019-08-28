@@ -110,7 +110,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
     int64_t t1 = it->time().totalNanoseconds();
     if (t1 != t0) {
       double deriv = 1.e+9 * (double(v1 - v0) / double(t1 - t0));
-      int64_t tm = static_cast<int64_t>((t1 + t0) / 2);
+      auto tm = static_cast<int64_t>((t1 + t0) / 2);
       timeSeriesDeriv->addValue(Types::Core::DateAndTime(tm), deriv);
     }
     t0 = t1;
@@ -153,8 +153,7 @@ TimeSeriesProperty<TYPE> &TimeSeriesProperty<TYPE>::merge(Property *rhs) {
 template <typename TYPE>
 TimeSeriesProperty<TYPE> &TimeSeriesProperty<TYPE>::
 operator+=(Property const *right) {
-  TimeSeriesProperty<TYPE> const *rhs =
-      dynamic_cast<TimeSeriesProperty<TYPE> const *>(right);
+  auto const *rhs = dynamic_cast<TimeSeriesProperty<TYPE> const *>(right);
 
   if (rhs) {
     if (this->operator!=(*rhs)) {
@@ -393,8 +392,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
       mp_copy.push_back(temp);
     } else {
       mp_copy.emplace_back(t_start, m_values[tstartindex].value());
-      for (size_t im = size_t(tstartindex + 1); im <= size_t(tstopindex);
-           ++im) {
+      for (auto im = size_t(tstartindex + 1); im <= size_t(tstopindex); ++im) {
         mp_copy.emplace_back(m_values[im].time(), m_values[im].value());
       }
     }
@@ -440,8 +438,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   size_t numOutputs = outputs.size();
   // 1. Clear the outputs before you start
   for (size_t i = 0; i < numOutputs; i++) {
-    TimeSeriesProperty<TYPE> *myOutput =
-        dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
+    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
       outputs_tsp.push_back(myOutput);
       if (this->m_values.size() == 1) {
@@ -536,8 +533,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
 
   // Make sure all entries have the correct size recorded in m_size.
   for (std::size_t i = 0; i < numOutputs; i++) {
-    TimeSeriesProperty<TYPE> *myOutput =
-        dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
+    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
       myOutput->m_size = myOutput->realSize();
     }
@@ -1730,7 +1726,7 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
       ;
     } else if (static_cast<size_t>(n) == m_filterQuickRef.back().second + 1) {
       // 2. n = size of the allowed region, duplicate the last one
-      long ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
+      auto ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
       long ind_t2 = ind_t1 - 1;
       Types::Core::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
       Types::Core::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
@@ -2509,8 +2505,8 @@ void TimeSeriesProperty<TYPE>::histogramData(
   if (nPoints == 0)
     return; // nothing to do
 
-  double t0 = static_cast<double>(tMin.totalNanoseconds());
-  double t1 = static_cast<double>(tMax.totalNanoseconds());
+  auto t0 = static_cast<double>(tMin.totalNanoseconds());
+  auto t1 = static_cast<double>(tMax.totalNanoseconds());
   if (t0 > t1)
     throw std::invalid_argument(
         "invalid arguments for histogramData; tMax<tMin");
@@ -2518,10 +2514,10 @@ void TimeSeriesProperty<TYPE>::histogramData(
   double dt = (t1 - t0) / static_cast<double>(nPoints);
 
   for (auto &ev : m_values) {
-    double time = static_cast<double>(ev.time().totalNanoseconds());
+    auto time = static_cast<double>(ev.time().totalNanoseconds());
     if (time < t0 || time >= t1)
       continue;
-    size_t ind = static_cast<size_t>((time - t0) / dt);
+    auto ind = static_cast<size_t>((time - t0) / dt);
     counts[ind] += static_cast<double>(ev.value());
   }
 }

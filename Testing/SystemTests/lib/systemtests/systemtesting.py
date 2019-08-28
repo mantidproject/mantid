@@ -41,11 +41,21 @@ import time
 import unittest
 
 
+def santize_backslash(path):
+    """ Some windows paths can contain sequences such as \r, e.g. \release_systemtests
+        and need escaping to be able to add to the python path"""
+    return path.replace('\\', '\\\\')
+
+
 # Path to this file
-THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
-# Some windows paths can contain sequences such as \r, e.g. \release_systemtests
-# and need escaping to be able to add to the python path
-TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
+TESTING_FRAMEWORK_DIR = santize_backslash(os.path.dirname(os.path.realpath(__file__)))
+# Path to PythonInterface/test directory for testhelpers module
+FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR,
+                                                                                     "..", "..", "..", "..",
+                                                                                     "Framework", "PythonInterface", "test")))
+
+if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
+    raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
 
 
 #########################################################################
@@ -641,13 +651,14 @@ except AttributeError:
     pass
 
 import sys
-for p in ('{test_framework}', '{test_dir}'):
+for p in ('{test_framework}', '{pythoninterface_test_dir}', '{test_dir}'):
     sys.path.append(p)
 from {test_modname} import {test_cls}
 systest = {test_cls}()
 if {exclude_in_pr}:
     systest.excludeInPullRequests = lambda: False
-""".format(test_framework=TESTING_FRAMEWORK_DIR, test_dir=self._test_dir, test_modname=self._modname,
+""".format(test_framework=TESTING_FRAMEWORK_DIR, pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
+           test_dir=self._test_dir, test_modname=self._modname,
            test_cls=self._test_cls_name, exclude_in_pr=self._exclude_in_pr_builds)
         if (not clean):
             code += "systest.execute()\n" + \
@@ -768,9 +779,9 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc=None, runner=None, output=[TextResultReporter()],
-                 quiet=False, testsInclude=None, testsExclude=None, showSkipped=False,
-                 exclude_in_pr_builds=None, output_on_failure=False, clean=False,
-                 process_number=0, ncores=1, list_of_tests=None):
+                 quiet=False, testsInclude=None, testsExclude=None, ignore_failed_imports=False,
+                 showSkipped=False, exclude_in_pr_builds=None, output_on_failure=False,
+                 clean=False, process_number=0, ncores=1, list_of_tests=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -787,6 +798,7 @@ class TestManager(object):
         self._testsInclude=testsInclude
         self._testsExclude=testsExclude
         self._exclude_in_pr_builds=exclude_in_pr_builds
+        self._ignore_failed_imports = ignore_failed_imports
 
         self._passedTests = 0
         self._skippedTests = 0
@@ -796,21 +808,26 @@ class TestManager(object):
         self._tests = list_of_tests
 
     def generateMasterTestList(self):
-
         # If given option is a directory
-        if os.path.isdir(self._testDir) == True:
+        if os.path.isdir(self._testDir):
             test_dir = os.path.abspath(self._testDir).replace('\\', '/')
             sys.path.append(test_dir)
             self._runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)
+            all_loaded, full_test_list = self.loadTestsFromDir(test_dir)
         else:
-            if os.path.exists(self._testDir) == False:
+            if not os.path.exists(self._testDir):
                 print('Cannot find file ' + self._testDir + '.py. Please check the path.')
                 exit(2)
             test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\', '/')
             sys.path.append(test_dir)
             self._runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+
+        if not all_loaded:
+            if  self._ignore_failed_imports:
+                print('\nUnable to load all test modules. Continuing as requested.')
+            else:
+                sys.exit('\nUnable to load all test modules. Cannot continue.')
 
         # Gather statistics on full test list
         test_stats = [0, 0, 0]
@@ -970,12 +987,14 @@ class TestManager(object):
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
         entries = os.listdir(test_dir)
-        tests = []
-        regex = re.compile('^.*\.py$', re.IGNORECASE)
-        for file in entries:
-            if regex.match(file) != None:
-                tests.extend(self.loadTestsFromModule(os.path.join(test_dir, file)))
-        return tests
+        loaded, tests = [], []
+        for filepath in entries:
+            if filepath.endswith('.py'):
+                module_loaded, module_tests = self.loadTestsFromModule(os.path.join(test_dir, filepath))
+                loaded.append(module_loaded)
+                tests.extend(module_tests)
+
+        return all(loaded), tests
 
     def loadTestsFromModule(self, filename):
         '''
@@ -985,6 +1004,7 @@ class TestManager(object):
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
         tests = []
+        module_loaded = False
         try:
             with open(filename, 'r') as pyfile:
                 mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
@@ -996,14 +1016,18 @@ class TestManager(object):
                     if self.isValidTestClass(value):
                         test_name = key
                         tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            module_loaded = True
         except Exception as exc:
-            print("Error importing module '%s': %s" % (modname, str(exc)))
-            # Error loading the source, add fake unnamed test so that an error
-            # will get generated when the tests are run and it will be counted properly
+            print("Error importing module '{}':".format(modname))
+            import traceback
+            traceback.print_exc()
+            module_loaded = False
+            # append a test with a blank name to indicate it was skipped
             tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
         finally:
             pyfile.close()
-        return tests
+
+        return module_loaded, tests
 
     def isValidTestClass(self, class_obj):
         """Returns true if the test is a valid test class. It is valid

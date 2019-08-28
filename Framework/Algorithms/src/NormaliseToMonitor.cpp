@@ -77,8 +77,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
 // function which modifies the allowed values for the list of monitors.
 void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
                                     Kernel::Property *const pProp) {
-  Kernel::PropertyWithValue<int> *piProp =
-      dynamic_cast<Kernel::PropertyWithValue<int> *>(pProp);
+  auto *piProp = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProp);
   if (!piProp) {
     throw(std::invalid_argument(
         "modify allowed value has been called on wrong property"));

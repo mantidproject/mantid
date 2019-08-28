@@ -21,6 +21,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Experiment
 
@@ -74,6 +75,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs,
                                                Experiment const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs,
                                                Experiment const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENT_H_

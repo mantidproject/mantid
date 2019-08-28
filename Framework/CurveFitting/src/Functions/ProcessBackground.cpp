@@ -566,7 +566,7 @@ void ProcessBackground::selectFromGivenFunction() {
       parmap.emplace(parname, parvalue);
   }
 
-  int bkgdorder =
+  auto bkgdorder =
       static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
   bkgdfunc->setAttributeValue("n", bkgdorder);
   for (auto &mit : parmap) {

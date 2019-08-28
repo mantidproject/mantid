@@ -15,6 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class InstrumentPresenterFactory {
 public:
@@ -24,6 +25,7 @@ public:
     return std::make_unique<InstrumentPresenter>(view, Instrument());
   }
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTERFACTORY_H

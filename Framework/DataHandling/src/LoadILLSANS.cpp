@@ -254,7 +254,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     throw std::runtime_error(
         "The time bins have not the same dimension for all the 5 detectors!");
   }
-  const size_t numberOfHistograms = static_cast<size_t>(
+  const auto numberOfHistograms = static_cast<size_t>(
       dataRear.dim0() * dataRear.dim1() + dataRight.dim0() * dataRight.dim1() +
       dataLeft.dim0() * dataLeft.dim1() + dataDown.dim0() * dataDown.dim1() +
       dataUp.dim0() * dataUp.dim1());

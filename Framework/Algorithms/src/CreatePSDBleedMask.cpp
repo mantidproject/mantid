@@ -97,7 +97,7 @@ void CreatePSDBleedMask::exec() {
   // of the lowest detector in the tree is a "tube" and that all pixels in a
   // tube are consecutively ordered
   // with respect to spectra number
-  const int numSpectra =
+  const auto numSpectra =
       static_cast<int>(inputWorkspace->getNumberHistograms());
   // Keep track of a map of tubes to lists of indices
   using TubeIndex = std::map<Geometry::ComponentID, std::vector<int>>;
@@ -125,8 +125,7 @@ void CreatePSDBleedMask::exec() {
     boost::shared_ptr<const Geometry::IComponent> parent;
 
     if (!spectrumInfo.hasUniqueDetector(i)) {
-      const Geometry::DetectorGroup &group =
-          dynamic_cast<const Geometry::DetectorGroup &>(det);
+      const auto &group = dynamic_cast<const Geometry::DetectorGroup &>(det);
       parent = group.getDetectors().front()->getParent();
     } else {
       parent = det.getParent();
@@ -149,7 +148,7 @@ void CreatePSDBleedMask::exec() {
   }
 
   // Now process the tubes in parallel
-  const int numTubes = static_cast<int>(tubeMap.size());
+  const auto numTubes = static_cast<int>(tubeMap.size());
   g_log.information() << "Found " << numTubes << " tubes.\n";
   int numSpectraMasked(0), numTubesMasked(0);
   // Create a mask workspace for output
@@ -218,7 +217,7 @@ bool CreatePSDBleedMask::performBleedTest(
   /// is necessary when calculating the rate
   bool isRawCounts = !(inputWS->isDistribution());
 
-  const int numBins = static_cast<int>(inputWS->blocksize());
+  const auto numBins = static_cast<int>(inputWS->blocksize());
   std::vector<double> totalRate(numBins, 0.0);
   size_t top = 0, bot = bottomBegin;
   for (; top < topEnd; ++top, ++bot) {

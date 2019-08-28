@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettings.h"
 #include "IndirectInterface.h"
+#include "IndirectSettingsHelper.h"
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtIcons/Icon.h"
 
@@ -61,8 +62,8 @@ void IndirectSettings::connectIndirectInterface(
 
 std::map<std::string, QVariant> IndirectSettings::getSettings() const {
   std::map<std::string, QVariant> settings;
-  settings["RestrictInput"] = m_presenter->getSetting("restrict-input-by-name");
-  settings["ErrorBars"] = m_presenter->getSetting("plot-error-bars");
+  settings["RestrictInput"] = IndirectSettingsHelper::restrictInputDataByName();
+  settings["ErrorBars"] = IndirectSettingsHelper::externalPlotErrorBars();
   return settings;
 }
 

@@ -89,8 +89,7 @@ int Cylinder::setSurface(const std::string &Pstr)
 
   // Cylinders on X/Y/Z axis
   const std::size_t itemPt((item[1] == '/' && item.length() == 3) ? 2 : 1);
-  const std::size_t ptype =
-      static_cast<std::size_t>(tolower(item[itemPt]) - 'x');
+  const auto ptype = static_cast<std::size_t>(tolower(item[itemPt]) - 'x');
   if (ptype >= 3)
     return errAxis;
   std::vector<double> norm(3, 0.0);

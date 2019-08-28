@@ -111,7 +111,7 @@ class subplot(QtWidgets.QWidget):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
         self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName, projection ='mantid')
+            gridspec[number], label=subplotName, projection='mantid')
         self.plotObjects[subplotName].set_title(subplotName)
         self._context.addSubplot(subplotName, self.plotObjects[subplotName])
         self._update()

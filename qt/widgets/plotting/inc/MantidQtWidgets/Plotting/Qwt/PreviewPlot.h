@@ -110,6 +110,8 @@ public:
 
   QString getAxisType(int axisID);
 
+  void disableYAxisMenu();
+
 signals:
   /// Signals that the plot should be refreshed
   void needToReplot();
@@ -219,6 +221,8 @@ private:
   QMap<QString, QwtSymbol::Style> m_curveSymbol;
 
   friend class DisplayCurveFit;
+
+  static const QString g_yAxisMenuName;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

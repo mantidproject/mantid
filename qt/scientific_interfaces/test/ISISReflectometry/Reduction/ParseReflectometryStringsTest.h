@@ -9,7 +9,7 @@
 #include "../../../ISISReflectometry/Reduction/ParseReflectometryStrings.h"
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class ParseReflectometryStringsTest : public CxxTest::TestSuite {
 public:

@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IBatchPresenter;
 
@@ -51,6 +52,7 @@ public:
   virtual int percentComplete() const = 0;
   virtual void notifySearchComplete() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSPRESENTER_H */

@@ -179,7 +179,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
     std::vector<Kernel::V3D> truepos;
     getDetPositionsFromRaw(scalingFile, detID, truepos);
     //
-    int detectorCount = static_cast<int>(detID.size());
+    auto detectorCount = static_cast<int>(detID.size());
     if (detectorCount < 1) {
       g_log.error("Failed to read any detectors from RAW file");
       throw std::runtime_error("Failed to read any detectors from RAW file");

@@ -111,8 +111,8 @@ void NormaliseByPeakArea::exec() {
   const auto yspaceIn = convertInputToY();
   createOutputWorkspaces(yspaceIn);
 
-  const int64_t nhist = static_cast<int64_t>(yspaceIn->getNumberHistograms());
-  const int64_t nreports =
+  const auto nhist = static_cast<int64_t>(yspaceIn->getNumberHistograms());
+  const auto nreports =
       static_cast<int64_t>(yspaceIn->getNumberHistograms() +
                            2 * m_symmetrisedWS->getNumberHistograms() *
                                m_symmetrisedWS->blocksize());
@@ -345,7 +345,7 @@ void NormaliseByPeakArea::symmetriseYSpace() {
   // Symmetrise input data in Y-space
   const double dy = 0.1;
   const size_t npts(m_yspaceWS->blocksize());
-  const int64_t nhist =
+  const auto nhist =
       static_cast<int64_t>(m_symmetrisedWS->getNumberHistograms());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_symmetrisedWS))

@@ -82,8 +82,7 @@ void CorrectToFile::exec() {
     const bool divide = operation == "Divide";
     double Yfactor, correctError;
 
-    const int64_t nOutSpec =
-        static_cast<int64_t>(outputWS->getNumberHistograms());
+    const auto nOutSpec = static_cast<int64_t>(outputWS->getNumberHistograms());
     const size_t nbins = outputWS->blocksize();
     // Set the progress bar
     Progress prg(this, 0 /*LOAD_TIME*/, 1.0, nOutSpec);

@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 template <typename Container, typename Predicate>
 boost::optional<int> indexOf(Container const &container, Predicate pred) {
@@ -30,6 +31,7 @@ boost::optional<int> indexOfValue(Container const &container, ValueType value) {
   else
     return boost::none;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INDEXOF_H

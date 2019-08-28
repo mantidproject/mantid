@@ -59,7 +59,7 @@ to_dateandtime(const PyObject *datetime) {
     throw std::runtime_error("Expected datetime64");
   }
 
-  const PyDatetimeScalarObject *npdatetime =
+  const auto *npdatetime =
       reinterpret_cast<const PyDatetimeScalarObject *>(datetime);
   npy_datetime value = npdatetime->obval;
 

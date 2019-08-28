@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 OptionDefaults::OptionDefaults(
     Mantid::Geometry::Instrument_const_sptr instrument)
@@ -57,5 +58,6 @@ std::string OptionDefaults::getString(std::string const &propertyName,
                                       std::string const &parameterName) const {
   return getValue<std::string>(propertyName, parameterName);
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

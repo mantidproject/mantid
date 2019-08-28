@@ -93,6 +93,10 @@ public:
         eventWksp);
     checkWorkspaceMetadata(*eventWksp);
     checkWorkspaceEventData(*eventWksp);
+
+    /* Ensure ToF range is as expected */
+    TS_ASSERT_EQUALS(6.0, eventWksp->getTofMin());
+    TS_ASSERT_EQUALS(11.0, eventWksp->getTofMax());
   }
 
   void test_Multiple_Period_Event_Stream() {
@@ -517,7 +521,8 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", 0);
+    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", "",
+                                                     0);
   }
 
   void

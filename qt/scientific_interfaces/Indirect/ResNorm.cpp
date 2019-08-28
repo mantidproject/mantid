@@ -159,6 +159,8 @@ bool ResNorm::validate() {
  * Run the ResNorm v2 algorithm.
  */
 void ResNorm::run() {
+  m_uiForm.ppPlot->watchADS(false);
+
   auto const vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
 
@@ -194,6 +196,8 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     previewSpecChanged(m_previewSpec);
     // Copy and add sample logs to result workspaces
     processLogs();
+
+    m_uiForm.ppPlot->watchADS(true);
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
@@ -295,14 +299,17 @@ void ResNorm::loadSettings(const QSettings &settings) {
 void ResNorm::handleVanadiumInputReady(const QString &filename) {
   // Plot the vanadium
   try {
+    if (!m_uiForm.ppPlot->hasCurve("Resolution"))
+      m_uiForm.ppPlot->clear();
+
     m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
+    return;
   }
 
   QPair<double, double> res;
-  QPair<double, double> const range =
-      m_uiForm.ppPlot->getCurveRange("Vanadium");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
   if (vanWs)
@@ -340,6 +347,9 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
  */
 void ResNorm::handleResolutionInputReady(const QString &filename) {
   try {
+    if (!m_uiForm.ppPlot->hasCurve("Vanadium"))
+      m_uiForm.ppPlot->clear();
+
     m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
@@ -352,7 +362,11 @@ void ResNorm::handleResolutionInputReady(const QString &filename) {
  * @param min :: The new value of the lower guide
  */
 void ResNorm::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -361,7 +375,11 @@ void ResNorm::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void ResNorm::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -371,16 +389,21 @@ void ResNorm::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void ResNorm::updateProperties(QtProperty *prop, double val) {
-  UNUSED_ARG(val);
-
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
-  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(getDoubleManagerProperty("EMin"),
-                            getDoubleManagerProperty("EMax"));
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     bounds);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
+  if (prop == m_properties["EMin"]) {
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
+  } else if (prop == m_properties["EMax"]) {
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -391,11 +414,16 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
 void ResNorm::previewSpecChanged(int value) {
   m_previewSpec = value;
 
+  m_uiForm.ppPlot->clear();
+
   // Update vanadium plot
   if (m_uiForm.dsVanadium->isValid())
     try {
       m_uiForm.ppPlot->addSpectrum(
           "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+      m_uiForm.ppPlot->addSpectrum("Resolution",
+                                   m_uiForm.dsResolution->getCurrentDataName(),
+                                   0, Qt::blue);
     } catch (std::exception const &ex) {
       g_log.warning(ex.what());
     }
@@ -436,24 +464,26 @@ void ResNorm::previewSpecChanged(int value) {
 
 void ResNorm::plotCurrentPreview() {
 
-  QStringList plotWorkspaces;
+  std::vector<std::string> plotWorkspaces;
   std::vector<int> plotIndices;
 
   if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
-    plotWorkspaces << m_uiForm.dsVanadium->getCurrentDataName();
+    plotWorkspaces.emplace_back(
+        m_uiForm.dsVanadium->getCurrentDataName().toStdString());
     plotIndices.push_back(m_previewSpec);
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
-    plotWorkspaces << m_uiForm.dsResolution->getCurrentDataName();
+    plotWorkspaces.emplace_back(
+        m_uiForm.dsResolution->getCurrentDataName().toStdString());
     plotIndices.push_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
     std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
 
-    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName + "_scaled");
+    plotWorkspaces.emplace_back("__" + fitWsGroupName + "_scaled");
     plotIndices.push_back(0);
   }
-  plotMultipleSpectra(plotWorkspaces, plotIndices);
+  m_plotter->plotCorrespondingSpectra(plotWorkspaces, plotIndices);
 }
 
 void ResNorm::runClicked() {
@@ -488,10 +518,9 @@ void ResNorm::plotClicked() {
 
   QString const plotOptions = m_uiForm.cbPlot->currentText();
   if (plotOptions == "Intensity" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Intensity", "0");
   if (plotOptions == "Stretch" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
-
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Stretch", "0");
   setPlotResultIsPlotting(false);
 }
 

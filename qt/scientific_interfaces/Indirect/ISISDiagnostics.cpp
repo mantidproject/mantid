@@ -27,6 +27,8 @@ namespace CustomInterfaces {
 ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 
   m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppSlicePreview->setCanvasColour(QColor(240, 240, 240));
@@ -129,7 +131,6 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
           SLOT(pbRunFinished()));
   // Handles running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(this,
@@ -253,13 +254,8 @@ void ISISDiagnostics::algorithmComplete(bool error) {
     return;
   }
 
-  for (size_t i = 0; i < sliceOutputGroup->size(); i++) {
-    QString wsName =
-        QString::fromStdString(sliceOutputGroup->getItem(i)->getName());
-  }
   // Enable plot and save buttons
   m_uiForm.pbSave->setEnabled(true);
-  m_uiForm.pbPlot->setEnabled(true);
 
   // Update the preview plots
   sliceAlgDone(false);
@@ -317,37 +313,62 @@ void ISISDiagnostics::handleNewFile() {
     return;
   }
 
-  Mantid::API::MatrixWorkspace_sptr input =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              wsname.toStdString()));
+  auto const inputWorkspace =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          wsname.toStdString());
 
-  auto const &dataX = input->x(0);
-  QPair<double, double> const limits(dataX.front(), dataX.back());
-  int previewSpec =
+  auto const previewSpec =
       static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"])) -
       specMin;
 
   m_uiForm.ppRawPlot->clear();
-  m_uiForm.ppRawPlot->addSpectrum("Raw", input->clone(), previewSpec);
+  m_uiForm.ppRawPlot->addSpectrum("Raw", inputWorkspace->clone(), previewSpec);
 
-  QPair<double, double> const peakRange(
-      getInstrumentDetail("peak-start").toDouble(),
-      getInstrumentDetail("peak-end").toDouble());
-  QPair<double, double> const backgroundRange(
-      getInstrumentDetail("back-start").toDouble(),
-      getInstrumentDetail("back-end").toDouble());
+  auto const xLimits = getXRangeFromWorkspace(inputWorkspace);
+  setPeakRangeLimits(xLimits.first, xLimits.second);
+  setBackgroundRangeLimits(xLimits.first, xLimits.second);
 
-  setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SlicePeak"),
-                   m_properties["PeakStart"], m_properties["PeakEnd"], limits,
-                   peakRange);
-
-  setRangeSelector(m_uiForm.ppRawPlot->getRangeSelector("SliceBackground"),
-                   m_properties["BackgroundStart"],
-                   m_properties["BackgroundEnd"], limits, backgroundRange);
+  setPeakRange(getInstrumentDetail("peak-start").toDouble(),
+               getInstrumentDetail("peak-end").toDouble());
+  setBackgroundRange(getInstrumentDetail("back-start").toDouble(),
+                     getInstrumentDetail("back-end").toDouble());
 
   m_uiForm.ppRawPlot->resizeX();
   m_uiForm.ppRawPlot->replot();
+}
+
+void ISISDiagnostics::setPeakRangeLimits(double peakMin, double peakMax) {
+  auto slicePeak = m_uiForm.ppRawPlot->getRangeSelector("SlicePeak");
+  setRangeLimits(slicePeak, peakMin, peakMax, "PeakStart", "PeakEnd");
+}
+
+void ISISDiagnostics::setBackgroundRangeLimits(double backgroundMin,
+                                               double backgroundMax) {
+  auto sliceBackground =
+      m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
+  setRangeLimits(sliceBackground, backgroundMin, backgroundMax,
+                 "BackgroundStart", "BackgroundEnd");
+}
+
+void ISISDiagnostics::setRangeLimits(
+    MantidWidgets::RangeSelector *rangeSelector, double minimum, double maximum,
+    QString const &minPropertyName, QString const &maxPropertyName) {
+  setPlotPropertyRange(rangeSelector, m_properties[minPropertyName],
+                       m_properties[maxPropertyName],
+                       qMakePair(minimum, maximum));
+}
+
+void ISISDiagnostics::setPeakRange(double minimum, double maximum) {
+  auto slicePeak = m_uiForm.ppRawPlot->getRangeSelector("SlicePeak");
+  setRangeSelector(slicePeak, m_properties["PeakStart"],
+                   m_properties["PeakEnd"], qMakePair(minimum, maximum));
+}
+
+void ISISDiagnostics::setBackgroundRange(double minimum, double maximum) {
+  auto sliceBackground =
+      m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
+  setRangeSelector(sliceBackground, m_properties["BackgroundStart"],
+                   m_properties["BackgroundEnd"], qMakePair(minimum, maximum));
 }
 
 /**
@@ -372,6 +393,9 @@ void ISISDiagnostics::rangeSelectorDropped(double min, double max) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(doublePropertyChanged(QtProperty *, double)));
+
   if (from == m_uiForm.ppRawPlot->getRangeSelector("SlicePeak")) {
     m_dblManager->setValue(m_properties["PeakStart"], min);
     m_dblManager->setValue(m_properties["PeakEnd"], max);
@@ -379,6 +403,9 @@ void ISISDiagnostics::rangeSelectorDropped(double min, double max) {
     m_dblManager->setValue(m_properties["BackgroundStart"], min);
     m_dblManager->setValue(m_properties["BackgroundEnd"], max);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(doublePropertyChanged(QtProperty *, double)));
 }
 
 /**
@@ -392,15 +419,24 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
 
-  if (prop == m_properties["PeakStart"])
-    peakRangeSelector->setMinimum(val);
-  else if (prop == m_properties["PeakEnd"])
-    peakRangeSelector->setMaximum(val);
-  else if (prop == m_properties["BackgroundStart"])
-    backgroundRangeSelector->setMinimum(val);
-  else if (prop == m_properties["BackgroundEnd"])
-    backgroundRangeSelector->setMaximum(val);
-  else if (prop == m_properties["PreviewSpec"])
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(doublePropertyChanged(QtProperty *, double)));
+
+  if (prop == m_properties["PeakStart"]) {
+    setRangeSelectorMin(m_properties["PeakStart"], m_properties["PeakEnd"],
+                        peakRangeSelector, val);
+  } else if (prop == m_properties["PeakEnd"]) {
+    setRangeSelectorMax(m_properties["PeakStart"], m_properties["PeakEnd"],
+                        peakRangeSelector, val);
+  } else if (prop == m_properties["BackgroundStart"]) {
+    setRangeSelectorMin(m_properties["BackgroundStart"],
+                        m_properties["BackgroundEnd"], backgroundRangeSelector,
+                        val);
+  } else if (prop == m_properties["BackgroundEnd"]) {
+    setRangeSelectorMax(m_properties["BackgroundStart"],
+                        m_properties["BackgroundEnd"], backgroundRangeSelector,
+                        val);
+  } else if (prop == m_properties["PreviewSpec"])
     handleNewFile();
   else if (prop == m_properties["SpecMin"]) {
     m_dblManager->setMinimum(m_properties["SpecMax"], val + 1);
@@ -409,6 +445,9 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
     m_dblManager->setMaximum(m_properties["SpecMin"], val - 1);
     m_dblManager->setMaximum(m_properties["PreviewSpec"], val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(doublePropertyChanged(QtProperty *, double)));
 }
 
 /**
@@ -444,6 +483,8 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
 
   // Set workspace for Python export as the first result workspace
   m_pythonExportWsName = sliceWs->getName();
+
+  setOutputPlotOptionsWorkspaces(sliceOutputGroup->getNames());
 
   // Plot result spectrum
   m_uiForm.ppSlicePreview->clear();
@@ -502,16 +543,6 @@ void ISISDiagnostics::pbRunFinished() {
 void ISISDiagnostics::runClicked() { runTab(); }
 
 /**
- * Handles mantid plotting
- */
-void ISISDiagnostics::plotClicked() {
-  setPlotIsPlotting(true);
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-  setPlotIsPlotting(false);
-}
-
-/**
  * Handles saving workspace
  */
 void ISISDiagnostics::saveClicked() {
@@ -524,19 +555,8 @@ void ISISDiagnostics::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void ISISDiagnostics::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
 void ISISDiagnostics::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
-}
-
-void ISISDiagnostics::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
 }
 
 void ISISDiagnostics::updateRunButton(bool enabled,
@@ -547,14 +567,7 @@ void ISISDiagnostics::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void ISISDiagnostics::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces

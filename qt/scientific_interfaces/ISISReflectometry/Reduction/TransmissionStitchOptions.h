@@ -13,6 +13,7 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 // For now just pass rebin params as a string but in future we may want to
 // expand this
@@ -46,6 +47,7 @@ operator==(TransmissionStitchOptions const &lhs,
 MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator!=(TransmissionStitchOptions const &lhs,
            TransmissionStitchOptions const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_TRANSMISSIONSTITCHOPTIONS_H_

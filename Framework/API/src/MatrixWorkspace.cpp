@@ -381,7 +381,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
       // The detector ID
       const detid_t detId = *it;
       // By default: Spectrum number = index +  1
-      const specnum_t specNo = specnum_t(index + 1);
+      const auto specNo = specnum_t(index + 1);
 
       if (index < this->getNumberHistograms()) {
         auto &spec = getSpectrum(index);
@@ -402,7 +402,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -426,7 +426,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  */
 std::vector<size_t>
 MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -2216,7 +2216,7 @@ template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -2233,7 +2233,7 @@ template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

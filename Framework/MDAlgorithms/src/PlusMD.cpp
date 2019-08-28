@@ -50,7 +50,7 @@ void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   // TODO:    OMP
   MDBoxIterator<MDE, nd> it2(box2, 1000, true);
   do {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(it2.getBox());
+    auto *box = dynamic_cast<MDBox<MDE, nd> *>(it2.getBox());
     if (box && !box->getIsMasked()) {
       // Copy the events from WS2 and add them into WS1
       const std::vector<MDE> &events = box->getConstEvents();

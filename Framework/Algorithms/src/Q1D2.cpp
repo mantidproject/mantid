@@ -164,7 +164,7 @@ void Q1D2::exec() {
   // the averaged Q resolution.
   HistogramData::HistogramDx qResolutionOut(YOut.size(), 0.0);
 
-  const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
+  const auto numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
   const auto &spectrumInfo = m_dataWS->spectrumInfo();

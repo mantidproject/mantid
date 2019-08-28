@@ -189,7 +189,7 @@ void ConvertToMDMinMaxGlobal::exec() {
                                PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
       if (GeometryMode == "Direct") {
-        const double Ei = ws->run().getPropertyValueAsType<double>("Ei");
+        const auto Ei = ws->run().getPropertyValueAsType<double>("Ei");
         qmax =
             std::sqrt(energyToK * Ei) + std::sqrt(energyToK * (Ei - deltaEmin));
       } else // indirect
@@ -259,8 +259,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       throw std::invalid_argument("Property not found. Please see error log.");
     }
     Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
-    TimeSeriesProperty<double> *p =
-        dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
+    auto *p = dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
     if (p) {
       MinValues.push_back(p->getStatistics().minimum);
       MaxValues.push_back(p->getStatistics().maximum);

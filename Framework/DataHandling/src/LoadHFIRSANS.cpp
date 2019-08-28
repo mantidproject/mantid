@@ -354,10 +354,9 @@ void LoadHFIRSANS::createWorkspace() {
       Kernel::UnitFactory::Instance().create("Wavelength");
   m_workspace->setYUnit("Counts");
 
-  double monitorCounts =
+  auto monitorCounts =
       boost::lexical_cast<double>(m_metadata["Counters/monitor"]);
-  double countingTime =
-      boost::lexical_cast<double>(m_metadata["Counters/time"]);
+  auto countingTime = boost::lexical_cast<double>(m_metadata["Counters/time"]);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -449,7 +448,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
                 << "\n";
 
   // The maximum value for the trapDiametersInUse is the trap in use
-  std::vector<double>::iterator trapDiameterInUseIt =
+  auto trapDiameterInUseIt =
       std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
   if (trapDiameterInUseIt != trapDiametersInUse.end())
     trapDiameterInUse = *trapDiameterInUseIt;
@@ -488,7 +487,7 @@ void LoadHFIRSANS::storeMetaDataIntoWS() {
       "timer", boost::lexical_cast<double>(m_metadata["Counters/time"]), "sec");
 
   // XML 1.03: sample thickness is now in meters
-  double sample_thickness =
+  auto sample_thickness =
       boost::lexical_cast<double>(m_metadata["Header/Sample_Thickness"]);
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
     g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: "
@@ -569,14 +568,14 @@ void LoadHFIRSANS::setDetectorDistance() {
   } else if (m_metadata.find("Motor_Positions/sample_det_dist") !=
              m_metadata.end()) {
     // Old Format
-    double sampleDetectorDistancePartial = boost::lexical_cast<double>(
+    auto sampleDetectorDistancePartial = boost::lexical_cast<double>(
         m_metadata["Motor_Positions/sample_det_dist"]);
     sampleDetectorDistancePartial *= 1000.0;
 
-    double sampleDetectorDistanceOffset =
+    auto sampleDetectorDistanceOffset =
         boost::lexical_cast<double>(m_metadata["Header/tank_internal_offset"]);
 
-    double sampleDetectorDistanceWindow =
+    auto sampleDetectorDistanceWindow =
         boost::lexical_cast<double>(m_metadata["Header/sample_to_flange"]);
 
     m_sampleDetectorDistance = sampleDetectorDistancePartial +
@@ -601,7 +600,7 @@ void LoadHFIRSANS::setDetectorDistance() {
 void LoadHFIRSANS::moveDetector() {
 
   setDetectorDistance();
-  double translationDistance =
+  auto translationDistance =
       boost::lexical_cast<double>(m_metadata["Motor_Positions/detector_trans"]);
   g_log.debug() << "Detector Translation = " << translationDistance << " mm."
                 << '\n';
@@ -656,7 +655,7 @@ LoadHFIRSANS::getInstrumentDoubleParameter(const std::string &parameter) {
  **/
 double LoadHFIRSANS::getSourceToSampleDistance() {
   // First let's try to get source_distance first:
-  double sourceToSampleDistance =
+  auto sourceToSampleDistance =
       boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
   // XML 1.03: source distance is now in meters
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
@@ -680,7 +679,7 @@ double LoadHFIRSANS::getSourceToSampleDistance() {
         boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
     g_log.debug() << "Number of guides used = " << nGuides
                   << " --> Raw SSD = " << sourceToSampleDistance << "mm.\n";
-    double sourceToSampleDistanceOffset = boost::lexical_cast<double>(
+    auto sourceToSampleDistanceOffset = boost::lexical_cast<double>(
         m_metadata["Header/sample_aperture_to_flange"]);
     g_log.debug() << "SSD offset  = " << sourceToSampleDistanceOffset
                   << "mm.\n";
@@ -699,9 +698,9 @@ void LoadHFIRSANS::setBeamDiameter() {
   double sourceToSampleDistance = getSourceToSampleDistance();
   addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
                          "mm");
-  const double sampleAperture =
+  const auto sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
-  const double sourceAperture =
+  const auto sourceAperture =
       boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
   g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance="
                 << m_sampleDetectorDistance

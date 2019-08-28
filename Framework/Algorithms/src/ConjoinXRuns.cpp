@@ -212,7 +212,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
         // try if numeric time series, then the size must match to the
         // blocksize
-        const int blocksize = static_cast<int>(ws->y(0).size());
+        const auto blocksize = static_cast<int>(ws->y(0).size());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
@@ -308,7 +308,7 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> errors;
   std::vector<double> axis;
   std::vector<double> xerrors;
-  const size_t index = static_cast<size_t>(wsIndex);
+  const auto index = static_cast<size_t>(wsIndex);
   const auto ySize = m_outWS->y(index).size();
   spectrum.reserve(ySize);
   errors.reserve(ySize);

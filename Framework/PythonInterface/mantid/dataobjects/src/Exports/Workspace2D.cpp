@@ -18,10 +18,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include "MantidTypes/SpectrumDefinition.h"
 

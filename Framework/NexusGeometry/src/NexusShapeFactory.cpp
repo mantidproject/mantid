@@ -90,6 +90,17 @@ createTriangularFaces(const std::vector<uint32_t> &faceIndices,
 }
 } // namespace
 
+DLLExport std::unique_ptr<const Geometry::IObject>
+createCylinder(const std::vector<uint32_t> &cylinderPoints,
+               const std::vector<Eigen::Vector3d> &vertices) {
+  // Read points into matrix, sorted by cPoints ordering
+  Eigen::Matrix<double, 3, 3> vSorted;
+  for (int i = 0; i < 3; ++i) {
+    vSorted.col(cylinderPoints[i]) = vertices[i];
+  }
+  return createCylinder(vSorted);
+}
+
 /** Refer to NX_Cylinder definition here
  * http://download.nexusformat.org/doc/html/classes/base_classes/NXcylindrical_geometry.html?highlight=nxcylindrical_geometry
  * @param pointsDef Eigen matrix which contains which contains vertices A

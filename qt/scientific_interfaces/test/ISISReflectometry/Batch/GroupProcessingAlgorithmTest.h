@@ -6,14 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHMTEST_H_
 #define MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHMTEST_H_
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/GroupProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 
 class GroupProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:

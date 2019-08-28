@@ -8,6 +8,7 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 
 #include "IndirectInstrumentConfig.h"
+#include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -48,11 +49,15 @@ public:
                            QObject *parent = nullptr);
   ~IndirectDataReductionTab() override;
 
+  /// Set the presenter for the output plotting options
+  void setOutputPlotOptionsPresenter(
+      std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
+  /// Set the active workspaces used in the plotting options
+  void setOutputPlotOptionsWorkspaces(
+      std::vector<std::string> const &outputWorkspaces);
+
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
-
-  /// Allows the user to turn the plotting of error bars off and on
-  void setPlotErrorBars(bool errorBars);
 
 public slots:
   void runTab();
@@ -91,6 +96,7 @@ private slots:
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
 
+  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
   IndirectDataReduction *m_idrUI;
   bool m_tabRunning;
 };

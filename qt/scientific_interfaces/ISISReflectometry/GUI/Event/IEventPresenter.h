@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IEventPresenter
 
@@ -30,6 +31,7 @@ public:
   virtual void autoreductionResumed() = 0;
   virtual Slicing const &slicing() const = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */

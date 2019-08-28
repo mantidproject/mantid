@@ -12,6 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IMainWindowPresenter
 
@@ -25,8 +26,11 @@ public:
   virtual bool isAnyBatchAutoreducing() const = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
+  virtual void reductionResumed() = 0;
+  virtual void reductionPaused() = 0;
   virtual ~IMainWindowPresenter() = default;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IMAINWINDOWPRESENTER_H */

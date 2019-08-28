@@ -101,7 +101,7 @@ void FFT::exec() {
   const bool isComplex = iImag != EMPTY_INT();
 
   const auto &xPoints = m_inWS->points(iReal);
-  const int nPoints = static_cast<int>(xPoints.size());
+  const auto nPoints = static_cast<int>(xPoints.size());
 
   boost::shared_array<double> data(new double[2 * nPoints]);
   const std::string transform = getProperty("Transform");
@@ -359,7 +359,7 @@ std::map<std::string, std::string> FFT::validateInputs() {
     }
 
     // check real, imaginary spectrum numbers and workspace sizes
-    int nHist = static_cast<int>(inWS->getNumberHistograms());
+    auto nHist = static_cast<int>(inWS->getNumberHistograms());
     if (iReal >= nHist) {
       errors["Real"] = "Real out of range";
     }

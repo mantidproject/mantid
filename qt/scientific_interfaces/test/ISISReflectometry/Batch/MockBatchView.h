@@ -12,6 +12,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MockBatchView : public IBatchView {
 public:
@@ -27,6 +28,7 @@ public:
   MOCK_METHOD0(executeAlgorithmQueue, void());
   MOCK_METHOD0(cancelAlgorithmQueue, void());
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE

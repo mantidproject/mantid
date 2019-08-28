@@ -81,9 +81,9 @@ void RebinByTimeBase::exec() {
   std::vector<double> rebinningParams;
 
   // workspace independent determination of length
-  const int histnumber = static_cast<int>(inWS->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inWS->getNumberHistograms());
 
-  const uint64_t nanoSecondsInASecond = static_cast<uint64_t>(1e9);
+  const auto nanoSecondsInASecond = static_cast<uint64_t>(1e9);
   const DateAndTime runStartTime = inWS->run().startTime();
   // The validator only passes parameters with size 1, or 3xn.
 

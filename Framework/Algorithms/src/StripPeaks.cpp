@@ -267,7 +267,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
 
     // Get central bin values using points
     auto binCenters = outputWS->points(peakslist->getRef<int>("spectrum", i));
-    const int spectrumLength = static_cast<int>(Y.size());
+    const auto spectrumLength = static_cast<int>(Y.size());
     for (int j = 0; j < spectrumLength; ++j) {
       double x = binCenters[j];
       // Skip if not anywhere near this peak

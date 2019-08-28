@@ -73,7 +73,7 @@ void SumRowColumn::exec() {
   }
 
   // This is the dimension if all rows/columns are included
-  const int dim = static_cast<int>(std::sqrt(static_cast<double>(numSpec)));
+  const auto dim = static_cast<int>(std::sqrt(static_cast<double>(numSpec)));
 
   // Check the column range properties
   int start = getProperty("HOverVMin");

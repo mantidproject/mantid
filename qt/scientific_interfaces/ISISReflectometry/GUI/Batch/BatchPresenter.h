@@ -22,6 +22,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class IBatchView;
 
@@ -65,11 +66,13 @@ public:
   void notifySettingsChanged() override;
   void anyBatchAutoreductionResumed() override;
   void anyBatchAutoreductionPaused() override;
+  void reductionPaused() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   bool isAnyBatchAutoreducing() const override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
+  std::string instrumentName() const override;
   int percentComplete() const override;
   AlgorithmRuntimeProps rowProcessingProperties() const override;
 
@@ -85,7 +88,6 @@ private:
   void resumeReduction();
   void reductionResumed();
   void pauseReduction();
-  void reductionPaused();
   void resumeAutoreduction();
   void autoreductionResumed();
   void pauseAutoreduction();
@@ -104,9 +106,14 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
+
 protected:
   std::unique_ptr<IBatchJobRunner> m_jobRunner;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H */

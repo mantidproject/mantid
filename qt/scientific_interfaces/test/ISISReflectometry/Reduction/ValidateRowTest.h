@@ -10,7 +10,7 @@
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class ValidateRowTest : public CxxTest::TestSuite {
 public:

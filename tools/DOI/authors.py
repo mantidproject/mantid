@@ -196,6 +196,7 @@ _translations = {
     'Michael Turner'          : 'Turner, Michael',
     'Bhuvan Bezawada'         : 'Bezawada, Bhuvan',
     'Andre Bamidele'          : 'Bamidele, Andre',
+    'Ayomide Bamidele'        : 'Bamidele, Andre',
     'Robert Applin'           : 'Applin, Robert',
     'robertapplin'            : 'Applin, Robert',
     'Rob'                     : 'Applin, Robert',
@@ -204,7 +205,13 @@ _translations = {
     'Sam Jenkins'             : 'Jenkins, Sam',
     'Samuel Jones'            : 'Jones, Sam',
     'Harry Saunders'          : 'Saunders, Harry',
-    'Geish Miladinovic'       : 'Miladinovic, Geish'
+    'Geish Miladinovic'       : 'Miladinovic, Geish',
+    'Harrietbrown'            : 'Brown, Harriet',
+    'Harriet Brown'           : 'Brown, Harriet',
+    'Adam J. Jackson'         : 'Jackson, Adam J.',
+    'LolloB'                  : 'Basso, Lorenzo',
+    'Lorenzo Basso'           : 'Basso, Lorenzo',
+    'SOKOLOVA'                : 'Sokolova, Anna'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

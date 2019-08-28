@@ -51,7 +51,7 @@ public:
     alg->setProperty("OutputWorkspace", "ws1");
     alg->execute();
 
-    MantidQt::CustomInterfaces::Plotter plotter;
+    MantidQt::CustomInterfaces::ISISReflectometry::Plotter plotter;
     plotter.reflectometryPlot({"ws1"});
   }
 };

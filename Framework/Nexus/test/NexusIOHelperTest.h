@@ -157,6 +157,21 @@ public:
     file.closeGroup();
     file.closeGroup();
   }
+
+  void test_nexus_io_helper_readNexusValue() {
+    const std::string filename =
+        Mantid::API::FileFinder::Instance().getFullPath("LARMOR00003368.nxs");
+    ::NeXus::File file(filename);
+    file.openGroup("raw_data_1", "NXentry");
+    file.openGroup("monitor_1", "NXmonitor");
+    auto monitor_number = Nioh::readNexusValue<int32_t>(file, "monitor_number");
+    TS_ASSERT_EQUALS(monitor_number, 1);
+    TS_ASSERT_THROWS(Nioh::readNexusValue<int16_t>(file, "monitor_number"),
+                     std::runtime_error &); // Downcasting forbidden
+    TS_ASSERT_THROWS_NOTHING(
+        Nioh::readNexusValue<int64_t>(file, "monitor_number")); // Larger OK
+    file.close();
+  }
 };
 
 #endif /*NEXUSIOHELPERTEST_H_*/

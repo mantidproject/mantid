@@ -10,6 +10,7 @@
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 enum class AnalysisMode { PointDetector, MultiDetector };
 
 inline AnalysisMode analysisModeFromString(std::string const &analysisMode) {
@@ -30,6 +31,7 @@ inline std::string analysisModeToString(AnalysisMode analysisMode) {
   }
   throw std::invalid_argument("Unexpected analysis mode");
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_ANALYSISMODE_H_

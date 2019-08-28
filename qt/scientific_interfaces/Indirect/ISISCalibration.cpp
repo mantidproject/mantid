@@ -16,6 +16,7 @@
 #include <stdexcept>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");
@@ -42,6 +43,8 @@ namespace CustomInterfaces {
 ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
     : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraBin));
 
   m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
@@ -183,7 +186,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   connect(this,
           SIGNAL(updateRunButton(bool, std::string const &, QString const &,
@@ -337,8 +339,18 @@ void ISISCalibration::run() {
  */
 void ISISCalibration::algorithmComplete(bool error) {
   if (!error) {
+    std::vector<std::string> outputWorkspaces{
+        m_outputCalibrationName.toStdString()};
+    if (m_uiForm.ckCreateResolution->isChecked() &&
+        !m_outputResolutionName.isEmpty()) {
+      outputWorkspaces.emplace_back(m_outputResolutionName.toStdString());
+      if (m_uiForm.ckSmoothResolution->isChecked())
+        outputWorkspaces.emplace_back(m_outputResolutionName.toStdString() +
+                                      "_pre_smooth");
+    }
+    setOutputPlotOptionsWorkspaces(outputWorkspaces);
+
     m_uiForm.pbSave->setEnabled(true);
-    m_uiForm.pbPlot->setEnabled(true);
   }
 }
 
@@ -561,6 +573,8 @@ void ISISCalibration::calMinChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(calUpdateRS(QtProperty *, double)));
   if (from == calPeak) {
     m_dblManager->setValue(m_properties["CalPeakMin"], val);
   } else if (from == calBackground) {
@@ -570,6 +584,8 @@ void ISISCalibration::calMinChanged(double val) {
   } else if (from == resBackground) {
     m_dblManager->setValue(m_properties["ResStart"], val);
   }
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(calUpdateRS(QtProperty *, double)));
 }
 
 /**
@@ -588,6 +604,8 @@ void ISISCalibration::calMaxChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(calUpdateRS(QtProperty *, double)));
   if (from == calPeak) {
     m_dblManager->setValue(m_properties["CalPeakMax"], val);
   } else if (from == calBackground) {
@@ -597,6 +615,8 @@ void ISISCalibration::calMaxChanged(double val) {
   } else if (from == resBackground) {
     m_dblManager->setValue(m_properties["ResEnd"], val);
   }
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(calUpdateRS(QtProperty *, double)));
 }
 
 /**
@@ -612,22 +632,37 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
   auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
   auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
 
-  if (prop == m_properties["CalPeakMin"])
-    calPeak->setMinimum(val);
-  else if (prop == m_properties["CalPeakMax"])
-    calPeak->setMaximum(val);
-  else if (prop == m_properties["CalBackMin"])
-    calBackground->setMinimum(val);
-  else if (prop == m_properties["CalBackMax"])
-    calBackground->setMaximum(val);
-  else if (prop == m_properties["ResStart"])
-    resBackground->setMinimum(val);
-  else if (prop == m_properties["ResEnd"])
-    resBackground->setMaximum(val);
-  else if (prop == m_properties["ResELow"])
-    resPeak->setMinimum(val);
-  else if (prop == m_properties["ResEHigh"])
-    resPeak->setMaximum(val);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(calUpdateRS(QtProperty *, double)));
+
+  if (prop == m_properties["CalPeakMin"]) {
+    setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalPeakMax"],
+                        calPeak, val);
+  } else if (prop == m_properties["CalPeakMax"]) {
+    setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalPeakMax"],
+                        calPeak, val);
+  } else if (prop == m_properties["CalBackMin"]) {
+    setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalBackMax"],
+                        calBackground, val);
+  } else if (prop == m_properties["CalBackMax"]) {
+    setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalBackMax"],
+                        calBackground, val);
+  } else if (prop == m_properties["ResStart"]) {
+    setRangeSelectorMin(m_properties["ResStart"], m_properties["ResEnd"],
+                        resBackground, val);
+  } else if (prop == m_properties["ResEnd"]) {
+    setRangeSelectorMax(m_properties["ResStart"], m_properties["ResEnd"],
+                        resBackground, val);
+  } else if (prop == m_properties["ResELow"]) {
+    setRangeSelectorMin(m_properties["ResELow"], m_properties["ResEHigh"],
+                        resPeak, val);
+  } else if (prop == m_properties["ResEHigh"]) {
+    setRangeSelectorMax(m_properties["ResELow"], m_properties["ResEHigh"],
+                        resPeak, val);
+  }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(calUpdateRS(QtProperty *, double)));
 }
 
 /**
@@ -693,26 +728,6 @@ void ISISCalibration::saveClicked() {
  * Handle when Run is clicked
  */
 void ISISCalibration::runClicked() { runTab(); }
-
-/**
- * Handle mantid plotting
- */
-void ISISCalibration::plotClicked() {
-  setPlotIsPlotting(true);
-
-  plotTimeBin(m_outputCalibrationName);
-  checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
-  QStringList plotWorkspaces;
-  if (m_uiForm.ckCreateResolution->isChecked() &&
-      !m_outputResolutionName.isEmpty()) {
-    checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
-    plotWorkspaces.append(m_outputResolutionName);
-    if (m_uiForm.ckSmoothResolution->isChecked())
-      plotWorkspaces.append(m_outputResolutionName + "_pre_smooth");
-  }
-  plotSpectrum(plotWorkspaces);
-  setPlotIsPlotting(false);
-}
 
 void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
   auto smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
@@ -795,19 +810,8 @@ void ISISCalibration::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void ISISCalibration::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-}
-
 void ISISCalibration::setSaveEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
-}
-
-void ISISCalibration::setOutputButtonsEnabled(
-    std::string const &enableOutputButtons) {
-  bool enable = enableOutputButtons == "enable" ? true : false;
-  setPlotEnabled(enable);
-  setSaveEnabled(enable);
 }
 
 void ISISCalibration::updateRunButton(bool enabled,
@@ -818,14 +822,7 @@ void ISISCalibration::updateRunButton(bool enabled,
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);
   if (enableOutputButtons != "unchanged")
-    setOutputButtonsEnabled(enableOutputButtons);
-}
-
-void ISISCalibration::setPlotIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Result");
-  setPlotEnabled(!plotting);
-  setRunEnabled(!plotting);
-  setSaveEnabled(!plotting);
+    setSaveEnabled(enableOutputButtons == "enable");
 }
 
 } // namespace CustomInterfaces

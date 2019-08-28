@@ -18,6 +18,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class ExperimentValidationErrors {
 public:
@@ -103,6 +104,7 @@ private:
   Experiment m_model;
   double m_thetaTolerance;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_EXPERIMENTPRESENTER_H

@@ -15,7 +15,7 @@
 using namespace MantidQt::API;
 
 ManageUserDirectories::ManageUserDirectories(QWidget *parent)
-    : QDialog(parent) {
+    : MantidDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
   m_uiForm.setupUi(this);
   initLayout();
@@ -212,7 +212,7 @@ void ManageUserDirectories::addDirectory() {
     input = m_uiForm.leDirectoryPathPython;
   }
 
-  if (input->text() != "") {
+  if (input && input->text() != "") {
     listWidget()->addItem(input->text());
     input->clear();
   }

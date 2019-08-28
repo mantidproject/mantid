@@ -63,7 +63,7 @@ const std::string EXPERIMENT_ID_PROPERTY("experiment_identifier");
 // Helper function to get a DateAndTime value from an ADARA packet header
 Mantid::Types::Core::DateAndTime
 timeFromPacket(const ADARA::PacketHeader &hdr) {
-  const uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
+  const auto seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
   const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
@@ -227,7 +227,7 @@ void SNSLiveEventDataListener::run() {
     // to update the StartLiveListener GUI, though.
 
     Poco::Timestamp now;
-    uint32_t now_usec =
+    auto now_usec =
         static_cast<uint32_t>(now.epochMicroseconds() - now.epochTime());
     helloPkt[2] =
         static_cast<uint32_t>(now.epochTime() - ADARA::EPICS_EPOCH_OFFSET);

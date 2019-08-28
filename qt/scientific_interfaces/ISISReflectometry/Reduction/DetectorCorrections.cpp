@@ -7,6 +7,7 @@
 #include "DetectorCorrections.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 DetectorCorrections::DetectorCorrections(bool correctPositions,
                                          DetectorCorrectionType correctionType)
@@ -30,5 +31,6 @@ bool operator==(DetectorCorrections const &lhs,
   return lhs.correctPositions() == rhs.correctPositions() &&
          lhs.correctionType() == rhs.correctionType();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

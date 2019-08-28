@@ -66,7 +66,7 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
   if (helper) {
-    int domainSize = static_cast<int>(domain.size());
+    auto domainSize = static_cast<int>(domain.size());
 
     double fwhm = m_profileFunction->fwhm();
     double centre = m_profileFunction->centre();
@@ -87,7 +87,7 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
 
     std::vector<double> localOut(dWidthN, 0.0);
 
-    size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
+    auto baseOffset = static_cast<size_t>(pos + helper->minTOFN);
 
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
       double newD = centre + helper->dFractionalOffsets[i];
@@ -141,7 +141,7 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
       }
     }
 
-    size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
+    auto baseOffset = static_cast<size_t>(pos + helper->minTOFN);
 
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
       double newD = centre + helper->dFractionalOffsets[i];
@@ -168,7 +168,7 @@ void PoldiSpectrumDomainFunction::poldiFunction1D(
   m_profileFunction->functionLocal(localValues.getPointerToCalculated(0),
                                    domain.getPointerAt(0), domain.size());
 
-  double chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
+  auto chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
 
   for (auto index : indices) {
     std::vector<double> factors(domain.size());

@@ -14,6 +14,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 class MockRunsTableView : public IRunsTableView {
 public:
@@ -38,6 +39,7 @@ public:
   MOCK_METHOD1(setProcessButtonEnabled, void(bool));
   MOCK_METHOD2(setActionEnabled, void(Action, bool));
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE
