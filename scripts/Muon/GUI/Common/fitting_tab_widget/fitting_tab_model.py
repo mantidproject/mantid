@@ -196,26 +196,33 @@ class FittingTabModel(object):
             input_workspace, output_workspace_name, global_parameters)
 
     def change_plot_guess(self, plot_guess, parameter_dict):
-        fit_function = parameter_dict['Function']
-        data_ws_name = parameter_dict['InputWorkspace']
-        guess_ws_name = '{}_guess'.format(data_ws_name)
-        if fit_function is None or data_ws_name == '':
+        try:
+            fit_function = parameter_dict['Function']
+            data_ws_name = parameter_dict['InputWorkspace']
+        except KeyError:
             return
+        guess_ws_name = '{}_guess'.format(data_ws_name)
 
-        # evaluate the current function on the workspace
-        if plot_guess:
-            try:
-                EvaluateFunction(InputWorkspace=data_ws_name,
-                                 Function=fit_function,
-                                 StartX=parameter_dict['StartX'],
-                                 EndX=parameter_dict['EndX'],
-                                 OutputWorkspace=guess_ws_name)
-            except RuntimeError:
-                mantid.logger.error('Could not evaluate the function.')
-                return
+        # Handle case of function removed
+        if fit_function is None and plot_guess:
+            self.context.fitting_context.notify_plot_guess_changed(plot_guess, None)
+        elif fit_function is None or data_ws_name == '':
+            return
+        else:
+            # evaluate the current function on the workspace
+            if plot_guess:
+                try:
+                    EvaluateFunction(InputWorkspace=data_ws_name,
+                                     Function=fit_function,
+                                     StartX=parameter_dict['StartX'],
+                                     EndX=parameter_dict['EndX'],
+                                     OutputWorkspace=guess_ws_name)
+                except RuntimeError:
+                    mantid.logger.error('Could not evaluate the function.')
+                    return
 
-        if AnalysisDataService.doesExist(guess_ws_name):
-            self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
+            if AnalysisDataService.doesExist(guess_ws_name):
+                self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
 
     def calculate_tf_function(self, algorithm_parameters):
         return ConvertFitFunctionForMuonTFAsymmetry(StoreInADS=False, **algorithm_parameters)
