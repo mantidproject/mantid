@@ -890,6 +890,7 @@ void saveInstrument(
 
   // save NXdetectors
   for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
+    // TODO there is a bug in isSaveableBank that will need fixing. Support for instruments with eight-packs not possible at present
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
       if (reporter != nullptr)
         reporter->report();
