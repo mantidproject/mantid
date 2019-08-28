@@ -20,6 +20,8 @@ Improvements
 
 - Changing the axis' scale, by right-clicking on a figure with multiple plots, changes only the plot that was clicked on.
 
+- If a spectrum has a label, this will now be used instead of the spectrum number in the legend when the spectrum is plotted.
+
 Bugfixes
 ########
 - Clicking Cancel after attempting to save a project upon closing now keeps Workbench open instead of closing without saving.
