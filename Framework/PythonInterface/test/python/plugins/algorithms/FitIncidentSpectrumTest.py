@@ -55,29 +55,64 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         term2 = phi_epi * delta_term / (wavelengths ** (1 + 2 * alpha))
         return term1 + term2
 
-    def test_fit_cubic_spline_with_gauss_conv_produces_fit_with_same_length_as_binning_for_fit(self):
-        binning_for_fit = "0.2,0.1,5.0"
+    def test_fit_cubic_spline_with_gauss_conv_produces_fit_with_same_range_as_binning_for_fit(self):
         binning_for_calc = "0.2,0.1,3.0"
+        binning_for_fit = "0.2,0.1,4.0"
         alg_test = run_algorithm(
             "FitIncidentSpectrum",
             InputWorkspace=self.incident_wksp,
             OutputWorkspace="fit_wksp",
-            BinningForCalc=binning_for_fit,
-            BinningForFit=binning_for_calc,
+            BinningForCalc=binning_for_calc,
+            BinningForFit=binning_for_fit,
             FitSpectrumWith="GaussConvCubicSpline")
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        self.assertEqual(fit_wksp.readX(0).size, np.arange(0.2, 5, 0.1).size)
+        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+
+    def test_fit_cubic_spline_produces_fit_with_same_range_as_binning_for_fit(self):
+        binning_for_calc = "0.2,0.1,3.0"
+        binning_for_fit = "0.2,0.1,4.0"
+        alg_test = run_algorithm(
+            "FitIncidentSpectrum",
+            InputWorkspace=self.incident_wksp,
+            OutputWorkspace="fit_wksp",
+            BinningForCalc=binning_for_calc,
+            BinningForFit=binning_for_fit,
+            FitSpectrumWith="CubicSpline")
+        self.assertTrue(alg_test.isExecuted())
+        fit_wksp = AnalysisDataService.retrieve("fit_wksp")
+        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+
+    def test_fit_cubic_spline_via_mantid_produces_fit_with_same_range_as_binning_for_fit(self):
+        binning_for_calc = "0.2,0.1,3.0"
+        binning_for_fit = "0.2,0.1,4.0"
+        alg_test = run_algorithm(
+            "FitIncidentSpectrum",
+            InputWorkspace=self.incident_wksp,
+            OutputWorkspace="fit_wksp",
+            BinningForCalc=binning_for_calc,
+            BinningForFit=binning_for_fit,
+            FitSpectrumWith="CubicSplineViaMantid")
+        self.assertTrue(alg_test.isExecuted())
+        fit_wksp = AnalysisDataService.retrieve("fit_wksp")
+        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+
+    def test_fit_howells_function_produces_fit_with_same_range_as_binning_for_fit(self):
+        binning_for_calc = "0.2,0.1,3.0"
+        binning_for_fit = "0.2,0.1,4.0"
+        alg_test = run_algorithm(
+            "FitIncidentSpectrum",
+            InputWorkspace=self.incident_wksp,
+            OutputWorkspace="fit_wksp",
+            BinningForCalc=binning_for_calc,
+            BinningForFit=binning_for_fit,
+            FitSpectrumWith="HowellsFunction")
+        self.assertTrue(alg_test.isExecuted())
+        fit_wksp = AnalysisDataService.retrieve("fit_wksp")
+        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
     def test_fit_cubic_spline_with_gauss_conv(self):
-        self.incident_wksp = CreateWorkspace(OutputWorkspace=self.incident_wksp_name,
-                                             NSpec=1,
-                                             DataX=[0],
-                                             DataY=[0],
-                                             UnitX='Wavelength',
-                                             VerticalAxisUnit='Text',
-                                             VerticalAxisValues='IncidentSpectrum')
-        binning_for_fit = "0.2,0.1,5.0"
+        binning_for_fit = "0.2,0.1,4.0"
         binning_for_calc = "0.2,0.1,3.0"
         alg_test = run_algorithm(
             "FitIncidentSpectrum",

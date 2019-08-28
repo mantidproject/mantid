@@ -23,8 +23,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
         return 'FitIncidentSpectrum'
 
     def summary(self):
-        return 'Calculate a fit for an incident spectrum using different methods.' \
-               'Outputs a workspace containing the functionalized fit and its first' \
+        return 'Calculate a fit for an incident spectrum using different methods. ' \
+               'Outputs a workspace containing the functionalized fit and its first ' \
                'derivative.'
 
     def seeAlso(self):
@@ -37,8 +37,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
         self.declareProperty(
             MatrixWorkspaceProperty('InputWorkspace', '',
                                     direction=Direction.Input,
-                                    # TODO find out what validator is best for this
-                                    # validator=CommonBinsValidator(),
                                     ),
             doc='Incident spectrum to be fit.')
 
@@ -51,13 +49,15 @@ class FitIncidentSpectrum(PythonAlgorithm):
             name='BinningForCalc',
             defaultValue='',
             doc='Bin range for calculation given as a comma separated string in the format '
-                '\"[Start],[Increment],[End]\". If empty use default binning.')
+                '\"[Start],[Increment],[End]\". If empty use default binning. The calculated '
+                'spectrum will use this binning')
 
         self.declareProperty(
             name='BinningForFit',
             defaultValue='',
             doc='Bin range for fitting given as a comma separated string in the format '
-                '\"[Start],[Increment],[End]\". If empty use BinningForCalc.')
+                '\"[Start],[Increment],[End]\". If empty use BinningForCalc. The '
+                'incident spectrum will be rebined to this range before being fit.')
 
         self.declareProperty(
             name='FitSpectrumWith',
@@ -68,8 +68,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-
-        input_ws = self.getProperty('InputWorkspace').value
 
         binning_for_calc = self.getProperty('BinningForCalc').value
         if not binning_for_calc == "":
@@ -203,9 +201,9 @@ class FitIncidentSpectrum(PythonAlgorithm):
         def calc_howells_function_1st_derivative(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
             term1 = (((2 * lam_t**2) / lambdas**2) - 5.) * (1. / lambdas) * \
                 phi_max * ((lam_t**4.) / lambdas**5.) * np.exp(-(lam_t / lambdas)**2.)
-            term2 = ((1 + 2 * a) / lambdas) \
-                * (1. / lambdas) * (phi_epi / (lambdas ** (1. + 2. * a))) \
-                * (1. / (1 + np.exp((lambdas - lam_1) / lam_2)))
+            term2 = - (phi_epi / lambdas**(1 + 2 * a)) * (1 / (1+np.exp((lambdas - lam_1) / lam_2))) \
+                * ((1 + 2 * a) / lambdas
+                    + (np.exp((lambdas - lam_1) / lam_2) / lam_2) * (1 / (1+np.exp((lambdas - lam_1) / lam_2))))
             return term1 + term2
 
         params = [1., 1., 1., 0., 1., 1.]
