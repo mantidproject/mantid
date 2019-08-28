@@ -8,6 +8,8 @@
 #include "Common/IndexOf.h"
 #include "GUI/Batch/BatchPresenterFactory.h"
 #include "GUI/Batch/QtBatchView.h"
+#include "GUI/Common/Decoder.h"
+#include "GUI/Common/Encoder.h"
 #include "GUI/Common/Plotter.h"
 #include <QMessageBox>
 #include <QToolButton>
@@ -17,7 +19,6 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 namespace {
-
 int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
   auto instrumentName =
       Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
@@ -29,7 +30,10 @@ int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
 }
 } // namespace
 
-DECLARE_SUBWINDOW(QtMainWindowView)
+// Do not change the last arguement as you will break backwards compatibility
+// with project save it should be the same as one of the tags in the decoder.
+DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder,
+                             "ISIS Reflectometry")
 
 QtMainWindowView::QtMainWindowView(QWidget *parent)
     : UserSubWindow(parent), m_notifyee(nullptr), m_batchIndex(1) {}

@@ -80,9 +80,6 @@ if( MSVC )
   set ( BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}" )
   set ( BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}" )
   set ( Boost_NO_SYSTEM_PATHS TRUE )
-
-  # Configure MSVC
-  include ( MSVCSetup )
 else()
   find_package ( Git )
 endif()

@@ -21,6 +21,7 @@
 #include "../RunsTable/RunsTablePresenter.h"
 #include "../Save/QtSaveView.h"
 #include "Encoder.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QApplication>
@@ -29,8 +30,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView &mwv) {
-  for (auto &ipresenter : mwv.m_presenter->m_batchPresenters) {
+                                            const QtMainWindowView *mwv) {
+  for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
       return presenter;
@@ -39,14 +40,32 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
   return nullptr;
 }
 
-void Decoder::decode(const QtMainWindowView &gui,
-                     const QMap<QString, QVariant> &map) {
-  UNUSED_ARG(gui);
-  UNUSED_ARG(map);
+QWidget *Decoder::decode(const QMap<QString, QVariant> &map,
+                         const std::string &directory) {
+  UNUSED_ARG(directory)
+  auto userSubWindow =
+      MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
+  auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
+  auto batches = map["batches"].toList();
+  // Create the number of batches required.
+  for (auto batchIndex = mwv->batches().size();
+       batchIndex < static_cast<long unsigned int>(batches.size());
+       ++batchIndex) {
+    mwv->newBatch();
+  }
+  for (auto ii = 0; ii < batches.size(); ++ii) {
+    decodeBatch(dynamic_cast<QtBatchView *>(mwv->m_batchViews[ii]), mwv,
+                batches[ii].toMap());
+  }
+  return mwv;
 }
 
-void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
-                          QMap<QString, QVariant> &map,
+QList<QString> Decoder::tags() {
+  return QList<QString>({QString("ISIS Reflectometry")});
+}
+
+void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
+                          const QMap<QString, QVariant> &map,
                           const BatchPresenter *presenter) {
   auto batchPresenter = presenter;
   if (!batchPresenter) {
@@ -61,23 +80,22 @@ void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView &mwv,
   auto runsTablePresenter =
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
-  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
-             map[QString("runsView")].toMap());
   decodeEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
   decodeExperiment(gui->m_experiment.get(),
                    map[QString("experimentView")].toMap());
   decodeInstrument(gui->m_instrument.get(),
                    map[QString("instrumentView")].toMap());
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
+  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
+             map[QString("runsView")].toMap());
 }
 
 void Decoder::decodeBatch(const IBatchPresenter *presenter,
                           const IMainWindowView *mwv,
-                          QMap<QString, QVariant> &map) {
+                          const QMap<QString, QVariant> &map) {
   auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
   decodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-              *dynamic_cast<const QtMainWindowView *>(mwv), map,
-              batchPresenter);
+              dynamic_cast<const QtMainWindowView *>(mwv), map, batchPresenter);
 }
 
 void Decoder::decodeExperiment(const QtExperimentView *gui,
@@ -225,7 +243,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                               const QMap<QString, QVariant> &map) {
   MantidQt::API::SignalBlocker signalBlockerView(gui);
 
-  bool projectSave = map[QString("projectSave")].toBool();
+  m_projectSave = map[QString("projectSave")].toBool();
   auto runsTable = map[QString("runsTableModel")].toList();
 
   // Clear
@@ -253,9 +271,10 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
   // Still need to do this for groups
   updateRunsTableViewFromModel(gui, redJobs);
 
-  if (projectSave) {
-    // Apply styling and restore completed state for output range values best
-    // way to achieve this is yet to be decided.
+  if (m_projectSave) {
+    // Apply styling and restore completed state for output range values
+    presenter->notifyRowOutputsChanged();
+    presenter->notifyRowStateChanged();
   }
   gui->m_ui.filterBox->setText(map[QString("filterBox")].toString());
 }
@@ -273,6 +292,10 @@ Decoder::decodeGroup(const QMap<QString, QVariant> &map) {
   auto rows = decodeRows(map["rows"].toList());
   MantidQt::CustomInterfaces::ISISReflectometry::Group group(
       map[QString("name")].toString().toStdString(), rows);
+  if (m_projectSave) {
+    auto itemState = map[QString("itemState")].toInt();
+    group.setState(State(itemState));
+  }
   group.m_postprocessedWorkspaceName =
       map[QString("postprocessedWorkspaceName")].toString().toStdString();
   return group;
@@ -310,27 +333,24 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   for (const auto &runNumber : map[QString("runNumbers")].toList()) {
     number.emplace_back(runNumber.toString().toStdString());
   }
+  boost::optional<double> maybeScaleFactor =
+      boost::make_optional<double>(false, 0.0);
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
-  double scaleFactor = 0;
   if (scaleFactorPresent) {
-    scaleFactor = map[QString("scaleFactor")].toDouble();
+    maybeScaleFactor = map[QString("scaleFactor")].toDouble();
   }
-
-  if (scaleFactorPresent) {
-    return MantidQt::CustomInterfaces::ISISReflectometry::Row(
-        number, map[QString("theta")].toDouble(),
-        decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
-        decodeRangeInQ(map[QString("qRange")].toMap()), scaleFactor,
-        decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-        decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
-  } else {
-    return MantidQt::CustomInterfaces::ISISReflectometry::Row(
-        number, map[QString("theta")].toDouble(),
-        decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
-        decodeRangeInQ(map[QString("qRange")].toMap()), boost::none,
-        decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-        decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+  auto row = MantidQt::CustomInterfaces::ISISReflectometry::Row(
+      number, map[QString("theta")].toDouble(),
+      decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
+      decodeRangeInQ(map[QString("qRange")].toMap()), maybeScaleFactor,
+      decodeReductionOptions(map[QString("reductionOptions")].toMap()),
+      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+  if (m_projectSave) {
+    auto itemState = map[QString("itemState")].toInt();
+    row.setState(State(itemState));
+    row.setOutputQRange(decodeRangeInQ(map[QString("qRangeOutput")].toMap()));
   }
+  return row;
 }
 
 RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {

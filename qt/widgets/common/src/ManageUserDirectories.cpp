@@ -15,7 +15,7 @@
 using namespace MantidQt::API;
 
 ManageUserDirectories::ManageUserDirectories(QWidget *parent)
-    : QDialog(parent) {
+    : MantidDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
   m_uiForm.setupUi(this);
   initLayout();
