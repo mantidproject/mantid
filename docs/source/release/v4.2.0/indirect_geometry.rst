@@ -72,6 +72,9 @@ Improvements
   for plotting for the relevant tabs.
 - Improved the output plotting options so that they now show the workspace currently selected.
   The options have also been made more consistent across the interface.
+- Improved the format of Abins HDF5 files to include readable set of advanced parameters. Values
+  in the AbinsParameters module have been re-organised into a logical heirarchy; user scripts
+  may need to be modified to match this.
 
 
 Diffraction Interface
