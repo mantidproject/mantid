@@ -54,7 +54,7 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
   // needs to ignore if index is the source
   if (compInfo.source() == idx)
     return false;
-  if (compInfo.hasDetectors(idx))
+  if (!compInfo.hasDetectors(idx))
     return false;
   // a bank must have a parent, skip this block if the component does not.
   if (compInfo.hasParent(idx)) {
