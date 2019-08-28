@@ -69,15 +69,32 @@ class FitIncidentSpectrum(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
+        input_ws = self.getProperty('InputWorkspace').value
+        range_min = input_ws.readX(0)[0]
+        bin_width = input_ws.readX(0)[1] - input_ws.readX(0)[0]
+        range_max = input_ws.readX(0)[-1]
         binning_for_calc = self.getProperty('BinningForCalc').value
         if not binning_for_calc == "":
-            if self.parse_binning(binning_for_calc).size == 0:
+            parsed_calc = self.parse_binning(binning_for_calc)
+            if parsed_calc[0] < range_min - bin_width:
+                issues['BinningForCalc'] = "Lower bin range outside of InputWorkspace range, minimum value: %f" % (
+                    range_min - bin_width)
+            if parsed_calc[-1] > range_max + bin_width:
+                issues['BinningForCalc'] = "Upper bin range outside of InputWorkspace range, maximum values: %f" % (
+                    range_max + bin_width)
+            if parsed_calc.size == 0:
                 issues['BinningForCalc'] = "Invalid parameters for bin range"
         binning_for_fit = self.getProperty('BinningForFit').value
         if not binning_for_fit == "":
-            if self.parse_binning(binning_for_fit).size == 0:
+            parsed_fit = self.parse_binning(binning_for_fit)
+            if parsed_fit[0] < range_min - bin_width:
+                issues['BinningForFit'] = "Lower bin range outside of InputWorkspace range, minimum value: %f" % (
+                    range_min - bin_width)
+            if parsed_fit[-1] > range_max + bin_width:
+                issues['BinningForFit'] = "Upper bin range outside of InputWorkspace range, maximum values: %f" % (
+                    range_max + bin_width)
+            if parsed_calc.size == 0:
                 issues['BinningForFit'] = "Invalid parameters for bin range"
-
         return issues
 
     def _setup(self):

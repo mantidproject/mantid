@@ -111,20 +111,6 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
-    def test_fit_cubic_spline_with_gauss_conv(self):
-        binning_for_fit = "0.2,0.1,4.0"
-        binning_for_calc = "0.2,0.1,3.0"
-        alg_test = run_algorithm(
-            "FitIncidentSpectrum",
-            InputWorkspace=self.incident_wksp,
-            OutputWorkspace="fit_wksp",
-            BinningForCalc=binning_for_fit,
-            BinningForFit=binning_for_calc,
-            FitSpectrumWith="GaussConvCubicSpline")
-        self.assertTrue(alg_test.isExecuted())
-        fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        print(fit_wksp.readY(0))
-
 
 if __name__ == '__main__':
     unittest.main()
