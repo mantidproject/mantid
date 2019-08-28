@@ -101,8 +101,13 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
   // Get last two messages in run topic to ensure we get a runStart message
   m_runStream =
       m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
-  m_spDetStream =
-      m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
+  try {
+    m_spDetStream =
+        m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
+  } catch (const std::runtime_error &) {
+    g_log.debug()
+        << "No detector-spectrum map message found, will assume a 1:1 mapping.";
+  }
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -341,21 +346,25 @@ void IKafkaStreamDecoder::waitForRunEndObservation() {
  * current run start time
  *
  * @param runStartStruct details of the current run
- * @return received detector-spectrum map message buffer
+ * @return received detector-spectrum map message buffer, empty string if a
+ *         mapping was not streamed
  */
 std::string IKafkaStreamDecoder::getDetSpecMapForRun(
     const IKafkaStreamDecoder::RunStartStruct &runStartStruct) {
   std::string rawMsgBuffer;
-  int64_t offset;
-  int32_t partition;
-  std::string topicName;
-  m_spDetStream = m_broker->subscribe(
-      {m_spDetTopic}, nanosecondsToMilliseconds(runStartStruct.startTime),
-      SubscribeAtOption::TIME);
-  m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
+  try {
+    m_spDetStream = m_broker->subscribe(
+        {m_spDetTopic}, nanosecondsToMilliseconds(runStartStruct.startTime),
+        SubscribeAtOption::TIME);
+    int64_t offset;
+    int32_t partition;
+    std::string topicName;
+    m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
+  } catch (const std::runtime_error &) {
+  }
   if (rawMsgBuffer.empty()) {
-    std::runtime_error("No detector-spectrum map message found for run " +
-                       runStartStruct.runId);
+    g_log.debug() << "No detector-spectrum map message found for run "
+                  << runStartStruct.runId << ", will assume a 1:1 mapping.";
   }
   return rawMsgBuffer;
 }

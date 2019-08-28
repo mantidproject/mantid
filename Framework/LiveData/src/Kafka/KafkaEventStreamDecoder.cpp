@@ -206,7 +206,9 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   int64_t offset;
   int32_t partition;
   std::string topicName;
-  m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
+  if (m_spDetStream) {
+    m_spDetStream->consumeMessage(&buffer, offset, partition, topicName);
+  }
   auto runStartStruct = getRunStartMessage(runBuffer);
   initLocalCaches(buffer, runStartStruct);
 
@@ -530,38 +532,55 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
  */
 void KafkaEventStreamDecoder::initLocalCaches(
     const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
-  if (rawMsgBuffer.empty()) {
-    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
-                             "Empty message received from spectrum-detector "
-                             "topic. Unable to continue");
-  }
-  auto spDetMsg = GetSpectraDetectorMapping(
-      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-  auto nudet = spDetMsg->detector_id()->size();
-  if (nudet != nspec) {
-    std::ostringstream os;
-    os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-          "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec="
-       << nspec << ", ndet=" << nudet;
-    throw std::runtime_error(os.str());
-  }
-
   m_runId = runStartData.runId;
 
-  // Create buffer
-  auto eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
-      "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
-      spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+  const auto jsonGeometry = runStartData.nexusStructure;
+  const auto instName = runStartData.instrumentName;
+
+  DataObjects::EventWorkspace_sptr eventBuffer;
+  if (rawMsgBuffer.empty()) {
+    /* Load the instrument to get the number of spectra :c */
+    auto ws =
+        API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
+    loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
+    const auto nspec = ws->getInstrument()->getNumberDetectors();
+
+    // Create buffer
+    eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+        API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
+                                                 1));
+    eventBuffer->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("TOF");
+    eventBuffer->setYUnit("Counts");
+  } else {
+    /* Parse mapping from stream */
+    auto spDetMsg = GetSpectraDetectorMapping(
+        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
+    auto nudet = spDetMsg->detector_id()->size();
+    if (nudet != nspec) {
+      std::ostringstream os;
+      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
+            "spectra/detector mapping. Expected matched length arrays but "
+            "found nspec="
+         << nspec << ", ndet=" << nudet;
+      throw std::runtime_error(os.str());
+    }
+
+    // Create buffer
+    eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
+        "EventWorkspace", static_cast<size_t>(spDetMsg->n_spectra()),
+        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+  }
 
   // Load the instrument if possible but continue if we can't
-  auto jsonGeometry = runStartData.nexusStructure;
-  auto instName = runStartData.instrumentName;
-  if (!instName.empty())
+  if (!instName.empty()) {
     loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
                                                 jsonGeometry);
-  else
+    if (rawMsgBuffer.empty()) {
+      eventBuffer->rebuildSpectraMapping();
+    }
+  } else
     g_log.warning(
         "Empty instrument name received. Continuing without instrument");
 
