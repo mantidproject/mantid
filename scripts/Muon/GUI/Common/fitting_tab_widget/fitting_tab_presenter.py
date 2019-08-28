@@ -145,10 +145,13 @@ class FittingTabPresenter(object):
         else:
             parameters = self.get_multi_domain_fit_parameters()
             current_idx = self.view.get_index_for_start_end_times()
-            parameters['InputWorkspace'] = parameters['InputWorkspace'][current_idx]
-            parameters['StartX'] = parameters['StartX'][current_idx]
-            parameters['EndX'] = parameters['EndX'][current_idx]
-            if self.view.fit_type != self.view.sequential_fit:
+            if len(parameters['InputWorkspace']) > current_idx:
+                parameters['InputWorkspace'] = parameters['InputWorkspace'][current_idx]
+            if len(parameters['StartX']) > current_idx:
+                parameters['StartX'] = parameters['StartX'][current_idx]
+            if len(parameters['EndX']) > current_idx:
+                parameters['EndX'] = parameters['EndX'][current_idx]
+            if self.view.fit_type != self.view.sequential_fit and parameters['Function'] is not None:
                 parameters['Function'] = parameters['Function'].createEquivalentFunctions()[current_idx]
 
         self.model.change_plot_guess(self.view.plot_guess, parameters)

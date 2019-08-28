@@ -130,16 +130,6 @@ class HomeTabPlotPresenterTest(unittest.TestCase):
 
         self.assertEqual(0, self.context.fitting_context.plot_guess.call_count)
 
-    def test_handle_plot_guess_changed_removes_guess_if_plot_guess_is_false(self):
-        self.context.fitting_context.plot_guess = False
-        self.context.fitting_context.guess_ws = 'ws_guess'
-        self.presenter.handle_plot_guess_changed()
-
-        self.assertEqual(0, self.model.add_workspace_to_plot.call_count)
-        self.assertEqual(1, self.model.remove_workpace_from_plot.call_count)
-        self.assertEqual(1, self.model.force_redraw.call_count)
-        self.model.remove_workpace_from_plot.assert_called_with('ws_guess')
-
     def test_handle_plot_guess_changed_removes_all_guesses_if_workspace_is_none(self):
         self.context.fitting_context.plot_guess = True
         self.context.fitting_context.guess_ws = None
@@ -158,20 +148,20 @@ class HomeTabPlotPresenterTest(unittest.TestCase):
         self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4', 'ws_guess']
         self.presenter.handle_plot_guess_changed()
 
-        self.assertEqual(1, self.model.remove_workpace_from_plot.call_count)
+        self.assertEqual(3, self.model.remove_workpace_from_plot.call_count)
         self.assertEqual(1, self.model.add_workspace_to_plot.call_count)
         self.model.remove_workpace_from_plot.assert_called_with('ws_guess')
         self.model.add_workspace_to_plot.assert_called_with('ws_guess',
                                                             workspace_index=1,
                                                             label='guess')
 
-    def test_handle_plot_guess_changed_adds_guess_to_plot_and_does_not_remove_previous_guess_if_not_present(self):
+    def test_handle_plot_guess_changed_adds_guess_to_plot(self):
         self.context.fitting_context.plot_guess = True
         self.context.fitting_context.guess_ws = 'ws_guess'
         self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4']
         self.presenter.handle_plot_guess_changed()
 
-        self.assertEqual(0, self.model.remove_workpace_from_plot.call_count)
+        self.assertEqual(2, self.model.remove_workpace_from_plot.call_count)
         self.assertEqual(1, self.model.add_workspace_to_plot.call_count)
         self.model.add_workspace_to_plot.assert_called_with('ws_guess',
                                                             workspace_index=1,
