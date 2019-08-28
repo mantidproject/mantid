@@ -16,6 +16,7 @@ Algorithms
 ----------
 * :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
 * Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load <algm-Load>`.
+* Added options to :ref:`SaveMD <algm-SaveMD>` to allow selection of what will be saved. For MDHistoWorkspace only.
 
 Data Objects
 ------------
