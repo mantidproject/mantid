@@ -7,7 +7,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from mantid.simpleapi import (DeleteWorkspace, CreateEmptyTableWorkspace, Fit)
+from mantid.simpleapi import (CreateEmptyTableWorkspace, Fit)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, WorkspaceProperty, ITableWorkspaceProperty)
 from mantid.kernel import (Direction, FloatBoundedValidator)
 
