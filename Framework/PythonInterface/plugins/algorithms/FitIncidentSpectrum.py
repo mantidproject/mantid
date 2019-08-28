@@ -7,8 +7,8 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 from scipy import signal, ndimage, interpolate, optimize
-from mantid.api import AlgorithmFactory, CommonBinsValidator, MatrixWorkspaceProperty, PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, StringListValidator, StringMandatoryValidator
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import Direction, StringListValidator
 from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing, AnalysisDataService
 
 
