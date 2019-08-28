@@ -140,11 +140,23 @@ class FittingTabPresenter(object):
                 'Display parameters for')
 
     def handle_plot_guess_changed(self):
-        self.model.change_plot_guess(self.view.plot_guess, self.get_parameters_for_single_fit())
+        if self.view.fit_type == self.view.single_fit:
+            parameters = self.get_parameters_for_single_fit()
+        else:
+            parameters = self.get_multi_domain_fit_parameters()
+            current_idx = self.view.get_index_for_start_end_times()
+            parameters['InputWorkspace'] = parameters['InputWorkspace'][current_idx]
+            parameters['StartX'] = parameters['StartX'][current_idx]
+            parameters['EndX'] = parameters['EndX'][current_idx]
+            if self.view.fit_type != self.view.sequential_fit:
+                parameters['Function'] = parameters['Function'].createEquivalentFunctions()[current_idx]
+
+        self.model.change_plot_guess(self.view.plot_guess, parameters)
 
     def fitting_domain_type_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
             multi_domain_function = self.create_multi_domain_function(self._fit_function)
+            self._multi_domain_function = multi_domain_function
             if multi_domain_function:
                 self.view.function_browser_multi.blockSignals(True)
                 self.view.function_browser_multi.setFunction(str(multi_domain_function))
