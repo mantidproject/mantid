@@ -27,6 +27,8 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         # Files and their corresponding sizes. the low-memory win machines
         # fair better loading the big files first
         files = []
+
+	# This will not work at present, because isSaveableBank does not properly handle eightpacks!
         for filename in myFiles:
             files.append(os.path.join(direc, filename))
         files.sort()
@@ -68,6 +70,7 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         # cleanup
         del wksp
         self.__removeFiles__([save_file_name])
+	return True
 
     def runTest(self):
         """Main entry point for the test suite"""
