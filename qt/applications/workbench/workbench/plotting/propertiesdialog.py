@@ -216,7 +216,7 @@ class MarkerEditor(QWidget):
         if new_name == "":
             raise RuntimeError("Marker names cannot be empty")
         if new_name in self.used_names and new_name != old_name:
-            raise RuntimeError("Marker names cannot be duplicated.\nAnother marker is named '{}'"
+            raise RuntimeError("Marker names cannot be duplicated.\n Another marker is named '{}'"
                                .format(new_name))
         try:
             marker.set_name(new_name)
@@ -279,7 +279,7 @@ class GlobalMarkerEditor(PropertiesEditorBase):
         self.ui.errors.hide()
         self.ui.marker.currentIndexChanged.connect(self.update_marker_data)
 
-        self.markers = sorted(markers, key=lambda x: x.name)
+        self.markers = sorted(markers, key=lambda _marker: _marker.name)
         self._names = [str(_marker.name) for _marker in self.markers]
 
         self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors, self._names)

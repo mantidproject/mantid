@@ -671,11 +671,11 @@ class SingleMarker(QObject):
         x_lower, x_upper = self.marker.axis.get_xlim()
         y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
-            self.label_x_pos = 0.98
-            self.label_y_pos = 0.005
+            self.label_x_offset = 0.98
+            self.label_y_offset = 0.005
         else:
-            self.label_x_pos = 0.0
-            self.label_y_pos = 0.95
+            self.label_x_offset = 0.0
+            self.label_y_offset = 0.95
 
     def set_label_visible(self, is_visible):
         """ Allows for labels to be hidden/shown """
@@ -683,20 +683,20 @@ class SingleMarker(QObject):
         self.label_visible = is_visible
         self.add_all_annotations()
 
-    def set_label_position(self, x_pos, y_pos):
+    def set_label_position(self, x_offset, y_offset):
         """
         Updates the position of a label (coordinates are relative, i.e. 0 <= pos <= 1)
         """
         self.remove_all_annotations()
-        old_x = self.label_x_pos
-        old_y = self.label_y_pos
-        self.label_x_pos = x_pos
-        self.label_y_pos = y_pos
+        old_x = self.label_x_offset
+        old_y = self.label_y_offset
+        self.label_x_offset = x_offset
+        self.label_y_offset = y_offset
         try:
             self.add_all_annotations()
         except RuntimeError as err:
-            self.label_x_pos = old_x
-            self.label_y_pos = old_y
+            self.label_x_offset = old_x
+            self.label_y_offset = old_y
             self.add_all_annotations()
             raise RuntimeError(str(err))
 
@@ -829,16 +829,16 @@ class SingleMarker(QObject):
         x_lower, x_upper = self.marker.axis.get_xlim()
         y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
-            x_pos = self.label_x_pos
-            y_pos = self.relative(self.marker.y, y_lower, y_upper) + self.label_y_pos
+            x_pos = self.label_x_offset
+            y_pos = self.relative(self.marker.y, y_lower, y_upper) + self.label_y_offset
             rotation = 0
             if not y_lower <= self.marker.y <= y_upper:
                 marker_in_scope = False
             horizontal = 'right'
             vertical = 'bottom'
         else:
-            x_pos = self.relative(self.marker.x, x_lower, x_upper) + self.label_x_pos
-            y_pos = self.label_y_pos
+            x_pos = self.relative(self.marker.x, x_lower, x_upper) + self.label_x_offset
+            y_pos = self.label_y_offset
             rotation = -90
             if not x_lower <= self.marker.x <= x_upper:
                 marker_in_scope = False
