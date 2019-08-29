@@ -238,7 +238,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         params = [1., 1., 1., 0., 1., 1.]
         params, convergence = optimize.curve_fit(
-            calc_howells_function, x_fit, y_fit, params)
+            calc_howells_function, x_fit, y_fit, params, maxfev=5000)
         fit = calc_howells_function(x, *params)
         fit_prime = calc_howells_function_1st_derivative(x, *params)
         return fit, fit_prime
