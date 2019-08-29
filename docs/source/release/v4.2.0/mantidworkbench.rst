@@ -23,10 +23,9 @@ Improvements
 - Project Save and Load will no longer freeze when saving and loading large amounts of workspaces and/or interfaces.
 - Attempting to save files that are larger than (by default) 10GB now results in a dialog box to inform the user that it may take a long time and gives them the opportunity to cancel.
 - Added basic tiled plots to workbench interface.
-
 - Changing the axis' scale, by right-clicking on a figure with multiple plots, changes only the plot that was clicked on.
-
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
+- There are now icons alongside the colormap names in the plot options dialog.
 
 Bugfixes
 ########
