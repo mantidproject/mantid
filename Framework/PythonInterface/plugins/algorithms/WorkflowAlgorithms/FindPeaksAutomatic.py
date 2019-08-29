@@ -115,7 +115,6 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
             WorkspaceProperty(name='OutputWorkspace', defaultValue='workspace_with_errors', direction=Direction.Output),
             'Workspace containing the same data as the input one, with errors added if not present from the beginning')
 
-
     def validateInputs(self):
         issues = {}
 
