@@ -139,9 +139,27 @@ class FittingTabPresenter(object):
             self.view.workspace_combo_box_label.setText(
                 'Display parameters for')
 
+    def handle_plot_guess_changed(self):
+        if self.view.fit_type == self.view.single_fit:
+            parameters = self.get_parameters_for_single_fit()
+        else:
+            parameters = self.get_multi_domain_fit_parameters()
+            current_idx = self.view.get_index_for_start_end_times()
+            if len(parameters['InputWorkspace']) > current_idx:
+                parameters['InputWorkspace'] = parameters['InputWorkspace'][current_idx]
+            if len(parameters['StartX']) > current_idx:
+                parameters['StartX'] = parameters['StartX'][current_idx]
+            if len(parameters['EndX']) > current_idx:
+                parameters['EndX'] = parameters['EndX'][current_idx]
+            if self.view.fit_type != self.view.sequential_fit and parameters['Function'] is not None:
+                parameters['Function'] = parameters['Function'].createEquivalentFunctions()[current_idx]
+
+        self.model.change_plot_guess(self.view.plot_guess, parameters)
+
     def fitting_domain_type_changed(self):
         if self.view.fit_type == self.view.simultaneous_fit:
             multi_domain_function = self.create_multi_domain_function(self._fit_function)
+            self._multi_domain_function = multi_domain_function
             if multi_domain_function:
                 self.view.function_browser_multi.blockSignals(True)
                 self.view.function_browser_multi.setFunction(str(multi_domain_function))
@@ -184,8 +202,7 @@ class FittingTabPresenter(object):
                     calculation_function)
             elif fit_type == self.view.simultaneous_fit:
                 self._number_of_fits_cached = 1
-                simultaneous_fit_parameters = self.get_multi_domain_fit_parameters(
-                )
+                simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_fit,
@@ -194,11 +211,9 @@ class FittingTabPresenter(object):
                     calculation_function)
             elif fit_type == self.view.sequential_fit:
                 self._number_of_fits_cached = len(self.selected_data)
-                sequential_fit_parameters = self.get_multi_domain_fit_parameters(
-                )
+                sequential_fit_parameters = self.get_multi_domain_fit_parameters()
                 calculation_function = functools.partial(self.model.do_sequential_fit, sequential_fit_parameters)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                self.calculation_thread = self.create_thread(calculation_function)
 
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
@@ -215,23 +230,20 @@ class FittingTabPresenter(object):
             if fit_type == self.view.single_fit:
                 single_fit_parameters = self.get_parameters_for_tf_single_fit_calculation()
                 calculation_function = functools.partial(
-                    self.model.do_single_tf_fit, single_fit_parameters, self.view.group_name)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                    self.model.do_single_tf_fit, single_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
             elif fit_type == self.view.simultaneous_fit:
                 simultaneous_fit_parameters = self.get_multi_domain_tf_fit_parameters()
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_tf_fit,
-                    simultaneous_fit_parameters, global_parameters, self.view.group_name)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                    simultaneous_fit_parameters, global_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
             elif fit_type == self.view.sequential_fit:
                 sequential_fit_parameters = self.get_sequential_tf_fit_parameters()
                 calculation_function = functools.partial(
-                    self.model.do_sequential_tf_fit, sequential_fit_parameters, self.view.group_name)
-                self.calculation_thread = self.create_thread(
-                    calculation_function)
+                    self.model.do_sequential_tf_fit, sequential_fit_parameters)
+                self.calculation_thread = self.create_thread(calculation_function)
 
             self.calculation_thread.threadWrapperSetUp(self.handle_started,
                                                        self.handle_finished,
@@ -241,10 +253,8 @@ class FittingTabPresenter(object):
             self.view.warning_popup(error)
 
     def get_parameters_for_tf_single_fit_calculation(self):
-        fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace, workspace_directory = self.model.create_fitted_workspace_name(self.view.display_workspace,
-                                                                                 self.view.fit_object,
-                                                                                 fit_group_name)
+                                                                                 self.view.fit_object)
 
         return {
             'InputFunction': self.view.fit_object,
@@ -258,10 +268,8 @@ class FittingTabPresenter(object):
         }
 
     def get_multi_domain_tf_fit_parameters(self):
-        fit_group_name = self.model.get_function_name(self.view.fit_object)
-        workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(self.view.display_workspace,
-                                                                                              self.view.fit_object,
-                                                                                              fit_group_name)
+        workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
+            self.view.display_workspace, self.view.fit_object)
 
         return {
                    'InputFunction': self.view.fit_object,
@@ -275,13 +283,10 @@ class FittingTabPresenter(object):
                }
 
     def get_sequential_tf_fit_parameters(self):
-        fit_group_name = self.model.get_function_name(self.view.fit_object)
         workspace_name_list = []
         for workspace in self.selected_data:
-            workspace_name, workspace_directory = self.model.create_fitted_workspace_name(
-                workspace,
-                self.view.fit_object,
-                fit_group_name)
+            workspace_name, workspace_directory = self.model.create_fitted_workspace_name(workspace,
+                                                                                          self.view.fit_object)
             workspace_name_list.append(workspace_name)
 
         return {
@@ -324,6 +329,7 @@ class FittingTabPresenter(object):
 
         self.update_fit_status_information_in_view()
         self.view.undo_fit_button.setEnabled(True)
+        self.view.plot_guess_checkbox.setChecked(False)
 
     def handle_error(self, error):
         self.thread_success = False
@@ -463,8 +469,7 @@ class FittingTabPresenter(object):
         return {
             'Function': self.view.fit_object,
             'Minimizer': self.view.minimizer,
-            'EvaluationType': self.view.evaluation_type,
-            'FitGroupName': self.view.group_name
+            'EvaluationType': self.view.evaluation_type
         }
 
     @property
