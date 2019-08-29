@@ -173,7 +173,7 @@ class YAxisEditor(AxisEditor):
 
 
 class MarkerEditor(QWidget):
-    def __init__(self, filename, valid_style, valid_colors):
+    def __init__(self, filename, valid_style, valid_colors, used_names=[]):
         """
         Widget to edit a marker properties
         :param filename: name of the ui file for this widget
@@ -185,7 +185,10 @@ class MarkerEditor(QWidget):
         super(MarkerEditor, self).__init__()
         self.widget = load_ui(__file__, filename, baseinstance=self)
         self.widget.position.setValidator(QDoubleValidator())
+        self.widget.label_x_pos.setValidator(QDoubleValidator())
+        self.widget.label_y_pos.setValidator(QDoubleValidator())
         self.colors = valid_colors
+        self.used_names = used_names
 
         self.widget.style.addItems(valid_style)
         self.widget.color.addItems(list(valid_colors.keys()))
@@ -199,25 +202,45 @@ class MarkerEditor(QWidget):
         self.widget.position.setText(str(marker.get_position()))
         self.widget.style.setCurrentText(str(marker.style))
         self.widget.color.setCurrentText(_color)
+        self.widget.display_label.setChecked(marker.label_visible)
+        self.widget.label_x_pos.setText(str(marker.label_x_pos))
+        self.widget.label_y_pos.setText(str(marker.label_y_pos))
+        self.draggable.setChecked(marker.draggable)
 
     def update_marker(self, marker):
         """
         Update the properties of the marker with the values from the widget
         """
         old_name = str(marker.name)
+        new_name = self.widget.name.text()
+        if new_name == "":
+            raise RuntimeError("Marker names cannot be empty")
+        if new_name in self.used_names and new_name != old_name:
+            raise RuntimeError("Marker names cannot be duplicated.\nAnother marker is named '{}'"
+                               .format(new_name))
         try:
-            marker.set_name(self.widget.name.text())
+            marker.set_name(new_name)
         except:
             marker.set_name(old_name)
-            raise RuntimeError("Invalid label '{}'".format(self.widget.name.text()))
+            raise RuntimeError("Invalid label '{}'".format(new_name))
 
         marker.set_position(float(self.widget.position.text()))
+        marker.draggable = self.widget.draggable.isChecked()
         marker.set_style(self.widget.style.currentText())
         marker.set_color(self.colors.get(self.widget.color.currentText(), 'C2'))
+        marker.set_label_visible(self.widget.display_label.isChecked())
+
+        x_pos = float(self.widget.label_x_pos.text())
+        y_pos = float(self.widget.label_y_pos.text())
+        if not 0.0 <= x_pos <= 1.0:
+            raise RuntimeError('The horizontal position is a relative value, must be in range 0,1')
+        if not 0.0 <= y_pos <= 1.0:
+            raise RuntimeError('The vertical position is a relative value, must be in range 0,1')
+        marker.set_label_position(x_pos, y_pos)
 
 
 class SingleMarkerEditor(PropertiesEditorBase):
-    def __init__(self, canvas, marker, valid_style, valid_colors):
+    def __init__(self, canvas, marker, valid_style, valid_colors, used_names):
         """
         Edit the properties of a single marker.
         :param canvas: A reference to the target canvas
@@ -228,7 +251,7 @@ class SingleMarkerEditor(PropertiesEditorBase):
         super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
         self.ui.errors.hide()
 
-        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors)
+        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors, used_names)
         layout = self.ui.layout()
         layout.addWidget(self._widget, 1, 0)
 
@@ -260,13 +283,17 @@ class GlobalMarkerEditor(PropertiesEditorBase):
         self.ui.errors.hide()
         self.ui.marker.currentIndexChanged.connect(self.update_marker_data)
 
-        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors)
+        self.markers = sorted(markers, key=lambda x: x.name)
+        self._names = [str(_marker.name) for _marker in self.markers]
+
+        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors, self._names)
         layout = self.ui.layout()
         layout.addWidget(self._widget, 2, 0, 1, 2)
 
-        self.markers = sorted(markers, key=lambda x: x.name)
-        self._names = [str(_marker.name) for _marker in self.markers]
-        self.ui.marker.addItems(self._names)
+        if self._names:
+            self.ui.marker.addItems(self._names)
+        else:
+            self._widget.setEnabled(False)
 
     def changes_accepted(self):
         """Update the properties of the currently selected marker"""
@@ -280,4 +307,8 @@ class GlobalMarkerEditor(PropertiesEditorBase):
 
     def update_marker_data(self, idx):
         """When changing the selected marker update the properties displayed in the editor window"""
+        if self.ui.marker.count == 0:
+            self._widget.setEnabled(False)
+            return
+        self._widget.setEnabled(True)
         self._widget.set_defaults(self.markers[idx])

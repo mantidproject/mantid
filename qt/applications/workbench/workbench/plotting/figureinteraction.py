@@ -391,8 +391,9 @@ class FigureInteraction(object):
             editor.move(QCursor.pos())
             editor.exec_()
 
+        used_names = [str(_marker.name) for _marker in self.markers]
         QApplication.restoreOverrideCursor()
-        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors))
+        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors, used_names))
 
     def _set_hover_cursor(self, x_pos, y_pos):
         """

@@ -656,14 +656,39 @@ class SingleMarker(QObject):
         self.canvas = canvas
         self.annotations = {}
         self.name = name
+        self.label_visible = True
         self.style = line_style
         self.color = color
+        self.draggable = True
         if self.marker_type == 'XSingle':
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
         elif self.marker_type == 'YSingle':
             self.marker = HorizontalMarker(canvas, color, position, line_style=line_style)
         else:
             raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
+
+        # Set default label position
+        x_lower, x_upper = self.marker.axis.get_xlim()
+        y_lower, y_upper = self.marker.axis.get_ylim()
+        if self.marker_type == 'YSingle':
+            self.label_x_pos = 0.98
+            self.label_y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
+        else:
+            self.label_x_pos = self.relative(self.marker.x, x_lower, x_upper)
+            self.label_y_pos = 0.95
+
+    def set_label_visible(self, is_visible):
+        """ Allows for labels to be hidden/shown """
+        self.remove_all_annotations()
+        self.label_visible = is_visible
+        self.add_all_annotations()
+
+    def set_label_position(self, x_pos, y_pos):
+        """ Updates the position of a label (coordinates are relative, i.e. 0 <= pos <= 1) """
+        self.remove_all_annotations()
+        self.label_x_pos = x_pos
+        self.label_y_pos = y_pos
+        self.add_all_annotations()
 
     def redraw(self):
         """
@@ -786,21 +811,21 @@ class SingleMarker(QObject):
         if text is None:
             return
 
+        if not self.label_visible:
+            self.annotations[self.name] = ''
+            return
+
         marker_in_scope = True
         x_lower, x_upper = self.marker.axis.get_xlim()
         y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
             rotation = 0
-            x_pos = 0.98
-            y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
             if not y_lower <= self.marker.y <= y_upper:
                 marker_in_scope = False
             horizontal = 'right'
             vertical = 'bottom'
         else:
             rotation = -90
-            x_pos = self.relative(self.marker.x, x_lower, x_upper)
-            y_pos = 0.95
             if not x_lower <= self.marker.x <= x_upper:
                 marker_in_scope = False
             horizontal = 'left'
@@ -808,7 +833,7 @@ class SingleMarker(QObject):
 
         if marker_in_scope:
             self.annotations[text] = self.marker.axis.annotate(text,
-                                                               xy=(x_pos, y_pos),
+                                                               xy=(self.label_x_pos, self.label_y_pos),
                                                                xycoords="axes fraction",
                                                                ha=horizontal,
                                                                va=vertical,
