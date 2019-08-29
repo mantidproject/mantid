@@ -103,7 +103,7 @@ The most important to this effect are:
     high_noise_ws = CreateWorkspace(DataX=x_values, DataY=y_values_high_noise, DataE=np.sqrt(y_values_high_noise))
 
     # Fitting the data with low noise
-    FindPeakAutomatic(InputWorkspace=low_noise_ws,
+    FindPeaksAutomatic(InputWorkspace=low_noise_ws,
                       AcceptanceThreshold=0.2,
                       SmoothWindow=30,
                       EstimatePeakSigma=2,
@@ -116,7 +116,7 @@ The most important to this effect are:
     peak_low2 = peak_properties.row(1)
 
     # Fitting the data with strong noise
-    FindPeakAutomatic(InputWorkspace=high_noise_ws,
+    FindPeaksAutomatic(InputWorkspace=high_noise_ws,
                       AcceptanceThreshold=0.1,
                       SmoothWindow=30,
                       EstimatePeakSigma=2,

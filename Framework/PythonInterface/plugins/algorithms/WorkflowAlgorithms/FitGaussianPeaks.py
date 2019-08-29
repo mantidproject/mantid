@@ -30,7 +30,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         return 'Fits a list of gaussian peaks returning the parameters and the value of a cost function.'
 
     def seeAlso(self):
-        return ['FindPeakAutomatic', 'FindPeaks', 'FindPeaksMD', 'FindSXPeaks', 'FitPeak', 'FitPeaks']
+        return ['FindPeaksAutomatic', 'FindPeaks', 'FindPeaksMD', 'FindSXPeaks', 'FitPeak', 'FitPeaks']
 
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)

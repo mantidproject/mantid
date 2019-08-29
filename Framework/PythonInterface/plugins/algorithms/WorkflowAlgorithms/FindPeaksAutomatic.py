@@ -17,7 +17,7 @@ import numpy as np
 import scipy.signal
 
 
-class FindPeakAutomatic(DataProcessorAlgorithm):
+class FindPeaksAutomatic(DataProcessorAlgorithm):
     _acceptance = 0.01
     _bad_peak_to_consider = 50
     _smooth_window = 5
@@ -33,7 +33,7 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
         return 'Optimization\\PeakFinding'
 
     def summary(self):
-        return 'Locates and estimated parameters for all the peaks in an emission spectra'
+        return 'Locates and estimates parameters for all the peaks in a given spectra'
 
     def seeAlso(self):
         return [
@@ -111,6 +111,10 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
                 direction=Direction.Output),
             doc='Name of the table containing the properties of the peaks that had to be fitted twice '
                 'as the first time the error was unreasonably large')
+        self.declareProperty(
+            WorkspaceProperty(name='OutputWorkspace', defaultValue='workspace_with_errors', direction=Direction.Output),
+            'Workspace containing the same data as the input one, with errors added if not present from the beginning')
+
 
     def validateInputs(self):
         issues = {}
@@ -187,6 +191,8 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
                             OutputWorkspace=error_ws)
         else:
             error_ws = self.getPropertyValue('InputWorkspace')
+
+        self.setPropertyValue('OutputWorkspace', error_ws)
 
         return raw_xvals, raw_yvals, raw_error, error_ws
 
@@ -392,4 +398,4 @@ class FindPeakAutomatic(DataProcessorAlgorithm):
                                     peak_width_estimate=peak_width_estimate), baseline
 
 
-AlgorithmFactory.subscribe(FindPeakAutomatic)
+AlgorithmFactory.subscribe(FindPeaksAutomatic)
