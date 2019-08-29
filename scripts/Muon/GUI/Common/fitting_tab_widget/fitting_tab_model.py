@@ -54,7 +54,7 @@ class FittingTabModel(object):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix =\
             run_CalculateMuonAsymmetry(parameter_dict, alg)
         if len(parameter_dict['ReNormalizedWorkspaceList']) > 1:
-            for input_workspace, output in zip(parameter_dict['ReNormalizedWorkspaceList'], output_workspace.getNames()):
+            for input_workspace, output in zip(parameter_dict['ReNormalizedWorkspaceList'], mantid.api.AnalysisDataService.retrieve(output_workspace).getNames()):
                 CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
         else:
             CopyLogs(InputWorkspace=parameter_dict['ReNormalizedWorkspaceList'][0], OutputWorkspace=output_workspace, StoreInADS=False)
@@ -105,7 +105,7 @@ class FittingTabModel(object):
         output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix\
             = run_simultaneous_Fit(parameters_dict, alg)
         if len(parameters_dict['InputWorkspace']) > 1:
-            for input_workspace, output in zip(parameters_dict['InputWorkspace'], output_workspace.getNames()):
+            for input_workspace, output in zip(parameters_dict['InputWorkspace'], mantid.api.AnalysisDataService.retrieve(output_workspace).getNames()):
                 CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
         else:
             CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'][0], OutputWorkspace=output_workspace, StoreInADS=False)
@@ -245,7 +245,9 @@ class FittingTabModel(object):
             workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
                 input_workspace_list[0], fit_function)
             self.add_workspace_to_ADS(output_workspace, workspace_name, '')
-            workspace_name = self.rename_members_of_fitted_workspace_group(output_workspace, input_workspace_list,
+
+            workspace_name = self.rename_members_of_fitted_workspace_group(workspace_name,
+                                                                           input_workspace_list,
                                                                            fit_function)
             self.add_workspace_to_ADS(covariance_matrix, workspace_name[0] + '_CovarianceMatrix', table_directory)
         else:
