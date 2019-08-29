@@ -54,6 +54,8 @@ FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(
     os.path.realpath(
         os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..", "Framework", "PythonInterface",
                      "test")))
+# Indicates the child process trying to run the tests had an error
+TESTING_PROC_FAILURE_CODE = 255
 
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
     raise ImportError(
@@ -1253,6 +1255,24 @@ def using_gsl_v1():
 def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
                     res_array, stat_dict, total_number_of_tests, maximum_name_length, tests_done,
                     process_number, lock, required_files_dict, locked_files_dict):
+    try:
+        testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
+                            res_array, stat_dict, total_number_of_tests, maximum_name_length,
+                            tests_done, process_number, lock, required_files_dict,
+                            locked_files_dict)
+        exit_code = 0
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        exit_code = TESTING_PROC_FAILURE_CODE
+
+    # exits the child process and not the whole program
+    sys.exit(exit_code)
+
+
+def testThreadsLoopImpl(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
+                        res_array, stat_dict, total_number_of_tests, maximum_name_length,
+                        tests_done, process_number, lock, required_files_dict, locked_files_dict):
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
