@@ -20,39 +20,38 @@ absorption_correction_params = {
 window_10_50_params = {
     "vanadium_tof_cropping": (1.1e4, 5e4),
     "focused_cropping_values": [
-        (1.2e4, 4.99e4),  # Bank 1
-        (1.2e4, 4.99e4),  # Bank 2
-        (1.2e4, 4.99e4),  # Bank 3
+       (1.2e4, 4.99e4),  # Bank 1
+       (1.2e4, 4.99e4),  # Bank 2
+       (1.2e4, 4.99e4),  # Bank 3
     ]
 }
 
 window_10_110_params = {
     "vanadium_tof_cropping": (1e4, 1.2e5),
     "focused_cropping_values": [
-        (1.5e4, 1.08e5),  # Bank 1
-        (1.5e4, 1.12e5),  # Bank 2
-        (1.5e4, 1e5)      # Bank 3
+       (1.046e4, 1.0577e5),  # Bank 1
+       (0.981e4, 1.147e5),   # Bank 2
+       (1e4, 1.106e5)        # Bank 3
     ]
 }
 
 window_30_130_params = {
     "vanadium_tof_cropping": (3e4, 1.4e5),
     "focused_cropping_values": [
-        (3.5e4, 1.3e5),  # Bank 1
-        (3.4e4, 1.4e5),  # Bank 2
-        (3.3e4, 1.3e5)   # Bank 3
+       (3.137e4, 1.25e5),  # Bank 1
+       (3e4, 1.3555e5),    # Bank 2
+       (3e4, 1.3e5)        # Bank 3
     ]
 }
 
 window_100_200_params = {
     "vanadium_tof_cropping": (1e5, 200500),
     "focused_cropping_values": [
-        (100200, 1.99e5),  # Bank 1
-        (100100, 1.99e5),  # Bank 2
-        (100100, 1.99e5)   # Bank 3
+        (1.0457e5, 1.92337e5),  # Bank 1
+        (0.981e5, 2.0861e5),    # Bank 2
+        (0.981e5, 2.0118e5)     # Bank 3
     ]
 }
-
 
 window_180_280_params = {
     "vanadium_tof_cropping": (1.8e5, 2.8e5),
@@ -73,7 +72,7 @@ general_params = {
     "focused_bin_widths": [
         -0.0003,  # Bank 1
         -0.0007,  # Bank 2
-        -0.0012   # Bank 3
+        -0.0012  # Bank 3
     ],
     "mode": "coupled"
 }
