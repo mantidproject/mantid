@@ -15,12 +15,12 @@ FitIncidentSpectrum is able to fit an incident spectrum using:
 1. CubicSpline: A fit using a cubic cline.
 2. CubicSplineViaMantid: A fit with cubic spline using the mantid SplineSmoothing algorithm.
 3. GaussConvCubicSpline: A fit with Cubic Spline using a Gaussian Convolution to get weights
-4. HowellsFunction: A fit with analytical function from Howells et. al.
+4. HowellsFunction: A fit with analytical function from Howells et. al. [1]_
 
 Usage
 -----
 
-**Example: fit an incident spectrum using GaussConvCubicSpline**
+**Example: fit an incident spectrum using GaussConvCubicSpline** [2]_
 
 .. testcode:: ExFitIncidentSpectrum
 
