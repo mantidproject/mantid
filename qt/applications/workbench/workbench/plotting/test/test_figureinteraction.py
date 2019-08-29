@@ -344,7 +344,8 @@ class FigureInteractionTest(unittest.TestCase):
         expected_call = [call(self.interactor.canvas,
                               marker,
                               self.interactor.valid_lines,
-                              self.interactor.valid_colors)]
+                              self.interactor.valid_colors,
+                              [])]
 
         self.interactor._edit_marker(marker)
 
