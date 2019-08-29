@@ -64,7 +64,8 @@ class FitIncidentSpectrumTest(unittest.TestCase):
             OutputWorkspace="fit_wksp",
             BinningForCalc=binning_for_calc,
             BinningForFit=binning_for_fit,
-            FitSpectrumWith="GaussConvCubicSpline")
+            FitSpectrumWith="GaussConvCubicSpline",
+            SetRethrows=True)
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
@@ -106,7 +107,8 @@ class FitIncidentSpectrumTest(unittest.TestCase):
             OutputWorkspace="fit_wksp",
             BinningForCalc=binning_for_calc,
             BinningForFit=binning_for_fit,
-            FitSpectrumWith="HowellsFunction")
+            FitSpectrumWith="HowellsFunction",
+            SetRethrows=True)
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
