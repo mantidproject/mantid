@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import systemtesting
 import shutil
-import platform
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -124,10 +123,10 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
-        if _current_os_has_gsl_lvl2():
-            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
-        else:
+        if systemtesting.using_gsl_v1():
             return self.focus_results.name(), "ISIS_Powder-GEM87618_groupedGSAS1.nxs"
+        else:
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
 
     def cleanup(self):
         try:
@@ -215,8 +214,3 @@ def _try_delete(path):
             os.remove(path)
     except OSError:
         print("Could not delete output file at: ", path)
-
-
-def _current_os_has_gsl_lvl2():
-    """ Check whether the current OS should be running GSLv2 """
-    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''

@@ -14,7 +14,7 @@ from mantidqt.widgets.functionbrowser import FunctionBrowser
 
 ui_fitting_tab, _ = load_ui(__file__, "fitting_tab.ui")
 allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate gradient (Polak-Ribiere imp.)',
-                      'Damped GaussNewton', 'FABADA', 'Levenberg-MarquardtMD', 'Simplex',
+                      'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
                       'SteepestDescent', 'Trust Region']
 
 

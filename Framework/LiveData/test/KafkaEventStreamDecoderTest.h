@@ -521,7 +521,8 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", 0);
+    return std::make_unique<KafkaEventStreamDecoder>(broker, "", "", "", "", "",
+                                                     0);
   }
 
   void

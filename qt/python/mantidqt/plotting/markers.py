@@ -11,7 +11,6 @@ from qtpy.QtWidgets import QApplication
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-
 MARKER_SENSITIVITY = 3
 
 
@@ -22,7 +21,8 @@ class HorizontalMarker(QObject):
 
     y_moved = Signal(float)
 
-    def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-'):
+    def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-',
+                 move_cursor=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -37,16 +37,23 @@ class HorizontalMarker(QObject):
         :param line_style: An MPL line style value.
         """
         super(HorizontalMarker, self).__init__()
+        self.canvas = canvas
         self.axis = canvas.figure.get_axes()[0]
         self.y = y
         self.x0 = x0
         self.x1 = x1
         x0, x1 = self._get_x0_x1()
         path = Path([(x0, y), (x1, y)], [Path.MOVETO, Path.LINETO])
-        self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
-                               linewidth=line_width, linestyle=line_style, animated=True)
+        self.patch = PathPatch(path,
+                               facecolor='None',
+                               edgecolor=color,
+                               picker=picker_width,
+                               linewidth=line_width,
+                               linestyle=line_style,
+                               animated=True)
         self.axis.add_patch(self.patch)
         self.is_moving = False
+        self.move_cursor = move_cursor
 
     def _get_x0_x1(self):
         """
@@ -168,8 +175,15 @@ class HorizontalMarker(QObject):
         if self.x1 is not None and x > self.x1:
             return None
         if self.is_moving or self.is_above(x, y):
-            return QCursor(Qt.SizeVerCursor)
+            return self.move_cursor if self.move_cursor is not None else QCursor(Qt.SizeVerCursor)
         return None
+
+    def set_move_cursor(self, cursor, x_pos, y_pos):
+        """Set the style of the cursor to use when the marker is moving"""
+        if cursor is not None:
+            cursor = QCursor(cursor)
+        self.move_cursor = cursor
+        self.override_cursor(x_pos, y_pos)
 
 
 class VerticalMarker(QObject):
@@ -179,7 +193,8 @@ class VerticalMarker(QObject):
 
     x_moved = Signal(float)
 
-    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-'):
+    def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-',
+                 move_cursor=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -194,7 +209,8 @@ class VerticalMarker(QObject):
         :param line_style: An MPL line style value.
         """
         super(VerticalMarker, self).__init__()
-        self.ax = canvas.figure.get_axes()[0]
+        self.canvas = canvas
+        self.axis = canvas.figure.get_axes()[0]
         self.x = x
         self.y0 = y0
         self.y1 = y1
@@ -202,8 +218,9 @@ class VerticalMarker(QObject):
         path = Path([(x, y0), (x, y1)], [Path.MOVETO, Path.LINETO])
         self.patch = PathPatch(path, facecolor='None', edgecolor=color, picker=picker_width,
                                linewidth=line_width, linestyle=line_style, animated=True)
-        self.ax.add_patch(self.patch)
+        self.axis.add_patch(self.patch)
         self.is_moving = False
+        self.move_cursor = move_cursor
 
     def _get_y0_y1(self):
         """
@@ -211,7 +228,7 @@ class VerticalMarker(QObject):
         :return: Tuple y0, y1.
         """
         if self.y0 is None or self.y1 is None:
-            y0, y1 = self.ax.get_ylim()
+            y0, y1 = self.axis.get_ylim()
         if self.y0 is not None:
             y0 = self.y0
         if self.y1 is not None:
@@ -232,7 +249,7 @@ class VerticalMarker(QObject):
         vertices = self.patch.get_path().vertices
         vertices[0] = self.x, y0
         vertices[1] = self.x, y1
-        self.ax.draw_artist(self.patch)
+        self.axis.draw_artist(self.patch)
 
     def set_color(self, color):
         """
@@ -318,7 +335,7 @@ class VerticalMarker(QObject):
         :param y: A y coordinate.
         :return: QCursor or None.
         """
-        return QCursor(Qt.SizeHorCursor)
+        return self.move_cursor if self.move_cursor is not None else QCursor(Qt.SizeHorCursor)
 
     def override_cursor(self, x, y):
         """
@@ -334,6 +351,13 @@ class VerticalMarker(QObject):
         if self.is_moving or self.is_above(x, y):
             return self.get_cursor_at_y(y)
         return None
+
+    def set_move_cursor(self, cursor, x_pos, y_pos):
+        """Set the style of the cursor to use when the marker is moving"""
+        if cursor is not None:
+            cursor = QCursor(cursor)
+        self.move_cursor = cursor
+        self.override_cursor(x_pos, y_pos)
 
 
 class CentreMarker(VerticalMarker):
@@ -613,7 +637,8 @@ class SingleMarker(QObject):
     """
         A marker used to mark out a vertical or horizontal line on a plot.
     """
-    def __init__(self, canvas, color, position, lower_bound, upper_bound, marker_type='XSingle', line_style='-'):
+    def __init__(self, canvas, color, position, lower_bound, upper_bound, name=None, marker_type='XSingle',
+                 line_style='-'):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -628,6 +653,11 @@ class SingleMarker(QObject):
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
         self.marker_type = marker_type
+        self.canvas = canvas
+        self.annotations = {}
+        self.name = name
+        self.style = line_style
+        self.color = color
         if self.marker_type == 'XSingle':
             self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
         elif self.marker_type == 'YSingle':
@@ -647,11 +677,28 @@ class SingleMarker(QObject):
         """
         self.marker.remove()
 
+    def set_style(self, style):
+        """
+        Change the marker style.
+        :param style: a valid matplotlib style (e.g. 'solid', 'dotted'...)
+        """
+        position = self.marker.get_position()
+        self.style = style
+        if self.marker_type == 'XSingle':
+            self.marker.remove()
+            self.marker = VerticalMarker(self.canvas, self.color, position, line_style=style)
+        elif self.marker_type == 'YSingle':
+            self.marker.remove()
+            self.marker = HorizontalMarker(self.canvas, self.color, position, line_style=style)
+        else:
+            raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
+
     def set_color(self, color):
         """
         Set the colour of the marker.
         """
         self.marker.set_color(color)
+        self.color = color
 
     def set_position(self, position):
         """
@@ -660,7 +707,9 @@ class SingleMarker(QObject):
         :return True if the value was changed.
         """
         if self.upper_bound >= position >= self.lower_bound:
+            self.remove_name()
             self.marker.set_position(position)
+            self.add_name()
             self.redraw()
             return True
         return False
@@ -729,6 +778,82 @@ class SingleMarker(QObject):
                 return False, self.lower_bound
         return True, position
 
+    def add_annotate(self, text):
+        """
+        Add an annotation near the marker and redraw the canvas.
+        :param text: annotation text
+        """
+        if text is None:
+            return
+
+        marker_in_scope = True
+        x_lower, x_upper = self.marker.axis.get_xlim()
+        y_lower, y_upper = self.marker.axis.get_ylim()
+        if self.marker_type == 'YSingle':
+            rotation = 0
+            x_pos = 0.98
+            y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
+            if not y_lower <= self.marker.y <= y_upper:
+                marker_in_scope = False
+            horizontal = 'right'
+            vertical = 'bottom'
+        else:
+            rotation = -90
+            x_pos = self.relative(self.marker.x, x_lower, x_upper)
+            y_pos = 0.95
+            if not x_lower <= self.marker.x <= x_upper:
+                marker_in_scope = False
+            horizontal = 'left'
+            vertical = 'top'
+
+        if marker_in_scope:
+            self.annotations[text] = self.marker.axis.annotate(text,
+                                                               xy=(x_pos, y_pos),
+                                                               xycoords="axes fraction",
+                                                               ha=horizontal,
+                                                               va=vertical,
+                                                               rotation=rotation)
+        else:
+            self.annotations[text] = None
+        self.canvas.draw()
+
+    def remove_annotate(self, label):
+        """
+        Remove the label from the canvas
+        """
+        if label not in self.annotations or self.annotations[label] is None:
+            return
+
+        try:
+            self.annotations[label].remove()
+        except:
+            return
+
+    def add_all_annotations(self):
+        """Add all previously added annotations"""
+        for label in self.annotations:
+            self.add_annotate(label)
+
+    def remove_all_annotations(self):
+        """Remove all annotations from plot"""
+        for label in self.annotations:
+            self.remove_annotate(label)
+
+    def add_name(self):
+        """Only add the annotation for the name of the marker"""
+        self.add_annotate(self.name)
+
+    def remove_name(self):
+        """Remove the annotation for the name of the marker"""
+        self.remove_annotate(self.name)
+
+    def set_name(self, name):
+        """Update the name of the marker by deleting the old one first"""
+        self.remove_name()
+        del self.annotations[self.name]
+        self.name = name
+        self.add_name()
+
     def mouse_move_start(self, x, y):
         """
         Start moving this marker if (x, y) is above it. Ignore otherwise.
@@ -739,6 +864,9 @@ class SingleMarker(QObject):
         if self.marker.is_above(x, y) and inside_bounds:
             self.marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
+
+        if self.is_marker_moving():
+            self.remove_name()
 
     def mouse_move(self, x, y=None):
         """
@@ -771,6 +899,25 @@ class SingleMarker(QObject):
         :return: True if the marker is being moved.
         """
         return self.marker.is_marker_moving()
+
+    def is_above(self, x, y):
+        """Check if the cursor is above the marker"""
+        if self.marker.is_above(x, y):
+            return True
+        else:
+            return False
+
+    def relative(self, value, lower, upper):
+        if not lower <= value <= upper:
+            return 0.0
+
+        return (value - lower) / (upper - lower)
+
+    def set_move_cursor(self, cursor, x_pos, y_pos):
+        """
+        Set the style of cursor to be used while moving the marker
+        """
+        self.marker.set_move_cursor(cursor, x_pos, y_pos)
 
 
 class RangeMarker(QObject):

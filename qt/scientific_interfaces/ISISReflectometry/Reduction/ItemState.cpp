@@ -14,6 +14,9 @@ ItemState::ItemState()
     : m_state(State::ITEM_NOT_STARTED), m_message(boost::none),
       m_progress(0.0) {}
 
+ItemState::ItemState(State state)
+    : m_state(state), m_message(boost::none), m_progress(0.0) {}
+
 State ItemState::state() const { return m_state; }
 
 std::string ItemState::message() const {

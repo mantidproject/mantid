@@ -78,6 +78,7 @@ private:
   /// of m_presenter should be avoided - use m_notifyee instead.
   std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
+  int m_batchIndex;
 
   friend class Encoder;
   friend class Decoder;
