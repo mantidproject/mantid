@@ -38,4 +38,7 @@ Bugfixes
 - A crash in the Fit Browser when the default peak was not a registered peak type has been fixed.
 - Fixed an issue where you could not edit table workspaces to enter negative numbers.
 
+
+- Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
+
 :ref:`Release 4.2.0 <v4.2.0>`
