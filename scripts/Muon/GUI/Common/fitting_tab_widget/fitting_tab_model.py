@@ -201,7 +201,7 @@ class FittingTabModel(object):
             data_ws_name = parameter_dict['InputWorkspace']
         except KeyError:
             return
-        guess_ws_name = '{}_guess'.format(data_ws_name)
+        guess_ws_name = '__{}_guess'.format(data_ws_name)
 
         # Handle case of function removed
         if fit_function is None and plot_guess:

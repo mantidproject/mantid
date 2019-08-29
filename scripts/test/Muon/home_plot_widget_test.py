@@ -153,7 +153,7 @@ class HomeTabPlotPresenterTest(unittest.TestCase):
         self.model.remove_workpace_from_plot.assert_called_with('ws_guess')
         self.model.add_workspace_to_plot.assert_called_with('ws_guess',
                                                             workspace_index=1,
-                                                            label='guess')
+                                                            label='Fit Function Guess')
 
     def test_handle_plot_guess_changed_adds_guess_to_plot(self):
         self.context.fitting_context.plot_guess = True
@@ -165,7 +165,7 @@ class HomeTabPlotPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.model.add_workspace_to_plot.call_count)
         self.model.add_workspace_to_plot.assert_called_with('ws_guess',
                                                             workspace_index=1,
-                                                            label='guess')
+                                                            label='Fit Function Guess')
 
 
 if __name__ == '__main__':

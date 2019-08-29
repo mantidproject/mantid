@@ -30,8 +30,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._model = model
         self.context = context
         self._view.on_plot_button_clicked(self.handle_data_updated)
-        self._view.on_rebin_options_changed(
-            self.handle_use_raw_workspaces_changed)
+        self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
 
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
@@ -145,6 +144,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                 any([workspace in combined_ws_list
                      for workspace in self.context.fitting_context.fit_list[-1].input_workspaces]):
             self.handle_fit_completed()
+
+        self.handle_plot_guess_changed()
 
     def handle_fit_completed(self):
         """
@@ -266,6 +267,6 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         if self.context.fitting_context.plot_guess and self.context.fitting_context.guess_ws is not None:
             self._model.add_workspace_to_plot(self.context.fitting_context.guess_ws,
                                               workspace_index=1,
-                                              label='guess')
+                                              label='Fit Function Guess')
 
         self._model.force_redraw()
