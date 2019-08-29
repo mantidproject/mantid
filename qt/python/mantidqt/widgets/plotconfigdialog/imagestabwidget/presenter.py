@@ -57,10 +57,10 @@ class ImagesTabWidgetPresenter:
         self.view.replace_selected_image_name(new_name)
 
     def update_view(self):
-        # self.view.update(ImageProperties.from_image(self.get_selected_image()))
         img_props = ImageProperties.from_image(self.get_selected_image())
         self.view.set_label(img_props.label)
         self.view.set_colormap(img_props.colormap)
+        self.view.set_reverse_colormap(img_props.reverse_colormap)
         self.view.set_min_value(img_props.vmin)
         self.view.set_max_value(img_props.vmax)
         if img_props.interpolation:
