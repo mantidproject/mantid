@@ -665,6 +665,12 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEquals(self.presenter.context.get_names_of_workspaces_to_fit.call_count,2)
         self.assertEquals(self.presenter.selected_data, "test")
 
+    def test_fabada_is_not_an_allowed_minimizer(self):
+        # In muon analysis FABADA minimizer cannot run as it requires a value of MaxIterations that is too high
+        # Furthermore it is not needed in this context (see issue #26478)
+        self.view.setup_fit_options_table()
+        self.assertEqual(-1, self.view.minimizer_combo.findText('FABADA'))
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
