@@ -56,8 +56,8 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         return term1 + term2
 
     def test_fit_cubic_spline_with_gauss_conv_produces_fit_with_same_range_as_binning_for_calc(self):
-        binning_for_calc = "0.2,0.1,3.0"
-        binning_for_fit = "0.2,0.1,4.0"
+        binning_for_calc = "0.2,0.01,3.0"
+        binning_for_fit = "0.2,0.01,4.0"
         alg_test = run_algorithm(
             "FitIncidentSpectrum",
             InputWorkspace=self.incident_wksp,
@@ -67,11 +67,11 @@ class FitIncidentSpectrumTest(unittest.TestCase):
             FitSpectrumWith="GaussConvCubicSpline")
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.01).all())
 
     def test_fit_cubic_spline_produces_fit_with_same_range_as_binning_for_calc(self):
-        binning_for_calc = "0.2,0.1,3.0"
-        binning_for_fit = "0.2,0.1,4.0"
+        binning_for_calc = "0.2,0.01,3.0"
+        binning_for_fit = "0.2,0.01,4.0"
         alg_test = run_algorithm(
             "FitIncidentSpectrum",
             InputWorkspace=self.incident_wksp,
@@ -84,8 +84,8 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
     def test_fit_cubic_spline_via_mantid_produces_fit_with_same_range_as_binning_for_calc(self):
-        binning_for_calc = "0.2,0.1,3.0"
-        binning_for_fit = "0.2,0.1,4.0"
+        binning_for_calc = "0.2,0.01,3.0"
+        binning_for_fit = "0.2,0.01,4.0"
         alg_test = run_algorithm(
             "FitIncidentSpectrum",
             InputWorkspace=self.incident_wksp,
@@ -98,8 +98,8 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
 
     def test_fit_howells_function_produces_fit_with_same_range_as_binning_for_calc(self):
-        binning_for_calc = "0.2,0.1,3.0"
-        binning_for_fit = "0.2,0.1,4.0"
+        binning_for_calc = "0.2,0.01,3.0"
+        binning_for_fit = "0.2,0.01,4.0"
         alg_test = run_algorithm(
             "FitIncidentSpectrum",
             InputWorkspace=self.incident_wksp,
@@ -109,7 +109,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
             FitSpectrumWith="HowellsFunction")
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
-        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
+        self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.01).all())
 
     def test_FitIncidentSpectrum_verification_raises_issue_when_calc_bin_too_low(self):
         binning_for_calc = "0.0,0.1,4.0"

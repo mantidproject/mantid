@@ -172,9 +172,15 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         avg, var = moving_average(y_fit)
         spline_fit = interpolate.UnivariateSpline(x_fit, y_fit, w=1. / np.sqrt(var))
-        spline_fit_prime = spline_fit.derivative()
         fit = spline_fit(x)
-        fit_prime = spline_fit_prime(x)
+        if hasattr(spline_fit, "derivative"):
+            spline_fit_prime = spline_fit.derivative()
+            fit_prime = spline_fit_prime(x)
+        else:
+            index = np.arange(len(x))
+            fit_prime = np.empty(len(x))
+            for pos in index:
+                fit_prime[pos] = spline_fit.derivatives(x[pos])[0]
         return fit, fit_prime
 
     def fit_cubic_spline(self, x_fit, y_fit, x, s=1e15):
