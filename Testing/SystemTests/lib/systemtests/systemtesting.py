@@ -1319,8 +1319,6 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, 
                               exclude_in_pr_builds=options.exclude_in_pr_builds,
                               showSkipped=options.showskipped,
                               output_on_failure=options.output_on_failure,
-                              process_number=process_number,
-                              ncores=options.ncores,
                               clean=options.clean,
                               list_of_tests=local_test_list)
 
