@@ -672,9 +672,9 @@ class SingleMarker(QObject):
         y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
             self.label_x_pos = 0.98
-            self.label_y_pos = self.relative(self.marker.y, y_lower, y_upper) + 0.005
+            self.label_y_pos = 0.005
         else:
-            self.label_x_pos = self.relative(self.marker.x, x_lower, x_upper)
+            self.label_x_pos = 0.0
             self.label_y_pos = 0.95
 
     def set_label_visible(self, is_visible):
@@ -684,11 +684,21 @@ class SingleMarker(QObject):
         self.add_all_annotations()
 
     def set_label_position(self, x_pos, y_pos):
-        """ Updates the position of a label (coordinates are relative, i.e. 0 <= pos <= 1) """
+        """
+        Updates the position of a label (coordinates are relative, i.e. 0 <= pos <= 1)
+        """
         self.remove_all_annotations()
+        old_x = self.label_x_pos
+        old_y = self.label_y_pos
         self.label_x_pos = x_pos
         self.label_y_pos = y_pos
-        self.add_all_annotations()
+        try:
+            self.add_all_annotations()
+        except RuntimeError as err:
+            self.label_x_pos = old_x
+            self.label_y_pos = old_y
+            self.add_all_annotations()
+            raise RuntimeError(str(err))
 
     def redraw(self):
         """
@@ -819,21 +829,31 @@ class SingleMarker(QObject):
         x_lower, x_upper = self.marker.axis.get_xlim()
         y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
+            x_pos = self.label_x_pos
+            y_pos = self.relative(self.marker.y, y_lower, y_upper) + self.label_y_pos
             rotation = 0
             if not y_lower <= self.marker.y <= y_upper:
                 marker_in_scope = False
             horizontal = 'right'
             vertical = 'bottom'
         else:
+            x_pos = self.relative(self.marker.x, x_lower, x_upper) + self.label_x_pos
+            y_pos = self.label_y_pos
             rotation = -90
             if not x_lower <= self.marker.x <= x_upper:
                 marker_in_scope = False
             horizontal = 'left'
             vertical = 'top'
+        if not 0.0 <= x_pos <= 1.0:
+            raise RuntimeError('The horizontal position of the label is relative.\nmust be 0 < pos < 1. Got {} instead'
+                               .format(x_pos))
+        if not 0.0 <= y_pos <= 1.0:
+            raise RuntimeError('The vertical position of the label is relative.\nmust be 0 < pos < 1. Got {} instead'
+                               .format(y_pos))
 
         if marker_in_scope:
             self.annotations[text] = self.marker.axis.annotate(text,
-                                                               xy=(self.label_x_pos, self.label_y_pos),
+                                                               xy=(x_pos, y_pos),
                                                                xycoords="axes fraction",
                                                                ha=horizontal,
                                                                va=vertical,
@@ -886,7 +906,7 @@ class SingleMarker(QObject):
         :param y: An y mouse coordinate.
         """
         inside_bounds, _ = self.is_inside_bounds(x, y)
-        if self.marker.is_above(x, y) and inside_bounds:
+        if self.marker.is_above(x, y) and inside_bounds and self.draggable:
             self.marker.mouse_move_start(x, y)
             QApplication.setOverrideCursor(self.marker.override_cursor(x, y))
 

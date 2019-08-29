@@ -205,7 +205,7 @@ class MarkerEditor(QWidget):
         self.widget.display_label.setChecked(marker.label_visible)
         self.widget.label_x_pos.setText(str(marker.label_x_pos))
         self.widget.label_y_pos.setText(str(marker.label_y_pos))
-        self.draggable.setChecked(marker.draggable)
+        self.fixed_marker.setChecked(not marker.draggable)
 
     def update_marker(self, marker):
         """
@@ -225,17 +225,13 @@ class MarkerEditor(QWidget):
             raise RuntimeError("Invalid label '{}'".format(new_name))
 
         marker.set_position(float(self.widget.position.text()))
-        marker.draggable = self.widget.draggable.isChecked()
+        marker.draggable = not self.widget.fixed_marker.isChecked()
         marker.set_style(self.widget.style.currentText())
         marker.set_color(self.colors.get(self.widget.color.currentText(), 'C2'))
         marker.set_label_visible(self.widget.display_label.isChecked())
 
         x_pos = float(self.widget.label_x_pos.text())
         y_pos = float(self.widget.label_y_pos.text())
-        if not 0.0 <= x_pos <= 1.0:
-            raise RuntimeError('The horizontal position is a relative value, must be in range 0,1')
-        if not 0.0 <= y_pos <= 1.0:
-            raise RuntimeError('The vertical position is a relative value, must be in range 0,1')
         marker.set_label_position(x_pos, y_pos)
 
 
