@@ -64,8 +64,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
             OutputWorkspace="fit_wksp",
             BinningForCalc=binning_for_calc,
             BinningForFit=binning_for_fit,
-            FitSpectrumWith="GaussConvCubicSpline",
-            SetRethrows=True)
+            FitSpectrumWith="GaussConvCubicSpline")
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
@@ -107,8 +106,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
             OutputWorkspace="fit_wksp",
             BinningForCalc=binning_for_calc,
             BinningForFit=binning_for_fit,
-            FitSpectrumWith="HowellsFunction",
-            SetRethrows=True)
+            FitSpectrumWith="HowellsFunction")
         self.assertTrue(alg_test.isExecuted())
         fit_wksp = AnalysisDataService.retrieve("fit_wksp")
         self.assertEqual(fit_wksp.readX(0).all(), np.arange(0.2, 3, 0.1).all())
@@ -117,7 +115,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         binning_for_calc = "0.0,0.1,4.0"
         binning_for_fit = "0.2,0.1,4.0"
         self.assertRaises(RuntimeError,
-                          FitIncidentSpectrum,
+                          self.agl_instance,
                           InputWorkspace=self.incident_wksp,
                           OutputWorkspace="fit_wksp",
                           BinningForCalc=binning_for_calc,
@@ -128,7 +126,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         binning_for_calc = "0.2,0.1,5.0"
         binning_for_fit = "0.2,0.1,4.0"
         self.assertRaises(RuntimeError,
-                          FitIncidentSpectrum,
+                          self.agl_instance,
                           InputWorkspace=self.incident_wksp,
                           OutputWorkspace="fit_wksp",
                           BinningForCalc=binning_for_calc,
@@ -139,7 +137,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         binning_for_calc = "0.2,0.1,4.0"
         binning_for_fit = "0.0,0.1,4.0"
         self.assertRaises(RuntimeError,
-                          FitIncidentSpectrum,
+                          self.agl_instance,
                           InputWorkspace=self.incident_wksp,
                           OutputWorkspace="fit_wksp",
                           BinningForCalc=binning_for_calc,
@@ -150,7 +148,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         binning_for_calc = "0.2,0.1,4.0"
         binning_for_fit = "0.2,0.1,5.0"
         self.assertRaises(RuntimeError,
-                          FitIncidentSpectrum,
+                          self.agl_instance,
                           InputWorkspace=self.incident_wksp,
                           OutputWorkspace="fit_wksp",
                           BinningForCalc=binning_for_calc,
@@ -161,7 +159,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         binning_for_calc = "0.2,4.0,0.1"
         binning_for_fit = "0.2,0.1,4.0"
         self.assertRaises(RuntimeError,
-                          FitIncidentSpectrum,
+                          self.agl_instance,
                           InputWorkspace=self.incident_wksp,
                           OutputWorkspace="fit_wksp",
                           BinningForCalc=binning_for_calc,
@@ -172,7 +170,7 @@ class FitIncidentSpectrumTest(unittest.TestCase):
         binning_for_calc = "0.2,0.1,4.0"
         binning_for_fit = "0.2,4.0,0.1"
         self.assertRaises(RuntimeError,
-                          FitIncidentSpectrum,
+                          self.agl_instance,
                           InputWorkspace=self.incident_wksp,
                           OutputWorkspace="fit_wksp",
                           BinningForCalc=binning_for_calc,
