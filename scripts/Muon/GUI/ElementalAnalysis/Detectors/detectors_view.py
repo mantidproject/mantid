@@ -10,12 +10,10 @@ from qtpy import QtWidgets
 
 from collections import OrderedDict
 
-
 from Muon.GUI.Common.checkbox import Checkbox
 
 
 class DetectorsView(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(DetectorsView, self).__init__(parent)
 

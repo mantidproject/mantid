@@ -46,18 +46,17 @@ class subplotContext(object):
         for label in list(self._labelObjects.keys()):
             self.add_annotate(self._labelObjects[label])
 
-    def addLine(self, ws, specNum=1, distribution=True):
+    def addLine(self, ws, spec_num=1, distribution=True, color=None):
+        if color is None:
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution}
+        else:
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
+
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot,
-                                         ws,
-                                         specNum=specNum,
-                                         distribution=distribution)
+        line, = plots.plotfunctions.plot(self._subplot, ws, **plot_kwargs)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
-                                                                      ws,
-                                                                      specNum=specNum,
-                                                                      label=label)
+            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, ws, **plot_kwargs)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
@@ -65,7 +64,7 @@ class subplotContext(object):
         else:
             # line will be a list - will include error bars
             self._lines[label] = [line]
-        self._specNum[label] = specNum
+        self._specNum[label] = spec_num
         # store the ws as the key and have a list of labels that use that ws
         if ws not in self._ws.keys():
             self._ws[ws] = [label]
