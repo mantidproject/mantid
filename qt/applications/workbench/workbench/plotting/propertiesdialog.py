@@ -203,8 +203,8 @@ class MarkerEditor(QWidget):
         self.widget.style.setCurrentText(str(marker.style))
         self.widget.color.setCurrentText(_color)
         self.widget.display_label.setChecked(marker.label_visible)
-        self.widget.label_x_pos.setText(str(marker.label_x_pos))
-        self.widget.label_y_pos.setText(str(marker.label_y_pos))
+        self.widget.label_x_pos.setText(str(marker.label_x_offset))
+        self.widget.label_y_pos.setText(str(marker.label_y_offset))
         self.fixed_marker.setChecked(not marker.draggable)
 
     def update_marker(self, marker):

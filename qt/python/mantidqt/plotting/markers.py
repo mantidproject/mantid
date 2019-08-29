@@ -22,7 +22,7 @@ class HorizontalMarker(QObject):
     y_moved = Signal(float)
 
     def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style='-',
-                 move_cursor=None):
+                 move_cursor=None, axis=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -38,7 +38,10 @@ class HorizontalMarker(QObject):
         """
         super(HorizontalMarker, self).__init__()
         self.canvas = canvas
-        self.axis = canvas.figure.get_axes()[0]
+        if axis is None:
+            self.axis = canvas.figure.get_axes()[0]
+        else:
+            self.axis = axis
         self.y = y
         self.x0 = x0
         self.x1 = x1
@@ -194,7 +197,7 @@ class VerticalMarker(QObject):
     x_moved = Signal(float)
 
     def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style='-',
-                 move_cursor=None):
+                 move_cursor=None, axis=None):
         """
         Init the marker.
         :param canvas: A MPL canvas.
@@ -210,7 +213,10 @@ class VerticalMarker(QObject):
         """
         super(VerticalMarker, self).__init__()
         self.canvas = canvas
-        self.axis = canvas.figure.get_axes()[0]
+        if axis is None:
+            self.axis = canvas.figure.get_axes()[0]
+        else:
+            self.axis = axis
         self.x = x
         self.y0 = y0
         self.y1 = y1
@@ -638,7 +644,7 @@ class SingleMarker(QObject):
         A marker used to mark out a vertical or horizontal line on a plot.
     """
     def __init__(self, canvas, color, position, lower_bound, upper_bound, name=None, marker_type='XSingle',
-                 line_style='-'):
+                 line_style='-', axis=None):
         """
         Init the marker.
         :param canvas: The MPL canvas.
@@ -660,16 +666,15 @@ class SingleMarker(QObject):
         self.style = line_style
         self.color = color
         self.draggable = True
+        self.axis = axis
         if self.marker_type == 'XSingle':
-            self.marker = VerticalMarker(canvas, color, position, line_style=line_style)
+            self.marker = VerticalMarker(canvas, color, position, line_style=line_style, axis=self.axis)
         elif self.marker_type == 'YSingle':
-            self.marker = HorizontalMarker(canvas, color, position, line_style=line_style)
+            self.marker = HorizontalMarker(canvas, color, position, line_style=line_style, axis=self.axis)
         else:
             raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
 
         # Set default label position
-        x_lower, x_upper = self.marker.axis.get_xlim()
-        y_lower, y_upper = self.marker.axis.get_ylim()
         if self.marker_type == 'YSingle':
             self.label_x_offset = 0.98
             self.label_y_offset = 0.005
@@ -721,10 +726,10 @@ class SingleMarker(QObject):
         self.style = style
         if self.marker_type == 'XSingle':
             self.marker.remove()
-            self.marker = VerticalMarker(self.canvas, self.color, position, line_style=style)
+            self.marker = VerticalMarker(self.canvas, self.color, position, line_style=style, axis=self.axis)
         elif self.marker_type == 'YSingle':
             self.marker.remove()
-            self.marker = HorizontalMarker(self.canvas, self.color, position, line_style=style)
+            self.marker = HorizontalMarker(self.canvas, self.color, position, line_style=style, axis=self.axis)
         else:
             raise RuntimeError("Incorrect SingleMarker type provided. Types are XSingle or YSingle.")
 
