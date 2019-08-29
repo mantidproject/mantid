@@ -7,21 +7,9 @@
 
 from __future__ import print_function, absolute_import
 
-from qtpy.QtGui import QCloseEvent
-import matplotlib
 import unittest
 import json
-import pprint
 
-from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import start_qapplication
-from testhelpers import assertRaisesNothing
-
-from Muon.GUI.ElementalAnalysis.elemental_analysis import ElementalAnalysisGui
-from Muon.GUI.ElementalAnalysis.elemental_analysis import gen_name
-from MultiPlotting.multi_plotting_widget import MultiPlotWindow
-from MultiPlotting.multi_plotting_widget import MultiPlotWidget
-from MultiPlotting.label import Label
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import _elements
 from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import valid_data
@@ -63,3 +51,6 @@ class PeakDataFileTest(unittest.TestCase):
             if from_file is not None and from_file['A'] is not None:
                 self.assertAlmostEqual(element[5], from_file['A'])
 
+
+if __name__ == '__main__':
+    unittest.main()
