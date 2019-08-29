@@ -14,6 +14,7 @@ from qtpy.QtGui import QColor, QPalette, QRegExpValidator
 from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
                             QColorDialog)
 
+
 def convert_color_to_hex(color):
     """Convert a matplotlib color to its hex form"""
     try:
