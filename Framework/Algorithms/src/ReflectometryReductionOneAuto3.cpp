@@ -487,7 +487,7 @@ ReflectometryReductionOneAuto3::getDetectorNames(MatrixWorkspace_sptr inputWS) {
         detectors.push_back(detectorName);
       }
     }
-  } catch (boost::bad_lexical_cast &) {
+  } catch (const boost::bad_lexical_cast &) {
     throw std::runtime_error("Invalid processing instructions: " +
                              m_processingInstructionsWorkspaceIndex);
   }
@@ -1085,7 +1085,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::getFloodWorkspace() {
         // If the first part is a number treat all parts as run numbers
         boost::lexical_cast<size_t>(parts.front());
         fileName = instrument->getName() + Strings::toString(parts);
-      } catch (boost::bad_lexical_cast) {
+      } catch (const boost::bad_lexical_cast &) {
         // Do nothing fileName == floodRunParam
       }
       auto alg = createChildAlgorithm("CreateFloodWorkspace");

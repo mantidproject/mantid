@@ -80,6 +80,8 @@ public:
   void setSelectorActive(bool active);
   bool selectorActive() const;
 
+  bool hasCurve(const QString &lineName) const;
+
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);

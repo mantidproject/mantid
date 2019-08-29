@@ -51,6 +51,10 @@ private:
   double m_thetaTolerance;
   ReductionJobs m_reductionJobs;
   std::vector<MantidWidgets::Batch::RowLocation> m_selectedRowLocations;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 template <typename T>

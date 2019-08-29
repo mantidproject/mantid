@@ -23,6 +23,8 @@ public:
   MOCK_METHOD0(newBatch, IBatchView *());
   MOCK_METHOD1(subscribe, void(MainWindowSubscriber *));
   MOCK_METHOD1(removeBatch, void(int));
+  MOCK_METHOD0(disableSaveAndLoadBatch, void());
+  MOCK_METHOD0(enableSaveAndLoadBatch, void());
   MOCK_CONST_METHOD0(batches, std::vector<IBatchView *>());
   ~MockMainWindowView() override{};
 };

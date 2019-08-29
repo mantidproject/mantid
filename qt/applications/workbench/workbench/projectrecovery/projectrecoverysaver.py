@@ -16,7 +16,7 @@ from threading import Timer
 from mantid.api import AnalysisDataService as ADS, WorkspaceGroup, AlgorithmManager
 from mantid.kernel import logger, UsageService
 from mantidqt.project.projectsaver import ProjectSaver
-from workbench.app.windowfinder import find_all_windows_that_are_savable
+from workbench.utils.windowfinder import find_all_windows_that_are_savable
 
 
 # To ignore an algorithm in project recovery please put it's name here, this is done to stop these algorithm

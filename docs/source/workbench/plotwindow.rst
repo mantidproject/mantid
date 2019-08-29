@@ -27,10 +27,22 @@ Plot Window Context Menu
 ------------------------
 
 .. image:: ../images/Workbench/PlotWindow/PlotWindowContextMenu.png
-    :scale: 70%
+    :height: 400px
 
-Right-clicking within your plot will open the plot context menu. From this menu
-you can set the axes' scales to linear or logarithmic.
+Right-clicking within your plot will open the plot context menu.
+From this menu you can:
+
+- set the axes' scales to linear or logarithmic.
+- add or remove bin width normalization (by default the data is normalized)
+- add and edit vertical/horizontal markers
+
+.. image:: ../images/Workbench/PlotWindow/MarkerContextMenu.png
+    :height: 400px
+
+When right clicking on top of a marker the menu will be replaced by one allowing the deletion or editing of the marker.
+To edit a marker the following window will appear, allowing to change position, name, line colour and line style.
+
+.. image:: ../images/Workbench/PlotWindow/MarkerEditWindow.png
 
 
 Figure Options

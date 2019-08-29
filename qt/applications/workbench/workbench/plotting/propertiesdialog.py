@@ -16,8 +16,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from matplotlib.image import AxesImage
 from qtpy.QtGui import QDoubleValidator, QIcon
-from qtpy.QtWidgets import QDialog
-
+from qtpy.QtWidgets import QDialog, QWidget
 
 SYMLOG_LIN_THRESHOLD = 0.01
 
@@ -198,3 +197,114 @@ class ColorbarAxisEditor(AxisEditor):
         memento.grid = False
 
         self._fill(memento)
+
+
+class MarkerEditor(QWidget):
+    def __init__(self, filename, valid_style, valid_colors):
+        """
+        Widget to edit a marker properties
+        :param filename: name of the ui file for this widget
+        :param valid_style: list of valid line styles (eg. 'solid', 'dashed'...) used by matplotlib
+        :param valid_colors: dictionary of valid colours
+            keys = name of the colour
+            value = corresponding matplotlib name (eg. {'red': 'C4'})
+        """
+        super(MarkerEditor, self).__init__()
+        self.widget = load_ui(__file__, filename, baseinstance=self)
+        self.widget.position.setValidator(QDoubleValidator())
+        self.colors = valid_colors
+
+        self.widget.style.addItems(valid_style)
+        self.widget.color.addItems(list(valid_colors.keys()))
+
+    def set_defaults(self, marker):
+        """
+        Set the values of all fields to the ones of the marker
+        """
+        _color = [name for name, symbol in self.colors.items() if symbol == marker.color][0]
+        self.widget.name.setText(str(marker.name))
+        self.widget.position.setText(str(marker.get_position()))
+        self.widget.style.setCurrentText(str(marker.style))
+        self.widget.color.setCurrentText(_color)
+
+    def update_marker(self, marker):
+        """
+        Update the properties of the marker with the values from the widget
+        """
+        old_name = str(marker.name)
+        try:
+            marker.set_name(self.widget.name.text())
+        except:
+            marker.set_name(old_name)
+            raise RuntimeError("Invalid label '{}'".format(self.widget.name.text()))
+
+        marker.set_position(float(self.widget.position.text()))
+        marker.set_style(self.widget.style.currentText())
+        marker.set_color(self.colors.get(self.widget.color.currentText(), 'C2'))
+
+
+class SingleMarkerEditor(PropertiesEditorBase):
+    def __init__(self, canvas, marker, valid_style, valid_colors):
+        """
+        Edit the properties of a single marker.
+        :param canvas: A reference to the target canvas
+        :param marker: The marker to be edited
+        :param valid_style: list of valid line styles (eg. 'solid', 'dashed'...) used by matplotlib
+        :param valid_colors: dictionary of valid colours
+        """
+        super(SingleMarkerEditor, self).__init__('singlemarkereditor.ui', canvas)
+        self.ui.errors.hide()
+
+        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors)
+        layout = self.ui.layout()
+        layout.addWidget(self._widget, 1, 0)
+
+        self.marker = marker
+        self._widget.set_defaults(self.marker)
+
+    def changes_accepted(self):
+        """
+        Update the marker properties
+        """
+        self.ui.errors.hide()
+        self._widget.update_marker(self.marker)
+
+    def error_occurred(self, exc):
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
+
+
+class GlobalMarkerEditor(PropertiesEditorBase):
+    def __init__(self, canvas, markers, valid_style, valid_colors):
+        """
+        Edit the properties of a marker, this can be chosen from a list of valid markers.
+        :param canvas: A reference to the target canvas
+        :param markers: List of markers that can be edited
+        :param valid_style: list of valid line styles (eg. 'solid', 'dashed'...) used by matplotlib
+        :param valid_colors: dictionary of valid colours
+        """
+        super(GlobalMarkerEditor, self).__init__('globalmarkereditor.ui', canvas)
+        self.ui.errors.hide()
+        self.ui.marker.currentIndexChanged.connect(self.update_marker_data)
+
+        self._widget = MarkerEditor('markeredit.ui', valid_style, valid_colors)
+        layout = self.ui.layout()
+        layout.addWidget(self._widget, 2, 0, 1, 2)
+
+        self.markers = sorted(markers, key=lambda x: x.name)
+        self._names = [str(_marker.name) for _marker in self.markers]
+        self.ui.marker.addItems(self._names)
+
+    def changes_accepted(self):
+        """Update the properties of the currently selected marker"""
+        self.ui.errors.hide()
+        idx = self.ui.marker.currentIndex()
+        self._widget.update_marker(self.markers[idx])
+
+    def error_occurred(self, exc):
+        self.ui.errors.setText(str(exc).strip())
+        self.ui.errors.show()
+
+    def update_marker_data(self, idx):
+        """When changing the selected marker update the properties displayed in the editor window"""
+        self._widget.set_defaults(self.markers[idx])

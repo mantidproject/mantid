@@ -1,4 +1,8 @@
-set(COMMON_SRC_FILES Plotter.cpp)
+set(COMMON_SRC_FILES 
+  Plotter.cpp
+  Encoder.cpp
+  Decoder.cpp
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(
@@ -7,6 +11,8 @@ set(
   IPythonRunner.h
   IPlotter.h
   Plotter.h
+  Encoder.h
+  Decoder.h
 )
 
 prepend(

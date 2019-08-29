@@ -14,7 +14,7 @@ from mantid.api import AnalysisDataService as ADS  # noqa
 class MatrixWorkspaceDisplayAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
-    tags = ["MatrixWorkspaceDisplayView"]
+    _tags = ["MatrixWorkspaceDisplayView"]
 
 
 class MatrixWorkspaceDisplayEncoder(MatrixWorkspaceDisplayAttributes):
@@ -26,8 +26,8 @@ class MatrixWorkspaceDisplayEncoder(MatrixWorkspaceDisplayAttributes):
         return {"workspace": obj.presenter.model._ws.name()}
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags
 
 
 class MatrixWorkspaceDisplayDecoder(MatrixWorkspaceDisplayAttributes):
@@ -42,5 +42,5 @@ class MatrixWorkspaceDisplayDecoder(MatrixWorkspaceDisplayAttributes):
         return pres.container
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags

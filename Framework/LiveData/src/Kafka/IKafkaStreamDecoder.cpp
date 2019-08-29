@@ -5,16 +5,21 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
-#include "private/Schema/ba57_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
+#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
+
+#include <json/json.h>
 
 using namespace Mantid::Types;
 using namespace LogSchema;
@@ -24,7 +29,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IKafkaStreamDecoder");
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "ba57";
+const std::string RUN_MESSAGE_ID = "y2gw";
 
 const std::chrono::seconds MAX_LATENCY(1);
 } // namespace
@@ -47,13 +52,14 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                                          const std::string &streamTopic,
                                          const std::string &runInfoTopic,
                                          const std::string &spDetTopic,
-                                         const std::string &sampleEnvTopic)
+                                         const std::string &sampleEnvTopic,
+                                         const std::string &chopperTopic)
     : m_broker(broker), m_streamTopic(streamTopic),
       m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
-      m_sampleEnvTopic(sampleEnvTopic), m_interrupt(false), m_specToIdx(),
-      m_runStart(), m_runNumber(-1), m_thread(), m_capturing(false),
-      m_exception(), m_extractWaiting(false), m_cbIterationEnd([] {}),
-      m_cbError([] {}) {}
+      m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic),
+      m_interrupt(false), m_specToIdx(), m_runStart(), m_runId(""), m_thread(),
+      m_capturing(false), m_exception(), m_extractWaiting(false),
+      m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 /**
  * Destructor.
@@ -79,6 +85,17 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
     m_dataStream =
         m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic},
                             SubscribeAtOption::LATEST);
+  }
+
+  try {
+    if (!m_chopperTopic.empty())
+      m_chopperStream =
+          m_broker->subscribe({m_chopperTopic}, SubscribeAtOption::LATEST);
+  } catch (std::exception &) {
+    g_log.notice() << "Could not subscribe to topic " + m_chopperTopic +
+                          ". This topic does not exist. No chopper information "
+                          "will be written to the logs."
+                   << std::endl;
   }
 
   // Get last two messages in run topic to ensure we get a runStart message
@@ -296,9 +313,9 @@ void IKafkaStreamDecoder::waitForRunEndObservation() {
   m_runStatusSeen = false;
   runStatusLock.unlock();
 
-  // Set to zero until we have the new run number, MonitorLiveData will
+  // Set to zero until we have the new run id, MonitorLiveData will
   // queries before each time it extracts data until it gets non-zero
-  m_runNumber = 0;
+  m_runId = "0";
 
   // Get new run message now so that new run number is available for
   // MonitorLiveData as early as possible
@@ -337,9 +354,8 @@ std::string IKafkaStreamDecoder::getDetSpecMapForRun(
       SubscribeAtOption::TIME);
   m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
   if (rawMsgBuffer.empty()) {
-    std::runtime_error(
-        "No detector-spectrum map message found for run number " +
-        std::to_string(runStartStruct.runNumber));
+    std::runtime_error("No detector-spectrum map message found for run " +
+                       runStartStruct.runId);
   }
   return rawMsgBuffer;
 }
@@ -365,16 +381,19 @@ bool IKafkaStreamDecoder::waitForNewRunStartMessage(
     } else {
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(runMsgBuffer.c_str()));
-      if (runMsg->info_type_type() == InfoTypes_RunStart) {
+      if (runMsg->info_type_type() == InfoTypes::RunStart) {
         // We got a run start message, deserialise it
         auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
         IKafkaStreamDecoder::RunStartStruct runStartStruct = {
-            runStartData->instrument_name()->str(), runStartData->run_number(),
+            runStartData->instrument_name()->str(),
+            runStartData->run_id()->str(),
             runStartData->start_time(),
-            static_cast<size_t>(runStartData->n_periods()), offset};
-        if (runStartStruct.runNumber > m_runNumber) {
+            static_cast<size_t>(runStartData->n_periods()),
+            runStartData->nexus_structure()->str(),
+            offset};
+        if (runStartStruct.runId != m_runId) {
           runStartStructOutput = runStartStruct;
-          m_runNumber = runStartStruct.runNumber;
+          m_runId = runStartStruct.runId;
           return false; // not interrupted
         }
       } else {
@@ -390,12 +409,12 @@ IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   auto offset = getRunInfoMessage(rawMsgBuffer);
   auto runMsg =
       GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  if (runMsg->info_type_type() != InfoTypes_RunStart) {
+  if (runMsg->info_type_type() != InfoTypes::RunStart) {
     // We want a runStart message, try the next one
     offset = getRunInfoMessage(rawMsgBuffer);
     runMsg =
         GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    if (runMsg->info_type_type() != InfoTypes_RunStart) {
+    if (runMsg->info_type_type() != InfoTypes::RunStart) {
       throw std::runtime_error("IKafkaStreamDecoder::initLocalCaches() - "
                                "Could not find a run start message"
                                "in the run info topic. Unable to continue");
@@ -403,9 +422,12 @@ IKafkaStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
   }
   auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
   IKafkaStreamDecoder::RunStartStruct runStart = {
-      runStartData->instrument_name()->str(), runStartData->run_number(),
+      runStartData->instrument_name()->str(),
+      runStartData->run_id()->str(),
       runStartData->start_time(),
-      static_cast<size_t>(runStartData->n_periods()), offset};
+      static_cast<size_t>(runStartData->n_periods()),
+      runStartData->nexus_structure()->str(),
+      offset};
   return runStart;
 }
 
@@ -461,7 +483,7 @@ void IKafkaStreamDecoder::checkRunMessage(
           reinterpret_cast<const uint8_t *>(buffer.c_str()),
           RUN_MESSAGE_ID.c_str())) {
     auto runMsg = GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
-    if (!checkOffsets && runMsg->info_type_type() == InfoTypes_RunStop) {
+    if (!checkOffsets && runMsg->info_type_type() == InfoTypes::RunStop) {
       auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
       auto stopTime = runStopMsg->stop_time();
       g_log.debug() << "Received an end-of-run message with stop time = "
@@ -495,6 +517,15 @@ void IKafkaStreamDecoder::checkRunEnd(
   }
 }
 
+int IKafkaStreamDecoder::runNumber() const noexcept {
+  if (m_runId.empty() ||
+      (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
+         return std::isdigit(c);
+       }) == m_runId.end()))
+    return -1;
+
+  return std::atoi(m_runId.c_str());
+}
 } // namespace LiveData
 
 } // namespace Mantid
