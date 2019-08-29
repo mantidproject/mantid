@@ -56,7 +56,8 @@ public:
    * \param flags window flags
    */
   ExtensibleFileDialog(QWidget *parent = nullptr, bool extended = true,
-                       Qt::WFlags flags = nullptr);
+                       Qt::WFlags flags = Qt::WindowCloseButtonHint |
+                                          Qt::WindowType::WindowTitleHint);
   //! Set the extension widget to be displayed when the user presses the toggle
   // button.
   void setExtensionWidget(QWidget *extension);

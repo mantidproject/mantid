@@ -36,6 +36,30 @@ class WorkspaceSelectorPresenterTest(unittest.TestCase):
         self.view.list_selector_presenter.update_model.assert_not_called()
         self.view.list_selector_presenter.update_filter_list.assert_called_once_with([])
 
+    def test_is_it_freq_flase(self):
+        self.assertEquals(self.view.is_it_freq, "None")
+
+@start_qapplication
+class WorkspaceSelectorPresenterWithFrequencyTest(unittest.TestCase):
+    def setUp(self):
+        self.current_runs = [[22725]]
+        self.context = setup_context(True)
+        self.context.get_names_of_workspaces_to_fit = mock.MagicMock(return_value=['MUSR22725; Group; fwd; Asymmetry; #1'])
+        self.view = WorkspaceSelectorView(self.current_runs, 'MUSR', [], True, self.context)
+        self.view.list_selector_presenter = mock.MagicMock()
+        self.context.get_names_of_workspaces_to_fit.reset_mock()
+
+    def set_combo(self, name):
+        index = self.view.time_domain_combo.findText(name)
+        self.view.time_domain_combo.setCurrentIndex(index)
+
+    def test_is_it_freq_flase(self):
+        self.set_combo("Time Domain")
+        self.assertEquals(self.view.is_it_freq, "None")
+
+    def test_is_it_freq_true(self):
+        self.set_combo("Frequency Domain Re")
+        self.assertEquals(self.view.is_it_freq, "Re")
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -44,11 +44,11 @@ void QtEventView::initUniformSliceTypeLayout() {
   connect(m_ui.uniformEdit, SIGNAL(valueChanged(double)), this,
           SLOT(onUniformSecondsChanged(double)));
 
-  connect(m_ui.customEdit, SIGNAL(textEdited(QString const &)), this,
+  connect(m_ui.customEdit, SIGNAL(textChanged(QString const &)), this,
           SLOT(onCustomChanged(QString const &)));
-  connect(m_ui.logValueEdit, SIGNAL(textEdited(QString const &)), this,
+  connect(m_ui.logValueEdit, SIGNAL(textChanged(QString const &)), this,
           SLOT(onLogValuesChanged(QString const &)));
-  connect(m_ui.logValueTypeEdit, SIGNAL(textEdited(QString const &)), this,
+  connect(m_ui.logValueTypeEdit, SIGNAL(textChanged(QString const &)), this,
           SLOT(onLogValueTypeChanged(QString const &)));
 }
 

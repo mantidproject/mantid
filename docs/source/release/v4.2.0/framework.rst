@@ -20,6 +20,12 @@ Algorithms
 
 Data Objects
 ------------
+* New methods :py:obj:`mantid.api.SpectrumInfo.azimuthal` and :py:obj:`mantid.geometry.DetectorInfo.azimuthal`  which returns the out-of-plane angle for a spectrum
+
+Live Data
+---------
+* Streaming of json geometry has been added to the KafkaLiveListener. User configuration is not required for this.
+  The streamer automatically picks up the geometry as a part of the run information and constructs the in-memory geometry without the need for an IDF.
 
 Python
 ------

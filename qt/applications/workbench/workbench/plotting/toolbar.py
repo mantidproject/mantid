@@ -60,6 +60,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                     a.setChecked(checked)
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
+                if text == 'Home':
+                    a.triggered.connect(self.on_home_clicked)
 
         self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
@@ -115,6 +117,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def contextMenuEvent(self, event):
         pass
 
+    def on_home_clicked(self, _):
+        self.home_clicked.emit()
+
 
 class ToolbarStateManager(object):
     """
@@ -149,3 +154,6 @@ class ToolbarStateManager(object):
             fit_action.setChecked(False)
         else:
             fit_action.setChecked(True)
+
+    def home_button_connect(self, slot):
+        self._toolbar.home_clicked.connect(slot)

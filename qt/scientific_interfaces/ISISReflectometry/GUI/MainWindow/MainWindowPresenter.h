@@ -45,11 +45,15 @@ public:
   bool isAnyBatchAutoreducing() const override;
   void notifyAutoreductionResumed() override;
   void notifyAutoreductionPaused() override;
+  void reductionResumed() override;
+  void reductionPaused() override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
   void notifyNewBatchRequested() override;
   void notifyCloseBatchRequested(int batchIndex) override;
+  void notifySaveBatchRequested(int batchIndex) override;
+  void notifyLoadBatchRequested(int batchIndex) override;
 
 protected:
   IMainWindowView *m_view;
@@ -60,6 +64,12 @@ protected:
 private:
   void showHelp();
   void addNewBatch(IBatchView *batchView);
+  void disableSaveAndLoadBatch();
+  void enableSaveAndLoadBatch();
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

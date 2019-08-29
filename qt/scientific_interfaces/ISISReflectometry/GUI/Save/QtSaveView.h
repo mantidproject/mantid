@@ -107,6 +107,10 @@ private:
   /// The widget
   Ui::SaveWidget m_ui;
   SaveViewSubscriber *m_notifyee;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 } // namespace ISISReflectometry

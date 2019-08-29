@@ -892,6 +892,13 @@
   <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
   </instrument>
+   <instrument name="V20_DENEX" shortname="V20_DENEX" >
+    <zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+    <livedata default="event">
+      <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+    </livedata>
+  </instrument>
 </facility>
 
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->

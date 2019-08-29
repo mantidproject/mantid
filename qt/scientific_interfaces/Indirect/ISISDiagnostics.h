@@ -78,6 +78,15 @@ private:
 
   void setFileExtensionsByName(bool filter) override;
 
+  void setPeakRangeLimits(double peakMin, double peakMax);
+  void setBackgroundRangeLimits(double backgroundMin, double backgroundMax);
+  void setRangeLimits(MantidWidgets::RangeSelector *rangeSelector,
+                      double minimum, double maximum,
+                      QString const &minPropertyName,
+                      QString const &maxPropertyName);
+  void setPeakRange(double minimum, double maximum);
+  void setBackgroundRange(double minimum, double maximum);
+
   Ui::ISISDiagnostics m_uiForm;
 };
 } // namespace CustomInterfaces

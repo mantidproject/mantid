@@ -131,6 +131,17 @@ public:
     verifyAndClear();
   }
 
+  void testRenameWorkspaceDoesResetStateForRowWhenOldNameIsSameAsCurrent() {
+    auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
+    auto *row = getRow(jobRunner, 0, 1);
+    row->setSuccess();
+    row->setOutputNames({"", "IvsQ_test", "IvsQBin_test"});
+
+    jobRunner.notifyWorkspaceRenamed("IvsQBin_new", "IvsQBin_test");
+    TS_ASSERT_DIFFERS(row->state(), State::ITEM_COMPLETE)
+    verifyAndClear();
+  }
+
   void testRenameWorkspaceUpdatesCorrectWorkspaceForRow() {
     auto jobRunner = makeJobRunner(oneGroupWithTwoRowsModel());
     auto *row = getRow(jobRunner, 0, 1);
