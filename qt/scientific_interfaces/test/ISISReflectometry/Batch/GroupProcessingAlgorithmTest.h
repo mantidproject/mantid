@@ -6,14 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHMTEST_H_
 #define MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHMTEST_H_
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/GroupProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 
 class GroupProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
@@ -72,12 +73,13 @@ public:
   }
 
   void testStitchParamsSetFromStitchingOptions() {
-    auto experiment = Experiment(
-        AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false,
-        PolarizationCorrections(PolarizationCorrectionType::None),
-        FloodCorrections(FloodCorrectionType::Workspace), boost::none,
-        makeStitchOptions(), std::vector<PerThetaDefaults>());
+    auto experiment =
+        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
+                   SummationType::SumInLambda, false, false,
+                   PolarizationCorrections(PolarizationCorrectionType::None),
+                   FloodCorrections(FloodCorrectionType::Workspace),
+                   TransmissionStitchOptions(), makeStitchOptions(),
+                   std::vector<PerThetaDefaults>());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
@@ -87,13 +89,13 @@ public:
   }
 
   void testPerThetaDefaultsQResolutionUsedForParamsIfStitchingOptionsEmpty() {
-    auto experiment =
-        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                   SummationType::SumInLambda, false, false,
-                   PolarizationCorrections(PolarizationCorrectionType::None),
-                   FloodCorrections(FloodCorrectionType::Workspace),
-                   boost::none, std::map<std::string, std::string>(),
-                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto experiment = Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false,
+        PolarizationCorrections(PolarizationCorrectionType::None),
+        FloodCorrections(FloodCorrectionType::Workspace),
+        TransmissionStitchOptions(), std::map<std::string, std::string>(),
+        makePerThetaDefaultsWithTwoAnglesAndWildcard());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRows();
     auto result = createAlgorithmRuntimeProps(model, group);
@@ -101,13 +103,13 @@ public:
   }
 
   void testQResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
-    auto experiment =
-        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                   SummationType::SumInLambda, false, false,
-                   PolarizationCorrections(PolarizationCorrectionType::None),
-                   FloodCorrections(FloodCorrectionType::Workspace),
-                   boost::none, std::map<std::string, std::string>(),
-                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto experiment = Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false,
+        PolarizationCorrections(PolarizationCorrectionType::None),
+        FloodCorrections(FloodCorrectionType::Workspace),
+        TransmissionStitchOptions(), std::map<std::string, std::string>(),
+        makePerThetaDefaultsWithTwoAnglesAndWildcard());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithMixedQResolutions();
     auto result = createAlgorithmRuntimeProps(model, group);
@@ -116,13 +118,13 @@ public:
 
   void
   testQOutputResolutionForFirstValidRowUsedForParamsIfStitchingOptionsEmpty() {
-    auto experiment =
-        Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                   SummationType::SumInLambda, false, false,
-                   PolarizationCorrections(PolarizationCorrectionType::None),
-                   FloodCorrections(FloodCorrectionType::Workspace),
-                   boost::none, std::map<std::string, std::string>(),
-                   makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto experiment = Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false,
+        PolarizationCorrections(PolarizationCorrectionType::None),
+        FloodCorrections(FloodCorrectionType::Workspace),
+        TransmissionStitchOptions(), std::map<std::string, std::string>(),
+        makePerThetaDefaultsWithTwoAnglesAndWildcard());
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto group = makeGroupWithTwoRowsWithOutputQResolutions();
     auto result = createAlgorithmRuntimeProps(model, group);

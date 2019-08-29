@@ -19,6 +19,7 @@ IndirectBayes::IndirectBayes(QWidget *parent)
     : IndirectInterface(parent),
       m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
   m_uiForm.setupUi(this);
+  m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -101,7 +102,6 @@ void IndirectBayes::applySettings(
     std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
-    tab->second->setPlotErrorBars(settings.at("ErrorBars").toBool());
   }
 }
 

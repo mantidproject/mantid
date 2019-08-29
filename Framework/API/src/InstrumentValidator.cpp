@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
 #include <boost/make_shared.hpp>
+#include <list>
 
 namespace Mantid {
 namespace API {

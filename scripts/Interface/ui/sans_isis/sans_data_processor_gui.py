@@ -20,6 +20,7 @@ from six import with_metaclass
 from reduction_gui.reduction.scripter import execute_script
 from mantid.kernel import (Logger)
 from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from sans.common.enums import (BinningType, ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
@@ -555,6 +556,9 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_help_button_clicked(self):
         if PYQT4:
             proxies.showCustomInterfaceHelp('ISIS SANS v2')
+        else:
+            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                            'interfaces/ISIS%20SANS%20v2.html')
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""
@@ -593,7 +597,10 @@ class SANSDataProcessorGui(QMainWindow,
         self._call_settings_listeners(lambda listener: listener.on_user_file_load())
 
     def on_user_file_load_failure(self):
-        self.gui_properties_handler.set_setting("user_file", "")
+        try:
+            self.gui_properties_handler.set_setting("user_file", "")
+        except AttributeError:
+            pass
         self.user_file_line_edit.setText("")
 
     def set_out_default_user_file(self):

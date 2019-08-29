@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IMainWindowView
 
@@ -26,6 +27,8 @@ public:
   virtual void notifyHelpPressed() = 0;
   virtual void notifyNewBatchRequested() = 0;
   virtual void notifyCloseBatchRequested(int) = 0;
+  virtual void notifySaveBatchRequested(int) = 0;
+  virtual void notifyLoadBatchRequested(int) = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 
@@ -35,9 +38,12 @@ public:
   virtual IBatchView *newBatch() = 0;
   virtual void removeBatch(int index) = 0;
   virtual std::vector<IBatchView *> batches() const = 0;
+  virtual void disableSaveAndLoadBatch() = 0;
+  virtual void enableSaveAndLoadBatch() = 0;
 
   virtual ~IMainWindowView() = default;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLWINDOWVIEW_H */

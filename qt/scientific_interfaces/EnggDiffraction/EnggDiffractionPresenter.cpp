@@ -1642,17 +1642,11 @@ void EnggDiffractionPresenter::focusingFinished() {
   // display warning and information to the users regarding Stop Focus
   if (g_abortThread) {
     // will get the last number in the list
-    std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
-    double lastRun = boost::lexical_cast<double>(last_RunNo);
-    double lastValid = boost::lexical_cast<double>(g_lastValidRun);
-
-    if (lastRun != lastValid) {
-      g_log.warning()
-          << "Focussing process has been stopped, last successful "
-             "run number: "
-          << g_lastValidRun
-          << " , total number of focus run that could not be processed: "
-          << (lastRun - lastValid) << '\n';
+    const std::string last_RunNo = isValidRunNumber(m_view->focusingRunNo());
+    if (last_RunNo != g_lastValidRun) {
+      g_log.warning() << "Focussing process has been stopped, last successful "
+                         "run: "
+                      << g_lastValidRun << '\n';
       m_view->showStatus("Focusing stopped. Ready");
     }
   }

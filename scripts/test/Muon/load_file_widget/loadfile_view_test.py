@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 
 
-class LoadFileWidgetViewTest(GuiTest):
+@start_qapplication
+class LoadFileWidgetViewTest(unittest.TestCase):
 
     def setUp(self):
         self.view = BrowseFileWidgetView()

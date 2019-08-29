@@ -405,10 +405,10 @@ void ReflectometryReductionOneAuto2::exec() {
                    getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
   alg->setProperty("Debug", getPropertyValue("Debug"));
-  double wavMin = checkForMandatoryInstrumentDefault<double>(
+  auto wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
-  double wavMax = checkForMandatoryInstrumentDefault<double>(
+  auto wavMax = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
@@ -507,7 +507,7 @@ ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
   try {
     for (const auto &wsIndex : wsIndices) {
 
-      size_t index = boost::lexical_cast<size_t>(wsIndex);
+      auto index = boost::lexical_cast<size_t>(wsIndex);
 
       auto detector = inputWS->getDetector(index);
       auto parent = detector->getParent();
@@ -854,7 +854,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   const std::vector<Property *> props = getProperties();
   for (auto &prop : props) {
     if (prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
         alg->setPropertyValue(prop->name(), prop->value());
     }
@@ -1009,10 +1009,9 @@ bool ReflectometryReductionOneAuto2::processGroups() {
  * TOF_<runNumber>_<otherInfo> then the output workspaces will be of the same
  * format otherwise they are numbered according to the wsGroupNumber
  */
-ReflectometryReductionOneAuto2::WorkspaceNames
-ReflectometryReductionOneAuto2::getOutputNamesForGroups(
+auto ReflectometryReductionOneAuto2::getOutputNamesForGroups(
     const std::string &inputName, const std::string &runNumber,
-    const size_t wsGroupNumber) {
+    const size_t wsGroupNumber) -> WorkspaceNames {
   auto const output = getOutputWorkspaceNames();
   std::string informativeName = "TOF" + runNumber + "_";
 

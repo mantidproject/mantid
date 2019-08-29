@@ -7,6 +7,7 @@
 #include "GetInstrumentParameter.h"
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 std::vector<std::string> InstrumentParameter<std::string>::get(
     Mantid::Geometry::Instrument_const_sptr instrument,
@@ -69,5 +70,6 @@ std::string const &InstrumentParameterTypeMissmatch::expectedType() const {
 std::string const &InstrumentParameterTypeMissmatch::originalMessage() const {
   return m_originalMessage;
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

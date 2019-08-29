@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
@@ -16,7 +16,8 @@ from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
-class LoadFileWidgetPresenterTest(GuiTest):
+@start_qapplication
+class LoadFileWidgetPresenterTest(unittest.TestCase):
     def run_test_with_and_without_threading(test_function):
 
         def run_twice(self):

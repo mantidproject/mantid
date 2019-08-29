@@ -42,7 +42,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
     auto LHSWorkspace = m_inputWS->getItem(periodsToSum[0] - 1);
     outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
-      int numPeriods = static_cast<int>(periodsToSum.size());
+      auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = m_inputWS->getItem(periodsToSum[i] - 1);
         IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");

@@ -14,12 +14,13 @@ import unittest
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 TEST_LANG = "Python"
 
 
-class CodeEditorTest(GuiTest):
+@start_qapplication
+class CodeEditorTest(unittest.TestCase):
 
     # ---------------------------------------------------------------
     # Success tests

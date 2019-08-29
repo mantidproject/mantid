@@ -10,7 +10,7 @@
 #include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::CustomInterfaces;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class GroupTest : public CxxTest::TestSuite {
 public:

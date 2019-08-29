@@ -93,7 +93,7 @@ void MuonGroupDetectors::exec() {
     size_t groupIndex =
         static_cast<size_t>(std::distance(nonEmptyRows.begin(), rowIt));
 
-    std::vector<int> &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
+    auto &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
 
     // Recieve detector IDs, but need workspace indices to group, so convert
     std::vector<size_t> wsIndices =

@@ -240,9 +240,9 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
                               GroupingWorkspace_sptr groupWS,
                               OffsetsWorkspace_sptr offsetsWS,
                               MaskWorkspace_sptr maskWS) {
-  bool doGroup = bool(groupWS);
-  bool doOffsets = bool(offsetsWS);
-  bool doMask = bool(maskWS);
+  auto doGroup = bool(groupWS);
+  auto doOffsets = bool(offsetsWS);
+  auto doMask = bool(maskWS);
 
   bool hasUnmasked(false);
   bool hasGrouped(false);

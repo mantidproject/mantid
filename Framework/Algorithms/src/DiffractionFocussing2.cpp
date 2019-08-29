@@ -185,7 +185,7 @@ void DiffractionFocussing2::exec() {
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    int group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
+    auto group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
     auto &Xout = group2xvector.at(group);
@@ -372,7 +372,7 @@ void DiffractionFocussing2::execEvent() {
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = static_cast<int>(m_validGroups[iGroup]);
+    const auto group = static_cast<int>(m_validGroups[iGroup]);
     EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
@@ -427,7 +427,7 @@ void DiffractionFocussing2::execEvent() {
   } else {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
-    int nValidGroups = static_cast<int>(this->m_validGroups.size());
+    auto nValidGroups = static_cast<int>(this->m_validGroups.size());
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERUPT_REGION
@@ -457,7 +457,7 @@ void DiffractionFocussing2::execEvent() {
   prog = std::make_unique<Progress>(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
-    const int group = static_cast<int>(m_validGroups[workspaceIndex]);
+    const auto group = static_cast<int>(m_validGroups[workspaceIndex]);
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 
@@ -640,7 +640,7 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   // set up the mapping of group to input workspace index
   std::vector<std::vector<std::size_t>> wsIndices;
   wsIndices.reserve(this->nGroups + 1);
-  size_t nHist_st = static_cast<size_t>(nHist);
+  auto nHist_st = static_cast<size_t>(nHist);
   for (size_t wi = 0; wi < nHist_st; wi++) {
     // wi is the workspace index (of the input)
     const int group = groupAtWorkspaceIndex[wi];

@@ -166,7 +166,7 @@ use.
 MatrixWorkspace_sptr
 NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
   const size_t nHistograms = inWS->getNumberHistograms();
-  const size_t progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
+  const auto progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
   Progress prog(this, 0.0, 1.0, progress_items);
   // Clone the input workspace to create a template for the denominator
   // workspace.

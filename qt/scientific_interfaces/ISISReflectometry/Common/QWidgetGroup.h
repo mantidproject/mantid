@@ -11,6 +11,7 @@
 #include <cstddef>
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 template <std::size_t N> class QWidgetGroup {
 public:
   QWidgetGroup() : m_widgets() {}
@@ -36,6 +37,7 @@ QWidgetGroup<sizeof...(Ts)> makeQWidgetGroup(Ts... widgets) {
   return QWidgetGroup<sizeof...(Ts)>(
       std::array<QWidget *, sizeof...(Ts)>({{widgets...}}));
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_QWIDGETGROUP_H

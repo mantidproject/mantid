@@ -233,6 +233,78 @@ DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> &index) const {
   return angle;
 }
 
+double DetectorInfo::azimuthal(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error("Azimuthal angle is not defined for monitors");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+
+  const auto sampleDetVec = position(index) - samplePos;
+  const auto beamLineNormalized = Kernel::normalize(beamLine);
+
+  // generate the vertical axis
+  const auto origHorizontal =
+      m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
+  if (vertical.scalar_prod(
+          m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+    throw std::runtime_error(
+        "Failed to create up axis orthogonal to the beam direction");
+
+  // generate the horizontal axis perpendicular to the other two
+  const auto horizontal = vertical.cross_prod(beamLineNormalized);
+  if (origHorizontal.scalar_prod(horizontal) <= 0.)
+    throw std::runtime_error(
+        "Failed to create horizontal axis orthogonal to the beam direction");
+
+  const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
+  const double dotVertical = sampleDetVec.scalar_prod(vertical);
+
+  return atan2(dotVertical, dotHorizontal);
+}
+
+double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
+  if (isMonitor(index))
+    throw std::logic_error("Azimuthal angle is not defined for monitors");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+
+  const auto sampleDetVec = position(index) - samplePos;
+  const auto beamLineNormalized = Kernel::normalize(beamLine);
+
+  // generate the vertical axis
+  const auto origHorizontal =
+      m_instrument->getReferenceFrame()->vecPointingHorizontal();
+  const auto vertical = beamLineNormalized.cross_prod(origHorizontal);
+  if (vertical.scalar_prod(
+          m_instrument->getReferenceFrame()->vecPointingUp()) <= 0.)
+    throw std::runtime_error(
+        "Failed to create up axis orthogonal to the beam direction");
+
+  // generate the horizontal axis perpendicular to the other two
+  const auto horizontal = vertical.cross_prod(beamLineNormalized);
+  if (origHorizontal.scalar_prod(horizontal) <= 0.)
+    throw std::runtime_error(
+        "Failed to create horizontal axis orthogonal to the beam direction");
+
+  const double dotHorizontal = sampleDetVec.scalar_prod(horizontal);
+  const double dotVertical = sampleDetVec.scalar_prod(vertical);
+
+  return atan2(dotVertical, dotHorizontal);
+}
+
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
   return Kernel::toV3D(m_detectorInfo->position(index));
@@ -355,7 +427,7 @@ const DetectorInfoConstIt DetectorInfo::cend() const {
 }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
     m_lastDetector[thread] = m_instrument->getDetector((*m_detectorIDs)[index]);
@@ -367,7 +439,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 /// Helper used by SpectrumInfo.
 boost::shared_ptr<const Geometry::IDetector>
 DetectorInfo::getDetectorPtr(const size_t index) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
 }

@@ -7,16 +7,17 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERMERGEJOBSTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLRUNSTABLEPRESENTERMERGEJOBSTEST_H_
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "RunsTablePresenterTest.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -30,20 +31,6 @@ public:
 
   static void destroySuite(RunsTablePresenterMergeJobsTest *suite) {
     delete suite;
-  }
-
-  void testMergeNothingIntoNothing() {
-    auto presenter = makePresenter(m_view, ReductionJobs());
-    presenter.mergeAdditionalJobs(ReductionJobs());
-    auto &result = jobsFromPresenter(presenter);
-    TS_ASSERT_EQUALS(result, ReductionJobs());
-  }
-
-  void testMergeGroupIntoEmptyTable() {
-    auto presenter = makePresenter(m_view, ReductionJobs());
-    presenter.mergeAdditionalJobs(oneGroupWithARowModel());
-    auto &result = jobsFromPresenter(presenter);
-    TS_ASSERT_EQUALS(result, oneGroupWithARowModel());
   }
 
   void testMergeEmptyTableDoesNothing() {
@@ -77,13 +64,6 @@ public:
   void testMergeInvalidRowDoesNothing() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
     presenter.mergeAdditionalJobs(oneGroupWithAnInvalidRowModel());
-    auto &result = jobsFromPresenter(presenter);
-    TS_ASSERT_EQUALS(result, oneGroupWithARowModel());
-  }
-
-  void testMergeNewRowIntoEmptyGroup() {
-    auto presenter = makePresenter(m_view, oneEmptyGroupModel());
-    presenter.mergeAdditionalJobs(oneGroupWithARowModel());
     auto &result = jobsFromPresenter(presenter);
     TS_ASSERT_EQUALS(result, oneGroupWithARowModel());
   }

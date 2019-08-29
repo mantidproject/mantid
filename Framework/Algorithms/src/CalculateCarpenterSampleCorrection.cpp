@@ -160,8 +160,7 @@ void CalculateCarpenterSampleCorrection::exec() {
                 << " coeff2=" << coeff2 << " coeff3=" << coeff3 << "\n";
 
   // geometry stuff
-  const int64_t NUM_HIST =
-      static_cast<int64_t>(inputWksp->getNumberHistograms());
+  const auto NUM_HIST = static_cast<int64_t>(inputWksp->getNumberHistograms());
   Instrument_const_sptr instrument = inputWksp->getInstrument();
   if (instrument == nullptr)
     throw std::runtime_error(

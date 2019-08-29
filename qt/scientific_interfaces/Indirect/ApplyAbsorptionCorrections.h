@@ -9,6 +9,9 @@
 
 #include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
+
 #include "ui_ApplyAbsorptionCorrections.h"
 
 namespace MantidQt {
@@ -35,8 +38,6 @@ private slots:
   void postProcessComplete(bool error);
   /// Handles mantid plot and save
   void saveClicked();
-  void plotSpectrumClicked();
-  void plotContourClicked();
   void runClicked();
   void plotCurrentPreview();
 
@@ -47,27 +48,16 @@ private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
-  std::size_t getOutWsNumberOfSpectra() const;
-  Mantid::API::MatrixWorkspace_const_sptr
-  getADSWorkspace(std::string const &name) const;
-
   void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate,
                             std::string toMatch);
   void plotInPreview(const QString &curveName,
                      Mantid::API::MatrixWorkspace_sptr &ws,
                      const QColor &curveColor);
 
-  void setPlotSpectrumIndexMax(int maximum);
-  int getPlotSpectrumIndex();
-
   void setRunEnabled(bool enabled);
-  void setPlotSpectrumEnabled(bool enabled);
-  void setPlotContourEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
-  void setPlotSpectrumIsPlotting(bool plotting);
-  void setPlotContourIsPlotting(bool plotting);
 
   Ui::ApplyAbsorptionCorrections m_uiForm;
 

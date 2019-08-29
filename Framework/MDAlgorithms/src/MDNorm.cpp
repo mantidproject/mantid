@@ -1069,8 +1069,8 @@ MDNorm::getValuesFromOtherDimensions(bool &skipNormalization,
   std::vector<coord_t> otherDimValues;
   for (size_t i = 3; i < m_inputWS->getNumDims(); i++) {
     const auto dimension = m_inputWS->getDimension(i);
-    coord_t inputDimMin = static_cast<float>(dimension->getMinimum());
-    coord_t inputDimMax = static_cast<float>(dimension->getMaximum());
+    auto inputDimMin = static_cast<float>(dimension->getMinimum());
+    auto inputDimMax = static_cast<float>(dimension->getMaximum());
     coord_t outputDimMin(0), outputDimMax(0);
     bool isIntegrated = true;
 
@@ -1169,7 +1169,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mappings
-  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
+  const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
@@ -1191,7 +1191,7 @@ void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
   std::vector<coord_t> pos, posNew;
 
   double progStep = 0.7 / static_cast<double>(m_numExptInfos * m_numSymmOps);
-  double progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
+  auto progIndex = static_cast<double>(soIndex + expInfoIndex * m_numSymmOps);
   auto prog =
       std::make_unique<API::Progress>(this, 0.3 + progStep * progIndex,
                                       0.3 + progStep * (1. + progIndex), ndets);
@@ -1284,7 +1284,7 @@ for (int64_t i = 0; i < ndets; i++) {
     signal_t signal;
     if (m_diffraction) {
       // index of the current intersection
-      size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+      auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
       // signal = integral between two consecutive intersections
       signal = (yValues[k] - yValues[k - 1]) * solid;
     } else {

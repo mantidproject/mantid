@@ -143,7 +143,8 @@ def run_Fit(parameters_dict, alg):
     alg.setProperty('EndX', parameters_dict['EndX'])
     alg.execute()
     return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
-        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
+        alg.getProperty("OutputNormalisedCovarianceMatrix").value
 
 
 def run_simultaneous_Fit(parameters_dict, alg):
@@ -164,7 +165,8 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
-        alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value
+        alg.getProperty('OutputStatus').value, alg.getProperty(
+            'OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").value
 
 
 def run_CalculateMuonAsymmetry(parameters_dict, alg):
@@ -175,7 +177,7 @@ def run_CalculateMuonAsymmetry(parameters_dict, alg):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value,\
         alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
-        alg.getProperty('ChiSquared').value
+        alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").value
 
 
 def run_AppendSpectra(ws1, ws2):
@@ -218,5 +220,33 @@ def run_Plus(parameter_dict):
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def convert_to_field(ws):
+    """
+    Apply the Scale algorithm to convert from MHz to Field.
+    """
+    alg = mantid.AlgorithmManager.create("ScaleX")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("Factor", 1.e3 / 13.55)
+    alg.execute()
+    output = alg.getProperty("OutputWorkspace").value
+    output.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
+    return output
+
+
+def extract_single_spec(ws, spec):
+
+    alg = mantid.AlgorithmManager.create("ExtractSingleSpectrum")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("WorkspaceIndex", spec)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value

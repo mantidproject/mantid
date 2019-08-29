@@ -14,8 +14,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -32,7 +33,7 @@ public:
   }
 
   void testExpandsAllGroupsWhenRequested() {
-    EXPECT_CALL(m_jobs, expandAll());
+    EXPECT_CALL(m_jobs, expandAll()).Times(2);
 
     auto presenter = makePresenter(m_view);
     presenter.notifyExpandAllRequested();
@@ -76,7 +77,7 @@ public:
 
     TS_ASSERT_EQUALS(3, groups.size());
     TS_ASSERT_EQUALS("Test group 1", groups[0].name());
-    TS_ASSERT_EQUALS("Group1",
+    TS_ASSERT_EQUALS("HiddenGroupName1",
                      groups[1].name()); // default name for inserted group
     TS_ASSERT_EQUALS("Test group 2", groups[2].name());
 
@@ -109,7 +110,7 @@ public:
     auto &groups = jobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("Group1", groups[2].name());
+    TS_ASSERT_EQUALS("HiddenGroupName1", groups[2].name());
     verifyAndClearExpectations();
   }
 
@@ -125,7 +126,7 @@ public:
 
     auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("Group1", groups[2].name());
+    TS_ASSERT_EQUALS("HiddenGroupName1", groups[2].name());
 
     verifyAndClearExpectations();
   }

@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 Group::Group( // cppcheck-suppress passedByValue
     std::string name, std::vector<boost::optional<Row>> rows)
@@ -227,5 +228,6 @@ bool operator==(Group const &lhs, Group const &rhs) {
          lhs.postprocessedWorkspaceName() == rhs.postprocessedWorkspaceName() &&
          lhs.rows() == rhs.rows();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

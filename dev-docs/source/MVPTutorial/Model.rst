@@ -28,7 +28,7 @@ The first model generates the data for the user:
         def getYData(self):
             return self.y_data
 
-The model methods can be split into three types initialisation, a
+The model methods can be split into three types: initialisation, a
 calculate button and get methods.
 
 In this case we have a distinct second method. Usually this will be

@@ -409,7 +409,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   const bool log_binning = getProperty("IQxQyLogBinning");
 
   // number of bins
-  int nBins = static_cast<int>(max / delta);
+  auto nBins = static_cast<int>(max / delta);
 
   HistogramData::BinEdges axis;
   if (log_binning) {

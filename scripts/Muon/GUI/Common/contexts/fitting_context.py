@@ -268,13 +268,23 @@ class FitInformation(object):
             if hasattr(prop, 'timeAverageValue'):
                 return prop.timeAverageValue()
             else:
-                return float(prop.value)
+                try:
+                    return float(prop.value)
+                except ValueError:
+                    return prop.valueAsStr
 
         values = [
             value_from_workspace(wksp_name)
             for wksp_name in self.output_workspace_names
         ]
-        return np.mean(values)
+        try:
+            return np.mean(values)
+        except TypeError:
+            # This will be a string
+            if len(values) == 1:
+                return values[0]
+            elif len(values) > 1:
+                return str(values[0]) + " to " + str(values[-1])
 
 
 class FittingContext(object):
@@ -291,6 +301,8 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self._number_of_fits = 0
+        self._number_of_fits_cache = 0
 
     def __len__(self):
         """
@@ -319,8 +331,9 @@ class FittingContext(object):
         :param fit: A new FitInformation object
         """
         if fit in self.fit_list:
-            return
+            self.fit_list.pop(self.fit_list.index(fit))
         self.fit_list.append(fit)
+        self._number_of_fits += 1
         self.new_fit_notifier.notify_subscribers()
 
     def fit_function_names(self):
@@ -348,9 +361,13 @@ class FittingContext(object):
         list_of_fits_to_remove = []
         for fit in self.fit_list:
             if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+                self._number_of_fits_cache = 0
                 list_of_fits_to_remove.append(fit)
 
         for fit in list_of_fits_to_remove:
+            index = self.fit_list.index(fit)
+            if index >= len(self.fit_list) - self._number_of_fits:
+                self._number_of_fits -= 1
             self.fit_list.remove(fit)
 
     def log_names(self, filter_fn=None):
@@ -367,6 +384,20 @@ class FittingContext(object):
 
     def clear(self):
         self.fit_list = []
+
+    def remove_latest_fit(self, number_of_fits_to_remove):
+        self.fit_list = self.fit_list[:-number_of_fits_to_remove]
+        self._number_of_fits = self._number_of_fits_cache
+        self.new_fit_notifier.notify_subscribers()
+
+    @property
+    def number_of_fits(self):
+        return self._number_of_fits
+
+    @number_of_fits.setter
+    def number_of_fits(self, value):
+        self._number_of_fits_cache = self._number_of_fits
+        self._number_of_fits = value
 
 
 # Private functions

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/list.hpp>

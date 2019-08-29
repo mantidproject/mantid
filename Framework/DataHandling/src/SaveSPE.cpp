@@ -219,7 +219,7 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
   const size_t nHist = WS->getNumberHistograms();
   // Create a progress reporting object
   Progress progress(this, 0.0, 1.0, 100);
-  const int progStep = static_cast<int>(ceil(static_cast<int>(nHist) / 100.0));
+  const auto progStep = static_cast<int>(ceil(static_cast<int>(nHist) / 100.0));
 
   // there are very often spectra that are missing detectors, as this can be a
   // lot of detectors log it once at the end

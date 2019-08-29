@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param view :: The view we are handling
@@ -148,5 +149,6 @@ bool EventPresenter::isProcessing() const {
 bool EventPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

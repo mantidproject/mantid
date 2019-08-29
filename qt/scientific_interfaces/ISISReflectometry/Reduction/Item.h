@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Item
 
@@ -28,6 +29,7 @@ public:
 
   virtual bool isGroup() const = 0;
   State state() const;
+  void setState(State state);
   std::string message() const;
   virtual bool requiresProcessing(bool reprocessFailed) const;
 
@@ -55,6 +57,7 @@ protected:
   ItemState m_itemState;
   bool m_skipped;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_ITEM_H_

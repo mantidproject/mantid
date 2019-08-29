@@ -129,12 +129,12 @@
      </row>
      <column>
       <property name="text">
-       <string>Value</string>
+       <string>Property</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Property</string>
+       <string>Value</string>
       </property>
      </column>
     </widget>

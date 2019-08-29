@@ -1,9 +1,9 @@
 set(RUNS_SRC_FILES
     RunsPresenter.cpp
-    RunsView.cpp
+    QtRunsView.cpp
     CatalogRunNotifier.cpp
-    CatalogSearcher.cpp
-    SearchModel.cpp
+    QtCatalogSearcher.cpp
+    QtSearchModel.cpp
     SearchResult.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -14,16 +14,16 @@ set(RUNS_INC_FILES
     IRunsView.h
     RunsPresenter.h
     RunsPresenterFactory.h
-    RunsView.h
+    QtRunsView.h
     IRunNotifier.h
     ISearcher.h
     CatalogRunNotifier.h
-    CatalogSearcher.h
+    QtCatalogSearcher.h
     ISearchModel.h
-    SearchModel.h
+    QtSearchModel.h
     SearchResult.h)
 
-set(RUNS_MOC_FILES RunsView.h SearchModel.h CatalogSearcher.h)
+set(RUNS_MOC_FILES QtRunsView.h QtSearchModel.h QtCatalogSearcher.h)
 
 set(RUNS_UI_FILES RunsWidget.ui)
 

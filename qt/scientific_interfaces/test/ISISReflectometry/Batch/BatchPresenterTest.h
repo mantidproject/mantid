@@ -7,8 +7,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERTEST_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERTEST_H_
 
-#include "../../../ISISReflectometry/Common/ModelCreationHelper.h"
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
+#include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "../MainWindow/MockMainWindowPresenter.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MockBatchView.h"
@@ -17,8 +18,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::CustomInterfaces::ModelCreationHelper;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using namespace MantidQt::CustomInterfaces::ISISReflectometry::
+    ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using testing::AtLeast;
 using testing::Mock;

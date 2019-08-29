@@ -190,7 +190,7 @@ class Gem(AbstractInst):
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                sample_details_obj=self._sample_details)
+                sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
@@ -209,6 +209,10 @@ class Gem(AbstractInst):
         return self._inst_settings.unit_to_keep
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
+        """
+        GEM uses a Vanadium-Niobium mix and doesn't need to strip any Vanadium Bragg peaks
+        before splining
+        """
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
 

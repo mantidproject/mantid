@@ -22,6 +22,7 @@ from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.simpleapi import CreateSampleWorkspace  # noqa
 from mantid.py3compat import mock  # noqa
 from mantidqt.project import projectloader, projectsaver  # noqa
+from mantidqt.utils.qt.testing import start_qapplication  # noqa
 
 
 project_file_ext = ".mtdproj"
@@ -29,6 +30,7 @@ working_directory = tempfile.mkdtemp()
 working_project_file = join(working_directory, "temp" + project_file_ext)
 
 
+@start_qapplication
 class ProjectLoaderTest(unittest.TestCase):
     def setUp(self):
         ws1_name = "ws1"

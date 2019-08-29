@@ -9,12 +9,14 @@ import unittest
 
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.observer_pattern import Observer
+from mantidqt.utils.qt.testing import start_qapplication
 
 if sys.version_info.major < 2:
     from unittest import mock
 else:
     import mock
 
+@start_qapplication
 class MuonGUIContextTest(unittest.TestCase):
     def test_can_set_variables(self):
         context = MuonGuiContext()

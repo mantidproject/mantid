@@ -125,9 +125,13 @@ class PowerScale(ScaleBase):
                 # an odd denominator then we can write the power as
                 #     (-a)^(1/b) = (-1)^1(a^(1/b)) = -1*a^(1/b)
                 negative_indices = (a < 0.)
-                out = np.negative(a, where=negative_indices)
-                out = np.power(out, 1. / self._gamma)
-                out = np.negative(out, where=negative_indices)
+                if np.any(negative_indices):
+                    out = np.copy(a)
+                    np.negative(a, where=negative_indices, out=out)
+                    np.power(out, 1. / self._gamma, out=out)
+                    np.negative(out, where=negative_indices, out=out)
+                else:
+                    out = np.power(a, 1. / self._gamma)
 
             return out
 

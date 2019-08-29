@@ -459,8 +459,7 @@ void PawleyFunction::function(const FunctionDomain &domain,
                               FunctionValues &values) const {
   values.zeroCalculated();
   try {
-    const FunctionDomain1D &domain1D =
-        dynamic_cast<const FunctionDomain1D &>(domain);
+    const auto &domain1D = dynamic_cast<const FunctionDomain1D &>(domain);
 
     UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
     double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");

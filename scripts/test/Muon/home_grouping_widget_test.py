@@ -8,7 +8,7 @@ import unittest
 from mantid import ConfigService
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 import Muon.GUI.Common.utilities.load_utils as load_utils
@@ -51,7 +51,8 @@ def perform_musr_file_finder(self):
     self.presenter.update_group_pair_list()
 
 
-class HomeTabGroupingPresenterTest(GuiTest):
+@start_qapplication
+class HomeTabGroupingPresenterTest(unittest.TestCase):
     def setUp(self):
         self.obj = QWidget()
         setup_context_for_tests(self)

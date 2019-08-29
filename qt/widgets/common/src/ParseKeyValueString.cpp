@@ -13,6 +13,16 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+namespace {
+void appendKeyValuePair(const std::pair<std::string, std::string> &kvp,
+                        const bool quoteValues,
+                        std::ostringstream &resultStream) {
+  if (quoteValues)
+    resultStream << kvp.first << "='" << kvp.second << '\'';
+  else
+    resultStream << kvp.first << "=" << kvp.second;
+}
+
 /** Trim matching start/end quotes from the given string
  *
  * @param value [inout] : string to trim
@@ -39,6 +49,7 @@ void trimQuotes(QString &value, const char quote, const char escape) {
     }
   }
 }
+} // unnamed namespace
 
 /** Trim whitespace and quotes from the start/end of a string.
  * Edits the value in-place.
@@ -77,10 +88,12 @@ void trimWhitespaceQuotesAndEmptyValues(QStringList &values) {
    Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
    into a map of key/value pairs
    @param str The input string
+   @param separator The character between each key=value pair
    @throws std::runtime_error on an invalid input string
    @returns : a map of key/value pairs as strings
 */
-std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
+std::map<std::string, std::string>
+parseKeyValueString(const std::string &str, const std::string &separator) {
   /*
     This is a bad example of using a tokenizer, and
     Mantid::Kernel::StringTokenizer should
@@ -92,7 +105,7 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
     yet possible with Mantid::Kernel::StringTokenizer.
   */
   boost::tokenizer<boost::escaped_list_separator<char>> tok(
-      str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+      str, boost::escaped_list_separator<char>("\\", separator, "\"'"));
   std::map<std::string, std::string> kvp;
 
   for (const auto &it : tok) {
@@ -127,10 +140,12 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
    Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'`
    into a map of key/value pairs
    @param qstr The input string
+   @param separator The character between each key=value pair
    @throws std::runtime_error on an invalid input string
    @returns : a map of key/value pairs as QStrings
 */
-std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
+std::map<QString, QString> parseKeyValueQString(const QString &qstr,
+                                                const std::string &separator) {
   /*
     This is a bad example of using a tokenizer, and
     Mantid::Kernel::StringTokenizer should
@@ -143,7 +158,7 @@ std::map<QString, QString> parseKeyValueQString(const QString &qstr) {
   */
   auto str = qstr.toStdString();
   boost::tokenizer<boost::escaped_list_separator<char>> tok(
-      str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
+      str, boost::escaped_list_separator<char>("\\", separator, "\"'"));
   std::map<QString, QString> kvp;
 
   for (const auto &it : tok) {
@@ -227,17 +242,21 @@ convertMapToString(const std::map<std::string, std::string> &optionsMap,
   return result;
 }
 
-std::string optionsToString(std::map<std::string, std::string> const &options) {
+std::string optionsToString(std::map<std::string, std::string> const &options,
+                            const bool quoteValues,
+                            const std::string &separator) {
   if (!options.empty()) {
     std::ostringstream resultStream;
     auto optionsKvpIt = options.cbegin();
 
     auto const &firstKvp = (*optionsKvpIt);
-    resultStream << firstKvp.first << "='" << firstKvp.second << '\'';
+    appendKeyValuePair(firstKvp, quoteValues, resultStream);
+    ++optionsKvpIt;
 
     for (; optionsKvpIt != options.cend(); ++optionsKvpIt) {
       auto kvp = (*optionsKvpIt);
-      resultStream << ", " << kvp.first << "='" << kvp.second << '\'';
+      resultStream << separator;
+      appendKeyValuePair(kvp, quoteValues, resultStream);
     }
 
     return resultStream.str();

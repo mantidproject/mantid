@@ -40,6 +40,9 @@ public:
                              const QString label,
                              const boost::optional<QHash<QString, QVariant>>
                                  &otherKwargs = boost::none);
+  void pcolormesh(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                  const boost::optional<QHash<QString, QVariant>> &otherKwargs =
+                      boost::none);
   ///@}
 
   /// @name Artist removal/replacement

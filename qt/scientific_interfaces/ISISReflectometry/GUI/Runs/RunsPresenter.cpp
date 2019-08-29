@@ -6,24 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
 #include "CatalogRunNotifier.h"
-#include "CatalogSearcher.h"
 #include "GUI/Batch/IBatchPresenter.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CatalogManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "QtCatalogSearcher.h"
 
 #include <algorithm>
-#include <boost/regex.hpp>
-#include <boost/tokenizer.hpp>
 #include <fstream>
 #include <iterator>
 #include <sstream>
@@ -37,6 +30,7 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** Constructor
  * @param mainView :: [input] The view we're managing
@@ -56,9 +50,10 @@ RunsPresenter::RunsPresenter(
     double thetaTolerance, std::vector<std::string> const &instruments,
     int defaultInstrumentIndex, IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
-      m_searcher(std::make_unique<CatalogSearcher>(mainView)), m_view(mainView),
-      m_progressView(progressableView), m_mainPresenter(nullptr),
-      m_messageHandler(messageHandler), m_instruments(instruments),
+      m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
+      m_view(mainView), m_progressView(progressableView),
+      m_mainPresenter(nullptr), m_messageHandler(messageHandler),
+      m_instruments(instruments),
       m_defaultInstrumentIndex(defaultInstrumentIndex),
       m_thetaTolerance(thetaTolerance) {
 
@@ -125,6 +120,7 @@ void RunsPresenter::notifySearchFailed() {
 
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::notifyInstrumentChanged() {
@@ -180,6 +176,7 @@ void RunsPresenter::notifyRowOutputsChanged(
 void RunsPresenter::reductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->reductionResumed();
+  notifyRowStateChanged();
 }
 
 void RunsPresenter::reductionPaused() {
@@ -354,29 +351,6 @@ RunsPresenter::setupProgressBar(const std::set<int> &rowsToTransfer) {
   return progress;
 }
 
-struct RunDescriptionMetadata {
-  std::string groupName;
-  std::string theta;
-};
-
-RunDescriptionMetadata metadataFromDescription(std::string const &description) {
-  static boost::regex descriptionFormatRegex("(.*)(th[:=]([0-9.]+))(.*)");
-  boost::smatch matches;
-  if (boost::regex_search(description, matches, descriptionFormatRegex)) {
-    constexpr auto preThetaGroup = 1;
-    constexpr auto thetaValueGroup = 3;
-    constexpr auto postThetaGroup = 4;
-
-    const auto theta = matches[thetaValueGroup].str();
-    const auto preTheta = matches[preThetaGroup].str();
-    const auto postTheta = matches[postThetaGroup].str();
-
-    return RunDescriptionMetadata{preTheta, theta};
-  } else {
-    return RunDescriptionMetadata{description, ""};
-  }
-}
-
 /** Transfers the selected runs in the search results to the processing table
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
@@ -393,15 +367,10 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
-      auto resultMetadata = metadataFromDescription(result.description);
-      auto row =
-          validateRowFromRunAndTheta(result.runNumber, resultMetadata.theta);
+      auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
       if (row.is_initialized()) {
-        auto rowChanged = [](Row const &rowA, Row const &rowB) -> bool {
-          return rowA.runNumbers() != rowB.runNumbers();
-        };
         mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          resultMetadata.groupName, rowChanged);
+                          result.groupName());
       } else {
         m_searcher->setSearchResultError(
             rowIndex, "Theta was not specified in the description.");
@@ -444,10 +413,12 @@ std::string RunsPresenter::liveDataReductionAlgorithm() {
 }
 
 std::string
-RunsPresenter::liveDataReductionOptions(const std::string &instrument) {
+RunsPresenter::liveDataReductionOptions(const std::string &inputWorkspace,
+                                        const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tabs
   AlgorithmRuntimeProps options = m_mainPresenter->rowProcessingProperties();
   // Add other required input properties to the live data reduction algorithnm
+  options["InputWorkspace"] = inputWorkspace;
   options["Instrument"] = instrument;
   options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
   // Convert the properties to a string to pass to the algorithm
@@ -460,15 +431,16 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->initialize();
   alg->setChild(true);
   alg->setLogging(false);
-  auto instrument = m_view->getSearchInstrument();
+  auto const instrument = m_view->getSearchInstrument();
+  auto const inputWorkspace = "TOF_live";
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
-  alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", "20");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
-                   liveDataReductionOptions(instrument));
+                   liveDataReductionOptions(inputWorkspace, instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {
@@ -557,5 +529,6 @@ void RunsPresenter::errorHandle(const IAlgorithm *alg,
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
 }
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

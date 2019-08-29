@@ -30,9 +30,8 @@ void IndirectInterface::help() {
 
 void IndirectInterface::settings() {
   m_settings->loadSettings();
-  m_settings->show();
-  m_settings->setFocus();
   m_settings->setWindowModality(Qt::ApplicationModal);
+  m_settings->show();
 }
 
 void IndirectInterface::applySettings() {

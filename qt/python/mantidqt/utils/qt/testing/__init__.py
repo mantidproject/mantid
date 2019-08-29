@@ -12,25 +12,30 @@
 """
 from __future__ import absolute_import
 
-from unittest import TestCase
-
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QObject
 
 from .application import get_application
 from .modal_tester import ModalTester
 from .gui_window_test import GuiWindowTest
 
 
-class GuiTest(TestCase):
-    """Base class for tests that require a QApplication instance
-    GuiTest ensures that a QApplication exists before tests are run
+def start_qapplication(cls):
     """
-    @classmethod
+    Unittest decorator. Adds or augments the setUpClass classmethod
+    to the given class. It starts the QApplication object
+    if it is not already started
+    @param cls: Class being decorated
+    """
+    def do_nothing(_):
+        pass
+
     def setUpClass(cls):
-        """Prepare for test execution.
-        Ensure that a (single copy of) QApplication has been created
-        """
-        get_application(cls.__name__)
+        get_application()
+        setUpClass_orig()
+
+    setUpClass_orig = cls.setUpClass if hasattr(cls, 'setUpClass') else do_nothing
+    setattr(cls, 'setUpClass', classmethod(setUpClass))
+    return cls
 
 
 def select_item_in_tree(tree, item_label):

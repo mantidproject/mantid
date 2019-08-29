@@ -233,6 +233,32 @@ private:
   UserSubWindow(QWidget *parent = nullptr);
 };
 
+class BaseEncoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseEncoder.h"
+%End
+public:
+  virtual QMap<QString, QVariant> encode(const QWidget *window,
+                                         const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseEncoder();
+  virtual ~BaseEncoder();
+};
+
+class BaseDecoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseDecoder.h"
+%End
+public:
+  virtual QWidget * decode(const QMap<QString, QVariant> &map,
+                          const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseDecoder();
+  virtual ~BaseDecoder();
+};
+
 class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindowFactory.h"
@@ -246,6 +272,9 @@ public:
     UserSubWindow *createUnwrapped(const std::string &name) const;
     QSet<QString> categories(const QString &interfaceName) const;
     QStringList keys() const;
+    BaseEncoder *findEncoder(QWidget *window);
+    BaseDecoder *findDecoder(const std::string &decodeString);
+
 
 private:
   UserSubWindowFactoryImpl();
@@ -356,6 +385,7 @@ class ManageUserDirectories : QDialog {
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
   static void openUserDirsDialog(QWidget *parent);
+  void setHelpButtonVisible(const bool &visible /TransferThis/ );
 };
 
 // ---------------------------------
@@ -391,7 +421,7 @@ public:
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void setTextPlotGuess(const QString);
 
-    SIP_PYOBJECT defaultPeakType() const;
+    SIP_PYOBJECT defaultPeakType();
 %MethodCode
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());
@@ -411,6 +441,8 @@ public:
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    void normaliseData(bool on);
+    QMenu *getFitMenu() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -439,6 +471,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+
 };
 
 // ---------------------------------
@@ -770,6 +803,10 @@ public:
     SIP_PYOBJECT getGlobalFunction();
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
+    %End
+    SIP_PYOBJECT getFunctionByIndex(const QString &index);
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionByIndex(*a0));
     %End
 signals:
     void functionStructureChanged();

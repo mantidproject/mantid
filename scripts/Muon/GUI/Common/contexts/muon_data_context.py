@@ -59,7 +59,7 @@ class MuonDataContext(object):
     The MuonContext is the core class for the MuonAnalysis 2 interface. It stores all the data and parameters used
     in the interface and serves as the model part of the MVP design pattern for every widget in the interface.
     By sharing a common instance of this class, the interface remains synchronized by use of the observer pattern to
-    notify subcribers of changes, whi will then respond by updating their view from this commonly shared model.
+    notify subcribers of changes, who will then respond by updating their view from this commonly shared model.
 
     The actual processing of data occurs via this class (as it should as the model).
     """

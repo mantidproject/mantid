@@ -13,7 +13,7 @@ from qtpy.QtCore import QCoreApplication, QObject
 import unittest
 
 from mantid.py3compat.mock import patch
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.writetosignal import WriteToSignal
 
 
@@ -24,7 +24,8 @@ class Receiver(QObject):
         self.captured_txt = txt
 
 
-class WriteToSignalTest(GuiTest):
+@start_qapplication
+class WriteToSignalTest(unittest.TestCase):
 
     def test_run_with_output_present(self):
         with patch("sys.stdout") as mock_stdout:

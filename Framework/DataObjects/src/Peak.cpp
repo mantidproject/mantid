@@ -245,7 +245,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   if (id >= 0) {
     setDetectorID(id);
   }
-  if (const Peak *peak = dynamic_cast<const Peak *>(&ipeak)) {
+  if (const auto *peak = dynamic_cast<const Peak *>(&ipeak)) {
     this->m_detIDs = peak->m_detIDs;
   }
 }
@@ -700,7 +700,7 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
   else if (m_inst->hasParameter("tube-gap")) {
     std::vector<double> gaps = m_inst->getNumberParameter("tube-gap", true);
     if (!gaps.empty()) {
-      const double gap = static_cast<double>(gaps.front());
+      const auto gap = static_cast<double>(gaps.front());
       // try adding and subtracting tube-gap in 3 q dimensions to see if you can
       // find detectors on each side of tube gap
       for (int i = 0; i < 3; i++) {

@@ -12,15 +12,16 @@
 #include "FloodCorrections.h"
 #include "PerThetaDefaults.h"
 #include "PolarizationCorrections.h"
-#include "RangeInLambda.h"
 #include "ReductionType.h"
 #include "SummationType.h"
+#include "TransmissionStitchOptions.h"
 #include <map>
 #include <string>
 #include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class Experiment
 
@@ -34,7 +35,7 @@ public:
              SummationType summationType, bool includePartialBins, bool debug,
              PolarizationCorrections polarizationCorrections,
              FloodCorrections floodCorrections,
-             boost::optional<RangeInLambda> transmissionRunRange,
+             TransmissionStitchOptions transmissionStitchOptions,
              std::map<std::string, std::string> stitchParameters,
              std::vector<PerThetaDefaults> perThetaDefaults);
 
@@ -45,11 +46,11 @@ public:
   bool debug() const;
   PolarizationCorrections const &polarizationCorrections() const;
   FloodCorrections const &floodCorrections() const;
-  boost::optional<RangeInLambda> transmissionRunRange() const;
+  TransmissionStitchOptions transmissionStitchOptions() const;
   std::map<std::string, std::string> stitchParameters() const;
   std::string stitchParametersString() const;
   std::vector<PerThetaDefaults> const &perThetaDefaults() const;
-  std::vector<std::array<std::string, 8>> perThetaDefaultsArray() const;
+  std::vector<PerThetaDefaults::ValueArray> perThetaDefaultsArray() const;
 
   PerThetaDefaults const *defaultsForTheta(double thetaAngle,
                                            double tolerance) const;
@@ -64,7 +65,7 @@ private:
 
   PolarizationCorrections m_polarizationCorrections;
   FloodCorrections m_floodCorrections;
-  boost::optional<RangeInLambda> m_transmissionRunRange;
+  TransmissionStitchOptions m_transmissionStitchOptions;
 
   std::map<std::string, std::string> m_stitchParameters;
   std::vector<PerThetaDefaults> m_perThetaDefaults;
@@ -74,6 +75,7 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Experiment const &lhs,
                                                Experiment const &rhs);
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Experiment const &lhs,
                                                Experiment const &rhs);
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_EXPERIMENT_H_

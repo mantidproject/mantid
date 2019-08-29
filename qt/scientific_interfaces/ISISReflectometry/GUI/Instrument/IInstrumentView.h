@@ -13,6 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class IInstrumentView
 
@@ -71,6 +72,7 @@ public:
   virtual void enableDetectorCorrectionType() = 0;
   virtual void disableDetectorCorrectionType() = 0;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IINSTRUMENTVIEW_H */

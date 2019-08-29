@@ -145,6 +145,7 @@ class MultiPythonFileInterpreter(QWidget):
         :param allow_zero_tabs: If True then closing the last tab does not add a new empty tab.
         :return: True if tab is to be closed, False if cancelled
         """
+
         if idx >= self.editor_count:
             return True
         # Make the current tab active so that it is clear what you

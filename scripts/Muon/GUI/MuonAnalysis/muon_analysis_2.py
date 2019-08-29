@@ -98,7 +98,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         central_widget.setLayout(vertical_layout)
 
         self.setCentralWidget(central_widget)
-        self.setWindowTitle("Muon Analysis")
+        self.setWindowTitle(self.context.window_title)
 
         self.setup_load_observers()
 
@@ -192,6 +192,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.phase_tab.phase_table_presenter.instrument_changed_observer)
+
+        self.context.data_context.instrumentNotifier.add_subscriber(
+            self.home_tab.plot_widget.instrument_observer)
 
     def setup_group_calculation_enable_notifer(self):
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(

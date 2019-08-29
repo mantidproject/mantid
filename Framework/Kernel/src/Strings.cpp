@@ -222,7 +222,7 @@ int endsWithInt(const std::string &word) {
     return -1;
   int out = -1;
   // Find the index of the first number in the string (if any)
-  int firstNumber = int(word.size());
+  auto firstNumber = int(word.size());
   for (int i = int(word.size()) - 1; i >= 0; i--) {
     char c = word[i];
     if ((c > '9') || (c < '0'))
@@ -274,7 +274,7 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
   // std::string Line;
   if (fh.good()) {
     auto ss = new char[spc + 1];
-    const int clen = static_cast<int>(spc - Out.length());
+    const auto clen = static_cast<int>(spc - Out.length());
     fh.getline(ss, clen, '\n');
     ss[clen + 1] = 0; // incase line failed to read completely
     Out += static_cast<std::string>(ss);
@@ -597,7 +597,7 @@ template <typename T> int section(std::string &A, T &out) {
   if (cx.fail())
     return 0;
   const std::streamoff xpt = cx.tellg();
-  const char xc = static_cast<char>(cx.get());
+  const auto xc = static_cast<char>(cx.get());
   if (!cx.fail() && !isspace(xc))
     return 0;
   A.erase(0, static_cast<unsigned int>(xpt));
@@ -629,7 +629,7 @@ template <typename T> int sectionMCNPX(std::string &A, T &out) {
     if (xpt < 0) {
       return 0;
     }
-    const char xc = static_cast<char>(cx.get());
+    const auto xc = static_cast<char>(cx.get());
     if (!cx.fail() && !isspace(xc) && (xc != '-' || xpt < 5)) {
       return 0;
     }
@@ -688,7 +688,7 @@ template <typename T> int convert(const std::string &A, T &out) {
   cx >> retval;
   if (cx.fail())
     return 0;
-  const char clast = static_cast<char>(cx.get());
+  const auto clast = static_cast<char>(cx.get());
   if (!cx.fail() && !isspace(clast))
     return 0;
   out = retval;

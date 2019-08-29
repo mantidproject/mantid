@@ -17,6 +17,10 @@ adding information to tables.
 """
 
 
+def default_validator(_text):
+    return True
+
+
 class ValidatedTableItem(QtWidgets.QTableWidgetItem):
     """
     An extension of the QTableWidgetItem class, which modifies the setData method to first check that the entered
@@ -55,10 +59,6 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
 
         return wrapper
 
-    @staticmethod
-    def default_validator(_text):
-        return True
-
     def __init__(self, validator=default_validator):
         """
         :param validator: A predicate function (returns True/False) taking a single string as argument
@@ -70,6 +70,10 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
     def validator(self, text):
         return self._validator(text)
 
+    def set_validator(self, validator):
+        self._validator = validator
+        self._modify_setData()
+
     def _modify_setData(self):
         """
         Modify the setData method.
@@ -77,10 +81,10 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
         setattr(self, "setData", self.validator_before_set(self.setData, self.validator))
 
 
-def setRowName(table, row, name):
+def setRowName(table, row, name, col=0):
     text = QtWidgets.QTableWidgetItem((name))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
-    table.setItem(row, 0, text)
+    table.setItem(row, col, text)
 
 
 def addComboToTable(table,row,options,col=1):

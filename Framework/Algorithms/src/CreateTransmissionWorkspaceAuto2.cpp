@@ -92,10 +92,10 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   auto instrument = firstWS->getInstrument();
 
   // Other mandatory properties
-  double wavMin = checkForMandatoryInstrumentDefault<double>(
+  auto wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
-  double wavMax = checkForMandatoryInstrumentDefault<double>(
+  auto wavMax = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 

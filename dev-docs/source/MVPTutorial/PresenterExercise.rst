@@ -2,10 +2,10 @@
 Presenter Exercise
 ==================
 
-In this exercise you will create a Presenter for View.py.
+In this exercise you will create a presenter for ``view.py.``
 
-Using the View from the previous exercise (the one which contains a
-table) create a Presenter to handle the button press. When the button
+Using the view from the previous exercise (the one which contains a
+table) create a presenter to handle the button press. When the button
 is pressed the following should be output:
 
 - The line colour

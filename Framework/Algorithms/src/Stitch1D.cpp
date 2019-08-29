@@ -63,7 +63,7 @@ DECLARE_ALGORITHM(Stitch1D)
 MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
   MatrixWorkspace_sptr product = source->clone();
-  const int histogramCount = static_cast<int>(source->getNumberHistograms());
+  const auto histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -100,7 +100,7 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
  * @return Masked workspace.
  */
 void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
-  const int histogramCount = static_cast<int>(source->getNumberHistograms());
+  const auto histogramCount = static_cast<int>(source->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*source))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -323,7 +323,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
   rebin->execute();
   MatrixWorkspace_sptr outWS = rebin->getProperty("OutputWorkspace");
 
-  const int histogramCount = static_cast<int>(outWS->getNumberHistograms());
+  const auto histogramCount = static_cast<int>(outWS->getNumberHistograms());
 
   // Record special values and then mask them out as zeros. Special values are
   // remembered and then replaced post processing.
@@ -445,8 +445,8 @@ MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
 boost::tuple<int, int>
 Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
                               MatrixWorkspace_sptr &workspace) {
-  int a1 = static_cast<int>(workspace->yIndexOfX(startOverlap));
-  int a2 = static_cast<int>(workspace->yIndexOfX(endOverlap));
+  auto a1 = static_cast<int>(workspace->yIndexOfX(startOverlap));
+  auto a2 = static_cast<int>(workspace->yIndexOfX(endOverlap));
   if (a1 == a2) {
     throw std::runtime_error("The Params you have provided for binning yield a "
                              "workspace in which start and end overlap appear "
@@ -461,7 +461,7 @@ Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
  @return True if there are any non-zero errors in the workspace
  */
 bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr &ws) {
-  int64_t ws_size = static_cast<int64_t>(ws->getNumberHistograms());
+  auto ws_size = static_cast<int64_t>(ws->getNumberHistograms());
   bool hasNonZeroErrors = false;
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int64_t i = 0; i < ws_size; ++i) {
@@ -644,7 +644,7 @@ void Stitch1D::exec() {
  * @param ws : MatrixWorkspace to resinsert special values into.
  */
 void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
-  int histogramCount = static_cast<int>(ws->getNumberHistograms());
+  auto histogramCount = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION

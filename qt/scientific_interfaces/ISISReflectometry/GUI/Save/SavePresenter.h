@@ -19,6 +19,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 /** @class SavePresenter
 
@@ -85,6 +86,7 @@ private:
   std::unique_ptr<IAsciiSaver> m_saver;
   bool m_shouldAutosave;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif /* MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H */

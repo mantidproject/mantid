@@ -53,8 +53,7 @@ Mantid::API::CoordTransform *CoordTransformAffineParser::createTransform(
 
   // Add input dimension parameter.
   InDimParameterParser inDimParser;
-  Poco::XML::Element *parameter =
-      dynamic_cast<Poco::XML::Element *>(parameters->item(0));
+  auto *parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(0));
   boost::shared_ptr<Mantid::API::InDimParameter> inDim(
       inDimParser.createWithoutDelegation(parameter));
 

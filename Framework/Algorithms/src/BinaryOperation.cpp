@@ -937,8 +937,8 @@ BinaryOperation::buildBinaryOperationTable(
   //  -1 if it should add a new entry at the end.
   auto table = boost::make_shared<BinaryOperationTable>();
 
-  int rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
-  int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
+  auto rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
+  auto lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
 
   // Initialize the table; filled with -1 meaning no match
   table->resize(lhs_nhist, -1);

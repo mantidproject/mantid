@@ -76,7 +76,7 @@ From the CMake gui
 * A new window will appear asking which 'Generator' you want to use:
 
   * Linux/Mac developers should choose ``Ninja``
-  * Windows developers should choose ``Visual Studio 15 2017`` and in the _Optional platform for generator\_ box select ``x64``. If you see errors related to HDF5 then you have most likely selected the wrong platform. 
+  * Windows developers should choose ``Visual Studio 16 2019`` and in the _Optional platform for generator\_ box select ``x64``. If you see errors related to HDF5 then you have most likely selected the wrong platform.
 
 * Wait a while....
 * You will be presented with a list of options in red that can in principle be changed. You probably don't want to change anything, except perhaps checking ``MAKE_VATES`` if you want to build that.

@@ -68,10 +68,10 @@ void DetectorEfficiencyCorUser::exec() {
 
   const size_t numberOfChannels = this->m_inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(this->m_inputWS->size() / numberOfChannels);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)

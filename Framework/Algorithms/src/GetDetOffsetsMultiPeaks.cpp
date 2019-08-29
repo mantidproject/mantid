@@ -52,8 +52,8 @@ const double BAD_OFFSET(1000.); // mark things that didn't work with this
 double gsl_costFunction(const gsl_vector *v, void *params) {
   // FIXME - there is no need to use vectors peakPosToFit, peakPosFitted and
   // chisq
-  double *p = reinterpret_cast<double *>(params);
-  size_t n = static_cast<size_t>(p[0]);
+  auto *p = reinterpret_cast<double *>(params);
+  auto n = static_cast<size_t>(p[0]);
   std::vector<double> peakPosToFit(n);
   std::vector<double> peakPosFitted(n);
   std::vector<double> height2(n);
@@ -478,7 +478,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
 /** Calculate (all) detectors' offsets
  */
 void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
-  int nspec = static_cast<int>(m_inputWS->getNumberHistograms());
+  auto nspec = static_cast<int>(m_inputWS->getNumberHistograms());
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
@@ -592,7 +592,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   } else {
     // dead detector will be masked
     const auto &Y = m_inputWS->y(wi);
-    const int YLength = static_cast<int>(Y.size());
+    const auto YLength = static_cast<int>(Y.size());
     double sumY = 0.0;
     size_t numNonEmptyBins = 0;
     for (int i = 0; i < YLength; i++) {
@@ -888,7 +888,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
       peakPosToFit.push_back(peakPositions[i]);
     }
   }
-  int numPeaksInRange = static_cast<int>(peakPosToFit.size());
+  auto numPeaksInRange = static_cast<int>(peakPosToFit.size());
   if (numPeaksInRange == 0) {
     std::stringstream outss;
     outss << "Spectrum " << wi << " has no peak in range (" << minD << ", "
@@ -1233,7 +1233,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
                    (tofitpeakpositions[i] * tofitpeakpositions[i]);
     }
 
-    double numdelta = static_cast<double>(numpeaksfitted);
+    auto numdelta = static_cast<double>(numpeaksfitted);
     double stddev = 0.;
     if (numpeaksfitted > 1.)
       stddev = sqrt(sumdelta2 / numdelta -

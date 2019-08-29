@@ -14,6 +14,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace ISISReflectometry {
 
 namespace { // unnamed
 std::vector<MantidQt::MantidWidgets::Batch::Cell>
@@ -96,6 +97,7 @@ public:
 private:
   MantidQt::MantidWidgets::Batch::IJobTreeView &m_view;
 };
+} // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H

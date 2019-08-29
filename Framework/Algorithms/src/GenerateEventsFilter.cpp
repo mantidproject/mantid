@@ -304,7 +304,7 @@ void GenerateEventsFilter::processInputTime() {
     // (percent of total run time)
     int64_t runtime_ns =
         m_runEndTime.totalNanoseconds() - runstarttime.totalNanoseconds();
-    double runtimed_ns = static_cast<double>(runtime_ns);
+    auto runtimed_ns = static_cast<double>(runtime_ns);
     m_timeUnitConvertFactorToNS = 0.01 * runtimed_ns;
   } else {
     // (Not defined/supported)
@@ -403,7 +403,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     int64_t timeslot = 0;
 
     // Explicitly N time intervals
-    int64_t deltatime_ns =
+    auto deltatime_ns =
         static_cast<int64_t>(timeinterval * m_timeUnitConvertFactorToNS);
 
     int64_t curtime_ns = m_startTime.totalNanoseconds();
@@ -444,8 +444,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     size_t numtimeintervals = vec_timeintervals.size();
     std::vector<int64_t> vec_dtimens(numtimeintervals);
     for (size_t id = 0; id < numtimeintervals; ++id) {
-      int64_t deltatime_ns = static_cast<int64_t>(vec_timeintervals[id] *
-                                                  m_timeUnitConvertFactorToNS);
+      auto deltatime_ns = static_cast<int64_t>(vec_timeintervals[id] *
+                                               m_timeUnitConvertFactorToNS);
       vec_dtimens[id] = deltatime_ns;
     }
 
@@ -646,7 +646,7 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
                                                     bool filterdecrease) {
   // Get parameters time-tolerance and log-boundary
   double timetolerance = this->getProperty("TimeTolerance");
-  int64_t timetolerance_ns =
+  auto timetolerance_ns =
       static_cast<int64_t>(timetolerance * m_timeUnitConvertFactorToNS);
 
   std::string logboundary = this->getProperty("LogBoundary");
@@ -991,7 +991,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   m_vecSplitterTimeSet.push_back(tempvectimes);
   m_vecGroupIndexSet.push_back(tempvecgroup);
   int istart = 0;
-  int iend = static_cast<int>(logsize - 1);
+  auto iend = static_cast<int>(logsize - 1);
 
   makeMultipleFiltersByValuesPartialLog(
       istart, iend, m_vecSplitterTime, m_vecSplitterGroup, indexwsindexmap,
@@ -1853,7 +1853,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
                 << runendtime.totalNanoseconds()
                 << ", no run end set = " << norunendset << "\n";
 
-  int64_t extended_ns = static_cast<int64_t>(1.0E8);
+  auto extended_ns = static_cast<int64_t>(1.0E8);
   if (m_dataWS->run().hasProperty("proton_charge")) {
     // Get last proton charge time and compare with run end time
     // this does nothing but make sure that run().endTime() is same as proton

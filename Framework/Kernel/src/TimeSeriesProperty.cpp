@@ -110,7 +110,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
     int64_t t1 = it->time().totalNanoseconds();
     if (t1 != t0) {
       double deriv = 1.e+9 * (double(v1 - v0) / double(t1 - t0));
-      int64_t tm = static_cast<int64_t>((t1 + t0) / 2);
+      auto tm = static_cast<int64_t>((t1 + t0) / 2);
       timeSeriesDeriv->addValue(Types::Core::DateAndTime(tm), deriv);
     }
     t0 = t1;
@@ -153,8 +153,7 @@ TimeSeriesProperty<TYPE> &TimeSeriesProperty<TYPE>::merge(Property *rhs) {
 template <typename TYPE>
 TimeSeriesProperty<TYPE> &TimeSeriesProperty<TYPE>::
 operator+=(Property const *right) {
-  TimeSeriesProperty<TYPE> const *rhs =
-      dynamic_cast<TimeSeriesProperty<TYPE> const *>(right);
+  auto const *rhs = dynamic_cast<TimeSeriesProperty<TYPE> const *>(right);
 
   if (rhs) {
     if (this->operator!=(*rhs)) {
@@ -393,8 +392,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
       mp_copy.push_back(temp);
     } else {
       mp_copy.emplace_back(t_start, m_values[tstartindex].value());
-      for (size_t im = size_t(tstartindex + 1); im <= size_t(tstopindex);
-           ++im) {
+      for (auto im = size_t(tstartindex + 1); im <= size_t(tstopindex); ++im) {
         mp_copy.emplace_back(m_values[im].time(), m_values[im].value());
       }
     }
@@ -440,8 +438,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   size_t numOutputs = outputs.size();
   // 1. Clear the outputs before you start
   for (size_t i = 0; i < numOutputs; i++) {
-    TimeSeriesProperty<TYPE> *myOutput =
-        dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
+    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
       outputs_tsp.push_back(myOutput);
       if (this->m_values.size() == 1) {
@@ -536,8 +533,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
 
   // Make sure all entries have the correct size recorded in m_size.
   for (std::size_t i = 0; i < numOutputs; i++) {
-    TimeSeriesProperty<TYPE> *myOutput =
-        dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
+    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
     if (myOutput) {
       myOutput->m_size = myOutput->realSize();
     }
@@ -1730,7 +1726,7 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
       ;
     } else if (static_cast<size_t>(n) == m_filterQuickRef.back().second + 1) {
       // 2. n = size of the allowed region, duplicate the last one
-      long ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
+      auto ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
       long ind_t2 = ind_t1 - 1;
       Types::Core::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
       Types::Core::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
@@ -2339,13 +2335,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
-
-  if (name() == "proton_charge") {
-    for (const auto &item : m_filterQuickRef) {
-      std::cerr << "first=" << item.first << ",  second=" << item.second
-                << "\n";
-    }
-  }
 }
 
 /*
@@ -2516,8 +2505,8 @@ void TimeSeriesProperty<TYPE>::histogramData(
   if (nPoints == 0)
     return; // nothing to do
 
-  double t0 = static_cast<double>(tMin.totalNanoseconds());
-  double t1 = static_cast<double>(tMax.totalNanoseconds());
+  auto t0 = static_cast<double>(tMin.totalNanoseconds());
+  auto t1 = static_cast<double>(tMax.totalNanoseconds());
   if (t0 > t1)
     throw std::invalid_argument(
         "invalid arguments for histogramData; tMax<tMin");
@@ -2525,10 +2514,10 @@ void TimeSeriesProperty<TYPE>::histogramData(
   double dt = (t1 - t0) / static_cast<double>(nPoints);
 
   for (auto &ev : m_values) {
-    double time = static_cast<double>(ev.time().totalNanoseconds());
+    auto time = static_cast<double>(ev.time().totalNanoseconds());
     if (time < t0 || time >= t1)
       continue;
-    size_t ind = static_cast<size_t>((time - t0) / dt);
+    auto ind = static_cast<size_t>((time - t0) / dt);
     counts[ind] += static_cast<double>(ev.value());
   }
 }
@@ -2555,19 +2544,15 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
   if (m_filter.empty()) {
     return this->valuesAsVector(); // no filtering to do
   }
-
-  std::vector<TYPE> filteredValues;
-
   if (!m_filterApplied) {
     applyFilter();
   }
-
   sortIfNecessary();
 
-  const auto &valueMap = valueAsCorrectMap();
-  for (const auto &entry : valueMap) {
-    if (isTimeFiltered(entry.first)) {
-      filteredValues.push_back(entry.second);
+  std::vector<TYPE> filteredValues;
+  for (const auto &value : m_values) {
+    if (isTimeFiltered(value.time())) {
+      filteredValues.emplace_back(value.value());
     }
   }
 
@@ -2576,7 +2561,9 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
 
 /**
  * Find out if the given time is included in the filtered data
- * i.e. it does not lie in an excluded region
+ * i.e. it does not lie in an excluded region. This function assumes
+ * the filter is not empty, it has been applied and the values are
+ * sorted by time.
  * @param time :: [input] Time to check
  * @returns :: True if time is in an included region, false if the filter
  * excludes it.
@@ -2584,24 +2571,29 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeFiltered(
     const Types::Core::DateAndTime &time) const {
-  if (m_filter.empty()) {
-    return false; // no filter
-  }
+  // Each time/value pair in the filter defines a point where the region defined
+  // after that time is either included/excluded depending on the boolean value.
+  // By definition of the filter construction the region before a given filter
+  // time must have the opposite value. For times outside the filter region:
+  //   1. time < first filter time: inverse of the first filter value
+  //   2. time > last filter time: value of the last filter value
+  // If time == a filter time then the value is taken to belong to that filter
+  // region and not the previous
 
-  if (!m_filterApplied) {
-    applyFilter();
-  }
-
-  // Find which range it lives in
+  // Find first fitler time strictly greater than time
   auto filterEntry = std::lower_bound(
       m_filter.begin(), m_filter.end(), time,
       [](const std::pair<Types::Core::DateAndTime, bool> &filterEntry,
-         const Types::Core::DateAndTime &t) { return filterEntry.first < t; });
+         const Types::Core::DateAndTime &t) { return filterEntry.first <= t; });
 
-  if (filterEntry != m_filter.begin()) {
-    --filterEntry; // get the latest time BEFORE the given time
+  if (filterEntry == m_filter.begin()) {
+    return !filterEntry->second;
+  } else {
+    // iterator points to filter greater than time and but we want the previous
+    // region
+    --filterEntry;
+    return filterEntry->second;
   }
-  return filterEntry->second;
 }
 
 /**

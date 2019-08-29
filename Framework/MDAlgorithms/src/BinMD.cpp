@@ -134,7 +134,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       for (size_t bd = 0; bd < m_outD; bd++) {
         // What is the bin index in that dimension
         coord_t x = outCenter[bd];
-        size_t ix = size_t(x);
+        auto ix = size_t(x);
         // Within range (for this chunk)?
         if ((x >= 0) && (ix >= chunkMin[bd]) && (ix < chunkMax[bd])) {
           // Build up the linear index
@@ -199,7 +199,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
     for (size_t bd = 0; bd < m_outD; bd++) {
       // What is the bin index in that dimension
       coord_t x = outCenter[bd];
-      size_t ix = size_t(x);
+      auto ix = size_t(x);
       // Within range (for this chunk)?
       if ((x >= 0) && (ix >= chunkMin[bd]) && (ix < chunkMax[bd])) {
         // Build up the linear index
@@ -265,8 +265,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // How many bins (in that dimension) per chunk.
   // Try to split it so each core will get 2 tasks:
-  int chunkNumBins = int(m_binDimensions[chunkDimension]->getNBins() /
-                         (PARALLEL_GET_MAX_THREADS * 2));
+  auto chunkNumBins = int(m_binDimensions[chunkDimension]->getNBins() /
+                          (PARALLEL_GET_MAX_THREADS * 2));
   if (chunkNumBins < 1)
     chunkNumBins = 1;
 
@@ -336,7 +336,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // Go through every box for this chunk.
       for (auto &boxe : boxes) {
-        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
+        auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
         if (box && !box->getIsMasked())
           this->binMDBox(box, chunkMin.data(), chunkMax.data());

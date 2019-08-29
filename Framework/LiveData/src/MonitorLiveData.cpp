@@ -164,7 +164,7 @@ void MonitorLiveData::exec() {
 
       // Time to run LoadLiveData again
       Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");
-      LoadLiveData *loadAlg = dynamic_cast<LoadLiveData *>(alg.get());
+      auto *loadAlg = dynamic_cast<LoadLiveData *>(alg.get());
       if (!loadAlg)
         throw std::runtime_error("Error creating LoadLiveData Child Algorithm");
 

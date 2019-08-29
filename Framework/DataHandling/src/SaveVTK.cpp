@@ -175,7 +175,7 @@ void SaveVTK::writeVTKPiece(std::ostream &outVTP,
                             int index) const {
   (void)errors; // Avoid compiler warning
 
-  int nY = static_cast<int>(yValue.size());
+  auto nY = static_cast<int>(yValue.size());
   int nPoints(8 * nY);
   outVTP << "<Piece NumberOfPoints=\"" << nPoints << "\" NumberOfCells=\"" << nY
          << "\">";

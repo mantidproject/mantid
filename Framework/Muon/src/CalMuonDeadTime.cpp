@@ -187,7 +187,7 @@ void CalMuonDeadTime::exec() {
     std::string function = ss.str();
 
     fit->setPropertyValue("Function", function);
-    const int wsindex = static_cast<int>(i);
+    const auto wsindex = static_cast<int>(i);
     fit->setProperty("InputWorkspace", wsFitAgainst);
     fit->setProperty("WorkspaceIndex", wsindex);
     fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
