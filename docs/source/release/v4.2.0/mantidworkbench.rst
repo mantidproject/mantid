@@ -24,6 +24,7 @@ Improvements
 - Attempting to save files that are larger than (by default) 10GB now results in a dialog box to inform the user that it may take a long time and gives them the opportunity to cancel.
 - Added basic tiled plots to workbench interface.
 - Changing the axis' scale, by right-clicking on a figure with multiple plots, changes only the plot that was clicked on.
+- If a spectrum has a label, this will now be used instead of the spectrum number in the legend when the spectrum is plotted.
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
 - There are now icons alongside the colormap names in the plot options dialog.
 
