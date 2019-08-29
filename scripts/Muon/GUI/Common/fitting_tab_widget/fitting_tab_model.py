@@ -12,6 +12,11 @@ from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapp
 from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CopyLogs, EvaluateFunction)
 from mantid.api import AnalysisDataService
 
+MUON_ANALYSIS_SUFFIX = ' MA'
+FREQUENCY_DOMAIN_ANALYSIS_SUFFIX = ' FD'
+MUON_ANALYSIS_GUESS_WS = '__muon_analysis_fitting_guess'
+FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS = '__frequency_domain_analysis_fitting_guess'
+
 
 class FittingTabModel(object):
     def __init__(self, context):
@@ -201,7 +206,12 @@ class FittingTabModel(object):
             data_ws_name = parameter_dict['InputWorkspace']
         except KeyError:
             return
-        guess_ws_name = '__muon_analysis_fit_guess'
+        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
+            guess_ws_name = MUON_ANALYSIS_GUESS_WS
+        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
+            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+        else:
+            guess_ws_name = '__unknown_interface_fitting_guess'
 
         # Handle case of function removed
         if fit_function is None and plot_guess:

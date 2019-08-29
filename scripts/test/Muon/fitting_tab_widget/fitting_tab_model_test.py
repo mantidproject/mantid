@@ -210,7 +210,7 @@ class FittingTabModelTest(unittest.TestCase):
                                              Function='func',
                                              StartX=parameters['StartX'],
                                              EndX=parameters['EndX'],
-                                             OutputWorkspace='__muon_analysis_fit_guess')
+                                             OutputWorkspace='__unknown_interface_fitting_guess')
 
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.mantid')
     @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction')
@@ -226,7 +226,7 @@ class FittingTabModelTest(unittest.TestCase):
                                          Function='func',
                                          StartX=parameters['StartX'],
                                          EndX=parameters['EndX'],
-                                         OutputWorkspace='__muon_analysis_fit_guess')
+                                         OutputWorkspace='__unknown_interface_fitting_guess')
         mock_mantid.logger.error.assert_called_with('Could not evaluate the function.')
         self.assertEqual(0, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
 
@@ -244,9 +244,9 @@ class FittingTabModelTest(unittest.TestCase):
                                          Function='func',
                                          StartX=parameters['StartX'],
                                          EndX=parameters['EndX'],
-                                         OutputWorkspace='__muon_analysis_fit_guess')
+                                         OutputWorkspace='__unknown_interface_fitting_guess')
         self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
-        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, '__muon_analysis_fit_guess')
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, '__unknown_interface_fitting_guess')
 
 
 if __name__ == '__main__':
