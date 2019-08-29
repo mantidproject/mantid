@@ -165,9 +165,6 @@ class MuonDataContext(object):
 
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
-            # workspace_group = WorkspaceGroup()
-            # for workspace_wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']:
-            #     workspace_group.addWorkspace(workspace_wrapper.workspace)
             workspace_list = [wrapper._workspace_name for wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']]
             return GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace='__temp_group')
         else:

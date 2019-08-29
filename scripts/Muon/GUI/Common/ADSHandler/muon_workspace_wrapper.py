@@ -160,13 +160,6 @@ class MuonWorkspaceWrapper(object):
 
             self._add_to_appropriate_groups()
 
-            # if self._directory_structure != "":
-            #     self.add_directory_structure()
-            #     # Add to the appropriate group
-            #     group = self._directory_structure.split("/")[-1]
-            #     if not AnalysisDataService.retrieve(group).__contains__(self._workspace_name):
-            #         AnalysisDataService.retrieve(group).add(self._workspace_name)
-
             self._workspace = None
             self._is_in_ads = True
         else:
