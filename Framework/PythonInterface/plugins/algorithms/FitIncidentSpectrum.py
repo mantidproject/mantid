@@ -180,6 +180,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
             index = np.arange(len(x))
             fit_prime = np.empty(len(x))
             for pos in index:
+                print(pos)
+                print(x[pos])
+                print(spline_fit.derivatives(x[pos]))
+                print(spline_fit.derivatives(x[pos])[0])
                 fit_prime[pos] = spline_fit.derivatives(x[pos])[0]
         return fit, fit_prime
 
