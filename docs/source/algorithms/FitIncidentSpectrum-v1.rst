@@ -37,7 +37,9 @@ Usage
 
     # Create the workspace to hold the already corrected incident spectrum
     incident_wksp_name = 'incident_spectrum_wksp'
-    binning = "%s,%s,%s" % (0.2, 0.01, 4.0)
+    binning_incident = "%s,%s,%s" % (0.2, 0.01, 4.0)
+    binning_for_calc = "%s,%s,%s" % (0.2, 0.2, 4.0)
+    binning_for_fit = "%s,%s,%s" % (0.2, 0.01, 4.0)
     incident_wksp = CreateWorkspace(
         OutputWorkspace=incident_wksp_name,
         NSpec=1,
@@ -46,14 +48,16 @@ Usage
         UnitX='Wavelength',
         VerticalAxisUnit='Text',
         VerticalAxisValues='IncidentSpectrum')
-    incident_wksp = Rebin(InputWorkspace=incident_wksp, Params=binning)
+    incident_wksp = Rebin(InputWorkspace=incident_wksp, Params=binning_incident)
     incident_wksp = ConvertToPointData(InputWorkspace=incident_wksp)
 
 
     # Spectrum function given in Milder et al. Eq (5)
-    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT):
+    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2,
+                         lamdaT):
         deltaTerm = 1. / (1. + np.exp((wavelengths - lambda1) / lambda2))
-        term1 = phiMax * (lambdaT**4. / wavelengths**5.) * np.exp(-(lambdaT / wavelengths)**2.)
+        term1 = phiMax * (
+            lambdaT**4. / wavelengths**5.) * np.exp(-(lambdaT / wavelengths)**2.)
         term2 = phiEpi * deltaTerm / (wavelengths**(1 + 2 * alpha))
         return term1 + term2
 
@@ -67,33 +71,32 @@ Usage
     lambdaT = 1.58
 
     # Add the incident spectrum to the workspace
-    corrected_spectrum = incidentSpectrum(incident_wksp.readX(0), phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT)
+    corrected_spectrum = incidentSpectrum(
+        incident_wksp.readX(0), phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT)
     incident_wksp.setY(0, corrected_spectrum)
 
+    # Calculate the efficiency correction for Alpha=0.693
+    # and back calculate measured spectrum
+    eff_wksp = CalculateEfficiencyCorrection(
+        InputWorkspace=incident_wksp, Alpha=0.693)
+    measured_wksp = Divide(LHSWorkspace=incident_wksp, RHSWorkspace=eff_wksp)
+
     # Fit incident spectrum
-    prefix = "incident_spectrum_fit_with"
+    prefix = "incident_spectrum_fit_with_"
 
     fit_gauss_conv_spline = prefix + "_gauss_conv_spline"
     FitIncidentSpectrum(
         InputWorkspace=incident_wksp,
-        OutputWorkspace="incident_spectrum_fit_with_gauss_conv_spline",
-        BinningForCalc=binning,
-        BinningForFit=binning,
+        OutputWorkspace=fit_gauss_conv_spline,
+        BinningForCalc=binning_for_calc,
+        BinningForFit=binning_for_fit,
         FitSpectrumWith="GaussConvCubicSpline")
 
     # Retrieve workspaces
-    wksp_fit_gauss_conv_spline = AnalysisDataService.retrieve(fit_gauss_conv_spline)
+    wksp_fit_gauss_conv_spline = AnalysisDataService.retrieve(
+        fit_gauss_conv_spline)
+
     print(wksp_fit_gauss_conv_spline.readY(0))
-
-.. testcleanup:: ExFitIncidentSpectrum
-
-    DeleteWorkspace('eff_wksp')
-    DeleteWorkspace('incident_wksp')
-    DeleteWorkspace('measured_wksp')
-    DeleteWorkspace('incident_spectrum_wksp')
-    DeleteWorkspace('fit')
-    DeleteWorkspace('fit_prime_1')
-    DeleteWorkspace('incident_spectrum_fit_with_gauss_conv_spline')
 
 Output:
 
