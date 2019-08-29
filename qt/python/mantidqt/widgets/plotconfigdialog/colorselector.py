@@ -43,6 +43,8 @@ class ColorSelector(QWidget):
 
         self.line_edit.setText(self.initial_color.name())
         self.prev_color = self.initial_color.name()
+
+        # Color input only allows valid hex codes.
         re = QRegExp('^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
         validator = ColorValidator(re, self.line_edit, self)
         self.line_edit.setValidator(validator)
@@ -65,8 +67,14 @@ class ColorSelector(QWidget):
         color_dialog.colorSelected.connect(
             lambda: self.set_line_edit(color_dialog.selectedColor().name())
         )
+        color_dialog.accepted.connect(
+            lambda: self.set_prev_color(color_dialog.selectedColor().name())
+        )
         color_dialog.setModal(True)
         color_dialog.show()
+
+    def set_prev_color(self, color):
+        self.prev_color = color
 
     def set_color(self, color_hex):
         self.line_edit.setText(color_hex)
@@ -84,6 +92,8 @@ class ColorSelector(QWidget):
     def convert_three_digit_hex_to_six(self):
         color = self.get_color()
 
+        # If a 3-digit hex code is inputted, it is converted to 6 digits
+        # by duplicating each digit.
         if len(color) == 4:
             new = '#{}'.format(''.join(2 * c for c in color.lstrip('#')))
             self.set_color(new)
@@ -95,8 +105,9 @@ class ColorSelector(QWidget):
 class ColorValidator(QRegExpValidator):
     def __init__(self, regexp, widget, color_selector):
         QRegExpValidator.__init__(self, regexp, widget)
-        self.widget = widget
         self.color_selector = color_selector
 
     def fixup(self, text):
+        # If an invalid color is inputted, the field reverts back
+        # to the last valid color entered.
         self.color_selector.set_color(self.color_selector.prev_color)
