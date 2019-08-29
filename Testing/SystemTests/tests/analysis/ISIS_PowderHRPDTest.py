@@ -65,8 +65,9 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(output_dir)
-            _try_delete(spline_path)
+            pass
+            #_try_delete(output_dir)
+            # _try_delete(spline_path)
         finally:
             mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
@@ -94,8 +95,9 @@ class FocusTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(spline_path)
-            _try_delete(output_dir)
+            pass
+            #_try_delete(spline_path)
+            #_try_delete(output_dir)
         finally:
             config["datasearch.directories"] = self.existing_config
             mantid.mtd.clear()

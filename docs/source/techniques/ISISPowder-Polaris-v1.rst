@@ -650,6 +650,36 @@ On POLARIS this is set to the following:
 
   vanadium_peaks_masking_file: "VanaPeaks.dat"
 
+.. _nxs_filename_polaris_isis-powder-diffraction-ref:
+
+nxs_filename
+^^^^^^^^^^^^
+A template for the filename of the generated NeXus file.
+
+.. _gss_filename_polaris_isis-powder-diffraction-ref:
+
+gss_filename
+^^^^^^^^^^^^
+A template for the filename of the generated GSAS file.
+
+.. _dat_files_directory_polaris_isis-powder-diffraction-ref:
+
+dat_files_directory
+^^^^^^^^^^^^^^^^^^^
+The subdirectory of the output directory where the .dat files are saved
+
+.. _tof_xye_filename_polaris_isis-powder-diffraction-ref:
+
+tof_xye_filename
+^^^^^^^^^^^^^^^^
+A template for the filename of the generated TOF XYE file.
+
+.. _dspacing_xye_filename_polaris_isis-powder-diffraction-ref:
+
+dspacing_xye_filename
+^^^^^^^^^^^^^^^^^^^^^
+A template for the filename of the generated dSpacing XYE file.
+
 .. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
 
 sample_empty_scale

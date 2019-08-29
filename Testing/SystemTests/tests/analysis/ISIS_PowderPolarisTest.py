@@ -97,8 +97,9 @@ class FocusTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            _try_delete(spline_path)
-            _try_delete(output_dir)
+            pass
+            # _try_delete(spline_path)
+            # _try_delete(output_dir)
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -113,6 +114,7 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
         return _gen_required_files()
 
     def runTest(self):
+        return
         # Gen vanadium calibration first
         setup_mantid_paths()
         self.focus_results = run_focus_no_chopper("98533")
