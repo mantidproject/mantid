@@ -50,12 +50,15 @@ def santize_backslash(path):
 # Path to this file
 TESTING_FRAMEWORK_DIR = santize_backslash(os.path.dirname(os.path.realpath(__file__)))
 # Path to PythonInterface/test directory for testhelpers module
-FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(os.path.realpath(os.path.join(TESTING_FRAMEWORK_DIR,
-                                                                                     "..", "..", "..", "..",
-                                                                                     "Framework", "PythonInterface", "test")))
+FRAMEWORK_PYTHONINTERFACE_TEST_DIR = santize_backslash(
+    os.path.realpath(
+        os.path.join(TESTING_FRAMEWORK_DIR, "..", "..", "..", "..", "Framework", "PythonInterface",
+                     "test")))
 
 if not os.path.exists(FRAMEWORK_PYTHONINTERFACE_TEST_DIR):
-    raise ImportError("Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?")
+    raise ImportError(
+        "Expected 'Framework/PythonInterface/test' to be found at '{}' but it wasn'target. Has the directory moved?"
+    )
 
 
 #########################################################################
@@ -82,7 +85,7 @@ class MantidSystemTest(unittest.TestCase):
         self.tolerance = 0.00000001
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
-        self.memory = MemoryStats().residentMem()/1024
+        self.memory = MemoryStats().residentMem() / 1024
 
     def runTest(self):
         raise NotImplementedError('"runTest(self)" should be overridden in a derived class')
@@ -191,9 +194,10 @@ class MantidSystemTest(unittest.TestCase):
             return
 
         # Check if memory is available
-        MB_avail = MemoryStats().availMem()/(1024.)
+        MB_avail = MemoryStats().availMem() / (1024.)
         if (MB_avail < required):
-            print("Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail, required))
+            print("Insufficient memory available to run test! %g MB available, need %g MB." %
+                  (MB_avail, required))
             sys.exit(TestRunner.SKIP_TEST)
 
     def execute(self):
@@ -285,7 +289,7 @@ class MantidSystemTest(unittest.TestCase):
             if numRezToCheck > 2:
                 mismatchName = valname
 
-            if not(self.validateWorkspaces(valPair, mismatchName)):
+            if not (self.validateWorkspaces(valPair, mismatchName)):
                 validationResult = False
                 print('Workspace {0} not equal to its reference file'.format(valname))
 
@@ -318,16 +322,16 @@ class MantidSystemTest(unittest.TestCase):
         if hasattr(self, 'tolerance_is_rel_err') and self.tolerance_is_rel_err:
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
-            checker.setProperty("Check"+d, False)
+            checker.setProperty("Check" + d, False)
         checker.execute()
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
             if mismatchName:
                 SaveNexus(InputWorkspace=valNames[0],
-                          Filename=self.__class__.__name__+mismatchName+'-mismatch.nxs')
+                          Filename=self.__class__.__name__ + mismatchName + '-mismatch.nxs')
             else:
                 SaveNexus(InputWorkspace=valNames[0],
-                          Filename=self.__class__.__name__+'-mismatch.nxs')
+                          Filename=self.__class__.__name__ + '-mismatch.nxs')
             return False
 
         return True
@@ -381,7 +385,7 @@ class MantidSystemTest(unittest.TestCase):
         # Now the validation is complete we can clear out all the stored data and check memory usage
         FrameworkManager.clear()
         # Get the resident memory again and work out how much it's gone up by (in MB)
-        memorySwallowed = MemoryStats().residentMem()/1024 - self.memory
+        memorySwallowed = MemoryStats().residentMem() / 1024 - self.memory
         # Store the result
         self.reportResult('memory footprint increase', memorySwallowed)
         return retcode
@@ -407,7 +411,7 @@ class MantidSystemTest(unittest.TestCase):
             msg += " "
         msg += "Expected %g == %g within +- %g." % (value, expected, delta)
 
-        if (value > expected+delta) or (value < expected-delta):
+        if (value > expected + delta) or (value < expected - delta):
             raise Exception(msg)
 
     def assertLessThan(self, value, expected, msg=""):
@@ -459,7 +463,6 @@ class TestResult(object):
     '''
     Stores the results of each test so that they can be reported later.
     '''
-
     def __init__(self):
         self._results = []
         self.name = ''
@@ -499,7 +502,6 @@ class ResultReporter(object):
     appropriate form, subclass this class and implement the dispatchResults
     method.
     '''
-
     def __init__(self, total_number_of_tests=0, maximum_name_length=0):
         '''Initialize a class instance, e.g. connect to a database'''
         self._total_number_of_tests = total_number_of_tests
@@ -507,7 +509,8 @@ class ResultReporter(object):
         pass
 
     def dispatchResults(self, result, number_of_completed_tests):
-        raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
+        raise NotImplementedError(
+            '"dispatchResults(self, result)" should be overridden in a derived class')
 
     def printResultsToConsole(self, result, number_of_completed_tests):
         '''
@@ -518,23 +521,26 @@ class ResultReporter(object):
         else:
             console_output = ''
             if self._quiet:
-                percentage = int(float(number_of_completed_tests)*100.0/float(self._total_number_of_tests))
+                percentage = int(
+                    float(number_of_completed_tests) * 100.0 / float(self._total_number_of_tests))
                 if len(result._results) < 6:
                     time_taken = " -- "
                 else:
                     time_taken = result._results[6][1]
-                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage, number_of_completed_tests,
+                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage,
+                                                                      number_of_completed_tests,
                                                                       self._total_number_of_tests)
-                console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", self._maximum_name_length+2,
+                console_output += '{:.<{}} ({}: {}s)'.format(result.name + " ",
+                                                             self._maximum_name_length + 2,
                                                              result.status, time_taken)
-            if ((self._output_on_failure
-                and (result.status != 'success')
-                and (result.status != 'skipped'))
-                or (not self._quiet)):
+            if ((self._output_on_failure and (result.status != 'success') and
+                 (result.status != 'skipped')) or (not self._quiet)):
                 nstars = 80
                 console_output += '\n' + ('*' * nstars) + '\n'
-                print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
-                              'status', 'time_taken', 'memory footprint increase', 'output', 'err']
+                print_list = [
+                    'test_name', 'filename', 'test_date', 'host_name', 'environment', 'status',
+                    'time_taken', 'memory footprint increase', 'output', 'err'
+                ]
                 for key in print_list:
                     key_not_found = True
                     for i in range(len(result._results)):
@@ -559,13 +565,13 @@ class TextResultReporter(ResultReporter):
     '''
     Report the results of a test using standard out
     '''
-
     def dispatchResults(self, result, number_of_completed_tests):
         '''
         The default text reporter prints to standard out
         '''
         self.printResultsToConsole(result, number_of_completed_tests)
         return
+
 
 # A class to report results as junit xml
 # DO NOT MOVE
@@ -602,8 +608,11 @@ class TestRunner(object):
 
     def spawnSubProcess(self, cmd):
         '''Spawn a new process and run the given command within it'''
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, bufsize=-1)
+        proc = subprocess.Popen(cmd,
+                                shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                bufsize=-1)
         std_out, _ = proc.communicate()
         return proc.returncode, std_out
 
@@ -626,7 +635,6 @@ class TestRunner(object):
 # Encapsulate the script for running a single test
 #########################################################################
 class TestScript(object):
-
     def __init__(self, test_dir, module_name, test_cls_name, exclude_in_pr_builds):
         self._test_dir = test_dir
         self._modname = module_name
@@ -657,9 +665,12 @@ from {test_modname} import {test_cls}
 systest = {test_cls}()
 if {exclude_in_pr}:
     systest.excludeInPullRequests = lambda: False
-""".format(test_framework=TESTING_FRAMEWORK_DIR, pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
-           test_dir=self._test_dir, test_modname=self._modname,
-           test_cls=self._test_cls_name, exclude_in_pr=self._exclude_in_pr_builds)
+""".format(test_framework=TESTING_FRAMEWORK_DIR,
+           pythoninterface_test_dir=FRAMEWORK_PYTHONINTERFACE_TEST_DIR,
+           test_dir=self._test_dir,
+           test_modname=self._modname,
+           test_cls=self._test_cls_name,
+           exclude_in_pr=self._exclude_in_pr_builds)
         if (not clean):
             code += "systest.execute()\n" + \
                     "exitcode = systest.returnValidationCode({})\n".format(TestRunner.VALIDATION_FAIL_CODE)
@@ -721,7 +732,8 @@ class TestSuite(object):
 
     def execute(self, runner, exclude_in_pr_builds):
         if self._test_cls_name is not None:
-            script = TestScript(self._test_dir, self._modname, self._test_cls_name, exclude_in_pr_builds)
+            script = TestScript(self._test_dir, self._modname, self._test_cls_name,
+                                exclude_in_pr_builds)
             # Start the new process and wait until it finishes
             retcode, output = runner.start(script)
         else:
@@ -777,11 +789,19 @@ class TestManager(object):
     '''A manager class that is responsible for overseeing the testing process.
     This is the main interaction point for the framework.
     '''
-
-    def __init__(self, test_loc=None, runner=None, output=[TextResultReporter()],
-                 quiet=False, testsInclude=None, testsExclude=None, ignore_failed_imports=False,
-                 showSkipped=False, exclude_in_pr_builds=None, output_on_failure=False,
-                 clean=False, process_number=0, ncores=1, list_of_tests=None):
+    def __init__(self,
+                 test_loc=None,
+                 runner=None,
+                 output=[TextResultReporter()],
+                 quiet=False,
+                 testsInclude=None,
+                 testsExclude=None,
+                 ignore_failed_imports=False,
+                 showSkipped=False,
+                 exclude_in_pr_builds=None,
+                 output_on_failure=False,
+                 clean=False,
+                 list_of_tests=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -795,9 +815,9 @@ class TestManager(object):
 
         self._testDir = test_loc
         self._quiet = quiet
-        self._testsInclude=testsInclude
-        self._testsExclude=testsExclude
-        self._exclude_in_pr_builds=exclude_in_pr_builds
+        self._testsInclude = re.compile(testsInclude) if testsInclude is not None else None
+        self._testsExclude = re.compile(testsExclude) if testsExclude is not None else None
+        self._exclude_in_pr_builds = exclude_in_pr_builds
         self._ignore_failed_imports = ignore_failed_imports
 
         self._passedTests = 0
@@ -824,7 +844,7 @@ class TestManager(object):
             all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
 
         if not all_loaded:
-            if  self._ignore_failed_imports:
+            if self._ignore_failed_imports:
                 print('\nUnable to load all test modules. Continuing as requested.')
             else:
                 sys.exit('\nUnable to load all test modules. Cannot continue.')
@@ -889,14 +909,15 @@ class TestManager(object):
         check = re.compile("[A-Za-z0-9_-]")
         # In the case of looking for digits inside strings, the strings can start
         # with either " or '
-        string_quotation_mark = ["'",'"']
+        string_quotation_mark = ["'", '"']
 
         # Now look through all the test modules and build the list of data files
         for modkey in modtests.keys():
 
-            fname = modkey+".py"
+            fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            with open(os.path.join(os.path.dirname(self._testDir), "analysis", fname),"r") as pyfile:
+            with open(os.path.join(os.path.dirname(self._testDir), "analysis", fname),
+                      "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
@@ -904,25 +925,26 @@ class TestManager(object):
                         for indx in [m.start() for m in re.finditer(ext, line)]:
                             # When '.nxs' is found, iterate backwards to find the start
                             # of the filename.
-                            for i in range(indx-1,1,-1):
+                            for i in range(indx - 1, 1, -1):
                                 # If the present character is not either a letter, digit,
                                 # underscore, or hyphen then the beginning of the filename
                                 # has been found
                                 if not check.search(line[i]):
-                                    key = line[i+1:indx]+ext
-                                    if (key not in files_required_by_test_module[modkey]) and (key != ext):
+                                    key = line[i + 1:indx] + ext
+                                    if (key not in files_required_by_test_module[modkey]) and (
+                                            key != ext):
                                         files_required_by_test_module[modkey].append(key)
                                         data_file_lock_status[key] = False
                                     break
 
                     # Search for '0123 or "0123
                     for so in string_quotation_mark:
-                        p = re.compile(so+r"\d{4}")
+                        p = re.compile(so + r"\d{4}")
                         for m in p.finditer(line):
                             # Iterate forwards to find the closing quotation mark
-                            for i in range(m.end(),len(line)):
+                            for i in range(m.end(), len(line)):
                                 if line[i] == so:
-                                    key = line[m.start()+1:i]
+                                    key = line[m.start() + 1:i]
                                     if key not in files_required_by_test_module[modkey]:
                                         files_required_by_test_module[modkey].append(key)
                                         data_file_lock_status[key] = False
@@ -930,18 +952,18 @@ class TestManager(object):
 
                     # Search for 0123' or 0123"
                     for so in string_quotation_mark:
-                        p = re.compile(r"\d{4}"+so)
+                        p = re.compile(r"\d{4}" + so)
                         for m in p.finditer(line):
                             # Iterate backwards to find the opening quotation mark
-                            for i in range(m.start(),1,-1):
+                            for i in range(m.start(), 1, -1):
                                 if line[i] == so:
-                                    key = line[i+1:m.end()-1]
+                                    key = line[i + 1:m.end() - 1]
                                     if key not in files_required_by_test_module[modkey]:
                                         files_required_by_test_module[modkey].append(key)
                                         data_file_lock_status[key] = False
                                     break
 
-        if (not self._quiet):
+        if not self._quiet:
             for key in files_required_by_test_module.keys():
                 print('=' * 45)
                 print(key)
@@ -952,11 +974,11 @@ class TestManager(object):
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
-            if self._testsInclude not in suite.name:
+            if not self._testsInclude.search(suite.name):
                 suite.markAsSkipped("NotIncludedTest")
                 return False
         if self._testsExclude is not None:
-            if self._testsExclude in suite.name:
+            if self._testsExclude.search(suite.name):
                 suite.markAsSkipped("ExcludedTest")
                 return False
         return True
@@ -990,7 +1012,8 @@ class TestManager(object):
         loaded, tests = [], []
         for filepath in entries:
             if filepath.endswith('.py'):
-                module_loaded, module_tests = self.loadTestsFromModule(os.path.join(test_dir, filepath))
+                module_loaded, module_tests = self.loadTestsFromModule(
+                    os.path.join(test_dir, filepath))
                 loaded.append(module_loaded)
                 tests.extend(module_tests)
 
@@ -1015,7 +1038,8 @@ class TestManager(object):
                         continue
                     if self.isValidTestClass(value):
                         test_name = key
-                        tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+                        tests.append(
+                            TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
         except Exception as exc:
             print("Error importing module '{}':".format(modname))
@@ -1049,10 +1073,12 @@ class TestManager(object):
 # Class to handle the environment
 #########################################################################
 class MantidFrameworkConfig:
-
-    def __init__(self, sourceDir=None,
-                 data_dirs="", save_dir="",
-                 loglevel='information', archivesearch=False):
+    def __init__(self,
+                 sourceDir=None,
+                 data_dirs="",
+                 save_dir="",
+                 loglevel='information',
+                 archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
         # add location of system tests
@@ -1110,7 +1136,8 @@ class MantidFrameworkConfig:
         if os.path.isdir(loc):
             return loc
         else:
-            raise RuntimeError("Expected the analysis tests directory at '%s' but it is not a directory " % loc)
+            raise RuntimeError(
+                "Expected the analysis tests directory at '%s' but it is not a directory " % loc)
 
     def __getDataDirsAsString(self):
         return self._dataDirs
@@ -1223,17 +1250,17 @@ def using_gsl_v1():
 # and finds the next element that has a 0 value). This aims to have all
 # threads end calculation approximately at the same time.
 #########################################################################
-def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
-                    tests_lock, tests_left, res_array, stat_dict,
-                    total_number_of_tests, maximum_name_length,
-                    tests_done, process_number, lock, required_files_dict,
-                    locked_files_dict):
+def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict, tests_lock, tests_left,
+                    res_array, stat_dict, total_number_of_tests, maximum_name_length, tests_done,
+                    process_number, lock, required_files_dict, locked_files_dict):
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
 
-    runner = TestRunner(executable=options.executable, exec_args=options.execargs,
-                        escape_quotes=True, clean=options.clean)
+    runner = TestRunner(executable=options.executable,
+                        exec_args=options.execargs,
+                        escape_quotes=True,
+                        clean=options.clean)
 
     # Make sure the status is 1 to begin with as it will be replaced
     res_array[process_number + 2 * options.ncores] = 1
@@ -1319,8 +1346,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
 
     # Report the errors
     local_dict = dict()
-    with open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number),
-              'w') as xml_report:
+    with open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number), 'w') as xml_report:
         xml_report.write(reporter.getResults(local_dict))
 
     for key in local_dict.keys():
