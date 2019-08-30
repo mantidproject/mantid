@@ -9,16 +9,13 @@ from __future__ import absolute_import, print_function
 from MultiPlotting.gridspec_engine import gridspecEngine
 from MultiPlotting.subplot.subplot_context import subplotContext
 
-
 import mantid.simpleapi as mantid
-
 
 xBounds = "xBounds"
 yBounds = "yBounds"
 
 
 class PlottingContext(object):
-
     def __init__(self, gridspec_engine=gridspecEngine()):
         self.context = {}
         self.subplots = {}
@@ -30,7 +27,7 @@ class PlottingContext(object):
     def addSubplot(self, name, subplot):
         self.subplots[name] = subplotContext(name, subplot)
 
-    def addLine(self, subplotName, workspace, specNum):
+    def addLine(self, subplot_name, workspace, spec_num, color=None):
         try:
             ws = None
             if isinstance(workspace, str):
@@ -41,31 +38,37 @@ class PlottingContext(object):
                 ws = workspace
 
             if ws is not None:
-                self.subplots[subplotName].addLine(ws, specNum)
+                self.subplots[subplot_name].addLine(ws, spec_num, color=color)
         except:
             return
 
-    def add_annotate(self, subplotName, label):
-        self.subplots[subplotName].add_annotate(label)
+    def add_annotate(self, subplot_name, label):
+        self.subplots[subplot_name].add_annotate(label)
 
-    def add_vline(self, subplotName, xvalue, name, color):
-        self.subplots[subplotName].add_vline(xvalue, name, color=color)
+    def add_vline(self, subplot_name, xvalue, name, color):
+        self.subplots[subplot_name].add_vline(xvalue, name, color=color)
 
-    def removePlotLine(self, subplotName, name):
+    def remove_line(self, subplot_name, name):
         try:
-            self.subplots[subplotName].removePlotLine(name)
+            self.subplots[subplot_name].removeLine(name)
         except KeyError:
             return
 
-    def removeLabel(self, subplotName, name):
+    def removePlotLine(self, subplot_name, name):
         try:
-            self.subplots[subplotName].removeLabel(name)
+            self.subplots[subplot_name].removePlotLine(name)
         except KeyError:
             return
 
-    def removeVLine(self, subplotName, name):
+    def removeLabel(self, subplot_name, name):
         try:
-            self.subplots[subplotName].removeVLine(name)
+            self.subplots[subplot_name].removeLabel(name)
+        except KeyError:
+            return
+
+    def removeVLine(self, subplot_name, name):
+        try:
+            self.subplots[subplot_name].removeVLine(name)
         except KeyError:
             return
 
@@ -91,8 +94,7 @@ class PlottingContext(object):
     def update_layout(self, figure):
         keys = list(self.subplots.keys())
         for counter, name in zip(range(len(keys)), keys):
-            self.subplots[name].update_gridspec(
-                self._gridspec, figure, counter)
+            self.subplots[name].update_gridspec(self._gridspec, figure, counter)
 
     def delete(self, name):
         self.subplots[name].delete()
@@ -103,3 +105,9 @@ class PlottingContext(object):
 
     def is_subplot_empty(self, subplot):
         return self.subplots[subplot].size == 0
+
+    def get_lines(self, subplot_name):
+        try:
+            return self.subplots[subplot_name].lines
+        except KeyError:
+            return []

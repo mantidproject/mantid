@@ -257,8 +257,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.new_fit_notifier.add_subscriber(
-            self.home_tab.plot_widget.fit_observer)
+        self.fitting_context.new_fit_notifier.add_subscriber(self.home_tab.plot_widget.fit_observer)
+
+        self.fitting_context.plot_guess_notifier.add_subscriber(self.home_tab.plot_widget.plot_guess_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

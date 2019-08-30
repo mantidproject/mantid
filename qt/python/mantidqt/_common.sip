@@ -420,6 +420,7 @@ public:
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void setTextPlotGuess(const QString);
+    bool plotDiff() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode

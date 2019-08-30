@@ -24,6 +24,7 @@ Improvements
 - Attempting to save files that are larger than (by default) 10GB now results in a dialog box to inform the user that it may take a long time and gives them the opportunity to cancel.
 - Added basic tiled plots to workbench interface.
 - Changing the axis' scale, by right-clicking on a figure with multiple plots, changes only the plot that was clicked on.
+- If a spectrum has a label, this will now be used instead of the spectrum number in the legend when the spectrum is plotted.
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
 - There are now icons alongside the colormap names in the plot options dialog.
 
@@ -38,5 +39,6 @@ Bugfixes
 - A crash in the Fit Browser when the default peak was not a registered peak type has been fixed.
 - Fixed an issue where you could not edit table workspaces to enter negative numbers.
 - The colorbar in the colorfill plot window now correctly resizes when the scale is changed by double-clicking on the colorbar axis.
+- Fixed an issue with fitting where the difference would be plotted even if the Plot Difference option in the fit property browser was not enabled.
 
 :ref:`Release 4.2.0 <v4.2.0>`
