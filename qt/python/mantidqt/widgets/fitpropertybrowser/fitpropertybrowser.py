@@ -230,7 +230,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         axes = self.get_axes()
         if axes.legend_ is not None:
-            axes.legend()
+            axes.legend().draggable()
 
     def plot_guess(self):
         """
