@@ -44,14 +44,14 @@ MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,
                const Geometry::DetectorInfo &detInfo,
                const std::string &fullPath, const std::string &rootName,
-               std::unique_ptr<AbstractLogger> logger, bool strict = true,
+               AbstractLogger &logger, bool strict = true,
                Kernel::ProgressBase *reporter = nullptr);
 
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
                     std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
     const std::string &fullPath, const std::string &rootName,
-    std::unique_ptr<AbstractLogger> logger, bool strict = true,
+    AbstractLogger &logger, bool strict = true,
     Kernel::ProgressBase *reporter = nullptr);
 } // namespace NexusGeometrySave
 } // namespace NexusGeometry
