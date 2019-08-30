@@ -82,7 +82,7 @@ UserSubWindowFactoryImpl::categories(const QString &interfaceName) const {
 
 /// Default constructor
 UserSubWindowFactoryImpl::UserSubWindowFactoryImpl()
-    : m_aliasLookup(), m_badAliases() {}
+    : m_aliasLookup(), m_badAliases(), m_encoders(), m_decoders() {}
 
 /**
  * Create a user sub window by searching for an alias name
@@ -126,4 +126,40 @@ QStringList UserSubWindowFactoryImpl::keys() const {
     key_list.append(QString::fromStdString(key));
   }
   return key_list;
+}
+
+/**
+ * Finds the Encoder for the given window and returns a raw pointer to it
+ *
+ * @param window Is the window that needs to have an encoder found for it.
+ * @return BaseEncoder* Need to return a raw pointer so sip can understand and
+ * then wrap the function for use in python
+ */
+BaseEncoder *UserSubWindowFactoryImpl::findEncoder(QWidget *window) {
+  auto subWindow = dynamic_cast<UserSubWindow *>(window);
+  if (subWindow) {
+    auto itemIt = m_encoders.find(subWindow->windowTitle().toStdString());
+    if (itemIt != m_encoders.end()) {
+      auto item = itemIt->second->createUnwrappedInstance();
+      return item;
+    }
+  }
+  return nullptr;
+}
+
+/**
+ * Finds the Decoder for the given window and returns a raw pointer to it
+ *
+ * @param decodeString Is the string from which the decoder should be found
+ * @return BaseDecoder* Need to return a raw pointer so sip can understand and
+ * then wrap the function for use in python
+ */
+BaseDecoder *
+UserSubWindowFactoryImpl::findDecoder(const std::string &decodeString) {
+  auto itemIt = m_decoders.find(decodeString);
+  if (itemIt != m_decoders.end()) {
+    auto item = itemIt->second->createUnwrappedInstance();
+    return item;
+  }
+  return nullptr;
 }

@@ -161,6 +161,7 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
           if (x <= m_max) {
             setMin(x);
           } else {
+            setMin(m_max);
             setMax(x);
             m_minChanging = false;
             m_maxChanging = true;
@@ -169,6 +170,7 @@ bool RangeSelector::eventFilter(QObject *obj, QEvent *evn) {
           if (x >= m_min) {
             setMax(x);
           } else {
+            setMax(m_min);
             setMin(x);
             m_minChanging = true;
             m_maxChanging = false;

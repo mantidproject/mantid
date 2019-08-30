@@ -76,6 +76,10 @@ private:
   std::vector<std::string> m_instruments;
   RunsTableViewSubscriber *m_notifyee;
   std::map<Action, QAction *> m_actions;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 class RunsTableViewFactory {

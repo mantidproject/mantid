@@ -251,6 +251,16 @@ public:
                      m_grouped.detectorSignedTwoTheta(*det));
   }
 
+  void test_azimuthal() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.azimuthal(0), -1.570796, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.azimuthal(1), 0.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.azimuthal(2), 1.570796, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(spectrumInfo.azimuthal(3), const std::logic_error &);
+    TS_ASSERT_THROWS(spectrumInfo.azimuthal(4), const std::logic_error &);
+  }
+
   void test_position() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, -0.1, 5.0));

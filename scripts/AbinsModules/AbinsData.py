@@ -31,7 +31,7 @@ class AbinsData(AbinsModules.GeneralData):
         else:
             raise ValueError("Invalid type of k-points data.")
 
-        if isinstance(atoms_data, AbinsModules.AtomsDaTa):
+        if isinstance(atoms_data, AbinsModules.AtomsData):
             self._atoms_data = atoms_data
         else:
             raise ValueError("Invalid type of atoms data.")

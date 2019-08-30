@@ -47,6 +47,8 @@ private:
   std::string m_iVsLambda;
   std::string m_iVsQ;
   std::string m_iVsQBinned;
+
+  friend class Encoder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(ReductionWorkspaces const &lhs,

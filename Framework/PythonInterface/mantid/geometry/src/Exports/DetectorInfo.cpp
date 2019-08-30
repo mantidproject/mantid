@@ -53,6 +53,9 @@ void export_DetectorInfo() {
   double (DetectorInfo::*twoTheta)(const size_t) const =
       &DetectorInfo::twoTheta;
 
+  double (DetectorInfo::*azimuthal)(const size_t) const =
+      &DetectorInfo::azimuthal;
+
   Mantid::Kernel::V3D (DetectorInfo::*position)(const size_t) const =
       &DetectorInfo::position;
 
@@ -101,7 +104,9 @@ void export_DetectorInfo() {
 
       .def("twoTheta", twoTheta, (arg("self"), arg("index")),
            "Returns 2 theta (scattering angle w.r.t beam direction).")
-
+      .def("azimuthal", azimuthal, (arg("self"), arg("index")),
+           "Returns the out-of-plane angle in radians angle w.r.t. to "
+           "vecPointingHorizontal")
       .def("position", position, (arg("self"), arg("index")),
            "Returns the absolute position of the detector where the detector "
            "is identified by 'index'.")

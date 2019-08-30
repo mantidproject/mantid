@@ -27,7 +27,8 @@ public:
                           const std::string &histoTopic,
                           const std::string &runInfoTopic,
                           const std::string &spDetTopic,
-                          const std::string &sampleEnvTopic);
+                          const std::string &sampleEnvTopic,
+                          const std::string &chopperTopic);
   ~KafkaHistoStreamDecoder();
   KafkaHistoStreamDecoder(const KafkaHistoStreamDecoder &) = delete;
   KafkaHistoStreamDecoder &operator=(const KafkaHistoStreamDecoder &) = delete;

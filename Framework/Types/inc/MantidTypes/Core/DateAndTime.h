@@ -79,10 +79,14 @@ public:
   int nanoseconds() const;
   int64_t totalNanoseconds() const;
 
-  bool operator==(const DateAndTime &rhs) const;
+  inline bool operator==(const DateAndTime &rhs) const {
+    return _nanoseconds == rhs._nanoseconds;
+  }
   bool operator==(const boost::posix_time::ptime &rhs) const;
   bool operator!=(const DateAndTime &rhs) const;
-  bool operator<(const DateAndTime &rhs) const;
+  inline bool operator<(const DateAndTime &rhs) const {
+    return _nanoseconds < rhs._nanoseconds;
+  }
   bool operator<=(const DateAndTime &rhs) const;
   bool operator>(const DateAndTime &rhs) const;
   bool operator>=(const DateAndTime &rhs) const;

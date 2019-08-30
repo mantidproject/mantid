@@ -8,13 +8,15 @@
 #define MANTIDQT_MANAGE_USER_DIRECTORIES_H
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_ManageUserDirectories.h"
 #include <QDialog>
 
 namespace MantidQt {
 namespace API {
 
-class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 
 public:
