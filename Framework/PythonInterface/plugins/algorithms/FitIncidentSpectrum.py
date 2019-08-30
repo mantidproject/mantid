@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, division, print_function
 import numpy as np
-from scipy import signal, ndimage, interpolate, optimize
+from scipy import signal, ndimage, interpolate
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator
 from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing, AnalysisDataService
