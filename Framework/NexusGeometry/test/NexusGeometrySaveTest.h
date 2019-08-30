@@ -12,41 +12,17 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/NexusFileReader.h"
 
+#include "mockobjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
 using namespace Mantid::NexusGeometry;
-
-//---------------------------------------------------------------
-namespace {
-
-class MockProgressBase : public Mantid::Kernel::ProgressBase {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(doReport, void(const std::string &));
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-};
-
-class MockLogger : public Mantid::NexusGeometry::AbstractLogger {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(warning, void(const std::string &));
-  MOCK_METHOD1(error, void(const std::string &));
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
-
-} // namespace
-
-//---------------------------------------------------------------------
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 private:
