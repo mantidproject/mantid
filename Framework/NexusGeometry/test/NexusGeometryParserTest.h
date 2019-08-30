@@ -44,7 +44,7 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
   return {std::move(std::get<0>(beamline)), std::move(std::get<1>(beamline))};
 }
 
-class MockLogger : public NexusGeometry::Logger {
+class MockLogger : public NexusGeometry::AbstractLogger {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(warning, void(const std::string &));

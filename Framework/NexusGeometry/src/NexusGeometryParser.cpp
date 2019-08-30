@@ -14,6 +14,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
+#include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
@@ -106,7 +107,7 @@ std::vector<ValueType> extractVector(const DataSet &data) {
 class Parser {
 private:
   // Logger object
-  std::unique_ptr<Logger> m_logger;
+  std::unique_ptr<AbstractLogger> m_logger;
 
   /**
    * The function allows us to determine where problems are and logs key
@@ -683,7 +684,7 @@ private:
   }
 
 public:
-  explicit Parser(std::unique_ptr<Logger> &&logger)
+  explicit Parser(std::unique_ptr<AbstractLogger> &&logger)
       : m_logger(std::move(logger)) {}
 
   std::unique_ptr<const Mantid::Geometry::Instrument>
@@ -750,7 +751,7 @@ public:
 
 std::unique_ptr<const Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName,
-                                      std::unique_ptr<Logger> logger) {
+                                      std::unique_ptr<AbstractLogger> logger) {
 
   const H5File file(fileName, H5F_ACC_RDONLY);
   auto rootGroup = file.openGroup("/");
