@@ -216,6 +216,13 @@ class SANSILLReduction(PythonAlgorithm):
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
 
+        self.declareProperty(MatrixWorkspaceProperty('DefaultMaskedInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Workspace to copy the mask from; for example, the bad detector edges.')
+
+        self.setPropertySettings('DefaultMaskedInputWorkspace', EnabledWhenProperty(sample, reference, LogicOperator.Or))
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -521,6 +528,11 @@ class SANSILLReduction(PythonAlgorithm):
                         container_ws = self.getProperty('ContainerInputWorkspace').value
                         if container_ws:
                             self._apply_container(ws, container_ws)
+                        # apply the default mask, e.g. the bad detector edges
+                        default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
+                        if default_mask_ws:
+                            self._mask(ws, default_mask_ws)
+                        # apply the beam stop mask
                         mask_ws = self.getProperty('MaskedInputWorkspace').value
                         if mask_ws:
                             self._mask(ws, mask_ws)

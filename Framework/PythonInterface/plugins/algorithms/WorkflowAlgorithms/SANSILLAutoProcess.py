@@ -73,6 +73,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     progress = None
     reduction_type = None
     sample = None
+    absorber = None
     beam = None
     container = None
     stransmission = None
@@ -81,6 +82,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     atransmission = None
     sensitivity = None
     mask = None
+    flux = None
+    default_mask = None
     output = None
     output_sens = None
     dimensionality = None
@@ -108,12 +111,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         sample_dim = self.getPropertyValue('SampleRuns').count(',')
         abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
         beam_dim = self.getPropertyValue('BeamRuns').count(',')
+        flux_dim = self.getPropertyValue('FluxRuns').count(',')
         can_dim = self.getPropertyValue('ContainerRuns').count(',')
         str_dim = self.getPropertyValue('SampleTransmissionRuns').count(',')
         ctr_dim = self.getPropertyValue('ContainerTransmissionRuns').count(',')
         btr_dim = self.getPropertyValue('TransmissionBeamRuns').count(',')
         atr_dim = self.getPropertyValue('TransmissionAbsorberRuns').count(',')
         mask_dim = self.getPropertyValue('MaskFiles').count(',')
+        sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
         ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
         if abs_dim != sample_dim and abs_dim != 0:
             result['AbsorberRuns'] = message.format('Absorber')
@@ -133,18 +138,25 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             result['MaskFiles'] = message.format('Mask')
         if ref_dim != sample_dim and ref_dim != 0:
             result['ReferenceFiles'] = message.format('Reference')
+        if sens_dim != sample_dim and sens_dim != 0:
+            result['SensitivityMaps'] = message.format('Sensitivity')
+        if flux_dim != flux_dim and flux_dim != 0:
+            result['FluxRuns'] = message.format('Flux')
+
         return result
 
     def setUp(self):
         self.sample = self.getPropertyValue('SampleRuns').split(',')
         self.absorber = self.getPropertyValue('AbsorberRuns').split(',')
         self.beam = self.getPropertyValue('BeamRuns').split(',')
+        self.flux = self.getPropertyValue('FluxRuns').split(',')
         self.container = self.getPropertyValue('ContainerRuns').split(',')
         self.stransmission = self.getPropertyValue('SampleTransmissionRuns')
         self.ctransmission = self.getPropertyValue('ContainerTransmissionRuns')
         self.btransmission = self.getPropertyValue('TransmissionBeamRuns')
         self.atransmission = self.getPropertyValue('TransmissionAbsorberRuns')
-        self.sensitivity = self.getPropertyValue('SensitivityMap')
+        self.sensitivity = self.getPropertyValue('SensitivityMaps').split(',')
+        self.default_mask = self.getPropertyValue('DefaultMaskFile')
         self.mask = self.getPropertyValue('MaskFiles').split(',')
         self.reference = self.getPropertyValue('ReferenceFiles').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
@@ -174,12 +186,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(MultipleFileProperty('BeamRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Empty beam run(s).')
 
+        self.declareProperty(MultipleFileProperty('FluxRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='Empty beam run(s) for flux calculation only; if left blank flux will be calculated from BeamRuns.')
+
         self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='Empty container run(s).')
 
         self.setPropertyGroup('SampleRuns', 'Numors')
         self.setPropertyGroup('AbsorberRuns', 'Numors')
         self.setPropertyGroup('BeamRuns', 'Numors')
+        self.setPropertyGroup('FluxRuns', 'Numors')
         self.setPropertyGroup('ContainerRuns', 'Numors')
 
         self.declareProperty(MultipleFileProperty('SampleTransmissionRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
@@ -199,14 +215,17 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
 
-        self.declareProperty(FileProperty('SensitivityMap', '', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='File containing the map of relative detector efficiencies.')
+        self.declareProperty(MultipleFileProperty('SensitivityMaps', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='File(s) containing the map of relative detector efficiencies.')
+
+        self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
+                             doc='File containing the default mask to be applied to all the detector configurations.')
 
         self.declareProperty(MultipleFileProperty('MaskFiles', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='Files containing the beam stop and other detector mask.')
+                             doc='File(s) containing the beam stop and other detector mask.')
 
         self.declareProperty(MultipleFileProperty('ReferenceFiles', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='Files containing the corrected water data for absolute normalisation.')
+                             doc='File(s) containing the corrected water data for absolute normalisation.')
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
                                                      direction=Direction.Output,
@@ -225,7 +244,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
 
-        self.setPropertyGroup('SensitivityMap', 'Options')
+        self.setPropertyGroup('SensitivityMaps', 'Options')
+        self.setPropertyGroup('DefaultMaskFile', 'Options')
         self.setPropertyGroup('MaskFiles', 'Options')
         self.setPropertyGroup('ReferenceFiles', 'Options')
         self.setPropertyGroup('SensitivityOutputWorkspace', 'Options')
@@ -310,7 +330,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         beam = self.beam[i] if len(self.beam) == self.dimensionality else self.beam[0]
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
-        flux_name = beam_name + '_Flux'
+        flux_name = beam_name + '_Flux' if not self.flux[0] else ''
         self.progress.report('Processing beam')
         if process_beam:
             SANSILLReduction(Run=beam,
@@ -320,6 +340,19 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              BeamRadius=self.radius,
                              AbsorberInputWorkspace=absorber_name,
                              FluxOutputWorkspace=flux_name)
+
+        if self.flux[0]:
+            flux = self.flux[i] if len(self.flux) == self.dimensionality else self.flux[0]
+            [process_flux, flux_name] = needs_processing(flux, 'Flux')
+            self.progress.report('Processing flux')
+            if process_flux:
+                SANSILLReduction(Run=flux,
+                                 ProcessAs='Beam',
+                                 OutputWorkspace=flux_name.replace('Flux', 'Beam'),
+                                 NormaliseBy=self.normalise,
+                                 BeamRadius=self.radius,
+                                 AbsorberInputWorkspace=absorber_name,
+                                 FluxOutputWorkspace=flux_name)
 
         container = self.container[i] if len(self.container) == self.dimensionality else self.container[0]
         [process_container, container_name] = needs_processing(container, 'Container')
@@ -334,6 +367,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              TransmissionInputWorkspace=container_transmission_name,
                              NormaliseBy=self.normalise)
 
+        # this is the default mask, the same for all the distance configurations
+        [load_default_mask, default_mask_name] = needs_loading(self.default_mask, 'DefaultMask')
+        self.progress.report('Loading default mask')
+        if load_default_mask:
+            LoadNexusProcessed(Filename=self.default_mask, OutputWorkspace=default_mask_name)
+
+        # this is the beam stop mask, potentially different at each distance configuration
         mask = self.mask[i] if len(self.mask) == self.dimensionality else self.mask[0]
         [load_mask, mask_name] = needs_loading(mask, 'Mask')
         self.progress.report('Loading mask')
@@ -346,11 +386,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if not self.reference[0]:
             flux_input = flux_name
             if self.sensitivity:
-                [load_sensitivity, sensitivity_name] = needs_loading(self.sensitivity, 'Sensitivity')
+                sens = self.sensitivity[i] if len(self.sensitivity) == self.dimensionality else self.sensitivity[0]
+                [load_sensitivity, sensitivity_name] = needs_loading(sens, 'Sensitivity')
                 sens_input = sensitivity_name
                 self.progress.report('Loading sensitivity')
                 if load_sensitivity:
-                    LoadNexusProcessed(Filename=self.sensitivity, OutputWorkspace=sensitivity_name)
+                    LoadNexusProcessed(Filename=sens, OutputWorkspace=sensitivity_name)
         else:
             reference = self.reference[i] if len(self.reference) == self.dimensionality else self.reference[0]
             [load_reference, reference_name] = needs_loading(reference, 'Reference')
@@ -373,6 +414,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ContainerInputWorkspace=container_name,
                              TransmissionInputWorkspace=sample_transmission_name,
                              MaskedInputWorkspace=mask_name,
+                             DefaultMaskedInputWorkspace=default_mask_name,
                              SensitivityInputWorkspace=sens_input,
                              FluxInputWorkspace=flux_input,
                              NormaliseBy=self.normalise,
@@ -402,7 +444,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              TransmissionInputWorkspace=sample_transmission_name,
                              SensitivityOutputWorkspace=self.output_sens,
                              MaskedInputWorkspace=mask_name,
-                             FluxInputWorkspace=flux_name,
+                             DefaultMaskedInputWorkspace=default_mask_name,
                              SampleThickness=self.getProperty('SampleThickness').value)
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)
