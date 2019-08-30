@@ -709,7 +709,9 @@ void saveNXDetector(const H5::Group &parentGroup,
  * Produces a Nexus format file containing the Instrument geometry and metadata.
  *
  * @param compInfo : componentInfo object.
+ * @param detInfo : detectorInfo object.
  * @param fullPath : save destination as full path.
+ * @param rootPath : name of root entry
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
@@ -810,8 +812,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
  * calls the save methods to write components to file after exception checking.
  * Produces a Nexus format file containing the Instrument geometry and metadata.
  *
- * @param compInfo : componentInfo object.
+ * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.
+ * @param rootPath : name of root entry
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(
@@ -823,92 +826,7 @@ void saveInstrument(
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  // Exception handling.
-  boost::filesystem::path tmp(fullPath);
-  if (!boost::filesystem::is_directory(tmp.root_directory())) {
-    throw std::invalid_argument(
-        "The path provided for saving the file is invalid: " + fullPath + "\n");
-  }
-
-  // check the file extension matches any of the valid extensions defined in
-  // nexus_geometry_extensions
-  const auto ext = boost::filesystem::path(tmp).extension();
-  bool isValidExt = std::any_of(
-      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-      [&ext](const std::string &str) { return ext.generic_string() == str; });
-
-  // throw if the file extension is invalid
-  if (!isValidExt) {
-
-    // string of valid extensions to output in exception
-    std::string extensions;
-    std::for_each(
-        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-        [&extensions](const std::string &str) { extensions += " " + str; });
-    throw std::invalid_argument("invalid extension for file: '" +
-                                ext.generic_string() +
-                                "'. Expected any of: " + extensions);
-  }
-
-  if (!compInfo.hasDetectorInfo()) {
-    throw std::invalid_argument(
-        "No detector info was found in the Instrument cache.\n");
-  }
-  if (!compInfo.hasSample()) {
-    throw std::invalid_argument(
-        "No sample was found in the Instrument cache.\n");
-  }
-
-  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    throw std::invalid_argument(
-        "The sample posiiton is required to be at the origin.\n");
-  }
-
-  if (!compInfo.hasSource()) {
-    throw std::invalid_argument("No source was found in the Instrument cache.");
-  }
-
-  // IDs of all detectors in Instrument cache
-  const auto detIds = detInfo.detectorIDs();
-
-  H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
-
-  H5::Group rootGroup, instrument;
-
-  // create and capture NXentry (file root)
-  rootGroup = file.createGroup(rootPath);
-  NexusGeometrySave::writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
-
-  // save and capture NXinstrument (component root)
-  instrument = NexusGeometrySave::NXInstrument(rootGroup, compInfo);
-
-  // save NXsource
-  NexusGeometrySave::saveNXSource(instrument, compInfo);
-
-  // save NXsample
-  NexusGeometrySave::saveNXSample(rootGroup, compInfo);
-
-  // save NXdetectors
-  for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
-      if (reporter != nullptr)
-        reporter->report();
-      NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
-    }
-  }
-
-  // save NXmonitors
-  for (size_t index = 0; index < detInfo.size(); ++index) {
-    if (detInfo.isMonitor(index)) {
-      if (reporter != nullptr)
-        reporter->report();
-      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds[index],
-                                       index);
-    }
-  }
-
-  file.close(); // close file
-
+  return saveInstrument(compInfo, detInfo, fullPath, rootPath, reporter);
 } // saveInstrument
 
 } // namespace NexusGeometrySave
