@@ -124,7 +124,7 @@ public:
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
                                     const std::string &childNX_CLASS_TYPE) {
 
-    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_PATH);
+    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_ENTRY_NAME);
 
     // if specified parent NX class type is NX entry, check the top level of
     // file structure only. (dont take extra step to look for parent group)
