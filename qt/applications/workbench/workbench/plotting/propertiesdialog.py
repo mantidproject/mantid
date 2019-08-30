@@ -14,6 +14,7 @@ from __future__ import (absolute_import, unicode_literals)
 # 3rdparty imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
+from matplotlib.collections import QuadMesh
 from matplotlib.image import AxesImage
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
@@ -180,19 +181,22 @@ class ColorbarAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
         super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
+
+        self.images = self.canvas.figure.gca().images
+        if len(self.images) == 0:
+            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)]
+
         self.create_model()
 
     def changes_accepted(self):
         super(ColorbarAxisEditor, self).changes_accepted()
-        images = self.canvas.figure.gca().images
-        if len(images) > 0 and isinstance(images[0], AxesImage):
-            cb = images[0]
-            cb.set_clim(self.limit_min, self.limit_max)
+        cb = self.images[0]
+        cb.set_clim(self.limit_min, self.limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = self.canvas.figure.gca().images[0].get_clim()
+        memento.min, memento.max = self.images[0].get_clim()
         memento.log = False
         memento.grid = False
 
