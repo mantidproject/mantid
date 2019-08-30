@@ -173,7 +173,7 @@ class YAxisEditor(AxisEditor):
 
 
 class MarkerEditor(QWidget):
-    def __init__(self, filename, valid_style, valid_colors, used_names=[]):
+    def __init__(self, filename, valid_style, valid_colors, used_names=None):
         """
         Widget to edit a marker properties
         :param filename: name of the ui file for this widget
@@ -188,7 +188,10 @@ class MarkerEditor(QWidget):
         self.widget.label_x_pos.setValidator(QDoubleValidator())
         self.widget.label_y_pos.setValidator(QDoubleValidator())
         self.colors = valid_colors
-        self.used_names = used_names
+        if used_names is None:
+            self.used_names = []
+        else:
+            self.used_names = used_names
 
         self.widget.style.addItems(valid_style)
         self.widget.color.addItems(list(valid_colors.keys()))
