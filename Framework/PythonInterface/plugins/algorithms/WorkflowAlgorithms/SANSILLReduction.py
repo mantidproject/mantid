@@ -474,6 +474,16 @@ class SANSILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
 
+    def _apply_masks(self, ws):
+        # apply the default mask, e.g. the bad detector edges
+        default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
+        if default_mask_ws:
+            self._mask(ws, default_mask_ws)
+        # apply the beam stop mask
+        mask_ws = self.getProperty('MaskedInputWorkspace').value
+        if mask_ws:
+            self._mask(ws, mask_ws)
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
@@ -528,14 +538,7 @@ class SANSILLReduction(PythonAlgorithm):
                         container_ws = self.getProperty('ContainerInputWorkspace').value
                         if container_ws:
                             self._apply_container(ws, container_ws)
-                        # apply the default mask, e.g. the bad detector edges
-                        default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
-                        if default_mask_ws:
-                            self._mask(ws, default_mask_ws)
-                        # apply the beam stop mask
-                        mask_ws = self.getProperty('MaskedInputWorkspace').value
-                        if mask_ws:
-                            self._mask(ws, mask_ws)
+                        self._apply_masks(ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
