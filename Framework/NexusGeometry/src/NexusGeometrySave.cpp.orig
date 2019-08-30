@@ -32,7 +32,7 @@
 namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
-namespace {
+
 /*
  * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
@@ -42,7 +42,7 @@ namespace {
  * @return std::vector<double> vector containing data values in
  * Mantid::Kernel::V3D format.
  */
-std::vector<double> toStdVector(const V3D &data) {
+inline std::vector<double> toStdVector(const V3D &data) {
   std::vector<double> stdVector;
   stdVector.reserve(3);
   stdVector.push_back(data.X());
@@ -60,7 +60,7 @@ std::vector<double> toStdVector(const V3D &data) {
  * @return std::vector<double> vector containing data values in
  * Eigen::Vector3d format
  */
-std::vector<double> toStdVector(const Eigen::Vector3d &data) {
+inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
   return toStdVector(Kernel::toV3D(data));
 }
 
@@ -74,7 +74,8 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
  * @param precision : double precision specifier
  * @return true if all elements are approx zero, else false.
  */
-bool isApproxZero(const std::vector<double> &data, const double &precision) {
+inline bool isApproxZero(const std::vector<double> &data,
+                         const double &precision) {
 
   return std::all_of(data.begin(), data.end(),
                      [&precision](const double &element) {
@@ -83,12 +84,13 @@ bool isApproxZero(const std::vector<double> &data, const double &precision) {
 }
 
 // overload. return true if vector is approx to zero
-bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
+inline bool isApproxZero(const Eigen::Vector3d &data, const double &precision) {
   return data.isApprox(Eigen::Vector3d(0, 0, 0), precision);
 }
 
 // overload. returns true is angle is approx to zero
-bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
+inline bool isApproxZero(const Eigen::Quaterniond &data,
+                         const double &precision) {
   return data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
 }
 
@@ -100,7 +102,7 @@ bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
  * @param str : std::string
  * @return string datatype of size = length of input string
  */
-H5::StrType strTypeOfSize(const std::string &str) {
+inline H5::StrType strTypeOfSize(const std::string &str) {
   H5::StrType stringType(H5::PredType::C_S1, str.size());
   return stringType;
 }
@@ -113,9 +115,9 @@ H5::StrType strTypeOfSize(const std::string &str) {
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-void writeStrDataset(H5::Group &grp, const std::string &dSetName,
-                     const std::string &dSetVal,
-                     const H5::DataSpace &dataSpace = SCALAR) {
+inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
+                            const std::string &dSetVal,
+                            const H5::DataSpace &dataSpace = SCALAR) {
   H5::StrType dataType = strTypeOfSize(dSetVal);
   H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
   dSet.write(dSetVal, dataType);
@@ -129,15 +131,12 @@ void writeStrDataset(H5::Group &grp, const std::string &dSetName,
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-void writeStrAttribute(H5::Group &grp, const std::string &attrName,
-                       const std::string &attrVal,
-                       const H5::DataSpace &dataSpace = SCALAR) {
-  if (!grp.attrExists(attrName)) {
-    H5::StrType dataType = strTypeOfSize(attrVal);
-    H5::Attribute attribute =
-        grp.createAttribute(attrName, dataType, dataSpace);
-    attribute.write(dataType, attrVal);
-  }
+inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
+                              const std::string &attrVal,
+                              const H5::DataSpace &dataSpace = SCALAR) {
+  H5::StrType dataType = strTypeOfSize(attrVal);
+  H5::Attribute attribute = grp.createAttribute(attrName, dataType, dataSpace);
+  attribute.write(dataType, attrVal);
 }
 
 /*
@@ -149,14 +148,12 @@ void writeStrAttribute(H5::Group &grp, const std::string &attrName,
  * @param attrname : attribute name.
  * @param attrVal : string attribute value to be stored in attribute.
  */
-void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
-                       const std::string &attrVal,
-                       const H5::DataSpace &dataSpace = SCALAR) {
-  if (!dSet.attrExists(attrName)) {
-    H5::StrType dataType = strTypeOfSize(attrVal);
-    auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
-    attribute.write(dataType, attrVal);
-  }
+inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
+                              const std::string &attrVal,
+                              const H5::DataSpace &dataSpace = SCALAR) {
+  H5::StrType dataType = strTypeOfSize(attrVal);
+  auto attribute = dSet.createAttribute(attrName, dataType, dataSpace);
+  attribute.write(dataType, attrVal);
 }
 
 // function to create a simple sub-group that has a nexus class attribute,
@@ -177,9 +174,9 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
  * @param compInfo : Component Info Instrument cache
  * @param idx : index of bank in cache.
  */
-void writeXYZPixeloffset(H5::Group &grp,
-                         const Geometry::ComponentInfo &compInfo,
-                         const size_t idx) {
+inline void writeXYZPixeloffset(H5::Group &grp,
+                                const Geometry::ComponentInfo &compInfo,
+                                const size_t idx) {
 
   H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset;
   auto childrenDetectors = compInfo.detectorsInSubtree(idx);
@@ -706,8 +703,6 @@ void saveNXDetector(const H5::Group &parentGroup,
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-} // namespace
-
 /*
  * Function: saveInstrument
  * calls the save methods to write components to file after exception checking.
@@ -716,15 +711,12 @@ void saveNXDetector(const H5::Group &parentGroup,
  * @param compInfo : componentInfo object.
  * @param detInfo : detectorInfo object.
  * @param fullPath : save destination as full path.
- * @param rootEntry : name of root entry
- * @param logger : logging object
- * @param strict : function will throw
+ * @param rootPath : name of root entry
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const Geometry::DetectorInfo &detInfo,
                     const std::string &fullPath, const std::string &rootPath,
-                    std::unique_ptr<AbstractLogger> logger, bool strict,
                     Kernel::ProgressBase *reporter) {
 
   // Exception handling.
@@ -755,59 +747,36 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   }
 
   if (!compInfo.hasDetectorInfo()) {
-    if (strict)
-      throw std::invalid_argument(
-          "No detector info was found in the Instrument");
-
-    logger->warning(
-        "No detector info was found in the Instrument. Instrument not saved.");
-    return;
+    throw std::invalid_argument(
+        "No detector info was found in the Instrument cache.\n");
   }
   if (!compInfo.hasSample()) {
-    if (strict)
-      throw std::invalid_argument("No sample was found in the Instrument");
-    logger->warning(
-        "No sample was found in the Instrument. Instrument not saved.");
-    return;
+    throw std::invalid_argument(
+        "No sample was found in the Instrument cache.\n");
   }
 
   if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    if (strict)
-      throw std::invalid_argument(
-          "The sample posiiton is required to be at the origin");
-    logger->warning("The sample posiiton is required to be at the origin. "
-                    "Instrument not saved.");
-    return;
+    throw std::invalid_argument(
+        "The sample posiiton is required to be at the origin.\n");
   }
 
   if (!compInfo.hasSource()) {
-    if (strict)
-      throw std::invalid_argument("No source was found in the Instrument");
-    logger->warning("No source was found in the Instrument. "
-                    "Instrument not saved.");
-    return;
+    throw std::invalid_argument("No source was found in the Instrument cache.");
   }
 
   // IDs of all detectors in Instrument cache
   const auto detIds = detInfo.detectorIDs();
 
-  // Todo a better way to do this would be to have strict as a bool template
-  // parameter and specialise on it, therefore getting compile-time behavioural
-  // switching.
-  H5::Group rootGroup;
-  H5::H5File file;
-  if (strict) {
-    file = H5::H5File(fullPath, H5F_ACC_TRUNC); // open file
-    rootGroup = file.createGroup(rootPath);
-  } else {
-    file = H5::H5File(fullPath, H5F_ACC_RDWR); // open file
-    rootGroup = file.openGroup(rootPath);
-  }
+  H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
 
+  H5::Group rootGroup, instrument;
+
+  // create and capture NXentry (file root)
+  rootGroup = file.createGroup(rootPath);
   NexusGeometrySave::writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
 
   // save and capture NXinstrument (component root)
-  H5::Group instrument = NexusGeometrySave::NXInstrument(rootGroup, compInfo);
+  instrument = NexusGeometrySave::NXInstrument(rootGroup, compInfo);
 
   // save NXsource
   NexusGeometrySave::saveNXSource(instrument, compInfo);
@@ -845,23 +814,110 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.
- * @param rootEntry : name of root entry
- * @param logger : logging object
- * @param strict : function will throw
+ * @param rootPath : name of root entry
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
                     std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
     const std::string &fullPath, const std::string &rootPath,
-    std::unique_ptr<AbstractLogger> logger, bool strict,
     Kernel::ProgressBase *reporter) {
 
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  return saveInstrument(compInfo, detInfo, fullPath, rootPath,
-                        std::move(logger), strict, reporter);
+<<<<<<< HEAD
+  return saveInstrument(compInfo, detInfo, fullPath, rootPath, reporter);
+=======
+  // Exception handling.
+  boost::filesystem::path tmp(fullPath);
+  if (!boost::filesystem::is_directory(tmp.root_directory())) {
+    throw std::invalid_argument(
+        "The path provided for saving the file is invalid: " + fullPath + "\n");
+  }
+
+  // check the file extension matches any of the valid extensions defined in
+  // nexus_geometry_extensions
+  const auto ext = boost::filesystem::path(tmp).extension();
+  bool isValidExt = std::any_of(
+      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+      [&ext](const std::string &str) { return ext.generic_string() == str; });
+
+  // throw if the file extension is invalid
+  if (!isValidExt) {
+
+    // string of valid extensions to output in exception
+    std::string extensions;
+    std::for_each(
+        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+        [&extensions](const std::string &str) { extensions += " " + str; });
+    throw std::invalid_argument("invalid extension for file: '" +
+                                ext.generic_string() +
+                                "'. Expected any of: " + extensions);
+  }
+
+  if (!compInfo.hasDetectorInfo()) {
+    throw std::invalid_argument(
+        "No detector info was found in the Instrument cache.\n");
+  }
+  if (!compInfo.hasSample()) {
+    throw std::invalid_argument(
+        "No sample was found in the Instrument cache.\n");
+  }
+
+  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
+    throw std::invalid_argument(
+        "The sample posiiton is required to be at the origin.\n");
+  }
+
+  if (!compInfo.hasSource()) {
+    throw std::invalid_argument("No source was found in the Instrument cache.");
+  }
+
+  // IDs of all detectors in Instrument cache
+  const auto detIds = detInfo.detectorIDs();
+
+  H5::H5File file(fullPath, H5F_ACC_TRUNC); // open file
+
+  H5::Group rootGroup, instrument;
+
+  // create and capture NXentry (file root)
+  rootGroup = file.createGroup(rootPath);
+  NexusGeometrySave::writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
+
+  // save and capture NXinstrument (component root)
+  instrument = NexusGeometrySave::NXInstrument(rootGroup, compInfo);
+
+  // save NXsource
+  NexusGeometrySave::saveNXSource(instrument, compInfo);
+
+  // save NXsample
+  NexusGeometrySave::saveNXSample(rootGroup, compInfo);
+
+  // save NXdetectors
+  for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
+    // TODO there is a bug in isSaveableBank that will need fixing. Support for
+    // instruments with eight-packs not possible at present
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+      if (reporter != nullptr)
+        reporter->report();
+      NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
+    }
+  }
+
+  // save NXmonitors
+  for (size_t index = 0; index < detInfo.size(); ++index) {
+    if (detInfo.isMonitor(index)) {
+      if (reporter != nullptr)
+        reporter->report();
+      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds[index],
+                                       index);
+    }
+  }
+
+  file.close(); // close file
+
+>>>>>>> 09ed16d9b67a8119cae83ccdfaad473bd5014ba5
 } // saveInstrument
 
 } // namespace NexusGeometrySave
