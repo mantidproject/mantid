@@ -15,6 +15,8 @@ from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing, AnalysisDa
 class FitIncidentSpectrum(PythonAlgorithm):
     _input_ws = None
     _output_ws = None
+    _scipy_not_old = hasattr(interpolate.UnivariateSpline, "derivative")
+    # check if scipy version is greater than 0.12.1 i.e it has the derivative function
 
     def category(self):
         return 'Diffraction\\Fitting'
@@ -62,8 +64,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
         self.declareProperty(
             name='FitSpectrumWith',
             defaultValue='GaussConvCubicSpline',
-            validator=StringListValidator(['GaussConvCubicSpline', 'CubicSpline', 'CubicSplineViaMantid',
-                                           'HowellsFunction']),
+            validator=StringListValidator(['GaussConvCubicSpline', 'CubicSpline', 'CubicSplineViaMantid']),
             doc='The method for fitting the incident spectrum.')
 
     def validateInputs(self):
@@ -136,9 +137,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 ParamsOutput=self._binning_for_calc,
                 Error=0.0001,
                 MaxNumberOfBreaks=0)
-        elif self._fit_spectrum_with == 'HowellsFunction':
-            # Fit using Howells function
-            fit, fit_prime = self.fit_howells_function(x_fit, y_fit, x)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
             fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x, sigma=0.5)
@@ -173,19 +171,18 @@ class FitIncidentSpectrum(PythonAlgorithm):
         avg, var = moving_average(y_fit)
         spline_fit = interpolate.UnivariateSpline(x_fit, y_fit, w=1. / np.sqrt(var))
         fit = spline_fit(x)
-        if hasattr(spline_fit, "derivative"):
-            # check if scipy version is greater than 0.12.1 i.e it has the derivative function
-            spline_fit_prime = spline_fit.derivative()
-            fit_prime = spline_fit_prime(x)
-        else:
-            index = np.arange(len(x))
-            fit_prime = np.empty(len(x))
-            for pos in index:
-                print(pos)
-                print(x[pos])
-                print(spline_fit.derivatives(x[pos]))
-                print(spline_fit.derivatives(x[pos])[0])
-                fit_prime[pos] = spline_fit.derivatives(x[pos])[0]
+
+        # if self._scipy_not_old:
+        #     spline_fit_prime = spline_fit.derivative()
+        #     fit_prime = spline_fit_prime(x)
+        # else:
+        index = np.arange(len(x))
+        fit_prime = np.empty(len(x))
+        for pos in index:
+                dx = (x[1] - x[0])/1000
+                y1 = spline_fit(x[pos] - dx)
+                y2 = spline_fit(x[pos] + dx)
+                fit_prime[pos] = (y2-y1)/dx
         return fit, fit_prime
 
     def fit_cubic_spline(self, x_fit, y_fit, x, s=1e15):
@@ -219,35 +216,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
             Params=ParamsOutput,
             PreserveEvents=True)
         return AnalysisDataService.retrieve('fit').readY(0), AnalysisDataService.retrieve('fit_prime_1').readY(0)
-
-    def fit_howells_function(self, x_fit, y_fit, x):
-        # Fit with analytical function from HowellsEtAl
-        def calc_howells_function(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
-            term1 = phi_max * ((lam_t**4.) / lambdas**5.) * \
-                np.exp(-(lam_t / lambdas)**2.)
-            term2 = (phi_epi / (lambdas**(1. + 2. * a))) * \
-                (1. / (1 + np.exp((lambdas - lam_1) / lam_2)))
-            return term1 + term2
-
-        def calc_howells_function_1st_derivative(lambdas, phi_max, phi_epi, lam_t, lam_1, lam_2, a):
-            term1 = (((2 * lam_t**2) / lambdas**2) - 5.) * (1. / lambdas) * \
-                phi_max * ((lam_t**4.) / lambdas**5.) * np.exp(-(lam_t / lambdas)**2.)
-            term2 = - (phi_epi / lambdas**(1 + 2 * a)) * (1 / (1+np.exp((lambdas - lam_1) / lam_2))) \
-                * ((1 + 2 * a) / lambdas
-                    + (np.exp((lambdas - lam_1) / lam_2) / lam_2) * (1 / (1+np.exp((lambdas - lam_1) / lam_2))))
-            return term1 + term2
-
-        params = [1., 1., 1., 0., 1., 1.]
-        if hasattr(interpolate.UnivariateSpline, "derivative"):
-            # check if scipy version is greater than 0.12.1 i.e it has the derivative function
-            params, convergence = optimize.curve_fit(
-                calc_howells_function, x_fit, y_fit, params)
-        else:
-            params, convergence = optimize.curve_fit(
-                calc_howells_function, x_fit, y_fit, params, maxfev=100000)
-        fit = calc_howells_function(x, *params)
-        fit_prime = calc_howells_function_1st_derivative(x, *params)
-        return fit, fit_prime
 
 
 AlgorithmFactory.subscribe(FitIncidentSpectrum)

@@ -12,15 +12,15 @@ Description
 This algorithm fits and functionalizes an incident spectrum and finds its first derivative.
 FitIncidentSpectrum is able to fit an incident spectrum using:
 
-1. CubicSpline: A fit using a cubic cline.
-2. CubicSplineViaMantid: A fit with cubic spline using the mantid SplineSmoothing algorithm.
-3. GaussConvCubicSpline: A fit with Cubic Spline using a Gaussian Convolution to get weights
-4. HowellsFunction: A fit with analytical function from Howells et. al. [1]_
+*  GaussConvCubicSpline: A fit with Cubic Spline using a Gaussian Convolution to get weights. In builds running older
+   versions of SciPy the first derivative is can be less accurate.
+*  CubicSpline: A fit using a cubic cline.
+*  CubicSplineViaMantid: A fit with cubic spline using the mantid SplineSmoothing algorithm.
 
 Usage
 -----
 
-**Example: fit an incident spectrum using GaussConvCubicSpline** [2]_
+**Example: fit an incident spectrum using GaussConvCubicSpline** [1]_
 
 .. testcode:: ExFitIncidentSpectrum
 
@@ -110,8 +110,7 @@ Output:
 References
 ------------
 
-.. [1] W. S. Howells (1983) *On the Choice of Moderator for Liquids Diffractometer on a Pulsed Neutron Source*, Nuclear Instruments and Methods in Physics Research 223 141-146 `doi: 10.1016/0167-5087(84)90256-4 <https://doi.org/10.1016/0167-5087(84)90256-4>`__
-.. [2] D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
+.. [1] D. F. R. Mildner, B. C. Boland, R. N. Sinclair, C. G. Windsor, L. J. Bunce, and J. H. Clarke (1977) *A Cooled Polyethylene Moderator on a Pulsed Neutron Source*, Nuclear Instruments and Methods 152 437-446 `doi: 10.1016/0029-554X(78)90043-5 <https://doi.org/10.1016/0029-554X(78)90043-5>`__
 
 .. categories::
 
