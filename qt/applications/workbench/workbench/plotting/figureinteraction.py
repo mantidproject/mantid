@@ -27,7 +27,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
-                                                 GlobalMarkerEditor)
+                                                 GlobalMarkerEditor, ColorbarAxisEditor)
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -177,7 +177,10 @@ class FigureInteraction(object):
                 move_and_show(XAxisEditor(canvas, ax))
             elif (ax.yaxis.contains(event)[0] or
                   any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
-                move_and_show(YAxisEditor(canvas, ax))
+                if ax == axes[0]:
+                    move_and_show(YAxisEditor(canvas, ax))
+                else:
+                    move_and_show(ColorbarAxisEditor(canvas,ax))
 
     def _show_markers_menu(self, markers, event):
         """

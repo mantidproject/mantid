@@ -14,6 +14,7 @@ from __future__ import (absolute_import, unicode_literals)
 # 3rdparty imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
+from matplotlib.collections import QuadMesh
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -123,13 +124,14 @@ class AxisEditor(PropertiesEditorBase):
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.linthresholdkw = 'linthres' + axis_id
         # Grid has no direct accessor from the axes
-        axis = axes.xaxis if axis_id == 'x' else axes.yaxis
+        self.axis = axes.xaxis if axis_id == 'x' else axes.yaxis
 
+    def create_model(self):
         memento = AxisEditorModel()
         self._memento = memento
-        memento.min, memento.max = getattr(axes, 'get_{}lim'.format(axis_id))()
-        memento.log = getattr(axes, 'get_{}scale'.format(axis_id))() != 'linear'
-        memento.grid = axis.majorTicks[0].gridOn
+        memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
+        memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
+        memento.grid = self.axis.majorTicks[0].gridOn
 
         self._fill(memento)
 
@@ -138,8 +140,8 @@ class AxisEditor(PropertiesEditorBase):
         # apply properties
         axes = self.axes
 
-        limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-        self.lim_setter(limit_min, limit_max)
+        self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+        self.lim_setter(self.limit_min, self.limit_max)
         if self.ui.logBox.isChecked():
             self.scale_setter('symlog', **{self.linthresholdkw: SYMLOG_LIN_THRESHOLD})
         else:
@@ -164,12 +166,40 @@ class XAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
         super(XAxisEditor, self).__init__(canvas, axes, 'x')
+        self.create_model()
 
 
 class YAxisEditor(AxisEditor):
 
     def __init__(self, canvas, axes):
         super(YAxisEditor, self).__init__(canvas, axes, 'y')
+        self.create_model()
+
+
+class ColorbarAxisEditor(AxisEditor):
+
+    def __init__(self, canvas, axes):
+        super(ColorbarAxisEditor, self).__init__(canvas, axes, 'y')
+
+        self.images = self.canvas.figure.gca().images
+        if len(self.images) == 0:
+            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)]
+
+        self.create_model()
+
+    def changes_accepted(self):
+        super(ColorbarAxisEditor, self).changes_accepted()
+        cb = self.images[0]
+        cb.set_clim(self.limit_min, self.limit_max)
+
+    def create_model(self):
+        memento = AxisEditorModel()
+        self._memento = memento
+        memento.min, memento.max = self.images[0].get_clim()
+        memento.log = False
+        memento.grid = False
+
+        self._fill(memento)
 
 
 class MarkerEditor(QWidget):

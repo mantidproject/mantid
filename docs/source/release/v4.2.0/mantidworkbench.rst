@@ -38,6 +38,7 @@ Bugfixes
 - Fit results on normalised plots are now also normalised to match the plot.
 - A crash in the Fit Browser when the default peak was not a registered peak type has been fixed.
 - Fixed an issue where you could not edit table workspaces to enter negative numbers.
+- The colorbar in the colorfill plot window now correctly resizes when the scale is changed by double-clicking on the colorbar axis.
 - Fixed an issue with fitting where the difference would be plotted even if the Plot Difference option in the fit property browser was not enabled.
 
 
