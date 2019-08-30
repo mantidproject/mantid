@@ -7,7 +7,6 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
 
-#include "FileResource.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -18,7 +17,8 @@
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "NexusFileReader.h"
+#include "MantidTestHelpers/FileResource.h"
+#include "MantidTestHelpers/NexusFileReader.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -340,7 +340,8 @@ used.
         V3D(0, 0, 10) /*bank position*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    auto const &compInfo = (*instr.first);
+    // instrument cache
+    auto &compInfo = (*instr.first);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_PATH);
@@ -994,8 +995,8 @@ Instrument cache.
         non-zero translation in source. Expected behaviour is: (dataset)
        'depends_on' has value "/absoulute/path/to/orientation", (dataset)
        'orientation' has dAttribute (AKA attribute of dataset) 'depends_on' with
-       value "/absoulute/path/to/location", and (dataset) 'location' has
-       dAttribute 'depends_on' with value "."
+        value "/absoulute/path/to/location", and (dataset) 'location' has
+        dAttribute 'depends_on' with value "."
          */
 
     // Geometry for test instrument
@@ -1109,7 +1110,7 @@ Instrument cache.
 
     // assert the group NXtransformations doesnt exist in file
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath),
-                     H5::GroupIException &)
+                     H5::GroupIException &);
   }
 };
 

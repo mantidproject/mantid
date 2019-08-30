@@ -5,20 +5,20 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
+/*
+ * RAII: Gives a clean file destination and removes the file when
+ * handle is out of scope. Must be stack allocated.
+ *
+ * @author Takudzwa Makoni, RAL (UKRI), ISIS
+ * @date 06/08/2019
+ */
+
 #ifndef MANTID_NEXUSGEOMETRY_FILERESOURCE_H_
 #define MANTID_NEXUSGEOMETRY_FILERESOURCE_H_
 
 #include <boost/filesystem.hpp>
 #include <string>
 
-/*
- RAII: Gives a clean file destination and removes the file when
- handle is out of scope. Must be stack allocated.
-
- TODO: DOCUMENTATION
- *@author Takudzwa Makoni, RAL (UKRI), ISIS
- *@date 06/08/2019
-*/
 class ScopedFileHandle {
 
 public:
