@@ -183,16 +183,16 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
         raw_error = self.getProperty('InputWorkspace').value.readE(0).copy()
         if len(np.argwhere(raw_error > 0)) == 0:
             raw_error = np.sqrt(raw_yvals)
-            self.setPropertyValue('OutputWorkspace',
-                                  '{}_with_errors'.format(self.getPropertyValue('InputWorkspace')))
             error_ws = CreateWorkspace(DataX=raw_xvals,
                                        DataY=raw_yvals,
                                        DataE=raw_error,
                                        StoreInADS=False)
+            self.setPropertyValue('OutputWorkspace',
+                                  '{}_with_errors'.format(self.getPropertyValue('InputWorkspace')))
+            self.setProperty('OutputWorkspace', error_ws)
         else:
-            error_ws = self.getProperty('InputWorkspace')
-
-        self.setProperty('OutputWorkspace', error_ws)
+            error_ws = self.getProperty('InputWorkspace').value
+            self.setPropertyValue('OutputWorkspace', error_ws.getName())
 
         return raw_xvals, raw_yvals, raw_error, error_ws
 
