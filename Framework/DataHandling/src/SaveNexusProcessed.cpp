@@ -21,6 +21,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
+#include <H5Cpp.h>
 #include <Poco/File.h>
 #include <boost/shared_ptr.hpp>
 
@@ -316,9 +317,13 @@ void SaveNexusProcessed::doExec(
           matrixWorkspace->componentInfo(), matrixWorkspace->detectorInfo(),
           filename, "mantid_workspace_1", adapter, false);
     } catch (std::exception &e) {
-      g_log.warning(std::string(e.what()) +
-                    " Nexus Geometry may be absent or incomplete "
-                    "from processed Nexus file");
+      g_log.error(std::string(e.what()) +
+                  " Nexus Geometry may be absent or incomplete "
+                  "from processed Nexus file");
+    } catch (H5::Exception &ex) {
+      g_log.error(ex.getDetailMsg() +
+                  " Nexus Geometry may be absent or incomplete "
+                  "from processed Nexus file");
     }
     // TODO we also want to catch H5 exeptions in the same way. However my idea
     // is to push this down into saveInstrument via a "strict" flag and pass a

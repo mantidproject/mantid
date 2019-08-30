@@ -718,13 +718,13 @@ void saveNXDetector(const H5::Group &parentGroup,
  * @param fullPath : save destination as full path.
  * @param rootEntry : name of root entry
  * @param logger : logging object
- * @param strict : function will throw
+ * @param append : function will throw
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const Geometry::DetectorInfo &detInfo,
                     const std::string &fullPath, const std::string &rootPath,
-                    AbstractLogger &logger, bool strict,
+                    AbstractLogger &logger, bool append,
                     Kernel::ProgressBase *reporter) {
 
   // Exception handling.
@@ -751,60 +751,48 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     std::string message = "invalid extension for file: '" +
                           ext.generic_string() +
                           "'. Expected any of: " + extensions;
-    if (strict)
-      throw std::invalid_argument(message);
-    logger.warning(message);
-    return;
+    logger.error(message);
+    throw std::invalid_argument(message);
   }
 
   if (!compInfo.hasDetectorInfo()) {
-    if (strict)
-      throw std::invalid_argument(
-          "No detector info was found in the Instrument");
-
-    logger.warning(
+    logger.error(
         "No detector info was found in the Instrument. Instrument not saved.");
-    return;
+    throw std::invalid_argument("No detector info was found in the Instrument");
   }
   if (!compInfo.hasSample()) {
-    if (strict)
-      throw std::invalid_argument("No sample was found in the Instrument");
-    logger.warning(
+    logger.error(
         "No sample was found in the Instrument. Instrument not saved.");
-    return;
+    throw std::invalid_argument("No sample was found in the Instrument");
   }
 
   if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    if (strict)
-      throw std::invalid_argument(
-          "The sample posiiton is required to be at the origin");
-    logger.warning("The sample posiiton is required to be at the origin. "
-                   "Instrument not saved.");
-    return;
+    logger.error("The sample positon is required to be at the origin. "
+                 "Instrument not saved.");
+    throw std::invalid_argument(
+        "The sample positon is required to be at the origin");
   }
 
   if (!compInfo.hasSource()) {
-    if (strict)
-      throw std::invalid_argument("No source was found in the Instrument");
-    logger.warning("No source was found in the Instrument. "
-                   "Instrument not saved.");
-    return;
+    logger.error("No source was found in the Instrument. "
+                 "Instrument not saved.");
+    throw std::invalid_argument("No source was found in the Instrument");
   }
 
   // IDs of all detectors in Instrument cache
   const auto detIds = detInfo.detectorIDs();
 
-  // Todo a better way to do this would be to have strict as a bool template
+  // Todo a better way to do this would be to have append as a bool template
   // parameter and specialise on it, therefore getting compile-time behavioural
   // switching.
   H5::Group rootGroup;
   H5::H5File file;
-  if (strict) {
-    file = H5::H5File(fullPath, H5F_ACC_TRUNC); // open file
-    rootGroup = file.createGroup(rootPath);
-  } else {
+  if (append) {
     file = H5::H5File(fullPath, H5F_ACC_RDWR); // open file
     rootGroup = file.openGroup(rootPath);
+  } else {
+    file = H5::H5File(fullPath, H5F_ACC_TRUNC); // open file
+    rootGroup = file.createGroup(rootPath);
   }
 
   NexusGeometrySave::writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
@@ -850,19 +838,19 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
  * @param fullPath : save destination as full path.
  * @param rootEntry : name of root entry
  * @param logger : logging object
- * @param strict : function will throw
+ * @param append : function will throw
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
                     std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
     const std::string &fullPath, const std::string &rootPath,
-    AbstractLogger &logger, bool strict, Kernel::ProgressBase *reporter) {
+    AbstractLogger &logger, bool append, Kernel::ProgressBase *reporter) {
 
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  return saveInstrument(compInfo, detInfo, fullPath, rootPath, logger, strict,
+  return saveInstrument(compInfo, detInfo, fullPath, rootPath, logger, append,
                         reporter);
 } // saveInstrument
 

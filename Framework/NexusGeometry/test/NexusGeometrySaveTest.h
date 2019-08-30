@@ -50,7 +50,7 @@ public:
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 private:
-  MockLogger m_mockLogger;
+  ::testing::NiceMock<MockLogger> m_mockLogger;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -108,7 +108,7 @@ used.
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger,
-                                      true /*strict*/, &progressRep);
+                                      false /*strict*/, &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
 
@@ -127,10 +127,11 @@ used.
                      std::invalid_argument &);
     // Same error but log rather than throw
     MockLogger logger;
-    EXPECT_CALL(logger, warning(testing::_)).Times(1);
-    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
-        false /*strict*/));
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
@@ -156,17 +157,13 @@ used.
                                                        m_mockLogger),
                      std::invalid_argument &);
 
-    struct nodelete {
-      void operator()(MockLogger *) const {
-        // Do nothing
-      }
-    };
     // Same error but log rather than throw
     MockLogger logger;
-    EXPECT_CALL(logger, warning(testing::_)).Times(1);
-    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
-        false /*strict*/));
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
@@ -193,10 +190,11 @@ used.
                      std::invalid_argument &);
     // Same error but log rather than throw
     MockLogger logger;
-    EXPECT_CALL(logger, warning(testing::_)).Times(1);
-    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
-        false /*strict*/));
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
@@ -215,10 +213,11 @@ used.
                      std::invalid_argument &);
     // Same error but log rather than throw
     MockLogger logger;
-    EXPECT_CALL(logger, warning(testing::_)).Times(1);
-    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
-        false /*strict*/));
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
