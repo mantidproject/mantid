@@ -29,7 +29,7 @@ import os
 import sys
 
 import site
-from .pyversion import check_python_version
+from .buildconfig import check_python_version
 
 check_python_version()
 

@@ -141,7 +141,7 @@ class FunctionsTest(TestCase):
         # make existing plot
         fig = plot([self._test_ws], wksp_indices=[0])
         self._do_plot_from_names_test(get_spectra_selection_mock, expected_labels=["spec 1", "spec 2"],
-                                      wksp_indices=[1], errors=False, overplot=False,
+                                      wksp_indices=[1], errors=False, overplot=True,
                                       target_fig=fig)
 
     @mock.patch('mantidqt.plotting.functions.pcolormesh')
@@ -280,7 +280,6 @@ class FunctionsTest(TestCase):
             self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
-
 
 if __name__ == '__main__':
     main()

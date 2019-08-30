@@ -184,6 +184,14 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertFalse(dist)
         self.assertEqual(kwargs['label'], 'ws1d_point: spec 1')
 
+    def test_legend_uses_label_if_first_axis_is_text_axis(self):
+        ws = CreateWorkspace([1], [1], NSpec=1)
+        axis = mantid.api.TextAxis.create(1)
+        ws.replaceAxis(1, axis)
+        ws.getAxis(1).setLabel(0, "test")
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws)
+        self.assertEqual(kwargs['label'], 'ws: test')
+
     def test_get_axes_labels(self):
         axs = funcs.get_axes_labels(self.ws2d_histo)
         self.assertEqual(axs, ('($\\AA$)$^{-1}$', 'Wavelength ($\\AA$)', 'Energy transfer ($meV$)'))

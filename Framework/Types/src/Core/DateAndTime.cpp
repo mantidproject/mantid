@@ -516,13 +516,6 @@ int DateAndTime::nanoseconds() const {
 int64_t DateAndTime::totalNanoseconds() const { return this->_nanoseconds; }
 
 //------------------------------------------------------------------------------------------------
-/** == operator
- * @param rhs :: DateAndTime to compare
- * @return true if equals
- */
-bool DateAndTime::operator==(const DateAndTime &rhs) const {
-  return _nanoseconds == rhs._nanoseconds;
-}
 
 /** == operator for boost::posix_time::ptime
  * @param rhs :: boost::posix_time::ptime to compare
@@ -553,14 +546,6 @@ bool DateAndTime::equals(const DateAndTime &rhs, const int64_t tol) const {
  */
 bool DateAndTime::operator!=(const DateAndTime &rhs) const {
   return _nanoseconds != rhs._nanoseconds;
-}
-
-/** < operator
- * @param rhs :: DateAndTime to compare
- * @return true if less than
- */
-bool DateAndTime::operator<(const DateAndTime &rhs) const {
-  return _nanoseconds < rhs._nanoseconds;
 }
 
 /** <= operator

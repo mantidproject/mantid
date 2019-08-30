@@ -56,6 +56,9 @@ public:
 
 private:
   size_t getWorkspaceIndexFromPixelID(const detid_t pixID);
+  size_t getFirstEventIndex(const size_t pulseIndex) const;
+  size_t getLastEventIndex(const size_t pulseIndex,
+                           const size_t numPulses) const;
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;
