@@ -29,6 +29,11 @@ Live Data
 Python
 ------
 
+API
+---
+
+It is now possible to have MultipleFileProperty configured in such a way, that it will allow empty placeholder tokens.
+
 Bug Fixes
 ---------
 * ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` bug fix for user provided top-level NXentry name 
