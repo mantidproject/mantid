@@ -995,8 +995,8 @@ Instrument cache.
         non-zero translation in source. Expected behaviour is: (dataset)
        'depends_on' has value "/absoulute/path/to/orientation", (dataset)
        'orientation' has dAttribute (AKA attribute of dataset) 'depends_on' with
-       value "/absoulute/path/to/location", and (dataset) 'location' has
-       dAttribute 'depends_on' with value "."
+        value "/absoulute/path/to/location", and (dataset) 'location' has
+        dAttribute 'depends_on' with value "."
          */
 
     // Geometry for test instrument
