@@ -174,6 +174,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
         spline_fit = interpolate.UnivariateSpline(x_fit, y_fit, w=1. / np.sqrt(var))
         fit = spline_fit(x)
         if hasattr(spline_fit, "derivative"):
+            # check if scipy version is greater than 0.12.1 i.e it has the derivative function
             spline_fit_prime = spline_fit.derivative()
             fit_prime = spline_fit_prime(x)
         else:
@@ -237,8 +238,13 @@ class FitIncidentSpectrum(PythonAlgorithm):
             return term1 + term2
 
         params = [1., 1., 1., 0., 1., 1.]
-        params, convergence = optimize.curve_fit(
-            calc_howells_function, x_fit, y_fit, params, maxfev=10000)
+        if hasattr(interpolate.UnivariateSpline, "derivative"):
+            # check if scipy version is greater than 0.12.1 i.e it has the derivative function
+            params, convergence = optimize.curve_fit(
+                calc_howells_function, x_fit, y_fit, params)
+        else:
+            params, convergence = optimize.curve_fit(
+                calc_howells_function, x_fit, y_fit, params, maxfev=100000)
         fit = calc_howells_function(x, *params)
         fit_prime = calc_howells_function_1st_derivative(x, *params)
         return fit, fit_prime
