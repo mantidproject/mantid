@@ -40,6 +40,7 @@ Bugfixes
 - Fixed an issue where you could not edit table workspaces to enter negative numbers.
 - The colorbar in the colorfill plot window now correctly resizes when the scale is changed by double-clicking on the colorbar axis.
 - Fixes an issue in the Slice Viewer where changing the colormap, min value, or max value via the figure options would not update the scale.
+- Fixes an issue where changing the curve properties in the figure options menu would reset the plot's axes scales.
 - Fixed an issue with fitting where the difference would be plotted even if the Plot Difference option in the fit property browser was not enabled.
 - Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
 
