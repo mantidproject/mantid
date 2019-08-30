@@ -334,6 +334,7 @@ class CurvesTabWidgetPresenter:
 
             self.apply_properties()
 
+        self.fig.canvas.draw()
         self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
 
     def marker_apply_to_all(self):
@@ -350,6 +351,7 @@ class CurvesTabWidgetPresenter:
 
             self.apply_properties()
 
+        self.fig.canvas.draw()
         self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
 
     def errorbars_apply_to_all(self):
@@ -376,4 +378,5 @@ class CurvesTabWidgetPresenter:
 
             self.apply_properties()
 
+        self.fig.canvas.draw()
         self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
