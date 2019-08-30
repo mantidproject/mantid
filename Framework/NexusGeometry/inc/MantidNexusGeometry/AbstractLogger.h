@@ -24,6 +24,21 @@ public:
   virtual ~AbstractLogger() {}
 };
 
+template <typename T>
+class MANTID_NEXUSGEOMETRY_DLL LogAdapter : public AbstractLogger {
+private:
+  T *m_adaptee;
+
+public:
+  LogAdapter(T *adaptee) : m_adaptee(adaptee) {}
+  virtual void warning(const std::string &message) override {
+    m_adaptee->warning(message);
+  }
+  virtual void error(const std::string &message) override {
+    m_adaptee->error(message);
+  }
+};
+
 /**
  * Creates an Adapter and instantiates and returns one as a unique_ptr
  *
@@ -34,17 +49,7 @@ template <typename T>
 MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<AbstractLogger>
 makeLogger(T *adaptee) {
 
-  struct Adapter : public AbstractLogger {
-    T *m_adaptee;
-    Adapter(T *adaptee) : m_adaptee(adaptee) {}
-    virtual void warning(const std::string &message) override {
-      m_adaptee->warning(message);
-    }
-    virtual void error(const std::string &message) override {
-      m_adaptee->error(message);
-    }
-  };
-  return std::make_unique<Adapter>(adaptee);
+  return std::make_unique<LogAdapter<T>>(adaptee);
 }
 
 } // namespace NexusGeometry
