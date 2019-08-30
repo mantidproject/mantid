@@ -724,7 +724,7 @@ void saveNXDetector(const H5::Group &parentGroup,
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const Geometry::DetectorInfo &detInfo,
                     const std::string &fullPath, const std::string &rootPath,
-                    std::unique_ptr<AbstractLogger> logger, bool strict,
+                    AbstractLogger &logger, bool strict,
                     Kernel::ProgressBase *reporter) {
 
   // Exception handling.
@@ -743,15 +743,18 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   // throw if the file extension is invalid
   if (!isValidExt) {
-
     // string of valid extensions to output in exception
     std::string extensions;
     std::for_each(
         nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
         [&extensions](const std::string &str) { extensions += " " + str; });
-    throw std::invalid_argument("invalid extension for file: '" +
-                                ext.generic_string() +
-                                "'. Expected any of: " + extensions);
+    std::string message = "invalid extension for file: '" +
+                          ext.generic_string() +
+                          "'. Expected any of: " + extensions;
+    if (strict)
+      throw std::invalid_argument(message);
+    logger.warning(message);
+    return;
   }
 
   if (!compInfo.hasDetectorInfo()) {
@@ -759,14 +762,14 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
       throw std::invalid_argument(
           "No detector info was found in the Instrument");
 
-    logger->warning(
+    logger.warning(
         "No detector info was found in the Instrument. Instrument not saved.");
     return;
   }
   if (!compInfo.hasSample()) {
     if (strict)
       throw std::invalid_argument("No sample was found in the Instrument");
-    logger->warning(
+    logger.warning(
         "No sample was found in the Instrument. Instrument not saved.");
     return;
   }
@@ -775,16 +778,16 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
     if (strict)
       throw std::invalid_argument(
           "The sample posiiton is required to be at the origin");
-    logger->warning("The sample posiiton is required to be at the origin. "
-                    "Instrument not saved.");
+    logger.warning("The sample posiiton is required to be at the origin. "
+                   "Instrument not saved.");
     return;
   }
 
   if (!compInfo.hasSource()) {
     if (strict)
       throw std::invalid_argument("No source was found in the Instrument");
-    logger->warning("No source was found in the Instrument. "
-                    "Instrument not saved.");
+    logger.warning("No source was found in the Instrument. "
+                   "Instrument not saved.");
     return;
   }
 
@@ -854,14 +857,13 @@ void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
                     std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
     const std::string &fullPath, const std::string &rootPath,
-    std::unique_ptr<AbstractLogger> logger, bool strict,
-    Kernel::ProgressBase *reporter) {
+    AbstractLogger &logger, bool strict, Kernel::ProgressBase *reporter) {
 
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  return saveInstrument(compInfo, detInfo, fullPath, rootPath,
-                        std::move(logger), strict, reporter);
+  return saveInstrument(compInfo, detInfo, fullPath, rootPath, logger, strict,
+                        reporter);
 } // saveInstrument
 
 } // namespace NexusGeometrySave

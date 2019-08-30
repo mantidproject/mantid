@@ -44,15 +44,13 @@ public:
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
-std::unique_ptr<AbstractLogger> makeMockLogger() {
-  return std::make_unique<MockLogger>();
-}
-
 } // namespace
 
 //---------------------------------------------------------------------
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
+private:
+  MockLogger m_mockLogger;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -90,10 +88,10 @@ used.
         V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
-                         instr, badDestinationPath, DEFAULT_ROOT_ENTRY_NAME,
-                         makeMockLogger()),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(
+        NexusGeometrySave::saveInstrument(
+            instr, badDestinationPath, DEFAULT_ROOT_ENTRY_NAME, m_mockLogger),
+        std::invalid_argument &);
   }
 
   void test_progress_reporting() {
@@ -109,7 +107,7 @@ used.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_ENTRY_NAME, makeMockLogger(),
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger,
                                       true /*strict*/, &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
@@ -125,8 +123,15 @@ used.
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
                                                        DEFAULT_ROOT_ENTRY_NAME,
-                                                       makeMockLogger()),
+                                                       m_mockLogger),
                      std::invalid_argument &);
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, warning(testing::_)).Times(1);
+    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
+        false /*strict*/));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   void test_instrument_without_sample_throws() {
@@ -148,8 +153,21 @@ used.
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
                                                        DEFAULT_ROOT_ENTRY_NAME,
-                                                       makeMockLogger()),
+                                                       m_mockLogger),
                      std::invalid_argument &);
+
+    struct nodelete {
+      void operator()(MockLogger *) const {
+        // Do nothing
+      }
+    };
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, warning(testing::_)).Times(1);
+    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
+        false /*strict*/));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   void test_instrument_without_source_throws() {
@@ -171,8 +189,15 @@ used.
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
                                                        DEFAULT_ROOT_ENTRY_NAME,
-                                                       makeMockLogger()),
+                                                       m_mockLogger),
                      std::invalid_argument &);
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, warning(testing::_)).Times(1);
+    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
+        false /*strict*/));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   void test_sample_not_at_origin_throws() {
@@ -186,8 +211,15 @@ used.
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
                                                        DEFAULT_ROOT_ENTRY_NAME,
-                                                       makeMockLogger()),
+                                                       m_mockLogger),
                      std::invalid_argument &);
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, warning(testing::_)).Times(1);
+    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, logger,
+        false /*strict*/));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   /*
@@ -218,8 +250,8 @@ used.
         V3D(0, 0, 10) /*bank position*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -243,8 +275,8 @@ used.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveinstrument taking test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check the output file
     NexusFileReader tester(destinationFile);
@@ -280,7 +312,7 @@ used.
     // call saveInstrument passing the test instrument as parameter.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME,
-                                      makeMockLogger()); // saves instrument
+                                      m_mockLogger); // saves instrument
 
     // test utility to check the output file.
     NexusFileReader testUtility(destinationFile);
@@ -320,7 +352,7 @@ used.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger()));
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, m_mockLogger));
   }
 
   void test_nxsource_group_exists_and_is_in_nxinstrument_group() {
@@ -338,8 +370,8 @@ used.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveInstrument passing test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -363,8 +395,8 @@ used.
     // instrument cache
     auto &compInfo = (*instr.first);
 
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
     NexusFileReader tester(destinationFile);
 
     TS_ASSERT(compInfo.hasSample());
@@ -417,8 +449,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveInstrument
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
@@ -478,8 +510,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveInstrument
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
@@ -535,8 +567,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveInstrument
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
@@ -592,8 +624,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveInstrument
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
@@ -651,8 +683,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call saveInstrument
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
@@ -701,8 +733,8 @@ Instrument cache.
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -739,8 +771,8 @@ Instrument cache.
                        "test-monitor", TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -781,8 +813,8 @@ Instrument cache.
                        TRANSFORMATIONS};
 
     // call saveinstrument passing test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -826,8 +858,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // call save insrument passing the test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
@@ -912,8 +944,8 @@ Instrument cache.
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -978,8 +1010,8 @@ Instrument cache.
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility for checking file
     NexusFileReader tester(destinationFile);
@@ -1048,8 +1080,8 @@ Instrument cache.
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility for checking output file
     NexusFileReader tester(destinationFile);
@@ -1120,8 +1152,8 @@ Instrument cache.
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter
-    NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, makeMockLogger());
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
