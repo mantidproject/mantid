@@ -59,14 +59,13 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     """ plotting """
-
     def add_subplot(self, name):
         self.plots.add_subplot(name, len(self.quickEdit.get_subplots()))
 
         self.quickEdit.add_subplot(name)
 
-    def plot(self, subplotName, ws, specNum=1):
-        self.plots.plot(subplotName, ws, specNum=specNum)
+    def plot(self, subplot_name, ws, color=None, spec_num=1):
+        self.plots.plot(subplot_name, ws, color=color, spec_num=spec_num)
 
     def remove_subplot(self, name):
         self.plots._remove_subplot(name)
@@ -93,6 +92,10 @@ class MultiPlotWidget(QtWidgets.QWidget):
 
     def rm_vline(self, subplotName, name):
         self.plots.rm_vline(subplotName, name)
+
+    def remove_line(self, subplot_name, ws_name, spec=1):
+        name = '{}: spec {}'.format(ws_name, spec)
+        self.plots.remove_lines(subplot_name, [name])
 
     # gets initial values for quickEdit
     def set_all_values(self):
@@ -122,8 +125,11 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def connectCloseSignal(self, slot):
         self.closeSignal.connect(slot)
 
-    def removeSubplotConnection(self, slot):
+    def remove_subplot_connection(self, slot):
         self.plots.connect_rm_subplot_signal(slot)
+
+    def remove_line_connection(self, slot):
+        self.plots.connect_rm_line_signal(slot)
 
     def disconnectCloseSignal(self):
         self.closeSignal.disconnect()
@@ -132,7 +138,6 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
-
     def _if_empty_close(self):
         if not self._context.subplots:
             self.closeSignal.emit()

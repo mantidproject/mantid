@@ -324,7 +324,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         original_lines = self.get_lines()
 
         self.clear_fit_result_lines()
-        plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
+
+        if self.plotDiff():
+            plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
+        else:
+            plot([ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
+
         name += ':'
         for lin in self.get_lines():
             if lin.get_label().startswith(name):
