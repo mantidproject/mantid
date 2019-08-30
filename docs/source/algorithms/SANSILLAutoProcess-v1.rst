@@ -71,17 +71,17 @@ When multiple runs are summed, the run number of the first run is attributed to 
             OutputWorkspace='iq_s' + str(i + 1)
         )
 
-    print('Distance 1 Q-range:{0}-{1} AA'.format(mtd['iq_s1_1'].readX(0)[0], mtd['iq_s1_1'].readX(0)[-1]))
-    print('Distance 2 Q-range:{0}-{1} AA'.format(mtd['iq_s1_2'].readX(0)[0], mtd['iq_s1_2'].readX(0)[-1]))
-    print('Distance 3 Q-range:{0}-{1} AA'.format(mtd['iq_s1_3'].readX(0)[0], mtd['iq_s1_3'].readX(0)[-1]))
+    print('Distance 1 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_1'].readX(0)[0], mtd['iq_s1_1'].readX(0)[-1]))
+    print('Distance 2 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_2'].readX(0)[0], mtd['iq_s1_2'].readX(0)[-1]))
+    print('Distance 3 Q-range:{0:4f}-{1:4f} AA'.format(mtd['iq_s1_3'].readX(0)[0], mtd['iq_s1_3'].readX(0)[-1]))
 
 Output:
 
 .. testoutput:: ExSANSILLAutoProcess
 
-    Distance 1 Q-range:0.00138607257172-0.0200645981982 AA
-    Distance 2 Q-range:0.00699991783546-0.0919624577623 AA
-    Distance 3 Q-range:0.0327264982579-0.343774943689 AA
+    Distance 1 Q-range:0.001386-0.020065 AA
+    Distance 2 Q-range:0.007000-0.091962 AA
+    Distance 3 Q-range:0.032726-0.343775 AA
 
 .. testcleanup:: ExSANSILLAutoProcess
 
