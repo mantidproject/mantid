@@ -35,6 +35,58 @@ The same caching is done for absorber, empty beam, container, sensitivity and ma
 The caching relies on Analysis Data Service (ADS) through naming convention by appending the relevant process name to the run number.
 When multiple runs are summed, the run number of the first run is attributed to the summed workspace name.
 
+.. include:: ../usagedata-note.txt
+
+**Example - full treatment of 3 samples at 3 different distances**
+
+.. testsetup:: ExSANSILLAutoProcess
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D11/')
+
+.. testcode:: ExSANSILLAutoProcess
+
+    beams = '2866,2867+2868,2878'
+    containers = '2888+2971,2884+2960,2880+2949'
+    container_tr = '2870+2954'
+    beam_tr = '2867+2868'
+    samples = ['2889,2885,2881',
+               '2887,2883,2879',
+               '3187,3177,3167']
+    sample_tr = ['2871', '2869', '3172']
+    thick = [0.1, 0.2, 0.2]
+
+    # reduce samples
+    for i in range(len(samples)):
+        SANSILLAutoProcess(
+            SampleRuns=samples[i],
+            BeamRuns=beams,
+            ContainerRuns=containers,
+            MaskFiles='mask1.nxs,mask2.nxs,mask3.nxs',
+            SensitivityMaps='sens-lamp.nxs',
+            SampleTransmissionRuns=sample_tr[i],
+            ContainerTransmissionRuns=container_tr,
+            TransmissionBeamRuns=beam_tr,
+            SampleThickness=thick[i],
+            OutputWorkspace='iq_s' + str(i + 1)
+        )
+
+    print('Distance 1 Q-range:{0}-{1} AA'.format(mtd['iq_s1_1'].readX(0)[0], mtd['iq_s1_1'].readX(0)[-1]))
+    print('Distance 2 Q-range:{0}-{1} AA'.format(mtd['iq_s1_2'].readX(0)[0], mtd['iq_s1_2'].readX(0)[-1]))
+    print('Distance 3 Q-range:{0}-{1} AA'.format(mtd['iq_s1_3'].readX(0)[0], mtd['iq_s1_3'].readX(0)[-1]))
+
+Output:
+
+.. testoutput:: ExSANSILLAutoProcess
+
+    Distance 1 Q-range:0.00138607257172-0.0200645981982 AA
+    Distance 2 Q-range:0.00699991783546-0.0919624577623 AA
+    Distance 3 Q-range:0.0327264982579-0.343774943689 AA
+
+.. testcleanup:: ExSANSILLAutoProcess
+
+    mtd.clear()
+
 .. categories::
 
 .. sourcelink::
