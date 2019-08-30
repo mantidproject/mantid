@@ -92,8 +92,10 @@ void SaveNexusGeometry::exec() {
   const auto &compInfo = ws->componentInfo();
   const auto &detInfo = ws->detectorInfo();
 
+  NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
   Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-      compInfo, detInfo, destinationFile, rootFileName);
+      compInfo, detInfo, destinationFile, rootFileName, adapter,
+      true /*strict*/);
 }
 
 } // namespace DataHandling
