@@ -1,9 +1,9 @@
 #ifndef NEXUSGEOMETRY_MOCKOBJECTS_H
 #define NEXUSGEOMETRY_MOCKOBJECTS_H
-#include <gmock/gmock.h>
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
+#include <gmock/gmock.h>
 
 namespace {
 
@@ -24,4 +24,3 @@ public:
 
 } // namespace
 #endif // NEXUSGEOMETRY_MOCKOBJECTS_H
-
