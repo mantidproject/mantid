@@ -67,12 +67,16 @@ protected:
   /// Override process groups
   bool processGroups() override;
 
-private:
+  virtual void saveNexusGeometry(const Mantid::API::MatrixWorkspace &,
+                                 const std::string &){
+      /* Do nothing by default */};
+
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
 
+private:
   void getWSIndexList(std::vector<int> &indices,
                       Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
 
