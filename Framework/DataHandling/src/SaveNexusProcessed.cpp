@@ -305,7 +305,9 @@ void SaveNexusProcessed::doExec(
   inputWorkspace->history().saveNexus(&cppFile);
   nexusFile->closeGroup();
   if (matrixWorkspace) {
-    nexusFile->closeNexusFile();
+    nexusFile->closeNexusFile(); // HACK. closing is a detial of the
+                                 // saveNexusGeometry most probably. As it is
+                                 // would break SaveProcessedNexus
     saveNexusGeometry(*matrixWorkspace, filename);
   }
 }
