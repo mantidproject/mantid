@@ -11,8 +11,9 @@ from __future__ import (absolute_import, unicode_literals)
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
 
 BASE_AXIS_LABEL_COMMAND = "set_{}label('{}')"
-BASE_AXIS_SCALE_COMMAND = "set_{}lim({})"
+BASE_AXIS_LIM_COMMAND = "set_{}lim({})"
 BASE_SET_TITLE_COMMAND = "set_title('{}')"
+BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}')"
 
 
 def generate_axis_limit_commands(ax):
@@ -20,7 +21,7 @@ def generate_axis_limit_commands(ax):
     commands = []
     for axis in ['x', 'y']:
         lims = getattr(ax, "get_{}lim".format(axis))()
-        commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, convert_value_to_arg_string(lims)))
+        commands.append(BASE_AXIS_LIM_COMMAND.format(axis, convert_value_to_arg_string(lims)))
     return commands
 
 
@@ -35,3 +36,12 @@ def generate_axis_label_commands(ax):
 
 def generate_set_title_command(ax):
     return BASE_SET_TITLE_COMMAND.format(ax.get_title())
+
+
+def generate_axis_scale_commands(ax):
+    commands = []
+    for axis in ['x', 'y']:
+        scale = getattr(ax, 'get_{}scale'.format(axis))()
+        if scale != 'linear':
+            commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale))
+    return commands

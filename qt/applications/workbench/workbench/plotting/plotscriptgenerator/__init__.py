@@ -14,7 +14,8 @@ from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
-                                                         generate_set_title_command)
+                                                         generate_set_title_command,
+                                                         generate_axis_scale_commands)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
@@ -71,6 +72,11 @@ def generate_script(fig, exclude_headers=False):
         plot_commands += [
             "{ax_obj}.{cmd}".format(ax_obj=ax_object_str, cmd=cmd) for cmd in axis_label_cmds
         ]
+        # Get ax.set_x/yscale() commands
+        axis_scale_cmds = generate_axis_scale_commands(ax)
+        plot_commands += [
+            "{ax_obj}.{cmd}".format(ax_obj=ax_object_str, cmd=cmd) for cmd in axis_scale_cmds
+        ]
 
         if ax.legend_:
             plot_commands.append("{ax_obj}.legend().draggable()".format(ax_obj=ax_object_str))
@@ -101,5 +107,7 @@ if __name__ == '__main__':
     # for ax in axes:
     #     ax.plot(ws)
     axes.plot(ws)
+    axes.set_xscale('symlog')
+    axes.set_yscale('Log')
 
     print(generate_script(fig))
