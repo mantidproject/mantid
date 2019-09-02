@@ -91,8 +91,9 @@ private:
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int perioidNum) override;
-  /// execute the algorithm.
-  void doExec(Mantid::API::Workspace_sptr inputWorkspace,
+  /// execute the algorithm. Returns true only if operating on a
+  /// MatrixWorkspace
+  bool doExec(Mantid::API::Workspace_sptr inputWorkspace,
               boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,
               boost::optional<size_t> entryNumber = boost::optional<size_t>());
