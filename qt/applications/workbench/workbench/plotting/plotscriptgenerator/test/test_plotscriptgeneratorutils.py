@@ -20,6 +20,7 @@ from workbench.plotting.plotscriptgenerator.utils import (convert_args_to_string
 
 
 class PlotScriptGeneratorUtilsTest(unittest.TestCase):
+
     def test_convert_args_to_string_returns_correct_string(self):
         kwargs_dict = OrderedDict({
             'key0': 'val0',

@@ -13,7 +13,8 @@ from mantid.plots import MantidAxes
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
-                                                         generate_axis_label_commands)
+                                                         generate_axis_label_commands,
+                                                         generate_set_title_command)
 from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
@@ -41,21 +42,25 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    for i, ax in enumerate(fig.get_axes()):
+    for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes) or not curve_in_ax(ax):
             continue
 
         # plt.subplots returns an Axes object if there's only one axes being
         # plotted otherwise it returns a list
-        if len(fig.get_axes()) > 1:
-            ax_object_str = "{ax_var}[{ax_idx}]".format(ax_var=AXES_VARIABLE, ax_idx=i)
-        else:
-            ax_object_str = AXES_VARIABLE
+        ax_object_str = AXES_VARIABLE
+        if ax.numRows > 1:
+            ax_object_str += "[{row_num}]".format(row_num=ax.rowNum)
+        if ax.numCols > 1:
+            ax_object_str += "[{col_num}]".format(col_num=ax.colNum)
 
         for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
             plot_commands.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_str,
                                                          cmd=generate_plot_command(artist)))
-
+        # Add command for setting title
+        if ax.get_title():
+            plot_commands.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_str,
+                                                         cmd=generate_set_title_command(ax)))
         # Get ax.set_x/ylim() commands
         axis_limit_cmds = generate_axis_limit_commands(ax)
         plot_commands += [
@@ -68,7 +73,9 @@ def generate_script(fig, exclude_headers=False):
         ]
 
         if ax.legend_:
-            plot_commands.append("{}.legend().draggable()".format(AXES_VARIABLE))
+            plot_commands.append("{ax_obj}.legend().draggable()".format(ax_obj=ax_object_str))
+
+        plot_commands.append('')
 
     if not plot_commands:
         return

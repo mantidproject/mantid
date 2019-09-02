@@ -12,6 +12,7 @@ from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_st
 
 BASE_AXIS_LABEL_COMMAND = "set_{}label('{}')"
 BASE_AXIS_SCALE_COMMAND = "set_{}lim({})"
+BASE_SET_TITLE_COMMAND = "set_title('{}')"
 
 
 def generate_axis_limit_commands(ax):
@@ -30,3 +31,7 @@ def generate_axis_label_commands(ax):
         if label:
             commands.append(BASE_AXIS_LABEL_COMMAND.format(axis, label))
     return commands
+
+
+def generate_set_title_command(ax):
+    return BASE_SET_TITLE_COMMAND.format(ax.get_title())

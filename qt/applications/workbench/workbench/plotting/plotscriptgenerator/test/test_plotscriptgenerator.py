@@ -31,9 +31,11 @@ SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
                  "axes[0].plot(...)\n"
                  "axes[0].set_xlim(...)\n"
                  "axes[0].set_ylim(...)\n"
+                 "\n"
                  "axes[1].plot(...)\n"
                  "axes[1].set_xlim(...)\n"
                  "axes[1].set_ylim(...)\n"
+                 "\n"
                  "plt.show()")
 
 
@@ -60,7 +62,10 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'legend_': False,
             'containers': [],
             'get_xlabel': lambda: '',
-            'get_ylabel': lambda: ''
+            'get_ylabel': lambda: '',
+            'numRows': 1,
+            'numCols': 1,
+            'get_title': lambda: ''
         }
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
@@ -83,9 +88,11 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_axis_lim_cmd.return_value = self.ax_limit_cmds
 
         mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
-                                         get_lines=lambda: [None, None])
+                                         get_lines=lambda: [None, None],
+                                         numRows=1, numCols=2, colNum=0)
         mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
-                                         get_lines=lambda: [None])
+                                         get_lines=lambda: [None],
+                                         numRows=1, numCols=2, colNum=1)
         mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2])
 
         output_script = generate_script(mock_fig, exclude_headers=True)
