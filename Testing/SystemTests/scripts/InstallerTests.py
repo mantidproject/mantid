@@ -119,9 +119,15 @@ if not os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath, testRunErrPath))
 try:
-    run_test_cmd = '%s %s %s/runSystemTests.py --loglevel=%s --executable="%s" --exec-args="%s"' % \
-                (installer.python_cmd, installer.python_args, THIS_MODULE_DIR,
-                options.log_level, installer.python_cmd, installer.python_args)
+    # There is a long-standing bug in argparse surrounding processing options starting with a dash.
+    # See https://bugs.python.org/issue9334. The suggestion is to use the `=` as we do here but the
+    # windows bat file used to start python then swallows these and the `=` is converted to a space
+    # and this produces the error: argument -a/--exec-args: expected one argument from runSystemTests.
+    # The workaround places a space in the --exec-args parameter that is then stripped off inside
+    # runSystemTests.
+    run_test_cmd = '{} {} {}/runSystemTests.py --loglevel={} --executable="{}" --exec-args=" {}"'.format(
+        installer.python_cmd, installer.python_args, THIS_MODULE_DIR,
+        options.log_level, installer.python_cmd, installer.python_args)
     run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
