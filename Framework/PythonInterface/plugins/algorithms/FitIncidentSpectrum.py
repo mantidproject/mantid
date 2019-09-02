@@ -148,6 +148,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             UnitX='Wavelength',
             NSpec=2,
             Distribution=False,
+            ParentWorkspace=self._input_ws,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 
