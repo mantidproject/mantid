@@ -30,20 +30,19 @@ If Function defines a one-dimensional function and InputWorkspace is a
 :ref:`Table Workspace <Table Workspaces>` the algorithm will have these
 additional properties:
 
-+------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
-| Name             | Direction   | Type      | Default                 | Description                                                                               |
-+==================+=============+===========+=========================+===========================================================================================+
-| StartX           | Input       | double    | Start of the spectrum   | An X value in the first bin to be included in the fit                                     |
-+------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
-| EndX             | Input       | double    | End of the spectrum     | An X value in the last bin to be included in the fit                                      |
-+------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
-| XColumnName      | Input       | string    |                         | The name of the X column. If empty this will default to the first column                  |
-+------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
-| YColumnName      | Input       | string    |                         | The name of the Y column. If empty this will default to the second column                 |
-+------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
-| ErrorColumnName  | Input       | string    |                         | The name of the error column. If empty this will default to the third column if it exists |
-+------------------+-------------+-----------+-------------------------+-------------------------------------------------------------------------------------------+
-
++------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
+| Name             | Direction   | Type      | Default                 | Description                                             |
++==================+=============+===========+=========================+=========================================================+
+| StartX           | Input       | double    | Start of the spectrum   | An X value in the first bin to be included in the fit   |
++------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
+| EndX             | Input       | double    | End of the spectrum     | An X value in the last bin to be included in the fit    |
++------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
+| XColumn          | Input       | string    |                         | The name of the X column.                               |
++------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
+| YColumn          | Input       | string    |                         | The name of the Y column.                               |
++------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
+| ErrColumn        | Input       | string    |                         | The name of the error column.                           |
++------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
 
 Overview
 ########
@@ -466,7 +465,8 @@ Output:
 
     # Do the fitting
     myFunc = 'name=Gaussian, PeakCentre=4, Height=8, Sigma=1'
-    fit_output = Fit(InputWorkspace=tableWS, StartX = 1, EndX=20, Output='fit', Function=myFunc)
+    fit_output = Fit(InputWorkspace=tableWS, StartX = 1, EndX=20, Output='fit', Function=myFunc, \
+                     XColumn = 'X data', YColumn = 'Y data', ErrColumn = 'Errors')
     paramTable = fit_output.OutputParameters
     fitWorkspace = fit_output.OutputWorkspace
 

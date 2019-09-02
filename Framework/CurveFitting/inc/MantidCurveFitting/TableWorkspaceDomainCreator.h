@@ -75,6 +75,9 @@ private:
   std::pair<size_t, size_t> getXInterval() const;
   /// Set all parameters
   void setParameters() const;
+  /// Get the names of the X, Y and Error columns
+  std::vector<std::string>
+  getXYEColumnNames(API::ITableWorkspace_sptr ws) const;
   /// Creates the blank output workspace of the correct size
   boost::shared_ptr<API::MatrixWorkspace>
   createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
@@ -129,13 +132,8 @@ private:
   std::string m_maxSizePropertyName;
   /// Store the Exclude property name
   std::string m_excludePropertyName;
-  /// Store the x column name
-  mutable size_t m_xColumnIndex;
-  /// Store the y column name
-  mutable size_t m_yColumnIndex;
-  /// Store the error column name
-  mutable size_t m_errorColumnIndex;
 
+  /// Store number of the first row used in fitting
   size_t m_startRowNo;
 };
 

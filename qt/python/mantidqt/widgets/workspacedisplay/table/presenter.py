@@ -217,7 +217,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         for column_index in range(self.view.columnCount()):
             self.view.showColumn(column_index)
 
-    def _action_set_as(self, add_to_list_func):
+    def _action_set_as(self, add_to_list_func, type):
         try:
             selected_columns = self._get_selected_columns()
         except ValueError:
@@ -225,14 +225,15 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         for col in selected_columns:
             add_to_list_func(col)
+            self.model.set_column_type(col, type)
 
         self.update_column_headers()
 
     def action_set_as_x(self):
-        self._action_set_as(self.model.marked_columns.add_x)
+        self._action_set_as(self.model.marked_columns.add_x, 1)
 
     def action_set_as_y(self):
-        self._action_set_as(self.model.marked_columns.add_y)
+        self._action_set_as(self.model.marked_columns.add_y , 2)
 
     def action_set_as_y_err(self, related_y_column, label_index):
         """
@@ -253,10 +254,11 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         self.model.marked_columns.add_y_err(err_column)
+        self.model.set_column_type(selected_column, 5)
         self.update_column_headers()
 
     def action_set_as_none(self):
-        self._action_set_as(self.model.marked_columns.remove)
+        self._action_set_as(self.model.marked_columns.remove, 0)
 
     def action_sort(self, sort_ascending):
         """

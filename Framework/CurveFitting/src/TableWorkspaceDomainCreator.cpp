@@ -19,6 +19,7 @@
 
 #include "MantidCurveFitting/ExcludeRangeFinder.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
 #include "MantidCurveFitting/SeqDomain.h"
 
@@ -33,36 +34,13 @@ namespace Mantid {
 namespace CurveFitting {
 
 namespace {
-/**
- * A simple implementation of Jacobian.
- */
-class SimpleJacobian : public API::Jacobian {
-public:
-  /// Constructor
-  SimpleJacobian(size_t nData, size_t nParams)
-      : m_nParams(nParams), m_data(nData * nParams) {}
-  /// Setter
-  void set(size_t iY, size_t iP, double value) override {
-    m_data[iY * m_nParams + iP] = value;
-  }
-  /// Getter
-  double get(size_t iY, size_t iP) override {
-    return m_data[iY * m_nParams + iP];
-  }
-  /// Zero
-  void zero() override { m_data.assign(m_data.size(), 0.0); }
-
-private:
-  size_t m_nParams;           ///< number of parameters / second dimension
-  std::vector<double> m_data; ///< data storage
-};
 
 /// Helper struct for helping with joining exclusion ranges.
-/// Endge points of the ranges can be wrapped in this struct
+/// Edge points of the ranges can be wrapped in this struct
 /// and sorted together without loosing their function.
 struct RangePoint {
-  enum Kind : char { Openning, Closing };
-  /// The kind of the point: either openning or closing the range.
+  enum Kind : char { Opening, Closing };
+  /// The kind of the point: either opening or closing the range.
   Kind kind;
   /// The value of the point.
   double value;
@@ -70,11 +48,11 @@ struct RangePoint {
   /// @param point :: Another point to compare with.
   bool operator<(const RangePoint &point) const {
     if (this->value == point.value) {
-      // If an Openning and Closing points have the same value
-      // the Openning one should go first (be "smaller").
+      // If an Opening and Closing points have the same value
+      // the Opening one should go first (be "smaller").
       // This way the procedure of joinOverlappingRanges will join
       // the ranges that meet at these points.
-      return this->kind == Openning;
+      return this->kind == Opening;
     }
     return this->value < point.value;
   }
@@ -98,7 +76,7 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
   std::vector<RangePoint> points;
   points.reserve(exclude.size());
   for (auto point = exclude.begin(); point != exclude.end(); point += 2) {
-    points.push_back(RangePoint{RangePoint::Openning, *point});
+    points.push_back(RangePoint{RangePoint::Opening, *point});
     points.push_back(RangePoint{RangePoint::Closing, *(point + 1)});
   }
   // Sort the points according to the operator defined in RangePoint.
@@ -110,7 +88,7 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
   // brackets.
   size_t level(0);
   for (auto &point : points) {
-    if (point.kind == RangePoint::Openning) {
+    if (point.kind == RangePoint::Opening) {
       if (level == 0) {
         // First openning bracket starts a new exclusion range.
         exclude.push_back(point.value);
@@ -132,8 +110,6 @@ bool greaterIsLess(double x1, double x2) { return x1 > x2; }
 } // namespace
 
 using namespace Kernel;
-using API::MatrixWorkspace;
-using API::Workspace;
 
 /**
  * Constructor.
@@ -147,8 +123,7 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
     TableWorkspaceDomainCreator::DomainType domainType)
     : IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName),
                      domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(0),
-      m_xColumnIndex(0), m_yColumnIndex(1), m_errorColumnIndex(2) {
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(0) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -163,8 +138,7 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
 TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
     TableWorkspaceDomainCreator::DomainType domainType)
     : IDomainCreator(nullptr, std::vector<std::string>(), domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10),
-      m_xColumnIndex(0), m_yColumnIndex(1), m_errorColumnIndex(2) {}
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10) {}
 
 /**
  * Declare properties that specify the dataset within the workspace to fit to.
@@ -179,9 +153,9 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
   m_endXPropertyName = "EndX" + suffix;
   m_maxSizePropertyName = "MaxSize" + suffix;
   m_excludePropertyName = "Exclude" + suffix;
-  m_xColumnPropertyName = "XColumnName" + suffix;
-  m_yColumnPropertyName = "YColumnName" + suffix;
-  m_errorColumnPropertyName = "ErrorColumnName" + suffix;
+  m_xColumnPropertyName = "XColumn" + suffix;
+  m_yColumnPropertyName = "YColumn" + suffix;
+  m_errorColumnPropertyName = "ErrColumn" + suffix;
 
   if (addProp) {
     auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -214,16 +188,13 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
     }
     declareProperty(
         new PropertyWithValue<std::string>(m_xColumnPropertyName, ""),
-        "The name of the X column. If empty this will "
-        "default to the first column.");
+        "The name of the X column.");
     declareProperty(
         new PropertyWithValue<std::string>(m_yColumnPropertyName, ""),
-        "The name of the Y column. If empty this will "
-        "default to the second column.");
+        "The name of the Y column.");
     declareProperty(
         new PropertyWithValue<std::string>(m_errorColumnPropertyName, ""),
-        "The name of the error column. If empty this will "
-        "default to the third column if it exists.");
+        "The name of the error column.");
   }
 }
 
@@ -240,7 +211,7 @@ void TableWorkspaceDomainCreator::createDomain(
   }
 
   auto X = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_xColumnIndex));
+      *m_tableWorkspace->getColumn(0));
   auto XData = X.data();
 
   // find the fitting interval: from -> to
@@ -283,7 +254,7 @@ void TableWorkspaceDomainCreator::createDomain(
 
   // set the data to fit to
   assert(n == domain->size());
-  auto Y = m_tableWorkspace->getColumn(m_yColumnIndex);
+  auto Y = m_tableWorkspace->getColumn(1);
   if (endRowNo > Y->size()) {
     throw std::runtime_error(
         "TableWorkspaceDomainCreator: Inconsistent TableWorkspace");
@@ -297,8 +268,8 @@ void TableWorkspaceDomainCreator::createDomain(
     // set start and end x values to be the first and last elements in the
     // table
     API::TableRow row = m_tableWorkspace->getRow(i);
-    double &y = row.Double(m_yColumnIndex);
-    double &error = row.Double(m_errorColumnIndex);
+    double &y = row.Double(1);
+    double &error = row.Double(2);
     double weight = 0.0;
 
     if (excludeFinder.isExcluded(X[i])) {
@@ -394,8 +365,8 @@ TableWorkspaceDomainCreator::createOutputWorkspace(
 
   if (!outputWorkspacePropertyName.empty()) {
     declareProperty(
-        new API::WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName,
-                                                    "", Direction::Output),
+        new API::WorkspaceProperty<API::MatrixWorkspace>(
+            outputWorkspacePropertyName, "", Direction::Output),
         "Name of the output Workspace holding resulting simulated spectrum");
     m_manager->setPropertyValue(outputWorkspacePropertyName,
                                 baseName + "Workspace");
@@ -509,7 +480,7 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
 
   if (covar || hasErrors) {
     // and errors
-    SimpleJacobian J(nData, nParams);
+    Jacobian J(nData, nParams);
     try {
       function->functionDeriv(*domain, J);
     } catch (...) {
@@ -581,19 +552,15 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
   API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", nhistograms, nxvalues, nyvalues);
   ws->setTitle(m_tableWorkspace->getTitle());
-  // TODO:Check if these can be found anywhere
-  ws->setYUnitLabel("");
-  ws->setYUnit("");
-  // ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
   auto tAxis = std::make_unique<API::TextAxis>(nhistograms);
   ws->replaceAxis(1, std::move(tAxis));
 
   auto &inputX = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_xColumnIndex));
+      *m_tableWorkspace->getColumn(0));
   auto &inputY = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_yColumnIndex));
+      *m_tableWorkspace->getColumn(1));
   auto &inputE = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_errorColumnIndex));
+      *m_tableWorkspace->getColumn(2));
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
     ws->mutableX(i).assign(inputX.data().begin() + m_startRowNo,
@@ -649,7 +616,7 @@ void TableWorkspaceDomainCreator::setInitialValues(API::IFunction &function) {
  */
 std::pair<size_t, size_t> TableWorkspaceDomainCreator::getXInterval() const {
   auto X = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_xColumnIndex));
+      *m_tableWorkspace->getColumn(0));
   auto XData = X.data();
   const auto sizeOfData = XData.size();
   if (sizeOfData == 0) {
@@ -725,26 +692,79 @@ void TableWorkspaceDomainCreator::setParameters() const {
     m_startX = m_manager->getProperty(m_startXPropertyName);
     m_endX = m_manager->getProperty(m_endXPropertyName);
     joinOverlappingRanges(m_exclude);
-
-    auto columnNames = m_tableWorkspace->getColumnNames();
-    const std::string xColName = m_manager->getProperty(m_xColumnPropertyName);
-    const std::string yColName = m_manager->getProperty(m_yColumnPropertyName);
-    const std::string eColName =
-        m_manager->getProperty(m_errorColumnPropertyName);
-    for (size_t i = 0; i < columnNames.size(); ++i) {
-      if (columnNames[i] == xColName)
-        m_xColumnIndex = i;
-      else if (columnNames[i] == yColName)
-        m_yColumnIndex = i;
-      else if (columnNames[i] == eColName)
-        m_errorColumnIndex = i;
-    }
   }
 }
 
 /**
- * Set the table workspace. Clones the input workspace and makes workspace into
- * form: x data | y data | error data
+ * Get the X, Y and Error column names as a vector. If no error column is found
+ * there will only be 2 entries in the vector. Gets the name from arguments if
+ * specified otherwise it check if any columns have been set as plot type X, Y
+ * or Yerror. If none found it will return an error
+ * @returns :: a vector containing the X and Y column names and the error column
+ * if it has been set
+ * @throws std::invalid_argument if no X or Y value can be found or are of the
+ * wrong type.
+ */
+
+std::vector<std::string> TableWorkspaceDomainCreator::getXYEColumnNames(
+    API::ITableWorkspace_sptr ws) const {
+  std::vector<std::string> XYEColumnNames;
+
+  auto columnNames = ws->getColumnNames();
+
+  std::string xColName = m_manager->getProperty(m_xColumnPropertyName);
+  if (xColName != "") {
+    auto column = ws->getColumn(xColName);
+    if (!column->isNumber()) {
+      throw std::invalid_argument(xColName + " does not contain numbers");
+    }
+  }
+
+  std::string yColName = m_manager->getProperty(m_yColumnPropertyName);
+  if (yColName != "") {
+    auto column = ws->getColumn(yColName);
+    if (!column->isNumber()) {
+      throw std::invalid_argument(yColName + " does not contain numbers");
+    }
+  }
+
+  std::string eColName = m_manager->getProperty(m_errorColumnPropertyName);
+  if (eColName != "") {
+    auto column = ws->getColumn(eColName);
+    if (!column->isNumber()) {
+      throw std::invalid_argument(eColName + " does not contain numbers");
+    }
+  }
+
+  // get the column name from plot type
+  for (const auto &name : columnNames) {
+    auto column = ws->getColumn(name);
+    if (xColName == "" && column->getPlotType() == 1) {
+      xColName = column->name();
+    }
+    if (yColName == "" && column->getPlotType() == 2) {
+      yColName = column->name();
+    }
+    if (eColName == "" && column->getPlotType() == 5) {
+      eColName = column->name();
+    }
+  }
+
+  if (xColName != "" && yColName != "") {
+    XYEColumnNames.push_back(xColName);
+    XYEColumnNames.push_back(yColName);
+    if (eColName != "") {
+      XYEColumnNames.push_back(eColName);
+    }
+  } else {
+    throw std::invalid_argument("No valid input for X or Y column names");
+  }
+  return XYEColumnNames;
+}
+
+/**
+ * Set the table workspace. Clones the input workspace and makes workspace
+ * into form: x data | y data | error data
  * @throws std::runtime_error if the Exclude property has an odd number of
  * entries.
  */
@@ -754,19 +774,22 @@ void TableWorkspaceDomainCreator::setAndValidateWorkspace(
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");
   }
+
+  auto columnNames = getXYEColumnNames(tableWorkspace);
   // table workspace is cloned so it can be changed within the domain
-  m_tableWorkspace = tableWorkspace->clone();
+  m_tableWorkspace = tableWorkspace->cloneColumns(columnNames);
 
   auto noOfColumns = m_tableWorkspace->getColumnNames().size();
-  // if no error column is given a column is added with 0 errors
-  if (noOfColumns == 2) {
+  // if no error column has been found a column is added with 0 errors
+  if (columnNames.size() == 2) {
     auto columnAdded = m_tableWorkspace->addColumn("double", "Error");
     if (!columnAdded)
-      throw std::invalid_argument("TableWorkspace must have 3 columns.");
-  } else if (noOfColumns < 3) {
-    throw std::invalid_argument("TableWorkspace must have at least 3 columns.");
+      throw std::invalid_argument("No error column provided.");
+  }
+
+  if (m_tableWorkspace->columnCount() != 3) {
+    throw std::invalid_argument("X or Y Columns not found");
   }
 }
-
 } // namespace CurveFitting
 } // namespace Mantid
