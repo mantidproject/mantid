@@ -718,7 +718,8 @@ void saveNXDetector(const H5::Group &parentGroup,
  * @param fullPath : save destination as full path.
  * @param rootEntry : name of root entry
  * @param logger : logging object
- * @param append : function will throw
+ * @param append : append mode, means openting and appending to existing file.
+ * If false, creates new file.
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
@@ -838,7 +839,8 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
  * @param fullPath : save destination as full path.
  * @param rootEntry : name of root entry
  * @param logger : logging object
- * @param append : function will throw
+ * @param append : append mode, means openting and appending to existing file.
+ * If false, creates new file.
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(
