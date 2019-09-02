@@ -196,7 +196,8 @@ def main():
     #########################################################################
 
     runner = systemtesting.TestRunner(executable=options.executable,
-                                      exec_args=options.execargs,
+                                      # see InstallerTests.py for why lstrip is required
+                                      exec_args=options.execargs.lstrip(),
                                       escape_quotes=True)
 
     tmgr = systemtesting.TestManager(test_loc=mtdconf.testDir,
