@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import re
+
 from numpy import ndarray
 from matplotlib.container import ErrorbarContainer
 
@@ -58,7 +59,7 @@ def get_plotted_workspaces_names(fig):
 def generate_workspace_retrieval_commands(fig):
     workspace_names = get_plotted_workspaces_names(fig)
     commands = ["from mantid.api import AnalysisDataService as ADS\n"]
-    for name in workspace_names:
+    for name in set(workspace_names):
         variable_name = clean_variable_name(name)
         commands.append("{} = ADS.retrieve('{}')".format(variable_name, name))
     return commands
