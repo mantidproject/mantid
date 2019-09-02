@@ -8,26 +8,47 @@
 
 import unittest
 
-from mantid.py3compat.mock import MagicMock
-from workbench.plotting.plotscriptgenerator.figure import (get_figure_command_kwargs,
-                                                           generate_figure_command)
+import matplotlib
+matplotlib.use("Agg")  # noqa
+import matplotlib.pyplot as plt
+
+from workbench.plotting.plotscriptgenerator.figure import (get_subplots_command_kwargs,
+                                                           _remove_kwargs_if_default)
 
 
 class PlotScriptGeneratorFigureTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.input_kwargs = {
+            'figsize': (1.2, 1.3),
+            'nrows': 2,
+            'ncols': 2,
+            'frameon': True,
+            'subplot_kw': {
+                'projection': 'mantid'
+            },
+            'dpi': 110,
+            'num': 'fig label'
+        }
+        cls.fig, axes = plt.subplots(**cls.input_kwargs)
 
-    def setUp(self):
-        self.mock_figure = MagicMock(get_figwidth=lambda: 10,
-                                     get_figheight=lambda: 7,
-                                     dpi=111,
-                                     get_label=lambda: 'fig_num')
+    @classmethod
+    def tearDownClass(cls):
+        plt.close()
+        del cls.fig
 
-    def test_get_figure_command_kwargs_returns_correct_dict(self):
-        expected_dict = {'figsize': (10, 7), 'dpi': 111, 'num': 'fig_num'}
-        self.assertEqual(expected_dict, get_figure_command_kwargs(self.mock_figure))
+    def test_get_figure_command_kwargs_returns_dict_with_expected_keys(self):
+        expected_keys = [
+            'dpi', 'edgecolor', 'facecolor', 'figsize', 'frameon', 'ncols', 'nrows', 'num',
+            'subplot_kw'
+        ]
+        keys = sorted(get_subplots_command_kwargs(self.fig))
+        self.assertEqual(expected_keys, keys)
 
-    def test_generate_figure_command_returns_correct_string(self):
-        expected_command = "plt.figure(dpi=111, figsize=(10, 7), num='fig_num')"
-        self.assertEqual(expected_command, generate_figure_command(self.mock_figure))
+    def test_remove_kwargs_if_default_returns_dict_not_containing_kwargs_with_default_values(self):
+        expected_keys = ['dpi', 'figsize', 'ncols', 'nrows', 'num', 'subplot_kw']
+        keys = sorted(_remove_kwargs_if_default(self.input_kwargs))
+        self.assertEqual(expected_keys, keys)
 
 
 if __name__ == '__main__':

@@ -70,7 +70,7 @@ def clean_variable_name(name):
 
 
 def sorted_lines_in(ax, artists):
-    lines = ax.lines
+    lines = ax.get_lines()
     err_containers = [cont for cont in ax.containers
                       if isinstance(cont, ErrorbarContainer)]
     sorted_lines = []

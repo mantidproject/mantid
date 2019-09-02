@@ -12,14 +12,14 @@ from mantid.plots import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from workbench.plugins.editor import DEFAULT_CONTENT
-from workbench.plotting.plotscriptgenerator.axes import (
-    generate_add_subplot_command, generate_axis_limit_commands, generate_axis_label_commands)
-from workbench.plotting.plotscriptgenerator.figure import generate_figure_command
+from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
+                                                         generate_axis_label_commands)
+from workbench.plotting.plotscriptgenerator.figure import generate_subplots_command
 from workbench.plotting.plotscriptgenerator.lines import generate_plot_command
 from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retrieval_commands, sorted_lines_in
 
 FIG_VARIABLE = "fig"
-AXES_VARIABLE = "ax"
+AXES_VARIABLE = "axes"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -31,9 +31,8 @@ def generate_script(fig, exclude_headers=False):
 
         <Default Workbench script contents (imports)>
         <Workspace retrieval from ADS>
-        fig = plt.figure()
-        ax = fig.add_subplot()
-        ax.plot() or ax.errorbar()
+        fig, axes = plt.subplots()
+        axes.plot() or axes.errorbar()
         ax.legend().draggable()     (if legend present)
         plt.show()
 
@@ -42,21 +41,31 @@ def generate_script(fig, exclude_headers=False):
     :return: A String. A script to recreate the given figure
     """
     plot_commands = []
-    for ax in fig.get_axes():
+    for i, ax in enumerate(fig.get_axes()):
         if not isinstance(ax, MantidAxes) or not curve_in_ax(ax):
             continue
-        plot_commands.append("{} = {}.{}"
-                             "".format(AXES_VARIABLE, FIG_VARIABLE,
-                                       generate_add_subplot_command(ax)))
+
+        # plt.subplots returns an Axes object if there's only one axes being
+        # plotted otherwise it returns a list
+        if len(fig.get_axes()) > 1:
+            ax_object_str = "{ax_var}[{ax_idx}]".format(ax_var=AXES_VARIABLE, ax_idx=i)
+        else:
+            ax_object_str = AXES_VARIABLE
+
         for artist in sorted_lines_in(ax, ax.get_tracked_artists()):
-            plot_commands.append("{}.{}".format(AXES_VARIABLE, generate_plot_command(artist)))
+            plot_commands.append("{ax_obj}.{cmd}".format(ax_obj=ax_object_str,
+                                                         cmd=generate_plot_command(artist)))
 
         # Get ax.set_x/ylim() commands
         axis_limit_cmds = generate_axis_limit_commands(ax)
-        plot_commands += ["{}.{}".format(AXES_VARIABLE, cmd) for cmd in axis_limit_cmds]
+        plot_commands += [
+            "{ax_obj}.{cmd}".format(ax_obj=ax_object_str, cmd=cmd) for cmd in axis_limit_cmds
+        ]
         # Get ax.set_x/ylabel() commands
         axis_label_cmds = generate_axis_label_commands(ax)
-        plot_commands += ["{}.{}".format(AXES_VARIABLE, cmd) for cmd in axis_label_cmds]
+        plot_commands += [
+            "{ax_obj}.{cmd}".format(ax_obj=ax_object_str, cmd=cmd) for cmd in axis_label_cmds
+        ]
 
         if ax.legend_:
             plot_commands.append("{}.legend().draggable()".format(AXES_VARIABLE))
@@ -65,7 +74,25 @@ def generate_script(fig, exclude_headers=False):
         return
     cmds = [] if exclude_headers else [DEFAULT_CONTENT]
     cmds += generate_workspace_retrieval_commands(fig) + ['']
-    cmds.append("{} = {}".format(FIG_VARIABLE, generate_figure_command(fig)))
+    cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds += plot_commands
     cmds.append("plt.show()")
     return '\n'.join(cmds)
+
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from mantid.simpleapi import CreateWorkspace
+
+    x = np.linspace(0, 10, 100)
+    y = np.sin(x)
+    e = np.sqrt(np.abs(y))
+
+    ws = CreateWorkspace(x, y, DataE=e, OutputWorkspace="ws")
+    fig, axes = plt.subplots(1, 1, subplot_kw={'projection': 'mantid'})
+    # for ax in axes:
+    #     ax.plot(ws)
+    axes.plot(ws)
+
+    print(generate_script(fig))

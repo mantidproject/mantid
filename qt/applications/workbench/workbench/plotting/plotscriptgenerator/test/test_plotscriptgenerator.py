@@ -10,7 +10,6 @@ import unittest
 
 import matplotlib
 matplotlib.use("Agg")  # noqa
-import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 from mantid.plots import MantidAxes
@@ -20,24 +19,21 @@ from workbench.plotting.plotscriptgenerator import generate_script
 
 GEN_WS_RETRIEVAL_CMDS = 'workbench.plotting.plotscriptgenerator.generate_workspace_retrieval_commands'
 GEN_PLOT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_plot_command'
-GEN_FIGURE_CMDS = 'workbench.plotting.plotscriptgenerator.generate_figure_command'
-GEN_ADD_SUBPLOT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_add_subplot_command'
+GEN_SUBPLOTS_CMD = 'workbench.plotting.plotscriptgenerator.generate_subplots_command'
 GEN_AXIS_LIMIT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_axis_limit_commands'
 
 SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
                  "\n"
                  "ADS.retrieve(...)\n"
                  "\n"
-                 "fig = plt.figure(...)\n"
-                 "ax = fig.add_subplot(...)\n"
-                 "ax.plot(...)\n"
-                 "ax.plot(...)\n"
-                 "ax.set_xlim(...)\n"
-                 "ax.set_ylim(...)\n"
-                 "ax = fig.add_subplot(...)\n"
-                 "ax.plot(...)\n"
-                 "ax.set_xlim(...)\n"
-                 "ax.set_ylim(...)\n"
+                 "fig, axes = plt.subplots(...)\n"
+                 "axes[0].plot(...)\n"
+                 "axes[0].plot(...)\n"
+                 "axes[0].set_xlim(...)\n"
+                 "axes[0].set_ylim(...)\n"
+                 "axes[1].plot(...)\n"
+                 "axes[1].set_xlim(...)\n"
+                 "axes[1].set_ylim(...)\n"
                  "plt.show()")
 
 
@@ -53,8 +49,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             OutputWorkspace='test_ws')
 
         cls.retrieval_cmds = ["from mantid.api import AnalysisDataService", "", "ADS.retrieve(...)"]
-        cls.figure_cmd = "plt.figure(...)"
-        cls.subplot_cmd = "add_subplot(...)"
+        cls.subplots_cmd = "plt.subplots(...)"
         cls.plot_cmd = "plot(...)"
         cls.ax_limit_cmds = ['set_xlim(...)', 'set_ylim(...)']
 
@@ -62,25 +57,14 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_kwargs = {
             'get_tracked_artists': lambda: [],
             'get_lines': lambda: [Mock()],
-            'legend_': False
+            'legend_': False,
+            'containers': [],
+            'get_xlabel': lambda: '',
+            'get_ylabel': lambda: ''
         }
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
         return mock_ax
-
-    def test_generate_script_returns_correct_number_of_lines_for_overplot(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1, projection='mantid')
-        ax.plot(self.test_ws, specNum=1)
-        ax.errorbar(self.test_ws, specNum=2)
-        output = generate_script(fig)
-        num_lines = len(output.split('\n'))
-        # Expect 11 lines from DEFAULT_CONTENT, 4 for workspace retrieval and 7 for plotting
-        expected_num_lines = 22
-        err_message = ("Expected to output {} lines, found {}.\nOutput:\n{}"
-                       "".format(expected_num_lines, num_lines, output))
-        plt.close()
-        self.assertEqual(expected_num_lines, num_lines, msg=err_message)
 
     def test_generate_script_returns_None_if_no_MantidAxes_in_figure(self):
         mock_fig = Mock(get_axes=lambda: [Mock(spec=Axes)])
@@ -89,19 +73,19 @@ class PlotScriptGeneratorTest(unittest.TestCase):
     @patch(GEN_AXIS_LIMIT_CMDS)
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
-    @patch(GEN_FIGURE_CMDS)
-    @patch(GEN_ADD_SUBPLOT_CMDS)
-    def test_generate_script_compiles_script_correctly(self, mock_add_subplot_cmd, mock_figure_cmd,
+    @patch(GEN_SUBPLOTS_CMD)
+    def test_generate_script_compiles_script_correctly(self, mock_subplots_cmd,
                                                        mock_plot_cmd, mock_retrieval_cmd,
                                                        mock_axis_lim_cmd):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
-        mock_figure_cmd.return_value = self.figure_cmd
-        mock_add_subplot_cmd.return_value = self.subplot_cmd
+        mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
         mock_axis_lim_cmd.return_value = self.ax_limit_cmds
 
-        mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None])
-        mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None])
+        mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
+                                         get_lines=lambda: [None, None])
+        mock_axes2 = self._gen_mock_axes(get_tracked_artists=lambda: [None],
+                                         get_lines=lambda: [None])
         mock_fig = Mock(get_axes=lambda: [mock_axes1, mock_axes2])
 
         output_script = generate_script(mock_fig, exclude_headers=True)
@@ -109,13 +93,11 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
-    @patch(GEN_FIGURE_CMDS)
-    @patch(GEN_ADD_SUBPLOT_CMDS)
+    @patch(GEN_SUBPLOTS_CMD)
     def test_generate_script_adds_legend_command_if_legend_present(
-            self, mock_add_subplot_cmd, mock_figure_cmd, mock_plot_cmd, mock_retrieval_cmd):
+            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
-        mock_figure_cmd.return_value = self.figure_cmd
-        mock_add_subplot_cmd.return_value = self.subplot_cmd
+        mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
 
         mock_ax = self._gen_mock_axes(legend_=True)
@@ -124,13 +106,11 @@ class PlotScriptGeneratorTest(unittest.TestCase):
 
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
-    @patch(GEN_FIGURE_CMDS)
-    @patch(GEN_ADD_SUBPLOT_CMDS)
+    @patch(GEN_SUBPLOTS_CMD)
     def test_generate_script_does_not_add_legend_command_if_legend_present(
-            self, mock_add_subplot_cmd, mock_figure_cmd, mock_plot_cmd, mock_retrieval_cmd):
+            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
-        mock_figure_cmd.return_value = self.figure_cmd
-        mock_add_subplot_cmd.return_value = self.subplot_cmd
+        mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
         mock_fig = Mock(get_axes=lambda: [self._gen_mock_axes()])
         self.assertNotIn('.legend()', generate_script(mock_fig))
