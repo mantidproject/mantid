@@ -32,11 +32,14 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
+#include "MantidNexusGeometry/AbstractLogger.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <H5Cpp.h>
 #include <nexus/NeXusException.hpp>
 
 #include <map>
@@ -374,7 +377,8 @@ void LoadNexusProcessed::exec() {
   progress(0, "Opening file...");
 
   // Throws an approriate exception if there is a problem with file access
-  NXRoot root(getPropertyValue("Filename"));
+  const std::string filename = getPropertyValue("Filename");
+  NXRoot root(filename);
 
   // "Open" the same file but with the C++ interface
   m_cppFile = new ::NeXus::File(root.m_fileID);
@@ -406,7 +410,7 @@ void LoadNexusProcessed::exec() {
 
   // Take the first real workspace obtainable. We need it even if loading
   // groups.
-  API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1);
+  API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1, filename);
 
   if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
     // We have what we need.
@@ -488,7 +492,7 @@ void LoadNexusProcessed::exec() {
         local_workspace =
             loadEntry(root, basename + indexStr,
                       static_cast<double>(p - 1) / nWorkspaceEntries_d,
-                      1. / nWorkspaceEntries_d);
+                      1. / nWorkspaceEntries_d, filename);
       }
 
       declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
@@ -1434,12 +1438,14 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
  * for this entry
  * @param progressRange :: The percentage range that the progress reporting
  * should cover
+ * @param filename :: name of loaded File
  * @returns A 2D workspace containing the loaded data
  */
 API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
                                                   const std::string &entry_name,
                                                   const double &progressStart,
-                                                  const double &progressRange) {
+                                                  const double &progressRange,
+                                                  const std::string &filename) {
   progress(progressStart, "Opening entry " + entry_name + "...");
 
   NXEntry mtd_entry = root.openEntry(entry_name);
@@ -1585,6 +1591,17 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     g_log.warning(e.what());
     g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
                   "update the geometry");
+    try {
+      using namespace Mantid::NexusGeometry;
+      auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
+          filename, NexusGeometry::makeLogger(&g_log));
+      local_workspace->setInstrument(
+          Geometry::Instrument_const_sptr(std::move(instrument)));
+    } catch (std::exception &e) {
+      g_log.warning(e.what());
+    } catch (H5::Exception &e) {
+      g_log.warning(e.getDetailMsg());
+    }
   }
 
   // Now assign the spectra-detector map

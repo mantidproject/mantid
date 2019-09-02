@@ -115,7 +115,8 @@ public:
   void setEFixed(const detid_t detID, const double value);
 
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file) const;
+  void saveExperimentInfoNexus(::NeXus::File *file,
+                               bool saveLegacyInstrument = true) const;
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename,
                                ::NeXus::File *file, std::string &parameterStr);
