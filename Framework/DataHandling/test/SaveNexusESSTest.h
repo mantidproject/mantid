@@ -71,7 +71,7 @@ public:
     // We have a 10 by 10 Rectangular Detector Bank, this means 10 columns.
     // SaveNexusGeometry (via SaveNexusESS) will not save columns of a
     // Rectangular detector bank. Hence subtranction from output.
-    TS_ASSERT_EQUALS(outCompInfo->size() - 10, inCompInfo.size());
+    TS_ASSERT_EQUALS(outCompInfo->size(), inCompInfo.size() - 10);
   }
 };
 
