@@ -117,9 +117,12 @@ H5::StrType strTypeOfSize(const std::string &str) {
 void writeStrDataset(H5::Group &grp, const std::string &dSetName,
                      const std::string &dSetVal,
                      const H5::DataSpace &dataSpace = SCALAR) {
-  H5::StrType dataType = strTypeOfSize(dSetVal);
-  H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
-  dSet.write(dSetVal, dataType);
+  // TODO. may need to review if we shoud in fact replace.
+  if (!utilities::findDataset(grp, dSetName)) {
+    H5::StrType dataType = strTypeOfSize(dSetVal);
+    H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
+    dSet.write(dSetVal, dataType);
+  }
 }
 
 /*
@@ -463,9 +466,9 @@ private:
             "Error - attempting to overwrite group " + name +
             " in destintation, as NX_Class type does not match " + classType);
       }
-    } else {
-      return parent.createGroup(name);
     }
+    // We can't find it, or we are writing from scratch anyway
+    return parent.createGroup(name);
   }
 
   // function to create a simple sub-group that has a nexus class attribute,
@@ -566,9 +569,9 @@ public:
       H5::Group transformations =
           simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-      // self, ".", is the default first NXsource dependency in the chain. first
-      // check translation in NXsource is non-zero, and set dependency to
-      // location if true and write location. Then check if orientation in
+      // self, ".", is the default first NXsource dependency in the chain.
+      // first check translation in NXsource is non-zero, and set dependency
+      // to location if true and write location. Then check if orientation in
       // NXsource is non-zero, replace dependency with orientation if true. If
       // neither orientation nor location are non-zero, NXsource is self
       // dependent.
@@ -600,7 +603,8 @@ public:
    * group, along with the Nexus compliant datasets, and metadata stored in
    * attributes to the new group.
    *
-   * @param parentGroup : parent group in which to write the NXinstrument group.
+   * @param parentGroup : parent group in which to write the NXinstrument
+   * group.
    * @param compInfo : componentInfo object.
    * @param monitorID :  ID of the specific monitor.
    * @param index :  index of the specific monitor in the Instrument cache.
@@ -636,10 +640,10 @@ public:
           simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
       // self, ".", is the default first NXmonitor dependency in the chain.
-      // first check translation in NXmonitor is non-zero, and set dependency to
-      // location if true and write location. Then check if orientation in
-      // NXmonitor is non-zero, replace dependency with orientation if true. If
-      // neither orientation nor location are non-zero, NXmonitor is self
+      // first check translation in NXmonitor is non-zero, and set dependency
+      // to location if true and write location. Then check if orientation in
+      // NXmonitor is non-zero, replace dependency with orientation if true.
+      // If neither orientation nor location are non-zero, NXmonitor is self
       // dependent.
       if (!locationIsOrigin) {
         dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
@@ -667,12 +671,13 @@ public:
 
   /*
    * Function: detectors
-   * For NXinstrument parent (component info root). Save method which produces a
-   * set of NXdetctor groups from Component info detector banks, and saves it in
-   * the parent group, along with the Nexus compliant datasets, and metadata
-   * stored in attributes to the new group.
+   * For NXinstrument parent (component info root). Save method which produces
+   * a set of NXdetctor groups from Component info detector banks, and saves
+   * it in the parent group, along with the Nexus compliant datasets, and
+   * metadata stored in attributes to the new group.
    *
-   * @param parentGroup : parent group in which to write the NXinstrument group.
+   * @param parentGroup : parent group in which to write the NXinstrument
+   * group.
    * @param compInfo : componentInfo object.
    * @param detIDs : global detector IDs, from which those specific to the
    * NXdetector will be extracted.
@@ -710,8 +715,8 @@ public:
       // self, ".", is the default first NXdetector dependency in the chain.
       // first check translation in NXdetector is non-zero, and set dependency
       // to location if true and write location. Then check if orientation in
-      // NXdetector is non-zero, replace dependency with orientation if true. If
-      // neither orientation nor location are non-zero, NXdetector is self
+      // NXdetector is non-zero, replace dependency with orientation if true.
+      // If neither orientation nor location are non-zero, NXdetector is self
       // dependent.
       if (!locationIsOrigin) {
         dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
