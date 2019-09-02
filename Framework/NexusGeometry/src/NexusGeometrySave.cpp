@@ -22,6 +22,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
+#include "MantidNexusGeometry/NexusGeometryUtilities.h"
 #include <H5Cpp.h>
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
@@ -450,18 +451,28 @@ public:
 private:
   Mode m_mode;
 
-  H5::Group openOrCreateGroup(const H5::Group &parent,
-                              const std::string &name) {
-    return m_mode == Mode::Append && parent.exists(name)
-               ? parent.openGroup(name)
-               : parent.createGroup(name);
+  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name,
+                              const std::string &classType) {
+
+    if (m_mode == Mode::Append) {
+      auto result = utilities::findGroup(parent, classType);
+      if (result) {
+        return *result; // note that requested group name is abandoned.
+      } else if (parent.exists(name)) {
+        throw std::runtime_error(
+            "Error - attempting to overwrite group " + name +
+            " in destintation, as NX_Class type does not match " + classType);
+      }
+    } else {
+      return parent.createGroup(name);
+    }
   }
 
   // function to create a simple sub-group that has a nexus class attribute,
   // inside a parent group.
   inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
                                     const std::string &nexusAttribute) {
-    H5::Group subGroup = openOrCreateGroup(parent, name);
+    H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
     writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
     return subGroup;
   }
@@ -485,7 +496,7 @@ public:
     std::string nameInCache = compInfo.name(compInfo.root());
     std::string instrName =
         nameInCache.empty() ? "unspecified_instrument" : nameInCache;
-    H5::Group childGroup = openOrCreateGroup(parent, instrName);
+    H5::Group childGroup = openOrCreateGroup(parent, instrName, NX_INSTRUMENT);
 
     writeStrDataset(childGroup, NAME, instrName);
     writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
@@ -512,7 +523,8 @@ public:
     std::string sampleName =
         nameInCache.empty() ? "unspecified_sample" : nameInCache;
 
-    H5::Group childGroup = openOrCreateGroup(parentGroup, sampleName);
+    H5::Group childGroup =
+        openOrCreateGroup(parentGroup, sampleName, NX_SAMPLE);
     writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
     writeStrDataset(childGroup, NAME, sampleName);
   }
@@ -545,7 +557,8 @@ public:
     bool locationIsOrigin = isApproxZero(position, PRECISION);
     bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-    H5::Group childGroup = openOrCreateGroup(parentGroup, sourceName);
+    H5::Group childGroup =
+        openOrCreateGroup(parentGroup, sourceName, NX_SOURCE);
     writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
     // do not write NXtransformations if there is no translation or rotation
@@ -613,7 +626,8 @@ public:
     bool locationIsOrigin = isApproxZero(position, PRECISION);
     bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-    H5::Group childGroup = openOrCreateGroup(parentGroup, monitorName);
+    H5::Group childGroup =
+        openOrCreateGroup(parentGroup, monitorName, NX_MONITOR);
     writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
     // do not write NXtransformations if there is no translation or rotation
@@ -684,7 +698,8 @@ public:
     bool locationIsOrigin = isApproxZero(position, PRECISION);
     bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-    H5::Group childGroup = openOrCreateGroup(parentGroup, detectorName);
+    H5::Group childGroup =
+        openOrCreateGroup(parentGroup, detectorName, NX_DETECTOR);
     writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
     // do not write NXtransformations if there is no translation or rotation
@@ -722,7 +737,7 @@ public:
     writeStrDataset(childGroup, BANK_NAME, detectorName);
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
-};
+}; // namespace
 
 } // namespace
 
