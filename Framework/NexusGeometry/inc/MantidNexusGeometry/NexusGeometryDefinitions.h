@@ -9,6 +9,7 @@
 
 #include <H5Cpp.h>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -61,7 +62,6 @@ const H5std_string VECTOR = "vector";
 
 const double DEGREES_IN_SEMICIRCLE = 180.0;
 const double PRECISION = 1e-5;
-const double PI = M_PI;
 
 const H5std_string DEFAULT_ROOT_ENTRY_NAME = "raw_data_1";
 const H5::DataSpace SCALAR(H5S_SCALAR);
