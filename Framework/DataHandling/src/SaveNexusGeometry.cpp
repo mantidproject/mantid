@@ -94,8 +94,7 @@ void SaveNexusGeometry::exec() {
 
   NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
   Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
-      compInfo, detInfo, destinationFile, rootFileName, adapter,
-      true /*strict*/);
+      compInfo, detInfo, destinationFile, rootFileName, adapter);
 }
 
 } // namespace DataHandling
