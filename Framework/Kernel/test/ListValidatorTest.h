@@ -99,7 +99,8 @@ public:
     TS_ASSERT_EQUALS(validator.getValueForAlias("2"), "two")
     TS_ASSERT_EQUALS(validator.getValueForAlias("3"), "three")
 
-    TS_ASSERT_THROWS(validator.getValueForAlias("4"), std::invalid_argument)
+    TS_ASSERT_THROWS(validator.getValueForAlias("4"),
+                     const std::invalid_argument &)
   }
 
   void testAliasInt() {
@@ -121,14 +122,15 @@ public:
     TS_ASSERT_EQUALS(validator.getValueForAlias("33"), "3")
     TS_ASSERT_EQUALS(validator.getValueForAlias("55"), "5")
 
-    TS_ASSERT_THROWS(validator.getValueForAlias("13"), std::invalid_argument)
+    TS_ASSERT_THROWS(validator.getValueForAlias("13"),
+                     const std::invalid_argument &)
   }
 
   void test_wrong_alias() {
     std::vector<std::string> values{"one", "three"};
     std::map<std::string, std::string> aliases{{"1", "one"}, {"2", "two"}};
     TS_ASSERT_THROWS(StringListValidator validator(values, aliases),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_self_alias() {

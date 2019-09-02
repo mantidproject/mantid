@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NotebookWriter.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
@@ -82,7 +82,7 @@ bool GenerateNotebook::hasPostprocessing() const {
   */
 QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
-  auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
+  auto notebook = std::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName).toStdString());
   notebook->markdownCell(tableString(data, m_whitelist).toStdString());

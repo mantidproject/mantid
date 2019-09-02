@@ -30,11 +30,6 @@ public:
   static void destroySuite(FindFilesWorkerTest *suite) { delete suite; }
 
   void test_find_file_with_algorithm() {
-    // Arrange
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("IRS26173");
     auto worker = new FindFilesWorker(parameters);
@@ -54,11 +49,6 @@ public:
   }
 
   void test_find_run_files() {
-    // Arrange
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("IRS26173");
     parameters.algorithmName = "";
@@ -81,11 +71,6 @@ public:
   }
 
   void test_fail_to_find_file_that_does_not_exist() {
-    // Arrange
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("ThisFileDoesNotExist");
     auto worker = new FindFilesWorker(parameters);
@@ -102,11 +87,6 @@ public:
   }
 
   void test_fail_to_find_file_when_search_text_is_empty() {
-    // Arrange
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("");
     auto worker = new FindFilesWorker(parameters);
@@ -123,11 +103,6 @@ public:
   }
 
   void test_no_error_when_search_text_empty_and_optional() {
-    // Arrange
-    int argc = 1;
-    char name[] = "DummyTestingApplication";
-    char *argv = name;
-    QCoreApplication app(argc, &argv);
 
     auto parameters = createFileSearch("");
     parameters.isOptional = true;

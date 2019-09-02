@@ -64,7 +64,7 @@ class LoadTests(unittest.TestCase):
         data = Load("OFFSPEC10791,10792,10793.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, WorkspaceGroup))
-        self.assertEquals(6, data.getNumberOfEntries())
+        self.assertEqual(6, data.getNumberOfEntries())
         ads_names = ["OFFSPEC00010791_1", "OFFSPEC00010791_2",
                      "OFFSPEC00010792_1", "OFFSPEC00010792_2",
                      "OFFSPEC00010793_1", "OFFSPEC00010793_2"]
@@ -84,7 +84,7 @@ class LoadTests(unittest.TestCase):
         data = Load("LOQ99631.RAW, CSP85423.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, WorkspaceGroup))
-        self.assertEquals(3, data.getNumberOfEntries())
+        self.assertEqual(3, data.getNumberOfEntries())
         ads_names = ["LOQ99631", "CSP85423_1", "CSP85423_2"]
         for name in ads_names:
             self.assertTrue(name in AnalysisDataService)
@@ -101,23 +101,23 @@ class LoadTests(unittest.TestCase):
                     BankName = "bank1", SingleBankPixelsOnly = False)
 
         self.assertTrue(isinstance(data, IEventWorkspace))
-        self.assertEquals(1740, data.getNumberEvents())
+        self.assertEqual(1740, data.getNumberEvents())
 
     def test_extra_properties_passed_to_loader_for_multiple_files(self):
         data = Load("EQSANS_1466_event.nxs,EQSANS_3293_event.nxs", OutputWorkspace = self.wsname,
                     BankName = "bank1", SingleBankPixelsOnly = False)
 
         self.assertTrue(isinstance(data, WorkspaceGroup))
-        self.assertEquals(2, data.getNumberOfEntries())
+        self.assertEqual(2, data.getNumberOfEntries())
         # Test number of events in each
-        self.assertEquals(740, data[0].getNumberEvents())
-        self.assertEquals(105666, data[1].getNumberEvents())
+        self.assertEqual(740, data[0].getNumberEvents())
+        self.assertEqual(105666, data[1].getNumberEvents())
 
     def test_range_operator_loads_correct_number_of_files(self):
         data = Load("TSC15352:15354.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, WorkspaceGroup))
-        self.assertEquals(3, data.getNumberOfEntries())
+        self.assertEqual(3, data.getNumberOfEntries())
 
         self.assertTrue(isinstance(data[0], MatrixWorkspace))
         self.assertTrue(isinstance(data[1], MatrixWorkspace))
@@ -132,7 +132,7 @@ class LoadTests(unittest.TestCase):
         data = Load("TSC15352:15354:2.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, WorkspaceGroup))
-        self.assertEquals(2, data.getNumberOfEntries())
+        self.assertEqual(2, data.getNumberOfEntries())
 
         self.assertTrue(isinstance(data[0], MatrixWorkspace))
         self.assertTrue(isinstance(data[1], MatrixWorkspace))
@@ -145,8 +145,8 @@ class LoadTests(unittest.TestCase):
         data = Load("TSC15352+15353.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, MatrixWorkspace))
-        self.assertEquals(149, data.getNumberHistograms())
-        self.assertEquals(24974, data.blocksize())
+        self.assertEqual(149, data.getNumberHistograms())
+        self.assertEqual(24974, data.blocksize())
 
         self.assertAlmostEqual(9.0, data.readX(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(46352.0, data.readY(2)[1], places = DIFF_PLACES)
@@ -160,12 +160,12 @@ class LoadTests(unittest.TestCase):
         summed_data = Load("TSC15352+15353.raw,TSC15352+15354.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(summed_data, WorkspaceGroup))
-        self.assertEquals(2, summed_data.getNumberOfEntries())
+        self.assertEqual(2, summed_data.getNumberOfEntries())
 
         # First group
         data = summed_data[0]
-        self.assertEquals(149, data.getNumberHistograms())
-        self.assertEquals(24974, data.blocksize())
+        self.assertEqual(149, data.getNumberHistograms())
+        self.assertEqual(24974, data.blocksize())
 
         self.assertAlmostEqual(9.0, data.readX(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(46352.0, data.readY(2)[1], places = DIFF_PLACES)
@@ -173,8 +173,8 @@ class LoadTests(unittest.TestCase):
 
         # Second group
         data = summed_data[1]
-        self.assertEquals(149, data.getNumberHistograms())
-        self.assertEquals(24974, data.blocksize())
+        self.assertEqual(149, data.getNumberHistograms())
+        self.assertEqual(24974, data.blocksize())
 
         self.assertAlmostEqual(9.0, data.readX(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(35640.0, data.readY(2)[1], places = DIFF_PLACES)
@@ -188,8 +188,8 @@ class LoadTests(unittest.TestCase):
         data = Load("TSC15352-15353.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, MatrixWorkspace))
-        self.assertEquals(149, data.getNumberHistograms())
-        self.assertEquals(24974, data.blocksize())
+        self.assertEqual(149, data.getNumberHistograms())
+        self.assertEqual(24974, data.blocksize())
 
         self.assertAlmostEqual(9.0, data.readX(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(46352.0, data.readY(2)[1], places = DIFF_PLACES)
@@ -199,8 +199,8 @@ class LoadTests(unittest.TestCase):
         data = Load("TSC15352-15354:2.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(data, MatrixWorkspace))
-        self.assertEquals(149, data.getNumberHistograms())
-        self.assertEquals(24974, data.blocksize())
+        self.assertEqual(149, data.getNumberHistograms())
+        self.assertEqual(24974, data.blocksize())
 
         self.assertAlmostEqual(9.0, data.readX(2)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(35640.0, data.readY(2)[1], places = DIFF_PLACES)
@@ -210,12 +210,12 @@ class LoadTests(unittest.TestCase):
         summed_data = Load("OFFSPEC10791+10792.raw", OutputWorkspace = self.wsname)
 
         self.assertTrue(isinstance(summed_data, WorkspaceGroup))
-        self.assertEquals(2, summed_data.getNumberOfEntries())
+        self.assertEqual(2, summed_data.getNumberOfEntries())
 
         # First group
         data = summed_data[0]
-        self.assertEquals(245, data.getNumberHistograms())
-        self.assertEquals(5000, data.blocksize())
+        self.assertEqual(245, data.getNumberHistograms())
+        self.assertEqual(5000, data.blocksize())
 
         self.assertAlmostEqual(25.0, data.readX(1)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(4.0, data.readY(1)[1], places = DIFF_PLACES)
@@ -223,8 +223,8 @@ class LoadTests(unittest.TestCase):
 
         # Second group
         data = summed_data[1]
-        self.assertEquals(245, data.getNumberHistograms())
-        self.assertEquals(5000, data.blocksize())
+        self.assertEqual(245, data.getNumberHistograms())
+        self.assertEqual(5000, data.blocksize())
 
         self.assertAlmostEqual(25.0, data.readX(1)[1], places = DIFF_PLACES)
         self.assertAlmostEqual(1.0, data.readY(1)[1], places = DIFF_PLACES)

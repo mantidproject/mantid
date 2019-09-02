@@ -36,15 +36,15 @@ using namespace DataObjects;
  *
  */
 void InterpolatingRebin::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace containing the input data");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Workspace containing the input data");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to give the output workspace");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
@@ -76,13 +76,14 @@ void InterpolatingRebin::exec() {
   const int ntcnew = VectorHelper::createAxisFromRebinParams(
       rb_params, XValues_new.mutableRawData());
 
-  const int nHists = static_cast<int>(inputW->getNumberHistograms());
+  const auto nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes
   MatrixWorkspace_sptr outputW =
       create<MatrixWorkspace>(*inputW, BinEdges(ntcnew));
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
-    outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
+    outputW->replaceAxis(
+        1, std::unique_ptr<Axis>(inputW->getAxis(1)->clone(outputW.get())));
   outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the
@@ -152,7 +153,7 @@ void InterpolatingRebin::outputYandEValues(
   // prepare to use GSL functions but don't let them terminate Mantid
   gsl_error_handler_t *old_handler = gsl_set_error_handler(nullptr);
 
-  const int histnumber = static_cast<int>(inputW->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inputW->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, histnumber);
   for (int hist = 0; hist < histnumber; ++hist) {
 

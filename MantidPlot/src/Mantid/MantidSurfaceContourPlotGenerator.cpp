@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidPlotUtilities.h"
-#include <MantidQtWidgets/Common/MantidDisplayBase.h>
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
 
 using namespace MantidQt::MantidWidgets;
 using Mantid::API::MatrixWorkspace;
@@ -197,7 +197,8 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
   }
 
   // Set log axis values by replacing the "spectra" axis
-  matrixWS->replaceAxis(1, new Mantid::API::NumericAxis(logValues));
+  matrixWS->replaceAxis(1,
+                        std::make_unique<Mantid::API::NumericAxis>(logValues));
 
   return matrixWS;
 }

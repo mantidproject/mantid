@@ -108,7 +108,7 @@ public:
     }
 
     TS_ASSERT_THROWS(getReflectionConditionByName("invalid"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_getReflectionConditionBySymbol() {
@@ -120,7 +120,7 @@ public:
     }
 
     TS_ASSERT_THROWS(getReflectionConditionBySymbol("Q"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

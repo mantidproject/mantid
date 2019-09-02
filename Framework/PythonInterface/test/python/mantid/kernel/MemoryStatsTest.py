@@ -25,7 +25,7 @@ class MemoryStatsTest(unittest.TestCase):
         if sys.platform == 'win32':
             self.assertTrue(mem.reservedMem() > 0.0, "Value should be larger than 0.0")
         else:
-            self.assertTrue(mem.reservedMem() == 0.0, "Value should 0.0")
+            self.assertEqual(mem.reservedMem(),  0.0, "Value should 0.0")
 
 if __name__ == '__main__':
     unittest.main()

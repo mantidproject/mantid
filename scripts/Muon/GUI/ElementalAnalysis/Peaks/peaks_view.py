@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 from qtpy import QtWidgets
 
 from Muon.GUI.Common.checkbox import Checkbox
@@ -20,11 +22,7 @@ class PeaksView(QtWidgets.QWidget):
         self.gamma = Checkbox("Gamma Peaks")
         self.electron = Checkbox("Electron Peaks")
 
-        self.peak_checkboxes = [
-            self.major,
-            self.minor,
-            self.gamma,
-            self.electron]
+        self.peak_checkboxes = [self.major, self.minor, self.gamma, self.electron]
         for peak_type in self.peak_checkboxes:
             self.list.addWidget(peak_type)
         self.setLayout(self.list)

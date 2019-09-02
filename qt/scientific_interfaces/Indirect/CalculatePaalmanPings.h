@@ -10,7 +10,10 @@
 #include "CorrectionsTab.h"
 #include "ui_CalculatePaalmanPings.h"
 
+#include "MantidGeometry/Instrument_fwd.h"
+
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,7 +31,6 @@ private slots:
   void fillCorrectionDetails(const QString &wsName);
   void validateChemical();
   void saveClicked();
-  void plotClicked();
   void runClicked();
   void setSampleDensityOptions(QString const &method);
   void setCanDensityOptions(QString const &method);
@@ -46,6 +48,7 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
 
   bool doValidation(bool silent = false);
 
@@ -65,11 +68,9 @@ private:
   double getCanDensityValue(QString const &type) const;
 
   void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
 
   boost::optional<double>
   getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,

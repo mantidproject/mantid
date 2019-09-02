@@ -89,7 +89,7 @@ public:
     calDeadTime.setPropertyValue("FirstGoodData", "1.0");
     calDeadTime.setPropertyValue("LastGoodData", "2.0");
 
-    TS_ASSERT_THROWS(calDeadTime.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(calDeadTime.execute(), const std::runtime_error &);
     TS_ASSERT(!calDeadTime.isExecuted());
   }
 

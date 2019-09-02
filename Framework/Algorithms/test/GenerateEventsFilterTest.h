@@ -1133,7 +1133,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
 
     // Running and check this throws
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
     TS_ASSERT(!alg.isExecuted());
 
     // Clean

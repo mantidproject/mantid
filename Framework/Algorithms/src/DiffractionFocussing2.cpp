@@ -44,19 +44,20 @@ DECLARE_ALGORITHM(DiffractionFocussing2)
 void DiffractionFocussing2::init() {
 
   auto wsValidator = boost::make_shared<API::RawCountValidator>();
-  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");
-  declareProperty(make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
 
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalLoad, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::OptionalLoad,
+                                                 ".cal"),
                   "Optional: The name of the CalFile with grouping data.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<GroupingWorkspace>>(
+      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use instead of a grouping file.");
 
@@ -184,7 +185,7 @@ void DiffractionFocussing2::exec() {
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    int group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
+    auto group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
     auto &Xout = group2xvector.at(group);
@@ -350,7 +351,7 @@ void DiffractionFocussing2::execEvent() {
   EventType eventWtype = m_eventW->getEventType();
 
   std::unique_ptr<Progress> prog =
-      make_unique<Progress>(this, 0.2, 0.25, nGroups);
+      std::make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
   // determine precount size
   vector<size_t> size_required(this->m_validGroups.size(), 0);
@@ -367,11 +368,11 @@ void DiffractionFocussing2::execEvent() {
 
   // ------------- Pre-allocate Event Lists ----------------------------
   prog.reset();
-  prog = make_unique<Progress>(this, 0.25, 0.3, totalHistProcess);
+  prog = std::make_unique<Progress>(this, 0.25, 0.3, totalHistProcess);
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = static_cast<int>(m_validGroups[iGroup]);
+    const auto group = static_cast<int>(m_validGroups[iGroup]);
     EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
@@ -382,7 +383,7 @@ void DiffractionFocussing2::execEvent() {
 
   // ----------- Focus ---------------
   prog.reset();
-  prog = make_unique<Progress>(this, 0.3, 0.9, totalHistProcess);
+  prog = std::make_unique<Progress>(this, 0.3, 0.9, totalHistProcess);
 
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
@@ -426,7 +427,7 @@ void DiffractionFocussing2::execEvent() {
   } else {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
-    int nValidGroups = static_cast<int>(this->m_validGroups.size());
+    auto nValidGroups = static_cast<int>(this->m_validGroups.size());
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERUPT_REGION
@@ -453,10 +454,10 @@ void DiffractionFocussing2::execEvent() {
   // Now that the data is cleaned up, go through it and set the X vectors to the
   // input workspace we first talked about.
   prog.reset();
-  prog = make_unique<Progress>(this, 0.9, 1.0, nGroups);
+  prog = std::make_unique<Progress>(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
-    const int group = static_cast<int>(m_validGroups[workspaceIndex]);
+    const auto group = static_cast<int>(m_validGroups[workspaceIndex]);
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 
@@ -639,7 +640,7 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   // set up the mapping of group to input workspace index
   std::vector<std::vector<std::size_t>> wsIndices;
   wsIndices.reserve(this->nGroups + 1);
-  size_t nHist_st = static_cast<size_t>(nHist);
+  auto nHist_st = static_cast<size_t>(nHist);
   for (size_t wi = 0; wi < nHist_st; wi++) {
     // wi is the workspace index (of the input)
     const int group = groupAtWorkspaceIndex[wi];

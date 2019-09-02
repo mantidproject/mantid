@@ -140,7 +140,7 @@ public:
         detectorInfo.detector(detectorInfo.indexOf(413256));
     TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
     TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
-    TS_ASSERT_THROWS(detectorInfo.indexOf(413257), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(413257), const std::out_of_range &);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
@@ -387,7 +387,7 @@ public:
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[0]);
     TS_ASSERT_EQUALS(2, detectorInfo.detectorIDs()[1]);
     TS_ASSERT_EQUALS(10707511, detectorInfo.detectorIDs()[778244]);
-    TS_ASSERT_THROWS(detectorInfo.indexOf(778245), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(778245), const std::out_of_range &);
   }
 
   /// Test the Nexus geometry loader from LOKI name
@@ -544,7 +544,7 @@ public:
                      V3D(3, 3, 0));
     // Note that one of the physical pixels doesn't exist in the neutronic
     // space
-    TS_ASSERT_THROWS(detectorInfo.indexOf(1004), std::out_of_range);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(1004), const std::out_of_range &);
     TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1005)),
                      V3D(4, 3, 0));
 

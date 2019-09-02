@@ -9,7 +9,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/regex.hpp>
 namespace Mantid {
 namespace Geometry {
@@ -95,13 +95,13 @@ bool UnknownFrameFactory::canInterpret(
 }
 
 MDFrameFactory_uptr makeMDFrameFactoryChain() {
-  MDFrameFactory_uptr first = Kernel::make_unique<QLabFrameFactory>();
-  first->setSuccessor(Kernel::make_unique<QSampleFrameFactory>())
-      .setSuccessor(Kernel::make_unique<HKLFrameFactory>())
+  MDFrameFactory_uptr first = std::make_unique<QLabFrameFactory>();
+  first->setSuccessor(std::make_unique<QSampleFrameFactory>())
+      .setSuccessor(std::make_unique<HKLFrameFactory>())
       // Make sure that GeneralFrameFactory is the last in the chain to give a
       // fall-through option
-      .setSuccessor(Kernel::make_unique<GeneralFrameFactory>())
-      .setSuccessor(Kernel::make_unique<UnknownFrameFactory>());
+      .setSuccessor(std::make_unique<GeneralFrameFactory>())
+      .setSuccessor(std::make_unique<UnknownFrameFactory>());
   return first;
 }
 

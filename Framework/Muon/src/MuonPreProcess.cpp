@@ -20,7 +20,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 using namespace Mantid::API;
@@ -38,14 +38,14 @@ DECLARE_ALGORITHM(MuonPreProcess)
 void MuonPreProcess::init() {
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input workspace containing data from detectors that the "
       "grouping/pairing will be applied to.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
-          "OutputWorkspace", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The output workspace group with all corrections applied. For single "
       "period data, a group is returned with a single workspace.");
 
@@ -57,7 +57,7 @@ void MuonPreProcess::init() {
                   "End time for the data in micro seconds.", Direction::Input);
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("RebinArgs", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("RebinArgs", Direction::Input),
       "Parameters used for rebinning. If empty - rebinning is not done.");
 
   declareProperty("TimeOffset", EMPTY_DBL(),
@@ -67,7 +67,7 @@ void MuonPreProcess::init() {
                   Direction::Input);
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
       "TableWorkspace with dead time information, used to apply dead time "
       "correction.");

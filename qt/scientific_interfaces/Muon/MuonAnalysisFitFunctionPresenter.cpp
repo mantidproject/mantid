@@ -6,9 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisFitFunctionPresenter.h"
 #include "MantidAPI/IFunction.h"
-#include "MultiDatasetFit/MDFEditLocalParameterDialog.h"
-
-using MantidQt::CustomInterfaces::MDF::EditLocalParameterDialog;
 
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
@@ -68,8 +65,6 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
       connect(funcBrowser,
               SIGNAL(parameterChanged(const QString &, const QString &)), this,
               SLOT(handleParameterEdited(const QString &, const QString &)));
-      connect(funcBrowser, SIGNAL(localParameterButtonClicked(const QString &)),
-              this, SLOT(editLocalParameterClicked(const QString &)));
     } else {
       disconnect(funcBrowser, SIGNAL(functionStructureChanged()), this,
                  SLOT(updateFunction()));
@@ -77,9 +72,6 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
                  SIGNAL(parameterChanged(const QString &, const QString &)),
                  this,
                  SLOT(handleParameterEdited(const QString &, const QString &)));
-      disconnect(funcBrowser,
-                 SIGNAL(localParameterButtonClicked(const QString &)), this,
-                 SLOT(editLocalParameterClicked(const QString &)));
     }
   }
 }
@@ -189,37 +181,12 @@ void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) {
 void MuonAnalysisFitFunctionPresenter::updateNumberOfDatasets(int nDatasets) {
   m_funcBrowser->clearErrors();
   m_funcBrowser->setNumberOfDatasets(nDatasets);
-}
-
-/**
- * Called when user clicks the "edit local parameter" button in the function
- * browser.
- * Launches the Edit Local Parameter dialog and deals with the input from it.
- * @param parName :: [input] Name of parameter that button was clicked for
- */
-void MuonAnalysisFitFunctionPresenter::editLocalParameterClicked(
-    const QString &parName) {
-  const int nDatasets = m_funcBrowser->getNumberOfDatasets();
   // get names of workspaces
   QStringList wsNames;
   for (const auto &name : m_fitBrowser->getWorkspaceNamesToFit()) {
     wsNames.append(QString::fromStdString(name));
   }
-  // spectrum indices are all zero
-  std::vector<size_t> wsIndices(nDatasets, 0);
-
-  EditLocalParameterDialog dialog(nullptr, m_funcBrowser, parName, wsNames,
-                                  wsIndices);
-  if (dialog.exec() == QDialog::Accepted) {
-    const auto values = dialog.getValues();
-    const auto fixes = dialog.getFixes();
-    const auto ties = dialog.getTies();
-    for (int i = 0; i < nDatasets; i++) {
-      m_funcBrowser->setLocalParameterValue(parName, i, values[i]);
-      m_funcBrowser->setLocalParameterFixed(parName, i, fixes[i]);
-      m_funcBrowser->setLocalParameterTie(parName, i, ties[i]);
-    }
-  }
+  m_funcBrowser->setDatasetNames(wsNames);
 }
 
 /**

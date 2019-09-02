@@ -7,6 +7,7 @@
 #ifndef MANTIDQT_API_MANTIDCONTOURPREVIEWPLOTTEST_H_
 #define MANTIDQT_API_MANTIDCONTOURPREVIEWPLOTTEST_H_
 
+#include <cxxtest/GlobalFixture.h>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -84,12 +85,6 @@ public:
   void test_that_setPlotVisible_will_hide_the_plot_when_it_is_passed_false() {
     m_contourPlot->setPlotVisible(false);
     TS_ASSERT(!m_contourPlot->isPlotVisible());
-  }
-
-  void
-  test_that_setColourBarVisible_will_hide_the_colour_bar_when_it_is_passed_false() {
-    m_contourPlot->setColourBarVisible(false);
-    TS_ASSERT(!m_contourPlot->isColourBarVisible());
   }
 
 private:

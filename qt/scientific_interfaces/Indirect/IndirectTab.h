@@ -7,6 +7,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_
 
+#include "DllConfig.h"
+#include "IPythonRunner.h"
+#include "IndirectPlotter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -16,11 +19,11 @@
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-#endif
+
+#include <boost/none_t.hpp>
+#include <boost/optional.hpp>
 
 #include <QDoubleValidator>
 #include <QMap>
@@ -28,6 +31,7 @@
 
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -49,23 +53,39 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 /** IndirectTab
 
-  Provided common functionality of all indirect interface tabs.
+Provided common functionality of all indirect interface tabs.
 
-  @author Dan Nixon
-  @date 08/10/2014
+@author Dan Nixon
+@date 08/10/2014
 */
-class DLLExport IndirectTab : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject, public IPyRunner {
   Q_OBJECT
 
 public:
   IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
-  /// Plot a spectrum plot of a given workspace
-  void plotSpectrum(const QString &workspaceName, const int &spectraIndex = 0,
-                    const bool &errorBars = false);
+  /// Get the suffixes used for an interface from the xml file
+  QStringList getExtensions(std::string const &interfaceName) const;
+  QStringList getCalibrationExtensions(std::string const &interfaceName) const;
+  QStringList getSampleFBSuffixes(std::string const &interfaceName) const;
+  QStringList getSampleWSSuffixes(std::string const &interfaceName) const;
+  QStringList getVanadiumFBSuffixes(std::string const &interfaceName) const;
+  QStringList getVanadiumWSSuffixes(std::string const &interfaceName) const;
+  QStringList getResolutionFBSuffixes(std::string const &interfaceName) const;
+  QStringList getResolutionWSSuffixes(std::string const &interfaceName) const;
+  QStringList getCalibrationFBSuffixes(std::string const &interfaceName) const;
+  QStringList getCalibrationWSSuffixes(std::string const &interfaceName) const;
+  QStringList getContainerFBSuffixes(std::string const &interfaceName) const;
+  QStringList getContainerWSSuffixes(std::string const &interfaceName) const;
+  QStringList getCorrectionsFBSuffixes(std::string const &interfaceName) const;
+  QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) const;
+
+  /// Used to run python code
+  void runPythonCode(std::string const &pythonCode) override;
 
 public slots:
   void runTab();
@@ -93,38 +113,6 @@ protected:
   QString getWorkspaceSuffix(const QString &wsName);
   /// Gets the base name of a workspace
   QString getWorkspaceBasename(const QString &wsName);
-  /// Plot multiple spectra from multiple workspaces
-  void plotMultipleSpectra(const QStringList &workspaceNames,
-                           const std::vector<int> &workspaceIndices);
-  /// Plot a spectrum plot with a given ws index
-  void plotSpectrum(const QStringList &workspaceNames,
-                    const int &spectraIndex = 0, const bool &errorBars = false);
-
-  /// Plot a spectrum plot with a given spectra range
-  void plotSpectrum(const QStringList &workspaceNames, int specStart,
-                    int specEnd);
-  /// Plot a spectrum plot with a given spectra range of a given workspace
-  void plotSpectrum(const QString &workspaceName, int specStart, int specEnd);
-
-  /// Plot a spectrum plot with a given set of spectra
-  void plotSpectra(const QStringList &workspaceNames,
-                   const std::vector<int> &wsIndices);
-
-  /// Plot a spectrum plot with a given set of spectra of a given workspace
-  void plotSpectra(const QString &workspaceName,
-                   const std::vector<int> &wsIndices);
-
-  /// Plot a time bin plot given a list of workspace names
-  void plotTimeBin(const QStringList &workspaceNames, int binIndex = 0);
-  /// Plot a time bin plot of a given workspace
-  void plotTimeBin(const QString &workspaceName, int binIndex = 0);
-
-  /// Plot a contour plot of a given workspace
-  void plot2D(const QString &workspaceName);
-
-  /// Resizes the specified plot range
-  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
-                       QPair<double, double> range);
 
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
@@ -133,13 +121,22 @@ protected:
                     const size_t &axisIndex) const;
 
   /// Function to set the range limits of the plot
-  void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector *rs,
-                            QtProperty *min, QtProperty *max,
+  void setPlotPropertyRange(MantidWidgets::RangeSelector *rs, QtProperty *min,
+                            QtProperty *max,
                             const QPair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
-  void setRangeSelector(MantidQt::MantidWidgets::RangeSelector *rs,
-                        QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &bounds);
+  void setRangeSelector(
+      MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+      const QPair<double, double> &bounds,
+      const boost::optional<QPair<double, double>> &range = boost::none);
+  /// Sets the min of the range selector if it is less than the max
+  void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
+                           MantidWidgets::RangeSelector *rangeSelector,
+                           double newValue);
+  /// Sets the max of the range selector if it is more than the min
+  void setRangeSelectorMax(QtProperty *minProperty, QtProperty *maxProperty,
+                           MantidWidgets::RangeSelector *rangeSelector,
+                           double newValue);
 
   /// Function to get energy mode from a workspace
   std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);
@@ -155,6 +152,14 @@ protected:
   /// pointer
   bool getResolutionRangeFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                 QPair<double, double> &res);
+
+  /// Gets the x range from a workspace
+  QPair<double, double>
+  getXRangeFromWorkspace(std::string const &workspaceName,
+                         double precision = 0.000001) const;
+  QPair<double, double>
+  getXRangeFromWorkspace(Mantid::API::MatrixWorkspace_const_sptr workspace,
+                         double precision = 0.000001) const;
 
   /// Converts a standard vector of standard strings to a QVector of QStrings.
   QVector<QString>
@@ -221,6 +226,18 @@ protected:
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
+
+  std::unique_ptr<IndirectPlotter> m_plotter;
+
+private slots:
+  virtual void handleDataReady(QString const &dataName) {
+    UNUSED_ARG(dataName);
+  };
+
+private:
+  std::string getInterfaceProperty(std::string const &interfaceName,
+                                   std::string const &propertyName,
+                                   std::string const &attribute) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

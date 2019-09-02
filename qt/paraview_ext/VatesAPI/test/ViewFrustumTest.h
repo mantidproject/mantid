@@ -103,7 +103,7 @@ public:
 
     // Assert
     TSM_ASSERT_THROWS("Frustum is not well defined, should throw error",
-                      frustum.toExtents(), std::runtime_error);
+                      frustum.toExtents(), const std::runtime_error &);
   }
 };
 

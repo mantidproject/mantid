@@ -77,7 +77,7 @@ public:
     // so use a pointer instead
     ConvexPolygon::Iterator *iter(nullptr);
     TS_ASSERT_THROWS(iter = new ConvexPolygon::Iterator(invalid),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     delete iter;
   }
 

@@ -65,9 +65,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     QueryRemoteJob2 alg2;
@@ -75,7 +75,7 @@ public:
     // compute resource missing
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("JobID", "missing001"));
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
   }
 
@@ -83,11 +83,11 @@ public:
     QueryRemoteJob2 qr;
     TS_ASSERT_THROWS_NOTHING(qr.initialize();)
     TS_ASSERT_THROWS(qr.setPropertyValue("job", "whatever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qr.setPropertyValue("id", "whichever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qr.setPropertyValue("ComputeRes", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {

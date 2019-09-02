@@ -50,7 +50,7 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
   if (!m_usingFullRayTrace) {
     createDetectorCache();
   } else {
-    m_rayTracer = Kernel::make_unique<InstrumentRayTracer>(instrument);
+    m_rayTracer = std::make_unique<InstrumentRayTracer>(instrument);
   }
 }
 
@@ -92,7 +92,7 @@ void DetectorSearcher::createDetectorCache() {
 
   // create KDtree of cached detector Q vectors
   m_detectorCacheSearch =
-      Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
+      std::make_unique<Kernel::NearestNeighbours<3>>(points);
 }
 
 /** Find the index of a detector given a vector in Qlab space

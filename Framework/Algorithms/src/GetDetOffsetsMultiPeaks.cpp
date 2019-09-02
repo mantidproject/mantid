@@ -52,8 +52,8 @@ const double BAD_OFFSET(1000.); // mark things that didn't work with this
 double gsl_costFunction(const gsl_vector *v, void *params) {
   // FIXME - there is no need to use vectors peakPosToFit, peakPosFitted and
   // chisq
-  double *p = reinterpret_cast<double *>(params);
-  size_t n = static_cast<size_t>(p[0]);
+  auto *p = reinterpret_cast<double *>(params);
+  auto n = static_cast<size_t>(p[0]);
   std::vector<double> peakPosToFit(n);
   std::vector<double> peakPosFitted(n);
   std::vector<double> height2(n);
@@ -148,12 +148,12 @@ GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void GetDetOffsetsMultiPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D matrix workspace with X values of d-spacing");
 
-  declareProperty(make_unique<ArrayProperty<double>>("DReference"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DReference"),
                   "Enter a comma-separated list of the expected X-position of "
                   "the centre of the peaks. Only peaks near these positions "
                   "will be fitted.");
@@ -162,7 +162,7 @@ void GetDetOffsetsMultiPeaks::init() {
                   "Optional: The maximum width of the fitting window. If this "
                   "is <=0 the window is not specified to FindPeaks");
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "FitwindowTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of the input Tableworkspace containing peak fit window "
@@ -182,19 +182,20 @@ void GetDetOffsetsMultiPeaks::init() {
 
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::OptionalSave, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::OptionalSave,
+                                                 ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
   declareProperty(
-      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "NumberPeaksWorkspace", "NumberPeaksFitted", Direction::Output),
       "An output workspace containing the offsets.");
-  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                        Direction::Output),
                   "An output workspace containing the mask.");
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");
@@ -224,24 +225,24 @@ void GetDetOffsetsMultiPeaks::init() {
   gsl_set_error_handler_off();
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputResolutionWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "Name of the optional input resolution (delta(d)/d) workspace. ");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output),
       "Name of the output table workspace containing "
       "spectra peak fit information.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output),
       "Name of an output table workspace containing peaks' offset data.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FittedResolutionWorkspace", "ResolutionWS", Direction::Output),
       "Name of the resolution workspace containing "
       "delta(d)/d for each unmasked spectrum. ");
@@ -477,7 +478,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
 /** Calculate (all) detectors' offsets
  */
 void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
-  int nspec = static_cast<int>(m_inputWS->getNumberHistograms());
+  auto nspec = static_cast<int>(m_inputWS->getNumberHistograms());
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
@@ -591,7 +592,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   } else {
     // dead detector will be masked
     const auto &Y = m_inputWS->y(wi);
-    const int YLength = static_cast<int>(Y.size());
+    const auto YLength = static_cast<int>(Y.size());
     double sumY = 0.0;
     size_t numNonEmptyBins = 0;
     for (int i = 0; i < YLength; i++) {
@@ -887,7 +888,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
       peakPosToFit.push_back(peakPositions[i]);
     }
   }
-  int numPeaksInRange = static_cast<int>(peakPosToFit.size());
+  auto numPeaksInRange = static_cast<int>(peakPosToFit.size());
   if (numPeaksInRange == 0) {
     std::stringstream outss;
     outss << "Spectrum " << wi << " has no peak in range (" << minD << ", "
@@ -1232,7 +1233,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
                    (tofitpeakpositions[i] * tofitpeakpositions[i]);
     }
 
-    double numdelta = static_cast<double>(numpeaksfitted);
+    auto numdelta = static_cast<double>(numpeaksfitted);
     double stddev = 0.;
     if (numpeaksfitted > 1.)
       stddev = sqrt(sumdelta2 / numdelta -

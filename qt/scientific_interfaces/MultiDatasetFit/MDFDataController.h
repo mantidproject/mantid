@@ -7,10 +7,11 @@
 #ifndef MDFDATACONTROLLER_H_
 #define MDFDATACONTROLLER_H_
 
-#include <MantidKernel/Statistics.h>
+#include "MantidKernel/Statistics.h"
 #include <QObject>
 
 // Forward declaration
+class QStringList;
 class QTableWidget;
 
 // Forward declaration
@@ -55,9 +56,9 @@ public:
 signals:
   void dataTableUpdated();
   void dataSetUpdated(int i);
-  void hasSelection(bool /*_t1*/);
-  void spectraRemoved(QList<int> /*_t1*/);
-  void spectraAdded(int n);
+  void hasSelection(bool);
+  void spectraRemoved(QList<int>);
+  void spectraAdded(const QStringList &);
 
 public slots:
   void setFittingRangeGlobal(bool /*on*/);

@@ -103,7 +103,7 @@ def fit_edges(fit_par, index, ws, output_ws):
     # get values around the expected center
     all_values = ws.dataY(0)
     right_limit = len(all_values)
-    values = all_values[max(centre - margin, 0):min(centre + margin, len(all_values))]
+    values = all_values[max(int(centre - margin), 0):min(int(centre + margin), len(all_values))]
 
     # identify if the edge is a sloping edge or descent edge
     descent_mode = values[0] > values[-1]
@@ -130,8 +130,8 @@ def fit_gaussian(fit_par, index, ws, output_ws):
 
     right_limit = len(all_values)
 
-    min_index = max(centre - int(margin), 0)
-    max_index = min(centre + int(margin), right_limit)
+    min_index = max(int(centre - margin), 0)
+    max_index = min(int(centre + margin), right_limit)
     values = all_values[min_index:max_index]
 
     # find the peak position

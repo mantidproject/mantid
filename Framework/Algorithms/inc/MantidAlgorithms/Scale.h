@@ -37,6 +37,7 @@ public:
     return "Scales an input workspace by the given factor, which can be either "
            "multiplicative or additive.";
   }
+  std::map<std::string, std::string> validateInputs() override;
 
   /// Algorithm's version
   int version() const override { return (1); }

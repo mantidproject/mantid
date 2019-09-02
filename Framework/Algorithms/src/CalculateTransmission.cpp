@@ -68,18 +68,18 @@ void CalculateTransmission::init() {
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SampleRunWorkspace", "", Direction::Input, wsValidator),
                   "The workspace containing the sample transmission run. Must "
                   "have common binning and be in units of wavelength.");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "DirectRunWorkspace", "", Direction::Input, wsValidator),
                   "The workspace containing the direct beam (no sample) "
                   "transmission run. The units and binning must match those of "
                   "the SampleRunWorkspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace in which to store the fitted transmission "
       "fractions.");
 
@@ -91,7 +91,7 @@ void CalculateTransmission::init() {
   declareProperty("TransmissionMonitor", EMPTY_INT(), zeroOrMore,
                   "The UDET of the transmission monitor");
 
-  declareProperty(make_unique<ArrayProperty<double>>("RebinParams"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("RebinParams"),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
@@ -119,7 +119,7 @@ void CalculateTransmission::init() {
                   "[OutputWorkspace]_unfitted containing the unfitted "
                   "transmission correction.");
 
-  declareProperty(make_unique<ArrayProperty<detid_t>>("TransmissionROI"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("TransmissionROI"),
                   "An optional ArrayProperty containing a list of detector "
                   "ID's.  These specify a region of interest "
                   "which is to be summed and then used instead of a "
@@ -238,7 +238,7 @@ void CalculateTransmission::exec() {
     transmission = childAlg->getProperty("OutputWorkspace");
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
         "UnfittedData", outputWSName, Direction::Output));
     setProperty("UnfittedData", transmission);
   }

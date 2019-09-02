@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
@@ -60,6 +62,46 @@ class HRPD(AbstractInst):
         for ws in ws_list:
             self._mask_prompt_pulses(ws)
 
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
+
+    def create_solid_angle_corrections(self, vanadium, run_details):
+        """
+        Creates the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
+        :param vanadium: The vanadium used to create this
+        :param run_details: the run details of to use
+        """
+        if not self._inst_settings.do_solid_angle:
+            return
+        solid_angle = mantid.SolidAngle(InputWorkspace=vanadium)
+        solid_angle = mantid.Scale(InputWorkspace=solid_angle, Factor=100, Operation='Multiply')
+
+        eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=solid_angle)
+        eff = mantid.ConvertUnits(InputWorkspace=eff, Target='Wavelength')
+        eff = mantid.Integration(InputWorkspace=eff, RangeLower=1.4, RangeUpper=3)
+
+        correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=eff)
+        correction = mantid.Scale(InputWorkspace=correction, Factor=1e-5,
+                                  Operation='Multiply')
+        name = "sac" + common.generate_splined_name(run_details.run_number, [])
+        path = run_details.van_paths
+
+        mantid.SaveNexus(InputWorkspace=correction, Filename=os.path.join(path, name))
+        common.remove_intermediate_workspace(eff)
+        common.remove_intermediate_workspace(correction)
+
+    def get_solid_angle_corrections(self, vanadium, run_details):
+        if not self._inst_settings.do_solid_angle:
+            return
+        name = "sac" + common.generate_splined_name(vanadium, [])
+        path = run_details.van_paths
+        try:
+            solid_angle = mantid.Load(Filename=os.path.join(path,name))
+            return solid_angle
+        except ValueError:
+            raise RuntimeError("Could not find " + os.path.join(path, name)+" please run create_vanadium with "
+                                                                            "\"do_solid_angle_corrections=True\"")
+
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return hrpd_algs.calculate_van_absorb_corrections(
@@ -100,17 +142,12 @@ class HRPD(AbstractInst):
     def _mask_prompt_pulses(self, ws):
         left_crop = 30
         right_crop = 140
-        for i in range(6):
-            middle = 100000 + 20000 * i
+        pulse_interval = 20000
+        for i in range(1, 6):
+            middle = i*pulse_interval
             min_crop = middle - left_crop
             max_crop = middle + right_crop
             mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
-
-    def _spline_vanadium_ws(self, focused_vanadium_banks, instrument_version=''):
-        spline_coeff = self._inst_settings.spline_coeff
-        output = hrpd_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_banks,
-                                                         spline_number=spline_coeff)
-        return output
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(

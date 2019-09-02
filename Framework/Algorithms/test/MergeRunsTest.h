@@ -778,7 +778,7 @@ public:
     MergeRuns merge2;
     TS_ASSERT_THROWS_NOTHING(merge2.initialize());
     TS_ASSERT_THROWS_NOTHING(merge.setPropertyValue("OutputWorkspace", "null"));
-    TS_ASSERT_THROWS(merge2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(merge2.execute(), const std::runtime_error &);
     TS_ASSERT(!merge2.isExecuted());
     MatrixWorkspace_sptr badIn =
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
@@ -1013,7 +1013,7 @@ public:
     if (noOutput) {
       TS_ASSERT_THROWS(
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"),
-          Mantid::Kernel::Exception::NotFoundError);
+          const Mantid::Kernel::Exception::NotFoundError &);
       return;
     } else {
       TS_ASSERT_THROWS_NOTHING(
@@ -1230,7 +1230,7 @@ public:
     // should get stuck when trying to get "prop1" as a time series
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType,
                                              "2013-Jun-25 10:59:15  1\n", 2),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_mergeSampleLogs_with_additional_time_series_property() {

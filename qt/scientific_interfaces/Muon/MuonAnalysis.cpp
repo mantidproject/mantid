@@ -2335,15 +2335,13 @@ void MuonAnalysis::loadFittings() {
   m_dataSelector->sizePolicy().setVerticalStretch(0);
   m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
   // Set up fit data and function presenters
-  m_fitDataPresenter =
-      Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
-          m_uiForm.fitBrowser, m_dataSelector, m_dataLoader,
-          m_groupingHelper.parseGroupingTable(), PlotType::Asymmetry,
-          m_dataTimeZero);
+  m_fitDataPresenter = std::make_unique<MuonAnalysisFitDataPresenter>(
+      m_uiForm.fitBrowser, m_dataSelector, m_dataLoader,
+      m_groupingHelper.parseGroupingTable(), PlotType::Asymmetry,
+      m_dataTimeZero);
   updateRebinParams(); // set initial params for fit data presenter
-  m_fitFunctionPresenter =
-      Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
-          nullptr, m_uiForm.fitBrowser, m_functionBrowser);
+  m_fitFunctionPresenter = std::make_unique<MuonAnalysisFitFunctionPresenter>(
+      nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));

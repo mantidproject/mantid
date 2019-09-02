@@ -41,10 +41,10 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
 
     def test_default_inputs_return_single_slice(self):
         output = self._assert_run_algorithm_succeeds(self._default_args)
-        self.assertEquals(output.getNumberOfEntries(), 1)
+        self.assertEqual(output.getNumberOfEntries(), 1)
         first_slice = output[0]
-        self.assertEquals(first_slice.getNumberHistograms(), 5)
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.getNumberHistograms(), 5)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 14)
         self._assert_delta(first_slice.dataY(3)[51], 16)
         self._assert_delta(first_slice.dataY(3)[99], 8)
@@ -53,9 +53,9 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args = self._default_args
         args['TimeInterval'] = 600
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEquals(output.getNumberOfEntries(), 7)
+        self.assertEqual(output.getNumberOfEntries(), 7)
         first_slice = output[0]
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 2)
         self._assert_delta(first_slice.dataY(3)[51], 6)
         self._assert_delta(first_slice.dataY(3)[99], 1)
@@ -66,9 +66,9 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args['StartTime'] = '1800'
         args['StopTime'] = '3300'
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEquals(output.getNumberOfEntries(), 3)
+        self.assertEqual(output.getNumberOfEntries(), 3)
         first_slice = output[0]
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 4)
         self._assert_delta(first_slice.dataY(3)[51], 2)
         self._assert_delta(first_slice.dataY(3)[99], 2)
@@ -77,10 +77,10 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args = self._default_args
         args['LogValueInterval'] = 600
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEquals(output.getNumberOfEntries(), 1)
+        self.assertEqual(output.getNumberOfEntries(), 1)
         first_slice = output[0]
-        self.assertEquals(first_slice.getNumberHistograms(), 5)
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.getNumberHistograms(), 5)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 14)
         self._assert_delta(first_slice.dataY(3)[51], 16)
         self._assert_delta(first_slice.dataY(3)[99], 8)
@@ -92,9 +92,9 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args['MinimumLogValue'] = '75'
         args['MaximumLogValue'] = '110'
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEquals(output.getNumberOfEntries(), 2)
+        self.assertEqual(output.getNumberOfEntries(), 2)
         first_slice = output[0]
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 4)
         self._assert_delta(first_slice.dataY(3)[51], 5)
         self._assert_delta(first_slice.dataY(3)[99], 2)
@@ -104,11 +104,11 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args['TimeInterval'] = 600
         args['InputWorkspace'] = 'input_ws_group'
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEquals(output.getNumberOfEntries(), 3)
+        self.assertEqual(output.getNumberOfEntries(), 3)
         first_subgroup = output[0]
-        self.assertEquals(first_subgroup.getNumberOfEntries(), 7)
+        self.assertEqual(first_subgroup.getNumberOfEntries(), 7)
         first_slice = first_subgroup[0]
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 2)
         self._assert_delta(first_slice.dataY(3)[51], 6)
         self._assert_delta(first_slice.dataY(3)[99], 1)
@@ -119,11 +119,11 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         args['InputWorkspace'] = 'input_ws_group'
         args['MonitorWorkspace'] = 'monitor_ws_group'
         output = self._assert_run_algorithm_succeeds(args)
-        self.assertEquals(output.getNumberOfEntries(), 3)
+        self.assertEqual(output.getNumberOfEntries(), 3)
         first_subgroup = output[0]
-        self.assertEquals(first_subgroup.getNumberOfEntries(), 7)
+        self.assertEqual(first_subgroup.getNumberOfEntries(), 7)
         first_slice = first_subgroup[0]
-        self.assertEquals(first_slice.dataX(0).size, 101)
+        self.assertEqual(first_slice.dataX(0).size, 101)
         self._assert_delta(first_slice.dataY(3)[0], 2)
         self._assert_delta(first_slice.dataY(3)[51], 6)
         self._assert_delta(first_slice.dataY(3)[99], 1)
@@ -187,14 +187,14 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
         """Run the algorithm with the given args and check it succeeds"""
         alg = create_algorithm('ReflectometrySliceEventWorkspace', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.doesExist('output'), True)
+        self.assertEqual(mtd.doesExist('output'), True)
         return mtd['output']
 
     def _assert_run_algorithm_fails(self, args):
         """Run the algorithm with the given args and check it fails to produce output"""
         alg = create_algorithm('ReflectometrySliceEventWorkspace', **args)
         assertRaisesNothing(self, alg.execute)
-        self.assertEquals(mtd.doesExist('output'), False)
+        self.assertEqual(mtd.doesExist('output'), False)
 
     def _assert_run_algorithm_throws(self, args = {}):
         """Run the algorithm with the given args and check it throws"""
@@ -204,10 +204,10 @@ class ReflectometrySliceEventWorkspace(unittest.TestCase):
             alg.execute()
         except:
             throws = True
-        self.assertEquals(throws, True)
+        self.assertEqual(throws, True)
 
     def _assert_delta(self, value1, value2):
-        self.assertEquals(round(value1, 6), round(value2, 6))
+        self.assertEqual(round(value1, 6), round(value2, 6))
 
 
 if __name__ == '__main__':

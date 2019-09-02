@@ -36,15 +36,15 @@ MaskBinsFromTable::MaskBinsFromTable()
 
 //----------------------------------------------------------------------------------------------
 void MaskBinsFromTable::init() {
-  this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "InputWorkspace", "", Direction::Input,
                             boost::make_shared<HistogramValidator>()),
                         "Input Workspace to mask bins. ");
-  this->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "OutputWorkspace", "", Direction::Output),
                         "Output Workspace with bins masked.");
   this->declareProperty(
-      Kernel::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(
           "MaskingInformation", "", Direction::Input),
       "Input TableWorkspace containing parameters, XMin and "
       "XMax and either SpectraList or DetectorIDsList");

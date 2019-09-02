@@ -13,7 +13,7 @@
 
 using MantidQt::Widgets::MplCpp::Cycler;
 using MantidQt::Widgets::MplCpp::cycler;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+using namespace MantidQt::Widgets::Common;
 
 class CyclerTest : public CxxTest::TestSuite {
 public:
@@ -38,7 +38,7 @@ public:
 
   void testConstructWithNonCyclerThrowsInvalidArgument() {
     Python::Object none;
-    TS_ASSERT_THROWS(Cycler cycler(none), std::invalid_argument);
+    TS_ASSERT_THROWS(Cycler cycler(none), const std::invalid_argument &);
   }
 };
 

@@ -44,11 +44,11 @@ const std::string NexusTester::category() const {
 void NexusTester::init() {
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "SaveFilename", "", FileProperty::OptionalSave, exts),
                   "The name of the Nexus file to write.");
 
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "LoadFilename", "", FileProperty::OptionalLoad, exts),
                   "The name of the Nexus file to load (optional).\n"
                   "Must have been written by NexusTester algorithm.");

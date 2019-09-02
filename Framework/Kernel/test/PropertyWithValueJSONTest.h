@@ -140,7 +140,7 @@ public:
     Json::Value root;
     TSM_ASSERT_THROWS("Expected decode to throw for empty value",
                       decodeAsProperty("NullValue", root),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testDecodeAsPropertyEmptyArrayValueThrows() {
@@ -150,7 +150,7 @@ public:
     using Mantid::Kernel::decodeAsProperty;
     TSM_ASSERT_THROWS("Expected an empty json array to throw",
                       decodeAsProperty("EmptyArray", root),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testDecodeAsPropertyHeterogenousArrayValueThrows() {
@@ -162,7 +162,7 @@ public:
     using Mantid::Kernel::decodeAsProperty;
     TSM_ASSERT_THROWS("Expected an empty json array to throw",
                       decodeAsProperty("Mixed", mixedArray),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
 private:

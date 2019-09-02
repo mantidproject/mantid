@@ -37,7 +37,7 @@ public:
     auto countRate = createFunction();
 
     TS_ASSERT_THROWS(countRate->setAttributeValue("IntensityConstraints", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Incorrect_String_For_Intensity_Attribute_Throws_Error() {
@@ -45,7 +45,7 @@ public:
 
     TS_ASSERT_THROWS(
         countRate->setAttributeValue("IntensityConstraints", "Matrix"),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_Single_Row_In_Intensity_Attribute_Does_Not_Throw() {

@@ -42,12 +42,14 @@ DECLARE_ALGORITHM(PaddingAndApodization)
  *
  */
 void PaddingAndApodization::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "The name of the input 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output 2D workspace.");
   declareProperty("ApodizationFunction", "None",
                   boost::make_shared<Mantid::Kernel::StringListValidator>(
                       std::vector<std::string>{"None", "Lorentz", "Gaussian"}),
@@ -112,7 +114,7 @@ void PaddingAndApodization::exec() {
   const int padding = getProperty("Padding");
   fptr apodizationFunction = getApodizationFunction(method);
   // Do the specified spectra only
-  int specLength = static_cast<int>(spectra.size());
+  auto specLength = static_cast<int>(spectra.size());
   std::vector<double> norm(specLength, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {

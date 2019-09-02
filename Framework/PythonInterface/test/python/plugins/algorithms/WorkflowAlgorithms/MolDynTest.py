@@ -70,7 +70,7 @@ class MolDynTest(unittest.TestCase):
         x_max = x_data[len(x_data) - 1]
 
         # Check that it is less that what was passed to algorithm
-        self.assertTrue(x_max <= 1.0)
+        self.assertLessEqual(x_max, 1.0)
 
 
     def test_loadSqwWithSymm(self):

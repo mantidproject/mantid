@@ -27,7 +27,7 @@ public:
 
   void test_Create_With_Unknown_Unit_Throws_Exception() {
     TS_ASSERT_THROWS(UnitFactory::Instance().create("_NOT_A_REAL_UNIT"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 };
 

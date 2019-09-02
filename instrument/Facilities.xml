@@ -799,15 +799,24 @@
   <instrument name="LTF">
     <technique>Muon spectroscopy</technique>
   </instrument>
+
+  <!-- Added to allow general PSI instrument for Muon -->
+  <instrument name="PSI">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
 </facility>
 
 <!--  Reactor Orphee (France) -->
-<facility name="LLB" FileExtensions=".nxs,.hdf">
+<facility name="LLB" FileExtensions=".nxs,.hdf,.xml">
   <timezone>Europe/Paris</timezone>
-
   <instrument name="MIBEMOL">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
+  </instrument>
+  <instrument name="5C1">
+    <technique>Neutron Diffraction</technique>
+    <technique>Powder Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
   </instrument>
 </facility>
 
@@ -887,6 +896,13 @@
   <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
   </instrument>
+   <instrument name="V20_DENEX" shortname="V20_DENEX" >
+    <zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+    <livedata default="event">
+      <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+    </livedata>
+  </instrument>
 </facility>
 
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
@@ -929,12 +945,18 @@
   </instrument>
 
 </facility>
+
 <!--  ESS  -->
 <facility name="ESS" FileExtensions=".nxs,.hdf5">
- <timezone>Europe/Copenhagen</timezone>
+  <timezone>Europe/Copenhagen</timezone>
+
   <instrument name="LOKI">
     <technique>Small Angle Scattering</technique>
+    <livedata>
+      <connection name="test_event" address="localhost:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
+
 </facility>
 
 </facilities>

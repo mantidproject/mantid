@@ -162,13 +162,14 @@ public:
 
     TSM_ASSERT_THROWS(
         "No workspace, so should not be possible to complete initialization.",
-        factory.initialize(ws_sptr), std::runtime_error);
+        factory.initialize(ws_sptr), const std::runtime_error &);
   }
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
     vtkPeakMarkerFactory factory("signal");
-    TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdate),
+                     const std::runtime_error &);
   }
 
   void testTypeName() {
@@ -187,7 +188,7 @@ public:
   }
 
   void testGetPeakRadiusWhenNotIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     const double expectedRadius = -1; // The default
     // Note that no PeaksRadius property has been set.
 
@@ -198,7 +199,7 @@ public:
   }
 
   void testIsPeaksWorkspaceIntegratedWhenNotIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     // Note that no PeaksRadius property has been set.
 
     vtkPeakMarkerFactory factory("signal");
@@ -209,7 +210,7 @@ public:
   }
 
   void testGetPeakRadiusWhenIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     const double expectedRadius = 4;
     mockWorkspace->mutableRun().addProperty("PeakRadius", expectedRadius,
                                             true); // Has a PeaksRadius so must
@@ -223,7 +224,7 @@ public:
   }
 
   void testIsPeaksWorkspaceIntegratedWhenIntegrated() {
-    auto mockWorkspace = Mantid::Kernel::make_unique<MockPeaksWorkspace>();
+    auto mockWorkspace = std::make_unique<MockPeaksWorkspace>();
     const double expectedRadius = 4;
     mockWorkspace->mutableRun().addProperty("PeakRadius", expectedRadius,
                                             true); // Has a PeaksRadius so must

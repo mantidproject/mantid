@@ -89,21 +89,23 @@ public:
     SampleEnvironmentSpec spec("CRYO-001");
     auto testContainer = boost::make_shared<const Container>("");
 
-    TS_ASSERT_THROWS(spec.addContainer(testContainer), std::invalid_argument);
+    TS_ASSERT_THROWS(spec.addContainer(testContainer),
+                     const std::invalid_argument &);
   }
 
   void test_Find_Throws_If_ID_Not_Found() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
 
-    TS_ASSERT_THROWS(spec.findContainer("8mm"), std::invalid_argument);
+    TS_ASSERT_THROWS(spec.findContainer("8mm"), const std::invalid_argument &);
   }
 
   void test_BuildEnvironment_Throws_If_ID_Not_Found() {
     using Mantid::Geometry::Container;
     SampleEnvironmentSpec spec("CRYO-001");
 
-    TS_ASSERT_THROWS(spec.buildEnvironment("8mm"), std::invalid_argument);
+    TS_ASSERT_THROWS(spec.buildEnvironment("8mm"),
+                     const std::invalid_argument &);
   }
 };
 

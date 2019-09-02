@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
-#include "MantidKernel/make_unique.h"
+
 #include <vector>
 
 namespace Mantid {
@@ -51,7 +51,7 @@ size_t DataBlock::getNumberOfChannels() const { return m_numberOfChannels; }
 std::unique_ptr<DataBlockGenerator> DataBlock::getGenerator() const {
   std::vector<std::pair<int64_t, int64_t>> interval{
       std::make_pair(m_minSpectraID, m_maxSpectraID)};
-  return Mantid::Kernel::make_unique<DataBlockGenerator>(interval);
+  return std::make_unique<DataBlockGenerator>(interval);
 }
 
 bool DataBlock::operator==(const DataBlock &other) const {

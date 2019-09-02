@@ -122,7 +122,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     size_t num_histograms = dataWS->getNumberHistograms();
     const auto &spectrumInfo = dataWS->spectrumInfo();
     for (size_t i = 0; i < num_histograms; i++) {
-      double adj = static_cast<double>(detectAdj->y(i)[0]);
+      auto adj = static_cast<double>(detectAdj->y(i)[0]);
       if (adj <= 0.0) {
         bool det_is_masked;
         if (!spectrumInfo.hasDetectors(i)) {
@@ -193,7 +193,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   std::string baseName = alg->getPropertyValue("OutputWorkspace");
 
   alg->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "SumOfCounts", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of counts");
   alg->setPropertyValue("SumOfCounts", baseName + "_sumOfCounts");
@@ -201,7 +201,7 @@ void Qhelper::outputParts(API::Algorithm *alg,
   alg->setProperty("SumOfCounts", sumOfCounts);
 
   alg->declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "sumOfNormFactors", "", Kernel::Direction::Output),
       "The name of the MatrixWorkspace to store sum of normalising factors");
   alg->setPropertyValue("sumOfNormFactors", baseName + "_sumOfNormFactors");

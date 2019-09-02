@@ -19,7 +19,7 @@ namespace Kernel {
 ProgressBase::ProgressBase()
     : m_start(0), m_end(1.0), m_ifirst(0), m_numSteps(1), m_notifyStep(1),
       m_notifyStepPct(1), m_step(1), m_i(0), m_last_reported(-1),
-      m_timeElapsed(new Timer), m_notifyStepPrecision(0) {
+      m_timeElapsed(std::make_unique<Timer>()), m_notifyStepPrecision(0) {
   m_timeElapsed->reset();
 }
 
@@ -33,7 +33,8 @@ ProgressBase::ProgressBase()
 ProgressBase::ProgressBase(double start, double end, int64_t numSteps)
     : m_start(start), m_end(end), m_ifirst(0), m_numSteps(numSteps),
       m_notifyStep(1), m_notifyStepPct(1), m_step(1), m_i(0),
-      m_last_reported(-1), m_timeElapsed(new Timer), m_notifyStepPrecision(0) {
+      m_last_reported(-1), m_timeElapsed(std::make_unique<Timer>()),
+      m_notifyStepPrecision(0) {
   if (start < 0. || start >= end) {
     std::stringstream msg;
     msg << "Progress range invalid 0 <= start=" << start << " <= end=" << end;
@@ -51,7 +52,7 @@ ProgressBase::ProgressBase(double start, double end, int64_t numSteps)
  * @param source The source of the copy
  */
 ProgressBase::ProgressBase(const ProgressBase &source)
-    : m_timeElapsed(new Timer) // new object, new timer
+    : m_timeElapsed(std::make_unique<Timer>()) // new object, new timer
 {
   *this = source;
 }
@@ -78,7 +79,7 @@ ProgressBase &ProgressBase::operator=(const ProgressBase &rhs) {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ProgressBase::~ProgressBase() { delete m_timeElapsed; }
+ProgressBase::~ProgressBase() {}
 
 //----------------------------------------------------------------------------------------------
 /** Increments the loop counter by 1, then
@@ -148,7 +149,7 @@ void ProgressBase::reportIncrement(size_t inc, const std::string &msg) {
 void ProgressBase::setNumSteps(int64_t nsteps) {
   m_numSteps = std::max(nsteps, int64_t{1}); // Minimum of 1
 
-  double numSteps = static_cast<double>(m_numSteps);
+  auto numSteps = static_cast<double>(m_numSteps);
   m_step = (m_end - m_start) / numSteps;
 
   m_notifyStep = static_cast<int64_t>(numSteps * m_notifyStepPct * 0.01 /
@@ -203,7 +204,7 @@ void ProgressBase::setNotifyStep(double notifyStepPct) {
  *
  * @return seconds estimated to remain. 0 if it cannot calculate it */
 double ProgressBase::getEstimatedTime() const {
-  double elapsed = double(m_timeElapsed->elapsed_no_reset());
+  auto elapsed = double(m_timeElapsed->elapsed_no_reset());
   double prog = double(m_i) * m_step;
   if (prog <= 1e-4)
     return 0.0; // unknown

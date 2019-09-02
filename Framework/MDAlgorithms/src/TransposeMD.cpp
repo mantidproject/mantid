@@ -57,7 +57,7 @@ const std::string TransposeMD::summary() const {
 /** Initialize the algorithm's properties.
  */
 void TransposeMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
@@ -65,12 +65,12 @@ void TransposeMD::init() {
   axisValidator->setLower(0);
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0),
-                                              axisValidator, Direction::Input),
+      std::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0),
+                                           axisValidator, Direction::Input),
       "Permutes the axes according to the indexes given. Zero "
       "based indexing. Defaults to no transpose.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

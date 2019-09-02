@@ -218,7 +218,7 @@ public:
     alg.setProperty<std::vector<double>>("DataE", values);
     alg.setProperty<std::vector<double>>("Dx", xVals);
 
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void testParenting() {

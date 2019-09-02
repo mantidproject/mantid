@@ -150,7 +150,7 @@ class SANSLoadTest(unittest.TestCase):
                 self.assertTrue(isinstance(ws, workspace_type[index]))
         else:
             ws = load_alg.getProperty(workspace_name).value
-            self.assertTrue(ws is None)
+            self.assertEqual(ws, None)
 
     def _do_test_output(self, load_alg, expected_number_of_workspaces, expected_number_on_ads, workspace_type):
         #  Check the number of workspaces
@@ -159,7 +159,7 @@ class SANSLoadTest(unittest.TestCase):
                         "NumberOfCanTransmissionWorkspaces", "NumberOfCanDirectWorkspaces"]
         for num_workspaces, num_name in zip(expected_number_of_workspaces, tags_numbers):
             number_of_workspaces = load_alg.getProperty(num_name).value
-            self.assertTrue(number_of_workspaces == num_workspaces)
+            self.assertEqual(number_of_workspaces,  num_workspaces)
 
         # Check that workspaces were loaded
         tags_workspaces = ["SampleScatterWorkspace", "SampleTransmissionWorkspace",
@@ -181,7 +181,7 @@ class SANSLoadTest(unittest.TestCase):
 
         # Confirm there is nothing on the ADS
         workspaces_on_the_ads = AnalysisDataService.getObjectNames()
-        self.assertTrue(len(workspaces_on_the_ads) == expected_number_on_ads)
+        self.assertEqual(len(workspaces_on_the_ads),  expected_number_on_ads)
 
     @staticmethod
     def _has_calibration_been_applied(load_alg):
@@ -233,7 +233,7 @@ class SANSLoadTest(unittest.TestCase):
                   "output_workspace_names": output_workspace_names}
         load_alg = self._run_load(**kwargs)
         transmission_workspace = load_alg.getProperty("SampleTransmissionWorkspace").value
-        self.assertTrue(transmission_workspace.getNumberHistograms() == 8)
+        self.assertEqual(transmission_workspace.getNumberHistograms(),  8)
 
     def test_that_runs_for_isis_nexus_file_with_event_data_and_single_period(self):
         # Arrange

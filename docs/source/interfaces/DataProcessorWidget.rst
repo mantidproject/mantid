@@ -431,7 +431,7 @@ and then the implementation would be:
         const ProcessingAlgorithm &algorithm,
 		const QString &loader, QWidget *parent)
         : QDataProcessorWidget(
-              Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
+              std::make_unique<GenericDataProcessorPresenter>(whitelist,
                                                                          algorithm,
                                                                          loader.toStdString()),
               parent) {}

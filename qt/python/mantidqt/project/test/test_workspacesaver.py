@@ -13,12 +13,13 @@ from os import listdir
 from os.path import isdir
 from shutil import rmtree
 import tempfile
+import mock
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace  # noqa
 from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa
 from mantidqt.project import workspacesaver
 from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors,  # noqa
-                              ExtractMask)  # noqa
+                              ExtractMask, GroupWorkspaces)  # noqa
 
 
 class WorkspaceSaverTest(unittest.TestCase):
@@ -72,6 +73,23 @@ class WorkspaceSaverTest(unittest.TestCase):
         self.assertEqual(len(list_of_files), 1)
         self.assertTrue(ws1_name + ".nxs" in list_of_files)
         self._load_MDWorkspace_and_test_it(ws1_name)
+
+    @mock.patch("mantidqt.project.workspacesaver.logger")
+    def test_when_nested_workspaces_are_being_saved_from_the_ADS(self, logger):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        CreateSampleWorkspace(OutputWorkspace="ws2")
+        CreateSampleWorkspace(OutputWorkspace="ws3")
+        CreateSampleWorkspace(OutputWorkspace="ws4")
+        GroupWorkspaces(InputWorkspaces="ws1,ws2", OutputWorkspace="group1")
+        GroupWorkspaces(InputWorkspaces="ws4,ws3", OutputWorkspace="group2")
+        ADS.addToGroup("group2", "group1")
+        ws_saver = workspacesaver.WorkspaceSaver(self.working_directory)
+
+        ws_saver.save_workspaces(["group2"])
+
+        self.assertListEqual(["group1", "group2", "ws1", "ws2", "ws3", "ws4"], ADS.getObjectNames())
+        logger.warning.assert_called_with(u'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed: '
+                                          u'NeXus files do not support nested groups of groups')
 
     def _load_MDWorkspace_and_test_it(self, save_name):
         filename = self.working_directory + '/' + save_name + ".nxs"

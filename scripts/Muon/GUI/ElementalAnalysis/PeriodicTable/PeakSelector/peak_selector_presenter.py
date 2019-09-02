@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
 
 
 class PeakSelectorPresenter(object):
@@ -12,12 +13,13 @@ class PeakSelectorPresenter(object):
         self.primary_checkboxes = self.view.primary_checkboxes
         self.secondary_checkboxes = self.view.secondary_checkboxes
         self.gamma_checkboxes = self.view.gamma_checkboxes
+        self.electron_checkboxes = self.view.electron_checkboxes
 
     def finish_selection(self):
         self.view.finish_selection()
 
     def update_peak_data(self, data):
-        self.view.update_peak_data(data)
+        self.view.update_new_data(data)
 
     def on_finished(self, slot):
         self.view.on_finished(slot)

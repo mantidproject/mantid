@@ -58,11 +58,11 @@ int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
  */
 void LoadMcStasNexus::init() {
   const std::vector<std::string> exts{".h5", ".nxs"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the Nexus file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -145,7 +145,8 @@ void LoadMcStasNexus::exec() {
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 
-      Axis *axis2 = new NumericAxis(axis2Length);
+      auto axis2 = std::make_unique<NumericAxis>(axis2Length);
+      auto axis2Raw = axis2.get();
       axis2->title() = axis2Name;
       // Set caption
       lblUnit = boost::make_shared<Units::Label>();
@@ -153,7 +154,7 @@ void LoadMcStasNexus::exec() {
       axis2->unit() = lblUnit;
 
       ws->setYUnit(axis2Name);
-      ws->replaceAxis(1, axis2);
+      ws->replaceAxis(1, std::move(axis2));
 
       ws->mutableX(0) = std::move(axis1Values);
 
@@ -171,7 +172,7 @@ void LoadMcStasNexus::exec() {
           if (!errors.empty())
             dataE[j] = errors[fileDataIndex];
         }
-        axis2->setValue(wsIndex, axis2Values[wsIndex]);
+        axis2Raw->setValue(wsIndex, axis2Values[wsIndex]);
       }
       // Make Mantid store the workspace in the group
       outputGroup->addWorkspace(ws);

@@ -63,28 +63,29 @@ ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
 void ConvertToDiffractionMDWorkspace::init() {
   // Input units must be TOF
   auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, validator),
                   "An input workspace in time-of-flight. If you specify a "
                   "Workspace2D, it gets converted to "
                   "an EventWorkspace using ConvertToEventWorkspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace. If the workspace "
                   "already exists, then the events will be added to it.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("Append", false, Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("Append", false,
+                                                Direction::Input),
       "Append events to the output workspace. The workspace is replaced if "
       "unchecked.");
-  declareProperty(make_unique<PropertyWithValue<bool>>("ClearInputWorkspace",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "ClearInputWorkspace", false, Direction::Input),
                   "Clear the events from the input workspace during "
                   "conversion, to save memory.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("OneEventPerBin", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("OneEventPerBin", false,
+                                                Direction::Input),
       "Use the histogram representation (event for event workspaces).\n"
       "One MDEvent will be created for each histogram bin (even empty ones).\n"
       "Warning! This can use significantly more memory!");
@@ -100,8 +101,8 @@ void ConvertToDiffractionMDWorkspace::init() {
       "the sample (taking out goniometer rotation).\n"
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("LorentzCorrection",
-                                                       false, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "LorentzCorrection", false, Direction::Input),
                   "Correct the weights of events by multiplying by the Lorentz "
                   "formula: sin(theta)^2 / lambda^4");
 
@@ -110,7 +111,7 @@ void ConvertToDiffractionMDWorkspace::init() {
                                20 /*MaxRecursionDepth*/);
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
+      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of "
@@ -122,7 +123,7 @@ void ConvertToDiffractionMDWorkspace::init() {
 
   std::vector<double> extents{-50, +50};
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
+      std::make_unique<ArrayProperty<double>>("Extents", std::move(extents)),
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default "
       "+-50 in each dimension.");
@@ -232,9 +233,9 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
     const V3D Q_dir = mat * Q_dir_lab_frame;
 
     // For speed we extract the components.
-    coord_t Q_dir_x = coord_t(Q_dir.X());
-    coord_t Q_dir_y = coord_t(Q_dir.Y());
-    coord_t Q_dir_z = coord_t(Q_dir.Z());
+    auto Q_dir_x = coord_t(Q_dir.X());
+    auto Q_dir_y = coord_t(Q_dir.Y());
+    auto Q_dir_z = coord_t(Q_dir.Z());
 
     // For lorentz correction, calculate  sin(theta))^2
     double sin_theta_squared = 0;
@@ -267,7 +268,7 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
 
     for (; it != it_end; it++) {
       // Get the wavenumber in ang^-1 using the previously calculated constant.
-      coord_t wavenumber =
+      auto wavenumber =
           coord_t(wavenumber_in_angstrom_times_tof_in_microsec / it->tof());
 
       // Q vector = K_final - K_initial = wavenumber * (output_direction -
@@ -286,8 +287,8 @@ void ConvertToDiffractionMDWorkspace::convertEventList(
       if (LorentzCorrection) {
         // double lambda = 1.0/wavenumber;
         // (sin(theta))^2 / wavelength^4
-        float correct = float(sin_theta_squared * wavenumber * wavenumber *
-                              wavenumber * wavenumber);
+        auto correct = float(sin_theta_squared * wavenumber * wavenumber *
+                             wavenumber * wavenumber);
         // Push the MDLeanEvent but correct the weight.
         box->addEvent(MDE(float(it->weight() * correct),
                           float(it->errorSquared() * correct * correct),
@@ -327,7 +328,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   if (LorentzCorrection) {
     API::Run &run = m_inWS->mutableRun();
     if (run.hasProperty("LorentzCorrection")) {
-      bool lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
+      auto lorentzDone = run.getPropertyValueAsType<bool>("LorentzCorrection");
       if (lorentzDone) {
         LorentzCorrection = false;
         g_log.warning()
@@ -512,7 +513,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   const auto &specInfo = m_inWS->spectrumInfo();
   for (size_t wi = 0; wi < m_inWS->getNumberHistograms();) {
     // 1. Determine next chunk of spectra to process
-    int start = static_cast<int>(wi);
+    auto start = static_cast<int>(wi);
     for (; wi < m_inWS->getNumberHistograms(); ++wi) {
       // Get an idea of how many events we'll be adding
       size_t eventsAdding = m_inWS->blocksize();

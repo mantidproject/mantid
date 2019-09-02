@@ -25,7 +25,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/make_shared.hpp>
 
 namespace Mantid {

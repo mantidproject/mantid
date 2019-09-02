@@ -7,9 +7,11 @@
 #  This file is part of the mantidqt package
 from __future__ import absolute_import
 
+import unittest
+
 from qtpy.QtWidgets import QAction, QApplication, QWidget
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_assertions_helper import QtAssertionsHelper
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.utils.testing.strict_mock import StrictMock
@@ -37,7 +39,8 @@ class MockMultiFileInterpreter(QWidget):
         super(MockMultiFileInterpreter, self).closeEvent(event)
 
 
-class CodeEditorTabWidgetTest(GuiTest, QtWidgetFinder, QtAssertionsHelper):
+@start_qapplication
+class CodeEditorTabWidgetTest(unittest.TestCase, QtWidgetFinder, QtAssertionsHelper):
 
     def test_deleted_on_close(self):
         mock_mfp = MockMultiFileInterpreter()
@@ -77,3 +80,7 @@ class CodeEditorTabWidgetTest(GuiTest, QtWidgetFinder, QtAssertionsHelper):
         mock_mfp.close()
         QApplication.processEvents()
         self.assert_no_toplevel_widgets()
+
+
+if __name__ == '__main__':
+    unittest.main()

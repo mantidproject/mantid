@@ -44,10 +44,10 @@ namespace Crystal {
 DECLARE_ALGORITHM(SetCrystalLocation)
 
 void SetCrystalLocation::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Original event workspace");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output event workspace with a modified sample position");
   declareProperty("NewX", 0.0, "New Absolute X position of crystal.");

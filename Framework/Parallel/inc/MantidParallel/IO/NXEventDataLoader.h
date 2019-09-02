@@ -11,7 +11,6 @@
 #include <H5Cpp.h>
 #include <vector>
 
-#include "MantidKernel/make_unique.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
 #include "MantidParallel/IO/PulseTimeGenerator.h"
@@ -103,17 +102,11 @@ std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>
 makeEventDataPartitioner(const H5::Group &group, const int numWorkers) {
   const auto timeZero = group.openDataSet("event_time_zero");
   int64_t time_zero_offset{0};
-  // libhdf5 on Ubuntu 14.04 is too old to support timeZero.attrExists("offset")
-  // and Attribute::readAttribute, check and read manually.
-  hid_t attr_id = H5Aopen(timeZero.getId(), "offset", H5P_DEFAULT);
-  if (attr_id > 0) {
-    const H5::Attribute attr(attr_id);
-    std::string offset;
-    attr.read(attr.getDataType(), offset);
+  if (timeZero.attrExists("offset")) {
+    const auto &offset = readAttribute(timeZero, "offset");
     time_zero_offset = Types::Core::DateAndTime(offset).totalNanoseconds();
   }
-  H5Aclose(attr_id);
-  return Kernel::make_unique<
+  return std::make_unique<
       EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>>(
       numWorkers, PulseTimeGenerator<IndexType, TimeZeroType>{
                       read<IndexType>(group, "event_index"),

@@ -9,7 +9,6 @@ from copy import copy
 
 
 class subplotContext(object):
-
     def __init__(self, name, subplot):
         self.name = name
         self._subplot = subplot
@@ -26,20 +25,19 @@ class subplotContext(object):
         self._subplot.set_position(tmp)
         self._subplot.set_subplotspec(gridspec[j])
 
-    def add_vline(self, xvalue, name):
-        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1)
+    def add_vline(self, xvalue, name, color):
+        self._vLines[name] = self._subplot.axvline(xvalue, 0, 1, color=color)
 
     def add_annotate(self, label):
         self._labelObjects[label.text] = label
         x_range = self._subplot.get_xlim()
         y_range = self._subplot.get_ylim()
         if label.in_x_range(x_range):
-            self._labels[label.text] = self._subplot.annotate(
-                label.text,
-                xy=(label.get_xval(x_range),
-                    label.get_yval(y_range)),
-                xycoords="axes fraction",
-                rotation=label.rotation)
+            self._labels[label.text] = self._subplot.annotate(label.text,
+                                                              xy=(label.get_xval(x_range),
+                                                                  label.get_yval(y_range)),
+                                                              xycoords="axes fraction",
+                                                              rotation=label.rotation)
 
     def redraw_annotations(self):
         for key in list(self._labels.keys()):
@@ -48,13 +46,17 @@ class subplotContext(object):
         for label in list(self._labelObjects.keys()):
             self.add_annotate(self._labelObjects[label])
 
-    def addLine(self, ws, specNum=1):
+    def addLine(self, ws, spec_num=1, distribution=True, color=None):
+        if color is None:
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution}
+        else:
+            plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
+
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, specNum=specNum)
+        line, = plots.plotfunctions.plot(self._subplot, ws, **plot_kwargs)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
-                self._subplot, ws, specNum=specNum, label=label)
+            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, ws, **plot_kwargs)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
@@ -62,14 +64,14 @@ class subplotContext(object):
         else:
             # line will be a list - will include error bars
             self._lines[label] = [line]
-        self._specNum[label] = specNum
+        self._specNum[label] = spec_num
         # store the ws as the key and have a list of labels that use that ws
         if ws not in self._ws.keys():
             self._ws[ws] = [label]
         else:
             self._ws[ws].append(label)
 
-    def redraw(self, label):
+    def redraw(self, label, distribution=True):
         # get current colour and marker
         colour = copy(self._lines[label][0].get_color())
         marker = copy(self._lines[label][0].get_marker())
@@ -79,16 +81,36 @@ class subplotContext(object):
         del self._lines[label]
         # replot the line
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, self.get_ws(
-                label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
+            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
+                                                                      self.get_ws(label),
+                                                                      specNum=self.specNum[label],
+                                                                      color=colour,
+                                                                      marker=marker,
+                                                                      label=label,
+                                                                      distribution=distribution)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
             self._lines[label] = all_lines
         else:
-            line, = plots.plotfunctions.plot(self._subplot, self.get_ws(
-                label), specNum=self.specNum[label], color=colour, marker=marker, label=label)
+            line, = plots.plotfunctions.plot(self._subplot,
+                                             self.get_ws(label),
+                                             specNum=self.specNum[label],
+                                             color=colour,
+                                             marker=marker,
+                                             label=label,
+                                             distribution=distribution)
             self._lines[label] = [line]
+
+    def replace_ws(self, ws):
+        redraw_canvas = False
+        for key in self._ws.keys():
+            if key.name() == ws.name():
+                redraw_canvas = True
+                self._ws[ws] = self._ws.pop(key)
+                for label in self._ws[ws]:
+                    self.redraw(label)
+        return redraw_canvas
 
     def change_errors(self, state):
         self._errors = state
@@ -99,6 +121,10 @@ class subplotContext(object):
         for label in list(self._lines.keys()):
             self._subplot.autoscale(enable=state, axis="y")
             self.redraw_annotations()
+
+    @property
+    def size(self):
+        return len(self._lines)
 
     @property
     def lines(self):
@@ -198,3 +224,9 @@ class subplotContext(object):
         keys = list(self._labelObjects.keys())
         for label in keys:
             self.removeLabel(label)
+
+    def get_lines_from_WS_name(self, name):
+        for ws in self._ws:
+            if name == ws.name():
+                return self._ws[ws]
+        return []

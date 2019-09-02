@@ -71,7 +71,7 @@ const std::string AddNote::summary() const {
 /** Initialize the algorithm's properties.
  */
 void AddNote::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::InOut),
                   "An InOut workspace that will store the new log information");
 

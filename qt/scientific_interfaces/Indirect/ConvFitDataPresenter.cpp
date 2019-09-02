@@ -9,7 +9,6 @@
 #include "ConvFitDataTablePresenter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/make_unique.h"
 
 namespace {
 using namespace Mantid::API;
@@ -26,10 +25,9 @@ namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(
-          model, view,
-          Mantid::Kernel::make_unique<ConvFitDataTablePresenter>(
-              model, view->getDataTable())),
+    : IndirectFitDataPresenter(model, view,
+                               std::make_unique<ConvFitDataTablePresenter>(
+                                   model, view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 
@@ -78,10 +76,22 @@ void ConvFitDataPresenter::addModelData(const std::string &name) {
 
 std::unique_ptr<IAddWorkspaceDialog>
 ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = Mantid::Kernel::make_unique<ConvFitAddWorkspaceDialog>(parent);
+  auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
   dialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
   return std::move(dialog);
+}
+
+void ConvFitDataPresenter::setMultiInputResolutionFBSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
+    convDialog->setResolutionFBSuffices(getView()->getResolutionFBSuffices());
+}
+
+void ConvFitDataPresenter::setMultiInputResolutionWSSuffixes(
+    IAddWorkspaceDialog *dialog) {
+  if (auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(dialog))
+    convDialog->setResolutionWSSuffices(getView()->getResolutionWSSuffices());
 }
 
 } // namespace IDA

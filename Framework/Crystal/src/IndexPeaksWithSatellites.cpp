@@ -25,7 +25,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IndexPeaksWithSatellites::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -33,13 +33,13 @@ void IndexPeaksWithSatellites::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, mustBePositive, Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
-                                             mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "ToleranceForSatellite", 0.15, mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
   this->declareProperty("RoundHKLs", true,
@@ -47,57 +47,57 @@ void IndexPeaksWithSatellites::init() {
 
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
-  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                             std::string("ModVector1"), "0.0,0.0,0.0"),
                         "Modulation Vector 1: dh, dk, dl");
 
-  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                             std::string("ModVector2"), "0.0,0.0,0.0"),
                         "Modulation Vector 2: dh, dk, dl");
 
-  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                             std::string("ModVector3"), "0.0,0.0,0.0"),
                         "Modulation Vector 3: dh, dk, dl");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply Modulation Vectors. Default = 0");
 
   this->declareProperty("GetModVectorsFromUB", false,
                         "If false Modulation Vectors will be read from input");
 
-  this->declareProperty(make_unique<PropertyWithValue<bool>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<bool>>(
                             "CrossTerms", false, Direction::Input),
                         "Include cross terms (false)");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
                             "TotalNumIndexed", 0, Direction::Output),
                         "Gets set with the number of Total indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("MainNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "MainNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("SateNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "SateNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("MainError", 0.0,
-                                             Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("MainError", 0.0,
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Main Peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
-                                             Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
 }
 

@@ -166,7 +166,7 @@ void ConvertToYSpace::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace in Time of Flight");
 
@@ -176,13 +176,13 @@ void ConvertToYSpace::init() {
   declareProperty("Mass", -1.0, mustBePositive,
                   "The mass defining the recoil peak in AMU");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The output workspace in y-Space");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("QWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("QWorkspace", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "The output workspace in q-Space");
 }
 
@@ -194,7 +194,7 @@ void ConvertToYSpace::exec() {
   retrieveInputs();
   createOutputWorkspace();
 
-  const int64_t nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t nreports = nhist;
   auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
 

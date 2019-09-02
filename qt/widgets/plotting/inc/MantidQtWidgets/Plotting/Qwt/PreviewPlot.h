@@ -10,9 +10,11 @@
 #include "ui_PreviewPlot.h"
 
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 #include "MantidQtWidgets/Plotting/Qwt/RangeSelector.h"
+#include "MantidQtWidgets/Plotting/Qwt/SingleSelector.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -30,6 +32,7 @@
 #include <qwt_plot_magnifier.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_zoomer.h>
+#include <qwt_symbol.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -50,36 +53,46 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public API::MantidWidget {
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
   Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
   Q_PROPERTY(QStringList curveErrorBars READ getShownErrorBars WRITE
-                 setDefaultShownErrorBars)
+                 setLinesWithErrors)
 
 public:
   PreviewPlot(QWidget *parent = nullptr, bool init = true);
   ~PreviewPlot() override;
+  void watchADS(bool on);
 
+  QwtPlotCanvas *canvas() const;
+  QwtPlot *getPlot() const;
   QColor canvasColour();
   void setCanvasColour(const QColor &colour);
 
   bool legendIsShown();
   QStringList getShownErrorBars();
 
-  void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
+  void setAxisRange(QPair<double, double> range,
+                    AxisID axisID = AxisID::XBottom);
+  std::tuple<double, double>
+  getAxisRange(AxisID axisID = AxisID::XBottom) const;
 
   QPair<double, double>
   getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws);
   QPair<double, double> getCurveRange(const QString &curveName);
 
-  void addSpectrum(const QString &curveName,
-                   const Mantid::API::MatrixWorkspace_sptr &ws,
-                   const size_t wsIndex = 0,
-                   const QColor &curveColour = QColor());
-  void addSpectrum(const QString &curveName, const QString &wsName,
-                   const size_t wsIndex = 0,
-                   const QColor &curveColour = QColor());
+  void addSpectrum(
+      const QString &curveName, const Mantid::API::MatrixWorkspace_sptr &ws,
+      const size_t wsIndex = 0, const QColor &curveColour = QColor(),
+      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
+  void addSpectrum(
+      const QString &curveName, const QString &wsName, const size_t wsIndex = 0,
+      const QColor &curveColour = QColor(),
+      const QHash<QString, QVariant> &plotKwargs = QHash<QString, QVariant>());
 
   void removeSpectrum(const Mantid::API::MatrixWorkspace_sptr ws);
   void removeSpectrum(const QString &curveName);
 
   bool hasCurve(const QString &curveName);
+
+  void setCurveStyle(const QString &curveName, const int style);
+  void setCurveSymbol(const QString &curveName, const int symbol);
 
   RangeSelector *
   addRangeSelector(const QString &rsName,
@@ -89,7 +102,15 @@ public:
 
   bool hasRangeSelector(const QString &rsName);
 
+  SingleSelector *
+  addSingleSelector(const QString &rsName,
+                    SingleSelector::SelectType type = SingleSelector::XSINGLE,
+                    double position = 0.0);
+  SingleSelector *getSingleSelector(const QString &rsName);
+
   QString getAxisType(int axisID);
+
+  void disableYAxisMenu();
 
 signals:
   /// Signals that the plot should be refreshed
@@ -102,7 +123,7 @@ signals:
 
 public slots:
   void showLegend(bool show);
-  void setDefaultShownErrorBars(const QStringList &curveNames);
+  void setLinesWithErrors(const QStringList &curveNames);
   void togglePanTool(bool enabled);
   void toggleZoomTool(bool enabled);
   void resetView();
@@ -133,7 +154,7 @@ private:
 
   void addCurve(PlotCurveConfiguration &curveConfig,
                 Mantid::API::MatrixWorkspace_sptr ws, const size_t wsIndex,
-                const QColor &curveColour);
+                const QColor &curveColour, const QString &curveName = "");
   void removeCurve(QwtPlotItem *curve);
 
   QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group,
@@ -152,8 +173,12 @@ private:
 
   /// Range selector widget for mini plot
   QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
+  /// Single selector widget for mini plot
+  QMap<QString, MantidQt::MantidWidgets::SingleSelector *> m_singleSelectors;
   /// Cache of range selector visibility
   QMap<QString, bool> m_rsVisibility;
+  /// Cache of single selector visibility
+  QMap<QString, bool> m_ssVisibility;
 
   /// Poco Observers for ADS Notifications
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
@@ -192,7 +217,12 @@ private:
   // readded
   QMap<QString, bool> m_errorBarOptionCache;
 
+  QMap<QString, QwtPlotCurve::CurveStyle> m_curveStyle;
+  QMap<QString, QwtSymbol::Style> m_curveSymbol;
+
   friend class DisplayCurveFit;
+
+  static const QString g_yAxisMenuName;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -12,7 +12,6 @@ set(SRC_FILES
     src/QueryRemoteFile2.cpp
     src/QueryRemoteJob.cpp
     src/QueryRemoteJob2.cpp
-    src/SimpleJSON.cpp
     src/StartRemoteTransaction.cpp
     src/StartRemoteTransaction2.cpp
     src/StopRemoteTransaction.cpp
@@ -36,7 +35,6 @@ set(INC_FILES
     inc/MantidRemoteAlgorithms/QueryRemoteFile2.h
     inc/MantidRemoteAlgorithms/QueryRemoteJob.h
     inc/MantidRemoteAlgorithms/QueryRemoteJob2.h
-    inc/MantidRemoteAlgorithms/SimpleJSON.h
     inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
     inc/MantidRemoteAlgorithms/StartRemoteTransaction2.h
     inc/MantidRemoteAlgorithms/StopRemoteTransaction.h
@@ -60,7 +58,6 @@ set(TEST_FILES
     QueryRemoteFile2Test.h
     QueryRemoteJobTest.h
     QueryRemoteJob2Test.h
-    SimpleJSONTest.h
     StartRemoteTransactionTest.h
     StartRemoteTransaction2Test.h
     StopRemoteTransactionTest.h

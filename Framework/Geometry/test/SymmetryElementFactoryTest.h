@@ -358,7 +358,7 @@ public:
     TS_ASSERT_THROWS(factory.subscribeSymmetryElementGenerator<
                          TestableSymmetryElementMirrorGenerator>(
                          "SymmetryElementMirrorGenerator"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testSymmetryElementFactoryCreateSymElem() {

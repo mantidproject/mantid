@@ -9,12 +9,12 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
 #include "MockObjects.h"
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -45,7 +45,7 @@ public:
         new MockImplicitFunction);
     generator.setImplicitFunction(impFunction);
     TSM_ASSERT_THROWS("Cannot generate the xml without the workspace",
-                      generator.createXMLString(), std::runtime_error);
+                      generator.createXMLString(), const std::runtime_error &);
   }
 
   void testNoLocationDoesNotThrow() {
@@ -79,7 +79,7 @@ public:
     generator.setWorkspace(*workspace);
 
     TSM_ASSERT_THROWS("Cannot create the xml without the workspace name",
-                      generator.createXMLString(), std::runtime_error);
+                      generator.createXMLString(), const std::runtime_error &);
   }
 
   void testCreateXMLWithComponents() // Uses individual setters for geometry,

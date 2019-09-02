@@ -56,8 +56,9 @@ public:
   /// algorithm factory specific function to subscribe algorithms, calls the
   /// dynamic factory subscribe function internally
   template <class C> std::pair<std::string, int> subscribe() {
-    auto newI = new Kernel::Instantiator<C, Algorithm>;
-    return this->subscribe(newI);
+    std::unique_ptr<Kernel::AbstractInstantiator<Algorithm>> newI =
+        std::make_unique<Kernel::Instantiator<C, Algorithm>>();
+    return this->subscribe(std::move(newI));
   }
 
   /**
@@ -70,7 +71,7 @@ public:
    */
   template <class T>
   std::pair<std::string, int>
-  subscribe(Kernel::AbstractInstantiator<T> *instantiator,
+  subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator,
             const SubscribeAction replaceExisting = ErrorIfExists) {
     boost::shared_ptr<IAlgorithm> tempAlg = instantiator->createInstance();
     const int version = extractAlgVersion(tempAlg);
@@ -85,17 +86,15 @@ public:
           std::ostringstream os;
           os << "Cannot register algorithm " << className
              << " twice with the same version\n";
-          delete instantiator;
           throw std::runtime_error(os.str());
         }
         if (version > it->second) {
           m_vmap[className] = version;
         }
       }
-      Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator,
+      Kernel::DynamicFactory<Algorithm>::subscribe(key, std::move(instantiator),
                                                    replaceExisting);
     } else {
-      delete instantiator;
       throw std::invalid_argument("Cannot register empty algorithm name");
     }
     return std::make_pair(className, version);

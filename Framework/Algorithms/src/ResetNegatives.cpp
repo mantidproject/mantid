@@ -35,18 +35,18 @@ const std::string ResetNegatives::category() const {
 //----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::Algorithm::init()
 void ResetNegatives::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
   declareProperty(
       "AddMinimum", true,
       "Add the minimum value of the spectrum to bring it up to zero.");
   declareProperty("ResetValue", 0.,
                   "Reset negative values to this number (default=0)");
-  setPropertySettings("ResetValue", make_unique<EnabledWhenProperty>(
+  setPropertySettings("ResetValue", std::make_unique<EnabledWhenProperty>(
                                         "AddMinimum", IS_NOT_DEFAULT));
 }
 
@@ -63,7 +63,7 @@ void ResetNegatives::exec() {
   MatrixWorkspace_const_sptr minWS = alg->getProperty("OutputWorkspace");
 
   // determine if there is anything to do
-  int64_t nHist = static_cast<int64_t>(minWS->getNumberHistograms());
+  auto nHist = static_cast<int64_t>(minWS->getNumberHistograms());
   bool hasNegative = false;
   for (int64_t i = 0; i < nHist; i++) {
     if (minWS->y(i)[0] < 0.0) {

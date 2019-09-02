@@ -85,8 +85,8 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         ws_name = ReductionSingleton().get_sample().get_wksp_name()
         # it is different, because, it will compose the name using its rule,
         # which, for sure, will be different of my_workspace.
-        self.assertFalse(ws_name==my_workspace.name())
-        self.assertFalse(mtd[ws_name].dataY(0)[10]==5)
+        self.assertNotEqual(ws_name, my_workspace.name())
+        self.assertNotEqual(mtd[ws_name].dataY(0)[10], 5)
         # it is not necessary to ensure the Reduce occurs
 
     def test_should_not_accept_loaded_workspace_if_moved(self):

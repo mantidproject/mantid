@@ -28,12 +28,12 @@ using namespace HistogramData;
 
 void MultiplyRange::init() {
   // Declare an input workspace property.
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the input workspace.");
   // Declare an output workspace property.
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the output workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -58,7 +58,7 @@ void MultiplyRange::exec() {
   double factor = getProperty("Factor");
 
   // A few checks on the input properties
-  const int specSize = static_cast<int>(inputWS->blocksize());
+  const auto specSize = static_cast<int>(inputWS->blocksize());
   if (isEmpty(endBin))
     endBin = specSize - 1;
 
@@ -79,7 +79,7 @@ void MultiplyRange::exec() {
   }
 
   // Get the count of histograms in the input workspace
-  const int histogramCount = static_cast<int>(inputWS->getNumberHistograms());
+  const auto histogramCount = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, histogramCount);
   // Loop over spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))

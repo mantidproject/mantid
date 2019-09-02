@@ -212,7 +212,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
         # Check graph and layer exist
         self.assertTrue('Graph' in str(graph))
-        self.assertTrue(layer is not None)
+        self.assertNotEqual(layer, None)
 
         # Check plot curves exist
         curve1 = layer.curve(0)
@@ -300,8 +300,8 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
       contents = read_project_file(self._project_folder)
 
       window_options = contents['instrumentwindow']
-      self.assertEquals(int(window_options['SurfaceType']), 2)
-      self.assertEquals(int(window_options['CurrentTab']), 0)
+      self.assertEqual(int(window_options['SurfaceType']), 2)
+      self.assertEqual(int(window_options['CurrentTab']), 0)
 
       # render tab options
       render_options = contents['instrumentwindow']['tabs']['rendertab']

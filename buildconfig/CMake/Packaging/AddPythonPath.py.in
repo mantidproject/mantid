@@ -12,6 +12,21 @@ import traceback
 # get location of mantid this was run with
 mantidpath = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@"
 
+# get a list of all *.egg-link files
+eggfiles = [os.path.join(mantidpath, item)
+            for item in os.listdir(mantidpath)
+            # skip mantidplot looking files
+            if item.endswith('.egg-link') and 'plot' not in item.lower()]
+# directories to add are what are in those files
+pathdirs = []
+for filename in eggfiles:
+    with open(filename) as handle:
+        for line in handle.readlines():
+            line = line.strip()
+            if (not line) or (line == '.'):  # don't add current directory
+                continue
+            pathdirs.append(line)
+pathdirs = list(set(pathdirs))  # get unique directories
 
 def die(msg=None):
     if msg:
@@ -19,9 +34,11 @@ def die(msg=None):
     traceback.print_exc()
     exit(1)
 
-# check mantid can be loaded in this python
-sys.path.append(mantidpath)
-extra_pypath = None
+# modify the running path and check mantid can be loaded in this python
+pathdirs.insert(0, mantidpath)
+for directory in pathdirs:
+    sys.path.append(directory)
+
 try:
     import mantid  # noqa
 except ImportError as e:
@@ -30,6 +47,7 @@ except ImportError as e:
         print('Looks like "/usr/lib64/python2.7/plat-####/" is missing from sys.path')
         # can find platform path by comparing to (in vanilla python)
         # python -c "import sys, pprint; pprint.pprint(sys.path)"
+        found_dlfcn = False
         for platform_path in ['/usr/lib64/python2.7/plat-linux2/',
                               '/usr/lib/python2.7/plat-x86_64-linux-gnu']:
             if os.path.exists(platform_path):
@@ -40,23 +58,24 @@ except ImportError as e:
                 except ImportError:
                     die('Did not fix import error')
                 print('       {}  ... adding to mantid.pth'.format(' ' * len(platform_path)))
-                extra_pypath = platform_path
-        if not extra_pypath:  # missing path wasn't found
+                pathdirs.append(platform_path)
+                found_dlfcn = True
+        if not found_dlfcn:  # missing path wasn't found
             die()
     else:
         die("Can't import mantid: {}".format(e))
 
-# check that trailing `/` is there
-if not mantidpath.endswith(os.sep):
-    mantidpath += os.sep
-
 # where path file should go
 pathfile = os.path.join(sc.get_python_lib(plat_specific=True), 'mantid.pth')
 
-print('writing', mantidpath, 'to', pathfile)
+if os.path.exists(pathfile):
+    print('over-writing', pathfile, 'with', pathdirs)
+else:
+    print('writing', pathdirs, 'to', pathfile)
 with open(pathfile, 'w') as f:
-    if extra_pypath is not None:
-        f.write(extra_pypath)
+    for directory in pathdirs:
+        # check that trailing `/` is there
+        if not directory.endswith(os.sep):
+            directory += os.sep
+        f.write(directory)
         f.write('\n')
-    f.write(mantidpath)
-    f.write('\n')

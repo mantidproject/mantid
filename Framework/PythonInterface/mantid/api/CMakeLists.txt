@@ -80,7 +80,8 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfoItem.cpp
     src/Exports/SpectrumInfoIterator.cpp
     src/Exports/SpectrumInfoPythonIterator.cpp
-    src/Exports/AnalysisDataServiceObserver.cpp)
+    src/Exports/AnalysisDataServiceObserver.cpp
+    src/Exports/Citation.cpp)
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)
 create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
@@ -95,39 +96,23 @@ set(SRC_FILES
     src/PythonAlgorithm/AlgorithmAdapter.cpp
     src/PythonAlgorithm/DataProcessorAdapter.cpp
     src/CloneMatrixWorkspace.cpp
-    src/ExtractWorkspace.cpp
     src/Exports/AlgorithmFactoryObserverAdapter.cpp
     src/Exports/AnalysisDataServiceObserverAdapter.cpp)
 
 set(INC_FILES
-    ${HEADER_DIR}/api/Algorithms/AlgorithmFactoryObserverAdapter.h
-    ${HEADER_DIR}/api/Algorithms/AlgorithmObserverAdapter.h
-    ${HEADER_DIR}/api/Algorithms/RunPythonScript.h
-    ${HEADER_DIR}/api/FitFunctions/IFunctionAdapter.h
-    ${HEADER_DIR}/api/FitFunctions/IFunction1DAdapter.h
-    ${HEADER_DIR}/api/FitFunctions/IPeakFunctionAdapter.h
-    ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmAdapter.h
-    ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
-    ${HEADER_DIR}/api/AnalysisDataServiceObserverAdapter.h
-    ${HEADER_DIR}/api/BinaryOperations.h
-    ${HEADER_DIR}/api/CloneMatrixWorkspace.h
-    ${HEADER_DIR}/api/ExtractWorkspace.h
-    ${HEADER_DIR}/api/WorkspacePropertyExporter.h
-    ${HEADER_DIR}/api/SpectrumInfoPythonIterator.h
-    ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
-    ${HEADER_DIR}/api/ComponentInfoPythonIterator.h)
-
-set(PY_FILES __init__.py _adsimports.py _aliases.py _workspaceops.py)
-
-# Copy over the pure Python files for the module
-
-# Set the destination directory
-set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/api)
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  # Set the output directory for the libraries.
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/api)
-endif()
+    inc/MantidPythonInterface/api/Algorithms/AlgorithmFactoryObserverAdapter.h
+    inc/MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h
+    inc/MantidPythonInterface/api/Algorithms/RunPythonScript.h
+    inc/MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h
+    inc/MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h
+    inc/MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h
+    inc/MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h
+    inc/MantidPythonInterface/api/PythonAlgorithm/DataProcessorAdapter.h
+    inc/MantidPythonInterface/api/AnalysisDataServiceObserverAdapter.h
+    inc/MantidPythonInterface/api/BinaryOperations.h
+    inc/MantidPythonInterface/api/CloneMatrixWorkspace.h
+    inc/MantidPythonInterface/api/WorkspacePropertyExporter.h
+    inc/MantidPythonInterface/api/SpectrumInfoPythonIterator.h)
 
 # Create the target for this directory
 
@@ -138,6 +123,8 @@ add_library(PythonAPIModule
             ${INC_FILES}
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonAPIModule _api)
+
+target_include_directories(PythonAPIModule PUBLIC inc)
 
 # Add the required dependencies
 target_link_libraries(PythonAPIModule
@@ -173,12 +160,5 @@ endif()
 mtd_install_targets(TARGETS
                     PythonAPIModule
                     INSTALL_DIRS
-                    ${BIN_DIR}/mantid/api
-                    ${WORKBENCH_BIN_DIR}/mantid/api)
-
-# Pure Python files
-mtd_install_files(FILES
-                  ${PY_FILES}
-                  INSTALL_DIRS
-                  ${BIN_DIR}/mantid/api
-                  ${WORKBENCH_BIN_DIR}/mantid/api)
+                    ${LIB_DIR}/mantid/api
+                    ${WORKBENCH_LIB_DIR}/mantid/api)

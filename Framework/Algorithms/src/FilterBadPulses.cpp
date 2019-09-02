@@ -46,10 +46,10 @@ const std::string FilterBadPulses::category() const {
 
 /// Initialise the properties
 void FilterBadPulses::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An event workspace");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   auto range = boost::make_shared<BoundedValidator<double>>();
@@ -68,7 +68,7 @@ void FilterBadPulses::exec() {
 
   // see if the gd_prtn_charge log has anything useful to say
   if (runlogs.hasProperty(INT_CHARGE_NAME)) {
-    double value = runlogs.getPropertyValueAsType<double>(INT_CHARGE_NAME);
+    auto value = runlogs.getPropertyValueAsType<double>(INT_CHARGE_NAME);
     if (value <= 0.) {
       throw std::runtime_error("Found no integrated charge value in " +
                                INT_CHARGE_NAME);
@@ -83,9 +83,8 @@ void FilterBadPulses::exec() {
     throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME +
                              "\" in sample logs");
   }
-  Kernel::TimeSeriesProperty<double> *pcharge_log =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          runlogs.getLogData(LOG_CHARGE_NAME));
+  auto *pcharge_log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+      runlogs.getLogData(LOG_CHARGE_NAME));
   if (!pcharge_log) {
     throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME +
                            "\" in sample logs");

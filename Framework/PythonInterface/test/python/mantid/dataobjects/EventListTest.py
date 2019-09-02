@@ -23,16 +23,16 @@ class EventListTest(unittest.TestCase):
 
     def test_event_list_constructor(self):
         el = EventList()
-        self.assertEquals(el.getNumberEvents(), 0)
-        self.assertEquals(el.getEventType(), EventType.TOF)
+        self.assertEqual(el.getNumberEvents(), 0)
+        self.assertEqual(el.getEventType(), EventType.TOF)
 
     def test_event_list_addEventQuickly(self):
         el = EventList()
         el.addEventQuickly(float(0.123), DateAndTime(42))
-        self.assertEquals(el.getNumberEvents(), 1)
-        self.assertEquals(el.getEventType(), EventType.TOF)
-        self.assertEquals(el.getTofs()[0], float(0.123))
-        self.assertEquals(el.getPulseTimes()[0], DateAndTime(42))
+        self.assertEqual(el.getNumberEvents(), 1)
+        self.assertEqual(el.getEventType(), EventType.TOF)
+        self.assertEqual(el.getTofs()[0], float(0.123))
+        self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
 
 
     def test_event_list_iadd(self):
@@ -41,11 +41,11 @@ class EventListTest(unittest.TestCase):
 
         left += rght
 
-        self.assertEquals(left.getEventType(), EventType.TOF)
-        self.assertEquals(rght.getEventType(), EventType.TOF)
+        self.assertEqual(left.getEventType(), EventType.TOF)
+        self.assertEqual(rght.getEventType(), EventType.TOF)
 
-        self.assertEquals(left.getNumberEvents(), 30)
-        self.assertEquals(rght.getNumberEvents(), 20)
+        self.assertEqual(left.getNumberEvents(), 30)
+        self.assertEqual(rght.getNumberEvents(), 20)
 
     def test_event_list_isub(self):
         left = self.createRandomEventList(10)
@@ -53,13 +53,13 @@ class EventListTest(unittest.TestCase):
 
         left -= rght
 
-        self.assertEquals(left.getEventType(), EventType.WEIGHTED)
-        self.assertEquals(rght.getEventType(), EventType.TOF)
+        self.assertEqual(left.getEventType(), EventType.WEIGHTED)
+        self.assertEqual(rght.getEventType(), EventType.TOF)
 
-        self.assertEquals(left.getNumberEvents(), 30)
-        self.assertEquals(rght.getNumberEvents(), 20)
+        self.assertEqual(left.getNumberEvents(), 30)
+        self.assertEqual(rght.getNumberEvents(), 20)
 
-        self.assertEquals(left.integrate(-1.,31., True), -10.)
+        self.assertEqual(left.integrate(-1.,31., True), -10.)
 
     def test_mask_condition(self):
         evl = self.createRandomEventList(20)
@@ -68,8 +68,8 @@ class EventListTest(unittest.TestCase):
         mask = (tof < 10)
         evl.maskCondition(mask)
 
-        self.assertEquals(evl.getNumberEvents(), 10)
-        self.assertEquals(evl.getTofMax(), float(9.0))
+        self.assertEqual(evl.getNumberEvents(), 10)
+        self.assertEqual(evl.getTofMax(), float(9.0))
 
 if __name__ == '__main__':
     unittest.main()

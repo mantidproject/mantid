@@ -50,14 +50,14 @@ const std::string SaveParameterFile::category() const {
 /** Initialize the algorithm's properties.
  */
 void SaveParameterFile::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace to save the instrument parameters from.");
 
   declareProperty(
-      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Save,
-                                     ".xml"),
+      std::make_unique<API::FileProperty>("Filename", "",
+                                          API::FileProperty::Save, ".xml"),
       "The name of the file into which the instrument parameters will be "
       "saved.");
 
@@ -139,7 +139,7 @@ void SaveParameterFile::exec() {
         // With fitting parameters we do something special (i.e. silly)
         // We create an entire XML element to be inserted into the output,
         // instead of just giving a single fixed value
-        const FitParameter &fitParam = paramsIt.second->value<FitParameter>();
+        const auto &fitParam = paramsIt.second->value<FitParameter>();
         const std::string fpName =
             fitParam.getFunction() + ":" + fitParam.getName();
         std::stringstream fpValue;

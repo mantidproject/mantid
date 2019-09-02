@@ -48,17 +48,17 @@ GenerateEventsFilter::GenerateEventsFilter()
 void GenerateEventsFilter::init() {
   // Input/Output Workspaces
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "An input Matrix workspace.");
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output SplittersWorkspace object, "
                   "i.e., the filter.");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "InformationWorkspace", "", Direction::Output),
       "Optional output for the information of each splitter workspace index");
 
@@ -86,7 +86,7 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("TimeInterval"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("TimeInterval"),
                   "Array for lengths of time intervals for splitters.  "
                   "If the array is empty, then there will be one splitter "
                   "created from StartTime and StopTime. "
@@ -94,7 +94,7 @@ void GenerateEventsFilter::init() {
                   "same time intervals. "
                   "If the size of the array is larger than one, then the "
                   "splitters can have various time interval values.");
-  setPropertySettings("TimeInterval", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("TimeInterval", std::make_unique<VisibleWhenProperty>(
                                           "LogName", IS_EQUAL_TO, ""));
 
   std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
@@ -113,23 +113,20 @@ void GenerateEventsFilter::init() {
 
   declareProperty("MinimumLogValue", EMPTY_DBL(),
                   "Minimum log value for which to keep events.");
-  setPropertySettings(
-      "MinimumLogValue",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("MinimumLogValue", std::make_unique<VisibleWhenProperty>(
+                                             "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("MaximumLogValue", EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
-  setPropertySettings(
-      "MaximumLogValue",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("MaximumLogValue", std::make_unique<VisibleWhenProperty>(
+                                             "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueInterval", EMPTY_DBL(),
                   "Delta of log value to be sliced into from min log value and "
                   "max log value.\n"
                   "If not given, then only value ");
-  setPropertySettings(
-      "LogValueInterval",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+  setPropertySettings("LogValueInterval", std::make_unique<VisibleWhenProperty>(
+                                              "LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty(
@@ -142,12 +139,12 @@ void GenerateEventsFilter::init() {
       "respectively.");
   setPropertySettings(
       "FilterLogValueByChangingDirection",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
                   "Tolerance in time for the event times to keep. "
                   "It is used in the case to filter by single value.");
-  setPropertySettings("TimeTolerance", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("TimeTolerance", std::make_unique<VisibleWhenProperty>(
                                            "LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
@@ -156,7 +153,7 @@ void GenerateEventsFilter::init() {
       "LogBoundary", "Centre", logvalidator,
       "How to treat log values as being measured in the centre of time. "
       "There are three options, 'Centre', 'Left' and 'Other'. ");
-  setPropertySettings("LogBoundary", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>(
                                          "LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("LogValueTolerance", EMPTY_DBL(),
@@ -164,7 +161,7 @@ void GenerateEventsFilter::init() {
                   "used in the case to filter by multiple values.");
   setPropertySettings(
       "LogValueTolerance",
-      Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
+      std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   // Output workspaces' title and name
   declareProperty(
@@ -307,7 +304,7 @@ void GenerateEventsFilter::processInputTime() {
     // (percent of total run time)
     int64_t runtime_ns =
         m_runEndTime.totalNanoseconds() - runstarttime.totalNanoseconds();
-    double runtimed_ns = static_cast<double>(runtime_ns);
+    auto runtimed_ns = static_cast<double>(runtime_ns);
     m_timeUnitConvertFactorToNS = 0.01 * runtimed_ns;
   } else {
     // (Not defined/supported)
@@ -406,7 +403,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     int64_t timeslot = 0;
 
     // Explicitly N time intervals
-    int64_t deltatime_ns =
+    auto deltatime_ns =
         static_cast<int64_t>(timeinterval * m_timeUnitConvertFactorToNS);
 
     int64_t curtime_ns = m_startTime.totalNanoseconds();
@@ -447,8 +444,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     size_t numtimeintervals = vec_timeintervals.size();
     std::vector<int64_t> vec_dtimens(numtimeintervals);
     for (size_t id = 0; id < numtimeintervals; ++id) {
-      int64_t deltatime_ns = static_cast<int64_t>(vec_timeintervals[id] *
-                                                  m_timeUnitConvertFactorToNS);
+      auto deltatime_ns = static_cast<int64_t>(vec_timeintervals[id] *
+                                               m_timeUnitConvertFactorToNS);
       vec_dtimens[id] = deltatime_ns;
     }
 
@@ -649,7 +646,7 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
                                                     bool filterdecrease) {
   // Get parameters time-tolerance and log-boundary
   double timetolerance = this->getProperty("TimeTolerance");
-  int64_t timetolerance_ns =
+  auto timetolerance_ns =
       static_cast<int64_t>(timetolerance * m_timeUnitConvertFactorToNS);
 
   std::string logboundary = this->getProperty("LogBoundary");
@@ -673,11 +670,11 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   ss << "Log." << m_dblLog->name() << ".From." << minvalue << ".To." << maxvalue
      << ".Value-change-direction:";
   if (filterincrease && filterdecrease) {
-    ss << ".both ";
+    ss << "both";
   } else if (filterincrease) {
-    ss << ".increase";
+    ss << "increase";
   } else {
-    ss << ".decrease";
+    ss << "decrease";
   }
   row << 0 << ss.str();
 }
@@ -994,7 +991,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   m_vecSplitterTimeSet.push_back(tempvectimes);
   m_vecGroupIndexSet.push_back(tempvecgroup);
   int istart = 0;
-  int iend = static_cast<int>(logsize - 1);
+  auto iend = static_cast<int>(logsize - 1);
 
   makeMultipleFiltersByValuesPartialLog(
       istart, iend, m_vecSplitterTime, m_vecSplitterGroup, indexwsindexmap,
@@ -1278,6 +1275,12 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         // Check this value whether it falls into any range
         size_t index = searchValue(logvalueranges, currValue);
 
+        bool valueWithinMinMax = true;
+        if (index > logvalueranges.size()) {
+          // Out of range
+          valueWithinMinMax = false;
+        }
+
         if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
           stringstream dbss;
           dbss << "[DBx257] Examine Log Index " << i
@@ -1290,16 +1293,10 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
             dbss << logvalueranges[index] << ", " << logvalueranges[index + 1];
           else if (index == logvalueranges.size())
             dbss << logvalueranges[index - 1] << ", " << logvalueranges[index];
-          else
+          else if (valueWithinMinMax)
             dbss << logvalueranges[index - 1] << ", " << logvalueranges[index]
                  << ", " << logvalueranges[index + 1];
           g_log.debug(dbss.str());
-        }
-
-        bool valueWithinMinMax = true;
-        if (index > logvalueranges.size()) {
-          // Out of range
-          valueWithinMinMax = false;
         }
 
         if (valueWithinMinMax) {
@@ -1856,7 +1853,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
                 << runendtime.totalNanoseconds()
                 << ", no run end set = " << norunendset << "\n";
 
-  int64_t extended_ns = static_cast<int64_t>(1.0E8);
+  auto extended_ns = static_cast<int64_t>(1.0E8);
   if (m_dataWS->run().hasProperty("proton_charge")) {
     // Get last proton charge time and compare with run end time
     // this does nothing but make sure that run().endTime() is same as proton

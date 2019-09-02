@@ -315,14 +315,15 @@ public:
     m.set(3, 2, 32);
     m.set(3, 3, 33);
 
-    TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3), std::runtime_error);
+    TS_ASSERT_THROWS(ComplexMatrix subm(m, 2, 2, 3, 3),
+                     const std::runtime_error &);
   }
 
   void test_eigenSystem_rectangular_throw() {
     ComplexMatrix M(3, 4);
     GSLVector v;
     ComplexMatrix Q;
-    TS_ASSERT_THROWS(M.eigenSystemHermitian(v, Q), std::runtime_error);
+    TS_ASSERT_THROWS(M.eigenSystemHermitian(v, Q), const std::runtime_error &);
   }
 
   void test_small_real_eigenSystem() {

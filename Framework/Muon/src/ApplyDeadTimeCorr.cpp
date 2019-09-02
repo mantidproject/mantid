@@ -32,17 +32,19 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
  */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<EqualBinSizesValidator>(0.5)),
-                  "The name of the input workspace containing measured counts");
-
-  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "DeadTimeTable", "", Direction::Input),
-                  "Name of the Dead Time Table");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input,
+          boost::make_shared<EqualBinSizesValidator>(0.5)),
+      "The name of the input workspace containing measured counts");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "DeadTimeTable", "", Direction::Input),
+      "Name of the Dead Time Table");
+
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "The name of the output workspace containing corrected counts");
 }
@@ -60,7 +62,7 @@ void ApplyDeadTimeCorr::exec() {
 
     const API::Run &run = inputWs->run();
     if (run.hasProperty("goodfrm")) {
-      double numGoodFrames =
+      auto numGoodFrames =
           boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
 
       if (numGoodFrames == 0) {
@@ -88,7 +90,7 @@ void ApplyDeadTimeCorr::exec() {
           // Apply Dead Time
           for (size_t i = 0; i < deadTimeTable->rowCount(); ++i) {
             API::TableRow deadTimeRow = deadTimeTable->getRow(i);
-            size_t index =
+            auto index =
                 static_cast<size_t>(inputWs->getIndexFromSpectrumNumber(
                     static_cast<int>(deadTimeRow.Int(0))));
             const auto &yIn = inputWs->y(index);

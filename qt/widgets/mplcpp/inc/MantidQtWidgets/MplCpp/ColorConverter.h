@@ -7,8 +7,8 @@
 #ifndef MPLCPP_COLORCONVERTER_H
 #define MPLCPP_COLORCONVERTER_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 #include <QColor>
 
@@ -20,9 +20,9 @@ namespace MplCpp {
  * A static C++ wrapper around the matplotlib.colors.colorConverter instance.
  * It is used to translate colors of various formats to a QColor instance.
  */
-class MANTID_MPLCPP_DLL ColorConverter : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL ColorConverter : public Common::Python::InstanceHolder {
 public:
-  static QColor toRGB(const Python::Object &colorSpec);
+  static QColor toRGB(const Common::Python::Object &colorSpec);
 };
 
 } // namespace MplCpp

@@ -87,7 +87,7 @@ class PoldiMerge(PythonAlgorithm):
 
         if not self.chopperSpeedsMatch(leftRun, rightRun):
             raise RuntimeError(
-                "Chopper speeds do not match (" + '&'.join((leftWorkspace.getName(), rightWorkspace.getName())) + ")")
+                "Chopper speeds do not match (" + '&'.join((leftWorkspace.name(), rightWorkspace.name())) + ")")
 
         return self.propertiesMatch(leftRun, rightRun) and self.instrumentsMatch(leftWorkspace, rightWorkspace)
 

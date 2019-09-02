@@ -49,7 +49,7 @@ const std::string CALC_CONTAINER = "Container";
 const std::string CALC_ENVIRONMENT = "Environment";
 
 inline size_t findMiddle(const size_t start, const size_t stop) {
-  size_t half =
+  auto half =
       static_cast<size_t>(floor(.5 * (static_cast<double>(stop - start))));
   return start + half;
 }
@@ -76,11 +76,11 @@ void AbsorptionCorrection::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Output workspace name");
 
   // AbsorbedBy
@@ -189,9 +189,8 @@ void AbsorptionCorrection::exec() {
 
   constructSample(correctionFactors->mutableSample());
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If the number of wavelength points has not been given, use them all
   if (isEmpty(m_num_lambda))

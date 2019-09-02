@@ -25,7 +25,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 
@@ -247,14 +246,11 @@ int Rule::makeCNFcopy(std::unique_ptr<Rule> &TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(alpha),
-                                                        gamma->clone());
+              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
           std::unique_ptr<Rule> tmp2 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(beta),
-                                                        std::move(gamma));
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              Mantid::Kernel::make_unique<Union>(std::move(tmp1),
-                                                 std::move(tmp2));
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -367,14 +363,11 @@ int Rule::makeCNF(std::unique_ptr<Rule> &TopRule)
           // hence we have to play games with a second
           // gamma->clone()
           std::unique_ptr<Rule> tmp1 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(alpha),
-                                                        gamma->clone());
+              std::make_unique<Intersection>(std::move(alpha), gamma->clone());
           std::unique_ptr<Rule> tmp2 =
-              Mantid::Kernel::make_unique<Intersection>(std::move(beta),
-                                                        std::move(gamma));
+              std::make_unique<Intersection>(std::move(beta), std::move(gamma));
           std::unique_ptr<Rule> partReplace =
-              Mantid::Kernel::make_unique<Union>(std::move(tmp1),
-                                                 std::move(tmp2));
+              std::make_unique<Union>(std::move(tmp1), std::move(tmp2));
           //
           // General replacement
           //
@@ -428,7 +421,7 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
       TRule = PObj->clone();
     } else // Basic surf object
     {
-      SurfPoint *SX = dynamic_cast<SurfPoint *>(Ptr);
+      auto *SX = dynamic_cast<SurfPoint *>(Ptr);
       if (!SX) {
         throw std::logic_error("Failed to cast Rule object to SurfPoint");
       }
@@ -592,7 +585,7 @@ int Rule::substituteSurf(const int SurfN, const int newSurfN,
 */
 {
   int cnt(0);
-  SurfPoint *Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
+  auto *Ptr = dynamic_cast<SurfPoint *>(findKey(SurfN));
   while (Ptr) {
     Ptr->setKeyN(Ptr->getSign() * newSurfN);
     Ptr->setKey(SPtr);
@@ -625,7 +618,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
       if (tmpC)
         TreeLine.push(tmpC);
     } else {
-      const SurfPoint *SurX = dynamic_cast<const SurfPoint *>(tmpA);
+      const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX)
         IList.push_back(SurX->getKeyN());
       else {

@@ -28,7 +28,7 @@ using namespace Mantid::API;
  */
 void CreateSampleShape::init() {
   using namespace Mantid::Kernel;
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The workspace with which to associate the sample ");
   declareProperty("ShapeXML", "",

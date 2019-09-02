@@ -211,11 +211,13 @@ enable_precompiled_headers(inc/MantidDataObjects/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(DataObjects ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties(DataObjects
-                      PROPERTIES OUTPUT_NAME
-                                 MantidDataObjects
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_DATAOBJECTS)
+set_target_properties(DataObjects PROPERTIES
+                      OUTPUT_NAME
+                        MantidDataObjects
+                      COMPILE_DEFINITIONS
+                        IN_MANTID_DATAOBJECTS
+                      INTERFACE_INCLUDE_DIRECTORIES
+                        ${CMAKE_CURRENT_LIST_DIR}/inc)
 
 if(OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(DataObjects

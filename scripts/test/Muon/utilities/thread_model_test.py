@@ -7,8 +7,9 @@
 import unittest
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import start_qapplication
+from qtpy.QtWidgets import QApplication
 
-from Muon.GUI.Common.test_helpers import mock_widget
 from Muon.GUI.Common.thread_model import ThreadModel
 
 
@@ -57,18 +58,19 @@ class testModel:
         pass
 
 
+@start_qapplication
 class LoadFileWidgetViewTest(unittest.TestCase):
     class Runner:
         """This runner class creates a main event loop for threaded code to run within (otherwise the threaded
         code will not connect signals/slots properly).
         The finished signal of a QThread is connected to the finished method below"""
-        QT_APP = mock_widget.mockQapp()
 
         def __init__(self, thread_model):
             if thread_model:
                 thread_model.start()
 
     def setUp(self):
+        self._qapp = QApplication.instance()
         patcher = mock.patch('Muon.GUI.Common.thread_model.warning')
         self.addCleanup(patcher.stop)
         self.warning_box_patcher = patcher.start()
@@ -99,7 +101,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.Runner(self.thread)
         self.thread._thread.wait()
-        self.Runner.QT_APP.processEvents()
+        self._qapp.processEvents()
 
         self.assertEqual(self.model.execute.call_count, 1)
 
@@ -109,7 +111,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.Runner(self.thread)
         self.thread._thread.wait()
-        self.Runner.QT_APP.processEvents()
+        self._qapp.processEvents()
 
         self.assertEqual(self.model.output.call_count, 1)
 
@@ -121,7 +123,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.Runner(self.thread)
         self.thread._thread.wait()
-        self.Runner.QT_APP.processEvents()
+        self._qapp.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
         self.assertEqual(end_slot.call_count, 1)
@@ -153,7 +155,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.Runner(self.thread)
         self.thread._thread.wait()
-        self.Runner.QT_APP.processEvents()
+        self._qapp.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
         self.assertEqual(end_slot.call_count, 1)
@@ -166,7 +168,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.Runner(self.thread)
         self.thread._thread.wait()
-        self.Runner.QT_APP.processEvents()
+        self._qapp.processEvents()
 
         self.assertEqual(self.warning_box_patcher.call_count, 1)
 

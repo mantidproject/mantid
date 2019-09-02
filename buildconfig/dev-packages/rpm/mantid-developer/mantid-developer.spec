@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.30
+Version:        1.33
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -42,7 +42,6 @@ Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-qt5-devel
 Requires: python-QtPy
-Requires: python2-QtAwesome
 Requires: python-requests
 Requires: python-devel
 Requires: python-setuptools
@@ -94,7 +93,6 @@ Requires: python3-sip-devel
 Requires: python3-PyQt4-devel
 Requires: python-qt5-devel
 Requires: python3-QtPy
-%{?fedora:Requires: python3-QtAwesome}
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-scikit-image
@@ -110,6 +108,14 @@ Requires: python3-mock
 %{?fedora:Requires: python3-psutil}
 %{?fedora:Requires: python3-requests}
 Requires: boost-python3-devel
+%endif
+
+%if 0%{el7}
+Requires: boost-python36-devel
+Requires: python36-devel
+Requires: python36-h5py
+Requires: python36-numpy
+Requires: python36-PyYAML
 %endif
 
 BuildArch: noarch
@@ -133,6 +139,12 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Thu Jun 27 2019 Peter Peterson <petersonpf@ornl.gov>
+- Added python3 dependencies for framework on rhel7
+
+* Thu Apr 25 2019 Samuel Jones <samuel.jones@stfc.ac.uk>
+- Removed qtawesome
 
 * Thu Nov 18 2018 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Added python-requests

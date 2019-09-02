@@ -20,7 +20,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <numeric>
 
@@ -60,19 +59,19 @@ const std::string CalculateCountRate::summary() const {
 void CalculateCountRate::init() {
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
           "Workspace", "", Kernel::Direction::InOut),
       "Name of the event workspace to calculate counting rate for.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       "XMin", EMPTY_DBL(), Kernel::Direction::Input),
                   "Minimal value of X-range for the rate calculations. If left "
                   "to default, Workspace X-axis minimal value is used.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       "XMax", EMPTY_DBL(), Kernel::Direction::Input),
                   "Maximal value of X-range for the rate calculations. If left "
                   "to default, Workspace X-axis maximal value is used.");
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+      std::make_unique<Kernel::PropertyWithValue<std::string>>(
           "RangeUnits", "Energy",
           boost::make_shared<Kernel::StringListValidator>(
               Kernel::UnitFactory::Instance().getKeys()),
@@ -126,9 +125,9 @@ void CalculateCountRate::init() {
   // visualization group
   std::string spur_vis_mode("Spurion visualization");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
-          "VisualizationWs", "", Kernel::Direction::Output,
-          API::PropertyMode::Optional),
+      std::make_unique<API::WorkspaceProperty<>>("VisualizationWs", "",
+                                                 Kernel::Direction::Output,
+                                                 API::PropertyMode::Optional),
       "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
       "containing data to visualize counting rate as function of time in the "
@@ -137,13 +136,13 @@ void CalculateCountRate::init() {
   auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBeReasonable->setLower(3);
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<int>>(
+      std::make_unique<Kernel::PropertyWithValue<int>>(
           "NumTimeSteps", 200, mustBeReasonable, Kernel::Direction::Input),
       "Number of time steps (time accuracy) the visualization workspace has. "
       "Also number of steps in 'CountRateLogName' log if "
       "'UseNormLogGranularity' is set to false. Should be bigger than 3");
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<int>>(
+      std::make_unique<Kernel::PropertyWithValue<int>>(
           "XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
       "Number of steps (accuracy) of the visualization workspace has along "
       "X-axis. ");
@@ -215,12 +214,12 @@ void CalculateCountRate::calcRateLog(
     pVisWS_locks.reset(new std::mutex[m_visWs->getNumberHistograms()]);
   }
 
-  int64_t nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
+  auto nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
   // Initialize progress reporting.
   API::Progress prog(this, 0.0, 1.0, nHist);
 
-  double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
-  double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
+  auto dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
+  auto dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
   std::vector<MantidVec> Buff;
 
 #pragma omp parallel
@@ -302,8 +301,8 @@ void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
     if (tof < m_XRangeMin || tof >= m_XRangeMax)
       continue;
 
-    size_t n_spec = static_cast<size_t>((pulsetime - m_visT0) / m_visDT);
-    size_t n_bin = static_cast<size_t>((tof - m_XRangeMin) / m_visDX);
+    auto n_spec = static_cast<size_t>((pulsetime - m_visT0) / m_visDT);
+    auto n_bin = static_cast<size_t>((tof - m_XRangeMin) / m_visDX);
     (spectraLocks + n_spec)->lock();
     auto &Y = m_visWs->mutableY(n_spec);
     Y[n_bin]++;
@@ -413,9 +412,8 @@ void CalculateCountRate::setOutLogParameters(
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
-          m_tmpLogHolder =
-              Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-                  *m_pNormalizationLog->clone());
+          m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
+              *m_pNormalizationLog->clone());
         }
         m_tmpLogHolder->filterByTime(runTMin, runTMax);
         m_pNormalizationLog = m_tmpLogHolder.get();
@@ -449,7 +447,7 @@ void CalculateCountRate::setOutLogParameters(
   // identify epsilon to use with current time
   double t_epsilon = double(runTMax.totalNanoseconds()) *
                      (1 + std::numeric_limits<double>::epsilon());
-  int64_t eps_increment =
+  auto eps_increment =
       static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
 
   m_TRangeMin = runTMin - eps_increment;
@@ -641,9 +639,9 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
   for (int i = 0; i < numXBins; ++i) {
     xx[i] = m_XRangeMin + (0.5 + static_cast<double>(i)) * dX;
   }
-  auto ax0 = Kernel::make_unique<API::NumericAxis>(xx);
+  auto ax0 = std::make_unique<API::NumericAxis>(xx);
   ax0->setUnit(RangeUnits);
-  m_visWs->replaceAxis(0, ax0.release());
+  m_visWs->replaceAxis(0, std::move(ax0));
 
   // define Y axis (in seconds);
   double dt = (static_cast<double>(m_TRangeMax.totalNanoseconds() -
@@ -654,12 +652,12 @@ void CalculateCountRate::checkAndInitVisWorkspace() {
   for (int i = 0; i < numTBins; i++) {
     xx[i] = (0.5 + static_cast<double>(i)) * dt;
   }
-  auto ax1 = Kernel::make_unique<API::NumericAxis>(xx);
+  auto ax1 = std::make_unique<API::NumericAxis>(xx);
   auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel("sec");
   ax1->unit() = labelY;
-  m_visWs->replaceAxis(1, ax1.release());
+  m_visWs->replaceAxis(1, std::move(ax1));
 
   setProperty("VisualizationWs", m_visWs);
 

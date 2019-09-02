@@ -54,11 +54,11 @@ SmoothNeighbours::SmoothNeighbours()
  *
  */
 void SmoothNeighbours::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       INPUT_WORKSPACE, "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the spectra to be averaged.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.");
@@ -85,7 +85,7 @@ void SmoothNeighbours::init() {
   declareProperty(
       "Sigma", 0.5, mustBePositiveDouble,
       "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
-  setPropertySettings("Sigma", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Sigma", std::make_unique<EnabledWhenProperty>(
                                    "WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty(
@@ -549,7 +549,7 @@ void SmoothNeighbours::exec() {
 
   // Progress reporting, first for the sorting
   m_progress =
-      make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
+      std::make_unique<Progress>(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Run the appropriate method depending on the type of the instrument
   if (inWS->getInstrument()->containsRectDetectors() ==
@@ -734,7 +734,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr &ws) {
 
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = outWI;
-  const int YLength = static_cast<int>(inWS->blocksize());
+  const auto YLength = static_cast<int>(inWS->blocksize());
 
   EventWorkspace_sptr outWS;
   // Make a brand new EventWorkspace

@@ -57,7 +57,7 @@ public:
     TS_ASSERT(m_refAxis->isNumeric())
     TS_ASSERT(!m_refAxis->isSpectra())
     TS_ASSERT_EQUALS(m_refAxis->unit()->unitID(), "TOF")
-    TS_ASSERT_THROWS(m_refAxis->spectraNo(0), std::domain_error)
+    TS_ASSERT_THROWS(m_refAxis->spectraNo(0), const std::domain_error &)
   }
 
   void testClone() {
@@ -68,7 +68,7 @@ public:
     TS_ASSERT_EQUALS(clonedAxis->unit()->unitID(), "TOF")
     TS_ASSERT(clonedAxis->isNumeric())
     TS_ASSERT_EQUALS((*clonedAxis)(0, 0), 1.0)
-    TS_ASSERT_THROWS((*clonedAxis)(0, 1), std::range_error)
+    TS_ASSERT_THROWS((*clonedAxis)(0, 1), const std::range_error &)
   }
 
   void testCloneDifferentLength() {
@@ -87,24 +87,24 @@ public:
     TS_ASSERT_EQUALS((*m_refAxis)(0, 2), 10.1)
     TS_ASSERT_EQUALS((*m_refAxis)(2, 0), 2.1)
 
-    TS_ASSERT_THROWS((*m_refAxis)(-1, 0), Exception::IndexError)
-    TS_ASSERT_THROWS((*m_refAxis)(5, 0), Exception::IndexError)
-    TS_ASSERT_THROWS((*m_refAxis)(0, -1), std::range_error)
-    TS_ASSERT_THROWS((*m_refAxis)(0, 5), std::range_error)
+    TS_ASSERT_THROWS((*m_refAxis)(-1, 0), const Exception::IndexError &)
+    TS_ASSERT_THROWS((*m_refAxis)(5, 0), const Exception::IndexError &)
+    TS_ASSERT_THROWS((*m_refAxis)(0, -1), const std::range_error &)
+    TS_ASSERT_THROWS((*m_refAxis)(0, 5), const std::range_error &)
   }
 
   void testSetValue() {
-    TS_ASSERT_THROWS(m_refAxis->setValue(0, 9.9), std::domain_error)
+    TS_ASSERT_THROWS(m_refAxis->setValue(0, 9.9), const std::domain_error &)
   }
 
   void testGetMin() {
     std::unique_ptr<Axis> newRefAxis(m_refAxis->clone(5, m_space2.get()));
-    TS_ASSERT_THROWS(newRefAxis->getMin(), std::runtime_error)
+    TS_ASSERT_THROWS(newRefAxis->getMin(), const std::runtime_error &)
   }
 
   void testGetMax() {
     std::unique_ptr<Axis> newRefAxis(m_refAxis->clone(5, m_space2.get()));
-    TS_ASSERT_THROWS(newRefAxis->getMax(), std::runtime_error)
+    TS_ASSERT_THROWS(newRefAxis->getMax(), const std::runtime_error &)
   }
 
 private:

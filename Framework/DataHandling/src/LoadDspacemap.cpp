@@ -37,9 +37,9 @@ void LoadDspacemap::init() {
   LoadCalFile::getInstrument3WaysInit(this);
 
   const std::vector<std::string> exts{".dat", ".bin"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The DspacemapFile containing the d-space mapping.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The DspacemapFile containing the d-space mapping.");
 
   std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
                                        "VULCAN-Binary"};
@@ -47,7 +47,7 @@ void LoadDspacemap::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output OffsetsWorkspace.");
 }

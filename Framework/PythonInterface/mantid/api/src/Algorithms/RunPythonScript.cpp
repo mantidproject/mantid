@@ -8,10 +8,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
+#include "MantidPythonInterface/core/IsNone.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
@@ -54,16 +54,16 @@ bool RunPythonScript::checkGroups() { return false; }
  */
 void RunPythonScript::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An input workspace that the python code will modify."
       "The workspace will be in the python variable named 'input'.");
   declareProperty("Code", "", "Python code (can be on multiple lines).");
-  declareProperty(make_unique<FileProperty>("Filename", "",
-                                            FileProperty::OptionalLoad, "py"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::OptionalLoad, "py"),
                   "A File containing a python script");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "An output workspace to be produced by the python code."
       "The workspace will be in the python variable named 'output'.");

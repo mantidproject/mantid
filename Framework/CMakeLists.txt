@@ -24,10 +24,6 @@ check_include_files(stdint.h stdint)
 if(stdint)
   add_definitions(-DHAVE_STDINT_H)
 endif()
-check_include_files(cstdint.hpp boost_stdint)
-if(boost_stdint)
-  add_definitions(-DBOOST_CSTDINT_HPP)
-endif()
 
 # Globally-linked libraries variable
 
@@ -40,14 +36,14 @@ set(MANTIDLIBS ${Boost_LIBRARIES} ${POCO_LIBRARIES})
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(MPI_BUILD OFF CACHE BOOL "Enable MPI options")
+  option(MPI_BUILD "Enable MPI options")
   if(MPI_BUILD)
     include(MPISetup)
     set(MANTIDLIBS ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
   endif(MPI_BUILD)
 endif()
 
-set(MPI_EXPERIMENTAL OFF CACHE BOOL "Enable MPI options")
+option(MPI_EXPERIMENTAL "Enable MPI options")
 if(MPI_EXPERIMENTAL)
   include(BoostMPI)
 endif()
@@ -57,6 +53,7 @@ include(TargetFunctions)
 
 add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)
+add_dependencies(FrameworkTests Framework)
 
 include_directories(Types/inc)
 add_subdirectory(Types)

@@ -483,4 +483,4 @@ class MaskingTablePresenter(object):
                 instrument_win.show()
             else:
                 instrument_win = InstrumentViewPresenter(masked_workspace)
-                instrument_win.view.show()
+                instrument_win.container.show()

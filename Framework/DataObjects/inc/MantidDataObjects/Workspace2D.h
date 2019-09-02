@@ -96,7 +96,7 @@ protected:
   std::vector<specnum_t> m_monitorList;
 
   /// A vector that holds the 1D histograms
-  std::vector<Histogram1D *> data;
+  std::vector<std::unique_ptr<Histogram1D>> data;
 
 private:
   Workspace2D *doClone() const override;

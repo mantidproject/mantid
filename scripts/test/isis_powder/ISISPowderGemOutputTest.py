@@ -66,7 +66,7 @@ class ISISPowderGemOutputTest(unittest.TestCase):
 
         with open(temp_file_path + '\\test.gda') as read_file:
             first_line = read_file.readline()
-            self.assertEquals(first_line, self.CHECK_AGAINST)
+            self.assertEqual(first_line, self.CHECK_AGAINST)
 
 
 if __name__ == '__main__':

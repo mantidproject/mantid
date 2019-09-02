@@ -8,15 +8,20 @@
 #define LOAD_SHAPETEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -125,9 +130,79 @@ public:
     loadFailureTest(alg, "invalid_triangle.off");
   }
 
+  void testXRotation() {
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 1, 0, 0, 45);
+    auto sampleMesh = createCube();
+
+    rotate(*sampleMesh, inputWS);
+    std::vector<double> rotatedVertices = sampleMesh->getVertices();
+    std::vector<double> vectorToMatch = {
+        -5, 7.07106,    -14.142136, 5,  14.142136,  -7.07106,
+        5,  7.07106,    -14.142136, -5, 14.142136,  -7.07106,
+        5,  -14.142136, 7.07106,    5,  -7.07106,   14.142136,
+        -5, -7.07106,   14.142136,  -5, -14.142136, 7.07106};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
+  }
+  void testYRotation() {
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 1, 0, 90);
+    auto sampleMesh = createCube();
+
+    rotate(*sampleMesh, inputWS);
+    std::vector<double> rotatedVertices = sampleMesh->getVertices();
+    std::vector<double> vectorToMatch = {-15, -5,  5,  -15, 5,  -5, -15, -5,
+                                         -5,  -15, 5,  5,   15, -5, -5,  15,
+                                         5,   -5,  15, 5,   5,  15, -5,  5};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
+  }
+
+  void testZRotation() {
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    inputWS->mutableRun().mutableGoniometer().pushAxis("Axis0", 0, 0, 1, 180);
+    auto sampleMesh = createCube();
+
+    rotate(*sampleMesh, inputWS);
+    std::vector<double> rotatedVertices = sampleMesh->getVertices();
+    std::vector<double> vectorToMatch = {5,   5,  -15, -5,  -5, -15, -5, 5,
+                                         -15, 5,  -5,  -15, -5, 5,   15, -5,
+                                         -5,  15, 5,   -5,  15, 5,   5,  15};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
+  }
+
+  void testMultiRotation() {
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    inputWS->mutableRun().mutableGoniometer().pushAxis("Z", 0, 0, 1, 35);
+    inputWS->mutableRun().mutableGoniometer().pushAxis("Y", 0, 1, 0, 20);
+    inputWS->mutableRun().mutableGoniometer().pushAxis("X", 1, 0, 0, 70);
+    auto sampleMesh = createCube();
+
+    rotate(*sampleMesh, inputWS);
+    std::vector<double> rotatedVertices = sampleMesh->getVertices();
+    std::vector<double> vectorToMatch = {
+        -13.70635, 5.52235,   -7.52591,  -5.33788,  15.55731,  -2.11589,
+        -6.00884,  10.91220,  -10.94611, -13.03539, 10.16745,  1.30430,
+        13.03539,  -10.16745, -1.30430,  13.70635,  -5.52235,  7.52591,
+        6.00884,   -10.91220, 10.94611,  5.33788,   -15.55731, 2.11589};
+    for (size_t i = 0; i < 24; ++i) {
+      TS_ASSERT_DELTA(rotatedVertices[i], vectorToMatch[i], 1e-5);
+    }
+  }
+
 private:
   // Create workspaces and add them to algorithm properties
-  void prepareWorkspaces(LoadSampleShape &alg, bool outputWsSameAsInputWs) {
+  MatrixWorkspace_sptr prepareWorkspaces(LoadSampleShape &alg,
+                                         bool outputWsSameAsInputWs) {
     const int nvectors(2), nbins(10);
     MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nvectors,
@@ -138,6 +213,7 @@ private:
     if (outputWsSameAsInputWs) {
       alg.setProperty("OutputWorkspace", inputWS);
     }
+    return inputWS;
   }
 
   const MeshObject *loadMeshObject(LoadSampleShape &alg,
@@ -167,6 +243,20 @@ private:
     TSM_ASSERT_DIFFERS("Shape is not a mesh object", mObj, nullptr);
     return mObj;
   }
+
+  std::unique_ptr<MeshObject> createCube() {
+    const std::vector<uint32_t> faces{0, 1, 2, 0, 3, 1, 0, 2, 4, 2, 1, 5,
+                                      2, 5, 4, 6, 1, 3, 6, 5, 1, 4, 5, 6,
+                                      7, 3, 0, 0, 4, 7, 7, 6, 3, 4, 6, 7};
+    const std::vector<Mantid::Kernel::V3D> vertices{
+        Mantid::Kernel::V3D(-5, -5, -15), Mantid::Kernel::V3D(5, 5, -15),
+        Mantid::Kernel::V3D(5, -5, -15),  Mantid::Kernel::V3D(-5, 5, -15),
+        Mantid::Kernel::V3D(5, -5, 15),   Mantid::Kernel::V3D(5, 5, 15),
+        Mantid::Kernel::V3D(-5, 5, 15),   Mantid::Kernel::V3D(-5, -5, 15)};
+    auto cube = std::make_unique<MeshObject>(faces, vertices,
+                                             Mantid::Kernel::Material());
+    return cube;
+  }
 };
 
 class LoadSampleShapeTestPerformance : public CxxTest::TestSuite {
@@ -184,11 +274,11 @@ public:
   }
 
 private:
-  LoadSampleShape *alg;
+  std::unique_ptr<LoadSampleShape> alg;
   const int numberOfIterations = 5;
 
-  LoadSampleShape *setupAlg(Workspace2D_sptr inputWS) {
-    LoadSampleShape *loadAlg = new LoadSampleShape();
+  std::unique_ptr<LoadSampleShape> setupAlg(Workspace2D_sptr inputWS) {
+    auto loadAlg = std::make_unique<LoadSampleShape>();
     loadAlg->initialize();
     loadAlg->setChild(true);
     loadAlg->setProperty("InputWorkspace", inputWS);

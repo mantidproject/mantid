@@ -157,7 +157,7 @@ public:
 
     // set the first histogram to have 2 bins
     ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
-    TS_ASSERT_THROWS(ew->blocksize(), std::logic_error);
+    TS_ASSERT_THROWS(ew->blocksize(), const std::logic_error &);
     TS_ASSERT(!(ew->isCommonBins()));
     TS_ASSERT_EQUALS(ew->size(), 501);
   }
@@ -242,20 +242,20 @@ public:
     TS_ASSERT_EQUALS(el5.getNumberEvents(), 55);
 
     // Out of range
-    TS_ASSERT_THROWS(uneven->dataX(-3), std::range_error);
-    TS_ASSERT_THROWS(uneven->dataX(NUMPIXELS / 10), std::range_error);
+    TS_ASSERT_THROWS(uneven->dataX(-3), const std::range_error &);
+    TS_ASSERT_THROWS(uneven->dataX(NUMPIXELS / 10), const std::range_error &);
   }
 
   void test_data_access() {
     // Non-const access throws errors for Y & E - not for X
     TS_ASSERT_THROWS_NOTHING(ew->dataX(1));
-    TS_ASSERT_THROWS(ew->dataY(2), NotImplementedError);
-    TS_ASSERT_THROWS(ew->dataE(3), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataY(2), const NotImplementedError &);
+    TS_ASSERT_THROWS(ew->dataE(3), const NotImplementedError &);
     // Out of range
-    TS_ASSERT_THROWS(ew->dataX(-123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataX(5123), std::range_error);
-    TS_ASSERT_THROWS(ew->dataE(5123), NotImplementedError);
-    TS_ASSERT_THROWS(ew->dataY(5123), NotImplementedError);
+    TS_ASSERT_THROWS(ew->dataX(-123), const std::range_error &);
+    TS_ASSERT_THROWS(ew->dataX(5123), const std::range_error &);
+    TS_ASSERT_THROWS(ew->dataE(5123), const NotImplementedError &);
+    TS_ASSERT_THROWS(ew->dataY(5123), const NotImplementedError &);
 
     // Can't try the const access; copy constructors are not allowed.
   }
@@ -419,7 +419,7 @@ public:
     MantidVec X, Y, E;
     TSM_ASSERT_THROWS("Number of histograms is out of range, should throw",
                       ws->generateHistogramPulseTime(nHistos + 1, X, Y, E),
-                      std::range_error);
+                      const std::range_error &);
   }
 
   void do_test_binning(EventWorkspace_sptr ws, const BinEdges &axis,

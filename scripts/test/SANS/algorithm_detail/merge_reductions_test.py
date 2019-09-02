@@ -123,7 +123,7 @@ class MergeReductionsTest(unittest.TestCase):
         self.assertTrue(abs(shift - shift_input) < 1e-4)
 
         # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
     def test_that_can_merge_fitting(self):
         # Arrange
@@ -142,12 +142,12 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
         scale = result.scale
         shift = result.shift
-        self.assertTrue(scale != scale_input)
-        self.assertTrue(shift != shift_input)
+        self.assertNotEqual(scale,  scale_input)
+        self.assertNotEqual(shift,  shift_input)
         self.assertTrue(abs(scale - (-15.0)) < 1e-4)
         self.assertTrue(abs(shift - 0.0472222222222) < 1e-4)
 
@@ -168,12 +168,12 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
         scale = result.scale
         shift = result.shift
 
-        self.assertTrue(shift != shift_input)
+        self.assertNotEqual(shift,  shift_input)
         self.assertTrue(abs(scale - scale_input) < 1e-4)
         self.assertTrue(abs(shift - 0.823602794411) < 1e-4)
 
@@ -194,14 +194,14 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        self.assertTrue(merged_workspace.blocksize() == 10)
+        self.assertEqual(merged_workspace.blocksize(),  10)
 
         scale = result.scale
         shift = result.shift
 
-        self.assertTrue(scale != scale_input)
-        self.assertTrue(abs(scale-1.0) < 1e-4)
-        self.assertTrue(abs(shift-shift_input) < 1e-4)
+        self.assertNotEqual(scale,  scale_input)
+        self.assertLess(abs(scale-1.0), 1e-4)
+        self.assertLess(abs(shift-shift_input), 1e-4)
 
 
 if __name__ == '__main__':

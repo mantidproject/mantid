@@ -394,7 +394,7 @@ public:
     TS_ASSERT_EQUALS(parser.dirString(), "");
     TS_ASSERT_EQUALS(parser.instString(), "TSC");
     TS_ASSERT_EQUALS(parser.underscoreString(), "");
-    TS_ASSERT_EQUALS(parser.runString(), "10-15, 30:40:2, 50+51+52");
+    TS_ASSERT_EQUALS(parser.runString(), "10-15,30:40:2,50+51+52");
     TS_ASSERT_EQUALS(parser.extString(), ".raw");
 
     std::vector<std::vector<std::string>> filenames = parser.fileNames();
@@ -454,7 +454,7 @@ public:
     TS_ASSERT_EQUALS(parser.dirString(), "");
     TS_ASSERT_EQUALS(parser.instString(), "CNCS");
     TS_ASSERT_EQUALS(parser.underscoreString(), "");
-    TS_ASSERT_EQUALS(parser.runString(), "10-15, 30:40:2, 50+51+52");
+    TS_ASSERT_EQUALS(parser.runString(), "10-15,30:40:2,50+51+52");
     TS_ASSERT_EQUALS(parser.extString(), ".nxs");
 
     std::vector<std::vector<std::string>> filenames = parser.fileNames();

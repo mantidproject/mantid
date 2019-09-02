@@ -23,7 +23,8 @@ class TorusTest : public CxxTest::TestSuite {
 
 public:
   void testEmptyConstructor() {
-    TS_ASSERT_THROWS(Torus A;, Mantid::Kernel::Exception::NotImplementedError)
+    TS_ASSERT_THROWS(Torus A;
+                     , const Mantid::Kernel::Exception::NotImplementedError &)
     //		TS_ASSERT_EQUALS(extractString(A),"-1 tx [0,0,0] 0 0 0\n");
     //		TS_ASSERT_EQUALS(A.getCentre(),V3D(0,0,0));
     //		TS_ASSERT_EQUALS(A.getNormal(),V3D(1.0,0.0,0.0));

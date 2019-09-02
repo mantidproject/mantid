@@ -54,15 +54,14 @@ public:
         value2(prop2Value)
 
   {
-    Prop1 = new Kernel::EnabledWhenProperty(propName1, Criteria1, value1);
-    Prop2 = new Kernel::EnabledWhenProperty(propName2, Criteria2, value2);
+    Prop1 = std::make_unique<Kernel::EnabledWhenProperty>(propName1, Criteria1,
+                                                          value1);
+    Prop2 = std::make_unique<Kernel::EnabledWhenProperty>(propName2, Criteria2,
+                                                          value2);
   }
   ~OrEnabledWhenProperties() override // responsible for deleting all supplied
                                       // EnabledWhenProperites
-  {
-    delete Prop1;
-    delete Prop2;
-  }
+  {}
 
   IPropertySettings *clone() const override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
@@ -77,24 +76,24 @@ private:
   std::string propName1, propName2;
   ePropertyCriterion Criteria1, Criteria2;
   std::string value1, value2;
-  Kernel::EnabledWhenProperty *Prop1, *Prop2;
+  std::unique_ptr<Kernel::EnabledWhenProperty> Prop1, Prop2;
 };
 
 void OptimizeCrystalPlacement::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "Workspace of Peaks with UB loaded");
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>(
+  declareProperty(std::make_unique<ArrayProperty<int>>(
                       std::string("KeepGoniometerFixedfor"), Direction::Input),
                   "List of run Numbers for which the goniometer settings will "
                   "NOT be changed");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("ModifiedPeaksWorkspace",
-                                                     "", Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "ModifiedPeaksWorkspace", "", Direction::Output),
       "Output Workspace of Peaks with optimized sample Orientations");
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "FitInfoTable", "FitInfoTable", Direction::Output),
                   "Workspace of Results");
 
@@ -138,15 +137,15 @@ void OptimizeCrystalPlacement::init() {
   setPropertyGroup("MaxIndexingError", "Tolerance settings");
 
   setPropertySettings("MaxSamplePositionChangeMeters",
-                      make_unique<EnabledWhenProperty>(
+                      std::make_unique<EnabledWhenProperty>(
                           "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "1"));
 
   setPropertySettings("KeepGoniometerFixedfor",
-                      make_unique<OrEnabledWhenProperties>(
+                      std::make_unique<OrEnabledWhenProperties>(
                           "AdjustSampleOffsets", Kernel::IS_EQUAL_TO, "0",
                           "OptimizeGoniometerTilt", Kernel::IS_EQUAL_TO, "0"));
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputNormalisedCovarianceMatrixOptX", "CovarianceInfo",
                       Direction::Output),
                   "The name of the TableWorkspace in which to store the final "

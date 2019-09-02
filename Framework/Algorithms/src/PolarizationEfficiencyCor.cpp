@@ -86,13 +86,13 @@ void PolarizationEfficiencyCor::init() {
   bool const allowMultiSelection = true;
   bool const isOptional = true;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           Prop::INPUT_WORKSPACES, "",
           boost::make_shared<ADSValidator>(allowMultiSelection, isOptional),
           Kernel::Direction::Input),
       "A list of names of workspaces to be corrected.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       Prop::INPUT_WORKSPACE_GROUP, "", Kernel::Direction::Input,
                       PropertyMode::Optional),
                   "A group of workspaces to be corrected.");
@@ -104,7 +104,7 @@ void PolarizationEfficiencyCor::init() {
       boost::make_shared<Kernel::ListValidator<std::string>>(methods),
       "Correction method.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::EFFICIENCIES, "", Kernel::Direction::Input),
                   "A workspace containing the efficiency factors as "
                   "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, "
@@ -134,7 +134,7 @@ void PolarizationEfficiencyCor::init() {
                   "PA: Full Polarization Analysis PNR-PA "
                   "(Fredrikze method only)");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
                   "A group of polarization efficiency corrected workspaces.");
 }

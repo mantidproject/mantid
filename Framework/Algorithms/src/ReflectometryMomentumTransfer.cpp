@@ -129,11 +129,11 @@ void ReflectometryMomentumTransfer::init() {
   auto acceptableSumTypes =
       boost::make_shared<Kernel::ListValidator<std::string>>(sumTypes);
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, inWavelength),
       "A reflectivity workspace with X units in wavelength.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "The input workspace with X units converted to Q and DX values set to "
       "the Q resolution.");
@@ -399,7 +399,7 @@ double ReflectometryMomentumTransfer::interslitDistance(
 double ReflectometryMomentumTransfer::slitSize(const API::MatrixWorkspace &ws,
                                                const std::string &logEntry) {
   auto &run = ws.run();
-  const double opening = run.getPropertyValueAsType<double>(logEntry);
+  const auto opening = run.getPropertyValueAsType<double>(logEntry);
   const auto &units = run.getProperty(logEntry)->units();
   if (units.empty()) {
     m_log.warning() << "Slit opening entry " << logEntry

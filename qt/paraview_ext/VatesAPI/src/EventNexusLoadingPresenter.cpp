@@ -9,7 +9,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/MDLoadingView.h"
 
 #include "MantidVatesAPI/ProgressAction.h"
@@ -57,7 +57,7 @@ bool EventNexusLoadingPresenter::canReadFile() const {
 
   std::unique_ptr<NeXus::File> file;
   try {
-    file = Kernel::make_unique<NeXus::File>(this->m_filename);
+    file = std::make_unique<NeXus::File>(this->m_filename);
     // All SNS (event or histo) nxs files have an entry named "entry"
     try {
       file->openGroup("entry", "NXentry");

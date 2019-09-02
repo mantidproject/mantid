@@ -8,7 +8,7 @@
 #define MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_
 
 #include "MantidPythonInterface/core/DllConfig.h"
-#include <boost/python/detail/wrap_python.hpp>
+#include "MantidPythonInterface/core/WrapPython.h"
 
 namespace Mantid {
 namespace PythonInterface {

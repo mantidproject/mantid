@@ -90,9 +90,9 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(fn.setDecoratedFunction("PawleyFunction"));
     TS_ASSERT_THROWS(fn.setDecoratedFunction("Gaussian"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(fn.setDecoratedFunction("CompositeFunction"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_getPawleyFunction() {

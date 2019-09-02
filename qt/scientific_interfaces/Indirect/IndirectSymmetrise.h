@@ -22,7 +22,7 @@
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include <MantidQtWidgets/Common/QtPropertyBrowser/QtCheckBoxFactory>
+#include "MantidQtWidgets/Common/QtPropertyBrowser/QtCheckBoxFactory"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -51,7 +51,8 @@ public:
 
 private slots:
   void algorithmComplete(bool error);
-  void plotRawInput(const QString &workspaceName);
+  void handleDataReady(QString const &dataName) override;
+  void plotNewData(QString const &workspaceName);
   void updateMiniPlots();
   void replotNewSpectrum(QtProperty *prop, double value);
   void verifyERange(QtProperty *prop, double value);
@@ -62,20 +63,18 @@ private slots:
   void xRangeMinChanged(double value);
 
   void runClicked();
-  void plotClicked();
   void saveClicked();
 
   void setRunEnabled(bool enabled);
-  void setPlotEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
                        QString const message = "Run",
                        QString const tooltip = "");
-  void setPlotIsPlotting(bool plotting);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
+
   Ui::IndirectSymmetrise m_uiForm;
   double m_originalMax;
   double m_originalMin;

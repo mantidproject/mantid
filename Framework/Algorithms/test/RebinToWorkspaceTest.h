@@ -55,7 +55,7 @@ public:
       rebinToWS.initialize();
 
     // No properties have been set so should throw if executed
-    TS_ASSERT_THROWS(rebinToWS.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(rebinToWS.execute(), const std::runtime_error &);
 
     // Need to input workspaces to test this
     using namespace Mantid::DataObjects;

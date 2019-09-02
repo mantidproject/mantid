@@ -60,28 +60,28 @@ public:
     const Counts counts(0);
     const BinEdges edges{};
     TS_ASSERT_THROWS(const Frequencies frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_empty_Counts_size_mismatch() {
     const Counts counts(0);
     const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const Frequencies frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_Counts_null_BinEdges() {
     const Counts counts(1);
     const BinEdges edges{};
     TS_ASSERT_THROWS(const Frequencies frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_Counts_size_mismatch() {
     const Counts counts(2);
     const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const Frequencies frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_Counts() {

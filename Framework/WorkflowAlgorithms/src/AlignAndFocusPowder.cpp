@@ -46,14 +46,14 @@ DECLARE_ALGORITHM(AlignAndFocusPowder)
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void AlignAndFocusPowder::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "UnfocussedWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Treated data in d-spacing before focussing (optional). This will likely "
       "need rebinning.");
@@ -62,39 +62,39 @@ void AlignAndFocusPowder::init() {
   //   Direction::Output, PropertyMode::Optional),
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "CalFileName", "", FileProperty::OptionalLoad,
                       std::vector<std::string>{".h5", ".hd5", ".hdf", ".cal"}),
                   "The name of the calibration file with offset, masking, and "
                   "grouping data");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "GroupFilename", "", FileProperty::OptionalLoad,
                       std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
   declareProperty(
-      make_unique<WorkspaceProperty<GroupingWorkspace>>(
+      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A GroupingWorkspace giving the grouping info.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "CalibrationWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
   declareProperty(
-      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
   declareProperty(
-      make_unique<WorkspaceProperty<MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<MaskWorkspace>>(
           "MaskWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional: A workspace giving which detectors are masked.");
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "MaskBinTable", "", Direction::Input, PropertyMode::Optional),
       "Optional: A workspace giving pixels and bins to mask.");
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params" /*, boost::make_shared<RebinParamsValidator>()*/),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
@@ -106,13 +106,13 @@ void AlignAndFocusPowder::init() {
                   "overrides \"Params\" property. Negative "
                   "value means logarithmic binning.");
   setPropertySettings(
-      "Params", make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
+      "Params", std::make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
   declareProperty("Dspacing", true,
                   "Bin in Dspace. (True is Dspace; False is TOF)");
-  declareProperty(make_unique<ArrayProperty<double>>("DMin"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DMin"),
                   "Minimum for Dspace axis. (Default 0.) ");
   mapPropertyName("DMin", "d_min");
-  declareProperty(make_unique<ArrayProperty<double>>("DMax"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("DMax"),
                   "Maximum for Dspace axis. (Default 0.) ");
   mapPropertyName("DMax", "d_max");
   declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
@@ -131,16 +131,16 @@ void AlignAndFocusPowder::init() {
                   "pulse to remove. 0 disables");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty(make_unique<PropertyWithValue<double>>("CompressTolerance",
-                                                         1e-5, mustBePositive,
-                                                         Direction::Input),
-                  "Compress events (in "
-                  "microseconds) within this "
-                  "tolerance. (Default 1e-5)");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
-                                             EMPTY_DBL(), mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "CompressTolerance", 1e-5, mustBePositive, Direction::Input),
+      "Compress events (in "
+      "microseconds) within this "
+      "tolerance. (Default 1e-5)");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
+                                                  EMPTY_DBL(), mustBePositive,
+                                                  Direction::Input),
       "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
       "means compressing all wall-clock times together disabling pulsetime "
       "resolution.");
@@ -169,14 +169,14 @@ void AlignAndFocusPowder::init() {
   mapPropertyName("CropWavelengthMax", "wavelength_max");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
-  declareProperty(make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
+  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
                   "Optional: Spectrum Nos (note that it is not detector ID or "
                   "workspace indices).");
-  declareProperty(make_unique<ArrayProperty<double>>("L2"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("L2"),
                   "Optional: Secondary flight (L2) paths for each detector");
-  declareProperty(make_unique<ArrayProperty<double>>("Polar"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Polar"),
                   "Optional: Polar angles (two thetas) for detectors");
-  declareProperty(make_unique<ArrayProperty<double>>("Azimuthal"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("Azimuthal"),
                   "Azimuthal angles (out-of-plain) for detectors");
 
   declareProperty("LowResSpectrumOffset", -1,
@@ -411,7 +411,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = make_unique<Progress>(this, 0., 1., 21);
+  m_progress = std::make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
     if (compressEventsTolerance > 0.) {

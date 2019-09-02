@@ -14,10 +14,11 @@ import unittest
 from qtpy.QtWidgets import QInputDialog
 
 from mantid.py3compat.mock import patch
-from mantidqt.utils.qt.testing import GuiTest, ModalTester
+from mantidqt.utils.qt.testing import start_qapplication, ModalTester
 
 
-class TestModalTester(GuiTest):
+@start_qapplication
+class TestModalTester(unittest.TestCase):
 
     def test_pass_widget_closed(self):
         def testing_function(widget):
@@ -85,7 +86,7 @@ class TestModalTester(GuiTest):
             tester = ModalTester(create, testing_function)
             tester.start()
             print_exc.assert_called_once_with()
-        self.assertTrue(tester.widget is None)
+        self.assertEqual(tester.widget, None)
         self.assertFalse(tester.passed)
 
 

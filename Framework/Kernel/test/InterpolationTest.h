@@ -200,15 +200,15 @@ public:
     // called.
     TS_ASSERT_THROWS(
         interpolation.findIndexOfNextLargerValue(m_tableXValues, 204.0),
-        std::range_error);
+        const std::range_error &);
 
     // outside interpolation limits - edge cases as well
     TS_ASSERT_THROWS(
         interpolation.findIndexOfNextLargerValue(m_tableXValues, 199),
-        std::range_error);
+        const std::range_error &);
     TS_ASSERT_THROWS(
         interpolation.findIndexOfNextLargerValue(m_tableXValues, 2000.0),
-        std::range_error);
+        const std::range_error &);
   }
 
   void testInterpolationWithTooFewValues() {

@@ -32,7 +32,7 @@ class StringToPngTest(unittest.TestCase):
             ok2run = 'Problem importing matplotlib'
         if ok2run == '':
             simpleapi.StringToPng(String=to_plot, OutputFilename=self.plotfile)
-            self.assertTrue(os.path.getsize(self.plotfile) > 1e3)
+            self.assertGreater(os.path.getsize(self.plotfile), 1e3)
         self.cleanup()
 
 

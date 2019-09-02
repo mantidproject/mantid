@@ -10,7 +10,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 

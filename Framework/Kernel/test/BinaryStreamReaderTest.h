@@ -239,7 +239,8 @@ public:
     int i(0);
     m_bytes >> i;
     TSM_ASSERT_THROWS("Expected a runtime_error when given a bad stream",
-                      BinaryStreamReader reader(m_bytes), std::runtime_error);
+                      BinaryStreamReader reader(m_bytes),
+                      const std::runtime_error &);
   }
 
 private:

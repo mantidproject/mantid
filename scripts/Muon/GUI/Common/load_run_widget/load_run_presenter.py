@@ -12,6 +12,7 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
+from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -56,14 +57,20 @@ class LoadRunWidgetPresenter(object):
         return str(self._instrument)
 
     def set_current_instrument(self, instrument):
+        if instrument == "PSI":
+            self._view.disable_load_buttons()
+        else:
+            self._view.enable_load_buttons()
         self._instrument = instrument
         self._view.set_current_instrument(instrument)
 
     def disable_loading(self):
         self._view.disable_load_buttons()
+        self.thread_success = True
 
     def enable_loading(self):
-        self._view.enable_load_buttons()
+        if not self._instrument == "PSI":
+            self._view.enable_load_buttons()
 
     def clear_loaded_data(self):
         self._view.clear()
@@ -108,7 +115,11 @@ class LoadRunWidgetPresenter(object):
         if not run_string:
             return
 
-        self.run_list = run_utils.run_string_to_list(run_string)
+        try:
+            self.run_list = run_utils.run_string_to_list(run_string)
+        except IndexError as err:
+            self._view.warning_popup(err.args[0])
+            return
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
                       for new_run in self.run_list if not self._model.get_data(run=[new_run])]
         if file_names:
@@ -204,6 +215,7 @@ class LoadRunWidgetPresenter(object):
             self._model.execute()
         except ValueError as error:
             self._view.warning_popup(error.args[0])
+            self.run_list = flatten_run_list(self._model.current_runs)
         finished_callback()
 
     def on_loading_start(self):
@@ -221,6 +233,7 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.start()
 
     def error_callback(self, error_message):
+        self.thread_success = False
         self.enable_notifier.notify_subscribers()
         self._view.warning_popup(error_message)
 
@@ -228,14 +241,19 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.deleteLater()
         self._load_thread = None
 
+        if not self.thread_success:
+            self.run_list = flatten_run_list(self._model.current_runs)
         self.on_loading_finished()
 
     def on_loading_finished(self):
         try:
             if self.run_list and self.run_list[0] == 'Current':
-                self.run_list = self._model.get_latest_loaded_run()
+                latest_loaded_run = self._model.get_latest_loaded_run()
+                if isinstance(latest_loaded_run, list):
+                    self.run_list = latest_loaded_run
+                else:
+                    self.run_list[0] = latest_loaded_run
                 self._model.current_run = self.run_list
-
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             self._model.current_runs = run_list
 

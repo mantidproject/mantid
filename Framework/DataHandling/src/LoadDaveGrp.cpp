@@ -77,10 +77,10 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadDaveGrp::init() {
   std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "A DAVE grouped ASCII file");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the workspace that will be created.");
 
@@ -98,10 +98,10 @@ void LoadDaveGrp::init() {
                   "The name of the units for the Y-Axis (must be one of "
                   "those registered in "
                   "the Unit Factory)");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "IsMicroEV", false, Kernel::Direction::Input),
                   "Original file is in units of micro-eV for DeltaE");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "ConvertToHistogram", false, Kernel::Direction::Input),
                   "Convert output workspace to histogram data.");
 }
@@ -167,12 +167,12 @@ API::MatrixWorkspace_sptr LoadDaveGrp::setupWorkspace() const {
   outputWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create(getProperty("XAxisUnits"));
 
-  API::Axis *const verticalAxis = new API::NumericAxis(nGroups);
+  auto verticalAxis = std::make_unique<API::NumericAxis>(nGroups);
   // Set the y-axis units
   verticalAxis->unit() =
       Kernel::UnitFactory::Instance().create(getProperty("YAxisUnits"));
 
-  outputWorkspace->replaceAxis(1, verticalAxis);
+  outputWorkspace->replaceAxis(1, std::move(verticalAxis));
   return outputWorkspace;
 }
 

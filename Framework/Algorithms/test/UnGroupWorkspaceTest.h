@@ -97,7 +97,7 @@ public:
     Mantid::Algorithms::UnGroupWorkspace alg;
     alg.initialize();
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", wsName),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     removeFromADS(std::vector<std::string>(1, wsName));
   }

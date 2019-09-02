@@ -8,7 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
-#include <MantidQtWidgets/Plotting/Qwt/qwt_compat.h>
+#include "MantidQtWidgets/Plotting/Qwt/qwt_compat.h"
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>

@@ -25,6 +25,7 @@ def create_simple_workspace(data_x, data_y, run_number=0):
     ws.getRun().addProperty('run_number', run_number, 'NonDim', True)
     return ws
 
+
 class MuonFileUtilsTest(unittest.TestCase):
     def test_get_run_from_multi_period_data(self):
         simple_workspace = create_simple_workspace(data_x=[1,2,3,4], data_y=[10,20,30,40], run_number=74044)
@@ -67,7 +68,7 @@ class MuonFileUtilsTest(unittest.TestCase):
 
     def test_load_workspace_from_filename_for_existing_file(self):
         filename = 'MUSR00022725.nsx'
-        load_result, run, filename = utils.load_workspace_from_filename(filename)
+        load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
         self.assertEqual(load_result['DeadTimeTable'], None)
         self.assertEqual(load_result['FirstGoodData'], 0.11)

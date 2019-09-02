@@ -8,7 +8,7 @@
 #ifndef _EVENT_HANDLER_H_
 #define _EVENT_HANDLER_H_
 
-#include <MantidAPI/Algorithm.h>
+#include "MantidAPI/Algorithm.h"
 #include <Poco/ActiveMethod.h>
 #include <Poco/NObserver.h>
 #include <Poco/Notification.h>

@@ -71,7 +71,7 @@ def run_MuonGroupingAsymmetry(parameter_dict):
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("OutputWorkspace").value
+    return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputUnNormWorkspace").value
 
 
 def run_CalMuonDetectorPhases(parameter_dict, alg):
@@ -130,6 +130,56 @@ def run_MuonMaxent(parameters_dict, alg):
     return alg.getProperty("OutputWorkspace").value
 
 
+def run_Fit(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty('CreateOutput', True)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+    alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
+    alg.setProperty('StartX', parameters_dict['StartX'])
+    alg.setProperty('EndX', parameters_dict['EndX'])
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value, alg.getProperty("OutputParameters").value, alg.getProperty(
+        "Function").value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value, \
+        alg.getProperty("OutputNormalisedCovarianceMatrix").value
+
+
+def run_simultaneous_Fit(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperty('CreateOutput', True)
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    alg.setProperties(pruned_parameter_dict)
+
+    for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
+        index_str = '_' + str(index) if index else ''
+        alg.setProperty('InputWorkspace' + index_str, input_workspace)
+        alg.setProperty('StartX' + index_str, parameters_dict['StartX'][index])
+        alg.setProperty('EndX' + index_str, parameters_dict['EndX'][index])
+
+    alg.execute()
+
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value, alg.getProperty('Function').value,\
+        alg.getProperty('OutputStatus').value, alg.getProperty(
+            'OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").value
+
+
+def run_CalculateMuonAsymmetry(parameters_dict, alg):
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setRethrows(True)
+    alg.setProperties(parameters_dict)
+    alg.execute()
+    return alg.getProperty('OutputWorkspace').value, alg.getProperty('OutputParameters').value,\
+        alg.getProperty("OutputFunction").value, alg.getProperty('OutputStatus').value,\
+        alg.getProperty('ChiSquared').value, alg.getProperty("OutputNormalisedCovarianceMatrix").value
+
+
 def run_AppendSpectra(ws1, ws2):
     """
     Apply the AppendSpectra algorithm to two given workspaces (no checks made).
@@ -170,5 +220,33 @@ def run_Plus(parameter_dict):
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
+
+
+def convert_to_field(ws):
+    """
+    Apply the Scale algorithm to convert from MHz to Field.
+    """
+    alg = mantid.AlgorithmManager.create("ScaleX")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("Factor", 1.e3 / 13.55)
+    alg.execute()
+    output = alg.getProperty("OutputWorkspace").value
+    output.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')
+    return output
+
+
+def extract_single_spec(ws, spec):
+
+    alg = mantid.AlgorithmManager.create("ExtractSingleSpectrum")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("WorkspaceIndex", spec)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value

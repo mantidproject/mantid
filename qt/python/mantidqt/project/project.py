@@ -11,11 +11,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import os
 
 from qtpy.QtWidgets import QFileDialog, QMessageBox
+from qtpy.QtWidgets import QApplication
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
+from mantid.kernel import ConfigService
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 
 class Project(AnalysisDataServiceObserver):
@@ -28,6 +31,9 @@ class Project(AnalysisDataServiceObserver):
         super(Project, self).__init__()
         # Has the project been saved, to Access this call .saved
         self.__saved = True
+
+        self.__is_saving = False
+        self.__is_loading = False
 
         # Last save locations
         self.last_project_location = None
@@ -49,12 +55,20 @@ class Project(AnalysisDataServiceObserver):
     def __get_saved(self):
         return self.__saved
 
+    def __get_is_saving(self):
+        return self.__is_saving
+
+    def __get_is_loading(self):
+        return self.__is_loading
+
     saved = property(__get_saved)
+    is_saving = property(__get_is_saving)
+    is_loading = property(__get_is_loading)
 
     def save(self):
         """
         The function that is called if the save button is clicked on the mainwindow
-        :return: None; if the user cancels
+        :return: True; if the user cancels
         """
         if self.last_project_location is None:
             return self.save_as()
@@ -64,60 +78,83 @@ class Project(AnalysisDataServiceObserver):
 
             if answer == QMessageBox.Yes:
                 # Actually save
-                self._save()
-            # Else do nothing
+                task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
+                task.start()
+            elif answer == QMessageBox.No:
+                # Save with a new name
+                return self.save_as()
+            else:
+                # Cancel clicked
+                return True
 
     def save_as(self):
         """
         The function that is called if the save as... button is clicked on the mainwindow
-        :return: None; if the user cancels.
+        :return: True; if the user cancels.
         """
         path = self._save_file_dialog()
         if path is None:
             # Cancel close dialogs
-            return
-
-        # If the selected path is a project directory ask if overwrite is required?
-        if os.path.exists(os.path.join(path, (os.path.basename(path) + self.project_file_ext))):
-            answer = self._offer_overwriting_gui()
-            if answer == QMessageBox.No:
-                return
-            elif answer == QMessageBox.Yes:
-                # Just continue on
-                pass
+            return True
 
         # todo: get a list of workspaces but to be implemented on GUI implementation
         self.last_project_location = path
-        self._save()
+        task = BlockingAsyncTaskWithCallback(target=self._save, blocking_cb=QApplication.processEvents)
+        task.start()
 
     @staticmethod
     def _offer_overwriting_gui():
         """
         Offers up a overwriting QMessageBox giving the option to overwrite a project, and returns the reply.
-        :return: QMessaageBox.Yes or QMessageBox.No; The value is the value selected by the user.
+        :return: QMessaageBox.Yes or QMessageBox.No or QMessageBox.Cancel; The value is the value selected by the user.
         """
-        return QMessageBox.question(None, "Overwrite project?",
-                                    "Would you like to overwrite the selected project?",
-                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        return QMessageBox().question(None, "Overwrite project?",
+                                      "Would you like to overwrite the selected project?",
+                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+                                      QMessageBox.Yes)
 
     def _save_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptSave, file_mode=QFileDialog.AnyFile,
                                   file_filter="Project files ( *" + self.project_file_ext + ")")
 
     def _save(self):
+        self.__is_saving = True
         workspaces_to_save = AnalysisDataService.getObjectNames()
-        plots_to_save = self.plot_gfm.figs
-        interfaces_to_save = self.interface_populating_function()
-        project_saver = ProjectSaver(self.project_file_ext)
-        project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                   plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
-        self.__saved = True
+        # Calculate the size of the workspaces in the project.
+        project_size = self._get_project_size(workspaces_to_save)
+        warning_size = int(ConfigService.getString("projectSaving.warningSize"))
+        # If a project is > the value in the properties file, question the user if they want to continue.
+        result = None
+        if project_size > warning_size:
+            result = self._offer_large_size_confirmation()
+        if result is None or result != QMessageBox.Cancel:
+            plots_to_save = self.plot_gfm.figs
+            interfaces_to_save = self.interface_populating_function()
+            project_saver = ProjectSaver(self.project_file_ext)
+            project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
+                                       plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
+            self.__saved = True
+        self.__is_saving = False
+
+    @staticmethod
+    def inform_user_not_possible():
+        return QMessageBox().information(None, "That action is not possible!",
+                                         "You cannot at present exit workbench whilst it is saving or loading a "
+                                         "project")
+
+    @staticmethod
+    def _get_project_size(workspace_names):
+        project_size = 0
+        for name in workspace_names:
+            project_size += AnalysisDataService.retrieve(name).getMemorySize()
+        return project_size
 
     def load(self):
         """
         The event that is called when open project is clicked on the main window
         :return: None; if the user cancelled.
         """
+        self.__is_loading = True
         file_name = self._load_file_dialog()
         if file_name is None:
             # Cancel close dialogs
@@ -129,10 +166,17 @@ class Project(AnalysisDataServiceObserver):
         if file_ext != ".mtdproj":
             QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
 
-        project_loader = ProjectLoader(self.project_file_ext)
-        project_loader.load_project(file_name)
+        self._load(file_name)
+
         self.last_project_location = file_name
         self.__saved = True
+        self.__is_loading = False
+
+    def _load(self, file_name):
+        project_loader = ProjectLoader(self.project_file_ext)
+        task = BlockingAsyncTaskWithCallback(target=project_loader.load_project, args=[file_name],
+                                             blocking_cb=QApplication.processEvents)
+        task.start()
 
     def _load_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
@@ -151,7 +195,8 @@ class Project(AnalysisDataServiceObserver):
         result = self._offer_save_message_box(parent)
 
         if result == QMessageBox.Yes:
-            self.save()
+            if self.save():
+                return True
         elif result == QMessageBox.Cancel:
             return True
         # if yes or no return false
@@ -166,6 +211,16 @@ class Project(AnalysisDataServiceObserver):
                                         QMessageBox.Yes)
         else:
             return QMessageBox.No
+
+    @staticmethod
+    def _offer_large_size_confirmation():
+        """
+        Asks the user to confirm that they want to save a large project.
+        :return: QMessageBox; The response from the user. Default is Yes.
+        """
+        return QMessageBox.question(None, "You are trying to save a large project.",
+                                    "The project may take a long time to save. Would you like to continue?",
+                                    QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
 
     def modified_project(self):
         self.__saved = False

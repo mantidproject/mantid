@@ -35,12 +35,12 @@ DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
  */
 
 void MonitorEfficiencyCorUser::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace to correct for monitor efficiency");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result.");
 }
 
@@ -77,10 +77,10 @@ void MonitorEfficiencyCorUser::exec() {
   const double eff0 = m_monitorCounts * calculateFormulaValue(effFormula, m_Ei);
 
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(this->m_inputWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)

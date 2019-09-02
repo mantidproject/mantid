@@ -90,7 +90,7 @@ public:
                                 "EMU00020919; Pair; long; Asym; #1"});
     MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
                                            false);
-    TS_ASSERT_THROWS(creator.createTable(), std::runtime_error);
+    TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   void test_createTable_throws_noLogs() {
@@ -100,7 +100,7 @@ public:
     this->setUpLogs(workspaces);
     MuonAnalysisResultTableCreator creator(workspaces, QStringList(),
                                            &m_logValues, false);
-    TS_ASSERT_THROWS(creator.createTable(), std::runtime_error);
+    TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   /// Two separate fits of one run each
@@ -168,7 +168,7 @@ public:
     // Test
     MuonAnalysisResultTableCreator creator(workspaces, m_logs, &m_logValues,
                                            false);
-    TS_ASSERT_THROWS(creator.createTable(), std::runtime_error);
+    TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   /// Sequential fit of two runs
@@ -303,7 +303,7 @@ public:
 
     // Test
     MuonAnalysisResultTableCreator creator(labels, m_logs, &m_logValues, true);
-    TS_ASSERT_THROWS(creator.createTable(), std::runtime_error);
+    TS_ASSERT_THROWS(creator.createTable(), const std::runtime_error &);
   }
 
   void test_haveSameParameters_Yes() {

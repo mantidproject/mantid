@@ -14,16 +14,16 @@ class PropertyManagerTest(unittest.TestCase):
         manager = PropertyManager()
 
         # check that it is empty
-        self.assertEquals(manager.__len__(), 0)
-        self.assertEquals(len(manager), 0)
+        self.assertEqual(manager.__len__(), 0)
+        self.assertEqual(len(manager), 0)
 
         # add some values
         manager["f"] = 1.
         manager["i"] = 2
         manager["s"] = "3"
 
-        self.assertEquals(len(manager), 3)
-        self.assertEquals(manager.propertyCount(), 3)
+        self.assertEqual(len(manager), 3)
+        self.assertEqual(manager.propertyCount(), 3)
 
         # confirm they are in there
         self.assertTrue("f" in manager)
@@ -32,24 +32,24 @@ class PropertyManagerTest(unittest.TestCase):
         self.assertFalse("nonsense" in manager)
 
         # check string return values
-        self.assertEquals(manager.getPropertyValue("f"), "1")
-        self.assertEquals(manager.getPropertyValue("i"), "2")
-        self.assertEquals(manager.getPropertyValue("s"), "3")
+        self.assertEqual(manager.getPropertyValue("f"), "1")
+        self.assertEqual(manager.getPropertyValue("i"), "2")
+        self.assertEqual(manager.getPropertyValue("s"), "3")
 
         # check actual values
-        self.assertEquals(manager.getProperty("f").value, 1.)
-        self.assertEquals(manager.getProperty("i").value, 2)
-        self.assertEquals(manager.getProperty("s").value, "3")
+        self.assertEqual(manager.getProperty("f").value, 1.)
+        self.assertEqual(manager.getProperty("i").value, 2)
+        self.assertEqual(manager.getProperty("s").value, "3")
 
         # ...and accessing them through dict interface
-        self.assertEquals(manager["f"].value, 1.)
-        self.assertEquals(manager["i"].value, 2)
-        self.assertEquals(manager["s"].value, "3")
+        self.assertEqual(manager["f"].value, 1.)
+        self.assertEqual(manager["i"].value, 2)
+        self.assertEqual(manager["s"].value, "3")
 
         # see that you can get keys and values
         self.assertTrue(len(manager.values()), 3)
         keys = manager.keys()
-        self.assertEquals(len(keys), 3)
+        self.assertEqual(len(keys), 3)
         self.assertTrue("f" in keys)
         self.assertTrue("i" in keys)
         self.assertTrue("s" in keys)
@@ -77,10 +77,10 @@ class PropertyManagerTest(unittest.TestCase):
             "str": 'a string'
         }
         pmgr = PropertyManager(values)
-        self.assertEquals(len(pmgr), 3)
-        self.assertEquals(5, pmgr["int"].value)
-        self.assertEquals(20.0, pmgr["float"].value)
-        self.assertEquals('a string', pmgr["str"].value)
+        self.assertEqual(len(pmgr), 3)
+        self.assertEqual(5, pmgr["int"].value)
+        self.assertEqual(20.0, pmgr["float"].value)
+        self.assertEqual('a string', pmgr["str"].value)
 
     def test_propertymanager_cannot_be_created_from_arbitrary_sequence(self):
         with self.assertRaises(Exception):

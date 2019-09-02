@@ -16,7 +16,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
@@ -54,14 +53,12 @@ makeProperty(::NeXus::File *file, const std::string &name,
   file->getData(values);
   if (times.empty()) {
     if (values.size() == 1) {
-      return Mantid::Kernel::make_unique<PropertyWithValue<NumT>>(name,
-                                                                  values[0]);
+      return std::make_unique<PropertyWithValue<NumT>>(name, values[0]);
     } else {
-      return Mantid::Kernel::make_unique<ArrayProperty<NumT>>(
-          name, std::move(values));
+      return std::make_unique<ArrayProperty<NumT>>(name, std::move(values));
     }
   } else {
-    auto prop = Mantid::Kernel::make_unique<TimeSeriesProperty<NumT>>(name);
+    auto prop = std::make_unique<TimeSeriesProperty<NumT>>(name);
     prop->addValues(times, values);
     return std::unique_ptr<Property>(std::move(prop));
   }
@@ -84,7 +81,7 @@ makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
   for (size_t i = 0; i < nvals; ++i) {
     realValues[i] = (savedValues[i] != 0);
   }
-  auto prop = Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
+  auto prop = std::make_unique<TimeSeriesProperty<bool>>(name);
   prop->addValues(times, realValues);
   return std::unique_ptr<Property>(std::move(prop));
 }
@@ -96,22 +93,20 @@ makeStringProperty(::NeXus::File *file, const std::string &name,
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
-    return Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
-        name, bigString);
+    return std::make_unique<PropertyWithValue<std::string>>(name, bigString);
   } else {
     if (file->getInfo().dims.size() != 2)
       throw std::runtime_error("NXlog loading failed on field " + name +
                                ". Expected rank 2.");
     int64_t numStrings = file->getInfo().dims[0];
     int64_t span = file->getInfo().dims[1];
-    auto data = Mantid::Kernel::make_unique<char[]>(numStrings * span);
+    auto data = std::make_unique<char[]>(numStrings * span);
     file->getData(data.get());
     values.reserve(static_cast<size_t>(numStrings));
     for (int64_t i = 0; i < numStrings; i++)
       values.emplace_back(data.get() + i * span);
 
-    auto prop =
-        Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
+    auto prop = std::make_unique<TimeSeriesProperty<std::string>>(name);
     prop->addValues(times, values);
     return std::unique_ptr<Property>(std::move(prop));
   }

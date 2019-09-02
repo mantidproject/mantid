@@ -172,18 +172,18 @@ public:
   void test_initialize_throws() {
     IMDEventWorkspace *ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
+    TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     for (size_t i = 0; i < 5; i++)
       ew->addDimension(MDHistoDimension_sptr(
           new MDHistoDimension("x", "x", frame, -1, 1, 0)));
-    TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
+    TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     delete ew;
   }
 
   void test_initialize() {
     IMDEventWorkspace *ew = new MDEventWorkspace<MDLeanEvent<3>, 3>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
-    TS_ASSERT_THROWS(ew->initialize(), std::runtime_error);
+    TS_ASSERT_THROWS(ew->initialize(), const std::runtime_error &);
     for (size_t i = 0; i < 3; i++)
       ew->addDimension(MDHistoDimension_sptr(
           new MDHistoDimension("x", "x", frame, -1, 1, 0)));
@@ -416,8 +416,8 @@ public:
     max.push_back(1.5);
 
     // Create a function to mask some of the workspace.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ew->setMDMasking(function);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
+    ew->setMDMasking(std::move(function));
     ew->refreshCache();
 
     TSM_ASSERT_DELTA(
@@ -553,13 +553,13 @@ public:
   /*
   Generic masking checking helper method.
   */
-  void doTestMasking(MDImplicitFunction *function,
+  void doTestMasking(std::unique_ptr<MDImplicitFunction> function,
                      size_t expectedNumberMasked) {
     // 10x10x10 eventWorkspace
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
 
-    ws->setMDMasking(function);
+    ws->setMDMasking(std::move(function));
 
     size_t numberMasked = getNumberMasked(ws);
     TSM_ASSERT_EQUALS("Didn't perform the masking as expected",
@@ -578,9 +578,9 @@ public:
     max.push_back(10);
 
     // Create an function that encompases 1/4 of the total bins.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
-    doTestMasking(function, 1000); // 1000 out of 1000 bins masked
+    doTestMasking(std::move(function), 1000); // 1000 out of 1000 bins masked
   }
 
   void test_maskNULL() {
@@ -601,9 +601,9 @@ public:
     max.push_back(-0.01f);
 
     // Create an function that encompases 1/4 of the total bins.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
-    doTestMasking(function, 0); // 0 out of 1000 bins masked
+    doTestMasking(std::move(function), 0); // 0 out of 1000 bins masked
   }
 
   void test_maskHalf() {
@@ -619,9 +619,9 @@ public:
     max.push_back(4.99f);
 
     // Create an function that encompases 1/4 of the total bins.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
-    doTestMasking(function, 500); // 500 out of 1000 bins masked
+    doTestMasking(std::move(function), 500); // 500 out of 1000 bins masked
   }
 
   void test_clearMasking() {
@@ -634,11 +634,11 @@ public:
     max.push_back(10);
     max.push_back(10);
     max.push_back(10);
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
-    ws->setMDMasking(function);
+    ws->setMDMasking(std::move(function));
 
     TSM_ASSERT_EQUALS("Everything should be masked.", 1000,
                       getNumberMasked(ws));
@@ -701,8 +701,8 @@ public:
     std::vector<coord_t> max{3.0, 3.0, 3.0};
 
     // Create an function to mask some of the workspace.
-    MDImplicitFunction *function = new MDBoxImplicitFunction(min, max);
-    ew->setMDMasking(function);
+    auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
+    ew->setMDMasking(std::move(function));
     ew->refreshCache();
 
     Mantid::Kernel::VMD start(0, 0, 0);

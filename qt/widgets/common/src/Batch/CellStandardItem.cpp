@@ -17,6 +17,7 @@ void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   setBackgroundColor(item, cell.backgroundColor());
   setBorderColor(item, cell.borderColor(), cell.borderOpacity());
   setIcon(item, cell.iconFilePath());
+  setForegroundColor(item, cell.foregroundColor());
 }
 
 Cell extractCellPropertiesFromItem(QStandardItem const &item) {
@@ -24,6 +25,7 @@ Cell extractCellPropertiesFromItem(QStandardItem const &item) {
   cell.setBorderThickness(getBorderThickness(item));
   cell.setIconFilePath(getIconFilePath(item));
   cell.setBackgroundColor(getBackgroundColor(item));
+  cell.setForegroundColor(getForegroundColor(item));
 
   auto borderColor = getBorderColor(item);
   cell.setBorderColor(borderColor.name().toStdString());
@@ -74,6 +76,20 @@ void setBackgroundColor(QStandardItem &item,
 
 std::string getBackgroundColor(QStandardItem const &item) {
   return item.data(Qt::BackgroundRole)
+      .value<QBrush>()
+      .color()
+      .name()
+      .toStdString();
+}
+
+void setForegroundColor(QStandardItem &item,
+                        std::string const &foregroundColor) {
+  auto borderColor = QColor(foregroundColor.c_str());
+  item.setData(QBrush(borderColor), Qt::ForegroundRole);
+}
+
+std::string getForegroundColor(QStandardItem const &item) {
+  return item.data(Qt::ForegroundRole)
       .value<QBrush>()
       .color()
       .name()

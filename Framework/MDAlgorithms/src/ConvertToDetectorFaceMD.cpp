@@ -50,18 +50,18 @@ const std::string ConvertToDetectorFaceMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToDetectorFaceMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MatrixWorkspace.");
   declareProperty(
-      make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
       "A list of the bank numbers to convert. If empty, will use "
       "all banksMust have at least one entry.");
 
   // Now the box controller settings
   this->initBoxControllerProps("2", 200, 20);
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
@@ -100,7 +100,7 @@ void ConvertToDetectorFaceMD::convertEventList(
   auto it_end = events.end();
 
   for (; it != it_end; it++) {
-    coord_t tof = static_cast<coord_t>(it->tof());
+    auto tof = static_cast<coord_t>(it->tof());
     if (nd == 3) {
       coord_t center[3] = {x, y, tof};
       out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
@@ -274,9 +274,9 @@ void ConvertToDetectorFaceMD::exec() {
           throw std::runtime_error("Invalid workspace index found in bank " +
                                    det->getName() + "!");
 
-        coord_t xPos = static_cast<coord_t>(x);
-        coord_t yPos = static_cast<coord_t>(y);
-        coord_t bankPos = static_cast<coord_t>(bankNum);
+        auto xPos = static_cast<coord_t>(x);
+        auto yPos = static_cast<coord_t>(y);
+        auto bankPos = static_cast<coord_t>(bankNum);
 
         EventList &el = in_ws->getSpectrum(wi);
 

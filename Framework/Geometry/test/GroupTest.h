@@ -52,7 +52,7 @@ public:
     TS_ASSERT_EQUALS(groupOps.size(), 2);
 
     std::vector<SymmetryOperation> empty;
-    TS_ASSERT_THROWS(Group group(empty), std::invalid_argument);
+    TS_ASSERT_THROWS(Group group(empty), const std::invalid_argument &);
   }
 
   void testCopyConstructor() {
@@ -373,17 +373,17 @@ public:
     // Make sure that null-pointer do not work
     Group_const_sptr null;
 
-    TS_ASSERT_THROWS(null * null, std::invalid_argument);
+    TS_ASSERT_THROWS(null * null, const std::invalid_argument &);
     // clang gives a warning if we don't use the result
     GNU_DIAG_OFF("unused-comparison")
-    TS_ASSERT_THROWS(null == null, std::invalid_argument);
-    TS_ASSERT_THROWS(null != null, std::invalid_argument);
+    TS_ASSERT_THROWS(null == null, const std::invalid_argument &);
+    TS_ASSERT_THROWS(null != null, const std::invalid_argument &);
     GNU_DIAG_ON("unused-comparison")
-    TS_ASSERT_THROWS(three * null, std::invalid_argument);
-    TS_ASSERT_THROWS(null * three, std::invalid_argument);
+    TS_ASSERT_THROWS(three * null, const std::invalid_argument &);
+    TS_ASSERT_THROWS(null * three, const std::invalid_argument &);
 
     Mantid::Kernel::V3D coords(0.4, 0.3, 0.1);
-    TS_ASSERT_THROWS(null * coords, std::invalid_argument);
+    TS_ASSERT_THROWS(null * coords, const std::invalid_argument &);
   }
 };
 

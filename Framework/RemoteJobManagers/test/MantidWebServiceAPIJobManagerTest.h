@@ -12,8 +12,8 @@
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/SimpleJSON.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
-#include "MantidRemoteJobManagers/SimpleJSON.h"
 
 #include <boost/make_shared.hpp>
 
@@ -184,7 +184,7 @@ public:
                           " should fail",
                       IRemoteJobManager_sptr jobManager =
                           RemoteJobManagerFactory::Instance().create(FermiName),
-                      std::runtime_error);
+                      const std::runtime_error &);
 
     // restore facility to what it was before test
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
@@ -226,21 +226,23 @@ public:
     // response is empty or inconsistent).
     MockMantidAPIStatusNotFound jm;
     TSM_ASSERT_THROWS("abort job without job ID should throw",
-                      jm.abortRemoteJob(""), JSONParseException);
+                      jm.abortRemoteJob(""), const JSONParseException &);
     TSM_ASSERT_THROWS("abort job with wrong job ID should throw",
-                      jm.abortRemoteJob("anything_wrong"), JSONParseException);
+                      jm.abortRemoteJob("anything_wrong"),
+                      const JSONParseException &);
 
     TSM_ASSERT_THROWS("download with wrong transaction ID should throw",
                       jm.downloadRemoteFile("any_wrong_transID", "remote_fname",
                                             "local_fname"),
-                      JSONParseException);
+                      const JSONParseException &);
 
     // Note that as an exception queryAllRemoteJobs does a bit more of
     // checking and throws std::runtime_error when something is wrong
     // in the server response.
     std::vector<IRemoteJobManager::RemoteJobInfo> infos;
     TSM_ASSERT_THROWS("query all jobs without logging in should throw",
-                      infos = jm.queryAllRemoteJobs(), std::runtime_error);
+                      infos = jm.queryAllRemoteJobs(),
+                      const std::runtime_error &);
     TSM_ASSERT_EQUALS(
         "there should not be any job information returned from the remote",
         infos.size(), 0);
@@ -248,43 +250,45 @@ public:
     std::vector<std::string> files;
     TSM_ASSERT_THROWS(
         "query remote files with wrong transaction ID should throw",
-        files = jm.queryRemoteFile("any_wrong_transID"), JSONParseException);
+        files = jm.queryRemoteFile("any_wrong_transID"),
+        const JSONParseException &);
     TSM_ASSERT_EQUALS("The file list for a wrong transaction should be empty",
                       files.size(), 0);
 
     IRemoteJobManager::RemoteJobInfo info;
     TSM_ASSERT_THROWS("query job info should throw for wrong job ID",
                       info = jm.queryRemoteJob("any_wrong_jobID"),
-                      JSONParseException);
+                      const JSONParseException &);
 
     std::string id;
     TSM_ASSERT_THROWS("start transaction without logging in should throw",
-                      id = jm.startRemoteTransaction(), JSONParseException);
+                      id = jm.startRemoteTransaction(),
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("failed start transaction should not return any ID", id,
                       "");
 
     TSM_ASSERT_THROWS("stop transaction without logging in should throw",
                       jm.stopRemoteTransaction("a_wrong_transID"),
-                      JSONParseException);
+                      const JSONParseException &);
 
     std::string jobID;
     TSM_ASSERT_THROWS("submit job without logging in should throw",
                       id = jm.submitRemoteJob("a_wrong_transID", "executable",
                                               "--params 0", "name_for_job"),
-                      JSONParseException);
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("failed submit job should not return any ID", jobID, "");
 
     TSM_ASSERT_THROWS(
         "upload file without logging in should throw",
         jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
-        JSONParseException);
+        const JSONParseException &);
 
     // and failed login at the end
     TSM_ASSERT_THROWS("authenticate with empty credentials should throw",
-                      jm.authenticate("", ""), JSONParseException);
+                      jm.authenticate("", ""), const JSONParseException &);
     TSM_ASSERT_THROWS("mocked authenticate should throw",
                       jm.authenticate("wrong_user", "no_pass"),
-                      JSONParseException);
+                      const JSONParseException &);
   }
 
 private:
@@ -305,24 +309,28 @@ private:
     std::vector<IRemoteJobManager::RemoteJobInfo> infos;
     TSM_ASSERT_THROWS("query all jobs with ok response code but no content "
                       "from server should throw",
-                      infos = jm.queryAllRemoteJobs(), std::runtime_error);
+                      infos = jm.queryAllRemoteJobs(),
+                      const std::runtime_error &);
 
     std::vector<std::string> files;
     TSM_ASSERT_THROWS("query remote files with ok response code but no content "
                       "from server should throw",
-                      files = jm.queryRemoteFile("any"), JSONParseException);
+                      files = jm.queryRemoteFile("any"),
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("The file list for a transaction should be empty",
                       files.size(), 0);
 
     IRemoteJobManager::RemoteJobInfo info;
     TSM_ASSERT_THROWS("query job info with ok response code from but no "
                       "content from server should throw",
-                      info = jm.queryRemoteJob("any"), JSONParseException);
+                      info = jm.queryRemoteJob("any"),
+                      const JSONParseException &);
 
     std::string id;
     TSM_ASSERT_THROWS("start transaction with ok response code but no content "
                       "from server should throw",
-                      id = jm.startRemoteTransaction(), JSONParseException);
+                      id = jm.startRemoteTransaction(),
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("failed start transaction should not return any ID", id,
                       "");
 
@@ -335,7 +343,7 @@ private:
                       "server should throw",
                       id = jm.submitRemoteJob("a_wrong_transID", "executable",
                                               "--params 0", "name_for_job"),
-                      JSONParseException);
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("mock submit job should not return non-empty ID", jobID,
                       "");
 
@@ -343,7 +351,7 @@ private:
         "upload file with ok response code but no content from server should "
         "throw",
         jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
-        JSONParseException);
+        const JSONParseException &);
   }
 
   // for when the server returns status != HTTP_OK and a correctly
@@ -351,56 +359,57 @@ private:
   void checkJMWithErrResponse(MantidWebServiceAPIJobManager &jm) {
     TSM_ASSERT_THROWS(
         "abort job with error response code from server should throw",
-        jm.abortRemoteJob("anything"), JSONParseException);
+        jm.abortRemoteJob("anything"), const JSONParseException &);
 
     TSM_ASSERT_THROWS(
         "authenticate with error response code from server should throw",
-        jm.authenticate("any_user", "any_pass"), JSONParseException);
+        jm.authenticate("any_user", "any_pass"), const JSONParseException &);
 
     TSM_ASSERT_THROWS(
         "download with error response code from server should throw",
         jm.downloadRemoteFile("any_transID", "remote_fname", "local_fname"),
-        JSONParseException);
+        const JSONParseException &);
 
     std::vector<IRemoteJobManager::RemoteJobInfo> infos;
     TSM_ASSERT_THROWS(
         "query all jobs with error response from server should throw",
-        infos = jm.queryAllRemoteJobs(), std::runtime_error);
+        infos = jm.queryAllRemoteJobs(), const std::runtime_error &);
 
     std::vector<std::string> files;
     TSM_ASSERT_THROWS(
         "query remote files with error response code from server should throw",
-        files = jm.queryRemoteFile("any"), JSONParseException);
+        files = jm.queryRemoteFile("any"), const JSONParseException &);
     TSM_ASSERT_EQUALS("The file list for a wrong transaction should be empty",
                       files.size(), 0);
 
     IRemoteJobManager::RemoteJobInfo info;
     TSM_ASSERT_THROWS(
         "query job info with error response from server should throw",
-        info = jm.queryRemoteJob("any"), JSONParseException);
+        info = jm.queryRemoteJob("any"), const JSONParseException &);
 
     std::string id;
     TSM_ASSERT_THROWS(
         "start transaction with error response from server should throw",
-        id = jm.startRemoteTransaction(), JSONParseException);
+        id = jm.startRemoteTransaction(), const JSONParseException &);
     TSM_ASSERT_EQUALS("failed start transaction should not return any ID", id,
                       "");
 
     TSM_ASSERT_THROWS(
         "stop transaction with error response from server should throw",
-        jm.stopRemoteTransaction("a_wrong_transID"), JSONParseException);
+        jm.stopRemoteTransaction("a_wrong_transID"),
+        const JSONParseException &);
 
     std::string jobID;
     TSM_ASSERT_THROWS("submit job with error response from server should throw",
                       id = jm.submitRemoteJob("a_wrong_transID", "executable",
                                               "--params 0", "name_for_job"),
-                      JSONParseException);
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("failed submit job should not return any ID", jobID, "");
 
     TSM_ASSERT_THROWS(
         "upload file with error response from server should throw",
         jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
-        JSONParseException);
+        const JSONParseException &);
   }
 
   // for when the server returns an status code != HTTP_OK but the
@@ -409,61 +418,66 @@ private:
   void checkJMErrWithoutErrMessage(MantidWebServiceAPIJobManager &jm) {
     TSM_ASSERT_THROWS("abort job with error response code but no content from "
                       "server should throw",
-                      jm.abortRemoteJob("anything"), JSONParseException);
+                      jm.abortRemoteJob("anything"),
+                      const JSONParseException &);
 
     TSM_ASSERT_THROWS(
         "authenticate with error response code but no content from server but "
         "no content should throw",
-        jm.authenticate("any_user", "any_pass"), JSONParseException);
+        jm.authenticate("any_user", "any_pass"), const JSONParseException &);
 
     TSM_ASSERT_THROWS(
         "download with error response code but no content from server should "
         "throw",
         jm.downloadRemoteFile("any_transID", "remote_fname", "local_fname"),
-        JSONParseException);
+        const JSONParseException &);
 
     std::vector<IRemoteJobManager::RemoteJobInfo> infos;
     TSM_ASSERT_THROWS("query all jobs with error response from but no content "
                       "server should throw",
-                      infos = jm.queryAllRemoteJobs(), std::runtime_error);
+                      infos = jm.queryAllRemoteJobs(),
+                      const std::runtime_error &);
 
     std::vector<std::string> files;
     TSM_ASSERT_THROWS("query remote files with error response code but no "
                       "content from server should throw",
-                      files = jm.queryRemoteFile("any"), JSONParseException);
+                      files = jm.queryRemoteFile("any"),
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("The file list for a wrong transaction should be empty",
                       files.size(), 0);
 
     IRemoteJobManager::RemoteJobInfo info;
     TSM_ASSERT_THROWS("query job info with error response but no content from "
                       "server should throw",
-                      info = jm.queryRemoteJob("any"), JSONParseException);
+                      info = jm.queryRemoteJob("any"),
+                      const JSONParseException &);
 
     std::string id;
     TSM_ASSERT_THROWS("start transaction with error response but no content "
                       "from server should throw",
-                      id = jm.startRemoteTransaction(), JSONParseException);
+                      id = jm.startRemoteTransaction(),
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("failed start transaction should not return any ID", id,
                       "");
 
     TSM_ASSERT_THROWS("stop transaction with error response but no content "
                       "from server should throw",
                       jm.stopRemoteTransaction("a_wrong_transID"),
-                      JSONParseException);
+                      const JSONParseException &);
 
     std::string jobID;
     TSM_ASSERT_THROWS("submit job with error response but no content from "
                       "server should throw",
                       id = jm.submitRemoteJob("a_wrong_transID", "executable",
                                               "--params 0", "name_for_job"),
-                      JSONParseException);
+                      const JSONParseException &);
     TSM_ASSERT_EQUALS("failed submit job should not return any ID", jobID, "");
 
     TSM_ASSERT_THROWS(
         "upload file with error response but no content from server should "
         "throw",
         jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
-        JSONParseException);
+        const JSONParseException &);
   }
 
   static const std::string SNSFac;

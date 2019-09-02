@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::API;
 

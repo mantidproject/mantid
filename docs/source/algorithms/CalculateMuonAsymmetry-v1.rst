@@ -61,8 +61,12 @@ This example is for calculating the Asymmetry for a single data set.
    ws2= makeData("b",1.10)
    
    myFunc='name=GausOsc,$domains=i,Frequency=5.;'  
-   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(myFunc,tab,["a"],"Construct")
-   CalculateMuonAsymmetry(tab,["a"],["b"],str(TFFunc),OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
+
+   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=myFunc,NormalizationTable=tab,WorkspaceList=["a"],Mode="Construct")
+   CalculateMuonAsymmetry(NormalizationTable=tab, unNormalizedWorkspaceList=["a"],
+                          ReNormalizedWorkspaceList=["b"], InputFunction= str(TFFunc),
+                          OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
+
    print("Normalization constant for b: {0:.2f}".format(tab.column(0)[1]))
 
 Output:
@@ -107,9 +111,12 @@ This example is for calculating the Asymmetry for multuiple data sets.
    ws3= makeData("c",4.1)
    ws4= makeData("d",2.0)
 
-   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(multiFunc,tab,["a","c"],"Construct")
+   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(InputFunction=multiFunc, NormalizationTable=tab,
+                                                 WorkspaceList=["a","c"], Mode="Construct")
 
-   CalculateMuonAsymmetry(tab,["a","c"],["b","d"],str(TFFunc),OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
+   CalculateMuonAsymmetry(NormalizationTable=tab, unNormalizedWorkspaceList=["a","c"],
+                          ReNormalizedWorkspaceList=["b","d"], InputFunction= str(TFFunc),
+                          OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
 
    print("Normalization constant for b: {0:.2f}".format(tab.column(0)[1]))
    print("Normalization constant for d: {0:.2f}".format(tab.column(0)[3]))

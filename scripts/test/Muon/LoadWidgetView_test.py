@@ -7,15 +7,14 @@
 import unittest
 
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.load_widget.load_view import LoadView
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
+@start_qapplication
 class LoadViewTest(unittest.TestCase):
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
-
         self.view = LoadView()
         self.slot = mock.Mock()
         self.view.load_button = mock.Mock()

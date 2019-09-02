@@ -30,11 +30,10 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
 #include <limits>
@@ -72,7 +71,13 @@ IFunction::~IFunction() { m_attrs.clear(); }
  * Virtual copy constructor
  */
 boost::shared_ptr<IFunction> IFunction::clone() const {
-  return FunctionFactory::Instance().createInitialized(this->asString());
+  auto clonedFunction =
+      FunctionFactory::Instance().createInitialized(this->asString());
+  for (size_t i = 0; i < this->nParams(); i++) {
+    double error = this->getError(i);
+    clonedFunction->setError(i, error);
+  }
+  return clonedFunction;
 }
 
 /**
@@ -181,7 +186,7 @@ void IFunction::unfix(size_t i) {
  */
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
-  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
+  auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
     fix(getParameterIndex(*ti));
@@ -1084,14 +1089,13 @@ void IFunction::setMatrixWorkspace(
             paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
-          const Geometry::FitParameter &fitParam =
-              param->value<Geometry::FitParameter>();
+          const auto &fitParam = param->value<Geometry::FitParameter>();
 
           // check first if this parameter is actually specified for this
           // function
           if (name() == fitParam.getFunction()) {
             // update value
-            IFunctionWithLocation *testWithLocation =
+            auto *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() &&
@@ -1297,7 +1301,7 @@ void IFunction::convertValue(std::vector<double> &values,
     double twoTheta(0.0);
     if (!spectrumInfo.isMonitor(wsIndex))
       twoTheta = spectrumInfo.twoTheta(wsIndex);
-    int emode = static_cast<int>(ws->getEMode());
+    auto emode = static_cast<int>(ws->getEMode());
     double efixed(0.0);
     try {
       boost::shared_ptr<const Geometry::IDetector> det(
@@ -1346,6 +1350,11 @@ void IFunction::setAttributeValue(const std::string &attName,
   Attribute att = getAttribute(attName);
   att.setString(value);
   setAttribute(attName, att);
+}
+
+/// Returns the pointer to a child function
+IFunction_sptr IFunction::getFunction(std::size_t) const {
+  throw std::runtime_error("Function " + name() + " doesn't have children.");
 }
 
 /// Returns a list of attribute names
@@ -1594,10 +1603,9 @@ template <>
 MANTID_API_DLL boost::shared_ptr<Mantid::API::IFunction>
 IPropertyManager::getValue<boost::shared_ptr<Mantid::API::IFunction>>(
     const std::string &name) const {
-  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *prop =
-      dynamic_cast<
-          PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -1611,10 +1619,9 @@ template <>
 MANTID_API_DLL boost::shared_ptr<const Mantid::API::IFunction>
 IPropertyManager::getValue<boost::shared_ptr<const Mantid::API::IFunction>>(
     const std::string &name) const {
-  PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *prop =
-      dynamic_cast<
-          PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<boost::shared_ptr<Mantid::API::IFunction>> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

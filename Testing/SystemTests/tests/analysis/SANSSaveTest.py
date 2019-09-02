@@ -63,6 +63,29 @@ class SANSSaveTest(unittest.TestCase):
         if os.path.exists(file_name):
             os.remove(file_name)
 
+    def test_that_run_number_properties_can_be_set(self):
+        # Arrange
+        workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
+        file_name = os.path.join(mantid.config.getString('defaultsave.directory'), 'sample_sans_save_file')
+        save_name = "SANSSave"
+        save_options = {"InputWorkspace": workspace,
+                        "Filename": file_name,
+                        "UseZeroErrorFree": False,
+                        "Nexus": False,
+                        "CanSAS": False,
+                        "NXCanSAS": True,
+                        "NistQxy": False,
+                        "RKH": False,
+                        "CSV": False,
+                        "SampleTransmissionRunNumber": "5",
+                        "SampleDirectRunNumber": "6",
+                        "CanScatterRunNumber": "7",
+                        "CanDirectRunNumber": "8"}
+        try:
+            create_unmanaged_algorithm(save_name, **save_options)
+        except RuntimeError:
+            self.fail("Unable to set properties for SANSSave.")
+
     def test_that_workspace_can_be_saved_without_zero_error_free_option(self):
         # Arrange
         workspace = SANSSaveTest._get_sample_workspace(with_zero_errors=False, convert_to_numeric_axis=True)
@@ -177,9 +200,9 @@ class SANSSaveTest(unittest.TestCase):
         reloaded_workspace = load_alg.getProperty("OutputWorkspace").value
         errors = reloaded_workspace.dataE(0)
         # Make sure that the errors are not zero
-        self.assertTrue(errors[0] > 1.0)
-        self.assertTrue(errors[14] > 1.0)
-        self.assertTrue(errors[45] > 1.0)
+        self.assertGreater(errors[0], 1.0)
+        self.assertGreater(errors[14], 1.0)
+        self.assertGreater(errors[45], 1.0)
 
         # Clean up
         self._remove_file(file_name)

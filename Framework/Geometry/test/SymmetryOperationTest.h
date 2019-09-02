@@ -268,7 +268,7 @@ public:
     for (int i = 1; i < 10; ++i) {
       randMatrix.setRandom(1, -i, i);
       TS_ASSERT_THROWS(symOp.getOrderFromMatrix(randMatrix),
-                       std::runtime_error);
+                       const std::runtime_error &);
     }
   }
 
@@ -346,12 +346,12 @@ public:
     // no []
     std::stringstream invalidBrackets;
     invalidBrackets << "x,-y,z";
-    TS_ASSERT_THROWS(invalidBrackets >> mirror, std::runtime_error);
+    TS_ASSERT_THROWS(invalidBrackets >> mirror, const std::runtime_error &);
 
     // invalid string
     std::stringstream invalid;
     invalid << "[someString]";
-    TS_ASSERT_THROWS(invalid >> mirror, Exception::ParseError);
+    TS_ASSERT_THROWS(invalid >> mirror, const Exception::ParseError &);
   }
 
 private:

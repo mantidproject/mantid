@@ -471,11 +471,7 @@ class MuonMaxent(PythonAlgorithm):
             MAXPAGE_n,
             endpoint=False)
         # write results! Frequency spectra
-        outSpec = WorkspaceFactory.create(
-            "Workspace2D",
-            NVectors=1,
-            XLength=MAXPAGE_n,
-            YLength=MAXPAGE_n)
+        outSpec = WorkspaceFactory.create(ws,NVectors=1,XLength=MAXPAGE_n,YLength=MAXPAGE_n)
         outSpec.dataX(0)[:] = fchan
         outSpec.dataY(0)[:] = MAXPAGE_f
         outSpec.getAxis(0).setUnit('Label').setLabel('Field', 'Gauss')

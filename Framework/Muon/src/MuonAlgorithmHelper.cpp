@@ -219,7 +219,8 @@ void groupWorkspaces(const std::string &groupName,
   } else {
     // Doesn't exist or isn't a group -> create/overwrite
     IAlgorithm_sptr groupingAlg =
-        AlgorithmManager::Instance().create("GroupWorkspaces");
+        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupingAlg->initialize();
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
@@ -447,8 +448,8 @@ void parseRunLabel(const std::string &label, std::string &instrument,
               pairTokenizer[0].length() - pairTokenizer[1].length();
           const std::string endRun =
               pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
-          const int start = boost::lexical_cast<int>(pairTokenizer[0]);
-          const int end = boost::lexical_cast<int>(endRun);
+          const auto start = boost::lexical_cast<int>(pairTokenizer[0]);
+          const auto end = boost::lexical_cast<int>(endRun);
           for (int run = start; run < end + 1; run++) {
             runNumbers.push_back(run);
           }
@@ -478,7 +479,7 @@ bool checkValidPair(const std::string &WSname1, const std::string &WSname2) {
   try {
     group1 = parseWorkspaceName(WSname1);
     group2 = parseWorkspaceName(WSname2);
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     throw std::invalid_argument(
         "Ensure workspaces have the correctly formatted name (see "
         "documentation).");
@@ -538,10 +539,12 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS,
     auto LHSWorkspace = inputWS->getItem(periodsToSum[0] - 1);
     outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
-      int numPeriods = static_cast<int>(periodsToSum.size());
+      auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
-        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
+        IAlgorithm_sptr alg =
+            AlgorithmManager::Instance().createUnmanaged("Plus");
+        alg->initialize();
         alg->setChild(true);
         alg->setRethrows(true);
         alg->setProperty("LHSWorkspace", outWS);
@@ -565,7 +568,8 @@ MatrixWorkspace_sptr subtractWorkspaces(const MatrixWorkspace_sptr &lhs,
                                         const MatrixWorkspace_sptr &rhs) {
   MatrixWorkspace_sptr outWS;
   if (lhs && rhs) {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Minus");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Minus");
+    alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->setProperty("LHSWorkspace", lhs);
@@ -588,7 +592,8 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
   MatrixWorkspace_sptr outWS;
   if (inputWS) {
     IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+        AlgorithmManager::Instance().createUnmanaged("ExtractSingleSpectrum");
+    alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
     alg->setProperty("InputWorkspace", inputWS);
@@ -602,7 +607,9 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
 
 void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
                   const std::string &logValue) {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("AddSampleLog");
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
+  alg->initialize();
   alg->setChild(true);
   alg->setRethrows(true);
   alg->setProperty("Workspace", workspace);

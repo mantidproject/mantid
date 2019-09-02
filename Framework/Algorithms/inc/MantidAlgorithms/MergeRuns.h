@@ -7,12 +7,12 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
-#include <MantidAPI/MatrixWorkspace.h>
 
 #include <boost/optional.hpp>
 

@@ -28,6 +28,8 @@ class MultiPlotWindow(QtWidgets.QMainWindow):
 
     def closeEvent(self, event):
         self.multi_plot.removeSubplotDisonnect()
+        self.multi_plot.plots._ADSObserver.unsubscribe()
+        self.multi_plot.plots._ADSObserver = None
         self.windowClosedSignal.emit()
 
 
@@ -57,14 +59,13 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self.setLayout(layout)
 
     """ plotting """
-
     def add_subplot(self, name):
-        self.plots.add_subplot(name, len(self.quickEdit.get_selection()))
+        self.plots.add_subplot(name, len(self.quickEdit.get_subplots()))
 
         self.quickEdit.add_subplot(name)
 
-    def plot(self, subplotName, ws, specNum=1):
-        self.plots.plot(subplotName, ws, specNum=specNum)
+    def plot(self, subplot_name, ws, color=None, spec_num=1):
+        self.plots.plot(subplot_name, ws, color=color, spec_num=spec_num)
 
     def remove_subplot(self, name):
         self.plots._remove_subplot(name)
@@ -72,9 +73,9 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def get_subplots(self):
         return list(self._context.subplots.keys())
 
-    def add_vline_and_annotate(self, subplotName, xvalue, label):
+    def add_vline_and_annotate(self, subplotName, xvalue, label, color):
         self.add_annotate(subplotName, label)
-        self.add_vline(subplotName, xvalue, label.text)
+        self.add_vline(subplotName, xvalue, label.text, color)
 
     def rm_vline_and_annotate(self, subplotName, name):
         self.rm_annotate(subplotName, name)
@@ -83,8 +84,8 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def add_annotate(self, subplotName, label):
         self.plots.add_annotate(subplotName, label)
 
-    def add_vline(self, subplotName, xvalue, name):
-        self.plots.add_vline(subplotName, xvalue, name)
+    def add_vline(self, subplotName, xvalue, name, color):
+        self.plots.add_vline(subplotName, xvalue, name, color)
 
     def rm_annotate(self, subplotName, name):
         self.plots.rm_annotate(subplotName, name)
@@ -92,7 +93,11 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def rm_vline(self, subplotName, name):
         self.plots.rm_vline(subplotName, name)
 
-    # gets inital values for quickEdit
+    def remove_line(self, subplot_name, ws_name, spec=1):
+        name = '{}: spec {}'.format(ws_name, spec)
+        self.plots.remove_lines(subplot_name, [name])
+
+    # gets initial values for quickEdit
     def set_all_values(self):
         names = self.quickEdit.get_selection()
         xrange = list(self._context.subplots[names[0]].xbounds)
@@ -120,21 +125,23 @@ class MultiPlotWidget(QtWidgets.QWidget):
     def connectCloseSignal(self, slot):
         self.closeSignal.connect(slot)
 
-    def removeSubplotConnection(self, slot):
+    def remove_subplot_connection(self, slot):
         self.plots.connect_rm_subplot_signal(slot)
 
-    def disconnectCloseSignal(selft):
+    def remove_line_connection(self, slot):
+        self.plots.connect_rm_line_signal(slot)
+
+    def disconnectCloseSignal(self):
         self.closeSignal.disconnect()
 
     def removeSubplotDisonnect(self):
         self.plots.disconnect_rm_subplot_signal()
 
     """ update GUI """
-
     def _if_empty_close(self):
         if not self._context.subplots:
             self.closeSignal.emit()
-            self.close
+            self.close()
 
     def _update_quick_edit(self, subplotName):
         names = self.quickEdit.get_selection()
@@ -180,7 +187,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
             self._x_range_changed(xrange)
             self._y_range_changed(yrange)
 
-    def _autoscale_changed(self, state):
+    def _autoscale_changed(self, _):
         names = self.quickEdit.get_selection()
         self.plots.set_y_autoscale(names, True)
 

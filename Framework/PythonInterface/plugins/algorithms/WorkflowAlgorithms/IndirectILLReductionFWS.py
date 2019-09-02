@@ -237,7 +237,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         '''
 
         for item in mtd[wsgroup]:
-            ws = item.getName()
+            ws = item.name()
             size = item.blocksize()
             imin, imax = self._ifws_peak_bins(ws)
             x_values = item.readX(0)
@@ -257,8 +257,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         @param ws :: group workspace containing one ws for one wing, and two ws for two wing data
         '''
         if mtd[groupws].getNumberOfEntries() == 2:  # two wings, sum
-            left = mtd[groupws].getItem(0).getName()
-            right = mtd[groupws].getItem(1).getName()
+            left = mtd[groupws].getItem(0).name()
+            right = mtd[groupws].getItem(1).name()
             sum = '__sum_'+groupws
 
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value

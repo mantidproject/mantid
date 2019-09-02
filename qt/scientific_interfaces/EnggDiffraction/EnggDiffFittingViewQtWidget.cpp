@@ -9,7 +9,7 @@
 #include "EnggDiffFittingPresenter.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Plotting/Qwt/PeakPicker.h"
 
@@ -59,7 +59,7 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
       m_fileSettings(fileSettings), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
       m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
-          this, Mantid::Kernel::make_unique<EnggDiffFittingModel>(), mainCalib,
+          this, std::make_unique<EnggDiffFittingModel>(), mainCalib,
           mainParam)) {
 
   initLayout();

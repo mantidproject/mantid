@@ -1,13 +1,20 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from mantidqt.utils.qt.testing import start_qapplication
+
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
-from Muon.GUI.Common.test_helpers import mock_widget
 
 
+@start_qapplication
 class LoadRunWidgetViewTest(unittest.TestCase):
 
     def setUp(self):
-        self._qapp = mock_widget.mockQapp()
         self.view = LoadRunWidgetView()
         self.view.run_edit.insert('')
 

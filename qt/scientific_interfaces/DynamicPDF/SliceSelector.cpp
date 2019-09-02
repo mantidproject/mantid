@@ -120,7 +120,7 @@ void SliceSelector::preDeleteHandle(
  */
 void SliceSelector::loadSlices(const QString &workspaceName) {
   m_loadedWorkspace =
-      Mantid::Kernel::make_unique<WorkspaceRecord>(workspaceName.toStdString());
+      std::make_unique<WorkspaceRecord>(workspaceName.toStdString());
   /// don't process if workspace is not valid
   if (!this->isWorkspaceValid()) {
     return;

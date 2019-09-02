@@ -23,10 +23,10 @@ class BoundingBoxTest(unittest.TestCase):
 
     def test_properties_are_correct(self):
         bbox = BoundingBox (1.0, 2.0, 3.0, -1.0, -2.0, -3.0)
-        self.assertEquals(bbox.minPoint(), V3D(-1.0,-2.0,-3.0))
-        self.assertEquals(bbox.maxPoint(), V3D(1.0,2.0,3.0))
-        self.assertEquals(bbox.centrePoint(), V3D(0.0,0.0,0.0))
-        self.assertEquals(bbox.width(), V3D(2.0,4.0,6.0))
+        self.assertEqual(bbox.minPoint(), V3D(-1.0,-2.0,-3.0))
+        self.assertEqual(bbox.maxPoint(), V3D(1.0,2.0,3.0))
+        self.assertEqual(bbox.centrePoint(), V3D(0.0,0.0,0.0))
+        self.assertEqual(bbox.width(), V3D(2.0,4.0,6.0))
 
     def test_point_inside(self):
         box = BoundingBox(1.0, 2.0, 3.0, -1.0, -2.0, -3.0)

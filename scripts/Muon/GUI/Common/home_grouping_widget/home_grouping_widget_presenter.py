@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from Muon.GUI.Common.observer_pattern import Observable
+from Muon.GUI.Common.observer_pattern import Observable, GenericObservable
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 
@@ -32,6 +32,7 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.on_subtracted_periods_changed(self.handle_periods_changed)
 
         self.pairAlphaNotifier = HomeGroupingWidgetPresenter.PairAlphaNotifier(self)
+        self.selected_group_pair_changed_notifier = GenericObservable()
 
     def show(self):
         self._view.show()
@@ -46,7 +47,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
     def update_group_pair_list(self):
         group_names = self._model.get_group_names()
         pair_names = self._model.get_pair_names()
-        self._view.populate_group_pair_selector(group_names, pair_names)
+        default_name = self._model.get_default_group_pair()
+        self._view.populate_group_pair_selector(group_names, pair_names, default_name)
 
     def hide_multiperiod_widget_if_data_single_period(self):
         if self._model.is_data_multi_period():
@@ -56,6 +58,7 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 
     def handle_grouppair_selector_changed(self):
         name = str(self._view.get_selected_group_or_pair_name())
+        self._model.update_selected_group_pair_in_context(name)
         if self._model.is_group(name):
             self._view.alpha_hidden(True)
         elif self._model.is_pair(name):
@@ -64,6 +67,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
             self._view.set_current_alpha(alpha)
         else:
             self._view.alpha_hidden(True)
+
+        self.selected_group_pair_changed_notifier.notify_subscribers()
 
     def update_view_from_model(self):
         self.update_group_pair_list()

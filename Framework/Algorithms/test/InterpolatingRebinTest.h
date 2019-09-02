@@ -34,7 +34,7 @@ public:
     rebin.setPropertyValue("InputWorkspace", "InterpolatingRebinTest_indist");
     rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_outdist");
     // Check it fails if property not set
-    TS_ASSERT_THROWS(rebin.execute(), std::runtime_error)
+    TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &)
     TS_ASSERT(!rebin.isExecuted())
 
     // the last bin would are too high to calculate, check it aborts

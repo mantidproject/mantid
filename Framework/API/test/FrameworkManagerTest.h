@@ -71,9 +71,9 @@ public:
         FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2"))
     TS_ASSERT_THROWS(
         FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2", "", 3),
-        std::runtime_error)
+        const std::runtime_error &)
     TS_ASSERT_THROWS(FrameworkManager::Instance().createAlgorithm("aaaaaa"),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 
   void testcreateAlgorithmWithProps() {
@@ -97,7 +97,7 @@ public:
 
   void testGetWorkspace() {
     TS_ASSERT_THROWS(FrameworkManager::Instance().getWorkspace("wrongname"),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 };
 

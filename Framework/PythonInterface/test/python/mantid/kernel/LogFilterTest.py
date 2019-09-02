@@ -38,11 +38,11 @@ class LogFilterTest(unittest.TestCase):
         period_log.addValue("2008-Jun-17 11:12:21", True)
         period_log.addValue("2008-Jun-17 11:12:32", False)
 
-        self.assertEquals(height_log.size(), 10);
+        self.assertEqual(height_log.size(), 10);
         filter = LogFilter(height_log)
         filter.addFilter(period_log)
         filtered = filter.data()
-        self.assertEquals(filtered.size(), 1)
+        self.assertEqual(filtered.size(), 1)
 
 if __name__ == '__main__':
     unittest.main()

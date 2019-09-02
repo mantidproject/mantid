@@ -50,14 +50,14 @@ public:
     AffineMatrixParameter param(1, 3);
     AffineMatrixType transform(4, 4);
 
-    TS_ASSERT_THROWS(param.setMatrix(transform), std::runtime_error);
+    TS_ASSERT_THROWS(param.setMatrix(transform), const std::runtime_error &);
   }
 
   void testSetMatrixThrowsIfInDimsNotEqual() {
     AffineMatrixParameter param(3, 1);
     AffineMatrixType transform(4, 4);
 
-    TS_ASSERT_THROWS(param.setMatrix(transform), std::runtime_error);
+    TS_ASSERT_THROWS(param.setMatrix(transform), const std::runtime_error &);
   }
 
   void testAssign() {
@@ -90,14 +90,14 @@ public:
     AffineMatrixParameter A(2, 4);
     AffineMatrixParameter B(4, 4);
 
-    TS_ASSERT_THROWS(B = A, std::runtime_error);
+    TS_ASSERT_THROWS(B = A, const std::runtime_error &);
   }
 
   void testAssignementThrowsIfInDimsNotEqual() {
     AffineMatrixParameter A(4, 2);
     AffineMatrixParameter B(4, 4);
 
-    TS_ASSERT_THROWS(B = A, std::runtime_error);
+    TS_ASSERT_THROWS(B = A, const std::runtime_error &);
   }
 
   void testToXMLString() {

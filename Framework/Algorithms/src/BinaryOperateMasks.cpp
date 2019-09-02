@@ -36,19 +36,21 @@ void BinaryOperateMasks::init() {
 
   std::vector<std::string> operators{"AND", "OR", "XOR", "NOT"};
 
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
-                      "InputWorkspace1", "", Direction::Input),
-                  "MaskWorkspace 1 for binary operation");
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+          "InputWorkspace1", "", Direction::Input),
+      "MaskWorkspace 1 for binary operation");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "InputWorkspace2", "", Direction::Input, PropertyMode::Optional),
       "Optional MaskWorkspace 2 for binary operation");
   declareProperty("OperationType", "AND",
                   boost::make_shared<StringListValidator>(operators),
                   "Operator for Workspace1 and Workspace2");
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Output MaskWorkspace as result of binary operation");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Output MaskWorkspace as result of binary operation");
 }
 
 //----------------------------------------------------------------------------------------------

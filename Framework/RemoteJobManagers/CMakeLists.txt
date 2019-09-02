@@ -1,16 +1,14 @@
 set(SRC_FILES
-    src/MantidWebServiceAPIHelper.cpp
-    src/MantidWebServiceAPIJobManager.cpp
-    src/SimpleJSON.cpp)
+	src/MantidWebServiceAPIHelper.cpp
+	src/MantidWebServiceAPIJobManager.cpp)
 
 set(INC_FILES
-    inc/MantidRemoteJobManagers/MantidWebServiceAPIHelper.h
-    inc/MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h
-    inc/MantidRemoteJobManagers/SimpleJSON.h)
+	inc/MantidRemoteJobManagers/MantidWebServiceAPIHelper.h
+	inc/MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h)
 
 set(TEST_FILES
-    MantidWebServiceAPIHelperTest.h
-    MantidWebServiceAPIJobManagerTest.h)
+	MantidWebServiceAPIHelperTest.h
+	MantidWebServiceAPIJobManagerTest.h)
 
 # set ( TEST_PY_FILES
 #

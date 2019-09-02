@@ -23,32 +23,34 @@ from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_plot_options_triggered = QtCore.Signal()
 
     toolitems = (
-        ('Home', 'Reset original view', 'fa.home', 'home', None),
-        ('Pan', 'Pan axes with left mouse, zoom with right', 'fa.arrows-alt', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'fa.search-plus', 'zoom', False),
+        ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
-        ('Grid', 'Toggle grid on/off', None, 'toggle_grid', False),
-        ('Save', 'Save the figure', 'fa.save', 'save_figure', None),
-        ('Print','Print the figure', 'fa.print', 'print_figure', None),
+        ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
+        ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
+        ('Print', 'Print the figure', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'fa.cog', 'edit_parameters', None),
+        ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
     )
 
     def _init_toolbar(self):
-        for text, tooltip_text, fa_icon, callback, checked in self.toolitems:
+        for text, tooltip_text, mdi_icon, callback, checked in self.toolitems:
             if text is None:
                 self.addSeparator()
             else:
-                if fa_icon:
-                    a = self.addAction(get_icon(fa_icon),
+                if mdi_icon:
+                    a = self.addAction(get_icon(mdi_icon),
                                        text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
@@ -58,6 +60,8 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                     a.setChecked(checked)
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
+                if text == 'Home':
+                    a.triggered.connect(self.on_home_clicked)
 
         self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
@@ -77,7 +81,11 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
         self.adj_window = None
 
         # Adjust icon size or they are too small in PyQt5 by default
-        self.setIconSize(QtCore.QSize(24, 24))
+        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX()/100
+        self.setIconSize(QtCore.QSize(24*dpi_ratio, 24*dpi_ratio))
+
+    def launch_plot_options(self):
+        self.sig_plot_options_triggered.emit()
 
     def toggle_grid(self):
         self.sig_grid_toggle_triggered.emit()
@@ -108,6 +116,9 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
     def contextMenuEvent(self, event):
         pass
+
+    def on_home_clicked(self, _):
+        self.home_clicked.emit()
 
 
 class ToolbarStateManager(object):
@@ -143,3 +154,6 @@ class ToolbarStateManager(object):
             fit_action.setChecked(False)
         else:
             fit_action.setChecked(True)
+
+    def home_button_connect(self, slot):
+        self._toolbar.home_clicked.connect(slot)

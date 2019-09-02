@@ -207,6 +207,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Constant to multiply the data before writing out. This does not apply to "
                                  "PDFgetN files.")
+        self.declareProperty("OffsetData", defaultValue=0., validator=FloatBoundedValidator(lower=0., exclusive=False),
+                             doc="Constant to add to the data before writing out. This does not apply to "
+                                 "PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
                              "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', "
                              "'pdfgetn', and 'topas'")
@@ -264,6 +267,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._vanRadius = self.getProperty("VanadiumRadius").value
         self.calib = self.getProperty("CalibrationFile").value
         self._scaleFactor = self.getProperty("ScaleData").value
+        self._offsetFactor = self.getProperty("OffsetData").value
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
@@ -455,19 +459,24 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                    OutputWorkspace=sam_ws_name,
                                    Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
 
-            # make sure there are no negative values - gsas hates them
-            if self.getProperty("PushDataPositive").value != "None":
-                addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
-                api.ResetNegatives(InputWorkspace=sam_ws_name,
-                                   OutputWorkspace=sam_ws_name,
-                                   AddMinimum=addMin,
-                                   ResetValue=0.)
-
             # write out the files
             # FIXME - need documentation for mpiRank
             if mpiRank == 0:
                 if self._scaleFactor != 1.:
                     api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
+                if self._offsetFactor != 0.:
+                    api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
+                                                 OutputWorkspace=sam_ws_name)
+                    api.Scale(sam_ws_name, Factor=self._offsetFactor, OutputWorkspace=sam_ws_name,
+                              Operation='Add')
+                # make sure there are no negative values - gsas hates them
+                if self.getProperty("PushDataPositive").value != "None":
+                    addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
+                    api.ResetNegatives(InputWorkspace=sam_ws_name,
+                                       OutputWorkspace=sam_ws_name,
+                                       AddMinimum=addMin,
+                                       ResetValue=0.)
+
                 self._save(sam_ws_name, self._info, normalized, False)
         # ENDFOR
 

@@ -133,8 +133,8 @@ public:
 
   void test_Empty_History_Throws_When_Retrieving_Attempting_To_Algorithms() {
     WorkspaceHistory emptyHistory;
-    TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), std::out_of_range);
-    TS_ASSERT_THROWS(emptyHistory.getAlgorithm(1), std::out_of_range);
+    TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), const std::out_of_range &);
+    TS_ASSERT_THROWS(emptyHistory.getAlgorithm(1), const std::out_of_range &);
   }
 };
 

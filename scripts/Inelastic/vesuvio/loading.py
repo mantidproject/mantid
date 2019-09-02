@@ -137,7 +137,7 @@ class VesuvioTOFFitInput(object):
                         or input string and the loaded output workspace.
         """
         if isinstance(runs, MatrixWorkspace):
-            return runs.getName(), runs
+            return runs.name(), runs
         else:
             return runs, loader(runs, spectra)
 

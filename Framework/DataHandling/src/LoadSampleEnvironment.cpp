@@ -24,13 +24,15 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-#include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
-#include <cmath>
 #include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
+
+namespace {
+double DegreesToRadians(double angle) { return angle * M_PI / 180; }
+} // namespace
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadSampleEnvironment)
@@ -42,23 +44,23 @@ using namespace Geometry;
 void LoadSampleEnvironment::init() {
   auto wsValidator = boost::make_shared<InstrumentValidator>();
   // input workspace
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the workspace containing the instrument to add "
                   "the Environment");
 
   // Environment file
   const std::vector<std::string> extensions{".stl"};
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, extensions),
-      "The path name of the file containing the Environment");
+  declareProperty(std::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
+                  "The path name of the file containing the Environment");
 
   // scale to use for stl
   declareProperty("Scale", "cm", "The scale of the stl: m, cm, or mm");
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace that will contain the loaded "
                   "Environment of the sample");
 
@@ -68,15 +70,15 @@ void LoadSampleEnvironment::init() {
   // New Can or Add
   declareProperty("Add", false);
 
+  // Rotation angles
+  declareProperty("XDegrees", 0.0, "The degrees to rotate on the x axis by");
+  declareProperty("YDegrees", 0.0, "The degrees to rotate on the y axis by");
+  declareProperty("ZDegrees", 0.0, "The degrees to rotate on the z axis by");
+
   // Vector to translate mesh
   declareProperty(
-      make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
+      std::make_unique<ArrayProperty<double>>("TranslationVector", "0,0,0"),
       "Vector by which to translate the loaded environment");
-
-  // Matrix to rotate mesh
-  declareProperty(make_unique<ArrayProperty<double>>(
-                      "RotationMatrix", "1.0,0.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0"),
-                  "Rotation Matrix in format x1,x2,x3,y1,y2,y3,z1,z2,z3");
 
   declareProperty("SetMaterial", false);
 
@@ -125,11 +127,11 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("ChemicalFormula", formulaGrp);
   setPropertyGroup("AtomicNumber", formulaGrp);
   setPropertyGroup("MassNumber", formulaGrp);
-  setPropertySettings("ChemicalFormula", make_unique<EnabledWhenProperty>(
+  setPropertySettings("ChemicalFormula", std::make_unique<EnabledWhenProperty>(
                                              "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("AtomicNumber", make_unique<EnabledWhenProperty>(
+  setPropertySettings("AtomicNumber", std::make_unique<EnabledWhenProperty>(
                                           "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("MassNumber", make_unique<EnabledWhenProperty>(
+  setPropertySettings("MassNumber", std::make_unique<EnabledWhenProperty>(
                                         "SetMaterial", IS_NOT_DEFAULT));
 
   std::string densityGrp("Sample Density");
@@ -140,31 +142,34 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("SampleMassDensity", densityGrp);
   setPropertySettings(
       "SampleNumberDensity",
-      make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ZParameter", make_unique<EnabledWhenProperty>(
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("ZParameter", std::make_unique<EnabledWhenProperty>(
                                         "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("UnitCellVolume", make_unique<EnabledWhenProperty>(
+  setPropertySettings("UnitCellVolume", std::make_unique<EnabledWhenProperty>(
                                             "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("SampleMassDensity", make_unique<EnabledWhenProperty>(
-                                               "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
-      "NumberDensityUnit",
-      make_unique<EnabledWhenProperty>("SampleNumberDensity", IS_NOT_DEFAULT));
+      "SampleMassDensity",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings("NumberDensityUnit",
+                      std::make_unique<EnabledWhenProperty>(
+                          "SampleNumberDensity", IS_NOT_DEFAULT));
 
   std::string specificValuesGrp("Override Cross Section Values");
   setPropertyGroup("CoherentXSection", specificValuesGrp);
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
-  setPropertySettings("CoherentXSection", make_unique<EnabledWhenProperty>(
+  setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
                                               "SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("IncoherentXSection", make_unique<EnabledWhenProperty>(
-                                                "SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "IncoherentXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
       "AttenuationXSection",
-      make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
-  setPropertySettings("ScatteringXSection", make_unique<EnabledWhenProperty>(
-                                                "SetMaterial", IS_NOT_DEFAULT));
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "ScatteringXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
 std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
@@ -243,8 +248,8 @@ void LoadSampleEnvironment::exec() {
     throw Exception::ParseError(
         "Could not read file, did not match either STL Format", filename, 0);
   }
-  environmentMesh = translate(environmentMesh);
   environmentMesh = rotate(environmentMesh);
+  environmentMesh = translate(environmentMesh, scaleType);
 
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
@@ -293,10 +298,12 @@ void LoadSampleEnvironment::exec() {
 /**
  * translates the environment by a provided matrix
  * @param environmentMesh The environment to translate
+ * @param scaleType The scale to use
  * @returns a shared pointer to the newly translated environment
  */
-boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
-    boost::shared_ptr<MeshObject> environmentMesh) {
+boost::shared_ptr<MeshObject>
+LoadSampleEnvironment::translate(boost::shared_ptr<MeshObject> environmentMesh,
+                                 ScaleUnits scaleType) {
   const std::vector<double> translationVector =
       getProperty("TranslationVector");
   std::vector<double> checkVector = std::vector<double>(3, 0.0);
@@ -305,39 +312,95 @@ boost::shared_ptr<MeshObject> LoadSampleEnvironment::translate(
       throw std::invalid_argument(
           "Invalid Translation vector, must have exactly 3 dimensions");
     }
-    V3D translate =
-        V3D(translationVector[0], translationVector[1], translationVector[2]);
+    V3D translate = createScaledV3D(translationVector[0], translationVector[1],
+                                    translationVector[2], scaleType);
     environmentMesh->translate(translate);
   }
   return environmentMesh;
 }
 
 /**
- * Rotates the environment by a provided matrix
+ * Rotates the environment by a generated matrix
  * @param environmentMesh The environment to rotate
  * @returns a shared pointer to the newly rotated environment
  */
 boost::shared_ptr<MeshObject>
 LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
-  const std::vector<double> rotationMatrix = getProperty("RotationMatrix");
-  double valueList[] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0};
-  std::vector<double> checkVector1 =
-      std::vector<double>(std::begin(valueList), std::end(valueList));
-  if (rotationMatrix != checkVector1) {
-    if (rotationMatrix.size() != 9) {
-
-      throw std::invalid_argument(
-          "Invalid Rotation Matrix, must have exactly 9 values, not: " +
-          std::to_string(rotationMatrix.size()));
-    }
-    Matrix<double> rotation = Matrix<double>(rotationMatrix);
-    double determinant = rotation.determinant();
-    if (!(std::abs(determinant) == 1.0)) {
-      throw std::invalid_argument("Invalid Rotation Matrix");
-    }
-    environmentMesh->rotate(rotation);
-  }
+  const std::vector<double> rotationMatrix = generateMatrix();
+  environmentMesh->rotate(rotationMatrix);
   return environmentMesh;
+}
+
+/**
+ * Generates a rotation Matrix applying the x rotation then y rotation, then z
+ * rotation
+ * @returns a matrix of doubles to use as the rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateMatrix() {
+  Kernel::Matrix<double> xMatrix = generateXRotation();
+  Kernel::Matrix<double> yMatrix = generateYRotation();
+  Kernel::Matrix<double> zMatrix = generateZRotation();
+
+  return zMatrix * yMatrix * xMatrix;
+}
+
+/**
+ * Generates the x component of the rotation matrix
+ * using the xDegrees Property.
+ * @returns a matrix of doubles to use as the x axis rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateXRotation() {
+  const double xRotation = DegreesToRadians(getProperty("xDegrees"));
+  const double sinX = sin(xRotation);
+  const double cosX = cos(xRotation);
+  std::vector<double> matrixList = {1, 0, 0, 0, cosX, -sinX, 0, sinX, cosX};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+/**
+ * Generates the y component of the rotation matrix
+ * using the yDegrees Property.
+ * @returns a matrix of doubles to use as the y axis rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateYRotation() {
+  const double yRotation = DegreesToRadians(getProperty("yDegrees"));
+  const double sinY = sin(yRotation);
+  const double cosY = cos(yRotation);
+  std::vector<double> matrixList = {cosY, 0, sinY, 0, 1, 0, -sinY, 0, cosY};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+/**
+ * Generates the z component of the rotation matrix
+ * using the zDegrees Property.
+ * @returns a matrix of doubles to use as the z axis rotation matrix
+ */
+Matrix<double> LoadSampleEnvironment::generateZRotation() {
+  const double zRotation = DegreesToRadians(getProperty("zDegrees"));
+  const double sinZ = sin(zRotation);
+  const double cosZ = cos(zRotation);
+  std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
+  return Kernel::Matrix<double>(matrixList);
+}
+
+Kernel::V3D LoadSampleEnvironment::createScaledV3D(double xVal, double yVal,
+                                                   double zVal,
+                                                   ScaleUnits scaleType) {
+  switch (scaleType) {
+  case ScaleUnits::centimetres:
+    xVal = xVal / 100;
+    yVal = yVal / 100;
+    zVal = zVal / 100;
+    break;
+  case ScaleUnits::millimetres:
+    xVal = xVal / 1000;
+    yVal = yVal / 1000;
+    zVal = zVal / 1000;
+    break;
+  case ScaleUnits::metres:
+    break;
+  }
+  return Kernel::V3D(double(xVal), double(yVal), double(zVal));
 }
 
 } // namespace DataHandling

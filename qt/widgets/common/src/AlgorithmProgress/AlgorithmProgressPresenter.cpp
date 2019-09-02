@@ -10,7 +10,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 AlgorithmProgressPresenter::AlgorithmProgressPresenter(
-    QWidget *parent, AlgorithmProgressWidget *view)
+    QWidget *parent, IAlgorithmProgressWidget *view)
     : AlgorithmProgressPresenterBase(parent), m_model{AlgorithmProgressModel(
                                                   this)},
       m_algorithm(nullptr), m_view(view) {}
@@ -47,7 +47,9 @@ void AlgorithmProgressPresenter::updateProgressBarSlot(
     Mantid::API::AlgorithmID algorithm, const double progress,
     QString message) {
   if (algorithm == this->m_algorithm) {
-    setProgressBar(m_view->progressBar(), progress, message);
+    // this needs to be a call to the view
+    // so that it can be mocked out for testing
+    m_view->updateProgress(progress, message);
   }
 }
 

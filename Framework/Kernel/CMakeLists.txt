@@ -7,6 +7,7 @@ set(SRC_FILES
     src/Atom.cpp
     src/BinFinder.cpp
     src/BinaryStreamReader.cpp
+    src/BinaryStreamWriter.cpp
     src/CPUTimer.cpp
     src/CatalogInfo.cpp
     src/ChecksumHelper.cpp
@@ -55,7 +56,6 @@ set(SRC_FILES
     src/MDAxisValidator.cpp
     src/MDUnit.cpp
     src/MDUnitFactory.cpp
-    src/MagneticFormFactorTable.cpp
     src/MagneticIon.cpp
     src/MandatoryValidator.cpp
     src/MantidVersion.cpp
@@ -64,7 +64,6 @@ set(SRC_FILES
     src/MaterialBuilder.cpp
     src/MaterialXMLParser.cpp
     src/Math/ChebyshevPolyFit.cpp
-    src/Math/Distributions/BoseEinsteinDistribution.cpp
     src/Math/Distributions/ChebyshevPolynomial.cpp
     src/Math/Distributions/ChebyshevSeries.cpp
     src/Math/Optimization/SLSQPMinimizer.cpp
@@ -97,6 +96,7 @@ set(SRC_FILES
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
     src/RemoteJobManager.cpp
+    src/SimpleJSON.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/StartsWithValidator.cpp
@@ -149,6 +149,7 @@ set(INC_FILES
     inc/MantidKernel/BinFinder.h
     inc/MantidKernel/BinaryFile.h
     inc/MantidKernel/BinaryStreamReader.h
+    inc/MantidKernel/BinaryStreamWriter.h
     inc/MantidKernel/BoundedValidator.h
     inc/MantidKernel/CPUTimer.h
     inc/MantidKernel/Cache.h
@@ -215,7 +216,6 @@ set(INC_FILES
     inc/MantidKernel/MDAxisValidator.h
     inc/MantidKernel/MDUnit.h
     inc/MantidKernel/MRUList.h
-    inc/MantidKernel/MagneticFormFactorTable.h
     inc/MantidKernel/MagneticIon.h
     inc/MantidKernel/MandatoryValidator.h
     inc/MantidKernel/MantidVersion.h
@@ -224,7 +224,6 @@ set(INC_FILES
     inc/MantidKernel/MaterialBuilder.h
     inc/MantidKernel/MaterialXMLParser.h
     inc/MantidKernel/Math/ChebyshevPolyFit.h
-    inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
     inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
     inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
     inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
@@ -268,6 +267,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/RemoteJobManager.h
+    inc/MantidKernel/SimpleJSON.h 
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -308,8 +308,7 @@ set(INC_FILES
     inc/MantidKernel/WriteLock.h
     inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
-    inc/MantidKernel/make_cow.h
-    inc/MantidKernel/make_unique.h)
+    inc/MantidKernel/make_cow.h)
 
 set(TEST_FILES
     ArrayBoundedValidatorTest.h
@@ -320,7 +319,7 @@ set(TEST_FILES
     BinFinderTest.h
     BinaryFileTest.h
     BinaryStreamReaderTest.h
-    BoseEinsteinDistributionTest.h
+    BinaryStreamWriterTest.h
     BoundedValidatorTest.h
     CPUTimerTest.h
     CacheTest.h
@@ -376,10 +375,8 @@ set(TEST_FILES
     MDUnitFactoryTest.h
     MDUnitTest.h
     MRUListTest.h
-    MagneticFormFactorTableTest.h
     MagneticIonTest.h
     MakeCowTest.h
-    MakeUniqueTest.h
     MandatoryValidatorTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h
@@ -416,6 +413,7 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
+    SimpleJSONTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     StartsWithValidatorTest.h
@@ -490,7 +488,7 @@ target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
                                   ${JSONCPP_INCLUDE_DIR}
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-                                   ${OPENSSL_INCLUDE_DIR})
+                                   ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
 
 if(OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

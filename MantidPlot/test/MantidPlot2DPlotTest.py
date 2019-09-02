@@ -61,7 +61,7 @@ class MantidPlot2DPlotTest(unittest.TestCase):
         self.g = plots
 
         self.assertTrue(isinstance(plots, list))
-        self.assertEquals(2, len(plots))
+        self.assertEqual(2, len(plots))
         self.assertTrue(isinstance(plots[0], proxies.Graph))
         self.assertTrue(isinstance(plots[1], proxies.Graph))
 
@@ -74,7 +74,7 @@ class MantidPlot2DPlotTest(unittest.TestCase):
         self.g = plot2D("fake", window=win1)
 
         open_wins = app.windows()
-        self.assertEquals(1, len(open_wins))
+        self.assertEqual(1, len(open_wins))
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlot2DPlotTest)

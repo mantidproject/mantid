@@ -61,7 +61,7 @@ void run_StorageMode_MasterOnly(const Parallel::Communicator &comm) {
     TS_ASSERT_EQUALS(i.spectrumNumber(2), 3);
   } else {
     TS_ASSERT_THROWS(IndexInfo(3, Parallel::StorageMode::MasterOnly, comm),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 }
 
@@ -246,7 +246,7 @@ public:
 
   void test_setSpectrumNumbers_size_mismatch() {
     IndexInfo t(3);
-    TS_ASSERT_THROWS(t.setSpectrumNumbers({1, 2}), std::runtime_error);
+    TS_ASSERT_THROWS(t.setSpectrumNumbers({1, 2}), const std::runtime_error &);
   }
 
   void test_setSpectrumDefinitions_size_mismatch() {
@@ -283,13 +283,15 @@ public:
     // break some things, so we forbid this for now.
     IndexInfo info(3);
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> defs{nullptr};
-    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), std::runtime_error);
+    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs),
+                     const std::runtime_error &);
   }
 
   void test_setSpectrumDefinitions_size_mismatch_cow_ptr() {
     IndexInfo info(3);
     const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
-    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), std::runtime_error);
+    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs),
+                     const std::runtime_error &);
   }
 
   void test_setSpectrumDefinitions_cow_ptr() {

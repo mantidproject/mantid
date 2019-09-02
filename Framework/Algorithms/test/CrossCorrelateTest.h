@@ -178,7 +178,7 @@ private:
   // Run the algorithm with invalid input and check that it throws a runtime
   // error
   void runAlgorithmThrows(CrossCorrelate &alg) {
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
 

@@ -32,7 +32,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_init_reducer(self):
         tReducer = self.reducer
-        self.assertFalse(tReducer.prop_man is None)
+        self.assertNotEqual(tReducer.prop_man, None)
 
         prop_man = tReducer.prop_man
         self.assertEqual(prop_man.instr_name,"MARI")
@@ -53,12 +53,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
         def verify_absent(file_list):
             for file in file_list:
                 file = FileFinder.getFullPath(file)
-                self.assertTrue(len(file)==0)
+                self.assertEqual(len(file), 0)
 
         def verify_present_and_delete(file_list):
             for file in file_list:
                 file = FileFinder.getFullPath(file)
-                self.assertTrue(len(file)>0)
+                self.assertGreater(len(file), 0)
                 os.remove(file)
 
         clean_up(files)
@@ -68,7 +68,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
                 NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
 
 
-        self.assertTrue(len(tReducer.prop_man.save_format) ==0)
+        self.assertEqual(len(tReducer.prop_man.save_format), 0)
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file')
         #
@@ -87,7 +87,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file.tt')
         file = FileFinder.getFullPath('save_formats_test_file.tt')
-        self.assertTrue(len(file)==0)
+        self.assertEqual(len(file), 0)
 
         # save file with given extension on direct request:
         tReducer.save_results(tws,'save_formats_test_file.nxs')
@@ -97,7 +97,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # do nothing
         tReducer.save_results(tws,'save_formats_test_file')
         file = FileFinder.getFullPath('save_formats_test_file')
-        self.assertTrue(len(file)==0)
+        self.assertEqual(len(file), 0)
 
 
         # save files with extensions on request
@@ -105,7 +105,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         verify_present_and_delete(['save_formats_test_file.nxspe','save_formats_test_file.nxs'])
 
         # this is strange feature.
-        self.assertTrue(len(tReducer.prop_man.save_format) ==2)
+        self.assertEqual(len(tReducer.prop_man.save_format), 2)
 
     def test_diagnostics_wb(self):
         wb_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000)
@@ -147,9 +147,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # direct and indirect access to prop_man properties
         tReducer.sample_run = None
         #sample run has not been defined
-        self.assertTrue(getattr(tReducer,'sample_run') is None)
+        self.assertEqual(getattr(tReducer,'sample_run'), None)
         prop_man = tReducer.prop_man
-        self.assertTrue(getattr(prop_man ,'sample_run') is None)
+        self.assertEqual(getattr(prop_man,'sample_run'), None)
         # define sample run
         tReducer.sample_run =10234
         self.assertEqual(tReducer.sample_run,10234)
@@ -342,9 +342,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         xMax = max(x)
 
 
-        self.assertTrue(tof_range[0]>xMin)
+        self.assertGreater(tof_range[0], xMin)
         #self.assertAlmostEqual(tof_range[1],dt)
-        self.assertTrue(tof_range[2]<xMax)
+        self.assertLess(tof_range[2], xMax)
 
         # check another working mode
         red.prop_man.multirep_tof_specta_list = 4
@@ -353,12 +353,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
   
         tof_range1 = red.find_tof_range_for_multirep(run_tof)
 
-        self.assertTrue(tof_range1[0]>xMin)
-        self.assertTrue(tof_range1[2]<xMax)
+        self.assertGreater(tof_range1[0], xMin)
+        self.assertLess(tof_range1[2], xMax)
 
-        self.assertTrue(tof_range1[2]<tof_range[2])
-        self.assertTrue(tof_range1[0]<tof_range[0])
-        self.assertTrue(tof_range1[1]<tof_range[1])
+        self.assertLess(tof_range1[2], tof_range[2])
+        self.assertLess(tof_range1[0], tof_range[0])
+        self.assertLess(tof_range1[1], tof_range[1])
 
     def test_multirep_mode(self):
         # create test workspace

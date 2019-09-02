@@ -49,7 +49,7 @@ public:
       testAlgorithm1.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(testAlgorithm1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(testAlgorithm1.execute(), const std::runtime_error &);
     // Need a test workspace to use as input
     MatrixWorkspace_sptr inputWS1 =
         WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 1.0);
@@ -117,7 +117,7 @@ public:
     if (!testAlgorithm2.isInitialized())
       testAlgorithm2.initialize();
 
-    TS_ASSERT_THROWS(testAlgorithm2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(testAlgorithm2.execute(), const std::runtime_error &);
 
     using namespace Mantid::API;
     MatrixWorkspace_sptr inputWS2 =
@@ -188,7 +188,7 @@ public:
       testAlgorithm3.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(testAlgorithm3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(testAlgorithm3.execute(), const std::runtime_error &);
     // Need a test workspace to use as input
     auto inputWS3 = createInputWorkspaceHistoWithXerror();
     inputWS3->setDistribution(false);

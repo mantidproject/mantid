@@ -181,7 +181,7 @@ public:
     // throw
     ObjComponent comp("noShape");
     TS_ASSERT_THROWS(comp.interceptSurface(track),
-                     Exception::NullPointerException);
+                     const Exception::NullPointerException &);
   }
 
   void testSolidAngleCappedCylinder() {
@@ -211,7 +211,7 @@ public:
     // throw
     ObjComponent B("noShape");
     TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)),
-                     Exception::NullPointerException);
+                     const Exception::NullPointerException &);
   }
 
   void testBoundingBoxCappedCylinder() {
@@ -445,7 +445,7 @@ public:
     // throw
     ObjComponent B("noShape");
     TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)),
-                     Exception::NullPointerException)
+                     const Exception::NullPointerException &)
     delete A;
   }
 

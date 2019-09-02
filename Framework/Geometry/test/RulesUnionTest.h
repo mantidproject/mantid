@@ -16,7 +16,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
+
 #include <cfloat>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -42,8 +42,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -63,8 +63,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -84,8 +84,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -104,8 +104,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -128,8 +128,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -148,8 +148,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -169,8 +169,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -194,8 +194,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -218,8 +218,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -243,8 +243,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -256,8 +256,8 @@ public:
     TS_ASSERT_EQUALS(A.leaf(0), ptrS1);
     TS_ASSERT_EQUALS(A.leaf(1), ptrS2);
     TS_ASSERT_EQUALS(A.isComplementary(), 0);
-    auto B = Mantid::Kernel::make_unique<CompObj>();
-    auto C = Mantid::Kernel::make_unique<CompObj>();
+    auto B = std::make_unique<CompObj>();
+    auto C = std::make_unique<CompObj>();
     A.setLeaf(std::move(B), 1);
     TS_ASSERT_EQUALS(A.isComplementary(), -1);
     A.setLeaf(std::move(C), 0);
@@ -271,8 +271,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);
@@ -297,8 +297,8 @@ public:
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
-    auto S1 = Mantid::Kernel::make_unique<SurfPoint>();
-    auto S2 = Mantid::Kernel::make_unique<SurfPoint>();
+    auto S1 = std::make_unique<SurfPoint>();
+    auto S2 = std::make_unique<SurfPoint>();
     S1->setKey(P1);
     S1->setKeyN(10);
     S2->setKey(Sp1);

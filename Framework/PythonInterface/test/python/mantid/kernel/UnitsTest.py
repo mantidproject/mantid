@@ -17,22 +17,22 @@ class UnitsTest(unittest.TestCase):
         self.assertTrue(isinstance(label_unit, Unit))
         self.assertTrue(isinstance(label_unit, Label))
         label_unit.setLabel("Temperature", "K")
-        self.assertEquals("Temperature", label_unit.caption())
-        self.assertEquals("K", label_unit.label())
+        self.assertEqual("Temperature", label_unit.caption())
+        self.assertEqual("K", label_unit.label())
         self.assertTrue(isinstance(label_unit.symbol(), UnitLabel))
 
     def test_quick_conversion_with_string_input(self):
         energy = UnitFactory.Instance().create("Energy")
         factor, power = energy.quickConversion("Wavelength")
         self.assertAlmostEquals(factor, 9.04456756843)
-        self.assertEquals(power, -0.5)
+        self.assertEqual(power, -0.5)
 
     def test_quick_conversion_with_unit_input(self):
         energy = UnitFactory.Instance().create("Energy")
         wavelength = UnitFactory.Instance().create("Wavelength")
         factor, power = energy.quickConversion(wavelength)
         self.assertAlmostEquals(factor, 9.04456756843)
-        self.assertEquals(power, -0.5)
+        self.assertEqual(power, -0.5)
 
 # -------------  Failure cases  -------------------
     def test_failure_quick_conversion_failure_with_same_input(self):

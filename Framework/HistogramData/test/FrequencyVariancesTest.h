@@ -67,28 +67,28 @@ public:
     const CountVariances counts(0);
     const BinEdges edges{};
     TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_empty_CountVariances_size_mismatch() {
     const CountVariances counts(0);
     const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_CountVariances_null_BinEdges() {
     const CountVariances counts(1);
     const BinEdges edges{};
     TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_CountVariances_size_mismatch() {
     const CountVariances counts(2);
     const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
-                     std::logic_error);
+                     const std::logic_error &);
   }
 
   void test_construct_from_CountVariances() {

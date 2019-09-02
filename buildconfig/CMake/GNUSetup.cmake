@@ -41,7 +41,7 @@ endif()
 # -Wno-unused-result: Do not warn about unused return values in some C functions
 add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
                       -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
-                      -Wno-write-strings -Wno-unused-result )
+                      -Wno-write-strings -Wno-unused-result)
 # C++-specific flags
 add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
@@ -79,6 +79,15 @@ if(WITH_ASAN)
   set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address" )
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+endif()
+
+option(WITH_TSAN "Enable thread sanitizer" OFF)
+if(WITH_TSAN)
+  message(STATUS "enabling thread sanitizer")
+  add_compile_options(-fno-omit-frame-pointer -fno-common -fsanitize=thread)
+  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=thread" )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=thread")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=thread")
 endif()
 
 option(WITH_UBSAN "Enable undefined behavior sanitizer" OFF)

@@ -57,13 +57,13 @@ LoadPreNexusMonitors::LoadPreNexusMonitors()
 
 void LoadPreNexusMonitors::init() {
   // Filename for the runinfo file.
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       RUNINFO_FILENAME, "", FileProperty::Load, "_runinfo.xml"),
                   "The filename of the runinfo file for a particular run. "
                   "Allowed Values are: _runinfo.xml");
 
   // The output workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       WORKSPACE_OUT, "", Direction::Output),
                   "The workspace to load the monitors into.");
 
@@ -106,8 +106,7 @@ void LoadPreNexusMonitors::exec() {
 
     // Get the beamline name.
     if (pNode->nodeName() == "RunInfo") {
-      Poco::XML::Element *pRunInfoElement =
-          static_cast<Poco::XML::Element *>(pNode);
+      auto *pRunInfoElement = static_cast<Poco::XML::Element *>(pNode);
       instrumentName = pRunInfoElement->getAttribute("instrument");
     }
 
@@ -119,7 +118,7 @@ void LoadPreNexusMonitors::exec() {
       // Increment the number of monitors we've found
       ++nMonitors;
 
-      Poco::XML::Element *pE = static_cast<Poco::XML::Element *>(pNode);
+      auto *pE = static_cast<Poco::XML::Element *>(pNode);
       g_log.debug() << "Beam Monitor " << pE->getAttribute("id") << '\n';
       g_log.debug() << "\tname: " << pE->getAttribute("name") << '\n';
       g_log.debug() << "\tdescription: " << pE->getAttribute("description")
@@ -142,7 +141,7 @@ void LoadPreNexusMonitors::exec() {
       for (unsigned long i = 0; i < pDataListChildren->length(); ++i) {
         // We only care about monitors
         if (pDataListChildren->item(i)->nodeName() == "monitor") {
-          Poco::XML::Element *element =
+          auto *element =
               static_cast<Poco::XML::Element *>(pDataListChildren->item(i));
           monitorIDs.push_back(
               boost::lexical_cast<int>(element->getAttribute("id")));

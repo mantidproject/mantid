@@ -7,13 +7,13 @@
 #ifndef MANTID_GEOMETRY_REDUCED_CELL_TEST_H_
 #define MANTID_GEOMETRY_REDUCED_CELL_TEST_H_
 
-#include <MantidKernel/Matrix.h>
-#include <MantidKernel/System.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/V3D.h>
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
-#include <MantidGeometry/Crystal/ReducedCell.h>
+#include "MantidGeometry/Crystal/ReducedCell.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Matrix;

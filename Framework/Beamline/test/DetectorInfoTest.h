@@ -11,7 +11,6 @@
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using Beamline::DetectorInfo;
@@ -28,13 +27,13 @@ public:
 
   void test_constructor() {
     std::unique_ptr<DetectorInfo> detInfo;
-    TS_ASSERT_THROWS_NOTHING(detInfo = Kernel::make_unique<DetectorInfo>());
+    TS_ASSERT_THROWS_NOTHING(detInfo = std::make_unique<DetectorInfo>());
     TS_ASSERT_EQUALS(detInfo->size(), 0);
     TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT(!detInfo->hasComponentInfo());
 
     TS_ASSERT_THROWS_NOTHING(
-        detInfo = Kernel::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
+        detInfo = std::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
     TS_ASSERT_EQUALS(detInfo->size(), 1);
     TS_ASSERT(!detInfo->isScanning());
     TS_ASSERT(!detInfo->hasComponentInfo());
@@ -44,18 +43,19 @@ public:
     std::unique_ptr<DetectorInfo> info;
     std::vector<size_t> mons{0, 2};
     TS_ASSERT_THROWS_NOTHING(
-        info = Kernel::make_unique<DetectorInfo>(PosVec(3), RotVec(3), mons));
+        info = std::make_unique<DetectorInfo>(PosVec(3), RotVec(3), mons));
     TS_ASSERT_EQUALS(info->size(), 3);
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 1, 2}));
     TS_ASSERT_THROWS_NOTHING(DetectorInfo(PosVec(3), RotVec(3), {0, 0, 0}));
     TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(3), {3}),
-                     std::out_of_range);
+                     const std::out_of_range &);
   }
 
   void test_constructor_length_mismatch() {
-    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), std::runtime_error);
+    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)),
+                     const std::runtime_error &);
   }
 
   void test_assign_componentInfo() {

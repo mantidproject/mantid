@@ -113,6 +113,7 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
           matrixWS->getInstrument() &&
           !matrixWS->getInstrument()->getName().empty());
       menu->addAction(m_sampleLogs);
+      menu->addAction(m_sliceViewer);
     } else if (boost::dynamic_pointer_cast<ITableWorkspace>(workspace)) {
       menu->addAction(m_showData);
       menu->addAction(m_showAlgorithmHistory);

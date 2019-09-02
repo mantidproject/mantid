@@ -56,11 +56,11 @@ const std::string ExtractSpectra::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ExtractSpectra::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The input workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name of the output workspace");
 
   declareProperty("XMin", EMPTY_DBL(),
@@ -84,13 +84,13 @@ void ExtractSpectra::init() {
       "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "A comma-separated list of individual workspace indices to "
                   "read.  Only used if\n"
                   "explicitly set. The WorkspaceIndexList is only used if the "
                   "DetectorList is empty.");
 
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "A comma-separated list of individual detector IDs to read.  "
                   "Only used if\n"
                   "explicitly set. When specifying the WorkspaceIndexList and "
@@ -137,7 +137,7 @@ void ExtractSpectra::exec() {
 
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
-  int size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  auto size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
@@ -296,10 +296,10 @@ void ExtractSpectra::checkProperties() {
 
     if (m_workspaceIndexList.empty()) {
       int minSpec_i = getProperty("StartWorkspaceIndex");
-      size_t minSpec = static_cast<size_t>(minSpec_i);
+      auto minSpec = static_cast<size_t>(minSpec_i);
       const size_t numberOfSpectra = m_inputWorkspace->indexInfo().globalSize();
       int maxSpec_i = getProperty("EndWorkspaceIndex");
-      size_t maxSpec = static_cast<size_t>(maxSpec_i);
+      auto maxSpec = static_cast<size_t>(maxSpec_i);
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
       if (maxSpec < minSpec) {

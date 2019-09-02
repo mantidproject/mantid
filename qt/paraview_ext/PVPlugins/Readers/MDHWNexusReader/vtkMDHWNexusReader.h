@@ -7,7 +7,6 @@
 #ifndef _vtkMDHWNexusReader_h
 #define _vtkMDHWNexusReader_h
 
-#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "vtkStructuredGridAlgorithm.h"

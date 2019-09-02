@@ -92,7 +92,6 @@ public slots:
 
 private slots:
   void fit();
-  void editLocalParameterValues(const QString &parName);
   void finishFit(bool /*error*/);
   void enableZoom();
   void enablePan();

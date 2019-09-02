@@ -7,14 +7,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, \
-    StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
 from math import fabs
 import numpy as np
 
 
 class SANSILLReduction(PythonAlgorithm):
+
     _mode = 'Monochromatic'
     _instrument = None
 
@@ -45,7 +45,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws2 : workspace 2
             @return true if the detector distance difference is less than 1 cm
         """
-        tolerance = 0.01  # m
+        tolerance = 0.01 #m
         l2_1 = ws1.getRun().getLogData('L2').value
         l2_2 = ws2.getRun().getLogData('L2').value
         return fabs(l2_1 - l2_2) < tolerance
@@ -53,6 +53,16 @@ class SANSILLReduction(PythonAlgorithm):
     @staticmethod
     def _check_processed_flag(ws, value):
         return ws.getRun().getLogData('ProcessedAs').value == value
+
+    @staticmethod
+    def _cylinder(radius):
+        """
+            Returns XML for an infinite cylinder with axis of z (beam) and given radius [m]
+            @param radius : the radius of the cylinder [m]
+            @return : XML string for the geometry shape
+        """
+        return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
+               '<radius val="{0}"/></infinite-cylinder>'.format(radius)
 
     def PyInit(self):
 
@@ -100,8 +110,7 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('BeamFinderMethod', beam)
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
-                             doc='Sample thickness [cm]')
+        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.), doc='Sample thickness [cm]')
 
         self.setPropertySettings('SampleThickness', EnabledWhenProperty(sample, reference, LogicOperator.Or))
 
@@ -184,15 +193,6 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('FluxOutputWorkspace', beam)
 
-    def _cylinder(self, radius):
-        """
-            Returns XML for an infinite cylinder with axis of z (beam) and given radius [m]
-            @param radius : the radius of the cylinder [m]
-            @return : XML string for the geometry shape
-        """
-        return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
-               '<radius val="{0}"/></infinite-cylinder>'.format(radius)
-
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
@@ -214,136 +214,12 @@ class SANSILLReduction(PythonAlgorithm):
             if mtd[ws].getRun().hasProperty('timer'):
                 duration = mtd[ws].getRun().getLogData('timer').value
                 if duration != 0.:
-                    Scale(InputWorkspace=ws, Factor=1. / duration, OutputWorkspace=ws)
-                    self._dead_time_correction(ws)
+                    Scale(InputWorkspace=ws, Factor=1./duration, OutputWorkspace=ws)
+                    self._apply_dead_time(ws)
                 else:
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
             else:
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
-
-    def _dead_time_correction(self, ws):
-        """
-            Performs the dead time correction
-            @param ws : the input workspace
-        """
-
-        instrument = mtd[ws].getInstrument()
-        if instrument.hasParameter('tau'):
-            tau = instrument.getNumberParameter('tau')[0]
-            if instrument.hasParameter('grouping'):
-                pattern = instrument.getStringParameter('grouping')[0]
-                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
-            else:
-                self.log().warning('No grouping available in IPF, dead time correction will be performed pixel-wise.')
-                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
-        else:
-            self.log().information('No tau available in IPF, skipping dead time correction.')
-
-    def _check_absorber_workspace_processing(self, ws):
-        absorber_ws = self.getProperty('AbsorberInputWorkspace').value
-        if absorber_ws:
-            if not self._check_processed_flag(absorber_ws, 'Absorber'):
-                self.log().warning('Absorber input workspace is not processed as absorber.')
-            Minus(LHSWorkspace=ws, RHSWorkspace=absorber_ws, OutputWorkspace=ws)
-
-    def _check_beam_workspace_processing(self, ws):
-        beam_ws = self.getProperty('BeamInputWorkspace').value
-        if beam_ws:
-            if not self._check_processed_flag(beam_ws, 'Beam'):
-                self.log().warning('Beam input workspace is not processed as beam.')
-            if self._mode != 'TOF':
-                beam_x = beam_ws.getRun().getLogData('BeamCenterX').value
-                beam_y = beam_ws.getRun().getLogData('BeamCenterY').value
-                AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
-                AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
-                MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
-            if not self._check_distances_match(mtd[ws], beam_ws):
-                self.log().warning('Different detector distances found for empty beam and sample runs!')
-        return beam_ws
-
-    def _check_container_workspace_processing(self, container_ws, ws):
-        if container_ws:
-            if not self._check_processed_flag(container_ws, 'Container'):
-                self.log().warning('Container input workspace is not processed as container.')
-            if not self._check_distances_match(mtd[ws], container_ws):
-                self.log().warning(
-                    'Different detector distances found for container and sample runs!')
-            Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
-
-    def _check_reference_workspace_processing(self, beam_ws, ws):
-        reference_ws = self.getProperty('ReferenceInputWorkspace').value
-        coll_ws = None
-        if reference_ws:
-            if not self._check_processed_flag(reference_ws, 'Reference'):
-                self.log().warning('Reference input workspace is not processed as reference.')
-            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws)
-            coll_ws = reference_ws
-        else:
-            self._check_sensitivity_workspace_processing(ws)
-            flux_in = self.getProperty('FluxInputWorkspace').value
-            if flux_in:
-                coll_ws = beam_ws
-                flux_ws = ws + '_flux'
-                if self._mode == 'TOF':
-                    RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
-                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
-                    DeleteWorkspace(flux_ws)
-                else:
-                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws)
-        return coll_ws
-
-    def _check_sensitivity_workspace_processing(self, ws):
-        sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
-        if sensitivity_in:
-            if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
-                self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
-            Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
-
-    def _check_transmission_workspace_processing(self, ws):
-        transmission_ws = self.getProperty('TransmissionInputWorkspace').value
-        if transmission_ws:
-            if not self._check_processed_flag(transmission_ws, 'Transmission'):
-                self.log().warning('Transmission input workspace is not processed as transmission.')
-            if transmission_ws.blocksize() == 1:
-                # monochromatic mode, scalar transmission
-                transmission = transmission_ws.readY(0)[0]
-                transmission_err = transmission_ws.readE(0)[0]
-                ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
-                                            TransmissionError=transmission_err, OutputWorkspace=ws)
-            else:
-                # wavelenght dependent transmission, need to rebin
-                transmission_rebinned = ws + '_tr_rebinned'
-                RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
-                                 OutputWorkspace=transmission_rebinned)
-                ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned,
-                                            OutputWorkspace=ws)
-                DeleteWorkspace(transmission_rebinned)
-
-    def _create_sensitivity_out(self, ws):
-        sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
-        if sensitivity_out:
-            CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
-            mtd[sensitivity_out].getRun().addProperty('ProcessedAs', 'Sensitivity', True)
-            self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
-
-    def _do_masking(self, ws):
-        mask_ws = self.getProperty('MaskedInputWorkspace').value
-        if mask_ws:
-            masked_ws = ws + '_mask'
-            CloneWorkspace(InputWorkspace=mask_ws, OutputWorkspace=masked_ws)
-            ExtractMonitors(InputWorkspace=masked_ws, DetectorWorkspace=masked_ws)
-            MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
-            DeleteWorkspace(masked_ws)
-
-    def _parallax_correction(self, ws):
-        if self._instrument in ['D22', 'D22lr', 'D33']:
-            self.log().information('Performing parallax correction')
-            if self._instrument == 'D33':
-                components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
-                              'front_detector_left', 'front_detector_right']
-            else:
-                components = ['detector']
-            ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
 
     def _process_beam(self, ws):
         """
@@ -353,10 +229,9 @@ class SANSILLReduction(PythonAlgorithm):
         centers = ws + '_centers'
         method = self.getPropertyValue('BeamFinderMethod')
         radius = self.getProperty('BeamRadius').value
-        FindCenterOfMassPosition(InputWorkspace=ws, DirectBeam=(method == 'DirectBeam'), BeamRadius=radius,
-                                 Output=centers)
-        beam_x = mtd[centers].cell(0, 1)
-        beam_y = mtd[centers].cell(1, 1)
+        FindCenterOfMassPosition(InputWorkspace=ws, DirectBeam=(method == 'DirectBeam'), BeamRadius=radius, Output=centers)
+        beam_x = mtd[centers].cell(0,1)
+        beam_y = mtd[centers].cell(1,1)
         AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
         AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
         DeleteWorkspace(centers)
@@ -369,12 +244,11 @@ class SANSILLReduction(PythonAlgorithm):
             att_value = run.getLogData('attenuator.attenuation_value').value
             if float(att_value) < 10. and self._instrument == 'D33':
                 instrument = mtd[ws].getInstrument()
-                param = 'att' + str(int(att_value))
+                param = 'att'+str(int(att_value))
                 if instrument.hasParameter(param):
                     att_coeff = instrument.getNumberParameter(param)[0]
                 else:
-                    raise RuntimeError(
-                        'Unable to find the attenuation coefficient for D33 attenuator #' + str(int(att_value)))
+                    raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
             else:
                 att_coeff = att_value
         else:
@@ -395,21 +269,12 @@ class SANSILLReduction(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=flux, OutputWorkspace=flux_out)
             self.setProperty('FluxOutputWorkspace', mtd[flux_out])
 
-    def _process_sample(self, beam_ws, ws):
-        coll_ws = self._check_reference_workspace_processing(beam_ws, ws)
-        if coll_ws:
-            if not self._check_distances_match(mtd[ws], coll_ws):
-                self.log().warning(
-                    'Different detector distances found for the reference/flux and sample runs!')
-            sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
-            ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
-            flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
-            self.log().notice('Flux factor is: ' + str(flux_factor))
-            Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
-            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
-                                 NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
-
-    def _process_transmission(self, beam_ws, ws):
+    def _process_transmission(self, ws, beam_ws):
+        """
+            Calculates the transmission
+            @param ws: input workspace name
+            @param beam_ws: empty beam workspace
+        """
         if not self._check_distances_match(mtd[ws], beam_ws):
             self.log().warning('Different detector distances found for empty beam and transmission runs!')
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
@@ -427,13 +292,164 @@ class SANSILLReduction(PythonAlgorithm):
         CalculateTransmission(SampleRunWorkspace=ws, DirectRunWorkspace=beam_rebinned,
                               TransmissionROI=det_list, OutputWorkspace=ws, RebinParams=lambda_binning)
 
+    def _process_sensitivity(self, ws, sensitivity_out):
+        """
+            Generates the detector sensitivity map
+            @param ws: input workspace
+            @param sensitivity_out: sensitivity output map
+        """
+        CalculateEfficiency(InputWorkspace=ws, OutputWorkspace=sensitivity_out)
+        mtd[sensitivity_out].getRun().addProperty('ProcessedAs', 'Sensitivity', True)
+        self.setProperty('SensitivityOutputWorkspace', mtd[sensitivity_out])
+
+    def _process_sample(self, ws):
+        """
+            Processes the sample
+            @param ws: input workspace
+        """
+        reference_ws = self.getProperty('ReferenceInputWorkspace').value
+        coll_ws = None
+        if reference_ws:
+            if not self._check_processed_flag(reference_ws, 'Reference'):
+                self.log().warning('Reference input workspace is not processed as reference.')
+            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws)
+            coll_ws = reference_ws
+        else:
+            sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
+            if sensitivity_in:
+                if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
+                    self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
+                Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
+            flux_in = self.getProperty('FluxInputWorkspace').value
+            if flux_in:
+                coll_ws = flux_in
+                flux_ws = ws + '_flux'
+                if self._mode == 'TOF':
+                    RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
+                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+                    DeleteWorkspace(flux_ws)
+                else:
+                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws)
+        if coll_ws:
+            if not self._check_distances_match(mtd[ws], coll_ws):
+                self.log().warning(
+                    'Different detector distances found for the reference/flux and sample runs!')
+            sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
+            ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
+            flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
+            self.log().notice('Flux factor is: ' + str(flux_factor))
+            Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
+            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                                 NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+
+    def _apply_absorber(self, ws, absorber_ws):
+        """
+            Subtracts the dark current
+            @param ws: input workspace
+            @parma absorber_ws: dark current workspace
+        """
+        if not self._check_processed_flag(absorber_ws, 'Absorber'):
+            self.log().warning('Absorber input workspace is not processed as absorber.')
+        Minus(LHSWorkspace=ws, RHSWorkspace=absorber_ws, OutputWorkspace=ws)
+
+    def _apply_beam(self, ws, beam_ws):
+        """
+            Applies the beam center correction
+            @param ws: input workspace
+            @parma beam_ws: empty beam workspace
+        """
+        if not self._check_processed_flag(beam_ws, 'Beam'):
+            self.log().warning('Beam input workspace is not processed as beam.')
+        if self._mode != 'TOF':
+            beam_x = beam_ws.getRun().getLogData('BeamCenterX').value
+            beam_y = beam_ws.getRun().getLogData('BeamCenterY').value
+            AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
+            AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
+            MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
+        if not self._check_distances_match(mtd[ws], beam_ws):
+            self.log().warning('Different detector distances found for empty beam and sample runs!')
+
+    def _apply_transmission(self, ws, transmission_ws):
+        """
+            Applies transmission correction
+            @param ws: input workspace
+            @param transmission_ws: transmission workspace
+        """
+        if not self._check_processed_flag(transmission_ws, 'Transmission'):
+            self.log().warning('Transmission input workspace is not processed as transmission.')
+        if transmission_ws.blocksize() == 1:
+            # monochromatic mode, scalar transmission
+            transmission = transmission_ws.readY(0)[0]
+            transmission_err = transmission_ws.readE(0)[0]
+            ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
+                                        TransmissionError=transmission_err, OutputWorkspace=ws)
+        else:
+            # wavelenght dependent transmission, need to rebin
+            transmission_rebinned = ws + '_tr_rebinned'
+            RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
+                             OutputWorkspace=transmission_rebinned)
+            ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned,
+                                        OutputWorkspace=ws)
+            DeleteWorkspace(transmission_rebinned)
+
+    def _apply_container(self, ws, container_ws):
+        """
+            Applies empty container subtraction
+            @param ws: input workspace
+            @param container_ws: empty container workspace
+        """
+        if not self._check_processed_flag(container_ws, 'Container'):
+            self.log().warning('Container input workspace is not processed as container.')
+        if not self._check_distances_match(mtd[ws], container_ws):
+            self.log().warning(
+                'Different detector distances found for container and sample runs!')
+        Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
+
+    def _apply_mask(self, ws, mask_ws):
+        """
+            Applies the mask
+            @param ws: input workspace
+            @param mask_ws: input masked workspace
+        """
+        masked_ws = ws + '_mask'
+        CloneWorkspace(InputWorkspace=mask_ws, OutputWorkspace=masked_ws)
+        ExtractMonitors(InputWorkspace=masked_ws, DetectorWorkspace=masked_ws)
+        MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
+        DeleteWorkspace(masked_ws)
+
+    def _apply_parallax(self, ws):
+        self.log().information('Performing parallax correction')
+        if self._instrument == 'D33':
+            components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
+                          'front_detector_left', 'front_detector_right']
+        else:
+            components = ['detector']
+        ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components)
+
+    def _apply_dead_time(self, ws):
+        """
+            Performs the dead time correction
+            @param ws : the input workspace
+        """
+
+        instrument = mtd[ws].getInstrument()
+        if instrument.hasParameter('tau'):
+            tau = instrument.getNumberParameter('tau')[0]
+            if instrument.hasParameter('grouping'):
+                pattern = instrument.getStringParameter('grouping')[0]
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, GroupingPattern=pattern, OutputWorkspace=ws)
+            else:
+                self.log().warning('No grouping available in IPF, dead time correction will be performed pixel-wise.')
+                DeadTimeCorrection(InputWorkspace=ws, Tau=tau, OutputWorkspace=ws)
+        else:
+            self.log().information('No tau available in IPF, skipping dead time correction.')
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',', '+'), LoaderName='LoadILLSANS',
-                     OutputWorkspace=ws)
+        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
         ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
@@ -443,17 +459,23 @@ class SANSILLReduction(PythonAlgorithm):
                 self._mode = 'TOF'
         progress.report()
         if process in ['Beam', 'Transmission', 'Container', 'Reference', 'Sample']:
-            self._check_absorber_workspace_processing(ws)
+            absorber_ws = self.getProperty('AbsorberInputWorkspace').value
+            if absorber_ws:
+                self._apply_absorber(ws, absorber_ws)
             if process == 'Beam':
-                progress.report()
                 self._process_beam(ws)
-            else:
-                beam_ws = self._check_beam_workspace_processing(ws)
                 progress.report()
+            else:
+                beam_ws = self.getProperty('BeamInputWorkspace').value
+                if beam_ws:
+                    self._apply_beam(ws, beam_ws)
                 if process == 'Transmission':
-                    self._process_transmission(beam_ws, ws)
+                    self._process_transmission(ws, beam_ws)
+                    progress.report()
                 else:
-                    self._check_transmission_workspace_processing(ws)
+                    transmission_ws = self.getProperty('TransmissionInputWorkspace').value
+                    if transmission_ws:
+                        self._apply_transmission(ws, transmission_ws)
                     solid_angle = ws + '_sa'
                     SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws)
@@ -461,17 +483,23 @@ class SANSILLReduction(PythonAlgorithm):
                     progress.report()
                     if process in ['Reference', 'Sample']:
                         container_ws = self.getProperty('ContainerInputWorkspace').value
-                        self._check_container_workspace_processing(container_ws, ws)
-                        self._do_masking(ws)
+                        if container_ws:
+                            self._apply_container(ws, container_ws)
+                        mask_ws = self.getProperty('MaskedInputWorkspace').value
+                        if mask_ws:
+                            self._apply_mask(ws, mask_ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
-                        self._parallax_correction(ws)
+                        if self._instrument in ['D22', 'D22lr', 'D33']:
+                            self._apply_parallax(ws)
                         progress.report()
                         if process == 'Reference':
-                            self._create_sensitivity_out(ws)
+                            sensitivity_out = self.getPropertyValue('SensitivityOutputWorkspace')
+                            if sensitivity_out:
+                                self._process_sensitivity(ws, sensitivity_out)
                         elif process == 'Sample':
-                            self._process_sample(beam_ws, ws)
+                            self._process_sample(ws)
                             progress.report()
         if process != 'Transmission':
             if self._instrument == 'D33':
@@ -481,7 +509,6 @@ class SANSILLReduction(PythonAlgorithm):
         mtd[ws].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLReduction)

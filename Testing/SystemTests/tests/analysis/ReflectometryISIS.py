@@ -60,7 +60,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, systemtesting.MantidSystemTest))
             thisTheta = ws1.detectorSignedTwoTheta(ws1.getDetector(i))
             nextTheta = ws1.detectorSignedTwoTheta(ws1.getDetector(i+1))
             #This check would fail if negative values were being normalised.
-            self.assertTrue(thisTheta < nextTheta)
+            self.assertLess(thisTheta, nextTheta)
 
         # MD transformations
         QxQy, _QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
@@ -89,9 +89,9 @@ class ReflectometryISIS(with_metaclass(ABCMeta, systemtesting.MantidSystemTest))
         pipf_comparison = CompareMDWorkspaces(Workspace1='PiPf_rebinned',Workspace2='PiPf_benchmark', Tolerance=0.01, CheckEvents=False)
 
         # Assert against the outputs
-        self.assertTrue(int(qxqy_comparison[0]) == 1)
-        self.assertTrue(int(kikf_comparison[0]) == 1)
-        self.assertTrue(int(pipf_comparison[0]) == 1)
+        self.assertEqual(int(qxqy_comparison[0]),  1)
+        self.assertEqual(int(kikf_comparison[0]),  1)
+        self.assertEqual(int(pipf_comparison[0]),  1)
 
         return True
 

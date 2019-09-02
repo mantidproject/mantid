@@ -65,9 +65,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     AbortRemoteJob2 alg3;
@@ -75,7 +75,7 @@ public:
     // compute resource missing
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("JobID", "john_missing"));
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
   }
 
@@ -83,11 +83,11 @@ public:
     AbortRemoteJob2 ab;
     TS_ASSERT_THROWS_NOTHING(ab.initialize();)
     TS_ASSERT_THROWS(ab.setPropertyValue("ComputeRes", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ab.setPropertyValue("username", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(ab.setPropertyValue("sername", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_wrongResource() {
@@ -95,7 +95,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ab.initialize());
     // the compute resource given  does not exist:
     TS_ASSERT_THROWS(ab.setPropertyValue("ComputeResource", "missing c r!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_propertiesOK() {

@@ -40,11 +40,11 @@ DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input table workspace for data.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "RunInfoWorkspace", "", Direction::Input),
                   "Input matrix workspace containing sample logs.  "
                   "It can be the RunInfoWorkspace output from LoadSpiceAscii. "
@@ -79,16 +79,16 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty("DurationLogName", "time",
                   "Name of the sample log to record the duration of each run.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DetectorEfficiencyTableWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "Name of a table workspace containing the detectors' efficiency.");
@@ -264,7 +264,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
 
     std::vector<double> logvec(numrows);
     for (size_t ir = 0; ir < numrows; ++ir) {
-      double dbltemp = tablews->cell_cast<double>(ir, icol);
+      auto dbltemp = tablews->cell_cast<double>(ir, icol);
       logvec[ir] = dbltemp;
     }
 
@@ -381,7 +381,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       // anode
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));
-      size_t anodeid = static_cast<size_t>(std::stoi(terms.back()));
+      auto anodeid = static_cast<size_t>(std::stoi(terms.back()));
       anodelist.emplace_back(anodeid, icol);
     } else {
       samplenameindexmap.emplace(colname, icol);
@@ -610,8 +610,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
     for (std::size_t i = 0; i < nHist; ++i) {
       const auto &vecsignal = thisWorkspace->y(i);
       const auto &vecerror = thisWorkspace->e(i);
-      float signal = static_cast<float>(vecsignal[0]);
-      float error = static_cast<float>(vecerror[0]);
+      auto signal = static_cast<float>(vecsignal[0]);
+      auto error = static_cast<float>(vecerror[0]);
       detid_t detid = specInfo.detector(i).getID() + detindex;
       const auto &detPos = specInfo.position(i);
       Mantid::coord_t data[3];
@@ -680,7 +680,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
         std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
-    float signal = static_cast<float>(vecmonitor[iws]);
+    auto signal = static_cast<float>(vecmonitor[iws]);
     float error = 1;
     if (signal > 1)
       error = std::sqrt(signal);

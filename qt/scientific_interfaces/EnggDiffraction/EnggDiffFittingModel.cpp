@@ -134,16 +134,15 @@ void EnggDiffFittingModel::saveFitResultsToHDF5(
     const std::vector<RunLabel> &runLabels, const std::string &filename) const {
   std::vector<std::string> inputWorkspaces;
   inputWorkspaces.reserve(runLabels.size());
-  std::vector<long> runNumbers;
+  std::vector<std::string> runNumbers;
   runNumbers.reserve(runLabels.size());
   std::vector<long> bankIDs;
   bankIDs.reserve(runLabels.size());
 
   for (const auto &runLabel : runLabels) {
     const auto ws = getFitResults(runLabel);
-    const auto clonedWSName = "enggggui_fit_params_" +
-                              std::to_string(runLabel.runNumber) + "_" +
-                              std::to_string(runLabel.bank);
+    const auto clonedWSName = "enggggui_fit_params_" + runLabel.runNumber +
+                              "_" + std::to_string(runLabel.bank);
     cloneWorkspace(ws, clonedWSName);
     inputWorkspaces.emplace_back(clonedWSName);
     runNumbers.emplace_back(runLabel.runNumber);
@@ -496,10 +495,13 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
     loadWorkspace(filename, temporaryWSName);
 
     API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-    const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(temporaryWSName);
-
+    auto ws_test = ADS.retrieveWS<API::Workspace>(temporaryWSName);
+    const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws_test);
+    if (!ws) {
+      throw std::invalid_argument("Workspace is not a matrix workspace.");
+    }
     const auto bank = guessBankID(ws);
-    const int runNumber = ws->getRunNumber();
+    const auto runNumber = std::to_string(ws->getRunNumber());
     RunLabel runLabel(runNumber, bank);
 
     addFocusedWorkspace(runLabel, ws, filename);

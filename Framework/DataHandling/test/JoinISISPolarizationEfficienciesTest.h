@@ -53,7 +53,7 @@ public:
     alg.setRethrows(true);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     // Error: At least one of the efficiency file names must be set.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_mixed_input() {
@@ -72,7 +72,7 @@ public:
     alg.setProperty("P2", ws4);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     // Error: Efficiencies belonging to different methods cannot mix.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_fredrikze() {
@@ -349,7 +349,7 @@ public:
     alg.setProperty("F2", ws4);
     alg.setPropertyValue("OutputWorkspace", "dummy");
     // Error: Cannot mix histograms and point data.
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_ragged() {

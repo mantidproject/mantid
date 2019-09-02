@@ -27,7 +27,7 @@ public:
   void testNameValueConstructor() {
     GridDetector q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "Name");
     TS_ASSERT(!q.getParent());
@@ -47,7 +47,7 @@ public:
 
     TS_ASSERT_EQUALS(q->getName(), "Child");
     TS_ASSERT_EQUALS(q->nelements(), 0);
-    TS_ASSERT_THROWS((*q)[0], std::runtime_error);
+    TS_ASSERT_THROWS((*q)[0], const std::runtime_error &);
     // check the parent
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
@@ -85,7 +85,7 @@ public:
     TS_ASSERT_THROWS(det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0,
                                      1.0, 300, -20, 1.0, 1000000, "abc", 1000,
                                      1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testFullConstructor() {
@@ -210,10 +210,10 @@ private:
 
   void do_test_bounds(GridDetector *det) {
     // Go out of bounds
-    TS_ASSERT_THROWS(det->getAtXYZ(-1, 0, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXYZ(0, -1, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXYZ(100, 0, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXYZ(0, 205, 0), std::runtime_error);
+    TS_ASSERT_THROWS(det->getAtXYZ(-1, 0, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXYZ(0, -1, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXYZ(100, 0, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXYZ(0, 205, 0), const std::runtime_error &);
   }
 
   void do_test_ids(GridDetector *det) {

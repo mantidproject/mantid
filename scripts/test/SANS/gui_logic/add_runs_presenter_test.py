@@ -296,9 +296,7 @@ class BaseFileNameTest(SelectionMockingTestCase):
         self._on_model_updated(new_selection)
 
     def _base_file_name_arg(self, run_summation_mock):
-        first_call = 0
-        print(run_summation_mock.call_args)
-        return run_summation_mock.call_args[first_call][2]
+        return run_summation_mock.call_args[0][2]
 
     def _retrieve_generated_name_for(self, run_paths):
         run_summation = mock.Mock()

@@ -60,7 +60,7 @@ public:
       loader.initialize();
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(loader.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(loader.execute(), const std::runtime_error &);
 
     // Now set it...
     loader.setPropertyValue("Filename", inputFile);
@@ -313,38 +313,38 @@ public:
     Workspace_sptr output;
     // test that there is no workspace as it should have failed
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     loader3.setPropertyValue("SpectrumMin", "5");
     loader3.setPropertyValue("SpectrumMax", "1");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     loader3.setPropertyValue("SpectrumMin", "5");
     loader3.setPropertyValue("SpectrumMax", "3");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     loader3.setPropertyValue("SpectrumMin", "5");
     loader3.setPropertyValue("SpectrumMax", "5");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     loader3.setPropertyValue("SpectrumMin", "5");
     loader3.setPropertyValue("SpectrumMax", "3000");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     loader3.setPropertyValue("SpectrumMin", "5");
     loader3.setPropertyValue("SpectrumMax", "10");
     loader3.setPropertyValue("SpectrumList", "999,3000");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     loader3.setPropertyValue("SpectrumList", "999,2000");
     loader3.execute();
@@ -474,7 +474,7 @@ public:
       loader6.initialize();
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(loader6.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(loader6.execute(), const std::runtime_error &);
 
     // Now set it...
     loader6.setPropertyValue("Filename", inputFile);

@@ -136,7 +136,7 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
 /// Modifies count data so that the sum is zero.
 void PoldiResidualCorrelationCore::correctCountData() const {
   double sumOfResiduals = getSumOfCounts(m_timeBinCount, m_detectorElements);
-  double numberOfCells =
+  auto numberOfCells =
       static_cast<double>(m_timeBinCount * m_detectorElements.size());
   double ratio = sumOfResiduals / numberOfCells;
 

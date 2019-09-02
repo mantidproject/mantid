@@ -33,22 +33,22 @@ using namespace DataObjects;
 
 void EQSANSDarkCurrentSubtraction2::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
 
   declareProperty(
-      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
-                                     "_event.nxs"),
+      std::make_unique<API::FileProperty>(
+          "Filename", "", API::FileProperty::Load, "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputDarkCurrentWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -71,7 +71,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   // If the load algorithm isn't in the reduction properties, add it
   const bool persistent = getProperty("PersistentCorrection");
   if (!reductionManager->existsProperty("DarkCurrentAlgorithm") && persistent) {
-    auto algProp = make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -143,7 +143,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     if (!darkWSOutputName.empty())
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
-    reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
         entryName, "", Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);
@@ -153,8 +153,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   // Normalize the dark current and data to counting time
   double scaling_factor = 1.0;
   if (inputWS->run().hasProperty("duration")) {
-    double duration = inputWS->run().getPropertyValueAsType<double>("duration");
-    double dark_duration =
+    auto duration = inputWS->run().getPropertyValueAsType<double>("duration");
+    auto dark_duration =
         darkWS->run().getPropertyValueAsType<double>("duration");
     ;
     scaling_factor = duration / dark_duration;
@@ -166,9 +166,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     double dark_duration = dp->getStatistics().duration;
     scaling_factor = duration / dark_duration;
   } else if (inputWS->run().hasProperty("timer")) {
-    double duration = inputWS->run().getPropertyValueAsType<double>("timer");
-    double dark_duration =
-        darkWS->run().getPropertyValueAsType<double>("timer");
+    auto duration = inputWS->run().getPropertyValueAsType<double>("timer");
+    auto dark_duration = darkWS->run().getPropertyValueAsType<double>("timer");
     ;
     scaling_factor = duration / dark_duration;
   } else {
@@ -202,15 +201,15 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   scaledDarkWS = rebinAlg->getProperty("OutputWorkspace");
 
   // Scale the dark counts to the bin width and perform subtraction
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
-  const int numberOfDarkSpectra =
+  const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numberOfDarkSpectra =
       static_cast<int>(scaledDarkWS->getNumberHistograms());
   if (numberOfSpectra != numberOfDarkSpectra) {
     g_log.error() << "Incompatible number of pixels between sample run and "
                      "dark current\n";
   }
-  const int nBins = static_cast<int>(inputWS->readY(0).size());
-  const int xLength = static_cast<int>(inputWS->readX(0).size());
+  const auto nBins = static_cast<int>(inputWS->readY(0).size());
+  const auto xLength = static_cast<int>(inputWS->readX(0).size());
   if (xLength != nBins + 1) {
     g_log.error() << "The input workspaces are expected to be histograms\n";
   }

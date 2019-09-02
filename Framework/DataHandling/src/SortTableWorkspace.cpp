@@ -36,16 +36,16 @@ const std::string SortTableWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SortTableWorkspace::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>("Columns"),
+      std::make_unique<Kernel::ArrayProperty<std::string>>("Columns"),
       "Column names to sort by.");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>("Ascending"),
+  declareProperty(std::make_unique<Kernel::ArrayProperty<int>>("Ascending"),
                   "List of bools for each column: true for ascending order, "
                   "false for descending. "
                   "If contains a single value it applies to all columns.");

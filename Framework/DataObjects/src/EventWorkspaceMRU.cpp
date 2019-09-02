@@ -17,7 +17,6 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
     for (auto &data : m_bufferedDataY) {
       if (data) {
         data->clear();
-        delete data;
       }
     }
   }
@@ -25,7 +24,6 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
   for (auto &data : m_bufferedDataE) {
     if (data) {
       data->clear();
-      delete data;
     }
   }
 }
@@ -38,10 +36,11 @@ EventWorkspaceMRU::~EventWorkspaceMRU() {
 void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
   Poco::ScopedWriteRWLock _lock(m_changeMruListsMutexE);
   if (m_bufferedDataE.size() <= thread_num) {
-    m_bufferedDataE.resize(thread_num + 1, nullptr);
+    m_bufferedDataE.resize(thread_num + 1);
     for (auto &data : m_bufferedDataE) {
       if (!data)
-        data = new mru_listE(50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listE>(
+            50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -53,10 +52,11 @@ void EventWorkspaceMRU::ensureEnoughBuffersE(size_t thread_num) const {
 void EventWorkspaceMRU::ensureEnoughBuffersY(size_t thread_num) const {
   Poco::ScopedWriteRWLock _lock(m_changeMruListsMutexY);
   if (m_bufferedDataY.size() <= thread_num) {
-    m_bufferedDataY.resize(thread_num + 1, nullptr);
+    m_bufferedDataY.resize(thread_num + 1);
     for (auto &data : m_bufferedDataY) {
       if (!data)
-        data = new mru_listY(50); // Create a MRU list with this many entries.
+        data = std::make_unique<mru_listY>(
+            50); // Create a MRU list with this many entries.
     }
   }
 }
@@ -93,7 +93,7 @@ Kernel::cow_ptr<HistogramData::HistogramY>
 EventWorkspaceMRU::findY(size_t thread_num, const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexY);
   auto result = m_bufferedDataY[thread_num]->find(
-      reinterpret_cast<const std::uintptr_t>(index));
+      reinterpret_cast<std::uintptr_t>(index));
   if (result)
     return result->m_data;
   return YType(nullptr);
@@ -109,7 +109,7 @@ Kernel::cow_ptr<HistogramData::HistogramE>
 EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexE);
   auto result = m_bufferedDataE[thread_num]->find(
-      reinterpret_cast<const std::uintptr_t>(index));
+      reinterpret_cast<std::uintptr_t>(index));
   if (result)
     return result->m_data;
   return EType(nullptr);
@@ -124,12 +124,11 @@ EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
 void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
                                 const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexY);
-  auto yWithMarker =
-      new TypeWithMarker<YType>(reinterpret_cast<const std::uintptr_t>(index));
+  auto yWithMarker = std::make_shared<TypeWithMarker<YType>>(
+      reinterpret_cast<std::uintptr_t>(index));
   yWithMarker->m_data = std::move(data);
-  auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
-  // And clear up the memory of the old one, if it is dropping out.
-  delete oldData;
+  m_bufferedDataY[thread_num]->insert(yWithMarker);
+  // the memory is cleared automatically due to being a smart_ptr
 }
 
 /** Insert a new histogram into the MRU
@@ -141,12 +140,11 @@ void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
 void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
                                 const EventList *index) {
   Poco::ScopedReadRWLock _lock(m_changeMruListsMutexE);
-  auto eWithMarker =
-      new TypeWithMarker<EType>(reinterpret_cast<const std::uintptr_t>(index));
+  auto eWithMarker = std::make_shared<TypeWithMarker<EType>>(
+      reinterpret_cast<std::uintptr_t>(index));
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
-  delete oldData;
 }
 
 /** Delete any entries in the MRU at the given index
@@ -158,14 +156,14 @@ void EventWorkspaceMRU::deleteIndex(const EventList *index) {
     Poco::ScopedReadRWLock _lock1(m_changeMruListsMutexE);
     for (auto &data : m_bufferedDataE) {
       if (data) {
-        data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
+        data->deleteIndex(reinterpret_cast<std::uintptr_t>(index));
       }
     }
   }
   Poco::ScopedReadRWLock _lock2(m_changeMruListsMutexY);
   for (auto &data : m_bufferedDataY) {
     if (data) {
-      data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
+      data->deleteIndex(reinterpret_cast<std::uintptr_t>(index));
     }
   }
 }

@@ -20,7 +20,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -93,7 +92,7 @@ std::unique_ptr<std::stringstream> makeStringStream() {
   // so there are lots of restrictions in place with stream.
   // Instead we can work around this by using pointers to streams.
   // Tl;dr - This is a workaround for GCC 4.x (RHEL7)
-  return Mantid::Kernel::make_unique<std::stringstream>();
+  return std::make_unique<std::stringstream>();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -120,12 +119,12 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 //----------------------------------------------------------------------------------------------
 // Initialise the algorithm
 void SaveGSS::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The input workspace");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save),
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
+                                                      API::FileProperty::Save),
                   "The filename to use for the saved data");
 
   declareProperty(
@@ -155,7 +154,7 @@ void SaveGSS::init() {
       "Saves RALF data as either FXYE or alternative format");
   setPropertySettings(
       "DataFormat",
-      Kernel::make_unique<Kernel::VisibleWhenProperty>(
+      std::make_unique<Kernel::VisibleWhenProperty>(
           "Format", Kernel::ePropertyCriterion::IS_EQUAL_TO, RALF));
 
   declareProperty("MultiplyByBinWidth", true,
@@ -171,7 +170,7 @@ void SaveGSS::init() {
       "otherwise, the continuous bank IDs are applied. ");
 
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           "UserSpecifiedGSASHeader"),
       "Each line will be put to the header of the output GSAS file.");
 
@@ -182,7 +181,7 @@ void SaveGSS::init() {
                   "inserted before the original header");
 
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           "UserSpecifiedBankHeader"),
       "Each string will be used to replaced the standard GSAS bank header."
       "Number of strings in the give array must be same as number of banks."
@@ -198,7 +197,7 @@ void SaveGSS::init() {
 
   std::vector<int> default_precision(3, 9);
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>(
+      std::make_unique<Kernel::ArrayProperty<int>>(
           "SLOGXYEPrecision", std::move(default_precision),
           std::move(precision_validator)),
       "Enter 3 integers as the precisions of output X, Y and E for SLOG data "
@@ -231,7 +230,7 @@ void SaveGSS::exec() {
 
   // Progress is 2 * number of histograms. One for generating data
   // one for writing out data
-  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, (nHist * 2));
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, (nHist * 2));
 
   // Now start executing main part of the code
   generateGSASBuffer(numOfOutFiles, numOutSpectra);

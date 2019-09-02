@@ -36,7 +36,7 @@ public:
     TS_ASSERT_EQUALS(q.getR().size(), 0);
     TS_ASSERT_EQUALS(q.getG().size(), 0);
     TS_ASSERT_EQUALS(q.getB().size(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "");
     TS_ASSERT(!q.getParent());
@@ -59,8 +59,8 @@ public:
     TS_ASSERT_EQUALS(q.getG().size(), 0);
     TS_ASSERT_EQUALS(q.getB().size(), 0);
 
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "Name");
     TS_ASSERT(!q.getParent());
@@ -90,7 +90,7 @@ public:
     TS_ASSERT_EQUALS(q->getG().size(), 0);
     TS_ASSERT_EQUALS(q->getB().size(), 0);
 
-    TS_ASSERT_THROWS((*q)[0], std::runtime_error);
+    TS_ASSERT_THROWS((*q)[0], const std::runtime_error &);
     // check the parent
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
@@ -155,7 +155,7 @@ public:
         "StructuredDetectors created with beams not aligned "
         "along the z-axis should fail.",
         det->initialize(2, 2, std::move(x), std::move(y), false, 0, true, 2, 1),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     delete det;
   }
@@ -175,7 +175,7 @@ public:
     // Initialize with these parameters
     TS_ASSERT_THROWS(
         det->initialize(2, 2, std::move(x), std::move(y), true, 0, true, 2, 1),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     x2.resize(3);
     auto x3 = x2;
@@ -183,14 +183,14 @@ public:
 
     TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x2), std::move(y2), true,
                                      0, true, 2, 1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     x3.resize(0);
     y3.resize(0);
 
     TS_ASSERT_THROWS(det->initialize(2, 2, std::move(x3), std::move(y3), true,
                                      0, true, 2, 1),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     delete det;
   }
@@ -208,10 +208,10 @@ public:
     TS_ASSERT_EQUALS(det->getYValues().size(), size);
 
     // Go out of bounds
-    TS_ASSERT_THROWS(det->getAtXY(-1, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXY(0, -1), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXY(5, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXY(0, 6), std::runtime_error);
+    TS_ASSERT_THROWS(det->getAtXY(-1, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXY(0, -1), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXY(5, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXY(0, 6), const std::runtime_error &);
 
     // Check some ids
     TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getID(), 0);

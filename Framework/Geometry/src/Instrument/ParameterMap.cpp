@@ -63,17 +63,17 @@ void checkIsNotMaskingParameter(const std::string &name) {
  */
 ParameterMap::ParameterMap()
     : m_cacheLocMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
-      m_cacheRotMap(Kernel::make_unique<
-                    Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
+      m_cacheRotMap(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
       m_cacheLocMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
               *other.m_cacheLocMap)),
       m_cacheRotMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
+          std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
               *other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
   if (m_instrument)
@@ -1016,8 +1016,8 @@ std::string ParameterMap::asString() const {
   for (const auto &mappair : m_map) {
     const boost::shared_ptr<Parameter> &p = mappair.second;
     if (p && mappair.first) {
-      const IComponent *comp = dynamic_cast<const IComponent *>(mappair.first);
-      const IDetector *det = dynamic_cast<const IDetector *>(comp);
+      const auto *comp = dynamic_cast<const IComponent *>(mappair.first);
+      const auto *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();
       } else if (comp) {

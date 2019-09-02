@@ -29,11 +29,11 @@ DECLARE_ALGORITHM(LoadHKL)
 /** Initialize the algorithm's properties.
  */
 void LoadHKL::init() {
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, ".hkl"),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".hkl"),
                   "Path to an hkl file to save.");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
@@ -145,7 +145,7 @@ void LoadHKL::exec() {
   double amu = (mu2 - 1.0 * mu1) / (-1.0 * wl1 + wl2);
   double smu = mu1 - wl1 * amu;
   double theta = sc1 * radtodeg_half;
-  int i = static_cast<int>(theta / 5.);
+  auto i = static_cast<int>(theta / 5.);
   double x0, x1, x2;
   gsl_poly_solve_cubic(pc[2][i] / pc[3][i], pc[1][i] / pc[3][i],
                        (pc[0][i] - astar1) / pc[3][i], &x0, &x1, &x2);

@@ -11,7 +11,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
@@ -68,7 +68,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     /*
     Write mask array with correct order for each internal dimension.
     */
-    auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
+    auto masks = std::make_unique<bool[]>(nDims);
     for (size_t i_dim = 0; i_dim < nDims; ++i_dim) {
       bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
       masks[i_dim] =

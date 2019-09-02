@@ -60,49 +60,44 @@ const std::vector<std::string> CreatePolarizationEfficiencies::seeAlso() const {
 }
 
 void CreatePolarizationEfficiencies::init() {
-  declareProperty(make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "An input workspace to use the x-values from.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "An input workspace to use the x-values from.");
+
+  declareProperty(std::make_unique<ArrayProperty<double>>(Pp, Direction::Input),
+                  "Effective polarizing power of the polarizing system. "
+                  "Expressed as a ratio 0 < Pp < 1");
+
+  declareProperty(std::make_unique<ArrayProperty<double>>(Ap, Direction::Input),
+                  "Effective polarizing power of the analyzing system. "
+                  "Expressed as a ratio 0 < Ap < 1");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(Pp, Direction::Input),
-      "Effective polarizing power of the polarizing system. "
-      "Expressed as a ratio 0 < Pp < 1");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(Ap, Direction::Input),
-      "Effective polarizing power of the analyzing system. "
-      "Expressed as a ratio 0 < Ap < 1");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(Rho, Direction::Input),
+      std::make_unique<ArrayProperty<double>>(Rho, Direction::Input),
       "Ratio of efficiencies of polarizer spin-down to polarizer "
       "spin-up. This is characteristic of the polarizer flipper. "
       "Values are constants for each term in a polynomial "
       "expression.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(Alpha, Direction::Input),
+      std::make_unique<ArrayProperty<double>>(Alpha, Direction::Input),
       "Ratio of efficiencies of analyzer spin-down to analyzer "
       "spin-up. This is characteristic of the analyzer flipper. "
       "Values are factors for each term in a polynomial "
       "expression.");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(P1, Direction::Input),
-      "Polarizer efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(P1, Direction::Input),
+                  "Polarizer efficiency.");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(P2, Direction::Input),
-      "Analyzer efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(P2, Direction::Input),
+                  "Analyzer efficiency.");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(F1, Direction::Input),
-      "Polarizer flipper efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(F1, Direction::Input),
+                  "Polarizer flipper efficiency.");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(F2, Direction::Input),
-      "Analyzer flipper efficiency.");
+  declareProperty(std::make_unique<ArrayProperty<double>>(F2, Direction::Input),
+                  "Analyzer flipper efficiency.");
 
   initOutputWorkspace();
 }
@@ -125,8 +120,9 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
 
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       inWS, labels.size(), sharedInX->size(), inWS->blocksize());
-  auto axis1 = new TextAxis(labels.size());
-  outWS->replaceAxis(1, axis1);
+  auto axis1 = std::make_unique<TextAxis>(labels.size());
+  auto axis1Raw = axis1.get();
+  outWS->replaceAxis(1, std::move(axis1));
   outWS->getAxis(0)->setUnit(inWS->getAxis(0)->unit()->unitID());
 
   auto const x = inWS->points(0);
@@ -138,7 +134,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
       return calculatePolynomial(coefficients, v);
     });
     outWS->mutableY(i) = y;
-    axis1->setLabel(i, labels[i]);
+    axis1Raw->setLabel(i, labels[i]);
   }
 
   return outWS;

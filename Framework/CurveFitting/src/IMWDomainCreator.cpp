@@ -239,8 +239,8 @@ IMWDomainCreator::createEmptyResultWS(const size_t nhistograms,
   ws->setYUnitLabel(m_matrixWorkspace->YUnitLabel());
   ws->setYUnit(m_matrixWorkspace->YUnit());
   ws->getAxis(0)->unit() = m_matrixWorkspace->getAxis(0)->unit();
-  auto tAxis = new API::TextAxis(nhistograms);
-  ws->replaceAxis(1, tAxis);
+  auto tAxis = std::make_unique<API::TextAxis>(nhistograms);
+  ws->replaceAxis(1, std::move(tAxis));
 
   auto &inputX = m_matrixWorkspace->x(m_workspaceIndex);
   auto &inputY = m_matrixWorkspace->y(m_workspaceIndex);

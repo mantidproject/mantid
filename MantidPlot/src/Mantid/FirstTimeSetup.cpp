@@ -10,7 +10,9 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "ReportUsageDisableDialog.h"
 
+#include <QDialog>
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
@@ -51,6 +53,9 @@ void FirstTimeSetup::initLayout() {
           SLOT(openPythonInMantid()));
   connect(m_uiForm.clbExtendingMantid, SIGNAL(clicked()), this,
           SLOT(openExtendingMantid()));
+
+  connect(m_uiForm.lblPrivacyPolicy, SIGNAL(linkActivated(const QString &)),
+          this, SLOT(openExternalLink(const QString &)));
 
   // set first use
   QSettings settings;
@@ -140,29 +145,9 @@ void FirstTimeSetup::cancel() {
 
 void FirstTimeSetup::allowUsageDataStateChanged(int checkedState) {
   if (checkedState == Qt::Unchecked) {
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle("Mantid: Report Usage Data ");
-    msgBox.setTextFormat(Qt::RichText); // this is what makes the links
-                                        // clickable
-    msgBox.setText("Are you sure you want to disable reporting of <a "
-                   "href='http://reports.mantidproject.org'>usage data</a>?"
-                   "\t(full details in our <a "
-                   "href='http://www.mantidproject.org/"
-                   "MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'"
-                   ">Privacy Policy</a>)");
-    msgBox.setInformativeText(
-        "All usage data is anonymous and untraceable.\n"
-        "We use the usage data to inform the future development of Mantid.\n"
-        "If you click \"Yes\" aspects you need risk being deprecated in "
-        "future versions if we think they are not used.\n\n"
-        "Are you sure you still want to disable reporting usage data?\n"
-        "Please click \"No\".");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setEscapeButton(QMessageBox::No);
-    msgBox.setIcon(QMessageBox::Question);
+    auto widget = new ReportUsageDisableDialog(this);
 
-    int ret = msgBox.exec();
+    int ret = widget->exec();
     if ((ret == QMessageBox::No) || (ret == QMessageBox::NoButton)) {
       // No was clicked, or no button was clicked
       // set the checkbox back to checked
@@ -207,4 +192,7 @@ void FirstTimeSetup::openPythonInMantid() {
 void FirstTimeSetup::openExtendingMantid() {
   MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Extending_Mantid_With_Python"));
+}
+void FirstTimeSetup::openExternalLink(const QString &link) {
+  MantidDesktopServices::openUrl(link);
 }

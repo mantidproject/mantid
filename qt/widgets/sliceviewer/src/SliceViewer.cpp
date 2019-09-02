@@ -126,7 +126,7 @@ SliceViewer::SliceViewer(QWidget *parent)
                    this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
-  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
+  m_data = std::make_unique<API::QwtRasterDataMD>();
   m_spect->setColorMap(m_colorBar->getColorMap());
   m_plot->autoRefresh();
   // Make the splitter use the minimum size for the controls and not stretch out
@@ -721,7 +721,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     // Transfer the current settings
-    auto tempData = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    auto tempData = std::make_unique<API::QwtRasterDataMDNonOrthogonal>();
     transferSettings(m_data.get(), tempData.get());
     m_data = std::move(tempData);
     applyNonOrthogonalAxisScaleDraw();
@@ -729,7 +729,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
     applyOrthogonalAxisScaleDraw();
 
     // Transfer the current settings
-    auto tempData = Kernel::make_unique<API::QwtRasterDataMD>();
+    auto tempData = std::make_unique<API::QwtRasterDataMD>();
     transferSettings(m_data.get(), tempData.get());
     m_data = std::move(tempData);
   }
@@ -960,13 +960,13 @@ void SliceViewer::setColorScaleAutoSlice() {
 
 void SliceViewer::setAspectRatio(AspectRatioType type) {
 
-  SignalBlocker<QAction> actionGuess(m_lockAspectRatiosActionGuess);
-  SignalBlocker<QAction> actionAll(m_lockAspectRatiosActionAll);
-  SignalBlocker<QAction> actionUnlock(m_lockAspectRatiosActionUnlock);
+  SignalBlocker actionGuess(m_lockAspectRatiosActionGuess);
+  SignalBlocker actionAll(m_lockAspectRatiosActionAll);
+  SignalBlocker actionUnlock(m_lockAspectRatiosActionUnlock);
 
-  actionGuess->setChecked(type == Guess);
-  actionAll->setChecked(type == All);
-  actionUnlock->setChecked(type == Unlock);
+  m_lockAspectRatiosActionGuess->setChecked(type == Guess);
+  m_lockAspectRatiosActionAll->setChecked(type == All);
+  m_lockAspectRatiosActionUnlock->setChecked(type == Unlock);
 
   m_aspectRatioType = type;
   // Redraw the view.
@@ -992,8 +992,8 @@ void SliceViewer::colorRangeChanged() {
  * @param transparent :: true if you want zeros to be transparent.
  */
 void SliceViewer::setTransparentZeros(bool transparent) {
-  SignalBlocker<QAction> transparentZeros(m_actionTransparentZeros);
-  transparentZeros->setChecked(transparent);
+  SignalBlocker transparentZeros(m_actionTransparentZeros);
+  m_actionTransparentZeros->setChecked(transparent);
   // Set and display
   m_data->setZerosAsNan(transparent);
   this->updateDisplay();
@@ -1038,24 +1038,26 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
                                    bool update) {
 
   {
-    SignalBlocker<QAction> normalizeNone(m_actionNormalizeNone);
-    SignalBlocker<QAction> normalizeVolume(m_actionNormalizeVolume);
-    SignalBlocker<QAction> normalizeNumEvents(m_actionNormalizeNumEvents);
+    SignalBlocker normalizeNone(m_actionNormalizeNone);
+    SignalBlocker normalizeVolume(m_actionNormalizeVolume);
+    SignalBlocker normalizeNumEvents(m_actionNormalizeNumEvents);
 
-    normalizeNone->setChecked(norm == Mantid::API::NoNormalization);
-    normalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
-    normalizeNumEvents->setChecked(norm == Mantid::API::NumEventsNormalization);
+    m_actionNormalizeNone->setChecked(norm == Mantid::API::NoNormalization);
+    m_actionNormalizeVolume->setChecked(norm ==
+                                        Mantid::API::VolumeNormalization);
+    m_actionNormalizeNumEvents->setChecked(norm ==
+                                           Mantid::API::NumEventsNormalization);
   }
 
   // Sync the normalization combobox.
   {
-    SignalBlocker<QComboBox> comboNormalization(ui.comboNormalization);
+    SignalBlocker comboNormalization(ui.comboNormalization);
     if (norm == Mantid::API::NoNormalization) {
-      comboNormalization->setCurrentIndex(0);
+      ui.comboNormalization->setCurrentIndex(0);
     } else if (norm == Mantid::API::VolumeNormalization) {
-      comboNormalization->setCurrentIndex(1);
+      ui.comboNormalization->setCurrentIndex(1);
     } else {
-      comboNormalization->setCurrentIndex(2);
+      ui.comboNormalization->setCurrentIndex(2);
     }
   }
 

@@ -7,6 +7,7 @@
 #ifndef MANTID_ALGORITHMS_SORTXAXISTEST_H_
 #define MANTID_ALGORITHMS_SORTXAXISTEST_H_
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/SortXAxis.h"
@@ -108,6 +109,8 @@ public:
   // This means the constructor isn't called when running other tests
   static SortXAxisTest *createSuite() { return new SortXAxisTest(); }
   static void destroySuite(SortXAxisTest *suite) { delete suite; }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testXAscending() {
     std::vector<double> xData = {1, 2, 3};

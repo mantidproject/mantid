@@ -45,7 +45,7 @@ class BrowseFileWidgetPresenter(object):
         self._multiple_file_mode = text
 
     def get_filenames_from_user(self):
-        file_filter = file_utils.filter_for_extensions(["nxs"])
+        file_filter = file_utils.filter_for_extensions(["bin", "nxs"])
         directory = ""
         filenames = self._view.show_file_browser_and_return_selection(file_filter, [directory],
                                                                       multiple_files=self._multiple_files)
@@ -103,6 +103,7 @@ class BrowseFileWidgetPresenter(object):
             self._model.execute()
         except ValueError as error:
             self._view.warning_popup(error.args[0])
+            self.filenames = self._model.current_filenames
         self.on_loading_finished()
 
     def handle_load_thread_start(self, filenames):
@@ -112,19 +113,26 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread = self.create_load_thread()
         self._load_thread.threadWrapperSetUp(self.disable_loading,
                                              self.handle_load_thread_finished,
-                                             self._view.warning_popup)
+                                             self.handle_load_error)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
+
+    def handle_load_error(self, message):
+        self.thread_success = False
+        self._view.warning_popup(message)
 
     def handle_load_thread_finished(self):
         self._load_thread.deleteLater()
         self._load_thread = None
 
+        if not self.thread_success:
+            self.filenames = self._model.current_filenames
+
         self.on_loading_finished()
 
     def on_loading_finished(self):
         instrument_from_workspace = self._model.get_instrument_from_latest_run()
-        if instrument_from_workspace != self._model._data_context.instrument:
+        if instrument_from_workspace != self._model._data_context.instrument or instrument_from_workspace == "PSI":
             self._model.instrument = instrument_from_workspace
 
         if self._multiple_files and self._multiple_file_mode == "Co-Add":
@@ -152,6 +160,7 @@ class BrowseFileWidgetPresenter(object):
         self._model.clear()
 
     def disable_loading(self):
+        self.thread_success = True
         self._view.disable_load_buttons()
 
     def enable_loading(self):

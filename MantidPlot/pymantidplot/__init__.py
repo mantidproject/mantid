@@ -522,7 +522,7 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
         source = source._getHeldObject()
     elif hasattr(source, 'getName'):
         # If the source is a workspace, create a table from the specified index
-        wsName = source.getName()
+        wsName = source.name()
         source = threadsafe_call(_qti.app.mantidUI.workspaceToTable.wsName, wsName, [index], False, True)
         # The C++ stemPlot method takes the name of the column, so get that
         index = source.colName(2)

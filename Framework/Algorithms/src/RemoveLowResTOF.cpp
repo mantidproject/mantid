@@ -56,15 +56,15 @@ void RemoveLowResTOF::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "LowResTOFWorkspace", "", Direction::Output, PropertyMode::Optional),
       "The name of the optional output workspace that contains low resolution "
       "TOF which are removed "
@@ -88,12 +88,12 @@ void RemoveLowResTOF::init() {
                   "other parameters if specified.");
 
   // hide things when people cjoose the minimum wavelength
-  setPropertySettings("ReferenceDIFC", make_unique<EnabledWhenProperty>(
+  setPropertySettings("ReferenceDIFC", std::make_unique<EnabledWhenProperty>(
                                            "MinWavelength", IS_DEFAULT));
   setPropertySettings(
-      "K", make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
-  setPropertySettings(
-      "Tmin", make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
+      "K", std::make_unique<EnabledWhenProperty>("MinWavelength", IS_DEFAULT));
+  setPropertySettings("Tmin", std::make_unique<EnabledWhenProperty>(
+                                  "MinWavelength", IS_DEFAULT));
 }
 
 void RemoveLowResTOF::exec() {
@@ -128,7 +128,7 @@ void RemoveLowResTOF::exec() {
   }
 
   // set up the progress bar
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
 
   this->getTminData(false);
 
@@ -169,7 +169,8 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
 
   std::size_t numEventsOrig = outW->getNumberEvents();
   // set up the progress bar
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress =
+      std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());

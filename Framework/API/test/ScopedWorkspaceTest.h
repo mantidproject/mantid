@@ -182,7 +182,7 @@ public:
 
     ScopedWorkspace test(ws);
 
-    TS_ASSERT_THROWS(ScopedWorkspace test2(ws), std::invalid_argument);
+    TS_ASSERT_THROWS(ScopedWorkspace test2(ws), const std::invalid_argument &);
   }
 
   void test_boolConversion() {

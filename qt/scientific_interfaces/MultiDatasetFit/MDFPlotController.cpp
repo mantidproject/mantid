@@ -132,7 +132,7 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index) {
                                                  outputWorkspaceName);
       m_plotData.insert(index, data);
     } catch (std::exception &e) {
-      QMessageBox::critical(owner(), "MantidPlot - Error", e.what());
+      QMessageBox::critical(owner(), "Mantid - Error", e.what());
       clear();
       owner()->checkSpectra();
       m_plot->replot();

@@ -61,7 +61,7 @@ public:
     // Drift depening on bank to ensure correct offset is used for every bank.
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
 
-    return Kernel::make_unique<EventDataPartitioner<int64_t, double, int32_t>>(
+    return std::make_unique<EventDataPartitioner<int64_t, double, int32_t>>(
         m_numWorkers, PulseTimeGenerator<int64_t, double>{
                           index, time_zero, "second", time_zero_offset});
   }
@@ -164,7 +164,7 @@ public:
   void test_throws_if_file_does_not_exist() {
     TS_ASSERT_THROWS(
         EventLoader::load(Communicator{}, "abcdefg", "", {}, {}, {}),
-        H5::FileIException);
+        const H5::FileIException &);
   }
 
   void test_H5DataType_parameter_pack_conversion() {

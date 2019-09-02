@@ -34,7 +34,7 @@ const std::string EvaluateFunction::summary() const {
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
 void EvaluateFunction::initConcrete() {
-  declareProperty(make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }

@@ -102,18 +102,18 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(len(subst_dict),6)
 
         val = subst_dict['_first']
-        self.assertTrue(type(val) is helpers.ComplexProperty)
+        self.assertEqual(type(val), helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'kkk1')
         #self.assertEqual(val[1],'kkk2')
 
         val = subst_dict['other']
-        self.assertFalse(type(val) is helpers.ComplexProperty)
+        self.assertNotEqual(type(val), helpers.ComplexProperty)
         self.assertEqual(val,'unrelated')
 
         val = subst_dict['_second']
 
-        self.assertTrue(type(val) is helpers.ComplexProperty)
+        self.assertEqual(type(val), helpers.ComplexProperty)
         #self.assertTrue(isinstance(val,list))
         #self.assertEqual(val[0],'kkk1')
         #self.assertEqual(val[1],'other')
@@ -148,17 +148,17 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(len(prop_dict),6)
 
         val = prop_dict['_first']
-        self.assertTrue(type(val) is helpers.ComplexProperty)
+        self.assertEqual(type(val), helpers.ComplexProperty)
 
         #elf.assertEqual(val[0],'_kkk1')
         #self.assertEqual(val[1],'_kkk2')
 
         val = prop_dict['other']
-        self.assertFalse(type(val) is helpers.ComplexProperty)
+        self.assertNotEqual(type(val), helpers.ComplexProperty)
         self.assertEqual(val,'unrelated')
 
         val = prop_dict['_second']
-        self.assertTrue(type(val) is helpers.ComplexProperty)
+        self.assertEqual(type(val), helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'_kkk1')
         #self.assertEqual(val[1],'_other')
@@ -166,7 +166,7 @@ class DirectReductionHelpersTest(unittest.TestCase):
 
 
         val = prop_dict['third']
-        self.assertFalse(type(val) is helpers.ComplexProperty)
+        self.assertNotEqual(type(val), helpers.ComplexProperty)
         self.assertEqual(val,'Babara')
 
 
@@ -191,17 +191,17 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(len(subst_dict),6)
 
         val = subst_dict['_1']
-        self.assertTrue(type(val) is helpers.ComplexProperty)
+        self.assertEqual(type(val), helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'kkk1')
         #self.assertEqual(val[1],'kkk2')
 
         val = subst_dict['other']
-        self.assertFalse(type(val) is helpers.ComplexProperty)
+        self.assertNotEqual(type(val), helpers.ComplexProperty)
         self.assertEqual(val,'unrelated')
 
         val = subst_dict['_2']
-        self.assertTrue(type(val) is helpers.ComplexProperty)
+        self.assertEqual(type(val), helpers.ComplexProperty)
 
         #self.assertEqual(val[0],'kkk1')
         #self.assertEqual(val[1],'other')
@@ -320,10 +320,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # Good: prohibit assignment
         try:
             t1.A[0] = 10
-            Fail = False
         except TypeError:
-            Fail = True
-        self.assertTrue(Fail)
+            pass
+        else:
+            self.fail()  # TypeError should have been thrown
         self.assertEqual(t1.A,(1,10))
 
 
@@ -398,10 +398,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # Good, fail partial assignment
         try:
             t1.A[0] = 10
-            Fail = False
         except TypeError:
-            Fail = True
-        self.assertTrue(Fail)
+            pass
+        else:
+            self.fail()  # TypeError should have been thrown
         self.assertEqual(t1.A,(1,10))
 
         t1.special = 10
@@ -487,10 +487,10 @@ class DirectReductionHelpersTest(unittest.TestCase):
         # Good, fail partial assignment
         try:
             t1.A[0] = 10
-            Fail = False
         except TypeError:
-            Fail = True
-        self.assertTrue(Fail)
+            pass
+        else:
+            self.fail()  # TypeError should have been thrown
         self.assertEqual(t1.A,(1,10))
 
 

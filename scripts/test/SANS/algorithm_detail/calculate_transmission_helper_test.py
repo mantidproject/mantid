@@ -29,7 +29,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
     def _assert_collection_elements_are_equal(self, collection1, collection2):
         tolerance = 1e-7
-        self.assertTrue(len(collection1) == len(collection2))
+        self.assertEqual(len(collection1),  len(collection2))
         for index in range(len(collection1)):
             self.assertTrue(abs(collection1[index] - collection2[index]) < tolerance)
 
@@ -123,16 +123,16 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         idf_path = get_idf_path_from_workspace(self.immutable_test_workspace)
         # Assert
         self.assertTrue(os.path.exists(idf_path))
-        self.assertTrue(os.path.basename(idf_path) == "LOQ_Definition_20020226-.xml")
+        self.assertEqual(os.path.basename(idf_path),  "LOQ_Definition_20020226-.xml")
 
     def test_that_extracts_workspace_indices_of_monitor_when_monitors_are_present(self):
         # Act
         workspace_indices_generator = get_workspace_indices_for_monitors(self.immutable_test_workspace)
         # Assert
         workspace_indices = list(workspace_indices_generator)
-        self.assertTrue(len(workspace_indices) == 2)
-        self.assertTrue(workspace_indices[0] == 0)
-        self.assertTrue(workspace_indices[1] == 1)
+        self.assertEqual(len(workspace_indices),  2)
+        self.assertEqual(workspace_indices[0],  0)
+        self.assertEqual(workspace_indices[1],  1)
 
     def test_that_returns_empty_generator_if_no_monitors_are_present(self):
         # Arrange
@@ -141,7 +141,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         workspace_indices_generator = get_workspace_indices_for_monitors(test_workspace_for_monitors)
         # Assert
         workspace_indices = list(workspace_indices_generator)
-        self.assertTrue(workspace_indices == [])
+        self.assertEqual(workspace_indices,  [])
         # Clean up
         DeleteWorkspace(test_workspace_for_monitors)
 

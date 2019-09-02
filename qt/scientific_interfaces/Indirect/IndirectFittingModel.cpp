@@ -633,7 +633,7 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
   else
-    m_fitOutput = Mantid::Kernel::make_unique<IndirectFitOutput>(
+    m_fitOutput = std::make_unique<IndirectFitOutput>(
         createFitOutput(resultGroup, parameterTable, resultWorkspace,
                         fitDataBegin, fitDataEnd));
   m_previousModelSelected = isPreviousModelSelected();
@@ -648,9 +648,8 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitData, spectrum);
   else
-    m_fitOutput =
-        Mantid::Kernel::make_unique<IndirectFitOutput>(createFitOutput(
-            resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
+    m_fitOutput = std::make_unique<IndirectFitOutput>(createFitOutput(
+        resultGroup, parameterTable, resultWorkspace, fitData, spectrum));
   m_previousModelSelected = isPreviousModelSelected();
 }
 
@@ -739,6 +738,8 @@ std::string IndirectFittingModel::getResultXAxisUnit() const {
   return "MomentumTransfer";
 }
 
+std::string IndirectFittingModel::getResultLogName() const { return "axis-1"; }
+
 boost::optional<ResultLocation>
 IndirectFittingModel::getResultLocation(std::size_t index,
                                         std::size_t spectrum) const {
@@ -815,6 +816,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("PassWSIndexToFunction", true);
+  fitAlgorithm->setProperty("LogName", getResultLogName());
 
   const auto range = initialFitData->getRange(0);
   fitAlgorithm->setProperty("StartX", range.first);

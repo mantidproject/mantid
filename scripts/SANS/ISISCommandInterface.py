@@ -1009,7 +1009,7 @@ def PlotResult(workspace, canvas=None):
     if numSpecs == 1:
         graph = mantidplot.plotSpectrum(workspace, 0)
     else:
-        graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
+        graph = mantidplot.importMatrixWorkspace(workspace.name()).plotGraph2D()
 
     if canvas is not None:
         # we were given a handle to an existing graph, use it

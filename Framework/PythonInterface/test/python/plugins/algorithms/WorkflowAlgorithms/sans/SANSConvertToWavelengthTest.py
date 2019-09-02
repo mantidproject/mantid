@@ -102,13 +102,13 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         self.assertTrue(isinstance(output_workspace, EventWorkspace))
         # Check the rebinning part
         data_x0 = output_workspace.dataX(0)
-        self.assertTrue(len(data_x0) == 10)
-        self.assertTrue(data_x0[0] == 1.0)
-        self.assertTrue(data_x0[-1] == 10.0)
+        self.assertEqual(len(data_x0),  10)
+        self.assertEqual(data_x0[0],  1.0)
+        self.assertEqual(data_x0[-1],  10.0)
         # Check the units part
         axis0 = output_workspace.getAxis(0)
         unit = axis0.getUnit()
-        self.assertTrue(unit.unitID() == "Wavelength")
+        self.assertEqual(unit.unitID(),  "Wavelength")
 
     def test_that_not_setting_upper_bound_takes_it_from_original_value(self):
         workspace = provide_workspace(is_event=True)
@@ -126,14 +126,14 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
 
         # Check the rebinning part
         data_x0 = output_workspace.dataX(0)
-        self.assertTrue(data_x0[0] == 1.0)
+        self.assertEqual(data_x0[0],  1.0)
         expected_upper_bound = 5.27471197274
         self.assertEqual(round(data_x0[-1],11), expected_upper_bound)
 
         # Check the units part
         axis0 = output_workspace.getAxis(0)
         unit = axis0.getUnit()
-        self.assertTrue(unit.unitID() == "Wavelength")
+        self.assertEqual(unit.unitID(),  "Wavelength")
 
 
 if __name__ == '__main__':

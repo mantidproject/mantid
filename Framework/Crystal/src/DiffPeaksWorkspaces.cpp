@@ -34,15 +34,15 @@ const std::string DiffPeaksWorkspaces::category() const {
 /** Initialises the algorithm's properties.
  */
 void DiffPeaksWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "LHSWorkspace", "", Direction::Input),
                   "The first of peaks.");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "RHSWorkspace", "", Direction::Input),
                   "The second set of peaks.");
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                          Direction::Output),
       "The set of peaks that are in the first, but not the second, workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

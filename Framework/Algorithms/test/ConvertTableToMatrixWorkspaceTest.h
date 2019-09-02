@@ -127,7 +127,7 @@ public:
   }
 
   void test_fail_on_empty_table() {
-    TS_ASSERT_THROWS(m_converter->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(m_converter->execute(), const std::runtime_error &);
   }
 
   void setUp() override {
@@ -224,7 +224,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));
 
-    TS_ASSERT_THROWS(m_converter->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(m_converter->execute(), const std::invalid_argument &);
     API::AnalysisDataService::Instance().remove("out");
   }
 

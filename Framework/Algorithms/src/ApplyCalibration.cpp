@@ -21,14 +21,15 @@ using namespace API;
 void ApplyCalibration::init() {
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "Workspace", "", Direction::InOut),
       "The name of the input workspace to apply the calibration to");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      "PositionTable", "", Direction::Input),
-                  "The name of the table workspace containing the new "
-                  "positions of detectors");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "PositionTable", "", Direction::Input),
+      "The name of the table workspace containing the new "
+      "positions of detectors");
 }
 
 /** Executes the algorithm. Moving detectors of input workspace to positions

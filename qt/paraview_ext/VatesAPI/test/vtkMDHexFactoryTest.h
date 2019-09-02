@@ -13,7 +13,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
@@ -58,7 +58,8 @@ private:
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setCheckDimensionality(doCheckDimensionality);
     if (doCheckDimensionality) {
-      TS_ASSERT_THROWS(factory.initialize(binned_ws), std::runtime_error);
+      TS_ASSERT_THROWS(factory.initialize(binned_ws),
+                       const std::runtime_error &);
     } else {
       TS_ASSERT_THROWS_NOTHING(factory.initialize(binned_ws));
       vtkSmartPointer<vtkDataSet> product;
@@ -73,7 +74,8 @@ public:
     FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.",
-                      factory.create(progressUpdater), std::runtime_error);
+                      factory.create(progressUpdater),
+                      const std::runtime_error &);
   }
 
   void testInitalizeWithNullWorkspaceThrows() {
@@ -82,7 +84,7 @@ public:
     IMDEventWorkspace *ws = nullptr;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
                       factory.initialize(Workspace_sptr(ws)),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testGetFactoryTypeName() {
@@ -137,14 +139,15 @@ public:
     // factory.SetSuccessor(mockSuccessor); No Successor set.
 
     auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
-    TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
+    TS_ASSERT_THROWS(factory.initialize(ws), const std::runtime_error &);
   }
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdater;
     vtkMDHexFactory factory(VATES::VolumeNormalization);
     // initialize not called!
-    TS_ASSERT_THROWS(factory.create(progressUpdater), std::runtime_error);
+    TS_ASSERT_THROWS(factory.create(progressUpdater),
+                     const std::runtime_error &);
   }
 
   void test_roundUp_positive_numbers() {

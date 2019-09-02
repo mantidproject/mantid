@@ -69,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(col.cell<std::vector<int>>(4), v4);
 
     // Non-convertable characters
-    TS_ASSERT_THROWS(col.read(4, "1,2,a,3"), std::invalid_argument);
+    TS_ASSERT_THROWS(col.read(4, "1,2,a,3"), const std::invalid_argument &);
   }
 
   void test_print() {

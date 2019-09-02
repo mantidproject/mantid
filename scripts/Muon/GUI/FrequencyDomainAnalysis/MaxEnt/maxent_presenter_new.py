@@ -14,9 +14,8 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name, \
-    get_base_data_directory
-from Muon.GUI.Common.observer_pattern import GenericObserver
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
+from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
@@ -43,6 +42,8 @@ class MaxEntPresenter(object):
         self.view.cancelSignal.connect(self.cancel)
 
         self.phase_table_observer = GenericObserver(self.update_phase_table_options)
+        self.calculation_finished_notifier = GenericObservable()
+        self.calculation_started_notifier = GenericObservable()
 
     @property
     def widget(self):
@@ -90,12 +91,13 @@ class MaxEntPresenter(object):
         # put this on its own thread so not to freeze Mantid
         self.thread = self.createThread()
         self.thread.threadWrapperSetUp(self.deactivate, self.handleFinished, self.handle_error)
-
+        self.calculation_started_notifier.notify_subscribers()
         self.thread.start()
 
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
+        self.calculation_finished_notifier.notify_subscribers()
 
     def handle_error(self, error):
         self.activate()
@@ -151,14 +153,13 @@ class MaxEntPresenter(object):
     def add_maxent_workspace_to_ADS(self, input_workspace, maxent_workspace, alg):
         run = re.search('[0-9]+', input_workspace).group()
         base_name = get_maxent_workspace_name(input_workspace)
-        group = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument)
-        directory = get_base_data_directory(self.load, run) + group
+        directory = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
         muon_workspace_wrapper.show()
 
         maxent_output_options = self.get_maxent_output_options()
-
+        self.load._frequency_context.add_maxEnt(run, maxent_workspace)
         self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, directory)
 
     def get_maxent_output_options(self):
@@ -176,3 +177,6 @@ class MaxEntPresenter(object):
             if output_options[key]:
                 output = alg.getProperty(key).value
                 MuonWorkspaceWrapper(output, directory + base_name + optional_output_suffixes[key]).show()
+
+    def update_view_from_model(self):
+        self.getWorkspaceNames()

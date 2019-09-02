@@ -3,7 +3,7 @@
 Frequency Domain Analysis
 =========================
 
-.. image::  ../images/frequency_domain_analysis_2_home.png
+.. image::  ../images/frequency_domain_analysis_2.png
    :align: right
    :height: 400px
 
@@ -40,9 +40,14 @@ which runs are used by the rest of the GUI.
 Tabs
 ----
 
+All these tabs can be dragged away from the interface into their own window.
+
 * :ref:`Home Tab <muon_home_tab-ref>`
 * :ref:`Grouping Tab <muon_grouping_tab-ref>`
+* :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
 * :ref:`Transform Tab <muon_transform_tab-ref>`
+* :ref:`Fitting Tab <muon_fitting_tab-ref>`
+* :ref:`Results Table Tab <muon_results_tab-ref>`
 
 Feedback & Comments
 -------------------

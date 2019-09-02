@@ -51,11 +51,11 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
       int(nhist), int(nbins), x0, deltax);
 
   // We need something other than a spectrum axis, call this one theta
-  BinEdgeAxis *const thetaAxis = new BinEdgeAxis(nhist + 1);
+  auto thetaAxis = std::make_unique<BinEdgeAxis>(nhist + 1);
   for (size_t i = 0; i < nhist + 1; ++i) {
     thetaAxis->setValue(i, -0.5 + static_cast<double>(i));
   }
-  ws->replaceAxis(1, thetaAxis);
+  ws->replaceAxis(1, std::move(thetaAxis));
 
   if (distribution) {
     Mantid::API::WorkspaceHelpers::makeDistribution(ws);

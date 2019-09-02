@@ -33,7 +33,7 @@ public:
 
     // dimensions (min-max) have not been set
     TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     std::vector<double> dimMin(2, -1);
     std::vector<double> dimMax(2, 1);
     WSD.setMinMax(dimMin, dimMax);
@@ -59,7 +59,7 @@ public:
 
     int binNumWrong[] = {120, 60, 200};
     nBins.assign(binNumWrong, binNumWrong + 3);
-    TS_ASSERT_THROWS(WSD.setNumBins(nBins), std::invalid_argument);
+    TS_ASSERT_THROWS(WSD.setNumBins(nBins), const std::invalid_argument &);
   }
   void testBuildFromMatrixWS4D() {
     MDWSDescription WSD;
@@ -70,7 +70,7 @@ public:
     PropNamews[1] = "P";
     // no property named "P" is attached to workspace
     TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D, "|Q|", "Direct", PropNamews),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
 
     // H is attached
     PropNamews[1] = "H";
@@ -88,7 +88,7 @@ public:
 
     int binNumWrong[] = {120, 60};
     nBins.assign(binNumWrong, binNumWrong + 2);
-    TS_ASSERT_THROWS(WSD.setNumBins(nBins), std::invalid_argument);
+    TS_ASSERT_THROWS(WSD.setNumBins(nBins), const std::invalid_argument &);
 
     int binNumRight[] = {120, 60, 200, 100};
     nBins.assign(binNumRight, binNumRight + 4);

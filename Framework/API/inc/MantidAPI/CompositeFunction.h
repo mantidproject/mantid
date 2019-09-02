@@ -137,15 +137,15 @@ public:
   /// Split this function (if needed) into a list of independent functions.
   std::vector<boost::shared_ptr<IFunction>>
   createEquivalentFunctions() const override;
+  /// Returns the pointer to i-th function
+  IFunction_sptr getFunction(std::size_t i) const override;
+  /// Number of functions
+  std::size_t nFunctions() const override { return m_functions.size(); }
 
   /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
   virtual size_t addFunction(IFunction_sptr f);
-  /// Returns the pointer to i-th function
-  IFunction_sptr getFunction(std::size_t i) const;
-  /// Number of functions
-  std::size_t nFunctions() const { return m_functions.size(); }
   /// Remove a function
   void removeFunction(size_t i);
   /// Replace a function

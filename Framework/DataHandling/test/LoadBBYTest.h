@@ -45,7 +45,7 @@ public:
     algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
     // should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // should succeed now
     std::string inputFile = "BBY0000014.tar";

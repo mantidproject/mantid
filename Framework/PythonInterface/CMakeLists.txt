@@ -12,9 +12,6 @@ set(Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 find_package(Numpy REQUIRED)
 include_directories(SYSTEM ${PYTHON_INCLUDE_PATH} ${PYTHON_NUMPY_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
 
-# Base of the subproject include dir
-set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface)
-
 # Common definitions
 add_definitions(-DBOOST_PYTHON_NO_LIB
                 -DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
@@ -119,7 +116,7 @@ add_python_package ( PythonInterface EGGLINKNAME mantid )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
   PythonGeometryModule PythonAPIModule PythonDataObjectsModule
-  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule PythonPlotsModestImageModule )
+  PythonCurveFittingModule )
 
 # Clear any leftover bin/$(Configuration)/mantid/ folder, from when
 # PythonInterface was being copied over.

@@ -30,7 +30,7 @@
  ***************************************************************************/
 #include "Folder.h"
 #include "ApplicationWindow.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include <QApplication>
 #include <QDateTime>
 

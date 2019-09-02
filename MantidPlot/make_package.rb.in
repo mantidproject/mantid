@@ -244,6 +244,7 @@ end
 Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib "
 Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)} "
 Qt_Executables << "-executable=Contents/MacOS/mantidqt/_commonqt4.so "
+Qt_Executables << "-executable=Contents/MacOS/mantidqt/icons/_iconsqt4.so "
 
 if( "@MAKE_VATES@" == "ON" )
   list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
@@ -361,7 +362,7 @@ else
   p "Unknown python distribution at #{python_exe}"
 end
 
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtpy",
                "certifi","tornado","markupsafe","matplotlib","mpl_toolkits", "jinja2","jsonschema","functools32",
                "ptyprocess","CifFile","yaml","requests","networkx","PIL","dateutil","pytz",
                "skimage"]

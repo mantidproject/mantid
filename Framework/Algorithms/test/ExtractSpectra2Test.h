@@ -129,11 +129,11 @@ public:
 
   void test_BinEdgeAxis() {
     auto input = createWorkspace();
-    BinEdgeAxis *axis = new BinEdgeAxis(input->getNumberHistograms() + 1);
+    auto axis = std::make_unique<BinEdgeAxis>(input->getNumberHistograms() + 1);
     for (size_t i = 0; i < axis->length(); ++i) {
       axis->setValue(i, -2. + static_cast<double>(i));
     }
-    input->replaceAxis(1, axis);
+    input->replaceAxis(1, std::move(axis));
     ExtractSpectra2 alg;
     alg.initialize();
     alg.setChild(true);
@@ -154,11 +154,11 @@ public:
 
   void test_BinEdgeAxis_fails_with_non_contiguous_indices() {
     auto input = createWorkspace();
-    BinEdgeAxis *axis = new BinEdgeAxis(input->getNumberHistograms() + 1);
+    auto axis = std::make_unique<BinEdgeAxis>(input->getNumberHistograms() + 1);
     for (size_t i = 0; i < axis->length(); ++i) {
       axis->setValue(i, -2. + static_cast<double>(i));
     }
-    input->replaceAxis(1, axis);
+    input->replaceAxis(1, std::move(axis));
     ExtractSpectra2 alg;
     alg.initialize();
     alg.setChild(true);

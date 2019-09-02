@@ -28,6 +28,7 @@ class MockSettingsView(object):
         self.general_settings = FakeMVP()
 
         self.save_settings_button = MockQButton()
+        self.help_button = MockQButton()
 
 
 class SettingsPresenterTest(TestCase):

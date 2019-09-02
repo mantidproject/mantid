@@ -54,7 +54,7 @@ public:
       loadrkh.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(loadrkh.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(loadrkh.execute(), const std::runtime_error &);
 
     // Set the file name
     loadrkh.setPropertyValue("Filename", dataFile);

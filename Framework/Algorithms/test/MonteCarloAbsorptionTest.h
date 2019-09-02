@@ -234,7 +234,7 @@ public:
     auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
 
     TS_ASSERT_THROWS(mcAbsorb->setProperty("InputWorkspace", testWS),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Workspace_With_An_Invalid_Sample_Shape_Is_Not_Accepted() {
@@ -247,7 +247,7 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", testWS));
-    TS_ASSERT_THROWS(mcabs->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(mcabs->execute(), const std::invalid_argument &);
   }
 
   void test_Lower_Limit_for_Number_of_Wavelengths() {
@@ -256,10 +256,10 @@ public:
         1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     int nlambda{1};
     TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "Linear"),
-                     std::runtime_error)
+                     const std::runtime_error &)
     nlambda = 2;
     TS_ASSERT_THROWS(runAlgorithm(wsProps, nlambda, "CSpline"),
-                     std::runtime_error)
+                     const std::runtime_error &)
   }
 
   void test_event_workspace() {

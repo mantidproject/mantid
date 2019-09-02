@@ -36,13 +36,13 @@ PointByPointVCorrection::~PointByPointVCorrection() = default;
 
 void PointByPointVCorrection::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
       "Name of the Sample workspace.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
       "Name of the Vanadium workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -56,8 +56,8 @@ void PointByPointVCorrection::exec() {
   check_validity(inputWS1, inputWS2, outputWS);
 
   // Now do the normalisation
-  const int size = static_cast<int>(inputWS1->x(0).size());
-  const int nHist = static_cast<int>(inputWS1->getNumberHistograms());
+  const auto size = static_cast<int>(inputWS1->x(0).size());
+  const auto nHist = static_cast<int>(inputWS1->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS1, *inputWS2, *outputWS))

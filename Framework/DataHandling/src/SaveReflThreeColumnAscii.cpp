@@ -20,7 +20,7 @@ using namespace API;
 /// virtual method to set the extra properties required for this algorithm
 void SaveReflThreeColumnAscii::extraProps() {
   declareProperty("Title", "", "Text to be written to the Title field");
-  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   appendSeparatorProperty();
 }

@@ -37,15 +37,15 @@ const string ShiftLogTime::category() const { return "DataHandling\\Logs"; }
 /** Initialize the algorithm's properties.
  */
 void ShiftLogTime::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "A workspace with units of TOF");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   this->declareProperty("LogName", "", "Name of the log to add the offset to");
   this->declareProperty(
-      make_unique<PropertyWithValue<int>>("IndexShift", Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("IndexShift", Direction::Input),
       "Number of (integer) values to move the log values. Required.");
 }
 
@@ -62,9 +62,8 @@ void ShiftLogTime::exec() {
 
   // make sure the log is in the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  Kernel::TimeSeriesProperty<double> *oldlog =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          inputWS->run().getLogData(logname));
+  auto *oldlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData(logname));
   if (!oldlog) {
     stringstream msg;
     msg << "InputWorkspace \'" << this->getPropertyValue("InputWorkspace")

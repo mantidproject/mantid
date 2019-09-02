@@ -412,7 +412,7 @@ public:
 
   int axes() const;
   virtual Axis *getAxis(const std::size_t &axisIndex) const;
-  void replaceAxis(const std::size_t &axisIndex, Axis *const newAxis);
+  void replaceAxis(const std::size_t &axisIndex, std::unique_ptr<Axis> newAxis);
 
   /// Will return the number of Axis currently stored in the workspace it is not
   /// always safe to assume it is just 2
@@ -430,7 +430,8 @@ public:
 
   std::string YUnit() const;
   void setYUnit(const std::string &newUnit);
-  std::string YUnitLabel() const;
+  std::string YUnitLabel(bool useLatex = false,
+                         bool plotAsDistribution = false) const;
   void setYUnitLabel(const std::string &newLabel);
 
   /// Are the Y-values dimensioned?
@@ -455,7 +456,6 @@ public:
   setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
   boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
-  void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
 
   //=====================================================================================
@@ -501,8 +501,8 @@ public:
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Apply masking.
-  void
-  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
+  void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
+                        maskingRegion) override;
   /// Clear exsting masking.
   void clearMDMasking() override;
 
@@ -545,8 +545,9 @@ public:
 
   void invalidateCachedSpectrumNumbers();
 
-  void cacheDetectorGroupings(const det2group_map &mapping) override;
-  size_t groupOfDetectorID(const detid_t detID) const override;
+  /// Invalidates the commons bins flag.  This is generally called when a method
+  /// could allow the X values to be changed.
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -563,14 +564,10 @@ protected:
 
   virtual ISpectrum &getSpectrumWithoutInvalidation(const size_t index) = 0;
 
-  /// Invalidates the commons bins flag.  This is generally called when a method
-  /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
-
   void updateCachedDetectorGrouping(const size_t index) const override;
 
   /// A vector of pointers to the axes for this workspace
-  std::vector<Axis *> m_axes;
+  std::vector<std::unique_ptr<Axis>> m_axes;
 
 private:
   std::size_t binIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,

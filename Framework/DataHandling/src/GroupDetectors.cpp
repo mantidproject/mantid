@@ -24,22 +24,22 @@ using namespace API;
 
 void GroupDetectors::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "Workspace", "", Direction::InOut,
           boost::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
   declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList"),
+      std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
 
   declareProperty("ResultIndex", -1,
@@ -80,7 +80,7 @@ void GroupDetectors::exec() {
     return;
   }
 
-  const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
+  const auto firstIndex = static_cast<specnum_t>(indexList[0]);
   auto &firstSpectrum = WS->getSpectrum(firstIndex);
   setProperty("ResultIndex", firstIndex);
 

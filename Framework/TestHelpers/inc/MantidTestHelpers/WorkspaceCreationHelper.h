@@ -31,8 +31,6 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
-#include "MantidKernel/make_unique.h"
-
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
@@ -75,8 +73,8 @@ public:
 
   Mantid::API::Progress *getProgress() { return m_Progress.get(); }
   void resetProgress(size_t nSteps) {
-    m_Progress = Mantid::Kernel::make_unique<Mantid::API::Progress>(
-        this, 0.0, 1.0, nSteps);
+    m_Progress =
+        std::make_unique<Mantid::API::Progress>(this, 0.0, 1.0, nSteps);
   }
 
 private:
@@ -274,6 +272,12 @@ create2DWorkspace123WithMaskedBin(int numHist, int numBins,
 Mantid::DataObjects::EventWorkspace_sptr
 createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
                                        bool clearEvents = true);
+
+/** Create an Eventworkspace with instrument 2.0 that contains
+ * RectangularDetector's */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceWithFullInstrument2(int numBanks, int numPixels,
+                                        bool clearEvents = true);
 
 /**
  * Creates an event workspace with instrument which consists of cylindrical

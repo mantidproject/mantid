@@ -39,13 +39,13 @@ using Geometry::Instrument_const_sptr;
  */
 void CreateCalFileByNames::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "InstrumentWorkspace", "", Direction::Input,
           boost::make_shared<InstrumentValidator>()),
       "A workspace that contains a reference to the instrument of interest. "
       "You can use LoadEmptyInstrument to create such a workspace.");
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::Save, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::Save, ".cal"),
                   "The name of the output CalFile");
   declareProperty(
       "GroupNames", "",

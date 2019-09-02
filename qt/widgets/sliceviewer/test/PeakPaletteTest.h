@@ -46,10 +46,10 @@ public:
     PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex > Max Index, should throw.\n",
                       palette.foregroundIndexToColour(indexTooHigh),
-                      std::out_of_range);
+                      const std::out_of_range &);
     TSM_ASSERT_THROWS("\n\nIndex < Max Index, should throw.\n",
                       palette.foregroundIndexToColour(indexTooLow),
-                      std::out_of_range);
+                      const std::out_of_range &);
   }
 
   void test_backgroundIndexToColour_throws_if_out_of_range() {
@@ -59,10 +59,10 @@ public:
     PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex > Max Index, should throw.\n",
                       palette.backgroundIndexToColour(indexTooHigh),
-                      std::out_of_range);
+                      const std::out_of_range &);
     TSM_ASSERT_THROWS("\n\nIndex < Max Index, should throw.\n",
                       palette.backgroundIndexToColour(indexTooLow),
-                      std::out_of_range);
+                      const std::out_of_range &);
   }
 
   void test_setForgroundColour() {
@@ -118,10 +118,10 @@ public:
     PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex is > Max Index. Should throw\n.",
                       palette.setForegroundColour(indexTooHigh, Qt::red),
-                      std::out_of_range);
+                      const std::out_of_range &);
     TSM_ASSERT_THROWS("\n\nIndex is < Min Index. Should throw\n",
                       palette.setForegroundColour(indexTooLow, Qt::red),
-                      std::out_of_range);
+                      const std::out_of_range &);
   }
 
   void test_setBackgroundColour_throws_if_out_of_range() {
@@ -131,10 +131,10 @@ public:
     PeakPalette<QColor> palette;
     TSM_ASSERT_THROWS("\n\nIndex is > Max Index. Should throw\n.",
                       palette.setBackgroundColour(indexTooHigh, Qt::red),
-                      std::out_of_range);
+                      const std::out_of_range &);
     TSM_ASSERT_THROWS("\n\nIndex is < Min Index. Should throw\n",
                       palette.setBackgroundColour(indexTooLow, Qt::red),
-                      std::out_of_range);
+                      const std::out_of_range &);
   }
 
   void testCopy() {

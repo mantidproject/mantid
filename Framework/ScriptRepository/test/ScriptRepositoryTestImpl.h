@@ -227,7 +227,7 @@ ctest -j8 -R ScriptRepositoryTestImpl_  --verbose
 
 **/
 class ScriptRepositoryTestImpl : public CxxTest::TestSuite {
-  ScriptRepositoryImplLocal *repo;
+  std::unique_ptr<ScriptRepositoryImplLocal> repo;
   std::string local_rep;
   std::string backup_local_repository_path;
 
@@ -242,13 +242,13 @@ public:
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
-    TS_ASSERT_THROWS_NOTHING(
-        repo = new ScriptRepositoryImplLocal(local_rep, webserverurl));
+    TS_ASSERT_THROWS_NOTHING(repo = std::make_unique<ScriptRepositoryImplLocal>(
+                                 local_rep, webserverurl));
   }
 
   // ensure that the local files are free from the test created.
   void tearDown() override {
-    delete repo;
+    repo = nullptr;
     try {
       Poco::File f(local_rep);
       f.remove(true);
@@ -323,11 +323,10 @@ public:
     // after the installation, all the others instances of ScriptRepositoryImpl
     // should be valid,
     // by geting the information from the ScriptRepository settings.
-    ScriptRepositoryImplLocal *other = new ScriptRepositoryImplLocal();
+    auto other = std::make_unique<ScriptRepositoryImplLocal>();
     TSM_ASSERT(
         "All the others should recognize that this is a valid repository",
         other->isValid());
-    delete other;
   }
 
   /**
@@ -455,7 +454,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     // there is no new version, so there is no point to download it again.
     // it throws that the file has not changed.
-    TS_ASSERT_THROWS(repo->download("TofConv/README.txt"), ScriptRepoException);
+    TS_ASSERT_THROWS(repo->download("TofConv/README.txt"),
+                     const ScriptRepoException &);
   }
 
   /*************************************
@@ -922,7 +922,7 @@ public:
     // myfile.pyc should be ignored
     repo->setIgnorePatterns("*.pyc");
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-    TS_ASSERT_THROWS(repo->info("myfile.pyc"), ScriptRepoException);
+    TS_ASSERT_THROWS(repo->info("myfile.pyc"), const ScriptRepoException &);
 
     // myfile.pyc should not be ignored
     repo->setIgnorePatterns("");
@@ -933,8 +933,8 @@ public:
   }
 
   void test_construct_without_parameters() {
-    delete repo;
-    TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal());
+    TS_ASSERT_THROWS_NOTHING(repo =
+                                 std::make_unique<ScriptRepositoryImplLocal>());
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
   }
@@ -991,7 +991,7 @@ public:
     // it must throw exception describing the reason for failuring.
     TS_ASSERT_THROWS(
         repo->remove(file_name, "please remove it", "noauthor", "noemail"),
-        ScriptRepoException);
+        const ScriptRepoException &);
 
     // you should find the file internally and externally
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
@@ -1017,7 +1017,7 @@ public:
     // it must throw exception, to inform that it is not allowed to remove it.
     TS_ASSERT_THROWS(
         repo->remove(file_name, "please remove it", "noauthor", "noemail"),
-        ScriptRepoException);
+        const ScriptRepoException &);
     // the state is still remote-only
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
   }

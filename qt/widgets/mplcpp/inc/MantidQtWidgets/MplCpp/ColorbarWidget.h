@@ -74,8 +74,9 @@ private slots:
 
 private:
   void initLayout();
-  void createColorbar(const Python::Object &ticks = Python::Object(),
-                      const Python::Object &format = Python::Object());
+  void createColorbar(
+      const Common::Python::Object &ticks = Common::Python::Object(),
+      const Common::Python::Object &format = Common::Python::Object());
   void connectSignals();
 
 private: // data

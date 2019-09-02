@@ -11,6 +11,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -438,10 +439,54 @@ public:
 
   void test_D2B_single_file_raw() { do_test_D2B_single_file("Raw"); }
 
+  void test_D2B_single_point_scan() {
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "543614.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    const auto run = outputWS->run();
+    TS_ASSERT(run.hasProperty("ScanType"));
+    const auto type = run.getLogData("ScanType");
+    TS_ASSERT_EQUALS(type->value(), "DetectorScan");
+  }
+
 private:
   const double RAD_2_DEG = 180.0 / M_PI;
   std::string m_oldFacility;
   std::string m_oldInstrument;
+};
+
+class LoadILLDiffractionTestPerformance : public CxxTest::TestSuite {
+public:
+  static LoadILLDiffractionTestPerformance *createSuite() {
+    return new LoadILLDiffractionTestPerformance();
+  }
+  static void destroySuite(LoadILLDiffractionTestPerformance *suite) {
+    delete suite;
+  }
+
+  LoadILLDiffractionTestPerformance() {}
+
+  void setUp() override {
+    m_alg.initialize();
+    m_alg.setChild(true);
+    m_alg.setPropertyValue("Filename", "ILL/D2B/508093.nxs");
+    m_alg.setPropertyValue("OutputWorkspace", "__");
+  }
+
+  void test_performance() {
+    for (int i = 0; i < 5; ++i) {
+      TS_ASSERT_THROWS_NOTHING(m_alg.execute());
+    }
+  }
+
+private:
+  LoadILLDiffraction m_alg;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */

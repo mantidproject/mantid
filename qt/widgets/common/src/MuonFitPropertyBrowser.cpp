@@ -1175,9 +1175,9 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
           "MuonAnalysisTFNormalizations") &&
       m_compositeFunction->nFunctions() > 0) {
     alg->initialize();
-
     IFunction_sptr old =
         boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
+
     QStringList globals;
 
     if (m_isMultiFittingMode) {
@@ -1185,9 +1185,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       old = m_functionBrowser->getGlobalFunction();
       globals = m_functionBrowser->getGlobalParameters();
     } else if (!enabled && !m_isMultiFittingMode) {
-      // to extract in single fit we have an extra composite -> so remove it
-      auto tmp = boost::dynamic_pointer_cast<CompositeFunction>(old);
-      old = tmp->getFunction(0);
+      old = boost::dynamic_pointer_cast<CompositeFunction>(old);
     }
     alg->setProperty("InputFunction", old);
     alg->setProperty("NormalizationTable", "MuonAnalysisTFNormalizations");
@@ -1245,11 +1243,10 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
     } // single fit
     else {
       FitPropertyBrowser::clear();
-      FitPropertyBrowser::addFunction(func->asString());
+      m_functionBrowser->setFunction(func);
     }
 
     updateTFPlot();
-    // m_enumManager->setValue(m_workspace,j);
   }
 }
 
@@ -1679,7 +1676,7 @@ bool MuonFitPropertyBrowser::isPeriodValid(const QString &name) {
             // if the box does not exist and there is more than 1 period in name
             return false;
           }
-        } catch (boost::bad_lexical_cast) {
+        } catch (const boost::bad_lexical_cast &) {
           // none int value
           return false;
         }

@@ -21,9 +21,20 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         super(ToscaInstrument, self).__init__()
 
     def calculate_q_powder(self, input_data=None):
-        """
-        Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
-        :param input_data: frequencies which should be used to construct Q2
+        """Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
+
+        By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
+
+        where k are determined from AbinsParameters.tosca_final_neutron_energy
+        and the input series of vibrational frequencies and cos(theta) is
+        precomputed as AbinsParameters.tosca_cos_scattering_angle
+
+        :param input_data:
+            frequencies (in cm-1) which should be used to construct Q2
+
+        :returns:
+            Q^2 array (in cm-1) corresponding to input frequencies,
+            constrained by conservation of mass/momentum and TOSCA geometry
         """
 
         k2_i = (input_data + AbinsParameters.tosca_final_neutron_energy) * AbinsConstants.WAVENUMBER_TO_INVERSE_A

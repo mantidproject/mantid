@@ -93,11 +93,11 @@ void MockTokenStore::setToken(const boost::optional<OAuthToken> &token) {
 boost::optional<OAuthToken> MockTokenStore::getToken() { return m_token; }
 
 IOAuthTokenStore_uptr make_mock_token_store() {
-  return Mantid::Kernel::make_unique<MockTokenStore>();
+  return std::make_unique<MockTokenStore>();
 }
 
 IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
-  auto tokenStore = Mantid::Kernel::make_unique<MockTokenStore>();
+  auto tokenStore = std::make_unique<MockTokenStore>();
   tokenStore->setToken(OAuthToken(
       "Bearer", 3600, "2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ",
       "api:read data:read settings:read",

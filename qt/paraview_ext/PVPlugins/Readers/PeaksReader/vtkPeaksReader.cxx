@@ -74,7 +74,7 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   default: dim = vtkPeakMarkerFactory::Peak_in_Q_lab; break;
   }
   auto p_peakFactory =
-      Mantid::Kernel::make_unique<vtkPeakMarkerFactory>("peaks", dim);
+      std::make_unique<vtkPeakMarkerFactory>("peaks", dim);
 
   p_peakFactory->initialize(m_PeakWS);
 

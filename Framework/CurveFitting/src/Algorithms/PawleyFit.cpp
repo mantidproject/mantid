@@ -167,7 +167,7 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
 
     IPeakFunction_sptr currentPeak = pawleyFn->getPeakFunction(i);
 
-    int peakNumber = static_cast<int>(i + 1);
+    auto peakNumber = static_cast<int>(i + 1);
     V3D peakHKL = pawleyFn->getPeakHKL(i);
 
     for (size_t j = 0; j < currentPeak->nParams(); ++j) {
@@ -202,7 +202,7 @@ IFunction_sptr PawleyFit::getCompositeFunction(
 
 /// Initialization of properties.
 void PawleyFit::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input workspace that contains the spectrum on which to "
                   "perform the Pawley fit.");
@@ -229,8 +229,8 @@ void PawleyFit::init() {
                   "alpha, beta, gamma'.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>("PeakTable", "",
-                                                      Direction::Input),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>("PeakTable", "",
+                                                           Direction::Input),
       "Table with peak information. Can be used instead of "
       "supplying a list of indices for better starting parameters.");
 
@@ -258,18 +258,18 @@ void PawleyFit::init() {
                   "the function is only evaluated "
                   "and output is generated.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
                   "spectrum and difference curve.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>("RefinedCellTable", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "RefinedCellTable", "", Direction::Output),
       "TableWorkspace with refined lattice parameters, including errors.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "RefinedPeakParameterTable", "", Direction::Output),
       "TableWorkspace with refined peak parameters, including errors.");
 

@@ -23,6 +23,10 @@ class DLLExport JumpFit : public IndirectFitAnalysisTab {
 public:
   JumpFit(QWidget *parent = nullptr);
 
+  std::string tabName() const override { return "FQFit"; }
+
+  bool hasResolution() const override { return false; }
+
   void setupFitTab() override;
 
 protected slots:

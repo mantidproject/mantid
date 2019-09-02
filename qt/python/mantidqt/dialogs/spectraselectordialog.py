@@ -1,21 +1,20 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-#
+
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
-# 3rd party imports
 from mantid.api import MatrixWorkspace
-from qtpy.QtWidgets import QDialogButtonBox
 
-# local imports
 from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
 
@@ -28,7 +27,7 @@ RED_ASTERISK = None
 def red_asterisk():
     global RED_ASTERISK
     if RED_ASTERISK is None:
-        RED_ASTERISK = get_icon('fa.asterisk', color='red', scale_factor=0.6)
+        RED_ASTERISK = get_icon('mdi.asterisk', 'red', 0.6)
     return RED_ASTERISK
 
 
@@ -36,8 +35,8 @@ SpectraSelectionDialogUI, SpectraSelectionDialogUIBase = load_ui(__file__, 'spec
 
 
 class SpectraSelection(object):
-
     Individual = 0
+    Tiled = 1
 
     def __init__(self, workspaces):
         self.workspaces = workspaces
@@ -54,9 +53,10 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             if not isinstance(ws, MatrixWorkspace):
                 raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
 
-    def __init__(self, workspaces,
-                 parent=None):
+    def __init__(self, workspaces, parent=None, show_colorfill_btn=False, overplot=False):
         super(SpectraSelectionDialog, self).__init__(parent)
+        self.icon = self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.raise_error_if_workspaces_not_compatible(workspaces)
 
         # attributes
@@ -65,26 +65,47 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.wi_min, self.wi_max = None, None
         self.selection = None
         self._ui = None
+        self._show_colorfill_button = show_colorfill_btn
+        self._overplot = overplot
 
         self._init_ui()
         self._set_placeholder_text()
         self._setup_connections()
 
     def on_ok_clicked(self):
-        self.accept()
+        if self._check_number_of_plots(self.selection):
+            self.accept()
 
     def on_plot_all_clicked(self):
         selection = SpectraSelection(self._workspaces)
         selection.wksp_indices = range(self.wi_min, self.wi_max + 1)
-        self.selection = selection
+        selection.plot_type = self._ui.plotType.currentIndex()
+        if self._check_number_of_plots(selection):
+            self.selection = selection
+            self.accept()
+
+    def on_colorfill_clicked(self):
+        self.selection = 'colorfill'
         self.accept()
 
     # ------------------- Private -------------------------
+
+    def _check_number_of_plots(self, selection):
+        index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
+        if selection.plot_type == SpectraSelection.Tiled and len(selection.workspaces) * index_length > 25:
+            response = QMessageBox.warning(self, 'Mantid Workbench',
+                                           'You are attempting to create a tiled plot with more than 25 subplots,'
+                                           'this is not recommended as it may lead to performance issues.'
+                                           ' Do you wish to continue?', QMessageBox.Ok | QMessageBox.Cancel)
+            return response == QMessageBox.Ok
+
+        return True
 
     def _init_ui(self):
         ui = SpectraSelectionDialogUI()
         ui.setupUi(self)
         self._ui = ui
+        ui.colorfillButton.setVisible(self._show_colorfill_button)
         # overwrite the "Yes to All" button text
         ui.buttonBox.button(QDialogButtonBox.YesToAll).setText('Plot All')
         # ok disabled by default
@@ -119,10 +140,14 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self.on_ok_clicked)
         ui.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self.reject)
         ui.buttonBox.button(QDialogButtonBox.YesToAll).clicked.connect(self.on_plot_all_clicked)
+        ui.colorfillButton.clicked.connect(self.on_colorfill_clicked)
 
         # line edits are mutually exclusive
         ui.wkspIndices.textChanged.connect(self._on_wkspindices_changed)
         ui.specNums.textChanged.connect(self._on_specnums_changed)
+
+        # combobox changed
+        ui.plotType.currentIndexChanged.connect(self._on_plot_type_changed)
 
     def _on_wkspindices_changed(self):
         ui = self._ui
@@ -142,11 +167,19 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
+    def _on_plot_type_changed(self, new_index):
+        if self._overplot:
+            self._ui.plotType.setCurrentIndex(0)
+            return
+        if self.selection:
+            self.selection.plot_type = new_index
+
     def _parse_wksp_indices(self):
         wksp_indices = parse_selection_str(self._ui.wkspIndices.text(), self.wi_min, self.wi_max)
         if wksp_indices:
             selection = SpectraSelection(self._workspaces)
             selection.wksp_indices = wksp_indices
+            selection.plot_type = self._ui.plotType.currentIndex()
         else:
             selection = None
         self.selection = selection
@@ -156,45 +189,13 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
+            selection.plot_type = self._ui.plotType.currentIndex()
         else:
             selection = None
         self.selection = selection
 
     def _is_input_valid(self):
         return self.selection is not None
-
-
-def get_spectra_selection(workspaces, parent_widget=None):
-    """Decides whether it is necessary to request user input
-    when asked to plot a list of workspaces. The input
-    dialog will only be shown in the case where all workspaces
-    have more than 1 spectrum
-
-    :param workspaces: A list of MatrixWorkspaces that will be plotted
-    :param parent_widget: An optional parent_widget to use for the input selection dialog
-    :returns: Either a SpectraSelection object containing the details of workspaces to plot or None indicating
-    the request was cancelled
-    :raises ValueError: if the workspaces are not of type MatrixWorkspace
-    """
-    SpectraSelectionDialog.raise_error_if_workspaces_not_compatible(workspaces)
-    single_spectra_ws = [wksp.getNumberHistograms() for wksp in workspaces if wksp.getNumberHistograms() == 1]
-    if len(single_spectra_ws) > 0:
-        # At least 1 workspace contains only a single spectrum so this is all
-        # that is possible to plot for all of them
-        selection = SpectraSelection(workspaces)
-        selection.wksp_indices = [0]
-        return selection
-    else:
-        selection_dlg = SpectraSelectionDialog(workspaces, parent=parent_widget)
-        res = selection_dlg.exec_()
-        if res == SpectraSelectionDialog.Rejected:
-            # cancelled
-            return None
-        else:
-            user_selection = selection_dlg.selection
-            # the dialog should guarantee that only 1 of spectrum/indices is supplied
-            assert user_selection.spectra is None or user_selection.wksp_indices is None
-            return user_selection
 
 
 def parse_selection_str(txt, min_val, max_val):
@@ -206,6 +207,7 @@ def parse_selection_str(txt, min_val, max_val):
     :param max_val: The maximum allowed value
     :returns A list containing each value in the range or None if the string is invalid
     """
+
     def append_if_valid(out, val):
         try:
             val = int(val)
@@ -237,7 +239,7 @@ def parse_selection_str(txt, min_val, max_val):
                 valid = False
             else:
                 if is_in_range(beg) and is_in_range(end):
-                    parsed_numbers = parsed_numbers.union(set(range(beg, end+1)))
+                    parsed_numbers = parsed_numbers.union(set(range(beg, end + 1)))
                 else:
                     valid = False
         else:

@@ -10,8 +10,8 @@
 #include "MantidSampleLogDialog.h"
 
 // Mantid
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidUI.h"
-#include <MantidAPI/MultipleExperimentInfos.h>
 
 // Qt
 #include <QFormLayout>

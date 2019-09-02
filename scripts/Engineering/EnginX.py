@@ -12,7 +12,7 @@ import numpy as np
 import os
 from platform import system
 from shutil import copy2
-from six import u
+import six
 
 import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
@@ -573,11 +573,19 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
                                                                    params, time_period)
     banks = {}
     # read the csv file to work out the banks
-    with open(dg_file) as grouping_file:
-        group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+    # ensure csv reading works on python 2 or 3
+    if not six.PY2:
+        with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
+            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
 
-        for row in group_reader:
-            banks.update({row[0]: ','.join(row[1:])})
+            for row in group_reader:
+                banks.update({row[0]: ','.join(row[1:])})
+    else:
+        with open(dg_file, 'r') as grouping_file:
+            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+
+            for row in group_reader:
+                banks.update({row[0]: ','.join(row[1:])})
 
     # loop through the banks described in the csv, focusing and saing them out
     for bank in banks:
@@ -625,7 +633,7 @@ def _save_out(run_number, focus_directory, focus_general, output, enginx_file_na
     dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
                                                                                         enginx_file_name_format,
                                                                                         run_number)
-    if not u(bank_id).isnumeric():
+    if not six.u(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False,

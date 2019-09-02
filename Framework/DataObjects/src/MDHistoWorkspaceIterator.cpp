@@ -26,7 +26,7 @@ namespace {
 Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin,
                           Mantid::coord_t binWidth) {
   auto dExact = (location - origin) / binWidth;
-  const Mantid::coord_t tolerance = Mantid::coord_t(1e-5);
+  const auto tolerance = Mantid::coord_t(1e-5);
 
   // Expl. of the steps below
   // -1     -0.5       0      0.5        1   where integer values are bin

@@ -31,12 +31,12 @@ const std::string ClearUB::category() const { return "Crystal\\UBMatrix"; }
 /** Initialize the algorithm's properties.
  */
 void ClearUB::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
-                                                            Direction::InOut),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace", "", Direction::InOut),
                   "Workspace to clear the UB from.");
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("DoesClear", false,
-                                           Direction::Output),
+      std::make_unique<PropertyWithValue<bool>>("DoesClear", false,
+                                                Direction::Output),
       "Indicates action performed. DoesClear returns true only if one or more "
       "OrientedLattices have been removed.");
 }
@@ -74,12 +74,11 @@ bool ClearUB::clearSingleExperimentInfo(ExperimentInfo *const experimentInfo,
  */
 bool ClearUB::doExecute(Workspace *const ws, bool dryRun) {
   bool doesClear = false;
-  ExperimentInfo *experimentInfo = dynamic_cast<ExperimentInfo *>(ws);
+  auto *experimentInfo = dynamic_cast<ExperimentInfo *>(ws);
   if (experimentInfo) {
     doesClear = clearSingleExperimentInfo(experimentInfo, dryRun);
   } else {
-    MultipleExperimentInfos *experimentInfos =
-        dynamic_cast<MultipleExperimentInfos *>(ws);
+    auto *experimentInfos = dynamic_cast<MultipleExperimentInfos *>(ws);
     if (!experimentInfos) {
       if (!dryRun) {
         throw std::invalid_argument("Input workspace is neither of type "

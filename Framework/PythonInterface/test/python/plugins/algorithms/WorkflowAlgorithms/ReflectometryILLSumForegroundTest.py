@@ -162,7 +162,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.getNumberHistograms(), 1)
+        self.assertEqual(out.getNumberHistograms(), 1)
         Xs = out.readX(0)
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], xMin)
@@ -183,7 +183,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
         assertRaisesNothing(self, alg.execute)
         out = alg.getProperty('OutputWorkspace').value
-        self.assertEquals(out.getNumberHistograms(), 1)
+        self.assertEqual(out.getNumberHistograms(), 1)
         Xs = out.readX(0)
         self.assertGreater(len(Xs), 1)
         self.assertGreater(Xs[0], 0.)

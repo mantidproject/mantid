@@ -75,7 +75,7 @@ public:
     TS_ASSERT_EQUALS(listener->runStatus(), ILiveListener::EndRun)
 
     // Calling it again will throw as it's the end of the file
-    TS_ASSERT_THROWS(listener->extractData(), std::runtime_error)
+    TS_ASSERT_THROWS(listener->extractData(), const std::runtime_error &)
   }
 };
 

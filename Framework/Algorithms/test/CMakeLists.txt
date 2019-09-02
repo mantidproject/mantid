@@ -7,10 +7,6 @@ if(CXXTEST_FOUND)
   if(stdint)
     add_definitions(-DHAVE_STDINT_H)
   endif()
-  check_include_files(cstdint.hpp boost_stdint)
-  if(boost_stdint)
-    add_definitions(-DBOOST_CSTDINT_HPP)
-  endif()
 
   # Generate the MultiplyTest.h and DivideTest.h
   set(MULTIPLYDIVIDETEST_CLASS MultiplyTest)
@@ -52,6 +48,10 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/ParallelRunner.cpp
       ../../TestHelpers/src/ReflectometryHelper.cpp)
   cxxtest_add_test(AlgorithmsTest ${TEST_FILES})
+  if(WIN32)
+    # On Windows Boost uuid requires the bcrypt library
+    set(BCRYPT bcrypt)
+  endif()
   target_link_libraries(AlgorithmsTest
                         LINK_PRIVATE
                         ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -59,6 +59,7 @@ if(CXXTEST_FOUND)
                         Algorithms
                         DataHandling
                         Nexus
+                        ${BCRYPT}
                         ${GMOCK_LIBRARIES}
                         ${GTEST_LIBRARIES})
   add_dependencies(AlgorithmsTest Crystal CurveFitting)

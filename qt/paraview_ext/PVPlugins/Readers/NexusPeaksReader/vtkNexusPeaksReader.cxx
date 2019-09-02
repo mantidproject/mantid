@@ -75,7 +75,7 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   default: dim = vtkPeakMarkerFactory::Peak_in_Q_lab; break;
   }
   auto p_peakFactory =
-      Mantid::Kernel::make_unique<vtkPeakMarkerFactory>("peaks", dim);
+      std::make_unique<vtkPeakMarkerFactory>("peaks", dim);
 
   p_peakFactory->initialize(m_PeakWS);
 
@@ -176,7 +176,7 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
     return 0; 
   }
 
-  auto file = Mantid::Kernel::make_unique<::NeXus::File>(fileString);
+  auto file = std::make_unique<::NeXus::File>(fileString);
   try
   {
     try

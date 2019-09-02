@@ -59,7 +59,8 @@ public:
                       const std::string &streamTopic,
                       const std::string &runInfoTopic,
                       const std::string &spDetTopic,
-                      const std::string &sampleEnvTopic);
+                      const std::string &sampleEnvTopic,
+                      const std::string &chopperTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
@@ -75,7 +76,8 @@ public:
   ///@{
   bool isCapturing() const noexcept { return m_capturing; }
   virtual bool hasData() const noexcept = 0;
-  int runNumber() const noexcept { return m_runNumber; }
+  std::string runId() const noexcept { return m_runId; }
+  int runNumber() const noexcept;
   virtual bool hasReachedEndOfRun() noexcept = 0;
   bool dataReset();
   ///@}
@@ -98,9 +100,10 @@ public:
 protected:
   struct RunStartStruct {
     std::string instrumentName;
-    int runNumber;
+    std::string runId;
     uint64_t startTime;
     size_t nPeriods;
+    std::string nexusStructure;
     int64_t runStartMsgOffset;
   };
 
@@ -122,6 +125,9 @@ protected:
   /// Populate cache workspaces with data from messages
   virtual void sampleDataFromMessage(const std::string &buffer) = 0;
 
+  template <typename T = API::MatrixWorkspace>
+  void writeChopperTimestampsToWorkspaceLogs(std::vector<T> workspaces);
+
   /// For LoadLiveData to extract the cached data
   virtual API::Workspace_sptr extractDataImpl() = 0;
 
@@ -132,20 +138,24 @@ protected:
   const std::string m_runInfoTopic;
   const std::string m_spDetTopic;
   const std::string m_sampleEnvTopic;
+  const std::string m_chopperTopic;
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Subscriber for the data stream
   std::unique_ptr<IKafkaStreamSubscriber> m_dataStream;
   /// Mapping of spectrum number to workspace index.
-  spec2index_map m_specToIdx;
+  std::vector<size_t> m_specToIdx;
+  specnum_t m_specToIdxOffset;
   /// Start time of the run
   Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
+  /// Subscriber for the chopper timestamp stream
+  std::unique_ptr<IKafkaStreamSubscriber> m_chopperStream;
   /// Run number
-  int m_runNumber;
+  std::string m_runId;
 
   /// Associated thread running the capture process
   std::thread m_thread;
@@ -193,7 +203,8 @@ protected:
                         const boost::shared_ptr<T> &parent);
 
   template <typename T>
-  void loadInstrument(const std::string &name, boost::shared_ptr<T> workspace);
+  void loadInstrument(const std::string &name, boost::shared_ptr<T> workspace,
+                      const std::string &jsonGeometry = "");
 
   void checkRunMessage(
       const std::string &buffer, bool &checkOffsets,

@@ -70,7 +70,7 @@ public:
         new VectorDoubleValueExtractor);
     TS_ASSERT_THROWS(
         (*extractorBad)(const_cast<const Run &>(m_run), "chopperspeed_double"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // check that the value comes out correctly
     TS_ASSERT_EQUALS(
@@ -91,7 +91,7 @@ public:
         new VectorDoubleValueExtractor);
     TS_ASSERT_THROWS(
         (*extractorBad)(const_cast<const Run &>(m_run), "chopperspeed_double"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // check that the value comes out correctly
     TS_ASSERT_EQUALS((*extractorGood)(const_cast<const Run &>(m_run),
@@ -110,7 +110,7 @@ public:
         new NumberDoubleValueExtractor);
     TS_ASSERT_THROWS(
         (*extractorBad)(const_cast<const Run &>(m_run), "chopperspeed_vector"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // check that the value comes out correctly
     TS_ASSERT_EQUALS(
@@ -138,13 +138,13 @@ public:
     // Throws, because "chopperspeed" is missing
     TS_ASSERT_THROWS(
         instrumentAdapter.extractPropertyFromRun(m_run, "DOESNOTEXIST"),
-        std::runtime_error);
+        const std::runtime_error &);
 
     // Throws, because there is no extractor for supplied type
     const std::string propertyName = getChopperSpeedPropertyName();
     TS_ASSERT_THROWS(
         instrumentAdapter.extractPropertyFromRun(m_stringRun, propertyName),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // Should be ok.
     TS_ASSERT_THROWS_NOTHING(
@@ -161,7 +161,7 @@ public:
     // caught in the method
     TS_ASSERT_THROWS(
         instrumentAdapter.chopperSpeedMatchesTarget(m_stringRun, 10000.0),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     // If the property is not present, it is an old file and there can't be any
     // comparison, so it's always true
@@ -202,7 +202,7 @@ public:
 
     // Throw on null-pointer
     TS_ASSERT_THROWS(instrumentAdapter.getExtractorForProperty(nullptr),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(instrumentAdapter.getExtractorForProperty(
         m_run.getProperty("chopperspeed_double")));
 

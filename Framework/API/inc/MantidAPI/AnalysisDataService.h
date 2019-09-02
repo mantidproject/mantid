@@ -147,7 +147,8 @@ public:
 
 private:
   /// Checks the name is valid, throwing if not
-  void verifyName(const std::string &name);
+  void verifyName(const std::string &name,
+                  const boost::shared_ptr<API::WorkspaceGroup> &workspace);
 
   friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
   /// Constructor

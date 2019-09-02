@@ -37,13 +37,13 @@ public:
   void test_invalid_algorithms() {
     // Algorithms with no 'str list' property
     TS_ASSERT_THROWS(PostprocessingAlgorithm("StepScan"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // Algorithms with more than one 'str list' property
     TS_ASSERT_THROWS(PostprocessingAlgorithm("PDDetermineCharacterizations"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // Algorithms with invalid output ws properties
     TS_ASSERT_THROWS(PostprocessingAlgorithm("GroupWorkspaces"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_valid_algorithms() {

@@ -33,15 +33,14 @@ class Pearl(AbstractInst):
         self._cached_run_details = {}
 
     def focus(self, **kwargs):
-        with self._apply_temporary_inst_settings(kwargs):
+        with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
             return self._focus(run_number_string=self._inst_settings.run_number,
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
                                do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
         kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
-
-        with self._apply_temporary_inst_settings(kwargs):
+        with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_in_cycle")):
             if str(self._inst_settings.tt_mode).lower() == "all":
                 for new_tt_mode in ["tt35", "tt70", "tt88"]:
                     self._inst_settings.tt_mode = new_tt_mode
@@ -50,7 +49,7 @@ class Pearl(AbstractInst):
                 self._run_create_vanadium()
 
     def create_cal(self, **kwargs):
-        with self._apply_temporary_inst_settings(kwargs):
+        with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
             run_details = self._get_run_details(self._inst_settings.run_number)
 
             cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
@@ -77,12 +76,36 @@ class Pearl(AbstractInst):
         return self._inst_settings.subtract_empty_inst
 
     @contextmanager
-    def _apply_temporary_inst_settings(self, kwargs):
+    def _apply_temporary_inst_settings(self, kwargs, run):
+
+        # set temporary settings, Check has to occur before updating attributes,
+        # otherwise it would assumed the longmode vars are cached.
         if not self._inst_settings.long_mode == bool(kwargs.get("long_mode")):
+            self._inst_settings.update_attributes(kwargs=kwargs)
             self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        self._inst_settings.update_attributes(kwargs=kwargs)
+        else:
+            self._inst_settings.update_attributes(kwargs=kwargs)
+
+        # check that cache exists
+        run_number_string_key = self._generate_run_details_fingerprint(run,
+                                                                       self._inst_settings.file_extension,
+                                                                       self._inst_settings.tt_mode)
+        if run_number_string_key in self._cached_run_details:
+            # update spline path of cache
+
+            add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
+                [self._inst_settings.tt_mode]
+
+            self._cached_run_details[run_number_string_key].update_spline(self._inst_settings, add_spline)
         yield
+        # reset instrument settings
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
+
+        # reset spline path
+        add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
+            [self._inst_settings.tt_mode]
+
+        self._cached_run_details[run_number_string_key].update_spline(self._inst_settings, add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
@@ -129,7 +152,7 @@ class Pearl(AbstractInst):
         # Ensure the name is unique if we are in tt_mode all
         new_workspace_names = []
         for ws in splined_list:
-            new_name = ws.getName() + '_' + self._inst_settings.tt_mode
+            new_name = ws.name() + '_' + self._inst_settings.tt_mode
             new_workspace_names.append(mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace=new_name))
 
         return new_workspace_names
@@ -186,3 +209,5 @@ class Pearl(AbstractInst):
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on))
+        if long_mode_on:
+            setattr(self._inst_settings, "perform_atten", False)

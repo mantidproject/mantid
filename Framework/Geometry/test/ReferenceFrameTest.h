@@ -103,7 +103,7 @@ public:
 
   void testIdenticalUpAndBeamDirectionsThrow() {
     TS_ASSERT_THROWS(ReferenceFrame(X, X, Right, "source"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testGetUpDirectionVector() {

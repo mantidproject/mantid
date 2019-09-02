@@ -26,11 +26,11 @@ using namespace API;
 
 /// Initialisation method.
 void DeleteTableRows::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "TableWorkspace", "", Direction::InOut),
                   "The name of the workspace that will be modified.");
   declareProperty(
-      make_unique<ArrayProperty<size_t>>("Rows"),
+      std::make_unique<ArrayProperty<size_t>>("Rows"),
       "A comma-separated list of row numbers. Row numbering starts with 0.");
 }
 

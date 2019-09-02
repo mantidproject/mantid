@@ -165,7 +165,7 @@ public:
     ;
 
     // fine and no unit
-    TS_ASSERT_THROWS(wsp1 = ws1, std::invalid_argument);
+    TS_ASSERT_THROWS(wsp1 = ws1, const std::invalid_argument &);
 
     TS_ASSERT_EQUALS(wsp1.setValue(""),
                      "Enter a name for the Input/InOut workspace");

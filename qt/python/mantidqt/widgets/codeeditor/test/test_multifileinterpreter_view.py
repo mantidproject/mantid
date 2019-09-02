@@ -13,12 +13,13 @@ import unittest
 
 from qtpy.QtWidgets import QApplication
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
-class MultiPythonFileInterpreterDeletionTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class MultiPythonFileInterpreterDeletionTest(unittest.TestCase, QtWidgetFinder):
     def test_editor_widget_not_leaked(self):
         widget = MultiPythonFileInterpreter()
         self.assertEqual(1, widget.editor_count)

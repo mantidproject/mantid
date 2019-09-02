@@ -15,7 +15,7 @@
 using MantidQt::Widgets::MplCpp::Figure;
 using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::ScalarMappable;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+using namespace MantidQt::Widgets::Common;
 
 class FigureTest : public CxxTest::TestSuite {
 public:
@@ -43,13 +43,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(fig.addAxes(0.1, 0.1, 0.9, 0.9));
   }
 
-  void testSetFaceColor() {
+  void testSetFaceColorFromString() {
     Figure fig{false};
     fig.setFaceColor("r");
-    auto rgb = fig.pyobj().attr("get_facecolor")();
-    TS_ASSERT_EQUALS(1.0, rgb[0]);
-    TS_ASSERT_EQUALS(0.0, rgb[1]);
-    TS_ASSERT_EQUALS(0.0, rgb[2]);
+    const auto color = fig.faceColor();
+    TS_ASSERT_EQUALS(255, color.red());
+    TS_ASSERT_EQUALS(0, color.green());
+    TS_ASSERT_EQUALS(0, color.blue());
+  }
+
+  void testSetFaceColorFromQColor() {
+    Figure fig{false};
+    fig.setFaceColor(QColor("red"));
+    const auto color = fig.faceColor();
+    TS_ASSERT_EQUALS(255, color.red());
+    TS_ASSERT_EQUALS(0, color.green());
+    TS_ASSERT_EQUALS(0, color.blue());
   }
 
   void testSubPlot() {
@@ -57,9 +66,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111));
   }
 
+  void testSubPlotAcceptsProjection() {
+    Python::Object module{
+        Python::NewRef(PyImport_ImportModule("mantid.plots"))};
+    Figure fig{false};
+    TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111, "mantid"));
+  }
+
   void testColorbar() {
     Figure fig{false};
-    auto cax = fig.addAxes(0.1, 0.1, 0.9, 0.9);
+    const auto cax = fig.addAxes(0.1, 0.1, 0.9, 0.9);
     ScalarMappable mappable(Normalize(-1, 1), "jet");
 
     TS_ASSERT_THROWS_NOTHING(fig.colorbar(mappable, cax));
@@ -68,7 +84,7 @@ public:
   // -------------------------- Failure tests ---------------------------
   void testFigureConstructedWithNonFigureThrows() {
     TS_ASSERT_THROWS(Figure fig(Python::NewRef(Py_BuildValue("(i)", 1))),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

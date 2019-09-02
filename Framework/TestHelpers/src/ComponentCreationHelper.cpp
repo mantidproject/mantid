@@ -33,7 +33,6 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/Path.h>
 #include <boost/make_shared.hpp>
@@ -311,8 +310,8 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
   auto detShape = ComponentCreationHelper::createCappedCylinder(
       R0, h, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
-  int NY = int(ceil(2 * R_max / h) + 1);
-  int NX = int(ceil(2 * R_max / R0) + 1);
+  auto NY = int(ceil(2 * R_max / h) + 1);
+  auto NX = int(ceil(2 * R_max / R0) + 1);
   double y_bl = NY * h;
   double x_bl = NX * R0;
 
@@ -327,8 +326,8 @@ createVectorOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det = Mantid::Kernel::make_unique<Detector>(os.str(), ic + 1,
-                                                         detShape, nullptr);
+        auto det =
+            std::make_unique<Detector>(os.str(), ic + 1, detShape, nullptr);
         det->setPos(x, y, z0);
         allDetectors.emplace_back(std::move(det));
       }
@@ -542,7 +541,7 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
-  RectangularDetector *bank = new RectangularDetector(bankName);
+  auto *bank = new RectangularDetector(bankName);
   bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0,
                    pixelSpacing, idStart, true, pixels);
 
@@ -604,12 +603,99 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
  * Pixels are 4 mm wide.
  *
  * @param num_banks: number of rectangular banks to create
+ * @param pixels : number of pixels in each direction.
+ * @param nameless : components are unnamed if true.
+ * @param pixelSpacing : padding between pixels
+ */
+Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
+                                                 double pixelSpacing,
+                                                 bool nameless) {
+
+  auto instrName = nameless ? "" : "basic_rect";
+  auto testInst = boost::make_shared<Instrument>(instrName);
+
+  const double cylRadius(pixelSpacing / 2);
+  const double cylHeight(0.0002);
+  // One object
+  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+      cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+      "pixel-shape");
+
+  if (nameless) {
+    for (int banknum = 1; banknum <= num_banks; banknum++) {
+      // Make a new bank
+      std::ostringstream bankname;
+      bankname << "";
+
+      auto *bank = new RectangularDetector(bankname.str());
+      bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, (banknum - 1) * pixels * pixels, true,
+                       pixels);
+
+      // Mark them all as detectors
+      for (int x = 0; x < pixels; x++)
+        for (int y = 0; y < pixels; y++) {
+          boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+          if (detector)
+            // Mark it as a detector (add to the instrument cache)
+            testInst->markAsDetector(detector.get());
+        }
+
+      testInst->add(bank);
+      // Place the center.
+      bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
+      // rotate detector 90 degrees along vertical
+      bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+    }
+  } else {
+
+    for (int banknum = 1; banknum <= num_banks; banknum++) {
+      // Make a new bank
+      std::ostringstream bankname;
+      bankname << "bank" << banknum;
+      auto *bank = new RectangularDetector(bankname.str());
+      bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, pixels, -pixels * pixelSpacing / 2.0,
+                       pixelSpacing, (banknum - 1) * pixels * pixels, true,
+                       pixels);
+
+      // Mark them all as detectors
+      for (int x = 0; x < pixels; x++)
+        for (int y = 0; y < pixels; y++) {
+          boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
+          if (detector)
+            // Mark it as a detector (add to the instrument cache)
+            testInst->markAsDetector(detector.get());
+        }
+
+      testInst->add(bank);
+      // Place the center.
+      bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
+      // rotate detector 90 degrees along vertical
+      bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+    }
+  }
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
+
+  return testInst;
+}
+
+/**
+ * Create an test instrument with multiple nameless banks. Used for testing
+ * behaviour of name handling implementation in saveInstrument
+ *
+ * Banks are centered at (1*banknum, 0, 0) and are facing 0,0.
+ * Pixels are 4 mm wide.
+ *
+ * @param num_banks: number of rectangular banks to create
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
  */
-Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
-                                                 double pixelSpacing) {
-  auto testInst = boost::make_shared<Instrument>("basic_rect");
+Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels,
+                                              double pixelSpacing) {
+  auto testInst = boost::make_shared<Instrument>("");
 
   const double cylRadius(pixelSpacing / 2);
   const double cylHeight(0.0002);
@@ -621,7 +707,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
   for (int banknum = 1; banknum <= num_banks; banknum++) {
     // Make a new bank
     std::ostringstream bankname;
-    bankname << "bank" << banknum;
+    bankname << "";
 
     RectangularDetector *bank = new RectangularDetector(bankname.str());
     bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0,
@@ -652,7 +738,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
 }
 
 /**
- * createOneDetectorInstrument, creates the most simple possible definition of
+ * createMinimalInstrument, creates the most simple possible definition of
  * an instrument in which we can extract a valid L1 and L2 distance for unit
  * calculations.
  *
@@ -697,10 +783,218 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   return instrument;
 }
 
+/**
+ * createMinimalInstrumentWithMonitor, creates the most simple possible
+ * definition of an instrument with a Monitor.
+ *
+ * Beam direction is along X,
+ * Up direction is Y
+ *
+ * @param monitorPos : V3D monitor position
+ * @param monitorRot : V3D monitor rotation
+ * @return Instrument generated.
+ */
+Instrument_sptr
+createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
+                                   const Mantid::Kernel::Quat &monitorRot) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
+      "0,0,0"));
+
+  instrument->setName("test-instrument-with-monitor");
+
+  // A source
+  auto *source = new ObjComponent("source");
+  source->setPos(V3D(-10, 0, 0));
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  auto *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(V3D(0, 0, 0));
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  // A detector
+  auto *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  det->setPos(V3D(0, 0, 10));
+  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(det);
+  instrument->markAsDetector(det);
+
+  // A monitor
+  auto *mon = new Detector("test-monitor", 2 /*detector id*/, nullptr);
+  mon->setPos(monitorPos);
+  mon->setRot(monitorRot);
+  mon->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(mon);
+  instrument->markAsMonitor(mon);
+
+  return instrument;
+}
+
+/*
+An instrument creation helper allowing you to include/omit
+source/sample for unit test of exception handling.
+*
+* @param haveSource : bool option to have source in instrument
+* @param haveSample : bool option to have sample in instrument
+* @param haveDetector : bool option to have detector in instrument
+*/
+Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
+                                                       bool haveSample,
+                                                       bool haveDetector) {
+
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+
+  // A source
+  if (haveSource) {
+    ObjComponent *source = new ObjComponent("source");
+
+    instrument->add(source);
+    instrument->markAsSource(source);
+  }
+
+  // A sample
+  if (haveSample) {
+    ObjComponent *sample = new ObjComponent("some-sample");
+
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+  }
+
+  // A detector
+  if (haveDetector) {
+    Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+
+    instrument->add(det);
+    instrument->markAsDetector(det);
+  }
+
+  return instrument;
+}
+
+/**
+ * createSimpleInstrumentWithRotation, creates the most simple possible
+ * definition of an instrument in which we can extract a valid L1 and L2
+ * distance for unit calculations.
+ *
+ * Beam direction is along Z,
+ * Up direction is Y
+ *
+ * @param sourcePos : V3D position
+ * @param samplePos : V3D sample position
+ * @param detectorPos : V3D detector bank position
+ * @param relativeBankRotation : Quat relative bank rotation
+ * @param relativeDetRotation : Quat relative detector rotation
+ * @param detOffset : V3D offset of detector from bank
+ * @return Instrument generated.
+ */
+Instrument_sptr createSimpleInstrumentWithRotation(
+    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
+    const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::Quat &relativeBankRotation,
+    const Mantid::Kernel::Quat &relativeDetRotation,
+    const Mantid::Kernel::V3D detOffset) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+
+  instrument->setName("test-instrument-with-detector-rotations");
+
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  // A detector
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  det->setPos(detOffset); // defaults to {0,0,0} if no input
+  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  det->setRot(relativeDetRotation);
+  instrument->markAsDetector(det);
+
+  auto compAss = new ObjCompAssembly("detector-stage");
+  compAss->add(det);
+  compAss->setPos(detectorPos);
+  compAss->setRot(relativeBankRotation);
+
+  instrument->add(compAss);
+
+  return instrument;
+}
+
+/**
+ * createInstrumentWithSourceRotation, from
+ * createSimpleInstrumentWithRotation. Rotate source and sample.
+ *
+ * Beam direction is along Z,
+ * Up direction is Y
+ *
+ * @param sourcePos : V3D position
+ * @param samplePos : V3D sample position
+ * @param detectorPos : V3D detector position
+ * @param relativeSourceRotation : Quat relative source rotation
+ * @return Instrument generated.
+ */
+Instrument_sptr createInstrumentWithSourceRotation(
+    const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
+    const Mantid::Kernel::V3D &detectorPos,
+    const Mantid::Kernel::Quat &relativeSourceRotation) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left,
+      "0,0,0"));
+
+  instrument->setName("test-instrument");
+
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  source->setRot(relativeSourceRotation);
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  // A detector
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  det->setPos({0, 0, 0}); // No offset relative to parent CompAssembly
+  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->markAsDetector(det);
+
+  auto compAss = new ObjCompAssembly("detector-stage");
+  compAss->add(det);
+  compAss->setPos(detectorPos);
+
+  instrument->add(compAss);
+
+  return instrument;
+}
+
 CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
 
-  double width_d = double(width);
-  double height_d = double(height);
+  auto width_d = double(width);
+  auto height_d = double(height);
   static int bankNo = 1;
   auto bank = new CompAssembly("Bank" + std::to_string(bankNo++));
   static size_t id = 1;
@@ -798,9 +1092,15 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
   const double pixelRadius(0.01);
   const double pixelHeight(0.003);
   const double radius(1.0);
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(
+  const auto pixelShape = ComponentCreationHelper::createCappedCylinder(
       pixelRadius, pixelHeight, V3D(0.0, -0.5 * pixelHeight, 0.0),
       V3D(0.0, 1.0, 0.0), "pixelShape");
+
+  const auto tubeShape = ComponentCreationHelper::createCappedCylinder(
+      pixelRadius, pixelHeight,
+      V3D(0.0, -0.5 * pixelHeight * (double)nPixelsPerTube, 0.0),
+      V3D(0.0, 1.0, 0.0), "tubeShape");
+
   for (size_t i = 0; i < nTubes; ++i) {
     std::ostringstream lexer;
     lexer << "tube-" << i;
@@ -811,7 +1111,8 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     if (i == 0 && xDirection < 0)
       x = -1e-32;
     const auto z = radius * cos(theta);
-    CompAssembly *tube = new CompAssembly(lexer.str());
+    ObjCompAssembly *tube = new ObjCompAssembly(lexer.str());
+    tube->setShape(tubeShape);
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");

@@ -21,5 +21,5 @@ TMDE(MDBin)::MDBin() : m_signal(0), m_errorSquared(0) {
     m_max[d] = +std::numeric_limits<coord_t>::max();
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

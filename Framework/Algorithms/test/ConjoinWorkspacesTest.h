@@ -98,7 +98,7 @@ public:
     in2->mutableSpectrumInfo().setMasked(maskBottom, true);
 
     // Check it fails if properties haven't been set
-    TS_ASSERT_THROWS(conj.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(conj.execute(), const std::runtime_error &);
     TS_ASSERT(!conj.isExecuted());
 
     // Check it fails if input overlap
@@ -136,7 +136,7 @@ public:
 
     // Check that 2nd input workspace no longer exists
     TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("bottom"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
 
     // Check that th workspace has the correct number of history entries
     TS_ASSERT_EQUALS(output->getHistory().size(), 3);
@@ -176,7 +176,7 @@ public:
     conj.setProperty("InputWorkspace1", "testMismatchedEventWorkspace1");
     conj.setProperty("InputWorkspace2", "testMismatchedEventWorkspace2");
 
-    TS_ASSERT_THROWS(conj.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(conj.execute(), const std::invalid_argument &);
     TS_ASSERT(!conj.isExecuted());
   }
 

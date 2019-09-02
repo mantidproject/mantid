@@ -389,7 +389,11 @@ List All SCM Urls
     import org.eclipse.jgit.transport.URIish;
 
     for(project in Hudson.instance.items) {
-      scm = project.scm;
+      try {
+        scm = project.scm;
+      } catch(Exception) {
+        continue
+      }
       if (scm instanceof hudson.plugins.git.GitSCM) {
         for (RemoteConfig cfg : scm.getRepositories()) {
           for (URIish uri : cfg.getURIs()) {
@@ -398,6 +402,43 @@ List All SCM Urls
         }
       }
     }
+
+Update Urls on All Jobs
+-----------------------
+
+.. code-block:: groovy
+
+   import jenkins.model.*;
+   import hudson.model.*;
+   import hudson.tasks.*;
+   import hudson.plugins.git.*;
+   import org.eclipse.jgit.transport.RemoteConfig;
+
+   def modifyGitUrl(url) {
+     if(url.startsWith('git://')) {
+       return "https://" + url.substring(6);
+     } else {
+       return url;
+     }
+   }
+
+   for(project in Hudson.instance.items) {
+     try{
+       oldScm = project.scm;
+     } catch(Exception) {
+       continue
+     }
+     if (oldScm instanceof hudson.plugins.git.GitSCM) {
+       def newUserRemoteConfigs = oldScm.userRemoteConfigs.collect {
+         new UserRemoteConfig(modifyGitUrl(it.url), it.name, it.refspec, it.credentialsId)
+       }
+       def newScm = new GitSCM(newUserRemoteConfigs, oldScm.branches, oldScm.doGenerateSubmoduleConfigurations,
+                               oldScm.submoduleCfg, oldScm.browser, oldScm.gitTool, oldScm.extensions)
+       project.scm = newScm;
+       project.save();
+     }
+   }
+
 
 Print All Loggers
 -----------------

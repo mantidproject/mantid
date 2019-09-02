@@ -37,7 +37,7 @@ public:
       loginobj.initialize();
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(loginobj.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(loginobj.execute(), const std::runtime_error &);
   }
 
   void testLogin() {

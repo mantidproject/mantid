@@ -11,7 +11,7 @@
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include <boost/make_shared.hpp>
 
@@ -20,8 +20,7 @@ namespace NexusGeometry {
 
 /// Constructor
 InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
-    : m_instrument(
-          Mantid::Kernel::make_unique<Geometry::Instrument>(instrumentName)) {
+    : m_instrument(std::make_unique<Geometry::Instrument>(instrumentName)) {
   // Default view
   std::string defaultViewAxis = "z";
   Geometry::PointingAlong pointingUp(Geometry::Y), alongBeam(Geometry::Z),
@@ -167,8 +166,7 @@ std::unique_ptr<const Geometry::Instrument>
 InstrumentBuilder::createInstrument() {
   sortDetectors();
   // Create the new replacement first incase it throws
-  auto temp = Mantid::Kernel::make_unique<Geometry::Instrument>(
-      m_instrument->getName());
+  auto temp = std::make_unique<Geometry::Instrument>(m_instrument->getName());
   auto *product = m_instrument.release();
   m_instrument = std::move(temp);
   product->parseTreeAndCacheBeamline();

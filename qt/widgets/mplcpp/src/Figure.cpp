@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidQtWidgets/MplCpp/ColorConverter.h"
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
 namespace Widgets {
@@ -43,6 +45,25 @@ Figure::Figure(bool tightLayout)
     : Python::InstanceHolder(newFigure(tightLayout)) {}
 
 /**
+ * @return The facecolor of the current figure
+ */
+QColor Figure::faceColor() const {
+  return ColorConverter::toRGB(
+      callMethodNoCheck<Python::Object>(pyobj(), "get_facecolor"));
+}
+
+/**
+ * Reset the background color of the figure.
+ * @param color A character string indicating the color.
+ * See https://matplotlib.org/api/colors_api.html
+ */
+void Figure::setFaceColor(const QColor color) {
+  callMethodNoCheck<void, const char *>(
+      pyobj(), "set_facecolor",
+      color.name(QColor::HexRgb).toLatin1().constData());
+}
+
+/**
  * Reset the background color of the figure.
  * @param color A character string indicating the color.
  * See https://matplotlib.org/api/colors_api.html
@@ -68,12 +89,20 @@ Axes Figure::addAxes(double left, double bottom, double width, double height) {
 
 /**
  * Add a subplot Axes to the figure
- * @param subplotspec
- * @return
+ * @param subplotspec A short-form subplot specification
+ * @param projection An optional string denoting the projection type
+ * @return A wrapper around the Axes object
  */
-Axes Figure::addSubPlot(int subplotspec) {
+Axes Figure::addSubPlot(const int subplotspec, const QString projection) {
   GlobalInterpreterLock lock;
-  return Axes{pyobj().attr("add_subplot")(subplotspec)};
+  if (projection.isEmpty())
+    return Axes{pyobj().attr("add_subplot")(subplotspec)};
+  else {
+    const auto args = Python::NewRef(Py_BuildValue("(i)", subplotspec));
+    Python::Dict kwargs;
+    kwargs["projection"] = projection.toLatin1().constData();
+    return Axes{pyobj().attr("add_subplot")(*args, **kwargs)};
+  }
 }
 
 /**
@@ -89,9 +118,9 @@ Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
                                 const Python::Object &ticks,
                                 const Python::Object &format) {
   GlobalInterpreterLock lock;
-  auto args = Python::NewRef(
+  const auto args = Python::NewRef(
       Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
-  auto kwargs = Python::NewRef(
+  const auto kwargs = Python::NewRef(
       Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
   Python::Object attr{pyobj().attr("colorbar")};
   return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));

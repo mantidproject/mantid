@@ -52,7 +52,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
 
     def show_deprecation_warning(self):
         logger.warning("""
-The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in July 2019
+The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in November 2019
 We recommend you use ISIS Reflectometry instead, If this is not possible contact the development team using the "Help->Ask For Help" menu.
 """)
 

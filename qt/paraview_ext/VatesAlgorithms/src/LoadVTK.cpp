@@ -120,8 +120,7 @@ const std::string LoadVTK::category() const { return "MDAlgorithms"; }
 void LoadVTK::init() {
   std::vector<std::string> exts{"vtk"};
   this->declareProperty(
-      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
       "Binary legacy VTK uniform structured image file to load.");
 
   auto manditorySignalArrayName =
@@ -146,21 +145,21 @@ void LoadVTK::init() {
                         "the range min to max. Allow sparse regions to be "
                         "ignored. Defaults to 25%.");
 
-  setPropertySettings("KeepTopPercent", make_unique<EnabledWhenProperty>(
+  setPropertySettings("KeepTopPercent", std::make_unique<EnabledWhenProperty>(
                                             "AdaptiveBinned", IS_DEFAULT));
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDWorkspace equivalent of vtkStructuredPoints input.");
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
-                      "SignalMaximum", 0, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMaximum", 0,
+                                                           Direction::Output),
                   "Maximum signal value determined from input array.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
-                      "SignalMinimum", 0, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalMinimum", 0,
+                                                           Direction::Output),
                   "Minimum signal value determined from input array.");
-  declareProperty(Kernel::make_unique<PropertyWithValue<int>>(
-                      "SignalThreshold", 0, Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("SignalThreshold", 0,
+                                                           Direction::Output),
                   "Actual calculated signal threshold determined from "
                   "minimum, and maximum signal.");
 }

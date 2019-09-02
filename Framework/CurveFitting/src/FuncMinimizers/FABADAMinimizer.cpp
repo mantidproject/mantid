@@ -118,27 +118,27 @@ FABADAMinimizer::FABADAMinimizer()
   declareProperty("PDF", true, "If the PDF's should be calculated or not.");
   declareProperty("NumberBinsPDF", 20,
                   "Number of bins used for the output PDFs");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "Chains", "", Kernel::Direction::Output),
                   "The name to give the output workspace for the"
                   " complete chains.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "ConvergedChain", "", Kernel::Direction::Output,
                       API::PropertyMode::Optional),
                   "The name to give the output workspace for just the"
                   "converged chain");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "CostFunctionTable", "", Kernel::Direction::Output),
       "The name to give the output workspace");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "Parameters", "", Kernel::Direction::Output),
       "The name to give the output workspace (Parameter values and errors)");
 
   // To be implemented in the future
   /*declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "Chi-squareLandscape", "", Kernel::Direction::Output),
       "The name to give the output workspace containing the chi-square"
       " landscape");*/
@@ -325,7 +325,7 @@ void FABADAMinimizer::finalize() {
                        " (StepsBetweenValues = 10).\n";
     nSteps = 10;
   }
-  size_t convLength = size_t(double(chainLength) / double(nSteps));
+  auto convLength = size_t(double(chainLength) / double(nSteps));
 
   // Reduced chain
   std::vector<std::vector<double>> reducedConvergedChain;
@@ -400,8 +400,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
   API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
   if (!iConstraint)
     return;
-  Constraints::BoundaryConstraint *bcon =
-      dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+  auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
   if (!bcon)
     return;
 
@@ -1072,8 +1071,7 @@ void FABADAMinimizer::initChainsAndParameters() {
 
     API::IConstraint *iConstraint = m_fitFunction->getConstraint(i);
     if (iConstraint) {
-      Constraints::BoundaryConstraint *bcon =
-          dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+      auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
       if (bcon) {
         if (bcon->hasLower()) {
           if (param < bcon->lower())

@@ -49,15 +49,17 @@ public:
 
     TS_ASSERT_THROWS(
         alg->setPropertyValue("OutputWorkspace", "_unused_for_child"),
-        Mantid::Kernel::Exception::NotFoundError);
+        const Mantid::Kernel::Exception::NotFoundError &);
 
     TS_ASSERT_THROWS(
         alg->setPropertyValue("BitDepth", "this_is_wrong_you_must_fail"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 10),
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->setProperty("BitDepth", 64),
+                     const std::invalid_argument &);
   }
 
   void test_exec_fail() {
@@ -67,9 +69,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "foo.fits"));
     TS_ASSERT_THROWS(
         alg.setPropertyValue("InputWorkspace", "inexistent_workspace_fails"),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!alg.isExecuted());
   }
 
@@ -85,7 +87,7 @@ public:
 
     TSM_ASSERT_THROWS(
         "The algorithm should not accept workspaces if the units are wrong",
-        alg.setProperty("InputWorkspace", ws), std::invalid_argument);
+        alg.setProperty("InputWorkspace", ws), const std::invalid_argument &);
   }
 
   void test_exec_fails_empty() {
@@ -101,7 +103,7 @@ public:
 
     TSM_ASSERT_THROWS(
         "The algorithm should not accept empty / uninitialized workspaces",
-        alg.setProperty("InputWorkspace", ws), std::invalid_argument);
+        alg.setProperty("InputWorkspace", ws), const std::invalid_argument &);
   }
 
   void test_exec_runs_ok() {

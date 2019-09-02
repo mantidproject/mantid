@@ -390,7 +390,7 @@ public:
     alg.setProperty("DataWorkspace", dataWSTranspose);
     alg.setProperty("ShapeWorkspace", shapeWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
   void test_wrong_number_of_dimensions() {
@@ -408,7 +408,7 @@ public:
     alg.setProperty("DataWorkspace", dataWSTranspose);
     alg.setProperty("ShapeWorkspace", shapeWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
 

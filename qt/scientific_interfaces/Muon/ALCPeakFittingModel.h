@@ -26,19 +26,21 @@ public:
   Mantid::API::IFunction_const_sptr fittedPeaks() const override {
     return m_fittedPeaks;
   }
-  Mantid::API::MatrixWorkspace_const_sptr data() const override {
-    return m_data;
-  }
+  Mantid::API::MatrixWorkspace_sptr data() const override { return m_data; }
   Mantid::API::ITableWorkspace_sptr parameterTable() const {
     return m_parameterTable;
   }
 
   void fitPeaks(Mantid::API::IFunction_const_sptr peaks) override;
+
+  Mantid::API::MatrixWorkspace_sptr
+  guessData(Mantid::API::IFunction_const_sptr function,
+            const std::vector<double> &xValues) override;
   // -- End of IALCPeakFittingModel interface
   // ----------------------------------------------------
 
   /// Update the data
-  void setData(Mantid::API::MatrixWorkspace_const_sptr newData);
+  void setData(Mantid::API::MatrixWorkspace_sptr newData);
 
   /// Export data and fitted peaks as a single workspace
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
@@ -48,7 +50,7 @@ public:
 
 private:
   /// The data we are fitting peaks to
-  Mantid::API::MatrixWorkspace_const_sptr m_data;
+  Mantid::API::MatrixWorkspace_sptr m_data;
 
   /// Parameter table containing fit results
   Mantid::API::ITableWorkspace_sptr m_parameterTable;

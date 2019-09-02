@@ -53,23 +53,23 @@ void SaveToSNSHistogramNexus::init() {
   // workspac
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(Kernel::make_unique<FileProperty>("InputFilename", "",
-                                                    FileProperty::Load, exts),
+  declareProperty(std::make_unique<FileProperty>("InputFilename", "",
+                                                 FileProperty::Load, exts),
                   "The name of the original Nexus file for this data,\n"
                   "as a full or relative path");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
 
-  declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
-                                                    FileProperty::Save, exts),
+  declareProperty(std::make_unique<FileProperty>("OutputFilename", "",
+                                                 FileProperty::Save, exts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 
-  declareProperty(
-      make_unique<PropertyWithValue<bool>>("Compress", false, Direction::Input),
-      "Will the output NXS file data be compressed?");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("Compress", false,
+                                                            Direction::Input),
+                  "Will the output NXS file data be compressed?");
 }
 
 //  /** Execute the algorithm.
@@ -292,7 +292,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     int slabx = x % x_pixel_slab;
 
     Timer tim1;
-    int ypixels = static_cast<int>(det->ypixels());
+    auto ypixels = static_cast<int>(det->ypixels());
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
     for (int y = 0; y < ypixels; y++) {
@@ -725,7 +725,7 @@ void SaveToSNSHistogramNexus::exec() {
   m_map = m_inputWorkspace->getDetectorIDToWorkspaceIndexMap();
 
   // Start the progress bar. 3 reports per histogram.
-  m_progress = make_unique<Progress>(
+  m_progress = std::make_unique<Progress>(
       this, 0.0, 1.0, m_inputWorkspace->getNumberHistograms() * 3);
 
   EventWorkspace_const_sptr eventWorkspace =

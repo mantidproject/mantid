@@ -65,7 +65,7 @@ public:
     std::vector<double> values = {-1., 0., 1., 2., 3.};
 
     // Odd number of elements, we can't convert to real vector
-    TS_ASSERT_THROWS(space.fromComplex(values), std::invalid_argument);
+    TS_ASSERT_THROWS(space.fromComplex(values), const std::invalid_argument &);
   }
 };
 

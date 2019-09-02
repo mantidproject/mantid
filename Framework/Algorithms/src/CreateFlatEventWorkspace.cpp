@@ -38,7 +38,7 @@ const std::string CreateFlatEventWorkspace::category() const {
  */
 void CreateFlatEventWorkspace::init() {
   this->declareProperty(
-      Kernel::make_unique<Mantid::API::WorkspaceProperty<EventWorkspace>>(
+      std::make_unique<Mantid::API::WorkspaceProperty<EventWorkspace>>(
           "InputWorkspace", "", Mantid::Kernel::Direction::Input),
       "An input event workspace to use as a source for the events.");
 
@@ -48,7 +48,7 @@ void CreateFlatEventWorkspace::init() {
                         "Set the upper bound for sampling the background.");
 
   this->declareProperty(
-      Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
+      std::make_unique<Mantid::API::WorkspaceProperty<>>(
           "OutputWorkspace", "", Mantid::Kernel::Direction::Output),
       "Output event workspace containing a flat background.");
 }
@@ -77,7 +77,7 @@ void CreateFlatEventWorkspace::exec() {
   // How many times do we need to replicate the extracted background region in
   // order to fill up
   // the entire tof/x range covered by the data ?
-  int nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
+  auto nRegions = static_cast<int>((dataMax - dataMin) / sampleRange);
 
   g_log.debug() << "We will need to replicate the selected region " << nRegions
                 << " times.\n";

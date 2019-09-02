@@ -29,7 +29,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -83,7 +82,7 @@ const std::string ConjoinXRuns::summary() const {
  */
 void ConjoinXRuns::init() {
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           INPUT_WORKSPACE_PROPERTY, boost::make_shared<ADSValidator>()),
       "The names of the input workspaces or workspace groups as a list. At "
       "least two point-data MatrixWorkspaces are "
@@ -99,7 +98,7 @@ void ConjoinXRuns::init() {
       "time series, in which case the number "
       "of elements in the series must match the number of points for each "
       "workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
                       OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
                   "The output workspace.");
 
@@ -213,7 +212,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
         // try if numeric time series, then the size must match to the
         // blocksize
-        const int blocksize = static_cast<int>(ws->y(0).size());
+        const auto blocksize = static_cast<int>(ws->y(0).size());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
@@ -309,7 +308,7 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> errors;
   std::vector<double> axis;
   std::vector<double> xerrors;
-  const size_t index = static_cast<size_t>(wsIndex);
+  const auto index = static_cast<size_t>(wsIndex);
   const auto ySize = m_outWS->y(index).size();
   spectrum.reserve(ySize);
   errors.reserve(ySize);
@@ -433,7 +432,7 @@ void ConjoinXRuns::exec() {
   // copy over the merged sample logs from the temp
   m_outWS->mutableRun() = temp->run();
 
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, numSpec);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numSpec);
 
   // Now loop in parallel over all the spectra and join the data
   PARALLEL_FOR_IF(threadSafe(*m_outWS))

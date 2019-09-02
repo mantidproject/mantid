@@ -10,6 +10,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QTreeWidgetItem>
 #include <unordered_map>
@@ -21,9 +22,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 class AlgorithmProgressModel;
-class AlgorithmProgressDialogWidget;
+class IAlgorithmProgressDialogWidget;
 
-class AlgorithmProgressDialogPresenter : public AlgorithmProgressPresenterBase {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmProgressDialogPresenter
+    : public AlgorithmProgressPresenterBase {
   Q_OBJECT
   using RunningAlgorithms =
       std::unordered_map<Mantid::API::AlgorithmID,
@@ -31,16 +33,17 @@ class AlgorithmProgressDialogPresenter : public AlgorithmProgressPresenterBase {
 
 public:
   AlgorithmProgressDialogPresenter(QWidget *parent,
-                                   AlgorithmProgressDialogWidget *view,
+                                   IAlgorithmProgressDialogWidget *view,
                                    AlgorithmProgressModel &model);
 
-  void algorithmStartedSlot(Mantid::API::AlgorithmID /*unused*/) override;
-  void updateProgressBarSlot(Mantid::API::AlgorithmID /*unused*/,
-                             double /*unused*/, QString /*unused*/) override;
-  void algorithmEndedSlot(Mantid::API::AlgorithmID /*unused*/) override;
+  void algorithmStartedSlot(Mantid::API::AlgorithmID) override;
+  void updateProgressBarSlot(Mantid::API::AlgorithmID, double progress,
+                             QString message) override;
+  void algorithmEndedSlot(Mantid::API::AlgorithmID) override;
+  size_t getNumberTrackedAlgorithms();
 
 private:
-  AlgorithmProgressDialogWidget *m_view;
+  IAlgorithmProgressDialogWidget *m_view;
   /// Reference to the model of the main window progress bar
   AlgorithmProgressModel &m_model;
   /// Container for all the progress bars that are currently being displayed

@@ -34,12 +34,12 @@ void NormaliseVanadium::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<InstrumentValidator>();
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -59,9 +59,8 @@ void NormaliseVanadium::exec() {
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If sample not at origin, shift cached positions.
   const auto &spectrumInfo = m_inputWS->spectrumInfo();

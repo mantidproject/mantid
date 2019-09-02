@@ -25,9 +25,9 @@ using namespace API;
  *
  */
 void RenameWorkspace::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
   declareProperty<bool>(
       "RenameMonitors", false,

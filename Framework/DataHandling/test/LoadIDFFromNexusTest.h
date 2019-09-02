@@ -116,7 +116,7 @@ public:
 
     // Test a non-existant detector
     TS_ASSERT_THROWS(detectorInfo.detector(detectorInfo.indexOf(16735)),
-                     std::out_of_range);
+                     const std::out_of_range &);
 
     // Check the monitors are correctly marked
     const auto &detInfo = output->detectorInfo();

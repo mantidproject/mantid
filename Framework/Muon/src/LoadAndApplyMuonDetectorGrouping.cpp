@@ -71,18 +71,18 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   std::string emptyString("");
 
   declareProperty(
-      Mantid::Kernel::make_unique<FileProperty>(
-          "Filename", "", API::FileProperty::Load, ".xml"),
+      std::make_unique<FileProperty>("Filename", "", API::FileProperty::Load,
+                                     ".xml"),
       "The XML file containing the grouping and pairing information");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input workspace containing data from detectors that the "
       "grouping/pairing will be applied to.");
 
   declareProperty(
-      Mantid::Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "WorkspaceGroup", "", Direction::InOut, PropertyMode::Optional),
       "The workspaces created by the algorithm will be placed inside this "
       "group. If not specified will save to \"MuonAnalysisGroup\" ");
@@ -99,13 +99,13 @@ void LoadAndApplyMuonDetectorGrouping::init() {
   declareProperty("TimeMin", 0.0, "Start time for the data in mus.",
                   Direction::Input);
   setPropertySettings("TimeMin",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty("TimeMax", 32.0, "End time for the data in mus.",
                   Direction::Input);
   setPropertySettings("TimeMax",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "CropWorkspaces", Kernel::IS_EQUAL_TO, "1"));
 
   // Group asymmetry range
@@ -119,7 +119,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
       "Start time for the group asymmetry calculation (micro seconds).",
       Direction::Input);
   setPropertySettings("AsymmetryTimeMin",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "ApplyAsymmetryToGroups", Kernel::IS_EQUAL_TO, "1"));
 
   declareProperty(
@@ -127,7 +127,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
       "End time for the group asymmetry calculation (micro seconds).",
       Direction::Input);
   setPropertySettings("AsymmetryTimeMax",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "ApplyAsymmetryToGroups", Kernel::IS_EQUAL_TO, "1"));
 
   // Optional properties
@@ -151,7 +151,7 @@ void LoadAndApplyMuonDetectorGrouping::init() {
                   Direction::Input);
 
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DeadTimeTable", "", Direction::Input, PropertyMode::Optional),
       "Table with dead time information, used to apply dead time correction.");
 

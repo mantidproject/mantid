@@ -28,11 +28,11 @@ class SwapWidthsTest(unittest.TestCase):
         """
 
         self.assertTrue(isinstance(result, MatrixWorkspace))
-        self.assertEquals(result.getNumberHistograms(), 2)
-        self.assertEquals(result.blocksize(), self._input_ws.blocksize())
-        self.assertEquals(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
-        self.assertEquals(result.getAxis(1).label(0), 'f2.f1.FWHM')
-        self.assertEquals(result.getAxis(1).label(1), 'f2.f2.FWHM')
+        self.assertEqual(result.getNumberHistograms(), 2)
+        self.assertEqual(result.blocksize(), self._input_ws.blocksize())
+        self.assertEqual(result.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
+        self.assertEqual(result.getAxis(1).label(0), 'f2.f1.FWHM')
+        self.assertEqual(result.getAxis(1).label(1), 'f2.f2.FWHM')
 
     def _validate_result_values(self, result):
         """
@@ -60,11 +60,11 @@ class SwapWidthsTest(unittest.TestCase):
         # Check data is correct after swap
         for i in range(0, len(in_first_fwhm)):
             if i <= self._swap_point:
-                self.assertEquals(in_first_fwhm[i], result_first_fwhm[i])
-                self.assertEquals(in_second_fwhm[i], result_second_fwhm[i])
+                self.assertEqual(in_first_fwhm[i], result_first_fwhm[i])
+                self.assertEqual(in_second_fwhm[i], result_second_fwhm[i])
             else:
-                self.assertEquals(in_first_fwhm[i], result_second_fwhm[i])
-                self.assertEquals(in_second_fwhm[i], result_first_fwhm[i])
+                self.assertEqual(in_first_fwhm[i], result_second_fwhm[i])
+                self.assertEqual(in_second_fwhm[i], result_first_fwhm[i])
 
 
     def test_basic(self):

@@ -15,7 +15,6 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace API;
@@ -60,10 +59,10 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges(2));
     std::unique_ptr<const ISpectrum> specHist =
-        Kernel::make_unique<Histogram1D>(histogram);
+        std::make_unique<Histogram1D>(histogram);
     std::unique_ptr<const ISpectrum> specEvent =
-        Kernel::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = std::make_unique<Histogram1D>(
         Histogram::XMode::Points, Histogram::YMode::Counts);
 
     TS_ASSERT_THROWS_NOTHING(target->copyDataFrom(*specHist));
@@ -81,10 +80,10 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges(2));
     std::unique_ptr<const ISpectrum> specHist =
-        Kernel::make_unique<Histogram1D>(histogram);
+        std::make_unique<Histogram1D>(histogram);
     std::unique_ptr<const ISpectrum> specEvent =
-        Kernel::make_unique<EventList>(eventList);
-    std::unique_ptr<ISpectrum> target = make_unique<Histogram1D>(
+        std::make_unique<EventList>(eventList);
+    std::unique_ptr<ISpectrum> target = std::make_unique<Histogram1D>(
         Histogram::XMode::Points, Histogram::YMode::Counts);
     target->setSpectrumNo(37);
     target->setDetectorID(42);
@@ -105,7 +104,7 @@ public:
   void testcheckAndSanitizeHistogramThrowsNullY() {
     Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
     BinEdges edges{-0.04, 1.7};
-    TS_ASSERT_THROWS(h.setHistogram(edges), std::invalid_argument);
+    TS_ASSERT_THROWS(h.setHistogram(edges), const std::invalid_argument &);
   }
 
   void testcheckAndSanitizeHistogramThrowsNullE() {
@@ -114,7 +113,7 @@ public:
     Histogram histogram{edges};
     Counts counts{23};
     histogram.setCounts(counts);
-    TS_ASSERT_THROWS(h.setHistogram(histogram), std::invalid_argument);
+    TS_ASSERT_THROWS(h.setHistogram(histogram), const std::invalid_argument &);
   }
 
   void testsetgetXvector() {
@@ -171,16 +170,16 @@ public:
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
-    TS_ASSERT_THROWS(h.dataX().at(nel), std::out_of_range);
+    TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
-    TS_ASSERT_THROWS(h.dataY().at(nel), std::out_of_range);
+    TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
-    TS_ASSERT_THROWS(h.dataE().at(nel), std::out_of_range);
+    TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
   }
 
   void test_copy_constructor() {

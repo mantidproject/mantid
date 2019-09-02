@@ -59,7 +59,7 @@ void convertGroupsToMapFile(const std::vector<std::vector<int>> &groups,
   commands << groups.size() << "\n";
   for (auto &group : groups) {
     const int groupId = axis.spectraNo(group[0]);
-    const int groupSize = static_cast<int>(group.size());
+    const auto groupSize = static_cast<int>(group.size());
 
     // Comment the output for readability
     commands << "# Group " << groupId;
@@ -86,7 +86,7 @@ void forceSpectraAxis(MatrixWorkspace &ws) {
   if (dynamic_cast<SpectraAxis *>(ws.getAxis(1))) {
     return;
   }
-  ws.replaceAxis(1, new SpectraAxis(&ws));
+  ws.replaceAxis(1, std::make_unique<SpectraAxis>(&ws));
 }
 
 } // anonymous namespace
@@ -99,36 +99,36 @@ const double GroupDetectors2::OPENINGFILE = 0.03;
 const double GroupDetectors2::READFILE = 0.15;
 
 void GroupDetectors2::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The name of the input 2D workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
   const std::vector<std::string> exts{".map", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("MapFile", "",
-                                        FileProperty::OptionalLoad, exts),
+      std::make_unique<FileProperty>("MapFile", "", FileProperty::OptionalLoad,
+                                     exts),
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
   declareProperty(
       "IgnoreGroupNumber", true,
       "If true, use sequential spectrum numbers, otherwise use the group "
       "number from MapFile as spectrum numbers.");
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "GroupingPattern", "", Direction::Input),
                   "Describes how this algorithm should group the detectors. "
                   "See the help for full instructions.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the spectrum numbers to combine "
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "An array of detector IDs to combine (WorkspaceIndexList is "
                   "ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
   declareProperty(
       "KeepUngroupedSpectra", false,
@@ -145,7 +145,7 @@ void GroupDetectors2::init() {
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "CopyGroupingFromWorkspace", "", Direction::Input,
           PropertyMode::Optional),
       "The name of a workspace to copy the grouping from. "
@@ -407,7 +407,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
                     << " spectra indices to be combined\n";
     }
     // check we don't have an index that is too high for the workspace
-    size_t maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
+    auto maxIn = static_cast<size_t>(workspace->getNumberHistograms() - 1);
     auto indices0 = m_GroupWsInds[0];
     auto it = indices0.begin();
     for (; it != indices0.end(); ++it) {
@@ -879,8 +879,8 @@ void GroupDetectors2::readSpectraIndexes(const std::string &line,
 
     std::vector<size_t>::const_iterator specN = specNums.begin();
     for (; specN != specNums.end(); ++specN) {
-      specnum_t spectrumNum = static_cast<specnum_t>(*specN);
-      spec2index_map::const_iterator ind = specs2index.find(spectrumNum);
+      auto spectrumNum = static_cast<specnum_t>(*specN);
+      auto ind = specs2index.find(spectrumNum);
       if (ind == specs2index.end()) {
         g_log.debug() << name() << ": spectrum number " << spectrumNum
                       << " referred to in the input file was not found in the "
@@ -1196,7 +1196,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
       }
 
       // the tokenizer will always return at least on string
-      const size_t rangeEnd = boost::lexical_cast<size_t>(*readPostion);
+      const auto rangeEnd = boost::lexical_cast<size_t>(*readPostion);
 
       // this is unanticipated and marked as an error, it would be easy to
       // change this to count down however

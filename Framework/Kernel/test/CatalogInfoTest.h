@@ -42,7 +42,7 @@ public:
         "</facility>"
         "</facilities>";
 
-    CatalogInfo *catalogInfo = nullptr;
+    std::unique_ptr<CatalogInfo> catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
     TS_ASSERT_EQUALS(catalogInfo->catalogName(), "ICat3Catalog");
@@ -55,8 +55,6 @@ public:
     TS_ASSERT_EQUALS(catalogInfo->windowsPrefix(), "");
     TS_ASSERT_EQUALS(catalogInfo->macPrefix(), "/archive");
     TS_ASSERT_EQUALS(catalogInfo->linuxPrefix(), "/archive");
-
-    delete catalogInfo;
   }
 
   /// Test transformation of possible combinations of archive paths.
@@ -85,7 +83,7 @@ public:
         "</facility>"
         "</facilities>";
 
-    CatalogInfo *catalogInfo = nullptr;
+    std::unique_ptr<CatalogInfo> catalogInfo = nullptr;
     TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
     // Set the paths to test against.
@@ -120,12 +118,11 @@ public:
     TS_ASSERT_EQUALS(winPrefixPath, transformMac);
     TS_ASSERT_EQUALS(winPrefixPath, transformLin);
 #endif
-
-    delete catalogInfo;
   }
 
   /// Parse the XML string and create a catalog Object.
-  CatalogInfo *getCatalogFromXML(const std::string &xmlStr) const {
+  std::unique_ptr<CatalogInfo>
+  getCatalogFromXML(const std::string &xmlStr) const {
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> documentParser =
         parser.parseString(xmlStr);
@@ -140,7 +137,7 @@ public:
         dynamic_cast<Poco::XML::Element *>(elementTag->item(0));
     TS_ASSERT(element);
 
-    return (new CatalogInfo(element));
+    return (std::make_unique<CatalogInfo>(element));
   }
 
   void testCopyConstructor() {

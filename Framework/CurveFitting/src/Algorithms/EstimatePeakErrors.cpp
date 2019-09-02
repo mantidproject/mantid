@@ -114,12 +114,13 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(make_unique<FunctionProperty>("Function", Direction::InOut),
-                  "Fitting function containing peaks. Must have a covariance "
-                  "matrix attached.");
+  declareProperty(
+      std::make_unique<FunctionProperty>("Function", Direction::InOut),
+      "Fitting function containing peaks. Must have a covariance "
+      "matrix attached.");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the TableWorkspace with the output values and errors.");
 }
@@ -142,13 +143,13 @@ void EstimatePeakErrors::exec() {
     return;
   }
 
-  IPeakFunction *peak = dynamic_cast<IPeakFunction *>(function.get());
+  auto *peak = dynamic_cast<IPeakFunction *>(function.get());
 
   if (peak) {
     GSLMatrix covariance(*matrix);
     calculatePeakValues(*peak, *results, covariance, "");
   } else {
-    CompositeFunction *cf = dynamic_cast<CompositeFunction *>(function.get());
+    auto *cf = dynamic_cast<CompositeFunction *>(function.get());
     if (cf) {
       size_t ip = 0;
       for (size_t i = 0; i < cf->nFunctions(); ++i) {

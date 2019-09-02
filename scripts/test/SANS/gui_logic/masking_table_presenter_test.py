@@ -27,9 +27,9 @@ class MaskingTablePresenterTest(unittest.TestCase):
         presenter = MaskingTablePresenter(parent_presenter)
         # Act + Assert
         presenter.set_view(view)
-        self.assertTrue(view.set_table.call_count == 1)
+        self.assertEqual(view.set_table.call_count, 1)
         presenter.on_row_changed()
-        self.assertTrue(view.set_table.call_count == 2)
+        self.assertEqual(view.set_table.call_count, 2)
         first_call = mock.call([])
         second_call = mock.call([masking_information(first='Beam stop', second='', third='infinite-cylinder, r = 10.0'),
                                  masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0'),
@@ -46,12 +46,7 @@ class MaskingTablePresenterTest(unittest.TestCase):
         presenter._view.set_display_mask_button_to_processing = mock.MagicMock()
         presenter._view.get_current_row.side_effect = RuntimeError("Mock get_current_row failure")
 
-        try:
-            presenter.on_display()
-        except Exception as e:
-            self.assertEqual(str(e), "Mock get_current_row failure")
-        else:
-            self.assertFalse(True)  # As we expect an error to be raised
+        self.assertRaises(Exception, presenter.on_display)
 
         # Confirm that on_processing_error_masking_display was called
         self.assertEqual(

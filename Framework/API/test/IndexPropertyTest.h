@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>

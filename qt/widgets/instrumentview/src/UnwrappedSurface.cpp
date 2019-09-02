@@ -699,7 +699,7 @@ UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
 
   try {
     ws = AnalysisDataService::Instance().retrieve(name);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // couldn't find the workspace in the ADS for some reason
     // just fail silently. There's nothing more we can do.
     return nullptr;

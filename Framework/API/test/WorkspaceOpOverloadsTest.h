@@ -170,7 +170,7 @@ public:
     TS_ASSERT(!ws->isDistribution());
 
     TS_ASSERT_THROWS(WorkspaceHelpers::makeDistribution(ws),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 };
 

@@ -46,7 +46,7 @@ public:
   void testName() { TS_ASSERT(!p->name().compare("Test")); }
 
   void testEmptyNameNotPermitted() {
-    TS_ASSERT_THROWS(PropertyHelper(""), std::invalid_argument);
+    TS_ASSERT_THROWS(PropertyHelper(""), const std::invalid_argument &);
   }
 
   void testDocumentation() {

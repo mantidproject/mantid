@@ -72,7 +72,7 @@ public:
                          "simple_md", "Dimensions", "3", "Extents",
                          "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
                          "One,Two,Three", "Frames", "QSample, QTest, QSample"),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     // Wrong number of frames
     TS_ASSERT_THROWS(!FrameworkManager::Instance().exec(
@@ -80,7 +80,7 @@ public:
                          "simple_md", "Dimensions", "3", "Extents",
                          "-1,1,-2,2,3,3", "Names", "One,Two,Three", "Units",
                          "One,Two,Three", "Frames", "QSample, QSample"),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     // Uses too much memory
     TS_ASSERT(!FrameworkManager::Instance()

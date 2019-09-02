@@ -32,7 +32,7 @@ public:
                                "  </facility>"
                                "</facilities>";
 
-    TS_ASSERT_THROWS(getFacility(xmlStr), std::runtime_error);
+    TS_ASSERT_THROWS(getFacility(xmlStr), const std::runtime_error &);
   }
 
   void test_throws_if_no_file_extensions() {
@@ -42,7 +42,7 @@ public:
                                "  </facility>"
                                "</facilities>";
 
-    TS_ASSERT_THROWS(getFacility(xmlStr), std::runtime_error);
+    TS_ASSERT_THROWS(getFacility(xmlStr), const std::runtime_error &);
   }
 
   void test_throws_if_no_instruments() {
@@ -53,7 +53,7 @@ public:
         "  </facility>"
         "</facilities>";
 
-    TS_ASSERT_THROWS(getFacility(xmlStr), std::runtime_error);
+    TS_ASSERT_THROWS(getFacility(xmlStr), const std::runtime_error &);
   }
 
   void test_minimal() {
@@ -86,7 +86,8 @@ public:
                      "AnInst");
     TS_ASSERT(fac->instruments("Nonsense").empty());
     TS_ASSERT_EQUALS(fac->instrument("AnInst").name(), "AnInst");
-    TS_ASSERT_THROWS(fac->instrument("NoInst"), Exception::NotFoundError);
+    TS_ASSERT_THROWS(fac->instrument("NoInst"),
+                     const Exception::NotFoundError &);
 
     delete fac;
   }

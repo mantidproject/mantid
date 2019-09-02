@@ -10,9 +10,9 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <MantidHistogramData/LinearGenerator.h>
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
@@ -91,11 +91,11 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
     return ws;
 
   auto chopDelayLog =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
   auto chopSpeedLog =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
   auto isRunning =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
 
   for (int i = 0; i < 10; i++) {
     auto time = Types::Core::DateAndTime(10 * i, 0);
@@ -182,7 +182,8 @@ public:
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     TSM_ASSERT_THROWS(
         "should throw runtime error on as spectra ID should be positive",
-        m_getAllEi.setProperty("Monitor1SpecID", -1), std::invalid_argument);
+        m_getAllEi.setProperty("Monitor1SpecID", -1),
+        const std::invalid_argument &);
 
     m_getAllEi.setProperty("Monitor1SpecID", 1);
     m_getAllEi.setProperty("Monitor2SpecID", 2);
@@ -193,7 +194,7 @@ public:
 
     TSM_ASSERT_THROWS("should throw runtime error on validation as no "
                       "appropriate logs are defined",
-                      m_getAllEi.execute(), std::runtime_error);
+                      m_getAllEi.execute(), const std::runtime_error &);
     auto log_messages = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("Two logs should fail", log_messages.size(), 2);
     // add invalid property type
@@ -241,8 +242,8 @@ public:
     m_getAllEi.setProperty("FilterBaseLog", "proton_charge");
     m_getAllEi.setProperty("FilterWithDerivative", false);
 
-    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "Chopper_Speed");
+    auto chopSpeed =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
     for (int i = 0; i < 10; i++) {
       chopSpeed->addValue(Types::Core::DateAndTime(10000 + 10 * i, 0), 1.);
     }
@@ -257,7 +258,8 @@ public:
     // Test sort log by run time.
     TSM_ASSERT_THROWS(
         "Attempt to get log without start/stop time set should fail",
-        m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"), std::runtime_error);
+        m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"),
+        const std::runtime_error &);
 
     ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(90, 0),
                                         Types::Core::DateAndTime(10000, 0));
@@ -270,10 +272,10 @@ public:
     TS_ASSERT_DELTA(val, 10., 1.e-6);
 
     // Test sort log by log.
-    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "Chopper_Delay");
-    auto goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "proton_charge");
+    auto chopDelay =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+    auto goodFram =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
     for (int i = 0; i < 10; i++) {
       auto time = Types::Core::DateAndTime(200 + 10 * i, 0);
@@ -307,8 +309,8 @@ public:
     TSM_ASSERT_DELTA("Chopper delay should have special speed ",
                      (10 * 0.1 + 20) / 12., chop_delay, 1.e-6);
 
-    goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "proton_charge");
+    goodFram =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
     for (int i = 0; i < 10; i++) {
       auto time = Types::Core::DateAndTime(100 + 10 * i, 0);
       goodFram->addValue(time, 1);
@@ -337,12 +339,12 @@ public:
     m_getAllEi.setProperty("FilterWithDerivative", true);
 
     // Test select log by log derivative
-    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "Chopper_Delay");
-    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "Chopper_Speed");
-    auto protCharge = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "proton_charge");
+    auto chopDelay =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+    auto chopSpeed =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+    auto protCharge =
+        std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
     double gf(0);
     for (int i = 0; i < 50; i++) {
@@ -395,7 +397,7 @@ public:
     TSM_ASSERT_THROWS(
         "Should throw out of range",
         m_getAllEi.findGuessOpeningTimes(TOF_range, t0, Period, guess_tof),
-        std::runtime_error);
+        const std::runtime_error &);
 
     t0 = 1;
     guess_tof.resize(0);

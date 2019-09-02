@@ -51,11 +51,11 @@ void LoadRaw3::init() {
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if\n"
       "explicitly set.");
   declareProperty(
-      make_unique<ArrayProperty<int>>("PeriodList"),
+      std::make_unique<ArrayProperty<int>>("PeriodList"),
       "A comma-separated list of individual periods to read.  Only used if\n"
       "explicitly set.");
 
@@ -314,7 +314,7 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
                                DataObjects::Workspace2D_sptr ws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
-  double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
+  auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   // loop through the spectra
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     specnum_t histToRead = i + period * (m_numberOfSpectra + 1);
@@ -362,7 +362,7 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
 
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
-  double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
+  auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   // loop through spectra
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);
@@ -409,7 +409,7 @@ void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   int64_t mwsIndex = 0;
-  double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
+  auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   // loop through spectra
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + period * (m_numberOfSpectra + 1);

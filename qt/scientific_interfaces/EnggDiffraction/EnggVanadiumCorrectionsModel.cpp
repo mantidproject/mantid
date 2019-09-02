@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -32,8 +33,9 @@ const std::string EnggVanadiumCorrectionsModel::VANADIUM_INPUT_WORKSPACE_NAME =
 std::pair<Mantid::API::ITableWorkspace_sptr, Mantid::API::MatrixWorkspace_sptr>
 EnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
     const std::string &vanadiumRunNumber) const {
-  const auto vanadiumRunName = generateVanadiumRunName(vanadiumRunNumber);
-  loadMatrixWorkspace(vanadiumRunName, VANADIUM_INPUT_WORKSPACE_NAME);
+  const auto vanadiumWS =
+      loadMatrixWorkspace(vanadiumRunNumber, VANADIUM_INPUT_WORKSPACE_NAME);
+
   auto enggVanadiumCorrections =
       Mantid::API::AlgorithmManager::Instance().create(
           "EnggVanadiumCorrections");
@@ -105,7 +107,7 @@ std::string EnggVanadiumCorrectionsModel::generateCurvesFilename(
   const static std::string filenameSuffix =
       "_precalculated_vanadium_run_bank_curves.nxs";
 
-  const auto normalisedRunName = generateVanadiumRunName(vanadiumRunNumber);
+  const auto normalisedRunName = Poco::Path(vanadiumRunNumber).getBaseName();
   const auto curvesFilename = normalisedRunName + filenameSuffix;
 
   Poco::Path inputDir(m_calibSettings.m_inputDirCalib);
@@ -118,7 +120,7 @@ std::string EnggVanadiumCorrectionsModel::generateIntegratedFilename(
   const static std::string filenameSuffix =
       "_precalculated_vanadium_run_integration.nxs";
 
-  const auto normalisedRunName = generateVanadiumRunName(vanadiumRunNumber);
+  const auto normalisedRunName = Poco::Path(vanadiumRunNumber).getBaseName();
   const auto integratedFilename = normalisedRunName + filenameSuffix;
 
   Poco::Path inputDir(m_calibSettings.m_inputDirCalib);

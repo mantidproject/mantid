@@ -42,13 +42,13 @@ DECLARE_ALGORITHM(SaveNexusProcessed)
  *
  */
 void SaveNexusProcessed::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
   // Declare required input parameters for algorithm
   const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Save, fileExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 
@@ -64,7 +64,7 @@ void SaveNexusProcessed::init() {
   declareProperty("WorkspaceIndexMax", Mantid::EMPTY_INT(), mustBePositive,
                   "Index of last spectrum to write, only for single period\n"
                   "data.");
-  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "List of spectrum numbers to read, only for single period\n"
                   "data.");
 
@@ -77,17 +77,19 @@ void SaveNexusProcessed::init() {
       "For EventWorkspaces, preserve the events when saving (default).\n"
       "If false, will save the 2D histogram version of the workspace with the "
       "current binning parameters.");
-  setPropertySettings("PreserveEvents",
-                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
-                          "InputWorkspace", true));
+  setPropertySettings(
+      "PreserveEvents",
+      std::make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+          "InputWorkspace", true));
 
   declareProperty(
       "CompressNexus", false,
       "For EventWorkspaces, compress the Nexus data field (default False).\n"
       "This will make smaller files but takes much longer.");
-  setPropertySettings("CompressNexus",
-                      make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
-                          "InputWorkspace", true));
+  setPropertySettings(
+      "CompressNexus",
+      std::make_unique<EnabledWhenWorkspaceIsType<EventWorkspace>>(
+          "InputWorkspace", true));
 }
 
 /** Get the list of workspace indices to use
@@ -104,7 +106,7 @@ void SaveNexusProcessed::getWSIndexList(
   const bool interval = (spec_max != Mantid::EMPTY_INT());
   if (spec_max == Mantid::EMPTY_INT())
     spec_max = 0;
-  const int numberOfHist =
+  const auto numberOfHist =
       static_cast<int>(matrixWorkspace->getNumberHistograms());
 
   if (interval) {
@@ -371,8 +373,8 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events,
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                                    const bool uniformSpectra,
                                    const std::vector<int> &spec) {
-  m_progress = make_unique<Progress>(this, m_timeProgInit, 1.0,
-                                     m_eventWorkspace->getNumberEvents() * 2);
+  m_progress = std::make_unique<Progress>(
+      this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
 
   // Start by writing out the axes and crap
   nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec,
@@ -523,6 +525,10 @@ bool SaveNexusProcessed::processGroups() {
   if (!workspaces.empty()) {
     for (size_t entry = 0; entry < workspaces.size(); entry++) {
       const Workspace_sptr ws = workspaces[entry];
+      if (ws->isGroup()) {
+        throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
+                                 "support nested groups of groups");
+      }
       this->doExec(ws, nexusFile, true /*keepFile*/, entry);
       g_log.information() << "Saving group index " << entry << "\n";
     }
@@ -554,7 +560,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
   }
   // Start the detector group
 
-  const int numberSpec = int(wsIndices.size());
+  const auto numberSpec = int(wsIndices.size());
   // allocate space for the Nexus Muon format of spectra-detector mapping
   // allow for writing one more than required
   std::vector<int32_t> detector_index(numberSpec + 1, 0);
@@ -573,7 +579,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
 
     // The detectors in this spectrum
     const auto &detectorgroup = spectrum.getDetectorIDs();
-    const int ndet1 = static_cast<int>(detectorgroup.size());
+    const auto ndet1 = static_cast<int>(detectorgroup.size());
 
     // points to start of detector list for the next spectrum
     detector_index[i + 1] = int32_t(detector_index[i] + ndet1);
@@ -644,7 +650,7 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(
     const API::MatrixWorkspace &ws, ::NeXus::File *file,
     const std::vector<int> &wsIndices,
     const ::NeXus::NXcompression compression) const {
-  const int numberSpec = int(wsIndices.size());
+  const auto numberSpec = int(wsIndices.size());
   std::vector<int32_t> spectra;
   spectra.reserve(static_cast<size_t>(numberSpec));
   for (const auto index : wsIndices) {

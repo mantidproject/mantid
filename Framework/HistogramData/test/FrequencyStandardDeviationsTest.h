@@ -61,7 +61,7 @@ public:
     const BinEdges edges{};
     TS_ASSERT_THROWS(
         const FrequencyStandardDeviations frequencies(counts, edges),
-        std::logic_error);
+        const std::logic_error &);
   }
 
   void test_construct_from_empty_CountStandardDeviations_size_mismatch() {
@@ -69,7 +69,7 @@ public:
     const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(
         const FrequencyStandardDeviations frequencies(counts, edges),
-        std::logic_error);
+        const std::logic_error &);
   }
 
   void test_construct_from_CountStandardDeviations_null_BinEdges() {
@@ -77,7 +77,7 @@ public:
     const BinEdges edges{};
     TS_ASSERT_THROWS(
         const FrequencyStandardDeviations frequencies(counts, edges),
-        std::logic_error);
+        const std::logic_error &);
   }
 
   void test_construct_from_CountStandardDeviations_size_mismatch() {
@@ -85,7 +85,7 @@ public:
     const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(
         const FrequencyStandardDeviations frequencies(counts, edges),
-        std::logic_error);
+        const std::logic_error &);
   }
 
   void test_construct_from_CountStandardDeviations() {

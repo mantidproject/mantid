@@ -16,6 +16,10 @@ Provides Bayesian analysis routines primarily for use with QENS data.
 Action Buttons
 --------------
 
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
+
 ?
   Opens this help page.
 

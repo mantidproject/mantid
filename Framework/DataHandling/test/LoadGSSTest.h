@@ -148,15 +148,15 @@ public:
 
     API::IAlgorithm_sptr loader2 = createAlgorithm();
     loader2->setPropertyValue("Filename", "AsciiExample.txt");
-    TS_ASSERT_THROWS(loader2->execute(), std::out_of_range)
+    TS_ASSERT_THROWS(loader2->execute(), const std::out_of_range &)
 
     API::IAlgorithm_sptr loader3 = createAlgorithm();
     loader3->setPropertyValue("Filename", "CSP79590.raw");
-    TS_ASSERT_THROWS(loader3->execute(), std::out_of_range)
+    TS_ASSERT_THROWS(loader3->execute(), const std::out_of_range &)
 
     API::IAlgorithm_sptr loader4 = createAlgorithm();
     loader4->setPropertyValue("Filename", "VULCAN_2916_neutron0_event.dat");
-    TS_ASSERT_THROWS(loader4->execute(), std::out_of_range)
+    TS_ASSERT_THROWS(loader4->execute(), const std::out_of_range &)
   }
 
 private:

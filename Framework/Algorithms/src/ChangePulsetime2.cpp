@@ -27,11 +27,11 @@ using std::size_t;
 void ChangePulsetime2::init() {
   declareWorkspaceInputProperties<EventWorkspace>("InputWorkspace",
                                                   "An input event workspace.");
-  declareProperty(
-      make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
-      "Number of seconds (a float) to add to each event's pulse "
-      "time. Required.");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>("TimeOffset",
+                                                              Direction::Input),
+                  "Number of seconds (a float) to add to each event's pulse "
+                  "time. Required.");
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output event workspace.");
 }

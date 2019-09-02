@@ -25,12 +25,12 @@ using namespace Geometry;
 /// using namespace DataObjects;
 
 void CopyInstrumentParameters::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace giving the instrument");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
-      "Name of the workspace receiving the instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the workspace giving the instrument");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::InOut),
+                  "Name of the workspace receiving the instrument");
 }
 
 /** Executes the algorithm
@@ -64,7 +64,7 @@ void CopyInstrumentParameters::exec() {
 
       const Geometry::IComponent *targComp = nullptr;
 
-      IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
+      auto *pOldDet = dynamic_cast<IDetector *>(oldComponent);
       if (pOldDet) {
         detid_t detID = pOldDet->getID();
         targComp = inst2->getBaseDetector(detID);

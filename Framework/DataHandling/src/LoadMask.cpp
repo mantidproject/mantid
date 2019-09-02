@@ -115,8 +115,8 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
         throw std::invalid_argument(error);
       }
       // b) parse
-      T intstart = boost::lexical_cast<T>(ptemp[0]);
-      T intend = boost::lexical_cast<T>(ptemp[1]);
+      auto intstart = boost::lexical_cast<T>(ptemp[0]);
+      auto intend = boost::lexical_cast<T>(ptemp[1]);
       if (intstart >= intend) {
         std::string error =
             "Range string " + rawstring + " has wrong order of detectors ID!";
@@ -126,7 +126,7 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
       pairs.push_back(intend);
 
     } else { // 3. Treat singles
-      T itemp = boost::lexical_cast<T>(rawstring);
+      auto itemp = boost::lexical_cast<T>(rawstring);
       singles.push_back(itemp);
     }
   } // ENDFOR i
@@ -280,12 +280,12 @@ void LoadMask::init() {
                   "The name of the instrument to apply the mask.");
 
   const std::vector<std::string> maskExts{".xml", ".msk"};
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "InputFile", "", FileProperty::Load, maskExts),
+  declareProperty(std::make_unique<FileProperty>("InputFile", "",
+                                                 FileProperty::Load, maskExts),
                   "Masking file for masking. Supported file format is XML and "
                   "ISIS ASCII. ");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The name of the workspace wich defines instrument and spectra, "
       "used as the source of the spectra-detector map for the mask to load. "
@@ -293,7 +293,7 @@ void LoadMask::init() {
       "one specified by 'Instrument' property");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputWorkspace", "Masking", Direction::Output),
       "Output Masking Workspace");
 }

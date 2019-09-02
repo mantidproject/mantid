@@ -74,7 +74,7 @@ public:
     calc->setProperty("ForwardSpectra", std::vector<int>{1});
     calc->setProperty("BackwardSpectra", std::vector<int>{2});
 
-    TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(calc->execute(), const std::runtime_error &);
     TS_ASSERT(!calc->isExecuted());
   }
 
@@ -90,7 +90,7 @@ public:
     calc->setProperty("ForwardSpectra", std::vector<int>{1});
     calc->setProperty("BackwardSpectra", std::vector<int>{2});
 
-    TS_ASSERT_THROWS(calc->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(calc->execute(), const std::runtime_error &);
     TS_ASSERT(!calc->isExecuted());
   }
 

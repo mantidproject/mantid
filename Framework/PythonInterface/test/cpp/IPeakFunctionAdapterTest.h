@@ -36,7 +36,7 @@ public:
     std::array<double, 1> xvalues{{10}}, retvalue{{0}};
     TS_ASSERT_THROWS(
         badReturnFunc->function1D(retvalue.data(), xvalues.data(), 1),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testfunctionLocal_Returning_Numpy_Array_With_NonFloat_Type_Throws() {
@@ -53,7 +53,7 @@ public:
     std::array<double, 1> xvalues{{10}}, retvalue{{0}};
     TS_ASSERT_THROWS(
         badNdArrayFunc->function1D(retvalue.data(), xvalues.data(), 1),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   // -------------- Success tests -------------------------

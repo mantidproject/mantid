@@ -1011,7 +1011,7 @@ class SANS2DParserTest(unittest.TestCase):
     def test_that_sans2d_is_parsed_correctly(self):
         sans_2d_parser = SANS2DParser()
         result = sans_2d_parser.parse_line("SANS2D ")
-        self.assertTrue(result is not None)
+        self.assertNotEqual(result, None)
         self.assertTrue(not result)
 
 
@@ -1022,7 +1022,7 @@ class LOQParserTest(unittest.TestCase):
     def test_that_loq_is_parsed_correctly(self):
         loq_parser = LOQParser()
         result = loq_parser.parse_line("LOQ ")
-        self.assertTrue(result is not None)
+        self.assertNotEqual(result, None)
         self.assertTrue(not result)
 
 
@@ -1033,7 +1033,7 @@ class LARMORParserTest(unittest.TestCase):
     def test_that_loq_is_parsed_correctly(self):
         loq_parser = LARMORParser()
         result = loq_parser.parse_line("LARMOR ")
-        self.assertTrue(result is not None)
+        self.assertNotEqual(result, None)
         self.assertTrue(not result)
 
 

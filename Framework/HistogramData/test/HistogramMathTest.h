@@ -84,13 +84,13 @@ public:
 
   void test_bad_factors() {
     Histogram hist(BinEdges{1, 2, 3}, Counts{4, 9});
-    TS_ASSERT_THROWS(hist *= (-1.0), std::runtime_error);
-    TS_ASSERT_THROWS(hist * (-1.0), std::runtime_error);
-    TS_ASSERT_THROWS((-1.0) * hist, std::runtime_error);
-    TS_ASSERT_THROWS(hist /= (-1.0), std::runtime_error);
-    TS_ASSERT_THROWS(hist / (-1.0), std::runtime_error);
-    TS_ASSERT_THROWS(hist /= 0.0, std::runtime_error);
-    TS_ASSERT_THROWS(hist / 0.0, std::runtime_error);
+    TS_ASSERT_THROWS(hist *= (-1.0), const std::runtime_error &);
+    TS_ASSERT_THROWS(hist * (-1.0), const std::runtime_error &);
+    TS_ASSERT_THROWS((-1.0) * hist, const std::runtime_error &);
+    TS_ASSERT_THROWS(hist /= (-1.0), const std::runtime_error &);
+    TS_ASSERT_THROWS(hist / (-1.0), const std::runtime_error &);
+    TS_ASSERT_THROWS(hist /= 0.0, const std::runtime_error &);
+    TS_ASSERT_THROWS(hist / 0.0, const std::runtime_error &);
   }
 
   void test_plus_histogram() {
@@ -119,25 +119,25 @@ public:
   void test_plus_histogram_fail_xMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(Points{1, 2, 3}, Counts{1, 2, 3});
-    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 + hist2, const std::runtime_error &);
   }
 
   void test_plus_histogram_fail_yMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2, 3}, Frequencies{4, 9});
-    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 + hist2, const std::runtime_error &);
   }
 
   void test_plus_histogram_fail_x_length_mismatch() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2}, Counts{1});
-    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 + hist2, const std::runtime_error &);
   }
 
   void test_plus_histogram_fail_x_value_mismatch() {
     const Histogram hist1(BinEdges{1, 2.0, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2.1, 3}, Counts{1, 2});
-    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 + hist2, const std::runtime_error &);
   }
 
   void test_minus_histogram() {
@@ -168,25 +168,25 @@ public:
   void test_minus_histogram_fail_xMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(Points{1, 2, 3}, Counts{1, 2, 3});
-    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 - hist2, const std::runtime_error &);
   }
 
   void test_minus_histogram_fail_yMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2, 3}, Frequencies{4, 9});
-    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 - hist2, const std::runtime_error &);
   }
 
   void test_minus_histogram_fail_x_length_mismatch() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2}, Counts{1});
-    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 - hist2, const std::runtime_error &);
   }
 
   void test_minus_histogram_fail_x_value_mismatch() {
     const Histogram hist1(BinEdges{1, 2.0, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2.1, 3}, Counts{1, 2});
-    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 - hist2, const std::runtime_error &);
   }
 
   void test_times_histogram() {
@@ -233,13 +233,13 @@ public:
   void test_times_histogram_fail_xMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Frequencies{4, 9});
     const Histogram hist2(Points{1, 2, 3}, Frequencies{1, 2, 3});
-    TS_ASSERT_THROWS(hist1 * hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 * hist2, const std::runtime_error &);
   }
 
   void test_times_histogram_fail_yMode() {
     const Histogram histC(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram histF(BinEdges{1, 2, 3}, Frequencies{4, 9});
-    TS_ASSERT_THROWS(histC * histC, std::runtime_error);
+    TS_ASSERT_THROWS(histC * histC, const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(histC * histF);
     TS_ASSERT_THROWS_NOTHING(histF * histC);
     TS_ASSERT_THROWS_NOTHING(histF * histF);
@@ -248,13 +248,13 @@ public:
   void test_times_histogram_fail_x_length_mismatch() {
     const Histogram hist1(BinEdges{1, 2, 3}, Frequencies{4, 9});
     const Histogram hist2(BinEdges{1, 2}, Frequencies{1});
-    TS_ASSERT_THROWS(hist1 * hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 * hist2, const std::runtime_error &);
   }
 
   void test_times_histogram_fail_x_value_mismatch() {
     const Histogram hist1(BinEdges{1, 2.0, 3}, Frequencies{4, 9});
     const Histogram hist2(BinEdges{1, 2.1, 3}, Frequencies{1, 2});
-    TS_ASSERT_THROWS(hist1 * hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 * hist2, const std::runtime_error &);
   }
 
   void test_divide_histogram() {
@@ -303,7 +303,7 @@ public:
   void test_divide_histogram_fail_xMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Frequencies{4, 9});
     const Histogram hist2(Points{1, 2, 3}, Frequencies{1, 2, 3});
-    TS_ASSERT_THROWS(hist1 / hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 / hist2, const std::runtime_error &);
   }
 
   void test_divide_histogram_fail_yMode() {
@@ -311,20 +311,20 @@ public:
     const Histogram histF(BinEdges{1, 2, 3}, Frequencies{4, 9});
     TS_ASSERT_THROWS_NOTHING(histC / histC);
     TS_ASSERT_THROWS_NOTHING(histC / histF);
-    TS_ASSERT_THROWS(histF / histC, std::runtime_error);
+    TS_ASSERT_THROWS(histF / histC, const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(histF / histF);
   }
 
   void test_divide_histogram_fail_x_length_mismatch() {
     const Histogram hist1(BinEdges{1, 2, 3}, Frequencies{4, 9});
     const Histogram hist2(BinEdges{1, 2}, Frequencies{1});
-    TS_ASSERT_THROWS(hist1 / hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 / hist2, const std::runtime_error &);
   }
 
   void test_divide_histogram_fail_x_value_mismatch() {
     const Histogram hist1(BinEdges{1, 2.0, 3}, Frequencies{4, 9});
     const Histogram hist2(BinEdges{1, 2.1, 3}, Frequencies{1, 2});
-    TS_ASSERT_THROWS(hist1 / hist2, std::runtime_error);
+    TS_ASSERT_THROWS(hist1 / hist2, const std::runtime_error &);
   }
 };
 

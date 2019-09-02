@@ -113,7 +113,7 @@ public:
 
     TSM_ASSERT_THROWS(
         "No detectors yet defined, so should thow run time error: ",
-        Q3DTransf.initialize(WSDescr), std::runtime_error);
+        Q3DTransf.initialize(WSDescr), const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further
     WSDescr.m_PreprDetTable =

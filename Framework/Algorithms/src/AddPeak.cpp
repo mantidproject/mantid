@@ -32,10 +32,10 @@ using Mantid::DataObjects::PeaksWorkspace_sptr;
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "A peaks workspace.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "RunWorkspace", "", Direction::Input),
                   "An input workspace containing the run information.");
   declareProperty("TOF", 0.0, "Peak position in time of flight.");

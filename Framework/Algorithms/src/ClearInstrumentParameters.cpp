@@ -39,7 +39,7 @@ const std::string ClearInstrumentParameters::category() const {
 /** Initialize the algorithm's properties.
  */
 void ClearInstrumentParameters::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace whose instrument parameters are to be cleared.");

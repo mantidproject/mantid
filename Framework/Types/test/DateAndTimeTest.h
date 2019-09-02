@@ -63,11 +63,12 @@ public:
   }
 
   void test_constructor_fails_invalid_string() {
-    TS_ASSERT_THROWS(DateAndTime("invalid time string"), std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("invalid time string"),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(DateAndTime("1909-01-31  22:59:59"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(DateAndTime("2017-09-27T 07:03:49+00:00"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_limits_on_construction() {
@@ -420,7 +421,7 @@ public:
   void testNotADateTime() {
     boost::posix_time::ptime time(boost::posix_time::not_a_date_time);
     DateAndTime dt(time);
-    TS_ASSERT_THROWS(boost::posix_time::to_tm(time), std::out_of_range);
+    TS_ASSERT_THROWS(boost::posix_time::to_tm(time), const std::out_of_range &);
     TS_ASSERT_THROWS_NOTHING(dt.to_tm());
   }
 

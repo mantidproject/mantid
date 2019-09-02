@@ -130,6 +130,6 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
                                 CalibrationBackgroundScalingFactor=0.1,
                                 OutputWorkspace="efws_calib_bg")
 
-        self.assertEquals(mtd['efws_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
+        self.assertEqual(mtd['efws_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
 
         self.assertDelta(mtd['efws_calib_bg_red'].getItem(0).readY(0)[0], 0.218, 0.001)

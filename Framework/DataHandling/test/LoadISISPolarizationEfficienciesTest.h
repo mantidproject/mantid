@@ -150,7 +150,7 @@ public:
     alg.setProperty("P1", f1.getFileName());
     alg.setProperty("Pp", f1.getFileName());
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
 private:

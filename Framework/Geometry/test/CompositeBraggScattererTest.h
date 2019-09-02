@@ -88,7 +88,7 @@ public:
     TS_ASSERT_EQUALS(scatterer->propertyCount(), 1);
 
     TS_ASSERT_EQUALS(scatterer->nScatterers(), oldCount + 1);
-    TS_ASSERT_THROWS(scatterer->getScatterer(2), std::out_of_range);
+    TS_ASSERT_THROWS(scatterer->getScatterer(2), const std::out_of_range &);
   }
 
   void testRemoveScatterer() {
@@ -101,9 +101,9 @@ public:
     TS_ASSERT_EQUALS(scattererCollection->nScatterers(), oldCount - 1);
 
     TS_ASSERT_THROWS(scattererCollection->getScatterer(oldCount - 1),
-                     std::out_of_range);
+                     const std::out_of_range &);
     TS_ASSERT_THROWS(scattererCollection->removeScatterer(10),
-                     std::out_of_range);
+                     const std::out_of_range &);
 
     scattererCollection->removeScatterer(0);
 

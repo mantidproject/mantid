@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/return_value_policy.hpp>

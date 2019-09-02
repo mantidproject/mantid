@@ -9,7 +9,15 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.py3compat.mock import Mock
 from mantidqt.utils.testing.strict_mock import StrictMock
-from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
+
+try:
+    from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModelType
+
+    class MockQTableViewModel:
+        def __init__(self):
+            self.type = MatrixWorkspaceTableViewModelType.x
+except ImportError:
+    pass
 
 
 class MockQTableHeader(object):
@@ -39,11 +47,6 @@ class MockQSelectionModel:
         self.currentIndex = None
         self.mock_selection = MockQSelection()
         self.selection = Mock(return_value=self.mock_selection)
-
-
-class MockQTableViewModel:
-    def __init__(self):
-        self.type = MatrixWorkspaceTableViewModelType.x
 
 
 class MockQTableView:

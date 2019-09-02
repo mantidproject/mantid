@@ -58,7 +58,7 @@ public:
 
     // First test that a workspace not containing the number of good frames
     // fails
-    TS_ASSERT_THROWS(diagnostic.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(diagnostic.execute(), const std::invalid_argument &);
 
     // Set the number of frames
     testWS->mutableRun().addProperty("goodfrm", 10);

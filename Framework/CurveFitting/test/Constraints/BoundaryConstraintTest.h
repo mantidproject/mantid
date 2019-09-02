@@ -17,7 +17,6 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -85,7 +84,8 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("Sigma==20");
-    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false), std::invalid_argument);
+    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false),
+                     const std::invalid_argument &);
   }
 
   void testInitialize6() {
@@ -94,7 +94,8 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("a<Sigma<b");
-    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false), std::invalid_argument);
+    TS_ASSERT_THROWS(bc.initialize(&gaus, expr, false),
+                     const std::invalid_argument &);
   }
 
   // test constructor with lower boundary only
@@ -113,7 +114,7 @@ public:
     Gaussian gaus;
     gaus.initialize();
     {
-      auto bc = Kernel::make_unique<BoundaryConstraint>();
+      auto bc = std::make_unique<BoundaryConstraint>();
       Expression expr;
       expr.parse("Sigma<20");
       bc->initialize(&gaus, expr, false);
@@ -142,13 +143,13 @@ public:
     Gaussian gaus;
     gaus.initialize();
 
-    auto bcSigma = Kernel::make_unique<BoundaryConstraint>();
+    auto bcSigma = std::make_unique<BoundaryConstraint>();
     Expression exprSigma;
     exprSigma.parse("Sigma<20");
     bcSigma->initialize(&gaus, exprSigma, false);
     gaus.addConstraint(std::move(bcSigma));
 
-    auto bcHeight = Kernel::make_unique<BoundaryConstraint>();
+    auto bcHeight = std::make_unique<BoundaryConstraint>();
     Expression exprHeight;
     exprHeight.parse("1.3<Height<3.4");
     bcHeight->initialize(&gaus, exprHeight, false);

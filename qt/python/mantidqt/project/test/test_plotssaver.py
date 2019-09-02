@@ -8,14 +8,14 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import matplotlib
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
-from mantidqt.project.plotssaver import PlotsSaver
-from mantidqt.project.plotsloader import PlotsLoader
 from mantid.simpleapi import CreateSampleWorkspace
+from mantidqt.project.plotsloader import PlotsLoader
+from mantidqt.project.plotssaver import PlotsSaver
 
-import matplotlib
 matplotlib.use('AGG')
 
 
@@ -42,34 +42,35 @@ class PlotsSaverTest(unittest.TestCase):
                                                                                        u'errorbars': {
                                                                                            u'exists': False
                                                                                        }}],
-                                 u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
-                                                 u'frameOn': True, u'visible': True,
-                                                 u'xAxisProperties': {u'fontSize': 10.0,
-                                                                      u'gridStyle': {u'gridOn': False},
-                                                                      u'majorTickFormat': None,
-                                                                      u'majorTickFormatter': u'ScalarFormatter',
-                                                                      u'majorTickLocator': u'AutoLocator',
-                                                                      u'majorTickLocatorValues': None,
-                                                                      u'minorTickFormat': None,
-                                                                      u'minorTickFormatter': u'NullFormatter',
-                                                                      u'minorTickLocator': u'NullLocator',
-                                                                      u'minorTickLocatorValues': None,
-                                                                      u'position': u'Bottom',
-                                                                      u'visible': True},
-                                                 u'xAxisScale': u'linear', u'xLim': (0.0, 1.0),
-                                                 u'yAxisProperties': {u'fontSize': 10.0,
-                                                                      u'gridStyle': {u'gridOn': False},
-                                                                      u'majorTickFormat': None,
-                                                                      u'majorTickFormatter': u'ScalarFormatter',
-                                                                      u'majorTickLocator': u'AutoLocator',
-                                                                      u'majorTickLocatorValues': None,
-                                                                      u'minorTickFormat': None,
-                                                                      u'minorTickFormatter': u'NullFormatter',
-                                                                      u'minorTickLocator': u'NullLocator',
-                                                                      u'minorTickLocatorValues': None,
-                                                                      u'position': u'Left',
-                                                                      u'visible': True},
-                                                 u'yAxisScale': u'linear', u'yLim': (0.0, 1.0)},
+                                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0),
+                                                            u'dynamic': True,
+                                                            u'frameOn': True, u'visible': True,
+                                                            u'xAxisProperties': {u'fontSize': 10.0,
+                                                                                 u'gridStyle': {u'gridOn': False},
+                                                                                 u'majorTickFormat': None,
+                                                                                 u'majorTickFormatter': u'ScalarFormatter',
+                                                                                 u'majorTickLocator': u'AutoLocator',
+                                                                                 u'majorTickLocatorValues': None,
+                                                                                 u'minorTickFormat': None,
+                                                                                 u'minorTickFormatter': u'NullFormatter',
+                                                                                 u'minorTickLocator': u'NullLocator',
+                                                                                 u'minorTickLocatorValues': None,
+                                                                                 u'position': u'Bottom',
+                                                                                 u'visible': True},
+                                                            u'xAxisScale': u'linear', u'xLim': (0.0, 1.0),
+                                                            u'yAxisProperties': {u'fontSize': 10.0,
+                                                                                 u'gridStyle': {u'gridOn': False},
+                                                                                 u'majorTickFormat': None,
+                                                                                 u'majorTickFormatter': u'ScalarFormatter',
+                                                                                 u'majorTickLocator': u'AutoLocator',
+                                                                                 u'majorTickLocatorValues': None,
+                                                                                 u'minorTickFormat': None,
+                                                                                 u'minorTickFormatter': u'NullFormatter',
+                                                                                 u'minorTickLocator': u'NullLocator',
+                                                                                 u'minorTickLocatorValues': None,
+                                                                                 u'position': u'Left',
+                                                                                 u'visible': True},
+                                                            u'yAxisScale': u'linear', u'yLim': (0.0, 1.0)},
                                             u'textFromArtists': {}, u'texts': [{u'position': (0, 0),
                                                                                 u'style': {u'alpha': 1,
                                                                                            u'color': u'#000000',
@@ -124,7 +125,6 @@ class PlotsSaverTest(unittest.TestCase):
         self.assertDictEqual(return_value, expected_value)
 
     def test_get_dict_from_axis_properties(self):
-
         return_value = self.plot_saver.get_dict_from_axis_properties(self.fig.axes[0].xaxis)
 
         expected_value = self.loader_plot_dict["axes"][0]["properties"]["xAxisProperties"]

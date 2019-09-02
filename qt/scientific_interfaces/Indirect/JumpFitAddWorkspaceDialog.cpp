@@ -41,7 +41,7 @@ int JumpFitAddWorkspaceDialog::parameterNameIndex() const {
 
 void JumpFitAddWorkspaceDialog::setParameterTypes(
     const std::vector<std::string> &types) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.cbParameterType);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.cbParameterType);
   m_uiForm.cbParameterType->clear();
   for (auto &&type : types)
     m_uiForm.cbParameterType->addItem(QString::fromStdString(type));

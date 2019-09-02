@@ -1,5 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 import os
 import unittest
+from mantidqt.utils.qt.testing import start_qapplication
 
 import six
 
@@ -7,6 +14,7 @@ from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 
+@start_qapplication
 class LoadFileWidgetModelTest(unittest.TestCase):
 
     def setUp(self):

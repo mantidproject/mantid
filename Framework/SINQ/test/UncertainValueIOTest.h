@@ -49,11 +49,11 @@ public:
 
     std::string invalidOne("asdf");
     TS_ASSERT_THROWS(UncertainValueIO::fromString(invalidOne),
-                     boost::bad_lexical_cast);
+                     const boost::bad_lexical_cast &);
 
     std::string invalidTwo("4.0 +/- 3.0 +/- 1.0");
     TS_ASSERT_THROWS(UncertainValueIO::fromString(invalidTwo),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testComplementarity() {

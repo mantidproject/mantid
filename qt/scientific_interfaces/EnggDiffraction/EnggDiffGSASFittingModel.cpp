@@ -93,13 +93,13 @@ void EnggDiffGSASFittingModel::addSigma(const RunLabel &runLabel,
 namespace {
 
 std::string generateFittedPeaksWSName(const RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
-         std::to_string(runLabel.bank) + "_gsasii_fitted_peaks";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_gsasii_fitted_peaks";
 }
 
 std::string generateLatticeParamsName(const RunLabel &runLabel) {
-  return std::to_string(runLabel.runNumber) + "_" +
-         std::to_string(runLabel.bank) + "_lattice_params";
+  return runLabel.runNumber + "_" + std::to_string(runLabel.bank) +
+         "_lattice_params";
 }
 } // namespace
 
@@ -154,7 +154,7 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
 
 void EnggDiffGSASFittingModel::doRefinements(
     const std::vector<GSASIIRefineFitPeaksParameters> &params) {
-  m_workerThread = Mantid::Kernel::make_unique<QThread>(this);
+  m_workerThread = std::make_unique<QThread>(this);
   EnggDiffGSASFittingWorker *worker =
       new EnggDiffGSASFittingWorker(this, params);
   worker->moveToThread(m_workerThread.get());
@@ -227,7 +227,12 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   loadAlg->execute();
 
   API::AnalysisDataServiceImpl &ADS = API::AnalysisDataService::Instance();
-  const auto ws = ADS.retrieveWS<API::MatrixWorkspace>(wsName);
+  auto wsTest = ADS.retrieveWS<API::Workspace>(wsName);
+  const auto ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(wsTest);
+  if (!ws) {
+    throw std::invalid_argument(
+        "Invalid Workspace loaded, are you sure it has been focused?");
+  }
   return ws;
 }
 
@@ -274,7 +279,7 @@ void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
   const auto numRuns = refinementResultSets.size();
   std::vector<std::string> latticeParamWSNames;
   latticeParamWSNames.reserve(numRuns);
-  std::vector<long> runNumbers;
+  std::vector<std::string> runNumbers;
   runNumbers.reserve(numRuns);
   std::vector<long> bankIDs;
   bankIDs.reserve(numRuns);

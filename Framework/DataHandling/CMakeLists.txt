@@ -4,9 +4,7 @@ set(SRC_FILES
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
     src/CompressEvents.cpp
-    src/CreateChopperModel.cpp
     src/CreateChunkingFromInstrument.cpp
-    src/CreateModeratorModel.cpp
     src/CreatePolarizationEfficiencies.cpp
     src/CreatePolarizationEfficienciesBase.cpp
     src/CreateSampleShape.cpp
@@ -49,18 +47,17 @@ set(SRC_FILES
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
     src/LoadDspacemap.cpp
-    src/LoadEmptyInstrument.cpp
     src/LoadEMU.cpp
-    src/LoadOff.cpp
-    src/LoadPLN.cpp
+    src/LoadEmptyInstrument.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
     src/LoadEventPreNexus2.cpp
     src/LoadFITS.cpp
     src/LoadFullprofResolution.cpp
-    src/LoadGeometry.cpp
     src/LoadGSASInstrumentFile.cpp
     src/LoadGSS.cpp
+    src/LoadGeometry.cpp
+    src/LoadHFIRSANS.cpp
     src/LoadHelper.cpp
     src/LoadIDFFromNexus.cpp
     src/LoadILLDiffraction.cpp
@@ -93,11 +90,13 @@ set(SRC_FILES
     src/LoadNexusMonitors.cpp
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
+    src/LoadOff.cpp
     src/LoadPDFgetNFile.cpp
+    src/LoadPLN.cpp
+    src/LoadPSIMuonBin.cpp
     src/LoadParameterFile.cpp
     src/LoadPreNexus.cpp
     src/LoadPreNexusMonitors.cpp
-    src/LoadPSIMuonBin.cpp
     src/LoadQKK.cpp
     src/LoadRKH.cpp
     src/LoadRaw/byte_rel_comp.cpp
@@ -109,20 +108,20 @@ set(SRC_FILES
     src/LoadRawBin0.cpp
     src/LoadRawHelper.cpp
     src/LoadRawSpectrum0.cpp
-    src/LoadSampleShape.cpp
-    src/LoadSampleEnvironment.cpp
     src/LoadSESANS.cpp
     src/LoadSINQFocus.cpp
     src/LoadSNSspec.cpp
     src/LoadSPE.cpp
     src/LoadSampleDetailsFromRaw.cpp
+    src/LoadSampleEnvironment.cpp
+    src/LoadSampleShape.cpp
     src/LoadSassena.cpp
     src/LoadSpec.cpp
     src/LoadSpice2D.cpp
     src/LoadSpiceAscii.cpp
     src/LoadSpiceXML2DDet.cpp
-    src/LoadSwans.cpp
     src/LoadStl.cpp
+    src/LoadSwans.cpp
     src/LoadTBL.cpp
     src/LoadTOFRawNexus.cpp
     src/LoadVulcanCalFile.cpp
@@ -171,6 +170,7 @@ set(SRC_FILES
     src/SaveNXTomo.cpp
     src/SaveNXcanSAS.cpp
     src/SaveNexus.cpp
+    src/SaveNexusGeometry.cpp
     src/SaveNexusProcessed.cpp
     src/SaveOpenGenieAscii.cpp
     src/SavePAR.cpp
@@ -178,11 +178,13 @@ set(SRC_FILES
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
     src/SaveRKH.cpp
-    src/SaveReflectometryAscii.cpp
     src/SaveReflCustomAscii.cpp
     src/SaveReflThreeColumnAscii.cpp
+    src/SaveReflectometryAscii.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
+    src/SaveSampleEnvironmentAndShape.cpp
+    src/SaveStl.cpp
     src/SaveTBL.cpp
     src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
@@ -201,9 +203,7 @@ set(INC_FILES
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
-    inc/MantidDataHandling/CreateChopperModel.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
-    inc/MantidDataHandling/CreateModeratorModel.h
     inc/MantidDataHandling/CreatePolarizationEfficiencies.h
     inc/MantidDataHandling/CreatePolarizationEfficienciesBase.h
     inc/MantidDataHandling/CreateSampleShape.h
@@ -247,18 +247,17 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
     inc/MantidDataHandling/LoadDspacemap.h
-    inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadEMU.h
-    inc/MantidDataHandling/LoadOff.h
-    inc/MantidDataHandling/LoadPLN.h
+    inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
     inc/MantidDataHandling/LoadEventPreNexus2.h
     inc/MantidDataHandling/LoadFITS.h
     inc/MantidDataHandling/LoadFullprofResolution.h
-    inc/MantidDataHandling/LoadGeometry.h
     inc/MantidDataHandling/LoadGSASInstrumentFile.h
     inc/MantidDataHandling/LoadGSS.h
+    inc/MantidDataHandling/LoadGeometry.h
+    inc/MantidDataHandling/LoadHFIRSANS.h
     inc/MantidDataHandling/LoadHelper.h
     inc/MantidDataHandling/LoadIDFFromNexus.h
     inc/MantidDataHandling/LoadILLDiffraction.h
@@ -291,24 +290,26 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNexusMonitors.h
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
+    inc/MantidDataHandling/LoadOff.h
     inc/MantidDataHandling/LoadPDFgetNFile.h
+    inc/MantidDataHandling/LoadPLN.h
+    inc/MantidDataHandling/LoadPSIMuonBin.h
     inc/MantidDataHandling/LoadParameterFile.h
     inc/MantidDataHandling/LoadPreNexus.h
     inc/MantidDataHandling/LoadPreNexusMonitors.h
-    inc/MantidDataHandling/LoadPSIMuonBin.h
     inc/MantidDataHandling/LoadQKK.h
     inc/MantidDataHandling/LoadRKH.h
     inc/MantidDataHandling/LoadRaw3.h
     inc/MantidDataHandling/LoadRawBin0.h
     inc/MantidDataHandling/LoadRawHelper.h
     inc/MantidDataHandling/LoadRawSpectrum0.h
-    inc/MantidDataHandling/LoadSampleShape.h
-    inc/MantidDataHandling/LoadSampleEnvironment.h
     inc/MantidDataHandling/LoadSESANS.h
     inc/MantidDataHandling/LoadSINQFocus.h
     inc/MantidDataHandling/LoadSNSspec.h
     inc/MantidDataHandling/LoadSPE.h
     inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
+    inc/MantidDataHandling/LoadSampleEnvironment.h
+    inc/MantidDataHandling/LoadSampleShape.h
     inc/MantidDataHandling/LoadSassena.h
     inc/MantidDataHandling/LoadShape.h
     inc/MantidDataHandling/LoadSpec.h
@@ -366,6 +367,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNXTomo.h
     inc/MantidDataHandling/SaveNXcanSAS.h
     inc/MantidDataHandling/SaveNexus.h
+    inc/MantidDataHandling/SaveNexusGeometry.h
     inc/MantidDataHandling/SaveNexusProcessed.h
     inc/MantidDataHandling/SaveOpenGenieAscii.h
     inc/MantidDataHandling/SavePAR.h
@@ -373,11 +375,13 @@ set(INC_FILES
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
     inc/MantidDataHandling/SaveRKH.h
-    inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveReflCustomAscii.h
     inc/MantidDataHandling/SaveReflThreeColumnAscii.h
+    inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
+    inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
+    inc/MantidDataHandling/SaveStl.h
     inc/MantidDataHandling/SaveTBL.h
     inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
@@ -399,9 +403,7 @@ set(TEST_FILES
     AppendGeometryToSNSNexusTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
-    CreateChopperModelTest.h
     CreateChunkingFromInstrumentTest.h
-    CreateModeratorModelTest.h
     CreatePolarizationEfficienciesTest.h
     CreateSampleShapeTest.h
     CreateSimulationWorkspaceTest.h
@@ -427,8 +429,8 @@ set(TEST_FILES
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
-    LoadAsciiTest.h
     LoadAsciiStlTest.h
+    LoadAsciiTest.h
     LoadBBYTest.h
     LoadBinaryStlTest.h
     LoadCalFileTest.h
@@ -438,8 +440,8 @@ set(TEST_FILES
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
     LoadDspacemapTest.h
-    LoadEmptyInstrumentTest.h
     LoadEMUauTest.h
+    LoadEmptyInstrumentTest.h
     LoadEventNexusIndexSetupTest.h
     LoadEventNexusTest.h
     LoadEventPreNexus2Test.h
@@ -447,6 +449,7 @@ set(TEST_FILES
     LoadFullprofResolutionTest.h
     LoadGSASInstrumentFileTest.h
     LoadGSSTest.h
+    LoadHFIRSANSTest.h
     LoadIDFFromNexusTest.h
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
@@ -477,31 +480,31 @@ set(TEST_FILES
     LoadNexusProcessedTest.h
     LoadNexusTest.h
     LoadPDFgetNFileTest.h
-    LoadParameterFileTest.h
     LoadPLNTest.h
+    LoadPSIMuonBinTest.h
+    LoadParameterFileTest.h
     LoadPreNexusMonitorsTest.h
     LoadPreNexusTest.h
-    LoadPSIMuonBinTest.h
     LoadQKKTest.h
     LoadRKHTest.h
     LoadRaw3Test.h
     LoadRawBin0Test.h
     LoadRawSaveNxsLoadNxsTest.h
     LoadRawSpectrum0Test.h
-    LoadStlTest.h
-    LoadSampleShapeTest.h
-    LoadSampleEnvironmentTest.h
     LoadSESANSTest.h
     LoadSINQFocusTest.h
     LoadSNSspecTest.h
     LoadSPETest.h
     LoadSampleDetailsFromRawTest.h
+    LoadSampleEnvironmentTest.h
+    LoadSampleShapeTest.h
     LoadSassenaTest.h
     LoadSaveAsciiTest.h
     LoadSpecTest.h
     LoadSpice2dTest.h
     LoadSpiceAsciiTest.h
     LoadSpiceXML2DDetTest.h
+    LoadStlTest.h
     LoadSwansTest.h
     LoadTBLTest.h
     LoadTOFRawNexusTest.h
@@ -546,6 +549,7 @@ set(TEST_FILES
     SaveNXSPETest.h
     SaveNXTomoTest.h
     SaveNXcanSASTest.h
+    SaveNexusGeometryTest.h
     SaveNexusProcessedTest.h
     SaveNexusTest.h
     SaveOpenGenieAsciiTest.h
@@ -554,11 +558,13 @@ set(TEST_FILES
     SavePHXTest.h
     SaveParameterFileTest.h
     SaveRKHTest.h
-    SaveReflectometryAsciiTest.h
     SaveReflCustomAsciiTest.h
     SaveReflThreeColumnAsciiTest.h
+    SaveReflectometryAsciiTest.h
     SaveSESANSTest.h
     SaveSPETest.h
+    SaveSampleEnvironmentAndShapeTest.h
+    SaveStlTest.h
     SaveTBLTest.h
     SaveToSNSHistogramNexusTest.h
     SetBeamTest.h

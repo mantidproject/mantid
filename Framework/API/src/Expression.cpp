@@ -10,7 +10,7 @@
 #include "MantidAPI/Expression.h"
 
 #include "MantidKernel/Logger.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 namespace Mantid {
 namespace API {

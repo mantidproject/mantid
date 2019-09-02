@@ -84,7 +84,7 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
   for (size_t i = 0; i < dataWS.getNumDims(); ++i) {
     const auto dataDim = dataWS.getDimension(i);
     if (!dataDim->getIsIntegrated()) {
-      int index = static_cast<int>(
+      auto index = static_cast<int>(
           shapeWS.getDimensionIndexById(dataDim->getDimensionId()));
       axes.push_back(index);
     }
@@ -242,13 +242,13 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ReplicateMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "ShapeWorkspace", "", Direction::Input),
                   "An input workspace defining the shape of the output.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "DataWorkspace", "", Direction::Input),
                   "An input workspace containing the data to replicate.");
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace with replicated data.");
 }

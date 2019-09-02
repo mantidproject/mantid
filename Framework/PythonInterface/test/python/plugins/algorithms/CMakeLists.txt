@@ -46,7 +46,6 @@ set(TEST_PY_FILES
     FitGaussianTest.py
     FractionalIndexingTest.py
     GetEiT0atSNSTest.py
-    GetNegMuMuonicXRDTest.py
     HB2AReduceTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py

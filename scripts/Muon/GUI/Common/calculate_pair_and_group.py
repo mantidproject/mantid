@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, division, unicode_literals)
+
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
@@ -12,6 +14,7 @@ def calculate_group_data(context, group_name, run, rebin):
 
     params = _get_MuonGroupingCounts_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
+
     group_data = algorithm_utils.run_MuonGroupingCounts(params)
 
     return group_data
@@ -32,9 +35,9 @@ def estimate_group_asymmetry_data(context, group_name, run, rebin):
 
     params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
-    group_asymmetry = algorithm_utils.run_MuonGroupingAsymmetry(params)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params)
 
-    return group_asymmetry
+    return group_asymmetry, group_asymmetry_unnorm
 
 
 def _run_pre_processing(context, run, rebin):

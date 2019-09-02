@@ -36,7 +36,7 @@ class SANSLogTaggerTest(unittest.TestCase):
         self.assertFalse(has_tag(tag1, ws1))
         set_tag(tag1, value1, ws1)
         self.assertTrue(has_tag(tag1, ws1))
-        self.assertTrue(get_tag(tag1, ws1) == value1)
+        self.assertEqual(get_tag(tag1, ws1), value1)
 
     def test_that_can_read_and_write_hash_in_sample_log(self):
         # Arrange

@@ -28,7 +28,7 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertFalse(can_be_instantiated(IEventWorkspace))
 
     def test_meta_information(self):
-        self.assertEquals(self._test_ws.getNumberEvents(), 1000)
+        self.assertEqual(self._test_ws.getNumberEvents(), 1000)
         self.assertAlmostEquals(self._test_ws.getTofMin(), 0.5)
         self.assertAlmostEquals(self._test_ws.getTofMax(), 99.5)
 
@@ -43,20 +43,20 @@ class IEventWorkspaceTest(unittest.TestCase):
     def test_event_list_is_return_as_correct_type(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
-        self.assertEquals(el.getNumberEvents(), 200)
+        self.assertEqual(el.getNumberEvents(), 200)
 
     def test_event_list_getWeights(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()
-        self.assertEquals(len(TofList), el.getNumberEvents()) #check length
+        self.assertEqual(len(TofList), el.getNumberEvents()) #check length
         self.assertAlmostEquals(TofList[0], 0.5) #first value
 
     def test_event_list_getWeights(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightList = el.getWeights()
-        self.assertEquals(len(weightList), el.getNumberEvents()) #check length
+        self.assertEqual(len(weightList), el.getNumberEvents()) #check length
         self.assertAlmostEquals(weightList[0], 1.0) #first value
         self.assertAlmostEquals(weightList[len(weightList)-1], 1.0) #last value
 
@@ -64,14 +64,14 @@ class IEventWorkspaceTest(unittest.TestCase):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightErrorList = el.getWeightErrors()
-        self.assertEquals(len(weightErrorList), el.getNumberEvents()) #check length
+        self.assertEqual(len(weightErrorList), el.getNumberEvents()) #check length
         self.assertAlmostEquals(weightErrorList[0], 1.0) #first value
         self.assertAlmostEquals(weightErrorList[len(weightErrorList)-1], 1.0) #last value
 
     def test_deprecated_getEventList(self):
         el = self._test_ws.getEventList(0)
         self.assertTrue(isinstance(el, IEventList))
-        self.assertEquals(el.getNumberEvents(), 200)
+        self.assertEqual(el.getNumberEvents(), 200)
 
 
 if __name__ == '__main__':

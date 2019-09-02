@@ -61,7 +61,7 @@ protected:
 private:
   /// Multiple-reader/single-writer lock to restrict multithreaded
   /// access to the data item.
-  Poco::RWLock *m_lock;
+  std::unique_ptr<Poco::RWLock> m_lock;
 
   /// Allow the ReadLock class direct access to the m_lock object.
   friend class ReadLock;

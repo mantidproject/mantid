@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -42,13 +42,13 @@ const std::string CreateTransmissionWorkspace::category() const {
 void CreateTransmissionWorkspace::init() {
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run, or the low wavelength transmision "
                   "run if SecondTransmissionRun is also provided.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator->clone()),
                   "Second, high wavelength transmission run. Optional. Causes "
@@ -59,19 +59,19 @@ void CreateTransmissionWorkspace::init() {
   this->initIndexInputs();
   this->initWavelengthInputs();
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output Workspace IvsQ.");
 
-  setPropertySettings("Params", make_unique<Kernel::EnabledWhenProperty>(
+  setPropertySettings("Params", std::make_unique<Kernel::EnabledWhenProperty>(
                                     "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("StartOverlap",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("EndOverlap",
-                      make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "SecondTransmissionRun", IS_NOT_DEFAULT));
 }
 

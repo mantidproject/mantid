@@ -59,7 +59,7 @@ void ParDomain::additiveCostFunctionVal(
 void ParDomain::additiveCostFunctionValDerivHessian(
     const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
     bool evalHessian) {
-  const int n = static_cast<int>(getNDomains());
+  const auto n = static_cast<int>(getNDomains());
   PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;
   // funs.push_back( leastSquares.getFittingFunction()->clone() );

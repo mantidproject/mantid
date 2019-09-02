@@ -29,19 +29,19 @@ class CorrectLogTimesTest(unittest.TestCase):
     def testCLTsingle(self):
         w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
         LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
-        self.assertFalse(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
+        self.assertNotEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
         CorrectLogTimes(Workspace=w,LogNames="Speed4")
-        self.assertTrue(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
-        self.assertFalse(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed5'].firstTime())
+        self.assertEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
+        self.assertNotEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed5'].firstTime())
         DeleteWorkspace(w)
 
     def testCLTall(self):
         w=CreateSingleValuedWorkspace(DataValue='1',ErrorValue='1')
         LoadNexusLogs(Workspace=w,Filename='CNCS_7860_event.nxs')
-        self.assertFalse(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
+        self.assertNotEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
         CorrectLogTimes(Workspace=w,LogNames="")
-        self.assertTrue(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed4'].firstTime())
-        self.assertTrue(w.getRun()['proton_charge'].firstTime()==w.getRun()['Speed5'].firstTime())
+        self.assertEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed4'].firstTime())
+        self.assertEqual(w.getRun()['proton_charge'].firstTime(), w.getRun()['Speed5'].firstTime())
         DeleteWorkspace(w)
 if __name__ == '__main__':
     unittest.main()

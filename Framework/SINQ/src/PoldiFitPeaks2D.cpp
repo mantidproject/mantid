@@ -1181,10 +1181,10 @@ bool PoldiFitPeaks2D::isValidDeltaT(double deltaT) const {
 
 /// Initialization of algorithm properties.
 void PoldiFitPeaks2D::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Measured POLDI 2D-spectrum.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "PoldiPeakWorkspace", "", Direction::Input),
                   "Table workspace with peak information.");
 
@@ -1219,10 +1219,10 @@ void PoldiFitPeaks2D::init() {
                   "the fit. Use 0 to calculate "
                   "2D-spectrum without fitting.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Calculated POLDI 2D-spectrum");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Calculated1DSpectrum", "", Direction::Output),
                   "Calculated POLDI 1D-spectrum.");
 
@@ -1231,7 +1231,7 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LambdaMax", 5.0,
                   "Maximum wavelength for 1D spectrum calculation");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
 
@@ -1240,11 +1240,11 @@ void PoldiFitPeaks2D::init() {
                   "output will have integrated intensities instead of the "
                   "maximum.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "RawFitParameters", "", Direction::Output, PropertyMode::Optional),
       "Table workspace that contains all raw fit parameters.");
 }

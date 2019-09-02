@@ -136,7 +136,7 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        std::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
         value);
   else
     settings->setProperty(name, value);

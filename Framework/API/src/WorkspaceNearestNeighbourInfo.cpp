@@ -8,7 +8,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace API {
@@ -30,7 +29,7 @@ WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
   for (size_t i = 0; i < nhist; ++i)
     spectrumNumbers.emplace_back(m_workspace.getSpectrum(i).getSpectrumNo());
 
-  m_nearestNeighbours = Kernel::make_unique<WorkspaceNearestNeighbours>(
+  m_nearestNeighbours = std::make_unique<WorkspaceNearestNeighbours>(
       nNeighbours, workspace.spectrumInfo(), std::move(spectrumNumbers),
       ignoreMaskedDetectors);
 }

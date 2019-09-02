@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
@@ -95,6 +96,23 @@ Stretch::Stretch(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSample->isOptional(true);
+  m_uiForm.dsResolution->isOptional(true);
+}
+
+void Stretch::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("Stretch");
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                          : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                          : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
 }
 
 void Stretch::setup() {}
@@ -123,6 +141,7 @@ bool Stretch::validate() {
  * script that runs Stretch
  */
 void Stretch::run() {
+  m_uiForm.ppPlot->watchADS(false);
 
   // Workspace input
   auto const sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
@@ -187,6 +206,8 @@ void Stretch::algorithmComplete(const bool &error) {
       populateContourWorkspaceComboBox();
     else
       setPlotContourEnabled(false);
+
+    m_uiForm.ppPlot->watchADS(true);
   }
 }
 
@@ -260,29 +281,19 @@ int Stretch::displaySaveDirectoryMessage() {
  */
 void Stretch::plotWorkspaces() {
   setPlotResultIsPlotting(true);
-  WorkspaceGroup_sptr fitWorkspace;
-  fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
+  WorkspaceGroup_sptr fitWorkspace = getADSWorkspaceGroup(m_fitWorkspaceName);
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
   // Check Sigma and Beta workspaces exist
   if (sigma.right(5).compare("Sigma") == 0 &&
       beta.right(4).compare("Beta") == 0) {
-    QString pyInput = "from mantidplot import plot2D\n";
 
     std::string const plotType = m_uiForm.cbPlot->currentText().toStdString();
-    if (plotType == "All" || plotType == "Beta") {
-      pyInput += "importMatrixWorkspace('";
-      pyInput += beta;
-      pyInput += "').plotGraph2D()\n";
-    }
-    if (plotType == "All" || plotType == "Sigma") {
-      pyInput += "importMatrixWorkspace('";
-      pyInput += sigma;
-      pyInput += "').plotGraph2D()\n";
-    }
-
-    m_pythonRunner.runPythonCode(pyInput);
+    if (plotType == "All" || plotType == "Beta")
+      m_plotter->plotSpectra(beta.toStdString(), "0");
+    if (plotType == "All" || plotType == "Sigma")
+      m_plotter->plotSpectra(sigma.toStdString(), "0");
   } else {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
@@ -293,12 +304,11 @@ void Stretch::plotWorkspaces() {
 void Stretch::plotContourClicked() {
   setPlotContourIsPlotting(true);
 
-  auto const workspaceName = m_uiForm.cbPlotContour->currentText();
-  if (checkADSForPlotSaveWorkspace(workspaceName.toStdString(), true)) {
-    QString pyInput = "from mantidplot import plot2D\nimportMatrixWorkspace('" +
-                      workspaceName + "').plotGraph2D()\n";
-    m_pythonRunner.runPythonCode(pyInput);
-  }
+  auto const workspaceName =
+      m_uiForm.cbPlotContour->currentText().toStdString();
+  if (checkADSForPlotSaveWorkspace(workspaceName, true))
+    m_plotter->plotContour(workspaceName);
+
   setPlotContourIsPlotting(false);
 }
 
@@ -320,9 +330,16 @@ void Stretch::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void Stretch::handleSampleInputReady(const QString &filename) {
-  m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+  try {
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    return;
+  }
+
   // update the maximum and minimum range bar positions
-  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
@@ -352,8 +369,12 @@ void Stretch::previewSpecChanged(int value) {
 
   m_uiForm.ppPlot->clear();
 
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  auto const sampleName = m_uiForm.dsSample->getCurrentDataName();
+  try {
+    m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 }
 
 /**
@@ -361,7 +382,9 @@ void Stretch::previewSpecChanged(int value) {
  */
 void Stretch::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Sample")) {
-    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
+    m_plotter->plotSpectra(
+        m_uiForm.dsSample->getCurrentDataName().toStdString(),
+        std::to_string(m_previewSpec));
   }
 }
 
@@ -371,7 +394,11 @@ void Stretch::plotCurrentPreview() {
  * @param min :: The new value of the lower guide
  */
 void Stretch::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -380,7 +407,11 @@ void Stretch::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Stretch::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -390,16 +421,21 @@ void Stretch::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void Stretch::updateProperties(QtProperty *prop, double val) {
-  UNUSED_ARG(val);
-
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
 
-  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(m_dblManager->value(m_properties["EMin"]),
-                            m_dblManager->value(m_properties["EMax"]));
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     bounds);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
+  if (prop == m_properties["EMin"]) {
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
+  } else if (prop == m_properties["EMax"]) {
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 void Stretch::setRunEnabled(bool enabled) {

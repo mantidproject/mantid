@@ -35,7 +35,7 @@ class MantidPlotMatplotlibTest(unittest.TestCase):
     def test_1d_plot(self):
         x, y = np.arange(1.0,10.0), np.arange(1.0,10.)
         ax = plt.plot(x,y)
-        self.assertTrue(ax is not None)
+        self.assertNotEqual(ax, None)
         plt.show()
         time.sleep(0.2)
         plt.close()

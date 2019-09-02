@@ -29,7 +29,7 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         alg = AlgorithmManager.create('SANSFitShiftScale')
         alg.setChild(True)
         alg.initialize()
-        self.assertEquals('None', alg.getProperty('Mode').value)
+        self.assertEqual('None', alg.getProperty('Mode').value)
 
     def test_none_mode_requires_scale_and_shift_factors(self):
         alg = AlgorithmManager.create('SANSFitShiftScale')
@@ -106,8 +106,8 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-        self.assertEquals(out_scale_factor, in_scale_factor)
-        self.assertEquals(out_shift_factor, in_shift_factor)
+        self.assertEqual(out_scale_factor, in_scale_factor)
+        self.assertEqual(out_shift_factor, in_shift_factor)
 
     def test_shift_only(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -141,8 +141,8 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-        self.assertEquals(out_scale_factor, 1.0)
-        self.assertEquals(out_shift_factor, -5.0)
+        self.assertEqual(out_scale_factor, 1.0)
+        self.assertEqual(out_shift_factor, -5.0)
 
     def test_scale_only(self):
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -177,8 +177,8 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-        self.assertEquals(out_scale_factor, 1.0)
-        self.assertEquals(out_shift_factor, -5.0)
+        self.assertEqual(out_scale_factor, 1.0)
+        self.assertEqual(out_shift_factor, -5.0)
 
     def do_test_scale_both(self, hab_range, min_x = 0.0, max_x = 1000.0):
         create_alg = AlgorithmManager.create('CreateWorkspace')
@@ -218,8 +218,8 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         out_shift_factor = alg.getProperty('OutShiftFactor').value
         out_scale_factor = alg.getProperty('OutScaleFactor').value
 
-        self.assertEquals(out_scale_factor, 1.0)
-        self.assertEquals(out_shift_factor, -5.0)
+        self.assertEqual(out_scale_factor, 1.0)
+        self.assertEqual(out_shift_factor, -5.0)
 
     def test_scale_both(self):
         hab_range = range(5, 14)
@@ -286,10 +286,10 @@ class TestErrorTransferFromModelToData(unittest.TestCase):
         self.assertEqual(5, len(r_return.dataX(0)))
 
         expected_errors_in_rear = [np.sqrt(5),np.sqrt(5),np.sqrt(5),np.sqrt(5)]
-        self.assertTrue(expected_errors_in_rear[0] == r_return.dataE(0)[0])
-        self.assertTrue(expected_errors_in_rear[1] == r_return.dataE(0)[1])
-        self.assertTrue(expected_errors_in_rear[2] == r_return.dataE(0)[2])
-        self.assertTrue(expected_errors_in_rear[3] == r_return.dataE(0)[3])
+        self.assertEqual(expected_errors_in_rear[0],  r_return.dataE(0)[0])
+        self.assertEqual(expected_errors_in_rear[1],  r_return.dataE(0)[1])
+        self.assertEqual(expected_errors_in_rear[2],  r_return.dataE(0)[2])
+        self.assertEqual(expected_errors_in_rear[3],  r_return.dataE(0)[3])
 
 
 if __name__ == '__main__':

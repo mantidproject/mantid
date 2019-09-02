@@ -62,7 +62,7 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.execute(),
-                     std::runtime_error); // check it does output error
+                     const std::runtime_error &); // check it does output error
     TS_ASSERT(!alg.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(

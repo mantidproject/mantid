@@ -24,6 +24,10 @@ class DLLExport ConvFit : public IndirectFitAnalysisTab {
 public:
   ConvFit(QWidget *parent = nullptr);
 
+  std::string tabName() const override { return "ConvFit"; }
+
+  bool hasResolution() const override { return true; }
+
 protected slots:
   void setModelResolution(const QString &resolutionName);
   void runClicked();

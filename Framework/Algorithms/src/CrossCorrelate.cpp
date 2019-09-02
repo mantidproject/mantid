@@ -68,10 +68,10 @@ void CrossCorrelate::init() {
   wsValidator->add<API::RawCountValidator>();
 
   // Input and output workspaces
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
@@ -103,7 +103,7 @@ void CrossCorrelate::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   int reference = getProperty("ReferenceSpectra");
-  const size_t index_ref = static_cast<size_t>(reference);
+  const auto index_ref = static_cast<size_t>(reference);
 
   // check that the data range specified makes sense
   double xmin = getProperty("XMin");
@@ -168,7 +168,7 @@ void CrossCorrelate::exec() {
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
-  const int nY = static_cast<int>(refY.size());
+  const auto nY = static_cast<int>(refY.size());
   const int npoints = 2 * nY - 3;
   if (npoints < 1)
     throw std::runtime_error("Range is not valid");
@@ -189,7 +189,7 @@ void CrossCorrelate::exec() {
     outX[i] = static_cast<double>(i - nY + 2);
   }
   // Initialise the progress reporting object
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, nspecs);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *out))
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
   {

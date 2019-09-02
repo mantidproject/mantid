@@ -15,7 +15,9 @@ from copy import deepcopy
 import json
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, ZOOM, EMPTY_NAME,
+from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
+                                             SANSInstrument_string_as_key_NoInstrument)
+from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
@@ -96,15 +98,19 @@ def get_single_valued_logs_from_workspace(workspace, log_names, log_types, conve
     return log_results
 
 
-def create_unmanaged_algorithm(name, **kwargs):
+def create_unmanaged_algorithm(name, version=None, **kwargs):
     """
     Creates an unmanaged child algorithm and initializes it.
 
     :param name: the name of the algorithm
+    :param version: optional int. The version of the algorithm to use.
     :param kwargs: settings for the algorithm
     :return: an initialized algorithm instance.
     """
-    alg = AlgorithmManager.createUnmanaged(name)
+    if version is not None:
+        alg = AlgorithmManager.createUnmanaged(name, version)
+    else:
+        alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
     alg.setRethrows(True)
@@ -113,15 +119,20 @@ def create_unmanaged_algorithm(name, **kwargs):
     return alg
 
 
-def create_managed_non_child_algorithm(name, **kwargs):
+def create_managed_non_child_algorithm(name, version=None, **kwargs):
     """
     Creates a managed child algorithm and initializes it.
 
     :param name: the name of the algorithm
+    :param version: optional int. The version of the algorithm to use.
     :param kwargs: settings for the algorithm
     :return: an initialized algorithm instance.
     """
-    alg = AlgorithmManager.create(name)
+    if version is not None:
+        alg = AlgorithmManager.create(name, version)
+    else:
+        # Let the algorithm pick the most recent version
+        alg = AlgorithmManager.create(name)
     alg.initialize()
     alg.setChild(False)
     alg.setRethrows(True)
@@ -607,7 +618,8 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.to_string(DataType.Sample)):
+def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.to_string(DataType.Sample),
+                                       include_slice_limits=True):
     """
     Creates the name of the output workspace from a state object.
 
@@ -619,9 +631,11 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     5. A wavelength range: wavelength_low + "_" + wavelength_high
     6. In case of a 1D reduction, then add phi limits
     7. If we are dealing with an actual slice limit, then specify it: "_tXX_TYY" Note that the time set to
-       two decimals
+       two decimals. This is not included if creating a name for a workspace in "event_slice" mode, as the
+       slice limit information for names is calculated in SANSSingleReductionEventSlice
     :param state: a SANSState object
     :param reduction_data_type: which reduced data type is being looked at, ie HAB, LAB or Merged
+    :param include_slice_limits: optional bool. If True, add slice limits to the name.
     :return: the name of the reduced workspace, and the base name fo the reduced workspace
     """
     # 1. Short run number
@@ -676,7 +690,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     slice_state = state.slice
     start_time = slice_state.start_time
     end_time = slice_state.end_time
-    if start_time and end_time:
+    if start_time and end_time and include_slice_limits:
         start_time_as_string = '_t%.2f' % start_time[0]
         end_time_as_string = '_T%.2f' % end_time[0]
     else:
@@ -724,7 +738,8 @@ def get_transmission_output_name(state, data_type=DataType.Sample, multi_reducti
     return output_name, output_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None):
+def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None,
+                    event_slice_optimisation=False):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
@@ -738,7 +753,9 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
         use_reduction_mode_as_suffix = True
 
     # Get the standard workspace name
-    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode)
+    workspace_name, \
+        workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
+                                                                 include_slice_limits=(not event_slice_optimisation))
 
     # If user specified output name is not none then we use it for the base name
     if user_specified_output_name and not is_group:
@@ -830,20 +847,14 @@ def sanitise_instrument_name(instrument_name):
     :return: a sanitises instrument name string
     """
     instrument_name_upper = instrument_name.upper()
-    if re.search(LOQ, instrument_name_upper):
-        instrument_name = LOQ
-    elif re.search(SANS2D, instrument_name_upper):
-        instrument_name = SANS2D
-    elif re.search(LARMOR, instrument_name_upper):
-        instrument_name = LARMOR
-    elif re.search(ZOOM, instrument_name_upper):
-        instrument_name = ZOOM
+    for instrument in SANSInstrument_string_list:
+        if re.search(instrument, instrument_name_upper):
+            return instrument
     return instrument_name
 
 
 def get_facility(instrument):
-    if (instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ or
-        instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.ZOOM):  # noqa
+    if instrument in SANSInstrument_enum_list:
         return SANSFacility.ISIS
     else:
         return SANSFacility.NoFacility
@@ -858,17 +869,10 @@ def instrument_name_correction(instrument_name):
 
 def get_instrument(instrument_name):
     instrument_name = instrument_name.upper()
-    if instrument_name == SANS2D:
-        instrument = SANSInstrument.SANS2D
-    elif instrument_name == LARMOR:
-        instrument = SANSInstrument.LARMOR
-    elif instrument_name == LOQ:
-        instrument = SANSInstrument.LOQ
-    elif instrument_name == ZOOM:
-        instrument = SANSInstrument.ZOOM
-    else:
-        instrument = SANSInstrument.NoInstrument
-    return instrument
+    try:
+        return SANSInstrument_string_as_key_NoInstrument[instrument_name]
+    except KeyError:
+        pass
 
 
 # ----------------------------------------------------------------------------------------------------------------------

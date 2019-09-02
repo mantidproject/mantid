@@ -12,12 +12,16 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
+#include <QDomDocument>
+#include <QFile>
 #include <QMessageBox>
+#include <QtXml>
 
 #include <boost/algorithm/string/find.hpp>
 #include <boost/pointer_cast.hpp>
@@ -31,6 +35,17 @@ using Mantid::Types::Core::DateAndTime;
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
 
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd,
+                                            double precision) {
+  return QPair<double, double>(
+      roundToPrecision(rangeStart, precision) + precision,
+      roundToPrecision(rangeEnd, precision) - precision);
+}
+
 std::string castToString(int value) {
   return boost::lexical_cast<std::string>(value);
 }
@@ -42,13 +57,75 @@ void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
     algorithm->setPropertyValue(propName, value);
 }
 
+std::string getAttributeFromTag(QDomElement const &tag,
+                                QString const &attribute,
+                                QString const &defaultValue) {
+  if (tag.hasAttribute(attribute))
+    return tag.attribute(attribute, defaultValue).toStdString();
+  return defaultValue.toStdString();
+}
+
+bool hasCorrectAttribute(QDomElement const &child,
+                         std::string const &attributeName,
+                         std::string const &searchValue) {
+  auto const name = QString::fromStdString(attributeName);
+  return child.hasAttribute(name) &&
+         child.attribute(name).toStdString() == searchValue;
+}
+
+std::string getInterfaceAttribute(QDomElement const &root,
+                                  std::string const &interfaceName,
+                                  std::string const &propertyName,
+                                  std::string const &attribute) {
+  // Loop through interfaces
+  auto interfaceChild = root.firstChild().toElement();
+  while (!interfaceChild.isNull()) {
+    if (hasCorrectAttribute(interfaceChild, "id", interfaceName)) {
+
+      // Loop through interface properties
+      auto propertyChild = interfaceChild.firstChild().toElement();
+      while (!propertyChild.isNull()) {
+
+        // Return value of an attribute of the property if it is found
+        if (propertyChild.tagName().toStdString() == propertyName)
+          return getAttributeFromTag(propertyChild,
+                                     QString::fromStdString(attribute), "");
+
+        propertyChild = propertyChild.nextSibling().toElement();
+      }
+    }
+    interfaceChild = interfaceChild.nextSibling().toElement();
+  }
+  return "";
+}
+
+std::string getInterfaceAttribute(QFile &file, std::string const &interfaceName,
+                                  std::string const &propertyName,
+                                  std::string const &attribute) {
+  QDomDocument xmlBOM;
+  xmlBOM.setContent(&file);
+  return getInterfaceAttribute(xmlBOM.documentElement(), interfaceName,
+                               propertyName, attribute);
+}
+
+QStringList convertToQStringList(std::vector<std::string> const &strings) {
+  QStringList list;
+  for (auto const &str : strings)
+    list << QString::fromStdString(str);
+  return list;
+}
+
+QStringList convertToQStringList(std::string const &str,
+                                 std::string const &delimiter) {
+  std::vector<std::string> subStrings;
+  boost::split(subStrings, str, boost::is_any_of(delimiter));
+  return convertToQStringList(subStrings);
+}
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
+
 IndirectTab::IndirectTab(QObject *parent)
     : QObject(parent), m_properties(),
       m_dblManager(new QtDoublePropertyManager()),
@@ -56,7 +133,8 @@ IndirectTab::IndirectTab(QObject *parent)
       m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_pythonRunner(),
       m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()) {
+      m_tabEndTime(DateAndTime::maximum()),
+      m_plotter(std::make_unique<IndirectPlotter>(this)) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
@@ -164,6 +242,115 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
   return loader->isExecuted();
 }
 
+std::string
+IndirectTab::getInterfaceProperty(std::string const &interfaceName,
+                                  std::string const &propertyName,
+                                  std::string const &attribute) const {
+  QFile file(":/interface-properties.xml");
+  if (file.open(QIODevice::ReadOnly))
+    return getInterfaceAttribute(file, interfaceName, propertyName, attribute);
+
+  g_log.warning("There was an error while loading interface-properties.xml.");
+  return "";
+}
+
+QStringList IndirectTab::getExtensions(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "EXTENSIONS", "all"), ",");
+}
+
+QStringList
+IndirectTab::getCalibrationExtensions(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "EXTENSIONS", "calibration"), ",");
+}
+
+QStringList
+IndirectTab::getSampleFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "sample"), ",");
+}
+
+QStringList
+IndirectTab::getSampleWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "sample"), ",");
+}
+
+QStringList
+IndirectTab::getVanadiumFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "vanadium"), ",");
+}
+
+QStringList
+IndirectTab::getVanadiumWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "vanadium"),
+      ",");
+}
+
+QStringList
+IndirectTab::getResolutionFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "resolution"), ",");
+}
+
+QStringList
+IndirectTab::getResolutionWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "resolution"),
+      ",");
+}
+
+QStringList
+IndirectTab::getCalibrationFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "calibration"), ",");
+}
+
+QStringList
+IndirectTab::getCalibrationWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "calibration"),
+      ",");
+}
+
+QStringList
+IndirectTab::getContainerFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "container"), ",");
+}
+
+QStringList
+IndirectTab::getContainerWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "container"),
+      ",");
+}
+
+QStringList
+IndirectTab::getCorrectionsFBSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "FILE-SUFFIXES", "corrections"), ",");
+}
+
+QStringList
+IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceName) const {
+  return convertToQStringList(
+      getInterfaceProperty(interfaceName, "WORKSPACE-SUFFIXES", "corrections"),
+      ",");
+}
+
+/**
+ * Used to run python code
+ *
+ * @param pythonCode The python code to run
+ */
+void IndirectTab::runPythonCode(std::string const &pythonCode) {
+  m_pythonRunner.runPythonCode(QString::fromStdString(pythonCode));
+}
+
 /**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
  * default save directory and adds the algorithm to the batch queue.
@@ -227,254 +414,6 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
 }
 
 /**
- * Plots different spectra from multiple workspaces on the same plot
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param workspaceIndices List of indices to plot
- */
-void IndirectTab::plotMultipleSpectra(
-    const QStringList &workspaceNames,
-    const std::vector<int> &workspaceIndices) {
-
-  if (workspaceNames.isEmpty())
-    return;
-  if (workspaceNames.length() != static_cast<int>(workspaceIndices.size()))
-    return;
-
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-  pyInput += "current_window = plotSpectrum('";
-  pyInput += workspaceNames[0];
-  pyInput += "', ";
-  pyInput += QString::number(workspaceIndices[0]);
-  pyInput += ")\n";
-
-  for (int i = 1; i < workspaceNames.size(); i++) {
-    pyInput += "plotSpectrum('";
-    pyInput += workspaceNames[i];
-    pyInput += "', ";
-    pyInput += QString::number(workspaceIndices[i]);
-    pyInput += ", window=current_window)\n";
-  }
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Creates a spectrum plot of one or more workspaces at a given spectrum
- * index.
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param spectraIndex Index of spectrum from each workspace to plot
- */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               const int &spectraIndex, const bool &errorBars) {
-  if (!workspaceNames.isEmpty()) {
-    const QString errors = errorBars ? "True" : "False";
-
-    QString pyInput = "from mantidplot import plotSpectrum\n";
-    pyInput += "plotSpectrum(['";
-    pyInput += workspaceNames.join("','");
-    pyInput += "'], ";
-    pyInput += QString::number(spectraIndex);
-    pyInput += ", error_bars=" + errors + ")\n";
-
-    m_pythonRunner.runPythonCode(pyInput);
-  }
-}
-
-/**
- * Creates a spectrum plot of a single workspace at a given spectrum
- * index.
- *
- * @param workspaceName Names of workspace to plot
- * @param spectraIndex Workspace Index of spectrum to plot
- * @param errorBars Is true if you want to plot the error bars
- */
-void IndirectTab::plotSpectrum(const QString &workspaceName,
-                               const int &spectraIndex, const bool &errorBars) {
-  if (!workspaceName.isEmpty()) {
-    QStringList workspaceNames;
-    workspaceNames << workspaceName;
-    plotSpectrum(workspaceNames, spectraIndex, errorBars);
-  }
-}
-
-/**
- * Creates a spectrum plot of one or more workspaces with the range of
- * spectra [specStart, specEnd)
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param specStart Range start index
- * @param specEnd Range end index
- */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
-                               int specEnd) {
-  if (workspaceNames.isEmpty())
-    return;
-
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], list(range(";
-  pyInput += QString::number(specStart);
-  pyInput += ",";
-  pyInput += QString::number(specEnd + 1);
-  pyInput += ")))\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Creates a spectrum plot of a single workspace with the range of
- * spectra [specStart, specEnd)
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceName Names of workspace to plot
- * @param specStart Range start index
- * @param specEnd Range end index
- */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
-                               int specEnd) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, specStart, specEnd);
-}
-
-/**
- * Creates a spectrum plot of one or more workspaces with a set
- *  of spectra specified in a vector
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param wsIndices List of indices of spectra to plot
- */
-void IndirectTab::plotSpectra(const QStringList &workspaceNames,
-                              const std::vector<int> &wsIndices) {
-  if (workspaceNames.isEmpty()) {
-    return;
-  }
-  if (wsIndices.empty()) {
-    return;
-  }
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], [";
-  pyInput += QString::number(wsIndices[0]);
-  for (size_t i = 1; i < wsIndices.size(); i++) {
-    pyInput += " ,";
-    pyInput += QString::number(wsIndices[i]);
-  }
-  pyInput += "])\n";
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Creates a spectrum plot of a single workspace with a set
- *  of spectra specified in a vector
- *
- * @param workspaceName Name of workspace to plot
- * @param wsIndices List of indices of spectra to plot
- */
-void IndirectTab::plotSpectra(const QString &workspaceName,
-                              const std::vector<int> &wsIndices) {
-  if (workspaceName.isEmpty()) {
-    return;
-  }
-  if (wsIndices.empty()) {
-    return;
-  }
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectra(workspaceNames, wsIndices);
-}
-
-/**
- * Plots a contour (2D) plot of a given workspace.
- *
- * This uses the plot2D function from the Python API.
- *
- * @param workspaceName Name of workspace to plot
- */
-void IndirectTab::plot2D(const QString &workspaceName) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QString pyInput = "from mantidplot import plot2D\n";
-
-  pyInput += "plot2D('";
-  pyInput += workspaceName;
-  pyInput += "')\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Creates a time bin plot of one or more workspaces at a given spectrum
- * index.
- *
- * This uses the plotTimeBin function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param binIndex Index of spectrum from each workspace to plot
- */
-void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
-  if (workspaceNames.isEmpty())
-    return;
-
-  QString pyInput = "from mantidplot import plotTimeBin\n";
-
-  pyInput += "plotTimeBin(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(binIndex);
-  pyInput += ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Creates a time bin plot of a single workspace at a given spectrum
- * index.
- *
- * @param workspaceName Names of workspace to plot
- * @param binIndex Index of spectrum to plot
- */
-void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotTimeBin(workspaceNames, binIndex);
-}
-
-/*
- * Resizes the range (y-axis) of the specified plot preview given the specified
- * range
- *
- * @param preview The plot preview whose range to resize.
- * @param range   The range to resize to, as a pair of minimum and maximum value
- */
-void IndirectTab::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
-                                  QPair<double, double> range) {
-  preview->resizeX();
-  preview->setAxisRange(range, QwtPlot::yLeft);
-}
-
-/**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement
  *
@@ -500,14 +439,61 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min,
  * @param lower :: The lower bound property in the property browser
  * @param upper :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
+ * @param range :: The range to set the range selector to.
  */
-void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower,
-                                   QtProperty *upper,
-                                   const QPair<double, double> &bounds) {
+void IndirectTab::setRangeSelector(
+    RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+    const QPair<double, double> &bounds,
+    const boost::optional<QPair<double, double>> &range) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
-  rs->setMinimum(bounds.first);
-  rs->setMaximum(bounds.second);
+  if (range) {
+    rs->setMinimum(range.get().first);
+    rs->setMaximum(range.get().second);
+    // clamp the bounds of the selector
+    rs->setRange(range.get().first, range.get().second);
+  } else {
+    rs->setMinimum(bounds.first);
+    rs->setMaximum(bounds.second);
+  }
+}
+
+/**
+ * Set the minimum of a range selector if it is less than the maximum value.
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the minimum
+ */
+void IndirectTab::setRangeSelectorMin(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue <= maxProperty->valueText().toDouble())
+    rangeSelector->setMinimum(newValue);
+  else
+    m_dblManager->setValue(minProperty, rangeSelector->getMinimum());
+}
+
+/**
+ * Set the maximum of a range selector if it is greater than the minimum value
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the maximum
+ */
+void IndirectTab::setRangeSelectorMax(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue >= minProperty->valueText().toDouble())
+    rangeSelector->setMaximum(newValue);
+  else
+    m_dblManager->setValue(maxProperty, rangeSelector->getMaximum());
 }
 
 /**
@@ -583,24 +569,43 @@ bool IndirectTab::getResolutionRangeFromWs(const QString &workspace,
  *found)
  */
 bool IndirectTab::getResolutionRangeFromWs(
-    Mantid::API::MatrixWorkspace_const_sptr ws, QPair<double, double> &res) {
-  auto inst = ws->getInstrument();
-  auto analyser = inst->getStringParameter("analyser");
+    Mantid::API::MatrixWorkspace_const_sptr workspace,
+    QPair<double, double> &res) {
+  if (workspace) {
+    auto const instrument = workspace->getInstrument();
+    if (instrument && instrument->hasParameter("analyser")) {
+      auto const analyser = instrument->getStringParameter("analyser");
+      if (analyser.size() > 0) {
+        auto comp = instrument->getComponentByName(analyser[0]);
+        if (comp) {
+          auto params = comp->getNumberParameter("resolution", true);
 
-  if (analyser.size() > 0) {
-    auto comp = inst->getComponentByName(analyser[0]);
-    if (comp) {
-      auto params = comp->getNumberParameter("resolution", true);
-
-      // set the default instrument resolution
-      if (params.size() > 0) {
-        res = qMakePair(-params[0], params[0]);
-        return true;
+          // set the default instrument resolution
+          if (params.size() > 0) {
+            res = qMakePair(-params[0], params[0]);
+            return true;
+          }
+        }
       }
     }
   }
-
   return false;
+}
+
+QPair<double, double>
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName,
+                                    double precision) const {
+  auto const &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName))
+    return getXRangeFromWorkspace(
+        ads.retrieveWS<MatrixWorkspace>(workspaceName), precision);
+  return QPair<double, double>(0.0, 0.0);
+}
+
+QPair<double, double> IndirectTab::getXRangeFromWorkspace(
+    Mantid::API::MatrixWorkspace_const_sptr workspace, double precision) const {
+  auto const xValues = workspace->x(0);
+  return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 
 /**

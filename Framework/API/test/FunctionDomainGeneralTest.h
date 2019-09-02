@@ -88,7 +88,7 @@ public:
     TS_ASSERT_EQUALS(domain.size(), 5);
     TS_ASSERT_EQUALS(domain.columnCount(), 3);
     Column_sptr column4(new TestColumn<int>(2));
-    TS_ASSERT_THROWS(domain.addColumn(column4), std::runtime_error);
+    TS_ASSERT_THROWS(domain.addColumn(column4), const std::runtime_error &);
   }
 
   void test_column_values() {

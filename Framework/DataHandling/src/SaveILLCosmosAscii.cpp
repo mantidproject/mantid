@@ -20,7 +20,7 @@ using namespace API;
 
 /// virtual method to set the extra properties required for this algorithm
 void SaveILLCosmosAscii::extraProps() {
-  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   declareProperty("UserContact", "",
                   "Text to be written to the User-local contact field");

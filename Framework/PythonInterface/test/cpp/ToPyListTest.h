@@ -7,7 +7,7 @@
 #ifndef MANTID_PYTHONINTERFACE_TOPYLISTTEST_H
 #define MANTID_PYTHONINTERFACE_TOPYLISTTEST_H
 
-#include "MantidPythonInterface/kernel/Converters/ToPyList.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include <boost/python/errors.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -30,7 +30,7 @@ public:
   void test_unregistered_element_type_throws_runtime_error() {
     std::vector<UnregisteredType> unknownElements{UnregisteredType()};
     TS_ASSERT_THROWS(ToPyList<UnregisteredType>()(unknownElements),
-                     boost::python::error_already_set);
+                     const boost::python::error_already_set &);
   }
 
 private:

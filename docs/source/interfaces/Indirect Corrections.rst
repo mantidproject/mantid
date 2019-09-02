@@ -1,3 +1,5 @@
+.. _interface-indirect-corrections:
+
 Indirect Corrections
 ====================
 
@@ -18,6 +20,10 @@ These interfaces do not support GroupWorkspace's as input.
 
 Action Buttons
 ~~~~~~~~~~~~~~
+
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
 
 ?
   Opens this help page.
@@ -69,11 +75,11 @@ Plot Current Preview
 Run
   Runs the processing configured on the current tab.
 
-Plot Spectrum
-  Gives the option to create a plot of the spectrum selected in the spin box for the corrected workspace.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Plot Contour
-  Gives the option to create a contour plot of the corrected workspace.
+  If enabled, it will plot the selected output workspace as a contour plot.
   
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
@@ -129,8 +135,11 @@ Cross Sections
 Run
   Runs the processing configured on the current tab.
 
-Plot
-  Plots the parameter selected in the neighbouring combobox.
+Plot Wavelength
+  If enabled, it will plot a wavelength spectrum represented by the selected workspace indices.
+
+Plot Angle
+  If enabled, it will plot an angle bin represented by the neighbouring bin indices.
 
 Save Result
   Saves the result in the default save directory.
@@ -318,8 +327,11 @@ Cross Sections
 Run
   Runs the processing configured on the current tab.
 
-Plot
-  Plots the parameter selected in the neighbouring combobox.
+Plot Wavelength
+  If enabled, it will plot a wavelength spectrum represented by the selected workspace indices.
+
+Plot Angle
+  If enabled, it will plot an angle bin represented by the neighbouring bin indices.
 
 Save Result
   Saves the result in the default save directory.
@@ -469,12 +481,11 @@ Plot Current Preview
 Run
   Runs the processing configured on the current tab.
 
-Plot Spectrum
-  Gives the option to create a plot of the spectrum selected in the spin box for
-  the corrected workspace.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Plot Contour
-  Gives the option to create a contour plot of the corrected workspace.
+  If enabled, it will plot the selected output workspace as a contour plot.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.

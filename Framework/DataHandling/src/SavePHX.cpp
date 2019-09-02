@@ -32,12 +32,13 @@ using namespace Mantid::Geometry;
 // It is used to print out information,
 
 void SavePHX::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "The input workspace");
-  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
-                  "The filename to use for the saved data");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The filename to use for the saved data");
 }
 
 void SavePHX::exec() {
@@ -77,8 +78,7 @@ void SavePHX::exec() {
                     }*/
   spCalcDetPar->execute();
   //
-  FindDetectorsPar *pCalcDetPar =
-      dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+  auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
   if (!pCalcDetPar) { // "can not get pointer to FindDetectorsPar algorithm"
     throw(std::bad_cast());
   }

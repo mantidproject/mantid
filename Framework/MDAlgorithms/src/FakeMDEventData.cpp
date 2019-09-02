@@ -25,11 +25,11 @@ DECLARE_ALGORITHM(FakeMDEventData)
 /** Initialize the algorithm's properties.
  */
 void FakeMDEventData::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::InOut),
                   "An input workspace, that will get DataObjects added to it");
 
-  declareProperty(make_unique<ArrayProperty<double>>("UniformParams", ""),
+  declareProperty(std::make_unique<ArrayProperty<double>>("UniformParams", ""),
                   "Add a uniform, randomized distribution of events.\n"
                   "1 parameter: number_of_events; they will be distributed "
                   "across the size of the workspace.\n"
@@ -44,15 +44,15 @@ void FakeMDEventData::init() {
                   "steps of the regular grid in each dimension\n");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>("PeakParams", ""),
+      std::make_unique<ArrayProperty<double>>("PeakParams", ""),
       "Add a peak with a normal distribution around a central point.\n"
       "Parameters: number_of_events, x, y, z, ..., radius.\n");
 
-  declareProperty(make_unique<PropertyWithValue<int>>("RandomSeed", 0),
+  declareProperty(std::make_unique<PropertyWithValue<int>>("RandomSeed", 0),
                   "Seed int for the random number generator.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("RandomizeSignal", false),
+      std::make_unique<PropertyWithValue<bool>>("RandomizeSignal", false),
       "If true, the events' signal and error values will be "
       "randomized around 1.0+-0.5.");
 }

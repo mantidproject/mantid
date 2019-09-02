@@ -13,7 +13,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidKernel/make_unique.h"
 
 namespace {
 using namespace Mantid::API;
@@ -273,8 +272,9 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
     MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace,
     int spectrum, double startX, double endX) const {
   guessWorkspace->setInstrument(inputWS->getInstrument());
-  guessWorkspace->replaceAxis(0,
-                              inputWS->getAxis(0)->clone(guessWorkspace.get()));
+  guessWorkspace->replaceAxis(
+      0,
+      std::unique_ptr<Axis>(inputWS->getAxis(0)->clone(guessWorkspace.get())));
   guessWorkspace->setDistribution(inputWS->isDistribution());
 
   auto extracted = extractSpectra(inputWS, spectrum, spectrum, startX, endX);
@@ -282,10 +282,10 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   AnalysisDataService::Instance().addOrReplace(INPUT_AND_GUESS_NAME,
                                                inputAndGuess);
 
-  auto axis = Mantid::Kernel::make_unique<TextAxis>(2);
+  auto axis = std::make_unique<TextAxis>(2);
   axis->setLabel(0, "Sample");
   axis->setLabel(1, "Guess");
-  inputAndGuess->replaceAxis(1, axis.release());
+  inputAndGuess->replaceAxis(1, std::move(axis));
   return inputAndGuess;
 }
 

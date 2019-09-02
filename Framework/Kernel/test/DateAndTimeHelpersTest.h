@@ -43,7 +43,7 @@ public:
 
   void test_average() {
     std::vector<DateAndTime> times;
-    TS_ASSERT_THROWS(averageSorted(times), std::invalid_argument);
+    TS_ASSERT_THROWS(averageSorted(times), const std::invalid_argument &);
 
     times.push_back(
         createFromSanitizedISO8601("1977-05-25T00:00Z")); // Star Wars IV

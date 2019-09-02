@@ -12,7 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using MantidQt::Widgets::MplCpp::ColorConverter;
-namespace Python = MantidQt::Widgets::MplCpp::Python;
+using namespace MantidQt::Widgets::Common;
 
 class ColorConverterTest : public CxxTest::TestSuite {
 public:

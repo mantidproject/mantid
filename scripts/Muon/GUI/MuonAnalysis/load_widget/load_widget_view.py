@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 
-class LoadWidgetView(QtGui.QWidget):
+class LoadWidgetView(QtWidgets.QWidget):
 
     def __init__(self, parent=None, load_run_view=None, load_file_view=None):
         super(LoadWidgetView, self).__init__(parent)
@@ -21,21 +21,21 @@ class LoadWidgetView(QtGui.QWidget):
 
     def setup_interface_layout(self):
 
-        self.clear_button = QtGui.QPushButton(self)
+        self.clear_button = QtWidgets.QPushButton(self)
         self.clear_button.setObjectName("clearButton")
         self.clear_button.setToolTip("Clear the currently loaded data")
         self.clear_button.setText("Clear All")
 
-        self.multiple_loading_label = QtGui.QLabel(self)
+        self.multiple_loading_label = QtWidgets.QLabel(self)
         self.multiple_loading_label.setObjectName("multiple_loading_label")
         self.multiple_loading_label.setText("Co-Add : ")
 
-        self.multiple_loading_check = QtGui.QCheckBox(self)
+        self.multiple_loading_check = QtWidgets.QCheckBox(self)
         self.multiple_loading_check.setToolTip("Enable/disable co-adding selected runs")
         self.multiple_loading_check.setChecked(False)
 
         # Set the layout of the tools at the bottom of the widget
-        self.horizontal_layout = QtGui.QHBoxLayout()
+        self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.clear_button)
         self.horizontal_layout.addStretch(0)
@@ -43,17 +43,16 @@ class LoadWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.multiple_loading_check)
 
         self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
-        self.horizontal_layout.setMargin(0)
-        self.tool_widget = QtGui.QWidget(self)
+        self.tool_widget = QtWidgets.QWidget(self)
         self.tool_widget.setLayout(self.horizontal_layout)
 
         # Set the layout vertically
-        self.vertical_layout = QtGui.QVBoxLayout()
+        self.vertical_layout = QtWidgets.QVBoxLayout()
         self.vertical_layout.addWidget(self.load_run_widget)
         self.vertical_layout.addWidget(self.load_file_widget)
         self.vertical_layout.addWidget(self.tool_widget)
 
-        self.group = QtGui.QGroupBox("Loading")
+        self.group = QtWidgets.QGroupBox("Loading")
         self.group.setFlat(False)
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
@@ -66,7 +65,7 @@ class LoadWidgetView(QtGui.QWidget):
                            ' color: grey; }')
         self.group.setLayout(self.vertical_layout)
 
-        self.widget_layout = QtGui.QVBoxLayout(self)
+        self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
 

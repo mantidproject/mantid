@@ -224,7 +224,7 @@ public:
     IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
     alg->setProperty("StartX", 10.);
     alg->setProperty("EndX", 1.);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     clearADS();
   }
 
@@ -237,7 +237,7 @@ public:
     auto table = genTable();
 
     IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     clearADS();
   }
 
@@ -252,7 +252,7 @@ public:
     wsNames = {"ws1"};
 
     IAlgorithm_sptr alg = setUpAlg(table, func, wsNames, wsOut);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     clearADS();
   }
 

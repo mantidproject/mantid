@@ -7,14 +7,14 @@
 
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressDialogWidget.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
-    QWidget *parent, AlgorithmProgressDialogWidget *view,
+    QWidget *parent, IAlgorithmProgressDialogWidget *view,
     AlgorithmProgressModel &model)
     : AlgorithmProgressPresenterBase(parent), m_view{view}, m_model{model},
       m_progressBars{RunningAlgorithms()} {
@@ -79,6 +79,9 @@ void AlgorithmProgressDialogPresenter::algorithmEndedSlot(
     // this removes the item from the tree widget, and deletes all its children
     delete item;
   }
+}
+size_t AlgorithmProgressDialogPresenter::getNumberTrackedAlgorithms() {
+  return m_progressBars.size();
 }
 
 } // namespace MantidWidgets

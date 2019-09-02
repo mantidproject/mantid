@@ -179,8 +179,11 @@ in C++, or `unittest.mock
 can set expectations in the unit tests for certain methods to be
 called, and with certain arguments.
 
+Visual Design
+#############
+
 Qt Designer
-###########
+-----------
 
 The layout of all interfaces and reusable widgets should be done by
 using the Qt's `Designer
@@ -197,7 +200,7 @@ If it is felt that the design must be hand coded then this should be
 discussed with a senior developer.
 
 Reusable Widgets
-################
+----------------
 
 Many interfaces will require similar functionality. For example, the
 ability to enter a filename string to search for a file along with a
@@ -251,11 +254,28 @@ The current set of reusable items are:
 | WorkspaceSelector       | QComboBox     | A selection box showing the workspaces currently in Mantid. It can be restricted by type.                                                                    |
 +-------------------------+---------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+Icons
+-----
+
+Icons are a contentious subject as they can in some cases cause more
+confusion and hinder more than they help. The NHS came up with a
+good set of rules for what icons should be used and this could be
+useful to designers, check out this `article. <https://digital.nhs.uk
+/blog/transformation-blog/2019/icons-avoid-temptation-and-start-with
+-user-needs>`_. It may fit a situation more to have a text button
+instead of an icon.
+
+Whilst having too many icons will confuse the average user there are
+cases where many cases where it would help, for example if a button does a
+similar thing to another button somewhere else in the program then
+it should have the same icon. Have a look to see if the need you has
+an icon in Mantid by look at this handy :ref:`MantidUsedIconsTable`.
+
 Python
 ######
 
-Interfaces can also be created in Python using the `PyQt4
-<http://pyqt.sourceforge.net/Docs/PyQt4/>`_ package. The code for the
+Interfaces can also be created in Python using the `qtpy
+<https://pypi.org/project/QtPy/>`_ package. The code for the
 interface should be placed in a Python `package
 <https://docs.python.org/2/tutorial/modules.html#packages>`_ under the
 ``Code/Mantid/scripts`` directory. It should be named after the interface
@@ -279,6 +299,7 @@ file would look like:
 where ``FooGUI`` is the ``MainWindow`` for the interface. Some more
 detailed documentation on creating GUIs in Python can be found at
 :ref:`QtDesignerForPython`.
+
 
 Designer
 --------

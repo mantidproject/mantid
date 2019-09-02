@@ -47,8 +47,8 @@ const size_t NUMBERRESERVEDPERMODULE = 1250;
 void LoadVulcanCalFile::init() {
   // LoadVulcanCalFile::getInstrument3WaysInit(this);
 
-  declareProperty(Kernel::make_unique<FileProperty>("OffsetFilename", "",
-                                                    FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>("OffsetFilename", "",
+                                                 FileProperty::Load, ".dat"),
                   "Path to the VULCAN offset file. ");
 
   std::array<std::string, 3> groupoptions = {{"6Modules", "2Banks", "1Bank"}};
@@ -58,34 +58,33 @@ void LoadVulcanCalFile::init() {
       boost::make_shared<ListValidator<std::string>>(groupoptions),
       "Choices to output group workspace for 1 bank, 2 banks or 6 modules. ");
 
-  declareProperty(Kernel::make_unique<FileProperty>("BadPixelFilename", "",
-                                                    FileProperty::OptionalLoad,
-                                                    ".dat"),
+  declareProperty(std::make_unique<FileProperty>("BadPixelFilename", "",
+                                                 FileProperty::OptionalLoad,
+                                                 ".dat"),
                   "Path to the VULCAN bad pixel file. ");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
-                                                          Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("WorkspaceName", "",
+                                                       Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
       "'_offsets', '_mask' appended to them.");
 
   // Effective geometry: bank IDs
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("BankIDs"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("BankIDs"),
                   "Bank IDs for the effective detectors. "
                   "Must cover all banks in the definition. ");
 
   // Effective geometry: DIFCs
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("EffectiveDIFCs"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("EffectiveDIFCs"),
                   "DIFCs for effective detectors. ");
 
   // Effective geometry: 2theta
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("Effective2Thetas"),
-      "2 thetas for effective detectors. ");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Effective2Thetas"),
+                  "2 thetas for effective detectors. ");
 
   // This is the property for testing purpose only!
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<EventWorkspace>>(
+      std::make_unique<WorkspaceProperty<EventWorkspace>>(
           "EventWorkspace", "", Direction::InOut, PropertyMode::Optional),
       "Optional input/output EventWorkspace to get aligned by offset file. "
       "It serves as a verifying tool, and will be removed after test. ");
@@ -177,14 +176,14 @@ void LoadVulcanCalFile::processInOutProperites() {
   // Set properties for these file
   m_offsetsWS->mutableRun().addProperty("Filename", m_offsetFilename);
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputOffsetsWorkspace", WorkspaceName + "_offsets",
                       Direction::Output),
                   "Set the the output OffsetsWorkspace. ");
   setProperty("OutputOffsetsWorkspace", m_offsetsWS);
 
   m_tofOffsetsWS->mutableRun().addProperty("Filename", m_offsetFilename);
-  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                       "OutputTOFOffsetsWorkspace",
                       WorkspaceName + "_TOF_offsets", Direction::Output),
                   "Set the the (TOF) output OffsetsWorkspace. ");
@@ -192,7 +191,7 @@ void LoadVulcanCalFile::processInOutProperites() {
 
   // mask workspace
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<MaskWorkspace>>(
           "OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
       "Set the output MaskWorkspace. ");
   m_maskWS->mutableRun().addProperty("Filename", m_badPixFilename);
@@ -248,7 +247,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 
   // Output
   std::string WorkspaceName = getPropertyValue("WorkspaceName");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputGroupingWorkspace", WorkspaceName + "_group",
                       Direction::Output),
                   "Set the output GroupingWorkspace. ");
@@ -345,7 +344,7 @@ void LoadVulcanCalFile::readOffsetFile(
     double offset;
     if (!(iss >> pid >> offset))
       continue;
-    detid_t detid = static_cast<detid_t>(pid);
+    auto detid = static_cast<detid_t>(pid);
     map_detoffset.emplace(detid, offset);
   }
 }
@@ -401,7 +400,7 @@ void LoadVulcanCalFile::processOffsets(
 
   for (auto bankindex : vec_banks) {
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
-      detid_t detindex =
+      auto detindex =
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
       auto miter = map_verify.find(detindex);
       if (miter == map_verify.end())
@@ -589,9 +588,9 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
                                     GroupingWorkspace_sptr groupWS,
                                     OffsetsWorkspace_sptr offsetsWS,
                                     MaskWorkspace_sptr maskWS) {
-  bool doGroup = bool(groupWS);
-  bool doOffsets = bool(offsetsWS);
-  bool doMask = bool(maskWS);
+  auto doGroup = bool(groupWS);
+  auto doOffsets = bool(offsetsWS);
+  auto doMask = bool(maskWS);
 
   bool hasUnmasked(false);
   bool hasGrouped(false);

@@ -21,8 +21,8 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
 
     def test_exclusive_constructor(self):
         validator = FloatArrayBoundedValidator(lower=-1., upper=3., exclusive=True)
-        self.assertEquals(validator.lower(), -1.)
-        self.assertEquals(validator.upper(), 3.)
+        self.assertEqual(validator.lower(), -1.)
+        self.assertEqual(validator.upper(), 3.)
         self.assertTrue(validator.isLowerExclusive())
         self.assertTrue(validator.isUpperExclusive())
 
@@ -33,13 +33,13 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         lower = 5.6
         validator.setLower(lower)
         self.assertTrue(validator.hasLower())
-        self.assertEquals(validator.lower(), lower)
+        self.assertEqual(validator.lower(), lower)
         self.assertFalse(validator.hasUpper())
         upper = 10.6
         validator.setUpper(upper)
         self.assertTrue(validator.hasLower())
         self.assertTrue(validator.hasUpper())
-        self.assertEquals(validator.upper(), upper)
+        self.assertEqual(validator.upper(), upper)
 
     def test_clear_members_remove_bounds(self):
         lower = 7.0
@@ -47,8 +47,8 @@ class ArrayBoundedValidatorTest(unittest.TestCase):
         validator = FloatArrayBoundedValidator(lower, upper)
         self.assertTrue(validator.hasLower())
         self.assertTrue(validator.hasUpper())
-        self.assertEquals(validator.lower(), lower)
-        self.assertEquals(validator.upper(), upper)
+        self.assertEqual(validator.lower(), lower)
+        self.assertEqual(validator.upper(), upper)
         validator.clearLower()
         self.assertFalse(validator.hasLower())
         self.assertTrue(validator.hasUpper())

@@ -76,9 +76,9 @@ std::mutex ISaveableTester::streamMutex;
 //====================================================================================
 class DiskBufferISaveableTest : public CxxTest::TestSuite {
 public:
-  std::vector<ISaveableTester *> data;
+  std::vector<std::unique_ptr<ISaveableTester>> data;
   size_t num;
-  std::vector<ISaveableTester *> bigData;
+  std::vector<std::unique_ptr<ISaveableTester>> bigData;
   long BIG_NUM;
 
   void setUp() override {
@@ -87,22 +87,17 @@ public:
     num = 10;
     data.clear();
     for (size_t i = 0; i < num; i++)
-      data.push_back(new ISaveableTester(i));
+      data.push_back(std::make_unique<ISaveableTester>(i));
     BIG_NUM = 1000;
     bigData.clear();
     bigData.reserve(BIG_NUM);
     for (long i = 0; i < BIG_NUM; i++)
-      bigData.push_back(new ISaveableTester(i));
+      bigData.push_back(std::make_unique<ISaveableTester>(i));
   }
 
   void tearDown() override {
-    for (auto &item : data) {
-      delete item;
-    }
-
-    for (auto &bigItem : bigData) {
-      delete bigItem;
-    }
+    data.clear();
+    bigData.clear();
 
     ISaveableTester::fakeFile = "";
   }
@@ -143,11 +138,11 @@ public:
     // Nothing in cache
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 0);
 
-    dbuf.toWrite(data[0]);
+    dbuf.toWrite(data[0].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 1);
-    dbuf.toWrite(data[1]);
+    dbuf.toWrite(data[1].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 2);
-    dbuf.toWrite(data[2]);
+    dbuf.toWrite(data[2].get());
     // Write buffer now got flushed out
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 0);
 
@@ -157,9 +152,9 @@ public:
 
     // If you add the same one multiple times, it only is tracked once in the
     // to-write buffer.
-    dbuf.toWrite(data[4]);
-    dbuf.toWrite(data[4]);
-    dbuf.toWrite(data[4]);
+    dbuf.toWrite(data[4].get());
+    dbuf.toWrite(data[4].get());
+    dbuf.toWrite(data[4].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 1);
   }
   //--------------------------------------------------------------------------------
@@ -171,16 +166,16 @@ public:
     // Nothing in cache
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 0);
 
-    dbuf.toWrite(data[0]);
+    dbuf.toWrite(data[0].get());
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,");
-    dbuf.toWrite(data[1]);
+    dbuf.toWrite(data[1].get());
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,");
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 0);
-    dbuf.toWrite(data[2]);
+    dbuf.toWrite(data[2].get());
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,");
-    dbuf.toWrite(data[3]);
+    dbuf.toWrite(data[3].get());
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,");
-    dbuf.toWrite(data[4]);
+    dbuf.toWrite(data[4].get());
     // Everything get written immidiately;
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "0,1,2,3,4,");
     ISaveableTester::fakeFile = "";
@@ -191,7 +186,7 @@ public:
   void test_flushCache() {
     DiskBuffer dbuf(10);
     for (size_t i = 0; i < 6; i++)
-      dbuf.toWrite(data[i]);
+      dbuf.toWrite(data[i].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 6);
     // Nothing written out yet
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "");
@@ -208,16 +203,16 @@ public:
     // Room for 3 in the to-write cache
     DiskBuffer dbuf(3);
     // These 3 will get written out
-    dbuf.toWrite(data[5]);
+    dbuf.toWrite(data[5].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[5]->getFilePosition());
 
-    dbuf.toWrite(data[1]);
+    dbuf.toWrite(data[1].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[1]->getFilePosition());
-    dbuf.toWrite(data[9]);
+    dbuf.toWrite(data[9].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[9]->getFilePosition());
@@ -227,15 +222,15 @@ public:
     TSM_ASSERT_EQUALS("Is written to file at ", 1, data[1]->getFilePosition());
     TSM_ASSERT_EQUALS("Is written to file at ", 2, data[5]->getFilePosition());
     // These 4 at the end will be in the cache
-    dbuf.toWrite(data[2]);
+    dbuf.toWrite(data[2].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[2]->getFilePosition());
-    dbuf.toWrite(data[3]);
+    dbuf.toWrite(data[3].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[3]->getFilePosition());
-    dbuf.toWrite(data[4]);
+    dbuf.toWrite(data[4].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[4]->getFilePosition());
@@ -245,7 +240,7 @@ public:
     TSM_ASSERT_EQUALS("Is written to file at ", 4, data[3]->getFilePosition());
     TSM_ASSERT_EQUALS("Is written to file at ", 5, data[2]->getFilePosition());
 
-    dbuf.toWrite(data[6]);
+    dbuf.toWrite(data[6].get());
     TSM_ASSERT_EQUALS("Not yet written to file",
                       std::numeric_limits<uint64_t>::max(),
                       data[6]->getFilePosition());
@@ -261,7 +256,7 @@ public:
     DiskBuffer dbuf(4);
     for (size_t i = 0; i < 9; i++) {
       data[i]->setBusy(true);
-      dbuf.toWrite(data[i]);
+      dbuf.toWrite(data[i].get());
     }
     // We ended up with too much in the buffer since nothing could be written.
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 9);
@@ -269,7 +264,7 @@ public:
     for (size_t i = 0; i < 9; i++)
       data[i]->setBusy(false);
     // Trigger a write
-    dbuf.toWrite(data[8]);
+    dbuf.toWrite(data[8].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 0);
     // And all of these get written out at once
     TS_ASSERT_EQUALS(ISaveableTester::fakeFile, "8,7,6,5,4,3,2,1,0,");
@@ -282,12 +277,12 @@ public:
     DiskBuffer dbuf(6);
     // Fill the buffer
     for (size_t i = 0; i < 5; i++)
-      dbuf.toWrite(data[i]);
+      dbuf.toWrite(data[i].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 5);
 
     // First let's get rid of something in to to-write buffer
 
-    dbuf.objectDeleted(data[1]);
+    dbuf.objectDeleted(data[1].get());
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 4);
     TSM_ASSERT_EQUALS("The data have never been written",
                       dbuf.getFreeSpaceMap().size(), 0);
@@ -301,10 +296,10 @@ public:
   /** Any ISaveable that says it can't be written remains in the cache */
   void test_skips_dataBusy_Blocks() {
     DiskBuffer dbuf(3);
-    dbuf.toWrite(data[0]);
-    dbuf.toWrite(data[1]);
+    dbuf.toWrite(data[0].get());
+    dbuf.toWrite(data[1].get());
     data[1]->setBusy(true); // Won't get written out
-    dbuf.toWrite(data[2]);
+    dbuf.toWrite(data[2].get());
     dbuf.flushCache();
 
     // Item #1 was skipped and is still in the buffer!
@@ -329,7 +324,7 @@ public:
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (long i = 0; i < int(BIG_NUM); i++) {
-      dbuf.toWrite(bigData[i]);
+      dbuf.toWrite(bigData[i].get());
     }
     // std::cout << ISaveableTester::fakeFile << '\n';
   }
@@ -351,16 +346,16 @@ public:
     DiskBuffer dbuf(size_t(BIG_NUM + DATA_SIZE));
     Kernel::Timer clock;
     for (long i = 0; i < BIG_NUM; i++) {
-      dbuf.toWrite(bigData[i]);
+      dbuf.toWrite(bigData[i].get());
     }
     std::cout << "\nFinished DiskBuffer insertion performance test, inserted "
               << BIG_NUM << " objects on 1 thread in " << clock.elapsed()
               << " sec\n";
 
     for (long i = 0; i < DATA_SIZE; i++) {
-      dbuf.objectDeleted(bigData[indexToRemove[i]]);
+      dbuf.objectDeleted(bigData[indexToRemove[i]].get());
       dbuf.toWrite(objToAdd[i]);
-      dbuf.toWrite(bigData[indexToRemove[i]]);
+      dbuf.toWrite(bigData[indexToRemove[i]].get());
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, 1 "
                  "thread in "
@@ -391,7 +386,7 @@ public:
     Kernel::Timer clock;
     PARALLEL_FOR_NO_WSP_CHECK()
     for (long i = 0; i < BIG_NUM; i++) {
-      dbuf.toWrite(bigData[i]);
+      dbuf.toWrite(bigData[i].get());
     }
     std::cout << "\nFinished DiskBuffer insertion performance test, inserted "
               << BIG_NUM << " objects on multithread in " << clock.elapsed()
@@ -399,9 +394,9 @@ public:
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (long i = 0; i < DATA_SIZE; i++) {
-      dbuf.objectDeleted(bigData[indexToRemove[i]]);
+      dbuf.objectDeleted(bigData[indexToRemove[i]].get());
       dbuf.toWrite(objToAdd[i]);
-      dbuf.toWrite(bigData[indexToRemove[i]]);
+      dbuf.toWrite(bigData[indexToRemove[i]].get());
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, "
                  "multithread in "

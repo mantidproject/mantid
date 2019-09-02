@@ -37,12 +37,12 @@ const std::string ExtractMonitorWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ExtractMonitorWorkspace::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "A data workspace that holds a monitor workspace within.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "A data workspace that holds a monitor workspace within.");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
+                                            Direction::Output),
       "The workspace containing only monitor data relating to the main data in "
       "the InputWorkspace.");
   declareProperty(

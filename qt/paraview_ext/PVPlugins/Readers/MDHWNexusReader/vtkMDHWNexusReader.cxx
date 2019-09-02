@@ -107,10 +107,10 @@ int vtkMDHWNexusReader::RequestData(
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
   auto factory =
-      Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+      std::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
           m_normalizationOption, m_time);
   factory->setSuccessor(
-      Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(m_normalizationOption));
+      std::make_unique<vtkMDHistoHexFactory>(m_normalizationOption));
 
   auto product = m_presenter->execute(factory.get(), loadingProgressAction,
                                       drawingProgressAction);
@@ -119,7 +119,7 @@ int vtkMDHWNexusReader::RequestData(
   output->ShallowCopy(product);
 
   try {
-    auto workspaceProvider = Mantid::Kernel::make_unique<
+    auto workspaceProvider = std::make_unique<
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
                                    &drawingProgressAction);
@@ -139,9 +139,9 @@ int vtkMDHWNexusReader::RequestInformation(
     vtkInformationVector *outputVector) {
   if (m_presenter == nullptr) {
     std::unique_ptr<MDLoadingView> view =
-        Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
+        std::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
             this);
-    m_presenter = Mantid::Kernel::make_unique<MDHWNexusLoadingPresenter>(
+    m_presenter = std::make_unique<MDHWNexusLoadingPresenter>(
         std::move(view), FileName);
   }
 
@@ -170,7 +170,7 @@ void vtkMDHWNexusReader::PrintSelf(ostream &os, vtkIndent indent) {
 
 int vtkMDHWNexusReader::CanReadFile(const char *fname) {
   std::unique_ptr<MDLoadingView> view =
-      Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
+      std::make_unique<MDLoadingViewAdapter<vtkMDHWNexusReader>>(
           this);
   MDHWNexusLoadingPresenter temp(std::move(view), fname);
   return temp.canReadFile();

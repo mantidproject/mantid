@@ -123,19 +123,19 @@ DECLARE_ALGORITHM(ReflectometryReductionOne2)
 void ReflectometryReductionOne2::init() {
 
   // Input workspace
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Run to reduce.");
 
   initReductionProperties();
 
   // ThetaIn
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
                   "Angle in degrees");
 
   // Processing instructions
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
@@ -143,14 +143,14 @@ void ReflectometryReductionOne2::init() {
                   "the detectors of interest. See GroupDetectors for details.");
 
   // Minimum wavelength
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
   // Maximum wavelength
-  declareProperty(make_unique<PropertyWithValue<double>>(
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
                       boost::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
@@ -168,14 +168,14 @@ void ReflectometryReductionOne2::init() {
   // Init properties for diagnostics
   initDebugProperties();
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Output Workspace IvsQ.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
-                                                   "", Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspaceWavelength", "", Direction::Output,
+                      PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
 }
 
@@ -911,7 +911,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   // the same bin width as the input workspace
   const double binWidth = (detectorWS->x(0).back() - detectorWS->x(0).front()) /
                           static_cast<double>(detectorWS->blocksize());
-  const int numBins = static_cast<int>(
+  const auto numBins = static_cast<int>(
       std::ceil((wavelengthMax() - wavelengthMin()) / binWidth));
   // Construct the histogram with these X values. Y and E values are zero.
   const BinEdges xValues(numBins, LinearGenerator(wavelengthMin(), binWidth));
@@ -987,7 +987,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       std::vector<double> projectedE(outputE.size(), 0.0);
 
       // Process each value in the spectrum
-      const int ySize = static_cast<int>(inputY.size());
+      const auto ySize = static_cast<int>(inputY.size());
       for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
         // Do the summation in Q
         sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY,
@@ -995,7 +995,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       }
 
       // Sum errors in quadrature
-      const int eSize = static_cast<int>(outputE.size());
+      const auto eSize = static_cast<int>(outputE.size());
       for (int outIdx = 0; outIdx < eSize; ++outIdx) {
         outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
       }
@@ -1091,7 +1091,7 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  const int xSize = static_cast<int>(outputX.size());
+  const auto xSize = static_cast<int>(outputX.size());
   for (auto outIdx = startIter - outputX.begin(); outIdx < xSize - 1;
        ++outIdx) {
     const double binStart = outputX[outIdx];

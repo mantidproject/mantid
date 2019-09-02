@@ -17,7 +17,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/scoped_array.hpp>
@@ -329,7 +329,7 @@ MDHistoWorkspace::getVertexesArray(size_t linearIndex,
       numDimensions, linearIndex, m_indexMaker, m_indexMax, dimIndexes);
 
   // The output vertexes coordinates
-  auto out = Kernel::make_unique<coord_t[]>(numDimensions * numVertices);
+  auto out = std::make_unique<coord_t[]>(numDimensions * numVertices);
   for (size_t i = 0; i < numVertices; ++i) {
     size_t outIndex = i * numDimensions;
     // Offset the 0th box by the position of this linear index, in each
@@ -414,7 +414,7 @@ size_t MDHistoWorkspace::getLinearIndexAtCoord(const coord_t *coords) const {
   size_t linearIndex = 0;
   for (size_t d = 0; d < numDimensions; d++) {
     coord_t x = coords[d] - m_origin[d];
-    size_t ix = size_t(x / m_boxLength[d]);
+    auto ix = size_t(x / m_boxLength[d]);
     if (ix >= m_indexMax[d] || (x < 0))
       return size_t(-1);
     linearIndex += ix * m_indexMaker[d];
@@ -457,7 +457,7 @@ MDHistoWorkspace::createIterators(
     if (function)
       clonedFunction = new Mantid::Geometry::MDImplicitFunction(*function);
 
-    out.push_back(Kernel::make_unique<MDHistoWorkspaceIterator>(
+    out.push_back(std::make_unique<MDHistoWorkspaceIterator>(
         this, clonedFunction, begin, end));
   }
   return out;
@@ -560,7 +560,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
   for (size_t d = 0; d < nd; d++) {
     dirSign[d] = sgn(dir[d]);
   }
-  const size_t BADINDEX = size_t(-1);
+  const auto BADINDEX = size_t(-1);
 
   // Dimensions of the workspace
   boost::scoped_array<size_t> index(new size_t[nd]);
@@ -610,7 +610,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
 
       if (bin_centres && !(linearIndex == std::numeric_limits<size_t>::max() ||
                            this->getIsMaskedAt(linearIndex))) {
-        coord_t bin_centrePos =
+        auto bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
         line.x.push_back(bin_centrePos);
       } else if (!bin_centres)
@@ -1292,7 +1292,7 @@ Does not perform any clearing. Multiple calls are compounded.
 @param maskingRegion : Implicit function defining mask region.
 */
 void MDHistoWorkspace::setMDMasking(
-    Mantid::Geometry::MDImplicitFunction *maskingRegion) {
+    std::unique_ptr<Mantid::Geometry::MDImplicitFunction> maskingRegion) {
   if (maskingRegion != nullptr) {
     for (size_t i = 0; i < this->getNPoints(); ++i) {
       // If the function masks the point, then mask it, otherwise leave it as it
@@ -1301,7 +1301,6 @@ void MDHistoWorkspace::setMDMasking(
         this->setMDMaskAt(i, true);
       }
     }
-    delete maskingRegion;
   }
 }
 

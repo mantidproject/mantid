@@ -50,19 +50,19 @@ std::set<std::string> getAllStatisticTypeNames();
 void CreateLogPropertyTable::init() {
   // Input workspaces
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Name of the Input Workspaces from which to get log properties.");
 
   // Output workspace
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output ITableWorkspace.");
 
   // Which log properties to use
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "LogPropertyNames",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the log properties to place in table.");

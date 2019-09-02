@@ -205,7 +205,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_bad_linear_adjustment() {
@@ -224,7 +224,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_bad_const_adjustment() {
@@ -243,7 +243,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_linear_adjustment_with_too_few_spectra() {
@@ -262,7 +262,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_const_adjustment_with_too_few_spectra() {
@@ -281,7 +281,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_adjustments_together_too_few_spectra() {
@@ -305,7 +305,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_adjustments_together_real_data_not_supported() {
@@ -327,7 +327,7 @@ public:
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
 
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_adjustment_arithmetic() {
@@ -1058,7 +1058,7 @@ public:
     alg->initialize();
     alg->setChild(true);
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", ws),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_histogram_workspace() {

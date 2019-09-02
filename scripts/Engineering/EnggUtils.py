@@ -132,7 +132,7 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
     max_index = workspace.getNumberHistograms()
     if indices[-1] >= max_index:
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
-                         "workspace '" + workspace.getName() + "' (" + str(workspace.getNumberHistograms()) +
+                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms()) +
                          ") has been given. Please check the list of indices.")
     # and finally translate from 'spectrum numbers' to 'workspace indices'
     return [workspace.getIndexFromSpectrumNumber(sn) for sn in indices]

@@ -83,7 +83,7 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
                                              "16_4",
                                              "ISISPowderAbstractInstrumentTest",
                                              "MOCK15-suf.nxs")
-        self.assertEquals(output_paths["nxs_filename"], expected_nxs_filename)
+        self.assertEqual(output_paths["nxs_filename"], expected_nxs_filename)
 
     def test_set_valid_beam_parameters(self):
         # Setup basic instrument mock

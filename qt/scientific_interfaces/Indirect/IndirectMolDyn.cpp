@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMolDyn.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -14,20 +15,13 @@
 
 using namespace Mantid::API;
 
-namespace {
-
-WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      workspaceName);
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 IndirectMolDyn::IndirectMolDyn(QWidget *parent)
     : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour, "0"));
 
   connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy,
           SLOT(setEnabled(bool)));
@@ -37,11 +31,13 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent)
           this, SLOT(versionSelected(const QString &)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsResolution->isOptional(true);
 }
 
 void IndirectMolDyn::setup() {}
@@ -88,18 +84,19 @@ void IndirectMolDyn::run() {
 
   // Get filename and base filename (for naming output workspace group)
   auto const filename = m_uiForm.mwRun->getFirstFilename();
-  auto const baseName = QFileInfo(filename).baseName();
   auto const functionNames = m_uiForm.leFunctionNames->text().toStdString();
   bool const symmetrise = m_uiForm.ckSymmetrise->isChecked();
   bool const cropEnergy = m_uiForm.ckCropEnergy->isChecked();
   bool const resolution = m_uiForm.ckResolution->isChecked();
+
+  m_outputWsName = QFileInfo(filename).baseName().toStdString();
 
   // Setup algorithm
   auto molDynAlg = AlgorithmManager::Instance().create("MolDyn");
   molDynAlg->setProperty("Data", filename.toStdString());
   molDynAlg->setProperty("Functions", functionNames);
   molDynAlg->setProperty("SymmetriseEnergy", symmetrise);
-  molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
+  molDynAlg->setProperty("OutputWorkspace", m_outputWsName);
 
   // Set energy crop option
   if (cropEnergy) {
@@ -118,10 +115,10 @@ void IndirectMolDyn::run() {
 
 void IndirectMolDyn::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (error) {
-    setPlotEnabled(false);
+  if (error)
     setSaveEnabled(false);
-  }
+  else
+    setOutputPlotOptionsWorkspaces({m_outputWsName});
 }
 
 /**
@@ -144,33 +141,9 @@ void IndirectMolDyn::versionSelected(const QString &version) {
   m_uiForm.mwRun->isForDirectory(version4);
 }
 
-void IndirectMolDyn::runClicked() { runTab(); }
-
-/**
- * Handle plotting of mantid workspace
- */
-void IndirectMolDyn::plotClicked() {
-  setPlotIsPlotting(true);
-
-  QString const filename = m_uiForm.mwRun->getFirstFilename();
-  QString const baseName = QFileInfo(filename).baseName();
-
-  if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
-
-    auto const diffResultsGroup = getADSWorkspaceGroup(baseName.toStdString());
-    auto const names = diffResultsGroup->getNames();
-    auto const plotType = m_uiForm.cbPlot->currentText();
-
-    for (auto const &name : names) {
-      if (plotType == "Spectra" || plotType == "Both")
-        plotSpectrum(QString::fromStdString(name));
-
-      if (plotType == "Contour" || plotType == "Both")
-        plot2D(QString::fromStdString(name));
-    }
-  }
-
-  setPlotIsPlotting(false);
+void IndirectMolDyn::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
 
 /**
@@ -192,24 +165,13 @@ void IndirectMolDyn::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void IndirectMolDyn::setPlotIsPlotting(bool running) {
-  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot");
-  setButtonsEnabled(!running);
-}
-
 void IndirectMolDyn::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
 void IndirectMolDyn::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void IndirectMolDyn::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlot->setEnabled(enabled);
 }
 
 void IndirectMolDyn::setSaveEnabled(bool enabled) {

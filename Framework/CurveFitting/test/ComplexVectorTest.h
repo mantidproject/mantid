@@ -182,7 +182,7 @@ public:
     TS_ASSERT_DELTA(v1.get(2).real(), 888.0, 1e-10);
     TS_ASSERT_DELTA(v1.get(2).imag(), 0.888, 1e-10);
 
-    TS_ASSERT_THROWS(v1 += makeVector3(), std::runtime_error);
+    TS_ASSERT_THROWS(v1 += makeVector3(), const std::runtime_error &);
   }
 
   void test_minus_operator() {
@@ -195,7 +195,7 @@ public:
     TS_ASSERT_DELTA(v1.get(1).imag(), 0.22, 1e-10);
     TS_ASSERT_DELTA(v1.get(2).real(), 222.0, 1e-10);
     TS_ASSERT_DELTA(v1.get(2).imag(), 0.222, 1e-10);
-    TS_ASSERT_THROWS(v1 -= makeVector3(), std::runtime_error);
+    TS_ASSERT_THROWS(v1 -= makeVector3(), const std::runtime_error &);
   }
 
   void test_times_operator() {

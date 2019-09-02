@@ -71,11 +71,11 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSPE::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
-      "The name of the SPE file to load.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".spe"),
+                  "The name of the SPE file to load.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -110,7 +110,7 @@ void LoadSPE::exec() {
     reportFormatError(std::string(comment));
 
   // Create the axis that will hold the phi values
-  auto *phiAxis = new BinEdgeAxis(nhist + 1);
+  auto phiAxis = std::make_unique<BinEdgeAxis>(nhist + 1);
   // Look at previously read comment field to see what unit vertical axis should
   // have
   if (comment[4] == 'Q' || comment[4] == 'q') {
@@ -160,7 +160,7 @@ void LoadSPE::exec() {
   workspace->setDistribution(true); // It should be a distribution
   workspace->setYUnitLabel("S(Phi,Energy)");
   // Replace the default spectrum axis with the phi values one
-  workspace->replaceAxis(1, phiAxis);
+  workspace->replaceAxis(1, std::move(phiAxis));
 
   // Now read in the data spectrum-by-spectrum
   Progress progress(this, 0.0, 1.0, nhist);

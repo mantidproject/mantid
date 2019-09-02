@@ -16,11 +16,17 @@ AlgorithmProgressModel::AlgorithmProgressModel(
     AlgorithmProgressPresenter *presenter)
     : AlgorithmObserver(), m_dialogPresenter{nullptr}, m_mainWindowPresenter{
                                                            presenter} {
+
   // Start capturing the triggers from ALL algorithms starting
   // this allows us to attach an observer to the algorithm to track the
   // start, progress, finish and errors.
   observeStarting();
 }
+
+AlgorithmProgressModel::~AlgorithmProgressModel() {
+  this->stopObservingManager();
+}
+
 void AlgorithmProgressModel::setDialog(
     AlgorithmProgressDialogPresenter *presenter) {
   this->m_dialogPresenter = presenter;

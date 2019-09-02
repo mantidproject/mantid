@@ -33,7 +33,7 @@ using namespace Geometry;
 void PoldiAutoCorrelation5::init() {
 
   // Input workspace containing the raw data.
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "InputWorkspace", "", Direction::InOut),
                   "Input workspace containing raw POLDI data.");
 
@@ -45,7 +45,7 @@ void PoldiAutoCorrelation5::init() {
                   Direction::Input);
 
   // The output Workspace2D containing the Poldi data autocorrelation function.
-  declareProperty(make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output workspace containing the correlation spectrum.");
 

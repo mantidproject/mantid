@@ -52,7 +52,7 @@ const std::string ModeratorTzeroLinear::category() const {
 }
 
 void ModeratorTzeroLinear::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "The name of the input workspace, containing events and/or "
@@ -64,7 +64,7 @@ void ModeratorTzeroLinear::init() {
                   "TOF shift, units in microseconds. Overrides the value"
                   "stored in the instrument object");
   // declare the output workspace
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 
@@ -166,7 +166,7 @@ void ModeratorTzeroLinear::exec() {
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
-    size_t wsIndex = static_cast<size_t>(i);
+    auto wsIndex = static_cast<size_t>(i);
     calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
 
     outputWS->setHistogram(i, inputWS->histogram(i));
@@ -220,7 +220,7 @@ void ModeratorTzeroLinear::execEvent() {
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    size_t wsIndex = static_cast<size_t>(i);
+    auto wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION
     EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists

@@ -48,6 +48,8 @@ class StateData(StateBase):
     idf_file_path = StringParameter()
     ipf_file_path = StringParameter()
 
+    user_file = StringParameter()
+
     def __init__(self):
         super(StateData, self).__init__()
 
@@ -64,6 +66,7 @@ class StateData(StateBase):
         # in case this is not set, for example by not using the builders.
         self.instrument = SANSInstrument.NoInstrument
         self.facility = SANSFacility.NoFacility
+        self.user_file = ""
 
     def validate(self):
         is_invalid = dict()
@@ -111,7 +114,7 @@ class StateData(StateBase):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-def set_information_from_file(data_info, file_information):
+def set_information_from_file(data_info, file_information, user_file):
     instrument = file_information.get_instrument()
     facility = file_information.get_facility()
     run_number = file_information.get_run_number()
@@ -121,14 +124,16 @@ def set_information_from_file(data_info, file_information):
     data_info.sample_scatter_is_multi_period = file_information.get_number_of_periods() > 1
     data_info.idf_file_path = file_information.get_idf_file_path()
     data_info.ipf_file_path = file_information.get_ipf_file_path()
+    data_info.user_file = user_file
 
 
 class StateDataBuilder(object):
     @automatic_setters(StateData)
-    def __init__(self, file_information):
+    def __init__(self, file_information, user_file):
         super(StateDataBuilder, self).__init__()
         self.state = StateData()
         self._file_information = file_information
+        self._user_file = user_file
 
     def build(self):
         # Make sure that the product is in a valid state, ie not incomplete
@@ -138,7 +143,7 @@ class StateDataBuilder(object):
         #  This is currently:
         # 1. instrument
         # 2. sample_scatter_run_number
-        set_information_from_file(self.state, self._file_information)
+        set_information_from_file(self.state, self._file_information, self._user_file)
 
         return copy.copy(self.state)
 
@@ -146,9 +151,9 @@ class StateDataBuilder(object):
 # ------------------------------------------
 # Factory method for StateDataBuilder
 # ------------------------------------------
-def get_data_builder(facility, file_information=None):
+def get_data_builder(facility, file_information=None, user_file=""):
     if facility is SANSFacility.ISIS:
-        return StateDataBuilder(file_information)
+        return StateDataBuilder(file_information, user_file)
     else:
         raise NotImplementedError("StateDataBuilder: The selected facility {0} does not seem"
                                   " to exist".format(str(facility)))

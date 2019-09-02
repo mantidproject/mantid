@@ -44,10 +44,10 @@ class ConjoinSpectraTest(unittest.TestCase):
         self.assertEqual(len(inDataE), len(outDataE2))
         self.assertEqual(2, conjoinedWS.getNumberHistograms()) # Should always have 2 histograms
 
-        self.assertEquals(set(inDataY), set(outDataY1))
-        self.assertEquals(set(inDataY), set(outDataY2))
-        self.assertEquals(set(inDataE), set(outDataE1))
-        self.assertEquals(set(inDataE), set(outDataE2))
+        self.assertEqual(set(inDataY), set(outDataY1))
+        self.assertEqual(set(inDataY), set(outDataY2))
+        self.assertEqual(set(inDataE), set(outDataE1))
+        self.assertEqual(set(inDataE), set(outDataE2))
 
 
 if __name__ == '__main__':

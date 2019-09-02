@@ -96,14 +96,14 @@ class DNSMergeRuns(PythonAlgorithm):
         for wsname in workspace_names[1:]:
             wks = api.AnalysisDataService.retrieve(wsname)
             if wks.getNumDims() != ndims:
-                issues["WorkspaceNames"] = "Number of dimensions for workspace " + wks.getName() + \
-                    " does not match to one for " + ws0.getName()
+                issues["WorkspaceNames"] = "Number of dimensions for workspace " + wks.name() + \
+                    " does not match to one for " + ws0.name()
             if wks.getNumberHistograms() != nhists:
-                issues["WorkspaceNames"] = "Number of histohrams for workspace " + wks.getName() + \
-                    " does not match to one for " + ws0.getName()
+                issues["WorkspaceNames"] = "Number of histohrams for workspace " + wks.name() + \
+                    " does not match to one for " + ws0.name()
             if wks.blocksize() != nblocks:
-                issues["WorkspaceNames"] = "Number of blocks for workspace " + wks.getName() + \
-                    " does not match to one for " + ws0.getName()
+                issues["WorkspaceNames"] = "Number of blocks for workspace " + wks.name() + \
+                    " does not match to one for " + ws0.name()
         # workspaces must have the same wavelength and normalization
         result = api.CompareSampleLogs(workspace_names, 'wavelength,normalized', 0.01)
         if len(result) > 0:

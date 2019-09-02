@@ -156,8 +156,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         # Perform the ElasticWindow algorithms
         for input_ws in self._input_workspaces:
-            logger.information('Running ElasticWindow for workspace: {}'.format(input_ws.getName()))
-            progress.report('ElasticWindow for workspace: {}'.format(input_ws.getName()))
+            logger.information('Running ElasticWindow for workspace: {}'.format(input_ws.name()))
+            progress.report('ElasticWindow for workspace: {}'.format(input_ws.name()))
 
             q_workspace, q2_workspace = ElasticWindow(InputWorkspace=input_ws,
                                                       IntegrationRangeStart=self._integration_range_start,
@@ -174,7 +174,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_workspaces.append(q2_workspace)
 
             # Get the run number
-            run_no = getInstrRun(input_ws.getName())[1]
+            run_no = getInstrRun(input_ws.name())[1]
             run_numbers.append(run_no)
 
             # Get the sample environment unit
@@ -255,7 +255,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         """
         from IndirectCommon import getInstrRun
 
-        instr, run_number = getInstrRun(workspace.getName())
+        instr, run_number = getInstrRun(workspace.name())
 
         pad_num = config.getInstrument(instr).zeroPadding(int(run_number))
         zero_padding = '0' * (pad_num - len(run_number))

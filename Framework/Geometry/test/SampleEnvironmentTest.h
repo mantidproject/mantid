@@ -160,7 +160,7 @@ public:
     TS_ASSERT_THROWS(kit->generatePoint(rng,
                                         kit->getContainer().getBoundingBox(),
                                         maxAttempts),
-                     std::runtime_error);
+                     const std::runtime_error &);
     Mock::VerifyAndClearExpectations(&rng);
   }
 
