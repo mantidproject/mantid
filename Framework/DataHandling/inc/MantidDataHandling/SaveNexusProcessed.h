@@ -63,13 +63,15 @@ public:
       const std::vector<int> &wsIndices,
       const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
-protected:
-  /// Override process groups
-  bool processGroups() override;
-
   virtual void saveNexusGeometry(const Mantid::API::MatrixWorkspace &,
                                  const std::string &){
       /* Do nothing by default */};
+
+  virtual bool saveLegacyInstrument() { return true; }
+
+protected:
+  /// Override process groups
+  bool processGroups() override;
 
   /// Overwrites Algorithm method.
   void init() override;

@@ -9,7 +9,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SaveNexusESS.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -19,7 +21,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/filesystem.hpp>
 #include <memory>
-using Mantid::DataHandling::SaveNexusESS;
+
+using namespace Mantid::DataHandling;
 
 class SaveNexusESSTest : public CxxTest::TestSuite {
 public:
@@ -40,15 +43,15 @@ public:
     alg.isExecuted();
   }
 
-  void test_Init() {
+  void xtest_Init() {
     SaveNexusESS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec_instrument_details() {
+  void test_exec_rectangular_instrument_details() {
     using namespace Mantid::NexusGeometry;
-    const ScopedFileHandle fileInfo("test_rectangular.nxs");
+    ScopedFileHandle fileInfo("test_rectangular.nxs");
     auto ws =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 10 /*numBins*/);
@@ -72,6 +75,31 @@ public:
     // SaveNexusGeometry (via SaveNexusESS) will not save columns of a
     // Rectangular detector bank. Hence subtranction from output.
     TS_ASSERT_EQUALS(outCompInfo->size(), inCompInfo.size() - 10);
+  }
+
+  void test_exec_rectangular_data() {
+    ScopedFileHandle fileInfo("test_rectangular_data.nxs");
+    auto wsIn =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+
+    do_execute(fileInfo.fullPath(), wsIn);
+
+    LoadNexusProcessed loader;
+    loader.setChild(true);
+    loader.setRethrows(true);
+    loader.initialize();
+    loader.setProperty("Filename", fileInfo.fullPath());
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.execute();
+
+    Mantid::API::Workspace_sptr wsOut = loader.getProperty("OutputWorkspace");
+    auto matrixWSOut =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsOut);
+
+    TS_ASSERT_EQUALS(matrixWSOut->blocksize(), 12);
+    TS_ASSERT_EQUALS(matrixWSOut->getNumberHistograms(), 10 * 10);
+    TS_ASSERT(matrixWSOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
   }
 };
 

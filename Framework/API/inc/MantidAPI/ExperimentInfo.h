@@ -118,7 +118,7 @@ public:
   void saveExperimentInfoNexus(::NeXus::File *file) const;
   /// Saves this experiment description to the open NeXus file
   void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument,
-                               bool saveSample, bool saveLogs) const;
+                               bool saveSample, bool saveLogs, bool saveLegacyInstrument=true) const;
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename,
                                ::NeXus::File *file, std::string &parameterStr);

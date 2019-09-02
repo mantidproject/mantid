@@ -52,7 +52,7 @@ void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
     NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
     NexusGeometry::NexusGeometrySave::saveInstrument(
         ws.componentInfo(), ws.detectorInfo(), filename, "mantid_workspace_1",
-        adapter, false);
+        adapter, true);
   } catch (std::exception &e) {
     g_log.error(std::string(e.what()) +
                 " Nexus Geometry may be absent or incomplete "
@@ -62,6 +62,13 @@ void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
                 " Nexus Geometry may be absent or incomplete "
                 "from processed Nexus file");
   }
+}
+
+bool SaveNexusESS::saveLegacyInstrument() {
+  /*A hard No on this one. Mantids's current NXDetector, NXMonitor ... types do
+   * not have information needed for loading and just cause down-stream
+   * problems. Best not to save them in the first place.*/
+  return false;
 }
 
 //----------------------------------------------------------------------------------------------
