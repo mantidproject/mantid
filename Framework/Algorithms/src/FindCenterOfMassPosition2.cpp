@@ -167,9 +167,8 @@ void FindCenterOfMassPosition2::exec() {
       // Get the current spectrum
       auto &YIn = inputWS->y(i);
       // Skip if NaN of inf
-      if (std::isnan(YIn[specID]) || std::isinf(YIn[specID])
+      if (std::isnan(YIn[specID]) || std::isinf(YIn[specID]))
         continue;
-
       const V3D pos = spectrumInfo.position(i);
       double x = pos.X();
       double y = pos.Y();
