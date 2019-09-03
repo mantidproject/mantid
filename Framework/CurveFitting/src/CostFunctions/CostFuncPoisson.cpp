@@ -71,23 +71,33 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
                                          bool evalDeriv,
                                          bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
-  size_t np = function->nParams(); // number of parameters
-  size_t ny = domain->size();      // number of data points
-  Jacobian jacobian(ny, np);
+  size_t numParams = function->nParams(); // number of parameters
+  size_t numDataPoints = domain->size();  // number of data points
+  Jacobian jacobian(numDataPoints, numParams);
   function->function(*domain, *values);
   function->functionDeriv(*domain, jacobian);
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  // std::vector<double> weights = getFitWeights(values);
 
-  for (size_t ip = 0; ip < np; ++ip) {
+  if (evalDeriv) {
+    m_der.resize(nParams());
+    m_der.zero();
+  }
+  if (evalHessian) {
+    m_hessian.resize(nParams(), nParams());
+    m_hessian.zero();
+  }
+
+  for (size_t ip = 0; ip < numParams; ++ip) {
     if (!function->isActive(ip))
       continue;
+
     double d = 0.0;
-    for (size_t i = 0; i < ny; ++i) {
+    for (size_t i = 0; i < numDataPoints; ++i) {
       double calc = values->getCalculated(i);
       double obs = values->getFitData(i);
+
       if (calc <= absoluteCutOff) {
         if (iActiveP == 0) {
           fVal += std::numeric_limits<double>::infinity();
@@ -107,6 +117,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
           }
           d += jacobian.get(i, ip);
         } else {
+          // TODO this is duplicated
           if (iActiveP == 0) {
             fVal += (calc - obs) + obs * (log(obs) - log(calc));
           }
@@ -127,8 +138,8 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
   if (!evalHessian)
     return;
 
-  size_t i1 = 0;                  // active parameter index
-  for (size_t i = 0; i < np; ++i) // over parameters
+  size_t i1 = 0;                         // active parameter index
+  for (size_t i = 0; i < numParams; ++i) // over parameters
   {
     if (!function->isActive(i))
       continue;
@@ -139,7 +150,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
       dp *= p;
     }
     function->setParameter(i, p + dp);
-    Jacobian jacobian2(ny, np);
+    Jacobian jacobian2(numDataPoints, numParams);
     function->functionDeriv(*domain, jacobian2);
     function->setParameter(i, p);
     for (size_t j = 0; j <= i; ++j) // over ~ half of parameters
@@ -147,7 +158,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
       if (!function->isActive(j))
         continue;
       double d = 0.0;
-      for (size_t k = 0; k < ny; ++k) // over fitting data
+      for (size_t k = 0; k < numDataPoints; ++k) // over fitting data
       {
         double d2 = (jacobian2.get(k, j) - jacobian.get(k, j)) / dp;
 
