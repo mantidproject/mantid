@@ -16,7 +16,7 @@ from mantid.plots.helperfunctions import get_data_from_errorbar_container, set_e
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
-    CurveProperties, curve_has_errors, remove_curve_from_ax, curve_hidden)
+    CurveProperties, curve_has_errors, remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 
 
