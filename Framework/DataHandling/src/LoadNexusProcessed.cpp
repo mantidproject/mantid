@@ -374,141 +374,167 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
 void LoadNexusProcessed::exec() {
-  progress(0, "Opening file...");
 
-  // Throws an approriate exception if there is a problem with file access
-  const std::string filename = getPropertyValue("Filename");
-  NXRoot root(filename);
+  API::Workspace_sptr tempWS;
+  // Start scoped block
+  {
+    progress(0, "Opening file...");
 
-  // "Open" the same file but with the C++ interface
-  m_cppFile = new ::NeXus::File(root.m_fileID);
+    // Throws an approriate exception if there is a problem with file access
+    const std::string filename = getPropertyValue("Filename");
+    NXRoot root(filename);
 
-  // Find out how many first level entries there are
-  // Cast down to int as another property later on is an int
-  auto nWorkspaceEntries = static_cast<int>((root.groups().size()));
+    // "Open" the same file but with the C++ interface
+    m_cppFile = new ::NeXus::File(root.m_fileID);
 
-  // Check for an entry number property
-  int entrynumber = getProperty("EntryNumber");
-  Property const *const entryNumberProperty = this->getProperty("EntryNumber");
-  bool bDefaultEntryNumber = entryNumberProperty->isDefault();
+    // Find out how many first level entries there are
+    // Cast down to int as another property later on is an int
+    auto nWorkspaceEntries = static_cast<int>((root.groups().size()));
 
-  if (!bDefaultEntryNumber && entrynumber > nWorkspaceEntries) {
-    g_log.error() << "Invalid entry number specified. File only contains "
-                  << nWorkspaceEntries << " entries.\n";
-    throw std::invalid_argument("Invalid entry number specified.");
-  }
+    // Check for an entry number property
+    int entrynumber = getProperty("EntryNumber");
+    Property const *const entryNumberProperty =
+        this->getProperty("EntryNumber");
+    bool bDefaultEntryNumber = entryNumberProperty->isDefault();
 
-  const std::string basename = "mantid_workspace_";
-
-  std::ostringstream os;
-  if (bDefaultEntryNumber) {
-    // Set the entry number to 1 if not provided.
-    entrynumber = 1;
-  }
-  os << basename << entrynumber;
-  const std::string targetEntryName = os.str();
-
-  // Take the first real workspace obtainable. We need it even if loading
-  // groups.
-  API::Workspace_sptr tempWS = loadEntry(root, targetEntryName, 0, 1, filename);
-
-  if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
-    // We have what we need.
-    setProperty("OutputWorkspace", tempWS);
-  } else {
-    // We already know that this is a group workspace. Is it a true multiperiod
-    // workspace.
-    const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
-    const bool bIsMultiPeriod =
-        isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
-    Property *specListProp = this->getProperty("SpectrumList");
-    m_list = !specListProp->isDefault();
-
-    // Load all first level entries
-    auto wksp_group = boost::make_shared<WorkspaceGroup>();
-    // This forms the name of the group
-    std::string base_name = getPropertyValue("OutputWorkspace");
-    // First member of group should be the group itself, for some reason!
-
-    // load names of each of the workspaces. Note that if we have duplicate
-    // names then we don't select them
-    auto names =
-        extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
-
-    // remove existing workspace and replace with the one being loaded
-    bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
-    if (wsExists) {
-      Algorithm_sptr alg =
-          AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
-      alg->initialize();
-      alg->setChild(true);
-      alg->setProperty("Workspace", base_name);
-      alg->execute();
+    if (!bDefaultEntryNumber && entrynumber > nWorkspaceEntries) {
+      g_log.error() << "Invalid entry number specified. File only contains "
+                    << nWorkspaceEntries << " entries.\n";
+      throw std::invalid_argument("Invalid entry number specified.");
     }
 
-    base_name += "_";
-    const std::string prop_name = "OutputWorkspace_";
+    const std::string basename = "mantid_workspace_";
 
-    MatrixWorkspace_sptr tempMatrixWorkspace =
-        boost::dynamic_pointer_cast<Workspace2D>(tempWS);
-    bool bAccelleratedMultiPeriodLoading = false;
-    if (tempMatrixWorkspace) {
-      // We only accelerate for simple scenarios for now. Spectrum lists are too
-      // complicated to bother with.
-      bAccelleratedMultiPeriodLoading =
-          bIsMultiPeriod && bFastMultiPeriod && !m_list;
-      // Strip out any loaded logs. That way we don't pay for copying that
-      // information around.
-      tempMatrixWorkspace->mutableRun().clearLogs();
+    std::ostringstream os;
+    if (bDefaultEntryNumber) {
+      // Set the entry number to 1 if not provided.
+      entrynumber = 1;
     }
+    os << basename << entrynumber;
+    const std::string targetEntryName = os.str();
 
-    if (bAccelleratedMultiPeriodLoading) {
-      g_log.information("Accelerated multiperiod loading");
+    // Take the first real workspace obtainable. We need it even if loading
+    // groups.
+    tempWS = loadEntry(root, targetEntryName, 0, 1, filename);
+
+    if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
+      // We have what we need.
+      setProperty("OutputWorkspace", tempWS);
     } else {
-      g_log.information("Individual group loading");
-    }
+      // We already know that this is a group workspace. Is it a true
+      // multiperiod workspace.
+      const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
+      const bool bIsMultiPeriod =
+          isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
+      Property *specListProp = this->getProperty("SpectrumList");
+      m_list = !specListProp->isDefault();
 
-    for (int p = 1; p <= nWorkspaceEntries; ++p) {
-      const auto indexStr = std::to_string(p);
+      // Load all first level entries
+      auto wksp_group = boost::make_shared<WorkspaceGroup>();
+      // This forms the name of the group
+      std::string base_name = getPropertyValue("OutputWorkspace");
+      // First member of group should be the group itself, for some reason!
 
-      // decide what the workspace should be called
-      std::string wsName = buildWorkspaceName(names[p], base_name, p);
+      // load names of each of the workspaces. Note that if we have duplicate
+      // names then we don't select them
+      auto names =
+          extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
 
-      Workspace_sptr local_workspace;
-
-      /*
-      For multiperiod workspaces we can accelerate the loading by making
-      resonable assumptions about the differences between the workspaces
-      Only Y, E and log data entries should vary. Therefore we can clone our
-      temp workspace, and overwrite those things we are interested in.
-      */
-      if (bAccelleratedMultiPeriodLoading) {
-        local_workspace = doAccelleratedMultiPeriodLoading(
-            root, basename + indexStr, tempMatrixWorkspace, nWorkspaceEntries,
-            p);
-      } else // Fall-back for generic loading
-      {
-        const auto nWorkspaceEntries_d = static_cast<double>(nWorkspaceEntries);
-        local_workspace =
-            loadEntry(root, basename + indexStr,
-                      static_cast<double>(p - 1) / nWorkspaceEntries_d,
-                      1. / nWorkspaceEntries_d, filename);
+      // remove existing workspace and replace with the one being loaded
+      bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
+      if (wsExists) {
+        Algorithm_sptr alg =
+            AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+        alg->initialize();
+        alg->setChild(true);
+        alg->setProperty("Workspace", base_name);
+        alg->execute();
       }
 
-      declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
-          prop_name + indexStr, wsName, Direction::Output));
+      base_name += "_";
+      const std::string prop_name = "OutputWorkspace_";
 
-      wksp_group->addWorkspace(local_workspace);
-      setProperty(prop_name + indexStr, local_workspace);
+      MatrixWorkspace_sptr tempMatrixWorkspace =
+          boost::dynamic_pointer_cast<Workspace2D>(tempWS);
+      bool bAccelleratedMultiPeriodLoading = false;
+      if (tempMatrixWorkspace) {
+        // We only accelerate for simple scenarios for now. Spectrum lists are
+        // too complicated to bother with.
+        bAccelleratedMultiPeriodLoading =
+            bIsMultiPeriod && bFastMultiPeriod && !m_list;
+        // Strip out any loaded logs. That way we don't pay for copying that
+        // information around.
+        tempMatrixWorkspace->mutableRun().clearLogs();
+      }
+
+      if (bAccelleratedMultiPeriodLoading) {
+        g_log.information("Accelerated multiperiod loading");
+      } else {
+        g_log.information("Individual group loading");
+      }
+
+      for (int p = 1; p <= nWorkspaceEntries; ++p) {
+        const auto indexStr = std::to_string(p);
+
+        // decide what the workspace should be called
+        std::string wsName = buildWorkspaceName(names[p], base_name, p);
+
+        Workspace_sptr local_workspace;
+
+        /*
+        For multiperiod workspaces we can accelerate the loading by making
+        resonable assumptions about the differences between the workspaces
+        Only Y, E and log data entries should vary. Therefore we can clone our
+        temp workspace, and overwrite those things we are interested in.
+        */
+        if (bAccelleratedMultiPeriodLoading) {
+          local_workspace = doAccelleratedMultiPeriodLoading(
+              root, basename + indexStr, tempMatrixWorkspace, nWorkspaceEntries,
+              p);
+        } else // Fall-back for generic loading
+        {
+          const auto nWorkspaceEntries_d =
+              static_cast<double>(nWorkspaceEntries);
+          local_workspace =
+              loadEntry(root, basename + indexStr,
+                        static_cast<double>(p - 1) / nWorkspaceEntries_d,
+                        1. / nWorkspaceEntries_d, filename);
+        }
+
+        declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
+            prop_name + indexStr, wsName, Direction::Output));
+
+        wksp_group->addWorkspace(local_workspace);
+        setProperty(prop_name + indexStr, local_workspace);
+      }
+
+      // The group is the root property value
+      setProperty("OutputWorkspace",
+                  boost::static_pointer_cast<Workspace>(wksp_group));
     }
 
-    // The group is the root property value
-    setProperty("OutputWorkspace",
-                boost::static_pointer_cast<Workspace>(wksp_group));
+    root.close();
+  } // All file srources should be scoped to here
+
+  // if (nWorkspaceEntries == 1) {
+  if (auto *matrixWs = dynamic_cast<MatrixWorkspace *>(tempWS.get())) {
+    std::string fname = getProperty("Filename");
+    try {
+      using namespace Mantid::NexusGeometry;
+      auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
+          fname, NexusGeometry::makeLogger(&g_log));
+      matrixWs->setInstrument(
+          Geometry::Instrument_const_sptr(std::move(instrument)));
+    } catch (std::exception &e) {
+      g_log.warning(e.what());
+    } catch (H5::Exception &e) {
+      g_log.warning(e.getDetailMsg());
+    }
   }
+  // }
 
   m_axis1vals.clear();
-}
+} // namespace DataHandling
 
 /**
  * Decides what to call a child of a group workspace.
@@ -1591,17 +1617,6 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     g_log.warning(e.what());
     g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
                   "update the geometry");
-    try {
-      using namespace Mantid::NexusGeometry;
-      auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
-          filename, NexusGeometry::makeLogger(&g_log));
-      local_workspace->setInstrument(
-          Geometry::Instrument_const_sptr(std::move(instrument)));
-    } catch (std::exception &e) {
-      g_log.warning(e.what());
-    } catch (H5::Exception &e) {
-      g_log.warning(e.getDetailMsg());
-    }
   }
 
   // Now assign the spectra-detector map
