@@ -294,11 +294,13 @@ class FigureInteractionTest(unittest.TestCase):
     def test_adding_horizontal_marker_adds_correct_marker(self, mock_marker):
         y0, y1 = 0, 1
         data = MagicMock()
-        self.interactor._add_horizontal_marker(data, y0, y1)
+        axis = MagicMock()
+        self.interactor._add_horizontal_marker(data, y0, y1, axis)
         expected_call = call(self.interactor.canvas, 'C2', data, y0, y1,
                              name='marker 0',
                              marker_type='YSingle',
-                             line_style='dashed')
+                             line_style='dashed',
+                             axis=axis)
 
         self.assertEqual(1, mock_marker.call_count)
         mock_marker.assert_has_calls([expected_call])
@@ -307,11 +309,13 @@ class FigureInteractionTest(unittest.TestCase):
     def test_adding_vertical_marker_adds_correct_marker(self, mock_marker):
         x0, x1 = 0, 1
         data = MagicMock()
-        self.interactor._add_vertical_marker(data, x0, x1)
+        axis = MagicMock()
+        self.interactor._add_vertical_marker(data, x0, x1, axis)
         expected_call = call(self.interactor.canvas, 'C2', data, x0, x1,
                              name='marker 0',
                              marker_type='XSingle',
-                             line_style='dashed')
+                             line_style='dashed',
+                             axis=axis)
 
         self.assertEqual(1, mock_marker.call_count)
         mock_marker.assert_has_calls([expected_call])
@@ -344,7 +348,8 @@ class FigureInteractionTest(unittest.TestCase):
         expected_call = [call(self.interactor.canvas,
                               marker,
                               self.interactor.valid_lines,
-                              self.interactor.valid_colors)]
+                              self.interactor.valid_colors,
+                              [])]
 
         self.interactor._edit_marker(marker)
 
