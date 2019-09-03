@@ -146,7 +146,7 @@ void SaveNexusProcessed::getWSIndexList(
   }
 }
 
-bool SaveNexusProcessed::doExec(
+void SaveNexusProcessed::doExec(
     Workspace_sptr inputWorkspace,
     boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
     const bool keepFile, optional_size_t entryNumber) {
@@ -308,8 +308,6 @@ bool SaveNexusProcessed::doExec(
 
   inputWorkspace->history().saveNexus(&cppFile);
   nexusFile->closeGroup();
-  // Return true only for a matrix workspace. Some consumers need to know.
-  return matrixWorkspace.get() != nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -324,18 +322,7 @@ void SaveNexusProcessed::exec() {
   auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
 
   // Perform the execution.
-  auto isMatrixWorkspace = doExec(inputWorkspace, nexusFile);
-  // Add geometry (if implemented) as post-processing step. Note that because of
-  // the processGroups override, we are guranteed not to get here if we are
-  // processing groups. This is important as we must close the file before
-  // running saveNexusGeometry and this is incompatible with group processing.
-  if (isMatrixWorkspace) {
-    nexusFile->closeNexusFile();
-    const std::string filename = getProperty("Filename");
-    saveNexusGeometry(
-        dynamic_cast<Mantid::API::MatrixWorkspace &>(*inputWorkspace),
-        filename);
-  }
+  doExec(inputWorkspace, nexusFile);
 }
 
 //-------------------------------------------------------------------------------------
