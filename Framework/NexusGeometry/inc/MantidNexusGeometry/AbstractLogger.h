@@ -44,9 +44,7 @@ public:
  * Make it easy to wrap existing logging frameworks. Note that ownership of
  * adaptee is NOT transferred to returned Logger.
  */
-template <typename T>
-MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<AbstractLogger>
-makeLogger(T *adaptee) {
+template <typename T> std::unique_ptr<AbstractLogger> makeLogger(T *adaptee) {
 
   return std::make_unique<LogAdapter<T>>(adaptee);
 }
