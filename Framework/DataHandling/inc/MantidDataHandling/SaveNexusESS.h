@@ -34,7 +34,7 @@ protected:
 
 private:
   void saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
-                         const std::string &filename) override;
+                         const std::string &filename);
   virtual bool saveLegacyInstrument() override;
   void init() override;
   void exec() override;

@@ -85,8 +85,15 @@ void SaveNexusESS::init() {
 void SaveNexusESS::exec() {
   // Run the base algorithm. Template method approach used to call ESS
   // specifics.
-  return SaveNexusProcessed::exec();
-}
 
+  API::Workspace_sptr ws = getProperty("InputWorkspace");
+  const std::string filename = getProperty("Filename");
+  auto matrixWs = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+  if (!matrixWs)
+    throw std::runtime_error("SaveNexusESS expects a MatrixWorkspace as input");
+  SaveNexusProcessed::exec();
+  // Now append nexus geometry
+  saveNexusGeometry(*matrixWs, filename);
+}
 } // namespace DataHandling
 } // namespace Mantid

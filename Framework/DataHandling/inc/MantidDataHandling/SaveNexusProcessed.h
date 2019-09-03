@@ -63,10 +63,6 @@ public:
       const std::vector<int> &wsIndices,
       const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
-  virtual void saveNexusGeometry(const Mantid::API::MatrixWorkspace &,
-                                 const std::string &){
-      /* Do nothing by default */};
-
   virtual bool saveLegacyInstrument() { return true; }
 
 protected:
@@ -93,9 +89,7 @@ private:
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int perioidNum) override;
-  /// execute the algorithm. Returns true only if operating on a
-  /// MatrixWorkspace
-  bool doExec(Mantid::API::Workspace_sptr inputWorkspace,
+  void doExec(Mantid::API::Workspace_sptr inputWorkspace,
               boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,
               boost::optional<size_t> entryNumber = boost::optional<size_t>());
