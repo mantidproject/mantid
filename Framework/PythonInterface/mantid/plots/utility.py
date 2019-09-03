@@ -46,12 +46,6 @@ def get_errorbar_containers(ax):
             if isinstance(e_cont, ErrorbarContainer)]
 
 
-def get_axes_index(ax):
-    """Get the index position of given Axes in its figure"""
-    index = ax.rowNum*ax.numCols + ax.colNum + 1
-    return index
-
-
 def get_autoscale_limits(ax, axis):
     """
     Get limits that would be set by autoscale.
