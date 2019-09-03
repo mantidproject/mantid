@@ -46,14 +46,14 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         """
         self.delete_callback(workspace_name)
 
-    # @_catch_exceptions
-    # def renameHandle(self, old_workspace_name, new_workspace_name):
-    #     """
-    #             Called when the ADS has renamed a workspace. Currently treats this the same as deletion.
-    #             :param workspace_name: The name of the workspace
-    #             :param workspace: not used
-    #             """
-    #     self.delete_callback(old_workspace_name)
+    @_catch_exceptions
+    def renameHandle(self, old_workspace_name, new_workspace_name):
+        """
+                Called when the ADS has renamed a workspace. Currently treats this the same as deletion.
+                :param workspace_name: The name of the workspace
+                :param workspace: not used
+                """
+        self.delete_callback(old_workspace_name)
 
     @_catch_exceptions
     def clearHandle(self):

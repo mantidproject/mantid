@@ -182,6 +182,7 @@ class MuonContext(object):
             self.data_context.clear()
 
     def show_raw_data(self):
+        self.ads_observer.observeRename(False)
         for run in self.data_context.current_runs:
             run_string = run_list_to_string(run)
             loaded_workspace = \
@@ -203,6 +204,7 @@ class MuonContext(object):
                                                                self.data_context.is_multi_period(),
                                                                workspace_suffix=self.workspace_suffix)
                 loaded_workspace[0].show(name)
+        self.ads_observer.observeRename(True)
 
     def _do_rebin(self):
         return (self.gui_context['RebinType'] == 'Fixed' and

@@ -15,7 +15,6 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
-from mantid.api import WorkspaceGroup
 from mantid.simpleapi import GroupWorkspaces
 from mantid.kernel import ConfigService
 from Muon.GUI.Common.observer_pattern import Observable
