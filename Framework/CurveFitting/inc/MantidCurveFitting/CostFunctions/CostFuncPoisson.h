@@ -1,13 +1,16 @@
 #ifndef MANTID_CURVEFITTING_COSTFUNCPOISSON_H_
 #define MANTID_CURVEFITTING_COSTFUNCPOISSON_H_
 
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {
 
-/** CostFuncPoisson : TODO: DESCRIPTION
+/** CostFuncPoisson : Implements a cost function for fitting applications using
+  a Poisson measure
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -43,7 +46,17 @@ public:
   void addValDerivHessian(API::IFunction_sptr function,
                           API::FunctionDomain_sptr domain,
                           API::FunctionValues_sptr values,
-                          bool evalDeriv = true, bool evalHessian = true) const override;
+                          bool evalDeriv = true,
+                          bool evalHessian = true) const override;
+
+private:
+  /// Calculates the derivative for the addValDerivHessian method
+  void calculateDerivative(API::IFunction &function,
+                           API::FunctionDomain &domain,
+                           API::FunctionValues &values) const;
+  /// Calculates the Hessian matrix for the addValDerivHessian method
+  void calculateHessian(API::IFunction &function, API::FunctionDomain &domain,
+                        API::FunctionValues &values) const;
 };
 
 } // namespace CostFunctions
