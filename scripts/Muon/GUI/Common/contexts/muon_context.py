@@ -76,7 +76,8 @@ class MuonContext(object):
         asym_name = get_group_asymmetry_name(self, group_name, run_as_string, rebin=rebin)
         asym_name_unnorm = get_group_asymmetry_unnorm_name(self, group_name, run_as_string, rebin=rebin)
         group_workspace = calculate_group_data(self, group_name, run, rebin, name)
-        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin, asym_name, asym_name_unnorm)
+        group_asymmetry, group_asymmetry_unnormalised = estimate_group_asymmetry_data(self, group_name, run, rebin,
+                                                                                      asym_name, asym_name_unnorm)
 
         return group_workspace, group_asymmetry, group_asymmetry_unnormalised
 
@@ -195,7 +196,8 @@ class MuonContext(object):
             if len(loaded_workspace) > 1:
                 # Multi-period data
                 for i, single_ws in enumerate(loaded_workspace):
-                    name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string, self.data_context.is_multi_period(),
+                    name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
+                                                                   self.data_context.is_multi_period(),
                                                                    period=str(i + 1), workspace_suffix=self.workspace_suffix)
                     single_ws.show(name)
             else:
