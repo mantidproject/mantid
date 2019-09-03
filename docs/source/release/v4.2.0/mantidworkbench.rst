@@ -28,6 +28,8 @@ Improvements
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
 - There are now icons alongside the colormap names in the plot options dialog.
 
+- Hex codes can now be inputted directly into the color selectors in figure options.
+
 Bugfixes
 ########
 - Pressing the tab key while in the axis quick editor now selects each input field in the correct order.
