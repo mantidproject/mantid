@@ -144,7 +144,8 @@ class PhaseTablePresenter(object):
 
     def calculate_phase_table(self):
         parameters = self.create_parameters_for_cal_muon_phase_algorithm()
-        fitting_workspace_name = get_fitting_workspace_name(parameters['DetectorTable']) if self.view.output_fit_information else '__NotUsed'
+        fitting_workspace_name = get_fitting_workspace_name(parameters['DetectorTable'])\
+            if self.view.output_fit_information else '__NotUsed'
 
         self.current_alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
         detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg, fitting_workspace_name)

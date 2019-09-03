@@ -39,7 +39,7 @@ class FittingTabModel(object):
         CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'], OutputWorkspace=output_workspace, StoreInADS=False)
         return output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix
 
-    def do_single_tf_fit(self, parameter_dict, output_workspace_group):
+    def do_single_tf_fit(self, parameter_dict):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix =\
             run_CalculateMuonAsymmetry(parameter_dict, alg)
@@ -49,12 +49,13 @@ class FittingTabModel(object):
 
         return function_object.clone(), output_status, output_chi_squared
 
-    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters, fit_group_name):
+    def do_simultaneous_tf_fit(self, parameter_dict, global_parameters):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix =\
             run_CalculateMuonAsymmetry(parameter_dict, alg)
         if len(parameter_dict['ReNormalizedWorkspaceList']) > 1:
-            for input_workspace, output in zip(parameter_dict['ReNormalizedWorkspaceList'], mantid.api.AnalysisDataService.retrieve(output_workspace).getNames()):
+            for input_workspace, output in zip(parameter_dict['ReNormalizedWorkspaceList'],
+                                               mantid.api.AnalysisDataService.retrieve(output_workspace).getNames()):
                 CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
         else:
             CopyLogs(InputWorkspace=parameter_dict['ReNormalizedWorkspaceList'][0], OutputWorkspace=output_workspace, StoreInADS=False)
@@ -105,7 +106,8 @@ class FittingTabModel(object):
         output_workspace, output_parameters, function_object, output_status, output_chi, covariance_matrix\
             = run_simultaneous_Fit(parameters_dict, alg)
         if len(parameters_dict['InputWorkspace']) > 1:
-            for input_workspace, output in zip(parameters_dict['InputWorkspace'], mantid.api.AnalysisDataService.retrieve(output_workspace).getNames()):
+            for input_workspace, output in zip(parameters_dict['InputWorkspace'],
+                                               mantid.api.AnalysisDataService.retrieve(output_workspace).getNames()):
                 CopyLogs(InputWorkspace=input_workspace, OutputWorkspace=output, StoreInADS=False)
         else:
             CopyLogs(InputWorkspace=parameters_dict['InputWorkspace'][0], OutputWorkspace=output_workspace, StoreInADS=False)
@@ -114,7 +116,7 @@ class FittingTabModel(object):
     def rename_members_of_fitted_workspace_group(self, group_workspace, inputworkspace_list, function):
         self.context.ads_observer.observeRename(False)
         output_workspace_list = []
-        for index, workspace_name in enumerate(group_workspace.getNames()):
+        for index, workspace_name in enumerate(AnalysisDataService.retrieve(group_workspace).getNames()):
             new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index], function)
 
             new_name += '; Simultaneous'

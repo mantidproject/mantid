@@ -24,7 +24,7 @@ def run_MuonPreProcess(parameter_dict):
     alg.setProperty("OutputWorkspace", "__pre_processed_data")
     alg.setProperties(parameter_dict)
     alg.execute()
-    return "__pre_processed_data"#alg.getProperty("OutputWorkspace").value
+    return "__pre_processed_data"
 
 
 def run_MuonGroupingCounts(parameter_dict, workspace_name):
@@ -165,9 +165,9 @@ def run_simultaneous_Fit(parameters_dict, alg):
 
     alg.execute()
 
-    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr, alg.getProperty('Function').value,\
-        alg.getProperty('OutputStatus').value, alg.getProperty(
-            'OutputChi2overDoF').value, alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
+    return alg.getProperty('OutputWorkspace').valueAsStr, alg.getProperty('OutputParameters').valueAsStr,\
+        alg.getProperty('Function').value, alg.getProperty('OutputStatus').value, alg.getProperty('OutputChi2overDoF').value,\
+        alg.getProperty("OutputNormalisedCovarianceMatrix").valueAsStr
 
 
 def run_CalculateMuonAsymmetry(parameters_dict, alg):
@@ -227,7 +227,7 @@ def run_Plus(parameter_dict):
 
 def convert_to_field(workspace_name):
     """
-    Apply the Scale algorithm to convert from MHz to Field.
+    Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
     """
     alg = mantid.AlgorithmManager.create("ConvertAxisByFormula")
     alg.initialize()
