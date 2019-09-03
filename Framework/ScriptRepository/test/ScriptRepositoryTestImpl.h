@@ -79,7 +79,7 @@ const std::string REPOSITORYJSON =
 const std::string TOFCONV_README = "This is the content of TOFCONV_README";
 const std::string TOFCONV_CONVERTER = "print 'hello world'";
 
-const std::string webserverurl = "http://localhost";
+const std::string webserverurl = "https://localhost";
 
 /** The ScriptRepositoryTest aims to ensure and protect the logic and
 the interfaces described for ScriptRepository without requiring
@@ -140,7 +140,7 @@ public:
     // request to ping the site
     if (local_file_path.empty())
       return;
-    if (url_file.find("http://") == std::string::npos) {
+    if (url_file.find("https://") == std::string::npos) {
       throw ScriptRepoException("Invalid url to download");
     }
     Poco::FileStream _out(local_file_path);
