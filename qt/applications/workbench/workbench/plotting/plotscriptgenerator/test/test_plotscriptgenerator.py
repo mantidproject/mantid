@@ -65,7 +65,9 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'get_ylabel': lambda: '',
             'numRows': 1,
             'numCols': 1,
-            'get_title': lambda: ''
+            'get_title': lambda: '',
+            'get_xscale': lambda: 'linear',
+            'get_yscale': lambda: 'linear'
         }
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
