@@ -24,8 +24,7 @@ public:
   virtual ~AbstractLogger() {}
 };
 
-template <typename T>
-class MANTID_NEXUSGEOMETRY_DLL LogAdapter : public AbstractLogger {
+template <typename T> class LogAdapter : public AbstractLogger {
 private:
   T *m_adaptee;
 
