@@ -144,16 +144,12 @@ class MuonWorkspaceWrapper(object):
         Show the workspace in the ADS inside the WorkspaceGroup structure specified in name
         name = dirs/../dirs/workspace_name
         """
-
-        if not name:
+        if not name and not self.name:
             return
 
         self.name = str(name)
 
-        # if not self.is_hidden:
-        #     return
-
-        if len(self.name) > 0: #and self.is_hidden:
+        if len(self.name) > 0:
             # add workspace to ADS
             if self.is_hidden:
                 AnalysisDataService.addOrReplace(self._workspace_name, self.workspace)

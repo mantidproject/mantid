@@ -209,8 +209,9 @@ class FFTPresenter(object):
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
                                       frequency_domain_workspace)
 
-    def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
+    def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace_label):
         run = re.search('[0-9]+', input_workspace).group()
+        fft_workspace = mantid.AnalysisDataService.retrieve(fft_workspace_label)
         Im_run = ""
         if imaginary_input_workspace != "":
             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
@@ -223,7 +224,7 @@ class FFTPresenter(object):
         spectra = {"_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift, "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
                    "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift}
         for spec_type in list(spectra.keys()):
-            extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type])
+            extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type], fft_workspace_name + spec_type)
 
             if 'PhaseQuad' in self.view.workspace:
                 self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im,
@@ -231,8 +232,8 @@ class FFTPresenter(object):
             else:
                 self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im)
 
-            muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws, directory + fft_workspace_name + spec_type)
-            muon_workspace_wrapper.show()
+            muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws)
+            muon_workspace_wrapper.show(directory + fft_workspace_name + spec_type)
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

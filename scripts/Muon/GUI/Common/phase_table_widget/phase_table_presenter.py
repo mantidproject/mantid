@@ -91,12 +91,13 @@ class PhaseTablePresenter(object):
 
     def calculate_phase_quad(self):
         parameters = self.get_parameters_for_phase_quad()
+        phasequad_workspace_name = get_phase_quad_workspace_name(parameters['InputWorkspace'], parameters['PhaseTable'])
 
         self.current_alg = mantid.AlgorithmManager.create("PhaseQuad")
-        phase_quad = run_PhaseQuad(parameters, self.current_alg)
+        phase_quad = run_PhaseQuad(parameters, self.current_alg, phasequad_workspace_name)
         self.current_alg = None
 
-        self.add_phase_quad_to_ADS(parameters['InputWorkspace'], parameters['PhaseTable'], phase_quad)
+        self.add_phase_quad_to_ADS(parameters['InputWorkspace'], phase_quad)
 
     def get_parameters_for_phase_quad(self):
         parameters = {}
@@ -109,13 +110,12 @@ class PhaseTablePresenter(object):
 
         return parameters
 
-    def add_phase_quad_to_ADS(self, input_workspace, input_phase_table, phase_quad):
+    def add_phase_quad_to_ADS(self, input_workspace, phasequad_workspace_name):
         run = re.search('[0-9]+', input_workspace).group()
-        phasequad_workspace_name = get_phase_quad_workspace_name(input_workspace, input_phase_table)
 
         directory = get_base_data_directory(self.context, run)
 
-        muon_workspace_wrapper = MuonWorkspaceWrapper(phase_quad, directory + phasequad_workspace_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + phasequad_workspace_name)
         muon_workspace_wrapper.show()
 
         self.context.phase_context.add_phase_quad(muon_workspace_wrapper)
@@ -144,26 +144,27 @@ class PhaseTablePresenter(object):
 
     def calculate_phase_table(self):
         parameters = self.create_parameters_for_cal_muon_phase_algorithm()
+        fitting_workspace_name = get_fitting_workspace_name(parameters['DetectorTable']) if self.view.output_fit_information else '__NotUsed'
 
         self.current_alg = mantid.AlgorithmManager.create("CalMuonDetectorPhases")
-        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg)
+        detector_table, fitting_information = run_CalMuonDetectorPhases(parameters, self.current_alg, fitting_workspace_name)
         self.current_alg = None
 
-        self.add_phase_table_to_ADS(parameters['DetectorTable'], detector_table)
+        self.add_phase_table_to_ADS(detector_table)
         self.add_fitting_info_to_ADS_if_required(parameters['DetectorTable'], fitting_information)
 
         return parameters['DetectorTable']
 
-    def add_phase_table_to_ADS(self, base_name, detector_table):
+    def add_phase_table_to_ADS(self, base_name):
         run = re.search('[0-9]+', base_name).group()
 
         directory = get_base_data_directory(self.context, run)
-        muon_workspace_wrapper = MuonWorkspaceWrapper(detector_table, directory + base_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
         muon_workspace_wrapper.show()
 
         self.context.phase_context.add_phase_table(muon_workspace_wrapper)
 
-    def add_fitting_info_to_ADS_if_required(self, base_name, fitting_information):
+    def add_fitting_info_to_ADS_if_required(self, base_name, fit_workspace_name):
         if not self.view.output_fit_information:
             return
 
@@ -171,10 +172,9 @@ class PhaseTablePresenter(object):
         phase_table_group = get_phase_table_workspace_group_name(base_name,
                                                                  self.context.data_context.instrument,
                                                                  self.context.workspace_suffix)
-        fitting_workspace_name = get_fitting_workspace_name(base_name)
         directory = get_base_data_directory(self.context, run) + phase_table_group
 
-        muon_workspace_wrapper = MuonWorkspaceWrapper(fitting_information, directory + fitting_workspace_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + fit_workspace_name)
         muon_workspace_wrapper.show()
 
     def create_parameters_for_cal_muon_phase_algorithm(self):
