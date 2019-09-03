@@ -496,15 +496,13 @@ public:
   H5::Group instrument(const H5::Group &parent,
                        const Geometry::ComponentInfo &compInfo) {
 
-    std::string nameInCache = compInfo.name(compInfo.root());
-    std::string instrName =
-        nameInCache.empty() ? "unspecified_instrument" : nameInCache;
-    H5::Group childGroup = openOrCreateGroup(parent, instrName, NX_INSTRUMENT);
+    H5::Group childGroup =
+        openOrCreateGroup(parent, STANDARD_INSTRUMENT_NAME, NX_INSTRUMENT);
 
-    writeStrDataset(childGroup, NAME, instrName);
+    writeStrDataset(childGroup, NAME, STANDARD_INSTRUMENT_NAME);
     writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
 
-    std::string defaultShortName = instrName.substr(0, 3);
+    std::string defaultShortName = STANDARD_INSTRUMENT_NAME.substr(0, 3);
     H5::DataSet name = childGroup.openDataSet(NAME);
     writeStrAttribute(name, SHORT_NAME, defaultShortName);
     return childGroup;
