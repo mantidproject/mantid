@@ -170,6 +170,44 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
   }
   return isMultiPeriod;
 }
+
+/**
+ * Attempt to load nexus geometry. Should fail without exception if not
+ * possible.
+ *
+ * Caveats are:
+ * 1. Only works for input files where there is a single NXEntry. Does nothing
+ * otherwise.
+ * 2. Is only applied after attempted instrument loading in the legacy fashion
+ * that happens as part of loadEntry. So you will still get warning+error
+ * messages from that even if this succeeds
+ *
+ * @param ws : Input workspace onto which instrument will get attached
+ * @param nWorkspaceEntries : number of entries
+ * @param logger : to write to
+ * @param filename : filename to load from.
+ * @return true if successful
+ */
+bool loadNexusGeometry(Workspace &ws, const int nWorkspaceEntries,
+                       Kernel::Logger &logger, const std::string &filename) {
+  if (nWorkspaceEntries == 1) {
+    if (auto *matrixWs = dynamic_cast<MatrixWorkspace *>(&ws)) {
+      try {
+        using namespace Mantid::NexusGeometry;
+        auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
+            filename, NexusGeometry::makeLogger(&logger));
+        matrixWs->setInstrument(
+            Geometry::Instrument_const_sptr(std::move(instrument)));
+        return true;
+      } catch (std::exception &e) {
+        logger.warning(e.what());
+      } catch (H5::Exception &e) {
+        logger.warning(e.getDetailMsg());
+      }
+    }
+  }
+  return false;
+}
 } // namespace
 
 /// Default constructor
@@ -376,6 +414,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 void LoadNexusProcessed::exec() {
 
   API::Workspace_sptr tempWS;
+  int nWorkspaceEntries = 0;
   // Start scoped block
   {
     progress(0, "Opening file...");
@@ -389,7 +428,7 @@ void LoadNexusProcessed::exec() {
 
     // Find out how many first level entries there are
     // Cast down to int as another property later on is an int
-    auto nWorkspaceEntries = static_cast<int>((root.groups().size()));
+    nWorkspaceEntries = static_cast<int>((root.groups().size()));
 
     // Check for an entry number property
     int entrynumber = getProperty("EntryNumber");
@@ -415,7 +454,7 @@ void LoadNexusProcessed::exec() {
 
     // Take the first real workspace obtainable. We need it even if loading
     // groups.
-    tempWS = loadEntry(root, targetEntryName, 0, 1, filename);
+    tempWS = loadEntry(root, targetEntryName, 0, 1);
 
     if (nWorkspaceEntries == 1 || !bDefaultEntryNumber) {
       // We have what we need.
@@ -498,7 +537,7 @@ void LoadNexusProcessed::exec() {
           local_workspace =
               loadEntry(root, basename + indexStr,
                         static_cast<double>(p - 1) / nWorkspaceEntries_d,
-                        1. / nWorkspaceEntries_d, filename);
+                        1. / nWorkspaceEntries_d);
         }
 
         declareProperty(std::make_unique<WorkspaceProperty<API::Workspace>>(
@@ -514,24 +553,10 @@ void LoadNexusProcessed::exec() {
     }
 
     root.close();
-  } // All file srources should be scoped to here
-
-  // if (nWorkspaceEntries == 1) {
-  if (auto *matrixWs = dynamic_cast<MatrixWorkspace *>(tempWS.get())) {
-    std::string fname = getProperty("Filename");
-    try {
-      using namespace Mantid::NexusGeometry;
-      auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
-          fname, NexusGeometry::makeLogger(&g_log));
-      matrixWs->setInstrument(
-          Geometry::Instrument_const_sptr(std::move(instrument)));
-    } catch (std::exception &e) {
-      g_log.warning(e.what());
-    } catch (H5::Exception &e) {
-      g_log.warning(e.getDetailMsg());
-    }
-  }
-  // }
+  } // All file resources should be scoped to here. All previous file handles
+    // must be cleared to release locks
+  loadNexusGeometry(*tempWS, nWorkspaceEntries, g_log,
+                    std::string(getProperty("Filename")));
 
   m_axis1vals.clear();
 } // namespace DataHandling
@@ -1470,8 +1495,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
 API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
                                                   const std::string &entry_name,
                                                   const double &progressStart,
-                                                  const double &progressRange,
-                                                  const std::string &filename) {
+                                                  const double &progressRange) {
   progress(progressStart, "Opening entry " + entry_name + "...");
 
   NXEntry mtd_entry = root.openEntry(entry_name);
@@ -1613,6 +1637,10 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
              "Reading the parameter maps...");
     local_workspace->readParameterMap(parameterStr);
   } catch (std::exception &e) {
+    // TODO. For workspaces saved via SaveNexusESS, these warnings are not
+    // relevant. Unfortunately we need to close all file handles before we can
+    // attempt loading the new way see loadNexusGeometry function . A better
+    // solution should be found
     g_log.warning("Error loading Instrument section of nxs file");
     g_log.warning(e.what());
     g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
