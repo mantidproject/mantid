@@ -13,11 +13,13 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <H5Cpp.h>
+#include <Poco/Glob.h>
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -162,7 +164,7 @@ public:
         Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
-  void test_characterise_eight_pack_bug() {
+  void test_characterise_eight_pack_bug_fix() {
 
     // Bilby contains eight-packs, though other instrument features could still
     // be problematic
@@ -185,8 +187,8 @@ public:
     saver.initialize();
     saver.setProperty("Filename", "output.nxs");
     saver.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(saver.execute(), H5::Exception &);
-    TS_ASSERT(!saver.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(saver.execute());
+    TS_ASSERT(saver.isExecuted());
   }
 };
 
