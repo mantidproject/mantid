@@ -211,7 +211,7 @@ void TableWorkspaceDomainCreator::createDomain(
   }
 
   auto X = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(0));
+      *m_tableWorkspace->getColumn(m_xColName));
   auto XData = X.data();
 
   // find the fitting interval: from -> to
@@ -230,6 +230,7 @@ void TableWorkspaceDomainCreator::createDomain(
         // create a simple creator
         auto creator = new TableWorkspaceDomainCreator;
         creator->setWorkspace(m_tableWorkspace);
+        creator->setColumnNames(m_xColName, m_yColName, m_errColName);
         size_t k = m + m_maxSize;
         if (k > n)
           k = n;
@@ -254,7 +255,7 @@ void TableWorkspaceDomainCreator::createDomain(
 
   // set the data to fit to
   assert(n == domain->size());
-  auto Y = m_tableWorkspace->getColumn(1);
+  auto Y = m_tableWorkspace->getColumn(m_yColName);
   if (endRowNo > Y->size()) {
     throw std::runtime_error(
         "TableWorkspaceDomainCreator: Inconsistent TableWorkspace");
@@ -263,13 +264,11 @@ void TableWorkspaceDomainCreator::createDomain(
   // Helps find points excluded form fit.
   ExcludeRangeFinder excludeFinder(m_exclude, XData.front(), XData.back());
 
+  auto errors = m_tableWorkspace->getColumn(m_errColName);
   for (size_t i = m_startRowNo; i < endRowNo; ++i) {
     size_t j = i - m_startRowNo + i0;
-    // set start and end x values to be the first and last elements in the
-    // table
-    API::TableRow row = m_tableWorkspace->getRow(i);
-    double &y = row.Double(1);
-    double &error = row.Double(2);
+    auto y = Y->cell<double>(i);
+    auto error = errors->cell<double>(i);
     double weight = 0.0;
 
     if (excludeFinder.isExcluded(X[i])) {
@@ -556,11 +555,11 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
   ws->replaceAxis(1, std::move(tAxis));
 
   auto &inputX = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(0));
+      *m_tableWorkspace->getColumn(m_xColName));
   auto &inputY = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(1));
+      *m_tableWorkspace->getColumn(m_yColName));
   auto &inputE = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(2));
+      *m_tableWorkspace->getColumn(m_errColName));
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
     ws->mutableX(i).assign(inputX.data().begin() + m_startRowNo,
@@ -616,7 +615,7 @@ void TableWorkspaceDomainCreator::setInitialValues(API::IFunction &function) {
  */
 std::pair<size_t, size_t> TableWorkspaceDomainCreator::getXInterval() const {
   auto X = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(0));
+      *m_tableWorkspace->getColumn(m_xColName));
   auto XData = X.data();
   const auto sizeOfData = XData.size();
   if (sizeOfData == 0) {
@@ -706,9 +705,8 @@ void TableWorkspaceDomainCreator::setParameters() const {
  * wrong type.
  */
 
-std::vector<std::string> TableWorkspaceDomainCreator::getXYEColumnNames(
+void TableWorkspaceDomainCreator::setXYEColumnNames(
     API::ITableWorkspace_sptr ws) const {
-  std::vector<std::string> XYEColumnNames;
 
   auto columnNames = ws->getColumnNames();
 
@@ -751,15 +749,10 @@ std::vector<std::string> TableWorkspaceDomainCreator::getXYEColumnNames(
   }
 
   if (xColName != "" && yColName != "") {
-    XYEColumnNames.push_back(xColName);
-    XYEColumnNames.push_back(yColName);
-    if (eColName != "") {
-      XYEColumnNames.push_back(eColName);
-    }
+    setColumnNames(xColName, yColName, eColName);
   } else {
     throw std::invalid_argument("No valid input for X or Y column names");
   }
-  return XYEColumnNames;
 }
 
 /**
@@ -774,15 +767,19 @@ void TableWorkspaceDomainCreator::setAndValidateWorkspace(
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");
   }
-
-  auto columnNames = getXYEColumnNames(tableWorkspace);
+  setXYEColumnNames(tableWorkspace);
+  std::vector<std::string> columnNames;
+  columnNames.push_back(m_xColName);
+  columnNames.push_back(m_yColName);
+  if (m_errColName != "")
+    columnNames.push_back(m_errColName);
   // table workspace is cloned so it can be changed within the domain
   m_tableWorkspace = tableWorkspace->cloneColumns(columnNames);
 
-  auto noOfColumns = m_tableWorkspace->getColumnNames().size();
   // if no error column has been found a column is added with 0 errors
   if (columnNames.size() == 2) {
-    auto columnAdded = m_tableWorkspace->addColumn("double", "Error");
+    m_errColName = "AddedErrorColumn";
+    auto columnAdded = m_tableWorkspace->addColumn("double", m_errColName);
     if (!columnAdded)
       throw std::invalid_argument("No error column provided.");
   }

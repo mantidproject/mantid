@@ -66,6 +66,17 @@ public:
   /// @param maxSize :: Maximum size of each simple domain
   void setMaxSize(size_t maxSize) { m_maxSize = maxSize; }
 
+  /// Set the names Of the x, y and error columns
+  /// @param xColName :: name of the x column
+  /// @param yColName :: name of the y column
+  /// @param errColName :: name of the y error column
+  void setColumnNames(const std::string &xColName, const std::string &yColName,
+                      const std::string &errColName) const {
+    m_xColName = xColName;
+    m_yColName = yColName;
+    m_errColName = errColName;
+  }
+
   size_t getDomainSize() const override;
 
   void initFunction(API::IFunction_sptr function) override;
@@ -75,9 +86,8 @@ private:
   std::pair<size_t, size_t> getXInterval() const;
   /// Set all parameters
   void setParameters() const;
-  /// Get the names of the X, Y and Error columns
-  std::vector<std::string>
-  getXYEColumnNames(API::ITableWorkspace_sptr ws) const;
+  /// Set the names of the X, Y and Error columns
+  void setXYEColumnNames(API::ITableWorkspace_sptr ws) const;
   /// Creates the blank output workspace of the correct size
   boost::shared_ptr<API::MatrixWorkspace>
   createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
@@ -135,6 +145,12 @@ private:
 
   /// Store number of the first row used in fitting
   size_t m_startRowNo;
+  /// Store the X column name
+  mutable std::string m_xColName;
+  /// Store the Y column name
+  mutable std::string m_yColName;
+  /// Store the Y Error column name
+  mutable std::string m_errColName;
 };
 
 } // namespace CurveFitting

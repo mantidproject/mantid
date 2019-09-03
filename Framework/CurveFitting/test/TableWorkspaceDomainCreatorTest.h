@@ -181,7 +181,13 @@ public:
   void test_output_no_errors_provided() {
     auto wsWithNoErrors = createTestTableWorkspace(false);
     auto fun = createExpDecayFunction(1.0, 1.0);
-    auto fit = setupBasicFitPropertiesAlgorithm(fun, wsWithNoErrors);
+    auto fit = boost::make_shared<Fit>();
+    fit->initialize();
+    fit->setProperty("Function", fun);
+    fit->setProperty("InputWorkspace", wsWithNoErrors);
+    fit->setProperty("CreateOutput", true);
+    fit->setProperty("XColumn", "X data");
+    fit->setProperty("YColumn", "Y data");
     fit->execute();
 
     TS_ASSERT_DELTA(fun->getParameter("Height"), 10.0, 1e-6);
@@ -225,7 +231,8 @@ public:
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
-  void test_takes_correct_columns_when_given_column_names() {
+  void test_takes_correct_columns_when_no_column_names_given_but_types_set() {
+    // create table
     API::ITableWorkspace_sptr table =
         API::WorkspaceFactory::Instance().createTable();
     table->addColumn("double", "Y data");
@@ -234,6 +241,7 @@ public:
     table->addColumn("double", "X data");
     table->addColumn("double", "more extra data");
 
+    // set values in table
     for (auto i = 0; i != 20; ++i) {
       const double xValue = i * 0.1;
       const double yValue = 10.0 * exp(-xValue / 0.5);
@@ -242,11 +250,17 @@ public:
       newRow << yValue << eValue << 2.0 << xValue << 5.1;
     }
 
+    // set plot type for x, y and error columns
+    table->getColumn("X data")->setPlotType(1);
+    table->getColumn("Y data")->setPlotType(2);
+    table->getColumn("Errors")->setPlotType(5);
+
     auto fun = createExpDecayFunction(1.0, 1.0);
-    auto fit = setupBasicFitPropertiesAlgorithm(fun, table);
-    fit->setProperty("XColumnName", "X data");
-    fit->setProperty("YColumnName", "Y data");
-    fit->setProperty("ErrorColumnName", "Errors");
+    auto fit = boost::make_shared<Fit>();
+    fit->initialize();
+    fit->setProperty("Function", fun);
+    fit->setProperty("InputWorkspace", table);
+    fit->setProperty("CreateOutput", true);
     fit->execute();
 
     TS_ASSERT_DELTA(fun->getParameter("Height"), 10.0, 1e-6);
@@ -258,11 +272,17 @@ public:
   void test_createDomain_creates_FunctionDomain1DVector() {
     auto ws = createTestTableWorkspace();
 
+    // set plot type for x, y and error columns
+    ws->getColumn("X data")->setPlotType(1);
+    ws->getColumn("Y data")->setPlotType(2);
+    ws->getColumn("Errors")->setPlotType(5);
+
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
     TableWorkspaceDomainCreator tableDomainCreator;
     tableDomainCreator.setWorkspace(ws);
+    tableDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableDomainCreator.createDomain(domain, values);
 
     API::FunctionDomain1DVector *specDom =
@@ -274,6 +294,11 @@ public:
   void test_create_SeqDomain_creates_domain() {
     auto ws = createTableWorkspaceForSeqFit();
 
+    // set plot type for x, y and error columns
+    ws->getColumn("X data")->setPlotType(1);
+    ws->getColumn("Y data")->setPlotType(2);
+    ws->getColumn("Errors")->setPlotType(5);
+
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
@@ -281,6 +306,7 @@ public:
         TableWorkspaceDomainCreator::Sequential);
     tableDomainCreator.setWorkspace(ws);
     tableDomainCreator.setMaxSize(3);
+    tableDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableDomainCreator.createDomain(domain, values);
 
     CurveFitting::SeqDomain *seq =
@@ -294,6 +320,11 @@ public:
   void test_create_SeqDomain_outputs() {
     auto ws = createTableWorkspaceForSeqFit();
 
+    // set plot type for x, y and error columns
+    ws->getColumn("X data")->setPlotType(1);
+    ws->getColumn("Y data")->setPlotType(2);
+    ws->getColumn("Errors")->setPlotType(5);
+
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
@@ -301,6 +332,7 @@ public:
         TableWorkspaceDomainCreator::Sequential);
     tableDomainCreator.setWorkspace(ws);
     tableDomainCreator.setMaxSize(3);
+    tableDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableDomainCreator.createDomain(domain, values);
 
     CurveFitting::SeqDomain *seq =
@@ -340,6 +372,11 @@ public:
   void test_ignore_invalid_data_weighting() {
     auto ws = createTableWorkspaceWithInvalidData();
 
+    // set plot type for x, y and error columns
+    ws->getColumn("X data")->setPlotType(1);
+    ws->getColumn("Y data")->setPlotType(2);
+    ws->getColumn("Errors")->setPlotType(5);
+
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
 
@@ -355,6 +392,7 @@ public:
                                                      wsPropName);
     tableWSDomainCreator.declareDatasetProperties("", true);
     tableWSDomainCreator.ignoreInvalidData(true);
+    tableWSDomainCreator.setColumnNames("X data", "Y data", "Errors");
     tableWSDomainCreator.createDomain(domain, values);
 
     API::FunctionValues *val =
@@ -741,6 +779,9 @@ private:
     fit->setProperty("Function", fun);
     fit->setProperty("InputWorkspace", ws);
     fit->setProperty("CreateOutput", createOutput);
+    fit->setProperty("XColumn", "X data");
+    fit->setProperty("YColumn", "Y data");
+    fit->setProperty("ErrColumn", "Errors");
 
     return fit;
   }
