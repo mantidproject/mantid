@@ -9,12 +9,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SaveNexusESS.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidTestHelpers/FileResource.h"
@@ -23,6 +26,47 @@
 #include <memory>
 
 using namespace Mantid::DataHandling;
+using namespace Mantid::API;
+
+template <typename T> void do_execute(const std::string filename, T &ws) {
+  SaveNexusESS alg;
+  alg.setChild(true);
+  alg.setRethrows(true);
+  alg.initialize();
+  alg.isInitialized();
+  alg.setProperty("InputWorkspace", ws);
+  alg.setProperty("Filename", filename);
+  alg.execute();
+  alg.isExecuted();
+}
+
+namespace test_utility {
+Mantid::API::MatrixWorkspace_sptr reload(const std::string &filename) {
+  LoadNexusProcessed loader;
+  loader.setChild(true);
+  loader.setRethrows(true);
+  loader.initialize();
+  loader.setProperty("Filename", filename);
+  loader.setPropertyValue("OutputWorkspace", "dummy");
+  loader.execute();
+  Workspace_sptr out = loader.getProperty("OutputWorkspace");
+  auto matrixWSOut =
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+  return matrixWSOut;
+}
+
+Mantid::API::MatrixWorkspace_sptr
+from_instrument_file(const std::string &filename) {
+  LoadEmptyInstrument loader;
+  loader.setChild(true);
+  loader.initialize();
+  loader.setProperty("Filename", filename);
+  loader.setPropertyValue("OutputWorkspace", "dummy");
+  loader.execute();
+  MatrixWorkspace_sptr ws = loader.getProperty("OutputWorkspace");
+  return ws;
+}
+} // namespace test_utility
 
 class SaveNexusESSTest : public CxxTest::TestSuite {
 public:
@@ -31,19 +75,7 @@ public:
   static SaveNexusESSTest *createSuite() { return new SaveNexusESSTest(); }
   static void destroySuite(SaveNexusESSTest *suite) { delete suite; }
 
-  template <typename T> void do_execute(const std::string filename, T &ws) {
-    SaveNexusESS alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.isInitialized();
-    alg.setProperty("InputWorkspace", ws);
-    alg.setProperty("Filename", filename);
-    alg.execute();
-    alg.isExecuted();
-  }
-
-  void xtest_Init() {
+  void test_Init() {
     SaveNexusESS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized())
@@ -51,7 +83,7 @@ public:
 
   void test_exec_rectangular_instrument_details() {
     using namespace Mantid::NexusGeometry;
-    ScopedFileHandle fileInfo("test_rectangular.nxs");
+    ScopedFileHandle fileInfo("test_rectangular_instrument.nxs");
     auto ws =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 10 /*numBins*/);
@@ -85,21 +117,74 @@ public:
 
     do_execute(fileInfo.fullPath(), wsIn);
 
-    LoadNexusProcessed loader;
-    loader.setChild(true);
-    loader.setRethrows(true);
-    loader.initialize();
-    loader.setProperty("Filename", fileInfo.fullPath());
-    loader.setPropertyValue("OutputWorkspace", "dummy");
-    loader.execute();
-
-    Mantid::API::Workspace_sptr wsOut = loader.getProperty("OutputWorkspace");
-    auto matrixWSOut =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsOut);
+    auto matrixWSOut = test_utility::reload(fileInfo.fullPath());
 
     TS_ASSERT_EQUALS(matrixWSOut->blocksize(), 12);
     TS_ASSERT_EQUALS(matrixWSOut->getNumberHistograms(), 10 * 10);
     TS_ASSERT(matrixWSOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
+  }
+
+  void test_with_ess_instrument() {
+
+    using namespace Mantid::HistogramData;
+
+    ScopedFileHandle fileInfo("test_ess_instrument.nxs");
+
+    auto wsIn = test_utility::from_instrument_file(
+        "V20_4-tubes_90deg_Definition_v01.xml");
+    for (size_t i = 0; i < wsIn->getNumberHistograms(); ++i) {
+      wsIn->setCounts(i, Counts{double(i)});
+    }
+
+    do_execute(fileInfo.fullPath(), wsIn);
+    auto wsOut = test_utility::reload(fileInfo.fullPath());
+
+    // Quick geometry Test
+    TS_ASSERT(wsOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
+
+    // Quick data test.
+    for (size_t i = 0; i < wsIn->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(wsIn->counts(i)[0], wsOut->counts(i)[0]);
+    }
+  }
+
+  // Characterise behaviour to fix later. Issue here is that SaveProcesssedNexus
+  // saves the spectra mapping information to the NXDetector via the legacy
+  // Instrument::saveNexus method, which is called via ExperimentInfo. We
+  // disable that at present because the legacy NXDetectors are not compatible
+  void test_demonstrate_no_spectra_detector_map_saved() {
+    using namespace Mantid::Indexing;
+    ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
+    auto wsIn =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+
+    std::vector<SpectrumDefinition> specDefinitions;
+    std::vector<SpectrumNumber> spectrumNumbers;
+    size_t i = wsIn->getNumberHistograms() - 1;
+    for (size_t j = 0; j < wsIn->getNumberHistograms(); --i, ++j) {
+      specDefinitions.push_back(SpectrumDefinition(i));
+      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+    }
+    IndexInfo info(spectrumNumbers);
+    info.setSpectrumDefinitions(specDefinitions);
+    wsIn->setIndexInfo(info);
+    do_execute(fileInfo.fullPath(), wsIn);
+
+    // Reload it.
+    auto matrixWSOut = test_utility::reload(fileInfo.fullPath());
+
+    const auto &inSpecInfo = wsIn->spectrumInfo();
+    const auto &outSpecInfo = matrixWSOut->spectrumInfo();
+    TS_ASSERT_EQUALS(outSpecInfo.size(), inSpecInfo.size());
+    for (size_t i = 0; i < outSpecInfo.size(); ++i) {
+      // Output has no mapping, so for each spectrum have 0 detector indices
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i).size() + 1,
+                       inSpecInfo.spectrumDefinition(i).size());
+      // Compare actual detector indices for each spectrum when fixed as below
+      // TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i)[0],
+      //                 inSpecInfo.spectrumDefinition(i)[0]);
+    }
   }
 };
 
