@@ -26,6 +26,7 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
+    src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateSlits.cpp
     src/CalculateTransmission.cpp
@@ -369,6 +370,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateSlits.h
     inc/MantidAlgorithms/CalculateTransmission.h

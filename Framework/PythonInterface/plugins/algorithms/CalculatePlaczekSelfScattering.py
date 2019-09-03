@@ -48,13 +48,21 @@ class CalculatePlaczekSelfScattering(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+        input_ws = self.getProperty('InputWorkspace').value
+        det_info = input_ws.detectorInfo()
+        if not det_info.size() > 0:
+            issues['InputWorkspace'] = 'Workspace has no detector information'
         return issues
+        material = input_ws.sample().getMaterial().chemicalFormula()
+        if not len(material > 0):
+            issues['InputWorkspace'] = 'Workspace has no sample'
+
 
     def _setup(self):
         self._input_ws = self.getProperty('InputWorkspace').value
         self._output_ws = self.getProperty('OutputWorkspace').valueAsStr
-        self._spec_info = self._input_ws.detectorInfo()
-        self._L1 = self._spec_info.l1()
+        self._det_info = self._input_ws.detectorInfo()
+        self._L1 = self._det_info.l1()
 
     def PyExec(self):
         self._setup()
@@ -114,15 +122,15 @@ class CalculatePlaczekSelfScattering(PythonAlgorithm):
         x_lambdas = np.array([])
         placzek_correction = np.array([])
         num_spec = 0
-        for i in np.arange(1000):  # np.arange(self._spec_info.size()):
-            if not self._spec_info.isMonitor(i):
+        for i in np.arange(1000):  # np.arange(self._det_info.size()):
+            if not self._det_info.isMonitor(i):
                 num_spec += 1
                 # variables
-                path_length = self._L1 + self._spec_info.l2(i)
+                path_length = self._L1 + self._det_info.l2(i)
                 f = self._L1 / path_length
 
                 angle_conv = np.pi / 180.
-                sin_theta_by_2 = np.sin(self._spec_info.twoTheta(i) * angle_conv / 2.)
+                sin_theta_by_2 = np.sin(self._det_info.twoTheta(i) * angle_conv / 2.)
 
                 term1 = (f - 1.) * phi_1
                 term2 = f * eps_1
@@ -166,4 +174,4 @@ class CalculatePlaczekSelfScattering(PythonAlgorithm):
         return atom_species
 
 
-AlgorithmFactory.subscribe(CalculatePlaczekSelfScattering)
+# AlgorithmFactory.subscribe(CalculatePlaczekSelfScattering)
