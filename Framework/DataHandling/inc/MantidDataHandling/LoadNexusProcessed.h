@@ -97,8 +97,7 @@ private:
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name,
                                 const double &progressStart,
-                                const double &progressRange,
-                                const std::string &filename);
+                                const double &progressRange);
 
   API::Workspace_sptr loadTableEntry(Mantid::NeXus::NXEntry &entry);
 
