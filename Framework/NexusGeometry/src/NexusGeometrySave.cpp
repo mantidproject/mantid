@@ -298,12 +298,17 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
 
   // these DataSets are duplicates of each other. written to the group to
   // handle the naming inconsistency. probably temporary.
-  detectorNumber =
-      grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(&monitorID, H5::PredType::NATIVE_INT, space);
+  if (!utilities::findDataset(grp, DETECTOR_IDS)) {
+    detectorNumber =
+        grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
+    detectorNumber.write(&monitorID, H5::PredType::NATIVE_INT, space);
+  }
+  if (!utilities::findDataset(grp, DETECTOR_ID)) {
 
-  detector_id = grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
-  detector_id.write(&monitorID, H5::PredType::NATIVE_INT, space);
+    detector_id =
+        grp.createDataSet(DETECTOR_ID, H5::PredType::NATIVE_INT, space);
+    detector_id.write(&monitorID, H5::PredType::NATIVE_INT, space);
+  }
 }
 
 /*
@@ -846,7 +851,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   writer.sample(rootGroup, compInfo);
 
   // save NXdetectors
-  for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
+  for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
       if (reporter != nullptr)
         reporter->report();
