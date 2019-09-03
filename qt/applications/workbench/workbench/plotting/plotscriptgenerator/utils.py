@@ -10,10 +10,14 @@ from __future__ import (absolute_import, unicode_literals)
 
 import re
 
-from numpy import ndarray
+import numpy as np
 from matplotlib.container import ErrorbarContainer
 
 from mantid.py3compat import is_text_string
+
+
+def round_to_sig_figs(number, sig_figs):
+    return round(number, -int(np.floor(np.log10(np.abs(number)))) + (sig_figs - 1))
 
 
 def convert_value_to_arg_string(value):
@@ -24,7 +28,7 @@ def convert_value_to_arg_string(value):
     """
     if is_text_string(value):
         return "'{}'".format(value)
-    if isinstance(value, list) or isinstance(value, ndarray):
+    if isinstance(value, (list, np.ndarray, tuple)):
         return "[{}]".format(', '.join([convert_value_to_arg_string(v) for v in value]))
     if isinstance(value, dict):
         kv_pairs = []
@@ -32,6 +36,8 @@ def convert_value_to_arg_string(value):
             kv_pairs.append("{}: {}".format(convert_value_to_arg_string(key),
                                             convert_value_to_arg_string(val)))
         return "{{{}}}".format(', '.join(kv_pairs))
+    if isinstance(value, (float, np.float)):
+        return str(round_to_sig_figs(value, 5))
     return str(value)
 
 
