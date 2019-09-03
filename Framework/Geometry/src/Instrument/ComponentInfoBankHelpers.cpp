@@ -66,8 +66,14 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
     if (parentType != Beamline::ComponentType::Rectangular &&
         parentType != Beamline::ComponentType::Structured &&
         parentType != Beamline::ComponentType::Grid) {
-      // if component at index is not a tube then identify it as a bank
+      // check if component is sub-assembly of tube, if so returns false
       if (childType != Beamline::ComponentType::OutlineComposite) {
+        size_t idxBelow = idx - 1;
+        if (compInfo.parent(idxBelow) == idx &&
+            compInfo.componentType(idxBelow) ==
+                Beamline::ComponentType::OutlineComposite)
+          return false;
+        // otherwise returns true
         return true;
       }
     }
