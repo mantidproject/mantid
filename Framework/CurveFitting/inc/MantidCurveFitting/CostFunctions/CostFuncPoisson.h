@@ -38,13 +38,12 @@ public:
   /// Get short name of minimizer - useful for say labels in guis
   virtual std::string shortName() const { return "Poisson"; };
 
-protected:
   void addVal(API::FunctionDomain_sptr domain,
-              API::FunctionValues_sptr values) const;
+              API::FunctionValues_sptr values) const override;
   void addValDerivHessian(API::IFunction_sptr function,
                           API::FunctionDomain_sptr domain,
                           API::FunctionValues_sptr values,
-                          bool evalDeriv = true, bool evalHessian = true) const;
+                          bool evalDeriv = true, bool evalHessian = true) const override;
 };
 
 } // namespace CostFunctions
