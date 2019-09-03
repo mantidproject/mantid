@@ -26,6 +26,7 @@ public:
   using ItemCountFunction = int (Item::*)() const;
 
   Item();
+  virtual ~Item() = default;
 
   virtual bool isGroup() const = 0;
   State state() const;

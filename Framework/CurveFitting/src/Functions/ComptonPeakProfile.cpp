@@ -68,8 +68,9 @@ void ComptonPeakProfile::function1D(double *out, const double *xValues,
     m_voigt->setParameter(3, gaussFWHM);
     m_voigt->functionLocal(out, xValues, nData);
     const double norm = 1.0 / (0.5 * M_PI * lorentzFWHM);
+    using std::placeholders::_1;
     std::transform(out, out + nData, out,
-                   std::bind2nd(std::multiplies<double>(), norm));
+                   std::bind(std::multiplies<double>(), _1, norm));
   } else {
     double sigmaTotalSq =
         m_hwhmLorentz * m_hwhmLorentz + gaussSigma * gaussSigma;

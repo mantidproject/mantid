@@ -29,7 +29,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <H5Cpp.h>
-#include <boost/function.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -355,9 +354,9 @@ template <>
 void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
     EventWorkspaceCollection_sptr workspace) {
   // We provide a function pointer to the filter method of the object
-  boost::function<void(MatrixWorkspace_sptr)> func = std::bind1st(
-      std::mem_fun(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>),
-      this);
+  using std::placeholders::_1;
+  auto func = std::bind(
+      &LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
   workspace->applyFilter(func);
 }
 

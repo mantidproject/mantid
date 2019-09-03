@@ -23,13 +23,12 @@ public:
   RunsPresenterFactory( // cppcheck-suppress passedByValue
       RunsTablePresenterFactory runsTablePresenterFactory,
       double thetaTolerance, std::vector<std::string> instruments,
-      int defaultInstrumentIndex, IMessageHandler *messageHandler,
-      IPythonRunner *pythonRunner)
+      int defaultInstrumentIndex, IMessageHandler *messageHandler)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
         m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
-        m_messageHandler(messageHandler), m_pythonRunner(pythonRunner) {}
+        m_messageHandler(messageHandler) {}
 
   std::unique_ptr<IRunsPresenter> make(IRunsView *view) {
     return std::make_unique<RunsPresenter>(
@@ -43,7 +42,6 @@ private:
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;
   IMessageHandler *m_messageHandler;
-  IPythonRunner *m_pythonRunner;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

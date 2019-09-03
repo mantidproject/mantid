@@ -31,12 +31,13 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                    const double rhsY, const double rhsE,
                                    HistogramData::HistogramY &YOut,
                                    HistogramData::HistogramE &EOut) {
+  using std::placeholders::_1;
   std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
-                 std::bind2nd(std::minus<double>(), rhsY));
+                 std::bind(std::minus<double>(), _1, rhsY));
   // Only do E if non-zero, otherwise just copy
   if (rhsE != 0)
     std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
-                   std::bind2nd(VectorHelper::SumGaussError<double>(), rhsE));
+                   std::bind(VectorHelper::SumGaussError<double>(), _1, rhsE));
   else
     EOut = lhs.e();
 }
