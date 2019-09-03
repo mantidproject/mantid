@@ -10,18 +10,16 @@ from __future__ import (absolute_import, unicode_literals)
 
 import unittest
 
+import matplotlib as mpl
+mpl.use('Agg')  # noqa
+import matplotlib.pyplot as plt
+
 from mantid.py3compat.mock import Mock
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands)
 
 
 class PlotGeneratorAxisTest(unittest.TestCase):
-
-    def test_generate_axis_limits_commands_returns_correct_commands(self):
-        mock_ax = Mock(get_xlim=lambda: (0.5, 1), get_ylim=lambda: (2, 10))
-        expected = ["set_xlim([0.5, 1])", "set_ylim([2, 10])"]
-        actual = generate_axis_limit_commands(mock_ax)
-        self.assertEqual(expected, actual)
 
     def test_generate_axis_label_commands_only_returns_commands_for_labels_that_are_set(self):
         mock_ax = Mock(get_xlabel=lambda: '', get_ylabel=lambda: 'y')
@@ -48,6 +46,34 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         mock_ax = Mock(get_xlabel=lambda: "", get_ylabel=lambda: "")
         actual = generate_axis_label_commands(mock_ax)
         self.assertEqual([], actual)
+
+    def test_generate_axis_limit_commands_returns_empty_list_if_limits_not_changed(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot([-10, 10], [1, 2])
+        self.assertEqual([], generate_axis_limit_commands(ax))
+        plt.close()
+        del fig
+
+    def test_generate_axis_limit_commands_returns_x_limit_command_if_x_limit_changed(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot([-10, 10], [1, 2])
+        ax.set_xlim([-5, 5])
+        self.assertEqual(['set_xlim([-5.0, 5.0])'], generate_axis_limit_commands(ax))
+        plt.close()
+        del fig
+
+    def test_generate_axis_limit_commands_returns_x_and_y_limit_commands_if_limits_changed(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot([-10, 10], [1, 2])
+        ax.set_xlim([-5, 5])
+        ax.set_ylim([0, 4])
+        self.assertEqual(['set_xlim([-5.0, 5.0])', 'set_ylim([0.0, 4.0])'],
+                         generate_axis_limit_commands(ax))
+        plt.close()
+        del fig
 
 
 if __name__ == '__main__':

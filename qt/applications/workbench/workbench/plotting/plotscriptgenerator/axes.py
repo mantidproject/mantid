@@ -8,6 +8,9 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from numpy import isclose
+
+from mantid.plots.utility import get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
 
 BASE_AXIS_LABEL_COMMAND = "set_{}label('{}')"
@@ -20,8 +23,11 @@ def generate_axis_limit_commands(ax):
     """Generate commands to set the axes' limits"""
     commands = []
     for axis in ['x', 'y']:
-        lims = getattr(ax, "get_{}lim".format(axis))()
-        commands.append(BASE_AXIS_LIM_COMMAND.format(axis, convert_value_to_arg_string(lims)))
+        current_lims = getattr(ax, "get_{}lim".format(axis))()
+        default_lims = get_autoscale_limits(ax, axis)
+        if not isclose(current_lims, default_lims, rtol=0.01).all():
+            arg_string = convert_value_to_arg_string(current_lims)
+            commands.append(BASE_AXIS_LIM_COMMAND.format(axis, arg_string))
     return commands
 
 

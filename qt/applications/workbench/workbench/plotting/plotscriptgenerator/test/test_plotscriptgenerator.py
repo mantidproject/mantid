@@ -21,6 +21,7 @@ GEN_WS_RETRIEVAL_CMDS = 'workbench.plotting.plotscriptgenerator.generate_workspa
 GEN_PLOT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_plot_command'
 GEN_SUBPLOTS_CMD = 'workbench.plotting.plotscriptgenerator.generate_subplots_command'
 GEN_AXIS_LIMIT_CMDS = 'workbench.plotting.plotscriptgenerator.generate_axis_limit_commands'
+GET_AUTOSCALE_LIMITS = 'workbench.plotting.plotscriptgenerator.axes.get_autoscale_limits'
 
 SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
                  "\n"
@@ -67,7 +68,9 @@ class PlotScriptGeneratorTest(unittest.TestCase):
             'numCols': 1,
             'get_title': lambda: '',
             'get_xscale': lambda: 'linear',
-            'get_yscale': lambda: 'linear'
+            'get_yscale': lambda: 'linear',
+            'get_xlim': lambda: (-0.02, 1.02),
+            'get_ylim': lambda: (-0.02, 1.02)
         }
         mock_kwargs.update(kwargs)
         mock_ax = Mock(spec=MantidAxes, **mock_kwargs)
@@ -77,17 +80,20 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_fig = Mock(get_axes=lambda: [Mock(spec=Axes)])
         self.assertEqual(None, generate_script(mock_fig))
 
+    @patch(GET_AUTOSCALE_LIMITS)
     @patch(GEN_AXIS_LIMIT_CMDS)
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
     def test_generate_script_compiles_script_correctly(self, mock_subplots_cmd,
                                                        mock_plot_cmd, mock_retrieval_cmd,
-                                                       mock_axis_lim_cmd):
+                                                       mock_axis_lim_cmd,
+                                                       mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
         mock_axis_lim_cmd.return_value = self.ax_limit_cmds
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
 
         mock_axes1 = self._gen_mock_axes(get_tracked_artists=lambda: [None, None],
                                          get_lines=lambda: [None, None],
@@ -100,27 +106,34 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         output_script = generate_script(mock_fig, exclude_headers=True)
         self.assertEqual(SAMPLE_SCRIPT, output_script)
 
+    @patch(GET_AUTOSCALE_LIMITS)
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
     def test_generate_script_adds_legend_command_if_legend_present(
-            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd):
+            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
+            mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
 
         mock_ax = self._gen_mock_axes(legend_=True)
         mock_fig = Mock(get_axes=lambda: [mock_ax])
         self.assertIn('.legend().draggable()', generate_script(mock_fig))
 
+    @patch(GET_AUTOSCALE_LIMITS)
     @patch(GEN_WS_RETRIEVAL_CMDS)
     @patch(GEN_PLOT_CMDS)
     @patch(GEN_SUBPLOTS_CMD)
-    def test_generate_script_does_not_add_legend_command_if_legend_present(
-            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd):
+    def test_generate_script_does_not_add_legend_command_if_figure_has_no_legend(
+            self, mock_subplots_cmd, mock_plot_cmd, mock_retrieval_cmd,
+            mock_autoscale_lims):
         mock_retrieval_cmd.return_value = self.retrieval_cmds
         mock_subplots_cmd.return_value = self.subplots_cmd
         mock_plot_cmd.return_value = self.plot_cmd
+        mock_autoscale_lims.return_value = (-0.02, 1.02)
+
         mock_fig = Mock(get_axes=lambda: [self._gen_mock_axes()])
         self.assertNotIn('.legend()', generate_script(mock_fig))
 

@@ -17,6 +17,8 @@ from mantid.py3compat import is_text_string
 
 
 def round_to_sig_figs(number, sig_figs):
+    if np.isclose(number, 0):
+        return 0.0
     return round(number, -int(np.floor(np.log10(np.abs(number)))) + (sig_figs - 1))
 
 

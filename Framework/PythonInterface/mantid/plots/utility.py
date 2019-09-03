@@ -50,3 +50,20 @@ def get_axes_index(ax):
     """Get the index position of given Axes in its figure"""
     index = ax.rowNum*ax.numCols + ax.colNum + 1
     return index
+
+
+def get_autoscale_limits(ax, axis):
+    """
+    Get limits that would be set by autoscale.
+
+    This is a trimmed down  version of the function 'handle_single_axis'
+    that is found within 'matplotlib.axes._base._AxesBase.autoscale_view'
+    """
+    axis_min, axis_max = getattr(ax.dataLim, 'interval{}'.format(axis))
+    ax_margin = getattr(ax, '_{}margin'.format(axis))
+    if ax_margin > 0:
+        padding = (axis_max - axis_min)*ax_margin
+        return axis_min - padding, axis_max + padding
+    if not ax._tight:
+        locator = getattr(ax, '{}axis'.format(axis)).get_major_locator()
+        return locator.view_limits(axis_min, axis_max)
