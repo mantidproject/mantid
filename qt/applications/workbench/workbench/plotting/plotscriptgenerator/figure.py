@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib import rcParams
+from numpy import isclose
 
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string
@@ -54,7 +55,9 @@ def generate_subplots_command(fig):
 def _remove_kwargs_if_default(kwargs):
     for kwarg, default_value in default_kwargs.items():
         try:
-            if kwargs[kwarg] == default_value:
+            if kwarg == 'figsize' and isclose(kwargs[kwarg], default_value, rtol=0.05).all():
+                kwargs.pop(kwarg)
+            elif kwargs[kwarg] == default_value:
                 kwargs.pop(kwarg)
         except KeyError:
             pass

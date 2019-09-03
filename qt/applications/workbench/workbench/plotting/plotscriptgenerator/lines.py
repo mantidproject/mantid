@@ -27,7 +27,7 @@ mpl_default_kwargs = {
     'alpha': None,
     'barsabove': False,
     'capsize': rcParams['errorbar.capsize'],
-    'capthick': rcParams['lines.linewidth'],
+    'capthick': rcParams['lines.markeredgewidth'],
     'color': rcParams['lines.color'],
     'distribution': config['graph1d.autodistribution'] != 'On',
     'drawstyle': 'default',
