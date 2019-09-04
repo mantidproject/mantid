@@ -95,6 +95,20 @@
                               <xs:attribute name="listener" type="xs:string" use="required"/>
                             </xs:complexType>
                           </xs:element>
+						  <xs:element name="choppertopic" type="topicType" maxOccurs="unbounded" />
+							<xs:complexType>
+								<xs:attribute name="name" type="xs:string" use="required" />
+							</xs:complexType>
+							<xs:simpleType name="topicType">
+							  <xs:restriction base="xs:string">
+								<xs:enumeration value="event" />
+								<xs:enumeration value="chopper" />
+								<xs:enumeration value="sample" />
+								<xs:enumeration value="run" />
+								<xs:enumeration value="monitor" />
+							  </xs:restriction>
+							</xs:simpleType>
+						  </xs:element>
                         </xs:choice>
                         <xs:attribute name="default" type="xs:string" use="optional"/>
                       </xs:complexType>
