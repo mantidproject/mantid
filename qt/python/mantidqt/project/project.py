@@ -52,18 +52,17 @@ class Project(AnalysisDataServiceObserver):
     def load_settings_from_config(self, config):
         self.prompt_save_on_close = config.get('project', 'prompt_save_on_close')
 
-    def __get_saved(self):
+    @property
+    def saved(self):
         return self.__saved
 
-    def __get_is_saving(self):
+    @property
+    def is_saving(self):
         return self.__is_saving
 
-    def __get_is_loading(self):
+    @property
+    def is_loading(self):
         return self.__is_loading
-
-    saved = property(__get_saved)
-    is_saving = property(__get_is_saving)
-    is_loading = property(__get_is_loading)
 
     def save(self):
         """
