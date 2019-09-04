@@ -11,14 +11,13 @@ from mantidqt.widgets.jobtreeview import *
 class SansJobTreeView(JobTreeView):
 
     def __init__(self):
-        JobTreeView.__init__(self,
-             ["Sample", "Transmission", "Absorber", "Beam", "Flux", "Container", "ContainerTransmission",
-             "Mask", "TransmissionAbsorber", "TransmissionBeam", "Sensitivity"],
-             self.cell_style(""))
+        columns = ["Sample", "Transmission", "Absorber", "Beam", "Flux", "Container", "ContainerTransmission",
+                   "Mask", "TransmissionAbsorber", "TransmissionBeam", "Sensitivity", "CustomOptions"]
+
+        JobTreeView.__init__(self, columns,self.cell_style(''))
 
         self.setRootIsDecorated(False)
-        self.add_row([''] * 11)
-        # table_signals = jobtreeview.JobTreeViewSignalAdapter(self.job_tree_view, self)
+        self.add_row([''] * len(columns))
 
     def add_row(self, value):
         value = [self.cell_style(x) for x in value]

@@ -10,9 +10,11 @@ from qtpy.QtWidgets import (QMainWindow, QWidget, QFileDialog, QSizePolicy)
 from qtpy.QtGui import QIcon
 from qtpy.QtCore import *
 from mantidqt.widgets import (manageuserdirectories, instrumentselector)
+from mantidqt.widgets.jobtreeview import *
 from mantidqt import icons
 from mantid.simpleapi import config, logger
 from .ui_main import Ui_MainWindow
+from .helpers import *
 from ..sans.job_tree_view import SansJobTreeView
 from ..sans.tab_view import SansTabView
 from ..refl.job_tree_view import ReflJobTreeView
@@ -29,6 +31,7 @@ class DrillView(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.instrument = config['default.instrument']
+        self.technique = getTechnique(self.instrument)
         self.setup_header()
         self.setup_center()
         self.setup_footer()
@@ -58,22 +61,24 @@ class DrillView(QMainWindow, Ui_MainWindow):
             if self.job_tree_view:
                 self.job_tree_view.setParent(None)
                 self.job_tree_view = None
-        if self.instrument in ['D11', 'D22', 'D33']:
+
+        if self.technique == 'SANS':
             self.job_tree_view = SansJobTreeView()
-        elif self.instrument in ['D17', 'FIGARO']:
+        elif self.technique == 'Reflectometry':
             self.job_tree_view = ReflJobTreeView()
         else:
             pass
         self.center.addWidget(self.job_tree_view)
+        self.table_signals = JobTreeViewSignalAdapter(self.job_tree_view, self)
 
     def setup_footer(self):
         if hasattr(self, 'tab_view'):
             if self.tab_view:
                 self.tab_view.setParent(None)
                 self.tab_view = None
-        if self.instrument in ['D11', 'D22', 'D33']:
+        if self.technique == 'SANS':
             self.tab_view = SansTabView()
-        elif self.instrument in ['D17', 'FIGARO']:
+        elif self.technique == 'Reflectometry':
             self.tab_view = ReflTabView()
         else:
             pass
@@ -86,6 +91,7 @@ class DrillView(QMainWindow, Ui_MainWindow):
         if instrument in ['D11', 'D22', 'D33', 'D17', 'FIGARO']:
             config['default.instrument'] = instrument
             self.instrument = instrument
+            self.technique = getTechnique(self.instrument)
             self.setup_center()
             self.setup_footer()
         else:

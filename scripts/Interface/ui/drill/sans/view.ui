@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>315</height>
+    <width>843</width>
+    <height>372</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <widget class="QWidget" name="settings">
       <attribute name="title">
@@ -88,9 +88,24 @@
        <string>Mask</string>
       </attribute>
      </widget>
+     <widget class="QWidget" name="sens">
+      <attribute name="title">
+       <string>Sensitivity</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="absolutescale">
+      <attribute name="title">
+       <string>AbsoluteScale</string>
+      </attribute>
+     </widget>
      <widget class="QWidget" name="iq">
       <attribute name="title">
        <string>I(Q)</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="resolution">
+      <attribute name="title">
+       <string>Resolution</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="plot">
