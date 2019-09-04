@@ -15,6 +15,7 @@
  */
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
@@ -481,6 +482,104 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   dependsOn.write(strSize, dependency);
 }
 
+SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
+                             const detid2index_map &detToIndexMap,
+                             const Indexing::IndexInfo &indexInfo,
+                             const std::vector<Mantid::detid_t> &detIds,
+                             size_t index) {
+  auto childrenDetectors = compInfo.detectorsInSubtree(index);
+  // local to this nxdetector
+  std::vector<int> detector_list;
+  detector_list.reserve(childrenDetectors.size());
+  std::map<size_t, int> detector_count_map;
+  for (const auto det_index : childrenDetectors) {
+    auto detector_id = detIds[det_index];
+    detector_list.push_back(
+        detector_id); // Note detector_numbers already has this!
+    auto spectrum_index = detToIndexMap.at(detector_id);
+    detector_count_map[spectrum_index]++; // Attribute detector to a given
+                                          // spectrum_index
+  }
+  // Sized to spectra in bank
+  SpectraMappings mappings;
+  mappings.detector_count.resize(detector_count_map.size(), 0);
+  mappings.detector_index.resize(detector_count_map.size() + 1, 0);
+  mappings.detector_list = detector_list;
+  mappings.spectra_ids.resize(detector_count_map.size(), 0);
+  mappings.number_dets = childrenDetectors.size();
+  mappings.number_spec = detector_count_map.size();
+
+  size_t counter = 0;
+  for (auto &pair : detector_count_map) {
+    // using sort order of map to ensure we are ordered by lowest to highest
+    // spectrum index
+    mappings.detector_count[counter] = (pair.second); // Counts
+    mappings.detector_index[counter + 1] =
+        mappings.detector_index[counter] + (pair.second);
+    mappings.spectra_ids[counter] =
+        int32_t(indexInfo.spectrumNumber(pair.first));
+    ++counter;
+  }
+  mappings.detector_index.resize(
+      detector_count_map.size()); // cut-off last item
+
+  return mappings;
+}
+
+void validateInputs(AbstractLogger &logger, const std::string &fullPath,
+                    const Geometry::ComponentInfo &compInfo) {
+  boost::filesystem::path tmp(fullPath);
+  if (!boost::filesystem::is_directory(tmp.root_directory())) {
+    throw std::invalid_argument(
+        "The path provided for saving the file is invalid: " + fullPath + "\n");
+  }
+
+  // check the file extension matches any of the valid extensions defined in
+  // nexus_geometry_extensions
+  const auto ext = boost::filesystem::path(tmp).extension();
+  bool isValidExt = std::any_of(
+      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+      [&ext](const std::string &str) { return ext.generic_string() == str; });
+
+  // throw if the file extension is invalid
+  if (!isValidExt) {
+    // string of valid extensions to output in exception
+    std::string extensions;
+    std::for_each(
+        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+        [&extensions](const std::string &str) { extensions += " " + str; });
+    std::string message = "invalid extension for file: '" +
+                          ext.generic_string() +
+                          "'. Expected any of: " + extensions;
+    logger.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  if (!compInfo.hasDetectorInfo()) {
+    logger.error(
+        "No detector info was found in the Instrument. Instrument not saved.");
+    throw std::invalid_argument("No detector info was found in the Instrument");
+  }
+  if (!compInfo.hasSample()) {
+    logger.error(
+        "No sample was found in the Instrument. Instrument not saved.");
+    throw std::invalid_argument("No sample was found in the Instrument");
+  }
+
+  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
+    logger.error("The sample positon is required to be at the origin. "
+                 "Instrument not saved.");
+    throw std::invalid_argument(
+        "The sample positon is required to be at the origin");
+  }
+
+  if (!compInfo.hasSource()) {
+    logger.error("No source was found in the Instrument. "
+                 "Instrument not saved.");
+    throw std::invalid_argument("No source was found in the Instrument");
+  }
+}
+
 class NexusGeometrySaveImpl {
 public:
   enum class Mode { Trunc, Append };
@@ -879,64 +978,10 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath, const std::string &rootPath,
                     AbstractLogger &logger, bool append,
                     Kernel::ProgressBase *reporter) {
-  // Exception handling.
-  boost::filesystem::path tmp(fullPath);
-  if (!boost::filesystem::is_directory(tmp.root_directory())) {
-    throw std::invalid_argument(
-        "The path provided for saving the file is invalid: " + fullPath + "\n");
-  }
 
-  // check the file extension matches any of the valid extensions defined in
-  // nexus_geometry_extensions
-  const auto ext = boost::filesystem::path(tmp).extension();
-  bool isValidExt = std::any_of(
-      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-      [&ext](const std::string &str) { return ext.generic_string() == str; });
-
-  // throw if the file extension is invalid
-  if (!isValidExt) {
-    // string of valid extensions to output in exception
-    std::string extensions;
-    std::for_each(
-        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-        [&extensions](const std::string &str) { extensions += " " + str; });
-    std::string message = "invalid extension for file: '" +
-                          ext.generic_string() +
-                          "'. Expected any of: " + extensions;
-    logger.error(message);
-    throw std::invalid_argument(message);
-  }
-
-  if (!compInfo.hasDetectorInfo()) {
-    logger.error(
-        "No detector info was found in the Instrument. Instrument not saved.");
-    throw std::invalid_argument("No detector info was found in the Instrument");
-  }
-  if (!compInfo.hasSample()) {
-    logger.error(
-        "No sample was found in the Instrument. Instrument not saved.");
-    throw std::invalid_argument("No sample was found in the Instrument");
-  }
-
-  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    logger.error("The sample positon is required to be at the origin. "
-                 "Instrument not saved.");
-    throw std::invalid_argument(
-        "The sample positon is required to be at the origin");
-  }
-
-  if (!compInfo.hasSource()) {
-    logger.error("No source was found in the Instrument. "
-                 "Instrument not saved.");
-    throw std::invalid_argument("No source was found in the Instrument");
-  }
-
-  // IDs of all detectors in Instrument cache
-  const auto detIds = detInfo.detectorIDs();
-
-  // Todo a better way to do this would be to have append as a bool template
-  // parameter and specialise on it, therefore getting compile-time behavioural
-  // switching.
+  validateInputs(logger, fullPath, compInfo);
+  // IDs of all detectors in Instrument
+  const auto &detIds = detInfo.detectorIDs();
   H5::Group rootGroup;
   H5::H5File file;
   if (append) {
@@ -1017,63 +1062,10 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   const auto &compInfo = ws.componentInfo();
 
   // Exception handling.
-  boost::filesystem::path tmp(fullPath);
-  if (!boost::filesystem::is_directory(tmp.root_directory())) {
-    throw std::invalid_argument(
-        "The path provided for saving the file is invalid: " + fullPath + "\n");
-  }
+  validateInputs(logger, fullPath, compInfo);
+  // IDs of all detectors in Instrument
+  const auto &detIds = detInfo.detectorIDs();
 
-  // check the file extension matches any of the valid extensions defined in
-  // nexus_geometry_extensions
-  const auto ext = boost::filesystem::path(tmp).extension();
-  bool isValidExt = std::any_of(
-      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-      [&ext](const std::string &str) { return ext.generic_string() == str; });
-
-  // throw if the file extension is invalid
-  if (!isValidExt) {
-    // string of valid extensions to output in exception
-    std::string extensions;
-    std::for_each(
-        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
-        [&extensions](const std::string &str) { extensions += " " + str; });
-    std::string message = "invalid extension for file: '" +
-                          ext.generic_string() +
-                          "'. Expected any of: " + extensions;
-    logger.error(message);
-    throw std::invalid_argument(message);
-  }
-
-  if (!compInfo.hasDetectorInfo()) {
-    logger.error(
-        "No detector info was found in the Instrument. Instrument not saved.");
-    throw std::invalid_argument("No detector info was found in the Instrument");
-  }
-  if (!compInfo.hasSample()) {
-    logger.error(
-        "No sample was found in the Instrument. Instrument not saved.");
-    throw std::invalid_argument("No sample was found in the Instrument");
-  }
-
-  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
-    logger.error("The sample positon is required to be at the origin. "
-                 "Instrument not saved.");
-    throw std::invalid_argument(
-        "The sample positon is required to be at the origin");
-  }
-
-  if (!compInfo.hasSource()) {
-    logger.error("No source was found in the Instrument. "
-                 "Instrument not saved.");
-    throw std::invalid_argument("No source was found in the Instrument");
-  }
-
-  // IDs of all detectors in Instrument cache
-  const auto detIds = detInfo.detectorIDs();
-
-  // Todo a better way to do this would be to have append as a bool template
-  // parameter and specialise on it, therefore getting compile-time behavioural
-  // switching.
   H5::Group rootGroup;
   H5::H5File file;
   if (append) {
@@ -1104,41 +1096,9 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
 
-      auto childrenDetectors = compInfo.detectorsInSubtree(index);
-      // local to this nxdetector
-      std::vector<int> detector_list;
-      detector_list.reserve(childrenDetectors.size());
-      std::map<size_t, int> detector_count_map;
-      for (const auto det_index : childrenDetectors) {
-        auto detector_id = detIds[det_index];
-        detector_list.push_back(
-            detector_id); // Note detector_numbers already has this!
-        auto spectrum_index = detToIndexMap[detector_id];
-        detector_count_map[spectrum_index]++; // Attribute detector to a given
-                                              // spectrum_index
-      }
-      // Sized to spectra in bank
-      SpectraMappings mappings;
-      mappings.detector_count.resize(detector_count_map.size(), 0);
-      mappings.detector_index.resize(detector_count_map.size() + 1, 0);
-      mappings.detector_list = detector_list;
-      mappings.spectra_ids.resize(detector_count_map.size(), 0);
-      mappings.number_dets = childrenDetectors.size();
-      mappings.number_spec = detector_count_map.size();
-
-      size_t counter = 0;
-      for (auto &pair : detector_count_map) {
-        // using sort order of map to ensure we are ordered by lowest to highest
-        // spectrum index
-        mappings.detector_count[counter] = (pair.second); // Counts
-        mappings.detector_index[counter + 1] =
-            mappings.detector_index[counter] + (pair.second);
-        mappings.spectra_ids[counter] =
-            int32_t(indexInfo.spectrumNumber(pair.first));
-        ++counter;
-      }
-      mappings.detector_index.resize(
-          detector_count_map.size()); // cut-off last item
+      // Make spectra detector mappings that can be used
+      SpectraMappings mappings =
+          makeMappings(compInfo, detToIndexMap, indexInfo, detIds, index);
 
       if (reporter != nullptr)
         reporter->report();
