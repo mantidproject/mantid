@@ -17,14 +17,15 @@ namespace NexusGeometry {
 /**
  * Abstract logger. Avoid hard-coded logging dependencies.
  */
-class AbstractLogger {
+class MANTID_NEXUSGEOMETRY_DLL AbstractLogger {
 public:
   virtual void warning(const std::string &warning) = 0;
   virtual void error(const std::string &error) = 0;
   virtual ~AbstractLogger() {}
 };
 
-template <typename T> class LogAdapter : public AbstractLogger {
+template <typename T>
+class MANTID_NEXUSGEOMETRY_DLL LogAdapter : public AbstractLogger {
 private:
   T *m_adaptee;
 
@@ -44,9 +45,7 @@ public:
  * Make it easy to wrap existing logging frameworks. Note that ownership of
  * adaptee is NOT transferred to returned Logger.
  */
-template <typename T>
-MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<AbstractLogger>
-makeLogger(T *adaptee) {
+template <typename T> std::unique_ptr<AbstractLogger> makeLogger(T *adaptee) {
 
   return std::make_unique<LogAdapter<T>>(adaptee);
 }
