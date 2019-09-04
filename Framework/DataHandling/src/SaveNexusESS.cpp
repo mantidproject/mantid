@@ -93,16 +93,9 @@ void SaveNexusESS::exec() {
     throw std::runtime_error("SaveNexusESS expects a MatrixWorkspace as input");
   SaveNexusProcessed::exec();
 
-  NexusGeometry::NexusGeometrySave::SpectraMappings mappings;
   /*Make the mappings needed for writing to disk*/
   std::vector<int> workspaceIndices(matrixWs->getNumberHistograms());
   std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
-  const bool mappingsToWrite =
-      makeMappings(*matrixWs, workspaceIndices, mappings.detector_index,
-                   mappings.detector_count, mappings.detector_list,
-                   mappings.number_spec, mappings.number_dets);
-  if (!mappingsToWrite)
-    g_log.warning("No spectra mappings saved");
 
   // Now append nexus geometry
   saveNexusGeometry(*matrixWs, filename);

@@ -104,14 +104,6 @@ private:
   std::unique_ptr<API::Progress> m_progress;
 };
 
-/// Helper function for making spectra-detector mappings
-bool makeMappings(const Mantid::API::MatrixWorkspace &ws,
-                  const std::vector<int> &ws_indices,
-                  std::vector<int32_t> &out_detector_index,
-                  std::vector<int32_t> &out_detector_count,
-                  std::vector<int32_t> &out_detector_list, int &numberSpec,
-                  size_t &numberDetectors);
-
 } // namespace DataHandling
 } // namespace Mantid
 

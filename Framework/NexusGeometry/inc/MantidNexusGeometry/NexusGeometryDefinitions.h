@@ -54,6 +54,18 @@ const H5std_string STANDARD_INSTRUMENT_NAME =
 const H5std_string DETECTOR_IDS = "detector_number";
 const H5std_string DETECTOR_ID = "detector_id";
 
+// Processed Nexus definitions
+const H5std_string SPECTRA_COUNTS =
+    "detector_count"; // Number of detectors contributing to each spectra. NOT
+                      // Nexus compliant
+const H5std_string SPECTRA_NUMBERS = "spectra";     // NOT Nexus compliant
+const H5std_string DETECTOR_LIST = "detector_list"; // Note this is identical to
+                                                    // DETECTOR_ID, but is NOT
+                                                    // Nexus compliant
+const H5std_string DETECTOR_INDEX =
+    "detector_index"; // indices of detectors contributing to spectra. NOT Nexus
+                      // compliant
+
 const H5std_string TRANSFORMATION_TYPE = "transformation_type";
 
 const H5std_string METRES = "m";

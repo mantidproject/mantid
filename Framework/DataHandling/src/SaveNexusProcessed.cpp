@@ -38,6 +38,77 @@ using optional_size_t = NeXus::NexusFileIO::optional_size_t;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexusProcessed)
 
+namespace {
+
+/**
+ * Create containers for spectra-detector map writing
+ *
+ * Note that in-out vectors passed by ref will be dynamically resized
+ * internally. They do not need to be sized correctly prior to calling method.
+ *
+ * @param ws : input workspace
+ * @param ws_indices : workspace indices to write
+ * @param out_detector_index : detector indices to write
+ * @param out_detector_count : detector count to write
+ * @param out_detector_list : detector list to write
+ * @param numberSpec
+ * @param numberDetectors
+ * @return
+ */
+bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
+                  std::vector<int32_t> &out_detector_index,
+                  std::vector<int32_t> &out_detector_count,
+                  std::vector<int32_t> &out_detector_list, int &numberSpec,
+                  size_t &numberDetectors) {
+
+  // Count the total number of detectors
+  numberDetectors = 0;
+  for (auto index : ws_indices) {
+    numberDetectors +=
+        ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
+  }
+  if (numberDetectors < 1) {
+    return false;
+  }
+  // Start the detector group
+
+  numberSpec = int(ws_indices.size());
+  // allocate space for the Nexus Muon format of spectra-detector mapping
+  // allow for writing one more than required
+  out_detector_index.resize(numberSpec + 1, 0);
+  out_detector_count.resize(numberSpec, 0);
+  out_detector_list.resize(numberDetectors, 0);
+  int id = 0;
+
+  int ndet = 0;
+  // get data from map into Nexus Muon format
+  for (int i = 0; i < numberSpec; i++) {
+    // Workspace index
+    const int si = ws_indices[i];
+    // Spectrum there
+    const auto &spectrum = ws.getSpectrum(si);
+
+    // The detectors in this spectrum
+    const auto &detectorgroup = spectrum.getDetectorIDs();
+    const auto ndet1 = static_cast<int>(detectorgroup.size());
+
+    // points to start of detector list for the next spectrum
+    out_detector_index[i + 1] = int32_t(out_detector_index[i] + ndet1);
+    out_detector_count[i] = int32_t(ndet1);
+    ndet += ndet1;
+
+    std::set<detid_t>::const_iterator it;
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
+      out_detector_list[id++] = int32_t(*it);
+    }
+  }
+  // Cut the extra entry at the end of detector_index
+  out_detector_index.resize(numberSpec);
+  return true;
+}
+
+} // namespace
+
 /** Initialisation method.
  *
  */
@@ -633,73 +704,6 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(
 
   const std::vector<int> dims(1, numberSpec);
   file->writeCompData("spectra", spectra, dims, compression, dims);
-}
-
-/**
- * Create containers for spectra-detector map writing
- *
- * Note that in-out vectors passed by ref will be dynamically resized
- * internally. They do not need to be sized correctly prior to calling method.
- *
- * @param ws : input workspace
- * @param ws_indices : workspace indices to write
- * @param out_detector_index : detector indices to write
- * @param out_detector_count : detector count to write
- * @param out_detector_list : detector list to write
- * @param numberSpec
- * @param numberDetectors
- * @return
- */
-bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
-                  std::vector<int32_t> &out_detector_index,
-                  std::vector<int32_t> &out_detector_count,
-                  std::vector<int32_t> &out_detector_list, int &numberSpec,
-                  size_t &numberDetectors) {
-
-  // Count the total number of detectors
-  numberDetectors = 0;
-  for (auto index : ws_indices) {
-    numberDetectors +=
-        ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
-  }
-  if (numberDetectors < 1) {
-    return false;
-  }
-  // Start the detector group
-
-  numberSpec = int(ws_indices.size());
-  // allocate space for the Nexus Muon format of spectra-detector mapping
-  // allow for writing one more than required
-  out_detector_index.resize(numberSpec + 1, 0);
-  out_detector_count.resize(numberSpec, 0);
-  out_detector_list.resize(numberDetectors, 0);
-  int id = 0;
-
-  int ndet = 0;
-  // get data from map into Nexus Muon format
-  for (int i = 0; i < numberSpec; i++) {
-    // Workspace index
-    const int si = ws_indices[i];
-    // Spectrum there
-    const auto &spectrum = ws.getSpectrum(si);
-
-    // The detectors in this spectrum
-    const auto &detectorgroup = spectrum.getDetectorIDs();
-    const auto ndet1 = static_cast<int>(detectorgroup.size());
-
-    // points to start of detector list for the next spectrum
-    out_detector_index[i + 1] = int32_t(out_detector_index[i] + ndet1);
-    out_detector_count[i] = int32_t(ndet1);
-    ndet += ndet1;
-
-    std::set<detid_t>::const_iterator it;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
-      out_detector_list[id++] = int32_t(*it);
-    }
-  }
-  // Cut the extra entry at the end of detector_index
-  out_detector_index.resize(numberSpec);
-  return true;
 }
 
 } // namespace DataHandling

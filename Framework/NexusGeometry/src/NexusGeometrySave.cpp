@@ -36,6 +36,18 @@ namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
 namespace {
+
+/*
+ * Helper container for spectrum mapping information info
+ */
+struct SpectraMappings {
+  std::vector<int32_t> detector_index;
+  std::vector<int32_t> detector_count;
+  std::vector<int32_t> detector_list;
+  std::vector<int32_t> spectra_ids;
+  size_t number_spec = 0;
+  size_t number_dets = 0;
+};
 /*
  * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
@@ -275,26 +287,54 @@ void writeNXDetectorNumber(H5::Group &grp,
       grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
   detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
-/*
-void writeDetectorCount(H5::Group &grp, const Geometry::ComponentInfo &compInfo,
-                        SpectraMappings &mappings, const size_t idx) {
 
-  if (mappings.)
-
-    const auto nDetectorsInBank =
-        static_cast<hsize_t>(compInfo.detectorsInSubtree(idx));
-
+void writeDetectorCount(H5::Group &grp, const SpectraMappings &mappings) {
   int rank = 1;
   hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = nDetectorsInBank;
+  dims[0] = static_cast<hsize_t>(mappings.detector_count.size());
 
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
-  detectorNumber =
-      grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+  auto dataset =
+      grp.createDataSet(SPECTRA_COUNTS, H5::PredType::NATIVE_INT, space);
+  dataset.write(mappings.detector_count.data(), H5::PredType::NATIVE_INT,
+                space);
 }
-*/
+
+void writeDetectorList(H5::Group &grp, const SpectraMappings &mappings) {
+  int rank = 1;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = static_cast<hsize_t>(mappings.detector_list.size());
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+
+  auto dataset =
+      grp.createDataSet(DETECTOR_LIST, H5::PredType::NATIVE_INT, space);
+  dataset.write(mappings.detector_list.data(), H5::PredType::NATIVE_INT, space);
+}
+void writeDetectorIndex(H5::Group &grp, const SpectraMappings &mappings) {
+  int rank = 1;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = static_cast<hsize_t>(mappings.detector_index.size());
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+
+  auto dataset =
+      grp.createDataSet(DETECTOR_INDEX, H5::PredType::NATIVE_INT, space);
+  dataset.write(mappings.detector_index.data(), H5::PredType::NATIVE_INT,
+                space);
+}
+void writeSpectra(H5::Group &grp, const SpectraMappings &mappings) {
+  int rank = 1;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = static_cast<hsize_t>(mappings.spectra_ids.size());
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+
+  auto dataset =
+      grp.createDataSet(SPECTRA_NUMBERS, H5::PredType::NATIVE_INT, space);
+  dataset.write(mappings.spectra_ids.data(), H5::PredType::NATIVE_INT, space);
+}
 
 /*
  * Function: writeNXMonitorNumber
@@ -844,11 +884,12 @@ public:
     writeStrDataset(childGroup, BANK_NAME, detectorName);
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
 
-    /*
     writeDetectorCount(childGroup, mappings);
+    // Note that the detector lise is the same as detector_number. We write both
+    // for compatibility
     writeDetectorList(childGroup, mappings);
-    wrtieDetectorIndex(childGroup, mappings);
-*/
+    writeDetectorIndex(childGroup, mappings);
+    writeSpectra(childGroup, mappings);
   }
 }; // namespace
 
@@ -1092,13 +1133,10 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   // save NXsample
   writer.sample(rootGroup, compInfo);
 
-  SpectraMappings SpectraMappings; // TODO
   // save NXdetectors
   auto detToIndexMap =
       ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
   const auto &indexInfo = ws.indexInfo();
-  const auto &specInfo = ws.spectrumInfo();
-  const bool one_to_one = specInfo.size() != detInfo.size();
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
 
@@ -1106,7 +1144,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
       // local to this nxdetector
       std::vector<int> detector_list;
       detector_list.reserve(childrenDetectors.size());
-      std::map<int, int> detector_count_map;
+      std::map<size_t, int> detector_count_map;
       for (const auto det_index : childrenDetectors) {
         auto detector_id = detIds[det_index];
         detector_list.push_back(
@@ -1116,25 +1154,31 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
                                               // spectrum_index
       }
       // Sized to spectra in bank
-      std::vector<int> detector_count(detector_count_map.size(), 0);
-      std::vector<int> detector_indexes(detector_count_map.size() + 1, 0);
-      std::vector<int> spectra_id(detector_count_map.size(), 0);
+      SpectraMappings mappings;
+      mappings.detector_count.resize(detector_count_map.size(), 0);
+      mappings.detector_index.resize(detector_count_map.size() + 1, 0);
+      mappings.detector_list = detector_list;
+      mappings.spectra_ids.resize(detector_count_map.size(), 0);
+      mappings.number_dets = childrenDetectors.size();
+      mappings.number_spec = detector_count_map.size();
+
       size_t counter = 0;
       for (auto &pair : detector_count_map) {
         // using sort order of map to ensure we are ordered by lowest to highest
         // spectrum index
-        detector_count[counter] = (pair.second); // Counts
-        detector_indexes[counter + 1] =
-            detector_indexes[counter] + (pair.second);
-        spectra_id[counter] = int32_t(indexInfo.spectrumNumber(pair.first));
+        mappings.detector_count[counter] = (pair.second); // Counts
+        mappings.detector_index[counter + 1] =
+            mappings.detector_index[counter] + (pair.second);
+        mappings.spectra_ids[counter] =
+            int32_t(indexInfo.spectrumNumber(pair.first));
         ++counter;
       }
-      detector_indexes.resize(detector_count_map.size()); // cut-off last item
+      mappings.detector_index.resize(
+          detector_count_map.size()); // cut-off last item
 
       if (reporter != nullptr)
         reporter->report();
-      writer.detector(instrument, compInfo, detIds, index); //,
-      // spectraMappings);
+      writer.detector(instrument, compInfo, detIds, index, mappings);
     }
   }
 

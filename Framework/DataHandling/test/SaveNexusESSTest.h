@@ -187,8 +187,11 @@ public:
       //                 inSpecInfo.spectrumDefinition(i)[0]);
     }
   }
-  void test_with_workspace() {
+  void test_base_function_with_workspace() {
 
+    // This is testing the core routine, but we put it here and not in
+    // NexusGeometrySave because we need access to WorkspaceCreationHelpers for
+    // this.
     ScopedFileHandle fileResource("test_with_full_workspace.hdf5");
     std::string destinationFile = fileResource.fullPath();
     // auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(

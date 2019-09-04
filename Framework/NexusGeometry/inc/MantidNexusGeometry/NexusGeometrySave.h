@@ -45,16 +45,6 @@ class MatrixWorkspace;
 namespace NexusGeometry {
 namespace NexusGeometrySave {
 
-/// Container defining mappings needed for writing spectra information to
-/// NXDetectors
-struct MANTID_NEXUSGEOMETRY_DLL SpectraMappings {
-  std::vector<int32_t> detector_index;
-  std::vector<int32_t> detector_count;
-  std::vector<int32_t> detector_list;
-  int number_spec = 0;
-  size_t number_dets = 0;
-};
-
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,
                const Geometry::DetectorInfo &detInfo,
