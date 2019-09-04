@@ -139,7 +139,7 @@ class Project(AnalysisDataServiceObserver):
     @staticmethod
     def inform_user_not_possible():
         return QMessageBox().information(None, "That action is not possible!",
-                                         "You cannot at present exit workbench whilst it is saving or loading a "
+                                         "You cannot exit workbench whilst it is saving or loading a "
                                          "project")
 
     @staticmethod
