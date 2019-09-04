@@ -20,6 +20,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+#include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/filesystem.hpp>
@@ -185,6 +186,20 @@ public:
       // TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i)[0],
       //                 inSpecInfo.spectrumDefinition(i)[0]);
     }
+  }
+  void test_with_workspace() {
+
+    ScopedFileHandle fileResource("test_with_full_workspace.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+    // auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+    //    10 /*histograms*/, 100 /*bins*/);
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            2, 10, 20);
+    Mantid::Kernel::Logger logger("logger");
+    Mantid::NexusGeometry::LogAdapter<Mantid::Kernel::Logger> adapter(&logger);
+    Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
+        *ws, destinationFile, "entry", adapter);
   }
 };
 

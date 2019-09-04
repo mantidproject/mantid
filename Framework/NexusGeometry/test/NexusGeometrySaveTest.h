@@ -17,6 +17,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/NexusFileReader.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "mockobjects.h"
 #include <cxxtest/TestSuite.h>

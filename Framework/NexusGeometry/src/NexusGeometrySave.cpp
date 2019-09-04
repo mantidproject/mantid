@@ -15,9 +15,11 @@
  */
 
 #include "MantidNexusGeometry/NexusGeometrySave.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
@@ -273,6 +275,26 @@ void writeNXDetectorNumber(H5::Group &grp,
       grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
   detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
+/*
+void writeDetectorCount(H5::Group &grp, const Geometry::ComponentInfo &compInfo,
+                        SpectraMappings &mappings, const size_t idx) {
+
+  if (mappings.)
+
+    const auto nDetectorsInBank =
+        static_cast<hsize_t>(compInfo.detectorsInSubtree(idx));
+
+  int rank = 1;
+  hsize_t dims[static_cast<hsize_t>(1)];
+  dims[0] = nDetectorsInBank;
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+
+  detectorNumber =
+      grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
+  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+}
+*/
 
 /*
  * Function: writeNXMonitorNumber
@@ -743,6 +765,91 @@ public:
     writeStrDataset(childGroup, BANK_NAME, detectorName);
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
+
+  /*
+   * Function: detectors
+   * For NXinstrument parent (component info root). Save method which produces
+   * a set of NXdetctor groups from Component info detector banks, and saves
+   * it in the parent group, along with the Nexus compliant datasets, and
+   * metadata stored in attributes to the new group.
+   *
+   * @param parentGroup : parent group in which to write the NXinstrument
+   * group.
+   * @param compInfo : componentInfo object.
+   * @param detIDs : global detector IDs, from which those specific to the
+   * @param index : current component index
+   * @param mappings : Spectra to detector mappings
+   * NXdetector will be extracted.
+   */
+  void detector(const H5::Group &parentGroup,
+                const Geometry::ComponentInfo &compInfo,
+                const std::vector<int> &detIds, const size_t index,
+                SpectraMappings &mappings) {
+
+    // if the component is unnamed sets the name as unspecified with the
+    // location of the component in the cache
+    std::string nameInCache = compInfo.name(index);
+    std::string detectorName =
+        nameInCache.empty() ? "unspecified_detector_at_" + std::to_string(index)
+                            : nameInCache;
+
+    Eigen::Vector3d position =
+        Mantid::Kernel::toVector3d(compInfo.position(index));
+    Eigen::Quaterniond rotation =
+        Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+
+    std::string dependency = NO_DEPENDENCY; // dependency initialiser
+
+    bool locationIsOrigin = isApproxZero(position, PRECISION);
+    bool orientationIsZero = isApproxZero(rotation, PRECISION);
+
+    H5::Group childGroup =
+        openOrCreateGroup(parentGroup, detectorName, NX_DETECTOR);
+    writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
+
+    // do not write NXtransformations if there is no translation or rotation
+    if (!(locationIsOrigin && orientationIsZero)) {
+      H5::Group transformations =
+          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+
+      // self, ".", is the default first NXdetector dependency in the chain.
+      // first check translation in NXdetector is non-zero, and set dependency
+      // to location if true and write location. Then check if orientation in
+      // NXdetector is non-zero, replace dependency with orientation if true.
+      // If neither orientation nor location are non-zero, NXdetector is self
+      // dependent.
+      if (!locationIsOrigin) {
+        dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        writeLocation(transformations, position);
+      }
+      if (!orientationIsZero) {
+        dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+
+        // If location dataset is written to group also, then dependency for
+        // orientation dataset containg the rotation transformation will be
+        // location. Else dependency for orientation is self.
+        std::string rotationDependency =
+            locationIsOrigin ? NO_DEPENDENCY
+                             : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        writeOrientation(transformations, rotation, rotationDependency);
+      }
+    }
+
+    H5::StrType dependencyStrType = strTypeOfSize(dependency);
+    writeXYZPixeloffset(childGroup, compInfo, index);
+    // TODO in save processed nexus, this is defined "Spectra", not detector
+    // number maybe write both?
+    writeNXDetectorNumber(childGroup, compInfo, detIds, index);
+
+    writeStrDataset(childGroup, BANK_NAME, detectorName);
+    writeStrDataset(childGroup, DEPENDS_ON, dependency);
+
+    /*
+    writeDetectorCount(childGroup, mappings);
+    writeDetectorList(childGroup, mappings);
+    wrtieDetectorIndex(childGroup, mappings);
+*/
+  }
 }; // namespace
 
 } // namespace
@@ -894,7 +1001,156 @@ void saveInstrument(
 
   return saveInstrument(compInfo, detInfo, fullPath, rootPath, logger, append,
                         reporter);
-} // saveInstrument
+}
+
+void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
+                    const std::string &fullPath, const std::string &rootName,
+                    AbstractLogger &logger, bool append,
+                    Kernel::ProgressBase *reporter) {
+
+  const auto &detInfo = ws.detectorInfo();
+  const auto &compInfo = ws.componentInfo();
+
+  // Exception handling.
+  boost::filesystem::path tmp(fullPath);
+  if (!boost::filesystem::is_directory(tmp.root_directory())) {
+    throw std::invalid_argument(
+        "The path provided for saving the file is invalid: " + fullPath + "\n");
+  }
+
+  // check the file extension matches any of the valid extensions defined in
+  // nexus_geometry_extensions
+  const auto ext = boost::filesystem::path(tmp).extension();
+  bool isValidExt = std::any_of(
+      nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+      [&ext](const std::string &str) { return ext.generic_string() == str; });
+
+  // throw if the file extension is invalid
+  if (!isValidExt) {
+    // string of valid extensions to output in exception
+    std::string extensions;
+    std::for_each(
+        nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
+        [&extensions](const std::string &str) { extensions += " " + str; });
+    std::string message = "invalid extension for file: '" +
+                          ext.generic_string() +
+                          "'. Expected any of: " + extensions;
+    logger.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  if (!compInfo.hasDetectorInfo()) {
+    logger.error(
+        "No detector info was found in the Instrument. Instrument not saved.");
+    throw std::invalid_argument("No detector info was found in the Instrument");
+  }
+  if (!compInfo.hasSample()) {
+    logger.error(
+        "No sample was found in the Instrument. Instrument not saved.");
+    throw std::invalid_argument("No sample was found in the Instrument");
+  }
+
+  if (Mantid::Kernel::V3D{0, 0, 0} != compInfo.samplePosition()) {
+    logger.error("The sample positon is required to be at the origin. "
+                 "Instrument not saved.");
+    throw std::invalid_argument(
+        "The sample positon is required to be at the origin");
+  }
+
+  if (!compInfo.hasSource()) {
+    logger.error("No source was found in the Instrument. "
+                 "Instrument not saved.");
+    throw std::invalid_argument("No source was found in the Instrument");
+  }
+
+  // IDs of all detectors in Instrument cache
+  const auto detIds = detInfo.detectorIDs();
+
+  // Todo a better way to do this would be to have append as a bool template
+  // parameter and specialise on it, therefore getting compile-time behavioural
+  // switching.
+  H5::Group rootGroup;
+  H5::H5File file;
+  if (append) {
+    file = H5::H5File(fullPath, H5F_ACC_RDWR); // open file
+    rootGroup = file.openGroup(rootName);
+  } else {
+    file = H5::H5File(fullPath, H5F_ACC_TRUNC); // open file
+    rootGroup = file.createGroup(rootName);
+  }
+
+  writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
+
+  using Mode = NexusGeometrySaveImpl::Mode;
+  NexusGeometrySaveImpl writer(append ? Mode::Append : Mode::Trunc);
+  // save and capture NXinstrument (component root)
+  H5::Group instrument = writer.instrument(rootGroup);
+
+  // save NXsource
+  writer.source(instrument, compInfo);
+
+  // save NXsample
+  writer.sample(rootGroup, compInfo);
+
+  SpectraMappings SpectraMappings; // TODO
+  // save NXdetectors
+  auto detToIndexMap =
+      ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
+  const auto &indexInfo = ws.indexInfo();
+  const auto &specInfo = ws.spectrumInfo();
+  const bool one_to_one = specInfo.size() != detInfo.size();
+  for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
+    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+
+      auto childrenDetectors = compInfo.detectorsInSubtree(index);
+      // local to this nxdetector
+      std::vector<int> detector_list;
+      detector_list.reserve(childrenDetectors.size());
+      std::map<int, int> detector_count_map;
+      for (const auto det_index : childrenDetectors) {
+        auto detector_id = detIds[det_index];
+        detector_list.push_back(
+            detector_id); // Note detector_numbers already has this!
+        auto spectrum_index = detToIndexMap[detector_id];
+        detector_count_map[spectrum_index]++; // Attribute detector to a given
+                                              // spectrum_index
+      }
+      // Sized to spectra in bank
+      std::vector<int> detector_count(detector_count_map.size(), 0);
+      std::vector<int> detector_indexes(detector_count_map.size() + 1, 0);
+      std::vector<int> spectra_id(detector_count_map.size(), 0);
+      size_t counter = 0;
+      for (auto &pair : detector_count_map) {
+        // using sort order of map to ensure we are ordered by lowest to highest
+        // spectrum index
+        detector_count[counter] = (pair.second); // Counts
+        detector_indexes[counter + 1] =
+            detector_indexes[counter] + (pair.second);
+        spectra_id[counter] = int32_t(indexInfo.spectrumNumber(pair.first));
+        ++counter;
+      }
+      detector_indexes.resize(detector_count_map.size()); // cut-off last item
+
+      if (reporter != nullptr)
+        reporter->report();
+      writer.detector(instrument, compInfo, detIds, index); //,
+      // spectraMappings);
+    }
+  }
+
+  // save NXmonitors
+  for (size_t index = 0; index < detInfo.size(); ++index) {
+    if (detInfo.isMonitor(index)) {
+      if (reporter != nullptr)
+        reporter->report();
+      writer.monitor(instrument, compInfo, detIds[index], index);
+    }
+  }
+
+  file.close(); // close file
+}
+
+// saveInstrument
 
 } // namespace NexusGeometrySave
 } // namespace NexusGeometry

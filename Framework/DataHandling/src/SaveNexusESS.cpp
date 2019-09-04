@@ -8,6 +8,7 @@
 #include "MantidDataHandling/SaveNexusESS.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
+#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,8 +52,7 @@ void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
   try {
     NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
     NexusGeometry::NexusGeometrySave::saveInstrument(
-        ws.componentInfo(), ws.detectorInfo(), filename, "mantid_workspace_1",
-        adapter, true);
+        ws, filename, "mantid_workspace_1", adapter, true);
   } catch (std::exception &e) {
     g_log.error(std::string(e.what()) +
                 " Nexus Geometry may be absent or incomplete "
@@ -92,8 +92,22 @@ void SaveNexusESS::exec() {
   if (!matrixWs)
     throw std::runtime_error("SaveNexusESS expects a MatrixWorkspace as input");
   SaveNexusProcessed::exec();
+
+  NexusGeometry::NexusGeometrySave::SpectraMappings mappings;
+  /*Make the mappings needed for writing to disk*/
+  std::vector<int> workspaceIndices(matrixWs->getNumberHistograms());
+  std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
+  const bool mappingsToWrite =
+      makeMappings(*matrixWs, workspaceIndices, mappings.detector_index,
+                   mappings.detector_count, mappings.detector_list,
+                   mappings.number_spec, mappings.number_dets);
+  if (!mappingsToWrite)
+    g_log.warning("No spectra mappings saved");
+
   // Now append nexus geometry
   saveNexusGeometry(*matrixWs, filename);
+  // Now write spectrum to detector maps;
+  return;
 }
 } // namespace DataHandling
 } // namespace Mantid

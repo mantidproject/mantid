@@ -17,10 +17,12 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 
@@ -36,13 +38,32 @@ namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
 } // namespace Geometry
+namespace API {
+class MatrixWorkspace;
+}
 
 namespace NexusGeometry {
 namespace NexusGeometrySave {
 
+/// Container defining mappings needed for writing spectra information to
+/// NXDetectors
+struct MANTID_NEXUSGEOMETRY_DLL SpectraMappings {
+  std::vector<int32_t> detector_index;
+  std::vector<int32_t> detector_count;
+  std::vector<int32_t> detector_list;
+  int number_spec = 0;
+  size_t number_dets = 0;
+};
+
 MANTID_NEXUSGEOMETRY_DLL void
 saveInstrument(const Geometry::ComponentInfo &compInfo,
                const Geometry::DetectorInfo &detInfo,
+               const std::string &fullPath, const std::string &rootName,
+               AbstractLogger &logger, bool append = false,
+               Kernel::ProgressBase *reporter = nullptr);
+
+MANTID_NEXUSGEOMETRY_DLL void
+saveInstrument(const Mantid::API::MatrixWorkspace &ws,
                const std::string &fullPath, const std::string &rootName,
                AbstractLogger &logger, bool append = false,
                Kernel::ProgressBase *reporter = nullptr);
