@@ -29,22 +29,20 @@ Usage
 
 .. testcode:: SaveNexusESSExample
 
-   # Create a host workspace
-   ws_out = CreateSampleWorkspace()
-   SaveNexusESS(Filename="local.nxs", InputWorkspace=ws_out)
-
-   ws_in = Load(Filename="local.nxs")
-
-   comparison = CompareWorkspaces(ws_out, ws_in)
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+    from mantid.simpleapi import *
+    import os
+    import tempfile
+    simple_run = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=10)
+    destination = os.path.join(tempfile.gettempdir(), "sample_processed.nxs")
+    SaveNexusESS(Filename=destination, InputWorkspace=simple_run)
+    print("Created: {}".format(os.path.isfile(destination)))
+    os.remove(destination)
 
 Output:
 
 .. testoutput:: SaveNexusESSExample
 
-  The output workspace has ?? spectra
+  Created: True
 
 .. categories::
 
