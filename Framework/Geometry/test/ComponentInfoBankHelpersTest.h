@@ -194,7 +194,7 @@ public:
 
     /*
 
-        structure as in test:
+    structure as in test:
 
            root
             |
@@ -208,7 +208,6 @@ public:
 
     // instrument cache to be used with call offsetFromAncestor
     const auto &compInfo = (*wrappers.first);
-    const auto &detInfo = (*wrappers.second);
 
     TS_ASSERT(
         !isAncestorOf(compInfo, compInfo.source(),
