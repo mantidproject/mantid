@@ -31,6 +31,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <cmath>
 #include <memory>
+#include <regex>
 #include <string>
 
 namespace Mantid {
@@ -591,9 +592,13 @@ private:
                               const std::string &classType) {
 
     if (m_mode == Mode::Append) {
-      auto result = utilities::findGroup(parent, classType);
-      if (result) {
-        return *result; // note that requested group name is abandoned.
+      auto results = utilities::findGroups(parent, classType);
+      for (auto &result : results) {
+        auto n = H5ForwardCompatibility::getObjName(result);
+        auto matches = std::regex_match(n, std::regex(".*/" + name + "$"));
+        if (matches) {
+          return result; // note that requested group name is abandoned.
+        }
       }
     }
     // We can't find it, or we are writing from scratch anyway
@@ -947,8 +952,8 @@ public:
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
 
     writeDetectorCount(childGroup, mappings);
-    // Note that the detector list is the same as detector_number. We write both
-    // for compatibility
+    // Note that the detector list is the same as detector_number. We write
+    // both for compatibility
     writeDetectorList(childGroup, mappings);
     writeDetectorIndex(childGroup, mappings);
     writeSpectra(childGroup, mappings);
@@ -957,8 +962,9 @@ public:
 
 /*
  * Function: saveInstrument
- * calls the save methods to write components to file after exception checking.
- * Produces a Nexus format file containing the Instrument geometry and metadata.
+ * calls the save methods to write components to file after exception
+ * checking. Produces a Nexus format file containing the Instrument geometry
+ * and metadata.
  *
  * @param compInfo : componentInfo object.
  * @param detInfo : detectorInfo object.
@@ -1025,8 +1031,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
 /*
  * Function: saveInstrument (overload)
- * calls the save methods to write components to file after exception checking.
- * Produces a Nexus format file containing the Instrument geometry and metadata.
+ * calls the save methods to write components to file after exception
+ * checking. Produces a Nexus format file containing the Instrument geometry
+ * and metadata.
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.

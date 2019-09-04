@@ -10,6 +10,7 @@
 #include "H5Cpp.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <boost/optional.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -25,6 +26,9 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
 
 H5::Group findGroupOrThrow(const H5::Group &parentGroup,
                            const H5std_string &classType);
+
+std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
+                                  const H5std_string &classType);
 } // namespace utilities
 } // namespace NexusGeometry
 } // namespace Mantid
