@@ -594,10 +594,6 @@ private:
       auto result = utilities::findGroup(parent, classType);
       if (result) {
         return *result; // note that requested group name is abandoned.
-      } else if (parent.exists(name)) {
-        throw std::runtime_error(
-            "Error - attempting to overwrite group " + name +
-            " in destintation, as NX_Class type does not match " + classType);
       }
     }
     // We can't find it, or we are writing from scratch anyway
