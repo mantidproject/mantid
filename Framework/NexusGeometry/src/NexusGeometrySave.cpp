@@ -547,7 +547,7 @@ private:
   }
 
 public:
-  NexusGeometrySaveImpl(Mode mode) : m_mode(mode) {}
+  explicit NexusGeometrySaveImpl(Mode mode) : m_mode(mode) {}
 
   /*
    * Function: NXInstrument
