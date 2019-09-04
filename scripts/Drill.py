@@ -9,14 +9,13 @@ from mantidqt.gui_helper import get_qapplication
 from Interface.ui.drill.main import (model, view, presenter)
 from qtpy import PYQT5
 if not PYQT5:
-    raise RuntimeError('Drill is operational only on workbench.')
+    raise RuntimeError('Drill is operational only in workbench.')
 from mantid.simpleapi import config
 if config['default.facility'] != 'ILL':
     raise RuntimeError('Set the facility to ILL to launch this interface.')
 app, within_mantid = get_qapplication()
-instrument = config['default.instrument']
-window = view.DrillView(instrument)
-model = model.DrillModel(instrument)
+window = view.DrillView()
+model = model.DrillModel()
 presenter = presenter.DrillPresenter(model, view)
 window.show()
 if not within_mantid:

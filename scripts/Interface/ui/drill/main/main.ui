@@ -54,6 +54,9 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Load rundex</string>
+          </property>
           <property name="text">
            <string>LoadRundex</string>
           </property>
@@ -61,6 +64,9 @@
         </item>
         <item alignment="Qt::AlignRight">
          <widget class="QPushButton" name="userDirs">
+          <property name="toolTip">
+           <string>Manage data and save directories</string>
+          </property>
           <property name="text">
            <string>ManageUserDirectories</string>
           </property>

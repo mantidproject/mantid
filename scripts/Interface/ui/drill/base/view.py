@@ -5,12 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+from qtpy.QtWidgets import QWidget
 
 
-class DrillModel(object):
-
-    sheet_model = None
-    tab_model = None
+class BaseView(QWidget):
 
     def __init__(self):
-        pass
+        QWidget.__init__(self)

@@ -7,10 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class DrillModel(object):
-
-    sheet_model = None
-    tab_model = None
+class BasePresenter(object):
 
     def __init__(self):
         pass
