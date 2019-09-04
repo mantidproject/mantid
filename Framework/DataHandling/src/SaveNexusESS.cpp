@@ -8,7 +8,6 @@
 #include "MantidDataHandling/SaveNexusESS.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <H5Cpp.h>
-#include <numeric>
 
 namespace Mantid {
 namespace DataHandling {
@@ -92,10 +91,6 @@ void SaveNexusESS::exec() {
   if (!matrixWs)
     throw std::runtime_error("SaveNexusESS expects a MatrixWorkspace as input");
   SaveNexusProcessed::exec();
-
-  /*Make the mappings needed for writing to disk*/
-  std::vector<int> workspaceIndices(matrixWs->getNumberHistograms());
-  std::iota(workspaceIndices.begin(), workspaceIndices.end(), 0);
 
   // Now append nexus geometry
   saveNexusGeometry(*matrixWs, filename);

@@ -35,7 +35,6 @@
 namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
-namespace {
 
 /*
  * Helper container for spectrum mapping information info
@@ -893,8 +892,6 @@ public:
   }
 }; // namespace
 
-} // namespace
-
 /*
  * Function: saveInstrument
  * calls the save methods to write components to file after exception checking.
@@ -914,7 +911,6 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const std::string &fullPath, const std::string &rootPath,
                     AbstractLogger &logger, bool append,
                     Kernel::ProgressBase *reporter) {
-
   // Exception handling.
   boost::filesystem::path tmp(fullPath);
   if (!boost::filesystem::is_directory(tmp.root_directory())) {

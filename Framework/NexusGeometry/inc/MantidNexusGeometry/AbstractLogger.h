@@ -46,7 +46,6 @@ public:
  * adaptee is NOT transferred to returned Logger.
  */
 template <typename T> std::unique_ptr<AbstractLogger> makeLogger(T *adaptee) {
-
   return std::make_unique<LogAdapter<T>>(adaptee);
 }
 
