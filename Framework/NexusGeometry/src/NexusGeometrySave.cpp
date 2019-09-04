@@ -245,6 +245,18 @@ void writeXYZPixeloffset(H5::Group &grp,
   }
 }
 
+template <typename T>
+void write1DIntDataset(H5::Group &grp, const H5std_string &name,
+                       const std::vector<T> &container) {
+  const int rank = 1;
+  hsize_t dims[1] = {static_cast<hsize_t>(container.size())};
+
+  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+
+  auto dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);
+  dataset.write(container.data(), H5::PredType::NATIVE_INT, space);
+}
+
 /*
  * Function: writeNXDetectorNumber
  * For use with NXdetector group. Writes the detector numbers for all detector
@@ -274,65 +286,21 @@ void writeNXDetectorNumber(H5::Group &grp,
                   bankDetIDs.push_back(detectorIDs[index]);
                 });
 
-  const auto nDetectorsInBank = static_cast<hsize_t>(bankDetIDs.size());
-
-  int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = nDetectorsInBank;
-
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
-
-  detectorNumber =
-      grp.createDataSet(DETECTOR_IDS, H5::PredType::NATIVE_INT, space);
-  detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
+  write1DIntDataset(grp, DETECTOR_IDS, bankDetIDs);
 }
 
 void writeDetectorCount(H5::Group &grp, const SpectraMappings &mappings) {
-  int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = static_cast<hsize_t>(mappings.detector_count.size());
-
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
-
-  auto dataset =
-      grp.createDataSet(SPECTRA_COUNTS, H5::PredType::NATIVE_INT, space);
-  dataset.write(mappings.detector_count.data(), H5::PredType::NATIVE_INT,
-                space);
+  write1DIntDataset(grp, SPECTRA_COUNTS, mappings.detector_count);
 }
 
 void writeDetectorList(H5::Group &grp, const SpectraMappings &mappings) {
-  int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = static_cast<hsize_t>(mappings.detector_list.size());
-
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
-
-  auto dataset =
-      grp.createDataSet(DETECTOR_LIST, H5::PredType::NATIVE_INT, space);
-  dataset.write(mappings.detector_list.data(), H5::PredType::NATIVE_INT, space);
+  write1DIntDataset(grp, DETECTOR_LIST, mappings.detector_list);
 }
 void writeDetectorIndex(H5::Group &grp, const SpectraMappings &mappings) {
-  int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = static_cast<hsize_t>(mappings.detector_index.size());
-
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
-
-  auto dataset =
-      grp.createDataSet(DETECTOR_INDEX, H5::PredType::NATIVE_INT, space);
-  dataset.write(mappings.detector_index.data(), H5::PredType::NATIVE_INT,
-                space);
+  write1DIntDataset(grp, DETECTOR_INDEX, mappings.detector_index);
 }
 void writeSpectra(H5::Group &grp, const SpectraMappings &mappings) {
-  int rank = 1;
-  hsize_t dims[static_cast<hsize_t>(1)];
-  dims[0] = static_cast<hsize_t>(mappings.spectra_ids.size());
-
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
-
-  auto dataset =
-      grp.createDataSet(SPECTRA_NUMBERS, H5::PredType::NATIVE_INT, space);
-  dataset.write(mappings.spectra_ids.data(), H5::PredType::NATIVE_INT, space);
+  write1DIntDataset(grp, SPECTRA_NUMBERS, mappings.spectra_ids);
 }
 
 /*
@@ -539,8 +507,8 @@ private:
 
   // function to create a simple sub-group that has a nexus class attribute,
   // inside a parent group.
-  inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
-                                    const std::string &nexusAttribute) {
+  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
+                             const std::string &nexusAttribute) {
     H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
     writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
     return subGroup;
@@ -884,7 +852,7 @@ public:
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
 
     writeDetectorCount(childGroup, mappings);
-    // Note that the detector lise is the same as detector_number. We write both
+    // Note that the detector list is the same as detector_number. We write both
     // for compatibility
     writeDetectorList(childGroup, mappings);
     writeDetectorIndex(childGroup, mappings);
