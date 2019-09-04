@@ -164,7 +164,7 @@ public:
 
   void test_eight_pack() {
 
-    ScopedFileHandle fileResource("output.hdf5");
+    FileResource fileResource("output.hdf5");
     auto destinationFile = fileResource.fullPath();
 
     // Bilby contains eight-packs, though other instrument features could still
