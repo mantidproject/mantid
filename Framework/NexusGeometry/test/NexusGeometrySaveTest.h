@@ -26,7 +26,7 @@ using namespace Mantid::NexusGeometry;
 
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
 private:
-  ::testing::NiceMock<MockLogger> m_mockLogger;
+  testing::NiceMock<MockLogger> m_mockLogger;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
