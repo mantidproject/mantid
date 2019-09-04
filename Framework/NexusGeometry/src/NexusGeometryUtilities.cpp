@@ -33,7 +33,7 @@ boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup,
 /// Find a single group inside parent (returns first match). class type must
 /// match NX_class. Optional wrapped - empty to indicate nothing found.
 boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
-                                     const H5std_string &CLASS_TYPE) {
+                                     const H5std_string &classType) {
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -50,10 +50,10 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
           // Get attribute data type
           DataType dataType = attribute.getDataType();
           // Get the NX_class type
-          H5std_string classType;
-          attribute.read(dataType, classType);
+          H5std_string classT;
+          attribute.read(dataType, classT);
           // If group of correct type, return the childGroup
-          if (classType == CLASS_TYPE) {
+          if (classT == classType) {
             return boost::optional<Group>(childGroup);
           }
         }
@@ -62,6 +62,17 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
   }
   return boost::optional<Group>{}; // Empty
 }
+
+H5::Group findGroupOrThrow(const H5::Group &parentGroup,
+                           const H5std_string &classType) {
+  auto found = findGroup(parentGroup, classType);
+  if (!found) {
+    throw std::runtime_error(std::string("Could not find group class ") +
+                             classType);
+  } else
+    return *found;
+}
+
 } // namespace utilities
 } // namespace NexusGeometry
 } // namespace Mantid

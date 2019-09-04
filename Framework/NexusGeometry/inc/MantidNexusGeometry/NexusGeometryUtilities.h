@@ -22,6 +22,9 @@ boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup,
 
 boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
                                      const H5std_string &classType);
+
+H5::Group findGroupOrThrow(const H5::Group &parentGroup,
+                           const H5std_string &classType);
 } // namespace utilities
 } // namespace NexusGeometry
 } // namespace Mantid

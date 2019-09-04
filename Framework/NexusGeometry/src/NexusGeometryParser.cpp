@@ -583,9 +583,10 @@ private:
   // Parse source and add to instrument
   void parseAndAddSource(const H5File &file, const Group &root,
                          InstrumentBuilder &builder) {
-    Group entryGroup = *utilities::findGroup(root, NX_ENTRY);
-    Group instrumentGroup = *utilities::findGroup(entryGroup, NX_INSTRUMENT);
-    Group sourceGroup = *utilities::findGroup(instrumentGroup, NX_SOURCE);
+    Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
+    Group instrumentGroup =
+        utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
+    Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
     std::string sourceName = "Unspecfied";
     if (utilities::findDataset(sourceGroup, "name"))
       sourceName = get1DStringDataset("name", sourceGroup);
@@ -597,8 +598,8 @@ private:
   // Parse sample and add to instrument
   void parseAndAddSample(const H5File &file, const Group &root,
                          InstrumentBuilder &builder) {
-    Group entryGroup = *utilities::findGroup(root, NX_ENTRY);
-    Group sampleGroup = *utilities::findGroup(entryGroup, NX_SAMPLE);
+    Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
+    Group sampleGroup = utilities::findGroupOrThrow(entryGroup, NX_SAMPLE);
     auto sampleTransforms = getTransformations(file, sampleGroup);
     Eigen::Vector3d samplePos =
         sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
