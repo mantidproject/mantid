@@ -19,10 +19,10 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-class ScopedFileHandle {
+class FileResource {
 
 public:
-  ScopedFileHandle(const std::string &fileName) {
+  FileResource(const std::string &fileName) {
 
     const auto temp_dir = boost::filesystem::temp_directory_path();
     auto temp_full_path = temp_dir;
@@ -43,7 +43,7 @@ public:
 
   std::string fullPath() const { return m_full_path.generic_string(); }
 
-  ~ScopedFileHandle() {
+  ~FileResource() {
 
     // file is removed at end of file handle's lifetime
     if (boost::filesystem::is_regular_file(m_full_path)) {
