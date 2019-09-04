@@ -162,7 +162,10 @@ public:
         Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
-  void test_characterise_eight_pack_bug() {
+  void test_eight_pack() {
+
+    ScopedFileHandle fileResource("output.hdf5");
+    auto destinationFile = fileResource.fullPath();
 
     // Bilby contains eight-packs, though other instrument features could still
     // be problematic
@@ -174,19 +177,14 @@ public:
     alg.execute();
     Mantid::API::MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
 
-    // problem actually in
-    // Mantid::NexusGeometry::NexusGeometrySave::saveInstrument /
-    // ComponentInfoBankHelpers::isSaveableBank but demonstrated here via save
-    // algorithm.
-
     Mantid::DataHandling::SaveNexusGeometry saver;
     saver.setChild(true);
     saver.setRethrows(true);
     saver.initialize();
-    saver.setProperty("Filename", "output.nxs");
+    saver.setProperty("Filename", destinationFile);
     saver.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(saver.execute(), H5::Exception &);
-    TS_ASSERT(!saver.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(saver.execute());
+    TS_ASSERT(saver.isExecuted());
   }
 };
 

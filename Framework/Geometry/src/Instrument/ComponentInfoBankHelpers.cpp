@@ -66,12 +66,32 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
     if (parentType != Beamline::ComponentType::Rectangular &&
         parentType != Beamline::ComponentType::Structured &&
         parentType != Beamline::ComponentType::Grid) {
-      // if component at index is not a tube then identify it as a bank
+      // check if component is assembly, if so returns false
       if (childType != Beamline::ComponentType::OutlineComposite) {
         return true;
       }
     }
   }
+  return false;
+}
+
+/*Function: isAncestorOf. Finds all ancestors up to the root of a component
+ * index and returns true if the possible ancestor is encountered in the
+ * search.
+ *
+ * @param compInfo : Geometry::ComponentInfo Instrument cache containing the
+ * component info.
+ * @param possibleAncestor : the queried ancestor.
+ * @param current : the queried descendant.
+ */
+bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor,
+                  const size_t current) {
+  size_t next = current;
+  do {
+    if (compInfo.parent(next) == possibleAncestor)
+      return true;
+    next = compInfo.parent(next);
+  } while (next != compInfo.root());
   return false;
 }
 

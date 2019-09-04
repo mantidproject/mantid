@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <boost/filesystem/operations.hpp>
 #include <cmath>
+#include <list>
 #include <memory>
 #include <string>
 
@@ -785,11 +786,25 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   NexusGeometrySave::saveNXSample(rootGroup, compInfo);
 
   // save NXdetectors
-  for (size_t index = compInfo.root() - 1; index > detInfo.size(); --index) {
+  std::list<size_t> nxDetectorCandidates;
+  for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
+      nxDetectorCandidates.push_back(index);
+    }
+  }
+
+  for (std::list<size_t>::iterator index = nxDetectorCandidates.begin();
+       index != nxDetectorCandidates.end(); ++index) {
+    auto saveable =
+        !std::any_of(nxDetectorCandidates.begin(), nxDetectorCandidates.end(),
+                     [&compInfo, &index](const size_t idx) {
+                       return Geometry::ComponentInfoBankHelpers::isAncestorOf(
+                           compInfo, idx, *index);
+                     });
+    if (saveable || nxDetectorCandidates.size() == 1) {
       if (reporter != nullptr)
         reporter->report();
-      NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
+      NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, *index);
     }
   }
 
