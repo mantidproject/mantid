@@ -10,7 +10,7 @@ import numpy as np
 from scipy import signal, ndimage, interpolate
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
 from mantid.kernel import Direction, StringListValidator, FloatArrayProperty, RebinParamsValidator
-from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing, AnalysisDataService
+from mantid.simpleapi import CreateWorkspace, Rebin, SplineSmoothing
 
 
 class FitIncidentSpectrum(PythonAlgorithm):
