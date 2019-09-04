@@ -90,6 +90,23 @@ class FocusTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus()
 
     def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, 'POLARIS98533.nxs')
+        assert_output_file_exists(user_output, 'POLARIS98533.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'POL98533-b_{}-d.dat'.format(bankno))
+
         for ws in self.focus_results:
             self.assertEqual(ws.sample().getMaterial().name(), 'Si')
         self.tolerance = 1e-7
@@ -97,9 +114,8 @@ class FocusTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         try:
-            pass
-            # _try_delete(spline_path)
-            # _try_delete(output_dir)
+            _try_delete(spline_path)
+            _try_delete(output_dir)
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -114,7 +130,6 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
         return _gen_required_files()
 
     def runTest(self):
-        return
         # Gen vanadium calibration first
         setup_mantid_paths()
         self.focus_results = run_focus_no_chopper("98533")
