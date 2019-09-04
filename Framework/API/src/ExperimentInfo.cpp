@@ -1148,6 +1148,7 @@ void ExperimentInfo::invalidateAllSpectrumDefinitions() {
 
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
+ * @param saveLegacyInstrument : defaults to true, otherwise not in file output
  */
 void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file,
                                              bool saveLegacyInstrument) const {

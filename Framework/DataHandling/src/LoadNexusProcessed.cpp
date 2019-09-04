@@ -1489,7 +1489,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
  * for this entry
  * @param progressRange :: The percentage range that the progress reporting
  * should cover
- * @param filename :: name of loaded File
  * @returns A 2D workspace containing the loaded data
  */
 API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
