@@ -175,6 +175,47 @@ public:
     TS_ASSERT_THROWS(offsetFromAncestor(compInfo, ancestorIndex, currentIndex),
                      std::invalid_argument &);
   }
+
+  void test_isAncestorOf_finds_ancestor() {
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+
+    // the source is the child of the root
+    TS_ASSERT(isAncestorOf(compInfo, compInfo.root(), compInfo.source()));
+  }
+
+  void
+  test_isAncestorOf_returns_false_with_child_sibling_or_relative_proposed_as_ancestor() {
+
+    /*
+
+        structure as in test:
+
+           root
+            |
+    source ---- sample (siblings)
+
+    */
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+
+    // instrument cache to be used with call offsetFromAncestor
+    const auto &compInfo = (*wrappers.first);
+    const auto &detInfo = (*wrappers.second);
+
+    TS_ASSERT(
+        !isAncestorOf(compInfo, compInfo.source(),
+                      compInfo.root())); // child of root as proposed ancestor
+    TS_ASSERT(!isAncestorOf(compInfo, compInfo.source(),
+                            compInfo.sample())); // sibling as propsed asncestor
+  }
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_ */

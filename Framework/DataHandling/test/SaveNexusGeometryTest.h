@@ -13,13 +13,11 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <H5Cpp.h>
-#include <Poco/Glob.h>
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -164,7 +162,10 @@ public:
         Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
-  void test_characterise_eight_pack_bug_fix() {
+  void test_eight_pack() {
+
+    ScopedFileHandle fileResource("output.hdf5");
+    auto destinationFile = fileResource.fullPath();
 
     // Bilby contains eight-packs, though other instrument features could still
     // be problematic
@@ -176,16 +177,11 @@ public:
     alg.execute();
     Mantid::API::MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
 
-    // problem actually in
-    // Mantid::NexusGeometry::NexusGeometrySave::saveInstrument /
-    // ComponentInfoBankHelpers::isSaveableBank but demonstrated here via save
-    // algorithm.
-
     Mantid::DataHandling::SaveNexusGeometry saver;
     saver.setChild(true);
     saver.setRethrows(true);
     saver.initialize();
-    saver.setProperty("Filename", "output.nxs");
+    saver.setProperty("Filename", destinationFile);
     saver.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS_NOTHING(saver.execute());
     TS_ASSERT(saver.isExecuted());
