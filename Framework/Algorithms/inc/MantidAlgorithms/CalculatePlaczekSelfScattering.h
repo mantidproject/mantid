@@ -31,7 +31,7 @@ class CalculatePlaczekSelfScattering: public API::Algorithm
   private:
     void init() override;
     void exec() override;
-    std::map<std::string, std::map<std::string, float>>
+    std::map<std::string, std::map<std::string, double>>
     get_sample_species_info(API::MatrixWorkspace_sptr ws);
 };
 

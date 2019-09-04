@@ -122,7 +122,7 @@ class CalculatePlaczekSelfScattering(PythonAlgorithm):
         x_lambdas = np.array([])
         placzek_correction = np.array([])
         num_spec = 0
-        for i in np.arange(1000):  # np.arange(self._det_info.size()):
+        for i in np.arange(self._det_info.size()):
             if not self._det_info.isMonitor(i):
                 num_spec += 1
                 # variables
@@ -148,7 +148,7 @@ class CalculatePlaczekSelfScattering(PythonAlgorithm):
             DataX=x_lambdas,
             DataY=placzek_correction,
             UnitX='Wavelength',
-            NSpec=num_spec,
+            NSpec=len(self._det_info.twoTheta),
             ParentWorkspace=self._input_ws,
             Distribution=True)
         self.setProperty("OutputWorkspace", output_workspace)
