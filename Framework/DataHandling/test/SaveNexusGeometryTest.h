@@ -40,7 +40,7 @@ public:
 
   void test_exec() {
 
-    ScopedFileHandle fileResource("algorithm_test_file.hdf5");
+    FileResource fileResource("algorithm_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
     Mantid::API::IEventWorkspace_sptr inputWS =
@@ -68,7 +68,7 @@ public:
   void
   test_execution_succesful_when_no_h5_root_provided_and_default_root_is_used() {
 
-    ScopedFileHandle fileResource("algorithm_no_h5_root_file.hdf5");
+    FileResource fileResource("algorithm_no_h5_root_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
     Mantid::API::IEventWorkspace_sptr inputWS =
@@ -98,7 +98,7 @@ public:
     into the Input workspace property.
     */
 
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "algorithm_no_instrument_in_workspace_provided_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
     // Create test input if necessary
@@ -135,7 +135,7 @@ public:
     when invalid file extension is passed into fileName property.
     */
 
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "algorithm_invalid_extension_provided_test_file.txt");
     auto destinationFile = fileResource.fullPath();
     // Create test workspace
