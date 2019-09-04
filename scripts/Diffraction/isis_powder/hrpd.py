@@ -15,6 +15,12 @@ from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_para
 import mantid.simpleapi as mantid
 
 
+# Constants
+PROMPT_PULSE_INTERVAL = 20000.0
+PROMPT_PULSE_RIGHT_WIDTH = 140.0
+PROMPT_PULSE_LEFT_WIDTH = 30.0
+
+
 class HRPD(AbstractInst):
 
     def __init__(self, **kwargs):
@@ -140,14 +146,25 @@ class HRPD(AbstractInst):
         return self._cached_run_details[run_number_string_key]
 
     def _mask_prompt_pulses(self, ws):
-        left_crop = 30
-        right_crop = 140
-        pulse_interval = 20000
-        for i in range(1, 6):
-            middle = i*pulse_interval
-            min_crop = middle - left_crop
-            max_crop = middle + right_crop
-            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
+        """
+        HRPD has a long flight path from the moderator resulting
+        in sharp peaks from the proton pulse that maintain their
+        sharp resolution. Here we mask these pulses out that occur
+        at 20ms intervals.
+
+        :param ws: The workspace containing the pulses. It is
+        masked in place.
+        """
+        # The number of pulse can vary depending on the data range
+        # Compute number of pulses that occur at each 20ms interval.
+        x_data = ws.readX(0)
+        pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
+        pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
+        for i in range(pulse_min, pulse_max):
+            centre = PROMPT_PULSE_INTERVAL * float(i)
+            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws,
+                            XMin=centre - PROMPT_PULSE_LEFT_WIDTH,
+                            XMax=centre + PROMPT_PULSE_RIGHT_WIDTH)
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(
