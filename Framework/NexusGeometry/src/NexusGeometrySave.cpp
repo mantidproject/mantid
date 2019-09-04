@@ -495,11 +495,9 @@ public:
    * attributes to the new group.
    *
    * @param parent : parent group in which to write the NXinstrument group.
-   * @param compInfo : componentInfo object.
    * @return NXinstrument group, to be passed into children save methods.
    */
-  H5::Group instrument(const H5::Group &parent,
-                       const Geometry::ComponentInfo &compInfo) {
+  H5::Group instrument(const H5::Group &parent) {
 
     H5::Group childGroup =
         openOrCreateGroup(parent, STANDARD_INSTRUMENT_NAME, NX_INSTRUMENT);
@@ -842,7 +840,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   using Mode = NexusGeometrySaveImpl::Mode;
   NexusGeometrySaveImpl writer(append ? Mode::Append : Mode::Trunc);
   // save and capture NXinstrument (component root)
-  H5::Group instrument = writer.instrument(rootGroup, compInfo);
+  H5::Group instrument = writer.instrument(rootGroup);
 
   // save NXsource
   writer.source(instrument, compInfo);
