@@ -12,6 +12,7 @@ User Interface
 - The zoom icon in the SliceViewer and plot toolbars have been replaced with clearer icons.
 - Plots now allow the insertion of draggable horizontal and vertical markers.
 - Marker label, color and line style can be edited on a per-marker basis.
+- The button to remove a curve in the figure options is now the same size as the drop-down list of curves.
 
 New
 ###
