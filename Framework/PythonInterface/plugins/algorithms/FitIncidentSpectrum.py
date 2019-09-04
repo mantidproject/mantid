@@ -79,7 +79,8 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
     def PyExec(self):
         self._setup()
-        x = self.parse_binning(self._binning_for_calc)
+
+        x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
         incident_index = 0
         if not self._binning_for_fit.all():
             rebinned = Rebin(
@@ -107,8 +108,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 params_output=self._binning_for_calc,
                 Error=0.0001,
                 MaxNumberOfBreaks=0)
-            print(fit)
-            print(fit_prime)
         elif self._fit_spectrum_with == 'GaussConvCubicSpline':
             # Fit using Gauss conv cubic spline
             fit, fit_prime = self.fit_cubic_spline_with_gauss_conv(x_fit, y_fit, x, sigma=0.5)
@@ -122,15 +121,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
             Distribution=False,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
-
-    def parse_binning(self, binning):
-        # convert binning [min, width, max] into a np array
-        try:
-            params = [float(x) for x in binning.split(',')]
-        except AttributeError:
-            params = [float(x) for x in binning]
-        xlo, binsize, xhi = params
-        return np.arange(xlo, xhi, binsize)
 
     def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
