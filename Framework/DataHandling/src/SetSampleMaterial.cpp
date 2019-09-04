@@ -231,8 +231,7 @@ void SetSampleMaterial::exec() {
     g_log.information("Unknown value for number density");
   } else {
     const double rho = material->numberDensity();
-    double smu =
-        material->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+    double smu = material->totalScatterXSection() * rho;
     double amu = material->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.information() << "Anvred LinearScatteringCoef = " << smu << " 1/cm\n"
                         << "Anvred LinearAbsorptionCoef = " << amu << " 1/cm\n";
