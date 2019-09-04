@@ -166,7 +166,7 @@ public:
 
     ScopedFileHandle fileResource("output.hdf5");
     auto destinationFile = fileResource.fullPath();
-	
+
     // Bilby contains eight-packs, though other instrument features could still
     // be problematic
     Mantid::DataHandling::LoadEmptyInstrument alg;
