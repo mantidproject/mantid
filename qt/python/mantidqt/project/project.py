@@ -10,8 +10,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import os
 
-from qtpy.QtWidgets import QFileDialog, QMessageBox
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver
 from mantid.kernel import ConfigService
@@ -118,22 +117,24 @@ class Project(AnalysisDataServiceObserver):
 
     def _save(self):
         self.__is_saving = True
-        workspaces_to_save = AnalysisDataService.getObjectNames()
-        # Calculate the size of the workspaces in the project.
-        project_size = self._get_project_size(workspaces_to_save)
-        warning_size = int(ConfigService.getString("projectSaving.warningSize"))
-        # If a project is > the value in the properties file, question the user if they want to continue.
-        result = None
-        if project_size > warning_size:
-            result = self._offer_large_size_confirmation()
-        if result is None or result != QMessageBox.Cancel:
-            plots_to_save = self.plot_gfm.figs
-            interfaces_to_save = self.interface_populating_function()
-            project_saver = ProjectSaver(self.project_file_ext)
-            project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
-                                       plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
-            self.__saved = True
-        self.__is_saving = False
+        try:
+            workspaces_to_save = AnalysisDataService.getObjectNames()
+            # Calculate the size of the workspaces in the project.
+            project_size = self._get_project_size(workspaces_to_save)
+            warning_size = int(ConfigService.getString("projectSaving.warningSize"))
+            # If a project is > the value in the properties file, question the user if they want to continue.
+            result = None
+            if project_size > warning_size:
+                result = self._offer_large_size_confirmation()
+            if result is None or result != QMessageBox.Cancel:
+                plots_to_save = self.plot_gfm.figs
+                interfaces_to_save = self.interface_populating_function()
+                project_saver = ProjectSaver(self.project_file_ext)
+                project_saver.save_project(file_name=self.last_project_location, workspace_to_save=workspaces_to_save,
+                                           plots_to_save=plots_to_save, interfaces_to_save=interfaces_to_save)
+                self.__saved = True
+        finally:
+            self.__is_saving = False
 
     @staticmethod
     def inform_user_not_possible():
@@ -154,22 +155,24 @@ class Project(AnalysisDataServiceObserver):
         :return: None; if the user cancelled.
         """
         self.__is_loading = True
-        file_name = self._load_file_dialog()
-        if file_name is None:
-            # Cancel close dialogs
-            return
+        try:
+            file_name = self._load_file_dialog()
+            if file_name is None:
+                # Cancel close dialogs
+                return
 
-        # Sanity check
-        _, file_ext = os.path.splitext(file_name)
+            # Sanity check
+            _, file_ext = os.path.splitext(file_name)
 
-        if file_ext != ".mtdproj":
-            QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
+            if file_ext != ".mtdproj":
+                QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
 
-        self._load(file_name)
+            self._load(file_name)
 
-        self.last_project_location = file_name
-        self.__saved = True
-        self.__is_loading = False
+            self.last_project_location = file_name
+            self.__saved = True
+        finally:
+            self.__is_loading = False
 
     def _load(self, file_name):
         project_loader = ProjectLoader(self.project_file_ext)
