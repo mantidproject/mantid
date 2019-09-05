@@ -27,7 +27,6 @@ const H5std_string NX_ENTRY = "NXentry";
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
 const H5std_string NX_INSTRUMENT = "NXinstrument";
-const H5std_string NX_CHAR = "NX_CHAR";
 const H5std_string NX_SOURCE = "NXsource";
 const H5std_string NX_TRANSFORMATIONS = "NXtransformations";
 

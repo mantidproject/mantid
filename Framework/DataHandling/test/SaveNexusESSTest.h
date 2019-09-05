@@ -22,6 +22,7 @@
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/FileResource.h"
+#include "MantidTestHelpers/NexusFileReader.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/filesystem.hpp>
 #include <memory>
@@ -149,17 +150,13 @@ public:
     }
   }
 
-  // Characterise behaviour to fix later. Issue here is that SaveProcesssedNexus
-  // saves the spectra mapping information to the NXDetector via the legacy
-  // Instrument::saveNexus method, which is called via ExperimentInfo. We
-  // disable that at present because the legacy NXDetectors are not compatible
-  void test_demonstrate_no_spectra_detector_map_saved() {
+  void test_demonstrate_spectra_detector_map_saved() {
+
     using namespace Mantid::Indexing;
     ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
-    fileInfo.setDebugMode(true);
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+            2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
 
     std::vector<SpectrumDefinition> specDefinitions;
     std::vector<SpectrumNumber> spectrumNumbers;
@@ -173,19 +170,54 @@ public:
     wsIn->setIndexInfo(info);
     do_execute(fileInfo.fullPath(), wsIn);
 
+    {
+      // Check that mapping datasets are written
+      Mantid::NexusGeometry::NexusFileReader validator(fileInfo.fullPath());
+      TS_ASSERT(validator.hasDataset(
+          "spectra", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_list", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_index", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_count", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "spectra", {"mantid_workspace_1", "instrument", "bank2"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_list", {"mantid_workspace_1", "instrument", "bank2"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_index", {"mantid_workspace_1", "instrument", "bank2"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_count", {"mantid_workspace_1", "instrument", "bank2"}));
+    }
+
     // Reload it.
     auto matrixWSOut = test_utility::reload(fileInfo.fullPath());
 
     const auto &inSpecInfo = wsIn->spectrumInfo();
     const auto &outSpecInfo = matrixWSOut->spectrumInfo();
+
+    // Note we do not guarantee the preseveration of spectrum indexes during
+    // deserialisation, so we need the maps to ensure we compare like for like.
+    auto specToIndexOut = matrixWSOut->getSpectrumToWorkspaceIndexMap();
+    auto specToIndexIn = wsIn->getSpectrumToWorkspaceIndexMap();
+
+    auto indexInfo = matrixWSOut->indexInfo();
+
     TS_ASSERT_EQUALS(outSpecInfo.size(), inSpecInfo.size());
     for (size_t i = 0; i < outSpecInfo.size(); ++i) {
+
+      auto specNumber = int(indexInfo.spectrumNumber(i));
+
+      auto indexInInput = specToIndexIn.at(specNumber);
+      auto indexInOutput = specToIndexOut.at(specNumber);
+
       // Output has no mapping, so for each spectrum have 0 detector indices
-      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i).size(),
-                       inSpecInfo.spectrumDefinition(i).size());
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput).size(),
+                       inSpecInfo.spectrumDefinition(indexInInput).size());
       // Compare actual detector indices for each spectrum when fixed as below
-      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i)[0],
-                       inSpecInfo.spectrumDefinition(i)[0]);
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput)[0],
+                       inSpecInfo.spectrumDefinition(indexInInput)[0]);
     }
   }
   void test_base_function_with_workspace() {
