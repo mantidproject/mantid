@@ -148,7 +148,7 @@ class CalculatePlaczekSelfScattering(PythonAlgorithm):
             DataX=x_lambdas,
             DataY=placzek_correction,
             UnitX='Wavelength',
-            NSpec=len(self._det_info.twoTheta),
+            NSpec=num_spec,
             ParentWorkspace=self._input_ws,
             Distribution=True)
         self.setProperty("OutputWorkspace", output_workspace)

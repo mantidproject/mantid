@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/Material.h"
 
@@ -35,7 +36,7 @@ void CalculatePlaczekSelfScattering::init() {
  */
 void CalculatePlaczekSelfScattering::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  API::Workspace_sptr outWS = API::WorkspaceFactory::Instance().create(inWS);
+  API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
   const double factor = 1.0 / 1.66053906660e-27;
   const double neutron_mass = factor * 1.674927471e-27;
   // get sample information : mass, total scattering length, and concentration
@@ -49,19 +50,19 @@ void CalculatePlaczekSelfScattering::exec() {
                       neutron_mass / t->second["mass"];
   }
   // get incident spectrum and 1st derivative
-  auto x_lambda = inWS->readX(0);
-  auto incident = inWS->readY(0);
-  auto incident_prime = inWS->readY(0);
+  MantidVec x_lambda = inWS->readX(0);
+  MantidVec incident = inWS->readY(0);
+  MantidVec incident_prime = inWS->readY(1);
   std::vector<double> phi_1;
   for (int i = 0; i < x_lambda.size(); i++) {
-    phi_1.push_back(x_lambda[i] * incident[i] / incident_prime[i]);
+    phi_1.push_back(x_lambda[i] * incident_prime[i] / incident[i]);
   }
-  // set detector law
+  // set detector law term (eps_1)
   double lambda_D = 1.44;
-  std::vector<double> detector_law_term;
+  std::vector<double> eps_1;
   for (int i = 0; i < x_lambda.size(); i++) {
     double x_term = -x_lambda[i] / lambda_D;
-    detector_law_term.push_back(x_term * exp(x_term) / (1.0 - exp(x_term)));
+    eps_1.push_back(x_term * exp(x_term) / (1.0 - exp(x_term)));
   }
   /* Placzek
      Original Placzek inelastic correction Ref (for constant wavelength, reactor source):
@@ -73,8 +74,40 @@ void CalculatePlaczekSelfScattering::exec() {
      NOTE: Powles's Equation for inelastic self-scattering is equal to Howe's Equation for P(theta)
      by adding the elastic self-scattering
   */
-  std::vector<double> placzek_correction;
-
+  MantidVec x_lambdas;
+  MantidVec placzek_correction;
+  Geometry::DetectorInfo det_info = inWS->detectorInfo();
+  int NSpec = 0;
+  for (int det_index = 0; det_index < det_info.size(); det_index++) {
+    if (det_info.isMonitor(det_index) != true) {
+      NSpec += 1;
+      double path_length = det_info.l1() + det_info.l2(det_index);
+      double f = det_info.l1() / path_length;
+	  double angle_conv = M_PI / 180.0;
+      double sin_theta_by_2 =
+          sin(det_info.twoTheta(det_index) * angle_conv / 2.0);
+      for (int x_index = 0; x_index < x_lambda.size(); x_index++) {
+        double term1 = (f + 1.0) * phi_1[x_index];
+        double term2 = f * eps_1[x_index];
+        double term3 = f - 3;
+        double inelastic_placzek_self_correction = 
+            2.0 * (term1 - term2 + term3) * sin_theta_by_2 * sin_theta_by_2 *
+            summation_term;
+        x_lambdas.push_back(x_lambda[x_index]);
+        placzek_correction.push_back(inelastic_placzek_self_correction);
+	  }
+    }
+  }
+  Mantid::API::Algorithm_sptr ChildAlg =
+      createChildAlgorithm("CreateWorkspace");
+  ChildAlg->setProperty("DataX", x_lambdas);
+  ChildAlg->setProperty("DataY", placzek_correction);
+  ChildAlg->setProperty("UnitX", "Wavelength");
+  ChildAlg->setProperty("NSpec", NSpec);
+  ChildAlg->setProperty("ParentWorkspace", inWS);
+  ChildAlg->setProperty("Distribution", true);
+  ChildAlg->execute();
+  outWS = ChildAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outWS);
 }
 
