@@ -189,6 +189,37 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="progress">
+        <item>
+         <widget class="QProgressBar" name="progressBar">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="processRows">
+          <property name="toolTip">
+           <string>Process selected rows</string>
+          </property>
+          <property name="text">
+           <string>ProcessRows</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="processAll">
+          <property name="toolTip">
+           <string>Process the whole table</string>
+          </property>
+          <property name="text">
+           <string>ProcessAll</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="footer" stretch="">
         <property name="sizeConstraint">
          <enum>QLayout::SetMinimumSize</enum>
