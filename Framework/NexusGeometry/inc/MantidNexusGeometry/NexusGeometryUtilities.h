@@ -7,8 +7,8 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYUTILITIES_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYUTILITIES_H_
 
-#include "H5Cpp.h"
 #include "MantidNexusGeometry/DllConfig.h"
+#include <H5Cpp.h>
 #include <boost/optional.hpp>
 #include <vector>
 

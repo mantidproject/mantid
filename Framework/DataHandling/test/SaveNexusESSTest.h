@@ -41,6 +41,18 @@ template <typename T> void do_execute(const std::string filename, T &ws) {
   alg.isExecuted();
 }
 
+template <typename T> void do_execute2(const std::string filename, T &ws) {
+  SaveNexusProcessed alg;
+  alg.setChild(true);
+  alg.setRethrows(true);
+  alg.initialize();
+  alg.isInitialized();
+  alg.setProperty("InputWorkspace", ws);
+  alg.setProperty("Filename", filename);
+  alg.execute();
+  alg.isExecuted();
+}
+
 namespace test_utility {
 Mantid::API::MatrixWorkspace_sptr reload(const std::string &filename) {
   LoadNexusProcessed loader;
@@ -129,36 +141,28 @@ public:
 
     using namespace Mantid::HistogramData;
 
-    ScopedFileHandle fileInfo("test_ess_instrument.nxs");
+    auto wsIn = test_utility::from_instrument_file("SXD_Definition.xml");
 
-    auto wsIn = test_utility::from_instrument_file(
-        "V20_4-tubes_90deg_Definition_v01.xml");
-    for (size_t i = 0; i < wsIn->getNumberHistograms(); ++i) {
-      wsIn->setCounts(i, Counts{double(i)});
-    }
+    auto &compInfo = wsIn->mutableComponentInfo();
+    compInfo.setPosition(compInfo.sample(), Mantid::Kernel::V3D(0, 0, 0));
 
+    ScopedFileHandle fileInfo("test_ess_instrument_new.nxs");
     do_execute(fileInfo.fullPath(), wsIn);
-    auto wsOut = test_utility::reload(fileInfo.fullPath());
 
-    // Quick geometry Test
-    TS_ASSERT(wsOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
-
-    // Quick data test.
-    for (size_t i = 0; i < wsIn->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(wsIn->counts(i)[0], wsOut->counts(i)[0]);
-    }
+    ScopedFileHandle fileInfo1("test_ess_instrument_old.nxs");
+    do_execute2(fileInfo1.fullPath(), wsIn);
   }
 
-  // Characterise behaviour to fix later. Issue here is that SaveProcesssedNexus
-  // saves the spectra mapping information to the NXDetector via the legacy
-  // Instrument::saveNexus method, which is called via ExperimentInfo. We
-  // disable that at present because the legacy NXDetectors are not compatible
-  void test_demonstrate_no_spectra_detector_map_saved() {
+  // Characterise behaviour to fix later. Issue here is that LoadNexusProcessed
+  // expects a single NXDetector called "Detector". That is not thw way that we
+  // record the instrument
+  void test_demonstrate_no_spectra_detector_map_loaded() {
     using namespace Mantid::Indexing;
-    ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
+    ScopedFileHandle fileInfo("test_no_spectra_mapping_ess.nxs");
+    fileInfo.setDebugMode(true);
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
+            2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
 
     std::vector<SpectrumDefinition> specDefinitions;
     std::vector<SpectrumNumber> spectrumNumbers;
