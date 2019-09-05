@@ -103,15 +103,21 @@ size_t countEntriesOfType(const T &entry, const std::string &nxClass) {
  * @param entry
  * @return
  */
-bool isMantidInstrumentFormat(NXEntry &entry) {
-  bool result = false;
-  if (entry.containsGroup("instrument")) {
+InstrumentLayout instrumentFormat(NXEntry &entry) {
+  auto result = InstrumentLayout::NotRecognised;
+  const auto instrumentsCount = countEntriesOfType(entry, "NXinstrument");
+  if (instrumentsCount == 1 && entry.containsGroup("instrument")) {
     const auto instr = entry.openNXInstrument("instrument");
     if (instr.containsGroup("detector") &&
         countEntriesOfType(instr, "NXdetector") == 1) {
-      result = true;
+      result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
+                                         // single nxdetector called detector
+      entry.close();
+    } else if (instrumentsCount >= 1) {
+      // No further checks done here to prevent performance issues. In reality
+      // should check we have NXDetectors too.
+      result = InstrumentLayout::NexusFormat;
     }
-    entry.close();
   }
   return result;
 }
@@ -213,14 +219,8 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 
 } // namespace
 
-void LoadNexusProcessed::extractMappingInfoNew(NXEntry &mtd_entry,
-                                               Logger &logger) {
+void LoadNexusProcessed::extractMappingInfoNew(NXEntry &mtd_entry) {
 
-  const auto count = countEntriesOfType(mtd_entry, "NXinstrument");
-  if (count != 1) {
-    logger.information()
-        << "Expect single NXinstrument under root entry. Found " << count;
-  }
   NXInstrument inst =
       mtd_entry.openNXInstrument("instrument"); // TODO called be called
                                                 // something else though not at
@@ -293,10 +293,16 @@ bool LoadNexusProcessed::loadNexusGeometry(Workspace &ws,
         matrixWs->setInstrument(
             Geometry::Instrument_const_sptr(std::move(instrument)));
 
+        auto &detInfo = matrixWs->detectorInfo();
+        if (m_detectorIds.size() != detInfo.size()) {
+          logger.warning("New style mappings will not be loaded. Detector "
+                         "mappings do not match number of detectors in "
+                         "geometry");
+          return false;
+        }
         Indexing::IndexInfo info(m_spectrumNumbers);
         std::vector<SpectrumDefinition> definitions;
         definitions.reserve(m_detectorIds.size());
-        auto &detInfo = matrixWs->detectorInfo();
         for (const auto &id : m_detectorIds) {
           // Assumes 1:1 mapping
           definitions.push_back(SpectrumDefinition{detInfo.indexOf(id)});
@@ -660,7 +666,7 @@ void LoadNexusProcessed::exec() {
     root.close();
   } // All file resources should be scoped to here. All previous file handles
     // must be cleared to release locks
-  if (!m_mantidInstrumentFormat)
+  if (m_instrumentLayout == InstrumentLayout::NexusFormat)
     loadNexusGeometry(*tempWS, nWorkspaceEntries, g_log,
                       std::string(getProperty("Filename")));
 
@@ -1752,12 +1758,15 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
                   "update the geometry");
   }
 
-  m_mantidInstrumentFormat = isMantidInstrumentFormat(mtd_entry);
-  if (m_mantidInstrumentFormat) {
+  m_instrumentLayout = instrumentFormat(mtd_entry);
+  if (m_instrumentLayout == InstrumentLayout::Mantid) {
     // Now assign the spectra-detector map
     readInstrumentGroup(mtd_entry, local_workspace);
+  } else if (m_instrumentLayout == InstrumentLayout::NexusFormat) {
+    extractMappingInfoNew(mtd_entry);
   } else {
-    extractMappingInfoNew(mtd_entry, g_log);
+    g_log.information()
+        << "Instrument layout not recognised. Spectra mappings not loaded.";
   }
 
   if (!local_workspace->getAxis(1)

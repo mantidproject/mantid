@@ -28,7 +28,8 @@ class File;
 namespace Mantid {
 
 namespace DataHandling {
-
+/// Layout information relating to detector-spectra mappings
+enum class InstrumentLayout { Mantid, NexusFormat, NotRecognised };
 /**
 
 Loads a workspace from a NeXus Processed entry in a NeXus file.
@@ -91,8 +92,7 @@ private:
                                                  size_t nWorkspaceEntries);
 
   /// Extract mapping information where it is build across NXDetectors
-  void extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry,
-                             Mantid::Kernel::Logger &logger);
+  void extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry);
 
   /// Load the workspace name attribute if it exists
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,
@@ -231,7 +231,7 @@ private:
   // C++ interface to the NXS file
   ::NeXus::File *m_cppFile;
 
-  bool m_mantidInstrumentFormat = true;
+  InstrumentLayout m_instrumentLayout = InstrumentLayout::Mantid;
   std::vector<Indexing::SpectrumNumber> m_spectrumNumbers;
   std::vector<Mantid::detid_t> m_detectorIds;
 };
