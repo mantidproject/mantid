@@ -75,6 +75,7 @@ if(LIBRDKAFKA_FOUND)
       src/Kafka/private/Schema/flatbuffers/base.h
       src/Kafka/private/Schema/flatbuffers/stl_emulation.h
       src/Kafka/private/Schema/df12_det_spec_map_generated.h
+      src/Kafka/private/Schema/dtdb_adc_pulse_debug_generated.h
       src/Kafka/private/Schema/ev42_events_generated.h
       src/Kafka/private/Schema/f142_logdata_generated.h
       src/Kafka/private/Schema/fwdi_forwarder_internal_generated.h

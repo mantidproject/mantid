@@ -118,9 +118,9 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic,
-    const std::size_t bufferThreshold)
+    const std::string &monitorTopic, const std::size_t bufferThreshold)
     : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic),
+                          sampleEnvTopic, chopperTopic, monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "
@@ -379,7 +379,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
   BufferedPulse pulse{pulseTime, 0};
 
   /* Perform facility specific operations */
-  if (eventMsg->facility_specific_data_type() == FacilityData_ISISData) {
+  if (eventMsg->facility_specific_data_type() == FacilityData::ISISData) {
     std::lock_guard<std::mutex> workspaceLock(m_mutex);
     const auto ISISMsg =
         static_cast<const ISISData *>(eventMsg->facility_specific_data());
@@ -404,13 +404,24 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     m_receivedEventBuffer.reserve(oldBufferSize + nEvents);
 
     /* Store the buffered events */
+    for (flatbuffers::uoffset_t i = 0; i < tofData.size(); ++i) {
+      auto detId = detData[i];
+      auto tof = tofData[i];
+      uint32_t index = detId + m_specToIdxOffset;
+      if (index < m_specToIdx.size()) {
+        const auto workspaceIndex = m_specToIdx[index];
+        auto event = BufferedEvent{workspaceIndex, tof, pulseIndex};
+        m_receivedEventBuffer.emplace_back(std::move(event));
+      }
+    }
+    /*
     std::transform(detData.begin(), detData.end(), tofData.begin(),
                    std::back_inserter(m_receivedEventBuffer),
                    [&](uint64_t detId, uint64_t tof) -> BufferedEvent {
                      const auto workspaceIndex =
                          m_specToIdx[detId + m_specToIdxOffset];
                      return {workspaceIndex, tof, pulseIndex};
-                   });
+                   });*/
   }
 
   const auto endTime = std::chrono::system_clock::now();
@@ -549,6 +560,8 @@ void KafkaEventStreamDecoder::initLocalCaches(
     eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
                                                  1));
+    eventBuffer->setInstrument(ws->getInstrument());
+    eventBuffer->rebuildSpectraMapping();
     eventBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");
     eventBuffer->setYUnit("Counts");
@@ -574,15 +587,17 @@ void KafkaEventStreamDecoder::initLocalCaches(
   }
 
   // Load the instrument if possible but continue if we can't
-  if (!instName.empty()) {
-    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
-                                                jsonGeometry);
-    if (rawMsgBuffer.empty()) {
-      eventBuffer->rebuildSpectraMapping();
-    }
-  } else
-    g_log.warning(
-        "Empty instrument name received. Continuing without instrument");
+  if (!eventBuffer) {
+    if (!instName.empty()) {
+      loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                  jsonGeometry);
+      if (rawMsgBuffer.empty()) {
+        eventBuffer->rebuildSpectraMapping();
+      }
+    } else
+      g_log.warning(
+          "Empty instrument name received. Continuing without instrument");
+  }
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
@@ -602,7 +617,8 @@ void KafkaEventStreamDecoder::initLocalCaches(
       eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
-  const size_t nperiods = runStartData.nPeriods;
+  const size_t nperiods =
+      runStartData.nPeriods == 0 ? 1 : runStartData.nPeriods;
   if (nperiods == 0) {
     throw std::runtime_error(
         "KafkaEventStreamDecoder - Message has n_periods==0. This is "

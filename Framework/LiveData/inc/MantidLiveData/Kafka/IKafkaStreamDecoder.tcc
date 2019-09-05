@@ -153,7 +153,8 @@ void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
 
     const auto *timestamps = chopperMsg->timestamps();
     std::vector<uint64_t> mantidTimestamps;
-    std::copy(timestamps->begin(), timestamps->end(), mantidTimestamps.begin());
+    std::copy(timestamps->begin(), timestamps->end(),
+              std::back_inserter(mantidTimestamps));
     auto name = chopperMsg->name()->str();
 
     for (auto workspace : workspaces) {

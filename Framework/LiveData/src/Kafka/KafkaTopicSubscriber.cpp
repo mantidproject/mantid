@@ -12,6 +12,7 @@
 #include <chrono>
 #include <sstream>
 #include <thread>
+#include <iostream>
 
 using RdKafka::Conf;
 using RdKafka::KafkaConsumer;
@@ -29,18 +30,21 @@ Mantid::Kernel::Logger &LOGGER() {
 }
 
 /// Create and return the global configuration object
-std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
-  auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_GLOBAL));
+std::unique_ptr<RdKafka::Conf>
+createGlobalConfiguration(const std::string &brokerAddr) {
+  auto conf =
+      std::unique_ptr<RdKafka::Conf>(RdKafka::Conf::create(Conf::CONF_GLOBAL));
   std::string errorMsg;
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
   conf->set("message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("fetch.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
   conf->set("fetch.message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("receive.message.max.bytes", "100000512", errorMsg);
   conf->set("replica.fetch.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
-  conf->set("offset.store.method", "none", errorMsg);
   conf->set("api.version.request", "true", errorMsg);
   return conf;
 }
@@ -59,6 +63,7 @@ const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
 const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 const std::string KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX = "_sampleEnv";
 const std::string KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX = "_choppers";
+const std::string KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX = "_monitors";
 
 /**
  * Construct a topic subscriber
@@ -278,9 +283,7 @@ void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
  * Create the KafkaConsumer for required configuration
  */
 void KafkaTopicSubscriber::createConsumer() {
-  // Create configurations
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
-
   std::string errorMsg;
   m_consumer = std::unique_ptr<KafkaConsumer>(
       KafkaConsumer::create(globalConf.get(), errorMsg));

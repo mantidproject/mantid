@@ -882,6 +882,14 @@
 <!-- HZB -->
 <facility name="HZB" FileExtensions=".nxs">
    <timezone>Europe/Berlin</timezone>
+   
+   <instrument name="TEST" shortname="TEST">
+	<zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+	<livedata default="event">
+		<connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+	</livedata>
+   </instrument>
 
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>

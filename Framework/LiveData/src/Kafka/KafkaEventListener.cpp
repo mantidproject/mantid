@@ -59,7 +59,9 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
       sampleEnvTopic(m_instrumentName +
                      KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
       chopperTopic(m_instrumentName +
-                   KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX);
+                   KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX),
+      monitorTopic(m_instrumentName +
+                   KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX);
 
   for (const auto &topic : topics) {
     switch (topic.type()) {
@@ -75,6 +77,9 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
     case Kernel::TopicType::Run:
       runInfoTopic = topic.name();
       break;
+    case Kernel::TopicType::Monitor:
+      monitorTopic = topic.name();
+      break;
     }
   }
 
@@ -86,7 +91,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
 
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic,
-        chopperTopic, bufferThreshold);
+        chopperTopic, monitorTopic, bufferThreshold);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
