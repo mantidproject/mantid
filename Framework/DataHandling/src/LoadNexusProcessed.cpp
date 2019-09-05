@@ -105,18 +105,16 @@ int countEntriesOfType(const T &entry, const std::string &nxClass) {
  */
 InstrumentLayout instrumentFormat(NXEntry &entry) {
   auto result = InstrumentLayout::NotRecognised;
-  const auto instrumentsCount = countEntriesOfType(entry, "NXinstrument");
-  if (instrumentsCount == 1 && entry.containsGroup("instrument")) {
+  const int instrumentsCount = countEntriesOfType(entry, "NXinstrument");
+  if ((instrumentsCount == 1) && entry.containsGroup("instrument")) {
+    // Can now assume nexus format
+    result = InstrumentLayout::NexusFormat;
     const auto instr = entry.openNXInstrument("instrument");
     if (instr.containsGroup("detector") &&
         countEntriesOfType(instr, "NXdetector") == 1) {
       result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
                                          // single nxdetector called detector
       entry.close();
-    } else if (instrumentsCount >= 1) {
-      // No further checks done here to prevent performance issues. In reality
-      // should check we have NXDetectors too.
-      result = InstrumentLayout::NexusFormat;
     }
   }
   return result;
