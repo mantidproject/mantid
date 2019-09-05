@@ -104,7 +104,7 @@ public:
     TS_ASSERT_EQUALS(copy.getOrientedLattice().c(), 3.0);
     TS_ASSERT_EQUALS(copy.getEnvironment().name(), "TestKit");
     TS_ASSERT_EQUALS(copy.getEnvironment().nelements(), 1);
-    TS_ASSERT_DELTA(copy.getMaterial().cohScatterXSection(2.1), 0.0184, 1e-02);
+    TS_ASSERT_DELTA(copy.getMaterial().cohScatterXSection(), 0.0184, 1e-02);
     TS_ASSERT_EQUALS(copy.getShape().getName(), s.getShape().getName());
 
     // Remove workspace from the data service.
@@ -154,7 +154,7 @@ public:
     TS_ASSERT(!copy.hasOrientedLattice());
     TS_ASSERT_EQUALS(copy.getEnvironment().name(), "TestKit");
     TS_ASSERT_EQUALS(copy.getEnvironment().nelements(), 1);
-    TS_ASSERT_DELTA(copy.getMaterial().cohScatterXSection(2.1), 0.0184, 1e-02);
+    TS_ASSERT_DELTA(copy.getMaterial().cohScatterXSection(), 0.0184, 1e-02);
     TS_ASSERT_DIFFERS(copy.getShape().getName(), s.getShape().getName());
 
     // Remove workspace from the data service.

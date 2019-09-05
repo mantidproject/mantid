@@ -30,8 +30,6 @@ public:
     TS_ASSERT_EQUALS(empty.pressure(), 0.0);
 
     const double lambda(2.1);
-    TS_ASSERT_EQUALS(empty.cohScatterXSection(lambda), 0.0);
-    TS_ASSERT_EQUALS(empty.incohScatterXSection(lambda), 0.0);
     TS_ASSERT_EQUALS(empty.absorbXSection(lambda), 0.0);
   }
 
@@ -80,11 +78,9 @@ public:
 
     // check everything against another wavelength, only affects absorption
     const double lambda(2.1);
-    TS_ASSERT_DELTA(material.cohScatterXSection(lambda),
-                    material.cohScatterXSection(), 1e-04);
-    TS_ASSERT_DELTA(material.incohScatterXSection(lambda),
-                    material.incohScatterXSection(), 1e-04);
     TS_ASSERT_DELTA(material.absorbXSection(lambda), 5.93, 1e-02);
+    const double distance(0.05);
+    TS_ASSERT_DELTA(material.attenuation(distance, lambda), 0.01884, 1e-4);
   }
 
   // highly absorbing material
@@ -124,6 +120,8 @@ public:
 
     const double totXS = TiZr.totalScatterXSection();
     TS_ASSERT_DELTA(TiZr.totalScatterLengthSqrd(), 25. * totXS / M_PI, 1.e-4);
+    const double distance(0.05);
+    TS_ASSERT_DELTA(TiZr.attenuation(distance), 0., 1e-4);
   }
 
   /** Save then re-load from a NXS file */
@@ -146,8 +144,6 @@ public:
     TS_ASSERT_DELTA(testB.pressure(), 1.234, 1e-6);
     // This (indirectly) checks that the right element was found
     const double lambda(2.1);
-    TS_ASSERT_DELTA(testB.cohScatterXSection(lambda), 0.0184, 1e-02);
-    TS_ASSERT_DELTA(testB.incohScatterXSection(lambda), 5.08, 1e-02);
     TS_ASSERT_DELTA(testB.absorbXSection(lambda), 5.93, 1e-02);
   }
 
