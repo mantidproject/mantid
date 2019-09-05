@@ -16,6 +16,8 @@ Improvements
 ############
 
 - The HRPD scripts now mask out the Bragg peaks from the Vanadium.
+- The file-naming scheme for ISIS powder is now controlled by a string template
+- The file-naming of output on HRPD as been updated to closely match old script outputs
 - Geometry definition for LLB 5C1
 
 Bug Fixes

@@ -20,7 +20,8 @@ class Polaris(AbstractInst):
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
                                       calibration_dir=self._inst_settings.calibration_dir,
-                                      output_dir=self._inst_settings.output_dir, inst_prefix="POL")
+                                      output_dir=self._inst_settings.output_dir,
+                                      inst_prefix="POLARIS")
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
