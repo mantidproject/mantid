@@ -84,6 +84,36 @@ struct SpectraInfo {
 // Helper typdef.
 using SpectraInfo_optional = boost::optional<SpectraInfo>;
 
+size_t countEntriesOfType(const NXInstrument &inst,
+                          const std::string &nxClass) {
+  size_t count = 0;
+  for (const auto &group : inst.groups()) {
+    if (group.nxclass == nxClass)
+      ++count;
+  }
+  return count;
+}
+
+/**
+ * We have an NXInstrument group called "instrument" containing a single
+ * NXDetector called detector
+ * @param entry
+ * @return
+ */
+bool isMantidInstrumentFormat(NXEntry &entry) {
+
+  bool result = false;
+  if (entry.containsGroup("instrument")) {
+    const auto instr = entry.openNXInstrument("instrument");
+    if (instr.containsGroup("detector") &&
+        countEntriesOfType(instr, "NXdetector") == 1) {
+      result = true;
+    }
+    entry.close();
+  }
+  return result;
+}
+
 /**
  * Extract ALL the detector, spectrum number and workspace index mapping
  * information.
@@ -555,8 +585,9 @@ void LoadNexusProcessed::exec() {
     root.close();
   } // All file resources should be scoped to here. All previous file handles
     // must be cleared to release locks
-  loadNexusGeometry(*tempWS, nWorkspaceEntries, g_log,
-                    std::string(getProperty("Filename")));
+  if (!m_mantidInstrumentFormat)
+    loadNexusGeometry(*tempWS, nWorkspaceEntries, g_log,
+                      std::string(getProperty("Filename")));
 
   m_axis1vals.clear();
 } // namespace DataHandling
@@ -1646,8 +1677,11 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
                   "update the geometry");
   }
 
-  // Now assign the spectra-detector map
-  readInstrumentGroup(mtd_entry, local_workspace);
+  m_mantidInstrumentFormat = isMantidInstrumentFormat(mtd_entry);
+  if (m_mantidInstrumentFormat) {
+    // Now assign the spectra-detector map
+    readInstrumentGroup(mtd_entry, local_workspace);
+  }
 
   if (!local_workspace->getAxis(1)
            ->isSpectra()) { // If not a spectra axis, load the axis data into

@@ -221,6 +221,8 @@ private:
 
   // C++ interface to the NXS file
   ::NeXus::File *m_cppFile;
+
+  bool m_mantidInstrumentFormat = true;
 };
 /// to sort the algorithmhistory vector
 bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1,
