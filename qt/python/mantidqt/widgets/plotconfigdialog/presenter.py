@@ -8,11 +8,12 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.widgets.plotconfigdialog import curve_in_figure, image_in_figure
+from mantidqt.widgets.plotconfigdialog import curve_in_figure, image_in_figure, legend_in_figure
 from mantidqt.widgets.plotconfigdialog.view import PlotConfigDialogView
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
+from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
 
 class PlotConfigDialogPresenter:
@@ -25,8 +26,8 @@ class PlotConfigDialogPresenter:
             self.view = PlotConfigDialogView(parent)
         self.view.show()
 
-        self.tab_widget_presenters = [None, None, None]
-        self.tab_widget_views = [None, None, None]
+        self.tab_widget_presenters = [None, None, None, None]
+        self.tab_widget_views = [None, None, None, None]
         # Axes tab
         if len(self.fig.get_axes()) > 0:
             axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view)
@@ -42,6 +43,11 @@ class PlotConfigDialogPresenter:
             images_tab = ImagesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters[2] = images_tab
             self.tab_widget_views[2] = (images_tab.view, "Images")
+        #Legend tab
+        if legend_in_figure(self.fig):
+            legend_tab = LegendTabWidgetPresenter(self.fig, parent=self.view)
+            self.tab_widget_presenters[3] = legend_tab
+            self.tab_widget_views[3] = (legend_tab.view, "Legend")
 
         self._add_tab_widget_views()
 
