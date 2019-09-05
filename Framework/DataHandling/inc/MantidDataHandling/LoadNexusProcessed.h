@@ -13,12 +13,13 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/cow_ptr.h"
-
 #include "MantidNexus/NexusClasses.h"
-
 #include <map>
+#include <vector>
 
 namespace NeXus {
 class File;
@@ -89,10 +90,18 @@ private:
   std::vector<std::string> extractWorkspaceNames(Mantid::NeXus::NXRoot &root,
                                                  size_t nWorkspaceEntries);
 
+  /// Extract mapping information where it is build across NXDetectors
+  void extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry,
+                             Mantid::Kernel::Logger &logger);
+
   /// Load the workspace name attribute if it exists
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name);
 
+  /// Load nexus geometr and apply to workspace
+  bool loadNexusGeometry(Mantid::API::Workspace &ws,
+                         const int nWorkspaceEntries, Kernel::Logger &logger,
+                         const std::string &filename);
   /// Load a single entry
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name,
@@ -223,6 +232,8 @@ private:
   ::NeXus::File *m_cppFile;
 
   bool m_mantidInstrumentFormat = true;
+  std::vector<Indexing::SpectrumNumber> m_spectrumNumbers;
+  std::vector<Mantid::detid_t> m_detectorIds;
 };
 /// to sort the algorithmhistory vector
 bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1,

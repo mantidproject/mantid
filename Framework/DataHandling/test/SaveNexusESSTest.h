@@ -156,6 +156,7 @@ public:
   void test_demonstrate_no_spectra_detector_map_saved() {
     using namespace Mantid::Indexing;
     ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
+    fileInfo.setDebugMode(true);
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -180,11 +181,11 @@ public:
     TS_ASSERT_EQUALS(outSpecInfo.size(), inSpecInfo.size());
     for (size_t i = 0; i < outSpecInfo.size(); ++i) {
       // Output has no mapping, so for each spectrum have 0 detector indices
-      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i).size() + 1,
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i).size(),
                        inSpecInfo.spectrumDefinition(i).size());
       // Compare actual detector indices for each spectrum when fixed as below
-      // TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i)[0],
-      //                 inSpecInfo.spectrumDefinition(i)[0]);
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(i)[0],
+                       inSpecInfo.spectrumDefinition(i)[0]);
     }
   }
   void test_base_function_with_workspace() {

@@ -23,7 +23,9 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
@@ -34,6 +36,7 @@
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -84,10 +87,10 @@ struct SpectraInfo {
 // Helper typdef.
 using SpectraInfo_optional = boost::optional<SpectraInfo>;
 
-size_t countEntriesOfType(const NXInstrument &inst,
-                          const std::string &nxClass) {
+template <typename T>
+size_t countEntriesOfType(const T &entry, const std::string &nxClass) {
   size_t count = 0;
-  for (const auto &group : inst.groups()) {
+  for (const auto &group : entry.groups()) {
     if (group.nxclass == nxClass)
       ++count;
   }
@@ -101,7 +104,6 @@ size_t countEntriesOfType(const NXInstrument &inst,
  * @return
  */
 bool isMantidInstrumentFormat(NXEntry &entry) {
-
   bool result = false;
   if (entry.containsGroup("instrument")) {
     const auto instr = entry.openNXInstrument("instrument");
@@ -124,6 +126,14 @@ bool isMantidInstrumentFormat(NXEntry &entry) {
 SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
   SpectraInfo spectraInfo;
   // Instrument information
+
+  if (countEntriesOfType(mtd_entry, "NXinstrument") != 1 ||
+      !mtd_entry.containsGroup("instrument")) {
+    logger.information() << "No NXinstrument group called `instrument` under "
+                            "NXEntry. The workspace will not "
+                            "contain any detector information.\n";
+    return spectraInfo;
+  }
   NXInstrument inst = mtd_entry.openNXInstrument("instrument");
   if (!inst.containsGroup("detector")) {
     logger.information() << "Detector block not found. The workspace will not "
@@ -201,6 +211,58 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
   return isMultiPeriod;
 }
 
+} // namespace
+
+void LoadNexusProcessed::extractMappingInfoNew(NXEntry &mtd_entry,
+                                               Logger &logger) {
+
+  const auto count = countEntriesOfType(mtd_entry, "NXinstrument");
+  if (count != 1) {
+    logger.information()
+        << "Expect single NXinstrument under root entry. Found " << count;
+  }
+  NXInstrument inst =
+      mtd_entry.openNXInstrument("instrument"); // TODO called be called
+                                                // something else though not at
+                                                // present!
+
+  auto &spectrumNumbers = m_spectrumNumbers;
+  auto &detectorIds = m_detectorIds;
+  for (const auto &group : inst.groups()) {
+    if (group.nxclass == "NXdetector") {
+      NXDetector detgroup = inst.openNXDetector(group.nxname);
+
+      NXInt spectra_block = detgroup.openNXInt("spectra");
+      spectra_block.load();
+      const size_t nSpecEntries = spectra_block.dim0();
+      auto data = spectra_block.sharedBuffer();
+      size_t currentSize = spectrumNumbers.size();
+      spectrumNumbers.resize(currentSize + nSpecEntries, 0);
+      // Append spectrum numbers
+      for (size_t i = 0; i < nSpecEntries; ++i) {
+        spectrumNumbers[i + currentSize] = data[i];
+      }
+
+      NXInt det_index = detgroup.openNXInt("detector_list");
+      det_index.load();
+      size_t nDetEntries = det_index.dim0();
+
+      // TODO currently hard-coded for 1:1 mapping need to go via
+      // detector_indexes to fix
+      if (nSpecEntries != nDetEntries) {
+        throw std::runtime_error("Nexus mappings only support 1:1 at present");
+      }
+      currentSize = detectorIds.size();
+      data = det_index.sharedBuffer();
+      detectorIds.resize(currentSize + nDetEntries, 0);
+      for (size_t i = 0; i < nDetEntries; ++i) {
+        detectorIds[i + currentSize] = data[i];
+      }
+      detgroup.close();
+    }
+  }
+  inst.close();
+}
 /**
  * Attempt to load nexus geometry. Should fail without exception if not
  * possible.
@@ -218,8 +280,10 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
  * @param filename : filename to load from.
  * @return true if successful
  */
-bool loadNexusGeometry(Workspace &ws, const int nWorkspaceEntries,
-                       Kernel::Logger &logger, const std::string &filename) {
+bool LoadNexusProcessed::loadNexusGeometry(Workspace &ws,
+                                           const int nWorkspaceEntries,
+                                           Kernel::Logger &logger,
+                                           const std::string &filename) {
   if (nWorkspaceEntries == 1) {
     if (auto *matrixWs = dynamic_cast<MatrixWorkspace *>(&ws)) {
       try {
@@ -228,6 +292,18 @@ bool loadNexusGeometry(Workspace &ws, const int nWorkspaceEntries,
             filename, NexusGeometry::makeLogger(&logger));
         matrixWs->setInstrument(
             Geometry::Instrument_const_sptr(std::move(instrument)));
+
+        Indexing::IndexInfo info(m_spectrumNumbers);
+        std::vector<SpectrumDefinition> definitions;
+        definitions.reserve(m_detectorIds.size());
+        auto &detInfo = matrixWs->detectorInfo();
+        for (const auto &id : m_detectorIds) {
+          // Assumes 1:1 mapping
+          definitions.push_back(SpectrumDefinition{detInfo.indexOf(id)});
+        }
+        info.setSpectrumDefinitions(definitions);
+        matrixWs->setIndexInfo(info);
+
         return true;
       } catch (std::exception &e) {
         logger.warning(e.what());
@@ -238,7 +314,6 @@ bool loadNexusGeometry(Workspace &ws, const int nWorkspaceEntries,
   }
   return false;
 }
-} // namespace
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed()
@@ -1681,6 +1756,8 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
   if (m_mantidInstrumentFormat) {
     // Now assign the spectra-detector map
     readInstrumentGroup(mtd_entry, local_workspace);
+  } else {
+    extractMappingInfoNew(mtd_entry, g_log);
   }
 
   if (!local_workspace->getAxis(1)
