@@ -291,16 +291,23 @@ void writeNXDetectorNumber(H5::Group &grp,
   write1DIntDataset(grp, DETECTOR_IDS, bankDetIDs);
 }
 
+// Write the count of how many detectors contribute to each spectra
 void writeDetectorCount(H5::Group &grp, const SpectraMappings &mappings) {
   write1DIntDataset(grp, SPECTRA_COUNTS, mappings.detector_count);
 }
 
+// Write the detectors ids ordered by spectra index 0 - N for each NXDetector
 void writeDetectorList(H5::Group &grp, const SpectraMappings &mappings) {
   write1DIntDataset(grp, DETECTOR_LIST, mappings.detector_list);
 }
+
+// Write the detector indexes. This provides offsets into the detector_list and
+// is sized to the number of spectra
 void writeDetectorIndex(H5::Group &grp, const SpectraMappings &mappings) {
   write1DIntDataset(grp, DETECTOR_INDEX, mappings.detector_index);
 }
+
+// Write the spectra numbers for each spectra
 void writeSpectra(H5::Group &grp, const SpectraMappings &mappings) {
   write1DIntDataset(grp, SPECTRA_NUMBERS, mappings.spectra_ids);
 }
@@ -486,31 +493,31 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
 SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
                              const detid2index_map &detToIndexMap,
                              const Indexing::IndexInfo &indexInfo,
+                             const API::SpectrumInfo &specInfo,
                              const std::vector<Mantid::detid_t> &detIds,
                              size_t index) {
   auto childrenDetectors = compInfo.detectorsInSubtree(index);
   // local to this nxdetector
-  std::vector<int> detector_list;
-  detector_list.reserve(childrenDetectors.size());
   std::map<size_t, int> detector_count_map;
+  // We start knowing only the detector index, we have to establish spectra from
+  // that.
   for (const auto det_index : childrenDetectors) {
     auto detector_id = detIds[det_index];
-    detector_list.push_back(
-        detector_id); // Note detector_numbers already has this!
+
     auto spectrum_index = detToIndexMap.at(detector_id);
-    detector_count_map[spectrum_index]++; // Attribute detector to a given
+    detector_count_map[spectrum_index]++; // Attribute detector to a give
                                           // spectrum_index
   }
   // Sized to spectra in bank
   SpectraMappings mappings;
+  mappings.detector_list.resize(childrenDetectors.size());
   mappings.detector_count.resize(detector_count_map.size(), 0);
   mappings.detector_index.resize(detector_count_map.size() + 1, 0);
-  mappings.detector_list = detector_list;
   mappings.spectra_ids.resize(detector_count_map.size(), 0);
   mappings.number_dets = childrenDetectors.size();
   mappings.number_spec = detector_count_map.size();
-
   size_t counter = 0;
+
   for (auto &pair : detector_count_map) {
     // using sort order of map to ensure we are ordered by lowest to highest
     // spectrum index
@@ -519,6 +526,14 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
         mappings.detector_index[counter] + (pair.second);
     mappings.spectra_ids[counter] =
         int32_t(indexInfo.spectrumNumber(pair.first));
+
+    // We will list everything by spectrum index, so we need to add the detector
+    // ids in the same order.
+    const auto &specDefintion = specInfo.spectrumDefinition(pair.first);
+    for (const auto &def : specDefintion) {
+      mappings.detector_list[counter] = detIds[def.first];
+    }
+
     ++counter;
   }
   mappings.detector_index.resize(
@@ -592,12 +607,13 @@ private:
                               const std::string &classType) {
 
     if (m_mode == Mode::Append) {
+      // Find by class and by name
       auto results = utilities::findGroups(parent, classType);
       for (auto &result : results) {
-        auto n = H5ForwardCompatibility::getObjName(result);
-        auto matches = std::regex_match(n, std::regex(".*/" + name + "$"));
-        if (matches) {
-          return result; // note that requested group name is abandoned.
+        auto resultName = H5ForwardCompatibility::getObjName(result);
+        // resultName gives full path. We match the last name on the path
+        if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
+          return result;
         }
       }
     }
@@ -952,8 +968,9 @@ public:
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
 
     writeDetectorCount(childGroup, mappings);
-    // Note that the detector list is the same as detector_number. We write
-    // both for compatibility
+    // Note that the detector list is the same as detector_number, but it is
+    // ordered by spectrum index 0 - N, whereas detector_number is just written
+    // out in the order the detectors are encountered in the bank.
     writeDetectorList(childGroup, mappings);
     writeDetectorIndex(childGroup, mappings);
     writeSpectra(childGroup, mappings);
@@ -1095,13 +1112,13 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   // save NXdetectors
   auto detToIndexMap =
       ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
-  const auto &indexInfo = ws.indexInfo();
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
 
       // Make spectra detector mappings that can be used
       SpectraMappings mappings =
-          makeMappings(compInfo, detToIndexMap, indexInfo, detIds, index);
+          makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
+                       ws.spectrumInfo(), detIds, index);
 
       if (reporter != nullptr)
         reporter->report();

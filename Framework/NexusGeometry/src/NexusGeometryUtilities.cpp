@@ -63,7 +63,8 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
   return boost::optional<Group>{}; // Empty
 }
 
-/// Find all groups at the same level matching same class type
+/// Find all groups at the same level matching same class type. Returns first
+/// item found.
 std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
                                   const H5std_string &classType) {
   std::vector<H5::Group> groups;
