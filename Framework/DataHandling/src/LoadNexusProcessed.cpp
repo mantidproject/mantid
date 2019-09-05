@@ -88,8 +88,8 @@ struct SpectraInfo {
 using SpectraInfo_optional = boost::optional<SpectraInfo>;
 
 template <typename T>
-size_t countEntriesOfType(const T &entry, const std::string &nxClass) {
-  size_t count = 0;
+int countEntriesOfType(const T &entry, const std::string &nxClass) {
+  int count = 0;
   for (const auto &group : entry.groups()) {
     if (group.nxclass == nxClass)
       ++count;
