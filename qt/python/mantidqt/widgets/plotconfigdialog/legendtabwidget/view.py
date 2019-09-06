@@ -110,5 +110,17 @@ class LegendTabWidgetView(QWidget):
     def get_marker_size(self):
         return self.marker_size_spin_box.value()
 
+    def get_hide_box(self):
+        return self.hide_box_check_box.isChecked()
+
+    def set_hide_box(self, hide):
+        self.hide_box_check_box.setChecked(hide)
+
+    def get_hide_legend(self):
+        return self.hide_legend_check_box.isChecked()
+
+    def set_hide_legend(self, hide):
+        self.hide_legend_check_box.setChecked(hide)
+
     def get_properties(self):
         return LegendProperties.from_view(self)
