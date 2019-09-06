@@ -111,24 +111,6 @@ public:
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 
-  void test_bug() {
-
-    std::string file = "/Users/spu92482/builds/mantidbuild_debug/ExternalData//"
-                       "Testing/SystemTests/tests/analysis/reference/"
-                       "SANSLOQCan2D.nxs";
-    LoadNexusProcessed alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setPropertyValue("Filename", file);
-    alg.setPropertyValue("OutputWorkspace", output_ws);
-    alg.execute();
-
-    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  }
-
   void testNexusProcessed_Min_Max() {
 
     LoadNexusProcessed alg;
