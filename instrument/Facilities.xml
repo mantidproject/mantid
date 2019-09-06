@@ -595,6 +595,18 @@
       <technique>Small Wide Angle Scattering</technique>
    </instrument>
 
+   <instrument name="ZEEMANS" beamline="998">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+   </instrument>
+
+   <instrument name="CHESS" beamline="999">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+   </instrument>
+
 </facility>
 
 <facility name="NCNR" FileExtensions=".dat,.xml">
@@ -876,7 +888,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Inelastic Neutron Scattering</technique>
   </instrument>
-  
+
 </facility>
 
 <!-- HZB -->
