@@ -83,7 +83,7 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
     joinStreamAtTime(runStartData);
   } else {
     m_dataStream =
-        m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic, m_monitorTopic},
+        m_broker->subscribe({m_streamTopic, m_runInfoTopic, m_sampleEnvTopic},
                             SubscribeAtOption::LATEST);
   }
 

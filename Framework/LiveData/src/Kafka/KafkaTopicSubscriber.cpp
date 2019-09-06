@@ -432,9 +432,9 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
     if (kfMsg->len() > 0) {
       payload->assign(static_cast<const char *>(kfMsg->payload()),
                       static_cast<int>(kfMsg->len()));
+      topic = kfMsg->topic_name();
       offset = kfMsg->offset();
       partition = kfMsg->partition();
-      topic = kfMsg->topic_name();
     } else {
       // If RdKafka indicates no error then we should always get a
       // non-zero length message

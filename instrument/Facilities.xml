@@ -913,7 +913,6 @@
 	  <topic name="V20_motion" type="sample" />
 	  <topic name="V20_runInfo" type="run" />
 	  <topic name="denex_detector" type="event" />
-	  <topic name="monitor" type="monitor" />
     </livedata>
   </instrument>
 </facility>

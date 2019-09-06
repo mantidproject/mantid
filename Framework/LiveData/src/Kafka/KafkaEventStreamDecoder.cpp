@@ -369,7 +369,6 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
   /* Get TOF and detector ID buffers */
   const auto &tofData = *(eventMsg->time_of_flight());
   const auto &detData = *(eventMsg->detector_id());
-
   /* Increment event count */
   const auto nEvents = tofData.size();
   eventCount += nEvents;
@@ -403,7 +402,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
     m_receivedEventBuffer.reserve(oldBufferSize + nEvents);
 
     /* Store the buffered events */
-    for (flatbuffers::uoffset_t i = 0; i < tofData.size(); ++i) {
+    for (flatbuffers::uoffset_t i = 0; i < nEvents; ++i) {
       auto detId = detData[i];
       auto tof = tofData[i];
       uint32_t index = detId + m_specToIdxOffset;
@@ -413,14 +412,6 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer,
         m_receivedEventBuffer.emplace_back(std::move(event));
       }
     }
-    /*
-    std::transform(detData.begin(), detData.end(), tofData.begin(),
-                   std::back_inserter(m_receivedEventBuffer),
-                   [&](uint64_t detId, uint64_t tof) -> BufferedEvent {
-                     const auto workspaceIndex =
-                         m_specToIdx[detId + m_specToIdxOffset];
-                     return {workspaceIndex, tof, pulseIndex};
-                   });*/
   }
 
   const auto endTime = std::chrono::system_clock::now();
@@ -457,7 +448,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
       ws->invalidateCommonBinsFlag();
     }
 
-    PARALLEL_FOR_NO_WSP_CHECK()
+    //PARALLEL_FOR_NO_WSP_CHECK()
     for (auto group = 0; group < numberOfGroups; ++group) {
       for (auto idx = groupBoundaries[group]; idx < groupBoundaries[group + 1];
            ++idx) {
@@ -641,10 +632,7 @@ std::vector<size_t> computeGroupBoundaries(
     const std::vector<Mantid::LiveData::KafkaEventStreamDecoder::BufferedEvent>
         &eventBuffer,
     const size_t numberOfGroups) {
-  std::vector<size_t> groupBoundaries(numberOfGroups + 1);
-
-  /* Fill the buffer with the end of the event buffer index */
-  std::fill(groupBoundaries.begin(), groupBoundaries.end(), eventBuffer.size());
+  std::vector<size_t> groupBoundaries(numberOfGroups + 1, eventBuffer.size());
 
   /* First group always starts at beginning of buffer */
   groupBoundaries[0] = 0;
@@ -659,11 +647,11 @@ std::vector<size_t> computeGroupBoundaries(
 
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */
-    while (groupBoundaries[group] + 1 < eventBuffer.size() &&
-           (eventBuffer[groupBoundaries[group]].wsIdx ==
-            eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
-      ++groupBoundaries[group];
-    }
+    //while (groupBoundaries[group] + 1 < eventBuffer.size() &&
+    //       (eventBuffer[groupBoundaries[group]].wsIdx ==
+    //        eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
+    //  ++groupBoundaries[group];
+    //}
 
     /* Increment group end boundary (such that group is defined by [lower,
      * upper) boundaries) */
