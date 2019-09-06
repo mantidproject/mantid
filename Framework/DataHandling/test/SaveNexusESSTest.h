@@ -14,13 +14,16 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SaveNexusESS.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/NexusFileReader.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -153,7 +156,7 @@ public:
   void test_demonstrate_spectra_detector_map_saved() {
 
     using namespace Mantid::Indexing;
-    ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
+    ScopedFileHandle fileInfo("test_spectra_mapping.nxs");
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -218,6 +221,95 @@ public:
       // Compare actual detector indices for each spectrum when fixed as below
       TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput)[0],
                        inSpecInfo.spectrumDefinition(indexInInput)[0]);
+    }
+  }
+
+  void test_demonstrate_spectra_detector_map_saved_complex_mapping() {
+
+    using namespace Mantid::Indexing;
+    using namespace Mantid::HistogramData;
+    using Mantid::DataObjects::Workspace2D;
+
+    ScopedFileHandle fileInfo("test_spectra_mapping_complex.nxs");
+
+    const int nBanks = 2;
+    const int pixPerDim = 10;
+    const size_t nDetectors = pixPerDim * pixPerDim * nBanks;
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        nBanks, pixPerDim * pixPerDim);
+
+    // Make mappings
+    const size_t nSpectra =
+        nDetectors / 2; // We are going to have 2 detectors per spectra
+    std::vector<SpectrumDefinition> specDefinitions;
+    std::vector<SpectrumNumber> spectrumNumbers;
+    size_t i = nDetectors - 1;
+    for (size_t j = 0; j < nSpectra; i -= 2, j++) {
+      SpectrumDefinition def;
+      def.add(i);
+      def.add(i - 1);
+      specDefinitions.push_back(def);
+      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+    }
+    IndexInfo info(spectrumNumbers);
+    info.setSpectrumDefinitions(specDefinitions);
+    // Create a workspace, data is not important
+    auto wsIn = boost::make_shared<Workspace2D>();
+    Histogram histogram(BinEdges{1.0, 2.0}, Counts(), CountVariances());
+    wsIn->setInstrument(instrument);
+    wsIn->initialize(info, histogram);
+
+    do_execute(fileInfo.fullPath(), wsIn);
+
+    {
+      // Check that mapping datasets are written
+      Mantid::NexusGeometry::NexusFileReader validator(fileInfo.fullPath());
+      TS_ASSERT(validator.hasDataset(
+          "spectra", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_list", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_index", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_count", {"mantid_workspace_1", "instrument", "bank1"}));
+      TS_ASSERT(validator.hasDataset(
+          "spectra", {"mantid_workspace_1", "instrument", "bank2"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_list", {"mantid_workspace_1", "instrument", "bank2"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_index", {"mantid_workspace_1", "instrument", "bank2"}));
+      TS_ASSERT(validator.hasDataset(
+          "detector_count", {"mantid_workspace_1", "instrument", "bank2"}));
+    }
+
+    // Reload it.
+    auto matrixWSOut = test_utility::reload(fileInfo.fullPath());
+
+    const auto &inSpecInfo = wsIn->spectrumInfo();
+    const auto &outSpecInfo = matrixWSOut->spectrumInfo();
+
+    // Note we do not guarantee the preseveration of spectrum indexes during
+    // deserialisation, so we need the maps to ensure we compare like for like.
+    auto specToIndexOut = matrixWSOut->getSpectrumToWorkspaceIndexMap();
+    auto specToIndexIn = wsIn->getSpectrumToWorkspaceIndexMap();
+
+    auto indexInfo = matrixWSOut->indexInfo();
+
+    TS_ASSERT_EQUALS(outSpecInfo.size(), inSpecInfo.size());
+    for (size_t i = 0; i < outSpecInfo.size(); ++i) {
+
+      auto specNumber = int(indexInfo.spectrumNumber(i));
+      auto indexInInput = specToIndexIn.at(specNumber);
+      auto indexInOutput = specToIndexOut.at(specNumber);
+
+      // Output has no mapping, so for each spectrum have 0 detector indices
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput).size(),
+                       inSpecInfo.spectrumDefinition(indexInInput).size());
+      // Compare actual detector indices for each spectrum when fixed as below
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput)[0],
+                       inSpecInfo.spectrumDefinition(indexInInput)[0]);
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput)[1],
+                       inSpecInfo.spectrumDefinition(indexInInput)[1]);
     }
   }
   void test_base_function_with_workspace() {

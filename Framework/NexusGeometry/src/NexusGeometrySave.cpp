@@ -516,25 +516,25 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
   mappings.spectra_ids.resize(detector_count_map.size(), 0);
   mappings.number_dets = childrenDetectors.size();
   mappings.number_spec = detector_count_map.size();
-  size_t counter = 0;
-
+  size_t specCounter = 0;
+  size_t detCounter = 0;
   for (auto &pair : detector_count_map) {
     // using sort order of map to ensure we are ordered by lowest to highest
     // spectrum index
-    mappings.detector_count[counter] = (pair.second); // Counts
-    mappings.detector_index[counter + 1] =
-        mappings.detector_index[counter] + (pair.second);
-    mappings.spectra_ids[counter] =
+    mappings.detector_count[specCounter] = (pair.second); // Counts
+    mappings.detector_index[specCounter + 1] =
+        mappings.detector_index[specCounter] + (pair.second);
+    mappings.spectra_ids[specCounter] =
         int32_t(indexInfo.spectrumNumber(pair.first));
 
     // We will list everything by spectrum index, so we need to add the detector
     // ids in the same order.
     const auto &specDefintion = specInfo.spectrumDefinition(pair.first);
     for (const auto &def : specDefintion) {
-      mappings.detector_list[counter] = detIds[def.first];
+      mappings.detector_list[detCounter] = detIds[def.first];
+      ++detCounter;
     }
-
-    ++counter;
+    ++specCounter;
   }
   mappings.detector_index.resize(
       detector_count_map.size()); // cut-off last item
@@ -1111,7 +1111,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
 
   // save NXdetectors
   auto detToIndexMap =
-      ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
+      ws.getDetectorIDToWorkspaceIndexMap(false /*do not throw if multiples*/);
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
 
