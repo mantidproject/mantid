@@ -105,20 +105,30 @@ int countEntriesOfType(const T &entry, const std::string &nxClass) {
  */
 InstrumentLayout instrumentFormat(NXEntry &entry) {
   auto result = InstrumentLayout::NotRecognised;
-  const int instrumentsCount = countEntriesOfType(entry, "NXinstrument");
+  const auto instrumentsCount = countEntriesOfType(entry, "NXinstrument");
   if ((instrumentsCount == 1) && entry.containsGroup("instrument")) {
     // Can now assume nexus format
     result = InstrumentLayout::NexusFormat;
     const auto instr = entry.openNXInstrument("instrument");
-    if (instr.containsGroup("detector") &&
-        countEntriesOfType(instr, "NXdetector") == 1) {
-      result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
-                                         // single nxdetector called detector
-      entry.close();
+
+    if (instr.containsGroup("detector")) {
+      const auto detectorCount = countEntriesOfType(instr, "NXdetector");
+      if (detectorCount > 1) {
+        if (instr.containsGroup("physical_detectors")) {
+          // Either we have more than one nxdetector, and one of those is called
+          // physical_detectors
+          result =
+              InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
+        }
+      } else if (detectorCount == 1)
+        result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
+                                           // single nxdetector called detector
     }
+    entry.close();
   }
+
   return result;
-}
+} // namespace
 
 /**
  * Extract ALL the detector, spectrum number and workspace index mapping
