@@ -10,10 +10,11 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
+
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::CurveFitting::CostFunctions::CostFuncFitting;
 using namespace Mantid::API;

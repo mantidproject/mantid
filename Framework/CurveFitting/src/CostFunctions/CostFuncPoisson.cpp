@@ -7,6 +7,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <cmath>
 #include <limits>
 
 using namespace Mantid::API;
