@@ -63,13 +63,6 @@ public:
         fullpath, std::make_unique<MockLogger>());
   }
 
-  void test_bug() {
-
-    auto ess_data = NexusGeometryParser::createInstrument(
-        "/Users/spu92482/Downloads/nicos_00000534_agg_with_monitor.nxs",
-        std::make_unique<MockLogger>());
-  }
-
   void test_basic_instrument_information() {
     auto instrument = makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
