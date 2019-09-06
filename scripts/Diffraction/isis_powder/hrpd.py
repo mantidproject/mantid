@@ -14,6 +14,16 @@ from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_para
 
 import mantid.simpleapi as mantid
 
+# Force using raw files
+# A bug in loading old NeXus files prevents using NeXus.
+RAW_DATA_EXT = '.raw'
+
+
+# Constants
+PROMPT_PULSE_INTERVAL = 20000.0
+PROMPT_PULSE_RIGHT_WIDTH = 140.0
+PROMPT_PULSE_LEFT_WIDTH = 30.0
+
 
 class HRPD(AbstractInst):
 
@@ -26,12 +36,6 @@ class HRPD(AbstractInst):
                                    calibration_dir=self._inst_settings.calibration_dir,
                                    output_dir=self._inst_settings.output_dir,
                                    inst_prefix="HRPD")
-
-        # Cannot load older .nxs files into Mantid from HRPD
-        # because of a long-term bug which was not reported.
-        # Instead, ask Mantid to use .raw files in this case
-        if not self._inst_settings.file_extension:
-            self._inst_settings.file_extension = ".raw"
 
         self._cached_run_details = {}
         self._sample_details = None
@@ -102,6 +106,15 @@ class HRPD(AbstractInst):
             raise RuntimeError("Could not find " + os.path.join(path, name)+" please run create_vanadium with "
                                                                             "\"do_solid_angle_corrections=True\"")
 
+    def _generate_input_file_name(self, run_number, file_ext=None):
+        """
+        Generates a name which Mantid uses within Load to find the file.
+        :param run_number: The run number to convert into a valid format for Mantid
+        :param file_ext: An optional file extension to add to force a particular format
+        :return: A filename that will allow Mantid to find the correct run for that instrument.
+        """
+        return self._generate_inst_filename(run_number=run_number, file_ext=RAW_DATA_EXT)
+
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return hrpd_algs.calculate_van_absorb_corrections(
@@ -140,14 +153,25 @@ class HRPD(AbstractInst):
         return self._cached_run_details[run_number_string_key]
 
     def _mask_prompt_pulses(self, ws):
-        left_crop = 30
-        right_crop = 140
-        pulse_interval = 20000
-        for i in range(1, 6):
-            middle = i*pulse_interval
-            min_crop = middle - left_crop
-            max_crop = middle + right_crop
-            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
+        """
+        HRPD has a long flight path from the moderator resulting
+        in sharp peaks from the proton pulse that maintain their
+        sharp resolution. Here we mask these pulses out that occur
+        at 20ms intervals.
+
+        :param ws: The workspace containing the pulses. It is
+        masked in place.
+        """
+        # The number of pulse can vary depending on the data range
+        # Compute number of pulses that occur at each 20ms interval.
+        x_data = ws.readX(0)
+        pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
+        pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
+        for i in range(pulse_min, pulse_max):
+            centre = PROMPT_PULSE_INTERVAL * float(i)
+            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws,
+                            XMin=centre - PROMPT_PULSE_LEFT_WIDTH,
+                            XMax=centre + PROMPT_PULSE_RIGHT_WIDTH)
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(

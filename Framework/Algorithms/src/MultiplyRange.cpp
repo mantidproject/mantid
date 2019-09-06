@@ -90,12 +90,13 @@ void MultiplyRange::exec() {
     auto &newE = outputWS->mutableE(i);
 
     // Now multiply the requested range
+    using std::placeholders::_1;
     std::transform(newY.begin() + startBin, newY.begin() + endBin + 1,
                    newY.begin() + startBin,
-                   std::bind2nd(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), _1, factor));
     std::transform(newE.begin() + startBin, newE.begin() + endBin + 1,
                    newE.begin() + startBin,
-                   std::bind2nd(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), _1, factor));
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

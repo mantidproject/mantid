@@ -175,10 +175,11 @@ void FFTSmooth::truncate(int n) {
   xr.assign(X.begin(), X.begin() + nx);
   xi.assign(X.begin(), X.begin() + nx);
 
+  using std::placeholders::_1;
   std::transform(yr.begin(), yr.end(), yr.begin(),
-                 std::bind2nd(std::multiplies<double>(), f));
+                 std::bind(std::multiplies<double>(), _1, f));
   std::transform(yi.begin(), yi.end(), yi.begin(),
-                 std::bind2nd(std::multiplies<double>(), f));
+                 std::bind(std::multiplies<double>(), _1, f));
 }
 
 /** Smoothing by zeroing.

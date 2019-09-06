@@ -560,8 +560,9 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
   }
 
   std::list<std::string> detList;
+  using std::placeholders::_1;
   boost::algorithm::split(detList, detectorNames,
-                          std::bind2nd(std::equal_to<char>(), ','));
+                          std::bind(std::equal_to<char>(), _1, ','));
   for (auto detectorName : detList) {
     boost::algorithm::trim(detectorName);
 

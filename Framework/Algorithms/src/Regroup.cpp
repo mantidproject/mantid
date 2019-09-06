@@ -190,8 +190,9 @@ int Regroup::newAxis(const std::vector<double> &params,
   int isteps = ibounds - 1; // highest index in params array containing a step
 
   xcurr = params[0];
+  using std::placeholders::_1;
   auto iup = std::find_if(xold.cbegin(), xold.cend(),
-                          std::bind2nd(std::greater_equal<double>(), xcurr));
+                          std::bind(std::greater_equal<double>(), _1, xcurr));
   if (iup != xold.end()) {
     xcurr = *iup;
     xnew.push_back(xcurr);
@@ -211,7 +212,7 @@ int Regroup::newAxis(const std::vector<double> &params,
 
     // find nearest x_i that is >= xcurr
     iup = std::find_if(xold.begin(), xold.end(),
-                       std::bind2nd(std::greater_equal<double>(), xcurr + xs));
+                       std::bind(std::greater_equal<double>(), _1, xcurr + xs));
     if (iup != xold.end()) {
       if (*iup <= params[ibound]) {
         xcurr = *iup;

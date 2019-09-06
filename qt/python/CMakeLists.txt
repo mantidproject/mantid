@@ -9,7 +9,7 @@ if(ENABLE_MANTIDPLOT)
 endif()
 
 # mantidqt
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
   # The default value is just an empty string - this prevents a Python syntax
   # error when not on Windows Configure utils.qt.plugins file for build. It is
   # placed in the source directory and added to the .gitignore for simplicity.
@@ -21,7 +21,13 @@ if(ENABLE_WORKBENCH)
   # plugins
   configure_file(mantidqt/utils/qt/plugins.py.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py)
-  add_python_package(mantidqt)
+  if(APPLE)
+    set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+  else()
+    set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+  endif()
+  add_python_package(mantidqt
+    INSTALL_LIB_DIRS ${_install_lib_dirs})
 
   # Configure resources data in place for ease of development. The output file
   # is added to the toplevel gitignore
@@ -40,23 +46,25 @@ if(ENABLE_WORKBENCH)
   # Setup dependency chain
   add_dependencies(mantidqt
                    mantidqt_resources
-                   mantidqt_commonqt5
-                   mantidqt_instrumentviewqt5
-                   mantidqt_iconsqt5
                    PythonInterface)
 
   if(ENABLE_MANTIDPLOT)
     add_dependencies(mantidqt mantidqt_commonqt4 mantidqt_iconsqt4)
   endif()
-
-  if(MSVC)
-    # Debug builds need libraries that are linked with MSVC debug runtime
-    add_custom_command(
-      TARGET mantidqt POST_BUILD
-      COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy_directory
-              ${PYTHON_DIR}/msvc-site-packages/debug/PyQt5
-              ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
-      COMMENT "Copying debug PyQt5 to bin/Debug")
+  if(ENABLE_WORKBENCH)
+    add_dependencies(mantidqt
+                     mantidqt_commonqt5
+                     mantidqt_instrumentviewqt5
+                     mantidqt_iconsqt5)
+    if(MSVC)
+      # Debug builds need libraries that are linked with MSVC debug runtime
+      add_custom_command(
+        TARGET mantidqt POST_BUILD
+        COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy_directory
+                ${PYTHON_DIR}/msvc-site-packages/debug/PyQt5
+                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt5
+        COMMENT "Copying debug PyQt5 to bin/Debug")
+    endif()
   endif()
 
   # Testing
@@ -102,53 +110,57 @@ if(ENABLE_WORKBENCH)
     mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
     )
 
-  # ctest target for widgets that only get tested in qt5, because they are only
-  # used in the workbench
-  set(
-    PYTHON_WIDGET_QT5_ONLY_TESTS
-    mantidqt/widgets/algorithmselector/test/observer_test.py
-    mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
-    mantidqt/widgets/codeeditor/test/test_interpreter_view.py
-    mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
-    mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
-    mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
-    mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
-    mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
-    mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
-    mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
-    mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
-    mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
-    mantidqt/widgets/plotconfigdialog/test/test_apply_all_properties.py
-    mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
-    mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
-    mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
-    mantidqt/widgets/test/test_jupyterconsole.py
-    mantidqt/widgets/workspacedisplay/test/test_data_copier.py
-    mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
-    mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
-    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
-    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
-    mantidqt/icons/test/test_icons.py
-)
+  if(ENABLE_WORKBENCH)
+    # ctest target for widgets that only get tested in qt5, because they are only
+    # used in the workbench
+    set(
+      PYTHON_WIDGET_QT5_ONLY_TESTS
+      mantidqt/widgets/algorithmselector/test/observer_test.py
+      mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
+      mantidqt/widgets/codeeditor/test/test_interpreter_view.py
+      mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
+      mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
+      mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
+      mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
+      mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
+      mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+      mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
+      mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curveproperties.py
+      mantidqt/widgets/plotconfigdialog/curvestabwidget/test/test_curvestabwidgetpresenter.py
+      mantidqt/widgets/plotconfigdialog/test/test_apply_all_properties.py
+      mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
+      mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
+      mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+      mantidqt/widgets/test/test_jupyterconsole.py
+      mantidqt/widgets/workspacedisplay/test/test_data_copier.py
+      mantidqt/widgets/workspacedisplay/test/test_user_notifier.py
+      mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_model.py
+      mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_presenter.py
+      mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_table_view_model.py
+      mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
+      mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
+      mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
+      mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
+      mantidqt/icons/test/test_icons.py
+  )
 
-  # Tests
-  set(PYUNITTEST_QT_API pyqt5)
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR}
-                      mantidqt_qt5
-                      ${PYTHON_TEST_FILES}
-                      ${PYTHON_WIDGET_QT5_ONLY_TESTS})
-  set(PYUNITTEST_QT_API pyqt)
-  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt4
-                      ${PYTHON_TEST_FILES})
-  unset(PYUNITTEST_QT_API)
+    # Tests
+    set(PYUNITTEST_QT_API pyqt5)
+    pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR}
+                        mantidqt_qt5
+                        ${PYTHON_TEST_FILES}
+                        ${PYTHON_WIDGET_QT5_ONLY_TESTS})
+  endif()
+  if(ENABLE_MANTIDPLOT)
+    set(PYUNITTEST_QT_API pyqt)
+    pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt4
+                        ${PYTHON_TEST_FILES})
+    unset(PYUNITTEST_QT_API)
+  endif()
 endif()

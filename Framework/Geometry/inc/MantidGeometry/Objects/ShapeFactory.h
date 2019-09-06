@@ -74,11 +74,14 @@ public:
   boost::shared_ptr<CSGObject> createShape(std::string shapeXML,
                                            bool addTypeTag = true);
 
+  static boost::shared_ptr<CSGObject> createSphere(const Kernel::V3D &centre,
+                                                   double radius);
   static boost::shared_ptr<CSGObject>
   createHexahedralShape(double xlb, double xlf, double xrf, double xrb,
                         double ylb, double ylf, double yrf, double yrb);
 
 private:
+  static std::string sphereAlgebra(const int surfaceID);
   std::string parseSphere(Poco::XML::Element *pElem,
                           std::map<int, boost::shared_ptr<Surface>> &prim,
                           int &l_id);
