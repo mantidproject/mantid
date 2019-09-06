@@ -171,24 +171,26 @@ public:
     do_execute(fileInfo.fullPath(), wsIn);
 
     {
+      const auto rootName =
+          wsIn->componentInfo().name(wsIn->componentInfo().root());
       // Check that mapping datasets are written
       Mantid::NexusGeometry::NexusFileReader validator(fileInfo.fullPath());
       TS_ASSERT(validator.hasDataset(
-          "spectra", {"mantid_workspace_1", "instrument", "bank1"}));
+          "spectra", {"mantid_workspace_1", rootName, "bank1"}));
       TS_ASSERT(validator.hasDataset(
-          "detector_list", {"mantid_workspace_1", "instrument", "bank1"}));
+          "detector_list", {"mantid_workspace_1", rootName, "bank1"}));
       TS_ASSERT(validator.hasDataset(
-          "detector_index", {"mantid_workspace_1", "instrument", "bank1"}));
+          "detector_index", {"mantid_workspace_1", rootName, "bank1"}));
       TS_ASSERT(validator.hasDataset(
-          "detector_count", {"mantid_workspace_1", "instrument", "bank1"}));
+          "detector_count", {"mantid_workspace_1", rootName, "bank1"}));
       TS_ASSERT(validator.hasDataset(
-          "spectra", {"mantid_workspace_1", "instrument", "bank2"}));
+          "spectra", {"mantid_workspace_1", rootName, "bank2"}));
       TS_ASSERT(validator.hasDataset(
-          "detector_list", {"mantid_workspace_1", "instrument", "bank2"}));
+          "detector_list", {"mantid_workspace_1", rootName, "bank2"}));
       TS_ASSERT(validator.hasDataset(
-          "detector_index", {"mantid_workspace_1", "instrument", "bank2"}));
+          "detector_index", {"mantid_workspace_1", rootName, "bank2"}));
       TS_ASSERT(validator.hasDataset(
-          "detector_count", {"mantid_workspace_1", "instrument", "bank2"}));
+          "detector_count", {"mantid_workspace_1", rootName, "bank2"}));
     }
 
     // Reload it.
