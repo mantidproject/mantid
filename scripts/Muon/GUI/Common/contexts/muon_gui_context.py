@@ -26,6 +26,13 @@ class MuonGuiContext(dict):
 
     def update_and_send_signal(self, *args, **kwargs):
         updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
+        for key, value in updated_items.items():
+            try:
+                if self[key].id() == value.id():
+                    updated_items.pop(key)
+            except (AttributeError, KeyError):
+                pass
+
         if not updated_items and kwargs:
             return
 

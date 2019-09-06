@@ -23,6 +23,17 @@ class FittingTabModel(object):
         self.context = context
         self.function_name = ''
 
+    @property
+    def function_name(self):
+        return self._function_name
+
+    @function_name.setter
+    def function_name(self, value):
+        if value:
+            self._function_name = ' ' + value
+        else:
+            self._function_name = ''
+
     def do_single_fit(self, parameter_dict):
         output_workspace, fitting_parameters_table, function_object, output_status, output_chi_squared, covariance_matrix = \
             self.do_single_fit_and_return_workspace_parameters_and_fit_function(parameter_dict)
@@ -67,25 +78,27 @@ class FittingTabModel(object):
         return function_object, output_status, output_chi_squared
 
     def add_workspace_to_ADS(self, workspace, name, directory):
+        self.context.ads_observer.observeRename(False)
         workspace_wrapper = MuonWorkspaceWrapper(workspace)
         workspace_wrapper.show(directory + name)
+        self.context.ads_observer.observeRename(True)
         return workspace_wrapper
 
     def create_fitted_workspace_name(self, input_workspace_name, function_name):
-        directory = input_workspace_name + '; Fitted; ' + self.function_name + '/'
-        name = input_workspace_name + '; Fitted; ' + self.function_name + '; Workspace'
+        directory = input_workspace_name + '; Fitted;' + self.function_name + '/'
+        name = input_workspace_name + '; Fitted;' + self.function_name + '; Workspace'
 
         return name, directory
 
     def create_multi_domain_fitted_workspace_name(self, input_workspace, function):
-        directory = input_workspace + '; Fitted; ' + self.function_name + '/'
-        name = input_workspace + '+ ...; Fitted; ' + self.function_name
+        directory = input_workspace + '; Fitted;' + self.function_name + '/'
+        name = input_workspace + '+ ...; Fitted;' + self.function_name
 
         return name, directory
 
     def create_parameter_table_name(self, input_workspace_name, function_name):
-        directory = input_workspace_name + '; Fitted; ' + self.function_name + '/'
-        name = input_workspace_name + '; Fitted Parameters; ' + self.function_name
+        directory = input_workspace_name + '; Fitted;' + self.function_name + '/'
+        name = input_workspace_name + '; Fitted Parameters;' + self.function_name
 
         return name, directory
 

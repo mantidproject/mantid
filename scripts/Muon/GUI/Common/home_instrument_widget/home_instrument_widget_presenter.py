@@ -204,7 +204,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.dead_time_label_3.setVisible(True)
         elif index == DEADTIME_WORKSPACE:
             self._view.dead_time_label_3.hide()
-            self._model.set_user_dead_time_from_ADS()
+            self._model.set_user_dead_time_from_ADS(self._view.dead_time_file_selector.currentText())
         else:
             self._model.set_dead_time_to_none()
 

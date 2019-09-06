@@ -192,13 +192,12 @@ def load_dead_time_from_filename(filename):
 
     if dead_times is None:
         return ""
-    assert isinstance(dead_times, ITableWorkspace)
 
     instrument = loaded_data["OutputWorkspace"][0].workspace.getInstrument().getName()
     name = str(instrument) + file_utils.format_run_for_file(run) + "_deadTimes"
-    api.AnalysisDataService.Instance().addOrReplace(name, dead_times)
+    # api.AnalysisDataService.Instance().addOrReplace(name, dead_times)
 
-    return name
+    return dead_times
 
 
 def load_workspace_from_filename(filename,
@@ -251,18 +250,19 @@ def empty_loaded_data():
 def create_load_algorithm(filename, property_dictionary):
     # Assume if .bin it is a PSI file
     psi_data = False
+    output_filename = os.path.basename(filename)
     if ".bin" in filename:
         alg = mantid.AlgorithmManager.create("LoadPSIMuonBin")
         psi_data = True
     else:
         alg = mantid.AlgorithmManager.create("LoadMuonNexus")
         alg.setProperties(property_dictionary)
+        alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
 
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
-    alg.setProperty("OutputWorkspace", filename)
-    alg.setProperty("Filename", filename)
-    alg.setProperty("DeadTimeTable", filename + '_deadtime_table')
+    alg.setProperty("OutputWorkspace", output_filename)
+    alg.setProperty("Filename", output_filename)
     return alg, psi_data
 
 

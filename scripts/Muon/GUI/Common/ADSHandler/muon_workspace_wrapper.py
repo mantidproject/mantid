@@ -10,40 +10,6 @@ from mantid.api import Workspace, AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import RenameWorkspace, GroupWorkspaces
 
 
-def add_directory_structure(dirs):
-    """
-    create the nested WorkspaceGroup structure in the ADS specified by the
-    stored directory attribute.
-    dirs = ["dir1", "dir2"] eg. ['Muon Data', 'MUSR72105', 'MUSR72105 Raw Data']
-    """
-    if not dirs:
-        return
-    if len(dirs) > len(set(dirs)):
-        raise ValueError("Group names must be unique")
-
-    for directory in dirs:
-        if not AnalysisDataService.doesExist(directory):
-            workspace_group = WorkspaceGroup()
-            AnalysisDataService.addOrReplace(directory, workspace_group)
-        elif not isinstance(AnalysisDataService.retrieve(directory), WorkspaceGroup):
-            AnalysisDataService.remove(directory)
-            workspace_group = WorkspaceGroup()
-            AnalysisDataService.addOrReplace(directory, workspace_group)
-        else:
-            # exists and is a workspace group
-            pass
-
-    # Create the nested group structure in the ADS
-    previous_dir = ""
-    for i, directory in enumerate(dirs):
-        if i == 0:
-            previous_dir = directory
-            continue
-        if not AnalysisDataService.retrieve(previous_dir).__contains__(directory):
-            AnalysisDataService.retrieve(previous_dir).add(directory)
-        previous_dir = directory
-
-
 def _add_workspace_to_group(group_name, workspace_name):
     if AnalysisDataService.doesExist(group_name):
         workspaces_to_group = AnalysisDataService.retrieve(group_name).getNames()
@@ -100,7 +66,8 @@ class MuonWorkspaceWrapper(object):
     @property
     def name(self):
         """The current name of the workspace."""
-        return self._directory_structure + '/' + self._workspace_name
+        directory = self._directory_structure + '/' if self._directory_structure else ''
+        return directory + self._workspace_name
 
     @property
     def workspace_name(self):
@@ -145,7 +112,8 @@ class MuonWorkspaceWrapper(object):
         name = dirs/../dirs/workspace_name
         """
         if not name and not self.name:
-            return
+            raise ValueError("Cannot store workspace in ADS with name : ",
+                             str(name))
 
         self.name = str(name)
 
@@ -179,11 +147,3 @@ class MuonWorkspaceWrapper(object):
             AnalysisDataService.remove(self._workspace_name)
 
         self._is_in_ads = False
-
-    def add_directory_structure(self):
-        """
-        create the nested WorkspaceGroup structure in the ADS specified by the
-        stored _directory attribute.
-        """
-        dirs = self._directory_structure.split("/")
-        add_directory_structure(dirs)
