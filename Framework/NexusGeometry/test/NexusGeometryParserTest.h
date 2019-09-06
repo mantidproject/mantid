@@ -18,9 +18,9 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
+#include "mockobjects.h"
 #include <H5Cpp.h>
 #include <Poco/Glob.h>
 #include <chrono>
@@ -43,14 +43,6 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
   auto beamline = instrument.makeBeamline(pmap);
   return {std::move(std::get<0>(beamline)), std::move(std::get<1>(beamline))};
 }
-
-class MockLogger : public NexusGeometry::Logger {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(warning, void(const std::string &));
-  MOCK_METHOD1(error, void(const std::string &));
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
-};
 
 } // namespace
 class NexusGeometryParserTest : public CxxTest::TestSuite {

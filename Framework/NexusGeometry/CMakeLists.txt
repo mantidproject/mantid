@@ -1,28 +1,31 @@
 set(SRC_FILES
+    src/H5ForwardCompatibility.cpp
     src/Hdf5Version.cpp
     src/InstrumentBuilder.cpp
+    src/JSONGeometryParser.cpp
     src/JSONInstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
     src/NexusGeometrySave.cpp
-    src/JSONGeometryParser.cpp
+    src/NexusGeometryUtilities.cpp
     src/NexusShapeFactory.cpp
     src/TubeBuilder.cpp
-    src/TubeHelpers.cpp
-	src/H5ForwardCompatibility.cpp)
+    src/TubeHelpers.cpp)
 
 set(INC_FILES
+    inc/MantidNexusGeometry/AbstractLogger.h
     inc/MantidNexusGeometry/DllConfig.h
+    inc/MantidNexusGeometry/H5ForwardCompatibility.h
     inc/MantidNexusGeometry/Hdf5Version.h
     inc/MantidNexusGeometry/InstrumentBuilder.h
+    inc/MantidNexusGeometry/JSONGeometryParser.h
     inc/MantidNexusGeometry/JSONInstrumentBuilder.h
+    inc/MantidNexusGeometry/NexusGeometryDefinitions.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/NexusGeometrySave.h
-    inc/MantidNexusGeometry/JSONGeometryParser.h
+    inc/MantidNexusGeometry/NexusGeometryUtilities.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
     inc/MantidNexusGeometry/TubeBuilder.h
-    inc/MantidNexusGeometry/TubeHelpers.h
-    inc/MantidNexusGeometry/NexusGeometryDefinitions.h
-	inc/MantidNexusGeometry/H5ForwardCompatibility.h)
+    inc/MantidNexusGeometry/TubeHelpers.h)
 
 set(TEST_FILES
     InstrumentBuilderTest.h

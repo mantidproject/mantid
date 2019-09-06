@@ -29,8 +29,8 @@ namespace Geometry {
 
 class MANTID_GEOMETRY_DLL Sphere : public Quadratic {
 private:
-  Kernel::V3D Centre; ///< Point for centre
-  double Radius;      ///< Radius of sphere
+  Kernel::V3D m_centre; ///< Point for centre
+  double m_radius;      ///< Radius of sphere
   void rotate(const Kernel::Matrix<double> &) override;
   void displace(const Kernel::V3D &) override;
   /// Compute the distance from the centre of the sphere to the given point
@@ -43,6 +43,7 @@ protected:
 
 public:
   Sphere();
+  Sphere(Kernel::V3D centre, double radius);
   std::unique_ptr<Sphere> clone() const;
   /// Effective typename
   std::string className() const override { return "Sphere"; }
@@ -60,12 +61,12 @@ public:
   /// Setter for centre of sphere
   void setCentre(const Kernel::V3D &);
   /// Get Centre
-  Kernel::V3D getCentre() const { return Centre; }
+  Kernel::V3D getCentre() const { return m_centre; }
   /// Get Radius
-  double getRadius() const { return Radius; }
+  double getRadius() const { return m_radius; }
   /// Set Radius
   void setRadius(const double &r) {
-    Radius = r;
+    m_radius = r;
     setBaseEqn();
   }
   /// Generates the quadratic equation.
