@@ -36,7 +36,7 @@ PeakTransform_sptr PeakTransformHKL::clone() const {
 */
 Mantid::Kernel::V3D
 PeakTransformHKL::transformPeak(const Mantid::Geometry::IPeak &peak) const {
-  return PeakTransform::transform(peak.getIntHKL());
+  return PeakTransform::transform(peak.getHKL());
 }
 
 /**

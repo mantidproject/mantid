@@ -42,7 +42,7 @@ public:
   void test_maps_to_hkl_on_ipeak() {
     // Create a peak.
     MockIPeak mockPeak;
-    EXPECT_CALL(mockPeak, getIntHKL())
+    EXPECT_CALL(mockPeak, getHKL())
         .WillOnce(Return(V3D())); // Should RUN getHKL!
 
     // Use the transform on the peak.
