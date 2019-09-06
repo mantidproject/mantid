@@ -111,18 +111,10 @@ InstrumentLayout instrumentFormat(NXEntry &entry) {
     result = InstrumentLayout::NexusFormat;
     const auto instr = entry.openNXInstrument("instrument");
 
-    if (instr.containsGroup("detector")) {
-      const auto detectorCount = countEntriesOfType(instr, "NXdetector");
-      if (detectorCount > 1) {
-        if (instr.containsGroup("physical_detectors")) {
-          // Either we have more than one nxdetector, and one of those is called
-          // physical_detectors
-          result =
-              InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
-        }
-      } else if (detectorCount == 1)
-        result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
-                                           // single nxdetector called detector
+    if (instr.containsGroup("detector") ||
+        (instr.containsGroup("physical_detectors") &&
+         instr.containsGroup("physical_monitors"))) {
+      result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
     }
     entry.close();
   }
