@@ -29,8 +29,6 @@ GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
 
-using namespace HistoSchema;
-
 namespace {
 const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 const std::string RUN_NUMBER_PROPERTY = "run_number";
@@ -67,7 +65,7 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() {}
+KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
 
 /**
  * Check if there is data available to extract

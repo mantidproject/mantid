@@ -33,7 +33,6 @@ GNU_DIAG_ON("conversion")
 #include <tbb/parallel_sort.h>
 
 using namespace Mantid::Types;
-using namespace LogSchema;
 size_t totalNumEventsSinceStart = 0;
 size_t totalNumEventsBeforeLastTimeout = 0;
 double totalPopulateWorkspaceDuration = 0;
@@ -514,16 +513,16 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
-    if (seEvent->value_type() == Value_Int) {
+    if (seEvent->value_type() == Value::Int) {
       auto value = static_cast<const Int *>(seEvent->value());
       appendToLog<int32_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Long) {
+    } else if (seEvent->value_type() == Value::Long) {
       auto value = static_cast<const Long *>(seEvent->value());
       appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Double) {
+    } else if (seEvent->value_type() == Value::Double) {
       auto value = static_cast<const Double *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Float) {
+    } else if (seEvent->value_type() == Value::Float) {
       auto value = static_cast<const Float *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time,
                           static_cast<double>(value->value()));

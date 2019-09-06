@@ -8,6 +8,7 @@
 #define MANTID_KERNEL_TOPICINFO_H_
 
 #include "MantidKernel/DllConfig.h"
+#include <string>
 
 //----------------------------------------------------------------------
 // Forward declarations

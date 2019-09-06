@@ -22,7 +22,6 @@ GNU_DIAG_ON("conversion")
 #include <json/json.h>
 
 using namespace Mantid::Types;
-using namespace LogSchema;
 
 namespace {
 /// Logger
