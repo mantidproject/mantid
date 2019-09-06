@@ -47,11 +47,11 @@ public:
   void getParameters(GSLVector &params) const;
 
   /// Calculate value of cost function
-  virtual double val() const;
+  virtual double val() const override;
   /// Calculate the derivatives of the cost function
-  virtual void deriv(std::vector<double> &der) const;
+  virtual void deriv(std::vector<double> &der) const override;
   /// Calculate the value and the derivatives of the cost function
-  virtual double valAndDeriv(std::vector<double> &der) const;
+  virtual double valAndDeriv(std::vector<double> &der) const override;
   /// Calculate the value, the first and the second derivatives of the cost
   /// function
   virtual double valDerivHessian(bool evalDeriv = true,

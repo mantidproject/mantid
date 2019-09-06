@@ -37,9 +37,9 @@ class MANTID_CURVEFITTING_DLL CostFuncPoisson : public CostFuncFitting {
 public:
   CostFuncPoisson();
   /// Get name of minimizer
-  virtual std::string name() const { return "Poisson"; }
+  virtual std::string name() const override { return "Poisson"; }
   /// Get short name of minimizer - useful for say labels in guis
-  virtual std::string shortName() const { return "Poisson"; };
+  virtual std::string shortName() const override { return "Poisson"; };
 
   void addVal(API::FunctionDomain_sptr domain,
               API::FunctionValues_sptr values) const override;

@@ -29,7 +29,7 @@ std::vector<double> calculateDeterminant(const FunctionValues &vals,
 
   for (size_t iParam = 0; iParam < numParams; iParam++) {
 
-    for (int iDataPoint = 0; iDataPoint < vals.size(); iDataPoint++) {
+    for (size_t iDataPoint = 0; iDataPoint < vals.size(); iDataPoint++) {
       // The method names are a bit inconsistent with the data
       // they represent
       const double fitted = vals.getCalculated(iDataPoint);
@@ -45,7 +45,7 @@ std::vector<double> calculateDeterminant(const FunctionValues &vals,
 
 double calculatePoisson(const FunctionValues &vals) {
   double expectedVal = 0.0;
-  for (int i = 0; i < vals.size(); i++) {
+  for (size_t i = 0; i < vals.size(); i++) {
     const double fitted = vals.getCalculated(i);
     const double binCounts = vals.getFitData(i);
 
@@ -74,7 +74,7 @@ FunctionValues_sptr getFakeValues(const std::vector<double> &nValues,
          "The number of points must match domain size");
   auto funcValues = boost::make_shared<FunctionValues>(domain);
 
-  for (int i = 0; i < nValues.size(); i++) {
+  for (size_t i = 0; i < nValues.size(); i++) {
     funcValues->setFitData(i, nValues[i]);
   }
 
@@ -84,7 +84,7 @@ FunctionValues_sptr getFakeValues(const std::vector<double> &nValues,
 boost::shared_ptr<UserFunction> getFakeFunction() {
   auto func = boost::make_shared<UserFunction>();
   // By using x as our custom fitting formula we effectively map x->y
-  // within the CostFuncPossion method
+  // within the CostFuncPoisson method
   func->setAttributeValue("Formula", "x");
   return func;
 }
@@ -167,7 +167,6 @@ public:
     testInstance.setFittingFunction(getFakeFunction(), domain, vals);
 
     testInstance.addVal(domain, vals);
-
     const double expected = calculatePoisson(*vals);
 
     TS_ASSERT_EQUALS(testInstance.val(), expected)
@@ -192,7 +191,7 @@ public:
     testInstance.addVal(domain, vals);
 
     double expectedVal = 0.0;
-    for (int i = 0; i < vals->size(); i++) {
+    for (size_t i = 0; i < vals->size(); i++) {
       const double fitted = vals->getCalculated(i);
 
       double contribution = (cutOffPoint - fitted) / fitted;
@@ -216,7 +215,7 @@ public:
 
     const auto expectedDet = calculateDeterminant(*vals, 0);
     const auto returnedDet = testInstance.getDeriv();
-    for (int i = 0; i < expectedDet.size(); i++) {
+    for (size_t i = 0; i < expectedDet.size(); i++) {
       TS_ASSERT_EQUALS(returnedDet[i], expectedDet[i]);
     }
   }
@@ -224,7 +223,6 @@ public:
   void test_deriv_below_cutoff() {
     // Below 0 regardless of active parameters the resulting derivative should
     // be inf
-    const size_t numPoints = 2;
     auto domain = getFakeDomain(0, 1);
 
     FunctionValues_sptr vals = getFakeValues({1, 2}, *domain);
@@ -239,7 +237,6 @@ public:
 
     testInstance.addValDerivHessian(mockFunction, domain, vals);
 
-    bool evalHessian = false;
     TS_ASSERT(std::isinf(testInstance.getDeriv()[0]));
   }
 
@@ -259,7 +256,7 @@ public:
 
     const auto expectedDet = calculateDeterminant(*vals, 0);
     const auto returnedDet = testInstance.getDeriv();
-    for (int i = 0; i < expectedDet.size(); i++) {
+    for (size_t i = 0; i < expectedDet.size(); i++) {
       TS_ASSERT_EQUALS(returnedDet[i], expectedDet[i]);
     }
   }
@@ -282,7 +279,7 @@ public:
 
     const std::vector<double> expectedVals{5.618e-4, 5.62e-4};
 
-    for (int i = 0; i < expectedVals.size(); i++) {
+    for (size_t i = 0; i < expectedVals.size(); i++) {
       TS_ASSERT_DELTA(firstRow[i], expectedVals[i], 1e-7);
     }
   }
@@ -303,7 +300,7 @@ public:
     const auto returnedHessian = testInstance.getHessian();
     const auto firstRow = returnedHessian.copyRow(0);
 
-    for (int i = 0; i < firstRow.size(); i++) {
+    for (size_t i = 0; i < firstRow.size(); i++) {
       TS_ASSERT(std::isinf(firstRow[i]));
     }
   }
