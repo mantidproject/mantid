@@ -236,7 +236,7 @@ public:
     const int pixPerDim = 10;
     const size_t nDetectors = pixPerDim * pixPerDim * nBanks;
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        nBanks, pixPerDim * pixPerDim);
+        nBanks, pixPerDim);
 
     // Make mappings
     const size_t nSpectra =
