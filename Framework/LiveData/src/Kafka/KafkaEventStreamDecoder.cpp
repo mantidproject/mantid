@@ -448,7 +448,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
       ws->invalidateCommonBinsFlag();
     }
 
-    //PARALLEL_FOR_NO_WSP_CHECK()
+    // PARALLEL_FOR_NO_WSP_CHECK()
     for (auto group = 0; group < numberOfGroups; ++group) {
       for (auto idx = groupBoundaries[group]; idx < groupBoundaries[group + 1];
            ++idx) {
@@ -517,9 +517,20 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
       auto value = static_cast<const Float *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time,
                           static_cast<double>(value->value()));
+    } else if (seEvent->value_type() == Value::Short) {
+      auto value = static_cast<const Short *>(seEvent->value());
+      appendToLog<int32_t>(mutableRunInfo, name, time,
+                           static_cast<int32_t>(value->value()));
+    } else if (seEvent->value_type() == Value::String) {
+      auto value = static_cast<const String *>(seEvent->value());
+      appendToLog<std::string>(mutableRunInfo, name, time,
+                               static_cast<std::string>(value->value()->str()));
+    } else if (seEvent->value_type() == Value::ArrayByte) {
+      // do nothing for now.
     } else {
       g_log.warning() << "Value for sample log named '" << name
-                      << "' was not of recognised type" << std::endl;
+                      << "' was not of recognised type. The value type is "
+                      << EnumNameValue(seEvent->value_type()) << std::endl;
     }
   }
 }
@@ -647,7 +658,7 @@ std::vector<size_t> computeGroupBoundaries(
 
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */
-    //while (groupBoundaries[group] + 1 < eventBuffer.size() &&
+    // while (groupBoundaries[group] + 1 < eventBuffer.size() &&
     //       (eventBuffer[groupBoundaries[group]].wsIdx ==
     //        eventBuffer[groupBoundaries[group] + 1].wsIdx)) {
     //  ++groupBoundaries[group];

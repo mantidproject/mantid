@@ -156,17 +156,19 @@ void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
     std::copy(timestamps->begin(), timestamps->end(),
               std::back_inserter(mantidTimestamps));
     auto name = chopperMsg->name()->str();
-
-    for (auto workspace : workspaces) {
-      auto mutableRunInfo = workspace->mutableRun();
-      Kernel::ArrayProperty<uint64_t> *property;
-      if (mutableRunInfo.hasProperty(name)) {
-        property = dynamic_cast<Kernel::ArrayProperty<uint64_t> *>(
-            mutableRunInfo.getProperty(name));
-      } else {
-        property = new Mantid::Kernel::ArrayProperty<uint64_t>(name);
+    {
+      std::lock_guard<std::mutex> workspaceLock(m_mutex);
+      for (auto &workspace : workspaces) {
+        auto mutableRunInfo = workspace->mutableRun();
+        Kernel::ArrayProperty<uint64_t> *property;
+        if (mutableRunInfo.hasProperty(name)) {
+          property = dynamic_cast<Kernel::ArrayProperty<uint64_t> *>(
+              mutableRunInfo.getProperty(name));
+        } else {
+          property = new Mantid::Kernel::ArrayProperty<uint64_t>(name);
+        }
+        *property = mantidTimestamps;
       }
-      *property = mantidTimestamps;
     }
   }
 }

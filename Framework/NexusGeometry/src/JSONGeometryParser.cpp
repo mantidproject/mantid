@@ -127,6 +127,9 @@ void extractDatasetValues(const Json::Value &datasetParent,
   auto shape = datadesc["size"];
   auto values = datasetParent[VALUES];
 
+  if (shape.isNull())
+    return addSingleValue(values, data);
+
   std::vector<uint32_t> dims(shape.size());
 
   size_t nValues = 1;
@@ -337,16 +340,19 @@ void JSONGeometryParser::validateAndRetrieveGeometry(
   if (sample.isNull())
     throw std::invalid_argument("No sample found in json.");
 
-  auto source = get(entryChildren, NX_SOURCE);
-  if (source.isNull())
-    g_log.notice() << "No source information found in json instrument."
-                   << std::endl;
-
   auto instrument = get(entryChildren, NX_INSTRUMENT);
   if (instrument.isNull())
     throw std::invalid_argument("No instrument found in json.");
 
   m_name = extractInstrumentName(instrument);
+
+  auto instrumentChildren = instrument[CHILDREN];
+  
+  auto source = get(instrumentChildren, NX_SOURCE);
+
+  if (source.isNull())
+    g_log.notice() << "No source information found in json instrument."
+                   << std::endl;
 
   auto jsonDetectorBanks = getAllDetectors(instrument);
   if (jsonDetectorBanks.empty())

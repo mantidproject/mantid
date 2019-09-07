@@ -133,11 +133,10 @@ Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {
   }
 
   builder.addSample(
-      m_parser->sampleName(),
-      applyRotation(m_parser->samplePosition(), m_parser->sampleOrientation()));
+      m_parser->sampleName(), m_parser->samplePosition());
   builder.addSource(
       m_parser->sourceName(),
-      applyRotation(m_parser->sourcePosition(), m_parser->sourceOrientation()));
+      m_parser->sourcePosition());
   addMonitors(*m_parser, builder);
 
   return builder.createInstrument();
