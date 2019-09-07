@@ -77,7 +77,7 @@ target_link_libraries(PythonGeometryModule
                               Beamline
                               Types
                               Kernel
-                              ${PYTHON_LIBRARIES}
+                              ${PYTHON_LIBRARIES}			      
                               ${POCO_LIBRARIES}
                               ${Boost_LIBRARIES}
                               ${TBB_LIBRARIES}

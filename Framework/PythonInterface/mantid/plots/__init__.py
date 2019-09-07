@@ -26,26 +26,7 @@ from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
-try:
-    from mpl_toolkits.mplot3d.axes3d import Axes3D
-except ImportError:
-    # Special case to handle issues with importing mpl_toolkits
-    #
-    # Matplotlib adds a *nspkg.pth file to the user site packages directory.
-    # When that file is processed a fake built-in mpl_toolkits is imported
-    # which forces the site packages version to take precidence over our
-    # local copy regardless of python sys path settings.
-    #
-    # Work around by removing the fake built-in module from sys modules,
-    # then forcing python to search the path as expected.
-    #
-    # This is mostly but not necessarily limited to being an issue on OSX
-    # where there are multiple versions of matplotlib installed across the
-    # system.
-    import sys
-
-    del sys.modules['mpl_toolkits']
-    from mpl_toolkits.mplot3d.axes3d import Axes3D
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger

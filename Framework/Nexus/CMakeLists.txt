@@ -28,7 +28,7 @@ set_target_properties(Nexus
                                  IN_MANTID_NEXUS)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Nexus PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Nexus PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()

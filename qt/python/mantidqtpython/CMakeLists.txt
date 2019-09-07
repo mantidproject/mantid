@@ -112,6 +112,7 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                    FOLDER Qt4
                    OSX_INSTALL_RPATH
                      @loader_path/../Contents/MacOS
+		     @loader_path/../Contents/Frameworks
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 

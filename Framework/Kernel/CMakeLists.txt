@@ -491,7 +491,7 @@ target_include_directories(Kernel SYSTEM
                                    ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Kernel
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -633,11 +633,7 @@ mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
-if(APPLE AND ENABLE_MANTIDPLOT)
-  set(MANTID_ROOT ../..)
-else()
-  set(MANTID_ROOT ..)
-endif()
+set(MANTID_ROOT ..)
 
 # Log to file for installed packages but not mpi
 if(MPI_BUILD OR MPI_EXPERIMENTAL)

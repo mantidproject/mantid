@@ -70,7 +70,7 @@ set_target_properties(Parallel
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Parallel
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Parallel
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -105,7 +105,7 @@ set_target_properties(EventParallelLoader
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(EventParallelLoader
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(EventParallelLoader
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")

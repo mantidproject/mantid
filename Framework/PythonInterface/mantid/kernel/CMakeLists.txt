@@ -140,7 +140,7 @@ target_link_libraries(PythonKernelModule
                               Types
                               Kernel
                               ${Boost_LIBRARIES}
-                              ${PYTHON_LIBRARIES}
+                              ${PYTHON_LIBRARIES}			      
                               ${PYTHON_DEPS}
                               ${POCO_LIBRARIES}
                               ${TBB_LIBRARIES}

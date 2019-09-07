@@ -862,7 +862,7 @@ add_dependencies(MantidPlot mantidqtpython CompilePyUI)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidPlot
-    PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
+    PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(MAKE_VATES)
     set_target_properties(
@@ -1000,12 +1000,15 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                    ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake @ONLY)
     install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake)
   else()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb @ONLY)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
-            DESTINATION MantidPlot.app/)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake @ONLY)
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake)
+    install (CODE "
+      execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                              \${CMAKE_INSTALL_PREFIX}/MantidPlot.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
+                      RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+      if(NOT install_name_tool_result EQUAL 0)
+        message(\"\${_out}\")
+        message(FATAL_ERROR \"Package script failed!!!\n\")
+      endif()
+  ")
+
   endif()
 endif()

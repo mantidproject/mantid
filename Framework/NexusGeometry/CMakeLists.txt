@@ -56,7 +56,7 @@ set_target_properties(NexusGeometry
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(NexusGeometry
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 endif()
 
 # Include HDF5 libraries

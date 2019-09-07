@@ -24,7 +24,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     MantidParaViewNexusPeaksReaderSMPlugin
     PROPERTIES
       INSTALL_RPATH
-      "@loader_path/../../../Contents/Libraries;@loader_path/../../../Contents/MacOS"
+      "@loader_path/../../../Contents/Frameworks;@loader_path/../../../Contents/MacOS"
     )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(MantidParaViewNexusPeaksReaderSMPlugin

@@ -521,7 +521,7 @@ set_target_properties(API
                                  IN_MANTID_API)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
