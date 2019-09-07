@@ -640,17 +640,22 @@ public:
    * attributes to the new group.
    *
    * @param parent : parent group in which to write the NXinstrument group.
+   * @param compInfo : componentinfo
    * @return NXinstrument group, to be passed into children save methods.
    */
-  H5::Group instrument(const H5::Group &parent) {
+  H5::Group instrument(const H5::Group &parent,
+                       const Geometry::ComponentInfo &compInfo) {
 
-    H5::Group childGroup =
-        openOrCreateGroup(parent, STANDARD_INSTRUMENT_NAME, NX_INSTRUMENT);
+    std::string nameInCache = compInfo.name(compInfo.root());
+    std::string instrName =
+        nameInCache.empty() ? "unspecified_instrument" : nameInCache;
 
-    writeStrDataset(childGroup, NAME, STANDARD_INSTRUMENT_NAME);
+    H5::Group childGroup = openOrCreateGroup(parent, instrName, NX_INSTRUMENT);
+
+    writeStrDataset(childGroup, NAME, instrName);
     writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
 
-    std::string defaultShortName = STANDARD_INSTRUMENT_NAME.substr(0, 3);
+    std::string defaultShortName = instrName.substr(0, 3);
     H5::DataSet name = childGroup.openDataSet(NAME);
     writeStrAttribute(name, SHORT_NAME, defaultShortName);
     return childGroup;
@@ -1016,7 +1021,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   using Mode = NexusGeometrySaveImpl::Mode;
   NexusGeometrySaveImpl writer(append ? Mode::Append : Mode::Trunc);
   // save and capture NXinstrument (component root)
-  H5::Group instrument = writer.instrument(rootGroup);
+  H5::Group instrument = writer.instrument(rootGroup, compInfo);
 
   // save NXsource
   writer.source(instrument, compInfo);
@@ -1101,7 +1106,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   using Mode = NexusGeometrySaveImpl::Mode;
   NexusGeometrySaveImpl writer(append ? Mode::Append : Mode::Trunc);
   // save and capture NXinstrument (component root)
-  H5::Group instrument = writer.instrument(rootGroup);
+  H5::Group instrument = writer.instrument(rootGroup, compInfo);
 
   // save NXsource
   writer.source(instrument, compInfo);

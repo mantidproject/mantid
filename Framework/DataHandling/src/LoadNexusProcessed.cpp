@@ -97,6 +97,17 @@ int countEntriesOfType(const T &entry, const std::string &nxClass) {
   return count;
 }
 
+template <typename T>
+std::vector<NXClassInfo> findEntriesOfType(const T &entry,
+                                           const std::string &nxClass) {
+  std::vector<NXClassInfo> result;
+  for (const auto &group : entry.groups()) {
+    if (group.nxclass == nxClass)
+      result.push_back(group);
+  }
+  return result;
+}
+
 /**
  * We have an NXInstrument group called "instrument" containing a single
  * NXDetector called detector
@@ -106,15 +117,18 @@ int countEntriesOfType(const T &entry, const std::string &nxClass) {
 InstrumentLayout instrumentFormat(NXEntry &entry) {
   auto result = InstrumentLayout::NotRecognised;
   const auto instrumentsCount = countEntriesOfType(entry, "NXinstrument");
-  if ((instrumentsCount == 1) && entry.containsGroup("instrument")) {
+  if (instrumentsCount == 1) {
     // Can now assume nexus format
     result = InstrumentLayout::NexusFormat;
-    const auto instr = entry.openNXInstrument("instrument");
 
-    if (instr.containsGroup("detector") ||
-        (instr.containsGroup("physical_detectors") &&
-         instr.containsGroup("physical_monitors"))) {
-      result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
+    if (entry.containsGroup("instrument")) {
+      auto instr = entry.openNXInstrument("instrument");
+      if (instr.containsGroup("detector") ||
+          (instr.containsGroup("physical_detectors") &&
+           instr.containsGroup("physical_monitors"))) {
+        result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
+      }
+      instr.close();
     }
     entry.close();
   }
@@ -221,10 +235,8 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 
 void LoadNexusProcessed::extractMappingInfoNew(NXEntry &mtd_entry) {
 
-  NXInstrument inst =
-      mtd_entry.openNXInstrument("instrument"); // TODO called be called
-                                                // something else though not at
-                                                // present!
+  auto result = findEntriesOfType(mtd_entry, "NXinstrument");
+  auto inst = mtd_entry.openNXInstrument(result[0].nxname);
 
   auto &spectrumNumbers = m_spectrumNumbers;
   auto &detectorIds = m_detectorIds;

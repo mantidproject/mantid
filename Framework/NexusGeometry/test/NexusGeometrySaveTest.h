@@ -287,8 +287,10 @@ used.
     // test utility to check the output file.
     NexusFileReader testUtility(destinationFile);
 
+    const auto &compInfo = *instr.first;
+
     // full H5 path to the NXinstrument group
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME};
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, compInfo.name(compInfo.root())};
 
     // assert no exception thrown on open of instrument group in file with
     // manually set name.
@@ -299,8 +301,8 @@ used.
 
     // assert the dataset containing the instrument name has been correctly
     // stored also.
-    TS_ASSERT(
-        testUtility.dataSetHasStrValue(NAME, STANDARD_INSTRUMENT_NAME, path));
+    TS_ASSERT(testUtility.dataSetHasStrValue(
+        NAME, compInfo.name(compInfo.root()), path));
   }
 
   void
@@ -426,9 +428,10 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
-                       STANDARD_INSTRUMENT_NAME /*instrument name*/,
-                       "detector-stage" /*bank name*/, TRANSFORMATIONS};
+    FullNXPath path = {
+        DEFAULT_ROOT_ENTRY_NAME,
+        "test-instrument-with-detector-rotations" /*instrument name*/,
+        "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
     double angleInFile = tester.readDoubleFromDataset(ORIENTATION, path);
@@ -486,7 +489,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME,
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -544,7 +547,7 @@ Instrument cache.
 
     // full path to group to be opened in test utility
     FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
-                       STANDARD_INSTRUMENT_NAME /*instrument name*/,
+                       "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // get magnitude of vector in dataset
@@ -601,7 +604,7 @@ Instrument cache.
 
     // full path to group to be opened in test utility
     FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
-                       STANDARD_INSTRUMENT_NAME /*instrument name*/,
+                       "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -660,7 +663,7 @@ Instrument cache.
 
     // full path to group to be opened in test utility
     FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
-                       STANDARD_INSTRUMENT_NAME /*instrument name*/,
+                       "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // assertations
@@ -696,9 +699,10 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to access NXtransformations group with test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
-                       STANDARD_INSTRUMENT_NAME /*instrument name*/,
-                       "detector-stage" /*bank name*/, TRANSFORMATIONS};
+    FullNXPath path = {
+        DEFAULT_ROOT_ENTRY_NAME,
+        "test-instrument-with-detector-rotations" /*instrument name*/,
+        "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -735,7 +739,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME,
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
@@ -777,8 +781,8 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME,
-                       "source", TRANSFORMATIONS};
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument", "source",
+                       TRANSFORMATIONS};
 
     // call saveinstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -831,9 +835,10 @@ Instrument cache.
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
-                       STANDARD_INSTRUMENT_NAME /*instrument name*/,
-                       "detector-stage" /*bank name*/};
+    FullNXPath path = {
+        DEFAULT_ROOT_ENTRY_NAME,
+        "test-instrument-with-detector-rotations" /*instrument name*/,
+        "detector-stage" /*bank name*/};
 
     // initalise to zero for case when an offset is not written to file,
     // thus its values are zero
@@ -904,7 +909,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     FullNXPath sourcePath = transformationsPath;
@@ -970,7 +975,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     FullNXPath sourcePath = transformationsPath;
@@ -1039,7 +1044,7 @@ Instrument cache.
 
     // path to NXtransformations subgoup in NXsource
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
@@ -1111,7 +1116,7 @@ Instrument cache.
 
     // path to NXtransformations subgoup in NXsource
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_ENTRY_NAME, STANDARD_INSTRUMENT_NAME /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
