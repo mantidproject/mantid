@@ -90,6 +90,7 @@ set(SRC_FILES
     src/LoadNexusMonitors.cpp
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
+    src/LoadNexusProcessed2.cpp
     src/LoadOff.cpp
     src/LoadPDFgetNFile.cpp
     src/LoadPLN.cpp
@@ -291,6 +292,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNexusMonitors.h
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
+    inc/MantidDataHandling/LoadNexusProcessed2.h
     inc/MantidDataHandling/LoadOff.h
     inc/MantidDataHandling/LoadPDFgetNFile.h
     inc/MantidDataHandling/LoadPLN.h
@@ -479,6 +481,7 @@ set(TEST_FILES
     LoadNXcanSASTest.h
     LoadNexusLogsTest.h
     LoadNexusMonitorsTest.h
+    LoadNexusProcessed2Test.h
     LoadNexusProcessedTest.h
     LoadNexusTest.h
     LoadPDFgetNFileTest.h

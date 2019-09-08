@@ -11,7 +11,7 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/LoadNexusProcessed2.h"
 #include "MantidDataHandling/SaveNexusESS.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidGeometry/Instrument.h"
@@ -44,7 +44,7 @@ template <typename T> void do_execute(const std::string filename, T &ws) {
 
 namespace test_utility {
 Mantid::API::MatrixWorkspace_sptr reload(const std::string &filename) {
-  LoadNexusProcessed loader;
+  LoadNexusProcessed2 loader;
   loader.setChild(true);
   loader.setRethrows(true);
   loader.initialize();
