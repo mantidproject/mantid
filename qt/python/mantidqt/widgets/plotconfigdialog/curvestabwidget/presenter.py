@@ -19,6 +19,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
     CurveProperties, set_errorbars_hidden, curve_has_errors,
     remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class CurvesTabWidgetPresenter:
@@ -59,14 +60,13 @@ class CurvesTabWidgetPresenter:
         self.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
 
-        self.update_limits_and_legend(self.get_selected_ax())
+        self.update_limits(self.get_selected_ax())
 
     @staticmethod
-    def update_limits_and_legend(ax):
+    def update_limits(ax):
+        # This method used to update the legend but now the legend tab does that.
         ax.relim()
         ax.autoscale()
-        if ax.legend_:
-            ax.legend().draggable()
 
     @staticmethod
     def toggle_errors(curve, view_props):
@@ -177,7 +177,7 @@ class CurvesTabWidgetPresenter:
 
         ax = self.get_selected_ax()
         # Update the legend and redraw
-        self.update_limits_and_legend(ax)
+        self.update_limits(ax)
         ax.figure.canvas.draw()
 
         # Remove the curve from the curve selection combo box
