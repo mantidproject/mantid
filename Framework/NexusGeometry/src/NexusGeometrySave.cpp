@@ -34,6 +34,26 @@ namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
 
+inline H5::Group safeCreateGroup(const H5::Group &parentGroup,
+                                 const std::string &childGroupName) {
+  H5std_string parentGroupName = H5_OBJ_NAME(parentGroup);
+  H5std_string intendedPath = parentGroupName + "/" + childGroupName;
+  for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+    if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+      H5std_string child = parentGroup.getObjnameByIdx(i);
+      H5std_string currentPath = parentGroupName + "/" + child;
+      if (currentPath == intendedPath) {
+        // TODO: runtime error instead?
+        throw std::invalid_argument(
+            "Cannot create group with name " + childGroupName +
+            " inside parent group " + parentGroupName +
+            " because a group with this name already exists.");
+      }
+    }
+  }
+  return parentGroup.createGroup(childGroupName);
+}
+
 /*
  * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
@@ -161,7 +181,7 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
 // inside a parent group.
 inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
                                   const std::string &nexusAttribute) {
-  H5::Group subGroup = parent.createGroup(name);
+  H5::Group subGroup = safeCreateGroup(parent, name);
   writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
   return subGroup;
 }
@@ -169,8 +189,8 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
  * Function: writeXYZPixeloffset
  * write the x, y, and z offset of the pixels from the parent detector bank as
- * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or z
- * are approximately zero, skips writing that dataset to file.
+ * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or
+ * z are approximately zero, skips writing that dataset to file.
  * @param grp : HDF5 parent group
  * @param compInfo : Component Info Instrument cache
  * @param idx : index of bank in cache.
@@ -315,7 +335,8 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
  * dataset and metadata as attributes.
  *
  * @param grp : NXdetector group : (HDF group)
- * @param position : Eigen::Vector3d position of component in instrument cache.
+ * @param position : Eigen::Vector3d position of component in instrument
+ * cache.
  */
 inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
@@ -466,7 +487,7 @@ H5::Group NXInstrument(const H5::Group &parent,
   std::string nameInCache = compInfo.name(compInfo.root());
   std::string instrName =
       nameInCache.empty() ? "unspecified_instrument" : nameInCache;
-  H5::Group childGroup = parent.createGroup(instrName);
+  H5::Group childGroup = safeCreateGroup(parent, instrName);
 
   writeStrDataset(childGroup, NAME, instrName);
   writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
@@ -493,7 +514,7 @@ void saveNXSample(const H5::Group &parentGroup,
   std::string sampleName =
       nameInCache.empty() ? "unspecified_sample" : nameInCache;
 
-  H5::Group childGroup = parentGroup.createGroup(sampleName);
+  H5::Group childGroup = safeCreateGroup(parentGroup, sampleName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
   writeStrDataset(childGroup, NAME, sampleName);
 }
@@ -526,7 +547,7 @@ void saveNXSource(const H5::Group &parentGroup,
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = parentGroup.createGroup(sourceName);
+  H5::Group childGroup = safeCreateGroup(parentGroup, sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
   // do not write NXtransformations if there is no translation or rotation
@@ -594,7 +615,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = parentGroup.createGroup(monitorName);
+  H5::Group childGroup = safeCreateGroup(parentGroup, monitorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
   // do not write NXtransformations if there is no translation or rotation
@@ -602,8 +623,8 @@ void saveNXMonitor(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first NXmonitor dependency in the chain. first
-    // check translation in NXmonitor is non-zero, and set dependency to
+    // self, ".", is the default first NXmonitor dependency in the chain.
+    // first check translation in NXmonitor is non-zero, and set dependency to
     // location if true and write location. Then check if orientation in
     // NXmonitor is non-zero, replace dependency with orientation if true. If
     // neither orientation nor location are non-zero, NXmonitor is self
@@ -665,7 +686,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = parentGroup.createGroup(detectorName);
+  H5::Group childGroup = safeCreateGroup(parentGroup, detectorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
   // do not write NXtransformations if there is no translation or rotation
@@ -673,9 +694,9 @@ void saveNXDetector(const H5::Group &parentGroup,
     H5::Group transformations =
         simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
 
-    // self, ".", is the default first NXdetector dependency in the chain. first
-    // check translation in NXdetector is non-zero, and set dependency to
-    // location if true and write location. Then check if orientation in
+    // self, ".", is the default first NXdetector dependency in the chain.
+    // first check translation in NXdetector is non-zero, and set dependency
+    // to location if true and write location. Then check if orientation in
     // NXdetector is non-zero, replace dependency with orientation if true. If
     // neither orientation nor location are non-zero, NXdetector is self
     // dependent.
@@ -706,8 +727,9 @@ void saveNXDetector(const H5::Group &parentGroup,
 
 /*
  * Function: saveInstrument
- * calls the save methods to write components to file after exception checking.
- * Produces a Nexus format file containing the Instrument geometry and metadata.
+ * calls the save methods to write components to file after exception
+ * checking. Produces a Nexus format file containing the Instrument geometry
+ * and metadata.
  *
  * @param compInfo : componentInfo object.
  * @param detInfo : detectorInfo object.
@@ -824,8 +846,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
 /*
  * Function: saveInstrument (overload)
- * calls the save methods to write components to file after exception checking.
- * Produces a Nexus format file containing the Instrument geometry and metadata.
+ * calls the save methods to write components to file after exception
+ * checking. Produces a Nexus format file containing the Instrument geometry
+ * and metadata.
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.

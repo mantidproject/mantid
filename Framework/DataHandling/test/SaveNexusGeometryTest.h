@@ -164,7 +164,7 @@ public:
 
   void test_eight_pack() {
 
-    ScopedFileHandle fileResource("output.hdf5");
+    ScopedFileHandle fileResource("eight_pack.hdf5");
     auto destinationFile = fileResource.fullPath();
 
     // Bilby contains eight-packs, though other instrument features could still
@@ -185,6 +185,32 @@ public:
     saver.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS_NOTHING(saver.execute());
     TS_ASSERT(saver.isExecuted());
+  }
+
+  void test_duplicate_named_components_in_instrument_throws() {
+
+    ScopedFileHandle fileResource("duplicate_names_test.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
+    Mantid::DataHandling::LoadEmptyInstrument loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Filename", "HET_Definition_old.xml");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.execute();
+    Mantid::API::MatrixWorkspace_sptr ws =
+        loader.getProperty("OutputWorkspace");
+    const auto &compInfo = ws->componentInfo();
+    const auto &detInfo = ws->detectorInfo();
+
+    SaveNexusGeometry saver;
+    saver.setChild(true);
+    saver.setRethrows(true);
+    saver.initialize();
+    saver.setProperty("Filename", destinationFile);
+    saver.setProperty("InputWorkspace", ws);
+    TS_ASSERT_THROWS(saver.execute(), std::invalid_argument &);
+    TS_ASSERT(!saver.isExecuted());
   }
 };
 

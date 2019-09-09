@@ -10,12 +10,24 @@ from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import os
 import glob
-import systemtesting
 
 EXPECTED_EXT = '.expected'
 
+# files blacklisted due to containing duplicate named components in instrument.
+file_blacklist = [("HET_Definition_old.xml","duplicate monitor names"), ("MAPS_Definition.xml","duplicate bank names"),
+                  ("MAPS_Definition_2017_06_02.xml", "duplicate bank names"),("MARI_Definition.xml", "duplicate monitor names"),
+                  ("MARI_Definition_19900101_20160911.xml", "duplicate monitor names"), ("MERLIN_Definition.xml", "duplicate monitor names"),
+                  ("MERLIN_Definition_2017_02.xml", "duplicate monitor names"), ("MERLIN_Definition_2018_03.xml", "duplicate monitor names"),
+                  ("MERLIN_Definition_after2013_4.xml", "duplicate monitor names"),("NIM_Definition.xml", "duplicate monitor names"),
+                  ("POLARIS_Definition_115.xml", "duplicate monitor names"),("POLARIS_Definition_121.xml", "duplicate monitor names"),
+                  ("SANDALS_Definition.xml", "duplicate monitor names")]
 
-class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
+print("FOLLOWING FILES ARE BLACKLISTED")
+for entry in file_blacklist:
+    print(entry[0])
+    print("^reason:",entry[1])
+
+class LoadAndSaveLotsOfInstruments(object):
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
@@ -27,14 +39,16 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         # Files and their corresponding sizes. the low-memory win machines
         # fair better loading the big files first
         files = []
-
-	# This will not work at present, because isSaveableBank does not properly handle eightpacks!
-        for filename in myFiles:
+        valid_files = list(set(myFiles) - set([entry[0] for entry in file_blacklist]))
+        valid_files.sort()
+        
+        for filename in valid_files:
             files.append(os.path.join(direc, filename))
+        
         files.sort()
-        return files
+        return valid_files
 
-    def __removeFiles__(files):
+    def __removeFiles__(self, files):
         for ws in files:
             try:
                 path = os.path.join(os.path.expanduser("~"), ws)
@@ -49,28 +63,33 @@ class LoadLotsOfInstruments(systemtesting.MantidSystemTest):
         wksp = LoadEmptyInstrument(filename)
         save_file_name = "system_test_save.nxs"
         save_path = os.path.join(os.path.expanduser("~"), save_file_name)
-        print("saving '%s'" % filename)
-        SaveNexusGeometry(wksp, save_path)
-        if wksp is None:
-            return False
+        comp_info = wksp.componentInfo()
+        if not (comp_info.hasSource()):
+            print("Instrument definition has no source. Skipping test.")
+        elif not all([i == 0 for i in comp_info.position(comp_info.sample())]):
+            print("Sample in instrument definition not at origin. Skipping test.")
+        else:
+            print("saving '%s'" % filename)
+            SaveNexusGeometry(wksp, save_path)
+            if wksp is None:
+                return False
 
-        # TODO standard tests
-        if wksp.getNumberHistograms() <= 0:
-            del wksp
-            return False
-        if wksp.getMemorySize() <= 0:
-            print("Workspace takes no memory: Memory used=" + str(wksp.getMemorySize()))
-            del wksp
-            return False
-        if not os.path.isfile(save_path):
-            print("file '%s' was not saved" % filename)
-            del wksp
-            return False
-
+            # TODO standard tests
+            if wksp.getNumberHistograms() <= 0:
+                del wksp
+                return False
+            if wksp.getMemorySize() <= 0:
+                print("Workspace takes no memory: Memory used=" + str(wksp.getMemorySize()))
+                del wksp
+                return False
+            if not os.path.isfile(save_path):
+                print("file '%s' was not saved" % filename)
+                del wksp
+                return False
         # cleanup
         del wksp
         self.__removeFiles__([save_file_name])
-	return True
+        return True
 
     def runTest(self):
         """Main entry point for the test suite"""
