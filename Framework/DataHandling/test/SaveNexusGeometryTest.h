@@ -167,8 +167,6 @@ public:
     ScopedFileHandle fileResource("eight_pack.hdf5");
     auto destinationFile = fileResource.fullPath();
 
-    // Bilby contains eight-packs, though other instrument features could still
-    // be problematic
     Mantid::DataHandling::LoadEmptyInstrument alg;
     alg.setChild(true);
     alg.initialize();
@@ -189,6 +187,13 @@ public:
 
   void test_duplicate_named_components_in_instrument_throws() {
 
+    /*
+    instrument Definition HET_Definition_old.xml contains at least two monitors
+    both named "monitor". Expected behaviour is that nexus geometry save will
+    not allow naming of two groups with the same name in the same parent; Throws
+    exception.
+    */
+
     ScopedFileHandle fileResource("duplicate_names_test.hdf5");
     auto destinationFile = fileResource.fullPath();
 
@@ -200,8 +205,6 @@ public:
     loader.execute();
     Mantid::API::MatrixWorkspace_sptr ws =
         loader.getProperty("OutputWorkspace");
-    const auto &compInfo = ws->componentInfo();
-    const auto &detInfo = ws->detectorInfo();
 
     SaveNexusGeometry saver;
     saver.setChild(true);

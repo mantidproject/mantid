@@ -66,7 +66,7 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
     if (parentType != Beamline::ComponentType::Rectangular &&
         parentType != Beamline::ComponentType::Structured &&
         parentType != Beamline::ComponentType::Grid) {
-      // check if component is assembly, if so returns false
+      // check if component type mathces tube
       if (childType != Beamline::ComponentType::OutlineComposite) {
         return true;
       }

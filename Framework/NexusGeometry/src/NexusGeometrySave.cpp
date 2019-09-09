@@ -34,15 +34,22 @@ namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
 
-inline H5::Group safeCreateGroup(const H5::Group &parentGroup,
-                                 const std::string &childGroupName) {
+/*
+ * Function tryCreatGroup. will try to create a new child group with the given
+ * name inside the parent group. if a group with that name already exists in the
+ * parent group, throws std::invalid_argument.
+ *
+ * @param parentGroup : H5 parent group.
+ * @param childGroupName : intended name of the child goup.
+ * @return : new H5 Group object with name <childGroupName> if did not throw.
+ */
+inline H5::Group tryCreateGroup(const H5::Group &parentGroup,
+                                const std::string &childGroupName) {
   H5std_string parentGroupName = H5_OBJ_NAME(parentGroup);
-  H5std_string intendedPath = parentGroupName + "/" + childGroupName;
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
       H5std_string child = parentGroup.getObjnameByIdx(i);
-      H5std_string currentPath = parentGroupName + "/" + child;
-      if (currentPath == intendedPath) {
+      if (childGroupName == child) {
         // TODO: runtime error instead?
         throw std::invalid_argument(
             "Cannot create group with name " + childGroupName +
@@ -181,7 +188,7 @@ inline void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
 // inside a parent group.
 inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
                                   const std::string &nexusAttribute) {
-  H5::Group subGroup = safeCreateGroup(parent, name);
+  H5::Group subGroup = tryCreateGroup(parent, name);
   writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
   return subGroup;
 }
@@ -487,7 +494,7 @@ H5::Group NXInstrument(const H5::Group &parent,
   std::string nameInCache = compInfo.name(compInfo.root());
   std::string instrName =
       nameInCache.empty() ? "unspecified_instrument" : nameInCache;
-  H5::Group childGroup = safeCreateGroup(parent, instrName);
+  H5::Group childGroup = tryCreateGroup(parent, instrName);
 
   writeStrDataset(childGroup, NAME, instrName);
   writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
@@ -514,7 +521,7 @@ void saveNXSample(const H5::Group &parentGroup,
   std::string sampleName =
       nameInCache.empty() ? "unspecified_sample" : nameInCache;
 
-  H5::Group childGroup = safeCreateGroup(parentGroup, sampleName);
+  H5::Group childGroup = tryCreateGroup(parentGroup, sampleName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SAMPLE);
   writeStrDataset(childGroup, NAME, sampleName);
 }
@@ -547,7 +554,7 @@ void saveNXSource(const H5::Group &parentGroup,
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = safeCreateGroup(parentGroup, sourceName);
+  H5::Group childGroup = tryCreateGroup(parentGroup, sourceName);
   writeStrAttribute(childGroup, NX_CLASS, NX_SOURCE);
 
   // do not write NXtransformations if there is no translation or rotation
@@ -615,7 +622,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = safeCreateGroup(parentGroup, monitorName);
+  H5::Group childGroup = tryCreateGroup(parentGroup, monitorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
 
   // do not write NXtransformations if there is no translation or rotation
@@ -686,7 +693,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   bool locationIsOrigin = isApproxZero(position, PRECISION);
   bool orientationIsZero = isApproxZero(rotation, PRECISION);
 
-  H5::Group childGroup = safeCreateGroup(parentGroup, detectorName);
+  H5::Group childGroup = tryCreateGroup(parentGroup, detectorName);
   writeStrAttribute(childGroup, NX_CLASS, NX_DETECTOR);
 
   // do not write NXtransformations if there is no translation or rotation

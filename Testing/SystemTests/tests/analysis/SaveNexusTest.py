@@ -14,26 +14,34 @@ import glob
 EXPECTED_EXT = '.expected'
 
 # files blacklisted due to containing duplicate named components in instrument.
-file_blacklist = [("HET_Definition_old.xml","duplicate monitor names"),
-                  ("MAPS_Definition.xml","duplicate bank names"),
-                  ("MAPS_Definition_2017_06_02.xml", "duplicate bank names"),
-                  ("MARI_Definition.xml", "duplicate monitor names"),
-                  ("MARI_Definition_19900101_20160911.xml", "duplicate monitor names"),
-                  ("MERLIN_Definition.xml", "duplicate monitor names"),
-                  ("MERLIN_Definition_2017_02.xml", "duplicate monitor names"),
-                  ("MERLIN_Definition_2018_03.xml", "duplicate monitor names"),
-                  ("MERLIN_Definition_after2013_4.xml", "duplicate monitor names"),
-                  ("NIM_Definition.xml", "duplicate monitor names"),
-                  ("POLARIS_Definition_115.xml", "duplicate monitor names"),
-                  ("POLARIS_Definition_121.xml", "duplicate monitor names"),
-                  ("SANDALS_Definition.xml", "duplicate monitor names")]
+duplicate_bank_names = [
+    "MAPS_Definition.xml",
+    "MAPS_Definition_2017_06_02.xml"
+    ]
+duplicate_monitor_names = [
+    "HET_Definition_old.xml",
+    "MARI_Definition.xml",
+    "MARI_Definition_19900101_20160911.xml",
+    "MERLIN_Definition.xml",
+    "MERLIN_Definition_2017_02.xml",
+    "MERLIN_Definition_2018_03.xml",
+    "MERLIN_Definition_after2013_4.xml",
+    "NIM_Definition.xml",
+    "POLARIS_Definition_115.xml",
+    "POLARIS_Definition_121.xml",
+    "SANDALS_Definition.xml"
+    ]
+file_blacklist = duplicate_bank_names + duplicate_monitor_names
 
 print("FOLLOWING FILES ARE BLACKLISTED")
-for entry in file_blacklist:
+print("REASON -- Duplicate monitor names in instrument:")
+for entry in duplicate_monitor_names:
     print(entry[0])
-    print("^reason:",entry[1])
+print("REASON -- Duplicate bank names in instrument:")
+for entry in duplicate_bank_names:
+    print(entry[0])
 
-
+    
 class LoadAndSaveLotsOfInstruments(object):
     def __getDataFileList__(self):
         # get a list of directories to look in
@@ -46,7 +54,7 @@ class LoadAndSaveLotsOfInstruments(object):
         # Files and their corresponding sizes. the low-memory win machines
         # fair better loading the big files first
         files = []
-        valid_files = list(set(myFiles) - set([entry[0] for entry in file_blacklist]))
+        valid_files = list(set(myFiles) - set(file_blacklist))
         valid_files.sort()
         for filename in valid_files:
             files.append(os.path.join(direc, filename))
