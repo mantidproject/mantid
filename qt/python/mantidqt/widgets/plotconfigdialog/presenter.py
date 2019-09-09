@@ -33,9 +33,13 @@ class PlotConfigDialogPresenter:
             axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters[1] = axes_tab
             self.tab_widget_views[0] = (axes_tab.view, "Axes")
-        # Curves tab
+        # Curves and Legend tab
         if curve_in_figure(self.fig):
-            curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view)
+            legend_tab = LegendTabWidgetPresenter(self.fig, parent=self.view)
+            self.tab_widget_presenters[0] = legend_tab
+            self.tab_widget_views[3] = (legend_tab.view, "Legend")
+
+            curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view, legend_tab=legend_tab)
             self.tab_widget_presenters[2] = curves_tab
             self.tab_widget_views[1] = (curves_tab.view, "Curves")
         # Images tab
@@ -43,11 +47,6 @@ class PlotConfigDialogPresenter:
             images_tab = ImagesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters[3] = images_tab
             self.tab_widget_views[2] = (images_tab.view, "Images")
-        #Legend tab
-        if legend_in_figure(self.fig):
-            legend_tab = LegendTabWidgetPresenter(self.fig, parent=self.view)
-            self.tab_widget_presenters[0] = legend_tab
-            self.tab_widget_views[3] = (legend_tab.view, "Legend")
 
         self._add_tab_widget_views()
 

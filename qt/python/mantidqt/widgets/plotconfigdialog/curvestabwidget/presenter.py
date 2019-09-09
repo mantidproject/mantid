@@ -23,8 +23,9 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidg
 
 class CurvesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None):
+    def __init__(self, fig, view=None, parent=None, legend_tab=None):
         self.fig = fig
+        self.legend_tab = legend_tab
         if not view:
             self.view = CurvesTabWidgetView(parent)
         else:
@@ -198,6 +199,7 @@ class CurvesTabWidgetPresenter:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
                     self.close_tab()
+                    self.legend_tab.close_tab()
                     return True
 
     def set_new_curve_name_in_dict_and_combo_box(self, curve, new_label):
