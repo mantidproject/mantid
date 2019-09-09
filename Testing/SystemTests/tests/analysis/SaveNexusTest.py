@@ -14,18 +14,25 @@ import glob
 EXPECTED_EXT = '.expected'
 
 # files blacklisted due to containing duplicate named components in instrument.
-file_blacklist = [("HET_Definition_old.xml","duplicate monitor names"), ("MAPS_Definition.xml","duplicate bank names"),
-                  ("MAPS_Definition_2017_06_02.xml", "duplicate bank names"),("MARI_Definition.xml", "duplicate monitor names"),
-                  ("MARI_Definition_19900101_20160911.xml", "duplicate monitor names"), ("MERLIN_Definition.xml", "duplicate monitor names"),
-                  ("MERLIN_Definition_2017_02.xml", "duplicate monitor names"), ("MERLIN_Definition_2018_03.xml", "duplicate monitor names"),
-                  ("MERLIN_Definition_after2013_4.xml", "duplicate monitor names"),("NIM_Definition.xml", "duplicate monitor names"),
-                  ("POLARIS_Definition_115.xml", "duplicate monitor names"),("POLARIS_Definition_121.xml", "duplicate monitor names"),
+file_blacklist = [("HET_Definition_old.xml","duplicate monitor names"),
+                  ("MAPS_Definition.xml","duplicate bank names"),
+                  ("MAPS_Definition_2017_06_02.xml", "duplicate bank names"),
+                  ("MARI_Definition.xml", "duplicate monitor names"),
+                  ("MARI_Definition_19900101_20160911.xml", "duplicate monitor names"),
+                  ("MERLIN_Definition.xml", "duplicate monitor names"),
+                  ("MERLIN_Definition_2017_02.xml", "duplicate monitor names"),
+                  ("MERLIN_Definition_2018_03.xml", "duplicate monitor names"),
+                  ("MERLIN_Definition_after2013_4.xml", "duplicate monitor names"),
+                  ("NIM_Definition.xml", "duplicate monitor names"),
+                  ("POLARIS_Definition_115.xml", "duplicate monitor names"),
+                  ("POLARIS_Definition_121.xml", "duplicate monitor names"),
                   ("SANDALS_Definition.xml", "duplicate monitor names")]
 
 print("FOLLOWING FILES ARE BLACKLISTED")
 for entry in file_blacklist:
     print(entry[0])
     print("^reason:",entry[1])
+
 
 class LoadAndSaveLotsOfInstruments(object):
     def __getDataFileList__(self):
@@ -41,12 +48,10 @@ class LoadAndSaveLotsOfInstruments(object):
         files = []
         valid_files = list(set(myFiles) - set([entry[0] for entry in file_blacklist]))
         valid_files.sort()
-        
         for filename in valid_files:
             files.append(os.path.join(direc, filename))
-        
         files.sort()
-        return valid_files
+        return files
 
     def __removeFiles__(self, files):
         for ws in files:
