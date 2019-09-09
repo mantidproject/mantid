@@ -59,8 +59,8 @@ class LegendProperties(dict):
         props['column_spacing'] = legend.columnspacing
         props['label_spacing'] = legend.labelspacing
 
-        position = legend._legend_handle_box.get_children()[0].align == "baseline"
-        if position == True:
+        position = legend._legend_handle_box.get_children()[0].align
+        if position == "baseline":
             props['marker_position'] = "Left of Entries"
         else:
             props['marker_position'] = "Right of Entries"
