@@ -17,10 +17,7 @@ import matplotlib.font_manager
 class LegendTabWidgetPresenter:
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
-
-        self.legends = []
-        for ax in fig.get_axes():
-            self.legends.append(ax.get_legend())
+        self.axes = fig.get_axes()
 
         if not view:
             self.view = LegendTabWidgetView(parent)
@@ -44,7 +41,7 @@ class LegendTabWidgetPresenter:
         self.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
     def init_view(self):
-        legend_props = LegendProperties.from_legend(self.legends[0])
+        legend_props = LegendProperties.from_legend(self.axes[0].get_legend())
         self.check_font_in_list(legend_props.entries_font)
         self.check_font_in_list(legend_props.title_font)
 
@@ -82,38 +79,12 @@ class LegendTabWidgetPresenter:
     def apply_properties(self):
         props = self.view.get_properties()
         advanced_props = self.advanced_options.get_properties()
+        props.update(advanced_props)
 
-        for legend in self.legends:
-            legend = legend.axes.legend(ncol=advanced_props.columns,
-                                        prop={'size': props.entries_size},
-                                        numpoints=advanced_props.markers,
-                                        markerfirst=advanced_props.marker_position == "Left of Entries",
-                                        frameon=props.box_visible,
-                                        fancybox=advanced_props.round_edges,
-                                        shadow=advanced_props.shadow,
-                                        framealpha=props.transparency,
-                                        facecolor=props.background_color,
-                                        edgecolor=props.edge_color,
-                                        title=props.title,
-                                        borderpad=advanced_props.border_padding,
-                                        labelspacing=advanced_props.label_spacing,
-                                        handlelength=props.marker_size,
-                                        handletextpad=advanced_props.marker_label_padding,
-                                        columnspacing=advanced_props.column_spacing)
+        for ax in self.axes:
+            LegendProperties.create_legend(props, ax)
 
-            title = legend.get_title()
-            title.set_fontname(props.title_font)
-            title.set_fontsize(props.title_size)
-            title.set_color(props.title_color)
-
-            for text in legend.get_texts():
-                text.set_fontname(props.entries_font)
-                text.set_fontsize(props.entries_size)
-                text.set_color(props.entries_color)
-
-            legend.set_visible(props.visible)
-
-            legend.draggable(True)
+        self.current_view_properties = props
 
     def populate_font_combo_box(self):
         font_list = matplotlib.font_manager.findSystemFonts()
@@ -146,6 +117,8 @@ class LegendTabWidgetPresenter:
         self.view.edge_color_selector_widget.setEnabled(enable)
         self.view.transparency_slider.setEnabled(enable)
         self.view.transparency_spin_box.setEnabled(enable)
+        self.advanced_options.shadow_check_box.setEnabled(enable)
+        self.advanced_options.round_edges_check_box.setEnabled(enable)
 
     def check_font_in_list(self, font):
         if self.view.entries_font_combo_box.findText(font) == -1:

@@ -103,7 +103,7 @@ class FigureErrorsManager(object):
         curve_props.hide_errors = not curve_props.hide_errors if make_visible is None else not make_visible
 
         CurvesTabWidgetPresenter.toggle_errors(new_curve, curve_props)
-        CurvesTabWidgetPresenter.update_limits_and_legend(ax)
+        CurvesTabWidgetPresenter.update_limits(ax)
 
     def _update_plot_after(self, func, *args, **kwargs):
         """
