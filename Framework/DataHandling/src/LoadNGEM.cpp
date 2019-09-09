@@ -273,7 +273,10 @@ size_t LoadNGEM::verifyFileSize(FILE *&file) {
   // Check that the file fits into 16 byte sections.
   struct stat fileStatus;
   if (fstat(fileno(file), &fileStatus) != 0 || fileStatus.st_size % 16 != 0) {
-    g_log.warning() << "Invalid file size. Data may be corrupted.\n";
+    g_log.warning()
+        << "Invalid file size. File is size is " << fileStatus.st_size
+        << " bytes which is not a factor of 16. There may be some bytes "
+           "missing from the data. \n";
   }
   return fileStatus.st_size;
 }
