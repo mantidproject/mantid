@@ -31,13 +31,12 @@ New
 Improved
 ########
 
-- Grouping of groups has been avoided by adding individual workspaces from input group into the TOF group and removing the original group, ignoring any workspaces with x-axes that are not TOF.
-
 Bug fixes
 #########
 
 The following bugs have been fixed since the last release:
 
 - The pause button is now disabled upon opening the interface and becomes enabled when a process starts.
+- Ensure that the TOF group cannot contain non-TOF workspaces or nested groups (nested groups are not supported so are now flattened into a single group instead).
 
 :ref:`Release 4.2.0 <v4.2.0>`
