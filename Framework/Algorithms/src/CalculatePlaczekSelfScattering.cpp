@@ -24,18 +24,35 @@ void CalculatePlaczekSelfScattering::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
-      "");
+      "Workspace of fitted incident spectrum with it's first derivative. workspace must have instument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
-      "");
+      "Workspace with the Self scattering correction");
+}
+//----------------------------------------------------------------------------------------------
+/** Validate inputs.
+ */
+std::map<std::string, std::string>
+CalculatePlaczekSelfScattering::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  const Geometry::DetectorInfo det_info = inWS->detectorInfo();
+  if (det_info.size() == 0) {
+    issues["InputWorkspace"] = "Input workspace does not have detector information";
+  }
+  Kernel::Material::ChemicalFormula formula = inWS->sample().getMaterial().chemicalFormula();
+  if (formula.size() == 0) {
+    issues["InputWorkspace"] = "Input workspace does not have a valid sample";
+  }
+  return issues;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CalculatePlaczekSelfScattering::exec() {
-  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
   const double factor = 1.0 / 1.66053906660e-27;
   const double neutron_mass = factor * 1.674927471e-27;
@@ -50,15 +67,15 @@ void CalculatePlaczekSelfScattering::exec() {
                       neutron_mass / t->second["mass"];
   }
   // get incident spectrum and 1st derivative
-  MantidVec x_lambda = inWS->readX(0);
-  MantidVec incident = inWS->readY(0);
-  MantidVec incident_prime = inWS->readY(1);
+  const MantidVec x_lambda = inWS->readX(0);
+  const MantidVec incident = inWS->readY(0);
+  const MantidVec incident_prime = inWS->readY(1);
   std::vector<double> phi_1;
   for (int i = 0; i < x_lambda.size(); i++) {
     phi_1.push_back(x_lambda[i] * incident_prime[i] / incident[i]);
   }
   // set detector law term (eps_1)
-  double lambda_D = 1.44;
+  const double lambda_D = 1.44;
   std::vector<double> eps_1;
   for (int i = 0; i < x_lambda.size(); i++) {
     double x_term = -x_lambda[i] / lambda_D;
@@ -76,21 +93,21 @@ void CalculatePlaczekSelfScattering::exec() {
   */
   MantidVec x_lambdas;
   MantidVec placzek_correction;
-  Geometry::DetectorInfo det_info = inWS->detectorInfo();
+  const Geometry::DetectorInfo det_info = inWS->detectorInfo();
   int NSpec = 0;
   for (int det_index = 0; det_index < det_info.size(); det_index++) {
     if (det_info.isMonitor(det_index) != true) {
       NSpec += 1;
-      double path_length = det_info.l1() + det_info.l2(det_index);
-      double f = det_info.l1() / path_length;
-	  double angle_conv = M_PI / 180.0;
-      double sin_theta_by_2 =
+      const double path_length = det_info.l1() + det_info.l2(det_index);
+      const double f = det_info.l1() / path_length;
+	  const double angle_conv = M_PI / 180.0;
+      const double sin_theta_by_2 =
           sin(det_info.twoTheta(det_index) * angle_conv / 2.0);
       for (int x_index = 0; x_index < x_lambda.size(); x_index++) {
-        double term1 = (f + 1.0) * phi_1[x_index];
-        double term2 = f * eps_1[x_index];
-        double term3 = f - 3;
-        double inelastic_placzek_self_correction = 
+        const double term1 = (f + 1.0) * phi_1[x_index];
+        const double term2 = f * eps_1[x_index];
+        const double term3 = f - 3;
+        const double inelastic_placzek_self_correction = 
             2.0 * (term1 - term2 + term3) * sin_theta_by_2 * sin_theta_by_2 *
             summation_term;
         x_lambdas.push_back(x_lambda[x_index]);
@@ -111,19 +128,19 @@ void CalculatePlaczekSelfScattering::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-std::map<std::string, std::map<std::string, double>>
+const std::map<std::string, std::map<std::string, double>>
 CalculatePlaczekSelfScattering::get_sample_species_info(
     API::MatrixWorkspace_sptr ws) {
   // get sample information : mass, total scattering length, and concentration
   // of each species
   double total_stoich = 0.0;
   std::map<std::string, std::map<std::string, double>> atom_species;
-  const auto formula = ws->sample().getMaterial().chemicalFormula();
+  const Kernel::Material::ChemicalFormula formula = ws->sample().getMaterial().chemicalFormula();
   const double x_section = ws->sample().getMaterial().totalScatterXSection();
   const double b_sqrd_bar = x_section / (4.0 * M_PI);
 
   for (auto t = formula.begin(); t != formula.end(); t++) {
-    auto element = *t;
+    const Kernel::Material::FormulaUnit element = *t;
     std::map<std::string, double> atom_map;
     atom_map["mass"] = element.atom->mass;
     atom_map["stoich"] = element.multiplicity;

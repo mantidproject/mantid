@@ -30,7 +30,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
                'derivative.'
 
     def seeAlso(self):
-        return [""]
+        return []
 
     def version(self):
         return 1
