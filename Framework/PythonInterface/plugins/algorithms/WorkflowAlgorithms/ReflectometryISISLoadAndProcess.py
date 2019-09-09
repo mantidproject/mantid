@@ -241,13 +241,18 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Given a list of workspaces, which themselves could be groups of workspaces,
         return a new list of workspaces which are TOF"""
         ungrouped_workspaces = []
+        delete_ws_group_flag = True
         for ws_name in workspaces:
             ws = AnalysisDataService.retrieve(ws_name)
-            if (ws.getAxis(0).getUnit().caption()) == 'Time-of-flight':
-                ungrouped_workspaces.append(ws_name)
             if isinstance(ws, WorkspaceGroup):
                 ungrouped_workspaces += self._collapse_workspace_groups(ws.getNames())
-                AnalysisDataService.remove(ws_name)
+                if delete_ws_group_flag is True:
+                    AnalysisDataService.remove(ws_name)
+            else:
+                if (ws.getAxis(0).getUnit().unitID()) == 'TOF':
+                    ungrouped_workspaces.append(ws_name)
+                else:
+                    delete_ws_group_flag = False
         return ungrouped_workspaces
 
     def _group_workspaces(self, workspaces, output_ws_name):
