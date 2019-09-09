@@ -427,11 +427,11 @@
       <technique>Small Angle Scattering</technique>
    </instrument>
 
-   <instrument name="HIRESSANS">
+   <instrument name="BIOSANS"  shortname="CG3">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
-   <instrument name="BIOSANS">
+   <instrument name="HIRESSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
