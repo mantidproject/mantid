@@ -7,7 +7,7 @@
 
 #include "MantidDataHandling/LoadNGEM.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -17,6 +17,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/algorithm/string.hpp>
 #include <sys/stat.h>
 
 namespace Mantid {
@@ -62,8 +63,8 @@ void LoadNGEM::init() {
   // Filename property.
   const std::vector<std::string> extentions{".edb"};
   declareProperty(
-      std::make_unique<Mantid::API::FileProperty>(
-          "Filename", "", Mantid::API::FileProperty::Load, extentions),
+      std::make_unique<Mantid::API::MultipleFileProperty>("Filename",
+                                                          extentions),
       "The name of the nGEM file to load. Selecting multiple files will "
       "combine them into one workspace.");
   // Output workspace
@@ -101,27 +102,21 @@ void LoadNGEM::init() {
  */
 void LoadNGEM::exec() {
   progress(0);
-  const std::string filename = getPropertyValue("Filename");
+
+  std::string filename = getPropertyValue("Filename");
+  std::vector<std::string> filePaths;
+  filePaths = boost::split(filePaths, filename, boost::is_any_of(","));
+
   const int NUM_OF_SPECTRA = 16384;
   const int minEventsReq = stoi(getPropertyValue("MinEventsPerFrame"));
   const int maxEventsReq = stoi(getPropertyValue("MaxEventsPerFrame"));
 
-  // Create file reader
-  FILE *file = fopen(filename.c_str(), "rb");
-  if (file == NULL) {
-    g_log.error() << "Invalid input filename.\n";
-    throw std::runtime_error("File could not be found.");
-  }
-
-  size_t totalNumEvents = verifyFileSize(file) / 16;
-  size_t numProcessedEvents = 0;
-
-  EventUnion event, eventBigEndian;
-  size_t loadStatus;
-
   int maxToF = -1;
   int minToF = 2147483647;
   const double BIN_WIDTH(stod(getPropertyValue("BinWidth")));
+
+  EventUnion event, eventBigEndian;
+  size_t loadStatus;
 
   int rawFrames = 0;
   int goodFrames = 0;
@@ -133,65 +128,78 @@ void LoadNGEM::exec() {
   histogramsInFrame.resize(NUM_OF_SPECTRA);
   progress(0.04);
 
-  while (!feof(file)) {
-    // Load an event into the variable.
-    loadStatus = fread(&eventBigEndian, sizeof(eventBigEndian), 1, file);
-
-    // Check that the load was successful.
-    if (loadStatus == 0) {
-      g_log.information() << "File loading complete!\n";
-      break;
-    } else if (loadStatus != 1) {
-      g_log.error() << "Error while reading file.";
-      throw std::runtime_error("Error while reading file.");
+  for (std::string filePath : filePaths) {
+    // Create file reader
+    FILE *file = fopen(filePath.c_str(), "rb");
+    if (file == NULL) {
+      g_log.error() << "Invalid input filename.\n";
+      throw std::runtime_error("File could not be found.");
     }
 
-    // Correct for the big endian format.
-    correctForBigEndian(eventBigEndian, event);
+    size_t totalNumEvents = verifyFileSize(file) / 16;
+    size_t numProcessedEvents = 0;
 
-    if (event.coincidence.check()) { // Check for coincidence event.
-      ++eventCountInFrame;
-      uint64_t pixel = event.coincidence.getPixel();
-      int tof =
-          event.coincidence.timeOfFlight / 1000; // Convert to microseconds (us)
+    while (!feof(file)) {
+      // Load an event into the variable.
+      loadStatus = fread(&eventBigEndian, sizeof(eventBigEndian), 1, file);
 
-      if (tof > maxToF) {
-        maxToF = tof;
-      } else if (tof < minToF) {
-        minToF = tof;
+      // Check that the load was successful.
+      if (loadStatus == 0) {
+        g_log.information() << "File loading complete!\n";
+        break;
+      } else if (loadStatus != 1) {
+        g_log.error() << "Error while reading file.";
+        throw std::runtime_error("Error while reading file.");
       }
-      histogramsInFrame[pixel].addEventQuickly(
-          Mantid::Types::Event::TofEvent(tof));
 
-    } else if (event.tZero.check()) { // Check for T0 event.
-      ++rawFrames;
-      if (eventCountInFrame >= minEventsReq &&
-          eventCountInFrame <= maxEventsReq) {
-        // Add number of event counts to workspace.
-        frameEventCounts.emplace_back(eventCountInFrame);
-        ++goodFrames;
+      // Correct for the big endian format.
+      correctForBigEndian(eventBigEndian, event);
 
-        // Add histograms that match parameters to workspace
-        for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-          if (histogramsInFrame[i].getNumberEvents() > 0) {
-            histograms[i] += histogramsInFrame[i];
-            histogramsInFrame[i].clear();
+      if (event.coincidence.check()) { // Check for coincidence event.
+        ++eventCountInFrame;
+        uint64_t pixel = event.coincidence.getPixel();
+        int tof = event.coincidence.timeOfFlight /
+                  1000; // Convert to microseconds (us)
+
+        if (tof > maxToF) {
+          maxToF = tof;
+        } else if (tof < minToF) {
+          minToF = tof;
+        }
+        histogramsInFrame[pixel].addEventQuickly(
+            Mantid::Types::Event::TofEvent(tof));
+
+      } else if (event.tZero.check()) { // Check for T0 event.
+        ++rawFrames;
+        if (eventCountInFrame >= minEventsReq &&
+            eventCountInFrame <= maxEventsReq) {
+          // Add number of event counts to workspace.
+          frameEventCounts.emplace_back(eventCountInFrame);
+          ++goodFrames;
+
+          // Add histograms that match parameters to workspace
+          for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+            if (histogramsInFrame[i].getNumberEvents() > 0) {
+              histograms[i] += histogramsInFrame[i];
+              histogramsInFrame[i].clear();
+            }
           }
         }
+        // Progess Reporting
+        numProcessedEvents += eventCountInFrame;
+        progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111);
+        eventCountInFrame = 0;
+        // Check for cancel flag.
+        if (this->getCancel()) {
+          return;
+        }
+      } else { // Catch all other events and notify.
+        g_log.warning() << "Unexpected event type loaded.\n";
       }
-      // Progess Reporting
-      numProcessedEvents += eventCountInFrame;
-      progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111);
-      eventCountInFrame = 0;
-      // Check for cancel flag.
-      if (this->getCancel()) {
-        return;
-      }
-    } else { // Catch all other events and notify.
-      g_log.warning() << "Unexpected event type loaded.\n";
     }
+    fclose(file);
   }
-  // Add the final set of events.
+  // Add the final frame of events (as they are not followed by a T0 event)
   if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
     frameEventCounts.emplace_back(eventCountInFrame);
     ++goodFrames;
@@ -200,8 +208,6 @@ void LoadNGEM::exec() {
     }
   }
   ++rawFrames;
-
-  fclose(file);
   progress(0.90);
 
   // Create and fill main histogram data into an event workspace.

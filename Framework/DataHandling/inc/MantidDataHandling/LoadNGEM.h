@@ -94,7 +94,7 @@ public:
   /// Algorithm's category for identification.
   const std::string category() const override { return "DataHandling\\nGEM"; };
   /// Should the loader load multiple files into one workspace.
-  bool loadMutipleAsOne() override { return false; }
+  bool loadMutipleAsOne() override { return true; }
 
   /// The confidence that an algorithm is able to load the file.
   int confidence(Kernel::FileDescriptor &descriptor) const override;
