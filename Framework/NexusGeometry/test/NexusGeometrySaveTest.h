@@ -1157,65 +1157,6 @@ Instrument cache.
 
     TS_ASSERT_DELTA(radiusInFile, cylinderRadius, 1e-5);
     TS_ASSERT_DELTA(heightInFile, cylinderHeight, 1e-5);
-    // TS_ASSERT(base.isApprox(
-    //    Eigen::Vector3d{0, 0, 0}));
-  }
-
-  void test_inhomogeneous_cylindrical_instrument_vertices_written_to_file() {
-
-    /*
-     test scenario: A test instrument with cylindrical inhomogeneous pixel
-     shapes is passed into SaveInstrument to be saved. Written to file are the
-     four sets (or 12 rows) of coordinates of the vertices for four tubes which
-     describe the cylinder: the centre of the base along the cylinder axis, the
-     centre of the top face along the cylinder axis, and the edge of the
-     cylinder from the top face that is orthogonal to the axis. This test will
-     access the height and radius of the first two cylinders, and verify that
-     they are different."
-     */
-
-    /*
-    ScopedFileHandle fileResource("test_inhomogeneous_cylindrical.hdf5");
-    std::string destinationFile = fileResource.fullPath();
-
-    auto cylindricalInstrument = ComponentCreationHelper::
-        createCylInstrumentWithVerticalOffsetsSpecified(
-            2, std::vector<double>{1, 2, 3}, 2, 1, 2, 1, 2, true);
-    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
-        *cylindricalInstrument);
-
-    NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
-    FullNXPath path{DEFAULT_ROOT_PATH, "instrument_with_tubes", "sixteenpack",
-                    PIXEL_SHAPE};
-
-    NexusFileReader tester(destinationFile);
-    std::vector<double> buffer =
-        tester.readDataSetMultidimensional<double>(path, VERTICES);
-
-    Eigen::Vector3d base1{buffer[0], buffer[1], buffer[2]};
-    Eigen::Vector3d top1{buffer[3], buffer[4], buffer[5]};
-    Eigen::Vector3d edge1{buffer[6], buffer[7], buffer[8]};
-
-    Eigen::Vector3d base2{buffer[9], buffer[10], buffer[11]};
-    Eigen::Vector3d top2{buffer[12], buffer[13], buffer[14]};
-    Eigen::Vector3d edge2{buffer[15], buffer[16], buffer[17]};
-
-    Eigen::Vector3d radiusVector1 = (top1 - edge1);
-    Eigen::Vector3d heightVector1 = (base1 - top1);
-
-    Eigen::Vector3d radiusVector2 = (top2 - edge2);
-    Eigen::Vector3d heightVector2 = (base2 - top2);
-
-    double radiusInFile1 = radiusVector1.norm();
-    double heightInFile1 = heightVector1.norm();
-
-    double radiusInFile2 = radiusVector2.norm();
-    double heightInFile2 = heightVector2.norm();
-
-    // TS_ASSERT_DIFFERS(radiusInFile1, radiusInFile2);
-    // TS_ASSERT_DIFFERS(heightInFile1, heightInFile2);
-        */
   }
 };
 

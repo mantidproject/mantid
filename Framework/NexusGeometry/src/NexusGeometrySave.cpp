@@ -209,35 +209,56 @@ inline void writeCylinders(H5::Group &grp, size_t nCylinders,
 }
 
 /*
- * Function: writePixelData
- * write the x, y, and z offset of the pixels from the parent detector bank as
- * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or z
- * are approximately zero, skips writing that dataset to file. Also write the
- * pixel shape group to file, if there are valid* shapes.
- *
- * *current implementation is that only 'CYLINDER' type shape is considered
- * 'valid'.
- *
- * @param grp : HDF5 parent group
- * @param compInfo : Component Info Instrument cache
- * @param idx : index of bank in cache.
- */
-inline void writePixelData(H5::Group &grp,
-                           const Geometry::ComponentInfo &compInfo,
-                           const size_t idx) {
+TODO:
+*/
+inline void writeMeshObjShape(H5::Group &grp,
+                              const Geometry::ComponentInfo &compInfo,
+                              const size_t monitorIdx) {
 
-  H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset; // pixel offset datasets
+  std::vector<size_t> meshObjects;
+
+  auto &shapeObj = compInfo.shape(monitorIdx);
+  auto shapeInfo = shapeObj.shapeInfo();
+  if (!dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
+    return;
+
+  H5::Group shapeGroup = grp.createGroup(SHAPE);
+
+  // implement writing of mesh here
+}
+
+/*
+TODO:
+*/
+inline void writeMeshObj2DShape(H5::Group &grp,
+                                const Geometry::ComponentInfo &compInfo,
+                                const size_t monitorIdx) {
+
+  auto &shapeObj = compInfo.shape(monitorIdx);
+  auto shapeInfo = shapeObj.shapeInfo();
+
+  if (!dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
+    return;
+
+  H5::Group shapeGroup = grp.createGroup(SHAPE);
+
+  // implement writing of mesh here
+}
+
+/*
+TODO: DOC
+*/
+inline void writeCylinderShape(H5::Group &grp,
+                               const Geometry::ComponentInfo &compInfo,
+                               const size_t idx) {
+
   auto pixels =
       compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
-  const auto nPixels = pixels.size();   // number of pixels
-
   // If children detectors empty, there is no data to write to bank. exits here.
   if (pixels.empty())
     return;
 
   std::vector<size_t> cylinders;
-  std::vector<size_t> MeshObjects2D;
-  std::vector<size_t> meshObjects;
 
   // shape type of the first detector in children detectors
   auto &firstShape = compInfo.shape(pixels.front());
@@ -256,24 +277,13 @@ inline void writePixelData(H5::Group &grp,
     // if at least one cylinder is found, change flag to true.
     if (static_cast<int>(type) == 4 /*CYLINDER*/)
       cylinders.push_back(idx);
-    else if (dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
-      meshObjects.push_back(idx);
-    else if (dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
-      MeshObjects2D.push_back(idx);
   });
-
-  std::vector<double> posx;
-  std::vector<double> posy;
-  std::vector<double> posz;
-
-  posx.reserve(nPixels);
-  posy.reserve(nPixels);
-  posz.reserve(nPixels);
 
   // prevents undefined behaviour when passing empty container into std::all_of.
   // If empty, there is no data to write. No associated group will be created in
   // file.
   if (!cylinders.empty()) {
+    H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
     // check if cylinders are homogeneous
     bool cylindersAreHomogeneous = // TODO: check if needs refactor -  [&]
                                    // needed in lambda?
@@ -288,8 +298,6 @@ inline void writePixelData(H5::Group &grp,
     if (cylindersAreHomogeneous) {
 
       // create associated group
-      H5::Group pixelShapeGroup =
-          simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
 
       // write cylinder only once, using the first index
       auto geometry = firstShapeInfo.cylinderGeometry();
@@ -314,45 +322,76 @@ inline void writePixelData(H5::Group &grp,
                                    top[2],  edge[0], edge[1], edge[2]};
       writeCylinders(pixelShapeGroup, 1, vertices);
     } else {
-      // iterate and write each cylinder
+      std::vector<double> vertices;
+      for (std::vector<size_t>::iterator it = cylinders.begin();
+           it != cylinders.end(); ++it) {
+
+        auto shapeInfo = compInfo.shape(*it).shapeInfo();
+        auto geometry = shapeInfo.cylinderGeometry();
+        const Kernel::V3D &base = geometry.centreOfBottomBase;
+        const Kernel::V3D &axis = geometry.axis;
+        double &height = geometry.height;
+        double &radius = geometry.radius;
+
+        Eigen::Vector3d top =
+            Kernel::toVector3d(base) +
+            Eigen::Vector3d(height * Kernel::toVector3d(axis));
+        Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
+
+        // creat an arbitrary noncollinear vector
+        Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
+        // get vector that is othogonal to the cylinder axis
+        Eigen::Vector3d orthogonalV =
+            Kernel::toVector3d(axis).cross(nonCollinear);
+        Eigen::Vector3d edge =
+            top + Eigen::Vector3d(radius * orthogonalV.normalized());
+
+        vertices.push_back(base[0]);
+        vertices.push_back(base[1]);
+        vertices.push_back(base[3]);
+        vertices.push_back(top[0]);
+        vertices.push_back(top[1]);
+        vertices.push_back(top[2]);
+        vertices.push_back(edge[0]);
+        vertices.push_back(edge[1]);
+        vertices.push_back(edge[2]);
+      }
+      writeCylinders(pixelShapeGroup, cylinders.size(), vertices);
     }
   }
+}
 
-  // prevents undefined behaviour when passing empty container into std::all_of.
-  // If empty, there is no data to write. No associated group will be created in
-  // file.
-  if (!meshObjects.empty()) {
-    // check if mesh objects are homogeneous
-    bool meshObjectsAreHomogeneous = std::all_of(
-        meshObjects.begin(), meshObjects.end(), [&](const size_t &idx) {
-          // TODO: check meshobject parameters match the first
+/*
+ * Function: writePixelOffsets
+ * write the x, y, and z offset of the pixels from the parent detector bank as
+ * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or z
+ * are approximately zero, skips writing that dataset to file.
+ *
+ *
+ * @param grp : HDF5 parent group
+ * @param compInfo : Component Info Instrument cache
+ * @param idx : index of bank in cache.
+ */
+inline void writePixelOffsets(H5::Group &grp,
+                              const Geometry::ComponentInfo &compInfo,
+                              const size_t idx) {
 
-          return 0; // TODO: add return statement
-        });
-    if (meshObjectsAreHomogeneous) {
-      // write mesh object only once, using the first index
-    } else {
-      // iterate and write each mesh object
-    }
-  }
+  H5::DataSet xPixelOffset, yPixelOffset, zPixelOffset; // pixel offset datasets
+  auto pixels =
+      compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
+  const auto nPixels = pixels.size();   // number of pixels
 
-  // prevents undefined behaviour when passing empty container into std::all_of.
-  // If empty, there is no data to write. No associated group will be created in
-  // file.
-  if (!MeshObjects2D.empty()) {
-    // check if 2D mesh objects are homogeneous
-    bool meshObjs2dAreHomogeneous = std::all_of(
-        MeshObjects2D.begin(), MeshObjects2D.end(), [&](const size_t &idx) {
-          // TODO: check meshobject2d parameters match the first
+  // If children detectors empty, there is no data to write to bank. exits here.
+  if (pixels.empty())
+    return;
 
-          return 0; // TODO: add return statement
-        });
-    if (meshObjs2dAreHomogeneous) {
-      // write mesh object 2d only once, using the first index
-    } else {
-      // iterate and write each mesh object
-    }
-  }
+  std::vector<double> posx;
+  std::vector<double> posy;
+  std::vector<double> posz;
+
+  posx.reserve(nPixels);
+  posy.reserve(nPixels);
+  posz.reserve(nPixels);
 
   bool xIsZero{true}; // becomes false when atleast 1 non-zero x found
   bool yIsZero{true}; // becomes false when atleast 1 non-zero y found
@@ -798,6 +837,8 @@ void saveNXMonitor(const H5::Group &parentGroup,
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, monitorId);
+  writeMeshObjShape(childGroup, compInfo, index);
+  writeMeshObj2DShape(childGroup, compInfo, index);
 
   writeStrDataset(childGroup, BANK_NAME, monitorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
@@ -868,8 +909,9 @@ void saveNXDetector(const H5::Group &parentGroup,
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writePixelData(childGroup, compInfo, index);
+  writePixelOffsets(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
+  writeCylinderShape(childGroup, compInfo, index);
 
   writeStrDataset(childGroup, BANK_NAME, detectorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
