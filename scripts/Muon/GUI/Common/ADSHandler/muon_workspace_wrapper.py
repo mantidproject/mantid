@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import Workspace, AnalysisDataService, WorkspaceGroup
+from mantid.api import Workspace, AnalysisDataService
 from mantid.simpleapi import RenameWorkspace, GroupWorkspaces
 
 

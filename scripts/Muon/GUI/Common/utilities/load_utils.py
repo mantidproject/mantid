@@ -193,10 +193,6 @@ def load_dead_time_from_filename(filename):
     if dead_times is None:
         return ""
 
-    instrument = loaded_data["OutputWorkspace"][0].workspace.getInstrument().getName()
-    name = str(instrument) + file_utils.format_run_for_file(run) + "_deadTimes"
-    # api.AnalysisDataService.Instance().addOrReplace(name, dead_times)
-
     return dead_times
 
 

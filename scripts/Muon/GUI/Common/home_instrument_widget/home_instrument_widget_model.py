@@ -134,7 +134,6 @@ class InstrumentWidgetModel(object):
         dtc = api.AnalysisDataService.retrieve(str(name))
         self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 
-
     def validate_variable_rebin_string(self, variable_rebin_string):
         variable_rebin_list = variable_rebin_string.split(',')
         try:
