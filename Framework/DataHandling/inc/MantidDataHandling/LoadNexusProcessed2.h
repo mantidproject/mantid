@@ -10,6 +10,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include <string>
 
 namespace Mantid {
