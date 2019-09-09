@@ -39,7 +39,7 @@ class LegendProperties(dict):
         box = legend.get_frame()
         props['background_color'] = to_hex(box.get_facecolor())
         props['edge_color'] = to_hex(box.get_edgecolor())
-        props['transparency'] = 100 - (box.get_alpha()*100)
+        props['transparency'] = box.get_alpha()
 
         text = legend.get_texts()[0]
         props['entries_font'] = text.get_fontname()
