@@ -28,17 +28,19 @@ class PlotConfigDialogPresenter:
 
         self.tab_widget_presenters = [None, None, None, None]
         self.tab_widget_views = [None, None, None, None]
+        legend_tab = None
         # Axes tab
         if len(self.fig.get_axes()) > 0:
             axes_tab = AxesTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters[1] = axes_tab
             self.tab_widget_views[0] = (axes_tab.view, "Axes")
-        # Curves and Legend tab
-        if curve_in_figure(self.fig):
+        # Legend tab
+        if legend_in_figure(self.fig):
             legend_tab = LegendTabWidgetPresenter(self.fig, parent=self.view)
             self.tab_widget_presenters[0] = legend_tab
             self.tab_widget_views[3] = (legend_tab.view, "Legend")
-
+        # Curves tab
+        if curve_in_figure(self.fig):
             curves_tab = CurvesTabWidgetPresenter(self.fig, parent=self.view, legend_tab=legend_tab)
             self.tab_widget_presenters[2] = curves_tab
             self.tab_widget_views[1] = (curves_tab.view, "Curves")
