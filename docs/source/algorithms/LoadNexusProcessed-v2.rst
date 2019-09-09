@@ -80,6 +80,24 @@ Output:
 
    True
 
+.. testcode:: SaveNexusESSExample
+
+    from mantid.simpleapi import *
+    import os
+    import tempfile
+    simple_run = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=10)
+    destination = os.path.join(tempfile.gettempdir(), "sample_processed.nxs")
+    SaveNexusESS(Filename=destination, InputWorkspace=simple_run)
+    ws = LoadNexusProcessed(Filename=destination)
+    print("Workspace includes {} detectors".format(ws.detectorInfo().size(), 2 * 10 * 10))
+    os.remove(destination)
+
+Output:
+
+.. testoutput:: SaveNexusESSExample
+
+  Workspace includes 200 detectors
+
 .. categories::
 
 .. sourcelink::

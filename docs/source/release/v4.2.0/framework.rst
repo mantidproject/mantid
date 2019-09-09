@@ -18,6 +18,8 @@ Algorithms
 * :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>` will fit a curve to an incident spectrum returning the curve and it's first derivative.
 * Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load <algm-Load>`.
 * Added options to :ref:`SaveMD <algm-SaveMD>` to allow selection of what will be saved. For MDHistoWorkspace only.
+* New algorithm :ref:`SaveNexusESS <algm-SaveNexusESS>` to save data and nexus geometry to a single processed file.
+* Version upgrade :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` to allow loading of both existing Mantid format Processed Nexus files and those produced via :ref:`SaveNexusESS <algm-SaveNexusESS>`.
 
 Data Objects
 ------------
