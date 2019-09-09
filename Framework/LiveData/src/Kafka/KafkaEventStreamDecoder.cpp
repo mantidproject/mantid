@@ -13,20 +13,22 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 GNU_DIAG_OFF("conversion")
-#include "private/Schema/ba57_run_info_generated.h"
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
+#include "private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <chrono>
+#include <json/json.h>
 #include <numeric>
 #include <tbb/parallel_sort.h>
 
@@ -48,7 +50,7 @@ const std::string RUN_NUMBER_PROPERTY = "run_number";
 const std::string RUN_START_PROPERTY = "run_start";
 
 // File identifiers from flatbuffers schema
-const std::string RUN_MESSAGE_ID = "ba57";
+const std::string RUN_MESSAGE_ID = "y2gw";
 const std::string EVENT_MESSAGE_ID = "ev42";
 const std::string SAMPLE_MESSAGE_ID = "f142";
 
@@ -115,9 +117,10 @@ using Types::Event::TofEvent;
 KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
-    const std::string &sampleEnvTopic, const std::size_t bufferThreshold)
+    const std::string &sampleEnvTopic, const std::string &chopperTopic,
+    const std::size_t bufferThreshold)
     : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic),
+                          sampleEnvTopic, chopperTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "
@@ -166,9 +169,9 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
 
 API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
   std::lock_guard<std::mutex> workspaceLock(m_mutex);
-  g_log.notice() << "Events since last timeout "
-                 << totalNumEventsSinceStart - totalNumEventsBeforeLastTimeout
-                 << std::endl;
+  g_log.debug() << "Events since last timeout "
+                << totalNumEventsSinceStart - totalNumEventsBeforeLastTimeout
+                << std::endl;
   totalNumEventsBeforeLastTimeout = totalNumEventsSinceStart;
 
   if (m_localEvents.size() == 1) {
@@ -253,25 +256,27 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       continue;
     }
 
+    writeChopperTimestampsToWorkspaceLogs(m_localEvents);
+
     const auto end = std::chrono::system_clock::now();
     const std::chrono::duration<double> dur = end - start;
     if (dur.count() >= 60) {
-      g_log.notice() << "Message count " << nMessages << '\n';
+      g_log.debug() << "Message count " << nMessages << '\n';
       const auto rate = static_cast<double>(nMessages) / dur.count();
-      g_log.notice() << "Consuming " << rate << "Hz\n";
+      g_log.debug() << "Consuming " << rate << "Hz\n";
       nMessages = 0;
-      g_log.notice() << eventsPerMessage << " events per message\n";
+      g_log.debug() << eventsPerMessage << " events per message\n";
       const auto mpp = static_cast<double>(numMessagesForSinglePulse) /
                        static_cast<double>(pulseTimeCount);
-      g_log.notice() << mpp << " event messages per pulse\n";
-      g_log.notice() << "Achievable pulse rate is " << rate / mpp << "Hz\n";
-      g_log.notice() << "Average time taken to convert event messages "
-                     << totalEventFromMessageDuration / numEventFromMessageCalls
-                     << " seconds\n";
-      g_log.notice() << "Average time taken to populate workspace "
-                     << totalPopulateWorkspaceDuration /
-                            numPopulateWorkspaceCalls
-                     << " seconds\n";
+      g_log.debug() << mpp << " event messages per pulse\n";
+      g_log.debug() << "Achievable pulse rate is " << rate / mpp << "Hz\n";
+      g_log.debug() << "Average time taken to convert event messages "
+                    << totalEventFromMessageDuration / numEventFromMessageCalls
+                    << " seconds\n";
+      g_log.debug() << "Average time taken to populate workspace "
+                    << totalPopulateWorkspaceDuration /
+                           numPopulateWorkspaceCalls
+                    << " seconds\n";
       start = std::chrono::system_clock::now();
     }
 
@@ -335,9 +340,9 @@ void KafkaEventStreamDecoder::captureImplExcept() {
 
   const auto globend = std::chrono::system_clock::now();
   const std::chrono::duration<double> dur = globend - globstart;
-  g_log.notice() << "Consumed at a rate of "
-                 << static_cast<double>(totalMessages) / dur.count() << "Hz"
-                 << std::endl;
+  g_log.debug() << "Consumed at a rate of "
+                << static_cast<double>(totalMessages) / dur.count() << "Hz"
+                << std::endl;
   g_log.debug("Event capture finished");
   totalNumEventsBeforeLastTimeout = 0;
   totalNumEventsSinceStart = 0;
@@ -418,8 +423,8 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
     return;
   }
 
-  g_log.notice() << "Populating event workspace with "
-                 << m_receivedEventBuffer.size() << " events\n";
+  g_log.debug() << "Populating event workspace with "
+                << m_receivedEventBuffer.size() << " events\n";
 
   const auto startTime = std::chrono::system_clock::now();
 
@@ -463,7 +468,7 @@ void KafkaEventStreamDecoder::flushIntermediateBuffer() {
 
   const auto endTime = std::chrono::system_clock::now();
   const std::chrono::duration<double> dur = endTime - startTime;
-  g_log.notice() << "Time to populate EventWorkspace: " << dur.count() << '\n';
+  g_log.debug() << "Time to populate EventWorkspace: " << dur.count() << '\n';
 
   totalPopulateWorkspaceDuration += dur.count();
   numPopulateWorkspaceCalls += 1;
@@ -543,7 +548,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
     throw std::runtime_error(os.str());
   }
 
-  m_runNumber = runStartData.runNumber;
+  m_runId = runStartData.runId;
 
   // Create buffer
   auto eventBuffer = createBufferWorkspace<DataObjects::EventWorkspace>(
@@ -551,9 +556,11 @@ void KafkaEventStreamDecoder::initLocalCaches(
       spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
 
   // Load the instrument if possible but continue if we can't
+  auto jsonGeometry = runStartData.nexusStructure;
   auto instName = runStartData.instrumentName;
   if (!instName.empty())
-    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer);
+    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                jsonGeometry);
   else
     g_log.warning(
         "Empty instrument name received. Continuing without instrument");
@@ -566,8 +573,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
   auto timeString = m_runStart.toISO8601String();
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
-                         std::to_string(runStartData.runNumber));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));

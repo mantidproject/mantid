@@ -9,6 +9,7 @@
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "../MainWindow/MockMainWindowPresenter.h"
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MockBatchView.h"

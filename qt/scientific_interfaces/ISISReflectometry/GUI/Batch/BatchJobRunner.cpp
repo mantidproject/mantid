@@ -288,6 +288,12 @@ BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
     item->renameOutputWorkspace(oldName, newName);
     return boost::optional<Item const &>(item.get());
   }
+  auto newItem = m_batch.getItemWithOutputWorkspaceOrNone(newName);
+  if (newItem.is_initialized()) {
+    newItem->resetState();
+    return boost::optional<Item const &>(newItem.get());
+  }
+
   return boost::none;
 }
 

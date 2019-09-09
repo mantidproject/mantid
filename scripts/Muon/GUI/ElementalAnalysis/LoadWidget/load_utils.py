@@ -33,8 +33,10 @@ class LModel(object):
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
-        workspaces = {filename: get_filename(
-            filename, self.run) for filename in to_load if get_filename(filename, self.run) is not None}
+        workspaces = {
+            filename: get_filename(filename, self.run)
+            for filename in to_load if get_filename(filename, self.run) is not None
+        }
         self._load(workspaces)
         self.loaded_runs[self.run] = group_by_detector(self.run, workspaces.values())
         self.last_loaded_runs.append(self.run)

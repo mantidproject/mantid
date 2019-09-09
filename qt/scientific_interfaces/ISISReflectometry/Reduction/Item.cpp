@@ -14,6 +14,8 @@ Item::Item() : m_itemState(), m_skipped(false) {}
 
 State Item::state() const { return m_itemState.state(); }
 
+void Item::setState(State state) { m_itemState = ItemState(state); }
+
 std::string Item::message() const { return m_itemState.message(); }
 
 void Item::resetState(bool resetChildren) {

@@ -110,6 +110,10 @@ private:
 
   Ui::InstrumentWidget m_ui;
   InstrumentViewSubscriber *m_notifyee;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 } // namespace ISISReflectometry

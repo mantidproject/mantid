@@ -7,6 +7,8 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
+from matplotlib import cm
+
 from mantid.py3compat import Enum
 
 
@@ -31,3 +33,7 @@ def find_errorbar_container(line, containers):
     for container in containers:
         if line == container[0]:
             return container
+
+
+def get_colormap_names():
+    return sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])

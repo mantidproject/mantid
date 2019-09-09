@@ -704,6 +704,19 @@ public:
     TS_ASSERT_EQUALS(panel.topLeft, 3);
     TS_ASSERT_EQUALS(panel.topRight, 15);
   }
+
+  void test_has_detectors() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*1 bank*/, 4 /*4 by 4 pixels*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    TS_ASSERT(componentInfo->hasDetectors(componentInfo->root()));
+    TS_ASSERT(!componentInfo->hasDetectors(0));
+    TS_ASSERT(!componentInfo->hasDetectors(componentInfo->sample()));
+    TS_ASSERT(!componentInfo->hasDetectors(componentInfo->source()));
+    TS_ASSERT(componentInfo->hasDetectors(componentInfo->indexOfAny("bank1")));
+  }
 };
 
 #endif /* MANTID_GEOMETRY_COMPONENTINFOTEST_H_ */

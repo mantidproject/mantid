@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
-from testhelpers import *
+from testhelpers import WorkspaceCreationHelper
 from numpy import *
 
 

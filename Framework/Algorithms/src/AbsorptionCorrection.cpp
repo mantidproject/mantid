@@ -325,7 +325,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
     if (isEmpty(rho))
       rho = m_material.numberDensity();
     if (isEmpty(sigma_s))
-      sigma_s = m_material.totalScatterXSection(NeutronAtom::ReferenceLambda);
+      sigma_s = m_material.totalScatterXSection();
     if (isEmpty(sigma_atten))
       sigma_atten = m_material.absorbXSection(NeutronAtom::ReferenceLambda);
 

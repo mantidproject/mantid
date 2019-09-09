@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -37,14 +37,14 @@ class PeriodicListTest(unittest.TestCase):
     def test_that_fill_widget_uses_defaultTableItems_when_argument_is_none(self, mock_items):
         self.plist._fill_widget(None)
 
-        exp_num_calls = len(periodic_table._defaultTableItems)
+        exp_num_calls = len(periodic_table._default_table_items)
         self.assertEqual(mock_items.call_count, exp_num_calls)
         self.assertEqual(len(self.plist.tree_items), exp_num_calls)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table.QtWidgets.QTreeWidgetItem')
     def test_that_fill_widget_uses_custom_items_when_argument_is_not_none(self, mock_items):
         exp_num_calls = 3
-        self.plist._fill_widget(periodic_table._defaultTableItems[:exp_num_calls])
+        self.plist._fill_widget(periodic_table._default_table_items[:exp_num_calls])
 
         self.assertEqual(mock_items.call_count, exp_num_calls)
         self.assertEqual(len(self.plist.tree_items), exp_num_calls)
@@ -58,9 +58,9 @@ class PeriodicListTest(unittest.TestCase):
         self.plist._fill_widget(None)
 
         assert all([self.plist.tree_items[i].text(0) == str(el.Z)
-                    for i, el in enumerate(periodic_table._defaultTableItems)])
+                    for i, el in enumerate(periodic_table._default_table_items)])
         assert all([self.plist.tree_items[i].text(1) == el.symbol
-                    for i, el in enumerate(periodic_table._defaultTableItems)])
+                    for i, el in enumerate(periodic_table._default_table_items)])
 
     def test_that_selectionChanged_emits_correct_signal(self):
         self.plist.sigSelectionChanged = mock.Mock()
@@ -75,9 +75,9 @@ class PeriodicListTest(unittest.TestCase):
         ret = self.plist.getSelection()
 
         self.assertEqual(len(ret), 3)
-        self.assertEqual(ret, [periodic_table._defaultTableItems[0],
-                               periodic_table._defaultTableItems[1],
-                               periodic_table._defaultTableItems[2]])
+        self.assertEqual(ret, [periodic_table._default_table_items[0],
+                               periodic_table._default_table_items[1],
+                               periodic_table._default_table_items[2]])
 
     def test_that_setSelectedElements_throws_when_given_no_elements(self):
         with self.assertRaises(IndexError):

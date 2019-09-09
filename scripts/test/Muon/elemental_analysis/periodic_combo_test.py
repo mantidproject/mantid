@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -49,13 +49,13 @@ class PeriodicComboTest(unittest.TestCase):
         combo.sigSelectionChanged = mock.Mock()
         combo._selectionChanged(1)
 
-        combo.sigSelectionChanged.emit.assert_called_with(periodic_table._defaultTableItems[1])
+        combo.sigSelectionChanged.emit.assert_called_with(periodic_table._default_table_items[1])
 
     def test_that_selected_item_is_correct(self):
         combo = PeriodicCombo()
         combo.currentIndex = mock.Mock(return_value=1)
 
-        self.assertEqual(combo.getSelection(), periodic_table._defaultTableItems[1])
+        self.assertEqual(combo.getSelection(), periodic_table._default_table_items[1])
 
     def test_that_setSelection_sets_correct_selection_if_given_symbol(self):
         combo = PeriodicCombo()

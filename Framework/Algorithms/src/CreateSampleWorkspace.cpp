@@ -383,8 +383,10 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   // to find the events per bin
   double sum_of_elems = std::accumulate(yValues.begin(), yValues.end(), 0.0);
   double event_distrib_factor = numEvents / sum_of_elems;
-  std::transform(yValues.begin(), yValues.end(), yValues.begin(),
-                 std::bind1st(std::multiplies<double>(), event_distrib_factor));
+  using std::placeholders::_1;
+  std::transform(
+      yValues.begin(), yValues.end(), yValues.begin(),
+      std::bind(std::multiplies<double>(), event_distrib_factor, _1));
   // the array should now contain the number of events required per bin
 
   // Make fake events

@@ -43,9 +43,10 @@ public:
     auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
         1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
+    using std::placeholders::_1;
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),
-        std::bind2nd(std::multiplies<double>(), 1e-06)); // to seconds
+        std::bind(std::multiplies<double>(), _1, 1e-06)); // to seconds
     func->setMatrixWorkspace(testWS, 0, dataX.front(), dataX.back());
     FunctionDomain1DView domain(dataX.data(), dataX.size());
     FunctionValues values(domain);

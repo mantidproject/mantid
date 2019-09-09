@@ -118,8 +118,9 @@ void PointByPointVCorrection::exec() {
         (error2_factor1 / factor1 / factor1 + error2_factor2);
 
     // Calculate the normalized Y values
+    using std::placeholders::_1;
     // NOTE: Previously, we had been using std::transform with
-    // std::bind2nd(std::multiplies<double>(),factor)
+    // std::bind(std::multiplies<double>(), _1,factor)
     //       here, but that seemed to have strange effects in Windows Debug
     //       builds which caused the unit tests
     //       to sometimes fail.  Maybe this is some compiler bug to do with

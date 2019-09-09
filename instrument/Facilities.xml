@@ -595,6 +595,18 @@
       <technique>Small Wide Angle Scattering</technique>
    </instrument>
 
+   <instrument name="ZEEMANS" beamline="998">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+   </instrument>
+
+   <instrument name="CHESS" beamline="999">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+   </instrument>
+
 </facility>
 
 <facility name="NCNR" FileExtensions=".dat,.xml">
@@ -807,12 +819,16 @@
 </facility>
 
 <!--  Reactor Orphee (France) -->
-<facility name="LLB" FileExtensions=".nxs,.hdf">
+<facility name="LLB" FileExtensions=".nxs,.hdf,.xml">
   <timezone>Europe/Paris</timezone>
-
   <instrument name="MIBEMOL">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
+  </instrument>
+  <instrument name="5C1">
+    <technique>Neutron Diffraction</technique>
+    <technique>Powder Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
   </instrument>
 </facility>
 
@@ -872,7 +888,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Inelastic Neutron Scattering</technique>
   </instrument>
-  
+
 </facility>
 
 <!-- HZB -->
@@ -891,6 +907,13 @@
   </instrument>
   <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
+  </instrument>
+   <instrument name="V20_DENEX" shortname="V20_DENEX" >
+    <zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+    <livedata default="event">
+      <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
 </facility>
 

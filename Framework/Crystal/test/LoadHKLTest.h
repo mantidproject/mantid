@@ -111,11 +111,9 @@ public:
     TS_ASSERT_DELTA(p.getDSpacing(), 3.5933, 1e-4);
     double radius;
     const auto sampleMaterial = wsout->sample().getMaterial();
-    if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-        0.0) {
+    if (sampleMaterial.totalScatterXSection() != 0.0) {
       double rho = sampleMaterial.numberDensity();
-      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-            rho;
+      smu = sampleMaterial.totalScatterXSection() * rho;
       amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     } else {
       throw std::invalid_argument(

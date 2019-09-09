@@ -101,7 +101,7 @@ std::vector<Group> &ReductionJobs::mutableGroups() { return m_groups; }
 std::vector<Group> const &ReductionJobs::groups() const { return m_groups; }
 
 std::string ReductionJobs::nextEmptyGroupName() {
-  std::string name = "Group" + std::to_string(m_groupNameSuffix);
+  std::string name = "HiddenGroupName" + std::to_string(m_groupNameSuffix);
   m_groupNameSuffix++;
   return name;
 }

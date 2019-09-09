@@ -189,6 +189,60 @@ public:
       Poco::File(this_filename).remove();
   }
 
+  void test_saveOptions() {
+    std::string filename("OptionsSaveMD2Test.nxs");
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
+
+    Mantid::Geometry::Goniometer gon;
+    gon.pushAxis("Psi", 0, 1, 0);
+    // add experiment infos
+    for (int i = 0; i < 80; i++) {
+      ExperimentInfo_sptr ei = boost::make_shared<ExperimentInfo>();
+      ei->mutableRun().addProperty("Psi", double(i));
+      ei->mutableRun().addProperty("Ei", 400.);
+      ei->mutableRun().setGoniometer(gon, true);
+      ws->addExperimentInfo(ei);
+    }
+
+    AnalysisDataService::Instance().addOrReplace("SaveMD2Test_ws", ws);
+
+    // Save everything
+    SaveMD2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "SaveMD2Test_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename));
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    std::string this_filename = alg.getProperty("Filename");
+    long unsigned int fileSize = Poco::File(this_filename).getSize();
+    if (Poco::File(this_filename).exists())
+      Poco::File(this_filename).remove();
+
+    // Only save data
+    SaveMD2 alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("InputWorkspace", "SaveMD2Test_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("SaveHistory", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("SaveInstrument", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("SaveSample", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("SaveLogs", "0"));
+    alg2.execute();
+    TS_ASSERT(alg2.isExecuted());
+    std::string this_filename2 = alg2.getProperty("Filename");
+    long unsigned int fileSize2 = Poco::File(this_filename2).getSize();
+    if (Poco::File(this_filename2).exists())
+      Poco::File(this_filename2).remove();
+
+    // The second file should be small since less is saved
+    TS_ASSERT_LESS_THAN(fileSize2, fileSize);
+  }
+
   void test_saveAffine() {
     std::string filename("MDAffineSaveMD2Test.nxs");
     // Make a 4D MDEventWorkspace

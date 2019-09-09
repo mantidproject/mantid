@@ -18,21 +18,6 @@ using Kernel::V3D;
 
 namespace Algorithms {
 
-namespace {
-
-/**
- * Compute the attenuation factor for the given coefficients
- * @param rho Number density of the sample in \f$\\A^{-3}\f$
- * @param sigma Cross-section in barns
- * @param length Path length in metres
- * @return The dimensionless attenuated fraction
- */
-double attenuation(double rho, double sigma, double length) {
-  using std::exp;
-  return exp(-100 * rho * sigma * length);
-}
-} // namespace
-
 /**
  * Construct the volume encompassing the sample + any environment kit. The
  * beam profile defines a bounding region for the sampling of the scattering
@@ -119,11 +104,7 @@ double MCInteractionVolume::calculateAbsorption(
     for (const auto &segment : path) {
       const double length = segment.distInsideObject;
       const auto &segObj = *(segment.object);
-      const auto &segMat = segObj.material();
-      factor *= attenuation(segMat.numberDensity(),
-                            segMat.totalScatterXSection(lambda) +
-                                segMat.absorbXSection(lambda),
-                            length);
+      factor *= segObj.material().attenuation(length, lambda);
     }
     return factor;
   };

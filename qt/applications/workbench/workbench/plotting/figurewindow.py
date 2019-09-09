@@ -83,13 +83,20 @@ class FigureWindow(QMainWindow, ObservingView):
         :param event: A QDropEvent containing the MIME
                       data of the action
         """
+        from matplotlib.backend_bases import LocationEvent
         workspace_names = event.mimeData().text().split('\n')
-        self._plot_on_here(workspace_names)
+
+        # This creates a matplotlib LocationEvent so that the axis in which the drop event occurred can be calculated
+        x, y = self._canvas.mouseEventCoords(event.pos())
+        location_event = LocationEvent('AxesGetterEvent', self._canvas, x, y)
+        ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
+
+        self._plot_on_here(workspace_names, ax)
         QMainWindow.dropEvent(self, event)
 
     # private api
 
-    def _plot_on_here(self, names):
+    def _plot_on_here(self, names, ax):
         """
         Assume the list of strings refer to workspace names and they are to be plotted
         on this figure. If the current figure contains an image plot then
@@ -97,6 +104,7 @@ class FigureWindow(QMainWindow, ObservingView):
         contains a line plot then the user will be asked what should be plotted and this
         will overplot onto the figure. If the first line of the plot
         :param names: A list of workspace names
+        :param ax: The matplotlib axes object to overplot onto
         """
         if len(names) == 0:
             return
@@ -104,9 +112,9 @@ class FigureWindow(QMainWindow, ObservingView):
         from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
 
         fig = self._canvas.figure
-        fig_type = figure_type(fig)
+        fig_type = figure_type(fig, ax)
         if fig_type == FigureType.Image:
-            pcolormesh_from_names(names, fig=fig)
+            pcolormesh_from_names(names, fig=fig, ax=ax)
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
-                            overplot=True, fig=fig)
+                            overplot=ax, fig=fig)

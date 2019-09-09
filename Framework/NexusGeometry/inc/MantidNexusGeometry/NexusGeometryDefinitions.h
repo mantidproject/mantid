@@ -21,6 +21,7 @@ const H5std_string NX_CLASS = "NX_class";
 const H5std_string NX_SAMPLE = "NXsample";
 const H5std_string NX_DETECTOR = "NXdetector";
 const H5std_string NX_MONITOR = "NXmonitor";
+const H5std_string NX_DISK_CHOPPER = "NXdisk_chopper";
 const H5std_string NX_ENTRY = "NXentry";
 const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 const H5std_string NX_OFF = "NXoff_geometry";
@@ -64,6 +65,9 @@ const double PI = M_PI;
 
 const H5std_string DEFAULT_ROOT_PATH = "raw_data_1";
 const H5::DataSpace SCALAR(H5S_SCALAR);
+
+// JSON PARSER SPECIFICS
+const std::string NEXUS_STRUCTURE = "nexus_structure";
 
 } // namespace NexusGeometry
 } // namespace Mantid

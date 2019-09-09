@@ -817,8 +817,9 @@ void SaveISISNexus::runlog() {
   fil.close();
 
   run_status_vec.resize(time_vec.size());
+  using std::placeholders::_1;
   std::transform(is_running_vec.begin(), is_running_vec.end(),
-                 run_status_vec.begin(), std::bind2nd(std::plus<int>(), 1));
+                 run_status_vec.begin(), std::bind(std::plus<int>(), _1, 1));
 
   NXmakegroup(handle, "runlog", "IXrunlog");
   NXopengroup(handle, "runlog", "IXrunlog");

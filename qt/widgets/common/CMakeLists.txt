@@ -42,6 +42,7 @@ set(QT5_SRC_FILES
     src/LogValueSelector.cpp
     src/ManageUserDirectories.cpp
     src/MantidDesktopServices.cpp
+    src/MantidDialog.cpp
     src/MantidHelpInterface.cpp
     src/MantidHelpWindow.cpp
     src/MantidTreeModel.cpp
@@ -65,6 +66,7 @@ set(QT5_SRC_FILES
     src/PropertyWidgetFactory.cpp
     src/PythonRunner.cpp
     src/QtSignalChannel.cpp
+    src/QtJSONUtils.cpp
     src/RenameParDialog.cpp
     src/ScriptEditor.cpp
     src/SequentialFitDialog.cpp
@@ -160,6 +162,7 @@ set(
   inc/MantidQtWidgets/Common/LocalParameterItemDelegate.h
   inc/MantidQtWidgets/Common/LogValueSelector.h
   inc/MantidQtWidgets/Common/ManageUserDirectories.h
+  inc/MantidQtWidgets/Common/MantidDialog.h
   inc/MantidQtWidgets/Common/MantidHelpInterface.h
   inc/MantidQtWidgets/Common/MantidHelpWindow.h
   inc/MantidQtWidgets/Common/MantidTreeModel.h
@@ -218,6 +221,8 @@ set(
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES
     ${QT5_MOC_FILES}
+    inc/MantidQtWidgets/Common/BaseEncoder.h
+    inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
     inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
@@ -240,6 +245,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
+    inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
@@ -328,6 +334,7 @@ set(SRC_FILES
     src/PythonRunner.cpp
     src/QScienceSpinBox.cpp
     src/QtSignalChannel.cpp
+    src/QtJSONUtils.cpp
     src/RepoModel.cpp
     src/ScriptRepositoryView.cpp
     src/SelectionNotificationService.cpp
@@ -575,6 +582,7 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
+  inc/MantidQtWidgets/Common/MockAlgorithmRunner.h
   inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
   inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -602,6 +610,7 @@ set(
   inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
   inc/MantidQtWidgets/Common/QStringUtils.h
+  inc/MantidQtWidgets/Common/QtJSONUtils.h
   inc/MantidQtWidgets/Common/ScriptRepositoryView.h
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/SignalBlocker.h
@@ -828,6 +837,7 @@ mtd_add_qt_library(TARGET_NAME
                    Qt4::QtNetwork
                    Qt4::QtWebKit
                    Qt4::Qscintilla
+                   Qt4::QtScript
                    INSTALL_DIR
                    ${LIB_DIR}
                    OSX_INSTALL_RPATH
@@ -871,7 +881,6 @@ mtd_add_qt_library(TARGET_NAME
                    ${_webwidgets_tgt}
                    Qt5::Qscintilla
                    INSTALL_DIR
-                   ${LIB_DIR}
                    ${WORKBENCH_LIB_DIR}
                    OSX_INSTALL_RPATH
                    @loader_path/../MacOS
@@ -899,6 +908,7 @@ set(TEST_FILES
     test/SelectionNotificationServiceTest.h
     test/SignalBlockerTest.h
     test/TrackedActionTest.h
+    test/QtJSONUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
@@ -952,6 +962,7 @@ set(QT5_TEST_FILES
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
     test/InterfaceManagerTest.h
+    test/QtJSONUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
