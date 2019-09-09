@@ -66,11 +66,12 @@ function ( mtd_add_sip_module )
   set ( _module_spec ${CMAKE_CURRENT_BINARY_DIR}/${PARSED_MODULE_NAME}.sip )
   configure_file ( ${_sipmodule_template_path} ${_module_spec} )
   set ( _pyqt_sip_dir ${PYQT${PARSED_PYQT_VERSION}_SIP_DIR} )
+  set ( _sip_wrapper ${CMAKE_SOURCE_DIR}/tools/sip/sipwrapper.py)
   list ( APPEND _sip_include_flags "-I${_pyqt_sip_dir}" )
   set ( _pyqt_sip_flags ${PYQT${PARSED_PYQT_VERSION}_SIP_FLAGS} )
   set ( _sip_generated_cpp ${CMAKE_CURRENT_BINARY_DIR}/sip${PARSED_MODULE_NAME}part0.cpp )
   add_custom_command ( OUTPUT ${_sip_generated_cpp}
-    COMMAND ${SIP_EXECUTABLE}
+    COMMAND ${PYTHON_EXECUTABLE} ${_sip_wrapper} ${SIP_EXECUTABLE}
       ${_sip_include_flags} ${_pyqt_sip_flags}
       -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -e ${_module_spec}
     DEPENDS ${_module_spec} ${_sip_include_deps} ${SIP_INCLUDE_DIR}/sip.h

@@ -199,10 +199,11 @@ void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS,
   for (size_t i = 0; i < numQBins; ++i) {
     auto &Y = outputWS.mutableY(i);
     auto &E = outputWS.mutableE(i);
+    using std::placeholders::_1;
     std::transform(Y.begin(), Y.end(), Y.begin(),
-                   std::bind2nd(std::divides<double>(), widths[i + 1]));
+                   std::bind(std::divides<double>(), _1, widths[i + 1]));
     std::transform(E.begin(), E.end(), E.begin(),
-                   std::bind2nd(std::divides<double>(), widths[i + 1]));
+                   std::bind(std::divides<double>(), _1, widths[i + 1]));
   }
 }
 

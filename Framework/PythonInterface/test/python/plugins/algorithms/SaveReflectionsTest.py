@@ -15,7 +15,6 @@ from mantid.simpleapi import SaveReflections, DeleteWorkspace, LoadEmptyInstrume
 
 
 class SaveReflectionsTest(unittest.TestCase):
-
     def setUp(self):
         self._workspace = self._create_peaks_workspace()
         self._test_dir = tempfile.mkdtemp()
@@ -34,7 +33,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Add a bunch of random peaks that happen to fall on the
         # detetor bank defined in the IDF
-        center_q = np.array([-5.1302,2.5651,3.71809])
+        center_q = np.array([-5.1302, 2.5651, 3.71809])
         qs = []
         for i in np.arange(0, 1, 0.1):
             for j in np.arange(-0.5, 0, 0.1):
@@ -110,7 +109,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_fullprof_format_modulated(self):
         # Arrange
@@ -123,7 +122,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_jana_format(self):
         # Arrange
@@ -135,7 +134,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_jana_format_modulated(self):
         # Arrange
@@ -148,7 +147,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_GSAS_format(self):
         # Arrange
@@ -160,7 +159,8 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        #self._assert_file_content_equal(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_GSAS_format_modulated(self):
         # Arrange
@@ -169,7 +169,11 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "GSAS"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        self.assertRaises(RuntimeError,
+                          SaveReflections,
+                          InputWorkspace=workspace,
+                          Filename=file_name,
+                          Format=output_format)
 
     def test_save_SHELX_format(self):
         # Arrange
@@ -181,7 +185,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_SHELX_format_modulated(self):
         # Arrange
@@ -190,7 +194,11 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "SHELX"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        self.assertRaises(RuntimeError,
+                          SaveReflections,
+                          InputWorkspace=workspace,
+                          Filename=file_name,
+                          Format=output_format)
 
     def test_save_invalid_format(self):
         # Arrange
@@ -198,21 +206,22 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "InvalidFormatName"
 
         # Act
-        self.assertRaises(ValueError, SaveReflections, InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+        self.assertRaises(ValueError,
+                          SaveReflections,
+                          InputWorkspace=self._workspace,
+                          Filename=file_name,
+                          Format=output_format)
 
-
-def compare_file(reference_result, file_name):
-    with open(reference_result, 'r') as ref_file:
+    # Private api
+    def _assert_file_content_equal(self, reference_result, file_name):
+        with open(reference_result, 'r') as ref_file:
+            ref_lines = list(map(lambda x: x.strip(), ref_file.readlines()))
         with open(file_name, 'r') as actual_file:
-            ref_lines = ref_file.readlines()
-            actual_lines = actual_file.readlines()
-            ref_lines = map(lambda x: x.strip(), ref_lines)
-            actual_lines = map(lambda x: x.strip(), actual_lines)
-            for ref_line, actual_line in zip(ref_lines, actual_lines):
-                if ref_line != actual_line:
-                    return False
+            actual_lines = list(map(lambda x: x.strip(), actual_file.readlines()))
 
-    return True
+        self.assertEqual(len(ref_lines), len(actual_lines))
+        for ref_line, actual_line in zip(ref_lines, actual_lines):
+            self.assertEqual(ref_line, actual_line)
 
 
 if __name__ == '__main__':

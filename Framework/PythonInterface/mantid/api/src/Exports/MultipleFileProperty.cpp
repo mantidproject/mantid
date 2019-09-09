@@ -52,10 +52,9 @@ boost::python::list valueAsPyObject(MultipleFileProperty &self) {
   return fileList;
 }
 
-MultipleFileProperty *
-createMultipleFilePropertyWithAction(const std::string &name,
-                                     unsigned int action,
-                                     const object &extensions = object()) {
+MultipleFileProperty *createMultipleFilePropertyWithAction(
+    const std::string &name, unsigned int action,
+    const object &extensions = object(), const bool allowEmptyTokens = false) {
   std::vector<std::string> extsAsVector;
   if (!Mantid::PythonInterface::isNone(extensions)) {
     extract<std::string> extractor(extensions);
@@ -65,7 +64,7 @@ createMultipleFilePropertyWithAction(const std::string &name,
       extsAsVector = PySequenceToVector<std::string>(extensions)();
     }
   }
-  return new MultipleFileProperty(name, action, extsAsVector);
+  return new MultipleFileProperty(name, action, extsAsVector, allowEmptyTokens);
 }
 
 MultipleFileProperty *
@@ -86,10 +85,11 @@ void export_MultipleFileProperty() {
       .def("__init__", make_constructor(
                            &createMultipleFileProperty, default_call_policies(),
                            (arg("name"), arg("extensions") = object())))
-      .def("__init__",
-           make_constructor(
-               &createMultipleFilePropertyWithAction, default_call_policies(),
-               (arg("name"), arg("action"), arg("extensions") = object())))
+      .def("__init__", make_constructor(&createMultipleFilePropertyWithAction,
+                                        default_call_policies(),
+                                        (arg("name"), arg("action"),
+                                         arg("extensions") = object(),
+                                         arg("allow_empty") = false)))
       // Override the base class one to do something more appropriate
       .add_property("value", &valueAsPyObject);
 }

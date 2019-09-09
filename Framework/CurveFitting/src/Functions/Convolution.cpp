@@ -34,10 +34,9 @@ namespace CurveFitting {
 namespace Functions {
 
 using namespace CurveFitting;
-
 using namespace Kernel;
-
 using namespace API;
+using std::placeholders::_1;
 
 DECLARE_FUNCTION(Convolution)
 
@@ -183,7 +182,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
                            workspace.workspace);
     std::transform(m_resolution.begin(), m_resolution.end(),
                    m_resolution.begin(),
-                   std::bind2nd(std::multiplies<double>(), dx));
+                   std::bind(std::multiplies<double>(), _1, dx));
   }
 
   // Now m_resolution contains fourier transform of the resolution
@@ -193,7 +192,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     double dx = 1.; // nData > 1? xValues[1] - xValues[0]: 1.;
     std::transform(m_resolution.begin(), m_resolution.end(),
                    values.getPointerToCalculated(0),
-                   std::bind2nd(std::multiplies<double>(), dx));
+                   std::bind(std::multiplies<double>(), _1, dx));
     return;
   }
 
@@ -247,7 +246,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     // integration variable
     double dx = nData > 1 ? xValues[1] - xValues[0] : 1.;
     std::transform(out, out + nData, out,
-                   std::bind2nd(std::multiplies<double>(), dx));
+                   std::bind(std::multiplies<double>(), _1, dx));
 
     // now out contains fourier transform of the model function
 
@@ -276,7 +275,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     // integration variable
     dx = nData > 1 ? 1. / (xValues[1] - xValues[0]) : 1.;
     std::transform(out, out + nData, out,
-                   std::bind2nd(std::multiplies<double>(), dx));
+                   std::bind(std::multiplies<double>(), _1, dx));
   } else {
     values.zeroCalculated();
   }
@@ -287,7 +286,7 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
     std::vector<double> tmp(nData);
     resolution->function1D(tmp.data(), xValues, nData);
     std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                   std::bind2nd(std::multiplies<double>(), dltF));
+                   std::bind(std::multiplies<double>(), _1, dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
   } else if (!dltFuns.empty()) {
     std::vector<double> x(nData);
@@ -295,11 +294,11 @@ void Convolution::functionFFTMode(const FunctionDomain &domain,
       double shift = -df->getParameter("Centre");
       dltF = df->getParameter("Height") * df->HeightPrefactor();
       std::transform(xValues, xValues + nData, x.data(),
-                     std::bind2nd(std::plus<double>(), shift));
+                     std::bind(std::plus<double>(), _1, shift));
       std::vector<double> tmp(nData);
       resolution->function1D(tmp.data(), x.data(), nData);
       std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                     std::bind2nd(std::multiplies<double>(), dltF));
+                     std::bind(std::multiplies<double>(), _1, dltF));
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
     }
   }
@@ -417,7 +416,7 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
     std::vector<double> tmp(nData);
     resolution->function1D(tmp.data(), xValues, nData);
     std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                   std::bind2nd(std::multiplies<double>(), dltF));
+                   std::bind(std::multiplies<double>(), _1, dltF));
     std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
   } else if (!dltFuns.empty()) {
     std::vector<double> x(nData);
@@ -425,11 +424,11 @@ void Convolution::functionDirectMode(const FunctionDomain &domain,
       double shift = -df->getParameter("Centre");
       dltF = df->getParameter("Height") * df->HeightPrefactor();
       std::transform(xValues, xValues + nData, x.data(),
-                     std::bind2nd(std::plus<double>(), shift));
+                     std::bind(std::plus<double>(), _1, shift));
       std::vector<double> tmp(nData);
       resolution->function1D(tmp.data(), x.data(), nData);
       std::transform(tmp.begin(), tmp.end(), tmp.begin(),
-                     std::bind2nd(std::multiplies<double>(), dltF));
+                     std::bind(std::multiplies<double>(), _1, dltF));
       std::transform(out, out + nData, tmp.data(), out, std::plus<double>());
     }
   }

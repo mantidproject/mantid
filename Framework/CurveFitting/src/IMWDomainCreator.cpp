@@ -8,6 +8,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/ParameterEstimator.h"
 #include "MantidCurveFitting/SeqDomain.h"
 
@@ -32,30 +33,6 @@ namespace Mantid {
 namespace CurveFitting {
 
 namespace {
-/**
- * A simple implementation of Jacobian.
- */
-class SimpleJacobian : public API::Jacobian {
-public:
-  /// Constructor
-  SimpleJacobian(size_t nData, size_t nParams)
-      : m_nParams(nParams), m_data(nData * nParams) {}
-  /// Setter
-  void set(size_t iY, size_t iP, double value) override {
-    m_data[iY * m_nParams + iP] = value;
-  }
-  /// Getter
-  double get(size_t iY, size_t iP) override {
-    return m_data[iY * m_nParams + iP];
-  }
-  /// Zero
-  void zero() override { m_data.assign(m_data.size(), 0.0); }
-
-private:
-  size_t m_nParams;           ///< number of parameters / second dimension
-  std::vector<double> m_data; ///< data storage
-};
-
 bool greaterIsLess(double x1, double x2) { return x1 > x2; }
 } // namespace
 
@@ -455,7 +432,7 @@ void IMWDomainCreator::addFunctionValuesToWS(
 
   if (covar || hasErrors) {
     // and errors
-    SimpleJacobian J(nData, nParams);
+    Jacobian J(nData, nParams);
     try {
       function->functionDeriv(*domain, J);
     } catch (...) {

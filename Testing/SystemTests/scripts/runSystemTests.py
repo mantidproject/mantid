@@ -122,7 +122,8 @@ def main():
                         dest="output_on_failure",
                         action="store_true",
                         help="Print full log for failed tests.")
-    parser.add_argument('-N', '--dry-run',
+    parser.add_argument('-N',
+                        '--dry-run',
                         dest='dry_run',
                         action='store_true',
                         help='Do not run tests just print what would be run.')
@@ -195,7 +196,8 @@ def main():
     #########################################################################
 
     runner = systemtesting.TestRunner(executable=options.executable,
-                                      exec_args=options.execargs,
+                                      # see InstallerTests.py for why lstrip is required
+                                      exec_args=options.execargs.lstrip(),
                                       escape_quotes=True)
 
     tmgr = systemtesting.TestManager(test_loc=mtdconf.testDir,
@@ -274,23 +276,30 @@ def main():
         for ip in range(options.ncores):
             processes.append(
                 Process(target=systemtesting.testThreadsLoop,
-                        args=(mtdconf.testDir, mtdconf.saveDir, mtdconf.dataDir, options, tests_dict,
-                              tests_lock, tests_left, results_array, status_dict, total_number_of_tests,
-                              maximum_name_length, tests_done, ip, lock, required_files_dict,
-                              locked_files_dict)))
+                        args=(mtdconf.testDir, mtdconf.saveDir, mtdconf.dataDir, options,
+                              tests_dict, tests_lock, tests_left, results_array, status_dict,
+                              total_number_of_tests, maximum_name_length, tests_done, ip, lock,
+                              required_files_dict, locked_files_dict)))
         # Start and join processes
+        exitcodes = []
         try:
             for p in processes:
                 p.start()
 
             for p in processes:
                 p.join()
+                exitcodes.append(p.exitcode)
+
         except KeyboardInterrupt:
             print("Killed via KeyboardInterrupt")
             kill_children(processes)
         except Exception as e:
             print("Unexpected exception occured: {}".format(e))
             kill_children(processes)
+
+        # test processes could have failed to even start the tests. In this case skip printing the results
+        if systemtesting.TESTING_PROC_FAILURE_CODE in exitcodes:
+            sys.exit("\nFailed to execute tests. See traceback for more details.")
 
         # Gather results
         skipped_tests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])

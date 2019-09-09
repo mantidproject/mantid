@@ -17,6 +17,7 @@ Algorithms
 * :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
 * :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>` will fit a curve to an incident spectrum returning the curve and it's first derivative.
 * Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load <algm-Load>`.
+* Added options to :ref:`SaveMD <algm-SaveMD>` to allow selection of what will be saved. For MDHistoWorkspace only.
 
 Data Objects
 ------------
@@ -29,6 +30,11 @@ Live Data
 
 Python
 ------
+
+API
+---
+
+It is now possible to have MultipleFileProperty configured in such a way, that it will allow empty placeholder tokens.
 
 Bug Fixes
 ---------
