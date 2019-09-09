@@ -119,8 +119,12 @@ void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged(
     QString const &spectra) {
-  if (spectra.isEmpty())
+  int pos = 0;
+  QString nonConstCopy = spectra;
+  if (spectra.isEmpty() || m_plotOptions->leIndices->validator()->validate(nonConstCopy, pos) == QValidator::Acceptable)
+    {
     emit selectedIndicesChanged(spectra.toStdString());
+    }
 }
 
 void IndirectPlotOptionsView::emitPlotSpectraClicked() {

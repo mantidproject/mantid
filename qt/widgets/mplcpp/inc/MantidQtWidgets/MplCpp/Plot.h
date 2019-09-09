@@ -74,7 +74,7 @@ plot(const std::vector<std::string> &workspaces,
      boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
      boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
      boost::optional<std::string> windowTitle = boost::none,
-     bool errors = false, bool overplot = false);
+     bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
  * \overload plot(const std::vector<std::string> &workspaces,
@@ -94,7 +94,7 @@ plot(const QStringList &workspaces,
      boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
      boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
      boost::optional<std::string> windowTitle = boost::none,
-     bool errors = false, bool overplot = false);
+     bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
  * Makes a call to mantidqt.plotting.plotsubplots.
