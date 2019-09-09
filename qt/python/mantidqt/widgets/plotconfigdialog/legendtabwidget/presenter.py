@@ -143,3 +143,8 @@ class LegendTabWidgetPresenter:
         self.advanced_options.set_number_of_markers(self.current_advanced_properties.markers)
         self.advanced_options.set_round_edges(self.current_advanced_properties.round_edges)
         self.advanced_options.set_shadow(self.current_advanced_properties.shadow)
+
+    def close_tab(self):
+        """Close the tab and set the view to None"""
+        self.view.close()
+        self.view = None
