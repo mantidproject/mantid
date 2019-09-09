@@ -94,7 +94,12 @@ const gsl_vector *GSLVector::gsl() const { return &m_view.vector; }
 /// Resize the vector
 /// @param n :: The new length
 void GSLVector::resize(const size_t n) {
-  if (n != size()) {
+  if (n == 0) {
+    // A GSL Vector view in GSL 2.3 (RHEL 7)
+    // requires n > 0. This appears to be relaxed in >2.4 so use n=1
+    m_data.resize(1);
+    m_view = gsl_vector_view_array(m_data.data(), 1);
+  } else if (n != size()) {
     m_data.resize(n);
     m_view = gsl_vector_view_array(m_data.data(), m_data.size());
   }

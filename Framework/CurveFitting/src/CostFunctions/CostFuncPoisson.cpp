@@ -17,7 +17,7 @@ namespace {
 const double absoluteCutOff = 0.0;
 const double effectiveCutOff = 0.0001;
 
-double calculatePoissionLoss(double observedCounts, double predicted) {
+double calculatePoissonLoss(double observedCounts, double predicted) {
   double retVal = (predicted - observedCounts);
   retVal += observedCounts * (log(observedCounts) - log(predicted));
   return retVal;
@@ -63,7 +63,7 @@ void CostFuncPoisson::addVal(API::FunctionDomain_sptr domain,
       // at observed = 0 the Poisson function reduces to simply adding predicted
       retVal += predicted;
     } else {
-      retVal += calculatePoissionLoss(observed, predicted);
+      retVal += calculatePoissonLoss(observed, predicted);
     }
   }
 
@@ -86,14 +86,16 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
                                          bool evalDeriv,
                                          bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
+  const size_t numParams = nParams();
+
   if (evalDeriv) {
-    m_der.resize(nParams());
+    m_der.resize(numParams);
     m_der.zero();
     calculateDerivative(*function, *domain, *values);
   }
 
   if (evalHessian) {
-    m_hessian.resize(nParams(), nParams());
+    m_hessian.resize(numParams, numParams);
     m_hessian.zero();
     calculateHessian(*function, *domain, *values);
   }
@@ -145,7 +147,7 @@ void CostFuncPoisson::calculateDerivative(API::IFunction &function,
 
       } else {
         if (activeParamIndex == 0) {
-          costVal += calculatePoissionLoss(obs, calc);
+          costVal += calculatePoissonLoss(obs, calc);
         }
         determinant += jacobian.get(i, paramIndex) * (1.0 - obs / calc);
       }
