@@ -25,7 +25,10 @@ class CurvesTabWidgetPresenter:
 
     def __init__(self, fig, view=None, parent=None, legend_tab=None):
         self.fig = fig
+
+        # The legend tab is passed in so that it can be removed if all curves are removed.
         self.legend_tab = legend_tab
+
         if not view:
             self.view = CurvesTabWidgetView(parent)
         else:
