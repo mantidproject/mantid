@@ -19,7 +19,6 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
     CurveProperties, set_errorbars_hidden, curve_has_errors,
     remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class CurvesTabWidgetPresenter:
