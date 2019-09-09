@@ -103,7 +103,10 @@ class Abins(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S."
-                                 "If left blank, workspaces with S for all types of atoms will be calculated.")
+                                 "If left blank, workspaces with S for all types of atoms will be calculated. "
+                                 "Element symbols will be interpreted as a sum of all atoms of that element in the "
+                                 "cell. 'atomN' or 'atom_N' (where N is a positive integer) will be interpreted as "
+                                 "individual atoms, indexing from 1 following the order of the input data.")
 
         self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
