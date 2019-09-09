@@ -14,6 +14,7 @@ from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 import matplotlib.font_manager
 
+
 class LegendTabWidgetPresenter:
     def __init__(self, fig, view=None, parent=None):
         self.fig = fig
@@ -29,6 +30,7 @@ class LegendTabWidgetPresenter:
         self.populate_font_combo_box()
         self.init_view()
 
+        # Signals
         self.view.transparency_spin_box.valueChanged.connect(
             lambda: self.view.set_transparency_slider(self.view.get_transparency_spin_box_value()))
         self.view.transparency_slider.valueChanged.connect(
@@ -41,6 +43,7 @@ class LegendTabWidgetPresenter:
         self.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
     def init_view(self):
+        """Sets all of the initial values of the input fields when the tab is first loaded"""
         legend_props = LegendProperties.from_legend(self.axes[0].get_legend())
         self.check_font_in_list(legend_props.entries_font)
         self.check_font_in_list(legend_props.title_font)
@@ -48,6 +51,8 @@ class LegendTabWidgetPresenter:
         self.view.set_title(legend_props.title)
         self.view.set_background_color(legend_props.background_color)
         self.view.set_edge_color(legend_props.edge_color)
+
+        # Converts alpha value (opacity value between 0 and 1) to transparency percentage.
         transparency = 100-(legend_props.transparency*100)
         self.view.set_transparency_spin_box(transparency)
         self.view.set_transparency_slider(transparency)
@@ -78,6 +83,7 @@ class LegendTabWidgetPresenter:
         self.hide_box_ticked(box_visible)
 
     def apply_properties(self):
+        """Takes the properties from the views and creates a new legend."""
         props = self.view.get_properties()
         advanced_props = self.advanced_options.get_properties()
         props.update(advanced_props)
@@ -88,6 +94,7 @@ class LegendTabWidgetPresenter:
         self.current_view_properties = props
 
     def populate_font_combo_box(self):
+        """Adds all of the available fonts to the font combo boxes."""
         font_list = matplotlib.font_manager.findSystemFonts()
         self.fonts = set(sorted(
             matplotlib.font_manager.FontProperties(fname=font_name).get_name() for font_name in font_list))
@@ -95,13 +102,14 @@ class LegendTabWidgetPresenter:
         self.view.title_font_combo_box.addItems(self.fonts)
 
     def hide_legend_ticked(self, enable):
+        """Disables or enables all of the input fields when the hide legend box is ticked or unticked."""
         self.view.title_line_edit.setEnabled(enable)
         self.view.title_font_combo_box.setEnabled(enable)
         self.view.title_size_spin_box.setEnabled(enable)
         self.view.title_color_selector_widget.setEnabled(enable)
         self.view.hide_box_check_box.setEnabled(enable)
 
-        if not self.view.hide_box_check_box.isChecked():
+        if not self.view.get_hide_box():
             self.view.background_color_selector_widget.setEnabled(enable)
             self.view.edge_color_selector_widget.setEnabled(enable)
             self.view.transparency_slider.setEnabled(enable)
@@ -114,6 +122,7 @@ class LegendTabWidgetPresenter:
         self.view.advanced_options_push_button.setEnabled(enable)
 
     def hide_box_ticked(self, enable):
+        """Disables or enables all options related to the legend box when hide box is ticked or unticked."""
         self.view.background_color_selector_widget.setEnabled(enable)
         self.view.edge_color_selector_widget.setEnabled(enable)
         self.view.transparency_slider.setEnabled(enable)
@@ -122,6 +131,8 @@ class LegendTabWidgetPresenter:
         self.advanced_options.round_edges_check_box.setEnabled(enable)
 
     def check_font_in_list(self, font):
+        """For some reason the default matplotlib legend font isn't a system font so it's added
+        to the font combo boxes here."""
         if self.view.entries_font_combo_box.findText(font) == -1:
             self.fonts.add(font)
             self.fonts = sorted(self.fonts)
@@ -131,10 +142,14 @@ class LegendTabWidgetPresenter:
             self.view.title_font_combo_box.addItems(self.fonts)
 
     def show_advanced_options(self):
+        """Opens the advanced options dialog."""
         self.advanced_options.show()
+        # The current properties in the dialog are stored so they can be reverted back to if the user cancels.
         self.current_advanced_properties = self.advanced_options.get_properties()
 
     def advanced_options_cancelled(self):
+        """When the user clicks cancel in the advanced options dialog, the input fields reset to what they were
+        before the user opened the dialog."""
         self.advanced_options.set_border_padding(self.current_advanced_properties.border_padding)
         self.advanced_options.set_column_spacing(self.current_advanced_properties.column_spacing)
         self.advanced_options.set_label_spacing(self.current_advanced_properties.label_spacing)
@@ -145,6 +160,6 @@ class LegendTabWidgetPresenter:
         self.advanced_options.set_shadow(self.current_advanced_properties.shadow)
 
     def close_tab(self):
-        """Close the tab and set the view to None"""
+        """Closes the tab and sets the view to None"""
         self.view.close()
         self.view = None

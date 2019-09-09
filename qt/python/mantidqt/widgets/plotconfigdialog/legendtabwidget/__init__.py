@@ -136,5 +136,3 @@ class LegendProperties(dict):
 
         legend.draggable(True)
 
-        #return cls(legend)
-
