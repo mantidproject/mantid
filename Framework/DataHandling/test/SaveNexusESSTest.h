@@ -30,6 +30,7 @@
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
+namespace {
 template <typename T> void do_execute(const std::string filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
@@ -69,7 +70,7 @@ from_instrument_file(const std::string &filename) {
   return ws;
 }
 } // namespace test_utility
-
+} // namespace
 class SaveNexusESSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -192,36 +193,8 @@ public:
       TS_ASSERT(validator.hasDataset(
           "detector_count", {"mantid_workspace_1", rootName, "bank2"}));
     }
-
-    // Reload it.
-    auto matrixWSOut = test_utility::reload(fileInfo.fullPath());
-
-    const auto &inSpecInfo = wsIn->spectrumInfo();
-    const auto &outSpecInfo = matrixWSOut->spectrumInfo();
-
-    // Note we do not guarantee the preseveration of spectrum indexes during
-    // deserialisation, so we need the maps to ensure we compare like for like.
-    auto specToIndexOut = matrixWSOut->getSpectrumToWorkspaceIndexMap();
-    auto specToIndexIn = wsIn->getSpectrumToWorkspaceIndexMap();
-
-    auto indexInfo = matrixWSOut->indexInfo();
-
-    TS_ASSERT_EQUALS(outSpecInfo.size(), inSpecInfo.size());
-    for (size_t i = 0; i < outSpecInfo.size(); ++i) {
-
-      auto specNumber = int(indexInfo.spectrumNumber(i));
-
-      auto indexInInput = specToIndexIn.at(specNumber);
-      auto indexInOutput = specToIndexOut.at(specNumber);
-
-      // Output has no mapping, so for each spectrum have 0 detector indices
-      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput).size(),
-                       inSpecInfo.spectrumDefinition(indexInInput).size());
-      // Compare actual detector indices for each spectrum when fixed as below
-      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput)[0],
-                       inSpecInfo.spectrumDefinition(indexInInput)[0]);
-    }
   }
+
   void test_base_function_with_workspace() {
 
     // This is testing the core routine, but we put it here and not in

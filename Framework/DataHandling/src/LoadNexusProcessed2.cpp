@@ -36,6 +36,7 @@ int countEntriesOfType(const T &entry, const std::string &nxClass) {
   }
   return count;
 }
+
 template <typename T>
 std::vector<Mantid::NeXus::NXClassInfo>
 findEntriesOfType(const T &entry, const std::string &nxClass) {
@@ -47,8 +48,9 @@ findEntriesOfType(const T &entry, const std::string &nxClass) {
   return result;
 }
 /**
- * We have an NXInstrument group called "instrument" containing a single
- * NXDetector called detector
+ * Determine the format/layout of the instrument block. We use this to
+ * distinguish between the ESS saving schemes and the Mantid processed nexus
+ * schemes
  * @param entry
  * @return
  */
@@ -101,6 +103,9 @@ void LoadNexusProcessed2::extractMappingInfoNew(
     Mantid::NeXus::NXEntry &mtd_entry) {
   using namespace Mantid::NeXus;
   auto result = findEntriesOfType(mtd_entry, "NXinstrument");
+  if (result.size() != 1) {
+    g_log.warning("We are expecting a single NXinstrument. No mappings loaded");
+  }
   auto inst = mtd_entry.openNXInstrument(result[0].nxname);
 
   auto &spectrumNumbers = m_spectrumNumbers;
