@@ -237,17 +237,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Not found
         return None
 
-    def _collapse_workspace_groups(self, workspaces, ungrouped_workspaces):
+    def _collapse_workspace_groups(self, workspaces):
         """Given a list of workspaces, which themselves could be groups of workspaces,
         return a new list of workspaces which are TOF"""
+        ungrouped_workspaces = []
         for ws_name in workspaces:
             ws = AnalysisDataService.retrieve(ws_name)
+            if (ws.getAxis(0).getUnit().caption()) == 'Time-of-flight':
+                ungrouped_workspaces.append(ws_name)
             if isinstance(ws, WorkspaceGroup):
-                self._collapse_workspace_groups(ws.getNames(), ungrouped_workspaces)
+                ungrouped_workspaces += self._collapse_workspace_groups(ws.getNames())
                 AnalysisDataService.remove(ws_name)
-            else:
-                if (ws.getAxis(0).getUnit().caption()) == 'Time-of-flight':
-                    ungrouped_workspaces.append(ws_name)
         return ungrouped_workspaces
 
     def _group_workspaces(self, workspaces, output_ws_name):
@@ -258,8 +258,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
 
-        ungrouped_workspaces = []
-        workspaces = self._collapse_workspace_groups(workspaces, ungrouped_workspaces)
+        workspaces = self._collapse_workspace_groups(workspaces)
 
         if not workspaces:
             return
