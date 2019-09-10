@@ -85,7 +85,8 @@ MessageDisplay::MessageDisplay(QWidget *parent)
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
-    : QWidget(parent), m_logChannel(new QtSignalChannel),
+    : QWidget(parent), m_messageHistory(new QList<Message>),
+      m_logChannel(new QtSignalChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
       m_logLevelMapping(new QSignalMapper(this)),
@@ -141,6 +142,17 @@ void MessageDisplay::setSource(const QString &source) {
   m_logChannel->setSource(source);
 }
 
+/**
+ * Filter messages by output type: script and/or Framework
+ * @param showFramework Should framework messages be shown?
+ * @param showScript Should script messages be shown?
+ */
+void MessageDisplay::filterMessages(const bool &showFramework,
+                                    const bool &showScript) {
+  clear();
+  appendList(*getHistory(), showFramework, showScript);
+}
+
 //----------------------------------------------------------------------------------------
 // Public slots
 //----------------------------------------------------------------------------------------
@@ -189,8 +201,10 @@ void MessageDisplay::appendDebug(const QString &text) {
 /**
  * @param msg A message that is echoed to the display after the
  * current text
+ * @param addToHistory Whether to add the message to the history or not
  */
 void MessageDisplay::append(const Message &msg) {
+  m_messageHistory->append(msg);
   QTextCursor cursor = moveCursorToEnd();
   cursor.insertText(msg.text(), format(msg.priority()));
   moveCursorToEnd();
@@ -199,6 +213,37 @@ void MessageDisplay::append(const Message &msg) {
     emit errorReceived(msg.text());
   if (msg.priority() <= Message::Priority::PRIO_WARNING)
     emit warningReceived(msg.text());
+}
+
+/**
+ * Append a list of messages with the option to filter by whether the message
+ * came from a Python script or the framework.
+ * @param messages A QList of Message objects
+ * @param appendFramework Should framework messages be appended? (default=true)
+ * @param appendScript Should scripy messages be appended? (default=true)
+ */
+void MessageDisplay::appendList(const QList<Message> &messages,
+                                const bool &appendFramework,
+                                const bool &appendScript) {
+  for (auto &msg : messages) {
+    if (appendFramework && msg.frameworkMsg())
+      m_textDisplay->textCursor().insertText(msg.text(),
+                                             format(msg.priority()));
+    else if (appendScript && !msg.frameworkMsg())
+      m_textDisplay->textCursor().insertText(msg.text(),
+                                             format(msg.priority()));
+  }
+}
+
+/**
+ * Append a message to the message window, marking it as output from a Python
+ * script (i.e. frameworkMsg = false).
+ * @param text The message to display in the window
+ * @param priority The priority level of the message
+ */
+void MessageDisplay::appendPython(const QString &text, const int &priority) {
+  Message msg = Message(text, static_cast<Message::Priority>(priority), false);
+  append(msg);
 }
 
 /**
@@ -265,35 +310,7 @@ void MessageDisplay::scrollToBottom() {
 //-----------------------------------------------------------------------------
 
 void MessageDisplay::showContextMenu(const QPoint &mousePos) {
-  QMenu *menu = m_textDisplay->createStandardContextMenu();
-  menu->addSeparator();
-  if (!m_textDisplay->document()->isEmpty()) {
-    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
-    menu->addSeparator();
-  }
-  menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));
-  menu->addSeparator();
-
-  QMenu *logLevelMenu = menu->addMenu("&Log Level");
-  logLevelMenu->addAction(m_error);
-  logLevelMenu->addAction(m_warning);
-  logLevelMenu->addAction(m_notice);
-  logLevelMenu->addAction(m_information);
-  logLevelMenu->addAction(m_debug);
-
-  // check the right level
-  int level = Poco::Logger::root().getLevel();
-  if (level == Poco::Message::PRIO_ERROR)
-    m_error->setChecked(true);
-  if (level == Poco::Message::PRIO_WARNING)
-    m_warning->setChecked(true);
-  if (level == Poco::Message::PRIO_NOTICE)
-    m_notice->setChecked(true);
-  if (level == Poco::Message::PRIO_INFORMATION)
-    m_information->setChecked(true);
-  if (level >= Poco::Message::PRIO_DEBUG)
-    m_debug->setChecked(true);
-
+  QMenu *menu{generateContextMenu()};
   menu->exec(this->mapToGlobal(mousePos));
   delete menu;
 }
@@ -341,6 +358,38 @@ void MessageDisplay::setMaximumLineCount(int count) {
 //-----------------------------------------------------------------------------
 // Private non-slot member functions
 //-----------------------------------------------------------------------------
+QMenu *MessageDisplay::generateContextMenu() {
+  QMenu *menu = m_textDisplay->createStandardContextMenu();
+  menu->addSeparator();
+  if (!m_textDisplay->document()->isEmpty()) {
+    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
+    menu->addSeparator();
+  }
+  menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));
+  menu->addSeparator();
+
+  QMenu *logLevelMenu = menu->addMenu("&Log Level");
+  logLevelMenu->addAction(m_error);
+  logLevelMenu->addAction(m_warning);
+  logLevelMenu->addAction(m_notice);
+  logLevelMenu->addAction(m_information);
+  logLevelMenu->addAction(m_debug);
+
+  // check the right level
+  int level = Poco::Logger::root().getLevel();
+  if (level == Poco::Message::PRIO_ERROR)
+    m_error->setChecked(true);
+  if (level == Poco::Message::PRIO_WARNING)
+    m_warning->setChecked(true);
+  if (level == Poco::Message::PRIO_NOTICE)
+    m_notice->setChecked(true);
+  if (level == Poco::Message::PRIO_INFORMATION)
+    m_information->setChecked(true);
+  if (level >= Poco::Message::PRIO_DEBUG)
+    m_debug->setChecked(true);
+  return menu;
+}
+
 void MessageDisplay::initActions() {
   m_error->setCheckable(true);
   m_warning->setCheckable(true);

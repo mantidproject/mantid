@@ -25,6 +25,7 @@
 //----------------------------------------------------------
 class QAction;
 class QActionGroup;
+class QMenu;
 class QPlainTextEdit;
 class QPoint;
 class QSettings;
@@ -66,6 +67,14 @@ public:
   void setSource(const QString &source);
   /// Get the current source are emitted
   inline const QString &source() const { return m_logChannel->source(); }
+  /// Get the window's QPlainTextEdit object
+  QPlainTextEdit *getTextEdit() { return m_textDisplay; }
+  /// Get the window's message history
+  QList<Message> *getHistory() { return m_messageHistory; }
+  /// Generate the display's context menu QMenu object
+  QMenu *generateContextMenu();
+  /// Filter messages by message type (framework or from a script)
+  void filterMessages(const bool &showFramework, const bool &showScript);
 
 signals:
   /// Indicate that a message of error or higher has been received.
@@ -88,6 +97,12 @@ public slots:
   void appendDebug(const QString &text);
   /// Write a message after the current contents
   void append(const Message &msg);
+  /// Append a QList of messages to the current contents
+  void appendList(const QList<Message> &messages,
+                  const bool &appendFramework = true,
+                  const bool &appendScript = true);
+  /// Write a Python script message, intended for use with Python API
+  void appendPython(const QString &text, const int &priority);
   /// Replace the display text with the given contents
   void replace(const Message &msg);
   /// Clear all of the text
@@ -135,6 +150,8 @@ private:
   QSignalMapper *m_logLevelMapping;
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
+  /// Keep track of the message history
+  QList<Message> *m_messageHistory;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
