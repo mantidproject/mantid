@@ -472,7 +472,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
         self._assert_run_algorithm_succeeds(args)
 
-    def test_group_TOF_workspaces(self):
+    def test_group_TOF_workspaces_succeeds_with_only_TOF_workspaces(self):
         self._create_workspace(13460, 'TOF_')
         self._create_workspace(13463, 'TOF_')
         args = self._default_options
@@ -480,10 +480,38 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args['GroupTOFWorkspaces'] = True
         outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13463']
         self._assert_run_algorithm_succeeds(args, outputs)
-        workspace_names = AnalysisDataService.getObjectNames()
-        self.assertIn('TOF_13460', workspace_names)
-        self.assertIn('TOF_13463', workspace_names)
-        self.assertIn('TOF', workspace_names)
+
+    def test_group_TOF_workspaces_succeeds_with_TOF_group(self):
+        self._create_workspace_group(13460, 2, 'TOF_')
+        self._create_workspace(13463, 'TOF_')
+        args = self._default_options
+        args['InputRunList'] = '13460, 13463'
+        args['GroupTOFWorkspaces'] = True
+        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13460_1',
+                   'TOF_13460_2', 'TOF_13463']
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+    def test_group_TOF_workspaces_fails_with_mixed_unit_workspace_group(self):
+        self._create_workspace(13460, 'TOF_')
+        self._create_workspace(13463, 'TOF_')
+        self._create_workspace_wavelength(12345)
+        GroupWorkspaces('TOF_13463, 12345', OutputWorkspace='mixed_unit_group')
+        args = self._default_options
+        args['InputRunList'] = '13460, mixed_unit_group'
+        args['GroupTOFWorkspaces'] = True
+        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13460',
+                   'TOF_13463', '12345']
+        self._assert_run_algorithm_fails(args, outputs)
+
+    def test_group_TOF_workspaces_succeeds_with_no_TOF_input_workspace_groups_which_remain_unchanged(self):
+        self._create_workspace_wavelength(12345)
+        self._create_workspace_wavelength(67890)
+        GroupWorkspaces('12345, 67890', OutputWorkspace='no_TOF_group')
+        args = self._default_options
+        args['InputRunList'] = '12345, 67890'
+        args['GroupTOFWorkspaces'] = True
+        outputs = ['no_TOF_group', 'TOF_12345+67890', '12345', '67890']
+        self._assert_run_algorithm_succeeds(args, outputs)
 
     def _create_workspace(self, run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + suffix
