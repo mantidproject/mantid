@@ -177,6 +177,7 @@ void LoadNGEM::exec() {
           frameEventCounts.emplace_back(eventCountInFrame);
           ++goodFrames;
 
+#pragma omp parallel for
           // Add histograms that match parameters to workspace
           for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
             if (histogramsInFrame[i].getNumberEvents() > 0) {
@@ -203,6 +204,7 @@ void LoadNGEM::exec() {
   if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
     frameEventCounts.emplace_back(eventCountInFrame);
     ++goodFrames;
+#pragma omp parallel for
     for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
       histograms[i] += histogramsInFrame[i];
     }
