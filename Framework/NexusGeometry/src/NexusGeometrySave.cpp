@@ -324,8 +324,6 @@ inline void writeCylinderShape(H5::Group &grp,
         });
     if (cylindersAreHomogeneous) {
 
-      // create associated group
-
       // write cylinder only once, using the first index
       auto geometry = firstShapeInfo.cylinderGeometry();
       const Kernel::V3D &base = geometry.centreOfBottomBase;
