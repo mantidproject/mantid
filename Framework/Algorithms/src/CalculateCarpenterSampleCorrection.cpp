@@ -138,7 +138,7 @@ void CalculateCarpenterSampleCorrection::exec() {
   const bool absOn = getProperty("Absorption");
   const bool msOn = getProperty("MultipleScattering");
   const Material &sampleMaterial = inputWksp->sample().getMaterial();
-  if (sampleMaterial.totalScatterXSection(LAMBDA_REF) != 0.0) {
+  if (sampleMaterial.totalScatterXSection() != 0.0) {
     g_log.information() << "Using material \"" << sampleMaterial.name()
                         << "\" from workspace\n";
     if (std::abs(coeff1 - 2.8) < std::numeric_limits<double>::epsilon())
@@ -147,7 +147,7 @@ void CalculateCarpenterSampleCorrection::exec() {
         (!isEmpty(sampleMaterial.numberDensity())))
       coeff2 = sampleMaterial.numberDensity();
     if (std::abs(coeff3 - 5.1) < std::numeric_limits<double>::epsilon())
-      coeff3 = sampleMaterial.totalScatterXSection(LAMBDA_REF);
+      coeff3 = sampleMaterial.totalScatterXSection();
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
@@ -160,8 +160,7 @@ void CalculateCarpenterSampleCorrection::exec() {
                 << " coeff2=" << coeff2 << " coeff3=" << coeff3 << "\n";
 
   // geometry stuff
-  const int64_t NUM_HIST =
-      static_cast<int64_t>(inputWksp->getNumberHistograms());
+  const auto NUM_HIST = static_cast<int64_t>(inputWksp->getNumberHistograms());
   Instrument_const_sptr instrument = inputWksp->getInstrument();
   if (instrument == nullptr)
     throw std::runtime_error(

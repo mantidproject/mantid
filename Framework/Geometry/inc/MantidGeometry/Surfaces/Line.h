@@ -49,7 +49,7 @@ private:
   int lambdaPair(
       const int ix,
       const std::pair<std::complex<double>, std::complex<double>> &SQ,
-      std::list<Kernel::V3D> &PntOut) const;
+      std::vector<Kernel::V3D> &PntOut) const;
 
 public:
   Line();
@@ -73,10 +73,10 @@ public:
   int setLine(const Kernel::V3D &,
               const Kernel::V3D &); ///< input Origin + direction
 
-  int intersect(std::list<Kernel::V3D> &, const Quadratic &) const;
-  int intersect(std::list<Kernel::V3D> &, const Cylinder &) const;
-  int intersect(std::list<Kernel::V3D> &, const Plane &) const;
-  int intersect(std::list<Kernel::V3D> &, const Sphere &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Quadratic &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Cylinder &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Plane &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Sphere &) const;
 };
 
 } // namespace Geometry

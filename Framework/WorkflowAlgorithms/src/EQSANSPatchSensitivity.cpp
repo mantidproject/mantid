@@ -44,7 +44,7 @@ void EQSANSPatchSensitivity::exec() {
   const int ny_pixels = static_cast<int>(
       inputWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
 
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   auto &inSpectrumInfo = inputWS->mutableSpectrumInfo();
   const auto &spectrumInfo = patchWS->spectrumInfo();
@@ -129,7 +129,8 @@ void EQSANSPatchSensitivity::exec() {
 
   // Call Calculate efficiency to renormalize
   progress(0.91, "Renormalizing");
-  IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency");
+  IAlgorithm_sptr effAlg =
+      createChildAlgorithm("CalculateEfficiency", 0.91, 1, true, 1);
   effAlg->setProperty("InputWorkspace", inputWS);
   effAlg->setProperty("OutputWorkspace", inputWS);
   effAlg->execute();

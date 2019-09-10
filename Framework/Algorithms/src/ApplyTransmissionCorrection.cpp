@@ -88,7 +88,7 @@ void ApplyTransmissionCorrection::exec() {
     ETrIn = transWS->e(0);
   }
 
-  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numHists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numHists);
 
   // Create a Workspace2D to match the intput workspace

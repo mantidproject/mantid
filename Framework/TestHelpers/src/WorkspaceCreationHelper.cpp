@@ -262,7 +262,7 @@ create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
 
 Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
                              const std::set<int64_t> &maskedWorkspaceIndices) {
-  const int nhist = static_cast<int>(workspace->getNumberHistograms());
+  const auto nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
     auto instrument = boost::make_shared<Instrument>();
@@ -472,6 +472,47 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   Instrument_sptr inst =
       ComponentCreationHelper::createTestInstrumentRectangular(numBanks,
                                                                numPixels);
+  EventWorkspace_sptr ws =
+      createEventWorkspace2(numBanks * numPixels * numPixels, 100);
+  ws->setInstrument(inst);
+
+  // Set the X axes
+  const auto &xVals = ws->x(0);
+  const size_t xSize = xVals.size();
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
+  ax0->setUnit("dSpacing");
+  for (size_t i = 0; i < xSize; i++) {
+    ax0->setValue(i, xVals[i]);
+  }
+  ws->replaceAxis(0, std::move(ax0));
+
+  // re-assign detector IDs to the rectangular detector
+  const auto detIds = inst->getDetectorIDs();
+  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); ++wi) {
+    ws->getSpectrum(wi).clearDetectorIDs();
+    if (clearEvents)
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detIds[wi]);
+  }
+  return ws;
+}
+
+/** Create an Eventworkspace with  instrument 2.0 that contains
+ *RectangularDetector's.
+ * X axis = 100 histogrammed bins from 0.0 in steps of 1.0.
+ * 200 events per pixel.
+ *
+ * @param numBanks :: number of rectangular banks
+ * @param numPixels :: each bank will be numPixels*numPixels
+ * @param clearEvents :: if true, erase the events from list
+ * @return The EventWorkspace
+ */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceWithFullInstrument2(int numBanks, int numPixels,
+                                        bool clearEvents) {
+  Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular2(numBanks,
+                                                                numPixels);
   EventWorkspace_sptr ws =
       createEventWorkspace2(numBanks * numPixels * numPixels, 100);
   ws->setInstrument(inst);
@@ -985,7 +1026,7 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
+  auto rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
@@ -1174,7 +1215,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set Q ('y') axis binning
   std::vector<double> qbins{0.0, 1.0, 4.0};
   std::vector<double> qaxis;
-  const int numY =
+  const auto numY =
       static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
 
   // Initialize the workspace
@@ -1413,7 +1454,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   Mantid::DataObjects::TableWorkspace_sptr DetPos = createTableWorkspace(ws);
-  double Ei = ws->run().getPropertyValueAsType<double>("Ei");
+  auto Ei = ws->run().getPropertyValueAsType<double>("Ei");
   processDetectorsPositions(ws, DetPos, Ei);
 
   return DetPos;

@@ -31,7 +31,6 @@ private slots:
   void fillCorrectionDetails(const QString &wsName);
   void validateChemical();
   void saveClicked();
-  void plotClicked();
   void runClicked();
   void setSampleDensityOptions(QString const &method);
   void setCanDensityOptions(QString const &method);
@@ -69,11 +68,9 @@ private:
   double getCanDensityValue(QString const &type) const;
 
   void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
 
   boost::optional<double>
   getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,

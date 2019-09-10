@@ -56,8 +56,8 @@ void PointByPointVCorrection::exec() {
   check_validity(inputWS1, inputWS2, outputWS);
 
   // Now do the normalisation
-  const int size = static_cast<int>(inputWS1->x(0).size());
-  const int nHist = static_cast<int>(inputWS1->getNumberHistograms());
+  const auto size = static_cast<int>(inputWS1->x(0).size());
+  const auto nHist = static_cast<int>(inputWS1->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS1, *inputWS2, *outputWS))
@@ -118,8 +118,9 @@ void PointByPointVCorrection::exec() {
         (error2_factor1 / factor1 / factor1 + error2_factor2);
 
     // Calculate the normalized Y values
+    using std::placeholders::_1;
     // NOTE: Previously, we had been using std::transform with
-    // std::bind2nd(std::multiplies<double>(),factor)
+    // std::bind(std::multiplies<double>(), _1,factor)
     //       here, but that seemed to have strange effects in Windows Debug
     //       builds which caused the unit tests
     //       to sometimes fail.  Maybe this is some compiler bug to do with

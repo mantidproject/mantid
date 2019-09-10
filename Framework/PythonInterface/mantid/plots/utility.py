@@ -7,6 +7,8 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
+from matplotlib import cm
+
 from mantid.py3compat import Enum
 
 
@@ -18,3 +20,20 @@ class MantidAxType(Enum):
 
     BIN = 0
     SPECTRUM = 1
+
+
+def find_errorbar_container(line, containers):
+    """
+    Finds the ErrorbarContainer associated with the plot line.
+
+    :param line: Line that is looked for
+    :param containers: Collection of containers that contain `ErrorbarContainer`s
+    :return: The container that contains the line
+    """
+    for container in containers:
+        if line == container[0]:
+            return container
+
+
+def get_colormap_names():
+    return sorted([cmap for cmap in cm.cmap_d.keys() if not cmap.endswith('_r')])

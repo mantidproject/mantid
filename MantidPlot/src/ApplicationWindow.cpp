@@ -617,7 +617,7 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(
   auto &config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
-  if (facility.empty() || instrument.empty()) {
+  if (facility.empty()) {
     return true;
   } else {
     // check we can get the facility and instrument

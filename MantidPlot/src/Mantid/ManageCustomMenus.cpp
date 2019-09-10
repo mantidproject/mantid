@@ -21,7 +21,7 @@ using MantidQt::API::MantidDesktopServices;
  * @param parent :: pointer to the main MantidPlot ApplicationWindow object
  */
 ManageCustomMenus::ManageCustomMenus(QWidget *parent)
-    : QDialog(parent), m_scriptsTree(nullptr), m_menusTree(nullptr) {
+    : MantidDialog(parent), m_scriptsTree(nullptr), m_menusTree(nullptr) {
   m_uiForm.setupUi(this);
   m_appWindow = static_cast<ApplicationWindow *>(parent);
   initLayout();

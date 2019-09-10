@@ -154,7 +154,7 @@ public:
 
     TS_ASSERT_DELTA(firstGoodData, 0.167, 0.001);
     TS_ASSERT_DELTA(lastGoodData, 9.989, 0.001);
-    TS_ASSERT_DELTA(timeZero, 0.158, 0.001);
+    TS_ASSERT_DELTA(timeZero, 0.160, 0.001);
   }
 
   void test_temperatureFileLoaded() {

@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 class Observer(object):
@@ -29,9 +30,12 @@ class Observable(object):
     The Observable is an object which may be subscribed to by Observers. It maintains a list of subscribers to it,
     and when needed, it will notify those subscribers.
     """
-
     def __init__(self):
+        super(Observable, self).__init__()
         self._subscribers = []
+        self.thread_safe_update_call = QAppThreadCall(self._notify_subscribers_impl)
+        self.arg = None
+        self.kwargs = {}
 
     def add_subscriber(self, observer_instance):
         if not isinstance(observer_instance, Observer):
@@ -49,6 +53,9 @@ class Observable(object):
         return len(self._subscribers)
 
     def notify_subscribers(self, arg=None, **kwargs):
+        self.thread_safe_update_call(arg, **kwargs)
+
+    def _notify_subscribers_impl(self, arg, **kwargs):
         for observer in self._subscribers:
             observer.update(self, arg, **kwargs)
 

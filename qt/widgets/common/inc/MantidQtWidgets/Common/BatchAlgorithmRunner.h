@@ -17,19 +17,42 @@
 #include <Poco/NObserver.h>
 #include <Poco/Void.h>
 
+#include <QMetaType>
 #include <deque>
+#include <mutex>
 
 namespace MantidQt {
 namespace API {
-/**
- * Algorithm runner for execution of a queue of algorithms
-
-  @date 2014-08-10
-*/
-
-class BatchNotification : public Poco::Notification {
+class EXPORT_OPT_MANTIDQT_COMMON IConfiguredAlgorithm {
 public:
-  BatchNotification(bool inProgress, bool error)
+  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+
+  virtual Mantid::API::IAlgorithm_sptr algorithm() const = 0;
+  virtual AlgorithmRuntimeProps properties() const = 0;
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON ConfiguredAlgorithm
+    : public IConfiguredAlgorithm {
+public:
+  ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
+                      AlgorithmRuntimeProps properties);
+  virtual ~ConfiguredAlgorithm();
+
+  Mantid::API::IAlgorithm_sptr algorithm() const override;
+  AlgorithmRuntimeProps properties() const override;
+
+protected:
+  Mantid::API::IAlgorithm_sptr m_algorithm;
+
+private:
+  AlgorithmRuntimeProps m_properties;
+};
+
+using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
+
+class BatchCompleteNotification : public Poco::Notification {
+public:
+  BatchCompleteNotification(bool inProgress, bool error)
       : Poco::Notification(), m_inProgress(inProgress), m_error(error) {}
 
   bool isInProgress() const { return m_inProgress; }
@@ -40,13 +63,59 @@ private:
   bool m_error;
 };
 
+class BatchCancelledNotification : public Poco::Notification {
+public:
+  BatchCancelledNotification() : Poco::Notification() {}
+};
+
+class AlgorithmCompleteNotification : public Poco::Notification {
+public:
+  AlgorithmCompleteNotification(IConfiguredAlgorithm_sptr algorithm)
+      : Poco::Notification(), m_algorithm(algorithm) {}
+
+  IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+
+private:
+  IConfiguredAlgorithm_sptr m_algorithm;
+};
+
+class AlgorithmStartedNotification : public Poco::Notification {
+public:
+  AlgorithmStartedNotification(IConfiguredAlgorithm_sptr algorithm)
+      : Poco::Notification(), m_algorithm(algorithm) {}
+
+  IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+
+private:
+  IConfiguredAlgorithm_sptr m_algorithm;
+};
+
+class AlgorithmErrorNotification : public Poco::Notification {
+public:
+  AlgorithmErrorNotification(IConfiguredAlgorithm_sptr algorithm,
+                             std::string const &errorMessage)
+      : Poco::Notification(), m_algorithm(algorithm),
+        m_errorMessage(errorMessage) {}
+
+  IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
+  std::string errorMessage() const { return m_errorMessage; }
+
+private:
+  IConfiguredAlgorithm_sptr m_algorithm;
+  std::string m_errorMessage;
+};
+
+/**
+ * Algorithm runner for execution of a queue of algorithms
+
+ @date 2014-08-10
+*/
+
 class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
   Q_OBJECT
 
 public:
   using AlgorithmRuntimeProps = std::map<std::string, std::string>;
-  using ConfiguredAlgorithm =
-      std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>;
 
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
@@ -54,6 +123,7 @@ public:
   /// Adds an algorithm to the execution queue
   void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
                     AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
+  void setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithm);
   /// Clears all algorithms from queue
   void clearQueue();
   /// Gets size of queue
@@ -63,6 +133,8 @@ public:
   bool executeBatch();
   /// Starts the batch executing and returns immediately
   void executeBatchAsync();
+  /// Request to cancel processing the batch
+  void cancelBatch();
 
   /// Sets if the execuion should be stopped if an error is detected
   void stopOnFailure(bool stopOnFailure);
@@ -70,18 +142,31 @@ public:
 signals:
   /// Emitted when a batch has finished executing
   void batchComplete(bool error);
+  void batchCancelled();
+  void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
+  void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
+                      std::string errorMessage);
 
 private:
   /// Implementation of algorithm runner
   bool executeBatchAsyncImpl(const Poco::Void & /*unused*/);
   /// Sets up and executes an algorithm
-  bool executeAlgo(ConfiguredAlgorithm algorithm);
+  bool executeAlgo(IConfiguredAlgorithm_sptr algorithm);
 
-  /// Handler for batch completion
-  void handleNotification(const Poco::AutoPtr<BatchNotification> &pNf);
+  /// Handlers for notifications
+  void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);
+  void
+  handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf);
+  void handleAlgorithmStarted(
+      const Poco::AutoPtr<AlgorithmStartedNotification> &pNf);
+  void handleAlgorithmComplete(
+      const Poco::AutoPtr<AlgorithmCompleteNotification> &pNf);
+  void
+  handleAlgorithmError(const Poco::AutoPtr<AlgorithmErrorNotification> &pNf);
 
   /// The queue of algorithms to be executed
-  std::deque<ConfiguredAlgorithm> m_algorithms;
+  std::deque<IConfiguredAlgorithm_sptr> m_algorithms;
 
   /// The current algorithm being executed
   Mantid::API::IAlgorithm_sptr m_currentAlgorithm;
@@ -89,11 +174,25 @@ private:
   /// If execution should be stopped on algorithm failure
   bool m_stopOnFailure;
 
+  /// User has requested to cancel processing
+  bool m_cancelRequested;
+  std::mutex m_mutex;
+  void resetState();
+  bool cancelRequested();
+
   /// Notification center used to handle notifications from active method
   mutable Poco::NotificationCenter m_notificationCenter;
   /// Observer for notifications
-  Poco::NObserver<BatchAlgorithmRunner, BatchNotification>
-      m_notificationObserver;
+  Poco::NObserver<BatchAlgorithmRunner, BatchCompleteNotification>
+      m_batchCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, BatchCancelledNotification>
+      m_batchCancelledObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmStartedNotification>
+      m_algorithmStartedObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmCompleteNotification>
+      m_algorithmCompleteObserver;
+  Poco::NObserver<BatchAlgorithmRunner, AlgorithmErrorNotification>
+      m_algorithmErrorObserver;
 
   /// Active method to run batch runner on separate thread
   Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner,
@@ -101,8 +200,10 @@ private:
       m_executeAsync;
   /// Holds result of async execution
   Poco::ActiveResult<bool> executeAsync();
-};
 
+  void addAllObservers();
+  void removeAllObservers();
+};
 } // namespace API
 } // namespace MantidQt
 

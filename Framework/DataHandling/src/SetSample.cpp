@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -29,6 +30,8 @@
 namespace Mantid {
 namespace DataHandling {
 
+using API::ExperimentInfo;
+using API::Workspace_sptr;
 using Geometry::Goniometer;
 using Geometry::ReferenceFrame;
 using Geometry::SampleEnvironment;
@@ -221,7 +224,6 @@ const std::string SetSample::summary() const {
 std::map<std::string, std::string> SetSample::validateInputs() {
   using Kernel::PropertyManager;
   using Kernel::PropertyManager_const_sptr;
-  std::map<std::string, std::string> errors;
 
   auto existsAndNotEmptyString = [](const PropertyManager &pm,
                                     const std::string &name) {
@@ -242,6 +244,17 @@ std::map<std::string, std::string> SetSample::validateInputs() {
     }
     return false;
   };
+
+  std::map<std::string, std::string> errors;
+  // Check workspace type has ExperimentInfo fields
+  using API::ExperimentInfo_sptr;
+  using API::Workspace_sptr;
+  Workspace_sptr inputWS = getProperty(PropertyNames::INPUT_WORKSPACE);
+  if (!boost::dynamic_pointer_cast<ExperimentInfo>(inputWS)) {
+    errors[PropertyNames::INPUT_WORKSPACE] = "InputWorkspace type invalid. "
+                                             "Expected MatrixWorkspace, "
+                                             "PeaksWorkspace.";
+  }
 
   // Validate Environment
   const PropertyManager_const_sptr environArgs =
@@ -282,12 +295,13 @@ std::map<std::string, std::string> SetSample::validateInputs() {
  * Initialize the algorithm's properties.
  */
 void SetSample::init() {
+  using API::Workspace;
   using API::WorkspaceProperty;
   using Kernel::Direction;
   using Kernel::PropertyManagerProperty;
 
   // Inputs
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::InOut),
                   "A workspace whose sample properties will be updated");
   declareProperty(std::make_unique<PropertyManagerProperty>(
@@ -307,27 +321,29 @@ void SetSample::init() {
  * Execute the algorithm.
  */
 void SetSample::exec() {
-  using API::MatrixWorkspace_sptr;
+  using API::ExperimentInfo_sptr;
   using Kernel::PropertyManager_sptr;
 
-  MatrixWorkspace_sptr workspace = getProperty(PropertyNames::INPUT_WORKSPACE);
+  Workspace_sptr workspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   PropertyManager_sptr environArgs = getProperty(PropertyNames::ENVIRONMENT);
   PropertyManager_sptr geometryArgs = getProperty(PropertyNames::GEOMETRY);
   PropertyManager_sptr materialArgs = getProperty(PropertyNames::MATERIAL);
 
-  // The order here is important. Se the environment first. If this
+  // validateInputs guarantees this will be an ExperimentInfo object
+  auto experiment = boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
+  // The order here is important. Set the environment first. If this
   // defines a sample geometry then we can process the Geometry flags
   // combined with this
   const SampleEnvironment *sampleEnviron(nullptr);
   if (environArgs) {
-    sampleEnviron = setSampleEnvironment(workspace, environArgs);
+    sampleEnviron = setSampleEnvironment(*experiment, environArgs);
   }
 
   double sampleVolume = 0.;
   if (geometryArgs || sampleEnviron) {
-    setSampleShape(workspace, geometryArgs, sampleEnviron);
+    setSampleShape(*experiment, geometryArgs, sampleEnviron);
     // get the volume back out to use in setting the material
-    sampleVolume = CUBIC_METRE_TO_CM * workspace->sample().getShape().volume();
+    sampleVolume = CUBIC_METRE_TO_CM * experiment->sample().getShape().volume();
   }
 
   // Finally the material arguments
@@ -348,12 +364,12 @@ void SetSample::exec() {
 
 /**
  * Set the requested sample environment on the workspace
- * @param workspace A pointer to the workspace to be affected
+ * @param exptInfo A reference to the ExperimentInfo to receive the environment
  * @param args The dictionary of flags for the environment
  * @return A pointer to the new sample environment
  */
 const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
-    API::MatrixWorkspace_sptr &workspace,
+    API::ExperimentInfo &exptInfo,
     const Kernel::PropertyManager_const_sptr &args) {
   using Geometry::SampleEnvironmentFactory;
   using Geometry::SampleEnvironmentSpecFileFinder;
@@ -364,7 +380,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
-  auto instrument = workspace->getInstrument();
+  auto instrument = exptInfo.getInstrument();
   const auto &instOnWS = instrument->getName();
   const auto &config = ConfigService::Instance();
   std::string facilityName, instrumentName;
@@ -387,18 +403,18 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
   SampleEnvironmentFactory factory(std::move(finder));
   auto sampleEnviron =
       factory.create(facilityName, instrumentName, envName, canName);
-  workspace->mutableSample().setEnvironment(std::move(sampleEnviron));
-  return &(workspace->sample().getEnvironment());
+  exptInfo.mutableSample().setEnvironment(std::move(sampleEnviron));
+  return &(exptInfo.sample().getEnvironment());
 }
 
 /**
- * @param workspace A pointer to the workspace to be affected
+ * @param experiment A reference to the experiment to be affected
  * @param args The user-supplied dictionary of flags
  * @param sampleEnv A pointer to the sample environment if one exists, otherwise
  * null
  * @return A string containing the XML definition of the shape
  */
-void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
+void SetSample::setSampleShape(API::ExperimentInfo &experiment,
                                const Kernel::PropertyManager_const_sptr &args,
                                const Geometry::SampleEnvironment *sampleEnv) {
   using Geometry::Container;
@@ -410,10 +426,10 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
 
   // Try known shapes or CSG first if supplied
   if (args) {
-    const auto refFrame = workspace->getInstrument()->getReferenceFrame();
+    const auto refFrame = experiment.getInstrument()->getReferenceFrame();
     const auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
-      runSetSampleShape(workspace, xml);
+      CreateSampleShape::setSampleShape(experiment, xml);
       return;
     }
   }
@@ -436,12 +452,12 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
       // Given that the object is a CSG object, set the object
       // directly on the sample ensuring we preserve the
       // material.
-      const auto mat = workspace->sample().getMaterial();
+      const auto mat = experiment.sample().getMaterial();
       if (auto csgObj =
               boost::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
         csgObj->setMaterial(mat);
       }
-      workspace->mutableSample().setShape(shapeObject);
+      experiment.mutableSample().setShape(shapeObject);
     } else {
       throw std::runtime_error("The can does not define the sample shape. "
                                "Please either provide a 'Shape' argument "
@@ -590,7 +606,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   if (args.existsProperty(ShapeArgs::AXIS)) {
     const std::string axis = args.getPropertyValue(ShapeArgs::AXIS);
     if (axis.length() == 1) {
-      const unsigned axisId = static_cast<unsigned>(std::stoi(axis));
+      const auto axisId = static_cast<unsigned>(std::stoi(axis));
       XMLString << axisXML(axisId);
       baseCentre = cylBaseCentre(centre, height, axisId);
     } else {
@@ -600,7 +616,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
       baseCentre = cylBaseCentre(centre, height, axis);
     }
   } else {
-    const unsigned axisId = static_cast<unsigned>(refFrame.pointingUp());
+    const auto axisId = static_cast<unsigned>(refFrame.pointingUp());
     XMLString << axisXML(axisId);
     baseCentre = cylBaseCentre(centre, height, axisId);
   }
@@ -621,19 +637,6 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
 }
 
 /**
- * Run SetSampleShape as an algorithm to set the shape of the sample
- * @param workspace A reference to the workspace
- * @param xml A string containing the XML definition
- */
-void SetSample::runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
-                                  const std::string &xml) {
-  auto alg = createChildAlgorithm("CreateSampleShape");
-  alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);
-  alg->setProperty("ShapeXML", xml);
-  alg->executeAsChildAlg();
-}
-
-/**
  * Run the named child algorithm on the given workspace. It assumes an in/out
  * workspace property called InputWorkspace
  * @param name The name of the algorithm to run
@@ -641,7 +644,7 @@ void SetSample::runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
  * @param args A PropertyManager specifying the required arguments
  */
 void SetSample::runChildAlgorithm(const std::string &name,
-                                  API::MatrixWorkspace_sptr &workspace,
+                                  API::Workspace_sptr &workspace,
                                   const Kernel::PropertyManager &args) {
   auto alg = createChildAlgorithm(name);
   alg->setProperty(PropertyNames::INPUT_WORKSPACE, workspace);

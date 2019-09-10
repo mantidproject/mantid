@@ -1692,7 +1692,7 @@ double IndexingUtils::GetMagFFT(const std::vector<V3D> &q_vectors,
   for (const auto &q_vector : q_vectors) {
     q_vec = q_vector / (2.0 * M_PI);
     double dot_prod = current_dir.scalar_prod(q_vec);
-    size_t index = static_cast<size_t>(fabs(index_factor * dot_prod));
+    auto index = static_cast<size_t>(fabs(index_factor * dot_prod));
     if (index < N)
       projections[index] += 1;
     else

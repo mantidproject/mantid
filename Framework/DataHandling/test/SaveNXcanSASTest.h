@@ -60,6 +60,145 @@ public:
         saveAlg->setProperty("InputWorkspace", ws));
   }
 
+  void test_that_can_set_run_numbers_as_string_properties() {
+    auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "SaveNXcanSAS");
+    saveAlg->setChild(true);
+    saveAlg->initialize();
+
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set SampleTransmissionRunNumber property",
+        saveAlg->setProperty("SampleTransmissionRunNumber", "5"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set SampleDirectRunNumber property",
+        saveAlg->setProperty("SampleDirectRunNumber", "6"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set CanScatterRunNumber property",
+        saveAlg->setProperty("CanScatterRunNumber", "7"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set CanDirectRunNumber property",
+        saveAlg->setProperty("CanDirectRunNumber", "8"));
+  }
+
+  void
+  test_that_sample_run_numbers_included_if_sample_transmission_property_is_set() {
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.push_back("front-detector");
+    parameters.detectors.push_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.sampleDirectRun = "5";
+    parameters.canDirectRun = "6";
+    parameters.hasSampleRuns = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    // Create transmission can
+    NXcanSASTestTransmissionParameters transmissionParameters;
+    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
+    transmissionParameters.usesTransmission = true;
+
+    auto transmission = getTransmissionWorkspace(transmissionParameters);
+    setXValuesOn1DWorkspaceWithPointData(
+        transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+
+    // Act
+    save_file_no_issues(ws, parameters, transmission, nullptr);
+
+    // Assert
+    do_assert(parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+  }
+
+  void
+  test_that_can_run_numbers_included_if_can_transmission_property_is_set() {
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.push_back("front-detector");
+    parameters.detectors.push_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.sampleDirectRun = "5";
+    parameters.canDirectRun = "6";
+    parameters.hasCanRuns = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    // Create transmission can
+    NXcanSASTestTransmissionParameters transmissionCanParameters;
+    transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
+    transmissionCanParameters.usesTransmission = true;
+
+    auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
+    setXValuesOn1DWorkspaceWithPointData(transmissionCan,
+                                         transmissionCanParameters.xmin,
+                                         transmissionCanParameters.xmax);
+
+    // Act
+    save_file_no_issues(ws, parameters, nullptr, transmissionCan);
+
+    // Assert
+    do_assert(parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+  }
+
+  void
+  test_that_can_and_sample_runs_included_if_both_transmission_properties_are_set() {
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    parameters.detectors.push_back("front-detector");
+    parameters.detectors.push_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.sampleDirectRun = "5";
+    parameters.canDirectRun = "6";
+    parameters.hasCanRuns = true;
+    parameters.hasSampleRuns = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspaceWithPointData(ws, parameters.xmin, parameters.xmax);
+
+    parameters.idf = getIDFfromWorkspace(ws);
+
+    // Create transmission
+    NXcanSASTestTransmissionParameters transmissionParameters;
+    transmissionParameters.name = sasTransmissionSpectrumNameSampleAttrValue;
+    transmissionParameters.usesTransmission = true;
+
+    NXcanSASTestTransmissionParameters transmissionCanParameters;
+    transmissionCanParameters.name = sasTransmissionSpectrumNameCanAttrValue;
+    transmissionCanParameters.usesTransmission = true;
+
+    auto transmission = getTransmissionWorkspace(transmissionParameters);
+    setXValuesOn1DWorkspaceWithPointData(
+        transmission, transmissionParameters.xmin, transmissionParameters.xmax);
+
+    auto transmissionCan = getTransmissionWorkspace(transmissionCanParameters);
+    setXValuesOn1DWorkspaceWithPointData(transmissionCan,
+                                         transmissionCanParameters.xmin,
+                                         transmissionCanParameters.xmax);
+
+    // Act
+    save_file_no_issues(ws, parameters, transmission, transmissionCan);
+
+    // Assert
+    do_assert(parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+  }
+
   void test_that_1D_workspace_without_transmissions_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
@@ -258,6 +397,12 @@ private:
       saveAlg->setProperty("TransmissionCan", transmissionCan);
     }
 
+    saveAlg->setProperty("SampleTransmissionRunNumber",
+                         parameters.sampleTransmissionRun);
+    saveAlg->setProperty("SampleDirectRunNumber", parameters.sampleDirectRun);
+    saveAlg->setProperty("CanScatterRunNumber", parameters.canScatterRun);
+    saveAlg->setProperty("CanDirectRunNumber", parameters.canDirectRun);
+
     TSM_ASSERT_THROWS_NOTHING("Should not throw anything", saveAlg->execute());
     TSM_ASSERT("Should have executed", saveAlg->isExecuted());
   }
@@ -421,7 +566,10 @@ private:
     }
   }
 
-  void do_assert_process(H5::Group &process, const std::string &userFile) {
+  void do_assert_process(H5::Group &process, const bool &hasSampleRuns,
+                         const bool &hasCanRuns, const std::string &userFile,
+                         const std::string &sampleDirectRun,
+                         const std::string &canDirectRun) {
     auto numAttributes = process.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
@@ -457,6 +605,49 @@ private:
         Mantid::DataHandling::H5Util::readString(userFileDataSet);
     TSM_ASSERT_EQUALS("Should have the Mantid NXcanSAS process name",
                       userFileValue, userFile);
+
+    // Check note
+    if (hasSampleRuns || hasCanRuns) {
+      auto note = process.openGroup(sasNoteGroupName);
+      do_assert_process_note(note, hasSampleRuns, hasCanRuns, sampleDirectRun,
+                             canDirectRun);
+    }
+  }
+
+  void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns,
+                              const bool &hasCanRuns,
+                              const std::string &sampleDirectRun,
+                              const std::string canDirectRun) {
+    auto numAttributes = note.getNumAttrs();
+    TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
+
+    // canSAS_class and NX_class attribute
+    auto classAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(note, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASnote class", classAttribute,
+                      sasNoteClassAttr);
+
+    classAttribute =
+        Mantid::DataHandling::H5Util::readAttributeAsString(note, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXnote class", classAttribute,
+                      nxNoteClassAttr);
+
+    if (hasSampleRuns) {
+      auto sampleDirectRunDataSet =
+          note.openDataSet(sasProcessTermSampleDirect);
+      auto sampleDirectRunValue =
+          Mantid::DataHandling::H5Util::readString(sampleDirectRunDataSet);
+      TSM_ASSERT_EQUALS("Should have correct sample direct run number",
+                        sampleDirectRunValue, sampleDirectRun);
+    }
+
+    if (hasCanRuns) {
+      auto canDirectRunDataSet = note.openDataSet(sasProcessTermCanDirect);
+      auto canDirectRunValue =
+          Mantid::DataHandling::H5Util::readString(canDirectRunDataSet);
+      TSM_ASSERT_EQUALS("Should have correct can direct run number",
+                        canDirectRunValue, canDirectRun);
+    }
   }
 
   void do_assert_1D_vector_with_same_entries(H5::DataSet &dataSet,
@@ -791,7 +982,9 @@ private:
 
     // Check process
     auto process = entry.openGroup(sasProcessGroupName);
-    do_assert_process(process, parameters.userFile);
+    do_assert_process(process, parameters.hasSampleRuns, parameters.hasCanRuns,
+                      parameters.userFile, parameters.sampleDirectRun,
+                      parameters.canDirectRun);
 
     // Check data
     auto data = entry.openGroup(sasDataGroupName);

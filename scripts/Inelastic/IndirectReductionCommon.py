@@ -276,10 +276,14 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
         # Crop to the detectors required
         workspace = mtd[workspace_name]
 
-        CropWorkspace(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name,
-                      StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
-                      EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        try:
+            CropWorkspace(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
+                          EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        except RuntimeError:
+            raise RuntimeError('The spectra min {0} or spectra max {1} could not be found in workspace {2}.'
+                               .format(str(spec_min), str(spec_max), workspace_name))
 
 
 # -------------------------------------------------------------------------------
@@ -484,7 +488,6 @@ def unwrap_monitor(workspace_name):
         elif unwrap == 'BaseOnTimeRegime':
             mon_time = mtd[monitor_workspace_name].readX(0)[0]
             det_time = mtd[workspace_name].readX(0)[0]
-            logger.notice(str(mon_time) + " " + str(det_time))
             should_unwrap = mon_time == det_time
         else:
             should_unwrap = False

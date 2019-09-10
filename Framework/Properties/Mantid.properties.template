@@ -216,7 +216,7 @@ UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
 # Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
-ScriptRepository = http://download.mantidproject.org/scriptrepository/
+ScriptRepository = https://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;
 
@@ -234,3 +234,7 @@ projectRecovery.secondsBetween = 60
 
 # The number of checkpoints to retain in the recovery folder
 projectRecovery.numberOfCheckpoints = 5
+
+# The size of the project before a warning is given in bytes.
+# 10 GB = 10737418240 bytes
+projectSaving.warningSize = 10737418240

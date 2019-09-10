@@ -1,5 +1,3 @@
-.. _MantidUsedIconsTable:
-
 .. |copy| image:: images/LocalIcons/content-copy.png
 .. |paste| image:: images/LocalIcons/content-paste.png
 .. |cut| image:: images/LocalIcons/content-cut.png
@@ -20,7 +18,9 @@
 .. |refresh| image:: images/LocalIcons/twitter-retweet.png
 .. |home| image:: images/LocalIcons/home.png
 .. |pan| image:: images/LocalIcons/arrow-all.png
-.. |zoom| image:: images/LocalIcons/magnify-plus-outline.png
+.. |zoom| image:: images/LocalIcons/magnify.png
+.. |zoom-in| image:: images/LocalIcons/magnify-plus-outline.png
+.. |zoom-out| image:: images/LocalIcons/magnify-minus-outline.png
 .. |grid| image:: images/LocalIcons/grid.png
 .. |save| image:: images/LocalIcons/content-save.png
 .. |transfer-to-table| image:: images/LocalIcons/file-move.png
@@ -36,6 +36,8 @@
 .. |remove-table| image:: images/LocalIcons/table-remove.png
 .. |expand| image:: images/LocalIcons/expand-all.png
 .. |collapse| image:: images/LocalIcons/collapse-all.png
+
+.. _MantidUsedIconsTable:
 
 Mantid Icon Table
 #################
@@ -95,7 +97,11 @@ General Icons
 +---------------+-------------------------------------------+-----------------------------------+
 | Pan/Move      | "mdi.arrow-all"                           | |pan|                             |
 +---------------+-------------------------------------------+-----------------------------------+
-| Zoom In       | "mdi.magnify-plus-outline"                | |zoom|                            |
+| Zoom          | "mdi.magnify"                             | |zoom|                            |
++---------------+-------------------------------------------+-----------------------------------+
+| Zoom In       | "mdi.magnify-plus-outline"                | |zoom-in|                         |
++---------------+-------------------------------------------+-----------------------------------+
+| Zoom Out      | "mdi.magnify-minus-outline"               | |zoom-out|                        |
 +---------------+-------------------------------------------+-----------------------------------+
 | Grid          | "mdi.grid"                                | |grid|                            |
 +---------------+-------------------------------------------+-----------------------------------+

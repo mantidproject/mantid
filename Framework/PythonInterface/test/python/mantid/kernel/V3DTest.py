@@ -41,6 +41,16 @@ class V3DTest(unittest.TestCase):
         self.assertAlmostEquals(a.angle(c), math.pi / 4.0)
         self.assertAlmostEquals(a.angle(d), math.pi)
 
+    def test_cos_angle(self):
+        a = V3D(2.0, 0.0, 0.0)
+        b = V3D(0.0, 1.0, 0.0)
+        c = V3D(1.0, 1.0, 0.0)
+        d = V3D(-1.0, 0.0, 0.0)
+        self.assertAlmostEquals(a.cosAngle(a), 1.0)
+        self.assertAlmostEquals(a.cosAngle(b), 0.0)
+        self.assertAlmostEquals(a.cosAngle(c), 1.0 / np.sqrt(2.))
+        self.assertAlmostEquals(a.cosAngle(d), -1.0)
+
     def test_zenith(self):
         b = V3D(0.0, 0.0, 0.0)
         a = V3D(9.9, 7.6, 0.0)

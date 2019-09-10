@@ -738,6 +738,8 @@ std::string IndirectFittingModel::getResultXAxisUnit() const {
   return "MomentumTransfer";
 }
 
+std::string IndirectFittingModel::getResultLogName() const { return "axis-1"; }
+
 boost::optional<ResultLocation>
 IndirectFittingModel::getResultLocation(std::size_t index,
                                         std::size_t spectrum) const {
@@ -814,6 +816,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("PassWSIndexToFunction", true);
+  fitAlgorithm->setProperty("LogName", getResultLogName());
 
   const auto range = initialFitData->getRange(0);
   fitAlgorithm->setProperty("StartX", range.first);

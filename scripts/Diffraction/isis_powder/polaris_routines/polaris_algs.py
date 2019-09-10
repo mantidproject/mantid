@@ -12,7 +12,6 @@ from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 from isis_powder.polaris_routines import polaris_advanced_config
-from six import PY3
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
@@ -60,15 +59,6 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
                                      vanadium_string=vanadium_runs, grouping_file_name=grouping_file_name)
-
-
-def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
-    bragg_masking_list = _read_masking_file(mask_path)
-    masked_workspace_list = _apply_bragg_peaks_masking(bank_spectra, mask_list=bragg_masking_list)
-    output = common.spline_workspaces(focused_vanadium_spectra=masked_workspace_list,
-                                      num_splines=spline_number)
-    common.remove_intermediate_workspace(masked_workspace_list)
-    return output
 
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
@@ -125,48 +115,6 @@ def _obtain_focused_run(run_number, focus_file_path):
                              "Please ensure a focused file has been produced and is located in the output directory."
                              % run_number)
     return focused_ws
-
-
-def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
-    output_workspaces = list(workspaces_to_mask)
-
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
-            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
-                                                          OutputWorkspace=output_name,
-                                                          XMin=mask_params[0], XMax=mask_params[1])
-    return output_workspaces
-
-
-def _read_masking_file(masking_file_path):
-    all_banks_masking_list = []
-    bank_masking_list = []
-    ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
-
-    # Python 3 requires the encoding to be included so an Angstrom
-    # symbol can be read, I'm assuming all file read here are
-    # `latin-1` which may not be true in the future. Python 2 `open`
-    # doesn't have an encoding option
-    if PY3:
-        encoding = {"encoding": "latin-1"}
-    else:
-        encoding = {}
-    with open(masking_file_path, **encoding) as mask_file:
-        for line in mask_file:
-            if line.startswith(ignore_line_prefixes):
-                # Push back onto new bank
-                if bank_masking_list:
-                    all_banks_masking_list.append(bank_masking_list)
-                bank_masking_list = []
-            else:
-                # Parse and store in current list
-                line.rstrip()
-                bank_masking_list.append(line.split())
-
-    if bank_masking_list:
-        all_banks_masking_list.append(bank_masking_list)
-    return all_banks_masking_list
 
 
 def _determine_chopper_mode(ws):

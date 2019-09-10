@@ -21,17 +21,8 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
                                    CAN_AND_SAMPLE_WORKSPACE)
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
+from sans.gui_logic.plotting import get_plotting_module
 from sans.state.data import StateData
-
-from qtpy import PYQT4
-if PYQT4:
-    try:
-        from mantidplot import graph, plotSpectrum
-        IN_MANTIDPLOT = True
-    except ImportError:
-        IN_MANTIDPLOT = False
-else:
-    from mantidqt.plotting.functions import plot
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -172,16 +163,22 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         if not event_slice_optimisation and plot_results:
             # Plot results is intended to show the result of each workspace/slice as it is reduced
             # as we reduce in bulk, it is not possible to plot live results while in event_slice mode
-            if PYQT4:
-                plot_workspace(reduction_package, output_graph)
-            elif output_graph:
-                plot_workspace_matplotlib(reduction_package, output_graph)
+            plot_workspace(reduction_package, output_graph)
         # -----------------------------------
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can,
                                      event_slice_optimisation=event_slice_optimisation)
 
+    data = state.data
+    additional_run_numbers = {"SampleTransmissionRunNumber":
+                              "" if data.sample_transmission is None else str(data.sample_transmission),
+                              "SampleDirectRunNumber":
+                              "" if data.sample_direct is None else str(data.sample_direct),
+                              "CanScatterRunNumber":
+                              "" if data.can_scatter is None else str(data.can_scatter),
+                              "CanDirectRunNumber":
+                              "" if data.can_direct is None else str(data.can_direct)}
     # --------------------------------
     # Perform output of all workspaces
     # --------------------------------
@@ -195,10 +192,10 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     #    * This means that we need to save out the reduced data
     #    * The data is already on the ADS, so do nothing
     if output_mode is OutputMode.SaveToFile:
-        save_to_file(reduction_packages, save_can, event_slice_optimisation=event_slice_optimisation)
+        save_to_file(reduction_packages, save_can, additional_run_numbers, event_slice_optimisation=event_slice_optimisation)
         delete_reduced_workspaces(reduction_packages)
     elif output_mode is OutputMode.Both:
-        save_to_file(reduction_packages, save_can, event_slice_optimisation=event_slice_optimisation)
+        save_to_file(reduction_packages, save_can, additional_run_numbers, event_slice_optimisation=event_slice_optimisation)
 
     # -----------------------------------------------------------------------
     # Clean up other workspaces if the optimizations have not been turned on.
@@ -234,12 +231,29 @@ def load_workspaces_from_states(state):
 # ----------------------------------------------------------------------------------------------------------------------
 def plot_workspace(reduction_package, output_graph):
     """
+    Plotting continuous output. Decides on the backend to use based on availability
+
+    :param reduction_package: An object containing the reduced workspaces
+    :param output_graph: Name to the plot window
+    """
+    plotting_module = get_plotting_module()
+    if hasattr(plotting_module, 'graph'):
+        plot_workspace_mantidplot(reduction_package, output_graph, plotting_module)
+    else:
+        plot_workspace_mantidqt(reduction_package, output_graph, plotting_module)
+
+
+def plot_workspace_mantidplot(reduction_package, output_graph, plotting_module):
+    """
     Plotting continuous output when on MantidPlot
     This function should be deleted if and when MantidPlot is no longer a part of Mantid
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: Name to the plot window
+    :param plotting_module: The MantidPlot plotting module
     """
+    plotSpectrum, graph = plotting_module.plotSpectrum, plotting_module.graph
+
     if reduction_package.reduction_mode == ISISReductionMode.All:
         graph_handle = plotSpectrum([reduction_package.reduced_hab, reduction_package.reduced_lab], 0,
                                     window=graph(output_graph), clearWindow=True)
@@ -257,13 +271,16 @@ def plot_workspace(reduction_package, output_graph):
         graph_handle.activeLayer().logLogAxes()
 
 
-def plot_workspace_matplotlib(reduction_package, output_graph):
+def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
     """
     Continuous plotting using a matplotlib backend.
 
     :param reduction_package: An object containing the reduced workspaces
     :param output_graph: A matplotlib fig
+    :param plotting_module: The mantidqt plotting module
     """
+    plot = plotting_module.plot
+
     plot_kwargs = {"scalex": True,
                    "scaley": True}
     if reduction_package.reduction_mode == ISISReductionMode.All:
@@ -1151,13 +1168,18 @@ def rename_group_workspace(name_of_workspace, name_of_group_workspace):
     rename_alg.execute()
 
 
-def save_to_file(reduction_packages, save_can, event_slice_optimisation=False):
+def save_to_file(reduction_packages, save_can, additional_run_numbers, event_slice_optimisation=False):
     """
     Extracts all workspace names which need to be saved and saves them into a file.
 
     :param reduction_packages: a list of reduction packages which contain all the relevant information for saving
-    :param save_can: a bool. When true save the unsubtracted can and sample workspaces
-    :param event_slice_optimisation: an optional bool. If true then reduction packages contain event slice data
+    :type reduction_packages: list
+    :param save_can: When true save the unsubtracted can and sample workspaces
+    :type save_can: bool
+    :param additional_run_numbers: Workspace type to run number
+    :type additional_run_numbers: dict
+    :param event_slice_optimisation: optional. If true then reduction packages contain event slice data
+    :type event_slice_optimisation: bool
     """
     if not event_slice_optimisation:
         workspaces_names_to_save = get_all_names_to_save(reduction_packages, save_can=save_can)
@@ -1172,9 +1194,10 @@ def save_to_file(reduction_packages, save_can, event_slice_optimisation=False):
             transmission = name_to_save[1]
             transmission_can = name_to_save[2]
             name_to_save = name_to_save[0]
-            save_workspace_to_file(name_to_save, file_formats, name_to_save, transmission, transmission_can)
+            save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers,
+                                   transmission, transmission_can)
         else:
-            save_workspace_to_file(name_to_save, file_formats, name_to_save)
+            save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
@@ -1395,13 +1418,15 @@ def get_event_slice_names_to_save(reduction_packages, save_can):
     return set(names_to_save)
 
 
-def save_workspace_to_file(workspace_name, file_formats, file_name,
+def save_workspace_to_file(workspace_name, file_formats, file_name, additional_run_numbers,
                            transmission_name='', transmission_can_name=''):
     """
     Saves the workspace to the different file formats specified in the state object.
 
     :param workspace_name: the name of the output workspace and also the name of the file
     :param file_formats: a list of file formats to save
+    :param file_name: name of file to save
+    :param additional_run_numbers: a dict of workspace type to run number
     :param transmission_name: name of sample transmission workspace to save to file
             for CanSAS algorithm. Only some workspaces have a corresponding transmission workspace.
     :param transmission_can_name: name of can transmission workspace. As above.
@@ -1411,6 +1436,7 @@ def save_workspace_to_file(workspace_name, file_formats, file_name,
     save_options.update({"Filename": file_name,
                          "Transmission": transmission_name,
                          "TransmissionCan": transmission_can_name})
+    save_options.update(additional_run_numbers)
 
     if SaveType.Nexus in file_formats:
         save_options.update({"Nexus": True})

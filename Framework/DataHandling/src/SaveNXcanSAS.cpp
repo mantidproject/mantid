@@ -367,6 +367,39 @@ void addProcess(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace,
                                       std::to_string(canRun));
 }
 
+/**
+ * Create a note class within process
+ * @param group: the sasEntry
+ */
+void createNote(H5::Group &group) {
+  auto process = group.openGroup(sasProcessGroupName);
+  auto note = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
+}
+
+/**
+ * Add a note containing sample or can run numbers to the process group.
+ * We can add two sample runs, direct and trans, and two can runs, scatter and
+ * direct. Sample Scatter and Can Transmission are added to the data elsewhere
+ * @param group: the sasEntry
+ * @param firstEntryName: string containing the name of the first value to save
+ * @param firstEntryValue: string containing the first value to save
+ * @param secondEntryName: string contianing the name of the second value to
+ * save
+ * @param secondEntryValue: string containing the second value to save
+ */
+void addNoteToProcess(H5::Group &group, const std::string &firstEntryName,
+                      const std::string &firstEntryValue,
+                      const std::string &secondEntryName,
+                      const std::string &secondEntryValue) {
+  auto process = group.openGroup(sasProcessGroupName);
+  auto note = process.openGroup(sasNoteGroupName);
+
+  // Populate note
+  Mantid::DataHandling::H5Util::write(note, firstEntryName, firstEntryValue);
+  Mantid::DataHandling::H5Util::write(note, secondEntryName, secondEntryValue);
+}
+
 WorkspaceDimensionality
 getWorkspaceDimensionality(Mantid::API::MatrixWorkspace_sptr workspace) {
   auto numberOfHistograms = workspace->getNumberHistograms();
@@ -795,6 +828,16 @@ void SaveNXcanSAS::init() {
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace of the Can. Optional. If given, will be "
       "saved at TransmissionSpectrum");
+
+  declareProperty(
+      "SampleTransmissionRunNumber", "",
+      "The run number for the sample transmission workspace. Optional.");
+  declareProperty("SampleDirectRunNumber", "",
+                  "The run number for the sample direct workspace. Optional.");
+  declareProperty("CanScatterRunNumber", "",
+                  "The run number for the can scatter workspace. Optional.");
+  declareProperty("CanDirectRunNumber", "",
+                  "The run number for the can direct workspace. Optional.");
 }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
@@ -874,12 +917,30 @@ void SaveNXcanSAS::exec() {
   const auto detectors = splitDetectorNames(detectorNames);
   addInstrument(sasEntry, workspace, radiationSource, detectors);
 
+  // Get additional run numbers
+  const auto sampleTransmissionRun =
+      getPropertyValue("SampleTransmissionRunNumber");
+  const auto sampleDirectRun = getPropertyValue("SampleDirectRunNumber");
+  const auto canScatterRun = getPropertyValue("CanScatterRunNumber");
+  const auto canDirectRun = getPropertyValue("CanDirectRunNumber");
+
   // Add the process information
   progress.report("Adding process information.");
   if (transmissionCan) {
     addProcess(sasEntry, workspace, transmissionCan);
   } else {
     addProcess(sasEntry, workspace);
+  }
+
+  if (transmissionCan || transmissionSample) {
+    createNote(sasEntry);
+    if (transmissionCan)
+      addNoteToProcess(sasEntry, sasProcessTermCanScatter, canScatterRun,
+                       sasProcessTermCanDirect, canDirectRun);
+    if (transmissionSample)
+      addNoteToProcess(sasEntry, sasProcessTermSampleTrans,
+                       sampleTransmissionRun, sasProcessTermSampleDirect,
+                       sampleDirectRun);
   }
 
   // Add the transmissions for sample

@@ -318,12 +318,12 @@ MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization,
   std::vector<coord_t> otherDimValues;
   for (size_t i = 4; i < m_inputWS->getNumDims(); i++) {
     const auto dimension = m_inputWS->getDimension(i);
-    float dimMin = static_cast<float>(dimension->getMinimum());
-    float dimMax = static_cast<float>(dimension->getMaximum());
+    auto dimMin = static_cast<float>(dimension->getMinimum());
+    auto dimMax = static_cast<float>(dimension->getMaximum());
     auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         currentRun.getProperty(dimension->getName()));
     if (dimProp) {
-      coord_t value = static_cast<coord_t>(dimProp->firstValue());
+      auto value = static_cast<coord_t>(dimProp->firstValue());
       otherDimValues.push_back(value);
       // in the original MD data no time was spent measuring between dimMin and
       // dimMax
@@ -483,7 +483,7 @@ void MDNormDirectSC::calculateNormalization(
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mapping
-  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
+  const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");

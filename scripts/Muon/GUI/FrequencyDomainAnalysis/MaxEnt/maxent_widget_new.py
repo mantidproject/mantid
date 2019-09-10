@@ -35,3 +35,6 @@ class MaxEntWidget(QtWidgets.QWidget):
 
     def closeEvent(self, event):
         self._presenter.cancel()
+
+    def update_view_from_model(self):
+        self._presenter.update_view_from_model()

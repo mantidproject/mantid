@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -59,10 +59,8 @@ bool isFloatArray(PyObject *obj) {
  */
 bool typesEqual(PyObject *first, PyObject *second) {
 #if NPY_API_VERSION >= 0x00000007 // 1.7
-  const PyArrayObject *firstArray =
-      reinterpret_cast<const PyArrayObject *>(first);
-  const PyArrayObject *secondArray =
-      reinterpret_cast<const PyArrayObject *>(second);
+  const auto *firstArray = reinterpret_cast<const PyArrayObject *>(first);
+  const auto *secondArray = reinterpret_cast<const PyArrayObject *>(second);
 #else
   PyArrayObject *firstArray = (PyArrayObject *)first;
   PyArrayObject *secondArray = (PyArrayObject *)second;

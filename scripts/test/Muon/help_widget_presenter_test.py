@@ -7,14 +7,15 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
 from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
 
 
 
-class HelpWidgetPresenterTest(GuiTest):
+@start_qapplication
+class HelpWidgetPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = HelpWidgetView("test")
         self.presenter = HelpWidgetPresenter(self.view)

@@ -35,9 +35,9 @@ def estimate_group_asymmetry_data(context, group_name, run, rebin):
 
     params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
     params["InputWorkspace"] = processed_data
-    group_asymmetry = algorithm_utils.run_MuonGroupingAsymmetry(params)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params)
 
-    return group_asymmetry
+    return group_asymmetry, group_asymmetry_unnorm
 
 
 def _run_pre_processing(context, run, rebin):

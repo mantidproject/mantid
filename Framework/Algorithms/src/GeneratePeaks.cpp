@@ -633,7 +633,7 @@ void GeneratePeaks::getSpectraSet(
 
   for (size_t ipk = 0; ipk < numpeaks; ipk++) {
     // Spectrum
-    specnum_t specid = static_cast<specnum_t>((*col)[ipk]);
+    auto specid = static_cast<specnum_t>((*col)[ipk]);
     m_spectraSet.insert(specid);
 
     std::stringstream outss;

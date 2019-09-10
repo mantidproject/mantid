@@ -224,7 +224,6 @@ public:
   GenericDialog(QWidget *parent = nullptr);
 };
 
-
 class UserSubWindow : QMainWindow {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -232,6 +231,32 @@ using namespace MantidQt::API;
 %End
 private:
   UserSubWindow(QWidget *parent = nullptr);
+};
+
+class BaseEncoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseEncoder.h"
+%End
+public:
+  virtual QMap<QString, QVariant> encode(const QWidget *window,
+                                         const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseEncoder();
+  virtual ~BaseEncoder();
+};
+
+class BaseDecoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseDecoder.h"
+%End
+public:
+  virtual QWidget * decode(const QMap<QString, QVariant> &map,
+                          const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseDecoder();
+  virtual ~BaseDecoder();
 };
 
 class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
@@ -247,6 +272,9 @@ public:
     UserSubWindow *createUnwrapped(const std::string &name) const;
     QSet<QString> categories(const QString &interfaceName) const;
     QStringList keys() const;
+    BaseEncoder *findEncoder(QWidget *window);
+    BaseDecoder *findDecoder(const std::string &decodeString);
+
 
 private:
   UserSubWindowFactoryImpl();
@@ -357,6 +385,7 @@ class ManageUserDirectories : QDialog {
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
   static void openUserDirsDialog(QWidget *parent);
+  void setHelpButtonVisible(const bool &visible /TransferThis/ );
 };
 
 // ---------------------------------
@@ -391,8 +420,9 @@ public:
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void setTextPlotGuess(const QString);
+    bool plotDiff() const;
 
-    SIP_PYOBJECT defaultPeakType() const;
+    SIP_PYOBJECT defaultPeakType();
 %MethodCode
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());
@@ -412,6 +442,8 @@ public:
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    void normaliseData(bool on);
+    QMenu *getFitMenu() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -440,6 +472,7 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+
 };
 
 // ---------------------------------
@@ -541,7 +574,11 @@ public:
                                      int column,
                                      const std::string& oldValue,
                                      const std::string& newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
+  virtual void notifyAppendAndEditAtChildRowRequested() = 0;
+  virtual void notifyAppendAndEditAtRowBelowRequested() = 0;
+  virtual void notifyEditAtRowAboveRequested() = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
@@ -560,7 +597,7 @@ public:
     JobTreeView(const QStringList &columnHeadings, const Cell& defaultCellStyle,
      QWidget *parent = nullptr);
 
-    void subscribe(JobTreeViewSubscriber& subscriber);
+    void subscribe(JobTreeViewSubscriber *subscriber);
     MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
      &parent, int beforeRow,
                           const std::vector<Cell> &rowText);
@@ -571,6 +608,9 @@ public:
     MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
     &parentLocation,
                           const std::vector<Cell> &rowText);
+    void appendAndEditAtChildRow();
+    void appendAndEditAtRowBelow();
+    void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
     void removeAllRows();
@@ -663,7 +703,11 @@ public:
                                      int column,
                                      const std::string &oldValue,
                                      const std::string &newValue);
+  virtual void notifySelectionChanged();
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyAppendAndEditAtChildRowRequested();
+  virtual void notifyAppendAndEditAtRowBelowRequested();
+  virtual void notifyEditAtRowAboveRequested();
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
@@ -677,11 +721,13 @@ signals:
                        std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
-
 };
 
 
@@ -759,8 +805,13 @@ public:
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
     %End
+    SIP_PYOBJECT getFunctionByIndex(const QString &index);
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionByIndex(*a0));
+    %End
 signals:
     void functionStructureChanged();
+    void parameterChanged(const QString &funcIndex, const QString &paramName);
 };
 
 // ---------------------------------

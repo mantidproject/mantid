@@ -13,7 +13,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {

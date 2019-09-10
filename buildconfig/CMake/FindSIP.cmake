@@ -31,7 +31,15 @@ IF(SIP_VERSION)
   SET(SIP_FOUND TRUE)
 ELSE(SIP_VERSION)
 
-  FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+  if (EXISTS "${CMAKE_MODULE_PATH}/FindSIP.py")
+    set (_find_sip_py "${CMAKE_MODULE_PATH}/FindSIP.py")
+  else()
+    FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+  endif()
+
+  if (NOT EXISTS ${_find_sip_py})
+    message(FATAL_ERROR "Failed to find FindSIP.py in \"${CMAKE_MODULE_PATH}\"")
+  endif()
 
   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
   IF(sip_config)

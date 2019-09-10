@@ -492,7 +492,7 @@ void SaveISISNexus::detector_1() {
   NXopengroup(handle, "detector_1", "NXdata");
 
   for (int i = 0; i < nmon; ++i) {
-    int si = int(std::distance(
+    auto si = int(std::distance(
         m_isisRaw.spec,
         std::find(m_isisRaw.spec, m_isisRaw.spec + nsp, m_isisRaw.mdet[i])));
     monitor_index[si] = i;
@@ -817,13 +817,14 @@ void SaveISISNexus::runlog() {
   fil.close();
 
   run_status_vec.resize(time_vec.size());
+  using std::placeholders::_1;
   std::transform(is_running_vec.begin(), is_running_vec.end(),
-                 run_status_vec.begin(), std::bind2nd(std::plus<int>(), 1));
+                 run_status_vec.begin(), std::bind(std::plus<int>(), _1, 1));
 
   NXmakegroup(handle, "runlog", "IXrunlog");
   NXopengroup(handle, "runlog", "IXrunlog");
 
-  int time_vec_size = static_cast<int>(time_vec.size());
+  auto time_vec_size = static_cast<int>(time_vec.size());
 
   write_runlog("period", &time_vec[0], &period_vec[0], NX_INT32, time_vec_size,
                "none");

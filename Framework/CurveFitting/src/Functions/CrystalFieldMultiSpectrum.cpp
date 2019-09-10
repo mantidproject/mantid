@@ -260,7 +260,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
     m_physprops.resize(nSpec, 0); // Assume no physical properties - just INS
   } else if (physprops.size() != nSpec) {
     if (physprops.size() == 1) {
-      int physprop = static_cast<int>(physprops.front());
+      auto physprop = static_cast<int>(physprops.front());
       m_physprops.resize(nSpec, physprop);
     } else {
       throw std::runtime_error("Vector of PhysicalProperties must have same "

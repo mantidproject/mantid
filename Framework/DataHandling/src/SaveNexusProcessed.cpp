@@ -106,7 +106,7 @@ void SaveNexusProcessed::getWSIndexList(
   const bool interval = (spec_max != Mantid::EMPTY_INT());
   if (spec_max == Mantid::EMPTY_INT())
     spec_max = 0;
-  const int numberOfHist =
+  const auto numberOfHist =
       static_cast<int>(matrixWorkspace->getNumberHistograms());
 
   if (interval) {
@@ -525,6 +525,10 @@ bool SaveNexusProcessed::processGroups() {
   if (!workspaces.empty()) {
     for (size_t entry = 0; entry < workspaces.size(); entry++) {
       const Workspace_sptr ws = workspaces[entry];
+      if (ws->isGroup()) {
+        throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
+                                 "support nested groups of groups");
+      }
       this->doExec(ws, nexusFile, true /*keepFile*/, entry);
       g_log.information() << "Saving group index " << entry << "\n";
     }
@@ -556,7 +560,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
   }
   // Start the detector group
 
-  const int numberSpec = int(wsIndices.size());
+  const auto numberSpec = int(wsIndices.size());
   // allocate space for the Nexus Muon format of spectra-detector mapping
   // allow for writing one more than required
   std::vector<int32_t> detector_index(numberSpec + 1, 0);
@@ -575,7 +579,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
 
     // The detectors in this spectrum
     const auto &detectorgroup = spectrum.getDetectorIDs();
-    const int ndet1 = static_cast<int>(detectorgroup.size());
+    const auto ndet1 = static_cast<int>(detectorgroup.size());
 
     // points to start of detector list for the next spectrum
     detector_index[i + 1] = int32_t(detector_index[i] + ndet1);
@@ -646,7 +650,7 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(
     const API::MatrixWorkspace &ws, ::NeXus::File *file,
     const std::vector<int> &wsIndices,
     const ::NeXus::NXcompression compression) const {
-  const int numberSpec = int(wsIndices.size());
+  const auto numberSpec = int(wsIndices.size());
   std::vector<int32_t> spectra;
   spectra.reserve(static_cast<size_t>(numberSpec));
   for (const auto index : wsIndices) {

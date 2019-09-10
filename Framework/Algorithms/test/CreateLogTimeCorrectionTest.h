@@ -67,7 +67,7 @@ public:
     TS_ASSERT(outws);
 
     int numrows = static_cast<int>(outws->rowCount());
-    TS_ASSERT_EQUALS(numrows, 7392);
+    TS_ASSERT_EQUALS(numrows, 24900);
 
     // get some value to check
     double l1 = 43.754;

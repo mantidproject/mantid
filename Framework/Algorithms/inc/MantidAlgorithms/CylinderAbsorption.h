@@ -96,11 +96,12 @@ private:
   void initialiseCachedDistances() override;
   void getShapeFromSample(const Geometry::IObject &sampleShape,
                           bool updateHeight, bool updateRadius);
-
-  double m_cylHeight; ///< The height of the cylindrical sample in m
-  double m_cylRadius; ///< The radius of the cylindrical sample in m
-  int m_numSlices;    ///< The number of slices
-  int m_numAnnuli;    ///< The number of annuli
+  std::map<std::string, std::string> validateInputs() override;
+  Kernel::V3D m_cylAxis; ///< The axis orientation of the cylinder
+  double m_cylHeight;    ///< The height of the cylindrical sample in m
+  double m_cylRadius;    ///< The radius of the cylindrical sample in m
+  int m_numSlices;       ///< The number of slices
+  int m_numAnnuli;       ///< The number of annuli
   bool m_useSampleShape;
 };
 

@@ -4,18 +4,18 @@
 Fit Model Choices 
 =================
 
-Mantid containing a constant increasing catalog of predefined fitting
-function which can be used to create a model. Some of these well be
-demonstrated here. In addition create new fitting function using the Fit
-Function toolbox or by extending Mantid using either a plugin mechanism.
-The former will be covered here.
+Mantid contains a constantly increasing catalog of predefined fitting
+function which can be used to create a model. Some of these will be
+demonstrated here. In addition, it is possible to create new fitting
+functions using the Fit Function toolbox, or by extending Mantid using
+a plugin mechanism. The former will be covered here.
 
 Multiple peaks + background
 ===========================
 
-Mantid allows one to fit overlapping peaks on a common background. Just
-follow the steps described earlier to add more peaks to the model. The
-peaks don't have to be of the same type.
+Mantid provides the ability to fit overlapping peaks on a common
+background. Just follow the steps described earlier to add more peaks
+to the model. The peaks don't have to be of the same type.
 
 .. figure:: /images/FittingMultiplePeaks.png
    :alt: FittingMultiplePeaks.png
@@ -24,7 +24,7 @@ peaks don't have to be of the same type.
 Non peak model + background
 ===========================
 
-Mantid fitting tool isn't limited to peaks and backgrounds. You can
+The Mantid fitting tool isn't limited to peaks and backgrounds. You can
 select any other function from a list offered by the "Add other
 function.." option.
 

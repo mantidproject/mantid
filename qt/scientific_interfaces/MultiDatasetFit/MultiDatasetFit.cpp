@@ -664,7 +664,13 @@ double MultiDatasetFit::getLocalParameterValue(const QString &parName,
 void MultiDatasetFit::reset() {
   m_functionBrowser->setNumberOfDatasets(getNumberOfSpectra());
   setParameterNamesForPlotting();
-  m_plotController->setGuessFunction(m_functionBrowser->getFunctionString());
+  try {
+    m_plotController->setGuessFunction(m_functionBrowser->getFunctionString());
+  } catch (const std::runtime_error &e) {
+    m_plotController->setGuessFunction("");
+    m_functionBrowser->clear();
+    QMessageBox::warning(this, "Mantid - Warning", e.what());
+  }
 }
 
 /// Check if a local parameter is fixed

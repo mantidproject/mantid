@@ -97,7 +97,7 @@ class FitInformationTest(unittest.TestCase):
     def test_logs_from_workspace_without_logs_returns_emtpy_list(self):
         fake_ws = create_test_workspace()
         fit = FitInformation(mock.MagicMock(), 'func1', fake_ws.name(),
-                             mock.MagicMock())
+                             fake_ws.name())
 
         allowed_logs = fit.log_names()
         self.assertEqual(0, len(allowed_logs))
@@ -107,7 +107,7 @@ class FitInformationTest(unittest.TestCase):
         single_value_logs = (('sv_1', 'val1'), ('sv_2', 'val2'))
         fake_ws = create_test_workspace(time_series_logs=time_series_logs)
         fit = FitInformation(mock.MagicMock(), 'func1', fake_ws.name(),
-                             mock.MagicMock())
+                             fake_ws.name())
 
         log_names = fit.log_names()
         for name, _ in time_series_logs:
@@ -126,7 +126,7 @@ class FitInformationTest(unittest.TestCase):
         fake2 = create_test_workspace(
             ws_name='fake2', time_series_logs=time_series_logs[2:])
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], mock.MagicMock())
+                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
 
         log_names = fit.log_names()
         self.assertEqual(len(time_series_logs), len(log_names))
@@ -140,7 +140,7 @@ class FitInformationTest(unittest.TestCase):
         fake1 = create_test_workspace(
             ws_name='fake1', time_series_logs=time_series_logs)
         fit = FitInformation(mock.MagicMock(), 'func1', fake1.name(),
-                             mock.MagicMock())
+                             fake1.name())
 
         log_names = fit.log_names(lambda log: log.name == 'ts_1')
         self.assertEqual(1, len(log_names))
@@ -153,7 +153,7 @@ class FitInformationTest(unittest.TestCase):
         fake2 = create_test_workspace(
             ws_name='fake2', time_series_logs=time_series_logs)
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], mock.MagicMock())
+                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
 
         self.assertTrue(fit.has_log('ts_1'))
 
@@ -163,7 +163,7 @@ class FitInformationTest(unittest.TestCase):
             ws_name='fake1', time_series_logs=time_series_logs)
         fake2 = create_test_workspace(ws_name='fake2')
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], mock.MagicMock())
+                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
 
         self.assertFalse(
             fit.has_log('ts_1'),
@@ -174,7 +174,7 @@ class FitInformationTest(unittest.TestCase):
         fake1 = create_test_workspace(
             ws_name='fake1', string_value_logs=single_value_logs)
         fit = FitInformation(mock.MagicMock(), 'func1', [fake1.name()],
-                             mock.MagicMock())
+                             [fake1.name()])
 
         self.assertEqual(
             float(single_value_logs[0][1]),
@@ -187,8 +187,7 @@ class FitInformationTest(unittest.TestCase):
              ("2000-05-01T12:00:10", 20.),
              ("2000-05-01T12:05:00", 30.)))]
         fake1 = create_test_workspace('fake1', time_series_logs)
-        fit = FitInformation(mock.MagicMock(), 'func1', [fake1.name()],
-                             mock.MagicMock())
+        fit = FitInformation(mock.MagicMock(), 'func1', [fake1.name()], [fake1.name()], )
 
         time_average = (10 * 5 + 290 * 20) / 300.
         self.assertAlmostEqual(time_average, fit.log_value('ts_1'), places=6)
@@ -206,7 +205,7 @@ class FitInformationTest(unittest.TestCase):
              ("2000-05-01T12:05:00", 40.)))]
         fake2 = create_test_workspace('fake2', time_series_logs2)
         fit = FitInformation(mock.MagicMock(), 'func1',
-                             [fake1.name(), fake2.name()], mock.MagicMock())
+                             [fake1.name(), fake2.name()], [fake1.name(), fake2.name()])
 
         time_average1 = (10 * 5 + 290 * 20) / 300.
         time_average2 = (75 * 10 + 195 * 30) / 270.

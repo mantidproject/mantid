@@ -233,7 +233,7 @@ void CreateSampleWorkspace::exec() {
       progress, numBanks, numMonitors, bankPixelWidth, pixelSpacing,
       bankDistanceFromSample, sourceSampleDistance);
 
-  int numBins = static_cast<int>((xMax - xMin) / binWidth);
+  auto numBins = static_cast<int>((xMax - xMin) / binWidth);
 
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
@@ -383,8 +383,10 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   // to find the events per bin
   double sum_of_elems = std::accumulate(yValues.begin(), yValues.end(), 0.0);
   double event_distrib_factor = numEvents / sum_of_elems;
-  std::transform(yValues.begin(), yValues.end(), yValues.begin(),
-                 std::bind1st(std::multiplies<double>(), event_distrib_factor));
+  using std::placeholders::_1;
+  std::transform(
+      yValues.begin(), yValues.end(), yValues.begin(),
+      std::bind(std::multiplies<double>(), event_distrib_factor, _1));
   // the array should now contain the number of events required per bin
 
   // Make fake events
@@ -396,7 +398,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     for (int i = 0; i < numBins; ++i) {
       // create randomised events within the bin to match the number required -
       // calculated in yValues earlier
-      int eventsInBin = static_cast<int>(yValues[i]);
+      auto eventsInBin = static_cast<int>(yValues[i]);
       for (int q = 0; q < eventsInBin; q++) {
         DateAndTime pulseTime =
             run_start + (m_randGen->nextValue() * hourInSeconds);
@@ -428,7 +430,7 @@ CreateSampleWorkspace::evalFunction(const std::string &functionString,
   std::string parsedFuncString = functionString;
   for (int x = 0; x <= 10; ++x) {
     // get the rough peak centre value
-    int index = static_cast<int>((xSize / 10) * x);
+    auto index = static_cast<int>((xSize / 10) * x);
     if ((x == 10) && (index > 0))
       --index;
     double replace_val = xVal[index];

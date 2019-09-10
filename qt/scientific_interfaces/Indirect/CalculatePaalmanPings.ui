@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>752</width>
+    <width>793</width>
     <height>670</height>
    </rect>
   </property>
@@ -1268,48 +1268,24 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>56</height>
+      </size>
+     </property>
      <property name="title">
       <string>Output Options</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>7</number>
+      </property>
       <item>
-       <widget class="QLabel" name="lbPlotOutput">
-        <property name="text">
-         <string>Plot Output:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cbPlotOutput">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Wavelength</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Angle</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbPlot">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Plot</string>
-        </property>
-       </widget>
+       <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
       </item>
       <item>
        <spacer name="horizontalSpacer">
@@ -1341,6 +1317,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <extends>QWidget</extends>
+   <header>IndirectPlotOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
@@ -1364,7 +1346,6 @@
   <tabstop>spAnnBeamHeight</tabstop>
   <tabstop>spAnnBeamWidth</tabstop>
   <tabstop>spAnnStepSize</tabstop>
-  <tabstop>cbPlotOutput</tabstop>
   <tabstop>pbSave</tabstop>
  </tabstops>
  <resources/>

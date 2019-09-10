@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidPythonInterface/kernel/IsNone.h"
+#include "MantidPythonInterface/core/IsNone.h"
 #include <boost/python/class.hpp>
 #include <boost/python/default_call_policies.hpp>
 #include <boost/python/make_constructor.hpp>

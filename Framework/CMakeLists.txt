@@ -24,10 +24,6 @@ check_include_files(stdint.h stdint)
 if(stdint)
   add_definitions(-DHAVE_STDINT_H)
 endif()
-check_include_files(cstdint.hpp boost_stdint)
-if(boost_stdint)
-  add_definitions(-DBOOST_CSTDINT_HPP)
-endif()
 
 # Globally-linked libraries variable
 
@@ -57,6 +53,7 @@ include(TargetFunctions)
 
 add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)
+add_dependencies(FrameworkTests Framework)
 
 include_directories(Types/inc)
 add_subdirectory(Types)

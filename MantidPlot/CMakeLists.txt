@@ -93,7 +93,7 @@ set(QTIPLOT_SRCS
     src/PluginFit.cpp
     src/PolynomFitDialog.cpp
     src/PolynomialFit.cpp
-    src/Process.cpp
+    src/Processes.cpp
     src/ProjectRecovery.cpp
     src/ProjectSaveView.cpp
     src/ProjectSerialiser.cpp
@@ -176,6 +176,7 @@ set(MANTID_SRCS
     src/Mantid/AlgorithmMonitor.cpp
     src/Mantid/ErrorBarSettings.cpp
     src/Mantid/FirstTimeSetup.cpp
+    src/Mantid/ReportUsageDisableDialog.cpp
     src/Mantid/FitParameterTie.cpp
     src/Mantid/IFunctionWrapper.cpp
     src/Mantid/ImportWorkspaceDlg.cpp
@@ -301,7 +302,7 @@ set(QTIPLOT_HDRS
     src/PluginFit.h
     src/PolynomFitDialog.h
     src/PolynomialFit.h
-    src/Process.h
+    src/Processes.h
     src/ProjectRecovery.h
     src/ProjectSerialiser.h
     src/ProjectSaveView.h
@@ -373,6 +374,7 @@ set(MANTID_HDRS
     src/Mantid/AlgorithmMonitor.h
     src/Mantid/ErrorBarSettings.h
     src/Mantid/FirstTimeSetup.h
+    src/Mantid/ReportUsageDisableDialog.h
     src/Mantid/FitParameterTie.h
     src/Mantid/IFunctionWrapper.h
     src/Mantid/ImportWorkspaceDlg.h
@@ -602,6 +604,7 @@ set(MANTID_MOC_FILES
     src/Mantid/AlgorithmMonitor.h
     src/Mantid/ErrorBarSettings.h
     src/Mantid/FirstTimeSetup.h
+    src/Mantid/ReportUsageDisableDialog.h
     src/Mantid/IFunctionWrapper.h
     src/Mantid/ImportWorkspaceDlg.h
     src/Mantid/LabelToolLogValuesDialog.h

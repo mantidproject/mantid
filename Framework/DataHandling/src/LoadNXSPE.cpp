@@ -166,8 +166,8 @@ void LoadNXSPE::exec() {
   }
   file.openData("data");
   ::NeXus::Info info = file.getInfo();
-  std::size_t numSpectra = static_cast<std::size_t>(info.dims.at(0));
-  std::size_t numBins = static_cast<std::size_t>(info.dims.at(1));
+  auto numSpectra = static_cast<std::size_t>(info.dims.at(0));
+  auto numBins = static_cast<std::size_t>(info.dims.at(1));
   std::vector<double> data;
   file.getData(data);
   file.closeData();

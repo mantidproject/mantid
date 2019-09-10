@@ -400,7 +400,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   // this doesn't abort if the version string doesn't contain a v
   numStart = numStart != 1 ? 1 : 0;
   temp = std::string(temp.begin() + numStart, temp.end());
-  const int version = boost::lexical_cast<int>(temp);
+  const auto version = boost::lexical_cast<int>(temp);
 
   // Get the execution date/time
   std::string date, time;
@@ -425,7 +425,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
 
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
-  double dur = boost::lexical_cast<double>(temp);
+  auto dur = boost::lexical_cast<double>(temp);
   if (dur < -1.0) {
     g_log.warning() << "Error parsing duration in algorithm history entry."
                     << "\n";

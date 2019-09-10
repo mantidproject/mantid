@@ -15,8 +15,8 @@
  *WIKI*/
 
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -154,9 +154,9 @@ void CreateTransmissionWorkspaceAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
+  auto wavelength_min = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
+  auto wavelength_max = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMin", instrument,

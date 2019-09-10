@@ -15,18 +15,6 @@ set(SRC_FILES)
 
 set(INC_FILES)
 
-set(PY_FILES __init__.py)
-
-# Copy over the pure Python files for the module
-
-# Set the destination directory
-set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/_plugins)
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  # Set the output directory for the libraries.
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/_plugins)
-endif()
-
 #
 # Create the target for this directory
 #
@@ -79,12 +67,5 @@ endif()
 mtd_install_targets(TARGETS
                     PythonCurveFittingModule
                     INSTALL_DIRS
-                    ${BIN_DIR}/mantid/_plugins
-                    ${WORKBENCH_BIN_DIR}/mantid/_plugins)
-
-# Pure Python files
-mtd_install_files(FILES
-                  ${PY_FILES}
-                  INSTALL_DIRS
-                  ${BIN_DIR}/mantid/_plugins
-                  ${WORKBENCH_BIN_DIR}/mantid/_plugins)
+                    ${LIB_DIR}/mantid/_plugins
+                    ${WORKBENCH_LIB_DIR}/mantid/_plugins)

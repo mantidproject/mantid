@@ -258,7 +258,7 @@ LoadHFIRSANS::parseDetectorDimensions(const std::string &dims_str) {
  * Loads the data from the XML file
  */
 
-std::vector<int> LoadHFIRSANS::getData(const std::string &dataXpath) {
+std::vector<int> LoadHFIRSANS::readData(const std::string &dataXpath) {
 
   // data container
   std::vector<int> data;
@@ -318,6 +318,42 @@ std::vector<int> LoadHFIRSANS::getData(const std::string &dataXpath) {
 }
 
 /**
+ * Reorder data to take into account that the sequence of tubes in the
+ * XML file is different than the sequence in the IDF.
+ * @param data: detector counts as read from the XML file
+ */
+void LoadHFIRSANS::permuteTubes(std::vector<int> &data) {
+  const std::string &instrumentName = m_metadata["Header/Instrument"];
+
+  if (instrumentName.compare("CG2") == 0 ||
+      instrumentName.compare("GPSANS") == 0) {
+    std::vector<int> temp(data.size());
+    size_t nTubes(std::stoul(m_metadata["Header/Number_of_X_Pixels"]));
+    size_t nEightPacks = nTubes / 8;
+    size_t nPixelPerTube(std::stoul(m_metadata["Header/Number_of_Y_Pixels"]));
+    // permutation that takes us from a tube ID in the IDF to a tube ID in the
+    // XML file
+    std::vector<size_t> perm{0, 2, 4, 6, 1, 3, 5, 7};
+    size_t newStartPixelID, oldStartPixelID;
+    for (size_t e = 0; e < nEightPacks; ++e) { // iterate over all eightpacks
+      for (size_t t = 0; t < 8; t++) { // iterate over each tube in an eightpack
+        newStartPixelID =
+            (t + 8 * e) * nPixelPerTube; // t+8*e is the new tube ID
+        oldStartPixelID =
+            (perm[t] + 8 * e) * nPixelPerTube; // perm[t]+8*e is the old tube ID
+        for (size_t p = 0; p < nPixelPerTube;
+             p++) { // copy the "contents of the tube"
+          temp[p + newStartPixelID] = data[p + oldStartPixelID];
+        }
+      }
+    }
+    for (size_t i = 0; i < data.size(); i++) {
+      data[i] = temp[i];
+    }
+  }
+}
+
+/**
  * Convenience function to store a detector value into a given spectrum.
  * Note that this type of data doesn't use TOD, so that we use a single dummy
  * bin in X. Each detector is defined as a spectrum of length 1.
@@ -343,7 +379,9 @@ void LoadHFIRSANS::storeValue(int specID, double value, double error,
 
 void LoadHFIRSANS::createWorkspace() {
 
-  std::vector<int> data = getData("//Data");
+  std::vector<int> data = readData("//Data");
+  permuteTubes(data);
+
   int numSpectra = static_cast<int>(data.size()) + m_nMonitors;
 
   m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -354,10 +392,9 @@ void LoadHFIRSANS::createWorkspace() {
       Kernel::UnitFactory::Instance().create("Wavelength");
   m_workspace->setYUnit("Counts");
 
-  double monitorCounts =
+  auto monitorCounts =
       boost::lexical_cast<double>(m_metadata["Counters/monitor"]);
-  double countingTime =
-      boost::lexical_cast<double>(m_metadata["Counters/time"]);
+  auto countingTime = boost::lexical_cast<double>(m_metadata["Counters/time"]);
 
   int specID = 0;
   // Store monitor counts in the beggining
@@ -449,7 +486,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
                 << "\n";
 
   // The maximum value for the trapDiametersInUse is the trap in use
-  std::vector<double>::iterator trapDiameterInUseIt =
+  auto trapDiameterInUseIt =
       std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
   if (trapDiameterInUseIt != trapDiametersInUse.end())
     trapDiameterInUse = *trapDiameterInUseIt;
@@ -488,7 +525,7 @@ void LoadHFIRSANS::storeMetaDataIntoWS() {
       "timer", boost::lexical_cast<double>(m_metadata["Counters/time"]), "sec");
 
   // XML 1.03: sample thickness is now in meters
-  double sample_thickness =
+  auto sample_thickness =
       boost::lexical_cast<double>(m_metadata["Header/Sample_Thickness"]);
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
     g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: "
@@ -569,14 +606,14 @@ void LoadHFIRSANS::setDetectorDistance() {
   } else if (m_metadata.find("Motor_Positions/sample_det_dist") !=
              m_metadata.end()) {
     // Old Format
-    double sampleDetectorDistancePartial = boost::lexical_cast<double>(
+    auto sampleDetectorDistancePartial = boost::lexical_cast<double>(
         m_metadata["Motor_Positions/sample_det_dist"]);
     sampleDetectorDistancePartial *= 1000.0;
 
-    double sampleDetectorDistanceOffset =
+    auto sampleDetectorDistanceOffset =
         boost::lexical_cast<double>(m_metadata["Header/tank_internal_offset"]);
 
-    double sampleDetectorDistanceWindow =
+    auto sampleDetectorDistanceWindow =
         boost::lexical_cast<double>(m_metadata["Header/sample_to_flange"]);
 
     m_sampleDetectorDistance = sampleDetectorDistancePartial +
@@ -601,7 +638,7 @@ void LoadHFIRSANS::setDetectorDistance() {
 void LoadHFIRSANS::moveDetector() {
 
   setDetectorDistance();
-  double translationDistance =
+  auto translationDistance =
       boost::lexical_cast<double>(m_metadata["Motor_Positions/detector_trans"]);
   g_log.debug() << "Detector Translation = " << translationDistance << " mm."
                 << '\n';
@@ -656,7 +693,7 @@ LoadHFIRSANS::getInstrumentDoubleParameter(const std::string &parameter) {
  **/
 double LoadHFIRSANS::getSourceToSampleDistance() {
   // First let's try to get source_distance first:
-  double sourceToSampleDistance =
+  auto sourceToSampleDistance =
       boost::lexical_cast<double>(m_metadata["Header/source_distance"]);
   // XML 1.03: source distance is now in meters
   if (m_sansSpiceXmlFormatVersion >= 1.03) {
@@ -680,7 +717,7 @@ double LoadHFIRSANS::getSourceToSampleDistance() {
         boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
     g_log.debug() << "Number of guides used = " << nGuides
                   << " --> Raw SSD = " << sourceToSampleDistance << "mm.\n";
-    double sourceToSampleDistanceOffset = boost::lexical_cast<double>(
+    auto sourceToSampleDistanceOffset = boost::lexical_cast<double>(
         m_metadata["Header/sample_aperture_to_flange"]);
     g_log.debug() << "SSD offset  = " << sourceToSampleDistanceOffset
                   << "mm.\n";
@@ -699,9 +736,9 @@ void LoadHFIRSANS::setBeamDiameter() {
   double sourceToSampleDistance = getSourceToSampleDistance();
   addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
                          "mm");
-  const double sampleAperture =
+  const auto sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
-  const double sourceAperture =
+  const auto sourceAperture =
       boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]);
   g_log.debug() << "Computing beam diameter. m_sampleDetectorDistance="
                 << m_sampleDetectorDistance

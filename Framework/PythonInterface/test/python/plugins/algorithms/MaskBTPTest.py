@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
-from testhelpers import *
+from testhelpers import WorkspaceCreationHelper
 from numpy import *
 
 # tests run x10 slower with this on, but it may be useful to track down issues refactoring
@@ -93,16 +93,20 @@ class MaskBTPTest(unittest.TestCase):
         #check whether some pixels are masked when they should
         w=mtd['CNCSMaskBTP']
         detInfo = w.detectorInfo()
-        self.assertTrue(detInfo.isMasked(29699)) #pixel1 (detID 29696)
-        self.assertTrue(detInfo.isMasked(29700)) #pixel2 (detID 29697)
-        self.assertTrue(detInfo.isMasked(29701)) #pixel3 (detID 29698)
-        self.assertFalse(detInfo.isMasked(29702)) #pixel4 (detID 29699)
-        self.assertTrue(detInfo.isMasked(29703)) #pixel5 (detID 29700)
+        detIds = detInfo.detectorIDs()
 
-        self.assertTrue(detInfo.isMasked(1023)) #bank1 (detID 1020)
-        self.assertFalse(detInfo.isMasked(3071)) #bank3, tube 8 (detID 3068)
+        # check for some to be masked
+        for id in (29696, 29697, 29698, #29699,
+                   29700, 1020, 4400):
+            index = int(where(detIds == id)[0][0])
+            self.assertTrue(detInfo.isMasked(index),
+                            msg='detId={}, index={} should not be masked'.format(id, index))
 
-        self.assertTrue(detInfo.isMasked(4403)) #bank5, tube 3 (detID 4400)
+        # check for some to not be masked
+        for id in [3071]:
+            index = int(where(detIds == id)[0][0])
+            self.assertFalse(detInfo.isMasked(index),
+                             msg='detId={}, index={} should not be masked'.format(id, index))
         DeleteWorkspace(w)
 
     def testSEQMaskBTP(self):
@@ -126,6 +130,25 @@ class MaskBTPTest(unittest.TestCase):
         MaskBTP(Instrument='SEQUOIA', Bank="150")
         return
 
+
+    def testEQSANSMaskBTP(self):
+        w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
+                                OutputWorkspace='empty_eqsans')
+        m1 = MaskBTP(w, Bank='1-48', Pixel='1-8,249-256')  # tube tips
+        m2 = MaskBTP(w, Bank='17', Tube='2')  # rogue tube
+        m3 = MaskBTP(w, Components='back-panel')  # whole back panel
+        for mask, n_masked in zip((m1, m2, m3), (3072, 256, 24576)):
+            self.assertEqual(len(mask), n_masked)
+
+    def testCG2MaskBTP(self):
+        w = LoadEmptyInstrument(InstrumentName='EQ-SANS',
+                                OutputWorkspace='empty_eqsans')
+        m1 = MaskBTP(w, Bank='1-48', Pixel='1-8,249-256')  # tube tips
+        m2 = MaskBTP(w, Bank='17', Tube='2')  # rogue tube
+        m3 = MaskBTP(w, Components='back-panel')  # whole back panel
+        for mask, n_masked in zip((m1, m2, m3), (3072, 256, 24576)):
+            self.assertEqual(len(mask), n_masked)
+
     def testEdges(self):
         # this combined option should probably be called corners
         masking = MaskBTP(Instrument='TOPAZ', Tube='edges', Pixel='EdGes')  # funny case just b/c
@@ -135,61 +158,32 @@ class MaskBTPTest(unittest.TestCase):
         masking = MaskBTP(Workspace='TOPAZMaskBTP', Tube='edges')
         self.assertEqual(2 * 256 * 25, len(masking))
 
-    def test_cg2(self):
-        ws_name = 'cg2'
-        LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
+    def test_eqsans_simple(self):
+        ws_name = 'eqsans'
+        LoadEmptyInstrument(InstrumentName='EQ-SANS', OutputWorkspace=ws_name)
 
-        # Let's mask just the first tube
-        masked = MaskBTP(Workspace=ws_name, tube="1")
-        wksp = mtd[ws_name]
-        self.assertEqual(int(256), len(masked))
-        self.checkConsistentMask(wksp, masked)
-
-        # check for specific mask values
-        start_index = 2  # First 2 are monitors
-        self.checkDetectorIndexes(wksp, list(range(start_index, start_index+256)))
-
-    def test_cg2_top_bottom(self):
-        ws_name = 'cg2_top_bottom'
-        LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
-
-        # Let's mask the bottom and top of the detector
-        masked = MaskBTP(Workspace=ws_name, Pixel="1-10,247-256")
-        wksp = mtd[ws_name]
-        self.assertEqual(int(192*20), len(masked))
-        self.checkConsistentMask(wksp, masked)
-
-        # check for specific mask values
-        start_id = 2
-        for tube in range(192):
-            # top
-            this_tube_first_id = start_id + 256 * tube
-            self.checkDetectorIndexes(wksp, list(range(this_tube_first_id, this_tube_first_id + 10)))
-
-            # bottom
-            this_tube_almost_last_id = start_id + 246 + 256 * tube
-            self.checkDetectorIndexes(wksp, list(range(this_tube_almost_last_id, this_tube_almost_last_id + 10)))
-
-    def test_cg2_interleaved(self):
-        ws_name = 'cg2_interleaved'
-        LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
-
-        # Let's mask the bottom and top of the detector
-        masked = MaskBTP(Workspace=ws_name, Tube="1:300:2")
+        # every other tube in a "bank"
+        masked = MaskBTP(Workspace=ws_name, Tube="1,3")
         wksp = mtd[ws_name]
         self.assertEqual(int(192*256/2), len(masked))
         self.checkConsistentMask(wksp, masked)
 
-        # check for specific mask values
-        start_id = 2
-        for tube in range(0, 192, 2):
-            this_tube_first_id = start_id + 256*tube
-            self.checkDetectorIndexes(wksp, list(range(this_tube_first_id, this_tube_first_id+256)))
+    def test_cg2_simple(self):
+        ws_name = 'cg2'
+        LoadEmptyInstrument(InstrumentName='CG2', OutputWorkspace=ws_name)
+
+        # every other tube in a "bank"
+        masked = MaskBTP(Workspace=ws_name, Tube="1,3")
+        wksp = mtd[ws_name]
+        self.assertEqual(int(192*256/2), len(masked))
+        self.checkConsistentMask(wksp, masked)
+
 
     def test_eqsans_interleaved(self):
         ws_name = 'eqsans'
-        LoadEmptyInstrument(InstrumentName='EQSANS', OutputWorkspace=ws_name)
+        LoadEmptyInstrument(Filename='EQ-SANS_Definition_19000131_20190614.xml', OutputWorkspace=ws_name)
 
+        # legacy instrument had wacky numbering
         masked = MaskBTP(Workspace=ws_name, Tube="5:200:8,6:200:8,7:200:8,8:200:8")
         wksp = mtd[ws_name]
         self.assertEqual(int(192*256/2), len(masked))

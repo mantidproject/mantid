@@ -167,7 +167,7 @@ class FFTView(QtWidgets.QWidget):
 
     def phaseQuadChanged(self):
         # hide complex ws
-        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.workspace)
+        self.FFTTable.setRowHidden(2, "PhaseQuad" in self.workspace or self.Im_box.checkState() != QtCore.Qt.Checked)
 
     def set_raw_checkbox_state(self, state):
         if state:

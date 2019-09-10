@@ -329,7 +329,8 @@ void SANSSensitivityCorrection::exec() {
         }
 
         // Calculate detector sensitivity
-        IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency");
+        IAlgorithm_sptr effAlg =
+            createChildAlgorithm("CalculateEfficiency", -1, -1, true, 1);
         effAlg->setProperty("InputWorkspace", rawFloodWS);
 
         const double minEff = getProperty("MinEfficiency");

@@ -273,6 +273,12 @@ Mantid::DataObjects::EventWorkspace_sptr
 createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
                                        bool clearEvents = true);
 
+/** Create an Eventworkspace with instrument 2.0 that contains
+ * RectangularDetector's */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceWithFullInstrument2(int numBanks, int numPixels,
+                                        bool clearEvents = true);
+
 /**
  * Creates an event workspace with instrument which consists of cylindrical
  *detectors.

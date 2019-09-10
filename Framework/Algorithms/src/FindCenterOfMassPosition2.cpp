@@ -83,7 +83,7 @@ void FindCenterOfMassPosition2::exec() {
 
   // Get the number of monitors. We assume that all monitors are stored in the
   // first spectra
-  const int numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, max_iteration);
@@ -166,6 +166,9 @@ void FindCenterOfMassPosition2::exec() {
 
       // Get the current spectrum
       auto &YIn = inputWS->y(i);
+      // Skip if NaN of inf
+      if (std::isnan(YIn[specID]) || std::isinf(YIn[specID]))
+        continue;
       const V3D pos = spectrumInfo.position(i);
       double x = pos.X();
       double y = pos.Y();

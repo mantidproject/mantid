@@ -16,6 +16,9 @@ namespace Geometry {
 class ReferenceFrame;
 class SampleEnvironment;
 } // namespace Geometry
+namespace API {
+class ExperimentInfo;
+} // namespace API
 namespace DataHandling {
 
 /**
@@ -37,9 +40,9 @@ private:
   void exec() override final;
 
   const Geometry::SampleEnvironment *
-  setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
+  setSampleEnvironment(API::ExperimentInfo &experiment,
                        const Kernel::PropertyManager_const_sptr &args);
-  void setSampleShape(API::MatrixWorkspace_sptr &workspace,
+  void setSampleShape(API::ExperimentInfo &experiment,
                       const Kernel::PropertyManager_const_sptr &args,
                       const Geometry::SampleEnvironment *sampleEnv);
   std::string
@@ -52,10 +55,8 @@ private:
                                     const Geometry::ReferenceFrame &refFrame,
                                     bool hollow) const;
 
-  void runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
-                         const std::string &xml);
   void runChildAlgorithm(const std::string &name,
-                         API::MatrixWorkspace_sptr &workspace,
+                         API::Workspace_sptr &workspace,
                          const Kernel::PropertyManager &args);
 };
 

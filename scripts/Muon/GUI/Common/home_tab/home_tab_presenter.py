@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from Muon.GUI.Common.observer_pattern import Observer
+from Muon.GUI.Common.observer_pattern import Observer, GenericObserver
 
 
 class HomeTabSubWidget:
@@ -38,6 +38,8 @@ class HomeTabPresenter(object):
         self.groupingObserver = HomeTabPresenter.GroupingObserver(self)
         self.enable_observer = HomeTabPresenter.EnableWidgetObserver(self)
         self.disable_observer = HomeTabPresenter.DisableWidgetObserver(self)
+
+        self.update_view_from_model_observer = GenericObserver(self.update_all_widgets)
 
         self.update_all_widgets()
 

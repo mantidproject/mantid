@@ -17,15 +17,28 @@ from mantid.kernel import ConfigServiceImpl
 from Muon.GUI.Common.observer_pattern import Observable
 
 
+def get_incremental_number_for_value_in_list(name, list_copy, current_number=1):
+    if name + str(current_number) in list_copy:
+        return get_incremental_number_for_value_in_list(name, list_copy, current_number+1)
+    else:
+        return str(current_number)
+
+
 def get_grouping_psi(workspace):
     grouping_list = []
-
+    sample_log_value_list = []
     for ii in range(0, workspace.getNumberHistograms()):
         sample_log_label_name = "Label Spectra " + str(ii)
         workspace_run = workspace.getRun()
+
         if workspace_run.hasProperty(sample_log_label_name):
             sample_log_value = workspace_run.getProperty(sample_log_label_name).value
-            grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+            if sample_log_value not in sample_log_value_list:
+                grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+            else:
+                sample_log_value += get_incremental_number_for_value_in_list(sample_log_value, sample_log_value_list)
+                grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+            sample_log_value_list.append(sample_log_value)
 
     return grouping_list, [], ''
 
@@ -117,6 +130,10 @@ class MuonGroupPairContext(object):
     @property
     def pairs(self):
         return self._pairs
+
+    def clear(self):
+        self.clear_groups()
+        self.clear_pairs()
 
     def clear_groups(self):
         self._groups = []
@@ -217,3 +234,16 @@ class MuonGroupPairContext(object):
                 return equivalent_name
 
         return None
+
+    def remove_workspace_by_name(self, workspace_name):
+        for item in self.groups + self.pairs:
+            item.remove_workspace_by_name(workspace_name)
+
+    def get_unormalisised_workspace_list(self, workspace_list):
+        return [self.find_unormalised_workspace(workspace) for workspace in workspace_list]
+
+    def find_unormalised_workspace(self, workspace):
+        for group in self.groups:
+            unnormalised_workspace = group.find_unormalised(workspace)
+            if unnormalised_workspace:
+                return unnormalised_workspace

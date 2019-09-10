@@ -53,8 +53,8 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
 
   m_function = m_leastSquares->getFittingFunction();
   auto &values = *m_leastSquares->getValues();
-  int n = static_cast<int>(m_leastSquares->nParams());
-  int m = static_cast<int>(values.size());
+  auto n = static_cast<int>(m_leastSquares->nParams());
+  auto m = static_cast<int>(values.size());
   if (n > m) {
     throw std::runtime_error("More parameters than data.");
   }
@@ -83,7 +83,7 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
   m_function->function(domain, values);
-  int m = static_cast<int>(values.size());
+  auto m = static_cast<int>(values.size());
   if (f.len() != m) {
     f.allocate(m);
   }
@@ -102,8 +102,8 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
-  int n = static_cast<int>(m_leastSquares->nParams());
-  int m = static_cast<int>(values.size());
+  auto n = static_cast<int>(m_leastSquares->nParams());
+  auto m = static_cast<int>(values.size());
   if (J.len1() != m || J.len2() != n) {
     J.allocate(m, n);
   }
@@ -127,7 +127,7 @@ void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
                                   DoubleFortranMatrix &h) const {
   UNUSED_ARG(x);
   UNUSED_ARG(f);
-  int n = static_cast<int>(m_leastSquares->nParams());
+  auto n = static_cast<int>(m_leastSquares->nParams());
   if (h.len1() != n || h.len2() != n) {
     h.allocate(n, n);
   }

@@ -121,6 +121,42 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.hab_pos_2, self.presenter._beam_centre_model.scale_2 * result['pos2'])
         self.assertEqual(self.view.set_run_button_to_normal.call_count, 2)
 
+    def test_that_update_hab_selected_enabled_hab_and_disabled_lab(self):
+        self.presenter.set_view(self.view)
+        self.presenter.update_hab_selected()
+
+        # Check that the model has been updated
+        self.assertTrue(self.presenter._beam_centre_model.update_hab)
+        self.assertFalse(self.presenter._beam_centre_model.update_lab)
+
+        # Check that we called a method to enable the HAB and a method to disable the LAB
+        self.presenter._view.enable_update_hab.assert_called_once_with(True)
+        self.presenter._view.enable_update_lab.assert_called_once_with(False)
+
+    def test_that_update_lab_selected_enabled_lab_and_disabled_hab(self):
+        self.presenter.set_view(self.view)
+        self.presenter.update_lab_selected()
+
+        # Check that the model has been updated
+        self.assertFalse(self.presenter._beam_centre_model.update_hab)
+        self.assertTrue(self.presenter._beam_centre_model.update_lab)
+
+        # Check that we called a method to disable the HAB and a method to enable the LAB
+        self.presenter._view.enable_update_hab.assert_called_once_with(False)
+        self.presenter._view.enable_update_lab.assert_called_once_with(True)
+
+    def test_that_update_all_selected_enabled_hab_and_lab(self):
+        self.presenter.set_view(self.view)
+        self.presenter.update_all_selected()
+
+        # Check that the model has been updated
+        self.assertTrue(self.presenter._beam_centre_model.update_hab)
+        self.assertTrue(self.presenter._beam_centre_model.update_lab)
+
+        # Check that we called a method to enable the HAB and a method to enable the LAB
+        self.presenter._view.enable_update_hab.assert_called_once_with(True)
+        self.presenter._view.enable_update_lab.assert_called_once_with(True)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel//EigenConversionHelpers.h"
 
 using Mantid::Beamline::ComponentType;
 
@@ -30,6 +31,85 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
   }
 
   return false;
+}
+
+/*
+* Function: isSaveableBank. Returns true if the index in the Instrument cache is
+* a detector bank, ignoring tubes. otherwise returns false. Used by
+* SaveInstrument to find and save NXdetectors from memory to file.
+*
+* @param compInfo : Geometry::ComponentInfo Instrument cache containing the
+* component info.
+* @param idx : size_t index of component
+* @return true if component at index is bank, false otherwise.
+
+*/
+bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
+  // return false if is a detector.
+  if (compInfo.isDetector(idx))
+    return false;
+  // needs to ignore if index is the sample
+  if (compInfo.sample() == idx)
+    return false;
+  // needs to ignore if index is the source
+  if (compInfo.source() == idx)
+    return false;
+  if (!compInfo.hasDetectors(idx))
+    return false;
+  // a bank must have a parent, skip this block if the component does not.
+  if (compInfo.hasParent(idx)) {
+    size_t parent = compInfo.parent(idx);
+    auto parentType = compInfo.componentType(parent);
+    auto childType = compInfo.componentType(idx);
+    // if parent is any of the types below detector, then return false as it
+    // is not characteristic of a bank.
+    if (parentType != Beamline::ComponentType::Rectangular &&
+        parentType != Beamline::ComponentType::Structured &&
+        parentType != Beamline::ComponentType::Grid) {
+      // if component at index is not a tube then identify it as a bank
+      if (childType != Beamline::ComponentType::OutlineComposite) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/*
+ * Function: offsetFromAncestor. Returns the position of the component at the
+ * current index relative to the ancestor component at the ancestor index. Used
+ * by saveInstrument to get the pixel offsets relative directly to the bank,
+ * ignoring any intermediate assembly types.
+ *
+ * @param compInfo : Geometry::ComponentInfo Instrument cache containing the
+ * component info.
+ * @param ancestorIdx : size_t index of ancestor component which the offset is
+ * relative to
+ * @param currentIdx : size_t index of current component
+ * @return Eigen::vector3d offset of the component at the current index relative
+ * to the ancestor component
+ */
+Eigen::Vector3d
+offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
+                   const size_t ancestorIdx, const size_t currentIdx) {
+
+  if ((ancestorIdx <= currentIdx)) {
+    throw std::invalid_argument(
+        "Index of ancestor component is not higher than current Index.");
+  }
+
+  if (ancestorIdx == currentIdx) {
+    return Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
+  } else {
+    const auto ancestorPos =
+        Mantid::Kernel::toVector3d(compInfo.position(ancestorIdx));
+    auto transformation = Eigen::Affine3d(
+        Mantid::Kernel::toQuaterniond(compInfo.rotation(ancestorIdx))
+            .conjugate()); // Inverse ancestor rotation
+    transformation.translate(-ancestorPos);
+    return transformation *
+           Mantid::Kernel::toVector3d(compInfo.position(currentIdx));
+  }
 }
 
 } // namespace ComponentInfoBankHelpers

@@ -18,10 +18,6 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/MplCpp/Plot.h"
-#endif
-
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>
@@ -38,6 +34,17 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
+
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd,
+                                            double precision) {
+  return QPair<double, double>(
+      roundToPrecision(rangeStart, precision) + precision,
+      roundToPrecision(rangeEnd, precision) - precision);
+}
 
 std::string castToString(int value) {
   return boost::lexical_cast<std::string>(value);
@@ -114,7 +121,6 @@ QStringList convertToQStringList(std::string const &str,
   boost::split(subStrings, str, boost::is_any_of(delimiter));
   return convertToQStringList(subStrings);
 }
-
 } // namespace
 
 namespace MantidQt {
@@ -126,8 +132,9 @@ IndirectTab::IndirectTab(QObject *parent)
       m_blnManager(new QtBoolPropertyManager()),
       m_grpManager(new QtGroupPropertyManager()),
       m_dblEdFac(new DoubleEditorFactory()), m_pythonRunner(),
-      m_plotErrorBars(false), m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()) {
+      m_tabStartTime(DateAndTime::getCurrentTime()),
+      m_tabEndTime(DateAndTime::maximum()),
+      m_plotter(std::make_unique<IndirectPlotter>(this)) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
   m_batchAlgoRunner = new MantidQt::API::BatchAlgorithmRunner(m_parentWidget);
@@ -336,6 +343,15 @@ IndirectTab::getCorrectionsWSSuffixes(std::string const &interfaceName) const {
 }
 
 /**
+ * Used to run python code
+ *
+ * @param pythonCode The python code to run
+ */
+void IndirectTab::runPythonCode(std::string const &pythonCode) {
+  m_pythonRunner.runPythonCode(QString::fromStdString(pythonCode));
+}
+
+/**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
  * default save directory and adds the algorithm to the batch queue.
  *
@@ -398,316 +414,6 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
 }
 
 /**
- * Allows the user to turn the plotting of error bars off and on
- *
- * @param errorBars :: true if you want output plots to have error bars
- */
-void IndirectTab::setPlotErrorBars(bool errorBars) {
-  m_plotErrorBars = errorBars;
-}
-
-/**
- * Plots different spectra from multiple workspaces on the same plot
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param workspaceIndices List of indices to plot
- */
-void IndirectTab::plotMultipleSpectra(
-    const QStringList &workspaceNames,
-    const std::vector<int> &workspaceIndices) {
-  if (workspaceNames.isEmpty())
-    return;
-  if (workspaceNames.length() != static_cast<int>(workspaceIndices.size()))
-    return;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-  pyInput += "current_window = plotSpectrum('";
-  pyInput += workspaceNames[0];
-  pyInput += "', ";
-  pyInput += QString::number(workspaceIndices[0]);
-  pyInput += ")\n";
-
-  for (int i = 1; i < workspaceNames.size(); i++) {
-    pyInput += "plotSpectrum('";
-    pyInput += workspaceNames[i];
-    pyInput += "', ";
-    pyInput += QString::number(workspaceIndices[i]);
-    pyInput += ", window=current_window)\n";
-  }
-  m_pythonRunner.runPythonCode(pyInput);
-#else
-  using MantidQt::Widgets::MplCpp::plot;
-  plot(workspaceNames, boost::none, workspaceIndices);
-#endif
-}
-
-/**
- * Creates a spectrum plot of one or more workspaces at a given spectrum
- * index.
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param wsIndex Index of spectrum from each workspace to plot
- */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               const int &wsIndex) {
-  if (!workspaceNames.isEmpty()) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    const QString errors = m_plotErrorBars ? "True" : "False";
-
-    QString pyInput = "from mantidplot import plotSpectrum\n";
-    pyInput += "plotSpectrum(['";
-    pyInput += workspaceNames.join("','");
-    pyInput += "'], ";
-    pyInput += QString::number(wsIndex);
-    pyInput += ", error_bars=" + errors + ")\n";
-
-    m_pythonRunner.runPythonCode(pyInput);
-#else
-    using MantidQt::Widgets::MplCpp::plot;
-    plot(workspaceNames, boost::none, std::vector<int>{wsIndex});
-#endif
-  }
-}
-
-/**
- * Creates a spectrum plot of a single workspace at a given spectrum
- * index.
- *
- * @param workspaceName Names of workspace to plot
- * @param spectraIndex Workspace Index of spectrum to plot
- * @param errorBars Is true if you want to plot the error bars
- */
-void IndirectTab::plotSpectrum(const QString &workspaceName,
-                               const int &spectraIndex) {
-  if (!workspaceName.isEmpty()) {
-    QStringList workspaceNames;
-    workspaceNames << workspaceName;
-    plotSpectrum(workspaceNames, spectraIndex);
-  }
-}
-
-/**
- * Creates a spectrum plot of one or more workspaces with the range of
- * spectra [specStart, specEnd)
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param specStart Range start index
- * @param specEnd Range end index
- */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
-                               int specEnd) {
-  if (workspaceNames.isEmpty())
-    return;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString const errors = m_plotErrorBars ? "True" : "False";
-
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], list(range(";
-  pyInput += QString::number(specStart);
-  pyInput += ",";
-  pyInput += QString::number(specEnd + 1);
-  pyInput += ")), error_bars=" + errors + ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-#else
-  using MantidQt::Widgets::MplCpp::plot;
-  // Range is inclusive of end
-  const auto nSpectra = specEnd - specStart + 1;
-  std::vector<int> wkspIndices(nSpectra);
-  std::iota(std::begin(wkspIndices), std::end(wkspIndices), specStart);
-  plot(workspaceNames, boost::none, wkspIndices, boost::none, boost::none,
-       boost::none, boost::none, m_plotErrorBars);
-#endif
-}
-
-/**
- * Creates a spectrum plot of a single workspace with the range of
- * spectra [specStart, specEnd)
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceName Names of workspace to plot
- * @param specStart Range start index
- * @param specEnd Range end index
- */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
-                               int specEnd) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, specStart, specEnd);
-}
-
-/**
- * Creates a spectrum plot of one or more workspaces with a set
- *  of spectra specified in a vector
- *
- * This uses the plotSpectrum function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param wsIndices List of indices of spectra to plot
- */
-void IndirectTab::plotSpectra(const QStringList &workspaceNames,
-                              const std::vector<int> &wsIndices) {
-  if (workspaceNames.isEmpty() || wsIndices.empty())
-    return;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString const errors = m_plotErrorBars ? "True" : "False";
-
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], [";
-  pyInput += QString::number(wsIndices[0]);
-  for (size_t i = 1; i < wsIndices.size(); i++) {
-    pyInput += " ,";
-    pyInput += QString::number(wsIndices[i]);
-  }
-  pyInput += "]";
-  pyInput += ", error_bars=" + errors + ")\n";
-  m_pythonRunner.runPythonCode(pyInput);
-#else
-  using MantidQt::Widgets::MplCpp::plot;
-  plot(workspaceNames, boost::none, wsIndices, boost::none, boost::none,
-       boost::none, boost::none, m_plotErrorBars);
-#endif
-}
-
-/**
- * Creates a spectrum plot of a single workspace with a set
- *  of spectra specified in a vector
- *
- * @param workspaceName Name of workspace to plot
- * @param wsIndices List of indices of spectra to plot
- */
-void IndirectTab::plotSpectra(const QString &workspaceName,
-                              const std::vector<int> &wsIndices) {
-  if (workspaceName.isEmpty()) {
-    return;
-  }
-  if (wsIndices.empty()) {
-    return;
-  }
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectra(workspaceNames, wsIndices);
-}
-
-void IndirectTab::plotTiled(std::string const &workspaceName,
-                            std::size_t const &fromIndex,
-                            std::size_t const &toIndex) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  auto const numberOfPlots = toIndex - fromIndex + 1;
-  if (numberOfPlots != 0) {
-    QString pyInput = "from mantidplot import newTiledWindow\n";
-    pyInput += "newTiledWindow(sources=[";
-    for (auto index = fromIndex; index <= toIndex; ++index) {
-      if (index > fromIndex)
-        pyInput += ",";
-
-      std::string const pyInStr =
-          "(['" + workspaceName + "'], " + std::to_string(index) + ")";
-      pyInput += QString::fromStdString(pyInStr);
-    }
-    pyInput += QString::fromStdString("])\n");
-    m_pythonRunner.runPythonCode(pyInput);
-  }
-#else
-  Q_UNUSED(workspaceName);
-  Q_UNUSED(fromIndex);
-  Q_UNUSED(toIndex);
-  throw std::runtime_error("plotTiled is not implemented for >= Qt 5.");
-#endif
-}
-
-/**
- * Plots a contour (2D) plot of a given workspace.
- *
- * This uses the plot2D function from the Python API.
- *
- * @param workspaceName Name of workspace to plot
- */
-void IndirectTab::plot2D(const QString &workspaceName) {
-  if (workspaceName.isEmpty())
-    return;
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString pyInput = "from mantidplot import plot2D\n";
-
-  pyInput += "plot2D('";
-  pyInput += workspaceName;
-  pyInput += "')\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-#else
-  using MantidQt::Widgets::MplCpp::pcolormesh;
-  pcolormesh({workspaceName});
-#endif
-}
-
-/**
- * Creates a time bin plot of one or more workspaces at a given spectrum
- * index.
- *
- * This uses the plotTimeBin function from the Python API.
- *
- * @param workspaceNames List of names of workspaces to plot
- * @param binIndex Index of spectrum from each workspace to plot
- */
-void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
-  if (workspaceNames.isEmpty())
-    return;
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  QString const errors = m_plotErrorBars ? "True" : "False";
-
-  QString pyInput = "from mantidplot import plotTimeBin\n";
-
-  pyInput += "plotTimeBin(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(binIndex);
-  pyInput += ", error_bars=" + errors + ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-#else
-  using MantidQt::Widgets::MplCpp::MantidAxType;
-  using MantidQt::Widgets::MplCpp::plot;
-  QHash<QString, QVariant> plotKwargs{
-      {"axis", static_cast<int>(MantidAxType::Bin)}};
-  plot(workspaceNames, boost::none, std::vector<int>{binIndex}, boost::none,
-       plotKwargs);
-#endif
-}
-
-/**
- * Creates a time bin plot of a single workspace at a given spectrum
- * index.
- *
- * @param workspaceName Names of workspace to plot
- * @param binIndex Index of spectrum to plot
- */
-void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotTimeBin(workspaceNames, binIndex);
-}
-
-/**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement
  *
@@ -733,13 +439,61 @@ void IndirectTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min,
  * @param lower :: The lower bound property in the property browser
  * @param upper :: The upper bound property in the property browser
  * @param bounds :: The upper and lower bounds to be set
+ * @param range :: The range to set the range selector to.
  */
-void IndirectTab::setRangeSelector(RangeSelector *rs, QtProperty *lower,
-                                   QtProperty *upper,
-                                   const QPair<double, double> &bounds) {
+void IndirectTab::setRangeSelector(
+    RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+    const QPair<double, double> &bounds,
+    const boost::optional<QPair<double, double>> &range) {
   m_dblManager->setValue(lower, bounds.first);
   m_dblManager->setValue(upper, bounds.second);
-  rs->setRange(bounds.first, bounds.second);
+  if (range) {
+    rs->setMinimum(range.get().first);
+    rs->setMaximum(range.get().second);
+    // clamp the bounds of the selector
+    rs->setRange(range.get().first, range.get().second);
+  } else {
+    rs->setMinimum(bounds.first);
+    rs->setMaximum(bounds.second);
+  }
+}
+
+/**
+ * Set the minimum of a range selector if it is less than the maximum value.
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the minimum
+ */
+void IndirectTab::setRangeSelectorMin(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue <= maxProperty->valueText().toDouble())
+    rangeSelector->setMinimum(newValue);
+  else
+    m_dblManager->setValue(minProperty, rangeSelector->getMinimum());
+}
+
+/**
+ * Set the maximum of a range selector if it is greater than the minimum value
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the maximum
+ */
+void IndirectTab::setRangeSelectorMax(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue >= minProperty->valueText().toDouble())
+    rangeSelector->setMaximum(newValue);
+  else
+    m_dblManager->setValue(maxProperty, rangeSelector->getMaximum());
 }
 
 /**
@@ -836,6 +590,22 @@ bool IndirectTab::getResolutionRangeFromWs(
     }
   }
   return false;
+}
+
+QPair<double, double>
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName,
+                                    double precision) const {
+  auto const &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName))
+    return getXRangeFromWorkspace(
+        ads.retrieveWS<MatrixWorkspace>(workspaceName), precision);
+  return QPair<double, double>(0.0, 0.0);
+}
+
+QPair<double, double> IndirectTab::getXRangeFromWorkspace(
+    Mantid::API::MatrixWorkspace_const_sptr workspace, double precision) const {
+  auto const xValues = workspace->x(0);
+  return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 
 /**

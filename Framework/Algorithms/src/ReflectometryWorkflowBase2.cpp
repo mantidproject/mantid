@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -624,8 +624,8 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(
                                "provide processing instructions manually or "
                                "set analysis mode to 'MultiDetectorAnalysis'.");
 
-    const int detStart = static_cast<int>(pointStart[0]);
-    const int detStop = static_cast<int>(pointStop[0]);
+    const auto detStart = static_cast<int>(pointStart[0]);
+    const auto detStop = static_cast<int>(pointStop[0]);
 
     auto instructions = std::to_string(detStart);
     if (detStart != detStop)

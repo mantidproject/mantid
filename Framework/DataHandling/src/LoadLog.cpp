@@ -358,7 +358,7 @@ bool LoadLog::LoadSNSText() {
   if (!ret || cols.size() < 2)
     return false;
 
-  size_t numCols = static_cast<size_t>(cols.size() - 1);
+  auto numCols = static_cast<size_t>(cols.size() - 1);
   if (names.size() != numCols)
     throw std::invalid_argument("The Names parameter should have one fewer "
                                 "entry as the number of columns in a SNS-style "
@@ -472,7 +472,7 @@ bool LoadLog::isAscii(const std::string &filename) {
    * first 256 bytes of the file.
    */
   for (char *p = data; p < pend; ++p) {
-    unsigned long ch = static_cast<unsigned long>(*p);
+    auto ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       return false;
     }

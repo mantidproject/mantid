@@ -280,7 +280,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 
   calculateChisq();
   double factor = getChisq() * double(npoints) / 2;
-  double resolutionFactor =
+  auto resolutionFactor =
       static_cast<double>(m_dataCalc.size() / m_data.size());
 
   // Calculate the quadratic coefficients SB. eq 24

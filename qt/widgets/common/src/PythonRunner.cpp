@@ -66,8 +66,6 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   while (!stream.atEnd()) {
     tmpstring.append(stream.readLine().trimmed() + "\n");
   }
-  // FIXME: Ticket-9217 - Commented out for the moment to try and get working
-  // with clang
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
     g_log.debug() << "Raw output from execution:\n"
                   << qPrintable(tmpstring) << "\n";

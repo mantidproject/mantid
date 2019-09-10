@@ -153,8 +153,7 @@ double EstimateResolutionDiffraction::getWavelength() {
     throw runtime_error(
         "Unable to locate property LambdaRequest as central wavelength. ");
 
-  TimeSeriesProperty<double> *cwltimeseries =
-      dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
+  auto *cwltimeseries = dynamic_cast<TimeSeriesProperty<double> *>(cwlproperty);
 
   if (!cwltimeseries)
     throw runtime_error(

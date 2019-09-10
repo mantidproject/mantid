@@ -62,9 +62,9 @@ if(ENABLE_WORKBENCH)
 
   mtd_add_sip_module(MODULE_NAME _commonqt5
                      TARGET_NAME mantidqt_commonqt5
-                     SIP_SRCS _common.sip
                      HEADER_DEPS
                        ${_header_depends}
+                     SIP_SRCS _common.sip
                      PYQT_VERSION 5
                      INCLUDE_DIRS
                        ${CMAKE_CURRENT_LIST_DIR}
@@ -72,14 +72,14 @@ if(ENABLE_WORKBENCH)
                        ${PYTHON_INCLUDE_PATH}
                        ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS
-                       ${common_link_libs}
                        MantidQtWidgetsCommonQt5
+                       ${common_link_libs}
                        Qt5::Core
-                       Qt5::Gui
                        Qt5::Widgets
+                       Qt5::Gui
                        Qt5::Qscintilla
-                     ${Boost_LIBRARIES}
                        API
+                       ${Boost_LIBRARIES}
                      INSTALL_DIR
                        ${WORKBENCH_LIB_DIR}/mantidqt
                      LINUX_INSTALL_RPATH

@@ -10,8 +10,10 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantid.py3compat import mock
+from mantidqt.utils.qt.testing import start_qapplication
 
 
+@start_qapplication
 class FittingTabModelTest(unittest.TestCase):
     def setUp(self):
         self.model = FittingTabModel(setup_context())
@@ -26,12 +28,11 @@ class FittingTabModelTest(unittest.TestCase):
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_workspaces MA/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
+        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc; Workspace'
         self.model.function_name = 'GausOsc'
 
-        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function,
-                                                                  'Fitting Output')
+        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -39,11 +40,11 @@ class FittingTabModelTest(unittest.TestCase):
     def test_create_parameter_table_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_parameter_tables MA/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters; GausOsc'
         self.model.function_name = 'GausOsc'
 
-        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function, 'Fitting Output')
+        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -56,7 +57,7 @@ class FittingTabModelTest(unittest.TestCase):
         parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
                           'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
 
-        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
+        output_workspace, parameter_table, fitting_function, fit_status, fit_chi_squared, covariance_matrix = self.model.do_single_fit_and_return_workspace_parameters_and_fit_function(
             parameter_dict)
 
         self.assertAlmostEqual(parameter_table.row(0)['Value'], 5.0)
@@ -84,12 +85,11 @@ class FittingTabModelTest(unittest.TestCase):
             ' n = 0, A0 = 0,$domains = i;name = Polynomial, n = 0, A0 = 0,'
             '$domains = i;name = Polynomial, n = 0, A0 = 0,$domains = i;'
             'name = Polynomial, n = 0, A0 = 0,$domains = i')
-        expected_directory_name = 'Muon Data/Fitting Output MA/Fitting Output_workspaces MA/'
+        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; Polynomial/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
         self.model.function_name = 'Polynomial'
 
-        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function,
-                                                                               'Fitting Output')
+        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -118,8 +118,7 @@ class FittingTabModelTest(unittest.TestCase):
         workspace = CreateWorkspace(x_data, y_data)
         parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace.name()],
                           'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint',
-                          'FitGroupName': 'SimulFit'}
+                          'StartX': [0.0], 'EndX': [100.0], 'EvaluationType': 'CentrePoint'}
         global_parameters = ['A0']
         self.model.do_simultaneous_fit(parameter_dict, global_parameters)
 
@@ -138,8 +137,7 @@ class FittingTabModelTest(unittest.TestCase):
         workspace2 = CreateWorkspace(x_data, y_data)
         parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace1.name(), workspace2.name()],
                           'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint',
-                          'FitGroupName': 'SimulFit'}
+                          'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint'}
         self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
 
         fit_context = self.model.context.fitting_context
@@ -187,6 +185,69 @@ class FittingTabModelTest(unittest.TestCase):
         name_as_string = self.model.get_function_name(function_object)
 
         self.assertEqual(name_as_string, 'ExpDecayOsc,GausDecay,ExpDecayOsc,...')
+
+    def test_change_plot_guess_returns_when_given_bad_parameters(self):
+        self.model.context = mock.Mock()
+        self.model.change_plot_guess(True, {})
+
+        self.assertEqual(0, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
+
+    def test_change_plot_guess_notifies_of_change_when_function_removed_but_plot_guess_true(self):
+        self.model.context = mock.Mock()
+        self.model.change_plot_guess(True, {'Function': None, 'InputWorkspace': 'ws'})
+
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, None)
+
+    def test_change_plot_guess_evaluates_the_function(self):
+        self.model.context = mock.Mock()
+        with mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction') as mock_evaluate:
+            parameters = {'Function': 'func',
+                          'InputWorkspace': 'ws',
+                          'StartX': 0,
+                          'EndX': 1}
+            self.model.change_plot_guess(True, parameters)
+            mock_evaluate.assert_called_with(InputWorkspace='ws',
+                                             Function='func',
+                                             StartX=parameters['StartX'],
+                                             EndX=parameters['EndX'],
+                                             OutputWorkspace='__unknown_interface_fitting_guess')
+
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.mantid')
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction')
+    def test_change_plot_guess_writes_log_and_returns_if_function_evaluation_fails(self, mock_evaluate, mock_mantid):
+        self.model.context = mock.Mock()
+        mock_evaluate.side_effect = RuntimeError()
+        parameters = {'Function': 'func',
+                      'InputWorkspace': 'ws',
+                      'StartX': 0,
+                      'EndX': 1}
+        self.model.change_plot_guess(True, parameters)
+        mock_evaluate.assert_called_with(InputWorkspace='ws',
+                                         Function='func',
+                                         StartX=parameters['StartX'],
+                                         EndX=parameters['EndX'],
+                                         OutputWorkspace='__unknown_interface_fitting_guess')
+        mock_mantid.logger.error.assert_called_with('Could not evaluate the function.')
+        self.assertEqual(0, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
+
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.AnalysisDataService')
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_model.EvaluateFunction')
+    def test_change_plot_guess_notifies_subscribers_if_workspace_in_ads(self, mock_evaluate, mock_ads):
+        self.model.context = mock.Mock()
+        mock_ads.doesExist.return_value = True
+        parameters = {'Function': 'func',
+                      'InputWorkspace': 'ws',
+                      'StartX': 0,
+                      'EndX': 1}
+        self.model.change_plot_guess(True, parameters)
+        mock_evaluate.assert_called_with(InputWorkspace='ws',
+                                         Function='func',
+                                         StartX=parameters['StartX'],
+                                         EndX=parameters['EndX'],
+                                         OutputWorkspace='__unknown_interface_fitting_guess')
+        self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, '__unknown_interface_fitting_guess')
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

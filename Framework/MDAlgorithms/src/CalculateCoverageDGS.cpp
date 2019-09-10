@@ -420,7 +420,7 @@ void CalculateCoverageDGS::exec() {
 
   cacheDimensionXValues();
 
-  const int64_t ndets = static_cast<int64_t>(tt.size());
+  const auto ndets = static_cast<int64_t>(tt.size());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int64_t i = 0; i < ndets; i++) {

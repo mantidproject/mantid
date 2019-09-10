@@ -4,8 +4,8 @@
 Plotting in Workbench
 =====================
 
-A new feature of Workbench is the Plots Toolbox, with this you can manage several plots at once from one window. to switch
-to the Plots Toolbox click on the Plots tab in the bottom left had corner, this will switch out the Algorithms Toolbox.
+A new feature of Workbench is the Plots Toolbox. This allows you to manage several plots at once from one window. To switch
+to the Plots Toolbox, click on the Plots tab in the bottom left-hand corner.
 
 .. figure:: /images/Workbench_algorithms_plots_tab.png
    :width: 700px

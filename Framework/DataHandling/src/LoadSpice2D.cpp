@@ -196,7 +196,7 @@ void LoadSpice2D::exec() {
   // it tests if there is metadata tagged with the wing detector
   // if so, puts the detector in the right angle
   if (metadata.find("Motor_Positions/det_west_wing_rot") != metadata.end()) {
-    double angle = boost::lexical_cast<double>(
+    auto angle = boost::lexical_cast<double>(
         metadata["Motor_Positions/det_west_wing_rot"]);
     rotateDetector(-angle);
   }
@@ -472,7 +472,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
                 << "\n";
 
   // The maximum value for the trapDiametersInUse is the trap in use
-  std::vector<double>::iterator trapDiameterInUseIt =
+  auto trapDiameterInUseIt =
       std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
   if (trapDiameterInUseIt != trapDiametersInUse.end())
     trapDiameterInUse = *trapDiameterInUseIt;

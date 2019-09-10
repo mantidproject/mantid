@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ADSValidator.h"
 #include "MantidKernel/TypedValidator.h"
-#include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
+#include "MantidPythonInterface/core/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::ADSValidator;

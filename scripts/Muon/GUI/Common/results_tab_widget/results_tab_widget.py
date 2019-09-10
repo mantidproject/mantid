@@ -14,7 +14,7 @@ from Muon.GUI.Common.results_tab_widget.results_tab_model import ResultsTabModel
 class ResultsTabWidget(object):
     """Factory object to wire together components of the results tab"""
 
-    def __init__(self, fit_context, parent):
+    def __init__(self, fit_context, context, parent):
         """
         Initialize the widget.
         :param fit_context: A reference to the a FitContext object used to store fit results
@@ -23,3 +23,5 @@ class ResultsTabWidget(object):
         self.results_tab_view = ResultsTabView(parent=parent)
         self.results_tab_presenter = ResultsTabPresenter(
             self.results_tab_view, ResultsTabModel(fit_context))
+
+        context.update_view_from_model_notifier.add_subscriber(self.results_tab_presenter.update_view_from_model_observer)

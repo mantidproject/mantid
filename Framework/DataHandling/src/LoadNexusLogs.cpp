@@ -689,8 +689,9 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
 
   // Convert to seconds if needed
   if (time_units == "minutes") {
+    using std::placeholders::_1;
     std::transform(time_double.begin(), time_double.end(), time_double.begin(),
-                   std::bind2nd(std::multiplies<double>(), 60.0));
+                   std::bind(std::multiplies<double>(), _1, 60.0));
   }
   // Now the values: Could be a string, int or double
   file.openData("value");

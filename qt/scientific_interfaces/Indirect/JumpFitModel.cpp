@@ -364,6 +364,8 @@ std::string JumpFitModel::singleFitOutputName(std::size_t index,
 
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
+std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
+
 std::string JumpFitModel::constructOutputName() const {
   auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
   auto const position = name.find("_Results");

@@ -7,10 +7,12 @@
 #  This file is part of the mantid workbench
 from __future__ import absolute_import, unicode_literals
 
+import unittest
+
 from qtpy.QtWidgets import QApplication, QWidget
 
 from mantid.py3compat.mock import MagicMock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from workbench.widgets.settings.presenter import SettingsPresenter
 
@@ -40,7 +42,8 @@ class MockWorkspaceWidget(QWidget):
         self.close()
 
 
-class SettingsViewTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class SettingsViewTest(unittest.TestCase, QtWidgetFinder):
     def test_deletes_on_close(self):
         with MockWorkspaceWidget() as temp_widget:
             widget = SettingsPresenter(temp_widget)

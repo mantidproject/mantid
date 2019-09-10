@@ -56,7 +56,6 @@ set(SRC_FILES
     src/MDAxisValidator.cpp
     src/MDUnit.cpp
     src/MDUnitFactory.cpp
-    src/MagneticFormFactorTable.cpp
     src/MagneticIon.cpp
     src/MandatoryValidator.cpp
     src/MantidVersion.cpp
@@ -65,7 +64,6 @@ set(SRC_FILES
     src/MaterialBuilder.cpp
     src/MaterialXMLParser.cpp
     src/Math/ChebyshevPolyFit.cpp
-    src/Math/Distributions/BoseEinsteinDistribution.cpp
     src/Math/Distributions/ChebyshevPolynomial.cpp
     src/Math/Distributions/ChebyshevSeries.cpp
     src/Math/Optimization/SLSQPMinimizer.cpp
@@ -218,7 +216,6 @@ set(INC_FILES
     inc/MantidKernel/MDAxisValidator.h
     inc/MantidKernel/MDUnit.h
     inc/MantidKernel/MRUList.h
-    inc/MantidKernel/MagneticFormFactorTable.h
     inc/MantidKernel/MagneticIon.h
     inc/MantidKernel/MandatoryValidator.h
     inc/MantidKernel/MantidVersion.h
@@ -227,7 +224,6 @@ set(INC_FILES
     inc/MantidKernel/MaterialBuilder.h
     inc/MantidKernel/MaterialXMLParser.h
     inc/MantidKernel/Math/ChebyshevPolyFit.h
-    inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
     inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
     inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
     inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
@@ -271,7 +267,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/RemoteJobManager.h
-    inc/MantidKernel/SimpleJSON.h 
+    inc/MantidKernel/SimpleJSON.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -324,7 +320,6 @@ set(TEST_FILES
     BinaryFileTest.h
     BinaryStreamReaderTest.h
     BinaryStreamWriterTest.h
-    BoseEinsteinDistributionTest.h
     BoundedValidatorTest.h
     CPUTimerTest.h
     CacheTest.h
@@ -380,7 +375,6 @@ set(TEST_FILES
     MDUnitFactoryTest.h
     MDUnitTest.h
     MRUListTest.h
-    MagneticFormFactorTableTest.h
     MagneticIonTest.h
     MakeCowTest.h
     MandatoryValidatorTest.h
@@ -600,7 +594,7 @@ set(
   ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
   )
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
-set(MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository?debug=1")
+set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
 set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 
 # For an mpi-enabled build, do not log to file, format console output (which
@@ -671,7 +665,7 @@ set(UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}")
 set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
 set(DATADIRS "")
-set(MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository")
+set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
 set(HTML_ROOT ../share/doc/html)
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and

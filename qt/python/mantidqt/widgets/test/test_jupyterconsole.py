@@ -18,10 +18,11 @@ import unittest
 
 # local package imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class InProcessJupyterConsoleTest(GuiTest):
+@start_qapplication
+class InProcessJupyterConsoleTest(unittest.TestCase):
 
     def test_construction_raises_no_errors(self):
         widget = InProcessJupyterConsole()

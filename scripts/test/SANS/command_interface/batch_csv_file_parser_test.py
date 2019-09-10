@@ -204,6 +204,20 @@ class BatchCsvParserTest(unittest.TestCase):
         except RuntimeError as e:
             self.fail("An error should not have been raised. Error raised was: {}".format(str(e)))
 
+    def test_can_parse_sample_geometries(self):
+        batch_file_row = ["sample_sans", "1", "sample_trans", "", "sample_direct_beam", "",
+                          "can_sans", "", "can_trans", "", "can_direct_beam", "", "output_as", "", "user_file", "",
+                          "sample_thickness", "5", "sample_height", "5", "sample_width", "5"]
+
+        content = "# MANTID_BATCH_FILE add more text here\n" + ",".join(batch_file_row)
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser(batch_file_path)
+
+        try:
+            parser._parse_row(batch_file_row, 0)
+        except RuntimeError as e:
+            self.fail("An error should not have been raised. Error raised was: {}".format(str(e)))
+
 
 if __name__ == '__main__':
     unittest.main()

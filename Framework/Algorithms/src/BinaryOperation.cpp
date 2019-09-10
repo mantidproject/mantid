@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -241,7 +242,15 @@ void BinaryOperation::exec() {
     //   (b) it has been, but it's not the correct dimensions
     if ((m_out != m_lhs && m_out != m_rhs) ||
         (m_out == m_rhs && (m_lhs->size() > m_rhs->size()))) {
-      m_out = create<HistoWorkspace>(*m_lhs);
+      // if the input workspace are specialworkspace2d, then we need to ensure
+      // the map is set
+      auto specialLHS = dynamic_cast<const SpecialWorkspace2D *>(m_lhs.get());
+      auto specialRHS = dynamic_cast<const SpecialWorkspace2D *>(m_rhs.get());
+      if (specialLHS && specialRHS) {
+        m_out = create<SpecialWorkspace2D>(*specialLHS);
+      } else {
+        m_out = create<HistoWorkspace>(*m_lhs);
+      }
     }
   }
 
@@ -928,8 +937,8 @@ BinaryOperation::buildBinaryOperationTable(
   //  -1 if it should add a new entry at the end.
   auto table = boost::make_shared<BinaryOperationTable>();
 
-  int rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
-  int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
+  auto rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
+  auto lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
 
   // Initialize the table; filled with -1 meaning no match
   table->resize(lhs_nhist, -1);

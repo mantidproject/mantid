@@ -135,7 +135,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     return main_out; // all done. It is not to load the transmission, nor check
                      // if it exists.
 
-  Element *workspaceElem = dynamic_cast<Element *>(workspaceData);
+  auto *workspaceElem = dynamic_cast<Element *>(workspaceData);
   //  check(workspaceElem, "<SASentry>"); // already done at
   //  LoadCanSAS1D::loadEntry
   Poco::AutoPtr<NodeList> sasTransList =
@@ -150,7 +150,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
        trans_index++) {
     // foreach SAStransmission_spectrum
     Node *idataElem = sasTransList->item(trans_index);
-    Element *sasTrasElem = dynamic_cast<Element *>(idataElem);
+    auto *sasTrasElem = dynamic_cast<Element *>(idataElem);
     if (!sasTrasElem)
       continue;
     std::vector<API::MatrixWorkspace_sptr> &group =
@@ -183,7 +183,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     //"T" and "Tdev" text nodes and fill X,Y,E vectors
     for (unsigned long index = 0; index < nBins; ++index) {
       idataElem = tdataElemList->item(index);
-      Element *elem = dynamic_cast<Element *>(idataElem);
+      auto *elem = dynamic_cast<Element *>(idataElem);
       if (elem) {
         // setting X vector
         std::string nodeVal;

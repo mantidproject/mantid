@@ -53,6 +53,7 @@ constexpr char FilterByTimeStopStr[] = "FilterByTimeStop";
 constexpr char PathToBinaryStr[] = "BinaryEventPath";
 constexpr char TOFBiasStr[] = "TimeOfFlightBias";
 constexpr char CalibrateTOFStr[] = "CalibrateTOFBias";
+constexpr char LambdaOnTwoStr[] = "LambdaOnTwoMode";
 
 // Common pairing of limits
 using TimeLimits = std::pair<double, double>;
@@ -141,7 +142,7 @@ void MapNeXusToSeries(NeXus::NXEntry &entry, const std::string &path,
                       const std::string &time, const std::string &name,
                       const T &factor, int32_t index) {
 
-  T value = GetNeXusValue<T>(entry, path, defval, index);
+  auto value = GetNeXusValue<T>(entry, path, defval, index);
   AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
 }
 
@@ -273,9 +274,9 @@ protected:
 public:
   EventProcessor(const std::vector<bool> &roi,
                  const std::vector<size_t> &mapIndex, const double framePeriod,
-                 const TimeLimits &timeBoundary)
+                 const double gatePeriod, const TimeLimits &timeBoundary)
       : m_roi(roi), m_mapIndex(mapIndex), m_framePeriod(framePeriod),
-        m_gatePeriod(0.5 * framePeriod), m_frames(0), m_framesValid(0),
+        m_gatePeriod(gatePeriod), m_frames(0), m_framesValid(0),
         m_timeBoundary(timeBoundary) {}
 
   void newFrame() {
@@ -359,10 +360,10 @@ public:
   // construction
   EventCounter(const std::vector<bool> &roi,
                const std::vector<size_t> &mapIndex, const double framePeriod,
-               const TimeLimits &timeBoundary, std::vector<size_t> &eventCounts,
-               const double L1, const double V0,
-               const std::vector<double> &vecL2)
-      : EventProcessor(roi, mapIndex, framePeriod, timeBoundary),
+               const double gatePeriod, const TimeLimits &timeBoundary,
+               std::vector<size_t> &eventCounts, const double L1,
+               const double V0, const std::vector<double> &vecL2)
+      : EventProcessor(roi, mapIndex, framePeriod, gatePeriod, timeBoundary),
         m_eventCounts(eventCounts), m_L1(L1), m_V0(V0), m_L2(vecL2),
         m_histogram(5000, -2500.0, 2500.0) {}
 
@@ -427,10 +428,10 @@ protected:
 public:
   EventAssigner(const std::vector<bool> &roi,
                 const std::vector<size_t> &mapIndex, const double framePeriod,
-                const TimeLimits &timeBoundary,
+                const double gatePeriod, const TimeLimits &timeBoundary,
                 std::vector<EventVector_pt> &eventVectors, int64_t startTime,
                 double tofCorrection, double sampleTime)
-      : EventProcessor(roi, mapIndex, framePeriod, timeBoundary),
+      : EventProcessor(roi, mapIndex, framePeriod, gatePeriod, timeBoundary),
         m_eventVectors(eventVectors),
         m_tofMin(std::numeric_limits<double>::max()),
         m_tofMax(std::numeric_limits<double>::min()), m_startTime(startTime),
@@ -500,6 +501,9 @@ void LoadPLN::init() {
 
   declareProperty(CalibrateTOFStr, false,
                   "Calibrate the TOF correction from the elastic pulse.");
+
+  declareProperty(LambdaOnTwoStr, false,
+                  "Instrument is operating in Lambda on Two mode.");
 
   declareProperty(FilterByTimeStartStr, 0.0,
                   "Only include events after the provided start time, in "
@@ -582,9 +586,21 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
   std::vector<size_t> eventCounts(numberHistograms, 0);
 
-  double framePeriod =
-      1.0e6 / fabs(logManager.getTimeSeriesProperty<double>("FermiChopperFreq")
-                       ->firstValue());
+  double masterRpm =
+      fabs(logManager.getTimeSeriesProperty<double>("FermiChopperFreq")
+               ->firstValue());
+  double slaveRpm =
+      fabs(logManager.getTimeSeriesProperty<double>("OverlapChopperFreq")
+               ->firstValue());
+  double framePeriod = 1.0e6 / masterRpm;
+
+  // if fermi chopper freq equals the overlap freq then the gate period is
+  // half the frame period
+  double gatePeriod =
+      (std::round(masterRpm / slaveRpm) == 1.0 ? 0.5 * framePeriod
+                                               : framePeriod);
+  AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun, "GatePeriod",
+                                           gatePeriod);
 
   // count total events per pixel and reserve necessary memory
   loadDetectorL2Values();
@@ -594,9 +610,9 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   double velocity = PhysicalConstants::h /
                     (PhysicalConstants::NeutronMass * wavelength * 1e-10);
   double sampleTime = 1.0e6 * sourceSample / velocity;
-  PLN::EventCounter eventCounter(roi, detMapIndex, framePeriod, timeBoundary,
-                                 eventCounts, sourceSample, velocity,
-                                 m_detectorL2);
+  PLN::EventCounter eventCounter(roi, detMapIndex, framePeriod, gatePeriod,
+                                 timeBoundary, eventCounts, sourceSample,
+                                 velocity, m_detectorL2);
   PLN::loadEvents(prog, "loading neutron counts", eventFile, eventCounter);
   ANSTO::ProgressTracker progTracker(prog, "creating neutron event lists",
                                      numberHistograms, Progress_ReserveMemory);
@@ -624,9 +640,9 @@ void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
   logManager.addProperty("CalibrateTOF", (calibrateTOF ? 1 : 0));
   AddSinglePointTimeSeriesProperty<double>(logManager, m_startRun,
                                            "TOFCorrection", tofCorrection);
-  PLN::EventAssigner eventAssigner(roi, detMapIndex, framePeriod, timeBoundary,
-                                   eventVectors, start_nanosec, tofCorrection,
-                                   sampleTime);
+  PLN::EventAssigner eventAssigner(roi, detMapIndex, framePeriod, gatePeriod,
+                                   timeBoundary, eventVectors, start_nanosec,
+                                   tofCorrection, sampleTime);
   PLN::loadEvents(prog, "loading neutron events (TOF)", eventFile,
                   eventAssigner);
 
@@ -795,6 +811,14 @@ void LoadPLN::loadParameters(const std::string &hdfFile,
     m_startRun = startTime.toISO8601String();
   }
 
+  // Add support for instrument running in lambda on two mode.
+  // Added as UI option as the available instrument parameters
+  // cannot be reliably interpreted to predict the mode (as
+  // advised by the instrument scientist).
+  bool const lambdaOnTwoMode = getProperty(LambdaOnTwoStr);
+  double lambdaFactor = (lambdaOnTwoMode ? 0.5 : 1.0);
+  logm.addProperty("LambdaOnTwoMode", (lambdaOnTwoMode ? 1 : 0));
+
   MapNeXusToSeries<double>(entry, "instrument/fermi_chopper/mchs", 0.0, logm,
                            m_startRun, "FermiChopperFreq", 1.0 / 60,
                            m_datasetIndex);
@@ -802,7 +826,8 @@ void LoadPLN::loadParameters(const std::string &hdfFile,
                            m_startRun, "OverlapChopperFreq", 1.0 / 60,
                            m_datasetIndex);
   MapNeXusToSeries<double>(entry, "instrument/crystal/wavelength", 0.0, logm,
-                           m_startRun, "Wavelength", 1.0, m_datasetIndex);
+                           m_startRun, "Wavelength", lambdaFactor,
+                           m_datasetIndex);
   MapNeXusToSeries<double>(entry, "instrument/detector/stth", 0.0, logm,
                            m_startRun, "DetectorTankAngle", 1.0,
                            m_datasetIndex);

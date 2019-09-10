@@ -140,7 +140,7 @@ void CreateWorkspace::exec() {
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
   // Verify the size of the vertical axis.
-  const int vAxisSize = static_cast<int>(vAxis.size());
+  const auto vAxisSize = static_cast<int>(vAxis.size());
   if (vUnit != "SpectraNumber") {
     // In the case of numerical axis, the vertical axis can represent either
     // point data or bin edges.

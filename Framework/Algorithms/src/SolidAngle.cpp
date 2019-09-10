@@ -58,7 +58,7 @@ struct AlphaAngleCalculator {
     const auto sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
     auto inPlane = sampleDetVec;
     project(inPlane);
-    return sampleDetVec.angle(inPlane);
+    return sampleDetVec.cosAngle(inPlane);
   }
   virtual void project(V3D &v) const = 0;
   virtual ~AlphaAngleCalculator() = default;
@@ -86,7 +86,8 @@ struct SolidAngleCalculator {
                        const DetectorInfo &detectorInfo,
                        const std::string &method, const double pixelArea)
       : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo),
-        m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()) {
+        m_pixelArea(pixelArea), m_samplePos(detectorInfo.samplePosition()),
+        m_beamLine(m_samplePos - detectorInfo.sourcePosition()) {
     if (method.find("Vertical") != std::string::npos) {
       m_alphaAngleCalculator =
           std::make_unique<AlphaAngleVertical>(detectorInfo);
@@ -103,6 +104,7 @@ protected:
   const DetectorInfo &m_detectorInfo;
   const double m_pixelArea;
   const V3D m_samplePos;
+  const V3D m_beamLine;
   std::unique_ptr<const AlphaAngleCalculator> m_alphaAngleCalculator;
 };
 
@@ -116,7 +118,8 @@ struct GenericShape : public SolidAngleCalculator {
 struct Rectangle : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
+    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
+    const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -128,7 +131,7 @@ struct Rectangle : public SolidAngleCalculator {
 struct Tube : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
+    const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -140,8 +143,9 @@ struct Tube : public SolidAngleCalculator {
 struct Wing : public SolidAngleCalculator {
   using SolidAngleCalculator::SolidAngleCalculator;
   double solidAngle(size_t index) const override {
-    const double cosTheta = std::cos(m_detectorInfo.twoTheta(index));
-    const double cosAlpha = std::cos(m_alphaAngleCalculator->getAlpha(index));
+    const V3D sampleDetVec = m_detectorInfo.position(index) - m_samplePos;
+    const double cosTheta = sampleDetVec.cosAngle(m_beamLine);
+    const double cosAlpha = m_alphaAngleCalculator->getAlpha(index);
     const double l2 = m_detectorInfo.l2(index);
     const V3D scaleFactor = m_componentInfo.scaleFactor(index);
     const double scaledPixelArea =
@@ -198,7 +202,7 @@ void SolidAngle::exec() {
   int m_MinSpec = getProperty("StartWorkspaceIndex");
   int m_MaxSpec = getProperty("EndWorkspaceIndex");
 
-  const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if (m_MinSpec > numberOfSpectra) {
@@ -251,7 +255,7 @@ void SolidAngle::exec() {
   if (method == GENERIC_SHAPE) {
     solidAngleCalculator = std::make_unique<GenericShape>(
         componentInfo, detectorInfo, method, pixelArea);
-  } else if (method == "Rectangle") {
+  } else if (method == RECTANGLE) {
     solidAngleCalculator = std::make_unique<Rectangle>(
         componentInfo, detectorInfo, method, pixelArea);
   } else if (method == VERTICAL_TUBE || method == HORIZONTAL_TUBE) {
@@ -268,10 +272,7 @@ void SolidAngle::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int j = m_MinSpec; j <= m_MaxSpec; ++j) {
     PARALLEL_START_INTERUPT_REGION
-    outputWS->mutableX(j)[0] = inputWS->x(j).front();
-    outputWS->mutableX(j)[1] = inputWS->x(j).back();
-    outputWS->mutableE(j) = 0.;
-    outputWS->mutableY(j) = 0.; // default value for not calculated
+    initSpectrum(*inputWS, *outputWS, j);
     if (spectrumInfo.hasDetectors(j)) {
       double solidAngle = 0.0;
       for (const auto detID : inputWS->getSpectrum(j).getDetectorIDs()) {
@@ -294,10 +295,7 @@ void SolidAngle::exec() {
   auto &outputSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
   for (int j = 0; j < m_MinSpec; ++j) {
-    outputWS->mutableX(j)[0] = inputWS->x(j).front();
-    outputWS->mutableX(j)[1] = inputWS->x(j).back();
-    outputWS->mutableE(j) = 0.;
-    outputWS->mutableY(j) = 0.; // default value for not calculated
+    initSpectrum(*inputWS, *outputWS, j);
     // SpectrumInfo::setMasked is NOT threadsafe.
     outputSpectrumInfo.setMasked(j, true);
     prog.report();
@@ -305,10 +303,7 @@ void SolidAngle::exec() {
 
   // Loop over the histograms (detector spectra)
   for (int j = m_MaxSpec + 1; j < numberOfSpectra; ++j) {
-    outputWS->mutableX(j)[0] = inputWS->x(j).front();
-    outputWS->mutableX(j)[1] = inputWS->x(j).back();
-    outputWS->mutableE(j) = 0.;
-    outputWS->mutableY(j) = 0.; // default value for not calculated
+    initSpectrum(*inputWS, *outputWS, j);
     // SpectrumInfo::setMasked is NOT threadsafe.
     outputSpectrumInfo.setMasked(j, true);
     prog.report();
@@ -319,6 +314,18 @@ void SolidAngle::exec() {
                         << " spectra. The solid angle will be set to zero for "
                            "those detectors.\n";
   }
+}
+
+/**
+ * SolidAngle::initSpectrum Sets the default value for the spectra for which
+ * solid angle is not calculated.
+ */
+void SolidAngle::initSpectrum(const MatrixWorkspace &inputWS,
+                              MatrixWorkspace &outputWS, const size_t wsIndex) {
+  outputWS.mutableX(wsIndex)[0] = inputWS.x(wsIndex).front();
+  outputWS.mutableX(wsIndex)[1] = inputWS.x(wsIndex).back();
+  outputWS.mutableE(wsIndex) = 0.;
+  outputWS.mutableY(wsIndex) = 0.; // default value for not calculated
 }
 
 } // namespace Algorithms

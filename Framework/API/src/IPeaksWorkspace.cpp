@@ -41,7 +41,7 @@ template <>
 DLLExport Mantid::API::IPeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -58,7 +58,7 @@ template <>
 DLLExport Mantid::API::IPeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::IPeaksWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

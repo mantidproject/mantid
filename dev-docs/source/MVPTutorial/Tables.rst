@@ -4,11 +4,11 @@ Tables
 
 Tables are useful way to display a set of related options to a
 user. To add a table widget to a GUI the following lines need to be
-added to the ``__init__`` function of the View:
+added to the ``__init__`` function of the view:
 
 .. code-block:: python
 
-    self.table = QtGui.QTableWidget(self)
+    self.table = QtWidgets.QTableWidget(self)
     self.table.setRowCount(2)
     self.table.setColumnCount(2)
     grid.addWidget(self.table)
@@ -21,14 +21,14 @@ To add (non-editable) labels to the table the following code is needed:
 
 .. code-block:: python
 
-    text = QtGui.QTableWidgetItem(("test"))
+    text = QtWidgets.QTableWidgetItem(("test"))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
     row = 0
     col = 0
     self.table.setItem(row, col, text)
 
     row = 1
-    text2 = QtGui.QTableWidgetItem(("another test"))
+    text2 = QtWidgets.QTableWidgetItem(("another test"))
     text2.setFlags(QtCore.Qt.ItemIsEnabled)
     self.table.setItem(row, col, text2)
 

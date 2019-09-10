@@ -7,8 +7,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/none.hpp>
 #include <boost/optional.hpp>

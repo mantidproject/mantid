@@ -249,6 +249,7 @@ QStringList FunctionMultiDomainPresenter::getGlobalParameters() const {
 void FunctionMultiDomainPresenter::setGlobalParameters(
     const QStringList &globals) {
   m_model->setGlobalParameters(globals);
+  m_view->setGlobalParameters(m_model->getGlobalParameters());
 }
 
 QStringList FunctionMultiDomainPresenter::getLocalParameters() const {
@@ -313,6 +314,7 @@ IFunction_sptr FunctionMultiDomainPresenter::getFunction() const {
 void FunctionMultiDomainPresenter::clear() {
   m_model->clear();
   m_view->clear();
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::setColumnSizes(int s0, int s1, int s2) {

@@ -129,7 +129,7 @@ public:
   /// Set the default function type
   void setDefaultFunctionType(const std::string &fnType);
   /// Get the default peak type
-  std::string defaultPeakType() const;
+  std::string defaultPeakType();
   /// Set the default peak type
   void setDefaultPeakType(const std::string &fnType);
   /// Get the default background type
@@ -269,6 +269,10 @@ public:
   /// Allow or disallow sequential fits (depending on whether other conditions
   /// are met)
   void allowSequentialFits(bool allow) override;
+
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QMenu *getFitMenu() const { return m_fitMenu; }
 
   // Methods intended for testing only
 

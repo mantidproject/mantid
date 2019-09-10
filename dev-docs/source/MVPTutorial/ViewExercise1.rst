@@ -16,8 +16,6 @@ plot. The table should include options for:
 - Entering a phase shift
 
 The previous sections are not an exhaustive list of possible widgets.
-
-The pages :ref:`Matplotlib and MVP <Matplotlib>` and :ref:`MultipleView
-<MultipleViews>` will be useful for the exercise.
+Functionality for the update plot button will be added later.
 
 The solution can be found :ref:`here <ViewExercise1Solution>`.

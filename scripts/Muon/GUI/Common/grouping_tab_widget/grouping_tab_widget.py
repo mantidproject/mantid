@@ -33,3 +33,5 @@ class GroupingTabWidget(object):
                                                         self.group_tab_model,
                                                         self.grouping_table_widget,
                                                         self.pairing_table_widget)
+
+        context.update_view_from_model_notifier.add_subscriber(self.group_tab_presenter.update_view_from_model_observer)

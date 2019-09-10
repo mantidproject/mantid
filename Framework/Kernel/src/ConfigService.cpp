@@ -618,9 +618,10 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   std::string correctedPath = path;
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
+  using std::placeholders::_1;
   auto it =
       std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
-                   std::bind2nd(std::equal_to<std::string>(), correctedPath));
+                   std::bind(std::equal_to<std::string>(), _1, correctedPath));
   return (it != m_DataSearchDirs.end());
 }
 
@@ -1823,8 +1824,7 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   size_t n = pNL_facility->length();
 
   for (unsigned long i = 0; i < n; ++i) {
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
+    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
     if (elem) {
       m_facilities.push_back(new FacilityInfo(elem));
     }

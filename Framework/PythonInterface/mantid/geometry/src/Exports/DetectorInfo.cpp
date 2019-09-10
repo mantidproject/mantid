@@ -9,9 +9,9 @@
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/geometry/DetectorInfoPythonIterator.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -52,6 +52,9 @@ void export_DetectorInfo() {
 
   double (DetectorInfo::*twoTheta)(const size_t) const =
       &DetectorInfo::twoTheta;
+
+  double (DetectorInfo::*azimuthal)(const size_t) const =
+      &DetectorInfo::azimuthal;
 
   Mantid::Kernel::V3D (DetectorInfo::*position)(const size_t) const =
       &DetectorInfo::position;
@@ -101,7 +104,9 @@ void export_DetectorInfo() {
 
       .def("twoTheta", twoTheta, (arg("self"), arg("index")),
            "Returns 2 theta (scattering angle w.r.t beam direction).")
-
+      .def("azimuthal", azimuthal, (arg("self"), arg("index")),
+           "Returns the out-of-plane angle in radians angle w.r.t. to "
+           "vecPointingHorizontal")
       .def("position", position, (arg("self"), arg("index")),
            "Returns the absolute position of the detector where the detector "
            "is identified by 'index'.")

@@ -23,6 +23,7 @@ set(SRC_FILES
     src/CalculateDIFC.cpp
     src/CalculateDynamicRange.cpp
     src/CalculateEfficiency.cpp
+    src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
     src/CalculatePolynomialBackground.cpp
@@ -253,6 +254,7 @@ set(SRC_FILES
     src/ReflectometryMomentumTransfer.cpp
     src/ReflectometryReductionOne2.cpp
     src/ReflectometryReductionOneAuto2.cpp
+    src/ReflectometryReductionOneAuto3.cpp
     src/ReflectometrySumInQ.cpp
     src/ReflectometryWorkflowBase.cpp
     src/ReflectometryWorkflowBase2.cpp
@@ -359,12 +361,12 @@ set(INC_FILES
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
     inc/MantidAlgorithms/BinaryOperateMasks.h
     inc/MantidAlgorithms/BinaryOperation.h
-    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
     inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
     inc/MantidAlgorithms/CalculateCountRate.h
     inc/MantidAlgorithms/CalculateDIFC.h
     inc/MantidAlgorithms/CalculateDynamicRange.h
     inc/MantidAlgorithms/CalculateEfficiency.h
+    inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
@@ -599,6 +601,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
     inc/MantidAlgorithms/ReflectometryReductionOne2.h
     inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
+    inc/MantidAlgorithms/ReflectometryReductionOneAuto3.h
     inc/MantidAlgorithms/ReflectometrySumInQ.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
@@ -722,6 +725,7 @@ set(TEST_FILES
     CalculateDIFCTest.h
     CalculateDynamicRangeTest.h
     CalculateEfficiencyTest.h
+    CalculateEfficiency2Test.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculatePolynomialBackgroundTest.h
@@ -946,6 +950,7 @@ set(TEST_FILES
     ReflectometryMomentumTransferTest.h
     ReflectometryReductionOne2Test.h
     ReflectometryReductionOneAuto2Test.h
+    ReflectometryReductionOneAuto3Test.h
     ReflectometrySumInQTest.h
     RegroupTest.h
     RemoveBackgroundTest.h

@@ -289,7 +289,7 @@ void PeakHKLErrors::getRun2MatMap(
 Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
                                                          char axis) {
   int cint = toupper(axis);
-  char c = static_cast<char>(cint);
+  auto c = static_cast<char>(cint);
   std::string S(std::string("") + c);
   size_t axisPos = std::string("XYZ").find(S);
 
@@ -323,7 +323,7 @@ Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis(double theta,
 Matrix<double> PeakHKLErrors::DerivRotationMatrixAboutRegAxis(double theta,
                                                               char axis) {
   int cint = toupper(axis);
-  char c = static_cast<char>(cint);
+  auto c = static_cast<char>(cint);
   std::string S(std::string("") + c);
   size_t axisPos = std::string("XYZ").find(S);
 

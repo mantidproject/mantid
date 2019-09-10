@@ -10,15 +10,15 @@
 from __future__ import absolute_import, print_function
 
 import re
-
 from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QHeaderView, QLineEdit,
                             QMenu, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
+from mantid.py3compat.enum import IntEnum
+
 from mantidqt.icons import get_icon
 from mantidqt.utils.flowlayout import FlowLayout
-from mantid.py3compat.enum import IntEnum
-from workbench.plotting.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 DEBUG_MODE = False
 
@@ -618,9 +618,15 @@ class PlotNameWidget(QWidget):
         self.line_edit = QLineEdit(self.presenter.get_plot_name_from_number(plot_number))
         self.line_edit.setReadOnly(True)
         self.line_edit.setFrame(False)
-        self.line_edit.setStyleSheet("* { background-color: rgba(0, 0, 0, 0); }")
+        # changes the line edit to look like normal even when
+        self.line_edit.setStyleSheet("""* { background-color: rgba(0, 0, 0, 0); }
+        QLineEdit:disabled { color: black; }""")
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, True)
         self.line_edit.editingFinished.connect(self.rename_plot)
+        # Disabling the line edit prevents it from temporarily
+        # grabbing focus when changing code editors - this triggered
+        # the editingFinished signal, which was causing #26305
+        self.line_edit.setDisabled(True)
 
         shown_icon = get_icon('mdi.eye')
         self.hide_button = QPushButton(shown_icon, "")
@@ -694,6 +700,7 @@ class PlotNameWidget(QWidget):
                                      button state
         """
         self.line_edit.setReadOnly(not editable)
+        self.line_edit.setDisabled(not editable)
         self.line_edit.setAttribute(Qt.WA_TransparentForMouseEvents, not editable)
 
         # This is a sneaky way to avoid the issue of two calls to
@@ -734,6 +741,7 @@ class PlotNameWidget(QWidget):
         do the real renaming of the plot
         """
         self.presenter.rename_figure(self.plot_number, self.line_edit.text())
+
         self.toggle_plot_name_editable(False)
 
 

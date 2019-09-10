@@ -7,6 +7,6 @@ calibration_directory : 'C:\ISIS_Powder\calibration'
 output_directory : 'C:\ISIS_Powder\output'
 calibration_mapping_file : 'C:\ISIS_Powder\calibration\cal_map.yaml'
 
-# We can also use this configuration to set default options - e.g. always do absorption corrections
+# We can also use this configuration to set default options
 do_absorb_corrections : True
-
+do_solid_angle_corrections : True
