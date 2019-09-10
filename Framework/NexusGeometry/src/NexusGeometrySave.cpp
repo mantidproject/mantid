@@ -747,6 +747,85 @@ public:
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
   }
 
+  /* Function: saveNXMonitor
+   * For NXinstrument parent (component info root). Produces an NXmonitor
+   * groups from Component info, and saves it in the parent
+   * group, along with the Nexus compliant datasets, and metadata stored in
+   * attributes to the new group.
+   *
+   * @param parentGroup : parent group in which to write the NXinstrument
+   * group.
+   * @param compInfo : componentInfo object.
+   * @param monitorID :  ID of the specific monitor.
+   * @param index :  index of the specific monitor in the Instrument cache.
+   * @param mappings : Spectra to detector mappings
+   */
+  void monitor(const H5::Group &parentGroup,
+               const Geometry::ComponentInfo &compInfo, const int monitorId,
+               const size_t index, SpectraMappings &mappings) {
+
+    // if the component is unnamed sets the name as unspecified with the
+    // location of the component in the cache
+    std::string nameInCache = compInfo.name(index);
+    std::string monitorName =
+        nameInCache.empty() ? "unspecified_monitor_" + std::to_string(index)
+                            : nameInCache;
+
+    Eigen::Vector3d position =
+        Mantid::Kernel::toVector3d(compInfo.position(index));
+    Eigen::Quaterniond rotation =
+        Mantid::Kernel::toQuaterniond(compInfo.rotation(index));
+
+    std::string dependency = NO_DEPENDENCY; // dependency initialiser
+
+    bool locationIsOrigin = isApproxZero(position, PRECISION);
+    bool orientationIsZero = isApproxZero(rotation, PRECISION);
+
+    H5::Group childGroup =
+        openOrCreateGroup(parentGroup, monitorName, NX_MONITOR);
+    writeStrAttribute(childGroup, NX_CLASS, NX_MONITOR);
+
+    // do not write NXtransformations if there is no translation or rotation
+    if (!(locationIsOrigin && orientationIsZero)) {
+      H5::Group transformations =
+          simpleNXSubGroup(childGroup, TRANSFORMATIONS, NX_TRANSFORMATIONS);
+
+      // self, ".", is the default first NXmonitor dependency in the chain.
+      // first check translation in NXmonitor is non-zero, and set dependency
+      // to location if true and write location. Then check if orientation in
+      // NXmonitor is non-zero, replace dependency with orientation if true.
+      // If neither orientation nor location are non-zero, NXmonitor is self
+      // dependent.
+      if (!locationIsOrigin) {
+        dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        writeLocation(transformations, position);
+      }
+      if (!orientationIsZero) {
+        dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+
+        // If location dataset is written to group also, then dependency for
+        // orientation dataset containg the rotation transformation will be
+        // location. Else dependency for orientation is self.
+        std::string rotationDependency =
+            locationIsOrigin ? NO_DEPENDENCY
+                             : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        writeOrientation(transformations, rotation, rotationDependency);
+      }
+    }
+
+    H5::StrType dependencyStrType = strTypeOfSize(dependency);
+    writeNXMonitorNumber(childGroup, monitorId);
+
+    writeStrDataset(childGroup, BANK_NAME, monitorName);
+    writeStrDataset(childGroup, DEPENDS_ON, dependency);
+    // Note that the detector list is the same as detector_number, but it is
+    // ordered by spectrum index 0 - N, whereas detector_number is just written
+    // out in the order the detectors are encountered in the bank.
+    writeDetectorList(childGroup, mappings);
+    writeDetectorIndex(childGroup, mappings);
+    writeSpectra(childGroup, mappings);
+  }
+
   /*
    * Function: saveNXMonitor
    * For NXinstrument parent (component info root). Produces an NXmonitor
@@ -991,7 +1070,7 @@ public:
  * @param compInfo : componentInfo object.
  * @param detInfo : detectorInfo object.
  * @param fullPath : save destination as full path.
- * @param rootEntry : name of root entry
+ * @param rootName : name of root entry
  * @param logger : logging object
  * @param append : append mode, means openting and appending to existing file.
  * If false, creates new file.
@@ -999,21 +1078,20 @@ public:
  */
 void saveInstrument(const Geometry::ComponentInfo &compInfo,
                     const Geometry::DetectorInfo &detInfo,
-                    const std::string &fullPath, const std::string &rootPath,
+                    const std::string &fullPath, const std::string &rootName,
                     AbstractLogger &logger, bool append,
                     Kernel::ProgressBase *reporter) {
 
   validateInputs(logger, fullPath, compInfo);
   // IDs of all detectors in Instrument
-  const auto &detIds = detInfo.detectorIDs();
   H5::Group rootGroup;
   H5::H5File file;
   if (append) {
     file = H5::H5File(fullPath, H5F_ACC_RDWR); // open file
-    rootGroup = file.openGroup(rootPath);
+    rootGroup = file.openGroup(rootName);
   } else {
     file = H5::H5File(fullPath, H5F_ACC_TRUNC); // open file
-    rootGroup = file.createGroup(rootPath);
+    rootGroup = file.createGroup(rootName);
   }
 
   writeStrAttribute(rootGroup, NX_CLASS, NX_ENTRY);
@@ -1029,6 +1107,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   // save NXsample
   writer.sample(rootGroup, compInfo);
 
+  const auto &detIds = detInfo.detectorIDs();
   // save NXdetectors
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
@@ -1059,7 +1138,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.
- * @param rootEntry : name of root entry
+ * @param rootName : name of root entry
  * @param logger : logging object
  * @param append : append mode, means openting and appending to existing file.
  * If false, creates new file.
@@ -1068,13 +1147,13 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
                     std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
-    const std::string &fullPath, const std::string &rootPath,
+    const std::string &fullPath, const std::string &rootName,
     AbstractLogger &logger, bool append, Kernel::ProgressBase *reporter) {
 
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  return saveInstrument(compInfo, detInfo, fullPath, rootPath, logger, append,
+  return saveInstrument(compInfo, detInfo, fullPath, rootName, logger, append,
                         reporter);
 }
 
@@ -1134,9 +1213,14 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   // save NXmonitors
   for (size_t index = 0; index < detInfo.size(); ++index) {
     if (detInfo.isMonitor(index)) {
+      // Make spectra detector mappings that can be used
+      SpectraMappings mappings =
+          makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
+                       ws.spectrumInfo(), detIds, index);
+
       if (reporter != nullptr)
         reporter->report();
-      writer.monitor(instrument, compInfo, detIds[index], index);
+      writer.monitor(instrument, compInfo, detIds[index], index, mappings);
     }
   }
 

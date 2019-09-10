@@ -111,7 +111,7 @@ void LoadNexusProcessed2::extractMappingInfoNew(
   auto &spectrumNumbers = m_spectrumNumbers;
   auto &detectorIds = m_detectorIds;
   for (const auto &group : inst.groups()) {
-    if (group.nxclass == "NXdetector") {
+    if (group.nxclass == "NXdetector" || group.nxclass == "NXmonitor") {
       NXDetector detgroup = inst.openNXDetector(group.nxname);
 
       NXInt spectra_block = detgroup.openNXInt("spectra");
