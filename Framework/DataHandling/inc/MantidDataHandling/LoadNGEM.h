@@ -92,7 +92,7 @@ public:
   /// Algorithm's Version for identification.
   int version() const override { return 1; }
   /// Algorithm's category for identification.
-  const std::string category() const override { return "DataHandling\\nGEM"; };
+  const std::string category() const override { return "DataHandling\\NGEM"; };
   /// Should the loader load multiple files into one workspace.
   bool loadMutipleAsOne() override { return true; }
 
