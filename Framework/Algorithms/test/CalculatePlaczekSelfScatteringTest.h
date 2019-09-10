@@ -161,6 +161,15 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
+  void test_CalculatePlaczekSelfScattering_executes() {
+    MatrixWorkspace_sptr ws = generate_incident_spectrum_with_detector_data();
+    ws = add_sample_material_to_workspace(ws);
+    auto alg = makeAlgorithm();
+    alg->setProperty("InputWorkspace", "incident_spectrum_ws");
+    alg->setProperty("OutputWorkspace", "correction_ws");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
   void test_CalculatePlaczekSelfScattering_does_not_run_with_no_detectors() {
     MatrixWorkspace_sptr ws =
         generate_incident_spectrum_without_detector_data();

@@ -70,9 +70,10 @@ void CalculatePlaczekSelfScattering::exec() {
   const MantidVec x_lambda = inWS->readX(0);
   const MantidVec incident = inWS->readY(0);
   const MantidVec incident_prime = inWS->readY(1);
+  double dx = (x_lambda[1] - x_lambda[0]) / 2.0;
   std::vector<double> phi_1;
-  for (int i = 0; i < x_lambda.size(); i++) {
-    phi_1.push_back(x_lambda[i] * incident_prime[i] / incident[i]);
+  for (int i = 0; i < x_lambda.size()-1; i++) {
+    phi_1.push_back((x_lambda[i] + dx) * incident_prime[i] / incident[i]);
   }
   // set detector law term (eps_1)
   const double lambda_D = 1.44;
@@ -103,7 +104,7 @@ void CalculatePlaczekSelfScattering::exec() {
 	  const double angle_conv = M_PI / 180.0;
       const double sin_theta_by_2 =
           sin(det_info.twoTheta(det_index) * angle_conv / 2.0);
-      for (int x_index = 0; x_index < x_lambda.size(); x_index++) {
+      for (int x_index = 0; x_index < x_lambda.size()-1; x_index++) {
         const double term1 = (f + 1.0) * phi_1[x_index];
         const double term2 = f * eps_1[x_index];
         const double term3 = f - 3;
@@ -112,7 +113,8 @@ void CalculatePlaczekSelfScattering::exec() {
             summation_term;
         x_lambdas.push_back(x_lambda[x_index]);
         placzek_correction.push_back(inelastic_placzek_self_correction);
-	  }
+      }
+      x_lambdas.push_back(x_lambda.back());
     }
   }
   Mantid::API::Algorithm_sptr ChildAlg =
