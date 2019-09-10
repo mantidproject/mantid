@@ -8,6 +8,7 @@
 #define MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERING_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -15,8 +16,8 @@ namespace Algorithms {
 /** CalculatePlaczekSelfScattering : This algorithm calculates a correction for an 
 	incident spectrum defracted by a sample.
 */
-class CalculatePlaczekSelfScattering: public API::Algorithm 
-{
+class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering
+    : public API::Algorithm {
   public:
     CalculatePlaczekSelfScattering() : API::Algorithm() {}
     virtual ~CalculatePlaczekSelfScattering() {}

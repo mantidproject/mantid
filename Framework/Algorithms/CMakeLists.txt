@@ -730,6 +730,7 @@ set(TEST_FILES
     CalculateEfficiency2Test.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
+    CalculatePlaczekSelfScatteringTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateSlitsTest.h
     CalculateTransmissionBeamSpreaderTest.h
