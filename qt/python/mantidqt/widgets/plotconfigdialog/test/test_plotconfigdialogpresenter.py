@@ -134,7 +134,7 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
     def test_correct_tabs_present_axes_curves_and_legend(self):
         fig = figure()
         ax = fig.add_subplot(111)
-        ax.plot([0], [0])
+        ax.plot([0])
         ax.legend()
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)

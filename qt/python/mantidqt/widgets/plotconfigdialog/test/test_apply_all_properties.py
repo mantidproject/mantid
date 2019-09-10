@@ -71,7 +71,7 @@ new_legend_props = {
     'entries_font': 'DejaVu Sans',
     'entries_size': 12,
     'entries_color': '#000000',
-    'title_font': 'Arial',
+    'title_font': 'DejaVu Sans',
     'title_size': 14,
     'title_color': '#000000',
     'marker_size': 3.0,
@@ -357,6 +357,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
     def test_apply_properties_on_figure_with_legend_sets_marker_label_padding(self):
         self.assertEqual(new_legend_props['marker_label_padding'], self.new_legend.handletextpad)
+
 
 if __name__ == '__main__':
     unittest.main()
