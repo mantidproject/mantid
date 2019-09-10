@@ -39,6 +39,8 @@ class MessageDisplay(MessageDisplay_cpp):
         self.getTextEdit().customContextMenuRequested.disconnect()
         self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
 
+        self.script_name = None
+
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
         self.setShowFrameworkOutput(qsettings.value(SHOW_FRAMEWORK_OUTPUT_KEY, True))
@@ -70,7 +72,7 @@ class MessageDisplay(MessageDisplay_cpp):
         output from a Python script with "Error" priority. This function
         is hooked into stderr.
         """
-        self.appendPython(txt, Priority.Error)
+        self.appendPython(txt, Priority.Error, self.script_name)
 
     def append_script_notice(self, txt):
         """
@@ -78,7 +80,7 @@ class MessageDisplay(MessageDisplay_cpp):
         output from a Python script with "Notice" priority. This
         function is hooked into stdout.
         """
-        self.appendPython(txt, Priority.Notice)
+        self.appendPython(txt, Priority.Notice, self.script_name)
 
     def toggle_filter_framework_output(self):
         self.setShowFrameworkOutput(not self.showFrameworkOutput())

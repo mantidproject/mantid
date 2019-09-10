@@ -20,37 +20,40 @@ namespace MantidWidgets {
  */
 Message::Message()
     : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE),
-      m_frameworkMsg(true) {}
+      m_frameworkMsg(true), m_scriptName("") {}
 
 /**
  * @param text A QString containing the message text
  * @param priority A enumeration indicating the priority
  */
-Message::Message(const QString &text, Priority priority, bool frameworkMsg)
+Message::Message(const QString &text, Priority priority, bool frameworkMsg,
+                 QString scriptName)
     : QObject(), m_text(text), m_priority(priority),
-      m_frameworkMsg(frameworkMsg) {}
+      m_frameworkMsg(frameworkMsg), m_scriptName(scriptName) {}
 
 /**
  * @param text A std::string containing the message text
  * @param priority A enumeration indicating the priority
  */
-Message::Message(const std::string &text, Priority priority, bool frameworkMsg)
+Message::Message(const std::string &text, Priority priority, bool frameworkMsg,
+                 QString scriptName)
     : QObject(), m_text(QString::fromStdString(text)), m_priority(priority),
-      m_frameworkMsg(frameworkMsg) {}
+      m_frameworkMsg(frameworkMsg), m_scriptName(scriptName) {}
 
 /**
  * @param text A c-style string containing the message text
  * @param priority A enumeration indicating the priority
  */
-Message::Message(const char *text, Priority priority, bool frameworkMsg)
+Message::Message(const char *text, Priority priority, bool frameworkMsg,
+                 QString scriptName)
     : QObject(), m_text(text), m_priority(priority),
-      m_frameworkMsg(frameworkMsg) {}
+      m_frameworkMsg(frameworkMsg), m_scriptName(scriptName) {}
 
 /**
  * Construct a message from another object
  */
 Message::Message(const Message &msg)
     : QObject(), m_text(msg.text()), m_priority(msg.priority()),
-      m_frameworkMsg(msg.frameworkMsg()) {}
+      m_frameworkMsg(msg.frameworkMsg()), m_scriptName(msg.scriptName()) {}
 } // namespace MantidWidgets
 } // namespace MantidQt

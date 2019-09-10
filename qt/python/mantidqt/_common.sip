@@ -95,7 +95,7 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
-  void appendPython(const QString &text, const int &priority);
+  void appendPython(const QString &text, const int &priority, const QString &fileName);
   void setSource(const QString &source);
 };
 

@@ -107,7 +107,8 @@ public slots:
   /// Append a QList of messages to the current contents
   void appendList(const QList<Message> &messages);
   /// Write a Python script message, intended for use with Python API
-  void appendPython(const QString &text, const int &priority);
+  void appendPython(const QString &text, const int &priority,
+                    const QString &fileName);
   /// Replace the display text with the given contents
   void replace(const Message &msg);
   /// Clear all of the text

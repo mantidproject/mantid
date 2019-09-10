@@ -237,8 +237,10 @@ void MessageDisplay::appendList(const QList<Message> &messages) {
  * @param text The message to display in the window
  * @param priority The priority level of the message
  */
-void MessageDisplay::appendPython(const QString &text, const int &priority) {
-  Message msg = Message(text, static_cast<Message::Priority>(priority), false);
+void MessageDisplay::appendPython(const QString &text, const int &priority,
+                                  const QString &fileName) {
+  Message msg =
+      Message(text, static_cast<Message::Priority>(priority), false, fileName);
   append(msg);
 }
 
