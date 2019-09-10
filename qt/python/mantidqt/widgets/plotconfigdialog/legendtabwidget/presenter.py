@@ -24,7 +24,6 @@ class LegendTabWidgetPresenter:
         else:
             self.view = view
 
-
         self.current_view_properties = None
         self.populate_font_combo_box()
         self.init_view()

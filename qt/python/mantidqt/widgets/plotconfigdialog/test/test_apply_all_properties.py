@@ -12,7 +12,7 @@ from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.colors import LogNorm, to_hex
 from matplotlib.patches import BoxStyle
-from matplotlib.pyplot import figure, Text
+from matplotlib.pyplot import figure
 
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
