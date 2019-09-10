@@ -204,5 +204,13 @@ bool LoadNexusProcessed2::loadNexusGeometry(Mantid::API::Workspace &ws,
   return false;
 }
 
+int LoadNexusProcessed2::confidence(Kernel::NexusDescriptor &descriptor) const {
+  if (descriptor.pathExists("/mantid_workspace_1"))
+    return LoadNexusProcessed::confidence(descriptor) +
+           1; // incrementally better than v1.
+  else
+    return 0;
+}
+
 } // namespace DataHandling
 } // namespace Mantid
