@@ -13,7 +13,8 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
-                                   StringWithNoneParameter, rename_descriptor_names)
+                                   StringWithNoneParameter, rename_descriptor_names, FloatListParameter,
+                                   DictFloatsParameter)
 from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
@@ -96,13 +97,13 @@ class StateMove(StateBase):
         self.sample_offset_direction = CanonicalCoordinates.Z
 
     def validate(self):
-        # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
-        for key in self.detectors:
-            self.detectors[key].validate()
-
         # If the detectors are empty, then we raise
         if not self.detectors:
             raise ValueError("No detectors have been set.")
+
+        # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
+        for key in self.detectors:
+            self.detectors[key].validate()
 
 
 @rename_descriptor_names
@@ -194,8 +195,9 @@ class StateMoveLARMOR(StateMove):
 
 @rename_descriptor_names
 class StateMoveZOOM(StateMove):
+
     lab_detector_default_sd_m = FloatParameter()
-    monitor_n_offset = FloatParameter()
+    monitor_n_offset = DictFloatsParameter()
 
     def __init__(self):
         super(StateMoveZOOM, self).__init__()
@@ -203,7 +205,8 @@ class StateMoveZOOM(StateMove):
 
         # Set the monitor names
         self.monitor_names = {}
-        self.monitor_n_offset = 0.0
+        # Monitor 4 and 5 offsets
+        self.monitor_n_offset = {4: 0.0, 5: 0.0}
 
         # Setup the detectors
         self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}

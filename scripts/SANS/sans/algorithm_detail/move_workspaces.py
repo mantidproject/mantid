@@ -689,12 +689,27 @@ class SANSMoveZOOM(SANSMove):
         move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=False)
 
     @staticmethod
-    def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
-        monitor_offset = move_info.monitor_n_offset
-        if monitor_offset != 0.0:
-            monitor_spectrum_number_as_string = str(monitor_spectrum_number)
-            monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
-            instrument = workspace.getInstrument()
+    def _move_monitor_n(workspace, move_info, monitor_spectrum_number_list):
+        """
+        Moves n monitors in the workspace
+        :param workspace: The associated workspace
+        :param move_info: A move info object containing this instruments details
+        :param monitor_spectrum_number_list: A list of spectrum numbers to move
+        :return: None
+        """
+        assert(len(monitor_spectrum_number_list) == 2)
+        monitor_offset_dict = move_info.monitor_n_offset
+
+        instrument = workspace.getInstrument()
+
+        for monitor_spec_num in monitor_spectrum_number_list:
+            assert(monitor_spec_num == 4 or monitor_spec_num == 5)
+            monitor_offset = monitor_offset_dict[monitor_spec_num]
+
+            if monitor_offset == 0.0:
+                continue
+
+            monitor_n_name = move_info.monitor_names[str(monitor_spec_num)]
             monitor_n = instrument.getComponentByName(monitor_n_name)
 
             # Get position of monitor n
@@ -728,9 +743,9 @@ class SANSMoveZOOM(SANSMove):
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
-        # Move the monitor
-        monitor_spectrum = 5  # Only M5 can be moved for ZOOM
-        self._move_monitor_n(workspace, move_info, monitor_spectrum_number=monitor_spectrum)
+        # Move the monitors
+        monitor_spectrum = [4, 5]  # Both monitors 4 and 5 can be moved
+        self._move_monitor_n(workspace, move_info, monitor_spectrum_number_list=monitor_spectrum)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For ZOOM we only have to coordinates
