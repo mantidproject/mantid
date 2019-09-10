@@ -8,7 +8,6 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantidqt.widgets.plotconfigdialog.legendtabwidget.advancedlegendoptionsdialog.view import AdvancedLegendOptionsView
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.view import LegendTabWidgetView
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
@@ -25,7 +24,7 @@ class LegendTabWidgetPresenter:
         else:
             self.view = view
 
-        self.advanced_options = AdvancedLegendOptionsView(self.view)
+
         self.current_view_properties = None
         self.populate_font_combo_box()
         self.init_view()
@@ -40,7 +39,7 @@ class LegendTabWidgetPresenter:
         self.view.hide_box_check_box.stateChanged.connect(
             lambda: self.hide_box_ticked(not self.view.get_hide_box()))
         self.view.advanced_options_push_button.clicked.connect(self.show_advanced_options)
-        self.advanced_options.rejected.connect(self.advanced_options_cancelled)
+        self.view.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
     def init_view(self):
         """Sets all of the initial values of the input fields when the tab is first loaded"""
@@ -64,15 +63,15 @@ class LegendTabWidgetPresenter:
         self.view.set_title_color(legend_props.title_color)
         self.view.set_marker_size(legend_props.marker_size)
 
-        self.advanced_options.set_border_padding(legend_props.border_padding)
-        self.advanced_options.set_column_spacing(legend_props.column_spacing)
-        self.advanced_options.set_label_spacing(legend_props.label_spacing)
-        self.advanced_options.set_marker_position(legend_props.marker_position)
-        self.advanced_options.set_number_of_columns(legend_props.columns)
-        self.advanced_options.set_number_of_markers(legend_props.markers)
-        self.advanced_options.set_round_edges(legend_props.round_edges)
-        self.advanced_options.set_shadow(legend_props.shadow)
-        self.advanced_options.set_marker_label_padding(legend_props.marker_label_padding)
+        self.view.advanced_options.set_border_padding(legend_props.border_padding)
+        self.view.advanced_options.set_column_spacing(legend_props.column_spacing)
+        self.view.advanced_options.set_label_spacing(legend_props.label_spacing)
+        self.view.advanced_options.set_marker_position(legend_props.marker_position)
+        self.view.advanced_options.set_number_of_columns(legend_props.columns)
+        self.view.advanced_options.set_number_of_markers(legend_props.markers)
+        self.view.advanced_options.set_round_edges(legend_props.round_edges)
+        self.view.advanced_options.set_shadow(legend_props.shadow)
+        self.view.advanced_options.set_marker_label_padding(legend_props.marker_label_padding)
 
         visible = legend_props.visible
         self.view.set_hide_legend(not visible)
@@ -85,10 +84,8 @@ class LegendTabWidgetPresenter:
         self.current_view_properties = legend_props
 
     def apply_properties(self):
-        """Takes the properties from the views and creates a new legend."""
+        """Takes the properties from the view and creates a new legend."""
         props = self.view.get_properties()
-        advanced_props = self.advanced_options.get_properties()
-        props.update(advanced_props)
 
         if self.current_view_properties == props:
             return
@@ -132,8 +129,8 @@ class LegendTabWidgetPresenter:
         self.view.edge_color_selector_widget.setEnabled(enable)
         self.view.transparency_slider.setEnabled(enable)
         self.view.transparency_spin_box.setEnabled(enable)
-        self.advanced_options.shadow_check_box.setEnabled(enable)
-        self.advanced_options.round_edges_check_box.setEnabled(enable)
+        self.view.advanced_options.shadow_check_box.setEnabled(enable)
+        self.view.advanced_options.round_edges_check_box.setEnabled(enable)
 
     def check_font_in_list(self, font):
         """For some reason the default matplotlib legend font isn't a system font so it's added
@@ -148,21 +145,21 @@ class LegendTabWidgetPresenter:
 
     def show_advanced_options(self):
         """Opens the advanced options dialog."""
-        self.advanced_options.show()
+        self.view.advanced_options.show()
         # The current properties in the dialog are stored so they can be reverted back to if the user cancels.
-        self.current_advanced_properties = self.advanced_options.get_properties()
+        self.current_advanced_properties = self.view.advanced_options.get_properties()
 
     def advanced_options_cancelled(self):
         """When the user clicks cancel in the advanced options dialog, the input fields reset to what they were
         before the user opened the dialog."""
-        self.advanced_options.set_border_padding(self.current_advanced_properties.border_padding)
-        self.advanced_options.set_column_spacing(self.current_advanced_properties.column_spacing)
-        self.advanced_options.set_label_spacing(self.current_advanced_properties.label_spacing)
-        self.advanced_options.set_marker_position(self.current_advanced_properties.marker_position)
-        self.advanced_options.set_number_of_columns(self.current_advanced_properties.columns)
-        self.advanced_options.set_number_of_markers(self.current_advanced_properties.markers)
-        self.advanced_options.set_round_edges(self.current_advanced_properties.round_edges)
-        self.advanced_options.set_shadow(self.current_advanced_properties.shadow)
+        self.view.advanced_options.set_border_padding(self.current_advanced_properties.border_padding)
+        self.view.advanced_options.set_column_spacing(self.current_advanced_properties.column_spacing)
+        self.view.advanced_options.set_label_spacing(self.current_advanced_properties.label_spacing)
+        self.view.advanced_options.set_marker_position(self.current_advanced_properties.marker_position)
+        self.view.advanced_options.set_number_of_columns(self.current_advanced_properties.columns)
+        self.view.advanced_options.set_number_of_markers(self.current_advanced_properties.markers)
+        self.view.advanced_options.set_round_edges(self.current_advanced_properties.round_edges)
+        self.view.advanced_options.set_shadow(self.current_advanced_properties.shadow)
 
     def close_tab(self):
         """Closes the tab and sets the view to None"""

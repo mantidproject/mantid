@@ -29,6 +29,7 @@ class CurvesTabWidgetPresenter:
 
         # The legend tab is passed in so that it can be removed if all curves are removed.
         self.legend_tab = legend_tab
+        self.legend_props = None
 
         if not view:
             self.view = CurvesTabWidgetView(parent)
@@ -54,7 +55,8 @@ class CurvesTabWidgetPresenter:
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
         ax = self.get_selected_ax()
-        self.legend_props = LegendProperties.from_legend(ax.legend_)
+        if ax.legend_:
+            self.legend_props = LegendProperties.from_legend(ax.legend_)
 
         view_props = self.get_view_properties()
         if view_props == self.current_view_properties:
@@ -70,7 +72,7 @@ class CurvesTabWidgetPresenter:
         self.update_limits_and_legend(ax, self.legend_props)
 
     @staticmethod
-    def update_limits_and_legend(ax, legend_props):
+    def update_limits_and_legend(ax, legend_props=None):
         ax.relim()
         ax.autoscale()
         if ax.legend_:
@@ -180,7 +182,8 @@ class CurvesTabWidgetPresenter:
         curves left on the axes remove that axes from the axes combo box
         """
         ax = self.get_selected_ax()
-        self.legend_props = LegendProperties.from_legend(ax.legend_)
+        if ax.legend_:
+            self.legend_props = LegendProperties.from_legend(ax.legend_)
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())

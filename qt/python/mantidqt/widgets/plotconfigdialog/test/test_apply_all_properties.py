@@ -10,9 +10,9 @@ import unittest
 
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, to_hex
 from matplotlib.patches import BoxStyle
-from matplotlib.pyplot import figure
+from matplotlib.pyplot import figure, Text
 
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
@@ -92,7 +92,7 @@ def _run_apply_properties_on_figure_with_curve():
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
     presenter = PlotConfigDialogPresenter(fig, view=Mock())
-    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+    with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
     return ax
@@ -103,7 +103,7 @@ def _run_apply_properties_on_figure_with_image():
     img_ax = img_fig.add_subplot(111)
     img_ax.imshow([[0, 1], [0, 1]], label='old label')
     presenter = PlotConfigDialogPresenter(img_fig, view=Mock())
-    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+    with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
     return img_ax
@@ -112,9 +112,10 @@ def _run_apply_properties_on_figure_with_image():
 def _run_apply_properties_on_figure_with_legend():
     fig = figure()
     ax = fig.add_subplot(111)
+    ax.plot([1,2,3], label='old label')
     ax.legend()
     presenter = PlotConfigDialogPresenter(fig, view=Mock())
-    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+    with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
     return ax
@@ -159,7 +160,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.legend_view_patch.start()
 
         cls.legend_ax = _run_apply_properties_on_figure_with_legend()
-        cls.new_legend = cls.legend_ax.legend_
+        cls.new_legend = cls.legend_ax.get_legend()
 
     @classmethod
     def tearDownClass(cls):
@@ -282,19 +283,19 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         self.assertEqual(new_legend_props['visible'], self.new_legend.get_visible())
 
     def test_apply_properties_on_figure_with_legend_sets_title(self):
-        self.assertEqual(new_legend_props['title'], self.new_legend.get_title())
+        self.assertEqual(new_legend_props['title'], self.new_legend.get_title().get_text())
 
     def test_apply_properties_on_figure_with_legend_sets_background_color(self):
         self.assertEqual(new_legend_props['background_color'],
-                         self.new_legend.get_frame().get_facecolor())
+                         to_hex(self.new_legend.get_frame().get_facecolor()))
 
     def test_apply_properties_on_figure_with_legend_sets_edge_color(self):
         self.assertEqual(new_legend_props['edge_color'],
-                         self.new_legend.get_frame().get_edgecolor())
+                         to_hex(self.new_legend.get_frame().get_edgecolor()))
 
     def test_apply_properties_on_figure_with_legend_sets_transparency(self):
         self.assertEqual(new_legend_props['transparency'],
-                         self.new_legend.get_frame.get_alpha())
+                         self.new_legend.get_frame().get_alpha())
 
     def test_apply_properties_on_figure_with_legend_sets_entries_font(self):
         self.assertEqual(new_legend_props['entries_font'],
@@ -335,7 +336,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
                          isinstance(self.new_legend.legendPatch.get_boxstyle(), BoxStyle.Round))
 
     def test_apply_properties_on_figure_with_legend_sets_number_of_columns(self):
-        self.assertEqual(new_legend_props['columns'], self.new_legend.ncol)
+        self.assertEqual(new_legend_props['columns'], self.new_legend._ncol)
 
     def test_apply_properties_on_figure_with_legend_sets_column_spacing(self):
         self.assertEqual(new_legend_props['column_spacing'], self.new_legend.columnspacing)

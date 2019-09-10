@@ -11,9 +11,10 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
-from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+from mantidqt.widgets.plotconfigdialog.legendtabwidget.advancedlegendoptionsdialog.view import AdvancedLegendOptionsView
 
 
 class LegendTabWidgetView(QWidget):
@@ -37,6 +38,8 @@ class LegendTabWidgetView(QWidget):
         self.grid_layout.replaceWidget(self.title_color_selector_dummy_widget,
                                        self.title_color_selector_widget)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        self.advanced_options = AdvancedLegendOptionsView(self)
 
     def set_transparency_slider(self, transparency):
         self.transparency_slider.setValue(transparency)
@@ -123,4 +126,7 @@ class LegendTabWidgetView(QWidget):
         self.hide_legend_check_box.setChecked(hide)
 
     def get_properties(self):
-        return LegendProperties.from_view(self)
+        props = LegendProperties.from_view(self)
+        advanced_props = self.advanced_options.get_properties()
+        props.update(advanced_props)
+        return props
