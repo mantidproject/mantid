@@ -558,7 +558,7 @@ class Abins(PythonAlgorithm):
         AnalysisDataService.addOrReplace(workspace, wrk)
 
         # Set correct units on workspace
-        self._set_workspace_units(wrk=workspace)
+        self._set_workspace_units(wrk=workspace, layout="1D")
 
     def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         from mantid.api import NumericAxis
@@ -568,21 +568,25 @@ class Abins(PythonAlgorithm):
             s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
                                                                         nucleons_number=nucleons_number)
 
-        dim, length = s_points.shape
-        wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
-        q_axis = NumericAxis.create(length)
+        n_q_bins, n_freq_bins = s_points.shape
+        wrk = WorkspaceFactory.create("Workspace2D", NVectors=n_freq_bins, XLength=n_q_bins + 1, YLength=n_q_bins)
 
-        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.q_size)
+        freq_axis = NumericAxis.create(n_freq_bins)
 
-        for i in range(dim):
-            wrk.setX(i, self._bins)
-            wrk.setY(i, s_points[i, :])
-            q_axis.setValue(i, q_bins[i])
-        q_axis.setUnit('MomentumTransfer')
-        wrk.replaceAxis(1, q_axis)
+        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.q_size + 1)
+        q_bin_vals = np.linspace(start=Q_BEGIN, stop=Q_END, num=(abins.parameters.q_size))
+
+        freq_offset = (self._bins[1] - self._bins[0]) / 2
+        for i, freq in enumerate(self._bins[1:]):
+            wrk.setX(i, q_bins)
+            wrk.setY(i, s_points[:, i].T)
+            freq_axis.setValue(i, freq + freq_offset)
+        freq_axis.setUnit("Energy_inWavenumber")
+        wrk.replaceAxis(1, freq_axis)
+
         AnalysisDataService.addOrReplace(workspace, wrk)
 
-        self._set_workspace_units(wrk=workspace)
+        self._set_workspace_units(wrk=workspace, layout="2D")
 
         # wspace = WorkspaceFactory.create("Workspace2D",NVectors=10,XLength=10,YLength=10)
         # wspace.getAxis(0).setUnit('tof')
@@ -696,14 +700,29 @@ class Abins(PythonAlgorithm):
 
         return experimental_wrk
 
-    def _set_workspace_units(self, wrk=None):
+    def _set_workspace_units(self, wrk=None, layout='1D'):
         """
         Sets x and y units for a workspace.
         :param wrk: workspace which units should be set
+        :param layout: layout of data in Workspace2D.
+
+            - '1D' is a typical indirect spectrum, with energy transfer on Axis
+              0 (X), S on Axis 1 (Y)
+            - '2D' is a 2D S(q,omega) map with momentum transfer on Axis 0 (X),
+              S on Axis 1 and energy transfer on Axis 2
         """
-        mtd[wrk].getAxis(0).setUnit("DeltaE_inWavenumber")
-        mtd[wrk].setYUnitLabel("S /Arbitrary Units")
-        mtd[wrk].setYUnit("Arbitrary Units")
+
+        if layout == '1D':
+            mtd[wrk].getAxis(0).setUnit("DeltaE_inWavenumber")
+            mtd[wrk].setYUnitLabel("S / Arbitrary Units")
+            mtd[wrk].setYUnit("Arbitrary Units")
+        elif layout == '2D':
+            mtd[wrk].getAxis(0).setUnit("MomentumTransfer")
+            mtd[wrk].setYUnitLabel("S / Arbitrary Units")
+            mtd[wrk].setYUnit("Arbitrary Units")            
+            mtd[wrk].getAxis(1).setUnit("DeltaE_inWavenumber")
+        else:
+            raise ValueError('Unknown data/units layout "{}"'.format(layout))
 
     def _check_advanced_parameter(self):
         """
