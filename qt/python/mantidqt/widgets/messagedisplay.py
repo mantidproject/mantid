@@ -14,6 +14,9 @@ from qtpy.QtGui import QFont
 
 from mantidqt.utils.qt import import_qt
 
+SHOW_SCRIPT_OUTPUT_KEY = "MessageDisplayShowScriptOutput"
+SHOW_FRAMEWORK_OUTPUT_KEY = "MessageDisplayShowFrameworkOutput"
+
 MessageDisplay_cpp = import_qt('.._common', 'mantidqt.widgets', 'MessageDisplay')
 
 
@@ -36,9 +39,15 @@ class MessageDisplay(MessageDisplay_cpp):
         self.getTextEdit().customContextMenuRequested.disconnect()
         self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
 
-        # # Get these values from QSettings
-        # self.showFrameworkOutput(...)
-        # self.showScriptOutput(...)
+    def readSettings(self, qsettings):
+        super(MessageDisplay, self).readSettings(qsettings)
+        self.setShowFrameworkOutput(qsettings.value(SHOW_FRAMEWORK_OUTPUT_KEY, True))
+        self.setShowScriptOutput(qsettings.value(SHOW_SCRIPT_OUTPUT_KEY, True))
+
+    def writeSettings(self, qsettings):
+        super(MessageDisplay, self).writeSettings(qsettings)
+        qsettings.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, self.showFrameworkOutput())
+        qsettings.setValue(SHOW_SCRIPT_OUTPUT_KEY, self.showScriptOutput())
 
     def generateContextMenu(self):
         qmenu = super(MessageDisplay, self).generateContextMenu()
