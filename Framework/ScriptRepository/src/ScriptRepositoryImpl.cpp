@@ -161,7 +161,7 @@ DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
  ScriptrepositoryImpl sharing();
  // apply given values
  ScriptrepositoryImpl sharing("/tmp/gitrep",
- "http://repository.mantidproject.com");
+ "https://repository.mantidproject.com");
  @endcode
  */
 ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
@@ -983,7 +983,7 @@ void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
  *changing the word
  * publish to remove. For example:
  *
- * http://upload.mantidproject.org/scriptrepository/payload/remove
+ * https://upload.mantidproject.org/scriptrepository/payload/remove
  *
  * The server will them create a git commit deleting the file. And will reply
  *with a json string
