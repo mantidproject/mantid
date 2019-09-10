@@ -68,7 +68,7 @@ new_legend_props = {
     'background_color': '#ffffff',
     'edge_color': '#ffffff',
     'transparency': 0.5,
-    'entries_font': 'Arial',
+    'entries_font': 'DejaVu Sans',
     'entries_size': 12,
     'entries_color': '#000000',
     'title_font': 'Arial',
