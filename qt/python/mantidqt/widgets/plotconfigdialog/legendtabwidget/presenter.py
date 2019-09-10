@@ -26,7 +26,7 @@ class LegendTabWidgetPresenter:
             self.view = view
 
         self.advanced_options = AdvancedLegendOptionsView(self.view)
-
+        self.current_view_properties = None
         self.populate_font_combo_box()
         self.init_view()
 
@@ -82,11 +82,16 @@ class LegendTabWidgetPresenter:
         self.view.set_hide_box(not box_visible)
         self.hide_box_ticked(box_visible)
 
+        self.current_view_properties = legend_props
+
     def apply_properties(self):
         """Takes the properties from the views and creates a new legend."""
         props = self.view.get_properties()
         advanced_props = self.advanced_options.get_properties()
         props.update(advanced_props)
+
+        if self.current_view_properties == props:
+            return
 
         for ax in self.axes:
             LegendProperties.create_legend(props, ax)
