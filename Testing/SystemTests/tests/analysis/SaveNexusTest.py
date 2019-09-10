@@ -41,7 +41,6 @@ print("REASON -- Duplicate bank names in instrument:")
 for entry in duplicate_bank_names:
     print(entry[0])
 
-    
 class LoadAndSaveLotsOfInstruments(object):
     def __getDataFileList__(self):
         # get a list of directories to look in
