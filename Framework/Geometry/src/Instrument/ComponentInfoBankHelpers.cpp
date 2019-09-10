@@ -33,8 +33,8 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
   return false;
 }
 
-/*
-* Function: isSaveableBank. Returns true if the index in the Instrument cache is
+/** Function: isSaveableBank. Returns true if the index in the Instrument cache
+is
 * a detector bank, ignoring tubes. otherwise returns false. Used by
 * SaveInstrument to find and save NXdetectors from memory to file.
 *
@@ -75,7 +75,7 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
   return false;
 }
 
-/*Function: isAncestorOf. Finds all ancestors up to the root of a component
+/** Finds all ancestors up to the root of a component
  * index and returns true if the possible ancestor is encountered in the
  * search. The root index is not counted, as the function exits upon reaching
  * the root before further searching.
@@ -96,8 +96,7 @@ bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor,
   return false;
 }
 
-/*
- * Function: offsetFromAncestor. Returns the position of the component at the
+/** Returns the position of the component at the
  * current index relative to the ancestor component at the ancestor index. Used
  * by saveInstrument to get the pixel offsets relative directly to the bank,
  * ignoring any intermediate assembly types.

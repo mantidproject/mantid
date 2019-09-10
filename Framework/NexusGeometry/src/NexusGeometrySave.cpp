@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/*
- * NexusGeometrySave::saveInstrument :
+/** NexusGeometrySave::saveInstrument :
  * Save methods to save geometry and metadata from memory
  * to disk in Nexus file format for Instrument 2.0.
  *
@@ -34,8 +33,7 @@ namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
 
-/*
- * Function tryCreatGroup. will try to create a new child group with the given
+/** Function tryCreatGroup. will try to create a new child group with the given
  * name inside the parent group. if a group with that name already exists in the
  * parent group, throws std::invalid_argument.
  *
@@ -61,8 +59,7 @@ inline H5::Group tryCreateGroup(const H5::Group &parentGroup,
   return parentGroup.createGroup(childGroupName);
 }
 
-/*
- * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
+/** Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
  * datasets to file.
  *
@@ -79,8 +76,7 @@ inline std::vector<double> toStdVector(const V3D &data) {
   return stdVector;
 }
 
-/*
- * Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector
+/** Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
  * datasets to file.
  *
@@ -92,8 +88,7 @@ inline std::vector<double> toStdVector(const Eigen::Vector3d &data) {
   return toStdVector(Kernel::toV3D(data));
 }
 
-/*
- * Function: isApproxZero. returns true if all values in an variable-sized
+/** Function: isApproxZero. returns true if all values in an variable-sized
  * std-vector container evaluate to zero with a given level of precision. Used
  * by SaveInstrument methods to determine whether or not to write a dataset to
  * file.
@@ -122,8 +117,7 @@ inline bool isApproxZero(const Eigen::Quaterniond &data,
   return data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
 }
 
-/*
- * Function: strTypeOfSize
+/** Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
  * input string.
  *
@@ -135,8 +129,7 @@ inline H5::StrType strTypeOfSize(const std::string &str) {
   return stringType;
 }
 
-/*
- * Function: writeStrDataset
+/** Function: writeStrDataset
  * writes a StrType HDF dataset and dataset value to a HDF group.
  *
  * @param grp : HDF group object.
@@ -151,8 +144,7 @@ inline void writeStrDataset(H5::Group &grp, const std::string &dSetName,
   dSet.write(dSetVal, dataType);
 }
 
-/*
- * Function: writeStrAttribute
+/** Function: writeStrAttribute
  * writes a StrType HDF attribute and attribute value to a HDF group.
  *
  * @param grp : HDF group object.
@@ -167,8 +159,7 @@ inline void writeStrAttribute(H5::Group &grp, const std::string &attrName,
   attribute.write(dataType, attrVal);
 }
 
-/*
- * Function: writeStrAttribute
+/** Function: writeStrAttribute
  * Overload function which writes a StrType HDF attribute and attribute value
  * to a HDF dataset.
  *
@@ -193,8 +184,7 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
   return subGroup;
 }
 
-/*
- * Function: writeXYZPixeloffset
+/** Function: writeXYZPixeloffset
  * write the x, y, and z offset of the pixels from the parent detector bank as
  * HDF5 datasets to HDF5 group. If all of the pixel offsets in either x, y, or
  * z are approximately zero, skips writing that dataset to file.
@@ -262,8 +252,7 @@ inline void writeXYZPixeloffset(H5::Group &grp,
   }
 }
 
-/*
- * Function: writeNXDetectorNumber
+/** Function: writeNXDetectorNumber
  * For use with NXdetector group. Writes the detector numbers for all detector
  * pixels in compInfo to a new dataset in the group.
  *
@@ -304,8 +293,7 @@ void writeNXDetectorNumber(H5::Group &grp,
   detectorNumber.write(bankDetIDs.data(), H5::PredType::NATIVE_INT, space);
 }
 
-/*
- * Function: writeNXMonitorNumber
+/** Function: writeNXMonitorNumber
  * For use with NXmonitor group. write 'detector_id's of an NXmonitor, which
  * is a specific type of pixel, to its group.
  *
@@ -336,8 +324,7 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
   detector_id.write(&monitorID, H5::PredType::NATIVE_INT, space);
 }
 
-/*
- * Function: writeLocation
+/** Function: writeLocation
  * For use with NXdetector group. Writes absolute position of detector bank to
  * dataset and metadata as attributes.
  *
@@ -404,8 +391,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   dependsOn.write(strSize, dependency);
 }
 
-/*
- * Function: writeOrientation
+/** Function: writeOrientation
  * For use with NXdetector group. Writes the absolute rotation of detector
  * bank to dataset and metadata as attributes.
  *
@@ -478,8 +464,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   dependsOn.write(strSize, dependency);
 }
 
-/*
- * Function: NXInstrument
+/** Function: NXInstrument
  * for NXentry parent (root group). Produces an NXinstrument group in the
  * parent group, and writes Nexus compliant datasets and metadata stored in
  * attributes to the new group.
@@ -505,8 +490,7 @@ H5::Group NXInstrument(const H5::Group &parent,
   return childGroup;
 }
 
-/*
- * Function: saveNXSample
+/** Function: saveNXSample
  * For NXentry parent (root group). Produces an NXsample group in the parent
  * group, and writes the Nexus compliant datasets and metadata stored in
  * attributes to the new group.
@@ -526,8 +510,7 @@ void saveNXSample(const H5::Group &parentGroup,
   writeStrDataset(childGroup, NAME, sampleName);
 }
 
-/*
- * Function: saveNXSource
+/** Function: saveNXSource
  * For NXentry (root group). Produces an NXsource group in the parent group,
  * and writes the Nexus compliant datasets and metadata stored in attributes
  * to the new group.
@@ -589,8 +572,7 @@ void saveNXSource(const H5::Group &parentGroup,
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-/*
- * Function: saveNXMonitor
+/** Function: saveNXMonitor
  * For NXinstrument parent (component info root). Produces an NXmonitor
  * groups from Component info, and saves it in the parent
  * group, along with the Nexus compliant datasets, and metadata stored in
@@ -660,8 +642,7 @@ void saveNXMonitor(const H5::Group &parentGroup,
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-/*
- * Function: saveNXDetectors
+/** Function: saveNXDetectors
  * For NXinstrument parent (component info root). Save method which produces a
  * set of NXdetctor groups from Component info detector banks, and saves it in
  * the parent group, along with the Nexus compliant datasets, and metadata
@@ -732,8 +713,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-/*
- * Function: saveInstrument
+/** Function: saveInstrument
  * calls the save methods to write components to file after exception
  * checking. Produces a Nexus format file containing the Instrument geometry
  * and metadata.
@@ -815,22 +795,24 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   NexusGeometrySave::saveNXSample(rootGroup, compInfo);
 
   // save NXdetectors
-  std::list<size_t> nxDetectorCandidates;
+  std::list<size_t> saved_indices;
+  using namespace Geometry::ComponentInfoBankHelpers;
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
-    if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
-      nxDetectorCandidates.push_back(index);
-      auto saveable = std::find_if(
-          nxDetectorCandidates.begin(), nxDetectorCandidates.end(),
-          [&compInfo, &index](const size_t idx) {
-            return Geometry::ComponentInfoBankHelpers::isAncestorOf(compInfo,
-                                                                    idx, index);
-          });
-      auto name = compInfo.name(index);
-      if (saveable != nxDetectorCandidates.end() ||
-          nxDetectorCandidates.size() == 1) {
+    if (isSaveableBank(compInfo, index)) {
+
+      const bool needed =
+          saved_indices.end() ==
+          std::find_if(saved_indices.begin(), saved_indices.end(),
+                       [&compInfo, &index](const size_t idx) {
+                         return isAncestorOf(compInfo, idx, index);
+                       });
+
+      if (needed) {
         if (reporter != nullptr)
           reporter->report();
         NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
+        saved_indices.push_back(index); // Now record the fact that children of
+                                        // this are not needed as NXdetectors
       }
     }
   }
@@ -849,11 +831,9 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
 } // saveInstrument
 
-/*
- * Function: saveInstrument (overload)
- * calls the save methods to write components to file after exception
- * checking. Produces a Nexus format file containing the Instrument geometry
- * and metadata.
+/** (overload) calls the save methods to write components to file after
+ * exception checking. Produces a Nexus format file containing the Instrument
+ * geometry and metadata.
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.

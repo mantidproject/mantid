@@ -189,7 +189,6 @@ public:
 
     size_t bank = 6;                                 // index of bank
     auto pixels = compInfo.detectorsInSubtree(bank); // 4 detectors of bank
-    TS_ASSERT(isSaveableBank(compInfo, bank)); // assert bank is NXdetector
 
     // assert the pixels are the children of the bank
     TS_ASSERT(isAncestorOf(compInfo, bank, pixels[0]));
