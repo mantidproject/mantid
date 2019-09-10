@@ -233,7 +233,7 @@ TODO:
 */
 inline void writeMeshObjShape(H5::Group &grp,
                               const Geometry::ComponentInfo &compInfo,
-                              const size_t monitorIdx/*,
+                              const size_t monitorIdx /*,
                               const std::vector<int> &detIDs*/) {
 
   std::vector<size_t> meshObjects;
