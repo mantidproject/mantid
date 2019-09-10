@@ -72,9 +72,9 @@ class MessageDisplay(MessageDisplay_cpp):
         self.appendPython(txt, Priority.Notice)
 
     def toggle_filter_framework_output(self):
-        self.filterMessages(not self.showFrameworkOutput(), self.showScriptOutput())
         self.setShowFrameworkOutput(not self.showFrameworkOutput())
+        self.filterMessages()
 
     def toggle_filter_script_output(self):
-        self.filterMessages(self.showFrameworkOutput(), not self.showScriptOutput())
         self.setShowScriptOutput(not self.showScriptOutput())
+        self.filterMessages()

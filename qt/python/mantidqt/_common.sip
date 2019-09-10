@@ -81,7 +81,7 @@ public:
   MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
   QPlainTextEdit *getTextEdit();
-  void filterMessages(const bool &show, const bool &showScript);
+  void filterMessages();
   QMenu *generateContextMenu();
 
   bool showFrameworkOutput();

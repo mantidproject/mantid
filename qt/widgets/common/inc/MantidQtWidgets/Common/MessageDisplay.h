@@ -74,7 +74,7 @@ public:
   /// Generate the display's context menu QMenu object
   QMenu *generateContextMenu();
   /// Filter messages by message type (framework or from a script)
-  void filterMessages(const bool &showFramework, const bool &showScript);
+  void filterMessages();
   /// Getters and setters for showing/hiding message types
   bool showFrameworkOutput() const { return m_showFrameworkOutput; }
   void setShowFrameworkOutput(const bool &show) {
@@ -105,9 +105,7 @@ public slots:
   /// Write a message after the current contents
   void append(const Message &msg);
   /// Append a QList of messages to the current contents
-  void appendList(const QList<Message> &messages,
-                  const bool &appendFramework = true,
-                  const bool &appendScript = true);
+  void appendList(const QList<Message> &messages);
   /// Write a Python script message, intended for use with Python API
   void appendPython(const QString &text, const int &priority);
   /// Replace the display text with the given contents

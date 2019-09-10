@@ -144,13 +144,10 @@ void MessageDisplay::setSource(const QString &source) {
 
 /**
  * Filter messages by output type: script and/or Framework
- * @param showFramework Should framework messages be shown?
- * @param showScript Should script messages be shown?
  */
-void MessageDisplay::filterMessages(const bool &showFramework,
-                                    const bool &showScript) {
+void MessageDisplay::filterMessages() {
   m_textDisplay->clear();
-  appendList(*getHistory(), showFramework, showScript);
+  appendList(*getHistory());
   moveCursorToEnd();
 }
 
@@ -202,7 +199,6 @@ void MessageDisplay::appendDebug(const QString &text) {
 /**
  * @param msg A message that is echoed to the display after the
  * current text
- * @param addToHistory Whether to add the message to the history or not
  */
 void MessageDisplay::append(const Message &msg) {
   m_messageHistory->append(msg);
@@ -223,17 +219,13 @@ void MessageDisplay::append(const Message &msg) {
  * Append a list of messages with the option to filter by whether the message
  * came from a Python script or the framework.
  * @param messages A QList of Message objects
- * @param appendFramework Should framework messages be appended? (default=true)
- * @param appendScript Should scripy messages be appended? (default=true)
  */
-void MessageDisplay::appendList(const QList<Message> &messages,
-                                const bool &appendFramework,
-                                const bool &appendScript) {
+void MessageDisplay::appendList(const QList<Message> &messages) {
   for (auto &msg : messages) {
-    if (appendFramework && msg.frameworkMsg())
+    if (showFrameworkOutput() && msg.frameworkMsg())
       m_textDisplay->textCursor().insertText(msg.text(),
                                              format(msg.priority()));
-    else if (appendScript && !msg.frameworkMsg())
+    else if (showScriptOutput() && !msg.frameworkMsg())
       m_textDisplay->textCursor().insertText(msg.text(),
                                              format(msg.priority()));
   }
