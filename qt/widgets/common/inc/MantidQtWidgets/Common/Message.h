@@ -36,13 +36,16 @@ public:
   /// Default constuctor required by Qt meta-type system
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
-  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
+          bool frameworkMsg = true);
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
-  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
+          bool frameworkMsg = true);
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
-  Message(const char *text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
+          bool frameworkMsg = true);
   /// Copy constructor
   Message(const Message &msg);
 
@@ -51,10 +54,13 @@ public:
   inline QString text() const { return m_text; }
   /// @returns The message priority
   inline Priority priority() const { return m_priority; }
+  /// @returns Whether the message originated from the framework or not
+  inline bool frameworkMsg() const { return m_frameworkMsg; }
 
 private:
   QString m_text;
   Priority m_priority;
+  bool m_frameworkMsg;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
