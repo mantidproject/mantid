@@ -111,9 +111,10 @@ private:
   /// Helper function to convert big endian events.
   void correctForBigEndian(const EventUnion &bigEndian,
                            EventUnion &smallEndian);
-  /// Add some information to the sample logs.
+  /// Add some text information to the sample logs.
   void addToSampleLog(const std::string &logName, const std::string &logText,
                       DataObjects::EventWorkspace_sptr &ws);
+  /// Add some number information to the sample logs.
   void addToSampleLog(const std::string &logName, const int &logNumber,
                       DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
@@ -122,6 +123,8 @@ private:
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
   /// Load the instrument and attach to the data workspace.
   void loadInstrument();
+  /// Validate the imputs into the algorithm, overrides.
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace DataHandling

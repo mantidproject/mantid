@@ -78,7 +78,7 @@ void LoadNGEM::init() {
 
   auto mustBePositiveDbl =
       boost::make_shared<Kernel::BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
+  mustBePositiveDbl->setLower(0.0);
 
   // Bin Width
   declareProperty("BinWidth", 10.0, mustBePositiveDbl,
@@ -324,6 +324,19 @@ void LoadNGEM::loadInstrument() {
   loadInstrument->setProperty("RewriteSpectraMap",
                               Mantid::Kernel::OptionalBool(false));
   loadInstrument->execute();
+}
+
+std::map<std::string, std::string> LoadNGEM::validateInputs() {
+  std::map<std::string, std::string> results;
+
+  int MinEventsPerFrame = getProperty("MinEventsPerFrame");
+  int MaxEventsPerFrame = getProperty("MaxEventsPerFrame");
+
+  if (MaxEventsPerFrame < MinEventsPerFrame) {
+    results["MaxEventsPerFrame"] =
+        "MaxEventsPerFrame is less than MinEvents per frame";
+  }
+  return results;
 }
 
 } // namespace DataHandling
