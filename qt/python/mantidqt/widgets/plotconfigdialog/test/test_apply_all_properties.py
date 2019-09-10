@@ -10,7 +10,7 @@ import unittest
 
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
-from matplotlib.colors import LogNorm, to_hex
+from matplotlib.colors import LogNorm
 from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
@@ -287,11 +287,11 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
     def test_apply_properties_on_figure_with_legend_sets_background_color(self):
         self.assertEqual(new_legend_props['background_color'],
-                         to_hex(self.new_legend.get_frame().get_facecolor()))
+                         convert_color_to_hex(self.new_legend.get_frame().get_facecolor()))
 
     def test_apply_properties_on_figure_with_legend_sets_edge_color(self):
         self.assertEqual(new_legend_props['edge_color'],
-                         to_hex(self.new_legend.get_frame().get_edgecolor()))
+                         convert_color_to_hex(self.new_legend.get_frame().get_edgecolor()))
 
     def test_apply_properties_on_figure_with_legend_sets_transparency(self):
         self.assertEqual(new_legend_props['transparency'],

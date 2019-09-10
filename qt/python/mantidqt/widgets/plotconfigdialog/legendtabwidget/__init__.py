@@ -8,8 +8,10 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from matplotlib.colors import to_hex
+from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from matplotlib.patches import BoxStyle
+
+import sys
 
 
 class LegendProperties(dict):
@@ -26,26 +28,32 @@ class LegendProperties(dict):
         props['visible'] = legend.get_visible()
 
         title = legend.get_title()
-        if isinstance(title.get_text(), unicode):
-            props['title'] = title.get_text()
+        if sys.version_info[0] >= 3:
+            if isinstance(title.get_text(), str):
+                props['title'] = title.get_text()
+            else:
+                props['title'] = None
         else:
-            props['title'] = None
+            if isinstance(title.get_text(), unicode):
+                props['title'] = title.get_text()
+            else:
+                props['title'] = None
 
         props['title_font'] = title.get_fontname()
         props['title_size'] = title.get_fontsize()
-        props['title_color'] = to_hex(title.get_color())
+        props['title_color'] = convert_color_to_hex(title.get_color())
 
         props['box_visible'] = legend.get_frame_on()
 
         box = legend.get_frame()
-        props['background_color'] = to_hex(box.get_facecolor())
-        props['edge_color'] = to_hex(box.get_edgecolor())
+        props['background_color'] = convert_color_to_hex(box.get_facecolor())
+        props['edge_color'] = convert_color_to_hex(box.get_edgecolor())
         props['transparency'] = box.get_alpha()
 
         text = legend.get_texts()[0]
         props['entries_font'] = text.get_fontname()
         props['entries_size'] = text.get_fontsize()
-        props['entries_color'] = to_hex(text.get_color())
+        props['entries_color'] = convert_color_to_hex(text.get_color())
 
         props['marker_size'] = legend.handlelength
         props['shadow'] = legend.shadow
