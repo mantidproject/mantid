@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 from matplotlib.colors import to_hex
 from matplotlib.patches import BoxStyle
 
+
 class LegendProperties(dict):
     def __init__(self, props):
         self.update(props)
@@ -106,21 +107,21 @@ class LegendProperties(dict):
     @classmethod
     def create_legend(cls, props, ax):
         legend = ax.legend(ncol=props.columns,
-                            prop={'size': props.entries_size},
-                            numpoints=props.markers,
-                            markerfirst=props.marker_position == "Left of Entries",
-                            frameon=props.box_visible,
-                            fancybox=props.round_edges,
-                            shadow=props.shadow,
-                            framealpha=props.transparency,
-                            facecolor=props.background_color,
-                            edgecolor=props.edge_color,
-                            title=props.title,
-                            borderpad=props.border_padding,
-                            labelspacing=props.label_spacing,
-                            handlelength=props.marker_size,
-                            handletextpad=props.marker_label_padding,
-                            columnspacing=props.column_spacing)
+                           prop={'size': props.entries_size},
+                           numpoints=props.markers,
+                           markerfirst=props.marker_position == "Left of Entries",
+                           frameon=props.box_visible,
+                           fancybox=props.round_edges,
+                           shadow=props.shadow,
+                           framealpha=props.transparency,
+                           facecolor=props.background_color,
+                           edgecolor=props.edge_color,
+                           title=props.title,
+                           borderpad=props.border_padding,
+                           labelspacing=props.label_spacing,
+                           handlelength=props.marker_size,
+                           handletextpad=props.marker_label_padding,
+                           columnspacing=props.column_spacing)
 
         title = legend.get_title()
         title.set_fontname(props.title_font)
@@ -135,4 +136,3 @@ class LegendProperties(dict):
         legend.set_visible(props.visible)
 
         legend.draggable(True)
-

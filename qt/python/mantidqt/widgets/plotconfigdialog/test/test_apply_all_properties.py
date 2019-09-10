@@ -86,6 +86,7 @@ new_legend_props = {
     'border_padding': 0.0,
     'marker_label_padding': 1.0}
 
+
 def _run_apply_properties_on_figure_with_curve():
     fig = figure()
     ax = fig.add_subplot(111)
