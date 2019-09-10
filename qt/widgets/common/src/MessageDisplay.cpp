@@ -149,8 +149,9 @@ void MessageDisplay::setSource(const QString &source) {
  */
 void MessageDisplay::filterMessages(const bool &showFramework,
                                     const bool &showScript) {
-  clear();
+  m_textDisplay->clear();
   appendList(*getHistory(), showFramework, showScript);
+  moveCursorToEnd();
 }
 
 //----------------------------------------------------------------------------------------
@@ -205,14 +206,17 @@ void MessageDisplay::appendDebug(const QString &text) {
  */
 void MessageDisplay::append(const Message &msg) {
   m_messageHistory->append(msg);
-  QTextCursor cursor = moveCursorToEnd();
-  cursor.insertText(msg.text(), format(msg.priority()));
-  moveCursorToEnd();
+  if (m_showFrameworkOutput && msg.frameworkMsg() ||
+      m_showScriptOutput && !msg.frameworkMsg()) {
+    QTextCursor cursor = moveCursorToEnd();
+    cursor.insertText(msg.text(), format(msg.priority()));
+    moveCursorToEnd();
 
-  if (msg.priority() <= Message::Priority::PRIO_ERROR)
-    emit errorReceived(msg.text());
-  if (msg.priority() <= Message::Priority::PRIO_WARNING)
-    emit warningReceived(msg.text());
+    if (msg.priority() <= Message::Priority::PRIO_ERROR)
+      emit errorReceived(msg.text());
+    if (msg.priority() <= Message::Priority::PRIO_WARNING)
+      emit warningReceived(msg.text());
+  }
 }
 
 /**
@@ -257,7 +261,10 @@ void MessageDisplay::replace(const Message &msg) {
 /**
  * Clear all of the text
  */
-void MessageDisplay::clear() { m_textDisplay->clear(); }
+void MessageDisplay::clear() {
+  m_textDisplay->clear();
+  m_messageHistory->clear();
+}
 
 /**
  * @returns The cursor at the end of the text

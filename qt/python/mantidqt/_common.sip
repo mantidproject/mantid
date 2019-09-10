@@ -84,6 +84,11 @@ public:
   void filterMessages(const bool &show, const bool &showScript);
   QMenu *generateContextMenu();
 
+  bool showFrameworkOutput();
+  void setShowFrameworkOutput(const bool &show);
+  bool showScriptOutput();
+  void setShowScriptOutput(const bool &show);
+
   void appendFatal(const QString &text);
   void appendError(const QString &text);
   void appendWarning(const QString &text);

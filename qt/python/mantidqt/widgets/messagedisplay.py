@@ -36,9 +36,9 @@ class MessageDisplay(MessageDisplay_cpp):
         self.getTextEdit().customContextMenuRequested.disconnect()
         self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
 
-        # Get these from the settings later on
-        self.display_script_output = True
-        self.display_framework_output = True
+        # # Get these values from QSettings
+        # self.showFrameworkOutput(...)
+        # self.showScriptOutput(...)
 
     def generateContextMenu(self):
         qmenu = super(MessageDisplay, self).generateContextMenu()
@@ -48,7 +48,7 @@ class MessageDisplay(MessageDisplay_cpp):
             slot = getattr(self, "toggle_filter_{}_output".format(action_str))
             action.triggered.connect(slot)
             action.setCheckable(True)
-            action.setChecked(getattr(self, 'display_{}_output'.format(action_str)))
+            action.setChecked(getattr(self, 'show{}Output'.format(action_str.title()))())
             filter_menu.addAction(action)
         return qmenu
 
@@ -72,9 +72,9 @@ class MessageDisplay(MessageDisplay_cpp):
         self.appendPython(txt, Priority.Notice)
 
     def toggle_filter_framework_output(self):
-        self.filterMessages(not self.display_framework_output, self.display_script_output)
-        self.display_framework_output = not self.display_framework_output
+        self.filterMessages(not self.showFrameworkOutput(), self.showScriptOutput())
+        self.setShowFrameworkOutput(not self.showFrameworkOutput())
 
     def toggle_filter_script_output(self):
-        self.filterMessages(self.display_framework_output, not self.display_script_output)
-        self.display_script_output = not self.display_script_output
+        self.filterMessages(self.showFrameworkOutput(), not self.showScriptOutput())
+        self.setShowScriptOutput(not self.showScriptOutput())
