@@ -77,7 +77,8 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
 
 /*Function: isAncestorOf. Finds all ancestors up to the root of a component
  * index and returns true if the possible ancestor is encountered in the
- * search.
+ * search. The root index is not counted, as the function exits upon reaching
+ * the root before further searching.
  *
  * @param compInfo : Geometry::ComponentInfo Instrument cache containing the
  * component info.
@@ -87,11 +88,11 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
 bool isAncestorOf(const ComponentInfo &compInfo, const size_t possibleAncestor,
                   const size_t current) {
   size_t next = current;
-  do {
-    if (compInfo.parent(next) == possibleAncestor)
+  while (next != compInfo.root()) {
+    if (next == possibleAncestor)
       return true;
     next = compInfo.parent(next);
-  } while (next != compInfo.root());
+  }
   return false;
 }
 

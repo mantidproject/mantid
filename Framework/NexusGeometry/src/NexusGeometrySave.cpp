@@ -819,21 +819,19 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
       nxDetectorCandidates.push_back(index);
-    }
-  }
-
-  for (std::list<size_t>::iterator index = nxDetectorCandidates.begin();
-       index != nxDetectorCandidates.end(); ++index) {
-    auto saveable =
-        !std::any_of(nxDetectorCandidates.begin(), nxDetectorCandidates.end(),
-                     [&compInfo, &index](const size_t idx) {
-                       return Geometry::ComponentInfoBankHelpers::isAncestorOf(
-                           compInfo, idx, *index);
-                     });
-    if (saveable || nxDetectorCandidates.size() == 1) {
-      if (reporter != nullptr)
-        reporter->report();
-      NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, *index);
+      auto saveable = std::find_if(
+          nxDetectorCandidates.begin(), nxDetectorCandidates.end(),
+          [&compInfo, &index](const size_t idx) {
+            return Geometry::ComponentInfoBankHelpers::isAncestorOf(compInfo,
+                                                                    idx, index);
+          });
+      auto name = compInfo.name(index);
+      if (saveable != nxDetectorCandidates.end() ||
+          nxDetectorCandidates.size() == 1) {
+        if (reporter != nullptr)
+          reporter->report();
+        NexusGeometrySave::saveNXDetector(instrument, compInfo, detIds, index);
+      }
     }
   }
 
