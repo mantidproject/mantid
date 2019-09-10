@@ -13,6 +13,7 @@ User Interface
 - Plots now allow the insertion of draggable horizontal and vertical markers.
 - Marker label, color and line style can be edited on a per-marker basis.
 - The button to remove a curve in the figure options is now the same size as the drop-down list of curves.
+- Figure options now has a Legend tab so that a plot's legend can be customised.
 
 New
 ###
