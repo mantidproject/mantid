@@ -24,7 +24,7 @@ class FacilityInfoTest(unittest.TestCase):
         self.assertEqual(test_facility.name(), "ISIS")
         self.assertEqual(test_facility.zeroPadding(), 5)
         self.assertEqual(test_facility.delimiter(), "")
-        self.assertEqual(len(test_facility.extensions()), 7)
+        self.assertEqual(len(test_facility.extensions()), 8)
         self.assertEqual(test_facility.preferredExtension(), ".nxs")
         self.assertEqual(len(test_facility.archiveSearch()), 1)
         self.assertGreater(len(test_facility.instruments()), 30)
