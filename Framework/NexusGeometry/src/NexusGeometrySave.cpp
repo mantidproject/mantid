@@ -209,20 +209,49 @@ inline void writeCylinders(H5::Group &grp, size_t nCylinders,
 }
 
 /*
+TODO: DOCUMENTATION
+*/
+
+void writeMeshes(H5::Group &grp, size_t nVertices,
+                 const std::vector<double> &verticesData /*,
+                 std::vector<int> detIDs */) {
+
+  H5::DataSet /*faces,*/ vertices /*, windingOrder, detectorFaces*/;
+
+  int vrank = 2;
+  hsize_t vdims[static_cast<hsize_t>(2)];
+  vdims[0] = static_cast<hsize_t>(nVertices); // nCylinders;
+  vdims[1] = static_cast<hsize_t>(3);
+  H5::DataSpace cspace = H5Screate_simple(vrank, vdims, nullptr);
+
+  vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, cspace);
+  vertices.write(verticesData.data(), H5::PredType::NATIVE_DOUBLE, cspace);
+}
+
+/*
 TODO:
 */
 inline void writeMeshObjShape(H5::Group &grp,
                               const Geometry::ComponentInfo &compInfo,
-                              const size_t monitorIdx) {
+                              const size_t monitorIdx/*,
+                              const std::vector<int> &detIDs*/) {
 
   std::vector<size_t> meshObjects;
 
   auto &shapeObj = compInfo.shape(monitorIdx);
-  auto shapeInfo = shapeObj.shapeInfo();
   if (!dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
     return;
 
-  H5::Group shapeGroup = grp.createGroup(SHAPE);
+  auto mesh = static_cast<const Geometry::MeshObject *>(&shapeObj);
+
+  const size_t numOfFaces = mesh->numberOfTriangles();
+  const size_t numOfVertices = mesh->numberOfVertices();
+
+  const std::vector<double> vertices = mesh->getVertices();
+  const auto faces = mesh->getTriangles();
+
+  H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
+  writeMeshes(shapeGroup, numOfVertices, vertices /*, detIDs*/);
 
   // implement writing of mesh here
 }
@@ -235,12 +264,10 @@ inline void writeMeshObj2DShape(H5::Group &grp,
                                 const size_t monitorIdx) {
 
   auto &shapeObj = compInfo.shape(monitorIdx);
-  auto shapeInfo = shapeObj.shapeInfo();
-
   if (!dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
     return;
 
-  H5::Group shapeGroup = grp.createGroup(SHAPE);
+  H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
 
   // implement writing of mesh here
 }
@@ -784,8 +811,8 @@ void saveNXSource(const H5::Group &parentGroup,
  * @param index :  index of the specific monitor in the Instrument cache.
  */
 void saveNXMonitor(const H5::Group &parentGroup,
-                   const Geometry::ComponentInfo &compInfo, const int monitorId,
-                   const size_t index) {
+                   const Geometry::ComponentInfo &compInfo,
+                   const std::vector<int> &detIDs, const size_t index) {
 
   // if the component is unnamed sets the name as unspecified with the
   // location of the component in the cache
@@ -836,8 +863,8 @@ void saveNXMonitor(const H5::Group &parentGroup,
   }
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
-  writeNXMonitorNumber(childGroup, monitorId);
-  writeMeshObjShape(childGroup, compInfo, index);
+  writeNXMonitorNumber(childGroup, detIDs[index]);
+  writeMeshObjShape(childGroup, compInfo, index /*, detIDs*/);
   writeMeshObj2DShape(childGroup, compInfo, index);
 
   writeStrDataset(childGroup, BANK_NAME, monitorName);
@@ -1014,8 +1041,7 @@ void saveInstrument(
     if (detInfo.isMonitor(index)) {
       if (reporter != nullptr)
         reporter->report();
-      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds[index],
-                                       index);
+      NexusGeometrySave::saveNXMonitor(instrument, compInfo, detIds, index);
     }
   }
 

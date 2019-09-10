@@ -1158,6 +1158,46 @@ Instrument cache.
     TS_ASSERT_DELTA(radiusInFile, cylinderRadius, 1e-5);
     TS_ASSERT_DELTA(heightInFile, cylinderHeight, 1e-5);
   }
+
+  void test_instrument_with_shapes() {
+
+    /*
+         test scenario: A test instrument with cylindrical homogeneous pixel
+         shapes is passed into SaveInstrument to be saved. Written to file are
+       the three coordinates of the vertices which describe the cylinder: the
+       centre of the base along the cylinder axis, the centre of the top face
+       along the cylinder axis, and the edge of the cylinder from the top face
+       that is orthogonal to the axis. The hieght, radius and base centre are
+       known upon creation of the test instrument. This test will verify that
+       the vertex coordinates in file are concurrent with the known height,
+       radius, and base position."
+        */
+
+    // create RAII file resource for testing
+    ScopedFileHandle fileResource("test_shapes.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+    using namespace Mantid::Kernel;
+
+    std::vector<uint32_t> faces{0, 1, 2, 3};
+    std::vector<V3D> vertices{V3D{1, 0, 0}, V3D{0, 1, 0}, V3D{0, 0, 1},
+                              V3D{1, 1, 1}};
+    Material material{};
+
+    const auto mesh = ComponentCreationHelper::createSimpleMeshObject(
+        faces, vertices, material);
+
+    const auto cylinder = ComponentCreationHelper::createCappedCylinder(
+        0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+
+    auto cylindricalInstrument =
+        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh,
+                                                                   cylinder);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
+        *cylindricalInstrument);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+  }
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

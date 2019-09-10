@@ -19,6 +19,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidKernel/V3D.h"
 #include <memory>
 
@@ -45,6 +47,16 @@ tests.
 */
 
 //----------------------------------------------------------------------------------------------
+
+boost::shared_ptr<Mantid::Geometry::MeshObject>
+createSimpleMeshObject(const std::vector<uint32_t> &faces,
+                       const std::vector<Mantid::Kernel::V3D> &vertices,
+                       const Mantid::Kernel::Material &material);
+
+boost::shared_ptr<Mantid::Geometry::CSGObject>
+createCappedCylinder(double radius, double height,
+                     const Mantid::Kernel::V3D &baseCentre,
+                     const Mantid::Kernel::V3D &axis, const std::string &id);
 
 /// Add a spherical sample at samplePos to given instrument.
 void addSampleToInstrument(Mantid::Geometry::Instrument_sptr &instrument,
@@ -229,7 +241,11 @@ Mantid::Geometry::Instrument_sptr
 createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
                                    const Mantid::Kernel::Quat &monitorRot);
 
-// creates a minimal instrument with optional source, sample, and detector.
+Mantid::Geometry::Instrument_sptr createMinimalInstrumentWithShapes(
+    const boost::shared_ptr<Mantid::Geometry::IObject> &monitorShape,
+    const boost::shared_ptr<Mantid::Geometry::IObject> &detectorShape);
+
+/// creates a minimal instrument with optional source, sample, and detector.
 Mantid::Geometry::Instrument_sptr
 createInstrumentWithOptionalComponents(bool haveSource, bool haveSample,
                                        bool haveDetector);

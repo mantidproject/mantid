@@ -27,6 +27,8 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -62,6 +64,16 @@ std::string cappedCylinderXML(double radius, double height,
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
   return xml.str();
+}
+
+/**
+ * Create a mesh object
+ */
+boost::shared_ptr<MeshObject>
+createSimpleMeshObject(const std::vector<uint32_t> &faces,
+                       const std::vector<Mantid::Kernel::V3D> &vertices,
+                       const Mantid::Kernel::Material &material) {
+  return boost::make_shared<MeshObject>(faces, vertices, material);
 }
 
 /**
@@ -867,6 +879,72 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
   return instrument;
 }
 
+/**
+ * createMinimalInstrumentWithMonitor, creates the most simple possible
+ * definition of an instrument with a Monitor.
+ *
+ * Beam direction is along X,
+ * Up direction is Y
+ *
+ * @param monitorPos : V3D monitor position
+ * @param monitorRot : V3D monitor rotation
+ * @return Instrument generated.
+ */
+Instrument_sptr createMinimalInstrumentWithShapes(
+    const boost::shared_ptr<Mantid::Geometry::IObject> &monitorShape,
+    const boost::shared_ptr<Mantid::Geometry::IObject> &detectorShape) {
+
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
+      Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
+      "0,0,0"));
+
+  instrument->setName("test-instrument-with-shapes");
+
+  // A source
+  auto *source = new ObjComponent("source");
+  source->setPos(V3D(-10, 0, 0));
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  auto *sample = new ObjComponent("sample");
+  sample->setPos(V3D(0, 0, 0));
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  // A detector
+  auto *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  det->setPos(V3D(0, 0, 10));
+  det->setShape(detectorShape);
+  // instrument->add(det);
+  instrument->markAsDetector(det);
+
+  // A bank
+  std::string bankname = "bank_with_pixelshapes";
+  auto *bank = new RectangularDetector(bankname);
+  // Place the center.
+  bank->setPos(V3D(0.0, 0.0, 10.0));
+  // rotate detector 90 degrees along vertical
+  bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+  bank->add(det);
+
+  instrument->add(bank);
+
+  // A monitor
+  auto *mon =
+      new Detector("test-monitor_with_shape", 2 /*detector id*/, nullptr);
+  mon->setPos(V3D(0, 0, 10));
+  mon->setRot(Quat(45, V3D(0, 0, 10)));
+  mon->setShape(monitorShape);
+  instrument->add(mon);
+  instrument->markAsMonitor(mon);
+
+  return instrument;
+}
+
 /*
 An instrument creation helper allowing you to include/omit
 source/sample for unit test of exception handling.
@@ -1003,6 +1081,7 @@ Instrument_sptr createInstrumentWithSourceRotation(
   // A sample
   ObjComponent *sample = new ObjComponent("some-surface-holder");
   sample->setPos(samplePos);
+
   sample->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
