@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/LoadNexusProcessed2.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -23,7 +24,7 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadNexusProcessed2)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed2)
 //----------------------------------------------------------------------------------------------
 
 namespace {
