@@ -9,7 +9,72 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
+from qtpy.QtWidgets import QAction
+from qtpy.QtGui import QFont
+
 from mantidqt.utils.qt import import_qt
 
+MessageDisplay_cpp = import_qt('.._common', 'mantidqt.widgets', 'MessageDisplay')
 
-MessageDisplay = import_qt('.._common', 'mantidqt.widgets', 'MessageDisplay')
+
+class Priority:
+    Fatal = 2
+    Error = 3
+    Warning = 4
+    Notice = 5
+    Information = 6
+    Debug = 7
+
+
+class MessageDisplay(MessageDisplay_cpp):
+
+    def __init__(self, font=QFont(), parent=None):
+        super(MessageDisplay, self).__init__(font, parent)
+
+        # We need to disconnect from the C++ base class's slot to avoid
+        # calling the base class's showContextMenu method as well
+        self.getTextEdit().customContextMenuRequested.disconnect()
+        self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
+
+        # Get these from the settings later on
+        self.display_script_output = True
+        self.display_framework_output = True
+
+    def generateContextMenu(self):
+        qmenu = super(MessageDisplay, self).generateContextMenu()
+        filter_menu = qmenu.addMenu("&Filter by")
+        for action_str in ['script', 'framework']:
+            action = QAction("{} Output".format(action_str.title()), qmenu)
+            slot = getattr(self, "toggle_filter_{}_output".format(action_str))
+            action.triggered.connect(slot)
+            action.setCheckable(True)
+            action.setChecked(getattr(self, 'display_{}_output'.format(action_str)))
+            filter_menu.addAction(action)
+        return qmenu
+
+    def showContextMenu(self, q_position):
+        self.generateContextMenu().exec_(self.mapToGlobal(q_position))
+
+    def append_script_error(self, txt):
+        """
+        Append the given message to the window, marking the message as
+        output from a Python script with "Error" priority. This function
+        is hooked into stderr.
+        """
+        self.appendPython(txt, Priority.Error)
+
+    def append_script_notice(self, txt):
+        """
+        Append the given message to the window, marking the message as
+        output from a Python script with "Notice" priority. This
+        function is hooked into stdout.
+        """
+        self.appendPython(txt, Priority.Notice)
+
+    def toggle_filter_framework_output(self):
+        self.filterMessages(not self.display_framework_output, self.display_script_output)
+        self.display_framework_output = not self.display_framework_output
+
+    def toggle_filter_script_output(self):
+        self.filterMessages(self.display_framework_output, not self.display_script_output)
+        self.display_script_output = not self.display_script_output

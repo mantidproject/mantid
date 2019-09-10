@@ -80,6 +80,9 @@ public:
   MessageDisplay(QWidget *parent = 0);
   MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
+  QPlainTextEdit *getTextEdit();
+  void filterMessages(const bool &show, const bool &showScript);
+  QMenu *generateContextMenu();
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -87,6 +90,7 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
+  void appendPython(const QString &text, const int &priority);
   void setSource(const QString &source);
 };
 
