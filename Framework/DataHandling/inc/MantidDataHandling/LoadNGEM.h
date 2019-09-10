@@ -102,6 +102,8 @@ public:
 private:
   /// Main data workspace.
   DataObjects::EventWorkspace_sptr m_dataWorkspace;
+  /// The number of spectra in the detector.
+  const int m_NUM_OF_SPECTRA = 16384;
   /// Initialise the algorithm.
   void init() override;
   /// Execute the algorithm.
@@ -119,6 +121,20 @@ private:
                       DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
   size_t verifyFileSize(FILE *&file);
+  /// Check if a frame should be added to the output workspace.
+  void addFrameToOutputWorkspace(
+      int &rawFrames, int &goodFrames, const int &eventCountInFrame,
+      const int &minEventsReq, const int &maxEventsReq,
+      MantidVec &frameEventCounts,
+      std::vector<DataObjects::EventList> &histograms,
+      std::vector<DataObjects::EventList> &histogramsInFrame);
+  /// Reports progress and checks cancel flag.
+  bool reportProgressAndCheckCancel(size_t &numProcessedEvents,
+                                    int &eventCountInFrame,
+                                    size_t &totalNumEvents);
+  /// Create the main data workspace.
+  void createEventWorkspace(const int &maxToF, const double &binWidth,
+                            std::vector<DataObjects::EventList> &histograms);
   /// Create a workspace to store the number of counts per frame.
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
   /// Load the instrument and attach to the data workspace.

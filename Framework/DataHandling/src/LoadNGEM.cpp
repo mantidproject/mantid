@@ -107,13 +107,12 @@ void LoadNGEM::exec() {
   std::vector<std::string> filePaths;
   filePaths = boost::split(filePaths, filename, boost::is_any_of(","));
 
-  const int NUM_OF_SPECTRA = 16384;
   const int minEventsReq = stoi(getPropertyValue("MinEventsPerFrame"));
   const int maxEventsReq = stoi(getPropertyValue("MaxEventsPerFrame"));
 
   int maxToF = -1;
   int minToF = 2147483647;
-  const double BIN_WIDTH(stod(getPropertyValue("BinWidth")));
+  const double binWidth(stod(getPropertyValue("BinWidth")));
 
   EventUnion event, eventBigEndian;
   size_t loadStatus;
@@ -124,8 +123,8 @@ void LoadNGEM::exec() {
   int eventCountInFrame = 0;
 
   std::vector<DataObjects::EventList> histograms, histogramsInFrame;
-  histograms.resize(NUM_OF_SPECTRA);
-  histogramsInFrame.resize(NUM_OF_SPECTRA);
+  histograms.resize(m_NUM_OF_SPECTRA);
+  histogramsInFrame.resize(m_NUM_OF_SPECTRA);
   progress(0.04);
 
   for (std::string filePath : filePaths) {
@@ -170,28 +169,12 @@ void LoadNGEM::exec() {
             Mantid::Types::Event::TofEvent(tof));
 
       } else if (event.tZero.check()) { // Check for T0 event.
-        ++rawFrames;
-        if (eventCountInFrame >= minEventsReq &&
-            eventCountInFrame <= maxEventsReq) {
-          // Add number of event counts to workspace.
-          frameEventCounts.emplace_back(eventCountInFrame);
-          ++goodFrames;
+        addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
+                                  minEventsReq, maxEventsReq, frameEventCounts,
+                                  histograms, histogramsInFrame);
 
-#pragma omp parallel for
-          // Add histograms that match parameters to workspace
-          for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-            if (histogramsInFrame[i].getNumberEvents() > 0) {
-              histograms[i] += histogramsInFrame[i];
-              histogramsInFrame[i].clear();
-            }
-          }
-        }
-        // Progess Reporting
-        numProcessedEvents += eventCountInFrame;
-        progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111);
-        eventCountInFrame = 0;
-        // Check for cancel flag.
-        if (this->getCancel()) {
+        if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame,
+                                         totalNumEvents)) {
           return;
         }
       } else { // Catch all other events and notify.
@@ -201,36 +184,12 @@ void LoadNGEM::exec() {
     fclose(file);
   }
   // Add the final frame of events (as they are not followed by a T0 event)
-  if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
-    frameEventCounts.emplace_back(eventCountInFrame);
-    ++goodFrames;
-#pragma omp parallel for
-    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-      histograms[i] += histogramsInFrame[i];
-    }
-  }
-  ++rawFrames;
+  addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
+                            minEventsReq, maxEventsReq, frameEventCounts,
+                            histograms, histogramsInFrame);
   progress(0.90);
 
-  // Create and fill main histogram data into an event workspace.
-  std::vector<double> xAxis;
-  for (auto i = 0; i < (maxToF / BIN_WIDTH); i++) {
-    xAxis.push_back(i * BIN_WIDTH);
-  }
-
-  m_dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
-      NUM_OF_SPECTRA,
-      Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(xAxis)));
-
-  for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
-    m_dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
-    m_dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
-    m_dataWorkspace->getSpectrum(spectrumNo).setDetectorID(spectrumNo + 1);
-  }
-  m_dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
-  m_dataWorkspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
-  m_dataWorkspace->setYUnit("Counts");
+  createEventWorkspace(maxToF, binWidth, histograms);
 
   addToSampleLog("raw_frames", rawFrames, m_dataWorkspace);
   addToSampleLog("good_frames", goodFrames, m_dataWorkspace);
@@ -281,6 +240,62 @@ size_t LoadNGEM::verifyFileSize(FILE *&file) {
            "missing from the data. \n";
   }
   return fileStatus.st_size;
+}
+
+void LoadNGEM::addFrameToOutputWorkspace(
+    int &rawFrames, int &goodFrames, const int &eventCountInFrame,
+    const int &minEventsReq, const int &maxEventsReq,
+    MantidVec &frameEventCounts,
+    std::vector<DataObjects::EventList> &histograms,
+    std::vector<DataObjects::EventList> &histogramsInFrame) {
+  ++rawFrames;
+  if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
+    // Add number of event counts to workspace.
+    frameEventCounts.emplace_back(eventCountInFrame);
+    ++goodFrames;
+
+#pragma omp parallel for
+    // Add histograms that match parameters to workspace
+    for (auto i = 0; i < m_NUM_OF_SPECTRA; ++i) {
+      if (histogramsInFrame[i].getNumberEvents() > 0) {
+        histograms[i] += histogramsInFrame[i];
+        histogramsInFrame[i].clear();
+      }
+    }
+  }
+}
+
+bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
+                                            int &eventCountInFrame,
+                                            size_t &totalNumEvents) {
+  numProcessedEvents += eventCountInFrame;
+  progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111);
+  eventCountInFrame = 0;
+  // Check for cancel flag.
+  return this->getCancel();
+}
+
+void LoadNGEM::createEventWorkspace(
+    const int &maxToF, const double &binWidth,
+    std::vector<DataObjects::EventList> &histograms) {
+  std::vector<double> xAxis;
+  for (auto i = 0; i < (maxToF / binWidth); i++) {
+    xAxis.push_back(i * binWidth);
+  }
+
+  m_dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
+      m_NUM_OF_SPECTRA,
+      Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(xAxis)));
+
+  for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
+    m_dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
+    m_dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
+    m_dataWorkspace->getSpectrum(spectrumNo).setDetectorID(spectrumNo + 1);
+  }
+  m_dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
+  m_dataWorkspace->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("TOF");
+  m_dataWorkspace->setYUnit("Counts");
 }
 
 /**
