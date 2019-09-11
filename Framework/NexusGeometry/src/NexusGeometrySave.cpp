@@ -236,7 +236,7 @@ inline void writeMeshObjShape(H5::Group &grp,
                               const size_t monitorIdx /*,
                               const std::vector<int> &detIDs*/) {
 
-  std::vector<size_t> meshObjects;
+  // std::vector<size_t> meshObjects; awaiting implementation
 
   auto &shapeObj = compInfo.shape(monitorIdx);
   if (!dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
@@ -244,7 +244,8 @@ inline void writeMeshObjShape(H5::Group &grp,
 
   auto mesh = static_cast<const Geometry::MeshObject *>(&shapeObj);
 
-  const size_t numOfFaces = mesh->numberOfTriangles();
+  // const size_t numOfFaces = mesh->numberOfTriangles(); awaiting
+  // implememtation
   const size_t numOfVertices = mesh->numberOfVertices();
 
   const std::vector<double> vertices = mesh->getVertices();
