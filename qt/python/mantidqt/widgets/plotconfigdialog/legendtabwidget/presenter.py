@@ -96,11 +96,17 @@ class LegendTabWidgetPresenter:
 
     def populate_font_combo_box(self):
         """Adds all of the available fonts to the font combo boxes."""
-        font_list = matplotlib.font_manager.get_fontconfig_fonts()
-        if len(font_list) == 0:
-            font_list = matplotlib.font_manager.findSystemFonts()
-        self.fonts = set(sorted(
-            matplotlib.font_manager.FontProperties(fname=font_name).get_name() for font_name in font_list))
+        font_list = matplotlib.font_manager.findSystemFonts()
+        
+        self.fonts = set()
+        for font_name in font_list:
+            # This try-except is for a known matplotlib bug where get_name() causes an error for certain fonts.
+            try:
+                font = matplotlib.font_manager.FontProperties(fname=font_name).get_name()
+            except RuntimeError:
+                continue
+            self.fonts.add(font)
+        self.fonts = sorted(self.fonts)
         self.view.entries_font_combo_box.addItems(self.fonts)
         self.view.title_font_combo_box.addItems(self.fonts)
 
@@ -137,7 +143,7 @@ class LegendTabWidgetPresenter:
         """For some reason the default matplotlib legend font isn't a system font so it's added
         to the font combo boxes here."""
         if self.view.entries_font_combo_box.findText(font) == -1:
-            self.fonts.add(font)
+            self.fonts.append(font)
             self.fonts = sorted(self.fonts)
             self.view.entries_font_combo_box.clear()
             self.view.title_font_combo_box.clear()
