@@ -135,7 +135,7 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         fig = figure()
         ax = fig.add_subplot(111)
         ax.plot([0])
-        ax.legend()
+        ax.legend(['Label'])
         mock_view = Mock()
         presenter = PlotConfigDialogPresenter(fig, mock_view)
         expected_presenter_list = [self.legend_mock.return_value,
