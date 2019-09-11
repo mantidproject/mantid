@@ -7,6 +7,7 @@
 #ifndef MANTID_MANAGE_CUSTOM_MENUS_H
 #define MANTID_MANAGE_CUSTOM_MENUS_H
 
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_ManageCustomMenus.h"
 #include <QDialog>
 
@@ -19,7 +20,7 @@ add custom scripts or custom Qt interfaces to a menu in MantidPlot.
 
 @author Michael Whitty, ISIS
 */
-class ManageCustomMenus : public QDialog {
+class ManageCustomMenus : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
   explicit ManageCustomMenus(QWidget *parent = nullptr);

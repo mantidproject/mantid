@@ -82,8 +82,9 @@ if(ENABLE_MANTIDPLOT)
   include(ParaViewSetup)
 endif()
 
-# Set expected variables for OS X
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if( MSVC )
+  include ( MSVCSetup )
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include(DarwinSetup)
 endif()
 

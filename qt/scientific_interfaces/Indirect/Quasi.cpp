@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Quasi.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -167,6 +169,8 @@ bool Quasi::validate() {
  * Run the BayesQuasi algorithm
  */
 void Quasi::run() {
+  m_uiForm.ppPlot->watchADS(false);
+
   bool elasticPeak = false;
   bool sequence = false;
 
@@ -249,9 +253,10 @@ void Quasi::run() {
  */
 void Quasi::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error)
+  if (!error) {
     updateMiniPlot();
-  else {
+    m_uiForm.ppPlot->watchADS(true);
+  } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
@@ -302,8 +307,8 @@ void Quasi::updateMiniPlot() {
 
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
-  for (size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms();
-       histIndex++) {
+  for (std::size_t histIndex = 0;
+       histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
     QString specName = QString::fromStdString(axis->label(histIndex));
     QColor curveColour;
 
@@ -343,7 +348,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
   m_uiForm.spPreviewSpectrum->setMaximum(numHist);
   updateMiniPlot();
 
-  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
+
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
@@ -396,7 +402,11 @@ void Quasi::handleResolutionInputReady(const QString &wsName) {
  * @param min :: The new value of the lower guide
  */
 void Quasi::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -405,7 +415,11 @@ void Quasi::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Quasi::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -415,16 +429,21 @@ void Quasi::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void Quasi::updateProperties(QtProperty *prop, double val) {
-  UNUSED_ARG(val);
-
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
-  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(m_dblManager->value(m_properties["EMin"]),
-                            m_dblManager->value(m_properties["EMax"]));
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     bounds);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
+  if (prop == m_properties["EMin"]) {
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
+  } else if (prop == m_properties["EMax"]) {
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**

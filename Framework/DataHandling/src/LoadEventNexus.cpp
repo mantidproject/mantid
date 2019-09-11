@@ -51,6 +51,11 @@ using namespace API;
 using namespace DataObjects;
 using Types::Core::DateAndTime;
 
+namespace {
+// detnotes the end of iteration for NeXus::getNextEntry
+const std::string NULL_STR("NULL");
+} // namespace
+
 /**
  * Based on the current group in the file, does the named sub-entry exist?
  * @param file : File handle. This is not modified, but cannot be const
@@ -298,19 +303,20 @@ void LoadEventNexus::setTopEntryName() {
     m_top_entry_name = nxentryProperty;
     return;
   }
-  using string_map_t = std::map<std::string, std::string>;
+
   try {
-    string_map_t::const_iterator it;
-    // assume we're at the top, otherwise: m_file->openPath("/");
-    string_map_t entries = m_file->getEntries();
-
-    // Choose the first entry as the default
-    m_top_entry_name = entries.begin()->first;
-
-    for (it = entries.begin(); it != entries.end(); ++it) {
-      if (((it->first == "entry") || (it->first == "raw_data_1")) &&
-          (it->second == "NXentry")) {
-        m_top_entry_name = it->first;
+    while (true) {
+      const auto entry = m_file->getNextEntry();
+      if (entry.second == "NXentry") {
+        if ((entry.first == "entry") || (entry.first == "raw_data_1")) {
+          m_top_entry_name = entry.first;
+          break;
+        }
+      } else if (entry.first == NULL_STR && entry.second == NULL_STR) {
+        g_log.error()
+            << "Unable to determine name of top level NXentry - assuming "
+               "\"entry\".\n";
+        m_top_entry_name = "entry";
         break;
       }
     }
@@ -810,17 +816,18 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
-  map<string, string> entries = m_file->getEntries();
-  map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
-  for (; it != entries.end(); ++it) {
-    std::string entry_name(it->first);
-    std::string entry_class(it->second);
+  while (true) { // should be broken when entry name is set
+    const auto entry = m_file->getNextEntry();
+    const std::string entry_name(entry.first);
+    const std::string entry_class(entry.second);
+    if (entry_name == NULL_STR && entry_class == NULL_STR)
+      break;
 
     if (entry_class == classType) {
       // open the group
@@ -840,11 +847,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       bankNumEvents.push_back(num);
 
       // Look for weights in simulated file
-      if (exists(*m_file, "event_weight")) {
-        m_file->openData("event_weight");
-        haveWeights = true;
-        m_file->closeData();
-      }
+      haveWeights = exists(*m_file, "event_weight");
 
       m_file->closeGroup();
     }

@@ -948,17 +948,15 @@ void saveNXDetector(const H5::Group &parentGroup,
  * Produces a Nexus format file containing the Instrument geometry and metadata.
  *
  * @param compInfo : componentInfo object.
+ * @param detInfo : detectorInfo object.
  * @param fullPath : save destination as full path.
+ * @param rootPath : name of root entry
  * @param reporter : (optional) report to progressBase.
  */
-void saveInstrument(
-    const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
-                    std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
-    const std::string &fullPath, const std::string &rootPath,
-    Kernel::ProgressBase *reporter) {
-
-  const Geometry::ComponentInfo &compInfo = (*instrPair.first);
-  const Geometry::DetectorInfo &detInfo = (*instrPair.second);
+void saveInstrument(const Geometry::ComponentInfo &compInfo,
+                    const Geometry::DetectorInfo &detInfo,
+                    const std::string &fullPath, const std::string &rootPath,
+                    Kernel::ProgressBase *reporter) {
 
   // Exception handling.
   boost::filesystem::path tmp(fullPath);
@@ -1046,6 +1044,29 @@ void saveInstrument(
   file.close(); // close file
 
 } // saveInstrument
+
+/*
+ * Function: saveInstrument (overload)
+ * calls the save methods to write components to file after exception checking.
+ * Produces a Nexus format file containing the Instrument geometry and metadata.
+ *
+ * @param instrPair : instrument 2.0  object.
+ * @param fullPath : save destination as full path.
+ * @param rootPath : name of root entry
+ * @param reporter : (optional) report to progressBase.
+ */
+void saveInstrument(
+    const std::pair<std::unique_ptr<Geometry::ComponentInfo>,
+                    std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
+    const std::string &fullPath, const std::string &rootPath,
+    Kernel::ProgressBase *reporter) {
+
+  const Geometry::ComponentInfo &compInfo = (*instrPair.first);
+  const Geometry::DetectorInfo &detInfo = (*instrPair.second);
+
+  return saveInstrument(compInfo, detInfo, fullPath, rootPath, reporter);
+} // saveInstrument
+
 } // namespace NexusGeometrySave
 } // namespace NexusGeometry
 } // namespace Mantid

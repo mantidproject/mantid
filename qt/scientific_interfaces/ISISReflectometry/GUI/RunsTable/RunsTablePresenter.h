@@ -163,6 +163,10 @@ private:
   JobsViewUpdater m_jobViewUpdater;
   IRunsPresenter *m_mainPresenter;
   const IPlotter &m_plotter;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

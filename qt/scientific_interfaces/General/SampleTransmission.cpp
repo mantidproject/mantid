@@ -82,6 +82,16 @@ bool SampleTransmission::validate(bool silent) {
   case 1:
     uiv.checkFieldIsNotEmpty("Multiple binning", m_uiForm.leMultiple,
                              m_uiForm.valMultiple);
+
+    // Checks that the first number in the list is not negative.
+    // Only the first number needs to be checked because if it isn't negative
+    // then the rest can't be.
+    // The Rebin algorithm takes care of the rest of the checks.
+    if (m_uiForm.leMultiple->text().trimmed().at(0) == '-') {
+      uiv.setErrorLabel(m_uiForm.valMultiple, false);
+      uiv.addErrorMessage("Wavelength cannot be negative.");
+    }
+
     break;
   }
 

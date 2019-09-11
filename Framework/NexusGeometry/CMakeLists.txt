@@ -1,6 +1,7 @@
 set(SRC_FILES
     src/Hdf5Version.cpp
     src/InstrumentBuilder.cpp
+    src/JSONInstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
     src/NexusGeometrySave.cpp
     src/JSONGeometryParser.cpp
@@ -13,6 +14,7 @@ set(INC_FILES
     inc/MantidNexusGeometry/DllConfig.h
     inc/MantidNexusGeometry/Hdf5Version.h
     inc/MantidNexusGeometry/InstrumentBuilder.h
+    inc/MantidNexusGeometry/JSONInstrumentBuilder.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/NexusGeometrySave.h
     inc/MantidNexusGeometry/JSONGeometryParser.h
@@ -24,6 +26,7 @@ set(INC_FILES
 
 set(TEST_FILES
     InstrumentBuilderTest.h
+    JSONInstrumentBuilderTest.h
     NexusGeometryParserTest.h
     NexusGeometrySaveTest.h
     JSONGeometryParserTest.h

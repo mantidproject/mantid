@@ -43,6 +43,7 @@ public:
                           const std::string &runInfoTopic,
                           const std::string &spDetTopic,
                           const std::string &sampleEnvTopic,
+                          const std::string &chopperTopic,
                           const std::size_t bufferThreshold);
   ~KafkaEventStreamDecoder();
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;

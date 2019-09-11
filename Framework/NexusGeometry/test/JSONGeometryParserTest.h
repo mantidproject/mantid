@@ -14,6 +14,7 @@
 #include <Poco/Glob.h>
 #include <cxxtest/TestSuite.h>
 #include <exception>
+#include <json/json.h>
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -147,7 +148,8 @@ public:
     std::string json =
         Mantid::TestHelpers::getJSONGeometryMissingMonitorInformation();
     attemptParseInvalidArgument(
-        json, "Full monitor definition missing in json provided.");
+        json,
+        "Full monitor definition for monitor_1 missing in json provided.");
   }
 
   void test_load_full_instrument_simple_off_pixel_shape() {

@@ -16,6 +16,7 @@ Improvements
 ############
 
 - The HRPD scripts now mask out the Bragg peaks from the Vanadium.
+- Geometry definition for LLB 5C1
 
 Bug Fixes
 #########

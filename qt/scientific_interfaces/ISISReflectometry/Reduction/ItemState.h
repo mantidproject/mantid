@@ -16,12 +16,12 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 enum class State {
-  ITEM_NOT_STARTED,
-  ITEM_STARTING,
-  ITEM_RUNNING,
-  ITEM_COMPLETE,
-  ITEM_ERROR,
-  ITEM_WARNING
+  ITEM_NOT_STARTED = 0,
+  ITEM_STARTING = 1,
+  ITEM_RUNNING = 2,
+  ITEM_COMPLETE = 3,
+  ITEM_ERROR = 4,
+  ITEM_WARNING = 5
 };
 
 /** @class ItemState
@@ -32,6 +32,7 @@ enum class State {
 class MANTIDQT_ISISREFLECTOMETRY_DLL ItemState {
 public:
   ItemState();
+  explicit ItemState(State state);
 
   State state() const;
   std::string message() const;

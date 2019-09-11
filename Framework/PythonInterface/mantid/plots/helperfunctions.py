@@ -188,10 +188,13 @@ def get_wksp_index_dist_and_label(workspace, axis=MantidAxType.SPECTRUM, **kwarg
     if 'label' not in kwargs:
         ws_name = workspace.name()
         if axis == MantidAxType.SPECTRUM:
-            if ws_name:
-                kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
+            if workspace.getAxis(1).isText():
+                kwargs['label'] = '{0}: {1}'.format(ws_name, workspace.getAxis(1).label(workspace_index))
             else:
-                kwargs['label'] = 'spec {0}'.format(spectrum_number)
+                if ws_name:
+                    kwargs['label'] = '{0}: spec {1}'.format(ws_name, spectrum_number)
+                else:
+                    kwargs['label'] = 'spec {0}'.format(spectrum_number)
         elif axis == MantidAxType.BIN:
             if ws_name:
                 kwargs['label'] = '{0}: bin {1}'.format(ws_name, workspace_index)

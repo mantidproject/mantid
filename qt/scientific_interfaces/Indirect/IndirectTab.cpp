@@ -18,10 +18,6 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/MplCpp/Plot.h"
-#endif
-
 #include <QDomDocument>
 #include <QFile>
 #include <QMessageBox>
@@ -38,6 +34,17 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectTab");
+
+double roundToPrecision(double value, double precision) {
+  return value - std::remainder(value, precision);
+}
+
+QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd,
+                                            double precision) {
+  return QPair<double, double>(
+      roundToPrecision(rangeStart, precision) + precision,
+      roundToPrecision(rangeEnd, precision) - precision);
+}
 
 std::string castToString(int value) {
   return boost::lexical_cast<std::string>(value);
@@ -114,7 +121,6 @@ QStringList convertToQStringList(std::string const &str,
   boost::split(subStrings, str, boost::is_any_of(delimiter));
   return convertToQStringList(subStrings);
 }
-
 } // namespace
 
 namespace MantidQt {
@@ -453,6 +459,44 @@ void IndirectTab::setRangeSelector(
 }
 
 /**
+ * Set the minimum of a range selector if it is less than the maximum value.
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the minimum
+ */
+void IndirectTab::setRangeSelectorMin(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue <= maxProperty->valueText().toDouble())
+    rangeSelector->setMinimum(newValue);
+  else
+    m_dblManager->setValue(minProperty, rangeSelector->getMinimum());
+}
+
+/**
+ * Set the maximum of a range selector if it is greater than the minimum value
+ * To be used when changing the min or max via the Property table
+ *
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the maximum
+ */
+void IndirectTab::setRangeSelectorMax(QtProperty *minProperty,
+                                      QtProperty *maxProperty,
+                                      RangeSelector *rangeSelector,
+                                      double newValue) {
+  if (newValue >= minProperty->valueText().toDouble())
+    rangeSelector->setMaximum(newValue);
+  else
+    m_dblManager->setValue(maxProperty, rangeSelector->getMaximum());
+}
+
+/**
  * Gets the energy mode from a workspace based on the X unit.
  *
  * Units of dSpacing typically denote diffraction, hence Elastic.
@@ -549,18 +593,19 @@ bool IndirectTab::getResolutionRangeFromWs(
 }
 
 QPair<double, double>
-IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName) const {
+IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName,
+                                    double precision) const {
   auto const &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
     return getXRangeFromWorkspace(
-        ads.retrieveWS<MatrixWorkspace>(workspaceName));
+        ads.retrieveWS<MatrixWorkspace>(workspaceName), precision);
   return QPair<double, double>(0.0, 0.0);
 }
 
 QPair<double, double> IndirectTab::getXRangeFromWorkspace(
-    Mantid::API::MatrixWorkspace_const_sptr workspace) const {
-  const auto xValues = workspace->x(0);
-  return QPair<double, double>(xValues[0], xValues[xValues.size() - 1]);
+    Mantid::API::MatrixWorkspace_const_sptr workspace, double precision) const {
+  auto const xValues = workspace->x(0);
+  return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
 
 /**

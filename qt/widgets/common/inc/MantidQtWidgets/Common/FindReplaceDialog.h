@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include <QDialog>
 
 //----------------------------------
@@ -28,12 +29,13 @@ class QShowEvent;
  * Raises a dialog allowing the user to find/replace
  * text in the editor.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FindReplaceDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON FindReplaceDialog
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 
 public:
   /// Constructor
-  FindReplaceDialog(ScriptEditor *editor, Qt::WindowFlags fl = nullptr);
+  FindReplaceDialog(ScriptEditor *editor);
 
 protected:
   /// Create the layout
