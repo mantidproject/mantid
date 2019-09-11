@@ -33,8 +33,7 @@ public:
     return "Calculates the Placzek self scattering correction of an incident "
            "spectrum";
   };
-  std::map<std::string, std::string>
-  CalculatePlaczekSelfScattering::validateInputs() override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
