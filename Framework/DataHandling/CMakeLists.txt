@@ -90,6 +90,7 @@ set(SRC_FILES
     src/LoadNexusMonitors.cpp
     src/LoadNexusMonitors2.cpp
     src/LoadNexusProcessed.cpp
+    src/LoadNexusProcessed2.cpp
     src/LoadOff.cpp
     src/LoadPDFgetNFile.cpp
     src/LoadPLN.cpp
@@ -170,6 +171,7 @@ set(SRC_FILES
     src/SaveNXTomo.cpp
     src/SaveNXcanSAS.cpp
     src/SaveNexus.cpp
+    src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
     src/SaveNexusProcessed.cpp
     src/SaveOpenGenieAscii.cpp
@@ -290,6 +292,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadNexusMonitors.h
     inc/MantidDataHandling/LoadNexusMonitors2.h
     inc/MantidDataHandling/LoadNexusProcessed.h
+    inc/MantidDataHandling/LoadNexusProcessed2.h
     inc/MantidDataHandling/LoadOff.h
     inc/MantidDataHandling/LoadPDFgetNFile.h
     inc/MantidDataHandling/LoadPLN.h
@@ -367,6 +370,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNXTomo.h
     inc/MantidDataHandling/SaveNXcanSAS.h
     inc/MantidDataHandling/SaveNexus.h
+    inc/MantidDataHandling/SaveNexusESS.h
     inc/MantidDataHandling/SaveNexusGeometry.h
     inc/MantidDataHandling/SaveNexusProcessed.h
     inc/MantidDataHandling/SaveOpenGenieAscii.h
@@ -477,6 +481,7 @@ set(TEST_FILES
     LoadNXcanSASTest.h
     LoadNexusLogsTest.h
     LoadNexusMonitorsTest.h
+    LoadNexusProcessed2Test.h
     LoadNexusProcessedTest.h
     LoadNexusTest.h
     LoadPDFgetNFileTest.h
@@ -549,6 +554,7 @@ set(TEST_FILES
     SaveNXSPETest.h
     SaveNXTomoTest.h
     SaveNXcanSASTest.h
+    SaveNexusESSTest.h
     SaveNexusGeometryTest.h
     SaveNexusProcessedTest.h
     SaveNexusTest.h

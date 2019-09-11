@@ -419,19 +419,19 @@
       <technique>technique</technique>
    </instrument>
 
-   <instrument name="GPSANS">
+   <instrument name="GPSANS" shortname="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="CG2" shortname="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="BIOSANS"  shortname="CG3">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
    <instrument name="HIRESSANS">
-      <technique>Small Angle Scattering</technique>
-   </instrument>
-
-   <instrument name="CG2">
-      <technique>Small Angle Scattering</technique>
-   </instrument>
-
-   <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
 

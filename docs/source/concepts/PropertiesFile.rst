@@ -210,12 +210,12 @@ ScriptRepository Properties
 +============================+===============================================+======================================================================+
 | ``ScriptLocalRepository``  |Directory where ScriptRepository is Installed. | ``C:\\MantidInstall\\MyScriptRepository``                            |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
-| ``ScriptRepository``       |Base URL for the remote script repository.     | ``http://download.mantidproject.org/scriptrepository/``              |
+| ``ScriptRepository``       |Base URL for the remote script repository.     | ``https://download.mantidproject.org/scriptrepository/``             |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 | ``ScriptRepositoryIgnore`` |CSV patterns for paths that should not be      | ``*pyc;``                                                            |
 |                            |listed at ScriptRepository.                    |                                                                      |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
-| ``UploaderWebServer``      |URL for uploading scripts.                     | ``http://upload.mantidproject.org/scriptrepository/payload/publish`` |
+| ``UploaderWebServer``      |URL for uploading scripts.                     | ``https://upload.mantidproject.org/scriptrepository/payload/publish``|
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 
 

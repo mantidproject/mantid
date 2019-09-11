@@ -107,7 +107,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
             self.tolerance = 0.4
         else:
-            self.tolerance = 0.05
+            self.tolerance = 0.16
         return self.focus_results.name(), "HRPD66063_focused.nxs"
 
     def cleanup(self):
