@@ -115,7 +115,7 @@ class LegendProperties(dict):
 
     @classmethod
     def create_legend(cls, props, ax):
-        if matplotlib.__version__ > 2:
+        if int(matplotlib.__version__[0]) >= 2:
             legend = ax.legend(ncol=props.columns,
                                prop={'size': props.entries_size},
                                numpoints=props.markers,
