@@ -346,8 +346,8 @@ std::string QtRunsView::getSearchString() const {
 Get the live data update interval value given by the user.
 @returns The live data update interval
 */
-int QtRunsView::getLiveDataUpdateInterval() const {
-  return m_ui.spinBoxUpdateInterval->value();
+std::string QtRunsView::getLiveDataUpdateInterval() const {
+  return std::to_string(m_ui.spinBoxUpdateInterval->value());
 }
 
 void QtRunsView::on_buttonMonitor_clicked() { startMonitor(); }

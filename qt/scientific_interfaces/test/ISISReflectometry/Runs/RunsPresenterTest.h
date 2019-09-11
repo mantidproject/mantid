@@ -698,7 +698,7 @@ private:
         {"OutputWorkspace", "IvsQ_binned_live"},
         {"AccumulationWorkspace", "TOF_live"},
         {"AccumulationMethod", "Replace"},
-        {"UpdateEvery", "20"},
+        {"UpdateEvery", (m_view.getLiveDataUpdateInterval()},
         {"PostProcessingAlgorithm", "ReflectometryReductionOneLiveData"},
         {"RunTransitionBehavior", "Restart"},
     };

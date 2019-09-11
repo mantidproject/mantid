@@ -99,7 +99,7 @@ public:
   virtual std::string getSearchInstrument() const = 0;
   virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual std::string getSearchString() const = 0;
-  virtual int getLiveDataUpdateInterval() const = 0;
+  virtual std::string getLiveDataUpdateInterval() const = 0;
 
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
