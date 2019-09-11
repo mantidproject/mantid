@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.view import LegendTabWidgetView
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
+import matplotlib
 import matplotlib.font_manager
 
 
@@ -41,6 +42,10 @@ class LegendTabWidgetPresenter:
         self.view.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
     def init_view(self):
+        if int(matplotlib.__version__[0]) < 2:
+            self.view.background_color_selector_widget.setVisible(False)
+            self.view.edge_color_selector_widget.setVisible(False)
+
         """Sets all of the initial values of the input fields when the tab is first loaded"""
         legend_props = LegendProperties.from_legend(self.axes[0].get_legend())
         self.check_font_in_list(legend_props.entries_font)

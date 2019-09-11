@@ -66,7 +66,7 @@ new_legend_props = {
     'visible': True,
     'title': 'Legend',
     'background_color': '#ffffff',
-    'edge_color': '#ffffff',
+    'edge_color': '#000000',
     'transparency': 0.5,
     'entries_font': 'DejaVu Sans',
     'entries_size': 12,
