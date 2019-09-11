@@ -141,7 +141,6 @@ class LegendProperties(dict):
                                fancybox=props.round_edges,
                                shadow=props.shadow,
                                framealpha=props.transparency,
-                               facecolor=props.background_color,
                                title=props.title,
                                borderpad=props.border_padding,
                                labelspacing=props.label_spacing,
