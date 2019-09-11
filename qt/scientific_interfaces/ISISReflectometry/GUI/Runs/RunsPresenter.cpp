@@ -470,6 +470,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
 void RunsPresenter::updateViewWhenMonitorStarting() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(false);
+  m_view->setUpdateIntervalSpinBoxEnabled(false);
 }
 
 void RunsPresenter::updateViewWhenMonitorStarted() {
