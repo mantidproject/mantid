@@ -15,6 +15,9 @@ Improved
 - Instrument definition is improved for IN16B to have the physical detector on the correct side of the beam axis, and different analyser focus for single detectors.
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` is extended to support also the configurations with the first tube angle at 33.1 degrees.
 - :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` now offers the possibility to enable or disable the detector grouping both for Doppler and BATS modes. By default the pixels will be grouped tube by tube as before.
+- :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` offers an option to discard the single detectors if they were not enabled in the measurement.
+- A bug has been fixed in :ref:`MatchPeaks <algm-MatchPeaks>` which was causing wrong alignment in :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` with unmirror option 7, when
+the peaks in the alignment run are too narrow to be fitted.
 
 :ref:`Release 4.2.0 <v4.2.0>`
 
