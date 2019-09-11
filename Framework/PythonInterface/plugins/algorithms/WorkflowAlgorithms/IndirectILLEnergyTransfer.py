@@ -69,7 +69,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _fit_option = None
     _group_by = None
     _pulse_chopper = None
-    _group_detectors = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -171,6 +170,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                  'in order to get absorption corrections right, \n'
                                  'however the default value is True for backwards compatibility.')
 
+        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+                             doc='Whether to discard the spectra of single detectors.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -235,11 +237,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if self._use_map_file:
             if self._map_file == '':
                 # path name for default map file
-                if self._instrument.hasParameter('Workflow.GroupingFile'):
-                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
-                    self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                if self.getProperty('DiscardSingleDetectors').value:
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile.PSDOnly')[0]
                 else:
-                    raise RuntimeError("Failed to find default detector grouping file. Please specify manually.")
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+                self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
 
             self.log().information('Set detector map file : {0}'.format(self._map_file))
 

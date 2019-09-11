@@ -37,6 +37,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
     _back_calib_option = None
     _common_args = {}
     _all_runs = None
+    _discard_sds = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -134,6 +135,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
+        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+                             doc='Whether to discard the spectra of single detectors.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -158,6 +162,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._calib_option = self.getPropertyValue('CalibrationOption')
         self._back_calib_option = self.getPropertyValue('CalibrationBackgroundOption')
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
+        self._discard_sds = self.getProperty('DiscardSingleDetectors').value
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
@@ -165,6 +170,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['SpectrumAxis'] = self._spectrum_axis
+        self._common_args['DiscardSingleDetectors'] = self._discard_sds
 
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 
