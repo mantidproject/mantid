@@ -475,11 +475,13 @@ void RunsPresenter::updateViewWhenMonitorStarting() {
 void RunsPresenter::updateViewWhenMonitorStarted() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(true);
+  m_view->setUpdateIntervalSpinBoxEnabled(false);
 }
 
 void RunsPresenter::updateViewWhenMonitorStopped() {
   m_view->setStartMonitorButtonEnabled(true);
   m_view->setStopMonitorButtonEnabled(false);
+  m_view->setUpdateIntervalSpinBoxEnabled(true);
 }
 
 /** Start live data monitoring
