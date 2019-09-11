@@ -15,10 +15,9 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/cow_ptr.h"
-
 #include "MantidNexus/NexusClasses.h"
-
 #include <map>
+#include <vector>
 
 namespace NeXus {
 class File;
@@ -27,7 +26,6 @@ class File;
 namespace Mantid {
 
 namespace DataHandling {
-
 /**
 
 Loads a workspace from a NeXus Processed entry in a NeXus file.
@@ -70,7 +68,15 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
+protected:
+  /// Read the spectra
+  void readInstrumentGroup(Mantid::NeXus::NXEntry &mtd_entry,
+                           API::MatrixWorkspace &local_workspace);
+
 private:
+  virtual void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry,
+                                            Mantid::API::MatrixWorkspace &ws);
+
   /// Validates the input Min < Max and Max < Maximum_Int
   std::map<std::string, std::string> validateInputs() override;
   /// Overwrites Algorithm method.
@@ -93,6 +99,12 @@ private:
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name);
 
+  /// Load nexus geometry and apply to workspace
+  virtual bool loadNexusGeometry(Mantid::API::Workspace &, const int,
+                                 Kernel::Logger &,
+                                 const std::string &) { /*do nothing*/
+    return false;
+  }
   /// Load a single entry
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name,
@@ -139,9 +151,6 @@ private:
   bool addSampleProperty(Mantid::NeXus::NXMainClass &sample_entry,
                          const std::string &entryName,
                          API::Sample &sampleDetails);
-  /// Read the spectra
-  void readInstrumentGroup(Mantid::NeXus::NXEntry &mtd_entry,
-                           API::MatrixWorkspace_sptr local_workspace);
   /// Splits a string of exactly three words into the separate words
   void getWordsInString(const std::string &words3, std::string &w1,
                         std::string &w2, std::string &w3);

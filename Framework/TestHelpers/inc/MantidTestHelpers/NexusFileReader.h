@@ -74,6 +74,8 @@ void validateStorageType(const H5::DataSet &data) {
 // for unit tests in Nexus Geometry.
 class NexusFileReader {
 
+  bool m_open = false;
+
 public:
   NexusFileReader(const std::string &fullPath) {
     boost::filesystem::path tmp = fullPath;
@@ -82,6 +84,7 @@ public:
       throw std::invalid_argument("no such file.\n");
     } else {
       m_file.openFile(fullPath, H5F_ACC_RDONLY);
+      m_open = true;
     }
   }
 
@@ -124,7 +127,7 @@ public:
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
                                     const std::string &childNX_CLASS_TYPE) {
 
-    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_PATH);
+    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_ENTRY_NAME);
 
     // if specified parent NX class type is NX entry, check the top level of
     // file structure only. (dont take extra step to look for parent group)
@@ -365,6 +368,15 @@ public:
 
     return attributeValue == attrVal;
   }
+
+  void close() {
+    if (m_open) {
+      m_file.close();
+    }
+    m_open = false;
+  }
+
+  ~NexusFileReader() { close(); }
 
 private:
   H5::H5File m_file;
