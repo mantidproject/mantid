@@ -9,4 +9,6 @@ Direct Geometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+* Added the ``CHESS`` and ``ZEEMANS`` instruments  in the ``Facilities.xml`` to SNS for the second target station
+
 :ref:`Release 4.2.0 <v4.2.0>`

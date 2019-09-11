@@ -30,6 +30,7 @@ if(CXXTEST_FOUND)
                         Catalog
                         DataHandling
                         Nexus
+                        HistogramData
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${HDF5_HL_LIBRARIES})

@@ -203,15 +203,16 @@ void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff,
 
   std::vector<double> ypmEps(yspace.size());
   // y+2eps
+  using std::placeholders::_1;
   std::transform(
       yspace.begin(), yspace.end(), ypmEps.begin(),
-      std::bind2nd(std::plus<double>(), 2.0 * epsilon)); // Add 2 epsilon
+      std::bind(std::plus<double>(), _1, 2.0 * epsilon)); // Add 2 epsilon
   m_resolutionFunction->voigtApprox(voigtDiff, ypmEps, lorentzPos, lorentzAmp,
                                     lorentzWidth, gaussWidth);
   // y-2eps
   std::transform(
       yspace.begin(), yspace.end(), ypmEps.begin(),
-      std::bind2nd(std::minus<double>(), 2.0 * epsilon)); // Subtract 2 epsilon
+      std::bind(std::minus<double>(), _1, 2.0 * epsilon)); // Subtract 2 epsilon
   std::vector<double> tmpResult(yspace.size());
   m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp,
                                     lorentzWidth, gaussWidth);
@@ -221,11 +222,11 @@ void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff,
 
   // y+eps
   std::transform(yspace.begin(), yspace.end(), ypmEps.begin(),
-                 std::bind2nd(std::plus<double>(), epsilon)); // Add epsilon
+                 std::bind(std::plus<double>(), _1, epsilon)); // Add epsilon
   m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp,
                                     lorentzWidth, gaussWidth);
   std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(),
-                 std::bind2nd(std::multiplies<double>(), 2.0)); // times 2
+                 std::bind(std::multiplies<double>(), _1, 2.0)); // times 2
   // Difference with 3rd term - result is put back in voigtDiff
   std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(),
                  voigtDiff.begin(), std::minus<double>());
@@ -233,20 +234,19 @@ void ComptonProfile::voigtApproxDiff(std::vector<double> &voigtDiff,
   // y-eps
   std::transform(
       yspace.begin(), yspace.end(), ypmEps.begin(),
-      std::bind2nd(std::minus<double>(), epsilon)); // Subtract epsilon
+      std::bind(std::minus<double>(), _1, epsilon)); // Subtract epsilon
   m_resolutionFunction->voigtApprox(tmpResult, ypmEps, lorentzPos, lorentzAmp,
                                     lorentzWidth, gaussWidth);
   std::transform(tmpResult.begin(), tmpResult.end(), tmpResult.begin(),
-                 std::bind2nd(std::multiplies<double>(), 2.0)); // times 2
+                 std::bind(std::multiplies<double>(), _1, 2.0)); // times 2
   // Sum final term
   std::transform(voigtDiff.begin(), voigtDiff.end(), tmpResult.begin(),
                  voigtDiff.begin(), std::plus<double>());
 
-  // Finally multiply by 2*eps^3
+  // Finally divide by 2*eps^3
   std::transform(
       voigtDiff.begin(), voigtDiff.end(), voigtDiff.begin(),
-      std::bind2nd(std::divides<double>(),
-                   2.0 * std::pow(epsilon, 3))); // divided by (2eps^3)
+      std::bind(std::divides<double>(), _1, 2.0 * std::pow(epsilon, 3)));
 }
 
 } // namespace Functions

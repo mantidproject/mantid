@@ -12,6 +12,7 @@ User Interface
 - The zoom icon in the SliceViewer and plot toolbars have been replaced with clearer icons.
 - Plots now allow the insertion of draggable horizontal and vertical markers.
 - Marker label, color and line style can be edited on a per-marker basis.
+- The button to remove a curve in the figure options is now the same size as the drop-down list of curves.
 
 New
 ###
@@ -27,6 +28,8 @@ Improvements
 - If a spectrum has a label, this will now be used instead of the spectrum number in the legend when the spectrum is plotted.
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
 - There are now icons alongside the colormap names in the plot options dialog.
+
+- Hex codes can now be inputted directly into the color selectors in figure options.
 
 Bugfixes
 ########

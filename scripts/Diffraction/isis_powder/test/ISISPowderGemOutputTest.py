@@ -52,10 +52,7 @@ class ISISPowderGemOutputTest(unittest.TestCase):
                                                         XUnit='DSpacing',
                                                         StoreInADS=True))
 
-
-
         gem_output_test_ws_group = mantid.GroupWorkspaces(wsgroup)
-
         gem_output.save_gda(d_spacing_group=gem_output_test_ws_group,
                             gsas_calib_filename=path_to_ipf,
                             grouping_scheme=self.GROUPING_SCHEME,

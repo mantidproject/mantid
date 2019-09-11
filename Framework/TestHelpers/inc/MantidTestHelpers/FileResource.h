@@ -16,16 +16,19 @@
 #define MANTID_NEXUSGEOMETRY_FILERESOURCE_H_
 
 #include <boost/filesystem.hpp>
+#include <iostream>
 #include <string>
 
 class FileResource {
 
 public:
-  FileResource(const std::string &fileName);
+  FileResource(const std::string &fileName, bool debugMode = false);
+  void setDebugMode(bool mode);
   std::string fullPath() const;
   ~FileResource();
 
 private:
+  bool m_debugMode;
   boost::filesystem::path m_full_path; // full path to file
   // prevent heap allocation for ScopedFileHandle
 protected:

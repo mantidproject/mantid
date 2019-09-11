@@ -316,9 +316,10 @@ void ChebfunBase::derivative(const std::vector<double> &a,
   } else {
     aout.front() = a[1];
   }
-  double d = (m_end - m_start) / 2;
-  std::transform(aout.begin(), aout.end(), aout.begin(),
-                 std::bind2nd(std::divides<double>(), d));
+  using std::placeholders::_1;
+  std::transform(
+      aout.begin(), aout.end(), aout.begin(),
+      std::bind(std::divides<double>(), _1, 0.5 * (m_end - m_start)));
 }
 
 /**

@@ -11,6 +11,25 @@ import warnings
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
+from isis_powder.routines.param_map_entry import ParamMapEntry
+
+# Common param mapping entries
+PARAM_MAPPING = [
+    ParamMapEntry(ext_name="nxs_filename", int_name="nxs_filename"),
+    ParamMapEntry(ext_name="gss_filename", int_name="gss_filename"),
+    ParamMapEntry(ext_name="dat_files_directory", int_name="dat_files_directory"),
+    ParamMapEntry(ext_name="tof_xye_filename", int_name="tof_xye_filename"),
+    ParamMapEntry(ext_name="dspacing_xye_filename", int_name="dspacing_xye_filename"),
+]
+
+# Set of defaults for the advanced config settings
+ADVANCED_CONFIG = {
+    "nxs_filename": "{fileext}{inst}{runno}{suffix}.nxs",
+    "gss_filename": "{fileext}{inst}{runno}{suffix}.gsas",
+    "dat_files_directory": "dat_files",
+    "tof_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-TOF.dat",
+    "dspacing_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-d.dat"
+}
 
 
 def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
