@@ -8,11 +8,11 @@
 #define MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
 
 
-#include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
@@ -40,8 +40,8 @@ public:
 
   // generate spectrum with detector info
   MatrixWorkspace_sptr generate_incident_spectrum_with_detector_data() {
-    Algorithm_sptr alg = 
-		AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
+    Algorithm_sptr alg =
+        AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", "incident_spectrum_ws");
     alg->setProperty("XMin", x_start);
@@ -49,7 +49,7 @@ public:
     alg->setProperty("BinWidth", x_inc);
     alg->setProperty("BankPixelWidth", 1);
     alg->execute();
-	// get the output workspace from ADS
+    // get the output workspace from ADS
     MatrixWorkspace_sptr out_ws =
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
@@ -85,7 +85,7 @@ public:
     alg->setProperty("DataY", y);
     alg->setProperty("NSpec", 2);
     alg->execute();
-	// retreve output workspace from ADS
+    // retreve output workspace from ADS
     MatrixWorkspace_sptr out_ws =
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
@@ -107,8 +107,8 @@ public:
         double term2 =
             phi_epi * delta_term / (pow((x + dx), (1.0 + 2.0 * alpha)));
         amplitude.push_back(term1 + term2);
-	  }
-	}
+      }
+    }
     return amplitude;
   }
 

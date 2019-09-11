@@ -25,7 +25,7 @@ void CalculatePlaczekSelfScattering::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Kernel::Direction::Input),
       "Workspace of fitted incident spectrum with it's first derivative. "
-	  "Workspace must have instument and sample data.");
+      "Workspace must have instument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
@@ -40,7 +40,8 @@ CalculatePlaczekSelfScattering::validateInputs() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const Geometry::DetectorInfo det_info = inWS->detectorInfo();
   if (det_info.size() == 0) {
-    issues["InputWorkspace"] = "Input workspace does not have detector information";
+    issues["InputWorkspace"] = 
+		"Input workspace does not have detector information";
   }
   Kernel::Material::ChemicalFormula formula =
       inWS->sample().getMaterial().chemicalFormula();
@@ -86,13 +87,13 @@ void CalculatePlaczekSelfScattering::exec() {
   }
   /* Placzek
      Original Placzek inelastic correction Ref (for constant wavelength, reactor 
-	 source): Placzek, Phys. Rev v86, (1952), pp. 377-388 First Placzek 
-	 correction for time-of-flight, pulsed source (also shows reactor eqs.):
+     source): Placzek, Phys. Rev v86, (1952), pp. 377-388 First Placzek 
+     correction for time-of-flight, pulsed source (also shows reactor eqs.):
      Powles, Mol. Phys., v6 (1973), pp.1325-1350
      Nomenclature and calculation for this program follows Ref:
      Howe, McGreevy, and Howells, J. Phys.: Condens. Matter v1, (1989), pp. 
-	 3433-3451 NOTE: Powles's Equation for inelastic self-scattering is equal to 
-	 Howe's Equation for P(theta) by adding the elastic self-scattering
+     3433-3451 NOTE: Powles's Equation for inelastic self-scattering is equal to 
+     Howe's Equation for P(theta) by adding the elastic self-scattering
   */
   MantidVec x_lambdas;
   MantidVec placzek_correction;
@@ -110,7 +111,7 @@ void CalculatePlaczekSelfScattering::exec() {
         const double term1 = (f + 1.0) * phi_1[x_index];
         const double term2 = f * eps_1[x_index];
         const double term3 = f - 3;
-        const double inelastic_placzek_self_correction = 
+        const double inelastic_placzek_self_correction =
             2.0 * (term1 - term2 + term3) * sin_theta_by_2 * sin_theta_by_2 *
             summation_term;
         x_lambdas.push_back(x_lambda[x_index]);

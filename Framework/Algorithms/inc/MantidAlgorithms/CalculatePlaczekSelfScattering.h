@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** CalculatePlaczekSelfScattering : This algorithm calculates a correction for
-	an incident spectrum defracted by a sample.
+  an incident spectrum defracted by a sample.
 */
 class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering
     : public API::Algorithm {
@@ -34,13 +34,13 @@ public:
            "spectrum";
   };
 
- private:
-   void init() override;
-   void exec() override;
-   std::map<std::string, std::string>
-   CalculatePlaczekSelfScattering::validateInputs() override;
-   const std::map<std::string, std::map<std::string, double>>
-   get_sample_species_info(API::MatrixWorkspace_sptr ws);
+private:
+  void init() override;
+  void exec() override;
+  std::map<std::string, std::string>
+  CalculatePlaczekSelfScattering::validateInputs() override;
+  const std::map<std::string, std::map<std::string, double>>
+  get_sample_species_info(API::MatrixWorkspace_sptr ws);
 };
 
 } // namespace Algorithms
