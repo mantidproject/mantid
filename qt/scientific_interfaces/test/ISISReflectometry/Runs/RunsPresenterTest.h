@@ -721,16 +721,19 @@ private:
   void expectUpdateViewWhenMonitorStarting() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(false));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(false));
+    EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(false));
   }
 
   void expectUpdateViewWhenMonitorStarted() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(false));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(true));
+    EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(false));
   }
 
   void expectUpdateViewWhenMonitorStopped() {
     EXPECT_CALL(m_view, setStartMonitorButtonEnabled(true));
     EXPECT_CALL(m_view, setStopMonitorButtonEnabled(false));
+    EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(true));
   }
 
   void expectStopAutoreduction() {
