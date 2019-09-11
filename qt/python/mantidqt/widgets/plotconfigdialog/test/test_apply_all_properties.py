@@ -113,7 +113,8 @@ def _run_apply_properties_on_figure_with_legend():
     fig = figure()
     ax = fig.add_subplot(111)
     ax.plot([1,2,3], label='old label')
-    ax.legend()
+    legend = ax.legend()
+    legend.get_frame().set_alpha(0.5)
     presenter = PlotConfigDialogPresenter(fig, view=Mock())
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
