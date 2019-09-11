@@ -8,6 +8,7 @@
 
 import unittest
 
+import matplotlib
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.colors import LogNorm
@@ -287,12 +288,20 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         self.assertEqual(new_legend_props['title'], self.new_legend.get_title().get_text())
 
     def test_apply_properties_on_figure_with_legend_sets_background_color(self):
-        self.assertEqual(new_legend_props['background_color'],
-                         convert_color_to_hex(self.new_legend.get_frame().get_facecolor()))
+        if int(matplotlib.__version__[0]) >= 2:
+            self.assertEqual(new_legend_props['background_color'],
+                             convert_color_to_hex(self.new_legend.get_frame().get_facecolor()))
+        else:
+            self.assertEqual("#ffffff",
+                             convert_color_to_hex(self.new_legend.get_frame().get_facecolor()))
 
     def test_apply_properties_on_figure_with_legend_sets_edge_color(self):
-        self.assertEqual(new_legend_props['edge_color'],
-                         convert_color_to_hex(self.new_legend.get_frame().get_edgecolor()))
+        if int(matplotlib.__version__[0]) >= 2:
+            self.assertEqual(new_legend_props['edge_color'],
+                             convert_color_to_hex(self.new_legend.get_frame().get_edgecolor()))
+        else:
+            self.assertEqual("#000000",
+                             convert_color_to_hex(self.new_legend.get_frame().get_edgecolor()))
 
     def test_apply_properties_on_figure_with_legend_sets_transparency(self):
         self.assertEqual(new_legend_props['transparency'],
