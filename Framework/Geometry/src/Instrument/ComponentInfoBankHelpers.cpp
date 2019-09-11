@@ -33,17 +33,16 @@ bool isDetectorFixedInBank(const ComponentInfo &compInfo,
   return false;
 }
 
-/** Function: isSaveableBank. Returns true if the index in the Instrument cache
-is
-* a detector bank, ignoring tubes. otherwise returns false. Used by
-* SaveInstrument to find and save NXdetectors from memory to file.
-*
-* @param compInfo : Geometry::ComponentInfo Instrument cache containing the
-* component info.
-* @param idx : size_t index of component
-* @return true if component at index is bank, false otherwise.
-
-*/
+/** Function: isSaveableBank. Returns true if the index of the component in the
+ * Instrument cache can be represented as an NXdetector, ignoring tubes.
+ * otherwise returns false. current implementation can treat root as saveable
+ * NXdetector.
+ *
+ * @param compInfo : Geometry::ComponentInfo Instrument cache containing the
+ * component info.
+ * @param idx : size_t index of component
+ * @return true if component at index is bank, false otherwise.
+ */
 bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
   // return false if is a detector.
   if (compInfo.isDetector(idx))
@@ -54,25 +53,8 @@ bool isSaveableBank(const ComponentInfo &compInfo, const size_t idx) {
   // needs to ignore if index is the source
   if (compInfo.source() == idx)
     return false;
-  if (!compInfo.hasDetectors(idx))
-    return false;
-  // a bank must have a parent, skip this block if the component does not.
-  if (compInfo.hasParent(idx)) {
-    size_t parent = compInfo.parent(idx);
-    auto parentType = compInfo.componentType(parent);
-    auto childType = compInfo.componentType(idx);
-    // if parent is any of the types below detector, then return false as it
-    // is not characteristic of a bank.
-    if (parentType != Beamline::ComponentType::Rectangular &&
-        parentType != Beamline::ComponentType::Structured &&
-        parentType != Beamline::ComponentType::Grid) {
-      // check if component type mathces tube
-      if (childType != Beamline::ComponentType::OutlineComposite) {
-        return true;
-      }
-    }
-  }
-  return false;
+
+  return compInfo.hasDetectors(idx);
 }
 
 /** Finds all ancestors up to the root of a component

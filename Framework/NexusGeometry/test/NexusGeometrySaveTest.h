@@ -351,6 +351,27 @@ used.
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
   }
 
+  void test_correct_number_of_detectors_saved() {
+
+    ScopedFileHandle fileResource("check_num_of_banks_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    int banksInInstrument = 7;
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        banksInInstrument /*number of banks*/, 7 /*pixels (arbitrary)*/);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_PATH);
+    NexusFileReader tester(destinationFile);
+    FullNXPath path = {DEFAULT_ROOT_PATH, "basic_rect" /*instrument name*/};
+
+    int numOfNXDetectors = tester.countNXgroup(path, NX_DETECTOR);
+
+    TS_ASSERT(numOfNXDetectors == banksInInstrument);
+  }
+
   /*
 ====================================================================
 

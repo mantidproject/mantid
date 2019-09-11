@@ -8,6 +8,7 @@
 #ifndef MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
 #define MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
 
+#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
 #include <Eigen/Dense>
@@ -85,6 +86,37 @@ public:
     }
   }
 
+  int countNXgroup(const FullNXPath &pathToGroup, const std::string &nxClass) {
+    int counter = 0;
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
+    for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+      if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+        H5std_string childPath = parentGroup.getObjnameByIdx(i);
+        // Open the sub group
+        auto childGroup = parentGroup.openGroup(childPath);
+        // Iterate through attributes to find NX_class
+        for (uint32_t attribute_index = 0;
+             attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
+             ++attribute_index) {
+          // Test attribute at current index for NX_class
+          H5::Attribute attribute = childGroup.openAttribute(attribute_index);
+          if (attribute.getName() == NX_CLASS) {
+            // Get attribute data type
+            H5::DataType dataType = attribute.getDataType();
+            // Get the NX_class type
+            H5std_string classType;
+            attribute.read(dataType, classType);
+            // If group of correct type, return the childGroup
+            if (classType == nxClass) {
+              counter++;
+            }
+          }
+        }
+      }
+    }
+    return counter;
+  }
+
   // read a multidimensional dataset and returns vector containing the data
   template <typename T>
   std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
@@ -119,7 +151,8 @@ public:
   }
 
   // moves down the index through groups starting at root, and if
-  // child has expected CLASS_TYPE, and is in parent group with expected parent
+  // child has expected CLASS_TYPE, and is in parent group with expected
+  // parent
 
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
                                     const std::string &childNX_CLASS_TYPE) {
