@@ -97,7 +97,7 @@ class LegendTabWidgetPresenter:
     def populate_font_combo_box(self):
         """Adds all of the available fonts to the font combo boxes."""
         font_list = matplotlib.font_manager.findSystemFonts()
-        
+
         self.fonts = set()
         for font_name in font_list:
             # This try-except is for a known matplotlib bug where get_name() causes an error for certain fonts.
@@ -106,6 +106,7 @@ class LegendTabWidgetPresenter:
             except RuntimeError:
                 continue
             self.fonts.add(font)
+
         self.fonts = sorted(self.fonts)
         self.view.entries_font_combo_box.addItems(self.fonts)
         self.view.title_font_combo_box.addItems(self.fonts)
