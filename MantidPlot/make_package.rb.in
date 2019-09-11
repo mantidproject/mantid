@@ -210,11 +210,16 @@ if( "@MAKE_VATES@" == "ON" )
   `install_name_tool -id @rpath/libNonOrthogonalSource.dylib plugins/paraview/qt4/libNonOrthogonalSource.dylib`
 end
 
-# use install_tool_name to add an @rpath for the libraries
+# use install_tool_name to add an @rpath for the python dynamic libraries
 Dir["Contents/MacOS/*.so"].each do |library|
-  dependencies = `otool -L #{library}`
   print library, "\n"
   `install_name_tool -add_rpath @loader_path/../MacOS #{library} > /dev/null 2>&1`
+end
+
+# use install_tool_name to add an @rpath for the ParaView python dynamic libraries
+Dir["Contents/Libraries/*.so"].each do |library|
+  print library, "\n"
+  `install_name_tool -add_rpath @loader_path/../Libraries #{library} > /dev/null 2>&1`
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
