@@ -7,7 +7,6 @@
 #ifndef MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
 #define MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
 
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -94,8 +93,8 @@ public:
 
   // generate incident spectrum data
   std::vector<double> generate_incident_spectrum(
-      const Mantid::HistogramData::HistogramX &lambda, double phi_max = 6324.0, 
-      double phi_epi = 786.0, double alpha = 0.099, double lambda_1 = 0.67143, 
+      const Mantid::HistogramData::HistogramX &lambda, double phi_max = 6324.0,
+      double phi_epi = 786.0, double alpha = 0.099, double lambda_1 = 0.67143,
       double lambda_2 = 0.06075, double lambda_T = 1.58) {
     std::vector<double> amplitude;
     const double dx = x_inc / 2.0;
