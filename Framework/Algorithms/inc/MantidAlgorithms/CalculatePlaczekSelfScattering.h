@@ -21,10 +21,10 @@ class MANTID_ALGORITHMS_DLL CalculatePlaczekSelfScattering
 public:
   CalculatePlaczekSelfScattering() : API::Algorithm() {}
   virtual ~CalculatePlaczekSelfScattering() {}
-  virtual const std::string name() const {
+  virtual const std::string name() const override {
     return "CalculatePlaczekSelfScattering";
   }
-  virtual int version() const { return (1); }
+  virtual int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
     return {"FitIncidentSpectrum"};
   }
@@ -33,12 +33,12 @@ public:
     return "Calculates the Placzek self scattering correction of an incident "
            "spectrum";
   };
+  std::map<std::string, std::string>
+  CalculatePlaczekSelfScattering::validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
-  std::map<std::string, std::string>
-  CalculatePlaczekSelfScattering::validateInputs() override;
   const std::map<std::string, std::map<std::string, double>>
   get_sample_species_info(API::MatrixWorkspace_sptr ws);
 };

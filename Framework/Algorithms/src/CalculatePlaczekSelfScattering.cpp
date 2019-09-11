@@ -75,13 +75,13 @@ void CalculatePlaczekSelfScattering::exec() {
   const MantidVec incident_prime = inWS->readY(1);
   double dx = (x_lambda[1] - x_lambda[0]) / 2.0;
   std::vector<double> phi_1;
-  for (int i = 0; i < x_lambda.size() - 1; i++) {
+  for (size_t i = 0; i < x_lambda.size() - 1; i++) {
     phi_1.push_back((x_lambda[i] + dx) * incident_prime[i] / incident[i]);
   }
   // set detector law term (eps_1)
   const double lambda_D = 1.44;
   std::vector<double> eps_1;
-  for (int i = 0; i < x_lambda.size(); i++) {
+  for (size_t i = 0; i < x_lambda.size(); i++) {
     double x_term = -x_lambda[i] / lambda_D;
     eps_1.push_back(x_term * exp(x_term) / (1.0 - exp(x_term)));
   }
@@ -99,7 +99,7 @@ void CalculatePlaczekSelfScattering::exec() {
   MantidVec placzek_correction;
   const Geometry::DetectorInfo det_info = inWS->detectorInfo();
   int NSpec = 0;
-  for (int det_index = 0; det_index < det_info.size(); det_index++) {
+  for (size_t det_index = 0; det_index < det_info.size(); det_index++) {
     if (det_info.isMonitor(det_index) != true) {
       NSpec += 1;
       const double path_length = det_info.l1() + det_info.l2(det_index);
@@ -107,7 +107,7 @@ void CalculatePlaczekSelfScattering::exec() {
       const double angle_conv = M_PI / 180.0;
       const double sin_theta_by_2 =
           sin(det_info.twoTheta(det_index) * angle_conv / 2.0);
-      for (int x_index = 0; x_index < x_lambda.size() - 1; x_index++) {
+      for (size_t x_index = 0; x_index < x_lambda.size() - 1; x_index++) {
         const double term1 = (f + 1.0) * phi_1[x_index];
         const double term2 = f * eps_1[x_index];
         const double term3 = f - 3;
