@@ -138,10 +138,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
-        self.declareProperty(name='IgnoreSingleDetectorsFromAlignment',
-                             defaultValue=False, doc='Whether to ignore the single detectors from the '
-                                                     'cropping logic after unmirroring is done.')
-
     def validateInputs(self):
 
         issues = dict()
@@ -430,8 +426,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         alignment = '__alignment_'+self._red_ws
 
-        exclude_sds = 2 if self.getProperty('IgnoreSingleDetectorsFromAlignment').value else 0
-
         # make sure the sample and alignment runs have the same mirror sense for unmirror 5,7
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             if wings != mtd[alignment].getNumberOfEntries():
@@ -444,19 +438,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name,
-                           OutputWorkspace = outname,
-                           MaskBins = True,
-                           BinRangeTable = '',
-                           IgnoreLastSpectraFromMasking=exclude_sds)
+                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
             elif self._unmirror_option == 7:
-                MatchPeaks(InputWorkspace = name,
-                           InputWorkspace2 = mtd[alignment].getItem(0).getName(),
-                           MatchInput2ToCenter = True,
-                           OutputWorkspace = outname,
-                           MaskBins = True,
-                           BinRangeTable = '',
-                           IgnoreLastSpectraFromMasking=exclude_sds)
+                MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
+                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
 
         elif wings == 2:  # two wing
 
@@ -489,37 +474,25 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 CloneWorkspace(InputWorkspace=right, OutputWorkspace=outname)
             elif self._unmirror_option == 4:
                 bin_range_table = '__um4_'+right
-                MatchPeaks(InputWorkspace=right,
-                           InputWorkspace2=left,
-                           OutputWorkspace=right,
-                           MaskBins = True,
-                           BinRangeTable = bin_range_table,
-                           IgnoreLastSpectraFromMasking=exclude_sds)
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=left, OutputWorkspace=right,
+                           MaskBins = True, BinRangeTable = bin_range_table)
                 mask_min = mtd[bin_range_table].row(0)['MinBin']
                 mask_max = mtd[bin_range_table].row(0)['MaxBin']
                 DeleteWorkspace(bin_range_table)
             elif self._unmirror_option == 5:
                 bin_range_table = '__um5_' + right
-                MatchPeaks(InputWorkspace=right,
-                           InputWorkspace2=mtd[alignment].getItem(0).getName(),
-                           InputWorkspace3=mtd[alignment].getItem(1).getName(),
-                           OutputWorkspace=right,
-                           MaskBins = True,
-                           BinRangeTable = bin_range_table,
-                           IgnoreLastSpectraFromMasking=exclude_sds)
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           InputWorkspace3=mtd[alignment].getItem(1).getName(), OutputWorkspace=right,
+                           MaskBins = True, BinRangeTable = bin_range_table)
                 mask_min = mtd[bin_range_table].row(0)['MinBin']
                 mask_max = mtd[bin_range_table].row(0)['MaxBin']
                 DeleteWorkspace(bin_range_table)
             elif self._unmirror_option == 6:
                 bin_range_table_left = '__um6_' + left
                 bin_range_table_right = '__um6_' + right
-                MatchPeaks(InputWorkspace=left,
-                           OutputWorkspace=left,
-                           MaskBins = True,
+                MatchPeaks(InputWorkspace=left, OutputWorkspace=left, MaskBins = True,
                            BinRangeTable = bin_range_table_left)
-                MatchPeaks(InputWorkspace=right,
-                           OutputWorkspace=right,
-                           MaskBins = True,
+                MatchPeaks(InputWorkspace=right, OutputWorkspace=right, MaskBins = True,
                            BinRangeTable=bin_range_table_right)
                 mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'],mtd[bin_range_table_right].row(0)['MinBin'])
                 mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'],mtd[bin_range_table_right].row(0)['MaxBin'])
@@ -528,20 +501,12 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             elif self._unmirror_option == 7:
                 bin_range_table_left = '__um7_' + left
                 bin_range_table_right = '__um7_' + right
-                MatchPeaks(InputWorkspace=left,
-                           InputWorkspace2=mtd[alignment].getItem(0).getName(),
-                           OutputWorkspace=left,
-                           MatchInput2ToCenter=True,
-                           MaskBins = True,
-                           BinRangeTable=bin_range_table_left,
-                           IgnoreLastSpectraFromMasking=exclude_sds)
-                MatchPeaks(InputWorkspace=right,
-                           InputWorkspace2=mtd[alignment].getItem(1).getName(),
-                           OutputWorkspace=right,
-                           MatchInput2ToCenter=True,
-                           MaskBins = True,
-                           BinRangeTable=bin_range_table_right,
-                           IgnoreLastSpectraFromMasking=exclude_sds)
+                MatchPeaks(InputWorkspace=left, InputWorkspace2=mtd[alignment].getItem(0).getName(),
+                           OutputWorkspace=left,MatchInput2ToCenter=True,
+                           MaskBins = True, BinRangeTable=bin_range_table_left)
+                MatchPeaks(InputWorkspace=right, InputWorkspace2=mtd[alignment].getItem(1).getName(),
+                           OutputWorkspace=right, MatchInput2ToCenter=True,
+                           MaskBins = True, BinRangeTable=bin_range_table_right)
                 mask_min = max(mtd[bin_range_table_left].row(0)['MinBin'], mtd[bin_range_table_right].row(0)['MinBin'])
                 mask_max = min(mtd[bin_range_table_left].row(0)['MaxBin'], mtd[bin_range_table_right].row(0)['MaxBin'])
                 DeleteWorkspace(bin_range_table_left)
