@@ -7,23 +7,22 @@
 #ifndef MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
 #define MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 
+#include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <iostream>
+#include <cxxtest/TestSuite.h>
 
-using Mantid::Algorithms::CalculatePlaczekSelfScattering;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
+using Mantid::API::Algorithm_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::CalculatePlaczekSelfScattering;
 using Mantid::MantidVec;
 
 class CalculatePlaczekSelfScatteringTest : public CxxTest::TestSuite {
@@ -37,14 +36,12 @@ public:
     delete suite;
   }
 
-  void setUp() override {
-    Mantid::API::FrameworkManager::Instance();
-
-  }
+  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
   // generate spectrum with detector info
   MatrixWorkspace_sptr generate_incident_spectrum_with_detector_data() {
-    Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
+    Algorithm_sptr alg = 
+		AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", "incident_spectrum_ws");
     alg->setProperty("XMin", x_start);
@@ -55,8 +52,7 @@ public:
 	// get the output workspace from ADS
     MatrixWorkspace_sptr out_ws =
         Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(
-            "incident_spectrum_ws");
+            .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
     Mantid::HistogramData::HistogramX x = out_ws->x(0);
     std::vector<double> y = generate_incident_spectrum(x);
     out_ws->setCounts(0, y);
@@ -97,10 +93,10 @@ public:
   }
 
   // generate incident spectrum data
-  std::vector<double> generate_incident_spectrum(const Mantid::HistogramData::HistogramX &lambda, 
-	  double phi_max = 6324.0, double phi_epi = 786.0, double alpha = 0.099, 
-	  double lambda_1 = 0.67143, double lambda_2 = 0.06075, 
-	  double lambda_T = 1.58) {
+  std::vector<double> generate_incident_spectrum(
+	  const Mantid::HistogramData::HistogramX &lambda, double phi_max = 6324.0, 
+	  double phi_epi = 786.0, double alpha = 0.099, double lambda_1 = 0.67143, 
+	  double lambda_2 = 0.06075, double lambda_T = 1.58) {
     std::vector<double> amplitude;
     const double dx = x_inc / 2.0;
     for (double x : lambda) {
@@ -182,8 +178,7 @@ public:
   }
 
   void test_CalculatePlaczekSelfScattering_does_not_run_with_no_sample() {
-    MatrixWorkspace_sptr ws =
-        generate_incident_spectrum_with_detector_data();
+    MatrixWorkspace_sptr ws = generate_incident_spectrum_with_detector_data();
 
     auto alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", "incident_spectrum_ws");
@@ -195,8 +190,7 @@ private:
   const double x_start = 0.2;
   const double x_end = 4.0;
   const double x_inc = 0.01;
-  static boost::shared_ptr<CalculatePlaczekSelfScattering>
-  makeAlgorithm() {
+  static boost::shared_ptr<CalculatePlaczekSelfScattering> makeAlgorithm() {
     auto a = boost::make_shared<CalculatePlaczekSelfScattering>();
     a->initialize();
     a->setChild(true);
