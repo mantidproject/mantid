@@ -8,7 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode, MatrixWorkspace
 from mantid.simpleapi import *
-from mantid.kernel import Direction
+from mantid.kernel import Direction, IntBoundedValidator
 import numpy as np
 
 
@@ -53,6 +53,8 @@ class MatchPeaks(PythonAlgorithm):
     # Bool flags
     _masking = False
     _match_option = False
+
+    _ignore_last = 0
 
     def category(self):
         return "Transforms"
@@ -99,12 +101,17 @@ class MatchPeaks(PythonAlgorithm):
                                  'Bins outside this range are overflown out of range due to circular shift'
                                  'and can be masked.')
 
+        self.declareProperty('IgnoreLastSpectraFromMasking',
+                             defaultValue=0, validator=IntBoundedValidator(lower=0),
+                             doc='Ignores last N spectra from masking logic after circular shift.')
+
     def setUp(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._input_2_ws = self.getPropertyValue('InputWorkspace2')
         self._input_3_ws = self.getPropertyValue('InputWorkspace3')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._output_bin_range = self.getPropertyValue('BinRangeTable')
+        self._ignore_last = self.getProperty('IgnoreLastSpectraFromMasking').value
 
         self._masking = self.getProperty('MaskBins').value
         self._match_option = self.getProperty('MatchInput2ToCenter').value
@@ -206,11 +213,17 @@ class MatchPeaks(PythonAlgorithm):
 
         # This is a left shift, bins at the end of the workspace may be masked
         if np.min(-to_shift) < 0:
-            max_bin = size - 1 + np.min(-to_shift)
+            if self._ignore_last == 0:
+                max_bin = size - 1 + np.min(-to_shift)
+            else:
+                max_bin = size - 1 + np.min(-to_shift[:-self._ignore_last])
 
         # This is a right shift, bins at the beginning of the workspace may be masked
         if np.max(-to_shift) > 0:
-            min_bin = np.max(-to_shift)
+            if self._ignore_last == 0:
+                min_bin = np.max(-to_shift)
+            else:
+                min_bin = np.max(-to_shift[:-self._ignore_last])
 
         if self._masking:
             mask_ws(output_ws, min_bin, max_bin)
