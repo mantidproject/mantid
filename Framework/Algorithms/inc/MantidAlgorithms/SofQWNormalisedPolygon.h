@@ -50,7 +50,8 @@ public:
     return "Calculate the intensity as a function of momentum transfer and "
            "energy.";
   }
-
+  /// validate the inputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's version for identification
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
@@ -62,8 +63,6 @@ public:
 private:
   /// Initialize the algorithm
   void init() override;
-	///validate the inputs
-  std::map<std::string, std::string> validateInputs() override;
   /// Run the algorithm
   void exec() override;
   /// Init the theta index

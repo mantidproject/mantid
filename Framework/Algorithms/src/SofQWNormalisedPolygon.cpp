@@ -312,7 +312,7 @@ void SofQWNormalisedPolygon::init() {
 }
 
 /** Checks that the input workspace and table have compatible dimensions
- * @return a
+ * @return a map with the corresponding error messages
  * describing the problem with the property
  */
 std::map<std::string, std::string> SofQWNormalisedPolygon::validateInputs() {
@@ -324,42 +324,38 @@ std::map<std::string, std::string> SofQWNormalisedPolygon::validateInputs() {
                                "InputWorkspace";
 
   }
-
-  API::ITableWorkspace_const_sptr tableWS =
+  TableWorkspace_sptr tableWS =
       getProperty("DetectorTwoThetaRanges");
-	//The table should have three columns
-  if (tableWS->columnCount() != 3) {
-    result["DetectorTwoThetaRanges"] =
-        "DetectorTwoThetaRanges requires 3 columns";
-
+  if (tableWS) {
+		// The table should have three columns
+		if (tableWS->columnCount() != 3) {
+				result["DetectorTwoThetaRanges"] =
+						"DetectorTwoThetaRanges requires 3 columns";
+				return result;
+		}
+		// The first column should be of type int
+		if (!tableWS->getColumn(0)->isType<int>()) {
+				result["DetectorTwoThetaRanges"] =
+						"The first column of DetectorTwoThetaRanges should be of type int";
+		}
+		// The second column should be of type double
+		if (!tableWS->getColumn(1)->isType<double>()) {
+				result["DetectorTwoThetaRanges"] =
+						"The second column of DetectorTwoThetaRanges should be of type "
+						"double";
+		}
+		// The third column should be of type double.
+		if (!tableWS->getColumn(2)->isType<double>()) {
+				result["DetectorTwoThetaRanges"] =
+						"The third column of DetectorTwoThetaRanges should be of type double";
+		}
+		// Table and workspace should have the same number of detectors.
+		if (tableWS->rowCount() != inputWS->getNumberHistograms()) {
+				result["DetectorTwoThetaRanges"] =
+						"The table and workspace do not have the same number of detectors";
+		}
   }
-	//The first column should be of type int
-  if (!tableWS->getColumn(0)->isType<int>()) {
-    result["DetectorTwoThetaRanges"] =
-        "The first column of DetectorTwoThetaRanges should be of type int";
-
-  }
-	//The second column should be of type double 
-  if (!tableWS->getColumn(1)->isType<double>()) {
-    result["DetectorTwoThetaRanges"] =
-        "The second column of DetectorTwoThetaRanges should be of type double";
-
-  }
-	//The third column should be of type double.
-  if (!tableWS->getColumn(2)->isType<double>()) {
-    result["DetectorTwoThetaRanges"] =
-        "The third column of DetectorTwoThetaRanges should be of type double";
-
-  }
-	//Table and workspace should have the same number of detectors.
-  if (tableWS->rowCount() != inputWS->getNumberHistograms()) {
-    result["DetectorTwoThetaRanges"] =
-        "The table and workspace do not have the same number of detectors";
-
-	}
-
-    return result;
-
+return result;
 }
 
 /**

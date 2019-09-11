@@ -316,8 +316,8 @@ public:
     input->getAxis(0)->setUnit("DeltaE");
     input->mutableRun().addProperty("Ei", 23.);
     auto twoThetaRanges = boost::make_shared<TableWorkspace>();
-    twoThetaRanges->addColumn("double", "Max two theta");
     twoThetaRanges->addColumn("int", "Detector ID");
+    twoThetaRanges->addColumn("double", "Max two theta");
     twoThetaRanges->addColumn("double", "Min two theta");
     twoThetaRanges->setRowCount(nhist);
     auto column = twoThetaRanges->getColumn("Detector ID");
@@ -358,6 +358,101 @@ public:
     }
     TS_ASSERT(atLeastOneBinAsserted)
   }
+ 
+	/** Create an instance of the SofQWNormalisedPolygon algorithm object and setting it's properties
+	* @param inWS input matrix workspace pointer
+	* @param twoThetaRanges input table workspace
+	* @return the algorithm object
+	*/
+	IAlgorithm_sptr setUpAlg(
+      Mantid::API::MatrixWorkspace_sptr inWS,
+      boost::shared_ptr<Mantid::DataObjects::TableWorkspace> twoThetaRanges) {
+    const std::vector<double> qBinParams{0.023};
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SofQWNormalisedPolygon");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("EMode", "Indirect");
+    alg->setProperty("QAxisBinning", qBinParams);
+    alg->setProperty("DetectorTwoThetaRanges", twoThetaRanges);
+    return alg;
+  }
+
+	/** Create a table workspace
+	* @param types A vector of strings of the data types of the columns
+	* @param rowCount The number of detectors required
+	* @return A pointer to the table workspace
+	*/
+	boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
+	  createTableWorkspace(std::vector<std::string> types, int rowCount) {
+    auto twoThetaRanges = boost::make_shared<TableWorkspace>();
+          std::vector<std::string> names = {"Detector ID", "Max two theta", "Min two theta"};
+      for (auto i = 0; i < types.size(); i++) {
+            if (i >= names.size()) {
+						  twoThetaRanges->addColumn(types[i], "N/A");
+            }
+						else {
+              twoThetaRanges->addColumn(types[i], names[i]);
+						}
+      }
+      twoThetaRanges->setRowCount(rowCount);
+      return twoThetaRanges;
+	}
+
+	void testTableHasThreeColumns() {
+    std::vector<std::string> types = {"int", "double"};
+    auto inWS = SofQWTest::loadTestFile();
+    auto twoThetaRanges = createTableWorkspace(
+        types, static_cast<int>(inWS->getNumberHistograms()));
+    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
+    auto results = SofQW->validateInputs();
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+				"DetectorTwoThetaRanges requires 3 columns");
+	}
+
+	void testColumnOneType() {
+    std::vector<std::string> types = {"double", "double", "double"};
+    auto inWS = SofQWTest::loadTestFile();
+    auto twoThetaRanges = 
+				createTableWorkspace(
+        types, static_cast<int>(inWS->getNumberHistograms()));
+    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
+    auto results = SofQW->validateInputs();
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"], 
+				"The first column of DetectorTwoThetaRanges should be of type int");
+	}
+
+	void testColumnTwoType() {
+    std::vector<std::string> types = {"int", "int", "double"};
+    auto inWS = SofQWTest::loadTestFile();
+    auto twoThetaRanges = createTableWorkspace(
+        types, static_cast<int>(inWS->getNumberHistograms()));
+    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
+    auto results = SofQW->validateInputs();
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+        "The second column of DetectorTwoThetaRanges should be of type double");
+	}
+
+	void testColumnThreeType() {
+    std::vector<std::string> types = {"int", "double", "int"};
+    auto inWS = SofQWTest::loadTestFile();
+    auto twoThetaRanges =
+        createTableWorkspace(types, static_cast<int>(inWS->getNumberHistograms()));
+    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
+    auto results = SofQW->validateInputs();
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+        "The third column of DetectorTwoThetaRanges should be of type double");
+	}
+
+	void testTableAndWorkspaceHaveSameNumDetectors() {
+    std::vector<std::string> types = {"int", "double", "int"};
+    auto inWS = SofQWTest::loadTestFile();
+    auto twoThetaRanges =
+        createTableWorkspace(types, static_cast<int>(inWS->getNumberHistograms()+1));
+    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
+    auto results = SofQW->validateInputs();
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+        "The table and workspace do not have the same number of detectors");
+	}
 };
 
 class SofQWNormalisedPolygonTestPerformance : public CxxTest::TestSuite {
