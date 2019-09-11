@@ -54,13 +54,18 @@ class MessageDisplay(MessageDisplay_cpp):
     def generateContextMenu(self):
         qmenu = super(MessageDisplay, self).generateContextMenu()
         filter_menu = qmenu.addMenu("&Filter by")
-        for action_str in ['script', 'framework']:
-            action = QAction("{} Output".format(action_str.title()), qmenu)
-            slot = getattr(self, "toggle_filter_{}_output".format(action_str))
-            action.triggered.connect(slot)
-            action.setCheckable(True)
-            action.setChecked(getattr(self, 'show{}Output'.format(action_str.title()))())
-            filter_menu.addAction(action)
+
+        framework_action = QAction('Framework Output', filter_menu)
+        framework_action.triggered.connect(self.toggle_filter_framework_output)
+        framework_action.setCheckable(True)
+        framework_action.setChecked(self.showFrameworkOutput())
+        filter_menu.addAction(framework_action)
+
+        all_script_action = QAction('All Script Output', filter_menu)
+        all_script_action.triggered.connect(self.toggle_filter_all_script_output)
+        all_script_action.setCheckable(True)
+        all_script_action.setChecked(self.showAllScriptOutput())
+        filter_menu.addAction(all_script_action)
         return qmenu
 
     def showContextMenu(self, q_position):
@@ -86,6 +91,6 @@ class MessageDisplay(MessageDisplay_cpp):
         self.setShowFrameworkOutput(not self.showFrameworkOutput())
         self.filterMessages()
 
-    def toggle_filter_script_output(self):
-        self.setShowScriptOutput(not self.showScriptOutput())
+    def toggle_filter_all_script_output(self):
+        self.setShowAllScriptOutput(not self.showAllScriptOutput())
         self.filterMessages()

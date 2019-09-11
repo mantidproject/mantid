@@ -203,7 +203,7 @@ void MessageDisplay::appendDebug(const QString &text) {
 void MessageDisplay::append(const Message &msg) {
   m_messageHistory->append(msg);
   if (m_showFrameworkOutput && msg.frameworkMsg() ||
-      m_showScriptOutput && !msg.frameworkMsg()) {
+      m_showAllScriptOutput && !msg.frameworkMsg()) {
     QTextCursor cursor = moveCursorToEnd();
     cursor.insertText(msg.text(), format(msg.priority()));
     moveCursorToEnd();
@@ -225,7 +225,7 @@ void MessageDisplay::appendList(const QList<Message> &messages) {
     if (showFrameworkOutput() && msg.frameworkMsg())
       m_textDisplay->textCursor().insertText(msg.text(),
                                              format(msg.priority()));
-    else if (showScriptOutput() && !msg.frameworkMsg())
+    else if (showAllScriptOutput() && !msg.frameworkMsg())
       m_textDisplay->textCursor().insertText(msg.text(),
                                              format(msg.priority()));
   }

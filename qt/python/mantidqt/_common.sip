@@ -86,8 +86,8 @@ public:
 
   bool showFrameworkOutput();
   void setShowFrameworkOutput(const bool &show);
-  bool showScriptOutput();
-  void setShowScriptOutput(const bool &show);
+  bool showAllScriptOutput();
+  void setShowAllScriptOutput(const bool &show);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);

@@ -22,7 +22,7 @@ class MessageDisplayTest(unittest.TestCase):
     def setUp(self):
         self.display = MessageDisplay()
         self.display.setShowFrameworkOutput(True)
-        self.display.setShowScriptOutput(True)
+        self.display.setShowAllScriptOutput(True)
 
     def get_message_window_contents(self):
         return self.display.getTextEdit().toPlainText()
@@ -34,11 +34,11 @@ class MessageDisplayTest(unittest.TestCase):
 
     def test_that_text_appended_through_appendPython_toggles_visibility_when_toggling_filter_script(self):
         msg = 'Some script output'
-        self.display.appendPython(msg, Priority.Notice)
+        self.display.appendPython(msg, Priority.Notice, '')
         self.assertIn(msg, self.get_message_window_contents())
-        self.display.toggle_filter_script_output()
+        self.display.toggle_filter_all_script_output()
         self.assertNotIn(msg, self.get_message_window_contents())
-        self.display.toggle_filter_script_output()
+        self.display.toggle_filter_all_script_output()
         self.assertIn(msg, self.get_message_window_contents())
 
     def test_that_text_appended_through_appendNotice_toggles_visibility_when_toggling_filter_framework(self):
@@ -51,13 +51,13 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertIn(msg, self.get_message_window_contents())
 
     def test_new_script_output_is_not_shown_if_showScriptOutput_is_False(self):
-        self.display.setShowScriptOutput(False)
+        self.display.setShowAllScriptOutput(False)
         script_msg = 'A new script message'
         self.display.append_script_notice(script_msg)
         self.assertNotIn(script_msg, self.get_message_window_contents())
 
     def test_new_framework_output_is_shown_if_showScriptOutput_is_False(self):
-        self.display.setShowScriptOutput(False)
+        self.display.setShowAllScriptOutput(False)
         framework_msg = 'A new framework message'
         self.display.appendNotice(framework_msg)
         self.assertIn(framework_msg, self.get_message_window_contents())

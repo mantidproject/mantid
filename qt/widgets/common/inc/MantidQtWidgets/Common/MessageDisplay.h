@@ -76,12 +76,14 @@ public:
   /// Filter messages by message type (framework or from a script)
   void filterMessages();
   /// Getters and setters for showing/hiding message types
-  bool showFrameworkOutput() const { return m_showFrameworkOutput; }
+  inline bool showFrameworkOutput() const { return m_showFrameworkOutput; }
   void setShowFrameworkOutput(const bool &show) {
     m_showFrameworkOutput = show;
   }
-  bool showScriptOutput() const { return m_showScriptOutput; }
-  void setShowScriptOutput(const bool &show) { m_showScriptOutput = show; }
+  inline bool showAllScriptOutput() const { return m_showAllScriptOutput; }
+  void setShowAllScriptOutput(const bool &show) {
+    m_showAllScriptOutput = show;
+  }
 
 signals:
   /// Indicate that a message of error or higher has been received.
@@ -159,7 +161,7 @@ private:
   /// Keep track of the message history
   QList<Message> *m_messageHistory;
   /// Bools to dictate whether to print certain types of messages
-  bool m_showFrameworkOutput{true}, m_showScriptOutput{true};
+  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true};
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
