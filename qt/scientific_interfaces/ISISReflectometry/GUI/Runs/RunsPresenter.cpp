@@ -451,7 +451,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("UpdateEvery", "20");
+  alg->setProperty("UpdateEvery", m_view->getLiveDataUpdateInterval());
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
                    liveDataReductionOptions(inputWorkspace, instrument));
