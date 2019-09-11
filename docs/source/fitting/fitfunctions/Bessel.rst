@@ -13,11 +13,8 @@ Fitting function for use by Muon scientists defined by:
 
 .. math:: 
 
-	A(t)&=A_0J_0(2\pi\nu t+\phi)
-
-
-
-
+	A(t)&=A_0J_0(2\pi\nu t+\phi),\\
+	\text{where} \qquad J_0(x)&=\sum_{l=0}^{\infty}\frac{(-1)^l}{2^{2l}(l!)^2}x^{2l}
 .. attributes::
 
 .. properties::
