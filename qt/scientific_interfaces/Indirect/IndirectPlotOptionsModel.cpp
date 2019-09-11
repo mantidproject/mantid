@@ -67,8 +67,6 @@ std::string rearrangeIndicesRangeStrings(std::string const &str) {
 std::string formatIndicesString(std::string str) {
   // Remove spaces
   removeFromIterable(std::remove_if(str.begin(), str.end(), isspace), str);
-  // // Remove zero length ranges
-  // modifyZeroLengthRanges(std::string &str);
   // Rearrange range strings
   auto indices = parseRange(rearrangeIndicesRangeStrings(str));
   std::sort(indices.begin(), indices.end());
