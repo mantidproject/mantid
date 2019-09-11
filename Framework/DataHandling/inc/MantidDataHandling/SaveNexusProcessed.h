@@ -63,16 +63,18 @@ public:
       const std::vector<int> &wsIndices,
       const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
+  virtual bool saveLegacyInstrument() { return true; }
+
 protected:
   /// Override process groups
   bool processGroups() override;
 
-private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
 
+private:
   void getWSIndexList(std::vector<int> &indices,
                       Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
 
@@ -87,7 +89,6 @@ private:
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int perioidNum) override;
-  /// execute the algorithm.
   void doExec(Mantid::API::Workspace_sptr inputWorkspace,
               boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,

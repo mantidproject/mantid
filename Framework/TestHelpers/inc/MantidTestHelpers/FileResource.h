@@ -17,12 +17,14 @@
 #define MANTID_NEXUSGEOMETRY_FILERESOURCE_H_
 
 #include <boost/filesystem.hpp>
+#include <iostream>
 #include <string>
 
 class ScopedFileHandle {
 
 public:
-  ScopedFileHandle(const std::string &fileName) {
+  ScopedFileHandle(const std::string &fileName, bool debugMode = false)
+      : m_debugMode(debugMode) {
 
     const auto temp_dir = boost::filesystem::temp_directory_path();
     auto temp_full_path = temp_dir;
@@ -41,17 +43,23 @@ public:
     }
   }
 
+  void setDebugMode(bool mode) { m_debugMode = mode; }
   std::string fullPath() const { return m_full_path.generic_string(); }
 
   ~ScopedFileHandle() {
 
     // file is removed at end of file handle's lifetime
     if (boost::filesystem::is_regular_file(m_full_path)) {
-      boost::filesystem::remove(m_full_path);
+      if (!m_debugMode)
+        boost::filesystem::remove(m_full_path);
+      else
+        std::cout << "Debug file at: " << m_full_path << " not removed. "
+                  << std::endl;
     }
   }
 
 private:
+  bool m_debugMode;
   boost::filesystem::path m_full_path; // full path to file
 
   // prevent heap allocation for ScopedFileHandle
