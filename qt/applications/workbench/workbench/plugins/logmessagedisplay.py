@@ -46,6 +46,9 @@ class LogMessageDisplay(PluginWidget):
     def get_plugin_title(self):
         return "Messages"
 
+    def script_executing(self, script_path):
+        self.display.script_executing(script_path)
+
     def readSettings(self, settings):
         self.display.readSettings(toQSettings(settings))
 

@@ -13,7 +13,7 @@ from __future__ import (absolute_import, unicode_literals)
 import os.path as osp
 
 # 3rd party imports
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtCore import Qt, Slot, Signal
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
@@ -35,6 +35,8 @@ def _tab_title_and_toolip(filename):
 
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
+
+    sig_code_exec_start = Signal(str)
 
     def __init__(self, font=None, default_content=None, parent=None):
         """
@@ -176,6 +178,7 @@ class MultiPythonFileInterpreter(QWidget):
         Execute content of the current file. If a selection is active
         then only this portion of code is executed, this is completed asynchronously
         """
+        self.sig_code_exec_start.emit(self.current_editor().filename)
         return self.current_editor().execute_async()
 
     def execute_async(self):
@@ -184,13 +187,17 @@ class MultiPythonFileInterpreter(QWidget):
         Selection is ignored.
         This is completed asynchronously.
         """
+        self.sig_code_exec_start.emit(self.current_editor().filename)
         return self.current_editor().execute_async(ignore_selection=True)
 
     @Slot()
     def execute_current_async_blocking(self):
-        """Execute content of the current file. If a selection is active
-            then only this portion of code is executed, completed asynchronously
-            which blocks calling thread. """
+        """
+        Execute content of the current file. If a selection is active
+        then only this portion of code is executed, completed asynchronously
+        which blocks calling thread.
+        """
+        self.sig_code_exec_start.emit(self.current_editor().filename)
         self.current_editor().execute_async_blocking()
 
     def mark_current_tab_modified(self, modified):
