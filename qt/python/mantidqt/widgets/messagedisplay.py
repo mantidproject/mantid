@@ -9,7 +9,9 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-from qtpy.QtWidgets import QAction
+import os
+
+from qtpy.QtWidgets import QAction, QActionGroup
 from qtpy.QtGui import QFont
 
 from mantidqt.utils.qt import import_qt
@@ -39,7 +41,8 @@ class MessageDisplay(MessageDisplay_cpp):
         self.getTextEdit().customContextMenuRequested.disconnect()
         self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
 
-        self.script_name = None
+        self.active_script = ""
+        self.executed_scripts = set()
 
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
@@ -66,6 +69,25 @@ class MessageDisplay(MessageDisplay_cpp):
         all_script_action.setCheckable(True)
         all_script_action.setChecked(self.showAllScriptOutput())
         filter_menu.addAction(all_script_action)
+
+        # We use a QActionGroup here because of a bug where, if we hooked the
+        # actions in the loop directly to `toggle_filter_by_script`, every
+        # action's slot would contain the same path (the last one in the loop).
+        # Using a QActionGroup, the script's path can be stored on the QAction
+        # and the slot called with the path stored on the acton.
+        action_group = QActionGroup(filter_menu)
+        action_group.setExclusive(False)
+        for script_path in sorted(self.executed_scripts):
+            script_name = os.path.basename(script_path)
+            action = QAction(script_name, filter_menu)
+            action.setData(script_path)
+            action.setCheckable(True)
+            if self.showAllScriptOutput() or self.inScriptsToPrint(script_path):
+                action.setChecked(True)
+            action_group.addAction(action)
+            filter_menu.addAction(action)
+        action_group.triggered.connect(
+            lambda qaction: self.toggle_filter_by_script(qaction.data()))
         return qmenu
 
     def showContextMenu(self, q_position):
@@ -77,7 +99,7 @@ class MessageDisplay(MessageDisplay_cpp):
         output from a Python script with "Error" priority. This function
         is hooked into stderr.
         """
-        self.appendPython(txt, Priority.Error, self.script_name)
+        self.appendPython(txt, Priority.Error, self.active_script)
 
     def append_script_notice(self, txt):
         """
@@ -85,7 +107,7 @@ class MessageDisplay(MessageDisplay_cpp):
         output from a Python script with "Notice" priority. This
         function is hooked into stdout.
         """
-        self.appendPython(txt, Priority.Notice, self.script_name)
+        self.appendPython(txt, Priority.Notice, self.active_script)
 
     def toggle_filter_framework_output(self):
         self.setShowFrameworkOutput(not self.showFrameworkOutput())
@@ -94,3 +116,10 @@ class MessageDisplay(MessageDisplay_cpp):
     def toggle_filter_all_script_output(self):
         self.setShowAllScriptOutput(not self.showAllScriptOutput())
         self.filterMessages()
+
+    def toggle_filter_by_script(self, script_path):
+        print(script_path)
+
+    def script_executing(self, script_path):
+        self.active_script = script_path
+        self.executed_scripts.add(script_path)

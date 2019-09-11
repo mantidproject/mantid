@@ -220,7 +220,7 @@ class MainWindow(QMainWindow):
         self.editor.register_plugin()
         self.widgets.append(self.editor)
         self.editor.editors.sig_code_exec_start.connect(
-            lambda file_name: self.messagedisplay.code_executing(file_name))
+            lambda file_name: self.messagedisplay.script_executing(file_name))
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole
