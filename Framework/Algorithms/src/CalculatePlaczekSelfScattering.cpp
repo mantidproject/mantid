@@ -40,8 +40,8 @@ CalculatePlaczekSelfScattering::validateInputs() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const Geometry::DetectorInfo det_info = inWS->detectorInfo();
   if (det_info.size() == 0) {
-    issues["InputWorkspace"] = 
-		"Input workspace does not have detector information";
+    issues["InputWorkspace"] =
+        "Input workspace does not have detector information";
   }
   Kernel::Material::ChemicalFormula formula =
       inWS->sample().getMaterial().chemicalFormula();
@@ -86,13 +86,13 @@ void CalculatePlaczekSelfScattering::exec() {
     eps_1.push_back(x_term * exp(x_term) / (1.0 - exp(x_term)));
   }
   /* Placzek
-     Original Placzek inelastic correction Ref (for constant wavelength, reactor 
-     source): Placzek, Phys. Rev v86, (1952), pp. 377-388 First Placzek 
+     Original Placzek inelastic correction Ref (for constant wavelength, reactor
+     source): Placzek, Phys. Rev v86, (1952), pp. 377-388 First Placzek
      correction for time-of-flight, pulsed source (also shows reactor eqs.):
      Powles, Mol. Phys., v6 (1973), pp.1325-1350
      Nomenclature and calculation for this program follows Ref:
-     Howe, McGreevy, and Howells, J. Phys.: Condens. Matter v1, (1989), pp. 
-     3433-3451 NOTE: Powles's Equation for inelastic self-scattering is equal to 
+     Howe, McGreevy, and Howells, J. Phys.: Condens. Matter v1, (1989), pp.
+     3433-3451 NOTE: Powles's Equation for inelastic self-scattering is equal to
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
   MantidVec x_lambdas;
