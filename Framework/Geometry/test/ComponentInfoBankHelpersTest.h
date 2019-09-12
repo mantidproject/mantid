@@ -73,7 +73,7 @@ public:
     TS_ASSERT(!isDetectorFixedInBank(componentInfo, componentInfo.root()));
   }
 
-  void test_isSaveableBank_false_for_tubes() {
+  void test_any_non_detector_containing_detectors_considered_saveable() {
     // test instrument with detector tubes.
     auto instr = ComponentCreationHelper::createInstrumentWithPSDTubes(
         2 /*number of tubes*/, 2 /*pixels per tube*/);
@@ -82,7 +82,7 @@ public:
     const size_t tubeIdx = 5; // index of a tube in component info
 
     // assert isSaveableBank returns false
-    TS_ASSERT(!isSaveableBank(compInfo, tubeIdx));
+    TS_ASSERT(isSaveableBank(compInfo, tubeIdx));
   }
 
   void test_isSaveableBank_false_for_detector() {
