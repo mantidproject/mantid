@@ -19,13 +19,13 @@ Improvements
 - The file-naming scheme for ISIS powder is now controlled by a string template
 - The file-naming of output on HRPD as been updated to closely match old script outputs
 - Geometry definition for LLB 5C1
-- :ref:`SNAPReduce <SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
+- :ref:`SNAPReduce <algm-SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
 
 Bug Fixes
 #########
 
 - The values used to mask the prompt pulse on HRPD have been fixed.
-- :ref:`AlignAndFocusPowderFromFiles <AlignAndFocusPowderFromFiles-v1>` will reload the instrument if logs are skipped
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles-v1>` will reload the instrument if logs are skipped
 
 Engineering Diffraction
 -----------------------
