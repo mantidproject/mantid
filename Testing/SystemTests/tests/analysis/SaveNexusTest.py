@@ -60,8 +60,8 @@ sample_not_at_origin = [
 known_error_files = duplicate_bank_names + duplicate_monitor_names + no_source + sample_not_at_origin
 direc = config['instrumentDefinition.directory']
 
+
 class LoadAndSaveLotsOfInstruments(object):
-    
 
     def __getDataFileList__(self):
         # get a list of directories to look in
