@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -298,7 +298,7 @@ double CostFuncFitting::val() const {
     seqDomain->additiveCostFunctionVal(*this);
   } else {
     if (!m_values) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     addVal(m_domain, m_values);
   }

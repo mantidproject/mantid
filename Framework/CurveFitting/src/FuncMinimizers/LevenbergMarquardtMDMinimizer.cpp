@@ -45,7 +45,7 @@ LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer()
 
 /// Initialize minimizer, i.e. pass a function to minimize.
 void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function,
-                                               size_t) {
+                                               size_t /*maxIterations*/) {
   m_costFunction =
       boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(function);
   if (!m_costFunction) {

@@ -18,6 +18,7 @@ Algorithms
 * :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>` will fit a curve to an incident spectrum returning the curve and it's first derivative.
 * Whitespace is now ignored anywhere in the string when setting the Filename parameter in :ref:`Load <algm-Load>`.
 * Added options to :ref:`SaveMD <algm-SaveMD>` to allow selection of what will be saved. For MDHistoWorkspace only.
+* A new Poisson cost function has been added to :ref:`CalculateCostFunction <algm-CalculateCostFunction>`.
 
 Data Objects
 ------------

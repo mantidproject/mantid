@@ -12,7 +12,7 @@ namespace CostFunctions {
 /** CostFuncPoisson : Implements a cost function for fitting applications using
   a Poisson measure
 
-  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.

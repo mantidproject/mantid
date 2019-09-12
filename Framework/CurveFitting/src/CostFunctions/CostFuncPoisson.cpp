@@ -1,3 +1,12 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncPoisson.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionDomain.h"
@@ -85,7 +94,6 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function,
                                          API::FunctionValues_sptr values,
                                          bool evalDeriv,
                                          bool evalHessian) const {
-  UNUSED_ARG(evalDeriv);
   const size_t numParams = nParams();
 
   if (evalDeriv) {
