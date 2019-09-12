@@ -34,7 +34,6 @@ class SettingsAdjustmentModel(ModelCommon):
         # At a later date we could programmatically determine if an instrument is using
         # (or supports) monitor 5 by summing the counts and enabling where != 0
         # for the moment however only Zoom has this capability so just hard code check
-        inst = self.instrument
         return True if self.instrument is SANSInstrument.ZOOM else False
 
     def has_transmission_fit_got_separate_settings_for_sample_and_can(self):

@@ -742,7 +742,6 @@ class SANSMoveZOOM(SANSMove):
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
         # Move the monitors
-        monitor_spectrum = [4, 5]  # Both monitors 4 and 5 can be moved
         self._move_monitor_n(workspace, move_info)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
