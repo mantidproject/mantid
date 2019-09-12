@@ -348,8 +348,7 @@ void AnvredCorrection::retrieveBaseProperties() {
   m_power_th = getProperty("PowerLambda");     // in cm
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
 
-  const double scatterXSection =
-      sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
+  const double scatterXSection = sampleMaterial.totalScatterXSection();
 
   if (scatterXSection != 0.0) {
     double rho = sampleMaterial.numberDensity();

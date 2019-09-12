@@ -107,8 +107,9 @@ void LineIntersectVisit::procTrack()
 {
   // Calculate the distances to the points
   DOut.resize(PtOut.size());
+  using std::placeholders::_1;
   std::transform(PtOut.begin(), PtOut.end(), DOut.begin(),
-                 boost::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
+                 std::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
 }
 
 } // namespace Geometry

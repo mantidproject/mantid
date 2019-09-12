@@ -18,7 +18,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <H5Cpp.h>
-#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::DataHandling::SaveNexusGeometry;

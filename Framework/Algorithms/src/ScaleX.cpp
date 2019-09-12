@@ -143,8 +143,9 @@ void ScaleX::exec() {
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       double factor = getScaleFactor(inputW, i);
       // Do the offsetting
+      using std::placeholders::_1;
       std::transform(inX.begin(), inX.end(), outX.begin(),
-                     std::bind2nd(m_binOp, factor));
+                     std::bind(m_binOp, _1, factor));
       // reverse the vector if multiplicative factor was negative
       if (multiply && factor < 0.0) {
         std::reverse(outX.begin(), outX.end());

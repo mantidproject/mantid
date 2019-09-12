@@ -125,7 +125,6 @@ public:
     setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
-    testWS = setsample.getProperty("InputWorkspace");
 
     // run the actual algorithm
     std::string outputWS("factors");
@@ -183,7 +182,6 @@ public:
     setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
-    testWS = setsample.getProperty("InputWorkspace");
 
     // run the actual algorithm
     std::string outputWS("factors");
@@ -241,7 +239,6 @@ public:
     setsample.setProperty("Material", material);
     setsample.setProperty("Geometry", geometry);
     setsample.execute();
-    testWS = setsample.getProperty("InputWorkspace");
 
     // run the actual algorithm
     std::string outputWS("factors");

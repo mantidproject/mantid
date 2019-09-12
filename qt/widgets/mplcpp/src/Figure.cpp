@@ -122,7 +122,7 @@ Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
       Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
   const auto kwargs = Python::NewRef(
       Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
-  Python::Object attr{pyobj().attr("colorbar")};
+  Python::Object attr(pyobj().attr("colorbar"));
   return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
 }
 

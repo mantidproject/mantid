@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-import mantid
 import io
 import six
 import sys
@@ -349,6 +348,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(sample_details_obj_str.height(), float(height_string))
         self.assertEqual(sample_details_obj_str.center(), [float(p) for p in center_string])
         self.assertEqual(sample_details_obj_str.angle(), float(angle_string))
+
 
 def get_std_out_buffer_obj():
     # Because of the way that strings and bytes

@@ -318,8 +318,9 @@ void BnId::reverse()
   Transform 1 -> -1
 */
 {
+  using std::placeholders::_1;
   transform(Tval.begin(), Tval.end(), Tval.begin(),
-            std::bind2nd(std::multiplies<int>(), -1));
+            std::bind(std::multiplies<int>(), _1, -1));
   setCounters();
 }
 

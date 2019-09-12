@@ -532,8 +532,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
   peak_x.resize(nvalues);
   std::copy(Xs.begin() + im, Xs.begin() + ip + 1, peak_x.begin());
   peak_y.resize(nvalues);
+  using std::placeholders::_1;
   std::transform(Ys.begin() + im, Ys.begin() + ip + 1, peak_y.begin(),
-                 std::bind2nd(std::minus<double>(), bkgd));
+                 std::bind(std::minus<double>(), _1, bkgd));
   peak_e.resize(nvalues);
   std::copy(Es.begin() + im, Es.begin() + ip + 1, peak_e.begin());
 

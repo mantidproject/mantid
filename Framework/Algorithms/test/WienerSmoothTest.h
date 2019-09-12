@@ -570,11 +570,11 @@ private:
       std::vector<double> diff(inY.size());
       std::transform(inY.begin(), inY.end(), outY.begin(), diff.begin(),
                      std::minus<double>());
-
+      using std::placeholders::_1;
       auto countPos = std::count_if(diff.begin(), diff.end(),
-                                    std::bind2nd(std::greater<double>(), 0.0));
+                                    std::bind(std::greater<double>(), _1, 0.0));
       auto countNeg = std::count_if(diff.begin(), diff.end(),
-                                    std::bind2nd(std::less<double>(), 0.0));
+                                    std::bind(std::less<double>(), _1, 0.0));
 
       // the delta here is just a guess
       TS_ASSERT_DELTA(double(countPos) / double(countNeg), 1.0, 1e-1);
@@ -646,9 +646,9 @@ private:
       X.assign(x, x + nx);
       Y.assign(y, y + ny);
       E.assign(e, e + ny);
-
+      using std::placeholders::_1;
       std::transform(Y.begin(), Y.end(), Y.begin(),
-                     std::bind2nd(std::multiplies<double>(), double(i + 1)));
+                     std::bind(std::multiplies<double>(), _1, i + 1));
     }
 
     return dataWS;

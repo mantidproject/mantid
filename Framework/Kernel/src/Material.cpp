@@ -151,13 +151,9 @@ double Material::pressure() const { return m_pressure; }
 /**
  * Get the coherent scattering cross section according to Sears eqn 7.
  *
- * @param lambda :: The wavelength to evaluate the cross section
- * @returns The value of the coherent scattering cross section at
- * the given wavelength
+ * @returns The value of the coherent scattering cross section.
  */
-double Material::cohScatterXSection(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::cohScatterXSection() const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.coh_scatt_xs;
 
@@ -167,13 +163,9 @@ double Material::cohScatterXSection(const double lambda) const {
 /**
  * Get the incoherent scattering cross section according to Sears eqn 16
  *
- * @param lambda :: The wavelength to evaluate the cross section
- * @returns The value of the coherent scattering cross section at
- * the given wavelength
+ * @returns The value of the coherent scattering cross section.
  */
-double Material::incohScatterXSection(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::incohScatterXSection() const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.inc_scatt_xs;
 
@@ -183,13 +175,9 @@ double Material::incohScatterXSection(const double lambda) const {
 /**
  * Get the total scattering cross section following Sears eqn 13.
  *
- * @param lambda :: The wavelength to evaluate the cross section
- * @returns The value of the total scattering cross section at
- * the given wavelength
+ * @returns The value of the total scattering cross section.
  */
-double Material::totalScatterXSection(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::totalScatterXSection() const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
 
@@ -243,11 +231,21 @@ double Material::absorbXSection(const double lambda) const {
   }
 }
 
+/**
+ * @param distance Distance (m) travelled
+ * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
+ * reference lambda)
+ * @return The dimensionless attenuation coefficient
+ */
+double Material::attenuation(const double distance, const double lambda) const {
+  return exp(-100 * numberDensity() *
+             (totalScatterXSection() + absorbXSection(lambda)) * distance);
+}
+
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
 // will cancel for mu to give units: cm^-1
 double Material::linearAbsorpCoef(const double lambda) const {
-  return absorbXSection(NeutronAtom::ReferenceLambda) * 100. * numberDensity() *
-         lambda / NeutronAtom::ReferenceLambda;
+  return absorbXSection(lambda) * 100. * numberDensity();
 }
 
 // This must match the values that come from the scalar version
