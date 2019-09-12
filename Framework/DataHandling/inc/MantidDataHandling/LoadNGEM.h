@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-#define CONTIN_ID_VALUE 0x4F;
+static constexpr uint64_t CONTIN_ID_VALUE = 0x4F;
 
 /// Generic event to separate bits.
 struct GenericEvent {
@@ -34,11 +34,13 @@ struct T0FrameEvent {
   uint64_t eventLoss : 20;  // Event loss count
   uint64_t frameLoss : 12;  // Frame loss count
   uint64_t id : 8;          // 0x4E Event ID
-  static const int T0_IDENTIFIER = 0x4E;
-  bool check() const { return id == T0_IDENTIFIER && contin == CONTIN_ID_VALUE }
+  static constexpr int T0_IDENTIFIER = 0x4E;
+  bool check() const {
+    return id == T0_IDENTIFIER && contin == CONTIN_ID_VALUE;
+  }
 };
 
-/// A detected event.
+/// A detected neutron.
 struct CoincidenceEvent {
   uint64_t t0id : 24;         // T0 ID
   uint64_t clusterTimeY : 10; // Integrated time of the cluster on the Y side
@@ -57,7 +59,7 @@ struct CoincidenceEvent {
 
   uint64_t avgX() const { return (firstX + lastX) / 2; }
   uint64_t avgY() const { return (firstY + lastY) / 2; }
-  static const int COINCIDENCE_IDENTIFIER = 0x47;
+  static constexpr int COINCIDENCE_IDENTIFIER = 0x47;
   bool check() {
     return id == COINCIDENCE_IDENTIFIER && contin == CONTIN_ID_VALUE;
   }
@@ -102,14 +104,17 @@ public:
 private:
   /// Main data workspace.
   DataObjects::EventWorkspace_sptr m_dataWorkspace;
-  /// The number of spectra in the detector.
-  const int m_NUM_OF_SPECTRA = 16384;
   /// Initialise the algorithm.
   void init() override;
   /// Execute the algorithm.
   void exec() override;
-  /// Byte swap a word to be correct on x86 and x64 architecture.
-  uint64_t swapUint64(uint64_t word);
+  /// Load a file into the histograms.
+  void loadSingleFile(const std::vector<std::string> &filePath,
+                      int &eventCountInFrame, int &maxToF, int &minToF,
+                      int &rawFrames, int &goodFrames, const int &minEventsReq,
+                      const int &maxEventsReq, MantidVec &frameEventCounts,
+                      std::vector<DataObjects::EventList> &histograms,
+                      std::vector<DataObjects::EventList> &histogramsInFrame);
   /// Helper function to convert big endian events.
   void correctForBigEndian(const EventUnion &bigEndian,
                            EventUnion &smallEndian);
