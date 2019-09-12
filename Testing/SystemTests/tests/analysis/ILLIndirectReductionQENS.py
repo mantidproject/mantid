@@ -116,7 +116,7 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
 
     def test_unmirror_7_same_reference(self):
 
-        # there was a but in MatchPeaks with InputWorkspace2 and center peaks ON
+        # there was a bug in MatchPeaks with InputWorkspace2 and center peaks ON
         # in the case where the fitting was failing because of a too narrow peak
         # this tests the fix with the data where there are too narrow peaks to fit
         args = {'AlignmentRun': '251554',

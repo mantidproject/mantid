@@ -19,6 +19,7 @@ Improved
 - A bug has been fixed in :ref:`MatchPeaks <algm-MatchPeaks>` which was causing wrong alignment in :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` with unmirror option 7, when
 the peaks in the alignment run are too narrow to be fitted.
 
+
 :ref:`Release 4.2.0 <v4.2.0>`
 
 Data Analysis Interface
