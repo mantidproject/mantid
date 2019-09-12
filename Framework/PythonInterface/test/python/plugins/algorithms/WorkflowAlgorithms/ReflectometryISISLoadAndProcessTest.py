@@ -450,7 +450,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
         self._assert_run_algorithm_succeeds(args, outputs)
 
-    def test_throws_with_mixed_unit_input_workspace_group(self):
+    def test_fails_with_mixed_unit_input_workspace_group(self):
         self._create_workspace(13460, 'TOF_')
         self._create_workspace(13463, 'TOF_')
         self._create_workspace_wavelength(12345)
