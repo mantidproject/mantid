@@ -12,18 +12,23 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.utils.qt import import_qt
 
 
-ManageUserDirectories_cpp = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
+ManageUserDirectories = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
+
+manage_user_directories = None
 
 
-class ManageUserDirectories(ManageUserDirectories_cpp):
-    """
-    Small wrapper class around the Manage User Directories Window that
-    hides the help button which can lead to a crash.
-    See https://github.com/mantidproject/mantid/issues/26404.
+def open_mud(parent):
+    # Checks whether a Manage User Directories window is already open before opening another one.
+    global manage_user_directories
+    if manage_user_directories is None:
+        manage_user_directories = ManageUserDirectories(parent)
+        manage_user_directories.show()
+        manage_user_directories.destroyed.connect(mud_closed)
+    else:
+        # Brings the already open window to the front.
+        manage_user_directories.raise_()
 
-    This is a safe, temporary fix, for release 4.0.1.
-    """
 
-    def __init__(self, parent=None):
-        super(ManageUserDirectories, self).__init__(parent)
-        self.setHelpButtonVisible(False)
+def mud_closed():
+    global manage_user_directories
+    manage_user_directories = None
