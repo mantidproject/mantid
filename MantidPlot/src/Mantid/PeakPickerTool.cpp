@@ -153,8 +153,8 @@ PeakPickerTool::PeakPickerTool(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             m_wsName.toStdString()));
   } catch (...) { // or it can be a TableWorkspace
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        m_fitPropertyBrowser->createMatrixFromTableWorkspace());
+    m_ws = Mantid::API::AnalysisDataService::Instance().retrieve(
+        m_fitPropertyBrowser->workspaceName());
   }
 }
 

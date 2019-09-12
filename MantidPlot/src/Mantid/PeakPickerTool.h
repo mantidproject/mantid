@@ -197,7 +197,7 @@ private:
   /// Workspace index
   int m_spec;
   /// Pointer to the workspace
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
+  boost::shared_ptr<Mantid::API::Workspace> m_ws;
 
   bool m_init;         // Is the tool initialized?
   bool m_width_set;    // The width set flag

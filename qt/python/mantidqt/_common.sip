@@ -414,11 +414,16 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
+    QVector<double> getXRange();
+	QString getXColumnName() const;
+	QString getYColumnName() const;
+	QString getErrColumnName() const;
     int workspaceIndex() const;
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+	void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
 
