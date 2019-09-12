@@ -23,13 +23,13 @@ class Bessel(IFunction1D):
 
     def init(self):
         self.declareParameter("A0",1)
-        self.declareParameter("phi",0.1)
-        self.declareParameter("nu",0.1)
+        self.declareParameter("Phi",0.1)
+        self.declareParameter("Nu",0.1)
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
-        phi = self.getParameterValue("phi")
-        nu = self.getParameterValue("nu")
-        return A0*sp.j0(2*np.pi*nu*x+phi)
+        Phi = self.getParameterValue("Phi")
+        Nu = self.getParameterValue("Nu")
+        return A0*sp.j0(2*np.pi*Nu*x+Phi)
 
 FunctionFactory.subscribe(Bessel)

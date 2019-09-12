@@ -16,10 +16,10 @@ Fitting function for use by Muon scientists defined by:
 .. attributes::
 
 .. properties::
-J_0(x) is the Bessel Function
-A_0 is the amplitude at $t=0$
-$\nu$ is wavenumber
-$\phi$ is the phase
+:math:`J_0(x)` is the Bessel Function
+:math:`A_0` is the amplitude at :math:`t=0`
+:math:`\nu$` is wavenumber
+:math:`\phi` is the phase
 
 .. categories::
 
