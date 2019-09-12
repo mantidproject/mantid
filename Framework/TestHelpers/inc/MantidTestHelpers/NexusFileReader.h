@@ -108,12 +108,12 @@ public:
    debug information to output where open fails) */
   H5::Group openfullH5Path(const FullNXPath &pathList) const {
 
-    H5::Group child;
-    H5::Group parent = m_file.openGroup(pathList[0]);
+    H5::Group child = m_file.openGroup(pathList[0]);
+    H5::Group parent;
 
     for (size_t i = 1; i < pathList.size(); ++i) {
-      child = parent.openGroup(pathList[i]);
       parent = child;
+      child = parent.openGroup(pathList[i]);
     }
     return child;
   }
@@ -220,45 +220,25 @@ public:
     return value;
   }
 
-  // HERE
-  bool hasDatasetWithNXAttribute(const std::string &pathToGroup,
-                                 const std::string &nx_attributeVal) {
-
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
-    auto numOfChildren = parentGroup.getNumObjs();
-    for (size_t i = 0; i < numOfChildren; i++) {
-      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
-        std::string dSetName = parentGroup.getObjnameByIdx(i);
-        H5::DataSet dSet = parentGroup.openDataSet(dSetName);
-        if (dSet.attrExists(NX_CLASS)) {
-          H5::Attribute attribute = dSet.openAttribute(NX_CLASS);
-          std::string attributeValue;
-          attribute.read(attribute.getDataType(), attributeValue);
-          if (attributeValue == nx_attributeVal)
-            return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  // HERE
-  bool hasDatasetWithAttribute(const std::string &pathToGroup,
+  bool hasDatasetWithAttribute(const FullNXPath &pathToGroup,
+                               const std::string dataSetName,
                                const std::string &attributeVal,
-                               const std::string &attrName) {
+                               const std::string &attrName = NX_CLASS) {
 
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
     for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
-        H5::DataSet dSet = parentGroup.openDataSet(dSetName);
-        if (dSet.attrExists(NX_CLASS)) {
-          H5::Attribute attribute = dSet.openAttribute(attrName);
-          std::string attributeValue;
-          attribute.read(attribute.getDataType(), attributeValue);
-          if (attributeValue == attributeVal)
-            return true;
+        if (dSetName == dataSetName) {
+          H5::DataSet dSet = parentGroup.openDataSet(dSetName);
+          if (dSet.attrExists(attrName)) {
+            H5::Attribute attribute = dSet.openAttribute(attrName);
+            std::string attributeValue;
+            attribute.read(attribute.getDataType(), attributeValue);
+            if (attributeValue == attributeVal)
+              return true;
+          }
         }
       }
     }
@@ -282,10 +262,10 @@ public:
   }
 
   bool groupHasNxClass(const std::string &attrVal,
-                       const std::string &pathToGroup) const {
+                       const FullNXPath &pathToGroup) const {
 
     H5::Attribute attribute;
-    H5::Group parentGroup = m_file.openGroup(pathToGroup);
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
     attribute = parentGroup.openAttribute(NX_CLASS);
     std::string attributeValue;
     attribute.read(attribute.getDataType(), attributeValue);
@@ -347,19 +327,6 @@ public:
     H5::Group parentGroup = openfullH5Path(pathToGroup);
     H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
     attribute = dataSet.openAttribute(attrName);
-    std::string attributeValue;
-    attribute.read(attribute.getDataType(), attributeValue);
-
-    return attributeValue == attrVal;
-  }
-
-  bool hasNXAttributeInDataSet(const std::string dataSetName,
-                               const std::string &attrVal,
-                               const FullNXPath &pathToGroup) {
-    H5::Attribute attribute;
-    H5::Group parentGroup = openfullH5Path(pathToGroup);
-    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
-    attribute = dataSet.openAttribute(NX_CLASS);
     std::string attributeValue;
     attribute.read(attribute.getDataType(), attributeValue);
 

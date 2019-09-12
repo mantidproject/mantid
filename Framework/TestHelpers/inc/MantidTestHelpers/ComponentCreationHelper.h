@@ -53,6 +53,12 @@ createSimpleMeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Mantid::Kernel::V3D> &vertices,
                        const Mantid::Kernel::Material &material);
 
+boost::shared_ptr<Mantid::Geometry::MeshObject>
+createCubeFromTriangles(const double size, const Mantid::Kernel::V3D &centre);
+
+boost::shared_ptr<Mantid::Geometry::MeshObject>
+createCubeFromTriangles(const double size);
+
 boost::shared_ptr<Mantid::Geometry::CSGObject>
 createCappedCylinder(double radius, double height,
                      const Mantid::Kernel::V3D &baseCentre,

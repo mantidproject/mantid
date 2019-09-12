@@ -176,8 +176,72 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
 TODO: DOCUMENTATION
 */
-inline void writeCylinders(H5::Group &grp, size_t nCylinders,
-                           const std::vector<double> &vertexCoordinates) {
+
+/*
+TODO:
+*/
+template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
+
+  const size_t nFaces = meshObj->numberOfTriangles();
+  const size_t nVertices = meshObj->numberOfVertices();
+
+  const std::vector<double> vertices = meshObj->getVertices();
+  const auto windingOrder = meshObj->getTriangles();
+  H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
+
+  H5::DataSet dFaces, dVertices, dWindingOrder;
+
+  // vertices
+
+  int vrank = 2;
+  hsize_t vdims[static_cast<hsize_t>(2)];
+  vdims[0] = static_cast<hsize_t>(nVertices);
+  vdims[1] = static_cast<hsize_t>(3);
+  H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
+
+  dVertices =
+      shapeGroup.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
+  dVertices.write(vertices.data(), H5::PredType::NATIVE_DOUBLE, vspace);
+
+  writeStrAttribute(dVertices, UNITS, METRES);
+
+  // winding order
+
+  int wrank = 1;
+  hsize_t wdims[static_cast<hsize_t>(1)];
+  wdims[0] = static_cast<hsize_t>(windingOrder.size());
+  H5::DataSpace wspace = H5Screate_simple(wrank, wdims, nullptr);
+
+  dWindingOrder =
+      shapeGroup.createDataSet(WINDING_ORDER, H5::PredType::NATIVE_INT, wspace);
+  dWindingOrder.write(windingOrder.data(), H5::PredType::NATIVE_INT, wspace);
+
+  // faces
+
+  // under current implementation, there is no optimisation procedure for faces,
+  // so that mesh object faces are made from triangles, and number of 'jumps' is
+  // fixed to 3. Future implementation of multivariable/dynamic 'jumps' values
+  // may be required to support faces optimisation.
+  int jumps = 3;
+
+  std::vector<int> facesData;
+  for (int i = 0; static_cast<hsize_t>(i) <= nFaces; ++i)
+    facesData.push_back(i * jumps);
+
+  int frank = 1;
+  hsize_t fdims[static_cast<hsize_t>(1)];
+  fdims[0] = static_cast<hsize_t>(nFaces);
+  H5::DataSpace fspace = H5Screate_simple(frank, fdims, nullptr);
+
+  dFaces = shapeGroup.createDataSet(FACES, H5::PredType::NATIVE_INT, fspace);
+  dFaces.write(facesData.data(), H5::PredType::NATIVE_INT, fspace);
+}
+
+/*
+TODO:
+*/
+void writeCylinders(H5::Group &grp, size_t nCylinders,
+                    const std::vector<double> &vertexCoordinates) {
 
   H5::DataSet cylinders, vertices;
   // prepare the data
@@ -209,76 +273,10 @@ inline void writeCylinders(H5::Group &grp, size_t nCylinders,
 }
 
 /*
-TODO: DOCUMENTATION
-*/
-
-void writeMeshes(H5::Group &grp, size_t nVertices,
-                 const std::vector<double> &verticesData /*,
-                 std::vector<int> detIDs */) {
-
-  H5::DataSet /*faces,*/ vertices /*, windingOrder, detectorFaces*/;
-
-  int vrank = 2;
-  hsize_t vdims[static_cast<hsize_t>(2)];
-  vdims[0] = static_cast<hsize_t>(nVertices); // nCylinders;
-  vdims[1] = static_cast<hsize_t>(3);
-  H5::DataSpace cspace = H5Screate_simple(vrank, vdims, nullptr);
-
-  vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, cspace);
-  vertices.write(verticesData.data(), H5::PredType::NATIVE_DOUBLE, cspace);
-}
-
-/*
-TODO:
-*/
-inline void writeMeshObjShape(H5::Group &grp,
-                              const Geometry::ComponentInfo &compInfo,
-                              const size_t monitorIdx /*,
-                              const std::vector<int> &detIDs*/) {
-
-  // std::vector<size_t> meshObjects; awaiting implementation
-
-  auto &shapeObj = compInfo.shape(monitorIdx);
-  if (!dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
-    return;
-
-  auto mesh = static_cast<const Geometry::MeshObject *>(&shapeObj);
-
-  // const size_t numOfFaces = mesh->numberOfTriangles(); awaiting
-  // implememtation
-  const size_t numOfVertices = mesh->numberOfVertices();
-
-  const std::vector<double> vertices = mesh->getVertices();
-  const auto faces = mesh->getTriangles();
-
-  H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
-  writeMeshes(shapeGroup, numOfVertices, vertices /*, detIDs*/);
-
-  // implement writing of mesh here
-}
-
-/*
-TODO:
-*/
-inline void writeMeshObj2DShape(H5::Group &grp,
-                                const Geometry::ComponentInfo &compInfo,
-                                const size_t monitorIdx) {
-
-  auto &shapeObj = compInfo.shape(monitorIdx);
-  if (!dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
-    return;
-
-  H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
-
-  // implement writing of mesh here
-}
-
-/*
 TODO: DOC
 */
-inline void writeCylinderShape(H5::Group &grp,
-                               const Geometry::ComponentInfo &compInfo,
-                               const size_t idx) {
+void writeCylinderShape(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
+                        const size_t idx) {
 
   auto pixels =
       compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
@@ -313,8 +311,7 @@ inline void writeCylinderShape(H5::Group &grp,
   if (!cylinders.empty()) {
     H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
     // check if cylinders are homogeneous
-    bool cylindersAreHomogeneous = // TODO: check if needs refactor -  [&]
-                                   // needed in lambda?
+    bool cylindersAreHomogeneous =
         std::all_of(cylinders.begin(), cylinders.end(), [&](const size_t &idx) {
           auto &shapeObj = compInfo.shape(idx);
           auto shapeInfo = shapeObj.shapeInfo();
@@ -385,6 +382,29 @@ inline void writeCylinderShape(H5::Group &grp,
       writeCylinders(pixelShapeGroup, cylinders.size(), vertices);
     }
   }
+}
+
+void writeShapeGeometry(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
+                        const size_t index) {
+
+  // if there is no valid shapee at this level, allow attempt to write shapes to
+  // individual pixels
+  if (!compInfo.hasValidShape(index)) {
+    writeCylinderShape(compInfo, grp,
+                       index); // will write cylinders if any
+    return;
+  }
+  auto &shapeObj = compInfo.shape(index);
+
+  // categorize geometry
+  if (const auto *mesh = dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
+    writeMeshObjShape(mesh, grp);
+  else if (const auto *mesh =
+               dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
+    writeMeshObjShape(mesh, grp);
+  else
+    writeCylinderShape(compInfo, grp,
+                       index); // will write cylinders if any
 }
 
 /*
@@ -863,15 +883,14 @@ void saveNXMonitor(const H5::Group &parentGroup,
 
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writeNXMonitorNumber(childGroup, detIDs[index]);
-  writeMeshObjShape(childGroup, compInfo, index /*, detIDs*/);
-  writeMeshObj2DShape(childGroup, compInfo, index);
+  writeShapeGeometry(compInfo, childGroup, index);
 
   writeStrDataset(childGroup, BANK_NAME, monitorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);
 }
 
-/*
- * Function: saveNXDetectors
+/**
+ * Function: saveNXDetector
  * For NXinstrument parent (component info root). Save method which produces a
  * set of NXdetctor groups from Component info detector banks, and saves it in
  * the parent group, along with the Nexus compliant datasets, and metadata
@@ -937,7 +956,7 @@ void saveNXDetector(const H5::Group &parentGroup,
   H5::StrType dependencyStrType = strTypeOfSize(dependency);
   writePixelOffsets(childGroup, compInfo, index);
   writeNXDetectorNumber(childGroup, compInfo, detIds, index);
-  writeCylinderShape(childGroup, compInfo, index);
+  writeShapeGeometry(compInfo, childGroup, index);
 
   writeStrDataset(childGroup, BANK_NAME, detectorName);
   writeStrDataset(childGroup, DEPENDS_ON, dependency);

@@ -67,13 +67,70 @@ std::string cappedCylinderXML(double radius, double height,
 }
 
 /**
- * Create a mesh object
+ * Create a mesh object, with specified faces, vertices, and material.
+ *
+ * @param faces : vector containing indices of vectors making the shape (aka
+ * winding order)
+ * @param vertices : vector containing V3D vertices of mesh object.
+ * @param material : material for meshobject
+ * @return MeshObject generated.
  */
 boost::shared_ptr<MeshObject>
 createSimpleMeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Mantid::Kernel::V3D> &vertices,
                        const Mantid::Kernel::Material &material) {
   return boost::make_shared<MeshObject>(faces, vertices, material);
+}
+
+/*
+create meshObject cube without shape optimisations; using triangles.
+*/
+boost::shared_ptr<MeshObject> createCubeFromTriangles(const double size,
+                                                      const V3D &centre) {
+
+  double min = 0.0 - 0.5 * size;
+  double max = 0.5 * size;
+  std::vector<V3D> vertices;
+  vertices.emplace_back(centre + V3D(max, max, max));
+  vertices.emplace_back(centre + V3D(min, max, max));
+  vertices.emplace_back(centre + V3D(max, min, max));
+  vertices.emplace_back(centre + V3D(min, min, max));
+  vertices.emplace_back(centre + V3D(max, max, min));
+  vertices.emplace_back(centre + V3D(min, max, min));
+  vertices.emplace_back(centre + V3D(max, min, min));
+  vertices.emplace_back(centre + V3D(min, min, min));
+
+  std::vector<uint32_t> triangles;
+  // top face of cube - z max
+  triangles.insert(triangles.end(), {0, 1, 2});
+  triangles.insert(triangles.end(), {2, 1, 3});
+  // right face of cube - x max
+  triangles.insert(triangles.end(), {0, 2, 4});
+  triangles.insert(triangles.end(), {4, 2, 6});
+  // back face of cube - y max
+  triangles.insert(triangles.end(), {0, 4, 1});
+  triangles.insert(triangles.end(), {1, 4, 5});
+  // bottom face of cube - z min
+  triangles.insert(triangles.end(), {7, 5, 6});
+  triangles.insert(triangles.end(), {6, 5, 4});
+  // left face of cube - x min
+  triangles.insert(triangles.end(), {7, 3, 5});
+  triangles.insert(triangles.end(), {5, 3, 1});
+  // front fact of cube - y min
+  triangles.insert(triangles.end(), {7, 6, 3});
+  triangles.insert(triangles.end(), {3, 6, 2});
+
+  // arbitrary material.
+  Mantid::Kernel::Material material{};
+  return createSimpleMeshObject(triangles, vertices, material);
+}
+
+/**
+(Overload) default centre at origin
+*/
+boost::shared_ptr<Mantid::Geometry::MeshObject>
+createCubeFromTriangles(const double size) {
+  return createCubeFromTriangles(size, V3D(0.0, 0.0, 0.0));
 }
 
 /**
@@ -880,14 +937,15 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
 }
 
 /**
- * createMinimalInstrumentWithMonitor, creates the most simple possible
- * definition of an instrument with a Monitor.
+ * createMinimalInstrumentWithShapes, creates the most simple possible
+ * definition of an instrument with IObject shapes specified for pixels and
+ * monitor.
  *
  * Beam direction is along X,
  * Up direction is Y
  *
- * @param monitorPos : V3D monitor position
- * @param monitorRot : V3D monitor rotation
+ * @param monitorShape : IObject shape of monitor
+ * @param detectorShape : IObject shape of pixels
  * @return Instrument generated.
  */
 Instrument_sptr createMinimalInstrumentWithShapes(
@@ -899,7 +957,7 @@ Instrument_sptr createMinimalInstrumentWithShapes(
       Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left,
       "0,0,0"));
 
-  instrument->setName("test-instrument-with-shapes");
+  instrument->setName("test_instrument_with_shapes");
 
   // A source
   auto *source = new ObjComponent("source");
@@ -916,7 +974,7 @@ Instrument_sptr createMinimalInstrumentWithShapes(
   instrument->markAsSamplePos(sample);
 
   // A detector
-  auto *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
+  auto *det = new Detector("point_detector", 1 /*detector id*/, nullptr);
   det->setPos(V3D(0, 0, 10));
   det->setShape(detectorShape);
   // instrument->add(det);
@@ -935,7 +993,7 @@ Instrument_sptr createMinimalInstrumentWithShapes(
 
   // A monitor
   auto *mon =
-      new Detector("test-monitor_with_shape", 2 /*detector id*/, nullptr);
+      new Detector("test_monitor_with_shape", 2 /*detector id*/, nullptr);
   mon->setPos(V3D(0, 0, 10));
   mon->setRot(Quat(45, V3D(0, 0, 10)));
   mon->setShape(monitorShape);
@@ -945,14 +1003,15 @@ Instrument_sptr createMinimalInstrumentWithShapes(
   return instrument;
 }
 
-/*
-An instrument creation helper allowing you to include/omit
-source/sample for unit test of exception handling.
-*
-* @param haveSource : bool option to have source in instrument
-* @param haveSample : bool option to have sample in instrument
-* @param haveDetector : bool option to have detector in instrument
-*/
+/**
+ * An instrument creation helper allowing you to include/omit
+ * source/sample for unit test of exception handling.
+ *
+ * @param haveSource : bool option to have source in instrument
+ * @param haveSample : bool option to have sample in instrument
+ * @param haveDetector : bool option to have detector in instrument
+ * @return Instrument generated.
+ */
 Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
                                                        bool haveSample,
                                                        bool haveDetector) {
