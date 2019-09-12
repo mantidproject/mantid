@@ -532,7 +532,7 @@ class Abins(PythonAlgorithm):
                     partial_wrk_names.append(wrk_name)
 
                     self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
-                                              nucleons_number=nucleons_number)                
+                                              nucleons_number=nucleons_number)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
@@ -569,12 +569,12 @@ class Abins(PythonAlgorithm):
                                                                         nucleons_number=nucleons_number)
 
         n_q_bins, n_freq_bins = s_points.shape
+
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=n_freq_bins, XLength=n_q_bins + 1, YLength=n_q_bins)
 
         freq_axis = NumericAxis.create(n_freq_bins)
 
         q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.q_size + 1)
-        q_bin_vals = np.linspace(start=Q_BEGIN, stop=Q_END, num=(abins.parameters.q_size))
 
         freq_offset = (self._bins[1] - self._bins[0]) / 2
         for i, freq in enumerate(self._bins[1:]):
@@ -598,7 +598,7 @@ class Abins(PythonAlgorithm):
         #    newAxis.setValue(i,0.3*i**2)
         # newAxis.setUnit('DeltaE')
         # wspace.replaceAxis(1, newAxis)
-        # AnalysisDataService.addOrReplace('testWS',wspace)        
+        # AnalysisDataService.addOrReplace('testWS',wspace)
 
     def _get_cross_section(self, protons_number=None, nucleons_number=None):
         """
@@ -648,16 +648,19 @@ class Abins(PythonAlgorithm):
             # initialize S
             if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                 s_atoms = np.zeros_like(ws.dataY(0))
+
             if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-                s_atoms = np.zeros([abins.parameters.q_size] + list(ws.dataY(0).shape))
+                n_q, n_energy_bins = abins.parameters.q_size, ws.getDimension(1).getNBins()
+                s_atoms = np.zeros([n_q, n_energy_bins])
 
             # collect all S
             for partial_ws in local_partial_workspaces:
                 if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
+
                 elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-                    for i in range(abins.parameters.q_size):
-                        s_atoms[i] += mtd[partial_ws].dataY(i)
+                    for i in range(n_energy_bins):
+                        s_atoms[:, i] += mtd[partial_ws].dataY(i)
 
             # create workspace with S
             self._fill_s_workspace(s_atoms, total_workspace)
@@ -686,8 +689,6 @@ class Abins(PythonAlgorithm):
         ws_name = self._out_ws_name + "_" + atom_name + optional_name
         self._fill_s_workspace(s_points=s_points, workspace=ws_name, protons_number=protons_number,
                                nucleons_number=nucleons_number)
-
-
         return ws_name
 
     def _create_experimental_data_workspace(self):
@@ -719,7 +720,7 @@ class Abins(PythonAlgorithm):
         elif layout == '2D':
             mtd[wrk].getAxis(0).setUnit("MomentumTransfer")
             mtd[wrk].setYUnitLabel("S / Arbitrary Units")
-            mtd[wrk].setYUnit("Arbitrary Units")            
+            mtd[wrk].setYUnit("Arbitrary Units")
             mtd[wrk].getAxis(1).setUnit("DeltaE_inWavenumber")
         else:
             raise ValueError('Unknown data/units layout "{}"'.format(layout))
