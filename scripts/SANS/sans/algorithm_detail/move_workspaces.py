@@ -461,7 +461,11 @@ class SANSMoveSANS2D(SANSMove):
 
     @staticmethod
     def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
-        if move_info.monitor_n_offset != 0.0:
+        # Only monitor 4 can be moved for SANS2D
+        assert(monitor_spectrum_number == 4)
+        monitor_offset = move_info.monitor_4_offset
+
+        if monitor_offset != 0.0:
             monitor_spectrum_number_as_string = str(monitor_spectrum_number)
             monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
             instrument = workspace.getInstrument()
@@ -478,8 +482,7 @@ class SANSMoveSANS2D(SANSMove):
             detector_position = lab_detector_component.getPos()
             z_position_detector = detector_position.getZ()
 
-            monitor_n_offset = move_info.monitor_n_offset
-            z_new = z_position_detector + monitor_n_offset
+            z_new = z_position_detector + monitor_offset
             z_move = z_new - z_position_monitor
             offset = {CanonicalCoordinates.Z: z_move}
 
@@ -689,24 +692,20 @@ class SANSMoveZOOM(SANSMove):
         move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=False)
 
     @staticmethod
-    def _move_monitor_n(workspace, move_info, monitor_spectrum_number_list):
+    def _move_monitor_n(workspace, move_info):
         """
         Moves n monitors in the workspace
         :param workspace: The associated workspace
         :param move_info: A move info object containing this instruments details
-        :param monitor_spectrum_number_list: A list of spectrum numbers to move
         :return: None
         """
-        assert(len(monitor_spectrum_number_list) == 2)
-        monitor_offset_dict = move_info.monitor_n_offset
+        monitor_offset_dict = { 4 : move_info.monitor_4_offset,
+                                5 : move_info.monitor_5_offset }
 
         instrument = workspace.getInstrument()
 
-        for monitor_spec_num in monitor_spectrum_number_list:
-            assert(monitor_spec_num == 4 or monitor_spec_num == 5)
-            monitor_offset = monitor_offset_dict[monitor_spec_num]
-
-            if monitor_offset == 0.0:
+        for monitor_spec_num, offset in monitor_offset_dict.items():
+            if offset == 0.0:
                 continue
 
             monitor_n_name = move_info.monitor_names[str(monitor_spec_num)]
@@ -723,8 +722,7 @@ class SANSMoveZOOM(SANSMove):
             detector_position = lab_detector_component.getPos()
             z_position_detector = detector_position.getZ()
 
-            monitor_n_offset = monitor_offset
-            z_new = z_position_detector + monitor_n_offset
+            z_new = z_position_detector + offset
             z_move = z_new - z_position_monitor
             offset = {CanonicalCoordinates.Z: z_move}
 
@@ -745,7 +743,7 @@ class SANSMoveZOOM(SANSMove):
 
         # Move the monitors
         monitor_spectrum = [4, 5]  # Both monitors 4 and 5 can be moved
-        self._move_monitor_n(workspace, move_info, monitor_spectrum_number_list=monitor_spectrum)
+        self._move_monitor_n(workspace, move_info)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For ZOOM we only have to coordinates

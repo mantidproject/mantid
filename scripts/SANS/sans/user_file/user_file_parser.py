@@ -1386,7 +1386,14 @@ class TransParser(UserFileComponentParser):
         trans_spec_shift_string = re.sub(self._shift, "", trans_spec_shift_string)
         trans_spec_shift_string = re.sub(" ", "", trans_spec_shift_string)
         trans_spec_shift = convert_string_to_float(trans_spec_shift_string)
-        return {TransId.spec_shift: trans_spec_shift, TransId.spec: trans_spec}
+
+        # Pair up the monitor and shift amount
+        if trans_spec == 4:
+            return {TransId.spec_4_shift: trans_spec_shift, TransId.spec: trans_spec}
+        elif trans_spec == 5:
+            return {TransId.spec_5_shift: trans_spec_shift, TransId.spec: trans_spec}
+        else:
+            raise RuntimeError("Monitor {0} cannot be shifted".format(trans_spec))
 
     def _extract_radius(self, line):
         radius_string = re.sub(self._radius, "", line)
