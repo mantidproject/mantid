@@ -105,7 +105,7 @@ def get_reduction_mode_strings_for_gui(instrument=None):
 
 
 def get_instrument_strings_for_gui():
-        return SANSInstrument_string_list
+    return SANSInstrument_string_list
 
 
 def get_reduction_selection(instrument):

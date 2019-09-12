@@ -9,14 +9,14 @@
 """State for moving workspaces."""
 
 from __future__ import (absolute_import, division, print_function)
-import json
-import copy
 
-from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
-                                   StringWithNoneParameter, rename_descriptor_names, FloatListParameter,
-                                   DictFloatsParameter)
+import copy
+import json
+
 from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.automatic_setters import automatic_setters
+from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
+                                   StringWithNoneParameter, rename_descriptor_names)
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
 
 

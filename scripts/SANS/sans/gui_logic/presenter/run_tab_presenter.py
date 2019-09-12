@@ -17,14 +17,14 @@ import csv
 import os
 import time
 import traceback
+from qtpy import PYQT4
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from mantid.py3compat import csv_open_type
-
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, FitType, ISISReductionMode, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (BatchReductionEntry, ISISReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
@@ -45,12 +45,10 @@ from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjus
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.sans_batch import SANSCentreFinder
 from sans.user_file.user_file_reader import UserFileReader
-
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
-from qtpy import PYQT4
 IN_MANTIDPLOT = False
 if PYQT4:
     try:

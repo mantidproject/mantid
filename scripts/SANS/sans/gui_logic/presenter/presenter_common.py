@@ -33,7 +33,6 @@ class PresenterCommon(with_metaclass(ABCMeta)):
     def update_view_from_model(self):
         pass
 
-
     def set_view(self, view):
         assert(view is not None)
         self._view = view
@@ -41,7 +40,6 @@ class PresenterCommon(with_metaclass(ABCMeta)):
     def set_model(self, model):
         assert(model is not None)
         self._model = model
-
 
     def _set_on_state_model(self, attribute_name):
         self._set_on_custom_model(attribute_name, self._model)

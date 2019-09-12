@@ -29,7 +29,6 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(data.calibration,  "TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
         self.assertEqual(data.user_file,  "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger_FRONT.txt")
 
-    def assert_multiple_monitor_move(self, ):
 
     def _assert_move(self, state):
         move = state.move
@@ -47,7 +46,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertEqual(hab.rotation_correction,  0.0)
 
         # SANS2D-specific
-        self.assertEqual(move.monitor_n_offset,  -70.0/1000.)
+        self.assertEqual(move.monitor_4_offset,  -70.0/1000.)
 
     def _assert_mask(self, state):
         mask = state.mask
