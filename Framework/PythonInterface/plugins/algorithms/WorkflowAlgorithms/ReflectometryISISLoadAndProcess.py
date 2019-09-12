@@ -252,6 +252,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 if (ws.getAxis(0).getUnit().unitID()) == 'TOF':
                     ungrouped_workspaces.append(ws_name)
                 else:
+                    # Do not remove the workspace group from the ADS if a non-TOF workspace exists
                     delete_ws_group_flag = False
         return ungrouped_workspaces
 
