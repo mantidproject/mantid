@@ -45,8 +45,6 @@ const H5std_string BANK_NAME = "local_name";
 const H5std_string PIXEL_SHAPE = "pixel_shape";
 const H5std_string DETECTOR_SHAPE = "detector_shape";
 const H5std_string SHAPE = "shape";
-const H5std_string STANDARD_INSTRUMENT_NAME =
-    "instrument"; // important for compatibility elsewhere in mantid
 
 // these strings belong to DataSets which are duplicates of each other. written
 // to NXmonitor group to handle the naming inconsistency. probably temporary.

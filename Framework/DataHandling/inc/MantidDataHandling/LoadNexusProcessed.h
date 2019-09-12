@@ -13,9 +13,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/BinEdges.h"
-#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/NexusClasses.h"
 #include <map>
@@ -28,8 +26,6 @@ class File;
 namespace Mantid {
 
 namespace DataHandling {
-/// Layout information relating to detector-spectra mappings
-enum class InstrumentLayout { Mantid, NexusFormat, NotRecognised };
 /**
 
 Loads a workspace from a NeXus Processed entry in a NeXus file.
@@ -72,7 +68,15 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
+protected:
+  /// Read the spectra
+  void readInstrumentGroup(Mantid::NeXus::NXEntry &mtd_entry,
+                           API::MatrixWorkspace &local_workspace);
+
 private:
+  virtual void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry,
+                                            Mantid::API::MatrixWorkspace &ws);
+
   /// Validates the input Min < Max and Max < Maximum_Int
   std::map<std::string, std::string> validateInputs() override;
   /// Overwrites Algorithm method.
@@ -91,17 +95,16 @@ private:
   std::vector<std::string> extractWorkspaceNames(Mantid::NeXus::NXRoot &root,
                                                  size_t nWorkspaceEntries);
 
-  /// Extract mapping information where it is build across NXDetectors
-  void extractMappingInfoNew(Mantid::NeXus::NXEntry &mtd_entry);
-
   /// Load the workspace name attribute if it exists
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name);
 
-  /// Load nexus geometr and apply to workspace
-  bool loadNexusGeometry(Mantid::API::Workspace &ws,
-                         const int nWorkspaceEntries, Kernel::Logger &logger,
-                         const std::string &filename);
+  /// Load nexus geometry and apply to workspace
+  virtual bool loadNexusGeometry(Mantid::API::Workspace &, const int,
+                                 Kernel::Logger &,
+                                 const std::string &) { /*do nothing*/
+    return false;
+  }
   /// Load a single entry
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root,
                                 const std::string &entry_name,
@@ -148,9 +151,6 @@ private:
   bool addSampleProperty(Mantid::NeXus::NXMainClass &sample_entry,
                          const std::string &entryName,
                          API::Sample &sampleDetails);
-  /// Read the spectra
-  void readInstrumentGroup(Mantid::NeXus::NXEntry &mtd_entry,
-                           API::MatrixWorkspace_sptr local_workspace);
   /// Splits a string of exactly three words into the separate words
   void getWordsInString(const std::string &words3, std::string &w1,
                         std::string &w2, std::string &w3);
@@ -230,11 +230,6 @@ private:
 
   // C++ interface to the NXS file
   ::NeXus::File *m_cppFile;
-
-  InstrumentLayout m_instrumentLayout = InstrumentLayout::Mantid;
-  std::vector<Indexing::SpectrumNumber> m_spectrumNumbers;
-  std::vector<int> m_detectorCounts;
-  std::vector<Mantid::detid_t> m_detectorIds;
 };
 /// to sort the algorithmhistory vector
 bool UDlesserExecCount(Mantid::NeXus::NXClassInfo elem1,

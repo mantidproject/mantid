@@ -60,7 +60,6 @@ unset(PYUNITTEST_QT_API)
 
 # Additional tests
 add_subdirectory(directtools)
-add_subdirectory(isis_powder)
 add_subdirectory(MultiPlotting)
 add_subdirectory(Muon)
 add_subdirectory(SANS)
