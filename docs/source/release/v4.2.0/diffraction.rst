@@ -24,7 +24,7 @@ Bug Fixes
 #########
 
 - The values used to mask the prompt pulse on HRPD have been fixed.
-
+- :ref:`AlignAndFocusPowderFromFiles <AlignAndFocusPowderFromFiles-v1>` will reload the instrument if logs are skipped
 
 Engineering Diffraction
 -----------------------
