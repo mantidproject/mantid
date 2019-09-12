@@ -134,7 +134,7 @@ private:
   /// Reports progress and checks cancel flag.
   bool reportProgressAndCheckCancel(size_t &numProcessedEvents,
                                     int &eventCountInFrame,
-                                    size_t &totalNumEvents,
+                                    const size_t &totalNumEvents,
                                     const size_t &totalFilePaths,
                                     const int &fileCount);
   /// Create the main data workspace.

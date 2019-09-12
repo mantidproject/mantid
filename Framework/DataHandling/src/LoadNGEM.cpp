@@ -190,20 +190,18 @@ void LoadNGEM::loadSingleFile(
   if (!file.is_open()) {
     throw std::runtime_error("File could not be found.");
   }
-  char *buffer = new char[16];
+  std::array<char, 16> buffer;
 
-  EventUnion event;
-  EventUnion *eventBigEndian;
-
-  size_t totalNumEvents = verifyFileSize(file) / 16;
+  const size_t totalNumEvents = verifyFileSize(file) / 16;
   size_t numProcessedEvents = 0;
 
   while (!file.eof()) {
     // Load an event into the variable.
-    file.read(buffer, 16);
-    eventBigEndian = (EventUnion *)buffer;
+    file.read(buffer.data(), 16);
+    auto eventBigEndian = reinterpret_cast<EventUnion *>(buffer.data());
 
     // Correct for the big endian format.
+    EventUnion event;
     correctForBigEndian(eventBigEndian, event);
 
     if (event.coincidence.check()) { // Check for coincidence event.
@@ -312,6 +310,7 @@ size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
  *
  * @param rawFrames The number of T0 Events detected so far.
  * @param goodFrames The number of good frames detected so far.
+ * @param eventCountInFrame The number of events in the current frame.
  * @param minEventsReq The number of events required to be a good frame.
  * @param maxEventsReq The max events allowed to be a good frame.
  * @param frameEventCounts A vector of the number of events in each good frame.
@@ -354,7 +353,7 @@ void LoadNGEM::addFrameToOutputWorkspace(
  */
 bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
                                             int &eventCountInFrame,
-                                            size_t &totalNumEvents,
+                                            const size_t &totalNumEvents,
                                             const size_t &totalFilePaths,
                                             const int &fileCount) {
   numProcessedEvents += eventCountInFrame;
