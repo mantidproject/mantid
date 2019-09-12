@@ -389,7 +389,7 @@ public:
     auto twoThetaRanges = boost::make_shared<TableWorkspace>();
     std::vector<std::string> names = {"Detector ID", "Max two theta",
                                       "Min two theta"};
-    for (auto i = 0; i < types.size(); i++) {
+    for (std::vector<std::string>::size_type i = 0; i < types.size(); i++) {
       if (i >= names.size()) {
         twoThetaRanges->addColumn(types[i], "N/A");
       } else {
