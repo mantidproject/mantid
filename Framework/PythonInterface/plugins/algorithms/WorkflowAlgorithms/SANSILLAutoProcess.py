@@ -12,6 +12,9 @@ from mantid.simpleapi import *
 from os import path
 
 
+EMPTY_TOKEN = '000000'
+
+
 def needs_loading(property_value, loading_reduction_type):
     """
         Checks whether a given unary input needs loading or is already loaded in ADS.
@@ -106,8 +109,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
     def validateInputs(self):
         result = dict()
-        message = 'Wrong number of {0} runs. Provide one or as many as sample runs.'
-        tr_message = 'Wrong number of {0} runs. Provide one or multiple runs summed with +.'
+        message = 'Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}.'
+        tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple runs summed with +.'
         sample_dim = self.getPropertyValue('SampleRuns').count(',')
         abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
         beam_dim = self.getPropertyValue('BeamRuns').count(',')
@@ -120,26 +123,28 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         mask_dim = self.getPropertyValue('MaskFiles').count(',')
         sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
         ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
+        if self.getPropertyValue('SampleRuns') == '':
+            result['SampleRuns'] = 'Please provide at least one sample run.'
         if abs_dim != sample_dim and abs_dim != 0:
-            result['AbsorberRuns'] = message.format('Absorber')
+            result['AbsorberRuns'] = message.format('Absorber', abs_dim, sample_dim)
         if beam_dim != sample_dim and beam_dim != 0:
-            result['BeamRuns'] = message.format('Beam')
+            result['BeamRuns'] = message.format('Beam', beam_dim, sample_dim)
         if can_dim != sample_dim and can_dim != 0:
-            result['ContainerRuns'] = message.format('Container')
+            result['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
         if str_dim != 0:
-            issues['SampleTransmissionRuns'] = tr_message.format('SampleTransmission')
+            issues['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
         if ctr_dim != 0:
-            issues['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission')
+            issues['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
         if btr_dim != 0:
-            issues['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam')
+            issues['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
         if atr_dim != 0:
-            issues['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber')
+            issues['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
         if mask_dim != sample_dim and mask_dim != 0:
-            result['MaskFiles'] = message.format('Mask')
+            result['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
         if ref_dim != sample_dim and ref_dim != 0:
-            result['ReferenceFiles'] = message.format('Reference')
+            result['ReferenceFiles'] = message.format('Reference', ref_dim, sample_dim)
         if sens_dim != sample_dim and sens_dim != 0:
-            result['SensitivityMaps'] = message.format('Sensitivity')
+            result['SensitivityMaps'] = message.format('Sensitivity', sens_dim, sample_dim)
         if flux_dim != flux_dim and flux_dim != 0:
             result['FluxRuns'] = message.format('Flux')
 
@@ -177,19 +182,31 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                                     direction=Direction.Output),
                              doc='The output workspace group containing reduced data.')
 
-        self.declareProperty(MultipleFileProperty('SampleRuns', extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('SampleRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs'],
+                                                  allow_empty=True),
                              doc='Sample run(s).')
 
-        self.declareProperty(MultipleFileProperty('AbsorberRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('AbsorberRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Absorber (Cd/B4C) run(s).')
 
-        self.declareProperty(MultipleFileProperty('BeamRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('BeamRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Empty beam run(s).')
 
-        self.declareProperty(MultipleFileProperty('FluxRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
-                             doc='Empty beam run(s) for flux calculation only; if left blank flux will be calculated from BeamRuns.')
+        self.declareProperty(MultipleFileProperty('FluxRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
+                             doc='Empty beam run(s) for flux calculation only; '
+                                 'if left blank flux will be calculated from BeamRuns.')
 
-        self.declareProperty(MultipleFileProperty('ContainerRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('ContainerRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Empty container run(s).')
 
         self.setPropertyGroup('SampleRuns', 'Numors')
@@ -198,16 +215,24 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('FluxRuns', 'Numors')
         self.setPropertyGroup('ContainerRuns', 'Numors')
 
-        self.declareProperty(MultipleFileProperty('SampleTransmissionRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('SampleTransmissionRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Sample transmission run(s).')
 
-        self.declareProperty(MultipleFileProperty('ContainerTransmissionRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('ContainerTransmissionRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Container transmission run(s).')
 
-        self.declareProperty(MultipleFileProperty('TransmissionBeamRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('TransmissionBeamRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Empty beam run(s) for transmission.')
 
-        self.declareProperty(MultipleFileProperty('TransmissionAbsorberRuns', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('TransmissionAbsorberRuns',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='Absorber (Cd/B4C) run(s) for transmission.')
 
         self.setPropertyGroup('SampleTransmissionRuns', 'Transmissions')
@@ -215,16 +240,22 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
 
-        self.declareProperty(MultipleFileProperty('SensitivityMaps', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('SensitivityMaps',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='File(s) containing the map of relative detector efficiencies.')
 
         self.declareProperty(FileProperty('DefaultMaskFile', '', action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the default mask to be applied to all the detector configurations.')
 
-        self.declareProperty(MultipleFileProperty('MaskFiles', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('MaskFiles',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='File(s) containing the beam stop and other detector mask.')
 
-        self.declareProperty(MultipleFileProperty('ReferenceFiles', action=FileAction.OptionalLoad, extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty('ReferenceFiles',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
                              doc='File(s) containing the corrected water data for absolute normalisation.')
 
         self.declareProperty(MatrixWorkspaceProperty('SensitivityOutputWorkspace', '',
@@ -267,8 +298,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setUp()
         outputs = []
         for i in range(self.dimensionality):
-            self.reduce(i)
-            outputs.append(self.output+'_'+str(i+1))
+            if self.sample[i] != EMPTY_TOKEN:
+                self.reduce(i)
+                outputs.append(self.output+'_'+str(i+1))
+            else:
+                self.log().information('Skipping empty token run.')
 
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
         self.setProperty('OutputWorkspace', mtd[self.output])
