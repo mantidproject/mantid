@@ -61,6 +61,8 @@ known_error_files = duplicate_bank_names + duplicate_monitor_names + no_source +
 direc = config['instrumentDefinition.directory']
 
 class LoadAndSaveLotsOfInstruments(object):
+    
+
     def __getDataFileList__(self):
         # get a list of directories to look in
         print("Looking for instrument definition files in: %s" % direc)
@@ -122,10 +124,9 @@ class LoadAndSaveLotsOfInstruments(object):
 
         # final say on whether or not it 'worked'
         print("----------------------------------------")
-        
         if set(failed) != set(known_error_files) :
             newfound_errors = list(set(failed) - set(known_error_files))
-            for file in newfound_errors:    
+            for file in newfound_errors:
                 print("Failed: '%s'" % file)
             raise RuntimeError("System test failed.")
         else:
