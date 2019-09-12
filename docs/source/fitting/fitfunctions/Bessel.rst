@@ -21,6 +21,11 @@ Fitting function for use by Muon scientists defined by:
 :math:`\nu$` is wavenumber
 :math:`\phi` is the phase
 
+References
+----------
+
+[1]  `Savici et al., PRB 66 (2002) <https://journals.aps.org/prb/pdf/10.1103/PhysRevB.66.014524>`_.
+
 .. categories::
 
 .. sourcelink::

@@ -7,10 +7,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import Fit
+import numpy as np
+
 from MsdTestHelper import (is_registered, check_output, do_a_fit)
+
 
 class BesselTest(unittest.TestCase):
 
