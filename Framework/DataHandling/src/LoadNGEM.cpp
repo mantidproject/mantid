@@ -140,20 +140,40 @@ void LoadNGEM::exec() {
                             histograms, histogramsInFrame);
   progress(0.90);
 
-  createEventWorkspace(maxToF, binWidth, histograms);
+  DataObjects::EventWorkspace_sptr dataWorkspace;
+  createEventWorkspace(maxToF, binWidth, histograms, dataWorkspace);
 
-  addToSampleLog("raw_frames", rawFrames, m_dataWorkspace);
-  addToSampleLog("good_frames", goodFrames, m_dataWorkspace);
+  addToSampleLog("raw_frames", rawFrames, dataWorkspace);
+  addToSampleLog("good_frames", goodFrames, dataWorkspace);
+  addToSampleLog("max_ToF", maxToF, dataWorkspace);
+  addToSampleLog("min_ToF", minToF, dataWorkspace);
 
-  loadInstrument();
+  loadInstrument(dataWorkspace);
 
-  setProperty("OutputWorkspace", m_dataWorkspace);
+  setProperty("OutputWorkspace", dataWorkspace);
   if (this->getProperty("GenerateEventsPerFrame")) {
     createCountWorkspace(frameEventCounts);
   }
   progress(1.00);
 }
 
+/**
+ * @brief Load a single file into the histograms.
+ *
+ * @param filePath The path to the file.
+ * @param eventCountInFrame The number of events in the current frame.
+ * @param maxToF The highest detected ToF
+ * @param minToF The lowest detected ToF
+ * @param rawFrames The number of T0 Events detected so far.
+ * @param goodFrames The number of good frames detected so far.
+ * @param minEventsReq The number of events required to be a good frame.
+ * @param maxEventsReq The max events allowed to be a good frame.
+ * @param frameEventCounts A vector of the number of events in each good frame.
+ * @param histograms The main set of histograms for the data so far.
+ * @param histogramsInFrame The set of histograms for the current frame.
+ * @param totalFilePaths The total number of file paths.
+ * @param fileCount The number of file paths processed.
+ */
 void LoadNGEM::loadSingleFile(
     const std::vector<std::string> &filePath, int &eventCountInFrame,
     int &maxToF, int &minToF, int &rawFrames, int &goodFrames,
@@ -218,12 +238,26 @@ void LoadNGEM::loadSingleFile(
   ++fileCount;
 }
 
+/**
+ * @brief Correct a big endian event to be compatible with x64 and x86
+ * architecture.
+ *
+ * @param bigEndian The big endian formatted event.
+ * @param smallEndian The resulting small endian formatted event.
+ */
 void LoadNGEM::correctForBigEndian(EventUnion *&bigEndian,
                                    EventUnion &smallEndian) {
   smallEndian.splitWord.words[0] = swapUint64(bigEndian->splitWord.words[1]);
   smallEndian.splitWord.words[1] = swapUint64(bigEndian->splitWord.words[0]);
 }
 
+/**
+ * @brief Add a string value to the sample logs.
+ *
+ * @param logName The name of the log.
+ * @param logText The content of the log.
+ * @param ws The workspace to add the log to.
+ */
 void LoadNGEM::addToSampleLog(const std::string &logName,
                               const std::string &logText,
                               DataObjects::EventWorkspace_sptr &ws) {
@@ -235,6 +269,13 @@ void LoadNGEM::addToSampleLog(const std::string &logName,
   sampLogAlg->executeAsChildAlg();
 }
 
+/**
+ * @brief Add a number value to the sample logs.
+ *
+ * @param logName Name of the log.
+ * @param logNumber The value of the log.
+ * @param ws The workspace to add the log to.
+ */
 void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
                               DataObjects::EventWorkspace_sptr &ws) {
   Mantid::API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
@@ -245,6 +286,13 @@ void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
   sampLogAlg->executeAsChildAlg();
 }
 
+/**
+ * @brief Ensure that the file fits into 16, as the detector spits out 128 bit
+ * words (16 bytes)
+ *
+ * @param file The file to check.
+ * @return size_t The size of the file.
+ */
 size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
   // Check that the file fits into 16 byte sections.
   file.seekg(0, file.end);
@@ -252,13 +300,24 @@ size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
   if (size % 16 != 0) {
     g_log.warning()
         << "Invalid file size. File is size is " << size
-        << " bytes which is not a factor of 16. There may be some bytes "
+        << " bytes which is not a multiple of 16. There may be some bytes "
            "missing from the data. \n";
   }
   file.seekg(0);
   return size;
 }
 
+/**
+ * @brief Add a frame to the main set of histograms.
+ *
+ * @param rawFrames The number of T0 Events detected so far.
+ * @param goodFrames The number of good frames detected so far.
+ * @param minEventsReq The number of events required to be a good frame.
+ * @param maxEventsReq The max events allowed to be a good frame.
+ * @param frameEventCounts A vector of the number of events in each good frame.
+ * @param histograms The main set of histograms for the data so far.
+ * @param histogramsInFrame The set of histograms for the current frame.
+ */
 void LoadNGEM::addFrameToOutputWorkspace(
     int &rawFrames, int &goodFrames, const int &eventCountInFrame,
     const int &minEventsReq, const int &maxEventsReq,
@@ -282,6 +341,17 @@ void LoadNGEM::addFrameToOutputWorkspace(
   }
 }
 
+/**
+ * @brief Report the progress of the loader through the current file.
+ *
+ * @param numProcessedEvents The number of events processed so far.
+ * @param eventCountInFrame The number of events in the current frame.
+ * @param totalNumEvents The total number of events in the file.
+ * @param totalFilePaths The total number of file paths to process.
+ * @param fileCount The number of files processed.
+ * @return true If user has cancelled the load.
+ * @return false If the user has not cancelled.
+ */
 bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
                                             int &eventCountInFrame,
                                             size_t &totalNumEvents,
@@ -297,27 +367,36 @@ bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
   return this->getCancel();
 }
 
+/**
+ * @brief Creates an event workspace and fills it with the data.
+ *
+ * @param maxToF The largest ToF seen so far.
+ * @param binWidth The width of each bin.
+ * @param histograms The main histogram event data.
+ * @param dataWorkspace The workspace to add the data to.
+ */
 void LoadNGEM::createEventWorkspace(
     const int &maxToF, const double &binWidth,
-    std::vector<DataObjects::EventList> &histograms) {
+    std::vector<DataObjects::EventList> &histograms,
+    DataObjects::EventWorkspace_sptr &dataWorkspace) {
   std::vector<double> xAxis;
   for (auto i = 0; i < (maxToF / binWidth); i++) {
     xAxis.push_back(i * binWidth);
   }
 
-  m_dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
+  dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA,
       Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(xAxis)));
-
+#pragma omp parallel for
   for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
-    m_dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
-    m_dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
-    m_dataWorkspace->getSpectrum(spectrumNo).setDetectorID(spectrumNo + 1);
+    dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
+    dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
+    dataWorkspace->getSpectrum(spectrumNo).setDetectorID(spectrumNo + 1);
   }
-  m_dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
-  m_dataWorkspace->getAxis(0)->unit() =
+  dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
+  dataWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("TOF");
-  m_dataWorkspace->setYUnit("Counts");
+  dataWorkspace->setYUnit("Counts");
 }
 
 /**
@@ -356,16 +435,28 @@ void LoadNGEM::createCountWorkspace(
   this->setProperty("CountsWorkspace", countsWorkspace);
 }
 
-void LoadNGEM::loadInstrument() {
+/**
+ * @brief Load the nGEM instrument into a workspace.
+ *
+ * @param dataWorkspace The workspace to load into.
+ */
+void LoadNGEM::loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace) {
   auto loadInstrument = this->createChildAlgorithm("LoadInstrument");
   loadInstrument->setPropertyValue("InstrumentName", "NGEM");
-  loadInstrument->setProperty<Mantid::API::MatrixWorkspace_sptr>(
-      "Workspace", m_dataWorkspace);
+  loadInstrument->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace",
+                                                                 dataWorkspace);
   loadInstrument->setProperty("RewriteSpectraMap",
                               Mantid::Kernel::OptionalBool(false));
   loadInstrument->execute();
 }
 
+/**
+ * @brief Validate inputs into the loader GUI.
+ *
+ * @return std::map<std::string, std::string> A map that is empty if there are
+ * no issues, and contains a key of the input field and a value of the error
+ * message otherwise.
+ */
 std::map<std::string, std::string> LoadNGEM::validateInputs() {
   std::map<std::string, std::string> results;
 

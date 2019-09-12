@@ -102,8 +102,6 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  /// Main data workspace.
-  DataObjects::EventWorkspace_sptr m_dataWorkspace;
   /// Initialise the algorithm.
   void init() override;
   /// Execute the algorithm.
@@ -141,11 +139,12 @@ private:
                                     const int &fileCount);
   /// Create the main data workspace.
   void createEventWorkspace(const int &maxToF, const double &binWidth,
-                            std::vector<DataObjects::EventList> &histograms);
+                            std::vector<DataObjects::EventList> &histograms,
+                            DataObjects::EventWorkspace_sptr &dataWorkspace);
   /// Create a workspace to store the number of counts per frame.
   void createCountWorkspace(const std::vector<double> &frameEventCounts);
   /// Load the instrument and attach to the data workspace.
-  void loadInstrument();
+  void loadInstrument(DataObjects::EventWorkspace_sptr &dataWorkspace);
   /// Validate the imputs into the algorithm, overrides.
   std::map<std::string, std::string> validateInputs() override;
 };
