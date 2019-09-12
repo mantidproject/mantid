@@ -90,13 +90,13 @@ include_directories(Geometry/inc)
 add_subdirectory(Geometry)
 set(MANTIDLIBS ${MANTIDLIBS} Geometry)
 
-include_directories(NexusGeometry/inc)
-add_subdirectory(NexusGeometry)
-set(MANTIDLIBS ${MANTIDLIBS} NexusGeometry)
-
 include_directories(API/inc)
 add_subdirectory(API)
 set(MANTIDLIBS ${MANTIDLIBS} API)
+
+include_directories(NexusGeometry/inc)
+add_subdirectory(NexusGeometry)
+set(MANTIDLIBS ${MANTIDLIBS} NexusGeometry)
 
 add_subdirectory(PythonInterface)
 

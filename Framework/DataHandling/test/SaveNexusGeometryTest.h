@@ -18,7 +18,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <H5Cpp.h>
-#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::DataHandling::SaveNexusGeometry;
@@ -162,10 +161,11 @@ public:
         Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
-  void test_characterise_eight_pack_bug() {
+  void test_eight_pack() {
 
-    // Bilby contains eight-packs, though other instrument features could still
-    // be problematic
+    ScopedFileHandle fileResource("eight_pack.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
     Mantid::DataHandling::LoadEmptyInstrument alg;
     alg.setChild(true);
     alg.initialize();
@@ -174,18 +174,44 @@ public:
     alg.execute();
     Mantid::API::MatrixWorkspace_sptr ws = alg.getProperty("OutputWorkspace");
 
-    // problem actually in
-    // Mantid::NexusGeometry::NexusGeometrySave::saveInstrument /
-    // ComponentInfoBankHelpers::isSaveableBank but demonstrated here via save
-    // algorithm.
-
     Mantid::DataHandling::SaveNexusGeometry saver;
     saver.setChild(true);
     saver.setRethrows(true);
     saver.initialize();
-    saver.setProperty("Filename", "output.nxs");
+    saver.setProperty("Filename", destinationFile);
     saver.setProperty("InputWorkspace", ws);
-    TS_ASSERT_THROWS(saver.execute(), H5::Exception &);
+    TS_ASSERT_THROWS_NOTHING(saver.execute());
+    TS_ASSERT(saver.isExecuted());
+  }
+
+  void test_duplicate_named_components_in_instrument_throws() {
+
+    /*
+    instrument Definition HET_Definition_old.xml contains at least two monitors
+    both named "monitor". Expected behaviour is that nexus geometry save will
+    not allow naming of two groups with the same name in the same parent; Throws
+    exception.
+    */
+
+    ScopedFileHandle fileResource("duplicate_names_test.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
+    Mantid::DataHandling::LoadEmptyInstrument loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Filename", "HET_Definition_old.xml");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.execute();
+    Mantid::API::MatrixWorkspace_sptr ws =
+        loader.getProperty("OutputWorkspace");
+
+    SaveNexusGeometry saver;
+    saver.setChild(true);
+    saver.setRethrows(true);
+    saver.initialize();
+    saver.setProperty("Filename", destinationFile);
+    saver.setProperty("InputWorkspace", ws);
+    TS_ASSERT_THROWS(saver.execute(), std::invalid_argument &);
     TS_ASSERT(!saver.isExecuted());
   }
 };

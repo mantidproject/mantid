@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import argparse
 import os
 import subprocess
+import sys
 
 from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure, get_installer, run)
 
@@ -125,9 +126,12 @@ try:
     # and this produces the error: argument -a/--exec-args: expected one argument from runSystemTests.
     # The workaround places a space in the --exec-args parameter that is then stripped off inside
     # runSystemTests.
-    run_test_cmd = '{} {} {}/runSystemTests.py --loglevel={} --executable="{}" --exec-args=" {}"'.format(
+    executor_args = installer.python_args
+    if sys.platform == 'win32':
+        executor_args = ' ' + executor_args
+    run_test_cmd = '{} {} {}/runSystemTests.py --loglevel={} --executable="{}" --exec-args="{}"'.format(
         installer.python_cmd, installer.python_args, THIS_MODULE_DIR,
-        options.log_level, installer.python_cmd, installer.python_args)
+        options.log_level, installer.python_cmd, executor_args)
     run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
