@@ -13,6 +13,7 @@ from mantid.simpleapi import Fit
 from MsdTestHelper import (is_registered, check_output, do_a_fit)
 
 class BesselTest(unittest.TestCase):
+
 	def test_function_has_been_registered(self):
 		status, msg = is_registered("Bessel")
 		if not status:
