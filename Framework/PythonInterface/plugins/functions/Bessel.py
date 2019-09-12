@@ -12,25 +12,24 @@
 """
 
 from mantid.api import IFunction1D, FunctionFactory
-import math
 import numpy as np
 from scipy import special as sp
 
 
 class Bessel(IFunction1D):
 
-  def category(self):
-    return "Muon"
+    def category(self):
+        return "Muon"
 
-  def init(self):
-    self.declareParameter("A0",1)
-    self.declareParameter("phi",0.1)
-    self.declareParameter("nu",0.1)
+    def init(self):
+        self.declareParameter("A0",1)
+        self.declareParameter("phi",0.1)
+        self.declareParameter("nu",0.1)
 
-  def function1D(self, x):
-    A0 = self.getParameterValue("A0")
-    phi = self.getParameterValue("phi")
-    nu = self.getParameterValue("nu")
-    return A0*sp.j0(2*np.pi*nu*x+phi)
-    
+    def function1D(self, x):
+        A0 = self.getParameterValue("A0")
+        phi = self.getParameterValue("phi")
+        nu = self.getParameterValue("nu")
+        return A0*sp.j0(2*np.pi*nu*x+phi)
+
 FunctionFactory.subscribe(Bessel)
