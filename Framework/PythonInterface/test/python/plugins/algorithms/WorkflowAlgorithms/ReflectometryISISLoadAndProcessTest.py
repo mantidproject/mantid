@@ -546,15 +546,16 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         if namesNotExpected is not None:
             self.assertNotEqual(set(actual), set(namesNotExpected))
 
-    def _assert_run_algorithm_throws(self, args):
+    def _assert_run_algorithm_throws(self, args = None):
         """Run the algorithm with the given args and check it throws"""
         throws = False
-        alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
-        alg.setRethrows(True)
-        try:
-            alg.execute()
-        except:
-            throws = True
+        if args is not None:
+          alg = create_algorithm('ReflectometryISISLoadAndProcess', **args)
+          alg.setRethrows(True)
+          try:
+              alg.execute()
+          except:
+              throws = True
         self.assertEqual(throws, True)
 
     def _assert_delta(self, value1, value2):
