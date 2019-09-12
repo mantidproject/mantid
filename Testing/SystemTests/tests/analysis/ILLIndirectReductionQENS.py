@@ -119,9 +119,9 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         # there was a but in MatchPeaks with InputWorkspace2 and center peaks ON
         # in the case where the fitting was failing because of a too narrow peak
         # this tests the fix with the data where there are too narrow peaks to fit
-        args['AlignmentRun'] = '251554'
-        args['UnmirrorOption'] = 7
-        args['ManualPSDIntegrationRange'] = '44,90'
+        args = {'AlignmentRun': '251554',
+                'UnmirrorOption': 7,
+                'ManualPSDIntegrationRange': '44,90'}
 
         args['Run'] = '251530'
         args['OutputWorkspace'] = '50K'
