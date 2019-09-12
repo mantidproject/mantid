@@ -141,8 +141,9 @@ public:
     X[2] = Eval[2][1];
 
     std::vector<double> out = A * X;
+    using std::placeholders::_1;
     transform(X.begin(), X.end(), X.begin(),
-              std::bind2nd(std::multiplies<double>(), Diag[1][1]));
+              std::bind(std::multiplies<double>(), _1, Diag[1][1]));
     TS_ASSERT_DELTA(X[0], out[0], 0.0001);
     TS_ASSERT_DELTA(X[1], out[1], 0.0001);
     TS_ASSERT_DELTA(X[2], out[2], 0.0001);

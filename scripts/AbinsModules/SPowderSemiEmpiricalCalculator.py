@@ -94,11 +94,13 @@ class SPowderSemiEmpiricalCalculator(object):
 
         self._clerk = AbinsModules.IOmodule(
             input_filename=filename,
-            group_name=(AbinsModules.AbinsParameters.s_data_group + "/%s" % self._instrument + "/" +
-                        self._sample_form + "/%sK" % self._temperature))
+            group_name=("{s_data_group}/{instrument}/{sample_form}/{temperature}K").format(
+                s_data_group=AbinsModules.AbinsParameters.s_data_group,
+                instrument=self._instrument,
+                sample_form=self._sample_form,
+                temperature=self._temperature))
 
         self._freq_generator = AbinsModules.FrequencyPowderGenerator()
-
         self._calculate_order = {AbinsModules.AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
@@ -155,7 +157,7 @@ class SPowderSemiEmpiricalCalculator(object):
         :param order: order of quantum event
         :returns: large enough s, and corresponding freq, coeff and also if calculation is stable
         """
-        s_max = np.max(a=s)
+        s_max = np.max(s)
         threshold = max(s_max * self._s_current_threshold[atom], AbinsModules.AbinsParameters.s_absolute_threshold)
         small_s = AbinsModules.AbinsConstants.SMALL_S
 

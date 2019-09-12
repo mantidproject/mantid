@@ -319,21 +319,22 @@ ShapeFactory::parseSphere(Poco::XML::Element *pElem,
                           int &l_id) {
   Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
   Element *pElemRadius = getShapeElement(pElem, "radius");
-
-  // getDoubleAttribute can throw - put the calls above any new
   const double radius = getDoubleAttribute(pElemRadius, "val");
-
-  // create sphere
   const V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
-  auto pSphere = boost::make_shared<Sphere>();
-  pSphere->setCentre(centre);
-  pSphere->setRadius(radius);
-  prim[l_id] = pSphere;
 
-  std::stringstream retAlgebraMatch;
-  retAlgebraMatch << "(-" << l_id << ")";
+  prim[l_id] = boost::make_shared<Sphere>(centre, radius);
+  const auto algebra = sphereAlgebra(l_id);
   l_id++;
-  return retAlgebraMatch.str();
+  return algebra;
+}
+
+/**
+ * Create the algebra string for a Sphere
+ * @param surfaceID ID of surface in map lookup
+ * @return A CSG surface algebra string
+ */
+std::string ShapeFactory::sphereAlgebra(const int surfaceID) {
+  return "(-" + std::to_string(surfaceID) + ")";
 }
 
 /** Parse XML 'infinite-plane' element
@@ -1361,6 +1362,32 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
   }
 
   return retVal;
+}
+
+/**
+ * @brief Create a Sphere
+ * @param centre The center of the sphere
+ * @param radius The radius in metres
+ * @return A new CSGObject defining a sphere
+ */
+boost::shared_ptr<CSGObject>
+ShapeFactory::createSphere(const Kernel::V3D &centre, double radius) {
+  const int surfaceID = 1;
+  const std::map<int, boost::shared_ptr<Surface>> primitives{
+      {surfaceID, boost::make_shared<Sphere>(centre, radius)}};
+
+  auto shape = boost::make_shared<CSGObject>();
+  shape->setObject(21, sphereAlgebra(surfaceID));
+  shape->populate(primitives);
+
+  auto handler = boost::make_shared<GeometryHandler>(shape);
+  shape->setGeometryHandler(handler);
+  detail::ShapeInfo shapeInfo;
+  shapeInfo.setSphere(centre, radius);
+  handler->setShapeInfo(std::move(shapeInfo));
+
+  shape->defineBoundingBox(radius, radius, radius, -radius, -radius, -radius);
+  return shape;
 }
 
 /** Create a hexahedral shape object

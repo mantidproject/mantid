@@ -272,8 +272,8 @@ public:
 
     const Material &mat = sample.getMaterial();
     const double lambda(2.1);
-    TS_ASSERT_DELTA(mat.cohScatterXSection(lambda), 0.0184, 1e-02);
-    TS_ASSERT_DELTA(mat.incohScatterXSection(lambda), 5.08, 1e-02);
+    TS_ASSERT_DELTA(mat.cohScatterXSection(), 0.0184, 1e-02);
+    TS_ASSERT_DELTA(mat.incohScatterXSection(), 5.08, 1e-02);
     TS_ASSERT_DELTA(mat.absorbXSection(lambda), 5.93, 1e-02);
   }
 

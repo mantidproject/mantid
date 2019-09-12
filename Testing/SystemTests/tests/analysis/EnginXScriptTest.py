@@ -7,7 +7,6 @@
 
 from __future__ import (absolute_import, division, print_function)
 import os
-import platform
 import shutil
 import systemtesting
 
@@ -27,7 +26,7 @@ focus_directory = os.path.join(root_directory, "focus")
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(cal_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run=None, force_vanadium=True, directory=cal_directory)
 
     def validate(self):
@@ -41,7 +40,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(cal_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory)
 
     def validate(self):
@@ -50,18 +49,19 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 
         # this is neccesary due to appendspectra creating spectrum numbers of 0
         self.disableChecking.append('SpectraMap')
-        if _current_os_has_gsl_lvl2():
+        if systemtesting.using_gsl_v1():
+            return ("engg_calibration_bank_1", "engggui_calibration_bank_1_gsl1.nxs",
+                    "engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
+                    "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters_gsl1.nxs",
+                    "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
+                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
+        else:
             return ("engg_calibration_bank_1", "engggui_calibration_bank_1.nxs",
                     "engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters.nxs",
                     "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
                     "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs"
                     )
-        return ("engg_calibration_bank_1", "engggui_calibration_bank_1_gsl1.nxs",
-                "engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_banks_parameters_gsl1.nxs",
-                "Engg difc Zero Peaks Bank 1", "engggui_difc_zero_peaks_bank_1.nxs",
-                "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
 
     def cleanup(self):
         simple.mtd.clear()
@@ -71,7 +71,7 @@ class CreateCalibrationWholeTest(systemtesting.MantidSystemTest):
 class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(cal_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
              crop_type="spectra", crop_on="1-20")
 
@@ -81,13 +81,14 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 
         # this is neccesary due to appendspectra creating spectrum numbers of 0
         self.disableChecking.append('SpectraMap')
-        if _current_os_has_gsl_lvl2():
+        if systemtesting.using_gsl_v1():
+            return ("cropped", "engggui_calibration_bank_cropped.nxs_gsl1.nxs",
+                    "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs",
+                    "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
+        else:
             return ("cropped", "engggui_calibration_bank_cropped.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_bank_cropped_parameters.nxs",
                     "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
-        return ("cropped", "engggui_calibration_bank_cropped.nxs_gsl1.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_cropped_parameters_gsl1.nxs",
-                "Engg difc Zero Peaks Bank cropped", "engggui_difc_zero_peaks_bank_cropped.nxs")
 
     def cleanup(self):
         simple.mtd.clear()
@@ -97,7 +98,7 @@ class CreateCalibrationCroppedTest(systemtesting.MantidSystemTest):
 class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(cal_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=cal_directory,
              crop_type="banks", crop_on="South")
 
@@ -107,13 +108,14 @@ class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
 
         # this is neccesary due to appendspectra creating spectrum numbers of 0
         self.disableChecking.append('SpectraMap')
-        if _current_os_has_gsl_lvl2():
+        if systemtesting.using_gsl_v1():
+            return ("engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
+                    "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs",
+                    "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
+        else:
             return ("engg_calibration_bank_2", "engggui_calibration_bank_2.nxs",
                     "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters.nxs",
                     "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
-        return ("engg_calibration_bank_2", "engggui_calibration_bank_2_gsl1.nxs",
-                "engg_calibration_banks_parameters", "engggui_calibration_bank_south_parameters_gsl1.nxs",
-                "Engg difc Zero Peaks Bank 2", "engggui_difc_zero_peaks_bank_2.nxs")
 
     def cleanup(self):
         simple.mtd.clear()
@@ -123,7 +125,7 @@ class CreateCalibrationBankTest(systemtesting.MantidSystemTest):
 class FocusBothBanks(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(focus_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run="299080", do_cal=True, directory=focus_directory)
 
     def validate(self):
@@ -138,7 +140,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
 class FocusCropped(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(focus_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run="299080", directory=focus_directory,
              crop_type="spectra", crop_on="1-20")
 
@@ -153,7 +155,7 @@ class FocusCropped(systemtesting.MantidSystemTest):
 class FocusTextureMode(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        os.makedirs(focus_directory)
+        _make_test_directories()
         main(vanadium_run="236516", user="test", focus_run=None, do_cal=True, directory=focus_directory)
         simple.mtd.clear()
         csv_file = os.path.join(root_directory, "EnginX.csv")
@@ -180,6 +182,12 @@ class FocusTextureMode(systemtesting.MantidSystemTest):
         _try_delete(focus_directory)
 
 
+def _make_test_directories():
+    """Attempts to make the input directory for the tests"""
+    if not os.path.exists(cal_directory):
+        os.makedirs(cal_directory)
+
+
 def _try_delete(path):
     try:
         # Use this instead of os.remove as we could be passed a non-empty dir
@@ -189,8 +197,3 @@ def _try_delete(path):
             os.remove(path)
     except OSError:
         print("Could not delete output file at: ", path)
-
-
-def _current_os_has_gsl_lvl2():
-    """ Check whether the current OS should be running GSLv2 """
-    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''

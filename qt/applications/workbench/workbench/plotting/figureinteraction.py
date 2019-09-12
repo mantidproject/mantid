@@ -27,7 +27,7 @@ from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
-                                                 GlobalMarkerEditor)
+                                                 GlobalMarkerEditor, ColorbarAxisEditor)
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
@@ -177,7 +177,10 @@ class FigureInteraction(object):
                 move_and_show(XAxisEditor(canvas, ax))
             elif (ax.yaxis.contains(event)[0] or
                   any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
-                move_and_show(YAxisEditor(canvas, ax))
+                if ax == axes[0]:
+                    move_and_show(YAxisEditor(canvas, ax))
+                else:
+                    move_and_show(ColorbarAxisEditor(canvas,ax))
 
     def _show_markers_menu(self, markers, event):
         """
@@ -298,8 +301,8 @@ class FigureInteraction(object):
         marker_action_group = QActionGroup(marker_menu)
         x0, x1 = event.inaxes.get_xlim()
         y0, y1 = event.inaxes.get_ylim()
-        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1))
-        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1))
+        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
+        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
         edit = marker_menu.addAction("Edit", lambda: self._global_edit_markers())
 
         for action in [horizontal, vertical, edit]:
@@ -337,7 +340,7 @@ class FigureInteraction(object):
                 return "{} {}".format(self.default_marker_name, proposed_number)
             proposed_number += 1
 
-    def _add_horizontal_marker(self, y_pos, lower, upper, name=None, line_style='dashed', color='C2'):
+    def _add_horizontal_marker(self, y_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
         """
         Add a horizontal marker to the plot and append it to the list of open markers
         :param y_pos: position to plot the marker to
@@ -350,12 +353,12 @@ class FigureInteraction(object):
         if name is None:
             name = self._get_free_marker_name()
         marker = SingleMarker(self.canvas, color, y_pos, lower, upper, name=name,
-                              marker_type='YSingle', line_style=line_style)
+                              marker_type='YSingle', line_style=line_style, axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos, lower, upper, name=None, line_style='dashed', color='C2'):
+    def _add_vertical_marker(self, x_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
         """
         Add a vertical marker to the plot and append it to the list of open markers
         :param x_pos: position to plot the marker to
@@ -368,7 +371,7 @@ class FigureInteraction(object):
         if name is None:
             name = self._get_free_marker_name()
         marker = SingleMarker(self.canvas, color, x_pos, lower, upper, name=name,
-                              marker_type='XSingle', line_style=line_style)
+                              marker_type='XSingle', line_style=line_style, axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
@@ -391,8 +394,9 @@ class FigureInteraction(object):
             editor.move(QCursor.pos())
             editor.exec_()
 
+        used_names = [str(_marker.name) for _marker in self.markers]
         QApplication.restoreOverrideCursor()
-        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors))
+        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors, used_names))
 
     def _set_hover_cursor(self, x_pos, y_pos):
         """

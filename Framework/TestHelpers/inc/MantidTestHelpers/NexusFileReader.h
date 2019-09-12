@@ -10,17 +10,19 @@
 
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
+#include <Eigen/Dense>
 #include <H5Cpp.h>
 #include <boost/filesystem.hpp>
 #include <string>
 #include <vector>
 
 /*
- TODO: DOCUMENTATION
-
- *@author Takudzwa Makoni, RAL (UKRI), ISIS
- *@date 06/08/2019
-*/
+ * NexusFileReader: Test utility for unit testing in
+ * NexusGeometrySave::saveInstrument.
+ *
+ * @author Takudzwa Makoni, RAL (UKRI), ISIS
+ * @date 06/08/2019
+ */
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -34,9 +36,45 @@ std::string toNXPathString(FullNXPath &path) {
   return pathString;
 }
 
+// ported from NexusGeometryParser, for validating storage type of dataset
+// before reading its contents into a container
+template <typename ExpectedT>
+void validateStorageType(const H5::DataSet &data) {
+
+  const auto typeClass = data.getTypeClass();
+  const size_t sizeOfType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data.
+  if (std::is_floating_point<ExpectedT>::value) {
+    if (H5T_FLOAT != typeClass) {
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a "
+                               "floating point number");
+    }
+    if (sizeOfType != sizeof(ExpectedT)) {
+      throw std::runtime_error(
+          "Storage type mismatch for floats. This operation "
+          "is dangerous. Nexus stored has byte size:" +
+          std::to_string(sizeOfType));
+    }
+  } else if (std::is_integral<ExpectedT>::value) {
+    if (H5T_INTEGER != typeClass) {
+      throw std::runtime_error(
+          "Storage type mismatch. Expecting to extract a integer");
+    }
+    if (sizeOfType > sizeof(ExpectedT)) {
+      // endianness not checked
+      throw std::runtime_error(
+          "Storage type mismatch for integer. Result "
+          "would result in truncation. Nexus stored has byte size:" +
+          std::to_string(sizeOfType));
+    }
+  }
+}
+
 // test utility used for validation of the structure of a nexus file as needed
 // for unit tests in Nexus Geometry.
 class NexusFileReader {
+
+  bool m_open = false;
 
 public:
   NexusFileReader(const std::string &fullPath) {
@@ -46,7 +84,27 @@ public:
       throw std::invalid_argument("no such file.\n");
     } else {
       m_file.openFile(fullPath, H5F_ACC_RDONLY);
+      m_open = true;
     }
+  }
+
+  // read a multidimensional dataset and returns vector containing the data
+  template <typename T>
+  std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
+                                             std::string dataSetName) {
+
+    std::vector<T> dataInFile;
+
+    // open dataset and read.
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
+    H5::DataSet dataset = parentGroup.openDataSet(dataSetName);
+
+    validateStorageType<T>(dataset);
+    auto space = dataset.getSpace();
+
+    dataInFile.resize(space.getSelectNpoints());
+    dataset.read(dataInFile.data(), dataset.getDataType(), space);
+    return dataInFile;
   }
 
   /* safely open a HDF5 group path with additional helpful
@@ -69,13 +127,13 @@ public:
   bool parentNXgroupHasChildNXgroup(const std::string &parentNX_CLASS_TYPE,
                                     const std::string &childNX_CLASS_TYPE) {
 
-    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_PATH);
+    H5::Group rootGroup = m_file.openGroup(DEFAULT_ROOT_ENTRY_NAME);
 
     // if specified parent NX class type is NX entry, check the top level of
     // file structure only. (dont take extra step to look for parent group)
     if (parentNX_CLASS_TYPE == NX_ENTRY) {
 
-      for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+      for (size_t i = 0; i < rootGroup.getNumObjs(); ++i) {
         if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
           std::string childPath = rootGroup.getObjnameByIdx(i);
           // Open the sub group
@@ -92,7 +150,7 @@ public:
     }
 
     // Iterate over children of root group, and determine if a group
-    for (hsize_t i = 0; i < rootGroup.getNumObjs(); ++i) {
+    for (size_t i = 0; i < rootGroup.getNumObjs(); ++i) {
       if (rootGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
         std::string childPath = rootGroup.getObjnameByIdx(i);
         // Open the sub group
@@ -103,7 +161,7 @@ public:
         std::string parentAttrVal;
         parentAttribute.read(parentAttribute.getDataType(), parentAttrVal);
         if (parentAttrVal == parentNX_CLASS_TYPE) {
-          for (hsize_t i = 0; i < childGroup.getNumObjs(); ++i) {
+          for (size_t i = 0; i < childGroup.getNumObjs(); ++i) {
             if (childGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
               std::string grandchildPath = childGroup.getObjnameByIdx(i);
               // Open the sub group
@@ -130,10 +188,10 @@ public:
                                const FullNXPath &pathToGroup) {
     double value;
     int rank = 1;
-    hsize_t dims[(hsize_t)1];
-    dims[0] = (hsize_t)1;
+    hsize_t dims[static_cast<hsize_t>(1)];
+    dims[0] = static_cast<hsize_t>(1);
 
-    H5::DataSpace space = H5Screate_simple(rank, dims, NULL);
+    H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
     // open dataset and read.
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -171,7 +229,7 @@ public:
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
+    for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
         H5::DataSet dSet = parentGroup.openDataSet(dSetName);
@@ -194,7 +252,7 @@ public:
 
     H5::Group parentGroup = m_file.openGroup(pathToGroup);
     auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
+    for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dSetName = parentGroup.getObjnameByIdx(i);
         H5::DataSet dSet = parentGroup.openDataSet(dSetName);
@@ -215,7 +273,7 @@ public:
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
     auto numOfChildren = parentGroup.getNumObjs();
-    for (hsize_t i = 0; i < numOfChildren; i++) {
+    for (size_t i = 0; i < numOfChildren; i++) {
       if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
         std::string dataSetName = parentGroup.getObjnameByIdx(i);
         if (dsetName == dataSetName) {
@@ -310,6 +368,15 @@ public:
 
     return attributeValue == attrVal;
   }
+
+  void close() {
+    if (m_open) {
+      m_file.close();
+    }
+    m_open = false;
+  }
+
+  ~NexusFileReader() { close(); }
 
 private:
   H5::H5File m_file;

@@ -121,7 +121,11 @@ void CalculateTransmissionBeamSpreader::exec() {
   }
 
   // Extract the required spectra into separate workspaces
-  std::vector<detid_t> udets{getProperty("IncidentBeamMonitor")};
+  // The static_cast should not be necessary but it is required to avoid a
+  // "internal compiler error: segmentation fault" when compiling with gcc
+  // and std=c++1z
+  std::vector<detid_t> udets{
+      static_cast<detid_t>(getProperty("IncidentBeamMonitor"))};
 
   // Convert UDETs to workspace indices
   // Get monitors (assume that the detector mapping is the same for all data

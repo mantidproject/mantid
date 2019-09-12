@@ -590,7 +590,7 @@ void JSONGeometryParser::parse(const std::string &jsonGeometry) {
 }
 
 double JSONGeometryParser::degreesToRadians(const double degrees) noexcept {
-  return degrees * PI / DEGREES_IN_SEMICIRCLE;
+  return degrees * M_PI / DEGREES_IN_SEMICIRCLE;
 }
 } // namespace NexusGeometry
 } // namespace Mantid

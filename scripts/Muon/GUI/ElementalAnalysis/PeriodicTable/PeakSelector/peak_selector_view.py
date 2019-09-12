@@ -8,18 +8,51 @@ from __future__ import (absolute_import, division, unicode_literals)
 from qtpy import QtWidgets, QtCore
 
 from six import iteritems
+import numpy as np
 
 from Muon.GUI.Common.checkbox import Checkbox
 
 
-# Check that the new data format contains at least A, Z, primary (they can be empty)
+def value_in_bounds(val, lower, upper):
+    if val is None or val == {}:
+        return True
+
+    if lower <= val <= upper:
+        return True
+
+    return False
+
+
 def valid_data(peak_data):
+    # Check that the new data format contains at least A, Z, primary (they can be empty)
     data_label = peak_data.keys()
-    if any(['Z' not in data_label,
-            'A' not in data_label,
-            'Primary' not in data_label,
-            'Secondary' not in data_label]):
+    if any([
+            'Z' not in data_label, 'A' not in data_label, 'Primary' not in data_label,
+            'Secondary' not in data_label
+    ]):
         return False
+
+    # Check that the data is a sensible number (high bound set by element Oganesson, heaviest known element as of 2019)
+    if not value_in_bounds(peak_data['Z'], 1, 119):
+        return False
+    if not value_in_bounds(peak_data['A'], 1.0, 296.0):
+        return False
+    if peak_data['Primary'] is not None:
+        for x_pos in peak_data['Primary'].values():
+            if not value_in_bounds(x_pos, 0.0, np.Inf):
+                return False
+    if peak_data['Secondary'] is not None:
+        for x_pos in peak_data['Secondary'].values():
+            if not value_in_bounds(x_pos, 0.0, np.Inf):
+                return False
+    if 'Gammas' in data_label and peak_data['Gammas'] is not None:
+        for x_pos in peak_data['Gammas'].values():
+            if not value_in_bounds(x_pos, 0.0, np.Inf):
+                return False
+    if 'Electrons' in data_label and peak_data['Electrons'] is not None:
+        for x_pos in peak_data['Electrons'].values():
+            if not value_in_bounds(x_pos, 0.0, np.Inf):
+                return False
 
     return True
 
@@ -33,7 +66,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
 
         self.new_data = {}
         if not valid_data(peak_data):
-            raise ValueError
+            raise ValueError('Element {} does not contain valid data'.format(element))
 
         self.element = element
         self.update_new_data(peak_data)
@@ -44,7 +77,9 @@ class PeakSelectorView(QtWidgets.QListWidget):
         primary = peak_data["Primary"]
         self.primary_checkboxes = self._create_checkbox_list("Primary", primary)
         secondary = peak_data["Secondary"]
-        self.secondary_checkboxes = self._create_checkbox_list("Secondary", secondary, checked=False)
+        self.secondary_checkboxes = self._create_checkbox_list("Secondary",
+                                                               secondary,
+                                                               checked=False)
         try:
             gammas = peak_data["Gammas"]
             self.gamma_checkboxes = self._create_checkbox_list("Gammas", gammas, checked=False)
@@ -57,7 +92,9 @@ class PeakSelectorView(QtWidgets.QListWidget):
             for xpos, int in electrons.items():
                 name = '$e^-\quad$  {}'.format(xpos)
                 electron_data[name] = float(xpos)
-            self.electron_checkboxes = self._create_checkbox_list("Electrons", electron_data, checked=False)
+            self.electron_checkboxes = self._create_checkbox_list("Electrons",
+                                                                  electron_data,
+                                                                  checked=False)
         except KeyError:
             self.electron_checkboxes = []
 

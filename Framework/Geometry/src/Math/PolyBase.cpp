@@ -279,8 +279,9 @@ PolyBase &PolyBase::operator*=(const double V)
   @return (*this*V);
  */
 {
+  using std::placeholders::_1;
   transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(),
-            std::bind2nd(std::multiplies<double>(), V));
+            std::bind(std::multiplies<double>(), _1, V));
   return *this;
 }
 
@@ -291,8 +292,9 @@ PolyBase &PolyBase::operator/=(const double V)
   @return (*this/V);
  */
 {
+  using std::placeholders::_1;
   transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(),
-            std::bind2nd(std::divides<double>(), V));
+            std::bind(std::divides<double>(), _1, V));
   return *this;
 }
 

@@ -112,11 +112,17 @@ add_subdirectory(mantid)
 include ( PythonPackageTargetFunctions )
 
 # Adds `mantid` as a target in the `MantidFramework/Python` folder
-add_python_package ( PythonInterface EGGLINKNAME mantid )
+if(APPLE)
+  set(_install_lib_dirs "${LIB_DIR};${WORKBENCH_LIB_DIR}")
+else()
+  set(_install_lib_dirs "${WORKBENCH_LIB_DIR}")
+endif()
+add_python_package ( PythonInterface EGGLINKNAME mantid
+                     INSTALL_LIB_DIRS ${_install_lib_dirs} )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 add_dependencies ( PythonInterface PythonInterfaceCore PythonKernelModule
   PythonGeometryModule PythonAPIModule PythonDataObjectsModule
-  PythonCurveFittingModule PythonPlotsModule PythonPy3CompatModule PythonPlotsModestImageModule )
+  PythonCurveFittingModule )
 
 # Clear any leftover bin/$(Configuration)/mantid/ folder, from when
 # PythonInterface was being copied over.

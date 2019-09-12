@@ -24,7 +24,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     instname = None
     instrument = None
     bankmin = defaultdict(lambda: 1, {'SEQUOIA':23, 'TOPAZ':10})  # default is one
-    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':1, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':48, 'HYSPEC':20, 'MANDI':59,
+    bankmax = {'ARCS':115, 'BIOSANS':2, 'CG2':48, 'CNCS':50, 'CORELLI':91, 'EQ-SANS':48, 'HYSPEC':20, 'MANDI':59,
                'NOMAD':99, 'POWGEN':300, 'REF_M':1, 'SEQUOIA':150,'SNAP':64,'SXD':11,'TOPAZ':59,'WAND':8,'WISH':10}
 
     def category(self):
@@ -231,8 +231,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             return '{}{}{}'.format(label, banknum, ToB)
         elif self.instname == "WISH":
             return "panel" + "%02d" % banknum
-        elif self.instname in ['CG2', 'REF_M']:
+        elif self.instname == 'REF_M':
             return "detector{}".format(banknum)
+        elif self.instname == 'CG2':
+            return "bank{}".format(banknum)
         elif self.instname == 'EQ-SANS':
             if '2019-' in validFrom:
                 return "bank{}".format(banknum)

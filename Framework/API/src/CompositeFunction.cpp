@@ -508,8 +508,9 @@ void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
     } else if (np_new > 0) // it could happen if the old function is an empty
                            // CompositeFunction
     {
+      using std::placeholders::_1;
       itFun = std::find_if(m_IFunction.begin(), m_IFunction.end(),
-                           std::bind2nd(std::greater<size_t>(), i));
+                           std::bind(std::greater<size_t>(), _1, i));
       m_IFunction.insert(itFun, np_new, i);
     }
   }

@@ -36,8 +36,6 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
             "chemical_formula": "V"
         }
 
-        ws = mantid.CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=2, BinWidth=1)
-
         # Test each key one at a time
         for blacklisted_key in iterkeys(sample_properties):
             # Force python to make a shallow copy
@@ -46,11 +44,11 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
 
             # Check that is raises an error
             with assertRaisesRegex(self, KeyError, "The following key was not found in the advanced configuration"):
-                ws = absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
+                absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
 
             # Then check the error actually has the key name in it
             with assertRaisesRegex(self, KeyError, blacklisted_key):
-                ws = absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
+                absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
 
 
 if __name__ == "__main__":
