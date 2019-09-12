@@ -114,10 +114,10 @@ private:
                       int &rawFrames, int &goodFrames, const int &minEventsReq,
                       const int &maxEventsReq, MantidVec &frameEventCounts,
                       std::vector<DataObjects::EventList> &histograms,
-                      std::vector<DataObjects::EventList> &histogramsInFrame);
+                      std::vector<DataObjects::EventList> &histogramsInFrame,
+                      const size_t &totalFilePaths, int &fileCount);
   /// Helper function to convert big endian events.
-  void correctForBigEndian(const EventUnion &bigEndian,
-                           EventUnion &smallEndian);
+  void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian);
   /// Add some text information to the sample logs.
   void addToSampleLog(const std::string &logName, const std::string &logText,
                       DataObjects::EventWorkspace_sptr &ws);
@@ -125,7 +125,7 @@ private:
   void addToSampleLog(const std::string &logName, const int &logNumber,
                       DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
-  size_t verifyFileSize(FILE *&file);
+  size_t verifyFileSize(std::ifstream &file);
   /// Check if a frame should be added to the output workspace.
   void addFrameToOutputWorkspace(
       int &rawFrames, int &goodFrames, const int &eventCountInFrame,
@@ -136,7 +136,9 @@ private:
   /// Reports progress and checks cancel flag.
   bool reportProgressAndCheckCancel(size_t &numProcessedEvents,
                                     int &eventCountInFrame,
-                                    size_t &totalNumEvents);
+                                    size_t &totalNumEvents,
+                                    const size_t &totalFilePaths,
+                                    const int &fileCount);
   /// Create the main data workspace.
   void createEventWorkspace(const int &maxToF, const double &binWidth,
                             std::vector<DataObjects::EventList> &histograms);

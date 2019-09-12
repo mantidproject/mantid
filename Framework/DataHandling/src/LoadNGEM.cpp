@@ -18,6 +18,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
+#include <fstream>
 #include <sys/stat.h>
 
 namespace Mantid {
@@ -126,10 +127,12 @@ void LoadNGEM::exec() {
   histogramsInFrame.resize(NUM_OF_SPECTRA);
   progress(0.04);
 
+  size_t totalFilePaths(filePaths.size());
+  int counter(1);
   for (const auto &filePath : filePaths) {
     loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames,
                    goodFrames, minEventsReq, maxEventsReq, frameEventCounts,
-                   histograms, histogramsInFrame);
+                   histograms, histogramsInFrame, totalFilePaths, counter);
   }
   // Add the final frame of events (as they are not followed by a T0 event)
   addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
@@ -157,34 +160,28 @@ void LoadNGEM::loadSingleFile(
     const int &minEventsReq, const int &maxEventsReq,
     MantidVec &frameEventCounts,
     std::vector<DataObjects::EventList> &histograms,
-    std::vector<DataObjects::EventList> &histogramsInFrame) {
+    std::vector<DataObjects::EventList> &histogramsInFrame,
+    const size_t &totalFilePaths, int &fileCount) {
   // Create file reader
   if (filePath.size() > 1) {
     throw std::runtime_error("Invalid filename parameter.");
   }
-  FILE *file = fopen(filePath[0].c_str(), "rb");
-  if (file == NULL) {
+  std::ifstream file(filePath[0].c_str(), std::ifstream::binary);
+  if (!file.is_open()) {
     throw std::runtime_error("File could not be found.");
   }
+  char *buffer = new char[16];
 
-  EventUnion event, eventBigEndian;
+  EventUnion event;
+  EventUnion *eventBigEndian;
 
   size_t totalNumEvents = verifyFileSize(file) / 16;
   size_t numProcessedEvents = 0;
 
-  size_t loadStatus(0);
-
-  while (!feof(file)) {
+  while (!file.eof()) {
     // Load an event into the variable.
-    loadStatus = fread(&eventBigEndian, sizeof(eventBigEndian), 1, file);
-
-    // Check that the load was successful.
-    if (loadStatus == 0) {
-      g_log.information() << "Finished reading a file.\n";
-      break;
-    } else if (loadStatus != 1) {
-      throw std::runtime_error("Error while reading file.");
-    }
+    file.read(buffer, 16);
+    eventBigEndian = (EventUnion *)buffer;
 
     // Correct for the big endian format.
     correctForBigEndian(eventBigEndian, event);
@@ -209,20 +206,22 @@ void LoadNGEM::loadSingleFile(
                                 histograms, histogramsInFrame);
 
       if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame,
-                                       totalNumEvents)) {
+                                       totalNumEvents, totalFilePaths,
+                                       fileCount)) {
         return;
       }
     } else { // Catch all other events and notify.
       g_log.warning() << "Unexpected event type loaded.\n";
     }
   }
-  fclose(file);
+  g_log.information() << "Finished loading a file.\n";
+  ++fileCount;
 }
 
-void LoadNGEM::correctForBigEndian(const EventUnion &bigEndian,
+void LoadNGEM::correctForBigEndian(EventUnion *&bigEndian,
                                    EventUnion &smallEndian) {
-  smallEndian.splitWord.words[0] = swapUint64(bigEndian.splitWord.words[1]);
-  smallEndian.splitWord.words[1] = swapUint64(bigEndian.splitWord.words[0]);
+  smallEndian.splitWord.words[0] = swapUint64(bigEndian->splitWord.words[1]);
+  smallEndian.splitWord.words[1] = swapUint64(bigEndian->splitWord.words[0]);
 }
 
 void LoadNGEM::addToSampleLog(const std::string &logName,
@@ -246,16 +245,18 @@ void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
   sampLogAlg->executeAsChildAlg();
 }
 
-size_t LoadNGEM::verifyFileSize(FILE *&file) {
+size_t LoadNGEM::verifyFileSize(std::ifstream &file) {
   // Check that the file fits into 16 byte sections.
-  struct stat fileStatus;
-  if (fstat(fileno(file), &fileStatus) != 0 || fileStatus.st_size % 16 != 0) {
+  file.seekg(0, file.end);
+  size_t size = file.tellg();
+  if (size % 16 != 0) {
     g_log.warning()
-        << "Invalid file size. File is size is " << fileStatus.st_size
+        << "Invalid file size. File is size is " << size
         << " bytes which is not a factor of 16. There may be some bytes "
            "missing from the data. \n";
   }
-  return fileStatus.st_size;
+  file.seekg(0);
+  return size;
 }
 
 void LoadNGEM::addFrameToOutputWorkspace(
@@ -283,9 +284,14 @@ void LoadNGEM::addFrameToOutputWorkspace(
 
 bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
                                             int &eventCountInFrame,
-                                            size_t &totalNumEvents) {
+                                            size_t &totalNumEvents,
+                                            const size_t &totalFilePaths,
+                                            const int &fileCount) {
   numProcessedEvents += eventCountInFrame;
-  progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111);
+  std::string message(std::to_string(fileCount) + "/" +
+                      std::to_string(totalFilePaths));
+  progress(double(numProcessedEvents) / double(totalNumEvents) / 1.11111,
+           message);
   eventCountInFrame = 0;
   // Check for cancel flag.
   return this->getCancel();
