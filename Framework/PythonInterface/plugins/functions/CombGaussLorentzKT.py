@@ -13,7 +13,6 @@
 
 from mantid.api import IFunction1D, FunctionFactory
 import numpy as np
-from scipy import special as sp
 
 
 class CombGaussLorenKT(IFunction1D):

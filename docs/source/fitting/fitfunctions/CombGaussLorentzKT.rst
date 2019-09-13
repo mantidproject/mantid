@@ -16,9 +16,9 @@ Fitting function for use by Muon scientists defined by:
 .. attributes::
 
 .. properties::
-$\sigma$ is KuboToyabe decay rate
-$A_0$ is the amplitude at $t=0$
-$\lambda$ is exponential decay rate
+:math:`\sigma` is KuboToyabe decay rate
+:math:`A_0` is the amplitude at :math:`t=0`
+:math:`\lambda` is exponential decay rate
 
 .. categories::
 
