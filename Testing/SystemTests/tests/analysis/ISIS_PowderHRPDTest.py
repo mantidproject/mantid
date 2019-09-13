@@ -105,7 +105,7 @@ class FocusTest(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, 'hrpd66063_b{}_TOF.dat'.format(bankno))
 
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
-            self.tolerance = 0.4
+            self.tolerance = 0.47
         else:
             self.tolerance = 0.16
         return self.focus_results.name(), "HRPD66063_focused.nxs"

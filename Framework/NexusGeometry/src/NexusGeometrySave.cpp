@@ -38,7 +38,7 @@
 namespace Mantid {
 namespace NexusGeometry {
 namespace NexusGeometrySave {
-
+using namespace Geometry::ComponentInfoBankHelpers;
 /*
  * Helper container for spectrum mapping information info
  */
@@ -597,6 +597,27 @@ void validateInputs(AbstractLogger &logger, const std::string &fullPath,
   }
 }
 
+/*
+ * Function determines if a given index has an ancestor index in the
+ * saved_indices list. This allows us to prevent duplicate saving of things that
+ * could be considered NXDetectors
+ */
+template <typename T>
+bool isDesiredNXDetector(size_t index, const T &saved_indices,
+                         const Geometry::ComponentInfo &compInfo) {
+  return saved_indices.end() ==
+         std::find_if(saved_indices.begin(), saved_indices.end(),
+                      [&compInfo, &index](const size_t idx) {
+                        return isAncestorOf(compInfo, idx, index);
+                      });
+}
+
+/**
+ * Internal save implementation. We can either write a new file containing only
+ * the geometry, or we might also need to append/merge with an existing file.
+ * Knowing the logic for this is important so we build an object around the Mode
+ * state.
+ */
 class NexusGeometrySaveImpl {
 public:
   enum class Mode { Trunc, Append };
@@ -972,7 +993,7 @@ public:
  * @param fullPath : save destination as full path.
  * @param rootName : name of root entry
  * @param logger : logging object
- * @param append : append mode, means opening and appending to existing file.
+ * @param append : append mode, means openting and appending to existing file.
  * If false, creates new file.
  * @param reporter : (optional) report to progressBase.
  */
@@ -1009,26 +1030,17 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
   const auto &detIds = detInfo.detectorIDs();
   // save NXdetectors
-
-  std::list<size_t> nxDetectorCandidates;
+  std::list<size_t> saved_indices;
+  // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
-      nxDetectorCandidates.push_back(index);
-    }
-  }
-
-  for (std::list<size_t>::iterator index = nxDetectorCandidates.begin();
-       index != nxDetectorCandidates.end(); ++index) {
-    auto saveable =
-        !std::any_of(nxDetectorCandidates.begin(), nxDetectorCandidates.end(),
-                     [&compInfo, &index](const size_t idx) {
-                       return Geometry::ComponentInfoBankHelpers::isAncestorOf(
-                           compInfo, idx, *index);
-                     });
-    if (saveable || nxDetectorCandidates.size() == 1) {
-      if (reporter != nullptr)
-        reporter->report();
-      writer.detector(instrument, compInfo, detIds, *index);
+      if (isDesiredNXDetector(index, saved_indices, compInfo)) {
+        if (reporter != nullptr)
+          reporter->report();
+        writer.detector(instrument, compInfo, detIds, index);
+        saved_indices.push_back(index); // Now record the fact that children of
+                                        // this are not needed as NXdetectors
+      }
     }
   }
 
@@ -1111,17 +1123,24 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   // save NXdetectors
   auto detToIndexMap =
       ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
+  // save NXdetectors
+  std::list<size_t> saved_indices;
+  // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
 
-      // Make spectra detector mappings that can be used
-      SpectraMappings mappings =
-          makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
-                       ws.spectrumInfo(), detIds, index);
+      if (isDesiredNXDetector(index, saved_indices, compInfo)) {
+        // Make spectra detector mappings that can be used
+        SpectraMappings mappings =
+            makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
+                         ws.spectrumInfo(), detIds, index);
 
-      if (reporter != nullptr)
-        reporter->report();
-      writer.detector(instrument, compInfo, detIds, index, mappings);
+        if (reporter != nullptr)
+          reporter->report();
+        writer.detector(instrument, compInfo, detIds, index, mappings);
+        saved_indices.push_back(index); // Now record the fact that children of
+                                        // this are not needed as NXdetectors
+      }
     }
   }
 
