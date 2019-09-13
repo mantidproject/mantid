@@ -50,6 +50,34 @@ struct SpectraMappings {
   size_t number_spec = 0;
   size_t number_dets = 0;
 };
+
+/** Function tryCreatGroup. will try to create a new child group with the given
+ * name inside the parent group. if a child group with that name already exists
+ * in the parent group, throws std::invalid_argument. H5 will not allow us to
+ * save duplicate groups with the same name, so this provides a utility for an
+ * eager check.
+ *
+ * @param parentGroup : H5 parent group.
+ * @param childGroupName : intended name of the child goup.
+ * @return : new H5 Group object with name <childGroupName> if did not throw.
+ */
+inline H5::Group tryCreateGroup(const H5::Group &parentGroup,
+                                const std::string &childGroupName) {
+  H5std_string parentGroupName = H5_OBJ_NAME(parentGroup);
+  for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+    if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+      H5std_string child = parentGroup.getObjnameByIdx(i);
+      if (childGroupName == child) {
+        // TODO: runtime error instead?
+        throw std::invalid_argument(
+            "Cannot create group with name " + childGroupName +
+            " inside parent group " + parentGroupName +
+            " because a group with this name already exists.");
+      }
+    }
+  }
+  return parentGroup.createGroup(childGroupName);
+}
 /*
  * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
@@ -640,7 +668,7 @@ private:
       }
     }
     // We can't find it, or we are writing from scratch anyway
-    return parent.createGroup(name);
+    return tryCreateGroup(parent, name);
   }
 
   // function to create a simple sub-group that has a nexus class attribute,
