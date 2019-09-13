@@ -185,23 +185,21 @@ void IndirectMoments::rangeChanged(double min, double max) {
  * @param val :: The new value for the property
  */
 void IndirectMoments::updateProperties(QtProperty *prop, double val) {
+  auto eRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
+
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
   if (prop == m_properties["EMin"]) {
-    double emax = m_dblManager->value(m_properties["EMax"]);
-    if (val > emax) {
-      m_dblManager->setValue(prop, emax);
-    } else {
-      m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMinimum(val);
-      m_uiForm.ppRawPlot->replot();
-    }
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
-    double emin = m_dblManager->value(m_properties["EMin"]);
-    if (emin > val) {
-      m_dblManager->setValue(prop, emin);
-    } else {
-      m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMaximum(val);
-      m_uiForm.ppRawPlot->replot();
-    }
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**

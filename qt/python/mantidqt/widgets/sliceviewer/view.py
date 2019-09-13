@@ -56,6 +56,7 @@ class SliceViewerView(QWidget):
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.line_plots_toggle)
+        self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
 
         # layout
         self.layout = QVBoxLayout(self)

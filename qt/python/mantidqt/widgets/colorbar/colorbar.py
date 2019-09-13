@@ -122,6 +122,21 @@ class ColorbarWidget(QWidget):
         self.colorbar.mappable.set_cmap(name)
         self.redraw()
 
+    def mappable_changed(self):
+        """
+        Updates the colormap and min/max values of the colorbar
+        when the plot changes via settings.
+        """
+        mappable_cmap = self.colorbar.mappable.get_cmap()
+        low,high = self.colorbar.mappable.get_clim()
+        self.colorbar.set_cmap(mappable_cmap)
+        self.colorbar.set_clim(low,high)
+        self.cmin_value = low
+        self.cmax_value = high
+        self.update_clim_text()
+        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(self.colorbar.get_cmap().name))
+        self.redraw()
+
     def norm_changed(self):
         """
         Called when a different normalization is selected

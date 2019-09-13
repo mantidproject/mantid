@@ -181,20 +181,6 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="function_name_line_edit"/>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Workspace Group Name</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="ads_group_name_textbox">
-           <property name="text">
-            <string>Fitting Results</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
       </layout>
@@ -258,17 +244,24 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0" colspan="2">
+     <item row="0" column="2">
+      <widget class="QPushButton" name="undo_fit_button">
+       <property name="text">
+        <string>Undo Latest Fit</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
       <widget class="QPushButton" name="fit_button">
        <property name="text">
         <string>Fit</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="undo_fit_button">
+     <item row="0" column="1">
+      <widget class="QCheckBox" name="plot_guess_checkbox">
        <property name="text">
-        <string>Undo Latest Fit</string>
+        <string>Plot guess</string>
        </property>
       </widget>
      </item>

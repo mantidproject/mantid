@@ -233,6 +233,32 @@ private:
   UserSubWindow(QWidget *parent = nullptr);
 };
 
+class BaseEncoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseEncoder.h"
+%End
+public:
+  virtual QMap<QString, QVariant> encode(const QWidget *window,
+                                         const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseEncoder();
+  virtual ~BaseEncoder();
+};
+
+class BaseDecoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseDecoder.h"
+%End
+public:
+  virtual QWidget * decode(const QMap<QString, QVariant> &map,
+                          const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseDecoder();
+  virtual ~BaseDecoder();
+};
+
 class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindowFactory.h"
@@ -246,6 +272,9 @@ public:
     UserSubWindow *createUnwrapped(const std::string &name) const;
     QSet<QString> categories(const QString &interfaceName) const;
     QStringList keys() const;
+    BaseEncoder *findEncoder(QWidget *window);
+    BaseDecoder *findDecoder(const std::string &decodeString);
+
 
 private:
   UserSubWindowFactoryImpl();
@@ -391,6 +420,7 @@ public:
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
     void setTextPlotGuess(const QString);
+    bool plotDiff() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode

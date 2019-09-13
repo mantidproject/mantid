@@ -20,6 +20,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
     gridClicked = Signal()
     linePlotsClicked = Signal(bool)
+    plotOptionsChanged = Signal()
 
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
@@ -66,3 +67,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
         # Adjust icon size or they are too small in PyQt5 by default
         self.setIconSize(QSize(24, 24))
+
+    def edit_parameters(self):
+        NavigationToolbar2QT.edit_parameters(self)
+        self.plotOptionsChanged.emit()

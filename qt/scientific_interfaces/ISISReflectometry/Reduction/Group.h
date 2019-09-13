@@ -68,6 +68,10 @@ private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 
 template <typename ModificationListener>

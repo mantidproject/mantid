@@ -16,6 +16,7 @@
 #include <stdexcept>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISCalibration");
@@ -572,6 +573,8 @@ void ISISCalibration::calMinChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(calUpdateRS(QtProperty *, double)));
   if (from == calPeak) {
     m_dblManager->setValue(m_properties["CalPeakMin"], val);
   } else if (from == calBackground) {
@@ -581,6 +584,8 @@ void ISISCalibration::calMinChanged(double val) {
   } else if (from == resBackground) {
     m_dblManager->setValue(m_properties["ResStart"], val);
   }
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(calUpdateRS(QtProperty *, double)));
 }
 
 /**
@@ -599,6 +604,8 @@ void ISISCalibration::calMaxChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(calUpdateRS(QtProperty *, double)));
   if (from == calPeak) {
     m_dblManager->setValue(m_properties["CalPeakMax"], val);
   } else if (from == calBackground) {
@@ -608,6 +615,8 @@ void ISISCalibration::calMaxChanged(double val) {
   } else if (from == resBackground) {
     m_dblManager->setValue(m_properties["ResEnd"], val);
   }
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(calUpdateRS(QtProperty *, double)));
 }
 
 /**
@@ -623,22 +632,37 @@ void ISISCalibration::calUpdateRS(QtProperty *prop, double val) {
   auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
   auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
 
-  if (prop == m_properties["CalPeakMin"])
-    calPeak->setMinimum(val);
-  else if (prop == m_properties["CalPeakMax"])
-    calPeak->setMaximum(val);
-  else if (prop == m_properties["CalBackMin"])
-    calBackground->setMinimum(val);
-  else if (prop == m_properties["CalBackMax"])
-    calBackground->setMaximum(val);
-  else if (prop == m_properties["ResStart"])
-    resBackground->setMinimum(val);
-  else if (prop == m_properties["ResEnd"])
-    resBackground->setMaximum(val);
-  else if (prop == m_properties["ResELow"])
-    resPeak->setMinimum(val);
-  else if (prop == m_properties["ResEHigh"])
-    resPeak->setMaximum(val);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(calUpdateRS(QtProperty *, double)));
+
+  if (prop == m_properties["CalPeakMin"]) {
+    setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalPeakMax"],
+                        calPeak, val);
+  } else if (prop == m_properties["CalPeakMax"]) {
+    setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalPeakMax"],
+                        calPeak, val);
+  } else if (prop == m_properties["CalBackMin"]) {
+    setRangeSelectorMin(m_properties["CalPeakMin"], m_properties["CalBackMax"],
+                        calBackground, val);
+  } else if (prop == m_properties["CalBackMax"]) {
+    setRangeSelectorMax(m_properties["CalPeakMin"], m_properties["CalBackMax"],
+                        calBackground, val);
+  } else if (prop == m_properties["ResStart"]) {
+    setRangeSelectorMin(m_properties["ResStart"], m_properties["ResEnd"],
+                        resBackground, val);
+  } else if (prop == m_properties["ResEnd"]) {
+    setRangeSelectorMax(m_properties["ResStart"], m_properties["ResEnd"],
+                        resBackground, val);
+  } else if (prop == m_properties["ResELow"]) {
+    setRangeSelectorMin(m_properties["ResELow"], m_properties["ResEHigh"],
+                        resPeak, val);
+  } else if (prop == m_properties["ResEHigh"]) {
+    setRangeSelectorMax(m_properties["ResELow"], m_properties["ResEHigh"],
+                        resPeak, val);
+  }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(calUpdateRS(QtProperty *, double)));
 }
 
 /**

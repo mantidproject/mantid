@@ -74,9 +74,9 @@ class ProjectSaver(object):
     def _return_interfaces_dicts(directory, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
-            # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
             try:
-                tag = encoder.tags[0]
+                # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
+                tag = encoder.tags()[0]
                 encoded_dict = encoder.encode(interface, directory)
                 encoded_dict["tag"] = tag
                 interfaces.append(encoded_dict)
@@ -85,7 +85,6 @@ class ProjectSaver(object):
                 if isinstance(e, KeyboardInterrupt):
                     raise
                 logger.warning("Project Saver: An interface could not be saver error: " + str(e))
-
         return interfaces
 
 

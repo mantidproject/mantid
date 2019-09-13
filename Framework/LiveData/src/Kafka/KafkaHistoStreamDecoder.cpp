@@ -20,11 +20,14 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/hs00_event_histogram_generated.h"
 GNU_DIAG_ON("conversion")
+
+#include <json/json.h>
 
 using namespace HistoSchema;
 
@@ -55,9 +58,9 @@ namespace LiveData {
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
-    const std::string &sampleEnvTopic)
+    const std::string &sampleEnvTopic, const std::string &chopperTopic)
     : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic),
+                          sampleEnvTopic, chopperTopic),
       m_workspace() {}
 
 /**
@@ -221,7 +224,7 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     throw std::runtime_error(os.str());
   }
 
-  m_runNumber = runStartData.runNumber;
+  m_runId = runStartData.runId;
 
   // Create buffer
   auto histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
@@ -229,9 +232,11 @@ void KafkaHistoStreamDecoder::initLocalCaches(
       spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
 
   // Load the instrument if possible but continue if we can't
+  auto jsonGeometry = runStartData.nexusStructure;
   auto instName = runStartData.instrumentName;
   if (!instName.empty())
-    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer);
+    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
+                                             jsonGeometry);
   else
     g_log.warning(
         "Empty instrument name received. Continuing without instrument");
@@ -244,8 +249,7 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   auto timeString = m_runStart.toISO8601String();
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
-                         std::to_string(runStartData.runNumber));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));

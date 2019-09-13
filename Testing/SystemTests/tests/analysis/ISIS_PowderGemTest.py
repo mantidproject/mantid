@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import systemtesting
 import shutil
-import platform
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -21,6 +20,7 @@ DIRS = config['datasearch.directories'].split(';')
 # Setup various path details
 
 inst_name = "GEM"
+user_name = "Test"
 # Relative to system data folder
 working_folder_name = "ISIS_Powder"
 
@@ -31,7 +31,8 @@ output_folder_name = "output"
 # Relative to input folder
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "gem_system_test_mapping.yaml")
-spline_rel_path = os.path.join("17_1", "VanSplined_83608_offsets_2011_cycle111b.cal.nxs")
+cycle = "17_1"
+spline_rel_path = os.path.join(cycle, "VanSplined_83608_offsets_2011_cycle111b.cal.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -97,6 +98,23 @@ class FocusTestNoAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
         self.doTest(absorb_corrections=False)
 
     def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, cycle, user_name)
+        assert_output_file_exists(user_output, 'GEM83605.nxs')
+        assert_output_file_exists(user_output, 'GEM83605.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 7):
+            assert_output_file_exists(output_dat_dir, 'GEM83605-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'GEM83605-b_{}-d.dat'.format(bankno))
+
         return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
 
 
@@ -124,10 +142,10 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-5
-        if _current_os_has_gsl_lvl2():
-            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
-        else:
+        if systemtesting.using_gsl_v1():
             return self.focus_results.name(), "ISIS_Powder-GEM87618_groupedGSAS1.nxs"
+        else:
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
 
     def cleanup(self):
         try:
@@ -199,8 +217,6 @@ def setup_mantid_paths():
 
 
 def setup_inst_object(mode):
-    user_name = "Test"
-
     inst_obj = Gem(user_name=user_name, calibration_mapping_file=calibration_map_path,
                    calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
     return inst_obj
@@ -215,8 +231,3 @@ def _try_delete(path):
             os.remove(path)
     except OSError:
         print("Could not delete output file at: ", path)
-
-
-def _current_os_has_gsl_lvl2():
-    """ Check whether the current OS should be running GSLv2 """
-    return platform.linux_distribution()[0].lower() == "ubuntu" or platform.mac_ver()[0] != ''

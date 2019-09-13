@@ -650,8 +650,9 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time,
     times.load();
     std::string units = times.attributes("units");
     if (units == "minutes") {
+      using std::placeholders::_1;
       std::transform(times(), times() + times.dim0(), times(),
-                     std::bind2nd(std::multiplies<double>(), 60));
+                     std::bind(std::multiplies<double>(), _1, 60));
     } else if (!units.empty() && units.substr(0, 6) != "second") {
       return nullptr;
     }

@@ -1,5 +1,6 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
+  include_directories(SYSTEM 
+				      ${CXXTEST_INCLUDE_DIR})
 
   include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build this helper
@@ -28,6 +29,7 @@ if(CXXTEST_FOUND)
                         Catalog
                         DataHandling
                         Nexus
+                        HistogramData
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${HDF5_HL_LIBRARIES})

@@ -279,6 +279,8 @@ set(
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndirectBayes.cpp
+  IndirectBayesTab.cpp
   IndirectCorrections.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
@@ -308,6 +310,9 @@ set(
   IndirectToolsTab.cpp
   IndirectTransmission.cpp
   IndirectTransmissionCalc.cpp
+  Quasi.cpp
+  ResNorm.cpp
+  Stretch.cpp
 )
 
 set(
@@ -323,6 +328,8 @@ set(
   ISISDiagnostics.h
   ISISEnergyTransfer.h
   IIndirectSettingsView.h
+  IndirectBayes.h
+  IndirectBayesTab.h
   IndirectCorrections.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
@@ -348,6 +355,9 @@ set(
   IndirectToolsTab.h
   IndirectTransmission.h
   IndirectTransmissionCalc.h
+  Quasi.h
+  ResNorm.h
+  Stretch.h
 )
 
 set(
@@ -369,6 +379,7 @@ set(
   ISISCalibration.ui
   ISISDiagnostics.ui
   ISISEnergyTransfer.ui
+  IndirectBayes.ui
   IndirectCorrections.ui
   IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
@@ -386,6 +397,9 @@ set(
   IndirectTools.ui
   IndirectTransmission.ui
   IndirectTransmissionCalc.ui
+  Quasi.ui
+  ResNorm.ui
+  Stretch.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)

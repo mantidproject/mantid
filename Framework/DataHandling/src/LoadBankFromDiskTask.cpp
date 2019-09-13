@@ -10,6 +10,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Unit.h"
+#include <algorithm>
 
 #include "MantidNexus/NexusIOHelper.h"
 
@@ -216,13 +217,10 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     file.closeData();
 
     // determine the range of pixel ids
-    for (int64_t i = 0; i < m_loadSize[0]; ++i) {
-      const auto id = event_id[i];
-      if (id < m_min_id)
-        m_min_id = id;
-      if (id > m_max_id)
-        m_max_id = id;
-    }
+    m_min_id =
+        *(std::min_element(event_id.get(), event_id.get() + m_loadSize[0]));
+    m_max_id =
+        *(std::max_element(event_id.get(), event_id.get() + m_loadSize[0]));
 
     if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
       // All the detector IDs in the bank are higher than the highest 'known'

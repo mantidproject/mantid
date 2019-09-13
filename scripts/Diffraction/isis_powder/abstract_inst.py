@@ -8,7 +8,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 from isis_powder.routines import calibrate, focus, common, common_enums, common_output
-
+from mantid.kernel import config, logger
+from six import iteritems
 
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
@@ -19,6 +20,7 @@ from isis_powder.routines import calibrate, focus, common, common_enums, common_
 # to denote internal methods to abstract_inst we will use '_abs_' to denote it as a
 # private method for the scripts
 
+
 class AbstractInst(object):
     def __init__(self, user_name, calibration_dir, output_dir, inst_prefix):
         # ----- Properties common to ALL instruments -------- #
@@ -27,6 +29,13 @@ class AbstractInst(object):
         self._user_name = user_name
         self._calibration_dir = calibration_dir
         self._inst_prefix = inst_prefix
+        try:
+            self._inst_prefix_short = config.getInstrument(inst_prefix).shortName()
+        except RuntimeError:
+            logger.warning(
+                "Unknown instrument {}. Setting short prefix equal to full prefix".format(
+                    inst_prefix))
+            self._inst_prefix_short = inst_prefix
         self._output_dir = output_dir
         self._is_vanadium = None
         self._beam_parameters = None
@@ -53,10 +62,15 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        return calibrate.create_van(instrument=self, run_details=run_details,
+        return calibrate.create_van(instrument=self,
+                                    run_details=run_details,
                                     absorb=do_absorb_corrections)
 
-    def _focus(self, run_number_string, do_van_normalisation, do_absorb_corrections, sample_details=None):
+    def _focus(self,
+               run_number_string,
+               do_van_normalisation,
+               do_absorb_corrections,
+               sample_details=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -64,8 +78,11 @@ class AbstractInst(object):
         :return:
         """
         self._is_vanadium = False
-        return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
-                           instrument=self, absorb=do_absorb_corrections, sample_details=sample_details)
+        return focus.focus(run_number_string=run_number_string,
+                           perform_vanadium_norm=do_van_normalisation,
+                           instrument=self,
+                           absorb=do_absorb_corrections,
+                           sample_details=sample_details)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -86,12 +103,11 @@ class AbstractInst(object):
             height = float(height)
             width = float(width)
         except ValueError:
-                raise ValueError("Beam height and width must be numbers.")
+            raise ValueError("Beam height and width must be numbers.")
         if height <= 0 or width <= 0:
             raise ValueError("Beam height and width must be more than 0.")
         else:
-            self._beam_parameters = {'height': height,
-                                     'width': width}
+            self._beam_parameters = {'height': height, 'width': width}
 
     def should_subtract_empty_inst(self):
         """
@@ -109,13 +125,14 @@ class AbstractInst(object):
         """
         raise NotImplementedError("get_run_details must be implemented per instrument")
 
-    def _generate_input_file_name(self, run_number):
+    def _generate_input_file_name(self, run_number, file_ext=None):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
+        :param file_ext: An optional file extension to add to force a particular format
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        return self._generate_inst_filename(run_number=run_number)
+        return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """
@@ -124,7 +141,8 @@ class AbstractInst(object):
                 :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
                 :return: A workspace containing the corrections
                 """
-        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
+        raise NotImplementedError(
+            "apply_absorb_corrections Not implemented for this instrument yet")
 
     def _generate_output_file_name(self, run_number_string):
         """
@@ -236,16 +254,12 @@ class AbstractInst(object):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing group of the processed output workspaces
         """
-        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
-                                                                                   processed_spectra=processed_spectra)
-        output_paths = self._generate_out_file_paths(run_details=run_details)
-
-        file_ext = run_details.file_extension[1:] if run_details.file_extension else ""
-
-        common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
-                                        output_paths=output_paths, inst_prefix=self._inst_prefix,
-                                        run_number_string=run_details.output_run_string,
-                                        file_ext=file_ext)
+        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(
+            run_details=run_details, processed_spectra=processed_spectra)
+        common_output.save_focused_data(
+            d_spacing_group=d_spacing_group,
+            tof_group=tof_group,
+            output_paths=self._generate_out_file_paths(run_details=run_details))
 
         return d_spacing_group, tof_group
 
@@ -283,31 +297,56 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        file_name = str(self._generate_output_file_name(run_number_string=run_details.output_run_string))
-        # Prepend the file extension used if it was set, this groups the files nicely in the file browser
-        # Also remove the dot at the start so we don't make hidden files in *nix systems
-        file_name = run_details.file_extension[1:] + file_name if run_details.file_extension else file_name
-        file_name += run_details.output_suffix if run_details.output_suffix is not None else ""
+        dat_files_directory = output_directory
+        if self._inst_settings.dat_files_directory:
+            dat_files_directory = os.path.join(output_directory,
+                                               self._inst_settings.dat_files_directory)
 
-        nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
-        gss_file = os.path.join(output_directory, (file_name + ".gsas"))
-        tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))
-        d_xye_file = os.path.join(output_directory, (file_name + "_d_xye.dat"))
-        out_name = file_name
+        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(
+            ".")
+        out_file_names = {"output_folder": output_directory}
+        format_options = {
+            "inst": self._inst_prefix,
+            "instlow": self._inst_prefix.lower(),
+            "instshort": self._inst_prefix_short,
+            "runno": run_details.output_run_string,
+            "fileext": file_type,
+            "_fileext": "_" + file_type if file_type else "",
+            "suffix": run_details.output_suffix if run_details.output_suffix else ""
+        }
+        format_options = self._add_formatting_options(format_options)
 
-        out_file_names = {"nxs_filename": nxs_file,
-                          "gss_filename": gss_file,
-                          "tof_xye_filename": tof_xye_file,
-                          "dspacing_xye_filename": d_xye_file,
-                          "output_name": out_name,
-                          "output_folder": output_directory}
+        output_formats = {
+            "nxs_filename": output_directory,
+            "gss_filename": output_directory,
+            "tof_xye_filename": dat_files_directory,
+            "dspacing_xye_filename": dat_files_directory
+        }
+        for key, output_dir in iteritems(output_formats):
+            filepath = os.path.join(output_dir,
+                                    getattr(self._inst_settings, key).format(**format_options))
+            out_file_names[key] = filepath
 
+        out_file_names['output_name'] = os.path.splitext(
+            os.path.basename(out_file_names['nxs_filename']))[0]
         return out_file_names
 
-    def _generate_inst_filename(self, run_number):
+    def _generate_inst_filename(self, run_number, file_ext):
         if isinstance(run_number, list):
             # Multiple entries
-            return [self._generate_inst_filename(run) for run in run_number]
+            return [self._generate_inst_filename(run, file_ext) for run in run_number]
         else:
             # Individual entry
-            return self._inst_prefix + str(run_number)
+            runfile = self._inst_prefix + str(run_number)
+            if file_ext is not None:
+                runfile += file_ext
+            return runfile
+
+    def _add_formatting_options(self, format_options):
+        """
+        Add any instrument-specific format options to the given
+        list
+        :param format_options: A dictionary of string format keys mapped to their expansions
+        :return: format_options as it is passed in
+        """
+        return format_options
