@@ -478,7 +478,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '13460, 13463'
         args['GroupTOFWorkspaces'] = True
-        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13463']
+        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13460', 'TOF_13463']
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_group_TOF_workspaces_succeeds_with_TOF_group(self):
