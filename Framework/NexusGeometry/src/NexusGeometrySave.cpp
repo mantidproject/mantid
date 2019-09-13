@@ -660,7 +660,7 @@ private:
       // Find by class and by name
       auto results = utilities::findGroups(parent, classType);
       for (auto &result : results) {
-        auto resultName = H5ForwardCompatibility::getObjName(result);
+        auto resultName = H5_OBJ_NAME(result);
         // resultName gives full path. We match the last name on the path
         if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
           return result;
