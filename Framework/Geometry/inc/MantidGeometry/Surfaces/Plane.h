@@ -43,7 +43,7 @@ private:
 
 protected:
   Plane(const Plane &) = default;
-  Plane &operator=(const Plane &) = default;
+  Plane &operator=(const Plane &) = delete;
 
 public:
   /// Effective typename
