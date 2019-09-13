@@ -33,7 +33,6 @@ set(TEST_PY_FILES
     IndirectSampleChangerTest.py
     IndirectTransmissionMonitorTest.py
     IndirectTwoPeakFitTest.py
-    IndirectQuickRunTest.py
     IqtFitMultipleTest.py
     IqtFitSequentialTest.py
     ISISIndirectDiffractionReductionTest.py

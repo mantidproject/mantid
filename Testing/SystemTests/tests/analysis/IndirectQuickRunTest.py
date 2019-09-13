@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AnalysisDataService, WorkspaceGroup)
 from mantid.simpleapi import (CompareWorkspaces, IndirectQuickRun, LoadNexus)
-
+import systemtesting
 import unittest
 
 
@@ -94,5 +94,21 @@ class IndirectQuickRunTest(unittest.TestCase):
                                           Tolerance=5.0, ToleranceRelErr=True)[0])
 
 
-if __name__ == '__main__':
-    unittest.main()
+class IndirectQuickRunTestRunner(systemtesting.MantidSystemTest):
+    def __init__(self):
+        systemtesting.MantidSystemTest.__init__(self)
+        self._success = False
+
+    def runTest(self):
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(IndirectQuickRunTest, 'test'))
+        runner = unittest.TextTestRunner()
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+
+    def requiredMemoryMB(self):
+        return 2000
+
+    def validate(self):
+        return self._success
