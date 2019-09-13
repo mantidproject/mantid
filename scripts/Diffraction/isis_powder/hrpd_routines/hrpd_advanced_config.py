@@ -65,8 +65,8 @@ window_180_280_params = {
 file_names = {
     "vanadium_peaks_masking_file": "VanaPeaks.dat",
     "grouping_file_name": "hrpd_new_072_01_corr.cal",
-    "nxs_filename": "{instlow}{runno}{suffix}.nxs",
-    "gss_filename": "{instlow}{runno}{suffix}.gss",
+    "nxs_filename": "{instlow}{runno}{_fileext}{suffix}.nxs",
+    "gss_filename": "{instlow}{runno}{_fileext}{suffix}.gss",
     "dat_files_directory": "dat_files",
     "tof_xye_filename": "{instlow}{runno}{_fileext}{suffix}_b{{bankno}}_TOF.dat",
     "dspacing_xye_filename": "{instlow}{runno}{_fileext}{suffix}_b{{bankno}}_D.dat",
