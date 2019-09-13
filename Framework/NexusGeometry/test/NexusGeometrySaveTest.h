@@ -72,14 +72,16 @@ used.
 
   void test_progress_reporting() {
 
+    const int nbanks = 2;
     MockProgressBase progressRep;
-    EXPECT_CALL(progressRep, doReport(testing::_)).Times(2);
+    EXPECT_CALL(progressRep, doReport(testing::_))
+        .Times(nbanks); // Progress report once for each bank
 
     FileResource fileResource("progress_report_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        nbanks /*number of banks*/, 2 /*number of pixels per bank*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -319,8 +321,8 @@ used.
     std::string destinationFile = fileResource.fullPath();
 
     // unnamed ("") instrument with multiple unnamed detector banks ("")
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        2 /*number of banks*/, 2 /*number of pixels*/, 0.008, true);
+    auto instrument = ComponentCreationHelper::createTestUnnamedRectangular2(
+        2 /*number of banks*/, 2);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
@@ -373,6 +375,28 @@ used.
 
     TS_ASSERT(compInfo.hasSample());
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
+  }
+
+  void test_correct_number_of_detectors_saved() {
+
+    FileResource fileResource("check_num_of_banks_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    int banksInInstrument = 3;
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        banksInInstrument /*number of banks*/, 4 /*pixels (arbitrary)*/);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
+    NexusFileReader tester(destinationFile);
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+                       "basic_rect" /*instrument name*/};
+
+    int numOfNXDetectors = tester.countNXgroup(path, NX_DETECTOR);
+
+    TS_ASSERT_EQUALS(numOfNXDetectors, banksInInstrument);
   }
 
   /*

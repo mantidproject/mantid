@@ -163,11 +163,9 @@ public:
 
   void test_eight_pack() {
 
-    FileResource fileResource("output.hdf5");
+    FileResource fileResource("eight_pack.hdf5");
     auto destinationFile = fileResource.fullPath();
 
-    // Bilby contains eight-packs, though other instrument features could still
-    // be problematic
     Mantid::DataHandling::LoadEmptyInstrument alg;
     alg.setChild(true);
     alg.initialize();
@@ -184,6 +182,37 @@ public:
     saver.setProperty("InputWorkspace", ws);
     TS_ASSERT_THROWS_NOTHING(saver.execute());
     TS_ASSERT(saver.isExecuted());
+  }
+
+  void test_duplicate_named_components_in_instrument_throws() {
+
+    /*
+    instrument Definition HET_Definition_old.xml contains at least two monitors
+    both named "monitor". Expected behaviour is that nexus geometry save will
+    not allow naming of two groups with the same name in the same parent; Throws
+    exception.
+    */
+
+    FileResource fileResource("duplicate_names_test.hdf5");
+    auto destinationFile = fileResource.fullPath();
+
+    Mantid::DataHandling::LoadEmptyInstrument loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Filename", "HET_Definition_old.xml");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.execute();
+    Mantid::API::MatrixWorkspace_sptr ws =
+        loader.getProperty("OutputWorkspace");
+
+    SaveNexusGeometry saver;
+    saver.setChild(true);
+    saver.setRethrows(true);
+    saver.initialize();
+    saver.setProperty("Filename", destinationFile);
+    saver.setProperty("InputWorkspace", ws);
+    TS_ASSERT_THROWS(saver.execute(), std::invalid_argument &);
+    TS_ASSERT(!saver.isExecuted());
   }
 };
 
