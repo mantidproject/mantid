@@ -286,7 +286,8 @@ void write1DIntDataset(H5::Group &grp, const H5std_string &name,
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   auto dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);
-  dataset.write(container.data(), H5::PredType::NATIVE_INT, space);
+  if (!container.empty())
+    dataset.write(container.data(), H5::PredType::NATIVE_INT, space);
 }
 
 /*

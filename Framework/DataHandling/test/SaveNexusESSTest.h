@@ -84,14 +84,7 @@ from_instrument_name(const std::string &name) {
   return ws;
 }
 Mantid::API::MatrixWorkspace_sptr load(const std::string &name) {
-  LoadNexusProcessed loader;
-  loader.setChild(true);
-  loader.initialize();
-  loader.setProperty("Filename", name);
-  loader.setPropertyValue("OutputWorkspace", "dummy");
-  loader.execute();
-  Workspace_sptr ws = loader.getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  return reload(name);
 }
 } // namespace test_utility
 } // namespace
@@ -253,13 +246,21 @@ public:
         "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
                                                    // detectors in it's
                                                    // mappings.
-    handle.setDebugMode(true);
     auto ws = test_utility::load("irs26176_graphite002_red.nxs");
     Mantid::Kernel::Logger logger("logger");
     Mantid::NexusGeometry::LogAdapter<Mantid::Kernel::Logger> adapter(&logger);
     TS_ASSERT_THROWS_NOTHING(
         Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
             *ws, handle.fullPath(), "entry", adapter));
+  }
+  void test_not_all_detectors_mapped_to_spectrum_and_reloaded() {
+    ScopedFileHandle handle(
+        "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
+                                                   // detectors in it's
+                                                   // mappings.
+    auto ws = test_utility::load("irs26176_graphite002_red.nxs");
+    do_execute(handle.fullPath(), ws);
+    auto ws_out = test_utility::reload(handle.fullPath());
   }
 };
 
