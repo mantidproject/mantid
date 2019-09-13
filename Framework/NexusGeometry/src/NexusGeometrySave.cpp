@@ -650,38 +650,9 @@ class NexusGeometrySaveImpl {
 public:
   enum class Mode { Trunc, Append };
 
-private:
-  Mode m_mode;
-
-  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name,
-                              const std::string &classType) {
-
-    if (m_mode == Mode::Append) {
-      // Find by class and by name
-      auto results = utilities::findGroups(parent, classType);
-      for (auto &result : results) {
-        auto resultName = H5_OBJ_NAME(result);
-        // resultName gives full path. We match the last name on the path
-        if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
-          return result;
-        }
-      }
-    }
-    // We can't find it, or we are writing from scratch anyway
-    return tryCreateGroup(parent, name);
-  }
-
-  // function to create a simple sub-group that has a nexus class attribute,
-  // inside a parent group.
-  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
-                             const std::string &nexusAttribute) {
-    H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
-    writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
-    return subGroup;
-  }
-
-public:
   explicit NexusGeometrySaveImpl(Mode mode) : m_mode(mode) {}
+  NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) =
+      delete; // No intention to suport copies
 
   /*
    * Function: NXInstrument
@@ -1008,7 +979,37 @@ public:
     writeDetectorIndex(childGroup, mappings);
     writeSpectra(childGroup, mappings);
   }
-}; // namespace
+
+private:
+  const Mode m_mode;
+
+  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name,
+                              const std::string &classType) {
+
+    if (m_mode == Mode::Append) {
+      // Find by class and by name
+      auto results = utilities::findGroups(parent, classType);
+      for (auto &result : results) {
+        auto resultName = H5_OBJ_NAME(result);
+        // resultName gives full path. We match the last name on the path
+        if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
+          return result;
+        }
+      }
+    }
+    // We can't find it, or we are writing from scratch anyway
+    return tryCreateGroup(parent, name);
+  }
+
+  // function to create a simple sub-group that has a nexus class attribute,
+  // inside a parent group.
+  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
+                             const std::string &nexusAttribute) {
+    H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
+    writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
+    return subGroup;
+  }
+}; // class NexusGeometrySaveImpl
 
 /*
  * Function: saveInstrument
