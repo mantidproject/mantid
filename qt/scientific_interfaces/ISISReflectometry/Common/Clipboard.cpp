@@ -127,9 +127,9 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForSubtree(
                    });
     auto validationResult = validateRow(cells);
     if (validationResult.isValid())
-      result.push_back(validationResult.assertValid());
+      result.emplace_back(validationResult.assertValid());
     else
-      result.push_back(boost::none);
+      result.emplace_back(boost::none);
   }
 
   return result;

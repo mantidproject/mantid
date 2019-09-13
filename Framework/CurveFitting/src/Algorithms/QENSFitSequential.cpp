@@ -753,7 +753,11 @@ std::vector<MatrixWorkspace_sptr> QENSFitSequential::getWorkspaces() const {
   const auto inputString = getPropertyValue("Input");
   if (!inputString.empty())
     return extractWorkspaces(inputString);
-  return {getProperty("InputWorkspace")};
+  // The static_cast should not be necessary but it is required to avoid a
+  // "internal compiler error: segmentation fault" when compiling with gcc
+  // and std=c++1z
+  return std::vector<MatrixWorkspace_sptr>{
+      static_cast<MatrixWorkspace_sptr>(getProperty("InputWorkspace"))};
 }
 
 std::vector<MatrixWorkspace_sptr> QENSFitSequential::convertInputToElasticQ(

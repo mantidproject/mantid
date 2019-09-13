@@ -2277,8 +2277,9 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
+  using std::placeholders::_1;
   if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),
-                   std::bind2nd(std::greater<PixelType>(), max_pid)) !=
+                   std::bind(std::greater<PixelType>(), _1, max_pid)) !=
       m_pixelmap.end()) {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading "
                         "without mapping file");

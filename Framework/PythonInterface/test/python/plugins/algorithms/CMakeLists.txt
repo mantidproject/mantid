@@ -44,6 +44,7 @@ set(TEST_PY_FILES
     ExportSpectraMaskTest.py
     FilterLogByTimeTest.py
     FitGaussianTest.py
+    FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py

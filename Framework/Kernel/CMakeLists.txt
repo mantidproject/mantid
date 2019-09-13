@@ -267,7 +267,7 @@ set(INC_FILES
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
     inc/MantidKernel/RemoteJobManager.h
-    inc/MantidKernel/SimpleJSON.h 
+    inc/MantidKernel/SimpleJSON.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -594,7 +594,7 @@ set(
   ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
   )
 set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
-set(MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository?debug=1")
+set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
 set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 
 # For an mpi-enabled build, do not log to file, format console output (which
@@ -665,7 +665,7 @@ set(UPDATE_INSTRUMENT_DEFINTITIONS "${ENABLE_NETWORK_ACCESS}")
 set(CHECK_FOR_NEW_MANTID_VERSION "${ENABLE_NETWORK_ACCESS}")
 set(ENABLE_USAGE_REPORTS "${ENABLE_NETWORK_ACCESS}")
 set(DATADIRS "")
-set(MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository")
+set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository")
 set(HTML_ROOT ../share/doc/html)
 
 # For a framework-only (e.g. MPI) build some of these are not relevant and

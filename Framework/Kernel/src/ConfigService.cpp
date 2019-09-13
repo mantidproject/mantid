@@ -618,9 +618,10 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   std::string correctedPath = path;
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
+  using std::placeholders::_1;
   auto it =
       std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
-                   std::bind2nd(std::equal_to<std::string>(), correctedPath));
+                   std::bind(std::equal_to<std::string>(), _1, correctedPath));
   return (it != m_DataSearchDirs.end());
 }
 

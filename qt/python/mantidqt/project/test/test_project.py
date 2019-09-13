@@ -31,6 +31,10 @@ def fake_window_finding_function():
     return []
 
 
+def _raise(exception):
+    raise exception
+
+
 @start_qapplication
 class ProjectTest(unittest.TestCase):
     def setUp(self):
@@ -188,6 +192,31 @@ class ProjectTest(unittest.TestCase):
         self.project._offer_large_size_confirmation = mock.MagicMock()
         self.project._save()
         self.assertEqual(self.project._offer_large_size_confirmation.call_count, 0)
+
+    def test_is_loading_is_False_after_error_thrown_during_load(self):
+        with mock.patch.object(self.project, '_load_file_dialog', lambda: _raise(IOError)):
+            try:
+                self.project.load()
+            except IOError:
+                pass
+        self.assertFalse(self.project.is_loading)
+
+    def test_is_loading_is_False_after_None_returned_from_load_dialog(self):
+        # None is returned from the load dialog when a user clicks Cancel
+        with mock.patch.object(self.project, '_load_file_dialog', lambda: None):
+            try:
+                self.project.load()
+            except IOError:
+                pass
+        self.assertFalse(self.project.is_loading)
+
+    def test_is_saving_is_False_if_error_thrown_during_save(self):
+        with mock.patch.object(self.project, '_get_project_size', lambda x: _raise(IOError)):
+            try:
+                self.project._save()
+            except IOError:
+                pass
+        self.assertFalse(self.project.is_saving)
 
 
 if __name__ == "__main__":

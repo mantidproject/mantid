@@ -32,6 +32,7 @@ using namespace Kernel;
 using namespace CurveFitting;
 using namespace CurveFitting::Functions;
 using namespace std;
+using std::placeholders::_1;
 
 // Subscription
 DECLARE_ALGORITHM(VesuvioCalculateGammaBackground)
@@ -255,7 +256,7 @@ void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
   // Correct for distance to the detector: 0.5/l2^2
   const double detDistCorr = 0.5 / detPar.l2 / detPar.l2;
   std::transform(ctdet.begin(), ctdet.end(), ctdet.begin(),
-                 std::bind2nd(std::multiplies<double>(), detDistCorr));
+                 std::bind(std::multiplies<double>(), _1, detDistCorr));
 }
 
 /**
@@ -302,7 +303,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
   if (reversed) {
     // The reversed ones should be (C0 - C1)
     std::transform(ctfoil.begin(), ctfoil.end(), ctfoil.begin(),
-                   std::bind2nd(std::multiplies<double>(), -1.0));
+                   std::bind(std::multiplies<double>(), _1, -1.0));
   }
 }
 
@@ -398,7 +399,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
   // Assumes the input is in seconds, transform it temporarily
   auto &tseconds = m_backgroundWS->mutableX(wsIndex);
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
-                 std::bind2nd(std::multiplies<double>(), 1e-6));
+                 std::bind(std::multiplies<double>(), _1, 1e-6));
 
   // retrieveInputs ensures we will get a composite function and that each
   // member is a ComptonProfile
@@ -429,7 +430,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
   }
   // Put X back microseconds
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
-                 std::bind2nd(std::multiplies<double>(), 1e6));
+                 std::bind(std::multiplies<double>(), _1, 1e6));
   return correctedVals;
 }
 
