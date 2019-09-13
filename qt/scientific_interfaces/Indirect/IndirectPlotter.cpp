@@ -322,10 +322,9 @@ void IndirectPlotter::plotTiled(std::string const &workspaceName,
     QHash<QString, QVariant> plotKwargs;
     if (errorBars)
       plotKwargs["capsize"] = ERROR_CAPSIZE;
-    plot(QStringList(QString::fromStdString(workspaceName)),
-                 boost::none, createIndicesVector<int>(workspaceIndices),
-                 boost::none, plotKwargs, boost::none,
-                 "Tiled Plot: " + workspaceName, errorBars, false, true);
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+         createIndicesVector<int>(workspaceIndices), boost::none, plotKwargs,
+         boost::none, "Tiled Plot: " + workspaceName, errorBars, false, true);
 #endif
   }
 }

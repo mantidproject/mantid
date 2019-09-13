@@ -342,8 +342,7 @@ public:
             " add : Unable to insert Data Object : '" + newName + "'";
         g_log.error(error);
         throw std::runtime_error(error);
-      }
-      else {
+      } else {
         lock.unlock();
       }
     }
