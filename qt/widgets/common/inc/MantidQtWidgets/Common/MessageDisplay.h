@@ -80,9 +80,9 @@ public:
   void setShowFrameworkOutput(const bool &show) {
     m_showFrameworkOutput = show;
   }
-  inline bool showAllScriptOutput() const { return m_showAllScriptOutput; }
-  void setShowAllScriptOutput(const bool &show) {
-    m_showAllScriptOutput = show;
+  inline bool showScriptOutput() const { return m_showScriptOutput; }
+  void setShowScriptOutput(const bool &show) {
+    m_showScriptOutput = show;
   }
 
 signals:
@@ -161,7 +161,7 @@ private:
   /// Keep track of the message history
   QList<Message> *m_messageHistory;
   /// Bools to dictate whether to print certain types of messages
-  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true};
+  bool m_showFrameworkOutput{true}, m_showScriptOutput{true};
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

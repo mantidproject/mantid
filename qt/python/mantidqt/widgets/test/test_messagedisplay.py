@@ -28,7 +28,7 @@ class MessageDisplayTest(unittest.TestCase):
     def setUp(self):
         self.display = MessageDisplay()
         self.display.setShowFrameworkOutput(True)
-        self.display.setShowAllScriptOutput(True)
+        self.display.setShowScriptOutput(True)
 
     def get_message_window_contents(self):
         return self.display.getTextEdit().toPlainText()
@@ -57,13 +57,13 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertIn(msg, self.get_message_window_contents())
 
     def test_new_script_output_is_not_shown_if_showScriptOutput_is_False(self):
-        self.display.setShowAllScriptOutput(False)
+        self.display.setShowScriptOutput(False)
         script_msg = 'A new script message'
         self.display.append_script_notice(script_msg)
         self.assertNotIn(script_msg, self.get_message_window_contents())
 
     def test_new_framework_output_is_shown_if_showScriptOutput_is_False(self):
-        self.display.setShowAllScriptOutput(False)
+        self.display.setShowScriptOutput(False)
         framework_msg = 'A new framework message'
         self.display.appendNotice(framework_msg)
         self.assertIn(framework_msg, self.get_message_window_contents())
