@@ -13,19 +13,9 @@ from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.general_functions import create_child_algorithm, parse_diagnostic_settings
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.gui_logic.plotting import get_plotting_module
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
-
-from qtpy import PYQT4
-IN_MANTIDPLOT = False
-if PYQT4:
-    try:
-        import mantidplot
-        IN_MANTIDPLOT = True
-    except (Exception, Warning):
-        pass
-else:
-    from mantidqt.plotting.functions import plot
 
 
 def run_integral(integral_ranges, mask, integral, detector, state):
@@ -133,12 +123,13 @@ def generate_output_workspace_name(range, integral, mask, detector, input_worksp
 
 
 def plot_graph(workspace):
-    if IN_MANTIDPLOT:
-        return mantidplot.plotSpectrum(workspace, 0)
-    elif not PYQT4:
+    plotting_module = get_plotting_module()
+    if hasattr(plotting_module, 'plotSpectrum'):
+        return plotting_module.plotSpectrum(workspace, 0)
+    elif hasattr(plotting_module, 'plot'):
         if not isinstance(workspace, list):
             workspace = [workspace]
-        plot(workspace, wksp_indices=[0])
+        plotting_module.plot(workspace, wksp_indices=[0])
 
 
 def apply_mask(state, workspace, component):

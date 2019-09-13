@@ -124,6 +124,49 @@ class HomeTabPlotPresenterTest(unittest.TestCase):
         self.model.add_workspace_to_plot.assert_called_with('MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', 2,
                                                             'MUSR62260; Group; bottom; Asymmetry; MA; Fitted;: Diff')
 
+    def test_handle_plot_guess_changed_returns_if_no_plot_is_open(self):
+        self.model.plot_figure = None
+        self.presenter.handle_plot_guess_changed()
+
+        self.assertEqual(0, self.context.fitting_context.plot_guess.call_count)
+
+    def test_handle_plot_guess_changed_removes_all_guesses_if_workspace_is_none(self):
+        self.context.fitting_context.plot_guess = True
+        self.context.fitting_context.guess_ws = None
+        self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4']
+        call_list = [mock.call('ws2_guess'), mock.call('ws3_guess')]
+        self.presenter.handle_plot_guess_changed()
+
+        self.assertEqual(0, self.model.add_workspace_to_plot.call_count)
+        self.assertEqual(2, self.model.remove_workpace_from_plot.call_count)
+        self.model.remove_workpace_from_plot.assert_has_calls(call_list)
+        self.assertEqual(1, self.model.force_redraw.call_count)
+
+    def test_handle_plot_guess_changed_adds_guess_to_plot_and_removes_previous_guess_if_present(self):
+        self.context.fitting_context.plot_guess = True
+        self.context.fitting_context.guess_ws = 'ws_guess'
+        self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4', 'ws_guess']
+        self.presenter.handle_plot_guess_changed()
+
+        self.assertEqual(3, self.model.remove_workpace_from_plot.call_count)
+        self.assertEqual(1, self.model.add_workspace_to_plot.call_count)
+        self.model.remove_workpace_from_plot.assert_called_with('ws_guess')
+        self.model.add_workspace_to_plot.assert_called_with('ws_guess',
+                                                            workspace_index=1,
+                                                            label='Fit Function Guess')
+
+    def test_handle_plot_guess_changed_adds_guess_to_plot(self):
+        self.context.fitting_context.plot_guess = True
+        self.context.fitting_context.guess_ws = 'ws_guess'
+        self.model.plotted_fit_workspaces = ['ws1', 'ws2_guess', 'ws3_guess', 'ws4']
+        self.presenter.handle_plot_guess_changed()
+
+        self.assertEqual(2, self.model.remove_workpace_from_plot.call_count)
+        self.assertEqual(1, self.model.add_workspace_to_plot.call_count)
+        self.model.add_workspace_to_plot.assert_called_with('ws_guess',
+                                                            workspace_index=1,
+                                                            label='Fit Function Guess')
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

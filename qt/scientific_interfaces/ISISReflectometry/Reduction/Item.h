@@ -26,9 +26,11 @@ public:
   using ItemCountFunction = int (Item::*)() const;
 
   Item();
+  virtual ~Item() = default;
 
   virtual bool isGroup() const = 0;
   State state() const;
+  void setState(State state);
   std::string message() const;
   virtual bool requiresProcessing(bool reprocessFailed) const;
 

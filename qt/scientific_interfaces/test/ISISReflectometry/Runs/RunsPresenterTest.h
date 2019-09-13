@@ -13,9 +13,12 @@
 #include "../ReflMockObjects.h"
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
+#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MockRunsView.h"
 #include <cxxtest/TestSuite.h>
@@ -50,6 +53,7 @@ public:
         m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
         m_searchString("test search string"), m_searchResult("", "", "") {
+    Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
@@ -133,9 +137,7 @@ public:
     EXPECT_CALL(m_view, getSearchString())
         .Times(1)
         .WillOnce(Return(searchString));
-    EXPECT_CALL(m_view, getSearchInstrument())
-        .Times(1)
-        .WillOnce(Return(instrument));
+    expectSearchInstrument(instrument);
     EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument,
                                               ISearcher::SearchType::MANUAL))
         .Times(1);
@@ -409,12 +411,19 @@ public:
     verifyAndClear();
   }
 
+  void testTransferUpdatesTablePresenter() {
+    auto presenter = makePresenter();
+    auto expectedJobs = expectGetValidSearchResult();
+    EXPECT_CALL(*m_runsTablePresenter, mergeAdditionalJobs(expectedJobs))
+        .Times(1);
+    presenter.notifyTransfer();
+    verifyAndClear();
+  }
+
   void testInstrumentChanged() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
-    EXPECT_CALL(m_view, getSearchInstrument())
-        .Times(1)
-        .WillOnce(Return(instrument));
+    expectSearchInstrument(instrument);
     EXPECT_CALL(m_mainPresenter, notifyInstrumentChanged(instrument)).Times(1);
     presenter.notifyInstrumentChanged();
     verifyAndClear();
@@ -460,44 +469,80 @@ public:
     verifyAndClear();
   }
 
-  void testLiveDataReductionOptions() {
+  void testStartMonitorStartsAlgorithmRunner() {
     auto presenter = makePresenter();
-    auto props = AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
-    EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
-        .Times(1)
-        .WillOnce(Return(props));
-    auto result =
-        presenter.liveDataReductionOptions("live_input_workspace", "INTER");
-    auto expected =
-        "GetLiveValueAlgorithm=GetLiveInstrumentValue;InputWorkspace="
-        "live_input_workspace;Instrument=INTER;Prop1=val1;Prop2="
-        "val2";
-    TS_ASSERT_EQUALS(result, expected);
+    expectStartingLiveDataSucceeds();
+    auto algRunner = expectGetAlgorithmRunner();
+    EXPECT_CALL(*algRunner, startAlgorithmImpl(_)).Times(1);
+    presenter.notifyStartMonitor();
+    verifyAndClear();
   }
 
-  // TODO
-  //  void testStartMonitor() {
-  //    auto presenter = makePresenter();
-  //    EXPECT_CALL(m_view, getMonitorAlgorithmRunner()).Times(1);
-  //    EXPECT_CALL(m_view, getSearchInstrument()).Times(1);
-  //    expectUpdateViewWhenMonitorStarting();
-  //    presenter.notifyStartMonitor();
-  //    verifyAndClear();
-  //  }
-  //
-  //  void testStopMonitor() {
-  //    auto presenter = makePresenter();
-  //    expectUpdateViewWhenMonitorStopped();
-  //    presenter.notifyStopMonitor();
-  //    verifyAndClear();
-  //  }
-  //
-  //  void testStartMonitorComplete() {
-  //    auto presenter = makePresenter();
-  //    expectUpdateViewWhenMonitorStarted();
-  //    presenter.notifyStartMonitorComplete();
-  //    verifyAndClear();
-  //  }
+  void testStartMonitorUpdatesView() {
+    auto presenter = makePresenter();
+    expectStartingLiveDataSucceeds();
+    expectUpdateViewWhenMonitorStarting();
+    presenter.notifyStartMonitor();
+    verifyAndClear();
+  }
+
+  void testStartMonitorSetsAlgorithmProperties() {
+    auto presenter = makePresenter();
+    auto instrument = std::string("INTER");
+    expectGetLiveDataOptions(instrument);
+    auto algRunner = expectGetAlgorithmRunner();
+    presenter.notifyStartMonitor();
+    auto expected = defaultLiveMonitorAlgorithmOptions(instrument);
+    assertAlgorithmPropertiesContainOptions(expected, algRunner);
+    verifyAndClear();
+  }
+
+  void testStartMonitorSetsDefaultPostProcessingProperties() {
+    auto presenter = makePresenter();
+    auto options = defaultLiveMonitorReductionOptions();
+    expectGetLiveDataOptions(options);
+    auto algRunner = expectGetAlgorithmRunner();
+    presenter.notifyStartMonitor();
+    assertPostProcessingPropertiesContainOptions(options, algRunner);
+    verifyAndClear();
+  }
+
+  void testStartMonitorSetsUserSpecifiedPostProcessingProperties() {
+    auto presenter = makePresenter();
+    auto options = AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
+    expectGetLiveDataOptions(options);
+    auto algRunner = expectGetAlgorithmRunner();
+    presenter.notifyStartMonitor();
+    assertPostProcessingPropertiesContainOptions(options, algRunner);
+    verifyAndClear();
+  }
+
+  void testStopMonitorUpdatesView() {
+    auto presenter = makePresenter();
+    presenter.m_monitorAlg =
+        AlgorithmManager::Instance().createUnmanaged("MonitorLiveData");
+    expectUpdateViewWhenMonitorStopped();
+    presenter.notifyStopMonitor();
+    TS_ASSERT_EQUALS(presenter.m_monitorAlg, nullptr);
+    verifyAndClear();
+  }
+
+  void testMonitorNotRunningAfterStartMonitorFails() {
+    auto presenter = makePresenter();
+    auto algRunner = expectGetAlgorithmRunner();
+
+    // Ideally we should have a mock algorithm but for now just create the real
+    // one but don't run it so that it will fail to find the results
+    auto startMonitorAlg =
+        AlgorithmManager::Instance().createUnmanaged("StartLiveData");
+    startMonitorAlg->initialize();
+    EXPECT_CALL(*algRunner, getAlgorithm())
+        .Times(1)
+        .WillOnce(Return(startMonitorAlg));
+    expectUpdateViewWhenMonitorStopped();
+    presenter.notifyStartMonitorComplete();
+    verifyAndClear();
+  }
 
 private:
   class RunsPresenterFriend : public RunsPresenter {
@@ -559,6 +604,27 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_pythonRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runNotifier));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
+  }
+
+  AlgorithmRuntimeProps
+  defaultLiveMonitorAlgorithmOptions(const std::string &instrument) {
+    return AlgorithmRuntimeProps{
+        {"Instrument", instrument},
+        {"OutputWorkspace", "IvsQ_binned_live"},
+        {"AccumulationWorkspace", "TOF_live"},
+        {"AccumulationMethod", "Replace"},
+        {"UpdateEvery", "20"},
+        {"PostProcessingAlgorithm", "ReflectometryReductionOneLiveData"},
+        {"RunTransitionBehavior", "Restart"},
+    };
+  }
+
+  AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(
+      std::string instrument = std::string("OFFSPEC")) {
+    return AlgorithmRuntimeProps{
+        {"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
+        {"InputWorkspace", "TOF_live"},
+        {"Instrument", instrument}};
   }
 
   void expectRunsTableWithContent(RunsTable &runsTable) {
@@ -647,10 +713,39 @@ private:
     EXPECT_CALL(m_view, getSelectedSearchRows())
         .Times(1)
         .WillOnce(Return(selectedRows));
+    m_searchResult = SearchResult("", "", "");
     for (auto rowIndex : selectedRows)
       EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
           .Times(1)
           .WillOnce(ReturnRef(m_searchResult));
+  }
+
+  // Set up a valid search result with content and return the corresponding
+  // model
+  ReductionJobs
+  expectGetValidSearchResult(std::string const &run = "13245",
+                             std::string const &groupName = "Test group 1",
+                             double theta = 0.5) {
+    // Set a selected row in the search results table
+    auto const rowIndex = 0;
+    auto const selectedRows = std::set<int>({rowIndex});
+    EXPECT_CALL(m_view, getSelectedSearchRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    // Set the expected result from the search results model
+    auto const title = groupName + std::string("th=") + std::to_string(theta);
+    m_searchResult = SearchResult(run, title, "");
+    EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
+        .Times(1)
+        .WillOnce(ReturnRef(m_searchResult));
+    // Construct the corresponding model expected in the main table
+    auto jobs = ReductionJobs();
+    auto group = Group(groupName);
+    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(),
+                        boost::none, ReductionOptionsMap(),
+                        ReductionWorkspaces({run}, TransmissionRunPair())));
+    jobs.appendGroup(group);
+    return jobs;
   }
 
   void expectCreateEndlessProgressIndicator() {
@@ -757,6 +852,58 @@ private:
     EXPECT_CALL(m_mainPresenter, isProcessing())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
+  }
+
+  void expectSearchInstrument(std::string const &instrument) {
+    ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(instrument));
+  }
+
+  void expectGetLiveDataOptions(
+      AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
+      std::string const &instrument = std::string("OFFSPEC")) {
+    expectSearchInstrument(instrument);
+    EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
+        .Times(1)
+        .WillOnce(Return(options));
+  }
+
+  void expectGetLiveDataOptions(std::string const &instrument) {
+    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument);
+  }
+
+  boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+    // Get the algorithm runner
+    auto algRunner = boost::make_shared<NiceMock<MockAlgorithmRunner>>();
+    ON_CALL(m_view, getMonitorAlgorithmRunner())
+        .WillByDefault(Return(algRunner));
+    return algRunner;
+  }
+
+  void expectStartingLiveDataSucceeds() {
+    // The view must return valid reduction options and algorithm runner for
+    // the presenter to be able to run live data
+    expectGetLiveDataOptions();
+    expectGetAlgorithmRunner();
+  }
+
+  void assertAlgorithmPropertiesContainOptions(
+      AlgorithmRuntimeProps const &expected,
+      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+    auto alg = algRunner->algorithm();
+    for (auto const &kvp : expected)
+      TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
+  }
+
+  void assertPostProcessingPropertiesContainOptions(
+      AlgorithmRuntimeProps &expected,
+      boost::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+    auto alg = algRunner->algorithm();
+    auto resultString = alg->getPropertyValue("PostProcessingProperties");
+    auto result = parseKeyValueString(resultString, ";");
+    for (auto const &kvp : expected) {
+      TS_ASSERT(result.find(kvp.first) != result.end());
+      TS_ASSERT_EQUALS(result[kvp.first], expected[kvp.first]);
+    }
   }
 
   double m_thetaTolerance;

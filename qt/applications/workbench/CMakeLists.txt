@@ -8,6 +8,8 @@ endif()
 add_python_package(workbench
   EXECUTABLE
   EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+  INSTALL_LIB_DIRS "${WORKBENCH_LIB_DIR}"
+  INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
 )
 
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
@@ -32,7 +34,7 @@ if (WIN32)
 
     # Write resources.qrc.BUILD_TYPE
     file (WRITE ${_paths_qrc_file} ${_qrc_file_contents})
-  
+
     # Add command to generate resources.py file
     add_custom_command(OUTPUT ${_output_res_py}
                       COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
@@ -73,6 +75,7 @@ set(TEST_FILES
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py
     workbench/plugins/test/test_workspacewidget.py
+    workbench/utils/test/test_workspacehistorygeneration.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py

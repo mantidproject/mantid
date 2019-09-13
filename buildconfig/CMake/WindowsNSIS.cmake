@@ -88,7 +88,7 @@ set ( OCC_DIST_DLLS
     TKTopAlgo.dll
 )
 set ( MISC_CORE_DIST_DLLS
-    cblas.dll
+    gslcblas.dll
     gsl.dll
     hdf5_cpp.dll
     hdf5_hl_cpp.dll

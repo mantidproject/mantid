@@ -377,11 +377,12 @@ void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
     // divide by the xBinWidth
     outWS->convertToFrequencies(idx);
     auto &freqs = outWS->mutableY(idx);
+    using std::placeholders::_1;
     std::transform(freqs.begin(), freqs.end(), freqs.begin(),
-                   std::bind1st(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), factor, _1));
     auto &errors = outWS->mutableE(idx);
     std::transform(errors.begin(), errors.end(), errors.begin(),
-                   std::bind1st(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), factor, _1));
   }
 }
 

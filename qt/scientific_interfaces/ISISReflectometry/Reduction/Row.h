@@ -65,6 +65,8 @@ private:
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
+
+  friend class Encoder;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Row const &lhs, Row const &rhs);

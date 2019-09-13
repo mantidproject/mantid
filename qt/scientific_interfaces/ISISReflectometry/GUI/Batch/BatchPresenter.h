@@ -106,6 +106,10 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
   Mantid::Geometry::Instrument_const_sptr m_instrument;
 
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
+
 protected:
   std::unique_ptr<IBatchJobRunner> m_jobRunner;
 };

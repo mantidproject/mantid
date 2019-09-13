@@ -191,7 +191,7 @@
        <item>
         <widget class="QLabel" name="lbPreviewSpectrum">
          <property name="text">
-          <string>Preview Spectrum:</string>
+          <string>Preview Spectrum: </string>
          </property>
         </widget>
        </item>
@@ -322,17 +322,17 @@
              </property>
              <item>
               <property name="text">
+               <string>All</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>Sigma</string>
               </property>
              </item>
              <item>
               <property name="text">
                <string>Beta</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>All</string>
               </property>
              </item>
             </widget>

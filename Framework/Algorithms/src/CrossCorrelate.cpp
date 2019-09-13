@@ -113,12 +113,13 @@ void CrossCorrelate::exec() {
 
   // Now check if the range between x_min and x_max is valid
   auto &referenceX = inputWS->x(index_ref);
+  using std::placeholders::_1;
   auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
-                            std::bind2nd(std::greater<double>(), xmin));
+                            std::bind(std::greater<double>(), _1, xmin));
   if (minIt == referenceX.cend())
     throw std::runtime_error("No data above XMin");
   auto maxIt = std::find_if(minIt, referenceX.cend(),
-                            std::bind2nd(std::greater<double>(), xmax));
+                            std::bind(std::greater<double>(), _1, xmax));
   if (minIt == maxIt)
     throw std::runtime_error("Range is not valid");
 

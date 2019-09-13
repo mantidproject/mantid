@@ -10,7 +10,6 @@ import numpy as np
 import AbinsModules
 
 
-# noinspection PyMethodMayBeStatic
 class FrequencyPowderGenerator(object):
     """
     Class which generates frequencies for quantum order events.
@@ -19,7 +18,8 @@ class FrequencyPowderGenerator(object):
     def __init__(self):
         super(FrequencyPowderGenerator, self).__init__()
 
-    def construct_freq_combinations(self, previous_array=None, previous_coefficients=None,
+    @staticmethod
+    def construct_freq_combinations(previous_array=None, previous_coefficients=None,
                                     fundamentals_array=None, fundamentals_coefficients=None, quantum_order=None):
         """
         Generates frequencies for the given order of quantum event.
@@ -65,13 +65,13 @@ class FrequencyPowderGenerator(object):
             if not (isinstance(previous_array, np.ndarray) and
                     len(previous_array.shape) == 1 and
                     previous_array.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
-                raise ValueError("One dimensional array is expected.")
+                raise ValueError("One dimensional previous_array is expected.")
 
             if not (isinstance(previous_coefficients, np.ndarray) and
                     len(previous_coefficients.shape) == min(2, quantum_order - 1) and
                     previous_coefficients.dtype.num == AbinsModules.AbinsConstants.INT_ID):
-                raise ValueError("Numpy array is expected. (%s)" % previous_coefficients, type(previous_coefficients),
-                                 previous_coefficients.dtype)
+                raise ValueError("Numpy array of previous_coefficients is expected. (%s)" % previous_coefficients,
+                                 type(previous_coefficients), previous_coefficients.dtype)
 
             # generate indices
             fundamentals_size = fundamentals_array.size

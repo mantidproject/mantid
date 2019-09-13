@@ -88,8 +88,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.presenter.model.do_single_fit.assert_called_once_with(
             {'Function': mock.ANY, 'InputWorkspace': 'Input Workspace Name',
-             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint',
-             'FitGroupName': 'Fitting Results'})
+             'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0, 'EvaluationType': 'CentrePoint'})
 
         self.assertEqual(str(self.presenter.model.do_single_fit.call_args[0][0]['Function']),
                          'name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -102,7 +101,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(result, {'Function': mock.ANY,
                                   'InputWorkspace': 'Input Workspace Name',
                                   'Minimizer': 'Levenberg-Marquardt', 'StartX': 0.0, 'EndX': 15.0,
-                                  'EvaluationType': 'CentrePoint', 'FitGroupName': 'Fitting Results'}
+                                  'EvaluationType': 'CentrePoint'}
                          )
 
     def test_for_single_fit_mode_when_display_workspace_changes_updates_fitting_browser_with_new_name(self):
@@ -625,6 +624,58 @@ class FittingTabPresenterTest(unittest.TestCase):
         result = self.presenter._get_selected_groups_and_pairs()
 
         self.assertEqual(result.sort(), ['top', 'bottom', 'fwd'].sort())
+
+    def test_update_selected_ws_guess(self):
+        self.presenter.manual_selection_made = False
+        self.presenter.update_selected_time_workspace_guess = mock.Mock()
+        self.presenter.update_selected_workspace_guess()
+        self.assertEquals(self.presenter.update_selected_time_workspace_guess.call_count,1)
+
+    def test_update_selected_ws_guess_freq(self):
+        self.presenter.manual_selection_made = False
+        self.presenter.context._frequency_context = True
+        self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
+        self.presenter.update_selected_workspace_guess()
+        self.assertEquals(self.presenter.update_selected_frequency_workspace_guess.call_count,1)
+
+    def test_update_selected_ws_guess_non(self):
+        self.presenter.manual_selection_made = True
+        self.presenter.update_selected_time_workspace_guess = mock.Mock()
+        self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
+        before = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
+                                        'MUSR22725; Group; fwd; Asymmetry']
+
+        self.presenter.selected_data = before
+
+        self.presenter.update_selected_workspace_guess()
+        self.assertEquals(self.presenter.update_selected_frequency_workspace_guess.call_count,0)
+        self.assertEquals(self.presenter.update_selected_time_workspace_guess.call_count,0)
+        self.assertEquals(self.presenter.selected_data, before)
+
+    def test_update_time_guess(self):
+        self.context.get_names_of_workspaces_to_fit = mock.Mock(return_value="test")
+        self.presenter._get_selected_groups_and_pairs = mock.Mock(return_value = ["fwd","bwd"])
+        self.presenter.clear_and_reset_gui_state = mock.Mock()
+        self.presenter._check_data_exists = mock.Mock(return_value="test")
+        output = self.presenter.update_selected_time_workspace_guess()
+
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd",phasequad= True, rebin=False)
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd",phasequad= True, rebin=False)
+        self.assertEquals(self.presenter.context.get_names_of_workspaces_to_fit.call_count,2)
+        self.assertEquals(self.presenter.selected_data, "test")
+
+    def test_handle_plot_guess_changed_calls_correct_function(self):
+        self.presenter.get_parameters_for_single_fit = mock.Mock(return_value={})
+        self.presenter.view.plot_guess = True
+        self.presenter.handle_plot_guess_changed()
+
+        self.presenter.model.change_plot_guess.assert_called_with(True, {})
+
+    def test_fabada_is_not_an_allowed_minimizer(self):
+        # In muon analysis FABADA minimizer cannot run as it requires a value of MaxIterations that is too high
+        # Furthermore it is not needed in this context (see issue #26478)
+        self.view.setup_fit_options_table()
+        self.assertEqual(-1, self.view.minimizer_combo.findText('FABADA'))
 
 
 if __name__ == '__main__':

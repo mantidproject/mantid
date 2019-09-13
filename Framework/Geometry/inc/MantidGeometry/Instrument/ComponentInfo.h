@@ -116,6 +116,7 @@ public:
   Kernel::V3D samplePosition() const;
   bool hasSource() const;
   bool hasSample() const;
+  bool hasDetectors(const size_t componentIndex) const;
   size_t source() const;
   size_t sample() const;
   double l1() const;

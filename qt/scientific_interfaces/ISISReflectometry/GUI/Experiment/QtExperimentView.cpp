@@ -638,7 +638,8 @@ void QtExperimentView::showPerAngleOptionsAsInvalid(int row, int column) {
 void QtExperimentView::showPerAngleOptionsAsValid(int row) {
   m_ui.optionsTable->blockSignals(true);
   for (auto column = 0; column < m_ui.optionsTable->columnCount(); ++column)
-    m_ui.optionsTable->item(row, column)->setBackground(Qt::transparent);
+    m_ui.optionsTable->item(row, column)
+        ->setBackground(QBrush(Qt::transparent));
   m_ui.optionsTable->blockSignals(false);
 }
 

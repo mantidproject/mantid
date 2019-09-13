@@ -5,11 +5,17 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MainWindowPresenter.h"
+#include "GUI/Batch/IBatchPresenterFactory.h"
+#include "GUI/Common/Decoder.h"
+#include "GUI/Common/Encoder.h"
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
+
+#include <QFileDialog>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,13 +30,20 @@ namespace ISISReflectometry {
  */
 MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
-    BatchPresenterFactory batchPresenterFactory)
+    std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
 }
+
+MainWindowPresenter::~MainWindowPresenter() = default;
+
+MainWindowPresenter::MainWindowPresenter(MainWindowPresenter &&) = default;
+
+MainWindowPresenter &MainWindowPresenter::
+operator=(MainWindowPresenter &&) = default;
 
 void MainWindowPresenter::notifyNewBatchRequested() {
   auto *newBatchView = m_view->newBatch();
@@ -53,21 +66,27 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
 }
 
 void MainWindowPresenter::notifyAutoreductionResumed() {
-  for (auto batchPresenter : m_batchPresenters) {
+  for (const auto &batchPresenter : m_batchPresenters) {
     batchPresenter->anyBatchAutoreductionResumed();
   }
 }
 
 void MainWindowPresenter::notifyAutoreductionPaused() {
-  for (auto batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionResumed();
+  for (const auto &batchPresenter : m_batchPresenters) {
+    batchPresenter->anyBatchAutoreductionPaused();
   }
 }
+
+// Called on autoreduction normal reduction
+void MainWindowPresenter::reductionResumed() { disableSaveAndLoadBatch(); }
+
+// Called on autoreduction normal reduction
+void MainWindowPresenter::reductionPaused() { enableSaveAndLoadBatch(); }
 
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
 bool MainWindowPresenter::isAnyBatchProcessing() const {
-  for (auto batchPresenter : m_batchPresenters) {
+  for (const auto &batchPresenter : m_batchPresenters) {
     if (batchPresenter->isProcessing())
       return true;
   }
@@ -75,7 +94,7 @@ bool MainWindowPresenter::isAnyBatchProcessing() const {
 }
 
 bool MainWindowPresenter::isAnyBatchAutoreducing() const {
-  for (auto batchPresenter : m_batchPresenters) {
+  for (const auto &batchPresenter : m_batchPresenters) {
     if (batchPresenter->isAutoreducing())
       return true;
   }
@@ -83,7 +102,7 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
-  m_batchPresenters.emplace_back(m_batchPresenterFactory.make(batchView));
+  m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
 
   // starts in the paused state
@@ -99,6 +118,34 @@ void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
 void MainWindowPresenter::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("ISIS Reflectometry"));
+}
+
+void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
+  auto filename = QFileDialog::getSaveFileName();
+  if (filename == "")
+    return;
+  Encoder encoder;
+  IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
+  auto map = encoder.encodeBatch(batchPresenter, m_view, false);
+  MantidQt::API::saveJSONToFile(filename, map);
+}
+
+void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
+  auto filename = QFileDialog::getOpenFileName();
+  if (filename == "")
+    return;
+  auto map = MantidQt::API::loadJSONFromFile(filename);
+  IBatchPresenter *batchPresenter = m_batchPresenters[tabIndex].get();
+  Decoder decoder;
+  decoder.decodeBatch(batchPresenter, m_view, map);
+}
+
+void MainWindowPresenter::disableSaveAndLoadBatch() {
+  m_view->disableSaveAndLoadBatch();
+}
+
+void MainWindowPresenter::enableSaveAndLoadBatch() {
+  m_view->enableSaveAndLoadBatch();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

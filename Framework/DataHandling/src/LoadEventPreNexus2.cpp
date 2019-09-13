@@ -1236,8 +1236,9 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
   this->pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
+  using std::placeholders::_1;
   if (std::find_if(pixelmap.begin(), pixelmap.end(),
-                   std::bind2nd(std::greater<PixelType>(), max_pid)) !=
+                   std::bind(std::greater<PixelType>(), _1, max_pid)) !=
       pixelmap.end()) {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading "
                         "without mapping file");

@@ -65,9 +65,12 @@ set(TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
+    test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
     test/ISISReflectometry/Runs/SearchResultTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
+    test/ISISReflectometry/Common/DecoderTest.h
+    test/ISISReflectometry/Common/EncoderTest.h
 )
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
@@ -127,7 +130,10 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
-    test/ISISReflectometry/Common/PlotterTestQt5.h)
+    test/ISISReflectometry/Common/PlotterTestQt5.h
+    test/ISISReflectometry/Common/DecoderTest.h
+    test/ISISReflectometry/Common/EncoderTest.h
+)
 
 find_package(BoostPython REQUIRED)
 

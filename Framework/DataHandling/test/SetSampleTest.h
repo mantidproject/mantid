@@ -11,6 +11,8 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/SetSample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -422,9 +424,25 @@ public:
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, 0.021)));
     TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.041, -0.001)));
   }
+
+  void test_PeaksWorkspace_Is_Accepted_Workspace_Type() {
+    auto inputWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    auto alg = createAlgorithm(inputWS);
+    alg->setProperty("Geometry",
+                     createHollowCylinderWithIndexedAxisGeometryProps());
+  }
+
   //----------------------------------------------------------------------------
   // Failure tests
   //----------------------------------------------------------------------------
+
+  void test_validateArgs_Gives_Errors_For_Incorrect_WorkspaceType() {
+    using Mantid::DataObjects::TableWorkspace;
+    auto alg = createAlgorithm(boost::make_shared<TableWorkspace>(0));
+
+    auto helpMessages = alg->validateInputs();
+    TS_ASSERT(helpMessages.find("InputWorkspace") != helpMessages.cend());
+  }
 
   void test_Environment_Args_Without_Name_Invalid() {
     using Mantid::Kernel::PropertyManager;
@@ -538,8 +556,8 @@ public:
   //----------------------------------------------------------------------------
 private:
   Mantid::API::IAlgorithm_uptr
-  createAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS =
-                      Mantid::API::MatrixWorkspace_sptr()) {
+  createAlgorithm(const Mantid::API::Workspace_sptr &inputWS =
+                      Mantid::API::Workspace_sptr()) {
     auto alg = std::make_unique<SetSample>();
     alg->setChild(true);
     alg->setRethrows(true);

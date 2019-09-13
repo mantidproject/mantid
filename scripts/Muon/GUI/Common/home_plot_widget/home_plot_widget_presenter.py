@@ -30,8 +30,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._model = model
         self.context = context
         self._view.on_plot_button_clicked(self.handle_data_updated)
-        self._view.on_rebin_options_changed(
-            self.handle_use_raw_workspaces_changed)
+        self._view.on_rebin_options_changed(self.handle_use_raw_workspaces_changed)
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
 
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
@@ -39,6 +38,7 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self.group_pair_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.plot_type_observer = GenericObserver(self.handle_group_pair_to_plot_changed)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
+        self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.plot_type_changed_notifier = GenericObservable()
 
         self._force_redraw = False
@@ -145,6 +145,8 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
                      for workspace in self.context.fitting_context.fit_list[-1].input_workspaces]):
             self.handle_fit_completed()
 
+        self.handle_plot_guess_changed()
+
     def handle_fit_completed(self):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
@@ -194,8 +196,10 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         """
         try:
             runs = ""
+            seperator = ""
             for run in self.context.data_context.current_runs:
-                runs += ", " + str(run[0])
+                runs += seperator + str(run[0])
+                seperator = ", "
             workspace_list = self.context.get_names_of_frequency_domain_workspaces_to_fit(
                 runs, current_group_pair, True, plot_type[len(FREQ_PLOT_TYPE):])
 
@@ -252,3 +256,17 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         if self._model.plot_figure is not None:
             from matplotlib import pyplot as plt
             plt.close(self._model.plot_figure)
+
+    def handle_plot_guess_changed(self):
+        if self._model.plot_figure is None:
+            return
+
+        for guess in [ws for ws in self._model.plotted_fit_workspaces if '_guess' in ws]:
+            self._model.remove_workpace_from_plot(guess)
+
+        if self.context.fitting_context.plot_guess and self.context.fitting_context.guess_ws is not None:
+            self._model.add_workspace_to_plot(self.context.fitting_context.guess_ws,
+                                              workspace_index=1,
+                                              label='Fit Function Guess')
+
+        self._model.force_redraw()

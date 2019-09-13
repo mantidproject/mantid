@@ -63,7 +63,10 @@ class SubPlotContextTest(unittest.TestCase):
                 self.context.addLine(ws, 3)
                 self.assertEqual(plot.call_count, 1)
                 self.assertEqual(patch.call_count, 1)
-                patch.assert_called_with(self.subplot, ws, specNum=3, label=lines.get_label())
+                patch.assert_called_with(self.subplot,
+                                         ws,
+                                         specNum=3,
+                                         distribution=True)
 
     def test_redraw_errors(self):
         ws = mock.MagicMock()

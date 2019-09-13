@@ -41,7 +41,7 @@ class Instrument(object):
         """
         :param frequencies: discrete frequencies in cm^-1
         :parameter s_dft: discrete values of S
-        :param sigma: width of resolution function
+        :param sigma: resolution function width (or array of widths corresponding to each frequency)
         :param pkt_per_peak: number of points per peak
         :param gaussian: gaussian-like function used to broaden peaks
         :returns: frequencies for which peaks have been broadened, corresponding S

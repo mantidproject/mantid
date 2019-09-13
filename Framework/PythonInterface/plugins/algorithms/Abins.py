@@ -239,8 +239,8 @@ class Abins(PythonAlgorithm):
             if len(atom_symbols) + len(atom_numbers) < len(self._atoms):
                 elements_report = " Symbols: " + ", ".join(atom_symbols) if len(atom_symbols) else ""
                 numbers_report = " Numbers: " + ", ".join(atom_numbers) if len(atom_numbers) else ""
-                raise ValueError("Not all user atom selections ('atoms' option) were understood." +
-                                 elements_report + numbers_report)
+                raise ValueError("Not all user atom selections ('atoms' option) were understood."
+                                 + elements_report + numbers_report)
 
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
@@ -337,8 +337,8 @@ class Abins(PythonAlgorithm):
 
         if atoms_symbols is not None:
             for symbol in atoms_symbols:
-                sub = (len(masses[symbol]) > ONLY_ONE_MASS or
-                       abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
+                sub = (len(masses[symbol]) > ONLY_ONE_MASS
+                       or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS)
                 for m in masses[symbol]:
                     result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
                                                     element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
@@ -415,8 +415,8 @@ class Abins(PythonAlgorithm):
         element = Atom(symbol=element_symbol)
 
         for atom in range(num_atoms):
-            if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == element_symbol and
-                    abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < MASS_EPS):
+            if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == element_symbol
+                    and abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) < MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
@@ -684,18 +684,18 @@ class Abins(PythonAlgorithm):
 
         resolution_const_a = AbinsModules.AbinsParameters.tosca_a
         if not isinstance(resolution_const_a, float):
-            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)" +
-                               message_end)
+            raise RuntimeError("Invalid value of constant A for TOSCA (used by the resolution TOSCA function)"
+                               + message_end)
 
         resolution_const_b = AbinsModules.AbinsParameters.tosca_b
         if not isinstance(resolution_const_b, float):
-            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)" +
-                               message_end)
+            raise RuntimeError("Invalid value of constant B for TOSCA (used by the resolution TOSCA function)"
+                               + message_end)
 
         resolution_const_c = AbinsModules.AbinsParameters.tosca_c
         if not isinstance(resolution_const_c, float):
-            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)" +
-                               message_end)
+            raise RuntimeError("Invalid value of constant C for TOSCA (used by the resolution TOSCA function)"
+                               + message_end)
 
     def _check_folder_names(self, message_end=None):
         """

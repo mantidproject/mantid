@@ -497,6 +497,47 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   return ws;
 }
 
+/** Create an Eventworkspace with  instrument 2.0 that contains
+ *RectangularDetector's.
+ * X axis = 100 histogrammed bins from 0.0 in steps of 1.0.
+ * 200 events per pixel.
+ *
+ * @param numBanks :: number of rectangular banks
+ * @param numPixels :: each bank will be numPixels*numPixels
+ * @param clearEvents :: if true, erase the events from list
+ * @return The EventWorkspace
+ */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceWithFullInstrument2(int numBanks, int numPixels,
+                                        bool clearEvents) {
+  Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular2(numBanks,
+                                                                numPixels);
+  EventWorkspace_sptr ws =
+      createEventWorkspace2(numBanks * numPixels * numPixels, 100);
+  ws->setInstrument(inst);
+
+  // Set the X axes
+  const auto &xVals = ws->x(0);
+  const size_t xSize = xVals.size();
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
+  ax0->setUnit("dSpacing");
+  for (size_t i = 0; i < xSize; i++) {
+    ax0->setValue(i, xVals[i]);
+  }
+  ws->replaceAxis(0, std::move(ax0));
+
+  // re-assign detector IDs to the rectangular detector
+  const auto detIds = inst->getDetectorIDs();
+  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); ++wi) {
+    ws->getSpectrum(wi).clearDetectorIDs();
+    if (clearEvents)
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detIds[wi]);
+  }
+  return ws;
+}
+
 Mantid::DataObjects::EventWorkspace_sptr
 createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
   // Number of detectors in a bank as created by createTestInstrumentCylindrical

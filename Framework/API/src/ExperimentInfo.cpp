@@ -1148,12 +1148,36 @@ void ExperimentInfo::invalidateAllSpectrumDefinitions() {
 
 /** Save the object to an open NeXus file.
  * @param file :: open NeXus file
+ * @param saveLegacyInstrument : defaults to true, otherwise not in file output
  */
-void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file) const {
+void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file,
+                                             bool saveLegacyInstrument) const {
   Instrument_const_sptr instrument = getInstrument();
-  instrument->saveNexus(file, "instrument");
+  if (saveLegacyInstrument) {
+    instrument->saveNexus(file, "instrument");
+  }
   sample().saveNexus(file, "sample");
   run().saveNexus(file, "logs");
+}
+
+/** Save the object to an open NeXus file.
+ * @param file :: open NeXus file
+ * @param saveInstrument :: option to save Instrument
+ * @param saveSample :: option to save Sample
+ * @param saveLogs :: option to save Logs
+ */
+void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file,
+                                             bool saveInstrument,
+                                             bool saveSample,
+                                             bool saveLogs) const {
+  Instrument_const_sptr instrument = getInstrument();
+
+  if (saveInstrument)
+    instrument->saveNexus(file, "instrument");
+  if (saveSample)
+    sample().saveNexus(file, "sample");
+  if (saveLogs)
+    run().saveNexus(file, "logs");
 }
 
 /** Load the sample and log info from an open NeXus file.

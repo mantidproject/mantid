@@ -16,6 +16,7 @@
 #include "ui_MainWindowWidget.h"
 
 #include <QCloseEvent>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,13 +27,15 @@ namespace ISISReflectometry {
 MainWindowView is the concrete main window view implementing the
 functionality defined by the interface IMainWindowView
 */
-class QtMainWindowView : public MantidQt::API::UserSubWindow,
-                         public IMainWindowView,
-                         public IMessageHandler,
-                         public IPythonRunner {
+class MANTIDQT_ISISREFLECTOMETRY_DLL QtMainWindowView
+    : public MantidQt::API::UserSubWindow,
+      public IMainWindowView,
+      public IMessageHandler,
+      public IPythonRunner {
   Q_OBJECT
 public:
   explicit QtMainWindowView(QWidget *parent = nullptr);
+
   void subscribe(MainWindowSubscriber *notifyee) override;
 
   static std::string name() { return "ISIS Reflectometry"; }
@@ -53,10 +56,15 @@ public:
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) override;
 
+  void disableSaveAndLoadBatch() override;
+  void enableSaveAndLoadBatch() override;
+
 public slots:
   void helpPressed();
   void onTabCloseRequested(int tabIndex);
   void onNewBatchRequested(bool);
+  void onLoadBatchRequested(bool);
+  void onSaveBatchRequested(bool);
 
 private:
   /// Initializes the interface
@@ -70,6 +78,13 @@ private:
   /// of m_presenter should be avoided - use m_notifyee instead.
   std::unique_ptr<MainWindowPresenter> m_presenter;
   std::vector<IBatchView *> m_batchViews;
+  int m_batchIndex;
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
+  friend class DecoderTest;
+  friend class EncoderTest;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
