@@ -1384,7 +1384,7 @@ class TransParser(UserFileComponentParser):
         converted = line.upper().strip().replace(self.mon_shift_pattern, '').replace('=', '')
         # We should have some form of 'x y'
         assert(c.isDigit() for c in converted.replace(' ', ''))
-        split_vars = filter(None, converted.split(' '))
+        split_vars = [i for i in converted.split(' ') if i.strip() != '']
 
         if len(split_vars) != 2:
             raise RuntimeError("The line TRANS/{0} contains incorrect parameters", line)
