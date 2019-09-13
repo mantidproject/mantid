@@ -17,7 +17,8 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/NexusTestHelper.cpp
       ../../TestHelpers/src/ONCatHelper.cpp
       ../../TestHelpers/src/ParallelRunner.cpp
-      NXcanSASTestHelper.cpp)
+      NXcanSASTestHelper.cpp
+	  ../../TestHelpers/src/FileResource.cpp)
 
   cxxtest_add_test(DataHandlingTest ${TEST_FILES})
   target_include_directories(DataHandlingTest SYSTEM

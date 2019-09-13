@@ -56,7 +56,7 @@ used.
 
   void test_providing_invalid_path_throws() {
 
-    ScopedFileHandle fileResource("invalid_path_to_file_test_file.hdf5");
+    FileResource fileResource("invalid_path_to_file_test_file.hdf5");
     const std::string badDestinationPath =
         "false_directory\\" + fileResource.fullPath();
 
@@ -77,7 +77,7 @@ used.
     EXPECT_CALL(progressRep, doReport(testing::_))
         .Times(nbanks); // Progress report once for each bank
 
-    ScopedFileHandle fileResource("progress_report_test_file.hdf5");
+    FileResource fileResource("progress_report_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
@@ -92,7 +92,7 @@ used.
 
   void test_false_file_extension_throws() {
 
-    ScopedFileHandle fileResource("invalid_extension_test_file.abc");
+    FileResource fileResource("invalid_extension_test_file.abc");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
@@ -120,7 +120,7 @@ used.
             true, false, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    ScopedFileHandle fileResource("check_no_sample_throws_test_file.hdf5");
+    FileResource fileResource("check_no_sample_throws_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
 
     // instrument cache
@@ -155,7 +155,7 @@ used.
     // instrument cache
     auto &compInfo = (*instr.first);
 
-    ScopedFileHandle fileResource("check_no_source_throws_test_file.hdf5");
+    FileResource fileResource("check_no_source_throws_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
 
     TS_ASSERT(compInfo.hasDetectorInfo()); // rule out throw by no detector info
@@ -182,7 +182,7 @@ used.
         V3D(0, 0, -10), V3D(0, 0, 2), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -218,7 +218,7 @@ used.
     // has NXclass attribute of NXentry. as required by the Nexus file format.
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("check_nxentry_group_test_file.nxs");
+    FileResource fileResource("check_nxentry_group_test_file.nxs");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument
@@ -242,7 +242,7 @@ used.
     // data is saved to a group of NXclass NXinstrument
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("check_nxinstrument_group_test_file.hdf5");
+    FileResource fileResource("check_nxinstrument_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with some geometry
@@ -269,7 +269,7 @@ used.
     // compatibility reasons
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("check_instrument_name_test_file.nxs");
+    FileResource fileResource("check_instrument_name_test_file.nxs");
     auto destinationFile = fileResource.fullPath();
 
     // test instrument
@@ -307,12 +307,34 @@ used.
         NAME, compInfo.name(compInfo.root()), path));
   }
 
+  void
+  test_NXclass_without_name_is_assigned_unique_default_name_for_each_group() {
+    // this test will try to save and unnamed instrument with multiple unnamed
+    // detector banks, to verify that the unique group names which
+    // saveInstrument provides for each NXclass do not throw a H5 error due to
+    // duplication of group names. If any group in the same tree path share the
+    // same name, HDF5 will throw a group exception. In this test, we expect no
+    // such exception to throw.
+
+    // RAII file resource for test file destination.
+    FileResource fileResource("default_group_names_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    // unnamed ("") instrument with multiple unnamed detector banks ("")
+    auto instrument = ComponentCreationHelper::createTestUnnamedRectangular2(
+        2 /*number of banks*/, 2);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, m_mockLogger));
+  }
+
   void test_nxsource_group_exists_and_is_in_nxinstrument_group() {
     // this test checks that inside of the NXinstrument group, the the source
     // data is saved to a group of NXclass NXsource
 
     // RAII file resource for test file destination.
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument
@@ -336,7 +358,7 @@ used.
 
   void test_nxsample_group_exists_and_is_in_nxentry_group() {
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
@@ -357,7 +379,7 @@ used.
 
   void test_correct_number_of_detectors_saved() {
 
-    ScopedFileHandle fileResource("check_num_of_banks_test.hdf5");
+    FileResource fileResource("check_num_of_banks_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     int banksInInstrument = 3;
@@ -407,7 +429,7 @@ Instrument cache.
    */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_rotation_written_to_nxdetector_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -469,7 +491,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_rotation_written_to_nx_monitor_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -526,7 +548,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_location_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -583,7 +605,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_rotation_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -641,7 +663,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("origin_nx_source_location_file_test.hdf5");
+    FileResource fileResource("origin_nx_source_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // prepare geometry for instrument
@@ -690,7 +712,7 @@ Instrument cache.
     const Quat bankRotation(0, V3D(0, 0, 1));  // set (angle) to zero
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("zero_nx_detector_rotation_file_test.hdf5");
+    FileResource fileResource("zero_nx_detector_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with zero source rotation
@@ -729,7 +751,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("zero_nx_monitor_rotation_file_test.hdf5");
+    FileResource fileResource("zero_nx_monitor_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     V3D someLocation(0.0, 0.0, -5.0); // arbitrary monitor location
@@ -772,7 +794,7 @@ Instrument cache.
     const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
 
     // RAII file resource for test file destination
-    ScopedFileHandle inFileResource("zero_nx_source_rotation_file_test.hdf5");
+    FileResource inFileResource("zero_nx_source_rotation_file_test.hdf5");
     std::string destinationFile = inFileResource.fullPath();
 
     // test instrument with zero rotation
@@ -811,7 +833,7 @@ Instrument cache.
     */
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
+    FileResource fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // prepare geometry for instrument
@@ -899,7 +921,7 @@ Instrument cache.
     const V3D sourceLocation(0, 0, 0);           // set to zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("no_location_dependency_test.hdf5");
+    FileResource fileResource("no_location_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with location of source at zero
@@ -965,7 +987,7 @@ Instrument cache.
     const Quat sourceRotation(0.0, V3D(0.0, 1.0, 0.0)); // set to zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("no_orientation_dependency_test.hdf5");
+    FileResource fileResource("no_orientation_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with rotation of source of zero
@@ -1034,7 +1056,7 @@ Instrument cache.
     const Quat sourceRotation(45, V3D(0, 1, 0)); // arbitrary non-zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("both_transformations_dependency_test.hdf5");
+    FileResource fileResource("both_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with non zero rotation and translation
@@ -1105,8 +1127,7 @@ Instrument cache.
     const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource(
-        "neither_transformations_dependency_test.hdf5");
+    FileResource fileResource("neither_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with zero translation and rotation

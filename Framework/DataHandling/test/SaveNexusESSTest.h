@@ -103,7 +103,7 @@ public:
 
   void test_exec_rectangular_instrument_details() {
     using namespace Mantid::NexusGeometry;
-    ScopedFileHandle fileInfo("test_rectangular_instrument.nxs");
+    FileResource fileInfo("test_rectangular_instrument.nxs");
     auto ws =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 10 /*numBins*/);
@@ -130,7 +130,7 @@ public:
   }
 
   void test_exec_rectangular_data() {
-    ScopedFileHandle fileInfo("test_rectangular_data.nxs");
+    FileResource fileInfo("test_rectangular_data.nxs");
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -148,7 +148,7 @@ public:
 
     using namespace Mantid::HistogramData;
 
-    ScopedFileHandle fileInfo("test_ess_instrument.nxs");
+    FileResource fileInfo("test_ess_instrument.nxs");
 
     auto wsIn = test_utility::from_instrument_file(
         "V20_4-tubes_90deg_Definition_v01.xml");
@@ -171,7 +171,7 @@ public:
   void test_demonstrate_spectra_detector_map_saved() {
 
     using namespace Mantid::Indexing;
-    ScopedFileHandle fileInfo("test_spectra_mapping.nxs");
+    FileResource fileInfo("test_spectra_mapping.nxs");
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -217,7 +217,7 @@ public:
     // This is testing the core routine, but we put it here and not in
     // NexusGeometrySave because we need access to WorkspaceCreationHelpers for
     // this.
-    ScopedFileHandle fileResource("test_with_full_workspace.hdf5");
+    FileResource fileResource("test_with_full_workspace.hdf5");
     std::string destinationFile = fileResource.fullPath();
     auto ws =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
@@ -229,8 +229,7 @@ public:
   }
 
   void test_regression_iris() {
-    ScopedFileHandle handle(
-        "test_regression_iris.nxs"); // IRIS has single monitors
+    FileResource handle("test_regression_iris.nxs"); // IRIS has single monitors
     auto iris = test_utility::from_instrument_name("IRIS");
     do_execute(handle.fullPath(), iris);
     auto iris_reloaded = test_utility::reload(handle.fullPath());
@@ -242,7 +241,7 @@ public:
     TS_ASSERT_EQUALS(indexInfo.size(), indexInfoReload.size());
   }
   void test_not_all_detectors_mapped_to_spectrum() {
-    ScopedFileHandle handle(
+    FileResource handle(
         "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
                                                    // detectors in it's
                                                    // mappings.
@@ -254,7 +253,7 @@ public:
             *ws, handle.fullPath(), "entry", adapter));
   }
   void test_not_all_detectors_mapped_to_spectrum_and_reloaded() {
-    ScopedFileHandle handle(
+    FileResource handle(
         "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
                                                    // detectors in it's
                                                    // mappings.
