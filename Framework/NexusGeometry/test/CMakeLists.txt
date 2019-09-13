@@ -8,7 +8,8 @@ if(CXXTEST_FOUND)
 
   set(TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp
                       ../../TestHelpers/src/JSONGeometryParserTestHelper.cpp
-                      ../../TestHelpers/src/ComponentCreationHelper.cpp)
+                      ../../TestHelpers/src/ComponentCreationHelper.cpp
+					  ../../TestHelpers/src/FileResource.cpp)
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 

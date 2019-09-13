@@ -100,7 +100,7 @@ public:
 
     using namespace Mantid::HistogramData;
 
-    ScopedFileHandle fileInfo("test_ess_instrument.nxs");
+    FileResource fileInfo("test_ess_instrument.nxs");
 
     auto wsIn =
         test_utility::make_workspace("V20_4-tubes_90deg_Definition_v01.xml");
@@ -123,7 +123,7 @@ public:
   void test_reading_mappings() {
     using Mantid::SpectrumDefinition;
     using namespace Mantid::Indexing;
-    ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
+    FileResource fileInfo("test_no_spectra_mapping.nxs");
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -172,7 +172,7 @@ public:
 
   void test_demonstrate_old_loader_incompatible() {
 
-    ScopedFileHandle fileInfo("test_demo_file_for_incompatible.nxs");
+    FileResource fileInfo("test_demo_file_for_incompatible.nxs");
 
     auto wsIn =
         test_utility::make_workspace("V20_4-tubes_90deg_Definition_v01.xml");
