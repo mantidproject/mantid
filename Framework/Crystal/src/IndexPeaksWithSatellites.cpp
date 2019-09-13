@@ -430,6 +430,7 @@ void IndexPeaksWithSatellites::exec() {
               }
             }
             if (!suc_indexed) {
+              peaks[i].setHKL(V3D(0, 0, 0));
               peaks[i].setIntHKL(V3D(0, 0, 0));
               peaks[i].setIntMNP(V3D(0, 0, 0));
             }
