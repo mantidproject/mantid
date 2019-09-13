@@ -106,7 +106,7 @@ void CalculatePlaczekSelfScattering::exec() {
       const double f = det_info.l1() / path_length;
       const double angle_conv = M_PI / 180.0;
       const double sin_theta_by_2 =
-          sin(det_info.twoTheta(det_index) * angle_conv / 2.0);
+          sin(det_info.twoTheta(det_index) / 2.0);
       for (size_t x_index = 0; x_index < x_lambda.size() - 1; x_index++) {
         const double term1 = (f + 1.0) * phi_1[x_index];
         const double term2 = f * eps_1[x_index];
