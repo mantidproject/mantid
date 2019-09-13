@@ -73,7 +73,7 @@ from_instrument_file(const std::string &filename) {
   return ws;
 }
 Mantid::API::MatrixWorkspace_sptr
-from_instrument_file2(const std::string &name) {
+from_instrument_name(const std::string &name) {
   LoadEmptyInstrument loader;
   loader.setChild(true);
   loader.initialize();
@@ -82,6 +82,16 @@ from_instrument_file2(const std::string &name) {
   loader.execute();
   MatrixWorkspace_sptr ws = loader.getProperty("OutputWorkspace");
   return ws;
+}
+Mantid::API::MatrixWorkspace_sptr load(const std::string &name) {
+  LoadNexusProcessed loader;
+  loader.setChild(true);
+  loader.initialize();
+  loader.setProperty("Filename", name);
+  loader.setPropertyValue("OutputWorkspace", "dummy");
+  loader.execute();
+  Workspace_sptr ws = loader.getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
 } // namespace test_utility
 } // namespace
@@ -228,7 +238,7 @@ public:
   void test_regression_iris() {
     ScopedFileHandle handle(
         "test_regression_iris.nxs"); // IRIS has single monitors
-    auto iris = test_utility::from_instrument_file2("IRIS");
+    auto iris = test_utility::from_instrument_name("IRIS");
     do_execute(handle.fullPath(), iris);
     auto iris_reloaded = test_utility::reload(handle.fullPath());
     const auto &indexInfo = iris->indexInfo();
@@ -237,6 +247,19 @@ public:
     const auto &inDetInfo = iris->detectorInfo();
     TS_ASSERT_EQUALS(inDetInfo.size(), outDetInfo.size());
     TS_ASSERT_EQUALS(indexInfo.size(), indexInfoReload.size());
+  }
+  void test_not_all_detectors_mapped_to_spectrum() {
+    ScopedFileHandle handle(
+        "test_regression_iris_with_mappings.nxs"); // IRIS does not include all
+                                                   // detectors in it's
+                                                   // mappings.
+    handle.setDebugMode(true);
+    auto ws = test_utility::load("irs26176_graphite002_red.nxs");
+    Mantid::Kernel::Logger logger("logger");
+    Mantid::NexusGeometry::LogAdapter<Mantid::Kernel::Logger> adapter(&logger);
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(
+            *ws, handle.fullPath(), "entry", adapter));
   }
 };
 

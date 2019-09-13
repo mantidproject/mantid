@@ -497,6 +497,9 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
                              const std::vector<Mantid::detid_t> &detIds,
                              size_t index) {
   auto childrenDetectors = compInfo.detectorsInSubtree(index);
+  size_t nChildDetectors =
+      childrenDetectors.size(); // Number of detectors actually considered in
+                                // spectra-detector map for this NXdetector
   // local to this nxdetector
   std::map<size_t, int> detector_count_map;
   // We start knowing only the detector index, we have to establish spectra from
@@ -504,17 +507,24 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
   for (const auto det_index : childrenDetectors) {
     auto detector_id = detIds[det_index];
 
-    auto spectrum_index = detToIndexMap.at(detector_id);
-    detector_count_map[spectrum_index]++; // Attribute detector to a give
-                                          // spectrum_index
+    // A detector might not belong to any spectrum at all.
+    if (detToIndexMap.find(detector_id) != detToIndexMap.end()) {
+      auto spectrum_index = detToIndexMap.at(detector_id);
+      detector_count_map[spectrum_index]++; // Attribute detector to a give
+                                            // spectrum_index
+    } else {
+      --nChildDetectors; // Detector is not part of any spectra-detector
+                         // mapping. So we have one less detector to consider
+                         // recording
+    }
   }
   // Sized to spectra in bank
   SpectraMappings mappings;
-  mappings.detector_list.resize(childrenDetectors.size());
+  mappings.detector_list.resize(nChildDetectors);
   mappings.detector_count.resize(detector_count_map.size(), 0);
   mappings.detector_index.resize(detector_count_map.size() + 1, 0);
   mappings.spectra_ids.resize(detector_count_map.size(), 0);
-  mappings.number_dets = childrenDetectors.size();
+  mappings.number_dets = nChildDetectors;
   mappings.number_spec = detector_count_map.size();
   size_t specCounter = 0;
   size_t detCounter = 0;

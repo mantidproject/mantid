@@ -117,7 +117,12 @@ void LoadNexusProcessed2::extractMappingInfoNew(
       NXDetector detgroup = inst.openNXDetector(group.nxname);
 
       NXInt spectra_block = detgroup.openNXInt("spectra");
-      spectra_block.load();
+      try {
+        spectra_block.load();
+      } catch (std::runtime_error &) { // Throws if dataset zero-sized
+        detgroup.close();
+        continue;
+      }
       const size_t nSpecEntries = spectra_block.dim0();
       auto data = spectra_block.sharedBuffer();
       size_t currentSize = spectrumNumbers.size();
@@ -160,6 +165,7 @@ void LoadNexusProcessed2::extractMappingInfoNew(
                                  "the number of detectors given by number of "
                                  "detector_list entries");
       }
+
       detgroup.close();
     }
   }
@@ -198,12 +204,6 @@ bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws,
             Geometry::Instrument_const_sptr(std::move(instrument)));
 
         auto &detInfo = matrixWs->detectorInfo();
-        if (m_detectorIds.size() != detInfo.size()) {
-          logger.warning("New style mappings will not be loaded. Detector "
-                         "mappings do not match number of detectors in "
-                         "geometry");
-          return false;
-        }
         Indexing::IndexInfo info(m_spectrumNumbers);
         std::vector<SpectrumDefinition> definitions;
         definitions.reserve(m_spectrumNumbers.size());

@@ -171,6 +171,64 @@ public:
     }
   }
 
+  void test_reading_mappings_when_not_all_detectors_contained_in_spectra() {
+    // Detectors might not be used in any spectra. Saving/Loading should handle
+    // that.
+
+    using Mantid::SpectrumDefinition;
+    using namespace Mantid::Indexing;
+    ScopedFileHandle fileInfo("test_spectra_miss_detectors.nxs");
+    fileInfo.setDebugMode(true);
+
+    auto instr = ComponentCreationHelper::createTestInstrumentRectangular(
+        2 /*numBanks*/, 10 /*numPixels*/); // 200 detectors in instrument
+
+    auto wsIn = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        1 /*number of spectra*/, 1 /*number of bins*/);
+    wsIn->setInstrument(instr); // Just 1 spectra in the workspace
+
+    std::vector<SpectrumDefinition> specDefinitions;
+    std::vector<SpectrumNumber> spectrumNumbers;
+    // We add a single detector index 0 to a single spectrum with number (1). No
+    // other mappings provided!
+    specDefinitions.push_back(SpectrumDefinition(0));
+    spectrumNumbers.push_back(SpectrumNumber(1));
+    IndexInfo info(spectrumNumbers);
+    info.setSpectrumDefinitions(specDefinitions);
+    wsIn->setIndexInfo(info);
+    // Put the workspace on disk
+    test_utility::save(fileInfo.fullPath(), wsIn);
+
+    // Reload it.
+    auto matrixWSOut = do_load_v2(fileInfo.fullPath());
+
+    const auto &inSpecInfo = wsIn->spectrumInfo();
+    const auto &outSpecInfo = matrixWSOut->spectrumInfo();
+
+    // Note we do not guarantee the preseveration of spectrum indexes during
+    // deserialisation, so we need the maps to ensure we compare like for like.
+    auto specToIndexOut = matrixWSOut->getSpectrumToWorkspaceIndexMap();
+    auto specToIndexIn = wsIn->getSpectrumToWorkspaceIndexMap();
+
+    auto indexInfo = matrixWSOut->indexInfo();
+
+    TS_ASSERT_EQUALS(outSpecInfo.size(), inSpecInfo.size());
+    for (size_t i = 0; i < outSpecInfo.size(); ++i) {
+
+      auto specNumber = int(indexInfo.spectrumNumber(i));
+
+      auto indexInInput = specToIndexIn.at(specNumber);
+      auto indexInOutput = specToIndexOut.at(specNumber);
+
+      // Output has no mapping, so for each spectrum have 0 detector indices
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput).size(),
+                       inSpecInfo.spectrumDefinition(indexInInput).size());
+      // Compare actual detector indices for each spectrum when fixed as below
+      TS_ASSERT_EQUALS(outSpecInfo.spectrumDefinition(indexInOutput)[0],
+                       inSpecInfo.spectrumDefinition(indexInInput)[0]);
+    }
+  }
+
   void test_demonstrate_spectra_detector_map_1_to_n() {
 
     using namespace Mantid::Indexing;
