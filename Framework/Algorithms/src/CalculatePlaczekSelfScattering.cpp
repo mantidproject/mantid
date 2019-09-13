@@ -104,7 +104,6 @@ void CalculatePlaczekSelfScattering::exec() {
       NSpec += 1;
       const double path_length = det_info.l1() + det_info.l2(det_index);
       const double f = det_info.l1() / path_length;
-      const double angle_conv = M_PI / 180.0;
       const double sin_theta_by_2 = sin(det_info.twoTheta(det_index) / 2.0);
       for (size_t x_index = 0; x_index < x_lambda.size() - 1; x_index++) {
         const double term1 = (f + 1.0) * phi_1[x_index];
