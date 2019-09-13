@@ -43,7 +43,7 @@ void ParDomain::additiveCostFunctionVal(
     API::FunctionValues_sptr values;
     getDomainAndValues(static_cast<size_t>(i), domain, values);
     if (!values) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     costFunction.addVal(domain, values);
   }
@@ -62,7 +62,6 @@ void ParDomain::additiveCostFunctionValDerivHessian(
   const auto n = static_cast<int>(getNDomains());
   PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;
-  // funs.push_back( leastSquares.getFittingFunction()->clone() );
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < n; ++i) {
     API::FunctionDomain_sptr domain;
@@ -71,7 +70,7 @@ void ParDomain::additiveCostFunctionValDerivHessian(
     auto simpleValues =
         boost::dynamic_pointer_cast<API::FunctionValues>(values);
     if (!simpleValues) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     std::vector<API::IFunction_sptr>::size_type k = PARALLEL_THREAD_NUMBER;
     PARALLEL_CRITICAL(resize) {

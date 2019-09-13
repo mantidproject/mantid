@@ -84,7 +84,7 @@ void SeqDomain::additiveCostFunctionVal(
     values.reset();
     getDomainAndValues(i, domain, values);
     if (!values) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     costFunction.addVal(domain, values);
   }
@@ -126,7 +126,7 @@ void SeqDomain::additiveCostFunctionValDerivHessian(
     values.reset();
     getDomainAndValues(i, domain, values);
     if (!values) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     costFunction.addValDerivHessian(costFunction.getFittingFunction(), domain,
                                     values, evalDeriv, evalHessian);

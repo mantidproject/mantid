@@ -386,7 +386,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
                                                    evalHessian);
   } else {
     if (!m_values) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     addValDerivHessian(m_function, m_domain, m_values, evalDeriv, evalHessian);
   }
@@ -472,7 +472,7 @@ const GSLMatrix &CostFuncFitting::getHessian() const {
  */
 void CostFuncFitting::push() {
   if (m_pushed) {
-    throw std::runtime_error("Least squares: double push.");
+    throw std::runtime_error("Cost Function: double push.");
   }
   // make sure we are not dirty
   m_pushedValue = valDerivHessian();
@@ -485,7 +485,7 @@ void CostFuncFitting::push() {
  */
 void CostFuncFitting::pop() {
   if (!m_pushed) {
-    throw std::runtime_error("Least squares: empty stack.");
+    throw std::runtime_error("Cost Function: empty stack.");
   }
   setParameters(m_pushedParams);
   m_value = m_pushedValue;
@@ -500,7 +500,7 @@ void CostFuncFitting::pop() {
  */
 void CostFuncFitting::drop() {
   if (!m_pushed) {
-    throw std::runtime_error("Least squares: empty stack.");
+    throw std::runtime_error("Cost Function: empty stack.");
   }
   m_pushed = false;
   setDirty();
