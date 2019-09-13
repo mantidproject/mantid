@@ -42,7 +42,6 @@ class MessageDisplay(MessageDisplay_cpp):
         self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
 
         self.active_script = ""
-        self.executed_scripts = set()
 
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
@@ -77,7 +76,7 @@ class MessageDisplay(MessageDisplay_cpp):
         # and the slot called with the path stored on the acton.
         action_group = QActionGroup(filter_menu)
         action_group.setExclusive(False)
-        for script_path in sorted(self.executed_scripts):
+        for script_path in sorted(self.displayedScripts()):
             script_name = os.path.basename(script_path)
             action = QAction(script_name, filter_menu)
             action.setData(script_path)
@@ -122,4 +121,7 @@ class MessageDisplay(MessageDisplay_cpp):
 
     def script_executing(self, script_path):
         self.active_script = script_path
-        self.executed_scripts.add(script_path)
+        try:
+            self.displayedScripts()[script_path]
+        except KeyError:
+            self.insertIntoDisplayedScripts(script_path, True)

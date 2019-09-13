@@ -83,6 +83,8 @@ public:
   QPlainTextEdit *getTextEdit();
   void filterMessages();
   QMenu *generateContextMenu();
+  QMap<QString, QVariant> displayedScripts();
+  void insertIntoDisplayedScripts(const QString &scriptPath, const bool &display = true);
 
   bool showFrameworkOutput();
   void setShowFrameworkOutput(const bool &show);
@@ -261,7 +263,7 @@ class BaseDecoder {
 %End
 public:
   virtual QWidget * decode(const QMap<QString, QVariant> &map,
-                          const std::string &directory) = 0;
+                           const std::string &directory) = 0;
   virtual QList<QString> tags() = 0;
 private:
   BaseDecoder();

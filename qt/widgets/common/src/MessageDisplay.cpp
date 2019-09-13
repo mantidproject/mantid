@@ -85,8 +85,7 @@ MessageDisplay::MessageDisplay(QWidget *parent)
  * @param parent An optional parent widget
  */
 MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
-    : QWidget(parent), m_messageHistory(new QList<Message>),
-      m_logChannel(new QtSignalChannel),
+    : QWidget(parent), m_logChannel(new QtSignalChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
       m_logLevelMapping(new QSignalMapper(this)),
@@ -147,10 +146,17 @@ void MessageDisplay::setSource(const QString &source) {
  */
 void MessageDisplay::filterMessages() {
   m_textDisplay->clear();
-  appendList(*getHistory());
+  appendList(getHistory());
   moveCursorToEnd();
 }
 
+/**
+ * Add a key-value pair to the displayedScripts QMap
+ */
+void MessageDisplay::insertIntoDisplayedScripts(const QString &scriptPath,
+                                                const bool &display) {
+  m_displayedScripts.insert(scriptPath, QVariant(display));
+}
 //----------------------------------------------------------------------------------------
 // Public slots
 //----------------------------------------------------------------------------------------
@@ -201,7 +207,7 @@ void MessageDisplay::appendDebug(const QString &text) {
  * current text
  */
 void MessageDisplay::append(const Message &msg) {
-  m_messageHistory->append(msg);
+  m_messageHistory.append(msg);
   if (m_showFrameworkOutput && msg.frameworkMsg() ||
       m_showScriptOutput && !msg.frameworkMsg()) {
     QTextCursor cursor = moveCursorToEnd();
@@ -257,7 +263,7 @@ void MessageDisplay::replace(const Message &msg) {
  */
 void MessageDisplay::clear() {
   m_textDisplay->clear();
-  m_messageHistory->clear();
+  m_messageHistory.clear();
 }
 
 /**

@@ -80,11 +80,6 @@ class MessageDisplayTest(unittest.TestCase):
         self.display.appendNotice(framework_msg)
         self.assertNotIn(framework_msg, self.get_message_window_contents())
 
-    def test_that_executed_scripts_are_not_duplicated_in_executed_scripts_list(self):
-        self._simulate_script_executions([self.unix_path, self.win_path, self.unix_path])
-        self.assertEqual(1, list(self.display.executed_scripts).count(self.unix_path))
-        self.assertEqual(1, list(self.display.executed_scripts).count(self.win_path))
-
     def test_that_executed_scripts_appear_unduplicated_in_the_Filter_by_context_menu(self):
         self._simulate_script_executions([self.unix_path, self.win_path, self.unix_path])
         filter_by_menu = self._get_Filter_by_menu(self.display.generateContextMenu())
@@ -109,6 +104,17 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertEqual(
             [call("Script 1.py"), call("Script 2.py"),
              call("Script 3.py")], filter_by_script_mock.call_args_list)
+
+    def test_executed_scripts_are_added_to_the_getDisplayedScripts_QMap_with_True_value(self):
+        self.display.script_executing(self.unix_path)
+        self.assertIn(self.unix_path, self.display.displayedScripts())
+        self.assertTrue(self.display.displayedScripts()[self.unix_path])
+
+    def test_executed_scripts_are_not_set_from_False_to_True_if_they_are_executed_again(self):
+        self.display.script_executing(self.unix_path)
+        self.display.insertIntoDisplayedScripts(self.unix_path, False)
+        self.display.script_executing(self.unix_path)
+        self.assertFalse(self.display.displayedScripts()[self.unix_path])
 
     def _get_menu_action(self, menu, action_text):
         for action in menu.actions():
