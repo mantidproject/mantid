@@ -467,20 +467,23 @@ class SANSMoveSANS2D(SANSMove):
 
         if monitor_offset != 0.0:
             monitor_spectrum_number_as_string = str(monitor_spectrum_number)
+
             monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
-            instrument = workspace.getInstrument()
-            monitor_n = instrument.getComponentByName(monitor_n_name)
+
+            comp_info = workspace.componentInfo()
+            monitor_n = comp_info.indexOfAny(monitor_n_name)
 
             # Get position of monitor n
-            monitor_position = monitor_n.getPos()
-            z_position_monitor = monitor_position.getZ()
+            monitor_position = comp_info.position(monitor_n)
 
             # The location is relative to the rear-detector, get this position
             lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
             detector_name = lab_detector.detector_name
-            lab_detector_component = instrument.getComponentByName(detector_name)
-            detector_position = lab_detector_component.getPos()
+            lab_detector_index = comp_info.indexOfAny(detector_name)
+            detector_position =  comp_info.position(lab_detector_index)
+
             z_position_detector = detector_position.getZ()
+            z_position_monitor = monitor_position.getZ()
 
             z_new = z_position_detector + monitor_offset
             z_move = z_new - z_position_monitor
@@ -702,24 +705,24 @@ class SANSMoveZOOM(SANSMove):
         monitor_offset_dict = { 4 : move_info.monitor_4_offset,
                                 5 : move_info.monitor_5_offset }
 
-        instrument = workspace.getInstrument()
+        comp_info = workspace.componentInfo()
 
         for monitor_spec_num, offset in monitor_offset_dict.items():
             if offset == 0.0:
                 continue
 
             monitor_n_name = move_info.monitor_names[str(monitor_spec_num)]
-            monitor_n = instrument.getComponentByName(monitor_n_name)
+            monitor_index = comp_info.indexOfAny(monitor_n_name)
 
             # Get position of monitor n
-            monitor_position = monitor_n.getPos()
+            monitor_position = comp_info.position(monitor_index)
             z_position_monitor = monitor_position.getZ()
 
             # The location is relative to the rear-detector, get this position
             lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
             detector_name = lab_detector.detector_name
-            lab_detector_component = instrument.getComponentByName(detector_name)
-            detector_position = lab_detector_component.getPos()
+            lab_detector_index = comp_info.indexOfAny(detector_name)
+            detector_position = comp_info.position(lab_detector_index)
             z_position_detector = detector_position.getZ()
 
             z_new = z_position_detector + offset

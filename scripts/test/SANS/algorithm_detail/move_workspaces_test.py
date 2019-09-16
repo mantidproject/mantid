@@ -23,25 +23,27 @@ def get_coordinates():
 
 def get_monitor_pos(ws, monitor_spectrum_no, move_info):
     monitor_name = move_info.monitor_names[str(monitor_spectrum_no)]
-    instrument = ws.getInstrument()
-    monitor = instrument.getComponentByName(monitor_name)
 
-    monitor_z_pos = monitor.getPos().getZ()
+    comp_info = ws.componentInfo()
+    monitor_index = comp_info.indexOfAny(monitor_name)
+    monitor_z_pos = comp_info.position(monitor_index).getZ()
     return monitor_z_pos
 
 
 def calculate_new_pos(ws, move_info, offset):
-    rear_detector_z = get_rear_detector_pos(move_info=move_info, instrument=ws.getInstrument())
+    rear_detector_z = get_rear_detector_pos(move_info=move_info, ws=ws)
     expected_pos = rear_detector_z + offset
     return expected_pos
 
 
-def get_rear_detector_pos(move_info, instrument):
+def get_rear_detector_pos(move_info, ws):
     lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
     detector_name = lab_detector.detector_name
-    lab_detector_component = instrument.getComponentByName(detector_name)
-    detector_position = lab_detector_component.getPos()
-    return detector_position.getZ()
+    comp_info = ws.componentInfo()
+    lab_detector_index = comp_info.indexOfAny(detector_name)
+    lab_detector_component = comp_info.position(lab_detector_index)
+    detector_position = lab_detector_component.getZ()
+    return detector_position
 
 
 class MoveSansMonitor(unittest.TestCase):
