@@ -214,7 +214,7 @@ class PlotsLoader(object):
 
     @staticmethod
     def update_legend(ax, legend):
-        if not legend["exists"]:
+        if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
         LegendProperties.create_legend(legend, ax)
