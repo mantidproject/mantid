@@ -602,13 +602,14 @@ void AlignAndFocusPowder::exec() {
   if (applyLorentz) {
     g_log.information() << "Applying Lorentz correction started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    const size_t numHist = m_outputEW->getNumberHistograms();
+
+    API::IAlgorithm_sptr alg = createChildAlgorithm("LorentzCorrection");
+    alg->setProperty("InputWorkspace", m_outputW);
+    alg->setProperty("OutputWorkspace", m_outputW);
+    alg->setPropertyValue("Type", "PowderTOF");
+    alg->executeAsChildAlg();
+    m_outputW = alg->getProperty("OutputWorkspace");
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    const auto &specInfo = m_outputEW->spectrumInfo();
-    for (size_t i = 0; i < numHist; ++i) {
-      const double sin_theta = std::sin(.5 * specInfo.twoTheta(i));
-      m_outputEW->getSpectrum(i) *= sin_theta;
-    }
   }
 
   if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
