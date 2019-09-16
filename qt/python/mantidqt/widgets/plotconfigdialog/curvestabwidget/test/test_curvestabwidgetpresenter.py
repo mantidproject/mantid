@@ -14,7 +14,6 @@ from matplotlib import use as mpl_use
 
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
-from qtpy.QtCore import Qt
 
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import MantidAxes  # register MantidAxes projection  # noqa
@@ -253,7 +252,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
     @patch.object(CurvesTabWidgetPresenter, "apply_properties")
     def test_errorbar_apply_to_all_button_sets_and_applies_properties_to_each_curve_if_hide_errorbars_is_unticked\
-                    (self, mock_apply_properties):
+            (self, mock_apply_properties):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
@@ -273,7 +272,7 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
 
     @patch.object(CurvesTabWidgetPresenter, "apply_properties")
     def test_errorbar_apply_to_all_button_does_not_set_properties_if_hide_errorbars_is_ticked\
-                    (self, mock_apply_properties):
+            (self, mock_apply_properties):
         fig = self.make_figure_with_multiple_curves()
 
         mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
