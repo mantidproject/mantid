@@ -9,9 +9,12 @@ CombGaussLorentzKT
 Description
 -----------
 
-Fitting function for use by Muon scientists defined by:
+A combined function of the Gaussian decay and Lorentz KuboToyabe decay.
 
 .. math:: A(t)&=A_0\left(\frac13+\frac23\left(1-(\sigma t)^2-\lambda t\right)e^{-\frac{(\sigma t)^2}{2}-\lambda t}\right)
+
+.. figure:: /images/CombGaussLorentzKT.png
+   :alt: CombGaussLorentzKT.png
 
 .. attributes::
 
