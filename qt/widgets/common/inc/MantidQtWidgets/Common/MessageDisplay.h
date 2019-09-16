@@ -84,9 +84,11 @@ public:
   void setShowAllScriptOutput(const bool &show) {
     m_showAllScriptOutput = show;
   }
+  /// Return the displayedScripts QMap
   inline QMap<QString, QVariant> displayedScripts() const {
     return m_displayedScripts;
   }
+  /// Insert key-value pair into displayedScripts QMap
   void insertIntoDisplayedScripts(const QString &scriptPath,
                                   const bool &display = true);
 

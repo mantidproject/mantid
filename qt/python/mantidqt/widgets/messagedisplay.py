@@ -51,6 +51,10 @@ class MessageDisplay(MessageDisplay_cpp):
         qsettings.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, self.showFrameworkOutput())
 
     def generateContextMenu(self):
+        """
+        Generate the window's context menu. This first calls the base class's
+        context menu generator and then extends it with the filtering options.
+        """
         qmenu = super(MessageDisplay, self).generateContextMenu()
         filter_menu = qmenu.addMenu("&Filter by")
 
@@ -66,6 +70,8 @@ class MessageDisplay(MessageDisplay_cpp):
         all_script_action.setChecked(self.showAllScriptOutput())
         filter_menu.addAction(all_script_action)
 
+        if self.displayedScripts():
+            filter_menu.addSeparator()
         # We use a QActionGroup here because of a bug where, if we hooked the
         # actions in the loop directly to `toggle_filter_by_script`, every
         # action's slot would contain the same path (the last one in the loop).
@@ -127,6 +133,11 @@ class MessageDisplay(MessageDisplay_cpp):
         self.filterMessages()
 
     def script_executing(self, script_path):
+        """
+        Slot executed when a script is executed in the Workbench. The script's
+        path is added to the displayedScripts dictionary and set as the active
+        script. The script's path can then be associated to its output.
+        """
         self.active_script = script_path
         try:
             self.displayedScripts()[script_path]

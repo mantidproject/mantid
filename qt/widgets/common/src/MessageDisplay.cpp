@@ -156,7 +156,11 @@ void MessageDisplay::filterMessages() {
 }
 
 /**
- * Add a key-value pair to the displayedScripts QMap
+ * Add a key-value pair to the displayedScripts QMap. This QMap tracks the paths
+ * of executed scripts and whether they should be displayed.
+ * @param scriptPath A QString containing the path of the script.
+ * @param display Boolean specifying whether output from the script should be
+ * displayed
  */
 void MessageDisplay::insertIntoDisplayedScripts(const QString &scriptPath,
                                                 const bool &display) {
@@ -465,6 +469,10 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
 
+/** Returns true if the given message should be displayed given the current
+ * settings.
+ * @param msg A Message object
+ */
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
   if (msg.frameworkMsg() && showFrameworkOutput() ||
       !msg.frameworkMsg() && showAllScriptOutput() ||
