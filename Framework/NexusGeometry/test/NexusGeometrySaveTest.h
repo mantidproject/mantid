@@ -1229,7 +1229,7 @@ MeshObjects.
 ====================================================================
 */
 
-  void test_instrument_with_meshObj_and_cylindrical_shapes() {
+  void test_instrument_with_meshObj_monitor_and_cylindrical_detectors() {
 
     /*
          test scenario: A test instrument with cylindrical homogeneous pixel
@@ -1246,11 +1246,10 @@ MeshObjects.
     const auto cylinder = ComponentCreationHelper::createCappedCylinder(
         0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
 
-    auto cylindricalInstrument =
+    auto instrument =
         ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh,
                                                                    cylinder);
-    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
-        *cylindricalInstrument);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
@@ -1279,6 +1278,59 @@ MeshObjects.
     TS_ASSERT_THROWS_NOTHING(tester.openfullH5Path(pixelShapePath));
     // test has cylinders w/ values
     TS_ASSERT(tester.groupHasDataset(pixelShapePath, CYLINDERS));
+    // test has vertices w/ values
+    TS_ASSERT(tester.groupHasDatasetWithAttribute(pixelShapePath, VERTICES,
+                                                  METRES, UNITS));
+  }
+
+  void test_instrument_with_meshObjs() {
+
+    /*
+         test scenario: A test instrument with cylindrical homogeneous pixel
+         shapes, and a MeshObject cube shaped monitor is passed into
+       SaveInstrument to be saved."
+        */
+
+    // create RAII file resource for testing
+    FileResource fileResource("test_double_mesh.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+    using namespace Mantid::Kernel;
+
+    const auto mesh = ComponentCreationHelper::createCubeFromTriangles(5);
+
+    auto instrument =
+        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh, mesh);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
+    FullNXPath monitorShapePath{DEFAULT_ROOT_ENTRY_NAME,
+                                "test_instrument_with_shapes",
+                                "test_monitor_with_shape", SHAPE};
+    FullNXPath pixelShapePath{DEFAULT_ROOT_ENTRY_NAME,
+                              "test_instrument_with_shapes",
+                              "bank_with_pixelshapes", PIXEL_SHAPE};
+
+    NexusFileReader tester(destinationFile);
+
+    // test 'shapes' group in nxmonitor
+    TS_ASSERT_THROWS_NOTHING(tester.openfullH5Path(monitorShapePath));
+    // test has NX class NX_OFF_GEOMETRY
+    TS_ASSERT(tester.groupHasAttribute(monitorShapePath, NX_OFF));
+    // test has faces w/ values
+    TS_ASSERT(tester.groupHasDataset(monitorShapePath, FACES));
+    // test has windingorder w/ values
+    TS_ASSERT(tester.groupHasDataset(monitorShapePath, WINDING_ORDER));
+    // test has vertices w/ values
+    TS_ASSERT(tester.groupHasDatasetWithAttribute(monitorShapePath, VERTICES,
+                                                  METRES, UNITS));
+
+    // test 'pixelshapes' group in nxdetector
+    TS_ASSERT_THROWS_NOTHING(tester.openfullH5Path(pixelShapePath));
+    // test has cylinders w/ values
+    TS_ASSERT(tester.groupHasDataset(pixelShapePath, FACES));
+    // test has windingorder w/ values
+    TS_ASSERT(tester.groupHasDataset(pixelShapePath, WINDING_ORDER));
     // test has vertices w/ values
     TS_ASSERT(tester.groupHasDatasetWithAttribute(pixelShapePath, VERTICES,
                                                   METRES, UNITS));

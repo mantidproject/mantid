@@ -250,14 +250,9 @@ inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
 /*
 TODO:
 */
-template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
-
-  const size_t nFaces = meshObj->numberOfTriangles();
-  const size_t nVertices = meshObj->numberOfVertices();
-
-  const std::vector<double> vertices = meshObj->getVertices();
-  const auto windingOrder = meshObj->getTriangles();
-  H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
+void writeMesh(H5::Group &grp, const std::vector<double> &vertices,
+               const std::vector<uint32_t> windingOrder, const size_t nFaces,
+               const size_t nVertices) {
 
   H5::DataSet dFaces, dVertices, dWindingOrder;
 
@@ -269,8 +264,7 @@ template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
   vdims[1] = static_cast<hsize_t>(3);
   H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
-  dVertices =
-      shapeGroup.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
+  dVertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
   writeToDataset(dVertices, vertices, H5::PredType::NATIVE_DOUBLE, vspace);
   writeStrAttribute(dVertices, UNITS, METRES);
 
@@ -282,7 +276,7 @@ template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
   H5::DataSpace wspace = H5Screate_simple(wrank, wdims, nullptr);
 
   dWindingOrder =
-      shapeGroup.createDataSet(WINDING_ORDER, H5::PredType::NATIVE_INT, wspace);
+      grp.createDataSet(WINDING_ORDER, H5::PredType::NATIVE_INT, wspace);
   writeToDataset(dWindingOrder, windingOrder, H5::PredType::NATIVE_INT, wspace);
 
   // faces
@@ -302,15 +296,79 @@ template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
   fdims[0] = static_cast<hsize_t>(nFaces);
   H5::DataSpace fspace = H5Screate_simple(frank, fdims, nullptr);
 
-  dFaces = shapeGroup.createDataSet(FACES, H5::PredType::NATIVE_INT, fspace);
+  dFaces = grp.createDataSet(FACES, H5::PredType::NATIVE_INT, fspace);
   writeToDataset(dFaces, facesData, H5::PredType::NATIVE_INT, fspace);
+}
+
+template <typename T>
+void writeMeshObjShapeToPixels(const Geometry::ComponentInfo &compInfo,
+                               H5::Group &grp, std::vector<size_t> &meshes) {
+
+  // shape type of the first detector in children detectors
+  auto &firstShapeObj = compInfo.shape(meshes.front());
+
+  // prevents undefined behaviour when passing empty container into std::all_of.
+  // If empty, there is no data to write. No associated group will be created in
+  // file.
+
+  H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_OFF);
+  // check if cylinders are homogeneous
+  bool meshesAreHomogeneous =
+      std::all_of(meshes.begin(), meshes.end(), [&](const size_t &idx) {
+        // TODO LATER
+
+        return false;
+      });
+  if (meshesAreHomogeneous) {
+
+    // write first mesh
+
+    auto &shapeObj = compInfo.shape(meshes.front());
+    auto meshObj = dynamic_cast<const T *>(&shapeObj);
+
+    size_t nFaces = meshObj->numberOfTriangles();
+    size_t nVertices = meshObj->numberOfVertices();
+
+    auto windingOrder = meshObj->getTriangles();
+    std::vector<double> vertices = meshObj->getVertices();
+
+    writeMesh(pixelShapeGroup, vertices, windingOrder, nFaces, nVertices);
+
+  } else {
+    std::vector<double> vertices;
+    std::vector<uint32_t> windingOrder;
+    size_t totalNumOfVertices = 0;
+    size_t totalNumOfFaces = 0;
+    for (std::vector<size_t>::iterator it = meshes.begin(); it != meshes.end();
+         ++it) {
+
+      auto &shapeObj = compInfo.shape(*it);
+      auto meshObj = dynamic_cast<const T *>(&shapeObj);
+
+      size_t nFaces = meshObj->numberOfTriangles();
+      size_t nVertices = meshObj->numberOfVertices();
+
+      auto currentWindingOrder = meshObj->getTriangles();
+      std::vector<double> currentVertices = meshObj->getVertices();
+
+      // append the data
+      vertices.insert(vertices.end(), currentVertices.begin(),
+                      currentVertices.end());
+      windingOrder.insert(windingOrder.end(), currentWindingOrder.begin(),
+                          currentWindingOrder.end());
+      totalNumOfFaces += nFaces;
+      totalNumOfVertices += nVertices;
+    }
+    writeMesh(pixelShapeGroup, vertices, windingOrder, totalNumOfFaces,
+              totalNumOfVertices);
+  }
 }
 
 /*
 TODO:
 */
-void writeCylinders(H5::Group &grp, size_t nCylinders,
-                    const std::vector<double> &vertexCoordinates) {
+void writeCylinder(H5::Group &grp, size_t nCylinders,
+                   const std::vector<double> &vertexCoordinates) {
 
   H5::DataSet cylinders, vertices;
   // prepare the data
@@ -345,55 +403,58 @@ void writeCylinders(H5::Group &grp, size_t nCylinders,
 /*
 TODO: DOC
 */
-void writeCylinderShape(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
-                        const size_t idx) {
-
-  auto pixels =
-      compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
-  // If children detectors empty, there is no data to write to bank. exits here.
-  if (pixels.empty())
-    return;
-
-  std::vector<size_t> cylinders;
+void writeCylinderShapeToPixels(const Geometry::ComponentInfo &compInfo,
+                                H5::Group &grp,
+                                std::vector<size_t> &cylinders) {
 
   // shape type of the first detector in children detectors
-  auto &firstShape = compInfo.shape(pixels.front());
+  auto &firstShape = compInfo.shape(cylinders.front());
   auto firstShapeInfo = firstShape.shapeInfo();
   auto fType = firstShapeInfo.shape();
   auto fHeight = firstShapeInfo.height();
   auto fRadius = firstShapeInfo.radius();
 
-  // return true if all shape types, heights and radii are equal to the first
-  // shape in children detectors.
+  H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
+  // check if cylinders are homogeneous
+  bool cylindersAreHomogeneous =
+      std::all_of(cylinders.begin(), cylinders.end(), [&](const size_t &idx) {
+        auto &shapeObj = compInfo.shape(idx);
+        auto shapeInfo = shapeObj.shapeInfo();
+        auto type = shapeInfo.shape();
+        auto height = shapeInfo.height();
+        auto radius = shapeInfo.radius();
+        return (type == fType && height == fHeight && fRadius == radius);
+      });
+  if (cylindersAreHomogeneous) {
 
-  std::for_each(pixels.begin(), pixels.end(), [&](const size_t &idx) {
-    auto &shapeObj = compInfo.shape(idx);
-    auto shapeInfo = shapeObj.shapeInfo();
-    auto type = shapeInfo.shape();
-    // if at least one cylinder is found, change flag to true.
-    if (static_cast<int>(type) == 4 /*CYLINDER*/)
-      cylinders.push_back(idx);
-  });
+    // write cylinder only once, using the first index
+    auto geometry = firstShapeInfo.cylinderGeometry();
+    const Kernel::V3D &base = geometry.centreOfBottomBase;
+    const Kernel::V3D &axis = geometry.axis;
+    double &height = geometry.height;
+    double &radius = geometry.radius;
 
-  // prevents undefined behaviour when passing empty container into std::all_of.
-  // If empty, there is no data to write. No associated group will be created in
-  // file.
-  if (!cylinders.empty()) {
-    H5::Group pixelShapeGroup = simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
-    // check if cylinders are homogeneous
-    bool cylindersAreHomogeneous =
-        std::all_of(cylinders.begin(), cylinders.end(), [&](const size_t &idx) {
-          auto &shapeObj = compInfo.shape(idx);
-          auto shapeInfo = shapeObj.shapeInfo();
-          auto type = shapeInfo.shape();
-          auto height = shapeInfo.height();
-          auto radius = shapeInfo.radius();
-          return (type == fType && height == fHeight && fRadius == radius);
-        });
-    if (cylindersAreHomogeneous) {
+    Eigen::Vector3d top = Kernel::toVector3d(base) +
+                          Eigen::Vector3d(height * Kernel::toVector3d(axis));
+    Eigen::Affine3d rotation(Eigen::Quaterniond(0, 1, 1, 1));
 
-      // write cylinder only once, using the first index
-      auto geometry = firstShapeInfo.cylinderGeometry();
+    // creat an arbitrary noncollinear vector
+    Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
+
+    // get vector that is othogonal to the cylinder axis
+    Eigen::Vector3d orthogonalV = Kernel::toVector3d(axis).cross(nonCollinear);
+    Eigen::Vector3d edge =
+        top + Eigen::Vector3d(radius * orthogonalV.normalized());
+    std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
+                                 top[2],  edge[0], edge[1], edge[2]};
+    writeCylinder(pixelShapeGroup, 1, vertices);
+  } else {
+    std::vector<double> vertices;
+    for (std::vector<size_t>::iterator it = cylinders.begin();
+         it != cylinders.end(); ++it) {
+
+      auto shapeInfo = compInfo.shape(*it).shapeInfo();
+      auto geometry = shapeInfo.cylinderGeometry();
       const Kernel::V3D &base = geometry.centreOfBottomBase;
       const Kernel::V3D &axis = geometry.axis;
       double &height = geometry.height;
@@ -405,21 +466,62 @@ void writeCylinderShape(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
 
       // creat an arbitrary noncollinear vector
       Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
-
       // get vector that is othogonal to the cylinder axis
       Eigen::Vector3d orthogonalV =
           Kernel::toVector3d(axis).cross(nonCollinear);
       Eigen::Vector3d edge =
           top + Eigen::Vector3d(radius * orthogonalV.normalized());
-      std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
-                                   top[2],  edge[0], edge[1], edge[2]};
-      writeCylinders(pixelShapeGroup, 1, vertices);
-    } else {
-      std::vector<double> vertices;
-      for (std::vector<size_t>::iterator it = cylinders.begin();
-           it != cylinders.end(); ++it) {
 
-        auto shapeInfo = compInfo.shape(*it).shapeInfo();
+      vertices.push_back(base[0]);
+      vertices.push_back(base[1]);
+      vertices.push_back(base[3]);
+      vertices.push_back(top[0]);
+      vertices.push_back(top[1]);
+      vertices.push_back(top[2]);
+      vertices.push_back(edge[0]);
+      vertices.push_back(edge[1]);
+      vertices.push_back(edge[2]);
+    }
+    writeCylinder(pixelShapeGroup, cylinders.size(), vertices);
+  }
+}
+
+/*
+optimisation for
+*/
+void writeMonitorShape(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
+                       size_t idx) {
+
+  if (compInfo.hasValidShape(idx)) {
+    auto &shapeObj = compInfo.shape(idx);
+    if (const auto mesh =
+            dynamic_cast<const Geometry::MeshObject *>(&shapeObj)) {
+      size_t nFaces = mesh->numberOfTriangles();
+      size_t nVertices = mesh->numberOfVertices();
+      auto windingOrder = mesh->getTriangles();
+      std::vector<double> vertices = mesh->getVertices();
+      H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
+      writeMesh(shapeGroup, vertices, windingOrder, nFaces, nVertices);
+    } else if (const auto mesh =
+                   dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj)) {
+      size_t nFaces = mesh->numberOfTriangles();
+      size_t nVertices = mesh->numberOfVertices();
+      auto windingOrder = mesh->getTriangles();
+      std::vector<double> vertices = mesh->getVertices();
+      H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_OFF);
+      writeMesh(shapeGroup, vertices, windingOrder, nFaces, nVertices);
+
+    } else {
+
+      auto shapeInfo = shapeObj.shapeInfo();
+      auto type = shapeObj.shapeInfo().shape();
+      // this makes the assumption that if either dynamic casts above fail then
+      // the shape must be of type CSGObject, and has implementation for
+      // shabeObj.ShapeInfo().
+      if (static_cast<int>(type) == 4 /*CYLINDER*/) {
+
+        H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_CYLINDER);
+
         auto geometry = shapeInfo.cylinderGeometry();
         const Kernel::V3D &base = geometry.centreOfBottomBase;
         const Kernel::V3D &axis = geometry.axis;
@@ -433,48 +535,65 @@ void writeCylinderShape(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
 
         // creat an arbitrary noncollinear vector
         Eigen::Vector3d nonCollinear = rotation * Kernel::toVector3d(axis);
+
         // get vector that is othogonal to the cylinder axis
         Eigen::Vector3d orthogonalV =
             Kernel::toVector3d(axis).cross(nonCollinear);
         Eigen::Vector3d edge =
             top + Eigen::Vector3d(radius * orthogonalV.normalized());
-
-        vertices.push_back(base[0]);
-        vertices.push_back(base[1]);
-        vertices.push_back(base[3]);
-        vertices.push_back(top[0]);
-        vertices.push_back(top[1]);
-        vertices.push_back(top[2]);
-        vertices.push_back(edge[0]);
-        vertices.push_back(edge[1]);
-        vertices.push_back(edge[2]);
+        std::vector<double> vertices{base[0], base[1], base[2], top[0], top[1],
+                                     top[2],  edge[0], edge[1], edge[2]};
+        writeCylinder(shapeGroup, 1, vertices);
       }
-      writeCylinders(pixelShapeGroup, cylinders.size(), vertices);
     }
   }
 }
 
-void writeShapeGeometry(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
-                        const size_t index) {
+void writePixelShapes(const Geometry::ComponentInfo &compInfo, H5::Group &grp,
+                      size_t idx) {
 
-  // if there is no valid shapee at this level, allow attempt to write shapes to
-  // individual pixels
-  if (!compInfo.hasValidShape(index)) {
-    writeCylinderShape(compInfo, grp,
-                       index); // will write cylinders if any
+  auto pixels =
+      compInfo.detectorsInSubtree(idx); // indices of all pixels in bank
+  // If children detectors empty, there is no data to write to bank. exits here.
+  if (pixels.empty())
     return;
-  }
-  auto &shapeObj = compInfo.shape(index);
 
-  // categorize geometry
-  if (const auto *mesh = dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
-    writeMeshObjShape(mesh, grp);
-  else if (const auto *mesh =
-               dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
-    writeMeshObjShape(mesh, grp);
-  else
-    writeCylinderShape(compInfo, grp,
-                       index); // will write cylinders if any
+  std::vector<size_t> meshes;
+  std::vector<size_t> meshes2D;
+  std::vector<size_t> cylinders;
+
+  // shape type of the first detector in children detectors
+
+  // return true if all shape types, heights and radii are equal to the first
+  // shape in children detectors.
+
+  std::for_each(pixels.begin(), pixels.end(), [&](const size_t &idx) {
+    if (compInfo.hasValidShape(idx)) {
+      auto &shapeObj = compInfo.shape(idx);
+      if (dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
+        meshes.push_back(idx);
+      else if (dynamic_cast<const Geometry::MeshObject2D *>(&shapeObj))
+        meshes2D.push_back(idx);
+      else {
+        // this makes the assumption that if either dynamic casts above fail
+        // then the shape must be of type CSGObject, and has implementation for
+        // shabeObj.ShapeInfo().
+        auto type = shapeObj.shapeInfo().shape();
+        if (static_cast<int>(type) == 4 /*CYLINDER*/)
+          cylinders.push_back(idx);
+      }
+    }
+  });
+
+  // prevents undefined behaviour when passing empty container into std::all_of.
+  // If empty, there is no data to write. No associated group will be created in
+  // file.
+  if (meshes.size() == pixels.size())
+    writeMeshObjShapeToPixels<Geometry::MeshObject>(compInfo, grp, meshes);
+  else if (meshes2D.size() == pixels.size())
+    writeMeshObjShapeToPixels<Geometry::MeshObject2D>(compInfo, grp, meshes2D);
+  else if (cylinders.size() == pixels.size())
+    writeCylinderShapeToPixels(compInfo, grp, cylinders);
 }
 
 /*
@@ -1121,7 +1240,8 @@ public:
 
     H5::StrType dependencyStrType = strTypeOfSize(dependency);
     writeNXMonitorNumber(childGroup, monitorId);
-    writeShapeGeometry(compInfo, childGroup, index);
+    // write either INDIVIDUAL mesh or cylinder
+    writeMonitorShape(compInfo, childGroup, index);
 
     writeStrDataset(childGroup, BANK_NAME, monitorName);
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
@@ -1227,7 +1347,8 @@ public:
     H5::StrType dependencyStrType = strTypeOfSize(dependency);
     writePixelOffsets(childGroup, compInfo, index);
     writeNXDetectorNumber(childGroup, compInfo, detIds, index);
-    writeShapeGeometry(compInfo, childGroup, index);
+    // write either meshes or cyinders
+    // writePixelShapes(compInfo, childGroup, index);
 
     writeStrDataset(childGroup, BANK_NAME, detectorName);
     writeStrDataset(childGroup, DEPENDS_ON, dependency);
