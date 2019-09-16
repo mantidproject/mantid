@@ -238,7 +238,6 @@ void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
   }
 }
 
-
 // function to create a simple sub-group that has a nexus class attribute,
 // inside a parent group.
 inline H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
