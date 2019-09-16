@@ -25,14 +25,6 @@ NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
 
 
-def _tab_title_and_toolip(filename):
-    """Create labels for the tab title and tooltip from a filename"""
-    if filename is None:
-        return NEW_TAB_TITLE, NEW_TAB_TITLE
-    else:
-        return osp.basename(filename), filename
-
-
 class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
@@ -66,6 +58,22 @@ class MultiPythonFileInterpreter(QWidget):
 
         # setting defaults
         self.confirm_on_save = True
+
+    def _tab_title_and_tooltip(self, filename):
+        """Create labels for the tab title and tooltip from a filename"""
+        if filename is None:
+            title = NEW_TAB_TITLE
+            i = 1
+            while title in self.tab_titles:
+                title = "{} ({})".format(NEW_TAB_TITLE, i)
+                i += 1
+            return title, title
+        else:
+            return osp.basename(filename), filename
+
+    @property
+    def tab_titles(self):
+        return [self._tabs.tabText(i) for i in range(self.editor_count)]
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -112,7 +120,7 @@ class MultiPythonFileInterpreter(QWidget):
         interpreter.sig_editor_modified.connect(self.mark_current_tab_modified)
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
 
-        tab_title, tab_tooltip = _tab_title_and_toolip(filename)
+        tab_title, tab_tooltip = self._tab_title_and_tooltip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
         self._tabs.setTabToolTip(tab_idx, tab_tooltip)
         self._tabs.setCurrentIndex(tab_idx)
@@ -230,7 +238,7 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx, title_new)
 
     def on_filename_modified(self, filename):
-        title, tooltip = _tab_title_and_toolip(filename)
+        title, tooltip = self._tab_title_and_tooltip(filename)
         idx_cur = self._tabs.currentIndex()
         self._tabs.setTabText(idx_cur, title)
         self._tabs.setTabToolTip(idx_cur, tooltip)
