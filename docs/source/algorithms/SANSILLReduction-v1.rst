@@ -190,10 +190,10 @@ Output:
 
 .. testoutput:: ExSANSILLReduction
 
-    Water container transmission is 0.945
-    Water transmission is 0.500
-    Sample container transmission is 0.665
-    Sample transmission is 0.640
+    Water container transmission is 0.946
+    Water transmission is 0.501
+    Sample container transmission is 0.667
+    Sample transmission is 0.642
 
 .. testcleanup:: ExSANSILLReduction
 
