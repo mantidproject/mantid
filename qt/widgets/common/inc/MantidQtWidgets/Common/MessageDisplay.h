@@ -111,8 +111,6 @@ public slots:
   void appendDebug(const QString &text);
   /// Write a message after the current contents
   void append(const Message &msg);
-  /// Append a QList of messages to the current contents
-  void appendList(const QList<Message> &messages);
   /// Write a Python script message, intended for use with Python API
   void appendPython(const QString &text, const int &priority,
                     const QString &fileName);
@@ -150,6 +148,8 @@ private:
   void setupTextArea(const QFont &font);
   /// Return format for given log level
   QTextCharFormat format(const Message::Priority priority) const;
+  /// Return True if message should be shown given current user settings
+  bool shouldBeDisplayed(const Message &msg);
 
   /// A reference to the log channel
   QtSignalChannel *m_logChannel;

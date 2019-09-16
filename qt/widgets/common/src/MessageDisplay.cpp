@@ -142,11 +142,16 @@ void MessageDisplay::setSource(const QString &source) {
 }
 
 /**
- * Filter messages by output type: script and/or Framework
+ * Filter messages, either by Framework or all/individual scripts
  */
 void MessageDisplay::filterMessages() {
   m_textDisplay->clear();
-  appendList(getHistory());
+  for (auto &msg : getHistory()) {
+    if (shouldBeDisplayed(msg)) {
+      m_textDisplay->textCursor().insertText(msg.text(),
+                                             format(msg.priority()));
+    }
+  }
   moveCursorToEnd();
 }
 
@@ -208,8 +213,7 @@ void MessageDisplay::appendDebug(const QString &text) {
  */
 void MessageDisplay::append(const Message &msg) {
   m_messageHistory.append(msg);
-  if (m_showFrameworkOutput && msg.frameworkMsg() ||
-      m_showAllScriptOutput && !msg.frameworkMsg()) {
+  if (shouldBeDisplayed(msg)) {
     QTextCursor cursor = moveCursorToEnd();
     cursor.insertText(msg.text(), format(msg.priority()));
     moveCursorToEnd();
@@ -218,22 +222,6 @@ void MessageDisplay::append(const Message &msg) {
       emit errorReceived(msg.text());
     if (msg.priority() <= Message::Priority::PRIO_WARNING)
       emit warningReceived(msg.text());
-  }
-}
-
-/**
- * Append a list of messages with the option to filter by whether the message
- * came from a Python script or the framework.
- * @param messages A QList of Message objects
- */
-void MessageDisplay::appendList(const QList<Message> &messages) {
-  for (auto &msg : messages) {
-    if (showFrameworkOutput() && msg.frameworkMsg())
-      m_textDisplay->textCursor().insertText(msg.text(),
-                                             format(msg.priority()));
-    else if (showAllScriptOutput() && !msg.frameworkMsg())
-      m_textDisplay->textCursor().insertText(msg.text(),
-                                             format(msg.priority()));
   }
 }
 
@@ -475,6 +463,14 @@ void MessageDisplay::setupTextArea(const QFont &font) {
  */
 QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
+}
+
+bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
+  if (msg.frameworkMsg() && showFrameworkOutput() ||
+      !msg.frameworkMsg() && showAllScriptOutput() ||
+      m_displayedScripts.value(msg.scriptName()).toBool())
+    return true;
+  return false;
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

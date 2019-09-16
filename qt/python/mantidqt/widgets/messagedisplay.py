@@ -16,7 +16,7 @@ from qtpy.QtGui import QFont
 
 from mantidqt.utils.qt import import_qt
 
-SHOW_SCRIPT_OUTPUT_KEY = "MessageDisplayShowScriptOutput"
+SHOW_ALL_SCRIPT_OUTPUT_KEY = "MessageDisplayShowAllScriptOutput"
 SHOW_FRAMEWORK_OUTPUT_KEY = "MessageDisplayShowFrameworkOutput"
 
 MessageDisplay_cpp = import_qt('.._common', 'mantidqt.widgets', 'MessageDisplay')
@@ -46,12 +46,12 @@ class MessageDisplay(MessageDisplay_cpp):
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
         self.setShowFrameworkOutput(qsettings.value(SHOW_FRAMEWORK_OUTPUT_KEY, True))
-        self.setShowScriptOutput(qsettings.value(SHOW_SCRIPT_OUTPUT_KEY, True))
+        self.setShowAllScriptOutput(qsettings.value(SHOW_ALL_SCRIPT_OUTPUT_KEY, True))
 
     def writeSettings(self, qsettings):
         super(MessageDisplay, self).writeSettings(qsettings)
         qsettings.setValue(SHOW_FRAMEWORK_OUTPUT_KEY, self.showFrameworkOutput())
-        qsettings.setValue(SHOW_SCRIPT_OUTPUT_KEY, self.showScriptOutput())
+        qsettings.setValue(SHOW_ALL_SCRIPT_OUTPUT_KEY, self.showAllScriptOutput())
 
     def generateContextMenu(self):
         qmenu = super(MessageDisplay, self).generateContextMenu()
@@ -81,7 +81,7 @@ class MessageDisplay(MessageDisplay_cpp):
             action = QAction(script_name, filter_menu)
             action.setData(script_path)
             action.setCheckable(True)
-            if self.showAllScriptOutput() or self.inScriptsToPrint(script_path):
+            if self.displayedScripts()[script_path]:
                 action.setChecked(True)
             action_group.addAction(action)
             filter_menu.addAction(action)
@@ -113,11 +113,21 @@ class MessageDisplay(MessageDisplay_cpp):
         self.filterMessages()
 
     def toggle_filter_all_script_output(self):
-        self.setShowAllScriptOutput(not self.showAllScriptOutput())
+        show_all = self.showAllScriptOutput()
+        for script_path in self.displayedScripts():
+            self.insertIntoDisplayedScripts(script_path, not show_all)
+        self.setShowAllScriptOutput(not show_all)
         self.filterMessages()
 
     def toggle_filter_by_script(self, script_path):
-        print(script_path)
+        if self.displayedScripts()[script_path]:
+            self.insertIntoDisplayedScripts(script_path, False)
+            self.setShowAllScriptOutput(False)
+        else:
+            self.insertIntoDisplayedScripts(script_path, True)
+            if all(self.displayedScripts().values()):
+                self.setShowAllScriptOutput(True)
+        self.filterMessages()
 
     def script_executing(self, script_path):
         self.active_script = script_path
@@ -125,3 +135,5 @@ class MessageDisplay(MessageDisplay_cpp):
             self.displayedScripts()[script_path]
         except KeyError:
             self.insertIntoDisplayedScripts(script_path, True)
+        if all(self.displayedScripts().values()):
+            self.setShowAllScriptOutput(True)

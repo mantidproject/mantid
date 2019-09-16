@@ -116,6 +116,49 @@ class MessageDisplayTest(unittest.TestCase):
         self.display.script_executing(self.unix_path)
         self.assertFalse(self.display.displayedScripts()[self.unix_path])
 
+    def test_toggle_filter_by_script_only_hides_input_from_given_script(self):
+        messages = {self.unix_path: ["Message 1"], self.win_path: ["Message 2"]}
+        self._simulate_scripts_printing(messages)
+        self.display.toggle_filter_by_script(self.unix_path)
+        self.assertIn("Message 2", self.get_message_window_contents())
+        self.assertNotIn("Message 1", self.get_message_window_contents())
+
+    def test_showAllScriptOutput_returns_False_if_one_individual_script_is_set_as_displayed(self):
+        messages = {self.unix_path: ["Message 1"], self.win_path: ["Message 2"]}
+        self._simulate_scripts_printing(messages)
+        self.display.toggle_filter_by_script(self.unix_path)
+        self.assertFalse(self.display.showAllScriptOutput())
+
+    def test_showAllScriptOutput_is_set_to_True_if_all_individual_scripts_are_displayed(self):
+        self.display.toggle_filter_all_script_output()
+        messages = {self.unix_path: ["Message 1"], self.win_path: ["Message 2"]}
+        self._simulate_scripts_printing(messages)
+        self.assertTrue(all(self.display.displayedScripts().values()))
+        self.assertTrue(self.display.showAllScriptOutput())
+
+    def test_that_new_messages_from_a_script_that_is_not_set_to_display_are_not_displayed(self):
+        self._simulate_script_executions([self.unix_path])
+        self.display.toggle_filter_by_script(self.unix_path)
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"]})
+        self.assertNotIn("Message 1", self.get_message_window_contents())
+
+    def test_that_toggling_all_script_output_off_sets_all_values_in_displayedScripts_to_False(self):
+        self._simulate_script_executions([self.unix_path, self.win_path])
+        self.display.toggle_filter_all_script_output()
+        self.assertFalse(any(self.display.displayedScripts().values()))
+
+    def test_that_toggling_all_script_output_on_sets_all_values_in_displayedScripts_to_True(self):
+        self._simulate_script_executions([self.unix_path, self.win_path])
+        self.display.toggle_filter_by_script(self.unix_path)
+        self.display.toggle_filter_all_script_output()
+        self.assertTrue(all(self.display.displayedScripts().values()))
+
+    def _simulate_scripts_printing(self, script_messages):
+        for path, messages in script_messages.items():
+            self.display.script_executing(path)
+            for msg in messages:
+                self.display.append_script_notice(msg)
+
     def _get_menu_action(self, menu, action_text):
         for action in menu.actions():
             if action_text in action.iconText():
