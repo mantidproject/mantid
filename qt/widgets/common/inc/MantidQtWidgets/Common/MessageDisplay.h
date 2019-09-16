@@ -80,13 +80,13 @@ public:
   void setShowFrameworkOutput(const bool &show) {
     m_showFrameworkOutput = show;
   }
-  inline bool showScriptOutput() const { return m_showScriptOutput; }
-  void setShowScriptOutput(const bool &show) { m_showScriptOutput = show; }
-
+  inline bool showAllScriptOutput() const { return m_showAllScriptOutput; }
+  void setShowAllScriptOutput(const bool &show) {
+    m_showAllScriptOutput = show;
+  }
   inline QMap<QString, QVariant> displayedScripts() const {
     return m_displayedScripts;
   }
-
   void insertIntoDisplayedScripts(const QString &scriptPath,
                                   const bool &display = true);
 
@@ -166,9 +166,10 @@ private:
   /// Keep track of the message history
   QList<Message> m_messageHistory;
   /// Bools to dictate whether to print certain types of messages
-  bool m_showFrameworkOutput{true}, m_showScriptOutput{true};
-  /// Map storing the scripts with output and if their output is being displayed
-  /// Sip has no conversion for QMap<QString, bool>, so we use QVariant, not bool
+  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true};
+  /// Map storing the scripts with output and if their output is being
+  /// displayed Sip has no conversion for QMap<QString, bool>, so we use
+  /// QVariant, not bool
   QMap<QString, QVariant> m_displayedScripts;
 };
 } // namespace MantidWidgets

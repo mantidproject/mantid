@@ -66,7 +66,7 @@ class MessageDisplay(MessageDisplay_cpp):
         all_script_action = QAction('All Script Output', filter_menu)
         all_script_action.triggered.connect(self.toggle_filter_all_script_output)
         all_script_action.setCheckable(True)
-        all_script_action.setChecked(self.showScriptOutput())
+        all_script_action.setChecked(self.showAllScriptOutput())
         filter_menu.addAction(all_script_action)
 
         # We use a QActionGroup here because of a bug where, if we hooked the
@@ -81,7 +81,7 @@ class MessageDisplay(MessageDisplay_cpp):
             action = QAction(script_name, filter_menu)
             action.setData(script_path)
             action.setCheckable(True)
-            if self.showScriptOutput() or self.inScriptsToPrint(script_path):
+            if self.showAllScriptOutput() or self.inScriptsToPrint(script_path):
                 action.setChecked(True)
             action_group.addAction(action)
             filter_menu.addAction(action)
@@ -113,7 +113,7 @@ class MessageDisplay(MessageDisplay_cpp):
         self.filterMessages()
 
     def toggle_filter_all_script_output(self):
-        self.setShowScriptOutput(not self.showScriptOutput())
+        self.setShowAllScriptOutput(not self.showAllScriptOutput())
         self.filterMessages()
 
     def toggle_filter_by_script(self, script_path):
