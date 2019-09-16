@@ -12,40 +12,22 @@ from __future__ import (absolute_import, unicode_literals)
 from mantidqt.utils.qt import import_qt
 
 ManageUserDirectories = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
-#ManageUserDirectories_cpp = import_qt('.._common', 'mantidqt.widgets', 'ManageUserDirectories')
-
-# manage_user_directories = None
-#
-#
-# def open_mud(parent):
-#     # Checks whether a Manage User Directories window is already open before opening another one.
-#     global manage_user_directories
-#     if manage_user_directories is None:
-#         manage_user_directories = ManageUserDirectories(parent)
-#         manage_user_directories.show()
-#         manage_user_directories.destroyed.connect(mud_closed)
-#     else:
-#         # Brings the already open window to the front.
-#         manage_user_directories.raise_()
-#
-#
-# def mud_closed():
-#     global manage_user_directories
-#     manage_user_directories = None
 
 
 class OpenManageUserDirectories():
     currently_open_mud = None
 
-    def open_mud(self, parent):
+    @classmethod
+    def open_mud(cls, parent):
         # Checks whether a Manage User Directories window is already open before opening another one.
-        if self.currently_open_mud:
+        if cls.currently_open_mud:
             # Brings the already open window to the front.
-            self.currently_open_mud.raise_()
+            cls.currently_open_mud.raise_()
         else:
-            self.currently_open_mud = ManageUserDirectories(parent)
-            self.currently_open_mud.show()
-            self.currently_open_mud.destroyed.connect(self.mud_closed)
+            cls.currently_open_mud = ManageUserDirectories(parent)
+            cls.currently_open_mud.show()
+            cls.currently_open_mud.destroyed.connect(cls.mud_closed)
 
-    def mud_closed(self):
-        self.currently_open_mud = None
+    @classmethod
+    def mud_closed(cls):
+        cls.currently_open_mud = None

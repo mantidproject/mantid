@@ -188,10 +188,6 @@ class MainWindow(QMainWindow):
         self.interface_manager = None
         self.interface_executor = None
 
-        self.mud = manageuserdirectories.OpenManageUserDirectories()
-
-        self.manage_user_directories = None
-
     def setup(self):
         # menus must be done first so they can be filled by the
         # plugins in register_plugin
@@ -605,7 +601,7 @@ class MainWindow(QMainWindow):
         self.project.load()
 
     def open_manage_directories(self):
-        self.mud.open_mud(self)
+        manageuserdirectories.OpenManageUserDirectories.open_mud(self)
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)
