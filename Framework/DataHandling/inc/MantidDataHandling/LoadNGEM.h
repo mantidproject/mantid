@@ -70,16 +70,16 @@ struct CoincidenceEvent {
 };
 
 /// Holds the 128 bit words from the detector.
-struct Split64 {
-  uint64_t words[2]; // An array of the two words created by the detector.
+struct DetectorWord {
+  uint64_t words[2]; // Array holding the word from the detector split in two.
 };
 
-/// Is able to hold all versions of the data words in the same memory slot.
+/// Is able to hold all versions of the data words in the same memory location.
 union EventUnion {
   GenericEvent generic;
   T0FrameEvent tZero;
   CoincidenceEvent coincidence;
-  Split64 splitWord;
+  DetectorWord splitWord;
 };
 
 class DLLExport LoadNGEM : public API::IFileLoader<Kernel::FileDescriptor> {

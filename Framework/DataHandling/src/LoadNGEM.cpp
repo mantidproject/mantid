@@ -11,15 +11,14 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include <sys/stat.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -55,7 +54,7 @@ uint64_t swapUint64(uint64_t word) {
  */
 int LoadNGEM::confidence(Kernel::FileDescriptor &descriptor) const {
   if (descriptor.extension() == ".edb") {
-    return 100;
+    return 95;
   } else {
     return 0;
   }
@@ -329,7 +328,7 @@ void LoadNGEM::addFrameToOutputWorkspace(
     frameEventCounts.emplace_back(eventCountInFrame);
     ++goodFrames;
 
-#pragma omp parallel for
+    PARALLEL_FOR_NO_WSP_CHECK()
     // Add histograms that match parameters to workspace
     for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
       if (histogramsInFrame[i].getNumberEvents() > 0) {
@@ -388,7 +387,7 @@ void LoadNGEM::createEventWorkspace(
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA,
       Mantid::HistogramData::Histogram(Mantid::HistogramData::BinEdges(xAxis)));
-#pragma omp parallel for
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
     dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
     dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
