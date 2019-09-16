@@ -26,7 +26,7 @@ class PlotsSaverTest(unittest.TestCase):
 
         # Make a figure with a given input with all these values already set
         self.loader_plot_dict = {u'axes': [{u'colorbar': {u'exists': False},
-                                            u'legend': {u'exists': False,
+                                            u'legend': {u'exists': True,
                                                         u'visible': True,
                                                         u'title': "Legend",
                                                         u'background_color': u'#ffffff',
