@@ -418,7 +418,7 @@ void ReflectometryReductionOneAuto3::exec() {
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
   const auto params = getRebinParams(IvsQ, theta);
   auto IvsQC = IvsQ;
-  if (params.m_qMin && params.m_qMax)
+  if (!(isDefault("MomentumTransferMin") && isDefault("MomentumTransferMax")))
     IvsQC = cropQ(IvsQ, params);
   setProperty("OutputWorkspace", IvsQC);
 
@@ -444,7 +444,7 @@ void ReflectometryReductionOneAuto3::exec() {
   setProperty("MomentumTransferMin", params.m_qMin);
   setProperty("MomentumTransferMax", params.m_qMax);
   if (params.hasQStep())
-    setProperty("MomentumTransferStep", params.m_qStep);
+    setProperty("MomentumTransferStep", -(*params.m_qStep));
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
 }
@@ -708,9 +708,9 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);
-  if (params.m_qMin)
+  if (!(isDefault("MomentumTransferMin")))
     algCrop->setProperty("XMin", params.m_qMin);
-  if (params.m_qMax)
+  if (!(isDefault("MomentumTransferMax")))
     algCrop->setProperty("XMax", params.m_qMax);
   algCrop->execute();
   MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
@@ -725,11 +725,10 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
  */
 double ReflectometryReductionOneAuto3::getPropertyOrDefault(
     const std::string &propertyName, const double defaultValue) {
-  Property *property = getProperty(propertyName);
-  if (property)
-    return getProperty(propertyName);
-  else
+  if (isDefault(propertyName))
     return defaultValue;
+  else
+    return getProperty(propertyName);
 }
 
 /** Check if input workspace is a group

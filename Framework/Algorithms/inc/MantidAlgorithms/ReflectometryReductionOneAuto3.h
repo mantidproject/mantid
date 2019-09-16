@@ -47,7 +47,7 @@ private:
   struct RebinParams {
     RebinParams(const double qMin, const boost::optional<double> qStep,
                 const double qMax)
-        : m_qMin(qMin), m_qMax(qMax), m_qStep(qStep){};
+        : m_qMin(qMin), m_qStep(qStep), m_qMax(qMax){};
 
     double m_qMin;
     double m_qMax;
