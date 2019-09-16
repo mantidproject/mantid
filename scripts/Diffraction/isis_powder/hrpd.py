@@ -14,10 +14,10 @@ from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_para
 
 import mantid.simpleapi as mantid
 
-# Force using raw files
-# A bug in loading old NeXus files prevents using NeXus.
+# A bug on the instrument when recording historic NeXus files (< 2015) caused
+# corrupted data. Use raw files for now until sufficient time has past and old
+# data is unlikely to be reanalysed.
 RAW_DATA_EXT = '.raw'
-
 
 # Constants
 PROMPT_PULSE_INTERVAL = 20000.0
@@ -106,14 +106,16 @@ class HRPD(AbstractInst):
             raise RuntimeError("Could not find " + os.path.join(path, name)+" please run create_vanadium with "
                                                                             "\"do_solid_angle_corrections=True\"")
 
-    def _generate_input_file_name(self, run_number, file_ext=None):
+    def _generate_input_file_name(self, run_number, file_ext=""):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
         :param file_ext: An optional file extension to add to force a particular format
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        return self._generate_inst_filename(run_number=run_number, file_ext=RAW_DATA_EXT)
+        if not file_ext:
+            file_ext = RAW_DATA_EXT
+        return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:

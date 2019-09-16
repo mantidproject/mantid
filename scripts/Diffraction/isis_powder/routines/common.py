@@ -596,6 +596,7 @@ def _load_raw_files(run_number_string, instrument, file_ext=None):
     :return: A list of loaded workspaces
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
+    file_ext = "" if file_ext is None else file_ext
     load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
     return load_raw_ws
 
@@ -613,8 +614,7 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
     _check_load_range(list_of_runs_to_load=run_numbers_list)
 
     for run_number in run_numbers_list:
-        file_name = instrument._generate_input_file_name(run_number=run_number)
-        file_name = file_name + str(file_ext) if file_ext else file_name
+        file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
         read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
