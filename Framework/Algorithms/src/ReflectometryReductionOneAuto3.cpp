@@ -626,7 +626,7 @@ auto ReflectometryReductionOneAuto3::getRebinParams(
       getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
   auto const qMax =
       getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
-  return RebinParams(qMin, qMax, getQStep(inputWS, theta));
+  return RebinParams(qMin, getQStep(inputWS, theta), qMax);
 }
 
 /** Get the binning step the final output workspace in Q
