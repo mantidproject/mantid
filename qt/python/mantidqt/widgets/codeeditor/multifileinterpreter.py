@@ -173,12 +173,20 @@ class MultiPythonFileInterpreter(QWidget):
         """Return the editor at the given index. Must be in range"""
         return self._tabs.widget(idx)
 
+    def _emit_code_exec_start(self):
+        """Emit signal that code execution has started"""
+        if not self.current_editor().filename:
+            filename = self._tabs.tabText(self._tabs.currentIndex())
+            self.sig_code_exec_start.emit(filename)
+        else:
+            self.sig_code_exec_start.emit(self.current_editor().filename)
+
     def execute_current_async(self):
         """
         Execute content of the current file. If a selection is active
         then only this portion of code is executed, this is completed asynchronously
         """
-        self.sig_code_exec_start.emit(self.current_editor().filename)
+        self._emit_code_exec_start()
         return self.current_editor().execute_async()
 
     def execute_async(self):
@@ -187,7 +195,7 @@ class MultiPythonFileInterpreter(QWidget):
         Selection is ignored.
         This is completed asynchronously.
         """
-        self.sig_code_exec_start.emit(self.current_editor().filename)
+        self._emit_code_exec_start()
         return self.current_editor().execute_async(ignore_selection=True)
 
     @Slot()
@@ -197,7 +205,7 @@ class MultiPythonFileInterpreter(QWidget):
         then only this portion of code is executed, completed asynchronously
         which blocks calling thread.
         """
-        self.sig_code_exec_start.emit(self.current_editor().filename)
+        self._emit_code_exec_start()
         self.current_editor().execute_async_blocking()
 
     def mark_current_tab_modified(self, modified):

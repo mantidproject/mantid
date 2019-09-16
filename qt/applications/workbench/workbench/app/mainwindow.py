@@ -219,8 +219,7 @@ class MainWindow(QMainWindow):
         self.editor = MultiFileEditor(self)
         self.editor.register_plugin()
         self.widgets.append(self.editor)
-        self.editor.editors.sig_code_exec_start.connect(
-            lambda file_name: self.messagedisplay.script_executing(file_name))
+        self.editor.editors.sig_code_exec_start.connect(self.messagedisplay.script_executing)
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole
