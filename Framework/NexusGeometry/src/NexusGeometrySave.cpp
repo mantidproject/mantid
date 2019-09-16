@@ -64,8 +64,8 @@ struct SpectraMappings {
  * @param childGroupName : intended name of the child goup.
  * @return : new H5 Group object with name <childGroupName> if did not throw.
  */
-inline H5::Group tryCreateGroup(const H5::Group &parentGroup,
-                                const std::string &childGroupName) {
+H5::Group tryCreateGroup(const H5::Group &parentGroup,
+                         const std::string &childGroupName) {
   H5std_string parentGroupName = H5_OBJ_NAME(parentGroup);
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -165,11 +165,31 @@ void writeStrDataset(H5::Group &grp, const std::string &dSetName,
                      const std::string &dSetVal,
                      const H5::DataSpace &dataSpace = SCALAR) {
   // TODO. may need to review if we shoud in fact replace.
+  // added safety check for older HDF libraries
+  if (dSetVal.empty())
+    return;
   if (!utilities::findDataset(grp, dSetName)) {
     H5::StrType dataType = strTypeOfSize(dSetVal);
     H5::DataSet dSet = grp.createDataSet(dSetName, dataType, dataSpace);
     dSet.write(dSetVal, dataType);
   }
+}
+
+/*
+TODO: TESTS to check empty datasets and attributes are not written.
+*/
+template <typename T>
+void writeToDataset(H5::DataSet &dSet, const std::vector<T> &data,
+                    const H5::PredType &predType, const H5::DataSpace space) {
+  if (!data.empty())
+    dSet.write(data.data(), predType, space);
+}
+
+template <typename T>
+void writeToAttribute(H5::Attribute &attr, const std::vector<T> &data,
+                      const H5::PredType &predType) {
+  if (!data.empty())
+    attr.write(predType, data.data());
 }
 
 /** Function: writeStrAttribute
@@ -182,6 +202,10 @@ void writeStrDataset(H5::Group &grp, const std::string &dSetName,
 void writeStrAttribute(H5::Group &grp, const std::string &attrName,
                        const std::string &attrVal,
                        const H5::DataSpace &dataSpace = SCALAR) {
+  // added safety check for older HDF libraries
+  if (attrVal.empty())
+    throw std::invalid_argument("attribute value in " + attrName +
+                                " cannot be empty.");
   if (!grp.attrExists(attrName)) {
     H5::StrType dataType = strTypeOfSize(attrVal);
     H5::Attribute attribute =
@@ -241,8 +265,7 @@ template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
 
   dVertices =
       shapeGroup.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
-  dVertices.write(vertices.data(), H5::PredType::NATIVE_DOUBLE, vspace);
-
+  writeToDataset(dVertices, vertices, H5::PredType::NATIVE_DOUBLE, vspace);
   writeStrAttribute(dVertices, UNITS, METRES);
 
   // winding order
@@ -254,7 +277,7 @@ template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
 
   dWindingOrder =
       shapeGroup.createDataSet(WINDING_ORDER, H5::PredType::NATIVE_INT, wspace);
-  dWindingOrder.write(windingOrder.data(), H5::PredType::NATIVE_INT, wspace);
+  writeToDataset(dWindingOrder, windingOrder, H5::PredType::NATIVE_INT, wspace);
 
   // faces
 
@@ -274,7 +297,7 @@ template <typename T> void writeMeshObjShape(const T *meshObj, H5::Group &grp) {
   H5::DataSpace fspace = H5Screate_simple(frank, fdims, nullptr);
 
   dFaces = shapeGroup.createDataSet(FACES, H5::PredType::NATIVE_INT, fspace);
-  dFaces.write(facesData.data(), H5::PredType::NATIVE_INT, fspace);
+  writeToDataset(dFaces, facesData, H5::PredType::NATIVE_INT, fspace);
 }
 
 /*
@@ -299,7 +322,7 @@ void writeCylinders(H5::Group &grp, size_t nCylinders,
   H5::DataSpace cspace = H5Screate_simple(crank, cdims, nullptr);
 
   cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_INT, cspace);
-  cylinders.write(cylinderData.data(), H5::PredType::NATIVE_INT, cspace);
+  writeToDataset(cylinders, cylinderData, H5::PredType::NATIVE_INT, cspace);
 
   int vrank = 2;
   hsize_t vdims[static_cast<hsize_t>(2)];
@@ -308,7 +331,8 @@ void writeCylinders(H5::Group &grp, size_t nCylinders,
   H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
   vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace);
-  vertices.write(vertexCoordinates.data(), H5::PredType::NATIVE_DOUBLE, vspace);
+  writeToDataset(vertices, vertexCoordinates, H5::PredType::NATIVE_DOUBLE,
+                 vspace);
   writeStrAttribute(vertices, UNITS, METRES);
 }
 
@@ -510,21 +534,21 @@ void writePixelOffsets(H5::Group &grp, const Geometry::ComponentInfo &compInfo,
   if (!xIsZero) {
     xPixelOffset =
         grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
-    xPixelOffset.write(posx.data(), H5::PredType::NATIVE_DOUBLE, space);
+    writeToDataset(xPixelOffset, posx, H5::PredType::NATIVE_DOUBLE, space);
     writeStrAttribute(xPixelOffset, UNITS, METRES);
   }
 
   if (!yIsZero) {
     yPixelOffset =
         grp.createDataSet(Y_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
-    yPixelOffset.write(posy.data(), H5::PredType::NATIVE_DOUBLE);
+    writeToDataset(yPixelOffset, posy, H5::PredType::NATIVE_DOUBLE, space);
     writeStrAttribute(yPixelOffset, UNITS, METRES);
   }
 
   if (!zIsZero) {
     zPixelOffset =
         grp.createDataSet(Z_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
-    zPixelOffset.write(posz.data(), H5::PredType::NATIVE_DOUBLE);
+    writeToDataset(zPixelOffset, posz, H5::PredType::NATIVE_DOUBLE, space);
     writeStrAttribute(zPixelOffset, UNITS, METRES);
   }
 }
@@ -538,7 +562,7 @@ void write1DIntDataset(H5::Group &grp, const H5std_string &name,
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   auto dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);
-  dataset.write(container.data(), H5::PredType::NATIVE_INT, space);
+  writeToDataset(dataset, container, H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -677,8 +701,8 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
   vector = location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
                                     aspace); // attribute vector
-  vector.write(H5::PredType::NATIVE_DOUBLE,
-               stdNormPos.data()); // write unit vector to vector
+  writeToAttribute(vector, stdNormPos,
+                   H5::PredType::NATIVE_DOUBLE); // write unit vector to vector
 
   // units attribute
   strSize = strTypeOfSize(METRES);
@@ -750,8 +774,8 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
   vector = orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
                                        aspace); // attribute vector
-  vector.write(H5::PredType::NATIVE_DOUBLE,
-               stdNormAxis.data()); // write angle axis to vector
+  writeToAttribute(vector, stdNormAxis,
+                   H5::PredType::NATIVE_DOUBLE); // write angle axis to vector
 
   // units attribute
   strSize = strTypeOfSize(DEGREES);
