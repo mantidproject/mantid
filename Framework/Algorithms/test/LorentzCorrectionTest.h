@@ -108,9 +108,10 @@ public:
     LorentzCorrection alg;
     alg.setChild(true);
     alg.initialize();
-    TSM_ASSERT_THROWS("Workspace must be in units of wavelength",
-                      alg.setProperty("InputWorkspace", ws_tof),
-                      std::invalid_argument &);
+    alg.setProperty("InputWorkspace", ws_tof);
+
+    TSM_ASSERT_THROWS("Workspace must be in units of wavelength", alg.execute(),
+                      std::runtime_error &);
   }
 
   void test_throws_if_wavelength_zero() {
