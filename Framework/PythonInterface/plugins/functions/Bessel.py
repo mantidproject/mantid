@@ -22,9 +22,9 @@ class Bessel(IFunction1D):
         return "Muon"
 
     def init(self):
-        self.declareParameter("A0",1)
-        self.declareParameter("Phi",0.1)
-        self.declareParameter("Nu",0.1)
+        self.declareParameter("A0",1,'Amplitude')
+        self.declareParameter("Phi",0.1,'Phase')
+        self.declareParameter("Nu",0.1,'Wavenumber')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
