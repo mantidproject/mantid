@@ -138,12 +138,12 @@ class LegendProperties(dict):
                                fancybox=props['round_edges'],
                                shadow=props['shadow'],
                                framealpha=props['transparency'],
-                               title=props.title,
-                               borderpad=props.border_padding,
-                               labelspacing=props.label_spacing,
-                               handlelength=props.marker_size,
-                               handletextpad=props.marker_label_padding,
-                               columnspacing=props.column_spacing)
+                               title=props['title'],
+                               borderpad=props['border_padding'],
+                               labelspacing=props['label_spacing'],
+                               handlelength=props['marker_size'],
+                               handletextpad=props['marker_label_padding'],
+                               columnspacing=props['column_spacing'])
 
         title = legend.get_title()
         title.set_fontname(props['title_font'])
