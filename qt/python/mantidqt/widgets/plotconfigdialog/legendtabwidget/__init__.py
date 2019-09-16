@@ -16,9 +16,6 @@ import sys
 
 
 class LegendProperties(dict):
-    def __init__(self, props):
-        self.update(props)
-
     def __getattr__(self, item):
         return self[item]
 
@@ -116,31 +113,31 @@ class LegendProperties(dict):
     @classmethod
     def create_legend(cls, props, ax):
         if int(matplotlib.__version__[0]) >= 2:
-            legend = ax.legend(ncol=props.columns,
-                               prop={'size': props.entries_size},
-                               numpoints=props.markers,
-                               markerfirst=props.marker_position == "Left of Entries",
-                               frameon=props.box_visible,
-                               fancybox=props.round_edges,
-                               shadow=props.shadow,
-                               framealpha=props.transparency,
-                               facecolor=props.background_color,
-                               edgecolor=props.edge_color,
-                               title=props.title,
-                               borderpad=props.border_padding,
-                               labelspacing=props.label_spacing,
-                               handlelength=props.marker_size,
-                               handletextpad=props.marker_label_padding,
-                               columnspacing=props.column_spacing)
+            legend = ax.legend(ncol=props['columns'],
+                               prop={'size': props['entries_size']},
+                               numpoints=props['markers'],
+                               markerfirst=props['marker_position'] == "Left of Entries",
+                               frameon=props['box_visible'],
+                               fancybox=props['round_edges'],
+                               shadow=props['shadow'],
+                               framealpha=props['transparency'],
+                               facecolor=props['background_color'],
+                               edgecolor=props['edge_color'],
+                               title=props['title'],
+                               borderpad=props['border_padding'],
+                               labelspacing=props['label_spacing'],
+                               handlelength=props['marker_size'],
+                               handletextpad=props['marker_label_padding'],
+                               columnspacing=props['column_spacing'])
         else:
-            legend = ax.legend(ncol=props.columns,
-                               prop={'size': props.entries_size},
-                               numpoints=props.markers,
-                               markerfirst=props.marker_position == "Left of Entries",
-                               frameon=props.box_visible,
-                               fancybox=props.round_edges,
-                               shadow=props.shadow,
-                               framealpha=props.transparency,
+            legend = ax.legend(ncol=props['columns'],
+                               prop={'size': props['entries_size']},
+                               numpoints=props['markers'],
+                               markerfirst=props['marker_position'] == "Left of Entries",
+                               frameon=props['box_visible'],
+                               fancybox=props['round_edges'],
+                               shadow=props['shadow'],
+                               framealpha=props['transparency'],
                                title=props.title,
                                borderpad=props.border_padding,
                                labelspacing=props.label_spacing,
@@ -149,15 +146,15 @@ class LegendProperties(dict):
                                columnspacing=props.column_spacing)
 
         title = legend.get_title()
-        title.set_fontname(props.title_font)
-        title.set_fontsize(props.title_size)
-        title.set_color(props.title_color)
+        title.set_fontname(props['title_font'])
+        title.set_fontsize(props['title_size'])
+        title.set_color(props['title_color'])
 
         for text in legend.get_texts():
-            text.set_fontname(props.entries_font)
-            text.set_fontsize(props.entries_size)
-            text.set_color(props.entries_color)
+            text.set_fontname(props['entries_font'])
+            text.set_fontsize(props['entries_size'])
+            text.set_color(props['entries_color'])
 
-        legend.set_visible(props.visible)
+        legend.set_visible(props['visible'])
 
         legend.draggable(True)
