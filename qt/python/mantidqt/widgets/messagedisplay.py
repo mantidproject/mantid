@@ -111,6 +111,9 @@ class MessageDisplay(MessageDisplay_cpp):
         """
         self.appendPython(txt, Priority.Notice, self.active_script)
 
+    def file_name_modified(self, old_file_name, new_file_name):
+        self.filePathModified(old_file_name, new_file_name)
+
     def toggle_filter_framework_output(self):
         self.setShowFrameworkOutput(not self.showFrameworkOutput())
         self.filterMessages()

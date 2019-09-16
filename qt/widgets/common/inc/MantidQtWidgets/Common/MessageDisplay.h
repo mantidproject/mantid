@@ -91,6 +91,8 @@ public:
   /// Insert key-value pair into displayedScripts QMap
   void insertIntoDisplayedScripts(const QString &scriptPath,
                                   const bool &display = true);
+  /// Method to be called when a file's path is modified
+  void filePathModified(const QString &oldPath, const QString &newPath);
 
 signals:
   /// Indicate that a message of error or higher has been received.

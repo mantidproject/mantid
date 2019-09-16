@@ -27,8 +27,6 @@ class MessageDisplayTest(unittest.TestCase):
 
     def setUp(self):
         self.display = MessageDisplay()
-        self.display.setShowFrameworkOutput(True)
-        self.display.setShowAllScriptOutput(True)
 
     def get_message_window_contents(self):
         return self.display.getTextEdit().toPlainText()
@@ -152,6 +150,21 @@ class MessageDisplayTest(unittest.TestCase):
         self.display.toggle_filter_by_script(self.unix_path)
         self.display.toggle_filter_all_script_output()
         self.assertTrue(all(self.display.displayedScripts().values()))
+
+    def test_that_script_path_is_replaced_in_displayedScripts_when_it_is_renamed(self):
+        self._simulate_script_executions([self.unix_path])
+        self.display.file_name_modified(self.unix_path, self.win_path)
+        self.assertIn(self.win_path, self.display.displayedScripts())
+        self.assertNotIn(self.unix_path, self.display.displayedScripts())
+        self.assertTrue(self.display.displayedScripts()[self.win_path])
+
+    def test_that_toggling_Filter_by_script_after_renaming_script_shows_correct_messages(self):
+        self._simulate_scripts_printing({self.unix_path: ["Message"]})
+        self.display.toggle_filter_by_script(self.unix_path)
+        self.display.file_name_modified(self.unix_path, self.win_path)
+        self.assertNotIn("Message", self.get_message_window_contents())
+        self.display.toggle_filter_by_script(self.win_path)
+        self.assertIn("Message", self.get_message_window_contents())
 
     def _simulate_scripts_printing(self, script_messages):
         for path, messages in script_messages.items():

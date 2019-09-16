@@ -29,6 +29,7 @@ class MultiPythonFileInterpreter(QWidget):
     """Provides a tabbed widget for editing multiple files"""
 
     sig_code_exec_start = Signal(str)
+    sig_file_name_changed = Signal(str, str)
 
     def __init__(self, font=None, default_content=None, parent=None):
         """
@@ -73,7 +74,7 @@ class MultiPythonFileInterpreter(QWidget):
 
     @property
     def tab_titles(self):
-        return [self._tabs.tabText(i) for i in range(self.editor_count)]
+        return [self._tabs.tabText(i).rstrip('*') for i in range(self.editor_count)]
 
     def closeEvent(self, event):
         self.deleteLater()
@@ -184,7 +185,7 @@ class MultiPythonFileInterpreter(QWidget):
     def _emit_code_exec_start(self):
         """Emit signal that code execution has started"""
         if not self.current_editor().filename:
-            filename = self._tabs.tabText(self._tabs.currentIndex())
+            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
             self.sig_code_exec_start.emit(filename)
         else:
             self.sig_code_exec_start.emit(self.current_editor().filename)
@@ -238,6 +239,10 @@ class MultiPythonFileInterpreter(QWidget):
         self._tabs.setTabText(idx, title_new)
 
     def on_filename_modified(self, filename):
+        old_filename = self._tabs.tabToolTip(self._tabs.currentIndex()).rstrip('*')
+        if not filename:
+            filename = self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+        self.sig_file_name_changed.emit(old_filename, filename)
         title, tooltip = self._tab_title_and_tooltip(filename)
         idx_cur = self._tabs.currentIndex()
         self._tabs.setTabText(idx_cur, title)

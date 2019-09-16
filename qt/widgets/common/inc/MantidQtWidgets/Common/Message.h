@@ -58,6 +58,8 @@ public:
   inline bool frameworkMsg() const { return m_frameworkMsg; }
   /// @returns The name of the script the message came from
   inline QString scriptName() const { return m_scriptName; }
+  /// Set the script name. This is useful if a script is renamed
+  void setScriptName(const QString &scriptName) { m_scriptName = scriptName; }
 
 private:
   QString m_text;

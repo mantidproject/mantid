@@ -85,6 +85,7 @@ public:
   QMenu *generateContextMenu();
   QMap<QString, QVariant> displayedScripts();
   void insertIntoDisplayedScripts(const QString &scriptPath, const bool &display = true);
+  void filePathModified(const QString &oldPath, const QString &newPath);
 
   bool showFrameworkOutput();
   void setShowFrameworkOutput(const bool &show);

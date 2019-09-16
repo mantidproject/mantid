@@ -49,6 +49,9 @@ class LogMessageDisplay(PluginWidget):
     def script_executing(self, script_path):
         self.display.script_executing(script_path)
 
+    def file_name_modified(self, old_file_name, new_file_name):
+        self.display.file_name_modified(old_file_name, new_file_name)
+
     def readSettings(self, settings):
         self.display.readSettings(toQSettings(settings))
 
