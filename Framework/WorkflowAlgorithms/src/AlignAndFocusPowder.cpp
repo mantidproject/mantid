@@ -9,8 +9,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -76,8 +76,8 @@ const std::string LORENTZ("LorentzCorrection");
 const std::string UNWRAP_REF("UnwrapRef");
 const std::string LOWRES_REF("LowResRef");
 const std::string LOWRES_SPEC_OFF("LowResSpectrumOffset");
-}
-}
+} // namespace PropertyNames
+} // namespace
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
@@ -103,15 +103,14 @@ void AlignAndFocusPowder::init() {
   //   Direction::Output, PropertyMode::Optional),
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
-  declareProperty(
-      std::make_unique<FileProperty>(
-          PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad,
-          std::vector<std::string>{ ".h5", ".hd5", ".hdf", ".cal" }),
-      "The name of the calibration file with offset, masking, and "
-      "grouping data");
+  declareProperty(std::make_unique<FileProperty>(
+                      PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad,
+                      std::vector<std::string>{".h5", ".hd5", ".hdf", ".cal"}),
+                  "The name of the calibration file with offset, masking, and "
+                  "grouping data");
   declareProperty(std::make_unique<FileProperty>(
                       PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
-                      std::vector<std::string>{ ".xml", ".cal" }),
+                      std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
   declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       PropertyNames::GROUP_WKSP, "", Direction::InOut,
@@ -200,9 +199,10 @@ void AlignAndFocusPowder::init() {
       "starting filtering. Ignored if WallClockTolerance is not specified. "
       "Default is start of run",
       Direction::Input);
-  declareProperty(PropertyNames::LORENTZ, false, "Multiply each spectrum by "
-                                                 "sin(theta) where theta is "
-                                                 "half of the Bragg angle");
+  declareProperty(PropertyNames::LORENTZ, false,
+                  "Multiply each spectrum by "
+                  "sin(theta) where theta is "
+                  "half of the Bragg angle");
   declareProperty(PropertyNames::UNWRAP_REF, 0.,
                   "Reference total flight path for frame "
                   "unwrapping. Zero skips the correction");
@@ -225,9 +225,8 @@ void AlignAndFocusPowder::init() {
       "workspace indices).");
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::L2),
                   "Optional: Secondary flight (L2) paths for each detector");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(PropertyNames::POLAR),
-      "Optional: Polar angles (two thetas) for detectors");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::POLAR),
+                  "Optional: Polar angles (two thetas) for detectors");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHAL),
       "Azimuthal angles (out-of-plain) for detectors");

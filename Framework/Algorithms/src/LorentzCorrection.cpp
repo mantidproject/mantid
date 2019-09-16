@@ -36,7 +36,7 @@ namespace PropertyNames {
 const std::string INPUT_WKSP("InputWorkspace");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string TYPE("Type");
-}
+} // namespace PropertyNames
 
 const std::string TOF_SCD("SingleCrystalTOF");
 const std::string TOF_PD("PowderTOF");
@@ -46,7 +46,7 @@ inline double sinTheta(const API::SpectrumInfo &spectrumInfo, int64_t index) {
       spectrumInfo.isMonitor(index) ? 0.0 : spectrumInfo.twoTheta(index);
   return std::sin(0.5 * twoTheta);
 }
-} // anonymous
+} // namespace
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LorentzCorrection::version() const { return 1; }
@@ -68,15 +68,15 @@ const std::string LorentzCorrection::name() const {
 /** Initialize the algorithm's properties.
  */
 void LorentzCorrection::init() {
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MatrixWorkspace> >(
-          PropertyNames::INPUT_WKSP, "", Direction::Input, PropertyMode::Mandatory),
-      // boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
-      "Input workspace to correct in Wavelength.");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      PropertyNames::INPUT_WKSP, "", Direction::Input,
+                      PropertyMode::Mandatory),
+                  // boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                  "Input workspace to correct in Wavelength.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::OUTPUT_WKSP, "", Direction::Output),
                   "An output workspace.");
-  const std::vector<std::string> correction_types{ TOF_SCD, TOF_PD };
+  const std::vector<std::string> correction_types{TOF_SCD, TOF_PD};
   declareProperty(PropertyNames::TYPE, correction_types[0],
                   boost::make_shared<StringListValidator>(correction_types),
                   "Type of Lorentz correction to do");
@@ -88,11 +88,13 @@ std::map<std::string, std::string> LorentzCorrection::validateInputs() {
   const auto processingType = this->getPropertyValue(PropertyNames::TYPE);
   // check units if the SCD option is selected
   if (processingType == TOF_SCD) {
-    MatrixWorkspace_const_sptr wksp = this->getProperty(PropertyNames::INPUT_WKSP);
+    MatrixWorkspace_const_sptr wksp =
+        this->getProperty(PropertyNames::INPUT_WKSP);
     // code is a variant of private method from WorkspaceUnitValidator
     const auto unit = wksp->getAxis(0)->unit();
     if ((!unit) || (unit->unitID().compare("Wavelength"))) {
-      result[PropertyNames::INPUT_WKSP] = "The workspace must have units of Wavelength";
+      result[PropertyNames::INPUT_WKSP] =
+          "The workspace must have units of Wavelength";
     }
   }
 
@@ -108,8 +110,8 @@ void LorentzCorrection::exec() {
   auto cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0, 0.1);
   cloneAlg->initialize();
   cloneAlg->setProperty("InputWorkspace", inWS);
-  cloneAlg->setPropertyValue("OutputWorkspace",
-                             this->getPropertyValue(PropertyNames::OUTPUT_WKSP));
+  cloneAlg->setPropertyValue(
+      "OutputWorkspace", this->getPropertyValue(PropertyNames::OUTPUT_WKSP));
   cloneAlg->execute();
   Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr outWS =
