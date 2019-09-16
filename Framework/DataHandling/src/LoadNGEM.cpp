@@ -58,7 +58,7 @@ void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian) {
 }
 
 /**
- * @brief Add a frame to the main set of histograms.
+ * @brief Add a frame to the main set of events.
  *
  * @param rawFrames The number of T0 Events detected so far.
  * @param goodFrames The number of good frames detected so far.
@@ -66,15 +66,14 @@ void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian) {
  * @param minEventsReq The number of events required to be a good frame.
  * @param maxEventsReq The max events allowed to be a good frame.
  * @param frameEventCounts A vector of the number of events in each good frame.
- * @param histograms The main set of histograms for the data so far.
- * @param histogramsInFrame The set of histograms for the current frame.
+ * @param events The main set of events for the data so far.
+ * @param eventsInFrame The set of events for the current frame.
  */
 void addFrameToOutputWorkspace(
     int &rawFrames, int &goodFrames, const int &eventCountInFrame,
     const int &minEventsReq, const int &maxEventsReq,
-    MantidVec &frameEventCounts,
-    std::vector<DataObjects::EventList> &histograms,
-    std::vector<DataObjects::EventList> &histogramsInFrame) {
+    MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
+    std::vector<DataObjects::EventList> &eventsInFrame) {
   ++rawFrames;
   if (eventCountInFrame >= minEventsReq && eventCountInFrame <= maxEventsReq) {
     // Add number of event counts to workspace.
@@ -82,11 +81,11 @@ void addFrameToOutputWorkspace(
     ++goodFrames;
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    // Add histograms that match parameters to workspace
+    // Add events that match parameters to workspace
     for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
-      if (histogramsInFrame[i].getNumberEvents() > 0) {
-        histograms[i] += histogramsInFrame[i];
-        histogramsInFrame[i].clear();
+      if (eventsInFrame[i].getNumberEvents() > 0) {
+        events[i] += eventsInFrame[i];
+        eventsInFrame[i].clear();
       }
     }
   }
@@ -97,11 +96,11 @@ void addFrameToOutputWorkspace(
  *
  * @param maxToF The largest ToF seen so far.
  * @param binWidth The width of each bin.
- * @param histograms The main histogram event data.
+ * @param events The main events data.
  * @param dataWorkspace The workspace to add the data to.
  */
 void createEventWorkspace(const int &maxToF, const double &binWidth,
-                          std::vector<DataObjects::EventList> &histograms,
+                          std::vector<DataObjects::EventList> &events,
                           DataObjects::EventWorkspace_sptr &dataWorkspace) {
   std::vector<double> xAxis;
   // Round up number of bins needed and reserve the space in the vector.
@@ -113,10 +112,10 @@ void createEventWorkspace(const int &maxToF, const double &binWidth,
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (auto spectrumNo = 0u; spectrumNo < histograms.size(); ++spectrumNo) {
-    dataWorkspace->getSpectrum(spectrumNo) = histograms[spectrumNo];
-    dataWorkspace->getSpectrum(spectrumNo).setSpectrumNo(spectrumNo + 1);
-    dataWorkspace->getSpectrum(spectrumNo).setDetectorID(spectrumNo + 1);
+  for (auto i = 0u; i < events.size(); ++i) {
+    dataWorkspace->getSpectrum(i) = events[i];
+    dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
+    dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
   }
   dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
   dataWorkspace->getAxis(0)->unit() =
@@ -199,9 +198,9 @@ void LoadNGEM::exec() {
   std::vector<double> frameEventCounts;
   int eventCountInFrame = 0;
 
-  std::vector<DataObjects::EventList> histograms, histogramsInFrame;
-  histograms.resize(NUM_OF_SPECTRA);
-  histogramsInFrame.resize(NUM_OF_SPECTRA);
+  std::vector<DataObjects::EventList> events, eventsInFrame;
+  events.resize(NUM_OF_SPECTRA);
+  eventsInFrame.resize(NUM_OF_SPECTRA);
   progress(0.04);
 
   size_t totalFilePaths(filePaths.size());
@@ -209,16 +208,16 @@ void LoadNGEM::exec() {
   for (const auto &filePath : filePaths) {
     loadSingleFile(filePath, eventCountInFrame, maxToF, minToF, rawFrames,
                    goodFrames, minEventsReq, maxEventsReq, frameEventCounts,
-                   histograms, histogramsInFrame, totalFilePaths, counter);
+                   events, eventsInFrame, totalFilePaths, counter);
   }
   // Add the final frame of events (as they are not followed by a T0 event)
   addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
                             minEventsReq, maxEventsReq, frameEventCounts,
-                            histograms, histogramsInFrame);
+                            events, eventsInFrame);
   progress(0.90);
 
   DataObjects::EventWorkspace_sptr dataWorkspace;
-  createEventWorkspace(maxToF, binWidth, histograms, dataWorkspace);
+  createEventWorkspace(maxToF, binWidth, events, dataWorkspace);
 
   addToSampleLog("raw_frames", rawFrames, dataWorkspace);
   addToSampleLog("good_frames", goodFrames, dataWorkspace);
@@ -235,7 +234,7 @@ void LoadNGEM::exec() {
 }
 
 /**
- * @brief Load a single file into the histograms.
+ * @brief Load a single file into the event lists.
  *
  * @param filePath The path to the file.
  * @param eventCountInFrame The number of events in the current frame.
@@ -246,8 +245,8 @@ void LoadNGEM::exec() {
  * @param minEventsReq The number of events required to be a good frame.
  * @param maxEventsReq The max events allowed to be a good frame.
  * @param frameEventCounts A vector of the number of events in each good frame.
- * @param histograms The main set of histograms for the data so far.
- * @param histogramsInFrame The set of histograms for the current frame.
+ * @param events The main set of events for the data so far.
+ * @param eventsInFrame The set of events for the current frame.
  * @param totalFilePaths The total number of file paths.
  * @param fileCount The number of file paths processed.
  */
@@ -255,9 +254,8 @@ void LoadNGEM::loadSingleFile(
     const std::vector<std::string> &filePath, int &eventCountInFrame,
     int &maxToF, int &minToF, int &rawFrames, int &goodFrames,
     const int &minEventsReq, const int &maxEventsReq,
-    MantidVec &frameEventCounts,
-    std::vector<DataObjects::EventList> &histograms,
-    std::vector<DataObjects::EventList> &histogramsInFrame,
+    MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
+    std::vector<DataObjects::EventList> &eventsInFrame,
     const size_t &totalFilePaths, int &fileCount) {
   // Create file reader
   if (filePath.size() > 1) {
@@ -292,12 +290,12 @@ void LoadNGEM::loadSingleFile(
       } else if (tof < minToF) {
         minToF = tof;
       }
-      histogramsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
+      eventsInFrame[pixel].addEventQuickly(Types::Event::TofEvent(tof));
 
     } else if (event.tZero.check()) { // Check for T0 event.
       addFrameToOutputWorkspace(rawFrames, goodFrames, eventCountInFrame,
                                 minEventsReq, maxEventsReq, frameEventCounts,
-                                histograms, histogramsInFrame);
+                                events, eventsInFrame);
 
       if (reportProgressAndCheckCancel(numProcessedEvents, eventCountInFrame,
                                        totalNumEvents, totalFilePaths,

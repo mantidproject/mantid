@@ -106,13 +106,13 @@ private:
   void init() override;
   /// Execute the algorithm.
   void exec() override;
-  /// Load a file into the histograms.
+  /// Load a file into the event lists.
   void loadSingleFile(const std::vector<std::string> &filePath,
                       int &eventCountInFrame, int &maxToF, int &minToF,
                       int &rawFrames, int &goodFrames, const int &minEventsReq,
                       const int &maxEventsReq, MantidVec &frameEventCounts,
-                      std::vector<DataObjects::EventList> &histograms,
-                      std::vector<DataObjects::EventList> &histogramsInFrame,
+                      std::vector<DataObjects::EventList> &events,
+                      std::vector<DataObjects::EventList> &eventsInFrame,
                       const size_t &totalFilePaths, int &fileCount);
   /// Add some text information to the sample logs.
   void addToSampleLog(const std::string &logName, const std::string &logText,
