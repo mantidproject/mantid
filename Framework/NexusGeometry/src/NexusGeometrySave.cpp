@@ -3,7 +3,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/** NexusGeometrySave::saveInstrument :
+/*
+ * NexusGeometrySave::saveInstrument :
  * Save methods to save geometry and metadata from memory
  * to disk in Nexus file format for Instrument 2.0.
  *
@@ -81,8 +82,8 @@ H5::Group tryCreateGroup(const H5::Group &parentGroup,
   }
   return parentGroup.createGroup(childGroupName);
 }
-
-/** Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
+/*
+ * Function toStdVector (Overloaded). Store data in Mantid::Kernel::V3D vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
  * datasets to file.
  *
@@ -99,7 +100,8 @@ std::vector<double> toStdVector(const V3D &data) {
   return stdVector;
 }
 
-/** Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector
+/*
+ * Function toStdVector (Overloaded). Store data in Eigen::Vector3d vector
  * into std::vector<double> vector. Used by saveInstrument to write array-type
  * datasets to file.
  *
@@ -111,7 +113,8 @@ std::vector<double> toStdVector(const Eigen::Vector3d &data) {
   return toStdVector(Kernel::toV3D(data));
 }
 
-/** Function: isApproxZero. returns true if all values in an variable-sized
+/*
+ * Function: isApproxZero. returns true if all values in an variable-sized
  * std-vector container evaluate to zero with a given level of precision. Used
  * by SaveInstrument methods to determine whether or not to write a dataset to
  * file.
@@ -142,7 +145,8 @@ bool isApproxZero(const Eigen::Quaterniond &data, const double &precision) {
   return data.isApprox(Eigen::Quaterniond(1, 0, 0, 0), precision);
 }
 
-/** Function: strTypeOfSize
+/*
+ * Function: strTypeOfSize
  * Produces the HDF StrType of size equal to that of the
  * input string.
  *
@@ -154,7 +158,8 @@ H5::StrType strTypeOfSize(const std::string &str) {
   return stringType;
 }
 
-/** Function: writeStrDataset
+/*
+ * Function: writeStrDataset
  * writes a StrType HDF dataset and dataset value to a HDF group.
  *
  * @param grp : HDF group object.
@@ -214,7 +219,8 @@ void writeStrAttribute(H5::Group &grp, const std::string &attrName,
   }
 }
 
-/** Function: writeStrAttribute
+/*
+ * Function: writeStrAttribute
  * Overload function which writes a StrType HDF attribute and attribute value
  * to a HDF dataset.
  *
@@ -231,6 +237,7 @@ void writeStrAttribute(H5::DataSet &dSet, const std::string &attrName,
     attribute.write(dataType, attrVal);
   }
 }
+
 
 // function to create a simple sub-group that has a nexus class attribute,
 // inside a parent group.
@@ -618,7 +625,8 @@ void writeSpectra(H5::Group &grp, const SpectraMappings &mappings) {
   write1DIntDataset(grp, SPECTRA_NUMBERS, mappings.spectra_ids);
 }
 
-/** Function: writeNXMonitorNumber
+/*
+ * Function: writeNXMonitorNumber
  * For use with NXmonitor group. write 'detector_id's of an NXmonitor, which
  * is a specific type of pixel, to its group.
  *
@@ -654,13 +662,13 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
   }
 }
 
-/** Function: writeLocation
+/*
+ * Function: writeLocation
  * For use with NXdetector group. Writes absolute position of detector bank to
  * dataset and metadata as attributes.
  *
  * @param grp : NXdetector group : (HDF group)
- * @param position : Eigen::Vector3d position of component in instrument
- * cache.
+ * @param position : Eigen::Vector3d position of component in instrument cache.
  */
 inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
 
@@ -721,7 +729,8 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   dependsOn.write(strSize, dependency);
 }
 
-/** Function: writeOrientation
+/*
+ * Function: writeOrientation
  * For use with NXdetector group. Writes the absolute rotation of detector
  * bank to dataset and metadata as attributes.
  *
@@ -926,38 +935,6 @@ class NexusGeometrySaveImpl {
 public:
   enum class Mode { Trunc, Append };
 
-private:
-  const Mode m_mode;
-
-  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name,
-                              const std::string &classType) {
-
-    if (m_mode == Mode::Append) {
-      // Find by class and by name
-      auto results = utilities::findGroups(parent, classType);
-      for (auto &result : results) {
-        auto resultName = H5_OBJ_NAME(result);
-        // resultName gives full path. We match the last name on the path
-        if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
-          return result;
-        }
-      }
-    }
-    // We can't find it, or we are writing from scratch anyway. We need to
-    // verify no-duplicates
-    return tryCreateGroup(parent, name);
-  }
-
-  // function to create a simple sub-group that has a nexus class attribute,
-  // inside a parent group.
-  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
-                             const std::string &nexusAttribute) {
-    H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
-    writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
-    return subGroup;
-  }
-
-public:
   explicit NexusGeometrySaveImpl(Mode mode) : m_mode(mode) {}
   NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) =
       delete; // No intention to suport copies
@@ -1289,7 +1266,37 @@ public:
     writeDetectorIndex(childGroup, mappings);
     writeSpectra(childGroup, mappings);
   }
-}; // namespace
+
+private:
+  const Mode m_mode;
+
+  H5::Group openOrCreateGroup(const H5::Group &parent, const std::string &name,
+                              const std::string &classType) {
+
+    if (m_mode == Mode::Append) {
+      // Find by class and by name
+      auto results = utilities::findGroups(parent, classType);
+      for (auto &result : results) {
+        auto resultName = H5_OBJ_NAME(result);
+        // resultName gives full path. We match the last name on the path
+        if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
+          return result;
+        }
+      }
+    }
+    // We can't find it, or we are writing from scratch anyway
+    return tryCreateGroup(parent, name);
+  }
+
+  // function to create a simple sub-group that has a nexus class attribute,
+  // inside a parent group.
+  H5::Group simpleNXSubGroup(H5::Group &parent, const std::string &name,
+                             const std::string &nexusAttribute) {
+    H5::Group subGroup = openOrCreateGroup(parent, name, nexusAttribute);
+    writeStrAttribute(subGroup, NX_CLASS, nexusAttribute);
+    return subGroup;
+  }
+}; // class NexusGeometrySaveImpl
 
 /*
  * Function: saveInstrument
@@ -1343,8 +1350,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
     if (Geometry::ComponentInfoBankHelpers::isSaveableBank(compInfo, index)) {
-      const bool needed = isDesiredNXDetector(index, saved_indices, compInfo);
-      if (needed) {
+      if (isDesiredNXDetector(index, saved_indices, compInfo)) {
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index);
@@ -1367,10 +1373,11 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
 
 } // saveInstrument
 
-/*
+/**
  * Function: saveInstrument (overload)
- * calls the save methods to write components to file after exception checking.
- * Produces a Nexus format file containing the Instrument geometry and metadata.
+ * calls the save methods to write components to file after exception
+ * checking. Produces a Nexus format file containing the Instrument geometry
+ * and metadata.
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.
@@ -1432,6 +1439,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
   // save NXdetectors
   auto detToIndexMap =
       ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
+  // save NXdetectors
   std::list<size_t> saved_indices;
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
@@ -1442,6 +1450,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
         SpectraMappings mappings =
             makeMappings(compInfo, detToIndexMap, ws.indexInfo(),
                          ws.spectrumInfo(), detIds, index);
+
         if (reporter != nullptr)
           reporter->report();
         writer.detector(instrument, compInfo, detIds, index, mappings);

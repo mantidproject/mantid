@@ -97,7 +97,7 @@ public:
 
   void test_exec_rectangular_instrument_details() {
     using namespace Mantid::NexusGeometry;
-    ScopedFileHandle fileInfo("test_rectangular_instrument.nxs");
+    FileResource fileInfo("test_rectangular_instrument.nxs");
     auto ws =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 10 /*numBins*/);
@@ -124,7 +124,7 @@ public:
   }
 
   void test_exec_rectangular_data() {
-    ScopedFileHandle fileInfo("test_rectangular_data.nxs");
+    FileResource fileInfo("test_rectangular_data.nxs");
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             1 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -142,7 +142,7 @@ public:
 
     using namespace Mantid::HistogramData;
 
-    ScopedFileHandle fileInfo("test_ess_instrument.nxs");
+    FileResource fileInfo("test_ess_instrument.nxs");
 
     auto wsIn = test_utility::from_instrument_file(
         "V20_4-tubes_90deg_Definition_v01.xml");
@@ -165,7 +165,7 @@ public:
   void test_demonstrate_spectra_detector_map_saved() {
 
     using namespace Mantid::Indexing;
-    ScopedFileHandle fileInfo("test_no_spectra_mapping.nxs");
+    FileResource fileInfo("test_no_spectra_mapping.nxs");
     auto wsIn =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             2 /*numBanks*/, 10 /*numPixels*/, 12 /*numBins*/);
@@ -187,22 +187,22 @@ public:
           wsIn->componentInfo().name(wsIn->componentInfo().root());
       // Check that mapping datasets are written
       Mantid::NexusGeometry::NexusFileReader validator(fileInfo.fullPath());
-      TS_ASSERT(validator.hasDataset(
-          "spectra", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_list", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_index", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_count", {"mantid_workspace_1", rootName, "bank1"}));
-      TS_ASSERT(validator.hasDataset(
-          "spectra", {"mantid_workspace_1", rootName, "bank2"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_list", {"mantid_workspace_1", rootName, "bank2"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_index", {"mantid_workspace_1", rootName, "bank2"}));
-      TS_ASSERT(validator.hasDataset(
-          "detector_count", {"mantid_workspace_1", rootName, "bank2"}));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank1"}, "spectra"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank1"}, "detector_list"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank1"}, "detector_index"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank1"}, "detector_count"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank2"}, "spectra"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank2"}, "detector_list"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank2"}, "detector_index"));
+      TS_ASSERT(validator.groupHasDataset(
+          {"mantid_workspace_1", rootName, "bank2"}, "detector_count"));
     }
   }
 
@@ -211,7 +211,7 @@ public:
     // This is testing the core routine, but we put it here and not in
     // NexusGeometrySave because we need access to WorkspaceCreationHelpers for
     // this.
-    ScopedFileHandle fileResource("test_with_full_workspace.hdf5");
+    FileResource fileResource("test_with_full_workspace.hdf5");
     std::string destinationFile = fileResource.fullPath();
     // auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
     //    10 /*histograms*/, 100 /*bins*/);
@@ -225,8 +225,7 @@ public:
   }
 
   void test_regression_iris() {
-    ScopedFileHandle handle(
-        "test_regression_iris.nxs"); // IRIS has single monitors
+    FileResource handle("test_regression_iris.nxs"); // IRIS has single monitors
     auto iris = test_utility::from_instrument_file2("IRIS");
     do_execute(handle.fullPath(), iris);
     auto iris_reloaded = test_utility::reload(handle.fullPath());
