@@ -41,6 +41,7 @@ Bugfixes
 - Fit results on normalised plots are now also normalised to match the plot.
 - A crash in the Fit Browser when the default peak was not a registered peak type has been fixed.
 - Fixed an issue where you could not edit table workspaces to enter negative numbers.
+- The data display will now update automatically when deleting a column in a table workspace.
 - The colorbar in the colorfill plot window now correctly resizes when the scale is changed by double-clicking on the colorbar axis.
 - Fixes an issue in the Slice Viewer where changing the colormap, min value, or max value via the figure options would not update the scale.
 - Fixes an issue where changing the curve properties in the figure options menu would reset the plot's axes scales.
