@@ -37,15 +37,15 @@ public:
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
   Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
-          bool frameworkMsg = true, QString scriptName = "");
+          bool frameworkMsg = true, QString scriptPath = "");
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
   Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
-          bool frameworkMsg = true, QString scriptName = "");
+          bool frameworkMsg = true, QString scriptPath = "");
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
   Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
-          bool frameworkMsg = true, QString scriptName = "");
+          bool frameworkMsg = true, QString scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
 
@@ -57,15 +57,15 @@ public:
   /// @returns Whether the message originated from the framework or not
   inline bool frameworkMsg() const { return m_frameworkMsg; }
   /// @returns The name of the script the message came from
-  inline QString scriptName() const { return m_scriptName; }
+  inline QString scriptPath() const { return m_scriptPath; }
   /// Set the script name. This is useful if a script is renamed
-  void setScriptName(const QString &scriptName) { m_scriptName = scriptName; }
+  void setscriptPath(const QString &scriptPath) { m_scriptPath = scriptPath; }
 
 private:
   QString m_text;
   Priority m_priority;
   bool m_frameworkMsg;
-  QString m_scriptName;
+  QString m_scriptPath;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

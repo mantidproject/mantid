@@ -178,8 +178,8 @@ void MessageDisplay::filePathModified(const QString &oldPath,
                                       const QString &newPath) {
   m_displayedScripts.insert(newPath, m_displayedScripts.take(oldPath));
   for (auto &msg : m_messageHistory) {
-    if (msg.scriptName() == oldPath)
-      msg.setScriptName(newPath);
+    if (msg.scriptPath() == oldPath)
+      msg.setscriptPath(newPath);
   }
 }
 
@@ -494,7 +494,7 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
   if (msg.frameworkMsg() && showFrameworkOutput() ||
       !msg.frameworkMsg() && showAllScriptOutput() ||
-      m_displayedScripts.value(msg.scriptName()).toBool())
+      m_displayedScripts.value(msg.scriptPath()).toBool())
     return true;
   return false;
 }
