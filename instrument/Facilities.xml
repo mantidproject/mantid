@@ -157,6 +157,14 @@
     </livedata>
   </instrument>
 
+  <instrument name="NGEM">
+    <technique>Neutron Diffraction</technique>
+    <zeropadding size="8"/>
+    <livedata>
+      <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />
+    </livedata>
+  </instrument>
+
   <instrument name="OSIRIS" shortname="OSI" beamline="N6">
     <zeropadding size="8" startRunNumber="99780" prefix="OSIRIS"/>
     <technique>Neutron Diffraction</technique>
