@@ -188,6 +188,8 @@ class MainWindow(QMainWindow):
         self.interface_manager = None
         self.interface_executor = None
 
+        self.mud = manageuserdirectories.OpenManageUserDirectories()
+
         self.manage_user_directories = None
 
     def setup(self):
@@ -603,7 +605,7 @@ class MainWindow(QMainWindow):
         self.project.load()
 
     def open_manage_directories(self):
-        manageuserdirectories.open_mud(self)
+        self.mud.open_mud(self)
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)
