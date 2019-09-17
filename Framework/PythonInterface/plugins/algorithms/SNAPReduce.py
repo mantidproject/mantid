@@ -397,7 +397,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             progEnd = progStart + .9 * progDelta
             # pass all of the work to the child algorithm
             AlignAndFocusPowderFromFiles(Filename=filename, OutputWorkspace=wkspname ,
-                                         MaxChunkSize=self.chunksize,
+                                         MaxChunkSize=self.chunkSize,
                                          UnfocussedWorkspace=unfocussed,  # can be empty string
                                          startProgress=progStart,
                                          endProgress=progEnd,
