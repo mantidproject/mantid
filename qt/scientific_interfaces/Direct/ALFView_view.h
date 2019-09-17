@@ -23,6 +23,7 @@ class ALFView_view : public QWidget {
 public:
   ALFView_view(QWidget *parent = nullptr);
   int getRunNumber();
+  void setRunQuietly(const QString runNumber);
 
 public slots:
   void runChanged();
@@ -30,7 +31,7 @@ public slots:
 
 signals:
   void newRun();
-  void browsedToRun(const std::string &fileName);
+  void browsedToRun(std::string);
 
 private:
   void generateLoadWidget(QWidget *loadBar);

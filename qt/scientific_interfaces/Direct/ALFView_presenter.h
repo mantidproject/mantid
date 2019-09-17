@@ -30,10 +30,12 @@ protected:
 
 private slots:
   void loadRunNumber(); 
-  void loadBrowsedFile(const std::string &fileName);
+  void loadBrowsedFile(const std::string);
 
 private:
+  void loadAndAnalysis(const std::string &run);
   ALFView_view *m_view;
+  int m_currentRun;
 };
 }// customInterfaces
 }// MantidQt

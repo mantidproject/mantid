@@ -12,8 +12,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Direct {
 
-void loadData(const std::string &name);
-
+void loadEmptyInstrument();
+int loadData(const std::string &name);
+std::pair<bool,bool> isDataValid();
+void transformData();
+void rename();
+void remove();
+int currentRun();
 } // namespace Direct
 } // namespace CustomInterfaces
 } // namespace MantidQt
