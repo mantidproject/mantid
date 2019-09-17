@@ -39,6 +39,7 @@ const H5std_string LOCATION = "location";
 const H5std_string CYLINDERS = "cylinders";
 const H5std_string VERTICES = "vertices";
 const H5std_string FACES = "faces";
+const H5std_string DETECTOR_FACES = "detector_faces";
 const H5std_string WINDING_ORDER = "winding_order";
 const H5std_string ORIENTATION = "orientation";
 const H5std_string DEPENDS_ON = "depends_on";

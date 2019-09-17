@@ -919,7 +919,8 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
  */
 Instrument_sptr createMinimalInstrumentWithShapes(
     const boost::shared_ptr<Mantid::Geometry::IObject> &monitorShape,
-    const boost::shared_ptr<Mantid::Geometry::IObject> &detectorShape) {
+    const boost::shared_ptr<Mantid::Geometry::IObject> &detectorShape,
+    const boost::shared_ptr<Mantid::Geometry::IObject> &bankShape) {
 
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
@@ -946,18 +947,17 @@ Instrument_sptr createMinimalInstrumentWithShapes(
   auto *det = new Detector("point_detector", 1 /*detector id*/, nullptr);
   det->setPos(V3D(0, 0, 10));
   det->setShape(detectorShape);
-  // instrument->add(det);
   instrument->markAsDetector(det);
 
   // A bank
   std::string bankname = "bank_with_pixelshapes";
-  auto *bank = new RectangularDetector(bankname);
+  auto bank = new ObjCompAssembly(bankname);
   // Place the center.
   bank->setPos(V3D(0.0, 0.0, 10.0));
   // rotate detector 90 degrees along vertical
   bank->setRot(Quat(90.0, V3D(0, 1, 0)));
+  bank->setShape(bankShape);
   bank->add(det);
-
   instrument->add(bank);
 
   // A monitor

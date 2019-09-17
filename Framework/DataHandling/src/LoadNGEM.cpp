@@ -112,7 +112,7 @@ void createEventWorkspace(const int &maxToF, const double &binWidth,
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (auto i = 0u; i < events.size(); ++i) {
+  for (auto i = 0; i < events.size(); ++i) {
     dataWorkspace->getSpectrum(i) = events[i];
     dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
@@ -401,8 +401,8 @@ bool LoadNGEM::reportProgressAndCheckCancel(size_t &numProcessedEvents,
 void LoadNGEM::createCountWorkspace(
     const std::vector<double> &frameEventCounts) {
   std::vector<double> xAxisCounts(frameEventCounts.size() + 1);
-  std::generate(xAxisCounts.begin(),
-                xAxisCounts.end(), [n = 0.0]() mutable { return ++n; });
+  std::generate(xAxisCounts.begin(), xAxisCounts.end(),
+                [n = 0.0]() mutable { return ++n; });
 
   DataObjects::Workspace2D_sptr countsWorkspace =
       DataObjects::create<DataObjects::Workspace2D>(

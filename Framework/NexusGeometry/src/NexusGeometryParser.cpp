@@ -436,10 +436,10 @@ private:
   boost::shared_ptr<const Geometry::IObject>
   parseNexusMesh(const Group &shapeGroup) {
     const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "faces"));
+        get1DDataset<int32_t>(shapeGroup, FACES));
     const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "winding_order"));
-    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
+        get1DDataset<int32_t>(shapeGroup, WINDING_ORDER));
+    const auto vertices = get1DDataset<float>(shapeGroup, VERTICES);
     return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                                 vertices);
   }
@@ -517,18 +517,18 @@ private:
     }
   }
 
-  void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
-                       const std::vector<int> &detectorIds,
-                       const std::string &bankName) {
+  void parseOFFAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
+                          const std::vector<int> &detectorIds,
+                          const std::string &bankName) {
     // Load mapping between detector IDs and faces, winding order of vertices
     // for faces, and face corner vertices.
     const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "detector_faces"));
+        get1DDataset<int32_t>(shapeGroup, DETECTOR_FACES));
     const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "faces"));
+        get1DDataset<int32_t>(shapeGroup, FACES));
     const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "winding_order"));
-    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
+        get1DDataset<int32_t>(shapeGroup, WINDING_ORDER));
+    const auto vertices = get1DDataset<float>(shapeGroup, VERTICES);
 
     // Build a map of detector IDs to the index of occurrence in the
     // "detector_number" dataset
@@ -540,6 +540,26 @@ private:
     parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices,
                                   detectorIds.size(), detIdToIndex, bankName,
                                   builder);
+  }
+
+  void parseCylindricalAndAddBank(const Group &shapeGroup,
+                                  InstrumentBuilder &builder,
+                                  const std::vector<int> &detectorIds,
+                                  const std::string &bankName) {
+
+    const auto cylinderData = parseNexusCylinder(shapeGroup);
+    for (size_t i = 0; i < detectorIds.size(); ++i) {
+
+
+      builder.addDetectorToLastBank(bankName + "_" + std::to_string(i),
+                                    detectorIds[i], Eigen::Vector3d{0, 0, 0},
+                                    cylinderData);
+    }
+
+    // parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder,
+    // vertices,
+    //                              detectorIds.size(), detIdToIndex, bankName,
+    //                              builder);
   }
 
   /// Choose what shape type to parse
@@ -661,9 +681,18 @@ public:
       auto detectorIds = getDetectorIds(detectorGroup);
 
       try { // detector shape is not mandatory.
-        auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
-        parseAndAddBank(shapeGroup, builder, detectorIds, bankName);
-        continue;
+
+        // first identify whether shapes is NX_OFF or NX_CYLINDRICAL
+        auto shapeGroupOFF = utilities::findGroup(detectorGroup, NX_OFF);
+        auto shapeGroupCY = utilities::findGroup(detectorGroup, NX_CYLINDER);
+
+        if (shapeGroupCY) {
+          parseCylindricalAndAddBank(*shapeGroupCY, builder, detectorIds,
+                                     bankName);
+        } else if (shapeGroupOFF) {
+          parseOFFAndAddBank(*shapeGroupOFF, builder, detectorIds, bankName);
+        }
+        continue;                 // needed?
       } catch (H5::Exception &) { // No detector_shape group
       }
 

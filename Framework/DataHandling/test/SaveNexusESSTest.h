@@ -42,8 +42,7 @@ template <typename T> void do_execute(const std::string filename, T &ws) {
   alg.isInitialized();
   alg.setProperty("InputWorkspace", ws);
   alg.setProperty("Filename", filename);
-  alg.execute();
-  alg.isExecuted();
+  alg.exec();
 }
 
 namespace test_utility {

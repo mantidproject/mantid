@@ -28,6 +28,7 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  void exec() override;
 
 protected:
   bool processGroups() override;
@@ -37,7 +38,7 @@ private:
                          const std::string &filename);
   virtual bool saveLegacyInstrument() override;
   void init() override;
-  void exec() override;
+
 };
 
 } // namespace DataHandling

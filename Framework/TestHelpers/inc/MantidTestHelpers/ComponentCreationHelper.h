@@ -252,7 +252,8 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
 
 Mantid::Geometry::Instrument_sptr createMinimalInstrumentWithShapes(
     const boost::shared_ptr<Mantid::Geometry::IObject> &monitorShape,
-    const boost::shared_ptr<Mantid::Geometry::IObject> &detectorShape);
+    const boost::shared_ptr<Mantid::Geometry::IObject> &detectorShape,
+    const boost::shared_ptr<Mantid::Geometry::IObject> &bankShape);
 
 /// creates a minimal instrument with optional source, sample, and detector.
 Mantid::Geometry::Instrument_sptr

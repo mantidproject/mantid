@@ -1248,7 +1248,7 @@ MeshObjects.
 
     auto instrument =
         ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh,
-                                                                   cylinder);
+                                                                   cylinder, mesh);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1299,7 +1299,7 @@ MeshObjects.
     const auto mesh = ComponentCreationHelper::createCubeFromTriangles(5);
 
     auto instrument =
-        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh, mesh);
+        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh, mesh, mesh);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1335,6 +1335,8 @@ MeshObjects.
     TS_ASSERT(tester.groupHasDatasetWithAttribute(pixelShapePath, VERTICES,
                                                   METRES, UNITS));
   }
+
+  void test_nx_detector_with_mesh_shape_has_detector_faces() {}
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

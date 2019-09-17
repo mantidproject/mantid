@@ -48,19 +48,10 @@ bool SaveNexusESS::processGroups() {
 void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
                                      const std::string &filename) {
 
-  try {
     NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
     NexusGeometry::NexusGeometrySave::saveInstrument(
         ws, filename, "mantid_workspace_1", adapter, true);
-  } catch (std::exception &e) {
-    g_log.error(std::string(e.what()) +
-                " Nexus Geometry may be absent or incomplete "
-                "from processed Nexus file");
-  } catch (H5::Exception &ex) {
-    g_log.error(ex.getDetailMsg() +
-                " Nexus Geometry may be absent or incomplete "
-                "from processed Nexus file");
-  }
+
 }
 
 bool SaveNexusESS::saveLegacyInstrument() {
