@@ -58,7 +58,7 @@ class MessageDisplay(MessageDisplay_cpp):
         qmenu = super(MessageDisplay, self).generateContextMenu()
         filter_menu = qmenu.addMenu("&Filter by")
 
-        framework_action = QAction('Framework Output', filter_menu)
+        framework_action = QAction('Mantid Framework Output', filter_menu)
         framework_action.triggered.connect(self.toggle_filter_framework_output)
         framework_action.setCheckable(True)
         framework_action.setChecked(self.showFrameworkOutput())

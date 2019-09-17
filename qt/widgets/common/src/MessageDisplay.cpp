@@ -504,8 +504,8 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
  * @param msg A Message object
  */
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
-  if (msg.scriptPath().isEmpty() && showFrameworkOutput() ||
-      !msg.scriptPath().isEmpty() && showAllScriptOutput() ||
+  if ((msg.scriptPath().isEmpty() && showFrameworkOutput()) ||
+      (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
       m_displayedScripts.value(msg.scriptPath()).toBool())
     return true;
   return false;
