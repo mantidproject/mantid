@@ -264,11 +264,12 @@ void MessageDisplay::append(const Message &msg) {
  * with the message.
  * @param text The message to display in the window
  * @param priority The priority level of the message
+ * @param filePath The path of the Python script being executed
  */
 void MessageDisplay::appendPython(const QString &text, const int &priority,
-                                  const QString &fileName) {
+                                  const QString &filePath) {
   Message msg =
-      Message(text, static_cast<Message::Priority>(priority), fileName);
+      Message(text, static_cast<Message::Priority>(priority), filePath);
   append(msg);
 }
 

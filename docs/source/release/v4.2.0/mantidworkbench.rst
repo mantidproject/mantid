@@ -30,6 +30,7 @@ Improvements
 - There are now icons alongside the colormap names in the plot options dialog.
 - Hex codes can now be inputted directly into the color selectors in figure options.
 - There is now a button on the plot window's toolbar to generate a script that will re-create the current figure.
+- There is now a "Filter by" menu in the message display's context menu, allowing you to filter output by script.
 
 Bugfixes
 ########

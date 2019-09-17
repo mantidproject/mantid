@@ -25,6 +25,8 @@ Message::Message()
 /**
  * @param text A QString containing the message text
  * @param priority An enumeration indicating the priority
+ * @param scriptPath The path of the script the message originated from. Empty
+ * string if no script applicable
  */
 Message::Message(const QString &text, Priority priority, QString scriptPath)
     : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
@@ -32,6 +34,8 @@ Message::Message(const QString &text, Priority priority, QString scriptPath)
 /**
  * @param text A std::string containing the message text
  * @param priority An enumeration indicating the priority
+ * @param scriptPath The path of the script the message originated from. Empty
+ * string if no script applicable
  */
 Message::Message(const std::string &text, Priority priority, QString scriptPath)
     : QObject(), m_text(QString::fromStdString(text)), m_priority(priority),
@@ -40,6 +44,8 @@ Message::Message(const std::string &text, Priority priority, QString scriptPath)
 /**
  * @param text A c-style string containing the message text
  * @param priority An enumeration indicating the priority
+ * @param scriptPath The path of the script the message originated from. Empty
+ * string if no script applicable
  */
 Message::Message(const char *text, Priority priority, QString scriptPath)
     : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
