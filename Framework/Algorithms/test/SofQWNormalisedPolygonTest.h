@@ -411,17 +411,6 @@ public:
                      "DetectorTwoThetaRanges requires 3 columns");
   }
 
-	void testTableHasThreeColumns() {
-    std::vector<std::string> dataTypes = {"int", "double", "double", "double"};
-    auto inputWS = SofQWTest::loadTestFile();
-    auto twoThetaRanges = createTableWorkspace(
-        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
-    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
-    auto results = alg->validateInputs();
-    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
-                     "DetectorTwoThetaRanges requires 3 columns");
-  }
-
   void testColumnOneType() {
     std::vector<std::string> dataTypes = {"double", "double", "double"};
     auto inputWS = SofQWTest::loadTestFile();
