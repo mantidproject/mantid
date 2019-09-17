@@ -963,12 +963,11 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroups(
   std::string informativeName = "TOF" + runNumber + "_";
 
   WorkspaceNames outputNames;
-  const auto inputNameBegin = inputName.begin();
-  const auto runNumberStart = inputName.find("_");
-  const auto prefixEnd = inputName.find("_", runNumberStart + 1);
-  const auto inputNameEnd = std::next(inputName.begin(), prefixEnd);
-  if (equal(informativeName.begin(), informativeName.end(), inputNameBegin,
-            inputNameEnd)) {
+  const auto inputNameSize = inputName.size();
+  const auto informativeNameSize = informativeName.size();
+  if (inputNameSize >= informativeNameSize &&
+      equal(informativeName.begin(), informativeName.end(), inputName.begin(),
+            inputName.begin() + informativeNameSize)) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
