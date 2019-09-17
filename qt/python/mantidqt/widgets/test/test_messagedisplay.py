@@ -38,7 +38,7 @@ class MessageDisplayTest(unittest.TestCase):
 
     def test_that_text_appended_through_appendPython_toggles_visibility_when_toggling_filter_script(self):
         msg = 'Some script output'
-        self.display.appendPython(msg, Priority.Notice, '')
+        self.display.appendPython(msg, Priority.Notice, self.unix_path)
         self.assertIn(msg, self.get_message_window_contents())
         self.display.toggle_filter_all_script_output()
         self.assertNotIn(msg, self.get_message_window_contents())
@@ -54,21 +54,17 @@ class MessageDisplayTest(unittest.TestCase):
         self.display.toggle_filter_framework_output()
         self.assertIn(msg, self.get_message_window_contents())
 
-    def test_new_script_output_is_not_shown_if_showScriptOutput_is_False(self):
-        self.display.setShowAllScriptOutput(False)
-        script_msg = 'A new script message'
-        self.display.append_script_notice(script_msg)
-        self.assertNotIn(script_msg, self.get_message_window_contents())
-
-    def test_new_framework_output_is_shown_if_showScriptOutput_is_False(self):
+    def test_new_framework_output_is_shown_if_showAllScriptOutput_is_False(self):
         self.display.setShowAllScriptOutput(False)
         framework_msg = 'A new framework message'
         self.display.appendNotice(framework_msg)
         self.assertIn(framework_msg, self.get_message_window_contents())
 
-    def test_new_script_output_is_shown_if_showFrameworkOutput_is_False(self):
+    def test_new_script_output_is_shown_if_showFrameworkOutput_is_False_and_showAllScriptOutput_is_True(self):
         self.display.setShowFrameworkOutput(False)
+        self.display.setShowAllScriptOutput(True)
         script_msg = 'A new script message'
+        self.display.active_script = self.unix_path
         self.display.append_script_notice(script_msg)
         self.assertIn(script_msg, self.get_message_window_contents())
 

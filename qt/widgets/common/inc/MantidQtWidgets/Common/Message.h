@@ -37,15 +37,15 @@ public:
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
   Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
-          bool frameworkMsg = true, QString scriptPath = "");
+          QString scriptPath = "");
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
   Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
-          bool frameworkMsg = true, QString scriptPath = "");
+          QString scriptPath = "");
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
   Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
-          bool frameworkMsg = true, QString scriptPath = "");
+          QString scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
 
@@ -54,8 +54,6 @@ public:
   inline QString text() const { return m_text; }
   /// @returns The message priority
   inline Priority priority() const { return m_priority; }
-  /// @returns Whether the message originated from the framework or not
-  inline bool frameworkMsg() const { return m_frameworkMsg; }
   /// @returns The name of the script the message came from
   inline QString scriptPath() const { return m_scriptPath; }
   /// Set the script name. This is useful if a script is renamed
@@ -64,7 +62,6 @@ public:
 private:
   QString m_text;
   Priority m_priority;
-  bool m_frameworkMsg;
   QString m_scriptPath;
 };
 } // namespace MantidWidgets

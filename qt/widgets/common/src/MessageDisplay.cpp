@@ -259,15 +259,15 @@ void MessageDisplay::append(const Message &msg) {
 }
 
 /**
- * Append a message to the message window, marking it as output from a Python
- * script (i.e. frameworkMsg = false).
+ * Append a message to the message window, adding the script name associated
+ * with the message.
  * @param text The message to display in the window
  * @param priority The priority level of the message
  */
 void MessageDisplay::appendPython(const QString &text, const int &priority,
                                   const QString &fileName) {
   Message msg =
-      Message(text, static_cast<Message::Priority>(priority), false, fileName);
+      Message(text, static_cast<Message::Priority>(priority), fileName);
   append(msg);
 }
 
@@ -504,8 +504,8 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
  * @param msg A Message object
  */
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
-  if (msg.frameworkMsg() && showFrameworkOutput() ||
-      !msg.frameworkMsg() && showAllScriptOutput() ||
+  if (msg.scriptPath().isEmpty() && showFrameworkOutput() ||
+      !msg.scriptPath().isEmpty() && showAllScriptOutput() ||
       m_displayedScripts.value(msg.scriptPath()).toBool())
     return true;
   return false;

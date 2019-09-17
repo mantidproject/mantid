@@ -19,41 +19,36 @@ namespace MantidWidgets {
  * (here to satisfy Qt meta-type system)
  */
 Message::Message()
-    : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE),
-      m_frameworkMsg(true), m_scriptPath("") {}
+    : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE), m_scriptPath("") {
+}
 
 /**
  * @param text A QString containing the message text
- * @param priority A enumeration indicating the priority
+ * @param priority An enumeration indicating the priority
  */
-Message::Message(const QString &text, Priority priority, bool frameworkMsg,
-                 QString scriptPath)
-    : QObject(), m_text(text), m_priority(priority),
-      m_frameworkMsg(frameworkMsg), m_scriptPath(scriptPath) {}
+Message::Message(const QString &text, Priority priority, QString scriptPath)
+    : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
 
 /**
  * @param text A std::string containing the message text
- * @param priority A enumeration indicating the priority
+ * @param priority An enumeration indicating the priority
  */
-Message::Message(const std::string &text, Priority priority, bool frameworkMsg,
-                 QString scriptPath)
+Message::Message(const std::string &text, Priority priority, QString scriptPath)
     : QObject(), m_text(QString::fromStdString(text)), m_priority(priority),
-      m_frameworkMsg(frameworkMsg), m_scriptPath(scriptPath) {}
+      m_scriptPath(scriptPath) {}
 
 /**
  * @param text A c-style string containing the message text
- * @param priority A enumeration indicating the priority
+ * @param priority An enumeration indicating the priority
  */
-Message::Message(const char *text, Priority priority, bool frameworkMsg,
-                 QString scriptPath)
-    : QObject(), m_text(text), m_priority(priority),
-      m_frameworkMsg(frameworkMsg), m_scriptPath(scriptPath) {}
+Message::Message(const char *text, Priority priority, QString scriptPath)
+    : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
 
 /**
  * Construct a message from another object
  */
 Message::Message(const Message &msg)
     : QObject(), m_text(msg.text()), m_priority(msg.priority()),
-      m_frameworkMsg(msg.frameworkMsg()), m_scriptPath(msg.scriptPath()) {}
+      m_scriptPath(msg.scriptPath()) {}
 } // namespace MantidWidgets
 } // namespace MantidQt
