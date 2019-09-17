@@ -61,17 +61,17 @@ To ensure the GUI can be easily tested we follow the MVP design pattern. There i
 
 The view cannot be tested so should be kept as simple as possible - typically any user action on the view results in a notification to the presenter and is handled from there (even if that is just an update back to the view).
 
-The views should not have a direct pointer to their presenters, so the notification is done via a subscriber interface. The only exception is the QtMainWindowView, which 
+The views should not have a direct pointer to their presenters, so the notification is done via a subscriber interface. The only exception is the QtMainWindowView, but notifications should still be done via the subscriber interface.
 
 ### Coordinate via presenters
 
-Coordination between different widgets is done via the presenters. Each presenter has a pointer to its parent presenter which is set by the parent calling `acceptMainPresenter`.
+Coordination between different widgets is done via the presenters. Each presenter owns any child presenters, and has a pointer to its parent presenter which is set by the parent calling `acceptMainPresenter` on the child.
 
-Coordination between horizontal tabs is done by notifying up to the `BatchPresenter` which then notifies its child components. Coordination between batch tabs (e.g. to ensure only one autoprocessing operation can run at a time) is done via the `MainWindowPresenter`.
+Coordination between horizontal tabs is done by notifying up to the `BatchPresenter` which then notifies its child components. Coordination between different batch tabs is not usually required, but on the occasions it is (e.g. to ensure only one autoprocessing operation can run at a time) this is done via calls to the `MainWindowPresenter`.
 
 ### Avoid use of Qt types outside of Qt classes
 
-Qt specific types such as QString, QColor and subclasses of QWidget should be kept out of the presenters and models. All classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass QObjects) are named with a `Qt` prefix to make it clear where Qt is used. Conversion from types like QString to std::string is performed in the view, and no Qt types are present in their interfaces. 
+Qt specific types such as QString, QColor and subclasses of QWidget should be kept out of the presenters and models. All classes that use Qt (namely the views, along with a few supporting classes which wrap or subclass QObjects) are named with a `Qt` prefix to make it clear where Qt is used. Conversion from types like QString to std::string is performed within the view, and no Qt types are present in their interfaces. 
 
 ### Keep the reduction configuration up to date
 
