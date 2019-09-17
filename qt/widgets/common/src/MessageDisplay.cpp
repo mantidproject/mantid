@@ -183,6 +183,18 @@ void MessageDisplay::filePathModified(const QString &oldPath,
   }
 }
 
+/**
+ * Append a message to the message history. If the length of the history exceeds
+ * the max line count, remove entries from the start until it does not.
+ * @param msg The Message object to append
+ */
+void MessageDisplay::appendToHistory(const Message &msg) {
+  m_messageHistory.append(msg);
+  while (m_messageHistory.size() > maximumLineCount() && maximumLineCount() > 0)
+    // Use .removeAt(0) since .removeFirst asserts a !.isEmpty() check
+    m_messageHistory.removeAt(0);
+}
+
 //----------------------------------------------------------------------------------------
 // Public slots
 //----------------------------------------------------------------------------------------
@@ -233,7 +245,7 @@ void MessageDisplay::appendDebug(const QString &text) {
  * current text
  */
 void MessageDisplay::append(const Message &msg) {
-  m_messageHistory.append(msg);
+  appendToHistory(msg);
   if (shouldBeDisplayed(msg)) {
     QTextCursor cursor = moveCursorToEnd();
     cursor.insertText(msg.text(), format(msg.priority()));
