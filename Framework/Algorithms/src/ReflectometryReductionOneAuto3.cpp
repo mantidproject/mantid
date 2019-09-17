@@ -114,8 +114,8 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  * @return :: void
  */
 void ReflectometryReductionOneAuto3::getTransRun(
-    std::map<std::string, std::string> results,
-    WorkspaceGroup_sptr &workspaceGroup, const std::string &transRun) {
+    std::map<std::string, std::string> &results,
+            WorkspaceGroup_sptr & workspaceGroup, const std::string &transRun) {
   const std::string str = getPropertyValue(transRun);
   if (!str.empty()) {
     auto transGroup =
