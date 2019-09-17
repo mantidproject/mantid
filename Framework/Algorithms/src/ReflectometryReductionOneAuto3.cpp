@@ -115,7 +115,7 @@ const std::string ReflectometryReductionOneAuto3::summary() const {
  */
 void ReflectometryReductionOneAuto3::getTransRun(
     std::map<std::string, std::string> &results,
-            WorkspaceGroup_sptr & workspaceGroup, const std::string &transRun) {
+    WorkspaceGroup_sptr &workspaceGroup, const std::string &transRun) {
   const std::string str = getPropertyValue(transRun);
   if (!str.empty()) {
     auto transGroup =
@@ -957,8 +957,8 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroups(
   std::string informativeName = "TOF" + runNumber + "_";
 
   WorkspaceNames outputNames;
-  if (equal(informativeName.begin(), informativeName.end(),
-            inputName.begin(), inputName.end())) {
+  if (equal(informativeName.begin(), informativeName.end(), inputName.begin(),
+            inputName.end())) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
