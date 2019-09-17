@@ -418,7 +418,7 @@ void ReflectometryReductionOneAuto3::exec() {
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
   const auto params = getRebinParams(IvsQ, theta);
   auto IvsQC = IvsQ;
-  if (!(isDefault("MomentumTransferMin") && isDefault("MomentumTransferMax")))
+  if (!(params.m_qMinIsDefault && params.m_qMaxIsDefault))
     IvsQC = cropQ(IvsQ, params);
   setProperty("OutputWorkspace", IvsQC);
 
@@ -622,11 +622,13 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
 
 auto ReflectometryReductionOneAuto3::getRebinParams(
     MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
-  auto const qMin =
-      getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
-  auto const qMax =
-      getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
-  return RebinParams(qMin, getQStep(inputWS, theta), qMax);
+  bool qMinIsDefault = true, qMaxIsDefault = true;
+  auto const qMin = getPropertyOrDefault("MomentumTransferMin",
+                                         inputWS->x(0).front(), qMinIsDefault);
+  auto const qMax = getPropertyOrDefault("MomentumTransferMax",
+                                         inputWS->x(0).back(), qMaxIsDefault);
+  return RebinParams(qMin, qMinIsDefault, qMax, qMaxIsDefault,
+                     getQStep(inputWS, theta));
 }
 
 /** Get the binning step the final output workspace in Q
@@ -708,9 +710,9 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
   algCrop->initialize();
   algCrop->setProperty("InputWorkspace", inputWS);
   algCrop->setProperty("OutputWorkspace", inputWS);
-  if (!(isDefault("MomentumTransferMin")))
+  if (!(params.m_qMinIsDefault))
     algCrop->setProperty("XMin", params.m_qMin);
-  if (!(isDefault("MomentumTransferMax")))
+  if (!(params.m_qMaxIsDefault))
     algCrop->setProperty("XMax", params.m_qMax);
   algCrop->execute();
   MatrixWorkspace_sptr IvsQ = algCrop->getProperty("OutputWorkspace");
@@ -722,10 +724,14 @@ ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr inputWS,
  *
  * @param propertyName : the name of the property to get
  * @param defaultValue : the default value to use if the property is not set
+ * @param isDefault [out] : true if the default value was used
  */
 double ReflectometryReductionOneAuto3::getPropertyOrDefault(
-    const std::string &propertyName, const double defaultValue) {
-  if (isDefault(propertyName))
+    const std::string &propertyName, const double defaultValue,
+    bool &isDefault) {
+  Property *property = getProperty(propertyName);
+  isDefault = property->isDefault();
+  if (isDefault)
     return defaultValue;
   else
     return getProperty(propertyName);

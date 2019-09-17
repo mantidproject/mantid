@@ -45,12 +45,15 @@ private:
   };
 
   struct RebinParams {
-    RebinParams(const double qMin, const boost::optional<double> qStep,
-                const double qMax)
-        : m_qMin(qMin), m_qStep(qStep), m_qMax(qMax){};
+    RebinParams(const double qMin, const bool qMinIsDefault, const double qMax,
+                const bool qMaxIsDefault, const boost::optional<double> qStep)
+        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax),
+          m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
 
     double m_qMin;
+    bool m_qMinIsDefault;
     double m_qMax;
+    bool m_qMaxIsDefault;
     boost::optional<double> m_qStep;
 
     bool hasQStep() const { return m_qStep.is_initialized(); }
@@ -98,7 +101,7 @@ private:
                             const std::string &propertyName);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
-                              const double defaultValue);
+                              const double defaultValue, bool &isDefault);
   void setOutputWorkspaces(const WorkspaceNames &outputGroupNames,
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
