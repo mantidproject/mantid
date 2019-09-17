@@ -30,20 +30,23 @@ The Properties
 General properties
 ******************
 
-+----------------------------------+--------------------------------------------------+-------------------+
-|Property                          |Description                                       | Example value     |
-+==================================+==================================================+===================+
-| ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing`` |
-|                                  | algorithms that should be hidden in Mantid.      |                   |
-+----------------------------------+--------------------------------------------------+-------------------+
-| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``            |
-|                                  | memory for reference in scripts.                   |                 |
-+----------------------------------+--------------------------------------------------+-------------------+
-| ``MultiThreaded.MaxCores``       | Sets the maximum number of cores available to be | ``0``             |
-|                                  | used for threads for                             |                   |
-|                                  | `OpenMP <http://www.openmp.org/>`_. If zero it   |                   |
-|                                  | will use one thread per logical core available.  |                   |
-+----------------------------------+--------------------------------------------------+-------------------+
++----------------------------------+--------------------------------------------------+------------------------+
+|Property                          |Description                                       | Example value          |
++==================================+==================================================+========================+
+| ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
+|                                  | algorithms that should be hidden in Mantid.      |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``                 |
+|                                  | memory for reference in scripts.                 |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
+|                                  | that should be hidden in Mantid.                 |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``MultiThreaded.MaxCores``       | Sets the maximum number of cores available to be | ``0``                  |
+|                                  | used for threads for                             |                        |
+|                                  | `OpenMP <http://www.openmp.org/>`_. If zero it   |                        |
+|                                  | will use one thread per logical core available.  |                        |
++----------------------------------+--------------------------------------------------+------------------------+
 
 Facility and instrument properties
 **********************************
@@ -52,7 +55,7 @@ Facility and instrument properties
 |Property                      |Description                                         |Example value        |
 +==============================+====================================================+=====================+
 | ``default.facility``         | The name of the default facility. The facility     | ``ISIS``            |
-|                              | must be defined within the facilities.xml file to   |                    |
+|                              | must be defined within the facilities.xml file to  |                     |
 |                              | be considered valid. The file is described         |                     |
 |                              | :ref:`here <Facilities file>`.                     |                     |
 +------------------------------+----------------------------------------------------+---------------------+
@@ -181,7 +184,7 @@ Network Properties
 |                                           |operations (in seconds).                           |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
-|                                           |repository, this overrides the default timeout.   |                                  |
+|                                           |repository, this overrides the default timeout.    |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
 |                                           | set mantid will use the system proxy              |                                 |

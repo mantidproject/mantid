@@ -92,7 +92,7 @@ class Polaris(AbstractInst):
         return cropped_ws
 
     @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(run_number, file_ext=""):
         polaris_old_name = "POL"
         polaris_new_name = "POLARIS"
         first_run_new_name = 96912
@@ -114,7 +114,7 @@ class Polaris(AbstractInst):
 
             prefix = polaris_new_name if use_new_name else polaris_old_name
 
-            return prefix + str(run_number)
+            return prefix + str(run_number) + file_ext
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
