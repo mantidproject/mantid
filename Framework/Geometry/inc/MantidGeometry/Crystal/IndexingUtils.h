@@ -147,6 +147,9 @@ public:
                                 double required_tolerance, double len_tol,
                                 double ang_tol);
 
+  /// Round all the components of a HKL objects to the nearest integer
+  static void RoundHKL(Kernel::V3D &hkl);
+
   /// Round all the components of a list of V3D objects, to the nearest integer
   static void RoundHKLs(std::vector<Kernel::V3D> &hkl_list);
 

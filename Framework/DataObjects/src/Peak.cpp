@@ -15,7 +15,6 @@
 #include "MantidKernel/System.h"
 
 #include "boost/make_shared.hpp"
-#include <boost/math/special_functions/round.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -807,16 +806,14 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
  * @param HKL :: vector with integer x,y,z -> h,k,l
  */
 void Peak::setIntHKL(V3D HKL) {
-  m_intHKL = V3D(boost::math::iround(HKL[0]), boost::math::iround(HKL[1]),
-                 boost::math::iround(HKL[2]));
+  m_intHKL = V3D(std::round(HKL[0]), std::round(HKL[1]), std::round(HKL[2]));
 }
 
 /** Sets the modulated peak structure number
  * @param MNP :: modulated peak structure value
  */
 void Peak::setIntMNP(const V3D &MNP) {
-  m_intMNP = V3D(boost::math::iround(MNP[0]), boost::math::iround(MNP[1]),
-                 boost::math::iround(MNP[2]));
+  m_intMNP = V3D(std::round(MNP[0]), std::round(MNP[1]), std::round(MNP[2]));
 }
 
 /** Set sample position

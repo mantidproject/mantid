@@ -2100,6 +2100,16 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
 }
 
 /**
+  Round all of the components of the V3D to the nearest integer.
+  @param hkl_list   Vector of V3D objects whose components will be rounded.
+*/
+void IndexingUtils::RoundHKL(Mantid::Kernel::V3D &hkl) {
+  for (size_t i = 0; i < 3; i++) {
+    hkl[i] = std::round(hkl[i]);
+  }
+}
+
+/**
   Round all of the components of all vectors to the nearest integer.  This
   is useful when the vectors in the list represent Miller indices.  Since
   the PeaksWorkspace records the Miller indices as sets of three doubles,
@@ -2110,9 +2120,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
  */
 void IndexingUtils::RoundHKLs(std::vector<V3D> &hkl_list) {
   for (auto &entry : hkl_list) {
-    for (size_t i = 0; i < 3; i++) {
-      entry[i] = std::round(entry[i]);
-    }
+    RoundHKL(entry);
   }
 }
 
