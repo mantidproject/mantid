@@ -9,10 +9,20 @@ Bessel
 Description
 -----------
 
-.. math:: 
-	\begin{align} A(t)&=A_0J_0(2\pi\nu t+\phi),\\ \text{where} \qquad J_0(x)&=\sum_{l=0}^{\infty}\frac{(-1)^l}{2^{2l}(l!)^2}x^{2l} \end{align}
+.. math:: A(t)=A_0J_0(2\pi\nu t+\phi)
+
+.. math:: J_0(x)=\sum_{l=0}^{\infty}\frac{(-1)^l}{2^{2l}(l!)^2}x^{2l}
+
+where
 
 :math:`J_0(x)` is the Bessel Function of the first kind.
+
+:math:`A_0` is the amplitude
+
+:math:`\nu` is the frequency of oscillation (MHz)
+
+:math:`\phi` is the phase at :math:`t=0`
+
 
 .. figure:: /images/Bessel.png
    :alt: Bessel.png

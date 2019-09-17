@@ -23,8 +23,8 @@ class Bessel(IFunction1D):
 
     def init(self):
         self.declareParameter("A0",1,'Amplitude')
-        self.declareParameter("Phi",0.1,'Phase')
-        self.declareParameter("Nu",0.1,'Wavenumber')
+        self.declareParameter("Phi",0.1,'Phase(rad)')
+        self.declareParameter("Nu",0.1,'Frequency(MHz)')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
