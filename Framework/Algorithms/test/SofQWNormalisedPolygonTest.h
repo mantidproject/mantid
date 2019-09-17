@@ -401,59 +401,70 @@ public:
   }
 
   void testTableHasThreeColumns() {
-    std::vector<std::string> types = {"int", "double"};
-    auto inWS = SofQWTest::loadTestFile();
+    std::vector<std::string> dataTypes = {"int", "double"};
+    auto inputWS = SofQWTest::loadTestFile();
     auto twoThetaRanges = createTableWorkspace(
-        types, static_cast<int>(inWS->getNumberHistograms()));
-    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
-    auto results = SofQW->validateInputs();
+        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
+    auto results = alg->validateInputs();
+    TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
+                     "DetectorTwoThetaRanges requires 3 columns");
+  }
+
+	void testTableHasThreeColumns() {
+    std::vector<std::string> dataTypes = {"int", "double", "double", "double"};
+    auto inputWS = SofQWTest::loadTestFile();
+    auto twoThetaRanges = createTableWorkspace(
+        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
+    auto results = alg->validateInputs();
     TS_ASSERT_EQUALS(results["DetectorTwoThetaRanges"],
                      "DetectorTwoThetaRanges requires 3 columns");
   }
 
   void testColumnOneType() {
-    std::vector<std::string> types = {"double", "double", "double"};
-    auto inWS = SofQWTest::loadTestFile();
+    std::vector<std::string> dataTypes = {"double", "double", "double"};
+    auto inputWS = SofQWTest::loadTestFile();
     auto twoThetaRanges = createTableWorkspace(
-        types, static_cast<int>(inWS->getNumberHistograms()));
-    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
-    auto results = SofQW->validateInputs();
+        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
+    auto results = alg->validateInputs();
     TS_ASSERT_EQUALS(
         results["DetectorTwoThetaRanges"],
         "The first column of DetectorTwoThetaRanges should be of type int");
   }
 
   void testColumnTwoType() {
-    std::vector<std::string> types = {"int", "int", "double"};
-    auto inWS = SofQWTest::loadTestFile();
+    std::vector<std::string> dataTypes = {"int", "int", "double"};
+    auto inputWS = SofQWTest::loadTestFile();
     auto twoThetaRanges = createTableWorkspace(
-        types, static_cast<int>(inWS->getNumberHistograms()));
-    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
-    auto results = SofQW->validateInputs();
+        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
+    auto results = alg->validateInputs();
     TS_ASSERT_EQUALS(
         results["DetectorTwoThetaRanges"],
         "The second column of DetectorTwoThetaRanges should be of type double");
   }
 
   void testColumnThreeType() {
-    std::vector<std::string> types = {"int", "double", "int"};
-    auto inWS = SofQWTest::loadTestFile();
+    std::vector<std::string> dataTypes = {"int", "double", "int"};
+    auto inputWS = SofQWTest::loadTestFile();
     auto twoThetaRanges = createTableWorkspace(
-        types, static_cast<int>(inWS->getNumberHistograms()));
-    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
-    auto results = SofQW->validateInputs();
+        dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
+    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
+    auto results = alg->validateInputs();
     TS_ASSERT_EQUALS(
         results["DetectorTwoThetaRanges"],
         "The third column of DetectorTwoThetaRanges should be of type double");
   }
 
   void testTableAndWorkspaceHaveSameNumDetectors() {
-    std::vector<std::string> types = {"int", "double", "int"};
-    auto inWS = SofQWTest::loadTestFile();
+    std::vector<std::string> dataTypes = {"int", "double", "int"};
+    auto inputWS = SofQWTest::loadTestFile();
     auto twoThetaRanges = createTableWorkspace(
-        types, static_cast<int>(inWS->getNumberHistograms() + 1));
-    IAlgorithm_sptr SofQW = setUpAlg(inWS, twoThetaRanges);
-    auto results = SofQW->validateInputs();
+        dataTypes, static_cast<int>(inputWS->getNumberHistograms() + 1));
+    IAlgorithm_sptr alg = setUpAlg(inputWS, twoThetaRanges);
+    auto results = alg->validateInputs();
     TS_ASSERT_EQUALS(
         results["DetectorTwoThetaRanges"],
         "The table and workspace do not have the same number of detectors");
