@@ -23,7 +23,8 @@ Description
 
 References
 ----------
-[1]`Savici et al., PRB 66 (2002) <https://journals.aps.org/prb/pdf/10.1103/PhysRevB.66.014524>`_.
+
+[1]  `Savici et al., PRB 66 (2002) <https://journals.aps.org/prb/pdf/10.1103/PhysRevB.66.014524>`_.
 
 .. categories::
 
