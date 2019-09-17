@@ -541,7 +541,7 @@ def get_uneven_data(workspace, distribution):
                 zvals = zvals/(xvals[1:] - xvals[0:-1])
         else:
             xvals = boundaries_from_points(xvals)
-        if specInfo and specInfo.isMasked(index):
+        if specInfo and specInfo.hasDetectors(index) and specInfo.isMasked(index):
             zvals[:] = np.nan
         zvals = np.ma.masked_invalid(zvals)
         z.append(zvals)
