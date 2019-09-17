@@ -958,7 +958,7 @@ auto ReflectometryReductionOneAuto3::getOutputNamesForGroups(
 
   WorkspaceNames outputNames;
   if (equal(informativeName.begin(), informativeName.end(),
-            inputName.begin())) {
+            inputName.begin(), inputName.end())) {
     auto informativeTest = inputName.substr(informativeName.length());
     outputNames.iVsQ = output.iVsQ + "_" + informativeTest;
     outputNames.iVsQBinned = output.iVsQBinned + "_" + informativeTest;
