@@ -85,6 +85,16 @@ public:
     TS_ASSERT_DELTA(peak0.getK(), -1.0, .01);
     TS_ASSERT_DELTA(peak0.getL(), 2.0, .01);
 
+    auto &peak1 = Modulated->getPeak(1);
+    TS_ASSERT_DELTA(peak1.getH(), 0.0, .01);
+    TS_ASSERT_DELTA(peak1.getK(), 0.0, .01);
+    TS_ASSERT_DELTA(peak1.getL(), 0.0, .01);
+
+    auto &peak2 = Modulated->getPeak(2);
+    TS_ASSERT_DELTA(peak2.getH(), 0.0, .01);
+    TS_ASSERT_DELTA(peak2.getK(), 0.0, .01);
+    TS_ASSERT_DELTA(peak2.getL(), 0.0, .01);
+
     auto &peak3 = Modulated->getPeak(3);
     TS_ASSERT_DELTA(peak3.getH(), 1.49, .01);
     TS_ASSERT_DELTA(peak3.getK(), -0.56, .01);
