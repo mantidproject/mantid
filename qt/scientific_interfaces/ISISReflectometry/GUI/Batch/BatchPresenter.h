@@ -42,6 +42,10 @@ public:
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter);
+  BatchPresenter(BatchPresenter const &rhs) = delete;
+  BatchPresenter(BatchPresenter &&rhs) = delete;
+  BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
+  BatchPresenter &operator=(BatchPresenter &&rhs) = delete;
 
   // BatchViewSubscriber overrides
   void notifyBatchComplete(bool error) override;
