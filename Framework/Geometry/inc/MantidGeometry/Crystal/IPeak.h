@@ -45,6 +45,7 @@ public:
   virtual double getK() const = 0;
   virtual double getL() const = 0;
   virtual Mantid::Kernel::V3D getHKL() const = 0;
+  virtual bool isIndexed() const = 0;
   virtual Mantid::Kernel::V3D getIntHKL() const = 0;
   virtual void setH(double m_H) = 0;
   virtual void setK(double m_K) = 0;

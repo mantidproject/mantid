@@ -759,6 +759,13 @@ double Peak::getL() const { return m_L; }
 /** Return the HKL vector */
 Mantid::Kernel::V3D Peak::getHKL() const { return V3D(m_H, m_K, m_L); }
 
+/** Return True if the peak has been indexed */
+bool Peak::isIndexed() const {
+  if (m_H == 0. && m_K == 0. && m_L == 0.)
+    return false;
+  return true;
+}
+
 /** Return the int HKL vector */
 Mantid::Kernel::V3D Peak::getIntHKL() const { return m_intHKL; }
 

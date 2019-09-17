@@ -83,6 +83,7 @@ public:
   MOCK_CONST_METHOD0(getK, double());
   MOCK_CONST_METHOD0(getL, double());
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(isIndexed, bool());
   MOCK_CONST_METHOD0(getIntHKL, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getSamplePos, Mantid::Kernel::V3D());
   MOCK_METHOD1(setH, void(double m_H));
@@ -90,7 +91,7 @@ public:
   MOCK_METHOD1(setL, void(double m_L));
   MOCK_METHOD3(setHKL, void(double H, double K, double L));
   MOCK_METHOD1(setHKL, void(const Mantid::Kernel::V3D &HKL));
-  MOCK_METHOD1(setIntHKL, void(const Mantid::Kernel::V3D HKL));
+  MOCK_METHOD1(setIntHKL, void(const Mantid::Kernel::V3D &HKL));
   MOCK_METHOD3(setSamplePos, void(double samX, double samY, double samZ));
   MOCK_METHOD1(setSamplePos, void(const Mantid::Kernel::V3D &XYZ));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());

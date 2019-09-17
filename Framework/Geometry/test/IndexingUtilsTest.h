@@ -637,6 +637,22 @@ public:
     }
   }
 
+  void test_CalculateMillerIndicesSingleQ_for_Valid_Index() {
+    const auto q_vectors = getNatroliteQs();
+    const auto indices = getNatroliteIndices();
+    auto UB = getNatroliteUB();
+    UB.Invert();
+
+    const double tolerance = 0.1;
+    V3D miller_indices;
+
+    const bool success = IndexingUtils::CalculateMillerIndices(
+        UB, q_vectors[0], tolerance, miller_indices);
+    TS_ASSERT(success);
+    const auto diff = (indices[0] - miller_indices).norm();
+    TS_ASSERT_DELTA(diff, 0, 0.1);
+  }
+
   void test_GetIndexedPeaks_1D() {
     int correct_indices[] = {1, 4, 2, 0, 1, 3, 0, -1, 0, -1, -2, -3};
 

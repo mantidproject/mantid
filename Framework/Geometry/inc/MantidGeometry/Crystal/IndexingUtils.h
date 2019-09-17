@@ -194,6 +194,12 @@ public:
                                     std::vector<Kernel::V3D> &miller_indices,
                                     double &ave_error);
 
+  /// Given a UB, calculate the miller indices for given q vector
+  static bool CalculateMillerIndices(const Kernel::DblMatrix &inverseUB,
+                                     const Kernel::V3D &q_vector,
+                                     double tolerance,
+                                     Kernel::V3D &miller_indices);
+
   /// Get lists of indices and Qs for peaks indexed in the specified direction
   static int GetIndexedPeaks_1D(const Kernel::V3D &direction,
                                 const std::vector<Kernel::V3D> &q_vectors,

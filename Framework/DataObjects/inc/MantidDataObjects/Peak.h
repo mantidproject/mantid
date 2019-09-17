@@ -104,6 +104,7 @@ public:
   double getK() const override;
   double getL() const override;
   Mantid::Kernel::V3D getHKL() const override;
+  bool isIndexed() const override;
   Mantid::Kernel::V3D getIntHKL() const override;
   Mantid::Kernel::V3D getIntMNP() const override;
   void setH(double m_H) override;
