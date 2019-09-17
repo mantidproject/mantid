@@ -130,7 +130,7 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertTrue(all(self.display.displayedScripts().values()))
         self.assertTrue(self.display.showAllScriptOutput())
 
-    def test_that_new_messages_from_a_script_that_is_not_set_to_display_are_not_displayed(self):
+    def test_that_new_notices_from_a_script_that_is_not_set_to_display_are_not_displayed(self):
         self._simulate_script_executions([self.unix_path])
         self.display.toggle_filter_by_script(self.unix_path)
         self._simulate_scripts_printing({self.unix_path: ["Message 1"]})
@@ -161,6 +161,25 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertNotIn("Message", self.get_message_window_contents())
         self.display.toggle_filter_by_script(self.win_path)
         self.assertIn("Message", self.get_message_window_contents())
+
+    def test_that_messages_with_error_priority_are_displayed_even_if_the_script_is_set_to_not_be_displayed(self):
+        err_msg = "An error message"
+        notice_msg = "A notice message"
+        self._simulate_script_executions([self.unix_path])
+        self.display.toggle_filter_by_script(self.unix_path)
+        self.assertFalse(self.display.displayedScripts()[self.unix_path])
+        self.display.append_script_error(err_msg)
+        self.display.append_script_notice(notice_msg)
+        self.assertIn(err_msg, self.get_message_window_contents())
+        self.assertNotIn(notice_msg, self.get_message_window_contents())
+
+    def test_that_messages_with_error_priority_are_filtered_out_after_toggling_filter_on_script(self):
+        err_msg = "An error message"
+        self.display.script_executing(self.unix_path)
+        self.display.append_script_error(err_msg)
+        self.assertIn(err_msg, self.get_message_window_contents())
+        self.display.toggle_filter_by_script(self.unix_path)
+        self.assertNotIn(err_msg, self.get_message_window_contents())
 
     def _simulate_scripts_printing(self, script_messages):
         for path, messages in script_messages.items():

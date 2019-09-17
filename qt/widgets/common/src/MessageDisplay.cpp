@@ -246,7 +246,8 @@ void MessageDisplay::appendDebug(const QString &text) {
  */
 void MessageDisplay::append(const Message &msg) {
   appendToHistory(msg);
-  if (shouldBeDisplayed(msg)) {
+  if (shouldBeDisplayed(msg) ||
+      msg.priority() <= Message::Priority::PRIO_WARNING) {
     QTextCursor cursor = moveCursorToEnd();
     cursor.insertText(msg.text(), format(msg.priority()));
     moveCursorToEnd();
