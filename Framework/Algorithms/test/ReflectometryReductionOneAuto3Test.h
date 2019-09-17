@@ -1556,6 +1556,26 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void
+    test_output_workspace_is_given_informative_name_if_input_has_correct_form() {
+    const double startX = 1000;
+    const int nBins = 3;
+    const double deltaX = 1000;
+    const std::vector<double> yValues1 = {1, 2, 3};
+    MatrixWorkspace_sptr input =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("TOF1234_sliced", input);
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(ADS.doesExist("TOF1234_"), true);
+
+    ADS.clear();
+  }
+
 private:
   MatrixWorkspace_sptr
   createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
