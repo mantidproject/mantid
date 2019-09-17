@@ -11,18 +11,17 @@ Description
 
 .. math:: A(t)=A_0J_0(2\pi\nu t+\phi)
 
-.. math:: J_0(x)=\sum_{l=0}^{\infty}\frac{(-1)^l}{2^{2l}(l!)^2}x^{2l}
+where,
 
-where
+:math:`A_0` is the amplitude,
 
-:math:`J_0(x)` is the Bessel Function of the first kind.
+:math:`\nu` is the frequency of oscillation (MHz),
 
-:math:`A_0` is the amplitude
+:math:`\phi` is the phase at :math:`t=0`,
 
-:math:`\nu` is the frequency of oscillation (MHz)
+and :math:`J_0(x)` is the Bessel Function of the first kind, its expression is given by:
 
-:math:`\phi` is the phase at :math:`t=0`
-
+.. math:: J_0(x)=\sum_{l=0}^{\infty}\frac{(-1)^l}{2^{2l}(l!)^2}x^{2l}.
 
 .. figure:: /images/Bessel.png
    :alt: Bessel.png
