@@ -35,7 +35,7 @@ class PlotsSaverTest(unittest.TestCase):
                                                         u'entries_font': u'Impact',
                                                         u'entries_size': 10,
                                                         u'entries_color': u'#000000',
-                                                        u'title_font': u'Impact',
+                                                        u'title_font': u'Bitstream Vera Sans',
                                                         u'title_size': 12,
                                                         u'title_color': u'#000000',
                                                         u'marker_size': 2.0,
