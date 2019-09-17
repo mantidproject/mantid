@@ -37,9 +37,6 @@ public:
   bool processGroups() override;
 
 private:
-  void getTransRun(std::map<std::string, std::string> &results,
-                   WorkspaceGroup_sptr &workspaceGroup,
-                   const std::string &transRun);
   // Utility class to store output workspace names
   struct WorkspaceNames {
     std::string iVsQ;
@@ -109,7 +106,7 @@ private:
   WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
                                          const std::string &runNumber,
                                          const size_t wsGroupNumber);
-  void getTransRun(std::map<std::string, std::string> results,
+  void getTransRun(std::map<std::string, std::string> &results,
                    WorkspaceGroup_sptr &workspaceGroup,
                    const std::string &transRun);
 };
