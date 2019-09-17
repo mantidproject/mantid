@@ -20,6 +20,10 @@ def get_raw_data_workspace_name(instrument, run, multi_period, period='1', works
         return _base_run_name(instrument, run) + "_raw_data"  + workspace_suffix
 
 
+def get_deadtime_data_workspace_name(instrument, run, workspace_suffix=' MA'):
+    return _base_run_name(instrument, run) + "_deadtime"  + workspace_suffix
+
+
 def _base_run_name(instrument, run=None):
     return str(instrument) + run
 

@@ -9,13 +9,14 @@ from __future__ import (absolute_import, division, unicode_literals)
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_group_asymmetry_name,
-                                                         get_group_asymmetry_unnorm_name)
+                                                         get_group_asymmetry_unnorm_name, get_deadtime_data_workspace_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.observer_pattern import Observable
 
 
@@ -189,9 +190,16 @@ class MuonContext(object):
             loaded_workspace = \
                 self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
                     'OutputWorkspace']
+            loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
+                run=run,instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
             directory = get_base_data_directory(
                 self,
                 run_string)
+
+            deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument, run_string,workspace_suffix=self.workspace_suffix)
+            MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
+            self.data_context._loaded_data.get_data(
+                run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
 
             if len(loaded_workspace) > 1:
                 # Multi-period data
@@ -206,6 +214,7 @@ class MuonContext(object):
                                                                self.data_context.is_multi_period(),
                                                                workspace_suffix=self.workspace_suffix)
                 loaded_workspace[0].show(name)
+
         self.ads_observer.observeRename(True)
 
     def _do_rebin(self):

@@ -10,7 +10,7 @@ import os
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup, AnalysisDataService
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import mtd, UnGroupWorkspace
+from mantid.simpleapi import mtd, UnGroupWorkspace, Plus, DeleteWorkspace
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
@@ -282,17 +282,16 @@ def combine_loaded_runs(model, run_list):
     running_total = []
 
     for index, workspace in enumerate(return_ws["OutputWorkspace"]):
-        running_total.append(workspace.workspace)
+        running_total_item = workspace.workspace.name()
 
         for run in run_list[1:]:
             ws = model._loaded_data_store.get_data(run=[run])["workspace"]["OutputWorkspace"][index].workspace
-            running_total[index] = algorithm_utils.run_Plus({
-                "LHSWorkspace": running_total[index],
-                "RHSWorkspace": ws,
-                "AllowDifferentNumberSpectra": False}
-            )
+            Plus(LHSWorkspace=running_total_item, RHSWorkspace=ws, AllowDifferentNumberSpectra=False, OutputWorkspace=running_total_item)
+            DeleteWorkspace(Workspace=ws)
 
-    return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in running_total]
+        running_total.append(workspace.workspace)
+
+    return_ws["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period.name()) for running_total_period in running_total]
     model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._data_context.instrument)
     model._loaded_data_store.add_data(run=flatten_run_list(run_list), workspace=return_ws,
                                       filename="Co-added", instrument=model._data_context.instrument)
