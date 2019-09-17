@@ -47,17 +47,13 @@ void IndexPeaks::init() {
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
 
-  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "NumIndexed", 0, Direction::Output),
-                        "Gets set with the number of indexed peaks.");
-
   this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
   this->declareProperty(std::make_unique<PropertyWithValue<int>>(
-                            "TotalNumIndexed", 0, Direction::Output),
-                        "Gets set with the number of Total indexed peaks.");
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
   this->declareProperty(std::make_unique<PropertyWithValue<int>>(
                             "MainNumIndexed", 0, Direction::Output),
@@ -82,10 +78,6 @@ void IndexPeaks::init() {
  */
 void IndexPeaks::exec() {
   PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
-  if (!ws) {
-    throw std::runtime_error("Could not read the peaks workspace");
-  }
-
   OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
   const Matrix<double> &UB = o_lattice.getUB();
 
@@ -118,6 +110,8 @@ void IndexPeaks::exec() {
 
     total_indexed = IndexingUtils::CalculateMillerIndices(
         UB, q_vectors, tolerance, miller_indices, average_error);
+    if (round_hkls)
+      IndexingUtils::RoundHKLs(miller_indices);
 
     for (size_t i = 0; i < n_peaks; i++) {
       peaks[i].setHKL(miller_indices[i]);
@@ -204,11 +198,10 @@ void IndexPeaks::exec() {
         iteration++;
       }
 
-      if (o_lattice.getMaxOrder() ==
-          0) // If data not modulated, recalculate fractional HKL
-      {
-        if (!round_hkls) // If user wants fractional hkls, recalculate them
-        {
+      // If data not modulated, recalculate fractional HKL
+      if (o_lattice.getMaxOrder() == 0) {
+        // If user wants fractional hkls, recalculate them
+        if (!round_hkls) {
           num_indexed = IndexingUtils::CalculateMillerIndices(
               tempUB, q_vectors, tolerance, miller_indices, average_error);
         }
@@ -264,11 +257,14 @@ void IndexPeaks::exec() {
           if (peak.getRunNumber() == run) {
             peak.setHKL(miller_indices[miller_index_counter]);
             miller_index_counter++;
-
             auto hkl = peak.getHKL();
             bool peak_main_indexed{false}, peak_sat_indexed{false};
 
             if (IndexingUtils::ValidIndex(hkl, tolerance)) {
+              if (round_hkls) {
+                IndexingUtils::RoundHKL(hkl);
+                peak.setHKL(hkl);
+              }
               peak.setIntHKL(hkl);
               peak.setIntMNP(V3D(0, 0, 0));
               peak_main_indexed = true;
@@ -422,7 +418,11 @@ void IndexPeaks::exec() {
 
     // Save output properties
     this->setProperty("NumIndexed", total_indexed);
+    this->setProperty("MainNumIndexed", total_indexed);
+    this->setProperty("SateNumIndexed", 0);
     this->setProperty("AverageError", average_error);
+    this->setProperty("MainError", average_error);
+    this->setProperty("SatelliteError", 0.);
     // Show the lattice parameters
     g_log.notice() << o_lattice << "\n";
   } else {
@@ -440,11 +440,11 @@ void IndexPeaks::exec() {
                    << average_sate_error << '\n';
 
     // Save output properties
-    setProperty("TotalNumIndexed", total_indexed);
-    setProperty("MainNumIndexed", total_main);
-    setProperty("SateNumIndexed", total_sate);
-    setProperty("MainError", average_main_error);
-    setProperty("SatelliteError", average_sate_error);
+    this->setProperty("NumIndexed", total_indexed);
+    this->setProperty("MainNumIndexed", total_main);
+    this->setProperty("SateNumIndexed", total_sate);
+    this->setProperty("MainError", average_main_error);
+    this->setProperty("SatelliteError", average_sate_error);
     // Show the lattice parameters
     g_log.notice() << o_lattice << "\n";
   }
