@@ -89,9 +89,7 @@ class GroupingTabPresenter(object):
         """
         If user requests to add a pair from the grouping table.
         """
-        pair = self._model.construct_empty_pair_with_group_names(group_name1, group_name2)
-        self._model.add_pair(pair)
-        self.pairing_table_widget.update_view_from_model()
+        self.pairing_table_widget.handle_add_pair_button_clicked(group_name1, group_name2)
 
     def handle_guess_alpha(self, pair_name, group1_name, group2_name):
         """

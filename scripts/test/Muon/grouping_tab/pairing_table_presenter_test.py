@@ -258,6 +258,11 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(str(self.view.get_table_item_text(2, 0)), "pair_3")
         six.assertCountEqual(self, self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
+    def test_that_adding_pair_with_context_menu_allows_for_name_specification(self):
+        self.add_pair_from_grouping_table(MuonPair(pair_name="new"))
+
+        self.assertEqual(self.view.get_table_item_text(0, 0), "new")
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
