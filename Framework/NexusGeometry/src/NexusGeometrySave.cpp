@@ -285,7 +285,8 @@ void write1DIntDataset(H5::Group &grp, const H5std_string &name,
   H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
 
   auto dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);
-  dataset.write(container.data(), H5::PredType::NATIVE_INT, space);
+  if (!container.empty())
+    dataset.write(container.data(), H5::PredType::NATIVE_INT, space);
 }
 
 /*
@@ -526,6 +527,9 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
                              const std::vector<Mantid::detid_t> &detIds,
                              size_t index) {
   auto childrenDetectors = compInfo.detectorsInSubtree(index);
+  size_t nChildDetectors =
+      childrenDetectors.size(); // Number of detectors actually considered in
+                                // spectra-detector map for this NXdetector
   // local to this nxdetector
   std::map<size_t, int> detector_count_map;
   // We start knowing only the detector index, we have to establish spectra from
@@ -533,37 +537,44 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo,
   for (const auto det_index : childrenDetectors) {
     auto detector_id = detIds[det_index];
 
-    auto spectrum_index = detToIndexMap.at(detector_id);
-    detector_count_map[spectrum_index]++; // Attribute detector to a give
-                                          // spectrum_index
+    // A detector might not belong to any spectrum at all.
+    if (detToIndexMap.find(detector_id) != detToIndexMap.end()) {
+      auto spectrum_index = detToIndexMap.at(detector_id);
+      detector_count_map[spectrum_index]++; // Attribute detector to a give
+                                            // spectrum_index
+    } else {
+      --nChildDetectors; // Detector is not part of any spectra-detector
+                         // mapping. So we have one less detector to consider
+                         // recording
+    }
   }
   // Sized to spectra in bank
   SpectraMappings mappings;
-  mappings.detector_list.resize(childrenDetectors.size());
+  mappings.detector_list.resize(nChildDetectors);
   mappings.detector_count.resize(detector_count_map.size(), 0);
   mappings.detector_index.resize(detector_count_map.size() + 1, 0);
   mappings.spectra_ids.resize(detector_count_map.size(), 0);
-  mappings.number_dets = childrenDetectors.size();
+  mappings.number_dets = nChildDetectors;
   mappings.number_spec = detector_count_map.size();
-  size_t counter = 0;
-
+  size_t specCounter = 0;
+  size_t detCounter = 0;
   for (auto &pair : detector_count_map) {
     // using sort order of map to ensure we are ordered by lowest to highest
     // spectrum index
-    mappings.detector_count[counter] = (pair.second); // Counts
-    mappings.detector_index[counter + 1] =
-        mappings.detector_index[counter] + (pair.second);
-    mappings.spectra_ids[counter] =
+    mappings.detector_count[specCounter] = (pair.second); // Counts
+    mappings.detector_index[specCounter + 1] =
+        mappings.detector_index[specCounter] + (pair.second);
+    mappings.spectra_ids[specCounter] =
         int32_t(indexInfo.spectrumNumber(pair.first));
 
     // We will list everything by spectrum index, so we need to add the detector
     // ids in the same order.
     const auto &specDefintion = specInfo.spectrumDefinition(pair.first);
     for (const auto &def : specDefintion) {
-      mappings.detector_list[counter] = detIds[def.first];
+      mappings.detector_list[detCounter] = detIds[def.first];
+      ++detCounter;
     }
-
-    ++counter;
+    ++specCounter;
   }
   mappings.detector_index.resize(
       detector_count_map.size()); // cut-off last item
@@ -1151,8 +1162,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
 
   // save NXdetectors
   auto detToIndexMap =
-      ws.getDetectorIDToWorkspaceIndexMap(true /*throw if multiples*/);
-  // save NXdetectors
+      ws.getDetectorIDToWorkspaceIndexMap(false /*do not throw if multiples*/);
   std::list<size_t> saved_indices;
   // Looping from highest to lowest component index is critical
   for (size_t index = compInfo.root() - 1; index >= detInfo.size(); --index) {
