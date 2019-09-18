@@ -149,7 +149,6 @@ public:
   }
 
   void test_Init() {
-    std::cout << "test_Init running" << std::endl;
     CalculatePlaczekSelfScattering alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
