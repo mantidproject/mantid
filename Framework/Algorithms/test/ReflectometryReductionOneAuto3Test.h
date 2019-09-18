@@ -1557,21 +1557,28 @@ public:
   }
 
   void
-    test_output_workspace_is_given_informative_name_if_input_has_correct_form() {
-    const double startX = 1000;
-    const int nBins = 3;
-    const double deltaX = 1000;
-    const std::vector<double> yValues1 = {1, 2, 3};
-    MatrixWorkspace_sptr input =
-        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
-    ADS.addOrReplace("TOF1234_sliced", input);
+  test_output_workspace_is_given_informative_name_if_input_has_correct_form() {
+    std::string const groupName = "TOF_1234_sliced";
+    prepareInputGroup(groupName, "", 2);
 
     ReflectometryReductionOneAuto3 alg;
+    alg.setChild(true);
     alg.initialize();
-    alg.setRethrows(true);
+    alg.setPropertyValue("InputWorkspace", groupName);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    TS_ASSERT_EQUALS(ADS.doesExist("TOF1234_"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234_sliced_1"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_1234_sliced_2"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234_sliced_1"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234_sliced_2"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234_sliced_1"), true);
+    TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234_sliced_2"), true);
 
     ADS.clear();
   }
