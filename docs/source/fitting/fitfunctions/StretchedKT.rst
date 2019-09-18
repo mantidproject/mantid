@@ -1,0 +1,40 @@
+.. _func-StretchedKT:
+
+===========
+StretchedKT
+===========
+
+.. index:: StretchedKT
+
+Description
+-----------
+
+For observation of muon spin-relaxation (:math:`\mu`SR) spectra with lineshapes lying between a Guassian and a Lorentzian,
+
+.. math:: A(t)=A_0\left(\frac13+\frac23\left(1-(\sigma t)^\beta\right)e^{-\frac{(\sigma t)^\beta}{\beta}}\right)
+
+where,
+
+:math:`\sigma` is KuboToyabe decay rate,
+
+:math:`A_0` is the amplitude,
+
+:math:`\beta` is the stretching exponential and it ranges from 1 (neglible nuclear field) and 2 (strong nuclear field). 
+
+.. figure:: /images/StretchedKT.png
+
+.. attributes::
+
+.. properties::
+
+References
+----------
+
+[1]  `Crook et al, J. Phys.: Condens. Matter 9 1149-1158 (1997) <https://iopscience.iop.org/article/10.1088/0953-8984/9/5/018/pdf>`_.
+
+[2]  `Lord J.S., J. Phys.: Conf. Ser. 17 81 (2005) <https://iopscience.iop.org/article/10.1088/1742-6596/17/1/014/pdf>`_.
+
+
+.. categories::
+
+.. sourcelink::
