@@ -10,10 +10,11 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
+
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::CurveFitting::CostFunctions::CostFuncFitting;
 using namespace Mantid::API;
@@ -23,6 +24,20 @@ namespace {
 class CostFuncMock : public CostFuncFitting {
 public:
   std::string name() const override { return "CostFuncMock"; }
+  void addVal(FunctionDomain_sptr domain,
+              FunctionValues_sptr values) const override {
+    UNUSED_ARG(domain)
+    UNUSED_ARG(values)
+  }
+  void addValDerivHessian(IFunction_sptr function, FunctionDomain_sptr domain,
+                          FunctionValues_sptr values, bool evalDeriv = true,
+                          bool evalHessian = true) const override {
+    UNUSED_ARG(domain)
+    UNUSED_ARG(values)
+    UNUSED_ARG(evalDeriv)
+    UNUSED_ARG(evalHessian)
+    UNUSED_ARG(function)
+  }
   double val() const override { return 0.0; }
   void deriv(std::vector<double> &) const override {}
   double valAndDeriv(std::vector<double> &) const override { return 0.0; }

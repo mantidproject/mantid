@@ -29,7 +29,7 @@ public:
   MOCK_METHOD0(searchResults, ISearchModel const &());
   MOCK_METHOD0(mutableSearchResults, ISearchModel &());
 
-  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
+  MOCK_METHOD1(setInstrumentList, void(const std::vector<std::string> &));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));

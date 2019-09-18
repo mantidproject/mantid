@@ -202,8 +202,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
             if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
+                message = 'Monitors workspace ' + workspace_name + '_monitors does not exist'
                 if self._reload:
-                    message = 'Monitors workspace ' + workspace_name + '_monitors does not exist'
                     self.log().information(message)
                     _removeWorkspace(workspace_name)
                     return False

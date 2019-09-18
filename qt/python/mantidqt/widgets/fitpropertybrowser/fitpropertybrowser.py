@@ -15,6 +15,7 @@ from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 from .interactive_tool import FitInteractiveTool
 
@@ -230,7 +231,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         axes = self.get_axes()
         if axes.legend_ is not None:
-            axes.legend().draggable()
+            props = LegendProperties.from_legend(axes.legend_)
+            LegendProperties.create_legend(props, axes)
 
     def plot_guess(self):
         """
@@ -318,6 +320,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :param name: The name of Fit's output workspace.
         """
         from mantidqt.plotting.functions import plot
+
+        axes = self.get_axes()
+        props = LegendProperties.from_legend(axes.legend_)
+
         ws = mtd[name]
 
         # Keep local copy of the original lines
@@ -341,7 +347,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             new_line.update_from(old_line)
 
         # Now update the legend to make sure it changes to the old properties
-        self.get_axes().legend().draggable()
+        LegendProperties.create_legend(props, axes)
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):

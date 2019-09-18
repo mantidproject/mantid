@@ -14,6 +14,7 @@ User Interface
 - Marker label, color and line style can be edited on a per-marker basis.
 - The button to remove a curve in the figure options is now the same size as the drop-down list of curves.
 - Uses of "MantidPlot" in window titles have been removed.
+- Figure options now has a Legend tab so that a plot's legend can be customised.
 
 New
 ###
@@ -29,8 +30,8 @@ Improvements
 - If a spectrum has a label, this will now be used instead of the spectrum number in the legend when the spectrum is plotted.
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
 - There are now icons alongside the colormap names in the plot options dialog.
-
 - Hex codes can now be inputted directly into the color selectors in figure options.
+- There is now a button on the plot window's toolbar to generate a script that will re-create the current figure.
 
 Bugfixes
 ########
