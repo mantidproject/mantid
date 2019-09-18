@@ -24,7 +24,7 @@ and :math:`J_0(x)` is the Bessel Function of the first kind, its expression is g
 .. math:: J_0(x)=\sum_{l=0}^{\infty}\frac{(-1)^l}{2^{2l}(l!)^2}x^{2l}.
 
 .. figure:: /images/Bessel.png
-   :alt: Bessel.png
+   :alt: A plot of Bessel function.
 
 .. attributes::
 
