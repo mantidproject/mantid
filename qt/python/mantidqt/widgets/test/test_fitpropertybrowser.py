@@ -33,14 +33,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
             property_browser.normaliseData.assert_called_once_with(normalised)
             normaliseData_mock.reset_mock()
 
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.show')
-    def test_fitpropertybrowser_is_shown_for_table_workspaces(self, mock):
-        axes_mock = Mock(wsName = "table")
-        property_browser = self._create_widget()
-        with patch.object(property_browser, 'get_axes', lambda: axes_mock):
-            property_browser.show()
-        self.assertEqual(1, mock.show().call_count)
-
     def test_plot_guess_plots_for_table_workspaces(self):
         table = WorkspaceFactory.createTable()
         table.addColumn('double', 'X', 1)

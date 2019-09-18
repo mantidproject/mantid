@@ -65,10 +65,6 @@ Mantid::Kernel::Logger g_log("FitPropertyBrowser");
 
 using namespace Mantid::API;
 
-Workspace_sptr getADSWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieve(workspaceName);
-}
-
 int getNumberOfSpectra(MatrixWorkspace_sptr workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
@@ -1934,7 +1930,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
   if (tbl) {
     auto xColumnIndex = m_columnManager->value(m_xColumn);
     std::vector<double> xColumnData;
-    for (auto i = 0; i < tbl->rowCount(); ++i) {
+    for (size_t i = 0; i < tbl->rowCount(); ++i) {
       xColumnData.push_back(tbl->Double(i, xColumnIndex));
     }
     std::sort(xColumnData.begin(), xColumnData.end());
