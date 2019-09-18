@@ -19,6 +19,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
+#include <boost/algorithm/string.hpp>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -150,8 +152,21 @@ void LoadInstrument::exec() {
     const std::string::size_type stripPath = filename.find_last_of("\\/");
     std::string instrumentFile =
         filename.substr(stripPath + 1, filename.size());
+
     // Strip off "_Definition.xml"
-    instname = instrumentFile.substr(0, instrumentFile.find("_Def"));
+    auto definitionRange = boost::ifind_first(instrumentFile, "_Def");
+    if (definitionRange) {
+      // We need to find the position this occurs in the string and we
+      // can't pass begin() to substr. So take a performance pessimism
+      // and create a copy which find is guaranteed to find
+      const std::string foundDefTagCase(definitionRange.begin(),
+                                        definitionRange.end());
+      instname = instrumentFile.substr(0, instrumentFile.find(foundDefTagCase));
+    } else {
+      g_log.warning("The instrument definition filename does not contain "
+                    "_Definition. Your instrument name may be incorrect");
+      instname = instrumentFile;
+    }
 
     // Now that we have a file name, decide whether to use Nexus or IDF loading
     if (LoadGeometry::isIDF(filename)) {
