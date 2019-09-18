@@ -27,6 +27,11 @@ and :math:`\lambda` is exponential decay rate.
 
 .. properties::
 
+References
+----------
+
+[1]  `Lord J.S., J. Phys.: Conf. Ser. 17 81 (2005) <https://iopscience.iop.org/article/10.1088/1742-6596/17/1/014/pdf>`_.
+
 .. categories::
 
 .. sourcelink::
