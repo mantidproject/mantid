@@ -182,12 +182,12 @@ public:
   void setEndX(double end) override;
   /// Set both start and end X
   void setXRange(double start, double end);
-	/// Get the name of the X column 
-	QString getXColumnName() const;
-	/// Get the name of the Y column 
-	QString getYColumnName() const;
-	/// Get the name of the Error column 
-	QString getErrColumnName() const;
+  /// Get the name of the X column
+  QString getXColumnName() const;
+  /// Get the name of the Y column
+  QString getYColumnName() const;
+  /// Get the name of the Error column
+  QString getErrColumnName() const;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue
@@ -287,7 +287,7 @@ public:
   // Methods intended for interfacing with the workbench fitting tools
 
   void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
-	void addAllowedTableWorkspace(const QString& wsName);
+  void addAllowedTableWorkspace(const QString &wsName);
   QString addFunction(const QString &fnName);
   PropertyHandler *getPeakHandler(const QString &prefix);
   void setPeakCentreOf(const QString &prefix, double value);
@@ -665,8 +665,8 @@ private:
   ///   keys are workspace names,
   ///   values are lists of workspace indices
   QMap<QString, QList<int>> m_allowedSpectra;
-	/// If set it contains the table workspace name to be fitted in this browser:
-	QString m_allowedTableWorkspace;
+  /// If set it contains the table workspace name to be fitted in this browser:
+  QString m_allowedTableWorkspace;
   /// Store workspace index to revert to in case validation fails
   int m_oldWorkspaceIndex;
 

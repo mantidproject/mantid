@@ -1640,8 +1640,8 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     } else {
       alg->setPropertyValue("XColumn", getXColumnName().toStdString());
       alg->setPropertyValue("YColumn", getYColumnName().toStdString());
-			if(getErrColumnName().toStdString() != "")
-				alg->setPropertyValue("ErrColumn", getErrColumnName().toStdString());
+      if (getErrColumnName().toStdString() != "")
+        alg->setPropertyValue("ErrColumn", getErrColumnName().toStdString());
     }
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
@@ -1752,29 +1752,28 @@ void FitPropertyBrowser::clearFitResultStatus() {
 /// Get and store available workspace names
 void FitPropertyBrowser::populateWorkspaceNames() {
   m_workspaceNames.clear();
-	if (m_allowedTableWorkspace.isEmpty()) {
-		bool allAreAllowed = m_allowedSpectra.isEmpty();
-		QStringList tmp;
-		auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-		for (auto& it : sv) {
-			auto const& name = QString::fromStdString(it);
-			if (allAreAllowed || m_allowedSpectra.contains(name)) {
-				tmp << name;
-			}
-		}
+  if (m_allowedTableWorkspace.isEmpty()) {
+    bool allAreAllowed = m_allowedSpectra.isEmpty();
+    QStringList tmp;
+    auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+    for (auto &it : sv) {
+      auto const &name = QString::fromStdString(it);
+      if (allAreAllowed || m_allowedSpectra.contains(name)) {
+        tmp << name;
+      }
+    }
 
-		for (int i = 0; i < tmp.size(); i++) {
-			Mantid::API::Workspace_sptr ws =
-				Mantid::API::AnalysisDataService::Instance().retrieve(
-					tmp[i].toStdString());
-			if (isWorkspaceValid(ws)) {
-				m_workspaceNames.append(tmp[i]);
-			}
-		}
-	}
-	else {
-		m_workspaceNames.append(m_allowedTableWorkspace);
-	}
+    for (int i = 0; i < tmp.size(); i++) {
+      Mantid::API::Workspace_sptr ws =
+          Mantid::API::AnalysisDataService::Instance().retrieve(
+              tmp[i].toStdString());
+      if (isWorkspaceValid(ws)) {
+        m_workspaceNames.append(tmp[i]);
+      }
+    }
+  } else {
+    m_workspaceNames.append(m_allowedTableWorkspace);
+  }
   m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   setWorkspaceIndex(0);
 }
@@ -1810,7 +1809,8 @@ void FitPropertyBrowser::addHandle(
     const boost::shared_ptr<Mantid::API::Workspace> ws) {
   auto const qName = QString::fromStdString(wsName);
   if (!isWorkspaceValid(ws) ||
-      (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName) && m_allowedTableWorkspace.isEmpty()))
+      (!m_allowedSpectra.isEmpty() && !m_allowedSpectra.contains(qName) &&
+       m_allowedTableWorkspace.isEmpty()))
     return;
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(qName);
@@ -1951,7 +1951,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
 QString FitPropertyBrowser::getXColumnName() const {
   const auto ws = getWorkspace();
   auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
-	QString columnName = "";
+  QString columnName = "";
   if (tbl) {
     auto columns = tbl->getColumnNames();
     auto xIndex = m_columnManager->value(m_xColumn);
@@ -1967,7 +1967,7 @@ QString FitPropertyBrowser::getXColumnName() const {
 QString FitPropertyBrowser::getYColumnName() const {
   const auto ws = getWorkspace();
   auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
-	QString columnName = "";
+  QString columnName = "";
   if (tbl) {
     auto columns = tbl->getColumnNames();
     auto yIndex = m_columnManager->value(m_yColumn);
@@ -1983,7 +1983,7 @@ QString FitPropertyBrowser::getYColumnName() const {
 QString FitPropertyBrowser::getErrColumnName() const {
   const auto ws = getWorkspace();
   auto tbl = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
-	QString columnName = "";
+  QString columnName = "";
   if (tbl) {
     auto columns = tbl->getColumnNames();
     // The error column has an empty first entry
@@ -3398,15 +3398,14 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
   }
 }
 
-void FitPropertyBrowser::addAllowedTableWorkspace(const QString& wsName) {
-	auto const name = wsName.toStdString();
-	auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(name);
-	if (ws) {
-		m_allowedTableWorkspace = wsName;
-	}
-	else {
-		throw std::runtime_error("Workspace " + name + " is not a TableWorkspace");
-	}
+void FitPropertyBrowser::addAllowedTableWorkspace(const QString &wsName) {
+  auto const name = wsName.toStdString();
+  auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(name);
+  if (ws) {
+    m_allowedTableWorkspace = wsName;
+  } else {
+    throw std::runtime_error("Workspace " + name + " is not a TableWorkspace");
+  }
 }
 
 /**
