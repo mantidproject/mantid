@@ -329,26 +329,25 @@ std::map<std::string, std::string> SofQWNormalisedPolygon::validateInputs() {
     if (tableWS->columnCount() != 3) {
       result["DetectorTwoThetaRanges"] =
           "DetectorTwoThetaRanges requires 3 columns";
-      return result;
     }
     // The first column should be of type int
-    if (!tableWS->getColumn(0)->isType<int>()) {
+    else if (!tableWS->getColumn(0)->isType<int>()) {
       result["DetectorTwoThetaRanges"] =
           "The first column of DetectorTwoThetaRanges should be of type int";
     }
     // The second column should be of type double
-    if (!tableWS->getColumn(1)->isType<double>()) {
+    else if (!tableWS->getColumn(1)->isType<double>()) {
       result["DetectorTwoThetaRanges"] =
           "The second column of DetectorTwoThetaRanges should be of type "
           "double";
     }
     // The third column should be of type double.
-    if (!tableWS->getColumn(2)->isType<double>()) {
+    else if (!tableWS->getColumn(2)->isType<double>()) {
       result["DetectorTwoThetaRanges"] =
           "The third column of DetectorTwoThetaRanges should be of type double";
     }
     // Table and workspace should have the same number of detectors.
-    if (tableWS->rowCount() != inputWS->getNumberHistograms()) {
+    else if (tableWS->rowCount() != inputWS->getNumberHistograms()) {
       result["DetectorTwoThetaRanges"] =
           "The table and workspace do not have the same number of detectors";
     }
