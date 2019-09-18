@@ -10,47 +10,21 @@
 
 #include "MantidAPI/FileFinder.h"
 
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-#include "MantidQtWidgets/Plotting/PreviewPlot.h"
-
-#include <math.h>
-#include <QGridLayout>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QSplitter>
-#include <QVBoxLayout>
-#include <QWidget>
-#include <string>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace Mantid;
-using namespace MantidQt::MantidWidgets;
-using namespace MantidQt::CustomInterfaces;
-
-DECLARE_SUBWINDOW(ALFView)
-
-/// static logger
-Mantid::Kernel::Logger g_log("ALFView");
-
-ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_view(nullptr),m_currentRun(0) {
+ALFView_presenter::ALFView_presenter(ALFView_view *view)
+    : m_view(view), m_currentRun(0) {
   Direct::loadEmptyInstrument();
 }
 
-void ALFView::initLayout() {
-  m_view = new ALFView_view(this);
-  this->setCentralWidget(m_view);
+void ALFView_presenter::initLayout() {
   connect(m_view, SIGNAL(newRun()), this, SLOT(loadRunNumber()));
   connect(m_view, SIGNAL(browsedToRun(std::string)), this,
           SLOT(loadBrowsedFile(const std::string)));
 }
 
-void ALFView::loadAndAnalysis(const std::string &run) {
+void ALFView_presenter::loadAndAnalysis(const std::string &run) {
   int runNumber = Direct::loadData(run);
   auto bools = Direct::isDataValid();
   if (bools.first) {
@@ -69,7 +43,7 @@ void ALFView::loadAndAnalysis(const std::string &run) {
   }
 }
 
-void ALFView::loadRunNumber() {
+void ALFView_presenter::loadRunNumber() {
   int newRun = m_view->getRunNumber();
   const int currentRunInADS = Direct::currentRun();
 
@@ -93,7 +67,7 @@ void ALFView::loadRunNumber() {
   loadAndAnalysis(runNumber);
 }
 
-void ALFView::loadBrowsedFile(const std::string fileName) {
+void ALFView_presenter::loadBrowsedFile(const std::string fileName) {
   Direct::loadData(fileName);
   loadAndAnalysis(fileName);
 }
