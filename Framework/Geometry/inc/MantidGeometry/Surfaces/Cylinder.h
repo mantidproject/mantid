@@ -46,7 +46,7 @@ private:
 
 protected:
   Cylinder(const Cylinder &) = default;
-  Cylinder &operator=(const Cylinder &) = default;
+  Cylinder &operator=(const Cylinder &) = delete;
 
 public:
   /// Public identifer

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+ name="NGEM" valid-from   ="2019-05-30 00:00:00"
+                       valid-to     ="2100-10-17 09:29:59"
+		       last-modified="2019-05-30 11:40:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z-"/>
+  </defaults>
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-40.0"> <facing val="none"/> </location>
+  </component>
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location><facing val="none"/> </location>
+  </component>
+  
+<type name="some-sample-holder" is="SamplePos">
+     <properties />
+     <sphere id="some-shape">
+       <centre x="0.0"  y="0.0" z="0.0" />
+       <radius val="0.03" />
+     </sphere>
+     <algebra val="some-shape" />
+</type>
+  
+  
+  <component type="main-detector-bank" idstart="1" idfillbyfirst="x" idstepbyrow="128">
+    <location z="1.5" name="main-detector-bank"/>
+  </component>
+ 
+  <type name="main-detector-bank" is="rectangular_detector" type="main-detector-pixel" 
+    xpixels="128" xstart="-0.05" xstep="+0.000787402"
+    ypixels="128" ystart="-0.05" ystep="+0.000787402" > 
+  </type>
+    
+  <type name="main-detector-pixel" is="detector">
+    <cuboid id="shape"> 
+      <left-front-bottom-point x="0.000393701" y="-0.000393701" z="0.0"  />
+      <left-front-top-point  x="0.000393701" y="-0.000393701" z="0.00000005"  />
+      <left-back-bottom-point  x="-0.000393701" y="-0.000393701" z="0.0"  />
+      <right-front-bottom-point  x="0.000393701" y="0.000393701" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" /> 
+  </type>    
+
+
+</instrument>

@@ -102,6 +102,7 @@ RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
           cellText[SCALE_COLUMN]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
     m_invalidColumns.emplace_back(SCALE_COLUMN);
+
   return optionalScaleFactorOrNoneIfError;
 }
 

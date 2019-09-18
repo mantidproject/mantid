@@ -32,7 +32,7 @@ private:
 
 protected:
   General(const General &) = default;
-  General &operator=(const General &) = default;
+  General &operator=(const General &) = delete;
 
 public:
   General();

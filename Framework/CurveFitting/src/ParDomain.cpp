@@ -32,41 +32,36 @@ void ParDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
 
 /**
  * Calculate the value of a least squares cost function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param costFunction :: The cost func to calculate the value for
  */
-void ParDomain::leastSquaresVal(
-    const CostFunctions::CostFuncLeastSquares &leastSquares) {
-  const auto n = static_cast<int>(getNDomains());
+void ParDomain::additiveCostFunctionVal(
+    const CostFunctions::CostFuncFitting &costFunction) {
+  const int n = static_cast<int>(getNDomains());
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < n; ++i) {
     API::FunctionDomain_sptr domain;
     API::FunctionValues_sptr values;
     getDomainAndValues(static_cast<size_t>(i), domain, values);
     if (!values) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
-    leastSquares.addVal(domain, values);
-    // PARALLEL_CRITICAL(printout)
-    //{
-    //  std::cerr << "val= " << leastSquares.m_value << '\n';
-    //}
+    costFunction.addVal(domain, values);
   }
 }
 
 /**
  * Calculate the value, first and second derivatives of a least squares cost
  * function
- * @param leastSquares :: The least squares cost func to calculate the value for
+ * @param costFunction :: The cost func to calculate the value for
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void ParDomain::leastSquaresValDerivHessian(
-    const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+void ParDomain::additiveCostFunctionValDerivHessian(
+    const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
     bool evalHessian) {
   const auto n = static_cast<int>(getNDomains());
   PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;
-  // funs.push_back( leastSquares.getFittingFunction()->clone() );
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < n; ++i) {
     API::FunctionDomain_sptr domain;
@@ -75,7 +70,7 @@ void ParDomain::leastSquaresValDerivHessian(
     auto simpleValues =
         boost::dynamic_pointer_cast<API::FunctionValues>(values);
     if (!simpleValues) {
-      throw std::runtime_error("LeastSquares: undefined FunctionValues.");
+      throw std::runtime_error("CostFunction: undefined FunctionValues.");
     }
     std::vector<API::IFunction_sptr>::size_type k = PARALLEL_THREAD_NUMBER;
     PARALLEL_CRITICAL(resize) {
@@ -83,10 +78,10 @@ void ParDomain::leastSquaresValDerivHessian(
         funs.resize(k + 1);
       }
       if (!funs[k]) {
-        funs[k] = leastSquares.getFittingFunction()->clone();
+        funs[k] = costFunction.getFittingFunction()->clone();
       }
     }
-    leastSquares.addValDerivHessian(funs[k], domain, simpleValues, evalDeriv,
+    costFunction.addValDerivHessian(funs[k], domain, simpleValues, evalDeriv,
                                     evalHessian);
   }
 }

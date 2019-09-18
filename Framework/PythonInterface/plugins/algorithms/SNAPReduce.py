@@ -187,6 +187,9 @@ class SNAPReduce(DataProcessorAlgorithm):
                              + "All detectors as one group, Groups (East,West for "
                              + "SNAP), Columns for SNAP, detector banks")
 
+        self.declareProperty("MaxChunkSize", 16.,
+                             "Specify maximum Gbytes of file to read in one chunk. Zero reads the whole file at once.")
+
         mode = ["Set-Up", "Production"]
         self.declareProperty("ProcessingMode", mode[1], StringListValidator(mode),
                              "Set-Up Mode is used for establishing correct parameters. Production "
@@ -394,7 +397,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             progEnd = progStart + .9 * progDelta
             # pass all of the work to the child algorithm
             AlignAndFocusPowderFromFiles(Filename=filename, OutputWorkspace=wkspname ,
-                                         MaxChunkSize=16,  # GiB
+                                         MaxChunkSize=self.chunkSize,
                                          UnfocussedWorkspace=unfocussed,  # can be empty string
                                          startProgress=progStart,
                                          endProgress=progEnd,
@@ -412,6 +415,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         in_Runs = self.getProperty("RunNumbers").value
         progress = Progress(self, 0., .25, 3)
         finalUnits = self.getPropertyValue("FinalUnits")
+        self.chunkSize = self.getProperty('MaxChunkSize').value
 
         # default arguments for AlignAndFocusPowder
         self.alignAndFocusArgs = {'Tmin': 0,
