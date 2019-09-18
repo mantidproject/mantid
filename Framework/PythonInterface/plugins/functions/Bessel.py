@@ -3,11 +3,8 @@
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
-
-"""
-@author Hank Wu, RAL STFC
-@date September 11, 2019
-"""
+# SPDX - License - Identifier: GPL - 3.0 +
+# pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
 from mantid.api import IFunction1D, FunctionFactory
 import numpy as np

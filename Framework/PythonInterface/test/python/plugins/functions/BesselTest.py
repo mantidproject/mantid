@@ -29,7 +29,7 @@ class BesselTest(unittest.TestCase):
 			self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
 	def test_do_fit(self):
-		do_a_fit(np.arange(0.1, 16, 0.2), 'Bessel',guess=dict(A0=0.15, Phi=0.25, Nu=0.25),target=dict(A0=0.1, Phi=0.2, Nu=0.2), atol=0.01)
+		do_a_fit(np.arange(0.1, 16, 0.2), 'Bessel', guess=dict(A0=0.15, Phi=0.25, Nu=0.25), target=dict(A0=0.1, Phi=0.2, Nu=0.2), atol=0.01)
 
 if __name__ == '__main__':
 	unittest.main()
