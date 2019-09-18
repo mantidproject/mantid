@@ -43,7 +43,7 @@ namespace Mantid {
 namespace API {
 class IFunction;
 class CompositeFunction;
-class MatrixWorkspace;
+class Workspace;
 } // namespace API
 } // namespace Mantid
 
