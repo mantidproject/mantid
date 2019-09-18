@@ -378,7 +378,7 @@ QMenu *MessageDisplay::generateContextMenu() {
   QMenu *menu = m_textDisplay->createStandardContextMenu();
   menu->addSeparator();
   if (!m_textDisplay->document()->isEmpty()) {
-    menu->addAction("Clear", this, SLOT(clear()));
+    menu->addAction("Clear All", this, SLOT(clear()));
     menu->addSeparator();
   }
   menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));

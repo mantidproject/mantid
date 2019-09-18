@@ -54,9 +54,9 @@ class MessageDisplay(MessageDisplay_cpp):
         context menu generator and then extends it with the filtering options.
         """
         qmenu = super(MessageDisplay, self).generateContextMenu()
-        filter_menu = qmenu.addMenu("&Filter by")
+        filter_menu = qmenu.addMenu("&View")
 
-        framework_action = QAction('Mantid Framework Output', filter_menu)
+        framework_action = QAction('Mantid Log Output', filter_menu)
         framework_action.triggered.connect(self.toggle_filter_framework_output)
         framework_action.setCheckable(True)
         framework_action.setChecked(self.showFrameworkOutput())
@@ -65,15 +65,15 @@ class MessageDisplay(MessageDisplay_cpp):
         filter_menu.addSeparator()
 
         actions_to_group = []
+        active_script_action = QAction("Active Tab Output", filter_menu)
+        active_script_action.triggered.connect(self.show_active_script)
+        actions_to_group.append(active_script_action)
         all_script_action = QAction('All Script Output', filter_menu)
         all_script_action.triggered.connect(self.show_all_scripts)
         actions_to_group.append(all_script_action)
         hide_all_script_action = QAction("Hide All Script Output", filter_menu)
         hide_all_script_action.triggered.connect(self.hide_all_scripts)
         actions_to_group.append(hide_all_script_action)
-        active_script_action = QAction("Show Active Tab Output", filter_menu)
-        active_script_action.triggered.connect(self.show_active_script)
-        actions_to_group.append(active_script_action)
 
         action_group = QActionGroup(filter_menu)
         for action in actions_to_group:

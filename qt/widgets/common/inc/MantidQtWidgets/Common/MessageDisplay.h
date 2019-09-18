@@ -73,32 +73,38 @@ public:
   QList<Message> getHistory() { return m_messageHistory; }
   /// Generate the display's context menu QMenu object
   QMenu *generateContextMenu();
-  /// Filter messages by message type (framework or from a script)
+  /// Filter messages by message type
   void filterMessages();
-  /// Getters and setters for showing/hiding message types
-  inline bool showFrameworkOutput() const { return m_showFrameworkOutput; }
-  void setShowFrameworkOutput(const bool &show) {
-    m_showFrameworkOutput = show;
-  }
-  inline bool showAllScriptOutput() const { return m_showAllScriptOutput; }
-  void setShowAllScriptOutput(const bool &show) {
-    m_showAllScriptOutput = show;
-  }
-  inline bool showActiveScriptOutput() const {
-    return m_showActiveScriptOutput;
-  }
-  void setShowActiveScriptOutput(const bool &show) {
-    m_showActiveScriptOutput = show;
-  }
-  inline QString activeScript() const { return m_activeScript; }
-  void setActiveScript(const QString &scriptPath) {
-    m_activeScript = scriptPath;
-  }
-
   /// Method to be called when a file's path is modified
   void filePathModified(const QString &oldPath, const QString &newPath);
   /// Append a message to the message history
   void appendToHistory(const Message &msg);
+  /// Get whether framework output is being displayed
+  inline bool showFrameworkOutput() const { return m_showFrameworkOutput; }
+  /// Set whether framework output should be displayed
+  void setShowFrameworkOutput(const bool &show) {
+    m_showFrameworkOutput = show;
+  }
+  /// Get whether all script output is being displayed
+  inline bool showAllScriptOutput() const { return m_showAllScriptOutput; }
+  /// Set whether all script output should be displayed
+  void setShowAllScriptOutput(const bool &show) {
+    m_showAllScriptOutput = show;
+  }
+  /// Get whether only active script output is being displayed
+  inline bool showActiveScriptOutput() const {
+    return m_showActiveScriptOutput;
+  }
+  /// Get whether only active script output should be displayed
+  void setShowActiveScriptOutput(const bool &show) {
+    m_showActiveScriptOutput = show;
+  }
+  /// Get the path of the currently active script
+  inline QString activeScript() const { return m_activeScript; }
+  /// Set the path of the currently active script
+  void setActiveScript(const QString &scriptPath) {
+    m_activeScript = scriptPath;
+  }
 
 signals:
   /// Indicate that a message of error or higher has been received.
@@ -177,7 +183,7 @@ private:
   QList<Message> m_messageHistory;
   /// Bools to dictate whether to print certain types of messages
   bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true},
-      m_hideAllScriptOutput{false}, m_showActiveScriptOutput{false};
+      m_showActiveScriptOutput{false};
   QString m_activeScript;
 };
 } // namespace MantidWidgets
