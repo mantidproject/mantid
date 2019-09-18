@@ -16,9 +16,9 @@ class CombGaussLorentzKT(IFunction1D):
 		return "Muon"
 
 	def init(self):
-		self.declareParameter("A0", 0.5)
-		self.declareParameter("Lambda", 0.1)
-		self.declareParameter("Sigma", 0.2)
+		self.declareParameter("A0", 0.5, 'Amplitude')
+		self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
+		self.declareParameter("Sigma", 0.2, 'KuboToyabe decay rate')
 
 	def function1D(self, x):
 		A0 = self.getParameterValue("A0")
