@@ -400,7 +400,7 @@ public:
     twoThetaRanges->setRowCount(rowCount);
     return twoThetaRanges;
   }
-  
+
   void testTableHasThreeColumns() {
     const std::vector<std::string> dataTypes = {"int", "double"};
     auto inputWS = SofQWTest::loadTestFile();
@@ -412,8 +412,9 @@ public:
                      "DetectorTwoThetaRanges requires 3 columns");
   }
 
-	void testTableHasFourColumns() {
-    const std::vector<std::string> dataTypes = {"int", "double", "double", "double"};
+  void testTableHasFourColumns() {
+    const std::vector<std::string> dataTypes = {"int", "double", "double",
+                                                "double"};
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(
         dataTypes, static_cast<int>(inputWS->getNumberHistograms()));
