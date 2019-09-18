@@ -107,8 +107,8 @@ class MessageDisplayTest(unittest.TestCase):
         self.assertIn("Message", self._get_message_window_contents())
         self.display.current_tab_changed(self.win_path)
         self.assertNotIn("Message", self._get_message_window_contents())
-        self.display.file_name_modified(self.unix_path, self.win_path)
-        self.display.current_tab_changed(self.unix_path)
+        self.display.file_name_modified(self.unix_path, "New Path")
+        self.display.current_tab_changed("New Path")
         self.assertIn("Message", self._get_message_window_contents())
 
     def test_that_messages_with_error_priority_are_displayed_even_if_the_script_is_not_the_active_tab(self):

@@ -297,10 +297,13 @@ class MultiPythonFileInterpreter(QWidget):
         self.current_editor().save(force_save=True)
 
     def save_current_file_as(self):
+        previous_filename = self.current_editor().filename
         saved, filename = self.current_editor().save_as()
         if saved:
             self.current_editor().close()
             self.open_file_in_new_tab(filename)
+            if previous_filename:
+                self.sig_file_name_changed.emit(previous_filename, filename)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
