@@ -568,7 +568,9 @@ public:
 
   void testStartMonitorUpdatesView() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getLiveDataUpdateInterval()).WillByDefault(Return("20"));
+    EXPECT_CALL(m_view, getLiveDataUpdateInterval())
+        .Times(1)
+        .WillOnce(Return("20"));
     expectStartingLiveDataSucceeds();
     expectUpdateViewWhenMonitorStarting();
     presenter.notifyStartMonitor();
