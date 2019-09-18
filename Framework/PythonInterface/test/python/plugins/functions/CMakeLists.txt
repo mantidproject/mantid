@@ -1,9 +1,9 @@
 # Tests for Fit functions
 
 set(TEST_PY_FILES
-    CombGaussLorentzKTTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
+    CombGaussLorentzKTTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
