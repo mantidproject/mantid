@@ -14,6 +14,7 @@ from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import Groupi
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
+from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
@@ -38,6 +39,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.model = GroupingTabModel(context=self.context)
         self.view = PairingTableView(parent=self.obj)
         self.presenter = PairingTablePresenter(self.view, self.model)
+        self.presenter_grouping_table = GroupingTabPresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
         self.view.enter_pair_name = mock.Mock(side_effect=pair_name())
@@ -259,7 +261,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         six.assertCountEqual(self, self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
     def test_that_adding_pair_with_context_menu_allows_for_name_specification(self):
-        self.GroupingTabPresenter(self.model, self.view).add_pair_from_grouping_table(MuonPair(pair_name="new"))
+        GroupingTabPresenter(self.model, self.view).add_pair_from_grouping_table("my_group_1", "my_group_2")
 
         self.assertEqual(self.view.get_table_item_text(0, 0), "new")
 
