@@ -83,14 +83,16 @@ public:
   QPlainTextEdit *getTextEdit();
   void filterMessages();
   QMenu *generateContextMenu();
-  QMap<QString, QVariant> displayedScripts();
-  void insertIntoDisplayedScripts(const QString &scriptPath, const bool &display = true);
   void filePathModified(const QString &oldPath, const QString &newPath);
 
   bool showFrameworkOutput();
   void setShowFrameworkOutput(const bool &show);
   bool showAllScriptOutput();
   void setShowAllScriptOutput(const bool &show);
+  bool showActiveScriptOutput();
+  void setShowActiveScriptOutput(const bool &show);
+  QString activeScript();
+  void setActiveScript(const QString &scriptPath);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);

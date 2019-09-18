@@ -12,7 +12,6 @@ from __future__ import (absolute_import, division, print_function,
 
 import unittest
 
-from mantid.py3compat.mock import Mock, call, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.messagedisplay import MessageDisplay, Priority
 
@@ -36,13 +35,13 @@ class MessageDisplayTest(unittest.TestCase):
         menu_items = [action.iconText() for action in context_menu.actions()]
         self.assertIn('Filter by', menu_items)
 
-    def test_that_text_appended_through_appendPython_toggles_visibility_when_toggling_filter_script(self):
+    def test_that_text_appended_through_appendPython_toggles_visibility_when_toggling_show_and_hide_script(self):
         msg = 'Some script output'
         self.display.appendPython(msg, Priority.Notice, self.unix_path)
         self.assertIn(msg, self.get_message_window_contents())
-        self.display.toggle_filter_all_script_output()
+        self.display.hide_all_scripts()
         self.assertNotIn(msg, self.get_message_window_contents())
-        self.display.toggle_filter_all_script_output()
+        self.display.show_all_scripts()
         self.assertIn(msg, self.get_message_window_contents())
 
     def test_that_text_appended_through_appendNotice_toggles_visibility_when_toggling_filter_framework(self):
@@ -64,7 +63,7 @@ class MessageDisplayTest(unittest.TestCase):
         self.display.setShowFrameworkOutput(False)
         self.display.setShowAllScriptOutput(True)
         script_msg = 'A new script message'
-        self.display.active_script = self.unix_path
+        self.display.last_executed_script = self.unix_path
         self.display.append_script_notice(script_msg)
         self.assertIn(script_msg, self.get_message_window_contents())
 
@@ -74,100 +73,53 @@ class MessageDisplayTest(unittest.TestCase):
         self.display.appendNotice(framework_msg)
         self.assertNotIn(framework_msg, self.get_message_window_contents())
 
-    def test_that_executed_scripts_appear_unduplicated_in_the_Filter_by_context_menu(self):
-        self._simulate_script_executions([self.unix_path, self.win_path, self.unix_path])
-        filter_by_menu = self._get_Filter_by_menu(self.display.generateContextMenu())
-        filter_options = [action.text() for action in filter_by_menu.actions()]
-        self.assertEqual(1, filter_options.count('MyScript.py'))
-        self.assertEqual(1, filter_options.count('MyScript(1).py'))
-
-    def test_clicking_on_a_script_in_the_Filter_by_menu_calls_toggle_with_correct_path(self):
-        """
-        This covers a bug where clicking any filter scripts action would
-        always call the final script's slot, not the one that was clicked
-        """
-        script_paths = ["Script 1.py", "Script 2.py", "Script 3.py"]
-        self._simulate_script_executions(script_paths)
-        filter_by_menu = self._get_Filter_by_menu(self.display.generateContextMenu())
-        filter_by_script_mock = Mock()
-        with patch.object(self.display, 'toggle_filter_by_script', filter_by_script_mock):
-            for action_text in script_paths:
-                action = self._get_menu_action(filter_by_menu, action_text)
-                action.trigger()
-
-        self.assertEqual(
-            [call("Script 1.py"), call("Script 2.py"),
-             call("Script 3.py")], filter_by_script_mock.call_args_list)
-
-    def test_executed_scripts_are_added_to_the_getDisplayedScripts_QMap_with_True_value(self):
-        self.display.script_executing(self.unix_path)
-        self.assertIn(self.unix_path, self.display.displayedScripts())
-        self.assertTrue(self.display.displayedScripts()[self.unix_path])
-
-    def test_executed_scripts_are_not_set_from_False_to_True_if_they_are_executed_again(self):
-        self.display.script_executing(self.unix_path)
-        self.display.insertIntoDisplayedScripts(self.unix_path, False)
-        self.display.script_executing(self.unix_path)
-        self.assertFalse(self.display.displayedScripts()[self.unix_path])
-
-    def test_toggle_filter_by_script_only_hides_input_from_given_script(self):
-        messages = {self.unix_path: ["Message 1"], self.win_path: ["Message 2"]}
-        self._simulate_scripts_printing(messages)
-        self.display.toggle_filter_by_script(self.unix_path)
+    def test_that_changing_current_tab_hides_output_from_previous_tab_and_shows_output_from_the_new(self):
+        self.display.setActiveScript(self.unix_path)
+        self.display.show_active_script()
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
+                                         self.win_path: ["Message 2"]})
+        self.assertIn("Message 1", self.get_message_window_contents())
+        self.assertNotIn("Message 2", self.get_message_window_contents())
+        self.display.current_tab_changed(self.win_path)
+        self.assertNotIn("Message 1", self.get_message_window_contents())
         self.assertIn("Message 2", self.get_message_window_contents())
+
+    def test_that_new_notices_from_script_are_not_displayed_if_showAllScript_and_showActiveScriptOutput_are_False(self):
+        self.display.setShowAllScriptOutput(False)
+        self.display.setShowActiveScriptOutput(False)
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
+                                         self.win_path: ["Message 2"]})
         self.assertNotIn("Message 1", self.get_message_window_contents())
+        self.assertNotIn("Message 2", self.get_message_window_contents())
 
-    def test_showAllScriptOutput_returns_False_if_one_individual_script_is_set_as_displayed(self):
-        messages = {self.unix_path: ["Message 1"], self.win_path: ["Message 2"]}
-        self._simulate_scripts_printing(messages)
-        self.display.toggle_filter_by_script(self.unix_path)
-        self.assertFalse(self.display.showAllScriptOutput())
-
-    def test_showAllScriptOutput_is_set_to_True_if_all_individual_scripts_are_displayed(self):
-        self.display.toggle_filter_all_script_output()
-        messages = {self.unix_path: ["Message 1"], self.win_path: ["Message 2"]}
-        self._simulate_scripts_printing(messages)
-        self.assertTrue(all(self.display.displayedScripts().values()))
-        self.assertTrue(self.display.showAllScriptOutput())
-
-    def test_that_new_notices_from_a_script_that_is_not_set_to_display_are_not_displayed(self):
-        self._simulate_script_executions([self.unix_path])
-        self.display.toggle_filter_by_script(self.unix_path)
-        self._simulate_scripts_printing({self.unix_path: ["Message 1"]})
-        self.assertNotIn("Message 1", self.get_message_window_contents())
-
-    def test_that_toggling_all_script_output_off_sets_all_values_in_displayedScripts_to_False(self):
-        self._simulate_script_executions([self.unix_path, self.win_path])
-        self.display.toggle_filter_all_script_output()
-        self.assertFalse(any(self.display.displayedScripts().values()))
-
-    def test_that_toggling_all_script_output_on_sets_all_values_in_displayedScripts_to_True(self):
-        self._simulate_script_executions([self.unix_path, self.win_path])
-        self.display.toggle_filter_by_script(self.unix_path)
-        self.display.toggle_filter_all_script_output()
-        self.assertTrue(all(self.display.displayedScripts().values()))
-
-    def test_that_script_path_is_replaced_in_displayedScripts_when_it_is_renamed(self):
-        self._simulate_script_executions([self.unix_path])
-        self.display.file_name_modified(self.unix_path, self.win_path)
-        self.assertIn(self.win_path, self.display.displayedScripts())
-        self.assertNotIn(self.unix_path, self.display.displayedScripts())
-        self.assertTrue(self.display.displayedScripts()[self.win_path])
-
-    def test_that_toggling_Filter_by_script_after_renaming_script_shows_correct_messages(self):
+    def test_that_a_scripts_messages_are_still_visible_after_it_has_been_renamed_and_hide_all_toggled_on_and_off(self):
+        self.display.show_active_script()
+        self.display.setActiveScript(self.unix_path)
         self._simulate_scripts_printing({self.unix_path: ["Message"]})
-        self.display.toggle_filter_by_script(self.unix_path)
-        self.display.file_name_modified(self.unix_path, self.win_path)
+        self.assertIn("Message", self.get_message_window_contents())
+        self.display.hide_all_scripts()
         self.assertNotIn("Message", self.get_message_window_contents())
-        self.display.toggle_filter_by_script(self.win_path)
+        self.display.file_name_modified(self.unix_path, self.win_path)
+        self.display.show_active_script()
         self.assertIn("Message", self.get_message_window_contents())
 
-    def test_that_messages_with_error_priority_are_displayed_even_if_the_script_is_set_to_not_be_displayed(self):
+    def test_that_a_scripts_messages_are_visible_after_it_has_been_renamed_and_tabs_have_been_changed_to_and_from(self):
+        self.display.show_active_script()
+        self.display.setActiveScript(self.unix_path)
+        self._simulate_scripts_printing({self.unix_path: ["Message"]})
+        self.assertIn("Message", self.get_message_window_contents())
+        self.display.current_tab_changed(self.win_path)
+        self.assertNotIn("Message", self.get_message_window_contents())
+        self.display.file_name_modified(self.unix_path, self.win_path)
+        self.display.current_tab_changed(self.unix_path)
+        self.assertIn("Message", self.get_message_window_contents())
+
+    def test_that_messages_with_error_priority_are_displayed_even_if_the_script_is_not_the_active_tab(self):
         err_msg = "An error message"
         notice_msg = "A notice message"
+        self.display.show_active_script()
         self._simulate_script_executions([self.unix_path])
-        self.display.toggle_filter_by_script(self.unix_path)
-        self.assertFalse(self.display.displayedScripts()[self.unix_path])
+        self.display.current_tab_changed(self.win_path)
         self.display.append_script_error(err_msg)
         self.display.append_script_notice(notice_msg)
         self.assertIn(err_msg, self.get_message_window_contents())
@@ -175,11 +127,32 @@ class MessageDisplayTest(unittest.TestCase):
 
     def test_that_messages_with_error_priority_are_filtered_out_after_toggling_filter_on_script(self):
         err_msg = "An error message"
+        self.display.show_active_script()
         self.display.script_executing(self.unix_path)
         self.display.append_script_error(err_msg)
         self.assertIn(err_msg, self.get_message_window_contents())
-        self.display.toggle_filter_by_script(self.unix_path)
+        self.display.current_tab_changed(self.win_path)
         self.assertNotIn(err_msg, self.get_message_window_contents())
+
+    def test_that_hide_all_scripts_hides_all_script_messages(self):
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
+                                         self.win_path: ["Message 2"]})
+        self.display.hide_all_scripts()
+        self.assertNotIn("Message 1", self.get_message_window_contents())
+        self.assertNotIn("Message 2", self.get_message_window_contents())
+
+    def test_that_if_hide_all_script_selected_no_new_script_output_is_displayed(self):
+        self.display.hide_all_scripts()
+        self._simulate_scripts_printing({self.unix_path: ["Message 1"],
+                                         self.win_path: ["Message 2"]})
+        self.assertNotIn("Message 1", self.get_message_window_contents())
+        self.assertNotIn("Message 2", self.get_message_window_contents())
+
+    def test_that_log_messages_are_displayed_if_hide_all_scripts_is_selected(self):
+        msg = "Notice log message"
+        self.display.hide_all_scripts()
+        self.display.appendNotice(msg)
+        self.assertIn(msg, self.get_message_window_contents())
 
     def _simulate_scripts_printing(self, script_messages):
         for path, messages in script_messages.items():

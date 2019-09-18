@@ -46,6 +46,9 @@ class LogMessageDisplay(PluginWidget):
     def get_plugin_title(self):
         return "Messages"
 
+    def current_tab_changed(self, script_path):
+        self.display.current_tab_changed(script_path)
+
     def script_executing(self, script_path):
         self.display.script_executing(script_path)
 

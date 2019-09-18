@@ -221,6 +221,7 @@ class MainWindow(QMainWindow):
         self.widgets.append(self.editor)
         self.editor.editors.sig_code_exec_start.connect(self.messagedisplay.script_executing)
         self.editor.editors.sig_file_name_changed.connect(self.messagedisplay.file_name_modified)
+        self.editor.editors.sig_current_tab_changed.connect(self.messagedisplay.current_tab_changed)
 
         self.set_splash("Loading IPython console")
         from workbench.plugins.jupyterconsole import JupyterConsole

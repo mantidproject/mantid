@@ -156,30 +156,16 @@ void MessageDisplay::filterMessages() {
 }
 
 /**
- * Add a key-value pair to the displayedScripts QMap. This QMap tracks the paths
- * of executed scripts and whether they should be displayed.
- * @param scriptPath A QString containing the path of the script.
- * @param display Boolean specifying whether output from the script should be
- * displayed
- */
-void MessageDisplay::insertIntoDisplayedScripts(const QString &scriptPath,
-                                                const bool &display) {
-  m_displayedScripts.insert(scriptPath, QVariant(display));
-}
-
-/**
- * Method to be called when a file's path is modified. The file's key in the
- * displayedScripts QMap is replaced and the scriptPath in each message is
- * updated.
+ * Method to be called when a file's path is modified. Each Message object
+ * associated with the file has its scriptPath attribute updated.
  * @param oldPath The path of the file being renamed
  * @param newPath The new path of the file
  */
 void MessageDisplay::filePathModified(const QString &oldPath,
                                       const QString &newPath) {
-  m_displayedScripts.insert(newPath, m_displayedScripts.take(oldPath));
   for (auto &msg : m_messageHistory) {
     if (msg.scriptPath() == oldPath)
-      msg.setscriptPath(newPath);
+      msg.setScriptPath(newPath);
   }
 }
 
@@ -287,7 +273,6 @@ void MessageDisplay::replace(const Message &msg) {
 void MessageDisplay::clear() {
   m_textDisplay->clear();
   m_messageHistory.clear();
-  m_displayedScripts.clear();
 }
 
 /**
@@ -508,7 +493,7 @@ QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
 bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
   if ((msg.scriptPath().isEmpty() && showFrameworkOutput()) ||
       (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
-      m_displayedScripts.value(msg.scriptPath()).toBool())
+      (showActiveScriptOutput() && (msg.scriptPath() == activeScript())))
     return true;
   return false;
 }

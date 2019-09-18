@@ -84,13 +84,17 @@ public:
   void setShowAllScriptOutput(const bool &show) {
     m_showAllScriptOutput = show;
   }
-  /// Return the displayedScripts QMap
-  inline QMap<QString, QVariant> displayedScripts() const {
-    return m_displayedScripts;
+  inline bool showActiveScriptOutput() const {
+    return m_showActiveScriptOutput;
   }
-  /// Insert key-value pair into displayedScripts QMap
-  void insertIntoDisplayedScripts(const QString &scriptPath,
-                                  const bool &display = true);
+  void setShowActiveScriptOutput(const bool &show) {
+    m_showActiveScriptOutput = show;
+  }
+  inline QString activeScript() const { return m_activeScript; }
+  void setActiveScript(const QString &scriptPath) {
+    m_activeScript = scriptPath;
+  }
+
   /// Method to be called when a file's path is modified
   void filePathModified(const QString &oldPath, const QString &newPath);
   /// Append a message to the message history
@@ -172,11 +176,9 @@ private:
   /// Keep track of the message history
   QList<Message> m_messageHistory;
   /// Bools to dictate whether to print certain types of messages
-  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true};
-  /// Map storing the scripts with output and if their output is being
-  /// displayed Sip has no conversion for QMap<QString, bool>, so we use
-  /// QVariant, not bool
-  QMap<QString, QVariant> m_displayedScripts;
+  bool m_showFrameworkOutput{true}, m_showAllScriptOutput{true},
+      m_hideAllScriptOutput{false}, m_showActiveScriptOutput{false};
+  QString m_activeScript;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

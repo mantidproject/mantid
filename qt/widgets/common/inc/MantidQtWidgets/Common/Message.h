@@ -57,7 +57,7 @@ public:
   /// @returns The name of the script the message came from
   inline QString scriptPath() const { return m_scriptPath; }
   /// Set the script name. This is useful if a script is renamed
-  void setscriptPath(const QString &scriptPath) { m_scriptPath = scriptPath; }
+  void setScriptPath(const QString &scriptPath) { m_scriptPath = scriptPath; }
 
 private:
   QString m_text;

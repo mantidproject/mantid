@@ -30,6 +30,7 @@ class MultiPythonFileInterpreter(QWidget):
 
     sig_code_exec_start = Signal(str)
     sig_file_name_changed = Signal(str, str)
+    sig_current_tab_changed = Signal(str)
 
     def __init__(self, font=None, default_content=None, parent=None):
         """
@@ -50,6 +51,7 @@ class MultiPythonFileInterpreter(QWidget):
         # widget setup
         layout = QVBoxLayout(self)
         self._tabs = CodeEditorTabWidget(self)
+        self._tabs.currentChanged.connect(self._emit_current_tab_changed)
         layout.addWidget(self._tabs)
         self.setLayout(layout)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -182,6 +184,12 @@ class MultiPythonFileInterpreter(QWidget):
         """Return the editor at the given index. Must be in range"""
         return self._tabs.widget(idx)
 
+    def _emit_current_tab_changed(self, index):
+        if index == -1:
+            self.sig_current_tab_changed.emit("")
+        else:
+            self.sig_current_tab_changed.emit(self.current_tab_filename)
+
     def _emit_code_exec_start(self):
         """Emit signal that code execution has started"""
         if not self.current_editor().filename:
@@ -189,6 +197,12 @@ class MultiPythonFileInterpreter(QWidget):
             self.sig_code_exec_start.emit(filename)
         else:
             self.sig_code_exec_start.emit(self.current_editor().filename)
+
+    @property
+    def current_tab_filename(self):
+        if not self.current_editor().filename:
+            return self._tabs.tabText(self._tabs.currentIndex()).rstrip('*')
+        return self.current_editor().filename
 
     def execute_current_async(self):
         """

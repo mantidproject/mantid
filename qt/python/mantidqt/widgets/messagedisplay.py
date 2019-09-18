@@ -9,8 +9,6 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-import os
-
 from qtpy.QtWidgets import QAction, QActionGroup
 from qtpy.QtGui import QFont
 
@@ -40,7 +38,7 @@ class MessageDisplay(MessageDisplay_cpp):
         self.getTextEdit().customContextMenuRequested.disconnect()
         self.getTextEdit().customContextMenuRequested.connect(self.showContextMenu)
 
-        self.active_script = ""
+        self.last_executed_script = ""
 
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
@@ -64,36 +62,57 @@ class MessageDisplay(MessageDisplay_cpp):
         framework_action.setChecked(self.showFrameworkOutput())
         filter_menu.addAction(framework_action)
 
-        all_script_action = QAction('All Script Output', filter_menu)
-        all_script_action.triggered.connect(self.toggle_filter_all_script_output)
-        all_script_action.setCheckable(True)
-        all_script_action.setChecked(self.showAllScriptOutput())
-        filter_menu.addAction(all_script_action)
+        filter_menu.addSeparator()
 
-        if self.displayedScripts():
-            filter_menu.addSeparator()
-        # We use a QActionGroup here because of a bug where, if we hooked the
-        # actions in the loop directly to `toggle_filter_by_script`, every
-        # action's slot would contain the same path (the last one in the loop).
-        # Using a QActionGroup, the script's path can be stored on the QAction
-        # and the slot called with the path stored on the acton.
+        actions_to_group = []
+        all_script_action = QAction('All Script Output', filter_menu)
+        all_script_action.triggered.connect(self.show_all_scripts)
+        actions_to_group.append(all_script_action)
+        hide_all_script_action = QAction("Hide All Script Output", filter_menu)
+        hide_all_script_action.triggered.connect(self.hide_all_scripts)
+        actions_to_group.append(hide_all_script_action)
+        active_script_action = QAction("Show Active Tab Output", filter_menu)
+        active_script_action.triggered.connect(self.show_active_script)
+        actions_to_group.append(active_script_action)
+
         action_group = QActionGroup(filter_menu)
-        action_group.setExclusive(False)
-        for script_path in sorted(self.displayedScripts()):
-            script_name = os.path.basename(script_path)
-            action = QAction(script_name, filter_menu)
-            action.setData(script_path)
-            action.setCheckable(True)
-            if self.displayedScripts()[script_path]:
-                action.setChecked(True)
+        for action in actions_to_group:
             action_group.addAction(action)
             filter_menu.addAction(action)
-        action_group.triggered.connect(
-            lambda qaction: self.toggle_filter_by_script(qaction.data()))
+            action.setCheckable(True)
+
+        if self.showAllScriptOutput():
+            all_script_action.setChecked(True)
+        elif self.showActiveScriptOutput():
+            active_script_action.setChecked(True)
+        else:
+            hide_all_script_action.setChecked(True)
         return qmenu
 
     def showContextMenu(self, q_position):
         self.generateContextMenu().exec_(self.mapToGlobal(q_position))
+
+    def show_all_scripts(self):
+        if not self.showAllScriptOutput():
+            self.setShowAllScriptOutput(True)
+            self.setShowActiveScriptOutput(False)
+            self.filterMessages()
+
+    def hide_all_scripts(self):
+        if self.showActiveScriptOutput() or self.showAllScriptOutput():
+            self.setShowAllScriptOutput(False)
+            self.setShowActiveScriptOutput(False)
+            self.filterMessages()
+
+    def show_active_script(self):
+        if not self.showActiveScriptOutput():
+            self.setShowAllScriptOutput(False)
+            self.setShowActiveScriptOutput(True)
+            self.filterMessages()
+
+    def toggle_filter_framework_output(self):
+        self.setShowFrameworkOutput(not self.showFrameworkOutput())
+        self.filterMessages()
 
     def append_script_error(self, txt):
         """
@@ -101,7 +120,7 @@ class MessageDisplay(MessageDisplay_cpp):
         output from a Python script with "Error" priority. This function
         is hooked into stderr.
         """
-        self.appendPython(txt, Priority.Error, self.active_script)
+        self.appendPython(txt, Priority.Error, self.last_executed_script)
 
     def append_script_notice(self, txt):
         """
@@ -109,42 +128,18 @@ class MessageDisplay(MessageDisplay_cpp):
         output from a Python script with "Notice" priority. This
         function is hooked into stdout.
         """
-        self.appendPython(txt, Priority.Notice, self.active_script)
+        self.appendPython(txt, Priority.Notice, self.last_executed_script)
+
+    def script_executing(self, script_path):
+        """Slot executed when a script is executed in the Workbench."""
+        self.last_executed_script = script_path
 
     def file_name_modified(self, old_file_name, new_file_name):
         self.filePathModified(old_file_name, new_file_name)
+        if self.activeScript() == old_file_name:
+            self.setActiveScript(new_file_name)
 
-    def toggle_filter_framework_output(self):
-        self.setShowFrameworkOutput(not self.showFrameworkOutput())
-        self.filterMessages()
-
-    def toggle_filter_all_script_output(self):
-        show_all = self.showAllScriptOutput()
-        for script_path in self.displayedScripts():
-            self.insertIntoDisplayedScripts(script_path, not show_all)
-        self.setShowAllScriptOutput(not show_all)
-        self.filterMessages()
-
-    def toggle_filter_by_script(self, script_path):
-        if self.displayedScripts()[script_path]:
-            self.insertIntoDisplayedScripts(script_path, False)
-            self.setShowAllScriptOutput(False)
-        else:
-            self.insertIntoDisplayedScripts(script_path, True)
-            if all(self.displayedScripts().values()):
-                self.setShowAllScriptOutput(True)
-        self.filterMessages()
-
-    def script_executing(self, script_path):
-        """
-        Slot executed when a script is executed in the Workbench. The script's
-        path is added to the displayedScripts dictionary and set as the active
-        script. The script's path can then be associated to its output.
-        """
-        self.active_script = script_path
-        try:
-            self.displayedScripts()[script_path]
-        except KeyError:
-            self.insertIntoDisplayedScripts(script_path, True)
-        if all(self.displayedScripts().values()):
-            self.setShowAllScriptOutput(True)
+    def current_tab_changed(self, script_path):
+        self.setActiveScript(script_path)
+        if self.showActiveScriptOutput():
+            self.filterMessages()
