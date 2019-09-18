@@ -10,6 +10,7 @@
 
 #include "MantidAlgorithms/WeightedSumDetector.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -19,30 +20,15 @@ namespace Algorithms {
 // Algorithm must be declared
 DECLARE_ALGORITHM(WeightedSumDetector)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WeightedSumDetector::WeightedSumDetector() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WeightedSumDetector::~WeightedSumDetector() = default;
-
-//----------------------------------------------------------------------------------------------
-
 void WeightedSumDetector::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "DCSWorkspace", "", Kernel::Direction::Input,
-                      boost::make_shared<API::CommonBinsValidator>()),
+                      "DCSWorkspace", "", Kernel::Direction::Input),
                   "The workspace containing the spectra to be summed.");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "SLFWorkspace", "", Kernel::Direction::Input,
-                      boost::make_shared<API::CommonBinsValidator>()),
+                      "SLFWorkspace", "", Kernel::Direction::Input),
                   "The workspace containing the self Scattering correction.");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Kernel::Direction::Output,
-                      boost::make_shared<API::CommonBinsValidator>()),
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace to contain merged spectra.");
   declareProperty(
       "Alpha", "",
@@ -64,43 +50,70 @@ void WeightedSumDetector::exec() {
   API::MatrixWorkspace_sptr DCSWorkspace = getProperty("DCSWorkspace");
   API::MatrixWorkspace_sptr SLFWorkspace = getProperty("SLFWorkspace");
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
+
+  size_t spectra_num = DCSWorkspace->spectrumInfo().size();
   std::string alf_dir = getProperty("Alpha");
   std::string lin_dir = getProperty("Background");
   std::string lim_dir = getProperty("Limits");
+  std::map<int, double> alphas = read_alf_file(alf_dir, spectra_num);
+  std::map<int, std::vector<double>> linears =
+      read_lin_file(lin_dir, spectra_num);
+  std::map<int, std::vector<double>> limits =
+      read_lim_file(lim_dir, spectra_num);
 
-  q = DCSWorkspace->readX(0);
-  size_t spectra_num = DCSWorkspace->spectrumInfo().size();
-  for (size_t i = 0; i < spectra_num; i++) {
-    DCS.push_back(DCSWorkspace->readY(i));
-    SLF.push_back(SLFWorkspace->readY(i));
+  size_t n_bins = DCSWorkspace->readX(0).size();
+  double max_limit = -1.0;
+  double min_limit = -1.0;
+  for (auto it = limits.begin(); it != limits.end(); it++) {
+    if (max_limit == -1.0) {
+      min_limit = it->second[1];
+      max_limit = it->second[2];
+    } else {
+      min_limit = std::min(min_limit, it->second[1]);
+      max_limit = std::max(max_limit, it->second[2]);
+    }
   }
-  std::map<int, double> alphas = read_alf_file(alf_dir);
-  std::map<int, std::vector<double>> linears = read_lin_file(lin_dir);
-  std::map<int, std::vector<double>> limits = read_lim_file(lim_dir);
 
-  for (size_t i = 0; i < q.size(); i++) {
+  double new_binwidth = (max_limit - min_limit) / n_bins;
+  std::ostringstream binParams;
+  binParams << min_limit << "," << new_binwidth << "," << max_limit;
+  API::MatrixWorkspace_sptr DCSWorkspace_rebined =
+      rebin(DCSWorkspace, binParams.str());
+  API::MatrixWorkspace_sptr SLFWorkspace_rebined =
+      rebin(SLFWorkspace, binParams.str());
+
+  q = DCSWorkspace_rebined->readX(0);
+  for (size_t i = 0; i < spectra_num; i++) {
+    DCS.push_back(DCSWorkspace_rebined->readY(i));
+    SLF.push_back(SLFWorkspace_rebined->readY(i));
+  }
+
+  for (size_t i = 0; i < (q.size()-1); i++) {
+    double merge_q = 0.0;
+    double num_det = 0.0;
     for (auto it = limits.begin(); it != limits.end(); it++) {
       int detector = it->first;
+      int det_index = detector - 1;
       double use_det = limits[detector][0];
-      double merge_q = 0.0;
-      double num_det = 0.0;
       if (use_det == 1) {
         num_det++;
         double q_min = limits[detector][1];
         double q_max = limits[detector][2];
-        if (q[i] > q_min && q[i] < q_max) {
+        if (q[i] > q_min && q[i+1] < q_max) {
           double alpha = alphas[detector];
           double grad = linears[detector][1];
           double intercept = linears[detector][2];
-          double background = grad * q[i] + intercept;
+          double background = grad * (q[i] + new_binwidth / 2.0) + intercept;
           double corrected =
-              alpha * DCS[detector][i] - SLF[detector][i] + background;
+              alpha * DCS[det_index][i] - SLF[det_index][i] + background;
           merge_q += corrected;
         }
 	  }
-      merge.push_back(merge_q / num_det);
     }
+    merge.push_back(merge_q / num_det);
   }
+  std::cout << "q_size = " << q.size() << " merge_size = " << merge.size()
+            << std::endl;
   Mantid::API::Algorithm_sptr ChildAlg =
       createChildAlgorithm("CreateWorkspace");
   ChildAlg->setProperty("DataX", q);
@@ -114,86 +127,124 @@ void WeightedSumDetector::exec() {
   setProperty("OutputWorkspace", outWS);
 };
 
-std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir) {
+std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir,
+                                                         size_t spectra_num) {
   std::map<int, double> alpha;
-  std::ifstream alf_file(dir);
-  std::string line;
-  bool first_line = TRUE;
-  while (std::getline(alf_file, line)) {
-    if (first_line == FALSE) {
-      std::stringstream ss(line);
-      int detector;
-      double value;
-      ss >> detector;
-      ss >> value;
-      alpha[detector] = value;
-    } else {
-      first_line = FALSE;
+  if (dir.empty()) {
+    int detector = 1;
+    for (size_t i = 0; i < spectra_num; i++) {
+      alpha[detector] = 1.0;
+      detector++;
+    }
+  } else {
+    std::ifstream alf_file(dir);
+    std::string line;
+    bool first_line = TRUE;
+    while (std::getline(alf_file, line)) {
+      if (first_line == FALSE) {
+        std::stringstream ss(line);
+        int detector;
+        double value;
+        ss >> detector;
+        ss >> value;
+        alpha[detector] = value;
+      } else {
+        first_line = FALSE;
+      }
     }
   }
   return alpha;
 }
 
 std::map<int, std::vector<double>>
-WeightedSumDetector::read_lin_file(std::string dir) {
+WeightedSumDetector::read_lin_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> linear;
-  std::ifstream lin_file(dir);
-  std::string line;
-  bool first_line = TRUE;
-  while (std::getline(lin_file, line)) {
-    if (first_line == FALSE) {
-      std::stringstream ss(line);
-      int detector;
-      double has_linear;
-      double grad;
-      double intercept;
-      ss >> detector;
-      ss >> has_linear;
-      if (has_linear == 0.0) {
-        grad = 0.0;
-        intercept = 0.0;
+  if (dir.empty()) {
+    int detector = 1;
+    for (size_t i = 0; i < spectra_num; i++) {
+      linear[detector] = {1.0, 0.0, 0.1};
+      detector++;
+    }
+  } else {
+    std::ifstream lin_file(dir);
+    std::string line;
+    bool first_line = TRUE;
+    while (std::getline(lin_file, line)) {
+      if (first_line == FALSE) {
+        std::stringstream ss(line);
+        int detector;
+        double has_linear;
+        double grad;
+        double intercept;
+        ss >> detector;
+        ss >> has_linear;
+        if (has_linear == 0.0) {
+          grad = 0.0;
+          intercept = 0.0;
+        } else {
+          ss >> grad;
+          ss >> intercept;
+        }
+        std::vector<double> value = {has_linear, grad, intercept};
+        linear[detector] = value;
       } else {
-        ss >> grad;
-        ss >> intercept;
+        first_line = FALSE;
       }
-      std::vector<double> value = {has_linear, grad, intercept};
-      linear[detector] = value;
-    } else {
-      first_line = FALSE;
     }
   }
   return linear;
 }
 
 std::map<int, std::vector<double>>
-WeightedSumDetector::read_lim_file(std::string dir) {
+WeightedSumDetector::read_lim_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> limit;
-  std::ifstream lim_file(dir);
-  std::string line;
-  bool first_line = TRUE;
-  while (std::getline(lim_file, line)) {
-    if (first_line == FALSE) {
-      std::stringstream ss(line);
-      int detector;
-      double use_det;
-      double q_min;
-      double q_max;
-      ss >> detector;
-      ss >> use_det;
-      if (use_det == 0.0) {
-        q_min = 0.0;
-        q_max = 0.0;
+  if (dir.empty()) {
+    int detector = 1;
+    for (size_t i = 0; i < spectra_num; i++) {
+      limit[detector] = {1.0, 0.0, 60.0};
+      detector++;
+    }
+  } else {
+    std::ifstream lim_file(dir);
+    std::string line;
+    bool first_line = TRUE;
+    while (std::getline(lim_file, line)) {
+      if (first_line == FALSE) {
+        std::stringstream ss(line);
+        int detector;
+        double use_det;
+        double q_min;
+        double q_max;
+        ss >> detector;
+        ss >> use_det;
+        if (use_det == 0.0) {
+          q_min = 0.0;
+          q_max = 0.0;
+        } else {
+          ss >> q_min;
+          ss >> q_max;
+        }
+        std::vector<double> value = {use_det, q_min, q_max};
+        limit[detector] = value;
       } else {
-        ss >> q_min;
-        ss >> q_max;
+        first_line = FALSE;
       }
-      std::vector<double> value = {use_det, q_min, q_max};
-      limit[detector] = value;
-    } else {
-      first_line = FALSE;
     }
   }
   return limit;
+}
+
+API::MatrixWorkspace_sptr
+WeightedSumDetector::rebin(API::MatrixWorkspace_sptr input,
+	std::string params) {
+  auto childAlg = createChildAlgorithm("Rebin");
+  childAlg->setProperty("InputWorkspace", input);
+  childAlg->setProperty("OutputWorkspace", "blank");
+  childAlg->setPropertyValue("Params", params);
+  childAlg->executeAsChildAlg();
+  API::MatrixWorkspace_sptr rebined =
+      childAlg->getProperty("OutputWorkspace");
+  return rebined;
 }
 
 } // namespace Algorithms
