@@ -28,10 +28,10 @@ public:
   virtual bool shouldAutosave() const = 0;
 
   /// Tell the presenter something happened
-  virtual void reductionPaused() = 0;
-  virtual void reductionResumed() = 0;
-  virtual void autoreductionPaused() = 0;
-  virtual void autoreductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

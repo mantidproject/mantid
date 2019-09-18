@@ -74,7 +74,7 @@ int BatchJobRunner::percentComplete() const {
   return completedItems * 100 / totalItems;
 }
 
-void BatchJobRunner::reductionResumed() {
+void BatchJobRunner::notifyReductionResumed() {
   // Cache the set of rows to process when the user starts a reduction
   m_rowLocationsToProcess = m_batch.selectedRowLocations();
   m_isProcessing = true;
@@ -95,12 +95,12 @@ void BatchJobRunner::reductionResumed() {
   m_batch.resetSkippedItems();
 }
 
-void BatchJobRunner::reductionPaused() {
+void BatchJobRunner::notifyReductionPaused() {
   m_isProcessing = false;
   m_rowLocationsToProcess.clear();
 }
 
-void BatchJobRunner::autoreductionResumed() {
+void BatchJobRunner::notifyAutoreductionResumed() {
   m_isAutoreducing = true;
   m_isProcessing = true;
   m_reprocessFailed = true;
@@ -108,7 +108,7 @@ void BatchJobRunner::autoreductionResumed() {
   m_batch.resetSkippedItems();
 }
 
-void BatchJobRunner::autoreductionPaused() {
+void BatchJobRunner::notifyAutoreductionPaused() {
   m_isAutoreducing = false;
   m_rowLocationsToProcess.clear();
 }

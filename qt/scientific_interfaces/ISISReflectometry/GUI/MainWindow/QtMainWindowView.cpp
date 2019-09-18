@@ -18,18 +18,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-namespace {
-int getDefaultInstrumentIndex(std::vector<std::string> &instruments) {
-  auto instrumentName =
-      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-  auto result = indexOfValue(instruments, instrumentName);
-  if (result)
-    return *result;
-  // If not found, use first instrument
-  return 0;
-}
-} // namespace
-
 // Do not change the last arguement as you will break backwards compatibility
 // with project save it should be the same as one of the tags in the decoder.
 DECLARE_SUBWINDOW_AND_CODERS(QtMainWindowView, Encoder, Decoder,
@@ -87,11 +75,10 @@ void QtMainWindowView::initLayout() {
   auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, std::move(plotter));
 
-  auto defaultInstrumentIndex = getDefaultInstrumentIndex(instruments);
   auto messageHandler = this;
   auto makeRunsPresenter =
       RunsPresenterFactory(std::move(makeRunsTablePresenter), thetaTolerance,
-                           instruments, defaultInstrumentIndex, messageHandler);
+                           instruments, messageHandler);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
