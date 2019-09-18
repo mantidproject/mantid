@@ -130,9 +130,10 @@ void IndirectPlotOptionsView::emitPlotSpectraClicked() {
   emit plotSpectraClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotBinsClicked() { 
+void IndirectPlotOptionsView::emitPlotBinsClicked() {
   emitSelectedIndicesChanged();
-  emit plotBinsClicked(); }
+  emit plotBinsClicked();
+}
 
 void IndirectPlotOptionsView::emitPlotContourClicked() {
   emitSelectedIndicesChanged();
