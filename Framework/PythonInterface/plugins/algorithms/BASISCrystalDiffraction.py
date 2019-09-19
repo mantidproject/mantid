@@ -87,7 +87,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                  'BASIS_Mask_default_diff.xml'
     _solid_angle_ws_ = '/SNS/BSS/shared/autoreduce/solid_angle_diff.nxs'
     _flux_ws_ = '/SNS/BSS/shared/autoreduce/int_flux.nxs'
-    _wavelength_bands = {'311': [3.07, 3.60], '111': [6.05, 6.60]}
+    _wavelength_bands = {'311': [3.07, 3.60], '111': [5.70, 6.60]}
     _diff_bank_numbers = list(range(5, 14))
     _tzero = dict(gradient=11.967, intercept=-5.0)
 
