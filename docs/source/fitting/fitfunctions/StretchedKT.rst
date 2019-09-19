@@ -11,7 +11,7 @@ Description
 
 For observation of muon spin-relaxation (:math:`\mu`SR) spectra with lineshapes lying between a Guassian and a Lorentzian,
 
-.. math:: A(t)=A_0\left(\frac13+\frac23\left(1-(\sigma t)^\beta\right)e^{-\frac{(\sigma t)^\beta}{\beta}}\right)
+.. math:: A(t)=A_0\left(\frac{1}{3}+\frac{2}{3}\left(1-(\sigma t)^\beta\right)e^{-\frac{(\sigma t)^\beta}{\beta}}\right)
 
 where,
 
