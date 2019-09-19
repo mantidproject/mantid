@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "MantidAlgorithms/WeightedSumDetector.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -23,20 +24,24 @@ DECLARE_ALGORITHM(WeightedSumDetector)
 void WeightedSumDetector::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "DCSWorkspace", "", Kernel::Direction::Input),
-                  "The workspace containing the spectra to be summed.");
+                  "The workspace containing the corrected total scattering for "
+                  "each detector to be summed.");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "SLFWorkspace", "", Kernel::Direction::Input),
-                  "The workspace containing the self Scattering correction.");
+                  "The workspace containing the self Scattering correction for "
+                  "each detector.");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace to contain merged spectra.");
   declareProperty(
-      "Alpha", "",
+      std::make_unique<API::FileProperty>(".alf file", "", API::FileProperty::Load),
       "Path to a .alf file containing Alpha values for each detector");
-  declareProperty("Limits", "",
+  declareProperty(std::make_unique<API::FileProperty>(".lim file", "",
+                                                      API::FileProperty::Load),
                   "Path to a .lim file containing minimum and maximum values "
                   "to sum between for each detector");
-  declareProperty("Background", "",
+  declareProperty(std::make_unique<API::FileProperty>(".lin file", "",
+                                                      API::FileProperty::Load),
                   "Path to a .lin file containing the gradient and intercept "
                   "of a liniar background to be subtracted from each detector");
 };
@@ -51,17 +56,17 @@ void WeightedSumDetector::exec() {
   API::MatrixWorkspace_sptr SLFWorkspace = getProperty("SLFWorkspace");
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
 
-  size_t spectra_num = DCSWorkspace->spectrumInfo().size();
-  std::string alf_dir = getProperty("Alpha");
-  std::string lin_dir = getProperty("Background");
-  std::string lim_dir = getProperty("Limits");
+  const size_t spectra_num = DCSWorkspace->spectrumInfo().size();
+  const std::string alf_dir = getProperty(".alf file");
+  const std::string lin_dir = getProperty(".lin file");
+  const std::string lim_dir = getProperty(".lim file");
   std::map<int, double> alphas = read_alf_file(alf_dir, spectra_num);
   std::map<int, std::vector<double>> linears =
       read_lin_file(lin_dir, spectra_num);
   std::map<int, std::vector<double>> limits =
       read_lim_file(lim_dir, spectra_num);
 
-  size_t n_bins = DCSWorkspace->readX(0).size();
+  const size_t n_bins = DCSWorkspace->readX(0).size();
   double max_limit = -1.0;
   double min_limit = -1.0;
   for (auto it = limits.begin(); it != limits.end(); it++) {
@@ -74,7 +79,7 @@ void WeightedSumDetector::exec() {
     }
   }
 
-  double new_binwidth = (max_limit - min_limit) / n_bins;
+  const double new_binwidth = (max_limit - min_limit) / n_bins;
   std::ostringstream binParams;
   binParams << min_limit << "," << new_binwidth << "," << max_limit;
   API::MatrixWorkspace_sptr DCSWorkspace_rebined =
@@ -112,8 +117,6 @@ void WeightedSumDetector::exec() {
     }
     merge.push_back(merge_q / num_det);
   }
-  std::cout << "q_size = " << q.size() << " merge_size = " << merge.size()
-            << std::endl;
   Mantid::API::Algorithm_sptr ChildAlg =
       createChildAlgorithm("CreateWorkspace");
   ChildAlg->setProperty("DataX", q);
@@ -127,114 +130,120 @@ void WeightedSumDetector::exec() {
   setProperty("OutputWorkspace", outWS);
 };
 
-std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir,
+const std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir,
                                                          size_t spectra_num) {
   std::map<int, double> alpha;
-  if (dir.empty()) {
-    int detector = 1;
-    for (size_t i = 0; i < spectra_num; i++) {
-      alpha[detector] = 1.0;
-      detector++;
-    }
-  } else {
-    std::ifstream alf_file(dir);
-    std::string line;
-    bool first_line = TRUE;
-    while (std::getline(alf_file, line)) {
-      if (first_line == FALSE) {
-        std::stringstream ss(line);
-        int detector;
-        double value;
-        ss >> detector;
-        ss >> value;
-        alpha[detector] = value;
-      } else {
-        first_line = FALSE;
+  std::ifstream alf_file(dir);
+  std::string line;
+  bool first_line = TRUE;
+  while (std::getline(alf_file, line)) {
+    if (first_line == FALSE) {
+      std::stringstream ss(line);
+      int detector;
+      double value;
+      ss >> detector;
+      ss >> value;
+      alpha[detector] = value;
+    } else {
+      first_line = FALSE;
+      std::stringstream ss(line);
+      int detector;
+      ss >> detector;
+      if (detector /= spectra_num) {
+        try {
+          throw "Invalid .alf file";
+        } catch (std::string e) {
+          std::cout << "An exception occurred." << e << '\n';
+        }
       }
     }
   }
   return alpha;
 }
 
-std::map<int, std::vector<double>>
+const std::map<int, std::vector<double>>
 WeightedSumDetector::read_lin_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> linear;
-  if (dir.empty()) {
-    int detector = 1;
-    for (size_t i = 0; i < spectra_num; i++) {
-      linear[detector] = {1.0, 0.0, 0.1};
-      detector++;
-    }
-  } else {
-    std::ifstream lin_file(dir);
-    std::string line;
-    bool first_line = TRUE;
-    while (std::getline(lin_file, line)) {
-      if (first_line == FALSE) {
-        std::stringstream ss(line);
-        int detector;
-        double has_linear;
-        double grad;
-        double intercept;
-        ss >> detector;
-        ss >> has_linear;
-        if (has_linear == 0.0) {
-          grad = 0.0;
-          intercept = 0.0;
-        } else {
-          ss >> grad;
-          ss >> intercept;
-        }
-        std::vector<double> value = {has_linear, grad, intercept};
-        linear[detector] = value;
+  std::ifstream lin_file(dir);
+  std::string line;
+  bool first_line = TRUE;
+  while (std::getline(lin_file, line)) {
+    if (first_line == FALSE) {
+      std::stringstream ss(line);
+      int detector;
+      double has_linear;
+      double grad;
+      double intercept;
+      ss >> detector;
+      ss >> has_linear;
+      if (has_linear == 0.0) {
+        grad = 0.0;
+        intercept = 0.0;
       } else {
-        first_line = FALSE;
+        ss >> grad;
+        ss >> intercept;
+      }
+      std::vector<double> value = {has_linear, grad, intercept};
+      linear[detector] = value;
+    } else {
+      first_line = FALSE;
+      std::stringstream ss(line);
+      int detector;
+      ss >> detector;
+      if (detector /= spectra_num) {
+        try {
+          throw "Invalid .lin file";
+        } catch (std::string e) {
+          std::cout << "An exception occurred." << e << '\n';
+        }
       }
     }
   }
   return linear;
 }
 
-std::map<int, std::vector<double>>
+const std::map<int, std::vector<double>>
 WeightedSumDetector::read_lim_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> limit;
-  if (dir.empty()) {
-    int detector = 1;
-    for (size_t i = 0; i < spectra_num; i++) {
-      limit[detector] = {1.0, 0.0, 60.0};
-      detector++;
-    }
-  } else {
-    std::ifstream lim_file(dir);
-    std::string line;
-    bool first_line = TRUE;
-    while (std::getline(lim_file, line)) {
-      if (first_line == FALSE) {
-        std::stringstream ss(line);
-        int detector;
-        double use_det;
-        double q_min;
-        double q_max;
-        ss >> detector;
-        ss >> use_det;
-        if (use_det == 0.0) {
-          q_min = 0.0;
-          q_max = 0.0;
-        } else {
-          ss >> q_min;
-          ss >> q_max;
-        }
-        std::vector<double> value = {use_det, q_min, q_max};
-        limit[detector] = value;
+  std::ifstream lim_file(dir);
+  std::string line;
+  bool first_line = TRUE;
+  while (std::getline(lim_file, line)) {
+    if (first_line == FALSE) {
+      std::stringstream ss(line);
+      int detector;
+      double use_det;
+      double q_min;
+      double q_max;
+      ss >> detector;
+      ss >> use_det;
+      if (use_det == 0.0) {
+        q_min = 0.0;
+        q_max = 0.0;
       } else {
-        first_line = FALSE;
+        ss >> q_min;
+        ss >> q_max;
+      }
+      std::vector<double> value = {use_det, q_min, q_max};
+      limit[detector] = value;
+    } else {
+      first_line = FALSE;
+      std::stringstream ss(line);
+      int detector;
+      ss >> detector;
+      if (detector /= spectra_num) {
+        try {
+          throw "Invalid .lim file";
+        } catch (std::string e) {
+          std::cout << "An exception occurred." << e << '\n';
+        }
       }
     }
   }
   return limit;
 }
 
-API::MatrixWorkspace_sptr
+const API::MatrixWorkspace_sptr
 WeightedSumDetector::rebin(API::MatrixWorkspace_sptr input,
 	std::string params) {
   auto childAlg = createChildAlgorithm("Rebin");

@@ -1021,6 +1021,7 @@ set(TEST_FILES
     VesuvioL1ThetaResolutionTest.h
     WeightedMeanOfWorkspaceTest.h
     WeightedMeanTest.h
+    WeightedSumDetectorTest.h
     WeightingStrategyTest.h
     WienerSmoothTest.h
     WorkflowAlgorithmRunnerTest.h

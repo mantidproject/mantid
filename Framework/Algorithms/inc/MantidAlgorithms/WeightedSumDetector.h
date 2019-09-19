@@ -18,9 +18,6 @@ public:
   virtual ~WeightedSumDetector() {}
   const std::string name() const override { return "WeightedSumDetector"; };
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override {
-    return {""};
-  }
   const std::string category() const override { return "Transforms\\Grouping"; };
   const std::string summary() const override {
     return "This Algorithm creates a weighted mean from multiple detectors.";
@@ -29,12 +26,13 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::map<int, double> read_alf_file(std::string dir, size_t spectra_num);
-  std::map<int, std::vector<double>> read_lin_file(std::string dir,
+  const std::map<int, double> read_alf_file(std::string dir,
+                                            size_t spectra_num);
+  const std::map<int, std::vector<double>> read_lin_file(std::string dir,
                                                    size_t spectra_num);
-  std::map<int, std::vector<double>> read_lim_file(std::string dir,
+  const std::map<int, std::vector<double>> read_lim_file(std::string dir,
                                                    size_t spectra_num);
-  API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr input,
+  const API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr input,
                                   std::string params);
 };
 
