@@ -14,7 +14,6 @@ from mantid.simpleapi import mtd, UnGroupWorkspace, Plus, DeleteWorkspace
 from mantid import api
 from mantid.kernel import ConfigServiceImpl
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
-import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
