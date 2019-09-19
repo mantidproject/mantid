@@ -17,9 +17,9 @@ class FmuF(IFunction1D):
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
-        self.declareParameter("FreqD", 0.2, 'Dipolar interaction frequency' )
-        self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
-        self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
+        self.declareParameter("FreqD", 0.2, 'Dipolar interaction frequency (MHz)' )
+        self.declareParameter("Lambda", 0.1, 'Exponential decay rate (MHz)')
+        self.declareParameter("Sigma", 0.2, 'Gaussian decay rate (MHz)')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")

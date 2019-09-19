@@ -15,11 +15,11 @@ A fitting function for muon-fluorine bonds in ionic crystals.
 
 where,
 
-:math:`\lambda` is the exponential decay rate,
+:math:`\lambda`(MHz) is the exponential decay rate,
 
-:math:`\sigma` is the Gaussian decay rate,
+:math:`\sigma`(MHz) is the Gaussian decay rate,
 
-:math:`\omega_D` is the dipolar interaction frequency,
+:math:`\omega_D`(MHz) is the dipolar interaction frequency,
 
 and the expression for :math:`G(t)` is given by
 
