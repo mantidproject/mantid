@@ -150,7 +150,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                  'BASIS_Mask_default_diff.xml'
     # Consider only events with these wavelengths
     _wavelength_bands = {'311': [3.07, 3.60],
-                         '111': [6.05, 6.60],
+                         '111': [5.70, 6.60],
                          '333': [2.02, 2.20]}
     _diff_bank_numbers = list(range(5, 14))
     _tzero = dict(gradient=11.967, intercept=-5.0)
