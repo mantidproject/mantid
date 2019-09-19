@@ -30,8 +30,8 @@ Mantid::Kernel::Logger g_log("ALFView");
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_view(nullptr),m_presenter(nullptr) {
 
   m_view = new ALFView_view(this);
-  //m_model = new ALFView_model();
-  m_presenter = new ALFView_presenter(m_view);
+  m_model = new ALFView_model();
+  m_presenter = new ALFView_presenter(m_view, m_model);
 }
 
 void ALFView::initLayout() {

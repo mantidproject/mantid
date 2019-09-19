@@ -34,7 +34,7 @@ protected:
 private:
 
   ALFView_view *m_view;
-  //ALFView_model *m_model;
+  ALFView_model *m_model;
   ALFView_presenter *m_presenter;
 };
 }// customInterfaces

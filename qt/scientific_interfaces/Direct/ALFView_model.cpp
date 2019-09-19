@@ -26,9 +26,9 @@ const std::string wsName = "ALFData";
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace Direct {
 
-void loadEmptyInstrument() {
+
+void ALFView_model::loadEmptyInstrument() {
   Mantid::API::IAlgorithm_sptr alg =
       Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
@@ -42,7 +42,7 @@ void loadEmptyInstrument() {
  * @param name:: string name for ALF data
  * @return int:: the run number
  */
-int loadData(const std::string &name) {
+int ALFView_model::loadData(const std::string &name) {
   Mantid::API::IAlgorithm_sptr alg =
       Mantid::API::AlgorithmManager::Instance().create("Load");
   alg->initialize();
@@ -59,7 +59,7 @@ int loadData(const std::string &name) {
  * Loads data, normalise to current and then converts to d spacing
  * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
  */
-std::pair<bool, bool> isDataValid() {
+std::pair<bool, bool> ALFView_model::isDataValid() {
   Mantid::API::MatrixWorkspace_sptr ws =
       Mantid::API::AnalysisDataService::Instance()
           .retrieveWS<Mantid::API::MatrixWorkspace>(tmpName);
@@ -83,7 +83,7 @@ return std::make_pair(isItALF, isItDSpace);
  * Transforms ALF data; normalise to current and then converts to d spacing
  * If already d-space does nothing.
  */
-void transformData() {
+void ALFView_model::transformData() {
   Mantid::API::IAlgorithm_sptr normAlg =
       Mantid::API::AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
@@ -100,12 +100,14 @@ void transformData() {
   dSpacingAlg->execute();
 }
 
-void rename() {
+void ALFView_model::rename() {
   Mantid::API::AnalysisDataService::Instance().rename(tmpName, wsName);
 }
-void remove() { Mantid::API::AnalysisDataService::Instance().remove(tmpName); }
+void ALFView_model::remove() {
+  Mantid::API::AnalysisDataService::Instance().remove(tmpName);
+}
 
-int currentRun() {
+int ALFView_model::currentRun() {
   try {
 
     Mantid::API::MatrixWorkspace_sptr ws =
@@ -117,6 +119,5 @@ int currentRun() {
   }
 }
 
-} // namespace Direct
 } // namespace CustomInterfaces
 } // namespace MantidQt

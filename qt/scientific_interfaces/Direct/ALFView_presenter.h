@@ -20,7 +20,7 @@ namespace MantidQt {
           Q_OBJECT
 
 public:
-  ALFView_presenter( ALFView_view *view);
+  ALFView_presenter( ALFView_view *view, ALFView_model *model);
   ~ALFView_presenter(){};
   void initLayout();
 
@@ -31,7 +31,7 @@ private slots:
 private:
   void loadAndAnalysis(const std::string &run);
   ALFView_view *m_view;
-  //ALFView_model *m_model;
+  ALFView_model *m_model;
   int m_currentRun;
 };
 }// customInterfaces

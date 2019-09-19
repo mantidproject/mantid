@@ -13,9 +13,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_presenter::ALFView_presenter(ALFView_view *view)
-    : m_view(view), m_currentRun(0) {
-  Direct::loadEmptyInstrument();
+ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
+    : m_view(view), m_model(model), m_currentRun(0) {
+  m_model->loadEmptyInstrument();
 }
 
 void ALFView_presenter::initLayout() {
@@ -25,27 +25,26 @@ void ALFView_presenter::initLayout() {
 }
 
 void ALFView_presenter::loadAndAnalysis(const std::string &run) {
-  int runNumber = Direct::loadData(run);
-  auto bools = Direct::isDataValid();
+  int runNumber = m_model->loadData(run);
+  auto bools = m_model->isDataValid();
   if (bools.first) {
-    Direct::rename();
+    m_model->rename();
     m_currentRun = runNumber;
   } else {
-    Direct::remove();
+    m_model->remove();
   }
   // if the displayed run number is out of sinc
-  int das = m_view->getRunNumber();
   if (m_view->getRunNumber() != m_currentRun) {
     m_view->setRunQuietly(QString::number(m_currentRun));
   }
   if (bools.first && !bools.second) {
-    Direct::transformData();
+    m_model->transformData();
   }
 }
 
 void ALFView_presenter::loadRunNumber() {
   int newRun = m_view->getRunNumber();
-  const int currentRunInADS = Direct::currentRun();
+  const int currentRunInADS = m_model->currentRun();
 
 
   if (currentRunInADS == newRun) {
@@ -68,7 +67,7 @@ void ALFView_presenter::loadRunNumber() {
 }
 
 void ALFView_presenter::loadBrowsedFile(const std::string fileName) {
-  Direct::loadData(fileName);
+  m_model->loadData(fileName);
   loadAndAnalysis(fileName);
 }
 
