@@ -37,8 +37,9 @@ AXES_SCALE_MENU_OPTS = OrderedDict([
     ("Lin x/Log y", ("linear", "log")),
     ("Log x/Lin y", ("log", "linear"))]
 )
-VALID_LINE_STYLE = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
-VALID_COLORS = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
+VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
+VALID_COLORS = {'blue': '#1f77b4', 'orange': '#ff7f0e', 'green': '#2ca02c',
+                'red': '#d62728', 'purple': '#9467bd'}
 
 
 class FigureInteraction(object):
@@ -340,7 +341,8 @@ class FigureInteraction(object):
                 return "{} {}".format(self.default_marker_name, proposed_number)
             proposed_number += 1
 
-    def _add_horizontal_marker(self, y_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
+    def _add_horizontal_marker(self, y_pos, lower, upper, axis, name=None, line_style='dashed', 
+                               color=VALID_COLORS['green']):
         """
         Add a horizontal marker to the plot and append it to the list of open markers
         :param y_pos: position to plot the marker to
@@ -348,7 +350,7 @@ class FigureInteraction(object):
         :param upper: x value to stop the marker at
         :param name: label displayed beside the marker
         :param line_style: 'solid', 'dashed', etc.
-        :param color: 'C0', 'C1', 'r', etc.
+        :param color: 'r', 'g', 'b' etc. or some hex code
         """
         if name is None:
             name = self._get_free_marker_name()
@@ -358,7 +360,8 @@ class FigureInteraction(object):
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
+    def _add_vertical_marker(self, x_pos, lower, upper, axis, name=None, line_style='dashed', 
+                             color=VALID_COLORS['green']):
         """
         Add a vertical marker to the plot and append it to the list of open markers
         :param x_pos: position to plot the marker to
@@ -366,7 +369,7 @@ class FigureInteraction(object):
         :param upper: y value to stop the marker at
         :param name: label displayed beside the marker
         :param line_style: 'solid', 'dashed', etc.
-        :param color: 'C0', 'C1', 'r', etc.
+        :param color: 'r', 'g', 'b' etc. or some hex code
         """
         if name is None:
             name = self._get_free_marker_name()
