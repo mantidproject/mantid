@@ -15,8 +15,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/ISlitCalculator.h"
+#include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
 
 #include <QFileDialog>
@@ -45,8 +45,8 @@ MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
     std::unique_ptr<ISlitCalculator> slitCalculator,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
-    : m_view(view), m_messageHandler(messageHandler),
-      m_instrument(), m_slitCalculator(std::move(slitCalculator)),
+    : m_view(view), m_messageHandler(messageHandler), m_instrument(),
+      m_slitCalculator(std::move(slitCalculator)),
       m_batchPresenterFactory(std::move(batchPresenterFactory)) {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())

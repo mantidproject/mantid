@@ -25,12 +25,12 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 using MantidQt::MantidWidgets::ISlitCalculator;
-using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using testing::_;
 
 class MainWindowPresenterTest : public CxxTest::TestSuite {
 public:
@@ -158,7 +158,7 @@ public:
   void testShowOptionsOpensDialog() {
     auto presenter = makePresenter();
     // TODO Add test when options dialog is impelemented
-    //EXPECT_CALL(*m_optionsDialog, show()).Times(1);
+    // EXPECT_CALL(*m_optionsDialog, show()).Times(1);
     presenter.notifyShowOptionsRequested();
     verifyAndClear();
   }
@@ -332,7 +332,7 @@ private:
   }
 
   std::string setupInstrument(MainWindowPresenterFriend &presenter,
-    std::string const& instrumentName) {
+                              std::string const &instrumentName) {
     presenter.m_instrument =
         boost::make_shared<Mantid::Geometry::Instrument>(instrumentName);
     return presenter.instrumentName();
@@ -405,7 +405,8 @@ private:
   }
 
   void expectSlitCalculatorInstrumentUpdated() {
-    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument)).Times(1);
+    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
+        .Times(1);
     EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
   }
 
