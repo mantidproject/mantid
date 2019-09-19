@@ -149,7 +149,7 @@ const std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir,
       std::stringstream ss(line);
       int detector;
       ss >> detector;
-      if (detector /= spectra_num) {
+      if (detector != spectra_num) {
         try {
           throw "Invalid .alf file";
         } catch (std::string e) {
@@ -190,7 +190,7 @@ WeightedSumDetector::read_lin_file(std::string dir, size_t spectra_num) {
       std::stringstream ss(line);
       int detector;
       ss >> detector;
-      if (detector /= spectra_num) {
+      if (detector != spectra_num) {
         try {
           throw "Invalid .lin file";
         } catch (std::string e) {
@@ -231,7 +231,7 @@ WeightedSumDetector::read_lim_file(std::string dir, size_t spectra_num) {
       std::stringstream ss(line);
       int detector;
       ss >> detector;
-      if (detector /= spectra_num) {
+      if (detector != spectra_num) {
         try {
           throw "Invalid .lim file";
         } catch (std::string e) {

@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -108,30 +109,114 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_WeightedSumDetector_runs_without_correction_files() {
+  void test_WeightedSumDetector_runs_with_correction_files() {
+    std::cout << "test 1 begin" << std::endl;
     MatrixWorkspace_sptr DCSws = generate_DCS_data();
     MatrixWorkspace_sptr SLFws = generate_SLF_data();
     auto alg = makeAlgorithm();
+    ScopedFileHelper::ScopedFile alf_file = gen_valid_alf();
+    ScopedFileHelper::ScopedFile lim_file = gen_valid_lim();
+    ScopedFileHelper::ScopedFile lin_file = gen_valid_lin();
 
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", DCSws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
+    alg->setProperty(".alf file", alf_file.getFileName());
+    alg->setProperty(".lim file", lim_file.getFileName());
+    alg->setProperty(".lin file", lin_file.getFileName());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
+    std::cout << "test 1 finished" << std::endl;
   }
 
-  void test_WeightedSumDetector_runs_with_alf_file() {
+  void test_WeightedSumDetector_throws_with_invalid_alf_file() {
+    std::cout << "test 2 begin" << std::endl;
     MatrixWorkspace_sptr DCSws = generate_DCS_data();
     MatrixWorkspace_sptr SLFws = generate_SLF_data();
-
     auto alg = makeAlgorithm();
-
+    ScopedFileHelper::ScopedFile alf_file = gen_invalid_alf();
+    ScopedFileHelper::ScopedFile lim_file = gen_valid_lim();
+    ScopedFileHelper::ScopedFile lin_file = gen_valid_lin();
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", DCSws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    alg->setProperty(".alf file", alf_file.getFileName());
+    alg->setProperty(".lim file", lim_file.getFileName());
+    alg->setProperty(".lin file", lin_file.getFileName());
+    TS_ASSERT_THROWS(alg->execute(), std::string);
+    std::cout << "test 2 finished" << std::endl;
   }
 
 private:
+  static ScopedFileHelper::ScopedFile gen_valid_alf() {
+    const std::string content = " 8             \n"
+                                " 1             1.5 \n"
+                                " 2             1.1 \n"
+                                " 3             1.2 \n"
+                                " 4             1 \n"
+                                " 5             0.8 \n"
+                                " 6             0.8 \n"
+                                " 7             0.8 \n"
+                                " 8             0.8 ";
+    return ScopedFileHelper::ScopedFile(content, "gem61910.alf");
+  }
+  static ScopedFileHelper::ScopedFile gen_invalid_alf() {
+    const std::string content = " 6             \n"
+                                " 1             1.5 \n"
+                                " 2             1.1 \n"
+                                " 3             1.2 \n"
+                                " 4             1 \n"
+                                " 5             0.8 \n"
+                                " 6             0.8 ";
+    return ScopedFileHelper::ScopedFile(content, "gem61910.alf");
+  }
+  static ScopedFileHelper::ScopedFile gen_valid_lim() {
+    const std::string content =
+        " 8                                        \n"
+        " 1             1             1             30 \n"
+        " 2             1             1             7 \n"
+        " 3             1             0.9           7.3 \n"
+        " 4             1             2.3           9.8 \n"
+        " 5             1             6.2           13.2 \n"
+        " 6             1                           "
+        " 7             1             6.2           13.2 \n"
+        " 8             1             10            14 \n";
+    return ScopedFileHelper::ScopedFile(content, "gem61910.lim");
+  }
+  static ScopedFileHelper::ScopedFile gen_invalid_lim() {
+    const std::string content =
+        " 6                                        \n"
+        " 1             1             1             30 \n"
+        " 2             1             1             7 \n"
+        " 3             1             0.9           7.3 \n"
+        " 4             1             2.3           9.8 \n"
+        " 5             1             6.2           13.2 \n"
+        " 6             1                           ";
+    return ScopedFileHelper::ScopedFile(content, "gem61910.lim");
+  }
+  static ScopedFileHelper::ScopedFile gen_valid_lin() {
+    const std::string content =
+        " 8                                       \n"
+        " 1             0                           \n"
+        " 2             1             0             0.045 \n"
+        " 3             1             0             0.04 \n"
+        " 4             1             0             0.045 \n"
+        " 5             1             0             0.047 \n"
+        " 6             1             0             0.044 \n"
+        " 7             1             0             0.047 \n"
+        " 8             1             0             0.044 ";
+    return ScopedFileHelper::ScopedFile(content, "gem61910.lin");
+  }
+  static ScopedFileHelper::ScopedFile gen_invalid_lin() {
+    const std::string content =
+        " 6                                       \n"
+        " 1             0                           \n"
+        " 2             1             0             0.045 \n"
+        " 3             1             0             0.04 \n"
+        " 4             1             0             0.045 \n"
+        " 5             1             0             0.047 \n"
+        " 6             1             0             0.044 ";
+    return ScopedFileHelper::ScopedFile(content, "gem61910.lin");
+  }
   static boost::shared_ptr<WeightedSumDetector> makeAlgorithm() {
     auto a = boost::make_shared<WeightedSumDetector>();
     a->initialize();
