@@ -66,8 +66,6 @@ void QtMainWindowView::initLayout() {
           SLOT(onLoadBatchRequested(bool)));
   connect(m_ui.saveBatch, SIGNAL(triggered(bool)), this,
           SLOT(onSaveBatchRequested(bool)));
-  connect(m_ui.showOptions, SIGNAL(triggered(bool)), this,
-          SLOT(onShowOptionsRequested(bool)));
   connect(m_ui.showSlitCalculator, SIGNAL(triggered(bool)), this,
           SLOT(onShowSlitCalculatorRequested(bool)));
 

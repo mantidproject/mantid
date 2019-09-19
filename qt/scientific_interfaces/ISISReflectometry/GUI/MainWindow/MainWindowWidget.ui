@@ -80,7 +80,6 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="showOptions"/>
     <addaction name="showSlitCalculator"/>
    </widget>
    <addaction name="menuBatch"/>
@@ -94,11 +93,6 @@
   <action name="loadBatch">
    <property name="text">
     <string>&amp;Load</string>
-   </property>
-  </action>
-  <action name="showOptions">
-   <property name="text">
-    <string>&amp;Options</string>
    </property>
   </action>
   <action name="showSlitCalculator">
