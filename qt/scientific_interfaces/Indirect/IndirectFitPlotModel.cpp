@@ -255,9 +255,9 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
   const auto range = getGuessRange();
-  return createGuessWorkspace(
-      getWorkspace(), m_fittingModel->getFittingFunction(),
-      range.first, range.second);
+  return createGuessWorkspace(getWorkspace(),
+                              m_fittingModel->getFittingFunction(), range.first,
+                              range.second);
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
@@ -295,10 +295,11 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   return inputAndGuess;
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
-    MatrixWorkspace_sptr inputWorkspace, IFunction_const_sptr func,
-    double startX, double endX) const {
-      IAlgorithm_sptr createWsAlg =
+MatrixWorkspace_sptr
+IndirectFitPlotModel::createGuessWorkspace(MatrixWorkspace_sptr inputWorkspace,
+                                           IFunction_const_sptr func,
+                                           double startX, double endX) const {
+  IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("EvaluateFunction");
   createWsAlg->initialize();
   createWsAlg->setChild(true);
@@ -310,7 +311,10 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
   createWsAlg->setProperty("EndX", endX);
   createWsAlg->execute();
   Workspace_sptr outputWorkspace = createWsAlg->getProperty("OutputWorkspace");
-  return extractSpectra(boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWorkspace), 1, 1, startX, endX);
+  return extractSpectra(
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          outputWorkspace),
+      1, 1, startX, endX);
 }
 
 std::vector<double>

@@ -68,8 +68,8 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr
   createGuessWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-                       Mantid::API::IFunction_const_sptr func,
-                       double startX, double endX) const;
+                       Mantid::API::IFunction_const_sptr func, double startX,
+                       double endX) const;
 
   std::vector<double> computeOutput(Mantid::API::IFunction_const_sptr func,
                                     const std::vector<double> &dataX) const;
