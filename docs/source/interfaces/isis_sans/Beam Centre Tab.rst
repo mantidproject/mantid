@@ -3,17 +3,14 @@
 Beam centre tab
 ---------------
 
-.. image::  /images/sans_isis_v2_beam_centre_tab.png
-   :align: right
-   :width: 800px
-
 .. contents:: Table of Contents
   :local:
 
+.. image::  /images/ISISSansInterface/beam_centre_page.png
+   :align: right
+   :width: 800px
 
-.. _Beam:
-
-The beam centre tab allows the position of the beam centre to be set either 
+The beam centre tab allows the position of the beam centre to be set either
 manually by the user or by running the beam centre finder.
 
 +--------------------------+-----------------------------------------------------------------------------------------+

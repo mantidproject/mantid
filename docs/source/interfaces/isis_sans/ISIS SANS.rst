@@ -5,9 +5,8 @@ ISIS SANS
 =========
 
 This interface is used to reduce ISIS SANS data for SANS2D, LOQ, LARMOR
-and ZOOM.
-
-The interface in *Interfaces → SANS → ISIS SANS*.
+and ZOOM. It can be accessed from Mantid Workbench in
+*Interfaces → SANS → ISIS SANS*.
 
 .. toctree::
    :hidden:

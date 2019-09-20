@@ -3,7 +3,7 @@
 Diagnostic tab
 ---------------
 
-.. image::  /images/sans_isis_v2_diagnostic.png
+.. image::  /images/ISISSansInterface/diagnostic_page.png
    :align: right
    :width: 800px
 
@@ -12,7 +12,7 @@ Diagnostic tab
 
 .. _Diagnostic:
 
-The diagnistic tab allows quick integrations to be done on a workspace.
+The diagnostic tab allows quick integrations to be done on a workspace.
 
 +--------------------------+-----------------------------------------------------------------------------------------+
 | **User File**            | The currently loaded user file, this is loaded on the runs tab                          |

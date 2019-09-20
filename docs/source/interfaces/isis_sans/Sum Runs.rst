@@ -3,7 +3,7 @@
 Run Summation
 =============
 
-.. image:: /images/sans_isis_v2_add_runs_tab.png
+.. image:: /images/ISISSansInterface/sum_runs_page.png
    :align: center
    :width: 800px
 
@@ -72,7 +72,7 @@ is added using the event the :doc:`Plus Algorithm <../algorithms/Plus-v1>`.
 Timestamps of the events and of the logs are not
 changed as indicated in the image below.
 
-.. figure:: /images/sans_isis_v2_add_tabs_no_overlay.png
+.. figure:: /images/ISISSansInterface/sum_runs_add_no_overlay.png
    :align: center
    :width: 600px
 
@@ -90,7 +90,7 @@ The second workspace is essentially laid on the first. The same principle
 applies if more than two workspaces are involved as this is a pairwise
 operation. The working principle is illustrated below:
 
-.. figure:: /images/sans_isis_v2_add_tabs_overlay.png
+.. figure:: /images/ISISSansInterface/sum_runs_add_overlay.png
    :align: center
    :width: 600px
 
@@ -116,13 +116,13 @@ overlay mechanism.
 
 Both situations are illustrated below:
 
-.. figure:: /images/sans_isis_v2_add_tabs_pos_time_shift.png
+.. figure:: /images/ISISSansInterface/sum_runs_pos_time_shift.png
    :align: center
    :width: 500px
 
    Overlaid workspaces with a positive time shift (into the future).
 
-.. figure:: /images/sans_isis_v2_add_tabs_neg_time_shift.png
+.. figure:: /images/ISISSansInterface/sum_runs_neg_time_shift.png
    :align: center
    :width: 500px
 

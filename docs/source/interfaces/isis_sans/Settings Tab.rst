@@ -7,8 +7,8 @@ Settings
 
 .. _Settings:
 
-.. image::  /images/sans_isis_v2_general_tab_whole.png
-   :align: right
+.. image::  /images/ISISSansInterface/settings_page.png
+   :align: center
    :width: 800px
 
 The Settings tab and its sub-tabs allow users to control the parameters used
@@ -54,7 +54,7 @@ General, Wavelength, Scale, Event Slice, Sample
 General
 """""""
 
-.. image::  /images/sans_isis_v2_general_tab_general.png
+.. image::  /images/ISISSansInterface/settings_page_general.png
    :align: center
    :width: 800px
 
@@ -78,10 +78,6 @@ General
 Event Slice
 """""""""""
 .. _Event_Slice:
-
-.. image::  /images/sans_isis_v2_general_tab_event_slice.png
-   :align: center
-   :width: 800px
 
 Used for data capture in event-mode, it is possible to perform
 time-of-flight slices of the data and reduce these separately. The input can
@@ -108,10 +104,6 @@ Compatibility Mode
 """"""""""""""""""
 .. _Compatibility_Mode:
 
-.. image::  /images/sans_isis_v2_general_tab_event_binning.png
-   :align: center
-   :width: 800px
-
 The previous SANS GUI converted event-mode data to histogram-mode early into
 processing. This used the time-of-flight binning parameters specified by the
 user or copied the monitor binning.
@@ -130,10 +122,6 @@ Scale and Sample
 """"""""""""""""
 .. _Scale_and_Sample:
 
-.. image::  /images/sans_isis_v2_general_tab_sample.png
-   :align: right
-   :width: 800px
-
 This grouping allows the user to specify the absolute scale and sample geometry
 information. Note that the geometry information is in millimetres.
 
@@ -147,7 +135,7 @@ information. Note that the geometry information is in millimetres.
 
 Mask
 ^^^^
-.. image::  /images/sans_isis_v2_mask_tab_whole.png
+.. image::  /images/ISISSansInterface/settings_page_mask.png
    :align: center
    :width: 800px
 
@@ -155,10 +143,6 @@ The elements on this tab control the masking step during processing.
 
 Masking information
 """""""""""""""""""
-
-.. image::  /images/sans_isis_v2_masking_tab_masking_table.png
-   :align: right
-   :width: 400px
 
 The masking table shows detailed information about the masks that
 will be applied. If a mask is applied only to a particular detector
@@ -185,7 +169,7 @@ requires you to update the row selection by pressing *Update Rows*.
 Adjustment
 ^^^^^^^^^^
 
-.. image::  /images/sans_isis_v2_adjustment_tab_whole.png
+.. image::  /images/ISISSansInterface/settings_page_adjustment.png
    :align: center
    :width: 800px
 
@@ -195,11 +179,6 @@ transmission calculation and the application of adjustment files.
 
 Monitor normalization
 """""""""""""""""""""
-.. _Monitor_Normalization:
-
-.. image::  /images/sans_isis_v2_adjustment_tab_monitor_normalization.png
-   :align: center
-   :width: 800px
 
 +------------------------------+--------------------------------------------------------+
 | **Incident monitor**         | The incident monitor spectrum number.                  |
@@ -210,7 +189,7 @@ Monitor normalization
 
 Transmission calculation
 """"""""""""""""""""""""
-.. _Transmission_Calculation:
+
 
 The main inputs for the transmission calculation are concerned with the
 incident monitor, the monitors/detectors which measure the transmission
@@ -218,10 +197,6 @@ and the fit parameters for the transmission calculation.
 
 Incident monitor
 ~~~~~~~~~~~~~~~~
-
-.. image::  /images/sans_isis_v2_adjustment_tab_monitor_normalization.png
-   :align: center
-   :width: 800px
 
 +------------------------------+--------------------------------------------------------+
 | **Incident monitor**         | The incident monitor spectrum number.                  |
@@ -232,10 +207,6 @@ Incident monitor
 
 Transmission targets
 ~~~~~~~~~~~~~~~~~~~~
-
-.. image::  /images/sans_isis_v2_adjustment_tab_transmission_monitor.png
-   :align: center
-   :width: 800px
 
 +--------------------------+------------------------------------------------------------------------------------------------+
 | **Transmission targets** | This combo box allows the user to select the transmission target. *Transmission monitor* will  |
@@ -288,7 +259,7 @@ transmission calculation.
 
 The following example/image should help to clarify the selection process:
 
-.. image::  /images/sans_isis_v2_trans_calc_example.png
+.. image::  /images/ISISSansInterface/settings_page_trans_calc.png
    :align: center
    :width: 400
 
@@ -303,10 +274,6 @@ This means that pixels 14 and 15 are dropped and pixels 8, 9, 10, 11,
 
 Fit settings
 ~~~~~~~~~~~~
-
-.. image::  /images/sans_isis_v2_adjustment_tab_transmission_fit.png
-   :align: center
-   :width: 800px
 
 +-----------------+---------------------------------------+-----------------------------------------------------------------+
 | **Fit selection**        | If *Both* is selected, then the Sample and Can will have the same fit settings applied to them.|
@@ -329,10 +296,6 @@ Fit settings
 Adjustment files
 ~~~~~~~~~~~~~~~~
 
-.. image::  /images/sans_isis_v2_adjustment_tab_files.png
-   :align: center
-   :width: 800px
-
 +---------------------------------+------------------------------------------------------------------------------------------------+
 | **Pixel adjustment det 1**      | File name of the pixel adjustment file for the first detector.                                 |
 |                                 | The file to be loaded is a 'flat cell' (flood source) calibration file containing the relative |
@@ -352,23 +315,18 @@ Adjustment files
 |                                 | See more information above.                                                                    |
 +---------------------------------+------------------------------------------------------------------------------------------------+
 
-
 .. _Q_Wavelength-ref:
 
 Q, Wavelength and Detector Limits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image::  /images/sans_isis_v2_q_tab_whole.png
+.. image::  /images/ISISSansInterface/settings_page_q_wavelength.png
    :align: center
    :width: 800px
 
 Phi limit
 """""""""
 .. _Phi_Limit:
-
-.. image::  /images/sans_isis_v2_masking_tab_phi.png
-   :align: right
-   :width: 400px
 
 This group allows the user to specify an angle (pizza-slice) mask. The angles
 are in degree.
@@ -386,10 +344,6 @@ Radius limit
 """"""""""""
 .. _Radius_Limit:
 
-.. image::  /images/sans_isis_v2_masking_tab_radius.png
-   :align: right
-   :width: 400px
-
 These settings allow for a hollow cylinder mask. The *Min* entry is the inner
 radius and the *Max* entry is the outer radius of the
 hollow cylinder.
@@ -397,10 +351,6 @@ hollow cylinder.
 Wavelength
 """"""""""
 .. _Wavelength:
-
-.. image::  /images/sans_isis_v2_general_tab_wavelength_conversion.png
-   :align: center
-   :width: 800px
 
 The settings provide the binning for the conversion from
 time-of-flight units to wavelength units. Note that all units are Angstrom.
@@ -440,12 +390,6 @@ An example would be ``5-10,12:2:16,20-30``.
 Cuts
 """"
 
-.. _Cuts:
-
-.. image::  /images/sans_isis_v2_q_tab_cuts.png
-   :align: center
-   :width: 800px
-
 These allow radius and wavelength cuts to be set. They
 are passed to :ref:`Q1D <algm-Q1D>` as the RadiusCut and
 WaveCut respectively.
@@ -453,10 +397,6 @@ WaveCut respectively.
 Q limits
 """"""""
 .. _Q_Limits:
-
-.. image::  /images/sans_isis_v2_q_tab_q_limits.png
-   :align: center
-   :width: 800px
 
 The entries here allow for the providing the binning settings during the momentum transfer conversion. In the
 case of a 1D reduction the user can specify standard bin information. In the case of a 2D reduction the user can only
@@ -476,21 +416,12 @@ Gravity correction
 """"""""""""""""""
 .. _Gravity_Correction:
 
-.. image::  /images/sans_isis_v2_q_tab_gravity_correction.png
-   :align: center
-   :width: 800px
-
 Enabling the check-box will enable the gravity correction.
 In this case an additional length can be specified.
 
 
 Q Resolution
 """"""""""""
-.. _Q_Resolution:
-
-.. image::  /images/sans_isis_v2_q_tab_q_resolution.png
-   :align: center
-   :width: 800px
 
 If you want to perform a momentum transfer resolution calculation
 then enable the check-box of this group.
@@ -518,7 +449,7 @@ For detailed information please refer to :ref:`TOFSANSResolutionByPixel <algm-TO
 State Diagnostic
 ^^^^^^^^^^^^^^^^
 
-.. image::  /images/sans_isis_v2_state_diagnostic.png
+.. image::  /images/ISISSansInterface/settings_page_state_diagnostic.png
    :align: right
    :width: 800px
 

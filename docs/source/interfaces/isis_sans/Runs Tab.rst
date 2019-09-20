@@ -13,8 +13,8 @@ data table.
 Users can also control how they would like to save their processed data
 using the Save Options controls, which are described below.
 
-.. image:: /images/sans_isis_v2_whole_gui.png
-   :align: right
+.. image:: /images/ISISSansInterface/runs_page.png
+   :align: center
    :width: 800px
 
 Main Controls
@@ -36,6 +36,11 @@ Main Controls
 
 Table Controls
 --------------
+
+
+.. image:: /images/ISISSansInterface/runs_page_table.png
+   :align: center
+   :width: 800px
 
 +--------------------------+-------------------------------------------------------------------------+
 | **Insert row after**     | Adds a row after the currently selected row                             |
@@ -81,7 +86,7 @@ Table Columns
 Save Options
 ------------
 
-.. image::  /images/sans_isis_save_options.png
+.. image::  /images/ISISSansInterface/runs_page_save_opts.png
    :align: center
    :width: 500px
 
