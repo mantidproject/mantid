@@ -415,9 +415,9 @@ public:
     void setEndX(double end);
     void setXRange(double start, double end);
     QVector<double> getXRange();
-	QString getXColumnName() const;
-	QString getYColumnName() const;
-	QString getErrColumnName() const;
+    QString getXColumnName() const;
+    QString getYColumnName() const;
+    QString getErrColumnName() const;
     int workspaceIndex() const;
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();

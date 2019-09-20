@@ -95,14 +95,12 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Get the name of the table workspace if it exists
         """
-        table_workspace = ""
-
         for ax in self.canvas.figure.get_axes():
             try:
-                table_workspace = ax.wsName
+                return ax.wsName
             except AttributeError:  # only table workspaces have wsName
                 pass
-        return table_workspace
+        return None
 
     def _get_selected_workspace_artist(self):
         ws_artists_list = self.get_axes().tracked_workspaces[self.workspaceName()]
@@ -137,7 +135,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         if allowed_spectra:
             self._add_spectra(allowed_spectra)
-        elif table != "":
+        elif table:
             self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
@@ -279,7 +277,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             if isinstance(workspace, ITableWorkspace):
                 alg.setProperty('XColumn', self.getXColumnName())
                 alg.setProperty('YColumn', self.getYColumnName())
-                if self.getErrColumnName() != "":
+                if self.getErrColumnName():
                     alg.setProperty('ErrColumn', self.getErrColumnName())
             else:
                 alg.setProperty('WorkspaceIndex', ws_index)

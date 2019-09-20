@@ -1752,19 +1752,19 @@ void FitPropertyBrowser::populateWorkspaceNames() {
     bool allAreAllowed = m_allowedSpectra.isEmpty();
     QStringList tmp;
     auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-    for (auto &it : sv) {
+    for (const auto &it : sv) {
       auto const &name = QString::fromStdString(it);
       if (allAreAllowed || m_allowedSpectra.contains(name)) {
         tmp << name;
       }
     }
 
-    for (int i = 0; i < tmp.size(); i++) {
+    for (const auto &i : tmp) {
       Mantid::API::Workspace_sptr ws =
           Mantid::API::AnalysisDataService::Instance().retrieve(
-              tmp[i].toStdString());
+              i.toStdString());
       if (isWorkspaceValid(ws)) {
-        m_workspaceNames.append(tmp[i]);
+        m_workspaceNames.append(i);
       }
     }
   } else {
