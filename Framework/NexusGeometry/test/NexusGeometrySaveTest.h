@@ -11,14 +11,17 @@
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
+#include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/NexusFileReader.h"
 
 #include "mockobjects.h"
+#include <Poco/Glob.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -36,6 +39,16 @@ public:
     return new NexusGeometrySaveTest();
   }
   static void destroySuite(NexusGeometrySaveTest *suite) { delete suite; }
+
+  std::unique_ptr<const Mantid::Geometry::Instrument>
+  makeTestInstrument(std::string testFileName) {
+    H5std_string nexusFilename = testFileName;
+    const auto fullpath = Mantid::Kernel::ConfigService::Instance().getFullPath(
+        nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
+
+    return NexusGeometryParser::createInstrument(
+        fullpath, std::make_unique<MockLogger>());
+  }
 
   NexusGeometrySaveTest() {}
 
@@ -1169,6 +1182,20 @@ Instrument cache.
                      H5::GroupIException &);
   }
 
+  /*
+====================================================================
+
+NEXUS SHAPES  TESTS
+
+DESCRIPTION:
+The following tests document that saveInstrument will write the OFF and
+Cylindrical shape data from the instrument cache to components in the
+Instrument. saveInstrument will write cylinders, MeshObjects, and 2D
+MeshObjects.
+
+====================================================================
+*/
+
   void test_homogeneous_cylindrical_instrument_vertices_written_to_file() {
 
     /*
@@ -1183,51 +1210,42 @@ Instrument cache.
     */
 
     // create RAII file resource for testing
-    FileResource fileResource("test_cylindrical.hdf5");
+    FileResource fileResource("test_cylindrical.hdf5", true);
     std::string destinationFile = fileResource.fullPath();
 
-    auto cylindricalInstrument = ComponentCreationHelper::
-        createCylInstrumentWithVerticalOffsetsSpecified(
-            2, std::vector<double>{1, 2, 3}, 2, 1, 2, 1, 2);
+    const auto mesh = ComponentCreationHelper::createCubeFromTriangles(5);
+    const auto cylinder = ComponentCreationHelper::createCappedCylinder(
+        0.5 /*radius*/, 1.5 /*height*/, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
+        "tube");
+
+    auto cylindricalInstrument =
+        ComponentCreationHelper::createMinimalInstrumentWithShapes(
+            mesh, cylinder, cylinder);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(
         *cylindricalInstrument);
 
-    double cylinderHeight = 0.50;
-    double cylinderRadius = 0.25;
+    double cylinderHeight = 1.5;
+    double cylinderRadius = 0.5;
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "instrument_with_tubes",
-                       "sixteenpack", PIXEL_SHAPE};
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test_instrument_with_shapes",
+                       "bank_with_pixelshapes", PIXEL_SHAPE};
 
     NexusFileReader tester(destinationFile);
     std::vector<double> buffer =
         tester.readDataSetMultidimensional<double>(path, VERTICES);
 
     V3D base{buffer[0], buffer[1], buffer[2]};
-    V3D top{buffer[3], buffer[4], buffer[5]};
-    V3D edge{buffer[6], buffer[7], buffer[8]};
+    V3D edge{buffer[3], buffer[4], buffer[5]};
+    V3D top{buffer[6], buffer[7], buffer[8]};
 
-    double radiusInFile = std::abs((top - edge).norm());
+    double radiusInFile = std::abs((base - edge).norm());
     double heightInFile = std::abs((base - top).norm());
 
     TS_ASSERT_DELTA(radiusInFile, cylinderRadius, 1e-5);
     TS_ASSERT_DELTA(heightInFile, cylinderHeight, 1e-5);
   }
-
-  /*
-====================================================================
-
-NEXUS SHAPES  TESTS
-
-DESCRIPTION:
-The following tests document that saveInstrument will write the OFF and
-Cylindrical shape data from the instrument cache to components in the
-Instrument. saveInstrument will write cylinders, MeshObjects, and 2D
-MeshObjects.
-
-====================================================================
-*/
 
   void test_instrument_with_meshObj_monitor_and_cylindrical_detectors() {
 
@@ -1244,11 +1262,11 @@ MeshObjects.
 
     const auto mesh = ComponentCreationHelper::createCubeFromTriangles(5);
     const auto cylinder = ComponentCreationHelper::createCappedCylinder(
-        0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+        0.5, 1.5, V3D(0.0, 0.0, 0.0), V3D(0.5, 1.5, 0.5), "tube");
 
     auto instrument =
-        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh,
-                                                                   cylinder, mesh);
+        ComponentCreationHelper::createMinimalInstrumentWithShapes(
+            mesh, cylinder, mesh);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1292,14 +1310,15 @@ MeshObjects.
         */
 
     // create RAII file resource for testing
-    FileResource fileResource("test_double_mesh.hdf5");
+    FileResource fileResource("test_triple_mesh.hdf5");
     std::string destinationFile = fileResource.fullPath();
     using namespace Mantid::Kernel;
 
     const auto mesh = ComponentCreationHelper::createCubeFromTriangles(5);
 
     auto instrument =
-        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh, mesh, mesh);
+        ComponentCreationHelper::createMinimalInstrumentWithShapes(mesh, mesh,
+                                                                   mesh);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
@@ -1336,7 +1355,16 @@ MeshObjects.
                                                   METRES, UNITS));
   }
 
-  void test_nx_detector_with_mesh_shape_has_detector_faces() {}
+  void test_load_and_save_detectors_with_various_shape_configurations() {
+    auto instrument =
+        makeTestInstrument("unit_testing/SMALLFAKE_example_geometry.hdf5");
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    FileResource fileResource("test_resave_example.hdf5", true);
+    std::string destinationFile = fileResource.fullPath();
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
+  }
 };
 
 #endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */
