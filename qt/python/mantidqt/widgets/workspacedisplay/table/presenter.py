@@ -333,7 +333,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 return
         x = self.model.get_column(selected_x)
 
-        fig, ax = self.plot.subplots()
+        fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
         fig.canvas.set_window_title(self.model.get_name())
         ax.set_xlabel(self.model.get_column_header(selected_x))
         ax.wsName = self.model.get_name()

@@ -292,10 +292,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
         out_ws = alg.getProperty('OutputWorkspace').value
 
-        # Convert to a MantidAxes if it is not already
-        MantidAxes.from_mpl_axes(self.get_axes(), ignore_artists=[Legend]) \
-            if not isinstance(self.get_axes(), MantidAxes) else self.get_axes()
-
         # Setting distribution=True prevents the guess being normalised
         self.guess_line = self.get_axes().plot(out_ws, wkspIndex=1,
                                                label=out_ws_name,
