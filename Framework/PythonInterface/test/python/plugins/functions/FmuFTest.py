@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -29,7 +29,7 @@ class FmuFTest(unittest.TestCase):
 			self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
 	def test_do_fit(self):
-		do_a_fit(np.arange(0.1, 16, 0.2), 'FmuF', guess = dict(A0 = 0.55, FreqD = 0.25, Lambda = 0.15, Sigma = 0.25),target = dict(A0 = 0.5, FreqD = 0.2, Lambda = 0.1, Sigma = 0.2), atol = 0.01)
+		do_a_fit(np.arange(0.1, 16, 0.2), 'FmuF', guess = dict(A0 = 0.55, FreqD = 0.25, Lambda = 0.15, Sigma = 0.25), target = dict(A0 = 0.5, FreqD = 0.2, Lambda = 0.1, Sigma = 0.2), atol = 0.01)
 
 if __name__ == '__main__':
 	unittest.main()

@@ -15,15 +15,15 @@ A fitting function for muon-fluorine bonds in ionic crystals.
 
 where,
 
-:math:`\lambda`(MHz) is the exponential decay rate,
+:math:`\lambda` (MHz) is the exponential decay rate,
 
-:math:`\sigma`(MHz) is the Gaussian decay rate,
+:math:`\sigma` (MHz) is the Gaussian decay rate,
 
-:math:`\omega_D`(MHz) is the dipolar interaction frequency,
+:math:`\omega_D` (MHz) is the dipolar interaction frequency,
 
 and the expression for :math:`G(t)` is given by
 
-.. math:: G(t)=\frac16\left[3+\cos(\sqrt{3} \omega_\text{D} t)+(1-\frac{1}{\sqrt{3}})\cos(\frac{3-\sqrt{3}}{2}\omega_\text{D} t)+(1+\frac{1}{\sqrt{3}})\cos(\frac{3+\sqrt{3}}{2}\omega_\text{D} t)\right].
+.. math:: G(t)=\frac{1}{6}\left[3+\cos(\sqrt{3} \omega_\text{D} t)+(1-\frac{1}{\sqrt{3}})\cos(\frac{3-\sqrt{3}}{2}\omega_\text{D} t)+(1+\frac{1}{\sqrt{3}})\cos(\frac{3+\sqrt{3}}{2}\omega_\text{D} t)\right].
 
 .. figure:: /images/FmuF.png
 
