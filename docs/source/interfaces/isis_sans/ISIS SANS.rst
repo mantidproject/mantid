@@ -15,11 +15,19 @@ and ZOOM. It can be accessed from Mantid Workbench in
 
    *
 
+Usage and GUI Documentation
+---------------------------
+
 * :ref:`ISIS_SANS_Runs_Tab-ref`
 * :ref:`ISIS_SANS_Settings_Tab-ref`
 * :ref:`ISIS_SANS_Beam_Centre_Tab-ref`
 * :ref:`ISIS_SANS_Sum_Runs_Tab-ref`
 * :ref:`ISIS_SANS_Diagnostic_Tab-ref`
+
+File Documentation
+------------------
+* :ref:`ISIS_SANS_Batch_File-ref`
+
 
 Feedback & Comments
 -------------------

@@ -9,10 +9,14 @@ Run Summation
 
 .. _Run_Summation:
 
-The Run Summation tab is used to perform addition of two or more run files,
-saving the output to a single file. The user builds a list of multiple
+The Add Runs page provides a simple tool for adding similar runs
+(usually of short duration) together. The user builds a list of multiple
 histogram or event files (but not mixed) before pressing the sum button to
 produce a single output file in the mantid output directory.
+
+The resulting 'add file' is then the equivalent of having measured one
+run for an extended period. The final add file is named after the first
+run number that is entered.
 
 Runs To Sum
 ^^^^^^^^^^^^

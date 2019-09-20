@@ -17,6 +17,32 @@ using the Save Options controls, which are described below.
    :align: center
    :width: 800px
 
+Using the SANS GUI
+------------------
+All of the data required for a SANS reduction can be entered into this page.
+First load the appropriate user file, which is usually written by an instrument
+scientist and contains the settings that relate to a series of runs.
+
+Once the settings file is loaded other pages, documented in other sections,
+are activated allowing settings to be viewed and edited.
+
+There are two ways of specifying the run numbers to analyze: as single run
+or batch mode. In batch mode the runs are specified in a text file separated
+by commas as in the batch mode specification. In both cases the directory in
+where those run files can be found must be present in Mantid's
+"Manage Directories" dialog.
+
+In single run mode the sample run, empty can, transmission file, etc.
+run numbers are entered into each box.
+
+Next click "Load Data" and an error dialog box will appear if one of the
+runs is incorrect or its file cannot be found. Once the data is loaded you
+have the choice of a 1D or 2D reduction.
+
+Once this is complete the name of the results workspace name will be saved into
+the selected save directory.
+
+
 Main Controls
 -------------
 
