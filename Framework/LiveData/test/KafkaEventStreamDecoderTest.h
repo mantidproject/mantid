@@ -443,24 +443,6 @@ public:
     TS_ASSERT(!decoder->isCapturing());
   }
 
-  void test_Empty_SpDet_Stream_Throws_Error_On_ExtractData() {
-    using namespace ::testing;
-    using namespace KafkaTesting;
-
-    auto mockBroker = std::make_shared<MockKafkaBroker>();
-    EXPECT_CALL(*mockBroker, subscribe_(_, _))
-        .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISEventSubscriber(1)))
-        .WillOnce(Return(new FakeRunInfoStreamSubscriber(1)))
-        .WillOnce(Return(new FakeEmptyStreamSubscriber));
-    auto decoder = createTestDecoder(mockBroker);
-    startCapturing(*decoder, 1);
-
-    TS_ASSERT_THROWS(decoder->extractData(), const std::runtime_error &);
-    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
-    TS_ASSERT(!decoder->isCapturing());
-  }
-
   void test_Empty_RunInfo_Stream_Throws_Error_On_ExtractData() {
     using namespace ::testing;
     using namespace KafkaTesting;
