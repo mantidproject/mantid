@@ -3,6 +3,7 @@
 set(TEST_PY_FILES
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
+    MuH.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
