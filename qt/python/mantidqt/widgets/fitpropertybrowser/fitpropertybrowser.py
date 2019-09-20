@@ -11,11 +11,8 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal, Slot
 
-from matplotlib.legend import Legend
-
 from mantid import logger
 from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace
-from mantid.plots import MantidAxes
 from mantid.simpleapi import mtd
 from mantidqt.utils.qt import import_qt
 from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
