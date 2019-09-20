@@ -1396,7 +1396,7 @@ class TransParser(UserFileComponentParser):
         elif monitor == 5:
             return {TransId.spec_5_shift: dist}
         else:
-            raise RuntimeError("The monitor {0} cannot be shifted", monitor)
+            raise RuntimeError("The monitor {0} cannot be shifted".format(monitor))
 
     def _extract_trans_spec(self, line):
         trans_spec_string = re.sub(self._trans_spec, "", line)

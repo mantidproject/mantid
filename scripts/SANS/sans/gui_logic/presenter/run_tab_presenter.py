@@ -510,7 +510,6 @@ class RunTabPresenter(PresenterCommon):
             self._view.add_row(row_entry)
             self._view.change_row_color(row_state_to_colour_mapping[row.row_state], row_index + 1)
             self._view.set_row_tooltip(row.tool_tip, row_index + 1)
-            print(row.tool_tip)
             if row.isMultiPeriod():
                 self._view.show_period_columns()
         self._view.remove_rows([0])
