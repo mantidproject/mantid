@@ -295,9 +295,10 @@ def combine_loaded_runs(model, run_list, delete_added=False):
 
         running_total.append(running_total_item)
 
-    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData', 'DeadTimeTable', 'DetectorGroupingTable']}
+    return_ws_actual = {key: return_ws[key] for key in ['MainFieldDirection', 'TimeZero', 'FirstGoodData',
+                                                        'DeadTimeTable', 'DetectorGroupingTable']}
     return_ws_actual["OutputWorkspace"] = [MuonWorkspaceWrapper(running_total_period) for running_total_period in
-                                    running_total]
+                                           running_total]
     return_ws_actual['DataDeadTimeTable'] = CloneWorkspace(InputWorkspace=return_ws['DataDeadTimeTable'],
                                                            OutputWorkspace=return_ws['DataDeadTimeTable'] + 'CoAdd').name()
     model._loaded_data_store.remove_data(run=flatten_run_list(run_list), instrument=model._data_context.instrument)
