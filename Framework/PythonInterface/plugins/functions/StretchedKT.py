@@ -25,8 +25,8 @@ class StretchedKT(IFunction1D):
         beta = self.getParameterValue("Beta")
         Sigma = self.getParameterValue("Sigma")
         product = Sigma * x
-        A=(2./3) * (1 - product ** beta)
+        A=(2./3.) * (1 - product ** beta)
         B=np.exp(- product ** beta / beta)
-        return A0*(1./3 + A * B)
+        return A0*(1./3. + A * B)
 
 FunctionFactory.subscribe(StretchedKT)
