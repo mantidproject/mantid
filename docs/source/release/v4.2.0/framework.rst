@@ -43,7 +43,8 @@ It is now possible to have MultipleFileProperty configured in such a way, that i
 
 Bug Fixes
 ---------
-* ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` bug fix for user provided top-level NXentry name 
+* ref:`LoadNexusMonitors <algm-LoadNexusMonitors>` bug fix for user provided top-level NXentry name.
+* ref:`LoadInstrument <algm-LoadInstrument>` correctly handles IDF files which use all lowercase naming.
 
 :ref:`Release 4.2.0 <v4.2.0>`
 
