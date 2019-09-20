@@ -16,7 +16,6 @@
 #include <QStringList>
 #include <QVariant>
 #include <QWidget>
-#include <QtConcurrentRun>
 
 class QLineEdit;
 class QCheckBox;

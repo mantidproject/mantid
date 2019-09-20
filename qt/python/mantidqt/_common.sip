@@ -402,6 +402,18 @@ public:
 };
 
 // ---------------------------------
+// Script Repository
+// ---------------------------------
+
+class ScriptRepositoryView : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
+%End
+public:
+    ScriptRepositoryView(QWidget *parent = nullptr);
+};
+
+// ---------------------------------
 // Fit Property Browser
 // ---------------------------------
 class FitPropertyBrowser : public QDockWidget {
@@ -436,7 +448,7 @@ public:
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
-	void addAllowedTableWorkspace(const QString &wsName);
+    void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
 

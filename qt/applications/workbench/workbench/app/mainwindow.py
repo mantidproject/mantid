@@ -50,6 +50,7 @@ from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
 from mantidqt.widgets import manageuserdirectories  # noqa
+from mantidqt.widgets.scriptrepository import ScriptRepositoryView  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
@@ -300,6 +301,9 @@ class MainWindow(QMainWindow):
         action_manage_directories = create_action(
             self, "Manage User Directories",
             on_triggered=self.open_manage_directories)
+        action_script_repository = create_action(
+            self, "Script Repository",
+            on_triggered=self.open_script_repository)
         action_settings = create_action(
             self, "Settings", on_triggered=self.open_settings_window)
         action_quit = create_action(
@@ -309,7 +313,8 @@ class MainWindow(QMainWindow):
                                   action_save_script, action_save_script_as,
                                   action_generate_ws_script, None, action_save_project,
                                   action_save_project_as, None, action_settings, None,
-                                  action_manage_directories, None, action_quit]
+                                  action_manage_directories, None, action_script_repository,
+                                  None, action_quit]
 
         # view menu
         action_restore_default = create_action(
@@ -606,6 +611,9 @@ class MainWindow(QMainWindow):
 
     def open_manage_directories(self):
         manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
+
+    def open_script_repository(self):
+        ScriptRepositoryView(self).exec_()
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)

@@ -93,7 +93,7 @@ const QString dir_not_empty_label =
  *
  */
 ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
-    : QDialog(parent), ui(new Ui::ScriptRepositoryView) {
+    : MantidDialog(parent), ui(new Ui::ScriptRepositoryView) {
   using Mantid::API::ScriptRepositoryFactory;
   using Mantid::Kernel::ConfigService;
   using Mantid::Kernel::ConfigServiceImpl;
