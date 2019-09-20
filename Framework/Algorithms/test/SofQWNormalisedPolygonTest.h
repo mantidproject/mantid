@@ -461,7 +461,7 @@ public:
   }
 
   void testTableAndWorkspaceHaveSameNumDetectors() {
-    const std::vector<std::string> dataTypes = {"int", "double", "int"};
+    const std::vector<std::string> dataTypes = {"int", "double", "double"};
     auto inputWS = SofQWTest::loadTestFile();
     const auto twoThetaRanges = createTableWorkspace(
         dataTypes, static_cast<int>(inputWS->getNumberHistograms() + 1));
