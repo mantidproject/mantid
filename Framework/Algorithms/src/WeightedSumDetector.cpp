@@ -21,6 +21,35 @@ namespace Algorithms {
 // Algorithm must be declared
 DECLARE_ALGORITHM(WeightedSumDetector)
 
+std::map<std::string, std::string> WeightedSumDetector::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  API::MatrixWorkspace_sptr DCSWorkspace = getProperty("DCSWorkspace");
+  API::MatrixWorkspace_sptr SLFWorkspace = getProperty("SLFWorkspace");
+  const size_t spectra_num_DCS = DCSWorkspace->spectrumInfo().size();
+  const size_t spectra_num_SLF = SLFWorkspace->spectrumInfo().size();
+  if (spectra_num_DCS != spectra_num_SLF) {
+    issues["SLFWorkspace"] =
+        "SLFWorkspace detector number does not match DCSWorkspace";
+  }
+
+  std::vector<std::string> cor_files = {".alf file", ".lin file", ".lim file"};
+  for (const std::string &param : cor_files) {
+    std::string line;
+    int detector_num;
+    std::string dir;
+    dir = getProperty(param);
+    std::ifstream file(dir);
+    std::getline(file, line);
+    std::stringstream ss(line);
+    ss >> detector_num;
+    if (detector_num != spectra_num_DCS) {
+      issues[param] = param + " Detector number does not DCSWorkspace";
+    }
+  }
+  return issues;
+}
+
 void WeightedSumDetector::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "DCSWorkspace", "", Kernel::Direction::Input),

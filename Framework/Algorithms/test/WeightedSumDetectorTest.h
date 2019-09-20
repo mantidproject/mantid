@@ -39,12 +39,8 @@ public:
   void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
   // generate spectrum
-  MatrixWorkspace_sptr generate_DCS_data() {
-    const double x_start = 0.2;
-    const double x_end = 60.0;
-    const double x_inc = 0.01;
-    const int n_spec = 8;
-
+  MatrixWorkspace_sptr generate_data(double x_start, double x_end, double x_inc,
+                                     int n_spec, double decay) {
     std::vector<double> x;
     std::vector<double> y;
     for (int i = 0; i < (x_end - x_start) / x_inc; i++) {
@@ -52,13 +48,13 @@ public:
     }
     for (int j = 0; j < n_spec; j++) {
       for (int i = 0; i < (x_end - x_start) / x_inc; i++) {
-        y.push_back((1+j)*std::exp(-i));
+        y.push_back((1.0 + j) * std::exp(-i * decay));
       }
     }
     Algorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
     alg->initialize();
-    alg->setProperty("OutputWorkspace", "incident_spectrum_ws");
+    alg->setProperty("OutputWorkspace", "ws");
     alg->setProperty("DataX", x);
     alg->setProperty("DataY", y);
     alg->setProperty("NSpec", n_spec);
@@ -66,7 +62,7 @@ public:
     // retreve output workspace from ADS
     MatrixWorkspace_sptr out_ws =
         Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
+            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     return out_ws;
   }
 
@@ -84,13 +80,13 @@ public:
     }
     for (int j = 0; j < n_spec; j++) {
       for (int i = 0; i < (x_end - x_start) / x_inc; i++) {
-        y.push_back((1 + j) * std::exp(-2 * i));
+        y.push_back((1.0 + j) * std::exp(-2 * i));
       }
     }
     Algorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
     alg->initialize();
-    alg->setProperty("OutputWorkspace", "incident_spectrum_ws");
+    alg->setProperty("OutputWorkspace", "ws");
     alg->setProperty("DataX", x);
     alg->setProperty("DataY", y);
     alg->setProperty("NSpec", n_spec);
@@ -98,7 +94,7 @@ public:
     // retreve output workspace from ADS
     MatrixWorkspace_sptr out_ws =
         Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
+            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     return out_ws;
   }
 
@@ -110,40 +106,84 @@ public:
   }
 
   void test_WeightedSumDetector_runs_with_correction_files() {
-    std::cout << "test 1 begin" << std::endl;
-    MatrixWorkspace_sptr DCSws = generate_DCS_data();
-    MatrixWorkspace_sptr SLFws = generate_SLF_data();
+    MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
+    MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
     auto alg = makeAlgorithm();
     ScopedFileHelper::ScopedFile alf_file = gen_valid_alf();
     ScopedFileHelper::ScopedFile lim_file = gen_valid_lim();
     ScopedFileHelper::ScopedFile lin_file = gen_valid_lin();
 
     alg->setProperty("DCSWorkspace", DCSws);
-    alg->setProperty("SLFWorkspace", DCSws);
+    alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
     alg->setProperty(".alf file", alf_file.getFileName());
     alg->setProperty(".lim file", lim_file.getFileName());
     alg->setProperty(".lin file", lin_file.getFileName());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    std::cout << "test 1 finished" << std::endl;
+  }
+
+  void test_WeightedSumDetector_throws_with_diff_n_spec_file() {
+    MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
+    MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 6, 2.0);
+    auto alg = makeAlgorithm();
+    ScopedFileHelper::ScopedFile alf_file = gen_valid_alf();
+    ScopedFileHelper::ScopedFile lim_file = gen_valid_lim();
+    ScopedFileHelper::ScopedFile lin_file = gen_valid_lin();
+    alg->setProperty("DCSWorkspace", DCSws);
+    alg->setProperty("SLFWorkspace", SLFws);
+    alg->setProperty("OutputWorkspace", "merged_workspace");
+    alg->setProperty(".alf file", alf_file.getFileName());
+    alg->setProperty(".lim file", lim_file.getFileName());
+    alg->setProperty(".lin file", lin_file.getFileName());
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_WeightedSumDetector_throws_with_invalid_alf_file() {
-    std::cout << "test 2 begin" << std::endl;
-    MatrixWorkspace_sptr DCSws = generate_DCS_data();
-    MatrixWorkspace_sptr SLFws = generate_SLF_data();
+    MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
+    MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
     auto alg = makeAlgorithm();
     ScopedFileHelper::ScopedFile alf_file = gen_invalid_alf();
     ScopedFileHelper::ScopedFile lim_file = gen_valid_lim();
     ScopedFileHelper::ScopedFile lin_file = gen_valid_lin();
     alg->setProperty("DCSWorkspace", DCSws);
-    alg->setProperty("SLFWorkspace", DCSws);
+    alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
     alg->setProperty(".alf file", alf_file.getFileName());
     alg->setProperty(".lim file", lim_file.getFileName());
     alg->setProperty(".lin file", lin_file.getFileName());
-    TS_ASSERT_THROWS(alg->execute(), std::string);
-    std::cout << "test 2 finished" << std::endl;
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  }
+
+  void test_WeightedSumDetector_throws_with_invalid_lim_file() {
+    MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
+    MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
+    auto alg = makeAlgorithm();
+    ScopedFileHelper::ScopedFile alf_file = gen_valid_alf();
+    ScopedFileHelper::ScopedFile lim_file = gen_invalid_lim();
+    ScopedFileHelper::ScopedFile lin_file = gen_valid_lin();
+    alg->setProperty("DCSWorkspace", DCSws);
+    alg->setProperty("SLFWorkspace", SLFws);
+    alg->setProperty("OutputWorkspace", "merged_workspace");
+    alg->setProperty(".alf file", alf_file.getFileName());
+    alg->setProperty(".lim file", lim_file.getFileName());
+    alg->setProperty(".lin file", lin_file.getFileName());
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+  }
+
+  void test_WeightedSumDetector_throws_with_invalid_lin_file() {
+    MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
+    MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
+    auto alg = makeAlgorithm();
+    ScopedFileHelper::ScopedFile alf_file = gen_valid_alf();
+    ScopedFileHelper::ScopedFile lim_file = gen_valid_lim();
+    ScopedFileHelper::ScopedFile lin_file = gen_invalid_lin();
+    alg->setProperty("DCSWorkspace", DCSws);
+    alg->setProperty("SLFWorkspace", SLFws);
+    alg->setProperty("OutputWorkspace", "merged_workspace");
+    alg->setProperty(".alf file", alf_file.getFileName());
+    alg->setProperty(".lim file", lim_file.getFileName());
+    alg->setProperty(".lin file", lin_file.getFileName());
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
 private:

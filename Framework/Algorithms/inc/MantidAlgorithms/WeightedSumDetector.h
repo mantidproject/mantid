@@ -22,6 +22,7 @@ public:
   const std::string summary() const override {
     return "This Algorithm creates a weighted mean from multiple detectors.";
   };
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
