@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_WEIGHTEDSUMDETECTORTEST_H_
-#define MANTID_ALGORITHMS_WEIGHTEDSUMDETECTORTEST_H_
+#ifndef MANTID_ALGORITHMS_WEIGHTEDMEANDETECTORTEST_H_
+#define MANTID_ALGORITHMS_WEIGHTEDMEANDETECTORTEST_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/WeightedSumDetector.h"
+#include "MantidAlgorithms/WeightedMeanDetector.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
@@ -22,17 +22,17 @@
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::WeightedSumDetector;
+using Mantid::Algorithms::WeightedMeanDetector;
 using Mantid::MantidVec;
 
-class WeightedSumDetectorTest : public CxxTest::TestSuite {
+class WeightedMeanDetectorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WeightedSumDetectorTest *createSuite() {
-    return new WeightedSumDetectorTest();
+  static WeightedMeanDetectorTest *createSuite() {
+    return new WeightedMeanDetectorTest();
   }
-  static void destroySuite(WeightedSumDetectorTest *suite) {
+  static void destroySuite(WeightedMeanDetectorTest *suite) {
     delete suite;
   }
 
@@ -99,13 +99,13 @@ public:
   }
 
   void test_Init() {
-    WeightedSumDetector alg;
+    WeightedMeanDetector alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_WeightedSumDetector_runs_with_correction_files() {
+  void test_WeightedMeanDetector_runs_with_correction_files() {
     MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
     MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
     auto alg = makeAlgorithm();
@@ -116,13 +116,13 @@ public:
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
-    alg->setProperty(".alf file", alf_file.getFileName());
-    alg->setProperty(".lim file", lim_file.getFileName());
-    alg->setProperty(".lin file", lin_file.getFileName());
+    alg->setProperty("AlfFile", alf_file.getFileName());
+    alg->setProperty("LimFile", lim_file.getFileName());
+    alg->setProperty("LinFile", lin_file.getFileName());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
-  void test_WeightedSumDetector_throws_with_diff_n_spec_file() {
+  void test_WeightedMeanDetector_throws_with_diff_n_spec_file() {
     MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
     MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 6, 2.0);
     auto alg = makeAlgorithm();
@@ -132,13 +132,13 @@ public:
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
-    alg->setProperty(".alf file", alf_file.getFileName());
-    alg->setProperty(".lim file", lim_file.getFileName());
-    alg->setProperty(".lin file", lin_file.getFileName());
+    alg->setProperty("AlfFile", alf_file.getFileName());
+    alg->setProperty("LimFile", lim_file.getFileName());
+    alg->setProperty("LinFile", lin_file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void test_WeightedSumDetector_throws_with_invalid_alf_file() {
+  void test_WeightedMeanDetector_throws_with_invalid_alf_file() {
     MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
     MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
     auto alg = makeAlgorithm();
@@ -148,13 +148,13 @@ public:
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
-    alg->setProperty(".alf file", alf_file.getFileName());
-    alg->setProperty(".lim file", lim_file.getFileName());
-    alg->setProperty(".lin file", lin_file.getFileName());
+    alg->setProperty("AlfFile", alf_file.getFileName());
+    alg->setProperty("LimFile", lim_file.getFileName());
+    alg->setProperty("LinFile", lin_file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void test_WeightedSumDetector_throws_with_invalid_lim_file() {
+  void test_WeightedMeanDetector_throws_with_invalid_lim_file() {
     MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
     MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
     auto alg = makeAlgorithm();
@@ -164,13 +164,13 @@ public:
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
-    alg->setProperty(".alf file", alf_file.getFileName());
-    alg->setProperty(".lim file", lim_file.getFileName());
-    alg->setProperty(".lin file", lin_file.getFileName());
+    alg->setProperty("AlfFile", alf_file.getFileName());
+    alg->setProperty("LimFile", lim_file.getFileName());
+    alg->setProperty("LinFile", lin_file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
-  void test_WeightedSumDetector_throws_with_invalid_lin_file() {
+  void test_WeightedMeanDetector_throws_with_invalid_lin_file() {
     MatrixWorkspace_sptr DCSws = generate_data(0.2, 60.0, 0.01, 8, 1.0);
     MatrixWorkspace_sptr SLFws = generate_data(0.2, 60.0, 0.01, 8, 2.0);
     auto alg = makeAlgorithm();
@@ -180,9 +180,9 @@ public:
     alg->setProperty("DCSWorkspace", DCSws);
     alg->setProperty("SLFWorkspace", SLFws);
     alg->setProperty("OutputWorkspace", "merged_workspace");
-    alg->setProperty(".alf file", alf_file.getFileName());
-    alg->setProperty(".lim file", lim_file.getFileName());
-    alg->setProperty(".lin file", lin_file.getFileName());
+    alg->setProperty("AlfFile", alf_file.getFileName());
+    alg->setProperty("LimFile", lim_file.getFileName());
+    alg->setProperty("LinFile", lin_file.getFileName());
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
@@ -257,8 +257,8 @@ private:
         " 6             1             0             0.044 ";
     return ScopedFileHelper::ScopedFile(content, "gem61910.lin");
   }
-  static boost::shared_ptr<WeightedSumDetector> makeAlgorithm() {
-    auto a = boost::make_shared<WeightedSumDetector>();
+  static boost::shared_ptr<WeightedMeanDetector> makeAlgorithm() {
+    auto a = boost::make_shared<WeightedMeanDetector>();
     a->initialize();
     a->setChild(true);
     a->setRethrows(true);
@@ -266,4 +266,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_WEIGHTEDSUMDETECTORTEST_H_ */
+#endif /* MANTID_ALGORITHMS_WEIGHTEDMEANDETECTORTEST_H_ */

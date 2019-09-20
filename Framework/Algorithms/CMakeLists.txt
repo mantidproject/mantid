@@ -335,7 +335,7 @@ set(SRC_FILES
     src/VesuvioL1ThetaResolution.cpp
     src/WeightedMean.cpp
     src/WeightedMeanOfWorkspace.cpp
-    src/WeightedSumDetector.cpp
+    src/WeightedMeanDetector.cpp
     src/WeightingStrategy.cpp
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
@@ -685,7 +685,7 @@ set(INC_FILES
     inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
     inc/MantidAlgorithms/WeightedMean.h
     inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
-    inc/MantidAlgorithms/WeightedSumDetector.h
+    inc/MantidAlgorithms/WeightedMeanDetector.h
     inc/MantidAlgorithms/WeightingStrategy.h
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
@@ -1021,7 +1021,7 @@ set(TEST_FILES
     VesuvioL1ThetaResolutionTest.h
     WeightedMeanOfWorkspaceTest.h
     WeightedMeanTest.h
-    WeightedSumDetectorTest.h
+    WeightedMeanDetectorTest.h
     WeightingStrategyTest.h
     WienerSmoothTest.h
     WorkflowAlgorithmRunnerTest.h

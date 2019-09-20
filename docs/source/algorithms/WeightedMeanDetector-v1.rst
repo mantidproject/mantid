@@ -10,13 +10,13 @@ Description
 -----------
 
 This Algorithm produces a weighted mean of detectors in a workspace.
-`WeightedSumDetector` is designed to accept two workspaces obtained from
+`WeightedMeanDetector` is designed to accept two workspaces obtained from
 the ATLAS suite: the first is DCS containing the corrected total scattering
 :math:`I(Q)` for each detector group, the second is a SLF containing the
 self scattering for each detector group.
 
 The Algorithm also accepts three files describing the weighting to be used
-by `WeightedSumDetector`.
+by `WeightedMeanDetector`.
 - .alf file: Containing alpha values :math:`\alpha_i` for each detector group:
 
 +---+------+
@@ -96,6 +96,30 @@ between :math:`Qmax_i` and lower :math:`Qmin_i` for each detector.
 
 Usage
 -----
+
+.. code:: Python
+
+   from mantid.simpleapi import *
+
+   Load(
+       Filename = "gem61910.DCS",
+       OutputWorkspace = "gem61910_DCS")
+   ConvertToHistogram(
+       InputWorkspace = "gem61910_DCS",
+       OutputWorkspace = "gem61910_DCS")
+   Load(
+       Filename = "gem61910.SLF",
+       OutputWorkspace = "gem61910_SLF")
+   ConvertToHistogram(
+       InputWorkspace = "gem61910_SLF",
+       OutputWorkspace = "gem61910_SLF")
+   WeightedMeanDetector(
+       DCSWorkspace = gem61910_DCS,
+       SLFWorkspace = gem61910_SLF,
+       OutputWorkspace = gem61910_merged,
+       AlfFile = gem61910.alf,
+       LimFile = gem61910.lim,
+       LinFile = gem61910.lin)
 
 .. categories::
 

@@ -4,19 +4,19 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_WEIGHTEDSUMSPECTRA_H_
-#define MANTID_ALGORITHMS_WEIGHTEDSUMSPECTRA_H_
+#ifndef MANTID_ALGORITHMS_WEIGHTEDMEANDETECTOR_H_
+#define MANTID_ALGORITHMS_WEIGHTEDMEANDETECTOR_H_
 
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport WeightedSumDetector : public API::Algorithm {
+class DLLExport WeightedMeanDetector : public API::Algorithm {
 public:
-  WeightedSumDetector() : API::Algorithm() {}
-  virtual ~WeightedSumDetector() {}
-  const std::string name() const override { return "WeightedSumDetector"; };
+  WeightedMeanDetector() : API::Algorithm() {}
+  virtual ~WeightedMeanDetector() {}
+  const std::string name() const override { return "WeightedMeanDetector"; };
   int version() const override { return 1; };
   const std::string category() const override { return "Transforms\\Grouping"; };
   const std::string summary() const override {
@@ -41,4 +41,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_WEIGHTEDSUMSPECTRA_H_*/
+#endif /*MANTID_ALGORITHMS_WEIGHTEDMEANDETECTOR_H_*/

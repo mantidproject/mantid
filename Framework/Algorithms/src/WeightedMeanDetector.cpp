@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "MantidAlgorithms/WeightedSumDetector.h"
+#include "MantidAlgorithms/WeightedMeanDetector.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -19,9 +19,9 @@ namespace Mantid {
 namespace Algorithms {
 
 // Algorithm must be declared
-DECLARE_ALGORITHM(WeightedSumDetector)
+DECLARE_ALGORITHM(WeightedMeanDetector)
 
-std::map<std::string, std::string> WeightedSumDetector::validateInputs() {
+std::map<std::string, std::string> WeightedMeanDetector::validateInputs() {
   std::map<std::string, std::string> issues;
 
   API::MatrixWorkspace_sptr DCSWorkspace = getProperty("DCSWorkspace");
@@ -33,7 +33,7 @@ std::map<std::string, std::string> WeightedSumDetector::validateInputs() {
         "SLFWorkspace detector number does not match DCSWorkspace";
   }
 
-  std::vector<std::string> cor_files = {".alf file", ".lin file", ".lim file"};
+  std::vector<std::string> cor_files = {"AlfFile", "LinFile", "LimFile"};
   for (const std::string &param : cor_files) {
     std::string line;
     int detector_num;
@@ -50,7 +50,7 @@ std::map<std::string, std::string> WeightedSumDetector::validateInputs() {
   return issues;
 }
 
-void WeightedSumDetector::init() {
+void WeightedMeanDetector::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "DCSWorkspace", "", Kernel::Direction::Input),
                   "The workspace containing the corrected total scattering for "
@@ -63,19 +63,19 @@ void WeightedSumDetector::init() {
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace to contain merged spectra.");
   declareProperty(
-      std::make_unique<API::FileProperty>(".alf file", "", API::FileProperty::Load),
+      std::make_unique<API::FileProperty>("AlfFile", "", API::FileProperty::Load),
       "Path to a .alf file containing Alpha values for each detector");
-  declareProperty(std::make_unique<API::FileProperty>(".lim file", "",
+  declareProperty(std::make_unique<API::FileProperty>("LimFile", "",
                                                       API::FileProperty::Load),
                   "Path to a .lim file containing minimum and maximum values "
                   "to sum between for each detector");
-  declareProperty(std::make_unique<API::FileProperty>(".lin file", "",
+  declareProperty(std::make_unique<API::FileProperty>("LinFile", "",
                                                       API::FileProperty::Load),
                   "Path to a .lin file containing the gradient and intercept "
                   "of a liniar background to be subtracted from each detector");
 };
 
-void WeightedSumDetector::exec() {
+void WeightedMeanDetector::exec() {
   Mantid::MantidVec q;
   std::vector<Mantid::MantidVec> DCS;
   std::vector<Mantid::MantidVec> SLF;
@@ -86,9 +86,9 @@ void WeightedSumDetector::exec() {
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
 
   const size_t spectra_num = DCSWorkspace->spectrumInfo().size();
-  const std::string alf_dir = getProperty(".alf file");
-  const std::string lin_dir = getProperty(".lin file");
-  const std::string lim_dir = getProperty(".lim file");
+  const std::string alf_dir = getProperty("AlfFile");
+  const std::string lin_dir = getProperty("LinFile");
+  const std::string lim_dir = getProperty("LimFile");
   std::map<int, double> alphas = read_alf_file(alf_dir, spectra_num);
   std::map<int, std::vector<double>> linears =
       read_lin_file(lin_dir, spectra_num);
@@ -159,7 +159,7 @@ void WeightedSumDetector::exec() {
   setProperty("OutputWorkspace", outWS);
 };
 
-const std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir,
+const std::map<int, double> WeightedMeanDetector::read_alf_file(std::string dir,
                                                          size_t spectra_num) {
   std::map<int, double> alpha;
   std::ifstream alf_file(dir);
@@ -191,7 +191,7 @@ const std::map<int, double> WeightedSumDetector::read_alf_file(std::string dir,
 }
 
 const std::map<int, std::vector<double>>
-WeightedSumDetector::read_lin_file(std::string dir, size_t spectra_num) {
+WeightedMeanDetector::read_lin_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> linear;
   std::ifstream lin_file(dir);
   std::string line;
@@ -232,7 +232,7 @@ WeightedSumDetector::read_lin_file(std::string dir, size_t spectra_num) {
 }
 
 const std::map<int, std::vector<double>>
-WeightedSumDetector::read_lim_file(std::string dir, size_t spectra_num) {
+WeightedMeanDetector::read_lim_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> limit;
   std::ifstream lim_file(dir);
   std::string line;
@@ -273,7 +273,7 @@ WeightedSumDetector::read_lim_file(std::string dir, size_t spectra_num) {
 }
 
 const API::MatrixWorkspace_sptr
-WeightedSumDetector::rebin(API::MatrixWorkspace_sptr input,
+WeightedMeanDetector::rebin(API::MatrixWorkspace_sptr input,
 	std::string params) {
   auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", input);
