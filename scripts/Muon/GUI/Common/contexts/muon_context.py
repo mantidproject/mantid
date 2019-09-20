@@ -197,7 +197,7 @@ class MuonContext(object):
                 run_string)
 
             deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
-                                                             run_string,workspace_suffix=self.workspace_suffix)
+                                                             str(run[0]),workspace_suffix=self.workspace_suffix)
             MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
             self.data_context._loaded_data.get_data(
                 run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
@@ -376,6 +376,7 @@ class MuonContext(object):
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)
         self.fitting_context.remove_workspace_by_name(workspace_name)
+        self.gui_context.remove_workspace_by_name(workspace_name)
         self.update_view_from_model_notifier.notify_subscribers(workspace_name)
 
     def clear_context(self):

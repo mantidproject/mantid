@@ -61,3 +61,11 @@ class MuonGuiContext(dict):
             return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
         else:
             return '+'.join([str(period) for period in summed_periods])
+
+    def remove_workspace_by_name(self, workspace_name):
+        try:
+            if self['DeadTimeTable'].name() == workspace_name:
+                self.pop('DeadTimeTable')
+                self['DeadTimeSource'] = 'FromFile'
+        except KeyError:
+            pass
