@@ -9,11 +9,10 @@
 Description
 -----------
 
-This Algorithm produces a weighted mean of detectors in a workspace.
-`WeightedMeanDetector` is designed to accept two workspaces obtained from
-the ATLAS suite: the first is DCS containing the corrected total scattering
-:math:`I(Q)` for each detector group, the second is a SLF containing the
-self scattering for each detector group.
+This Algorithm produces a weighted mean of detectors using two workspaces
+obtained from the ATLAS suite: the first is DCS containing the corrected
+total scattering :math:`I(Q)` for each detector group, the second is a SLF
+containing the self scattering for each detector group. [1]_
 
 The Algorithm also accepts three files describing the weighting to be used
 by `WeightedMeanDetector`.
@@ -120,6 +119,8 @@ Usage
        AlfFile = gem61910.alf,
        LimFile = gem61910.lim,
        LinFile = gem61910.lin)
+
+.. [1] https://www.isis.stfc.ac.uk/Pages/intmer-manual6151.pdf
 
 .. categories::
 
