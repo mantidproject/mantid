@@ -23,7 +23,7 @@ where,
 
 and the expression for :math:`G(t)` and :math:`\omega_D` are given by
 
-.. math:: G(t)=\frac{1}{6}\left[3+\cos(\sqrt{3} \omega_\text{D} t)+(1-\frac{1}{\sqrt{3}})\cos(\frac{3-\sqrt{3}}{2}\omega_\text{D} t)+(1+\frac{1}{\sqrt{3}})\cos(\frac{3+\sqrt{3}}{2}\omega_\text{D} t)\right]
+.. math:: G(t)=\frac{1}{6}\left[3+\cos(\sqrt{3} \omega_\text{D} t)+\left(1-\frac{1}{\sqrt{3}}\right)\cos(\frac{3-\sqrt{3}}{2}\omega_\text{D} t)+\left(1+\frac{1}{\sqrt{3}}\right)\cos(\frac{3+\sqrt{3}}{2}\omega_\text{D} t)\right]
 
 and
 
