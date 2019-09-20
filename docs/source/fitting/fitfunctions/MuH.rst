@@ -30,6 +30,11 @@ and :math:`\phi` (rad) is the phase at time :math:`t=0`.
 
 .. properties::
 
+References
+----------
+
+[1]  `T. Lancaster et al., J. Phys.: Condens. Matter 21 346004 (2009) <https://iopscience.iop.org/article/10.1088/0953-8984/21/34/346004/pdf>`_.
+
 .. categories::
 
 .. sourcelink::
