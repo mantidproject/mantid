@@ -16,19 +16,19 @@ class MuH(IFunction1D):
         return "Muon"
 
     def init(self):
-        self.declareParameter("Amp", 0.5, 'Amplitude')
+        self.declareParameter("A0", 0.5, 'Amplitude')
         self.declareParameter("FreqD", 0.5, 'Frequency (MHz)' )
         self.declareParameter("Lambda", 0.3, 'Exponential decay rate')
         self.declareParameter("Sigma", 0.05, 'Gaussian decay rate')
 
     def function1D(self, x):
-        Amp = self.getParameterValue("Amp")
+        A0 = self.getParameterValue("A0")
         FreqD = self.getParameterValue("FreqD")
         Lambda = self.getParameterValue("Lambda")
         sigma = self.getParameterValue("Sigma")
         OmegaD = FreqD * 2 * np.pi
         gau = np.exp(-0.5 * (x * sigma) ** 2)
         Lor = np.exp( - Lambda * x)
-        return Amp * gau * Lor * (1 + np.cos(OmegaD * x) + 2 * np.cos(0.5 * OmegaD * x) + 2 * np.cos(1.5 * OmegaD * x)) / 6
+        return A0 * gau * Lor * (1 + np.cos(OmegaD * x) + 2 * np.cos(0.5 * OmegaD * x) + 2 * np.cos(1.5 * OmegaD * x)) / 6
 
 FunctionFactory.subscribe(MuH)
