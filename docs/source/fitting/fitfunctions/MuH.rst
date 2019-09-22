@@ -16,9 +16,9 @@ Fitting function for use by Muon scientists defined by:
 :math:`A_0` is the amplitude,
 
 
-:math:`\lambda` is exponential rate,
+:math:`\lambda` is the exponential decay rate,
 
-:math:`\sigma` is gaussian decay rate,
+:math:`\sigma` is the gaussian decay rate,
 
 :math:`\nu` (MHz) is the oscillating frequency,
 
