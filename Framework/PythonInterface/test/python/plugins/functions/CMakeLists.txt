@@ -1,9 +1,9 @@
 # Tests for Fit functions
 
 set(TEST_PY_FILES
-    BesselTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
+    StandardSCTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
