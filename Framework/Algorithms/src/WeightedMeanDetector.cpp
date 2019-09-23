@@ -36,7 +36,7 @@ std::map<std::string, std::string> WeightedMeanDetector::validateInputs() {
   std::vector<std::string> cor_files = {"AlfFile", "LinFile", "LimFile"};
   for (const std::string &param : cor_files) {
     std::string line;
-    int detector_num;
+    size_t detector_num;
     std::string dir;
     dir = getProperty(param);
     std::ifstream file(dir);
@@ -74,7 +74,7 @@ void WeightedMeanDetector::init() {
                                                       API::FileProperty::Load),
                   "Path to a .lin file containing the gradient and intercept "
                   "of a liniar background to be subtracted from each detector");
-};
+}
 
 void WeightedMeanDetector::exec() {
   Mantid::MantidVec q;
@@ -96,7 +96,7 @@ void WeightedMeanDetector::exec() {
   std::map<int, std::vector<double>> limits =
       read_lim_file(lim_dir, spectra_num);
 
-  const size_t n_bins = DCSWorkspace->readX(0).size();
+  const double n_bins = static_cast<double>(DCSWorkspace->readX(0).size());
   double max_limit = -1.0;
   double min_limit = -1.0;
   for (auto it = limits.begin(); it != limits.end(); it++) {
@@ -109,7 +109,8 @@ void WeightedMeanDetector::exec() {
     }
   }
 
-  const double new_binwidth = (max_limit - min_limit) / n_bins;
+  const double new_binwidth =
+      (max_limit - min_limit) / n_bins;
   std::ostringstream binParams;
   binParams << min_limit << "," << new_binwidth << "," << max_limit;
   API::MatrixWorkspace_sptr DCSWorkspace_rebined =
@@ -158,16 +159,16 @@ void WeightedMeanDetector::exec() {
   ChildAlg->execute();
   outWS = ChildAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outWS);
-};
+}
 
 const std::map<int, double>
 WeightedMeanDetector::read_alf_file(std::string dir, size_t spectra_num) {
   std::map<int, double> alpha;
   std::ifstream alf_file(dir);
   std::string line;
-  bool first_line = TRUE;
+  bool first_line = true;
   while (std::getline(alf_file, line)) {
-    if (first_line == FALSE) {
+    if (first_line == false) {
       std::stringstream ss(line);
       int detector;
       double value;
@@ -175,7 +176,7 @@ WeightedMeanDetector::read_alf_file(std::string dir, size_t spectra_num) {
       ss >> value;
       alpha[detector] = value;
     } else {
-      first_line = FALSE;
+      first_line = false;
       std::stringstream ss(line);
       int detector;
       ss >> detector;
@@ -196,9 +197,9 @@ WeightedMeanDetector::read_lin_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> linear;
   std::ifstream lin_file(dir);
   std::string line;
-  bool first_line = TRUE;
+  bool first_line = true;
   while (std::getline(lin_file, line)) {
-    if (first_line == FALSE) {
+    if (first_line == false) {
       std::stringstream ss(line);
       int detector;
       double has_linear;
@@ -216,7 +217,7 @@ WeightedMeanDetector::read_lin_file(std::string dir, size_t spectra_num) {
       std::vector<double> value = {has_linear, grad, intercept};
       linear[detector] = value;
     } else {
-      first_line = FALSE;
+      first_line = false;
       std::stringstream ss(line);
       int detector;
       ss >> detector;
@@ -237,9 +238,9 @@ WeightedMeanDetector::read_lim_file(std::string dir, size_t spectra_num) {
   std::map<int, std::vector<double>> limit;
   std::ifstream lim_file(dir);
   std::string line;
-  bool first_line = TRUE;
+  bool first_line = true;
   while (std::getline(lim_file, line)) {
-    if (first_line == FALSE) {
+    if (first_line == false) {
       std::stringstream ss(line);
       int detector;
       double use_det;
@@ -257,7 +258,7 @@ WeightedMeanDetector::read_lim_file(std::string dir, size_t spectra_num) {
       std::vector<double> value = {use_det, q_min, q_max};
       limit[detector] = value;
     } else {
-      first_line = FALSE;
+      first_line = false;
       std::stringstream ss(line);
       int detector;
       ss >> detector;
