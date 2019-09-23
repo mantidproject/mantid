@@ -550,7 +550,8 @@ void KafkaEventStreamDecoder::initLocalCaches(
         API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2,
                                                  1));
     eventBuffer->setInstrument(ws->getInstrument());
-    eventBuffer->rebuildSpectraMapping();
+    /* Need a mapping with spectra numbers starting at zero */
+    eventBuffer->rebuildSpectraMapping(true, 0);
     eventBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");
     eventBuffer->setYUnit("Counts");

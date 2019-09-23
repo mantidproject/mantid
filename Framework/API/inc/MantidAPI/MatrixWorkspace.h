@@ -99,7 +99,8 @@ public:
   virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
   /// Build the default spectra mapping, most likely wanted after an instrument
   /// update
-  void rebuildSpectraMapping(const bool includeMonitors = true);
+  void rebuildSpectraMapping(const bool includeMonitors = true,
+                             const specnum_t specNumOffset = 1);
 
   // More mapping
   spec2index_map getSpectrumToWorkspaceIndexMap() const;
