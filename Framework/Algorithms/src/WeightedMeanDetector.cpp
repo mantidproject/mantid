@@ -177,7 +177,7 @@ WeightedMeanDetector::read_alf_file(std::string dir, size_t spectra_num) {
     } else {
       first_line = false;
       std::stringstream ss(line);
-      int detector;
+      size_t detector;
       ss >> detector;
       if (detector != spectra_num) {
         try {
@@ -218,7 +218,7 @@ WeightedMeanDetector::read_lin_file(std::string dir, size_t spectra_num) {
     } else {
       first_line = false;
       std::stringstream ss(line);
-      int detector;
+      size_t detector;
       ss >> detector;
       if (detector != spectra_num) {
         try {
@@ -259,7 +259,7 @@ WeightedMeanDetector::read_lim_file(std::string dir, size_t spectra_num) {
     } else {
       first_line = false;
       std::stringstream ss(line);
-      int detector;
+      size_t detector;
       ss >> detector;
       if (detector != spectra_num) {
         try {
