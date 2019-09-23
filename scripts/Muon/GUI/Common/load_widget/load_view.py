@@ -36,7 +36,7 @@ class LoadView(QtWidgets.QWidget):
         self.setLayout(self.grid)
 
     def show_directory_manager(self):
-        manageuserdirectories.OpenManageUserDirectories.open_mud(self)
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def disable_buttons(self):
         self.spinbox.setEnabled(False)

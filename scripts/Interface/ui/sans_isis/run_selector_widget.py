@@ -58,7 +58,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         return "Files ( *" + " *".join(extensions) + ")"
 
     def show_directories_manager(self):
-        manageuserdirectories.OpenManageUserDirectories.open_mud(self)
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def run_not_found(self):
         QtWidgets.QMessageBox.warning(self, "Run Not Found!",

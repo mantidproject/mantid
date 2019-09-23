@@ -50,10 +50,6 @@ void ManageUserDirectories::initLayout() {
           SLOT(selectSaveDir()));
 }
 
-void ManageUserDirectories::setHelpButtonVisible(const bool &visible) {
-  m_uiForm.pbHelp->setVisible(visible);
-}
-
 void ManageUserDirectories::loadProperties() {
   m_userPropFile =
       QString::fromStdString(
@@ -281,11 +277,20 @@ void ManageUserDirectories::selectSaveDir() {
     m_uiForm.leDefaultSave->setText(path);
   }
 }
-/** Opens a manage directories dialog and gives it focus
- *  @param parent :: the parent window, probably the window that called it
- */
-void ManageUserDirectories::openUserDirsDialog(QWidget *parent) {
-  ManageUserDirectories *ad = new ManageUserDirectories(parent);
-  ad->show();
-  ad->setFocus();
+
+std::unique_ptr<ManageUserDirectories>
+    ManageUserDirectories::m_currentlyOpenMUD;
+
+void ManageUserDirectories::openManageUserDirectories() {
+  if (m_currentlyOpenMUD) {
+    m_currentlyOpenMUD->raise();
+  } else {
+    m_currentlyOpenMUD = std::make_unique<ManageUserDirectories>();
+    m_currentlyOpenMUD->show();
+  }
+}
+
+void ManageUserDirectories::closeEvent(QCloseEvent *event) {
+  m_currentlyOpenMUD = NULL;
+  QWidget::closeEvent(event);
 }

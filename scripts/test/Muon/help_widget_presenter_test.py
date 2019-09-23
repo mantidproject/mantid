@@ -25,17 +25,10 @@ class HelpWidgetPresenterTest(unittest.TestCase):
     def tearDown(self):
         self.view = None
 
-    @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.manageuserdirectories.OpenManageUserDirectories.open_mud')
-    def test_that_manage_directories_button_clicked_opens_directory_manager(self, open_mud_mock):
+    @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.manageuserdirectories.ManageUserDirectories')
+    def test_that_manage_directories_button_clicked_opens_directory_manager(self, mud_mock):
         self.view.manage_user_dir_button.clicked.emit(True)
-        self.assertEqual(1, open_mud_mock.call_count)
-
-    def test_that_manage_directories_button_does_not_open_multiple_times(self):
-        manageuserdirectories.OpenManageUserDirectories.currently_open_mud = manageuserdirectories.ManageUserDirectories()
-        manageuserdirectories.ManageUserDirectories.raise_ = mock.MagicMock()
-        self.view.manage_user_dir_button.clicked.emit(True)
-
-        self.assertEqual(1, manageuserdirectories.OpenManageUserDirectories.currently_open_mud.raise_.call_count)
+        self.assertEqual(1, mud_mock.openManageUserDirectories.call_count)
 
 
 if __name__ == '__main__':

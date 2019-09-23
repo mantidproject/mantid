@@ -22,8 +22,8 @@ class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
 public:
   ManageUserDirectories(QWidget *parent = nullptr);
   ~ManageUserDirectories() override;
-  static void openUserDirsDialog(QWidget *parent);
-  void setHelpButtonVisible(const bool &visible);
+  static void openManageUserDirectories();
+  void closeEvent(QCloseEvent *event);
 
 private:
   virtual void initLayout();
@@ -46,6 +46,7 @@ private slots:
 private:
   Ui::ManageUserDirectories m_uiForm;
   QString m_userPropFile;
+  static std::unique_ptr<ManageUserDirectories> m_currentlyOpenMUD;
 };
 
 } // namespace API

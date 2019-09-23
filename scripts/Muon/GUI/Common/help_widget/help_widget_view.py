@@ -60,7 +60,7 @@ class HelpWidgetView(QtWidgets.QWidget):
         self.help_button.clicked.connect(slot)
 
     def show_directory_manager(self):
-        manageuserdirectories.OpenManageUserDirectories.open_mud(self)
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def _on_help_button_clicked(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
