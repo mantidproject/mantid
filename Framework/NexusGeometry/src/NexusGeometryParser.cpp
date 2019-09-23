@@ -426,12 +426,13 @@ private:
   }
 
   // Parse cylinder nexus geometry
-  boost::shared_ptr<const Geometry::IObject>
+  void
   parseNexusCylinderDetector(const Group &shapeGroup, const std::string &name,
-                             InstrumentBuilder &builder) {
+                             InstrumentBuilder &builder,
+                             const std::vector<Mantid::detid_t> &detectorIds) {
 
-    const auto detIds = getDetectorIds(shapeGroup);
-
+    const auto cylinderIndexToDetId =
+        getDetectorIds(shapeGroup); // 2x detids size
     H5std_string pointsToVertices = "cylinders";
     const auto nxintsize =
         shapeGroup.openDataSet(pointsToVertices).getDataType().getSize();
@@ -442,39 +443,47 @@ private:
     } else {
       cPoints = get1DDataset<int64_t>(shapeGroup, pointsToVertices);
     }
-
     H5std_string verticesData = "vertices";
     // 1D reads row first, then columns
     std::vector<double> vPoints =
         get1DDataset<double>(shapeGroup, verticesData);
-    // auto nVertices = vPoints.size() / 3;
-    // Eigen::Map<Eigen::Matrix<double, 3, 3>> vertices(vPoints.data());
-    // Read points into matrix, sorted by cPoints ordering
-    Eigen::Matrix<double, 3, 3> vSorted;
-    for (int i = 0; i < cPoints.size(); i += 3) {
-      auto centre = Kernel::V3D{vPoints[cPoints[i]], vPoints[cPoints[i] + 1],
-                                vPoints[cPoints[i] + 2]};
-      auto radius =
-          Kernel::V3D{vPoints[cPoints[i + 1]], vPoints[cPoints[i + 1] + 1],
-                      vPoints[cPoints[i + 1] + 2]};
-      auto other =
-          Kernel::V3D{vPoints[cPoints[i + 2]], vPoints[cPoints[i + 2] + 1],
-                      vPoints[cPoints[i + 2] + 2]};
-      vSorted[0] = centre[0];
-      vSorted[1] = centre[1];
-      vSorted[2] = centre[2];
-      vSorted[3] = radius[0];
-      vSorted[4] = radius[1];
-      vSorted[5] = radius[2];
-      vSorted[6] = other[0];
-      vSorted[7] = other[1];
-      vSorted[8] = other[2];
-    }
+    if (cylinderIndexToDetId.size() != 2 * detectorIds.size())
+      throw std::runtime_error("numbers of detector with shape cylinder does "
+                               "not match number of detectors");
+    if (cPoints.size() % 3 != 0)
+      throw std::runtime_error("cylinders not divisble by 3. Bad input.");
+    if (vPoints.size() % 3 != 0)
+      throw std::runtime_error("vertices not divisble by 3. Bad input.");
 
-    NexusShapeFactory::createCylinder(vSorted);
-    builder.addDetectorToInstrument(name + "_" + std::to_string(i), detIds[i],
-                                    (centre + other) / 2,
+    for (size_t i = 0; i < cylinderIndexToDetId.size(); i += 2) {
+      auto cylinderIndex = cylinderIndexToDetId[i];
+      auto detId = cylinderIndexToDetId[i + 1];
+
+      auto centreIndex = cPoints[cylinderIndex * 3];
+      auto radiusIndex = cPoints[cylinderIndex * 3 + 1];
+      auto otherIndex = cPoints[cylinderIndex * 3 + 2];
+
+      Eigen::Matrix<double, 3, 3> vSorted;
+      auto centre = Kernel::V3D{vPoints[centreIndex], vPoints[centreIndex + 1],
+                                vPoints[centreIndex + 2]};
+      auto radius = Kernel::V3D{vPoints[radiusIndex], vPoints[radiusIndex + 1],
+                                vPoints[radiusIndex + 2]};
+      auto other = Kernel::V3D{vPoints[otherIndex], vPoints[otherIndex + 1],
+                               vPoints[otherIndex + 2]};
+      vSorted(0) = centre[0];
+      vSorted(1) = centre[1];
+      vSorted(2) = centre[2];
+      vSorted(3) = radius[0];
+      vSorted(4) = radius[1];
+      vSorted(5) = radius[2];
+      vSorted(6) = other[0];
+      vSorted(7) = other[1];
+      vSorted(8) = other[2];
+      builder.addDetectorToLastBank(name + "_" + std::to_string(cylinderIndex),
+                                    detId,
+                                    Kernel::toVector3d((centre + other) / 2),
                                     NexusShapeFactory::createCylinder(vSorted));
+    }
   }
 
   // Parse cylinder nexus geometry
@@ -617,7 +626,7 @@ private:
   }
 
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
-                       const std::vector<int> &detectorIds,
+                       const std::vector<Mantid::detid_t> &detectorIds,
                        const std::string &bankName) {
     if (utilities::hasAttribute(shapeGroup, NX_OFF)) {
       // Load mapping between detector IDs and faces, winding order of vertices
@@ -643,7 +652,7 @@ private:
                                     vertices, detectorIds.size(), detIdToIndex,
                                     bankName, builder);
     } else if (utilities::hasAttribute(shapeGroup, NX_CYLINDER)) {
-      parseNexusCylinderDetector(shapeGroup, bankName, builder);
+      parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
     }
   }
 

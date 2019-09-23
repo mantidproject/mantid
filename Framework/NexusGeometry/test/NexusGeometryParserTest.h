@@ -63,10 +63,61 @@ public:
         fullpath, std::make_unique<MockLogger>());
   }
 
-  void test_faces_without_detids() {
+  void test_pixel_shape_as_mesh() {
 
     auto instrument = NexusGeometryParser::createInstrument(
-        "/Users/spu92482/Downloads/DETGEOM_example_bug.nxs",
+        "/home/spu92482/Downloads/DETGEOM_example_1.nxs",
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 4);
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+    auto *shape1Mesh =
+        dynamic_cast<const Geometry::MeshObject2D *>(&shape1); // Test detectors
+    auto *shape2Mesh = dynamic_cast<const Geometry::MeshObject2D *>(&shape2);
+    TS_ASSERT(shape1Mesh);
+    TS_ASSERT(shape2Mesh);
+    TS_ASSERT_EQUALS(shape1Mesh, shape2Mesh); // pixel shape - all identical.
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 2);
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 4);
+  }
+  void test_pixel_shape_as_cylinders() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        "/home/spu92482/Downloads/DETGEOM_example_2.nxs",
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 4);
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+
+    auto *shape1Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape1); // Test detectors
+    auto *shape2Cylinder = dynamic_cast<const Geometry::CSGObject *>(&shape2);
+
+    TS_ASSERT(shape1Cylinder);
+    TS_ASSERT(shape2Cylinder);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(), 0.25);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), 0.5);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(),
+                     shape2Cylinder->shapeInfo().radius());
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(),
+                     shape2Cylinder->shapeInfo().height());
+  }
+  void test_detector_shape_as_mesh() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        "/home/spu92482/Downloads/DETGEOM_example_3.nxs",
+        std::make_unique<testing::NiceMock<MockLogger>>());
+    auto beamline = extractBeamline(*instrument);
+
+    // auto componentInfo = *beamline.first;
+  }
+  void test_detector_shape_as_cylinders() {
+    auto instrument = NexusGeometryParser::createInstrument(
+        "/home/spu92482/Downloads/DETGEOM_example_4.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
 
