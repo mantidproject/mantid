@@ -32,9 +32,7 @@ public:
   static WeightedMeanDetectorTest *createSuite() {
     return new WeightedMeanDetectorTest();
   }
-  static void destroySuite(WeightedMeanDetectorTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(WeightedMeanDetectorTest *suite) { delete suite; }
 
   void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 

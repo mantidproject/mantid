@@ -4,16 +4,16 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-#include "MantidAlgorithms/WeightedMeanDetector.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/WeightedMeanDetector.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,7 +63,8 @@ void WeightedMeanDetector::init() {
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "Workspace to contain merged spectra.");
   declareProperty(
-      std::make_unique<API::FileProperty>("AlfFile", "", API::FileProperty::Load),
+      std::make_unique<API::FileProperty>("AlfFile", "",
+                                          API::FileProperty::Load),
       "Path to a .alf file containing Alpha values for each detector");
   declareProperty(std::make_unique<API::FileProperty>("LimFile", "",
                                                       API::FileProperty::Load),
@@ -122,7 +123,7 @@ void WeightedMeanDetector::exec() {
     SLF.push_back(SLFWorkspace_rebined->readY(i));
   }
 
-  for (size_t i = 0; i < (q.size()-1); i++) {
+  for (size_t i = 0; i < (q.size() - 1); i++) {
     double merge_q = 0.0;
     double num_det = 0.0;
     for (auto it = limits.begin(); it != limits.end(); it++) {
@@ -133,7 +134,7 @@ void WeightedMeanDetector::exec() {
         num_det++;
         double q_min = limits[detector][1];
         double q_max = limits[detector][2];
-        if (q[i] > q_min && q[i+1] < q_max) {
+        if (q[i] > q_min && q[i + 1] < q_max) {
           double alpha = alphas[detector];
           double grad = linears[detector][1];
           double intercept = linears[detector][2];
@@ -142,7 +143,7 @@ void WeightedMeanDetector::exec() {
               alpha * DCS[det_index][i] - SLF[det_index][i] + background;
           merge_q += corrected;
         }
-	  }
+      }
     }
     merge.push_back(merge_q / num_det);
   }
@@ -159,8 +160,8 @@ void WeightedMeanDetector::exec() {
   setProperty("OutputWorkspace", outWS);
 };
 
-const std::map<int, double> WeightedMeanDetector::read_alf_file(std::string dir,
-                                                         size_t spectra_num) {
+const std::map<int, double>
+WeightedMeanDetector::read_alf_file(std::string dir, size_t spectra_num) {
   std::map<int, double> alpha;
   std::ifstream alf_file(dir);
   std::string line;
@@ -274,14 +275,13 @@ WeightedMeanDetector::read_lim_file(std::string dir, size_t spectra_num) {
 
 const API::MatrixWorkspace_sptr
 WeightedMeanDetector::rebin(API::MatrixWorkspace_sptr input,
-	std::string params) {
+                            std::string params) {
   auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", input);
   childAlg->setProperty("OutputWorkspace", "blank");
   childAlg->setPropertyValue("Params", params);
   childAlg->executeAsChildAlg();
-  API::MatrixWorkspace_sptr rebined =
-      childAlg->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr rebined = childAlg->getProperty("OutputWorkspace");
   return rebined;
 }
 
