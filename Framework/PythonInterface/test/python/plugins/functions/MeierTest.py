@@ -21,7 +21,7 @@ class MeierTest(unittest.TestCase):
 
 	def test_function_output(self):
 		input = [0.0, 4.0, 8.0, 12.0]
-		expected = [0.5, 0.0275220793218433, 0.012875459858433013, 0.0032788573310363165]
+		expected = [0.5, 0.09209927258374222, 0.0023798684614228685, 0.0007490849206591537]
 		tolerance = 1.0e-05
 		status, output = check_output("Meier", input, expected, tolerance, A0 = 0.5, FreqD = 0.01, FreqQ = 0.2, J = 3.5, Lambda = 0.1, Sigma = 0.2)
 		if not status:
