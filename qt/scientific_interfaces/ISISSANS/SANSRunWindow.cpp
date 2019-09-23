@@ -4512,9 +4512,8 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(
 
     auto transSpec = m_uiForm.trans_M3M4_line_edit->text();
     if (!transSpec.isEmpty()) {
-      pythonCode +=
-          "i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" + transSpec +
-          ")\n";
+      pythonCode += "i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" +
+                    transSpec + ")\n";
     }
   } else {
     // Handle Radius
