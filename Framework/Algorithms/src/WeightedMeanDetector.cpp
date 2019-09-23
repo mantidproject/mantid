@@ -109,8 +109,7 @@ void WeightedMeanDetector::exec() {
     }
   }
 
-  const double new_binwidth =
-      (max_limit - min_limit) / n_bins;
+  const double new_binwidth = (max_limit - min_limit) / n_bins;
   std::ostringstream binParams;
   binParams << min_limit << "," << new_binwidth << "," << max_limit;
   API::MatrixWorkspace_sptr DCSWorkspace_rebined =
