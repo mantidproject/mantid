@@ -8,6 +8,7 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 
 #include "DllConfig.h"
+#include "observerPattern.h"
 
 #include <QLineEdit>
 #include <QObject>
@@ -24,6 +25,9 @@ public:
   ALFView_view(QWidget *parent = nullptr);
   int getRunNumber();
   void setRunQuietly(const QString runNumber);
+  void observeLoadRun(observer *listener) {
+    m_loadRunObservable->attach(listener);
+  };
 
 public slots:
   void runChanged();
@@ -37,6 +41,7 @@ private:
   void generateLoadWidget(QWidget *loadBar);
   QLineEdit *m_run;
   QPushButton *m_browse;
+  observable *m_loadRunObservable;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

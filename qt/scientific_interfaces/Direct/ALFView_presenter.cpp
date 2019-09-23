@@ -10,18 +10,25 @@
 
 #include "MantidAPI/FileFinder.h"
 
+#include<functional>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
-    : m_view(view), m_model(model), m_currentRun(0) {
+    : m_view(view), m_model(model), m_currentRun(0),
+      m_loadRunObserver(nullptr) {
+  m_loadRunObserver = new loadObserver();
+  m_loadRunObserver->setSlot(std::bind(&ALFView_presenter::loadRunNumber,this));
   m_model->loadEmptyInstrument();
 }
 
 void ALFView_presenter::initLayout() {
-  connect(m_view, SIGNAL(newRun()), this, SLOT(loadRunNumber()));
-  connect(m_view, SIGNAL(browsedToRun(std::string)), this,
-          SLOT(loadBrowsedFile(const std::string)));
+  m_view->observeLoadRun(m_loadRunObserver);
+  
+      // connect(m_view, SIGNAL(newRun()), this, SLOT(loadRunNumber()));
+      connect(m_view, SIGNAL(browsedToRun(std::string)), this,
+              SLOT(loadBrowsedFile(const std::string)));
 }
 
 void ALFView_presenter::loadAndAnalysis(const std::string &run) {
@@ -46,7 +53,6 @@ void ALFView_presenter::loadRunNumber() {
   int newRun = m_view->getRunNumber();
   const int currentRunInADS = m_model->currentRun();
 
-
   if (currentRunInADS == newRun) {
     return;
   }
@@ -57,7 +63,7 @@ void ALFView_presenter::loadRunNumber() {
     filePath = Mantid::API::FileFinder::Instance().findRuns(runNumber)[0];
   } catch (...) {
     m_view->setRunQuietly(QString::number(m_currentRun));
-	// if file has been deleted we should replace it
+    // if file has been deleted we should replace it
     if (currentRunInADS == -999) {
       loadAndAnalysis("ALF" + std::to_string(m_currentRun));
     }

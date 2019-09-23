@@ -16,10 +16,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_view::ALFView_view(QWidget *parent) : QWidget(parent), m_run(nullptr) {
+ALFView_view::ALFView_view(QWidget *parent)
+    : QWidget(parent), m_run(nullptr), m_loadRunObservable(nullptr)
+{
   QSplitter *MainLayout = new QSplitter(Qt::Vertical, this);
   QWidget *loadBar = new QWidget();
-
+  m_loadRunObservable = new observable();
   generateLoadWidget(loadBar);
 
   MainLayout->addWidget(loadBar);
@@ -48,7 +50,9 @@ void ALFView_view::setRunQuietly(const QString runNumber) {
   m_run->blockSignals(false);
 }
 
-void ALFView_view::runChanged() { emit newRun(); }
+void ALFView_view::runChanged() {
+  m_loadRunObservable->notify();
+} // emit newRun(); }
 
 void ALFView_view::browse() {
   auto file = QFileDialog::getOpenFileName(this, "Open a file",

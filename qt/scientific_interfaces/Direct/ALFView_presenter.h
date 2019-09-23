@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ALFView_view.h"
 #include "ALFView_model.h"
+#include "observerPattern.h"
 
 namespace MantidQt {
 	namespace CustomInterfaces {
@@ -33,7 +34,8 @@ private:
   ALFView_view *m_view;
   ALFView_model *m_model;
   int m_currentRun;
-};
+  loadObserver *m_loadRunObserver;
+        };
 }// customInterfaces
 }// MantidQt
 
