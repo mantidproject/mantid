@@ -21,7 +21,7 @@ class Meier(IFunction1D):
         self.declareParameter("FreqQ", 0.05, 'Frequency due to quadrupole interaction of the nuclear spin (MHz)')
         self.declareParameter("Spin", 3.5, 'J, Total orbital quanutm number')
         self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
-        self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
+        self.declareParameter("Lambda", 0.1, 'Exponential decay rate')       
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
@@ -55,20 +55,20 @@ class Meier(IFunction1D):
             return lammValue
 
         def alpha(m):
-            alphaValue= 0.5 * np.arctan(OmegaD * np.sqrt(J * (J + 1) - m * (m - 1)) / ((1 - 2 * m) * (OmegaD + OmegaQ)))
+            alphaValue= 0.5 * np.arctan(OmegaD * np.sqrt(J * (J + 1) - m * (m - 1)) / ((1 - 2 * m) * (OmegaD + OmegaQ)))	
             return alphaValue
 
         tz = 0
         tx = 0
-        for mm in xrange(- int(J) + 1, int(J) + 1, 1):
+        for mm in np.arange(- J + 1, J + 1, 1):
             tz = tz + np.cos(2 * alpha(mm)) ** 2 + np.sin(2 * alpha(mm)) ** 2 * np.cos((lamp(mm) - lamm(mm)) * x)
         Pz=(1 + tz) / (2 * J + 1)
-        for mm in xrange(-int(J), int(J)+1, 1):
+        for mm in np.arange(- J, J + 1, 1):
             a = np.cos(alpha(mm + 1)) ** 2 * np.sin(alpha(mm)) ** 2 * np.cos((lamp(mm + 1) - lamp(mm)) * x)
             b = np.cos(alpha(mm + 1)) ** 2 * np.cos(alpha(mm)) ** 2 * np.cos((lamp(mm + 1) - lamm(mm)) * x)
             c = np.sin(alpha(mm + 1)) ** 2 * np.sin(alpha(mm)) ** 2 * np.cos((lamm(mm + 1) - lamp(mm)) * x)
             d = np.sin(alpha(mm + 1)) ** 2 * np.cos(alpha(mm)) ** 2 * np.cos((lamm(mm + 1) - lamm(mm)) * x)
-            tx = tx + a + b + c + d
+            tx = tx + a + b + c + d 
         Px = tx / (2 * J + 1)
         return A0 * gau * Lor * (1./3.) * (2 * Px + Pz)
 
