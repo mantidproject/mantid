@@ -29,6 +29,10 @@ H5::Group findGroupOrThrow(const H5::Group &parentGroup,
 
 std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
                                   const H5std_string &classType);
+
+boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup,
+                                           const H5std_string &name);
+bool hasAttribute(const H5::Group &group, const std::string attributeValue);
 } // namespace utilities
 } // namespace NexusGeometry
 } // namespace Mantid

@@ -13,6 +13,7 @@
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
+#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
@@ -412,7 +413,7 @@ private:
       H5std_string objName = detectorGroup.getObjnameByIdx(i);
       if (objName == DETECTOR_IDS) {
         const auto data = openDataSet(detectorGroup, objName);
-        if (data.getDataType().getSize() == 8) {
+        if (data.getDataType().getSize() == sizeof(int64_t)) {
           // Note the narrowing here!
           detIds = convertVector<int64_t, Mantid::detid_t>(
               extractVector<int64_t>(data));
@@ -426,9 +427,69 @@ private:
 
   // Parse cylinder nexus geometry
   boost::shared_ptr<const Geometry::IObject>
+  parseNexusCylinderDetector(const Group &shapeGroup, const std::string &name,
+                             InstrumentBuilder &builder) {
+
+    const auto detIds = getDetectorIds(shapeGroup);
+
+    H5std_string pointsToVertices = "cylinders";
+    const auto nxintsize =
+        shapeGroup.openDataSet(pointsToVertices).getDataType().getSize();
+    std::vector<int64_t> cPoints;
+    if (nxintsize == sizeof(int32_t)) {
+      cPoints = convertVector<int32_t, int64_t>(
+          get1DDataset<int32_t>(shapeGroup, pointsToVertices));
+    } else {
+      cPoints = get1DDataset<int64_t>(shapeGroup, pointsToVertices);
+    }
+
+    H5std_string verticesData = "vertices";
+    // 1D reads row first, then columns
+    std::vector<double> vPoints =
+        get1DDataset<double>(shapeGroup, verticesData);
+    // auto nVertices = vPoints.size() / 3;
+    // Eigen::Map<Eigen::Matrix<double, 3, 3>> vertices(vPoints.data());
+    // Read points into matrix, sorted by cPoints ordering
+    Eigen::Matrix<double, 3, 3> vSorted;
+    for (int i = 0; i < cPoints.size(); i += 3) {
+      auto centre = Kernel::V3D{vPoints[cPoints[i]], vPoints[cPoints[i] + 1],
+                                vPoints[cPoints[i] + 2]};
+      auto radius =
+          Kernel::V3D{vPoints[cPoints[i + 1]], vPoints[cPoints[i + 1] + 1],
+                      vPoints[cPoints[i + 1] + 2]};
+      auto other =
+          Kernel::V3D{vPoints[cPoints[i + 2]], vPoints[cPoints[i + 2] + 1],
+                      vPoints[cPoints[i + 2] + 2]};
+      vSorted[0] = centre[0];
+      vSorted[1] = centre[1];
+      vSorted[2] = centre[2];
+      vSorted[3] = radius[0];
+      vSorted[4] = radius[1];
+      vSorted[5] = radius[2];
+      vSorted[6] = other[0];
+      vSorted[7] = other[1];
+      vSorted[8] = other[2];
+    }
+
+    NexusShapeFactory::createCylinder(vSorted);
+    builder.addDetectorToInstrument(name + "_" + std::to_string(i), detIds[i],
+                                    (centre + other) / 2,
+                                    NexusShapeFactory::createCylinder(vSorted));
+  }
+
+  // Parse cylinder nexus geometry
+  boost::shared_ptr<const Geometry::IObject>
   parseNexusCylinder(const Group &shapeGroup) {
     H5std_string pointsToVertices = "cylinders";
-    std::vector<int> cPoints = get1DDataset<int>(shapeGroup, pointsToVertices);
+    const auto nxintsize =
+        shapeGroup.openDataSet(pointsToVertices).getDataType().getSize();
+    std::vector<int64_t> cPoints;
+    if (nxintsize == sizeof(int32_t)) {
+      cPoints = convertVector<int32_t, int64_t>(
+          get1DDataset<int32_t>(shapeGroup, pointsToVertices));
+    } else {
+      cPoints = get1DDataset<int64_t>(shapeGroup, pointsToVertices);
+    }
 
     H5std_string verticesData = "vertices";
     // 1D reads row first, then columns
@@ -460,35 +521,62 @@ private:
                      const std::vector<uint32_t> &windingOrder,
                      const std::vector<float> &vertices,
                      const std::unordered_map<int, uint32_t> &detIdToIndex,
+                     const std::vector<uint32_t> &faceIndices,
                      const size_t vertsPerFace,
                      std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
                      std::vector<std::vector<uint32_t>> &detFaceIndices,
                      std::vector<std::vector<uint32_t>> &detWindingOrder,
                      std::vector<int32_t> &detIds) {
     const size_t vertStride = 3;
-    size_t detFaceIndex = 1;
     std::fill(detFaceIndices.begin(), detFaceIndices.end(),
               std::vector<uint32_t>(1, 0));
-    for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
-      auto detFaceId = detFaces[detFaceIndex];
-      // Id -> Index
-      auto detIndex = detIdToIndex.at(detFaceId);
-      auto &detVerts = detFaceVerts[detIndex];
-      auto &detIndices = detFaceIndices[detIndex];
+    for (size_t i = 0; i < detFaces.size(); i += 2) {
+      const auto faceIndex = faceIndices[detFaces[i]];
+      const auto detID = detFaces[i + 1];
+      const auto detIndex = detIdToIndex.at(detID);
+      auto &vertsForDet = detFaceVerts[detIndex];
       auto &detWinding = detWindingOrder[detIndex];
-      detVerts.reserve(vertsPerFace);
+      auto &detIndices = detFaceIndices[detIndex];
+      vertsForDet.reserve(vertsPerFace);
       detWinding.reserve(vertsPerFace);
-      for (size_t v = 0; v < vertsPerFace; ++v) {
-        const auto vi = windingOrder[i + v] * vertStride;
-        detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
-        detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
+      // Use face index to index into winding order.
+      for (size_t j = faceIndex; j < vertsPerFace + faceIndex; ++j) {
+        for (size_t v = 0; v < vertsPerFace; ++v) {
+          const auto vi = windingOrder[faceIndex + v] * vertStride;
+          vertsForDet.emplace_back(vertices[vi], vertices[vi + 1],
+                                   vertices[vi + 2]);
+          detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
+        }
       }
+
       // Index -> Id
-      detIds[detIndex] = detFaceId;
-      detIndices.push_back(static_cast<uint32_t>(detVerts.size()));
-      // Detector faces is 2N detectors
-      detFaceIndex += 2;
+      detIds[detIndex] = detID;
+      detIndices.push_back(static_cast<uint32_t>(vertsForDet.size()));
     }
+    /*
+        std::fill(detFaceIndices.begin(), detFaceIndices.end(),
+                  std::vector<uint32_t>(1, 0));
+        for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
+          auto detFaceId = detFaces[detFaceIndex];
+          // Id -> Index
+          auto detIndex = detIdToIndex.at(detFaceId);
+          auto &detVerts = detFaceVerts[detIndex];
+          auto &detIndices = detFaceIndices[detIndex];
+          auto &detWinding = detWindingOrder[detIndex];
+          detVerts.reserve(vertsPerFace);
+          detWinding.reserve(vertsPerFace);
+          for (size_t v = 0; v < vertsPerFace; ++v) {
+            const auto vi = windingOrder[i + v] * vertStride;
+            detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi +
+       2]); detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
+          }
+          // Index -> Id
+          detIds[detIndex] = detFaceId;
+          detIndices.push_back(static_cast<uint32_t>(detVerts.size()));
+          // Detector faces is 2N detectors
+          detFaceIndex += 2;
+        }
+        */
   }
 
   void parseNexusMeshAndAddDetectors(
@@ -505,7 +593,7 @@ private:
     std::vector<int> detIds(numDets);
 
     extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex,
-                       vertsPerFace, detFaceVerts, detFaceIndices,
+                       faceIndices, vertsPerFace, detFaceVerts, detFaceIndices,
                        detWindingOrder, detIds);
 
     for (size_t i = 0; i < numDets; ++i) {
@@ -531,63 +619,53 @@ private:
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                        const std::vector<int> &detectorIds,
                        const std::string &bankName) {
-    // Load mapping between detector IDs and faces, winding order of vertices
-    // for faces, and face corner vertices.
-    const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "detector_faces"));
-    const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "faces"));
-    const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "winding_order"));
-    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
+    if (utilities::hasAttribute(shapeGroup, NX_OFF)) {
+      // Load mapping between detector IDs and faces, winding order of vertices
+      // for faces, and face corner vertices.
+      const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
+          get1DDataset<int32_t>(shapeGroup, "detector_faces"));
+      const std::vector<uint32_t> faceIndices =
+          convertVector<int32_t, uint32_t>(
+              get1DDataset<int32_t>(shapeGroup, "faces"));
+      const std::vector<uint32_t> windingOrder =
+          convertVector<int32_t, uint32_t>(
+              get1DDataset<int32_t>(shapeGroup, "winding_order"));
+      const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
 
-    // Build a map of detector IDs to the index of occurrence in the
-    // "detector_number" dataset
-    std::unordered_map<int, uint32_t> detIdToIndex;
-    for (uint32_t i = 0; i < detectorIds.size(); ++i) {
-      detIdToIndex.emplace(detectorIds[i], i);
+      // Build a map of detector IDs to the index of occurrence in the
+      // "detector_number" dataset
+      std::unordered_map<int, uint32_t> detIdToIndex;
+      for (uint32_t i = 0; i < detectorIds.size(); ++i) {
+        detIdToIndex.emplace(detectorIds[i], i);
+      }
+
+      parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder,
+                                    vertices, detectorIds.size(), detIdToIndex,
+                                    bankName, builder);
+    } else if (utilities::hasAttribute(shapeGroup, NX_CYLINDER)) {
+      parseNexusCylinderDetector(shapeGroup, bankName, builder);
     }
-
-    parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder, vertices,
-                                  detectorIds.size(), detIdToIndex, bankName,
-                                  builder);
   }
 
   /// Choose what shape type to parse
   boost::shared_ptr<const Geometry::IObject>
   parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
-    bool isGroup = false;
-    Group shapeGroup;
-    try {
-      shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
-      isGroup = true;
-    } catch (H5::Exception &) {
-      // shape is not mandatory
-      try {
-        shapeGroup = detectorGroup.openGroup(SHAPE);
-      } catch (H5::Exception &) {
-        return boost::shared_ptr<const Geometry::IObject>(nullptr);
-      }
+    auto cylinderical = utilities::findGroup(detectorGroup, NX_CYLINDER);
+    auto off = utilities::findGroup(detectorGroup, NX_OFF);
+    searchTubes = false;
+    if (off && cylinderical) {
+      throw std::runtime_error("Can either provide cylindrical OR OFF "
+                               "geometries as subgroups, not both");
     }
-
-    H5std_string shapeType;
-    for (uint32_t i = 0; i < static_cast<uint32_t>(shapeGroup.getNumAttrs());
-         ++i) {
-      Attribute attribute = shapeGroup.openAttribute(i);
-      H5std_string attributeName = attribute.getName();
-      if (attributeName == NX_CLASS) {
-        attribute.read(attribute.getDataType(), shapeType);
+    if (cylinderical) {
+      if (H5_OBJ_NAME((*cylinderical)) == PIXEL_SHAPE) {
+        searchTubes = true;
       }
-    }
-    // Give shape group to correct shape parser
-    if (shapeType == NX_CYLINDER) {
-      searchTubes = isGroup;
-      return parseNexusCylinder(shapeGroup);
-    } else if (shapeType == NX_OFF) {
-      return parseNexusMesh(shapeGroup);
-    } else {
-      throw std::runtime_error(
-          "Shape type not recognised by NexusGeometryParser");
+      return parseNexusCylinder(*cylinderical);
+    } else if (off)
+      return parseNexusMesh(*off);
+    else {
+      return boost::shared_ptr<const Geometry::IObject>(nullptr);
     }
   }
 
@@ -657,6 +735,7 @@ public:
     for (auto &detectorGroup : detectorGroups) {
       // Transform in homogenous coordinates. Offsets will be rotated then bank
       // translation applied.
+      auto debug = H5_OBJ_NAME(detectorGroup);
       Eigen::Transform<double, 3, 2> transforms =
           getTransformations(file, detectorGroup);
       // Absolute bank position
@@ -671,11 +750,11 @@ public:
       // Get the pixel detIds
       auto detectorIds = getDetectorIds(detectorGroup);
 
-      try { // detector shape is not mandatory.
-        auto shapeGroup = detectorGroup.openGroup(DETECTOR_SHAPE);
-        parseAndAddBank(shapeGroup, builder, detectorIds, bankName);
+      auto detector_shape =
+          utilities::findGroupByName(detectorGroup, DETECTOR_SHAPE);
+      if (detector_shape) {
+        parseAndAddBank(*detector_shape, builder, detectorIds, bankName);
         continue;
-      } catch (H5::Exception &) { // No detector_shape group
       }
 
       // Get the pixel offsets
@@ -686,7 +765,7 @@ public:
       // Extract shape
       auto detShape = parseNexusShape(detectorGroup, searchTubes);
 
-      if (searchTubes) {
+      if (detShape && searchTubes) {
         auto tubes = TubeHelpers::findAndSortTubes(*detShape, detectorPixels,
                                                    detectorIds);
         builder.addTubes(bankName, tubes, detShape);
