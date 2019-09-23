@@ -11,7 +11,7 @@ Description
 
 Time dependence of the polarization function for a static muon interacting with nuclear spin [1].
 
-.. math:: A(t)=\frac13(2P_x+P_z)
+.. math:: A(t)=\frac{1}{3}(2P_x+P_z)
 
 ,where
 
