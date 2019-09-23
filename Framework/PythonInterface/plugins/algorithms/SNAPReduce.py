@@ -26,6 +26,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         if self.IPTS_dir is None:
             self.IPTS_dir = GetIPTS(Instrument='SNAP',
                                     RunNumber=str(run))
+
         return self.IPTS_dir
 
     def smooth(self, data, order):
@@ -338,9 +339,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         else:  # other values are already held in normWS
             return normWS
 
-    def _save(self, saveDir, basename, outputWksp):
+    def _save(self, runnumber, basename, outputWksp):
         if not self.getProperty("SaveData").value:
             return
+
+        # determine where to save the data
+        saveDir = self.getPropertyValue("OutputDirectory").strip()
+        if len(saveDir) <= 0:
+            self.log().notice('Using default save location')
+            saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
 
         self.log().notice('Writing to \'' + saveDir + '\'')
 
@@ -491,7 +498,6 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         for i, runnumber in enumerate(in_Runs):
             self.log().notice("processing run %s" % runnumber)
-            self.log().information(str(self.get_IPTS_Local(runnumber)))
 
             # put together output names
             new_Tag = Tag
@@ -560,12 +566,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                         DeleteWorkspace(Workspace=redWS)
                         DeleteWorkspace(Workspace=normalizationWS)
 
-            # Save requested formats
-            saveDir = self.getPropertyValue("OutputDirectory").strip()
-            if len(saveDir) <= 0:
-                self.log().notice('Using default save location')
-                saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
-            self._save(saveDir, basename, outputWksp)
+            # Save requested formats - function checks that saving is requested
+            self._save(runnumber, basename, outputWksp)
 
             # set workspace as an output so it gets history
             ConvertUnits(InputWorkspace=str(outputWksp), OutputWorkspace=str(outputWksp), Target=finalUnits,
