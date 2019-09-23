@@ -341,9 +341,8 @@ class IndirectQuickRun(DataProcessorAlgorithm):
             e = width_workspace.readE(index)
             # The slice here is to make the plot versus number less cluttered/messy when using 5 or more digits.
             x_data.append(float(temperatures[index])) if x_axis_is_temperature else x_data.append(float(run_numbers[index][-3:]))
-            # Width is proportional to Q in the limit of low Q. A proper fit is done in FqFit where an appropriate fitting range can be selected. 
-            # For our purposes here it is sufficient & quick to just use a single point. 
-            # The first can be unreliable, so 5 is a guess for a suitable value. and shouldn't be too big.
+            # The 5th spectrum is taken here as only a single data point is needed for the fit and the first is often
+            # unreliable.
             y_data.append(y[5] / x[5])
             e_data.append(e[5] / x[5])
 
