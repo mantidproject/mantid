@@ -32,6 +32,6 @@ class StandardSC(IFunction1D):
         Abg = self.getParameterValue("Abg")
         omegaSC = FieldSC * 0.1355 * 2 * np.pi
         omegaBG = FieldBG * 0.1355 * 2 * np.pi
-        return A0 * np.exp(-sigma * sigma * x * x / 2) * np.cos(omegaSC * x + phi)+ Abg * np.cos(omegaBG * x + phi)
+        return A0 * np.exp(- 0.5 * sigma * sigma * x * x) * np.cos(omegaSC * x + phi)+ Abg * np.cos(omegaBG * x + phi)
 
 FunctionFactory.subscribe(StandardSC)
