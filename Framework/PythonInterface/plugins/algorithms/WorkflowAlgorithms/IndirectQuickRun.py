@@ -106,10 +106,10 @@ class IndirectQuickRun(DataProcessorAlgorithm):
                              doc='Value selection of the sample environment log entry')
 
         self.declareProperty(name='MSDFit', defaultValue=False,
-                             doc='Perform an MSDFit. Do not use with GroupingMethod as "All"')
+                             doc='Perform an MSDFit.')
 
         self.declareProperty(name='WidthFit', defaultValue=False,
-                             doc='Perform a 2 peak width Fit. Do not use with GroupingMethod as "All"')
+                             doc='Perform a 2 peak width Fit.')
 
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Switch Plot Off/On')
@@ -325,6 +325,7 @@ class IndirectQuickRun(DataProcessorAlgorithm):
         number_of_temperatures = len(temperatures)
         axis = NumericAxis.create(number_of_temperatures)
         for index in range(number_of_temperatures):
+            # The slice here is to make the plot versus number less cluttered/messy when using 5 or more digits.
             value = float(temperatures[index]) if x_axis_is_temperature else float(run_numbers[index][-3:])
             axis.setValue(index, value)
         width_workspace.replaceAxis(1, axis)
@@ -338,7 +339,11 @@ class IndirectQuickRun(DataProcessorAlgorithm):
             x = width_workspace.readX(index)
             y = width_workspace.readY(index)
             e = width_workspace.readE(index)
+            # The slice here is to make the plot versus number less cluttered/messy when using 5 or more digits.
             x_data.append(float(temperatures[index])) if x_axis_is_temperature else x_data.append(float(run_numbers[index][-3:]))
+            # Width is proportional to Q in the limit of low Q. A proper fit is done in FqFit where an appropriate fitting range can be selected. 
+            # For our purposes here it is sufficient & quick to just use a single point. 
+            # The first can be unreliable, so 5 is a guess for a suitable value. and shouldn't be too big.
             y_data.append(y[5] / x[5])
             e_data.append(e[5] / x[5])
 

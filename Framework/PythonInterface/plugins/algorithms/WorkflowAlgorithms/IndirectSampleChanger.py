@@ -139,8 +139,8 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
         self._setup()
 
         quick_run_alg = self.createChildAlgorithm("IndirectQuickRun", 0.05, 0.95)
-        for numb in range(self._number_samples):
-            first_run = self._run_first + numb
+        for num in range(self._number_samples):
+            first_run = self._run_first + num
             run_numbers = [str(first_run + idx * self._number_samples) for idx in range(self._number_runs)]
 
             quick_run_alg.setProperty('InputFiles', run_numbers)

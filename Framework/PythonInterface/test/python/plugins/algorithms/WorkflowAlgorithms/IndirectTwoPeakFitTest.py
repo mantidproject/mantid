@@ -30,8 +30,8 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
         self._red_name = 'osiris92762_graphite002_red'
         self._output_name = 'osiris92762_graphite002_two_peak_fit'
 
-        self._x_min = -0.927689707342884
-        self._x_max = 2.1502418039357183
+        self._x_min = -0.5
+        self._x_max = 0.5
 
         self._execute_IndirectTwoPeakFit()
 

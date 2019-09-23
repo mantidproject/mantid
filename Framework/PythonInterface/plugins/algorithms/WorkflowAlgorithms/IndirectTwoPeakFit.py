@@ -91,7 +91,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         self._temporary_fit_name = '__fit_ws'
         self._crop_workspace(self._sample_workspace, self._temporary_fit_name, self._e_min, self._e_max)
 
-        self._convert_to_histogram(self._temporary_fit_name, self._temporary_fit_name)
+        self._convert_to_histogram(self._temporary_fit_name)
         convertToElasticQ(self._temporary_fit_name)
 
         # Perform fits
@@ -172,7 +172,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         chi_1L_name = self._output_name + '_1L_ChiSq'
         chi_2L_name = self._output_name + '_2L_ChiSq'
         self._clone_workspace(chi_1L_name, chi_name)
-        self._append(chi_name, chi_2L_name, chi_name)
+        self._append_to(chi_name, chi_2L_name)
 
         # Replace y axis labels
         set_y_axis_labels(mtd[chi_name], ['1 peak', '2 peaks'])
@@ -189,9 +189,9 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         temporary_name = '__spectrum'
         self._extract_single_spectrum(result_1L_name, result_name, 1)
         self._extract_single_spectrum(result_2L_name, temporary_name, 1)
-        self._append(result_name, temporary_name, result_name)
+        self._append_to(result_name, temporary_name)
         self._extract_single_spectrum(result_2L_name, temporary_name, 3)
-        self._append(result_name, temporary_name, result_name)
+        self._append_to(result_name, temporary_name)
 
         # Replace y axis labels
         set_y_axis_labels(mtd[result_name], ['fwhm.1', 'fwhm.2.1', 'fwhm.2.2'])
@@ -321,12 +321,12 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         ctmw_alg.execute()
         mtd.addOrReplace(output_name, ctmw_alg.getProperty("OutputWorkspace").value)
 
-    def _convert_to_histogram(self, input_name, output_name):
+    def _convert_to_histogram(self, workspace_name):
         convert_to_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
-        convert_to_hist_alg.setProperty("InputWorkspace", input_name)
-        convert_to_hist_alg.setProperty("OutputWorkspace", output_name)
+        convert_to_hist_alg.setProperty("InputWorkspace", workspace_name)
+        convert_to_hist_alg.setProperty("OutputWorkspace", workspace_name)
         convert_to_hist_alg.execute()
-        mtd.addOrReplace(output_name, convert_to_hist_alg.getProperty("OutputWorkspace").value)
+        mtd.addOrReplace(workspace_name, convert_to_hist_alg.getProperty("OutputWorkspace").value)
 
     def _clone_workspace(self, input_name, output_name):
         clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
@@ -364,13 +364,13 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         extract_alg.execute()
         mtd.addOrReplace(output_name, extract_alg.getProperty("OutputWorkspace").value)
 
-    def _append(self, input_name1, input_name2, output_name):
+    def _append_to(self, initial_workspace, to_append):
         append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging = False)
-        append_alg.setProperty("InputWorkspace1", input_name1)
-        append_alg.setProperty("InputWorkspace2", input_name2)
-        append_alg.setProperty("OutputWorkspace", output_name)
+        append_alg.setProperty("InputWorkspace1", initial_workspace)
+        append_alg.setProperty("InputWorkspace2", to_append)
+        append_alg.setProperty("OutputWorkspace", initial_workspace)
         append_alg.execute()
-        mtd.addOrReplace(output_name, append_alg.getProperty("OutputWorkspace").value)
+        mtd.addOrReplace(initial_workspace, append_alg.getProperty("OutputWorkspace").value)
 
     def _copy_log(self, input_name, output_name):
         copy_log_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
