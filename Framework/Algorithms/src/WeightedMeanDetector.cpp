@@ -34,7 +34,7 @@ std::map<std::string, std::string> WeightedMeanDetector::validateInputs() {
   }
 
   std::vector<std::string> cor_files = {"AlfFile", "LinFile", "LimFile"};
-  for (const std::string &param : cor_files) {
+  for (const std::string param : cor_files) {
     std::string line;
     size_t detector_num;
     std::string dir;
