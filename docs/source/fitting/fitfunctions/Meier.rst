@@ -11,7 +11,7 @@ Description
 
 Time dependence of the polarization function for a static muon interacting with nuclear spin [1].
 
-.. math:: A(t)=\frac{1}{3}(2P_x+P_z)
+.. math:: A(t)=\frac13(2P_x+P_z)
 
 ,where
 
@@ -29,7 +29,7 @@ Time dependence of the polarization function for a static muon interacting with 
 
 :math:`\omega_Q` is the angular frequency due to quadrupole interaction of the nuclear spin :math:`J`due to a field gradient exerted by the presence of the muon ,
 
-:math:`J` is the total orbital quantum number,
+:math:`J` is the total angular momentum quantum number,
 
 and :math:`m` is the z-component of the total orbital quantum number.
 

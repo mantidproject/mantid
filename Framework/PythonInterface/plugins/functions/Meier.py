@@ -19,7 +19,7 @@ class Meier(IFunction1D):
         self.declareParameter("A0", 0.5, 'Amplitude')
         self.declareParameter("FreqD", 0.01, 'Frequency due to dipolar coupling (MHz)')
         self.declareParameter("FreqQ", 0.05, 'Frequency due to quadrupole interaction of the nuclear spin (MHz)')
-        self.declareParameter("Spin", 3.5, 'J, Total orbital quanutm number')
+        self.declareParameter("Spin", 3.5, 'J, Total angular momentum quanutm number')
         self.declareParameter("Sigma", 0.2, 'Gaussian decay rate')
         self.declareParameter("Lambda", 0.1, 'Exponential decay rate')
 
@@ -55,7 +55,10 @@ class Meier(IFunction1D):
             return lammValue
 
         def alpha(m):
-            alphaValue= 0.5 * np.arctan(OmegaD * np.sqrt(J * (J + 1) - m * (m - 1)) / ((1 - 2 * m) * (OmegaD + OmegaQ)))
+            if m == 0.5:
+                alphaValue = np.pi / 4
+            else:
+                alphaValue= 0.5 * np.arctan(OmegaD * np.sqrt(J * (J + 1) - m * (m - 1)) / ((1 - 2 * m) * (OmegaD + OmegaQ)))
             return alphaValue
 
         tz = 0
