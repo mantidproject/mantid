@@ -82,7 +82,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
         incident_index = 0
-        print(self._binning_for_fit)
         if self._binning_for_fit.size == 0:
             x_fit = np.array(self._input_ws.readX(incident_index))
             y_fit = np.array(self._input_ws.readY(incident_index))
