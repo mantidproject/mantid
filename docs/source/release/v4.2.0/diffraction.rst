@@ -26,6 +26,7 @@ Bug Fixes
 
 - The values used to mask the prompt pulse on HRPD have been fixed.
 - :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles-v1>` will reload the instrument if logs are skipped
+- Fixed issues with OptimizeLatticeForCellType, SelectCellOfType, SelectCellWithForm and TransformHKL when using modulated structures.
 
 Engineering Diffraction
 -----------------------
