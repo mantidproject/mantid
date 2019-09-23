@@ -57,8 +57,9 @@ CalculatePlaczekSelfScattering::validateInputs() {
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
-  const double factor = 1.0 / 1.66053906660e-27;
-  const double neutron_mass = factor * 1.674927471e-27;
+  const double factor =
+      1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
+  const double neutron_mass = factor * 1.674927471e-27; // neutron mass
   // get sample information : mass, total scattering length, and concentration
   // of each species
   auto atom_species =
@@ -106,7 +107,7 @@ void CalculatePlaczekSelfScattering::exec() {
       const double f = det_info.l1() / path_length;
       const double sin_theta_by_2 = sin(det_info.twoTheta(det_index) / 2.0);
       for (size_t x_index = 0; x_index < x_lambda.size() - 1; x_index++) {
-        const double term1 = (f + 1.0) * phi_1[x_index];
+        const double term1 = (f - 1.0) * phi_1[x_index];
         const double term2 = f * eps_1[x_index];
         const double term3 = f - 3;
         const double inelastic_placzek_self_correction =

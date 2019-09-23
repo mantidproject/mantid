@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm takes an incident spectrum function and it's derivative obtained
-from :ref:`FitIncidentSpectrum <algm-FitIncidentSpectrum>` and calculates the
-Placzek scattering correction from the workspaces material sample and detector info. [1]_ [2]_ [3]_
-
-
+This algorithm takes an incident spectrum function and it's derivative and
+calculates the time-of-flight Placzek scattering correction from the workspaces
+material sample and detector info. [1]_ [2]_ [3]_ For obtaining the incident spectrum
+from a measurement (ie beam monitors or calibrant sample), the
+:ref:FitIncidentSpectrum <algm-FitIncidentSpectrum> can provide the necessary inputs.
 
 Usage
 -----
