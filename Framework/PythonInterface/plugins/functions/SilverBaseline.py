@@ -7,7 +7,6 @@
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
 from mantid.api import *
-import math
 import numpy as np
 
 
