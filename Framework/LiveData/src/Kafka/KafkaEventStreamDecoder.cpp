@@ -643,7 +643,14 @@ std::vector<size_t> computeGroupBoundaries(
   /* Iterate over groups */
   for (size_t group = 1; group < numberOfGroups; ++group) {
     /* Calculate a reasonable end boundary for the group */
-    groupBoundaries[group] = groupBoundaries[group - 1] + eventsPerGroup - 1;
+    groupBoundaries[group] = std::min(
+        groupBoundaries[group - 1] + eventsPerGroup - 1, eventBuffer.size());
+
+    /* If we have already gotten through all events then exit early, leaving
+     * some threads without events. */
+    if (groupBoundaries[group] == eventBuffer.size()) {
+      break;
+    }
 
     /* Advance the end boundary of the group until all events for a given
      * workspace index fall within a single group */
