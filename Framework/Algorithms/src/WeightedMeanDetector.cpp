@@ -182,7 +182,7 @@ WeightedMeanDetector::read_alf_file(std::string dir, size_t spectra_num) {
       if (detector != spectra_num) {
         try {
           throw "Invalid .alf file";
-        } catch (const std::string& e) {
+        } catch (const std::string &e) {
           std::cout << "An exception occurred." << e << '\n';
         }
       }
@@ -223,7 +223,7 @@ WeightedMeanDetector::read_lin_file(std::string dir, size_t spectra_num) {
       if (detector != spectra_num) {
         try {
           throw "Invalid .lin file";
-        } catch (const std::string& e) {
+        } catch (const std::string &e) {
           std::cout << "An exception occurred." << e << '\n';
         }
       }
@@ -264,7 +264,7 @@ WeightedMeanDetector::read_lim_file(std::string dir, size_t spectra_num) {
       if (detector != spectra_num) {
         try {
           throw "Invalid .lim file";
-        } catch (const std::string& e) {
+        } catch (const std::string &e) {
           std::cout << "An exception occurred." << e << '\n';
         }
       }
