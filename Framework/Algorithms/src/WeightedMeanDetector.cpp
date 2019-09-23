@@ -37,8 +37,7 @@ std::map<std::string, std::string> WeightedMeanDetector::validateInputs() {
   for (const std::string param : cor_files) {
     std::string line;
     size_t detector_num;
-    std::string dir;
-    dir = getProperty(param);
+    std::string dir = getProperty(param);
     std::ifstream file(dir);
     std::getline(file, line);
     std::stringstream ss(line);
@@ -47,6 +46,7 @@ std::map<std::string, std::string> WeightedMeanDetector::validateInputs() {
       issues[param] = param + " Detector number does not DCSWorkspace";
     }
   }
+
   return issues;
 }
 
