@@ -38,6 +38,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public MantidDialog {
                      const QModelIndex &index) override;
     QSize sizeHint(const QStyleOptionViewItem &option,
                    const QModelIndex &index) const override;
+		QIcon getIcon(QString state) const;
   };
   /// Delegate to show the checkbox for configuring the auto update
   class CheckBoxDelegate : public QStyledItemDelegate {

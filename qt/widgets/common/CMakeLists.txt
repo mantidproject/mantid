@@ -862,6 +862,8 @@ mtd_add_qt_library(
     Qt4::QtWebKit
     Qt4::Qscintilla
     Qt4::QtScript
+  MTD_QT_LINK_LIBS
+    MantidQtIcons
   INSTALL_DIR ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
@@ -901,6 +903,8 @@ mtd_add_qt_library(
     Qt5::PrintSupport
     ${_webwidgets_tgt}
     Qt5::Qscintilla
+  MTD_QT_LINK_LIBS
+    MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS

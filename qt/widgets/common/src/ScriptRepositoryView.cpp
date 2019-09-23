@@ -9,6 +9,7 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/RepoModel.h"
 
@@ -335,24 +336,10 @@ void ScriptRepositoryView::RepoDelegate::paint(
   if (painter->device() == nullptr)
     return;
 
-  QIcon icon;
   // get the state and chose the best fit icon
   QString state = index.model()->data(index, Qt::DisplayRole).toString();
-  if (state == RepoModel::remoteOnlySt())
-    icon = QIcon::fromTheme("system-software-install",
-                            QIcon(QPixmap(":/win/download")));
-  else if (state == RepoModel::remoteChangedSt() ||
-           state == RepoModel::bothChangedSt())
-    icon = QIcon::fromTheme("bottom",
-                            QIcon(QPixmap(":win/system-software-update")));
-  else if (state == RepoModel::updatedSt())
-    icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok")));
-  else if (state == RepoModel::localOnlySt() ||
-           state == RepoModel::localChangedSt())
-    icon =
-        QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
-  else if (state == RepoModel::downloadSt() || state == RepoModel::uploadSt())
-    icon = QIcon(QPixmap(":win/running_process"));
+  auto icon = getIcon(state);
+
   // define the region to draw the icon
   QRect buttonRect(option.rect);
   int min_val = buttonRect.width() < buttonRect.height() ? buttonRect.width()
@@ -371,6 +358,44 @@ void ScriptRepositoryView::RepoDelegate::paint(
   button.state = QStyle::State_Enabled;
   // draw a push button
   QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
+}
+
+QIcon ScriptRepositoryView::RepoDelegate::getIcon(QString state) const {
+  QIcon icon;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  if (state == RepoModel::remoteOnlySt())
+    icon = QIcon::fromTheme("system-software-install",
+                            QIcon(QPixmap(":/win/download")));
+  else if (state == RepoModel::remoteChangedSt() ||
+           state == RepoModel::bothChangedSt())
+    icon = QIcon::fromTheme("bottom",
+                            QIcon(QPixmap(":win/system-software-update")));
+  else if (state == RepoModel::updatedSt())
+    icon = QIcon::fromTheme("dialog-ok", QIcon(QPixmap(":/win/dialog-ok")));
+  else if (state == RepoModel::localOnlySt() ||
+           state == RepoModel::localChangedSt())
+    icon =
+        QIcon::fromTheme("add-files-to-archive", QIcon(QPixmap(":win/upload")));
+  else if (state == RepoModel::downloadSt() || state == RepoModel::uploadSt())
+    icon = QIcon(QPixmap(":win/running_process"));
+  return icon;
+#else
+  if (state == RepoModel::remoteOnlySt())
+    icon = Icons::getIcon("mdi.download");
+  else if (state == RepoModel::remoteChangedSt() ||
+           state == RepoModel::bothChangedSt()) {
+    icon = Icons::getIcon("mdi.transfer-down");
+  } else if (state == RepoModel::updatedSt())
+    icon = Icons::getIcon("mdi.check-bold");
+  else if (state == RepoModel::localOnlySt() ||
+           state == RepoModel::localChangedSt())
+    icon = Icons::getIcon("mdi.upload");
+  else if (state == RepoModel::downloadSt())
+    icon = Icons::getIcon("mdi.progress-download");
+  else if (state == RepoModel::uploadSt())
+    icon = Icons::getIcon("mdi.progress-upload");
+  return icon;
+#endif
 }
 
 /** Reacts to the iteraction with the user when he clicks on the buttons
@@ -554,7 +579,12 @@ void ScriptRepositoryView::RemoveEntryDelegate::paint(
 
   if (entry_type == "protected")
     return;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   icon = QIcon::fromTheme("emptytrash", QIcon(QPixmap(":/win/emptytrash")));
+#else
+  icon = Icons::getIcon("mdi.trash-can");
+  ;
+#endif
 
   // define the region to draw the icon
   QRect buttonRect(option.rect);
