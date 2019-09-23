@@ -1750,21 +1750,21 @@ void FitPropertyBrowser::populateWorkspaceNames() {
   m_workspaceNames.clear();
   if (m_allowedTableWorkspace.isEmpty()) {
     bool allAreAllowed = m_allowedSpectra.isEmpty();
-    QStringList tmp;
-    auto sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-    for (const auto &it : sv) {
-      auto const &name = QString::fromStdString(it);
+    QStringList allowedNames;
+    auto wsList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+    for (const auto &wsName : wsList) {
+      auto const &name = QString::fromStdString(wsName);
       if (allAreAllowed || m_allowedSpectra.contains(name)) {
-        tmp << name;
+        allowedNames << name;
       }
     }
 
-    for (const auto &i : tmp) {
+    for (const auto &name : allowedNames) {
       Mantid::API::Workspace_sptr ws =
           Mantid::API::AnalysisDataService::Instance().retrieve(
-              i.toStdString());
+              name.toStdString());
       if (isWorkspaceValid(ws)) {
-        m_workspaceNames.append(i);
+        m_workspaceNames.append(name);
       }
     }
   } else {
