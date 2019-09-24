@@ -96,3 +96,32 @@ class SNAP_short_detcal(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
+
+
+class Simple(systemtesting.MantidSystemTest):
+    # this test is very similar to AlignAndFocusPowderFromFilesTest.ChunkingCompare
+    def runTest(self):
+        # 11MB file
+        kwargs = {'RunNumbers':'45874',
+                  'GroupDetectorsBy':'Banks',
+                  'Binning':(.5,-.004,7)}
+
+        # create grouping for two output spectra
+        CreateGroupingWorkspace(InstrumentFilename='SNAP_Definition.xml',
+                                GroupDetectorsBy='Group',
+                                OutputWorkspace='SNAP_grouping')
+
+        # process in 4 chunks
+        SNAPReduce(MaxChunkSize=.01, **kwargs)
+        RenameWorkspace(InputWorkspace='SNAP_45874_Banks_red', OutputWorkspace='with_chunks')
+
+        # process without chunks
+        SNAPReduce(MaxChunkSize=0, **kwargs)
+        RenameWorkspace(InputWorkspace='SNAP_45874_Banks_red', OutputWorkspace='no_chunks')
+
+    def validateMethod(self):
+        #self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return ('with_chunks', 'no_chunks')
