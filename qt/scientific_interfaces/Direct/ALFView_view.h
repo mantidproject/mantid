@@ -28,6 +28,9 @@ public:
   void observeLoadRun(observer *listener) {
     m_loadRunObservable->attach(listener);
   };
+  void observeBrowse(observer *listner) {
+    m_browseObservable->attach(listner);
+  };
 
 public slots:
   void runChanged();
@@ -42,6 +45,7 @@ private:
   QLineEdit *m_run;
   QPushButton *m_browse;
   observable *m_loadRunObservable;
+  observable *m_browseObservable;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

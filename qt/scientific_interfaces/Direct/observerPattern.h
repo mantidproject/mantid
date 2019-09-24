@@ -8,12 +8,14 @@
 #define MANTIDQT_CUSTOMINTERFACES_OBSERVERPATTERN_H_
 #include <functional>
 #include <set>
+#include <string>
 
 class observable;
 
 class observer {
 public:
-  virtual void update() = 0;
+  virtual void update(){};
+  virtual void update(std::string arg){};
 };
 
 class observable {
@@ -27,6 +29,11 @@ public:
       listener->update();
     }
   };
+  void notify(std ::string arg) {
+    for (auto &listener : m_observers) {
+      listener->update(arg);
+    }
+  };
 };
 
 class loadObserver : public observer {
@@ -35,9 +42,23 @@ public:
   ~loadObserver(){};
   void setSlot(std::function<void()> func) { m_slot = func; };
   void update() override { m_slot(); };
+  void update(std ::string arg) override { m_slot(); };
 
 private:
-   std::function<void ()> m_slot;
+  std::function<void()> m_slot;
+};
+
+class generalObserver : public observer {
+public:
+  generalObserver() { m_slot = nullptr; };
+  ~generalObserver(){};
+  void setSlot(std::function<void(std::string)> func) { m_slot = func; };
+  void update() override { m_slot("bob"); };
+
+  void update(std ::string arg) override { m_slot(arg); };
+
+private:
+  std::function<void(std::string)> m_slot;
 };
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_OBSERVERPATTERN_H_ */

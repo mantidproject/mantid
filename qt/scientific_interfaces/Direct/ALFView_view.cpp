@@ -17,11 +17,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(QWidget *parent)
-    : QWidget(parent), m_run(nullptr), m_loadRunObservable(nullptr)
-{
+    : QWidget(parent), m_run(nullptr),
+      m_loadRunObservable(nullptr), m_browseObservable(nullptr) {
   QSplitter *MainLayout = new QSplitter(Qt::Vertical, this);
   QWidget *loadBar = new QWidget();
   m_loadRunObservable = new observable();
+  m_browseObservable = new observable();
   generateLoadWidget(loadBar);
 
   MainLayout->addWidget(loadBar);
@@ -60,7 +61,8 @@ void ALFView_view::browse() {
   if (file.isEmpty()) {
     return;
   }
-  emit browsedToRun(file.toStdString());
+  //emit browsedToRun(file.toStdString());
+  m_browseObservable->notify(file.toStdString());
 }
 
 } // namespace CustomInterfaces

@@ -35,6 +35,7 @@ private:
   ALFView_model *m_model;
   int m_currentRun;
   loadObserver *m_loadRunObserver;
+  generalObserver *m_browseObserver;
         };
 }// customInterfaces
 }// MantidQt
