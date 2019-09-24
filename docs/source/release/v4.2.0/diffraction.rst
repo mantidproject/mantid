@@ -20,6 +20,7 @@ Improvements
 - The file-naming of output on HRPD as been updated to closely match old script outputs
 - Geometry definition for LLB 5C1
 - :ref:`SNAPReduce <algm-SNAPReduce-v1>` has an additional parameter ``MaxChunkSize`` for customizing the chunking behavior
+- :ref:`LorentzCorrection <algm-LorentzCorrection-v1>` has an additional option for single crystal (default) or powder operation
 
 Bug Fixes
 #########
