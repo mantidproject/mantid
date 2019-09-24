@@ -20,22 +20,18 @@ ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
       m_loadRunObserver(nullptr), m_browseObserver(nullptr) {
   m_loadRunObserver = new loadObserver();
   m_browseObserver = new generalObserver();
-
-  m_loadRunObserver->setSlot(
-      std::bind(&ALFView_presenter::loadRunNumber, this));
-
-  m_browseObserver->setSlot(std::bind(&ALFView_presenter::loadBrowsedFile, this,
-                                      std::placeholders:: _1));
-
   m_model->loadEmptyInstrument();
 }
 
 void ALFView_presenter::initLayout() {
+  // connect to new run
   m_view->observeLoadRun(m_loadRunObserver);
+  m_loadRunObserver->setSlot(
+      std::bind(&ALFView_presenter::loadRunNumber, this));
+  // connect to browse run
   m_view->observeBrowse(m_browseObserver);
-      // connect(m_view, SIGNAL(newRun()), this, SLOT(loadRunNumber()));
-      //connect(m_view, SIGNAL(browsedToRun(std::string)), this,
-      //        SLOT(loadBrowsedFile(const std::string)));
+  m_browseObserver->setSlot(std::bind(&ALFView_presenter::loadBrowsedFile, this,
+                                      std::placeholders::_1));
 }
 
 void ALFView_presenter::loadAndAnalysis(const std::string &run) {

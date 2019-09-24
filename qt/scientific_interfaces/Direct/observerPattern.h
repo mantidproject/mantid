@@ -42,7 +42,6 @@ public:
   ~loadObserver(){};
   void setSlot(std::function<void()> func) { m_slot = func; };
   void update() override { m_slot(); };
-  void update(std ::string arg) override { m_slot(); };
 
 private:
   std::function<void()> m_slot;
@@ -53,8 +52,6 @@ public:
   generalObserver() { m_slot = nullptr; };
   ~generalObserver(){};
   void setSlot(std::function<void(std::string)> func) { m_slot = func; };
-  void update() override { m_slot("bob"); };
-
   void update(std ::string arg) override { m_slot(arg); };
 
 private:

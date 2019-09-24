@@ -31,6 +31,7 @@ private slots:
 
 private:
   void loadAndAnalysis(const std::string &run);
+
   ALFView_view *m_view;
   ALFView_model *m_model;
   int m_currentRun;
