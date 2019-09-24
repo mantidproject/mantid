@@ -43,7 +43,7 @@ class Meier(IFunction1D):
         sinSQ2alpha = []
         cosSQalpha = []
         sinSQalpha = []
-        
+
         for i in range(0 , int(J2 + 2)):
             m = i - J
             q1 = (OmegaQ + OmegaD) * (2 * m - 1)
