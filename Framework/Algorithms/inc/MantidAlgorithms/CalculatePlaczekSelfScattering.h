@@ -39,8 +39,6 @@ private:
   void init() override;
   void exec() override;
 };
-const std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(API::MatrixWorkspace_sptr ws);
 
 } // namespace Algorithms
 } // namespace Mantid

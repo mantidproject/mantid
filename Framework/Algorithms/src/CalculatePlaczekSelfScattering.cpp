@@ -18,6 +18,9 @@
 namespace Mantid {
 namespace Algorithms {
 
+std::map<std::string, std::map<std::string, double>>
+getSampleSpeciesInfo(const API::MatrixWorkspace_sptr ws);
+
 DECLARE_ALGORITHM(CalculatePlaczekSelfScattering)
 
 void CalculatePlaczekSelfScattering::init() {
@@ -57,9 +60,9 @@ CalculatePlaczekSelfScattering::validateInputs() {
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
-  const double factor =
+  constexpr double factor =
       1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
-  const double neutronMass = factor * 1.674927471e-27; // neutron mass
+  constexpr double neutronMass = factor * 1.674927471e-27; // neutron mass
   // get sample information : mass, total scattering length, and concentration
   // of each species
   auto atomSpecies = getSampleSpeciesInfo(inWS);
@@ -141,8 +144,8 @@ void CalculatePlaczekSelfScattering::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-const std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(API::MatrixWorkspace_sptr ws) {
+std::map<std::string, std::map<std::string, double>>
+getSampleSpeciesInfo(const API::MatrixWorkspace_sptr ws) {
   // get sample information : mass, total scattering length, and concentration
   // of each species
   double totalStoich = 0.0;
@@ -154,10 +157,10 @@ getSampleSpeciesInfo(API::MatrixWorkspace_sptr ws) {
 
   for (auto t = formula.begin(); t != formula.end(); t++) {
     const Kernel::Material::FormulaUnit element = *t;
-    std::map<std::string, double> atomMap;
-    atomMap["mass"] = element.atom->mass;
-    atomMap["stoich"] = element.multiplicity;
-    atomMap["bSqrdBar"] = bSqrdBar;
+    const std::map<std::string, double> atomMap{
+        {"mass", element.atom->mass},
+        {"stoich", element.multiplicity},
+        {"bSqrdBar", bSqrdBar}};
     atomSpecies[element.atom->symbol] = atomMap;
     totalStoich += element.multiplicity;
   }
