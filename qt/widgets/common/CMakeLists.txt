@@ -930,6 +930,7 @@ set(TEST_FILES
     test/ProgressableViewTest.h
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
+    test/RepoModelTest.h
     test/ScriptRepositoryViewTest.h
     test/SelectionNotificationServiceTest.h
     test/SignalBlockerTest.h
@@ -967,6 +968,8 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
+    ../../../Framework/ScriptRepository/inc
+
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
@@ -990,6 +993,8 @@ set(
   test/FindFilesWorkerTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
+  test/RepoModelTest.h
+  test/ScriptRepositoryViewTest.h
   test/Batch/BuildSubtreeItemsTest.h
   test/Batch/ExtractSubtreesTest.h
   test/Batch/FindSubtreeRootsTest.h
@@ -1017,6 +1022,7 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
+    ../../../Framework/ScriptRepository/inc
     ${GMOCK_INCLUDE_DIR}
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
