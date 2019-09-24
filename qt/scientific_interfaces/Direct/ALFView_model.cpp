@@ -59,7 +59,7 @@ int ALFView_model::loadData(const std::string &name) {
  * Loads data, normalise to current and then converts to d spacing
  * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
  */
-std::pair<bool, bool> ALFView_model::isDataValid() {
+std::map<std::string, bool> ALFView_model::isDataValid() {
   Mantid::API::MatrixWorkspace_sptr ws =
       Mantid::API::AnalysisDataService::Instance()
           .retrieveWS<Mantid::API::MatrixWorkspace>(tmpName);
@@ -75,8 +75,11 @@ std::pair<bool, bool> ALFView_model::isDataValid() {
   if (unit == "dSpacing") {
     isItDSpace = true;
   }
+  std::map<std::string, bool> result = {
+    {"IsValidInstrument", isItALF},
+    {"IsItDSpace", isItDSpace}};
 
-return std::make_pair(isItALF, isItDSpace);
+  return result;
 }
 
 /*

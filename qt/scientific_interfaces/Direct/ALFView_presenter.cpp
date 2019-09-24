@@ -37,7 +37,7 @@ void ALFView_presenter::initLayout() {
 void ALFView_presenter::loadAndAnalysis(const std::string &run) {
   int runNumber = m_model->loadData(run);
   auto bools = m_model->isDataValid();
-  if (bools.first) {
+  if (bools["IsValidInstrument"]) {
     m_model->rename();
     m_currentRun = runNumber;
   } else {
@@ -47,7 +47,7 @@ void ALFView_presenter::loadAndAnalysis(const std::string &run) {
   if (m_view->getRunNumber() != m_currentRun) {
     m_view->setRunQuietly(QString::number(m_currentRun));
   }
-  if (bools.first && !bools.second) {
+  if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
     m_model->transformData();
   }
 }

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_
+#include <map>
 #include <string>
 
 namespace MantidQt {
@@ -15,7 +16,7 @@ class ALFView_model{
 public:
   void loadEmptyInstrument();
 int loadData(const std::string &name);
-std::pair<bool, bool> isDataValid();
+std::map<std::string, bool> isDataValid();
 void transformData();
 void rename();
 void remove();
