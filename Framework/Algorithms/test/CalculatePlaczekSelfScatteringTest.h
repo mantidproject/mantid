@@ -151,8 +151,6 @@ public:
 
   void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
-
-
   void test_Init() {
     CalculatePlaczekSelfScattering alg;
     alg.setRethrows(true);
@@ -198,6 +196,5 @@ private:
     return a;
   }
 };
-
 
 #endif /* MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_ */

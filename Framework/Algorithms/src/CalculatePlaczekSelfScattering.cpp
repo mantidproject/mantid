@@ -67,7 +67,7 @@ void CalculatePlaczekSelfScattering::exec() {
   double summationTerm = 0.0;
   for (auto t = atomSpecies.begin(); t != atomSpecies.end(); t++) {
     summationTerm += t->second["concentration"] * t->second["bSqrdBar"] *
-                      neutronMass / t->second["mass"];
+                     neutronMass / t->second["mass"];
   }
   // get incident spectrum and 1st derivative
   const MantidVec xLambda = inWS->readX(0);
