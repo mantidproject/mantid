@@ -18,12 +18,18 @@ from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
     CurveProperties, curve_has_errors, remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class CurvesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None):
+    def __init__(self, fig, view=None, parent=None, legend_tab=None):
         self.fig = fig
+
+        # The legend tab is passed in so that it can be removed if all curves are removed.
+        self.legend_tab = legend_tab
+        self.legend_props = None
+
         if not view:
             self.view = CurvesTabWidgetView(parent)
         else:
@@ -47,6 +53,10 @@ class CurvesTabWidgetPresenter:
 
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
+        ax = self.get_selected_ax()
+        if ax.legend_:
+            self.legend_props = LegendProperties.from_legend(ax.legend_)
+
         view_props = self.get_view_properties()
         if view_props == self.current_view_properties:
             return
@@ -59,14 +69,14 @@ class CurvesTabWidgetPresenter:
         self.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
 
-        self.update_limits_and_legend(self.get_selected_ax())
+        self.update_limits_and_legend(ax, self.legend_props)
 
     @staticmethod
-    def update_limits_and_legend(ax):
+    def update_limits_and_legend(ax, legend_props=None):
         ax.relim()
         ax.autoscale()
         if ax.legend_:
-            ax.legend().draggable()
+            LegendProperties.create_legend(legend_props, ax)
 
     @staticmethod
     def toggle_errors(curve, view_props):
@@ -172,13 +182,14 @@ class CurvesTabWidgetPresenter:
         Remove selected curve from figure and combobox. If there are no
         curves left on the axes remove that axes from the axes combo box
         """
+        ax = self.get_selected_ax()
+        if ax.legend_:
+            self.legend_props = LegendProperties.from_legend(ax.legend_)
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
-
-        ax = self.get_selected_ax()
         # Update the legend and redraw
-        self.update_limits_and_legend(ax)
+        self.update_limits_and_legend(ax, self.legend_props)
         ax.figure.canvas.draw()
 
         # Remove the curve from the curve selection combo box
@@ -198,6 +209,7 @@ class CurvesTabWidgetPresenter:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
                     self.close_tab()
+                    self.legend_tab.close_tab()
                     return True
 
     def set_new_curve_name_in_dict_and_combo_box(self, curve, new_label):

@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import matplotlib
+import platform
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
@@ -26,22 +27,45 @@ class PlotsSaverTest(unittest.TestCase):
 
         # Make a figure with a given input with all these values already set
         self.loader_plot_dict = {u'axes': [{u'colorbar': {u'exists': False},
-                                            u'legend': {u'exists': False}, u'lines': [{u'alpha': 1,
-                                                                                       u'color': u'#1f77b4',
-                                                                                       u'label': u'ws1: spec 2',
-                                                                                       u'lineIndex': 0,
-                                                                                       u'lineStyle': u'-',
-                                                                                       u'lineWidth': 1.5,
-                                                                                       u'markerStyle': {
-                                                                                           u'edgeColor': u'#1f77b4',
-                                                                                           u'edgeWidth': 1.0,
-                                                                                           u'faceColor': u'#1f77b4',
-                                                                                           u'markerSize': 6.0,
-                                                                                           u'markerType': u'None',
-                                                                                           u'zOrder': 2},
-                                                                                       u'errorbars': {
-                                                                                           u'exists': False
-                                                                                       }}],
+                                            u'legend': {u'exists': True,
+                                                        u'visible': True,
+                                                        u'title': "Legend",
+                                                        u'background_color': u'#ffffff',
+                                                        u'edge_color': u'#000000',
+                                                        u'transparency': 0.5,
+                                                        u'entries_font': u'Bitstream Vera Sans',
+                                                        u'entries_size': 10,
+                                                        u'entries_color': u'#000000',
+                                                        u'title_font': u'Bitstream Vera Sans',
+                                                        u'title_size': 12,
+                                                        u'title_color': u'#000000',
+                                                        u'marker_size': 2.0,
+                                                        u'box_visible': True,
+                                                        u'shadow': False,
+                                                        u'round_edges': True,
+                                                        u'columns': 1,
+                                                        u'column_spacing': 0.5,
+                                                        u'label_spacing': 0.5,
+                                                        u'marker_position': u'Left of Entries',
+                                                        u'markers': 1,
+                                                        u'border_padding': 0.5,
+                                                        u'marker_label_padding': 1.0},
+                                            u'lines': [{u'alpha': 1,
+                                                        u'color': u'#1f77b4',
+                                                        u'label': u'ws1: spec 2',
+                                                        u'lineIndex': 0,
+                                                        u'lineStyle': u'-',
+                                                        u'lineWidth': 1.5,
+                                                        u'markerStyle': {
+                                                            u'edgeColor': u'#1f77b4',
+                                                            u'edgeWidth': 1.0,
+                                                            u'faceColor': u'#1f77b4',
+                                                            u'markerSize': 6.0,
+                                                            u'markerType': u'None',
+                                                            u'zOrder': 2},
+                                                        u'errorbars': {
+                                                            u'exists': False
+                                                        }}],
                                             u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0),
                                                             u'dynamic': True,
                                                             u'frameOn': True, u'visible': True,
@@ -104,6 +128,11 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.loader_plot_dict[u'creationArguments'] = [[{u"specNum": 2, "function": "plot"}]]
 
+        # The original font isn't available on Windows so it has to be changed.
+        if platform.system() == "Windows":
+            self.loader_plot_dict[u'axes'][0][u'legend'][u'entries_font'] = 'DejaVu Sans'
+            self.loader_plot_dict[u'axes'][0][u'legend'][u'title_font'] = 'DejaVu Sans'
+
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
 
@@ -112,6 +141,11 @@ class PlotsSaverTest(unittest.TestCase):
         return_value = self.plot_saver.get_dict_for_axes(self.fig.axes[0])
 
         expected_value = self.loader_plot_dict["axes"][0]
+
+        # The original font isn't available on Windows so it has to be changed.
+        if platform.system() == "Windows":
+            self.loader_plot_dict[u'axes'][0][u'legend'][u'entries_font'] = 'DejaVu Sans'
+            self.loader_plot_dict[u'axes'][0][u'legend'][u'title_font'] = 'DejaVu Sans'
 
         self.maxDiff = None
         self.assertDictEqual(return_value, expected_value)

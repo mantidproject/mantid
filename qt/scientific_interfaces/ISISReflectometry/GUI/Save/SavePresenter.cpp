@@ -80,16 +80,16 @@ void SavePresenter::updateWidgetEnabledState() const {
   }
 }
 
-void SavePresenter::reductionPaused() {
+void SavePresenter::notifyReductionPaused() {
   populateWorkspaceList();
   updateWidgetEnabledState();
 }
 
-void SavePresenter::reductionResumed() { updateWidgetEnabledState(); }
+void SavePresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 
-void SavePresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void SavePresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
-void SavePresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void SavePresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
