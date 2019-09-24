@@ -15,7 +15,7 @@
 using namespace MantidQt::API;
 
 namespace {
-std::unique_ptr<ManageUserDirectories> g_currentlyOpenMUD;
+std::unique_ptr<ManageUserDirectories> CURRENTLY_OPEN_MUD;
 }
 
 ManageUserDirectories::ManageUserDirectories(QWidget *parent)
@@ -283,15 +283,15 @@ void ManageUserDirectories::selectSaveDir() {
 }
 
 void ManageUserDirectories::openManageUserDirectories() {
-  if (g_currentlyOpenMUD) {
-    g_currentlyOpenMUD->raise();
+  if (CURRENTLY_OPEN_MUD) {
+    CURRENTLY_OPEN_MUD->raise();
   } else {
-    g_currentlyOpenMUD = std::make_unique<ManageUserDirectories>();
-    g_currentlyOpenMUD->show();
+    CURRENTLY_OPEN_MUD = std::make_unique<ManageUserDirectories>();
+    CURRENTLY_OPEN_MUD->show();
   }
 }
 
 void ManageUserDirectories::closeEvent(QCloseEvent *event) {
-  g_currentlyOpenMUD.reset();
+  CURRENTLY_OPEN_MUD.reset();
   QWidget::closeEvent(event);
 }
