@@ -438,8 +438,20 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
 }
 
+/**
+ * @brief LoadILLReflectometry::doubleFromRun
+ * Returns a sample log a single double
+ * @param entryName : the name of the log
+ * @return the value as double
+ * @throws runtime_error : if the log does not exist
+ */
 double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
-  return m_localWorkspace->run().getPropertyValueAsType<double>(entryName);
+  if (m_localWorkspace->run().hasProperty(entryName)) {
+    return m_localWorkspace->run().getPropertyValueAsType<double>(entryName);
+  } else {
+    throw std::runtime_error("The log with the given name does not exist " +
+                             entryName);
+  }
 }
 
 /**
@@ -512,7 +524,17 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         if (chop1Phase > 360.0)
           chop1Phase = 0.0;
       }
-      const double POFF = doubleFromRun(m_offsetFrom + ".poff");
+      double POFF;
+      try {
+        POFF = doubleFromRun(m_offsetFrom + ".poff");
+      } catch (std::runtime_error &) {
+        try {
+          doubleFromRun(m_offsetFrom + ".pickup_offset");
+        } catch (std::runtime_error &) {
+          throw std::runtime_error(
+              "Unable to find VirtualChopper pickup offset");
+        }
+      }
       double openOffset;
       if (m_localWorkspace->run().hasProperty(
               m_offsetFrom + ".open_offset")) // Valid from 2018.
@@ -845,8 +867,24 @@ void LoadILLReflectometry::placeSlits() {
     slit2ToSample = 0.368 + offset;
     slit1ToSample = slit2ToSample + slitSeparation;
   } else {
-    slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
-    slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
+    try {
+      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
+    } catch (std::runtime_error &) {
+      try {
+        slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("Unable to find slit 1 to sample distance");
+      }
+    }
+    try {
+      slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
+    } catch (std::runtime_error &) {
+      try {
+        slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("Unable to find slit 2 to sample distance");
+      }
+    }
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
   m_loader.moveComponent(m_localWorkspace, "slit2", pos);
@@ -943,8 +981,18 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument != Supported::FIGARO) {
-    const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
-    // Chopper pair separation is in cm in sample logs.
+    double pairCentre;
+    try {
+      pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
+    } catch (std::runtime_error &) {
+      try {
+        pairCentre = mmToMeter(
+            doubleFromRun("VirtualChopper.MidChopper_Sample_distance"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error(
+            "Unable to extract chopper to sample distance");
+      }
+    }
     const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
     return pairCentre - 0.5 * pairSeparation;
   } else {
