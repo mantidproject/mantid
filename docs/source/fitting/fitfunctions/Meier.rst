@@ -27,7 +27,7 @@ Time dependence of the polarization function for a static muon interacting with 
 
 :math:`\omega_D` is the angular frequency due to dipolar coupling,
 
-:math:`\omega_Q` is the angular frequency due to quadrupole interaction of the nuclear spin :math:`J`due to a field gradient exerted by the presence of the muon ,
+:math:`\omega_Q` is the angular frequency due to quadrupole interaction of the nuclear spin :math:`J` due to a field gradient exerted by the presence of the muon,
 
 :math:`J` is the total angular momentum quantum number,
 
