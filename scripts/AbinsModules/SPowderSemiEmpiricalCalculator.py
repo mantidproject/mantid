@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
-from AbinsModules import AbinsParameters
+from AbinsModules import AbinsParameters, AbinsConstants
 import gc
 try:
     # noinspection PyUnresolvedReferences
@@ -15,25 +15,6 @@ try:
 except ImportError:
     PATHOS_FOUND = False
 import numpy as np
-
-
-# Helper class for handling stability issues with S threshold for one atom and one quantum event.
-class StabilityError(Exception):
-    def __init__(self, value=None):
-        self._value = value
-
-    def __str__(self):
-        return self._value
-
-
-# Helper class for handling stability issues with S threshold for all atoms and all quantum events.
-class StabilityErrorAllAtoms(Exception):
-    def __init__(self, value=None):
-        self._value = value
-
-    def __str__(self):
-        return self._value
-
 
 # noinspection PyMethodMayBeStatic
 class SPowderSemiEmpiricalCalculator(object):
@@ -115,13 +96,7 @@ class SPowderSemiEmpiricalCalculator(object):
         self._frequencies = self._bins[:-1] + (bin_width / 2)
         self._freq_size = self._bins.size - 1
 
-        # set initial threshold for s for each atom
         self._num_atoms = len(self._abins_data.get_atoms_data().extract())
-        s_threshold = AbinsParameters.sampling['s_relative_threshold']
-        self._s_threshold_ref = np.asarray([s_threshold for _ in range(self._num_atoms)])
-        self._s_current_threshold = np.copy(self._s_threshold_ref)
-        self._max_s_previous_order = np.asarray([0.0 for _ in range(self._num_atoms)])
-        self._total_s_correction_num_attempt = 0
 
         self._powder_atoms_data = None
         self._a_traces = None
@@ -148,113 +123,28 @@ class SPowderSemiEmpiricalCalculator(object):
 
         return s_data
 
-    def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None, atom=None, order=None):
+    def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
         """
         Discards frequencies for small S.
         :param s: numpy array with S for the given order quantum event and atom
         :param freq: frequencies which correspond to s
         :param coeff: coefficients which correspond to  freq
-        :param atom: number of atom
-        :param order: order of quantum event
-        :returns: large enough s, and corresponding freq, coeff and also if calculation is stable
+
+        :returns: freq, coeff corresponding to S greater than AbinsParameters.sampling['s_absolute_threshold']
         """
-        s_max = np.max(s)
-        threshold = max(s_max * self._s_current_threshold[atom], AbinsParameters.sampling['s_absolute_threshold'])
-        small_s = AbinsModules.AbinsConstants.SMALL_S
 
-        if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
-            self._max_s_previous_order[atom] = max(s_max, small_s)
-        else:
-            max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
+        indices = s > AbinsParameters.sampling['s_absolute_threshold']
 
-            is_not_smaller = s_max - self._max_s_previous_order[atom] > 1.3 * self._max_s_previous_order[atom]
-            allow_attempts = self._s_current_threshold[atom] < max_threshold
-
-            if is_not_smaller and allow_attempts:
-
-                msg = ("Numerical instability detected. Threshold for S has to be increased." +
-                       " Current max S is {} and the previous is {} for order {}."
-                       .format(s_max, self._max_s_previous_order[atom], order))
-                raise StabilityError(msg)
-            else:
-                self._max_s_previous_order[atom] = max(s_max, small_s)
-
-        indices = s > threshold
-        # indices are guaranteed to be a numpy array (but can be an empty numpy array)
-        # noinspection PyUnresolvedReferences
-        if indices.any():
-
+        # Mask out small values, but avoid returning an array smaller than MIN_SIZE
+        if np.count_nonzero(indices) >= AbinsConstants.MIN_SIZE:
             freq = freq[indices]
             coeff = coeff[indices]
 
         else:
-
-            freq = freq[:AbinsModules.AbinsConstants.MIN_SIZE]
-            coeff = coeff[:AbinsModules.AbinsConstants.MIN_SIZE]
+            freq = freq[:AbinsConstants.MIN_SIZE]
+            coeff = coeff[:AbinsConstants.MIN_SIZE]
 
         return freq, coeff
-
-    def _check_tot_s(self, tot_s=None):
-        """
-        Checks if total S for each quantum order event is consistent (it is expected that maximum intensity for n-th
-        order is larger than maximum intensity for n+1-th order ).
-        :param tot_s: dictionary with S for all atoms and all quantum events
-        """
-        s_temp = np.zeros_like(tot_s["atom_0"]["s"]["order_1"])
-        previous_s_max = 0.0
-        for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                           self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
-            s_temp.fill(0.0)
-            for atom in range(self._num_atoms):
-                s_temp += tot_s["atom_{}".format(atom)]["s"]["order_{}".format(order)]
-            if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
-                previous_s_max = np.max(s_temp)
-            else:
-
-                current_s_max = np.max(s_temp)
-                allow_attempts = np.median(self._s_current_threshold) < AbinsModules.AbinsConstants.MAX_THRESHOLD
-
-                if previous_s_max <= current_s_max and allow_attempts:
-                    raise StabilityErrorAllAtoms(
-                        "Numerical instability detected for all atoms for order {}".format(order))
-                else:
-                    previous_s_max = current_s_max
-
-    def _s_threshold_up(self, atom=None):
-        """
-        If index of atom is given then sets new higher threshold for S for the given atom. If no atom is specified then
-        threshold is increased for all  atoms.
-        :param atom: number of atom
-        """
-        intend = AbinsModules.AbinsConstants.S_THRESHOLD_CHANGE_INDENTATION
-        if atom is None:
-
-            self._s_current_threshold = self._s_threshold_ref * 2**self._total_s_correction_num_attempt
-            self._report_progress(
-                intend + "Threshold for S has been changed to {} for all atoms."
-                .format(self._s_current_threshold[0]) + " S for all atoms will be calculated from scratch.")
-
-        else:
-
-            self._s_current_threshold[atom] += self._s_threshold_ref[atom]
-
-            if self._s_current_threshold[atom] > AbinsModules.AbinsConstants.MAX_THRESHOLD:
-                raise StabilityErrorAllAtoms(
-                    "Numerical instability detected. To large threshold for the individual atom. Threshold for all "
-                    "atoms should be raised.")
-
-            atom_symbol = self._atoms["atom_{}".format(atom)]["symbol"]
-            self._report_progress(
-                intend + "Threshold for S has been changed to {} for atom {}  ({})."
-                .format(self._s_current_threshold[atom], atom, atom_symbol) +
-                " S for this atom will be calculated from scratch.")
-
-    def _s_threshold_reset(self):
-        """
-        Reset threshold for S to the initial value.
-        """
-        self._s_current_threshold = np.copy(self._s_threshold_ref)
-        self._total_s_correction_num_attempt = 0
 
     def _calculate_s_powder_over_k(self):
         """
@@ -303,20 +193,9 @@ class SPowderSemiEmpiricalCalculator(object):
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
         :returns: Python dictionary with S data
         """
-        self._s_threshold_reset()
-        while True:
 
-            try:
-
-                s_all_atoms = self._calculate_s_powder_over_atoms_core(q_indx=q_indx)
-                self._check_tot_s(tot_s=s_all_atoms)
-                return s_all_atoms
-
-            except StabilityErrorAllAtoms as e:
-
-                self._report_progress("{}".format(e))
-                self._total_s_correction_num_attempt += 1
-                self._s_threshold_up()
+        s_all_atoms = self._calculate_s_powder_over_atoms_core(q_indx=q_indx)
+        return s_all_atoms
 
     def _calculate_s_powder_over_atoms_core(self, q_indx=None):
         """
@@ -381,15 +260,9 @@ class SPowderSemiEmpiricalCalculator(object):
         logger.notice(msg)
 
     def _calculate_s_powder_one_atom(self, atom=None):
+         s = self._calculate_s_powder_one_atom_core(atom=atom)
 
-        while True:
-            try:
-                s = self._calculate_s_powder_one_atom_core(atom=atom)
-                return s
-            except StabilityError as e:
-
-                self._report_progress("{}".format(e))
-                self._s_threshold_up(atom=atom)
+         return s
 
     def _calculate_s_powder_one_atom_core(self, atom=None):
         """
@@ -508,9 +381,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
             local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
                                                                        freq=local_freq,
-                                                                       coeff=local_coeff,
-                                                                       atom=atom,
-                                                                       order=order)
+                                                                       coeff=local_coeff)
 
         else:
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
