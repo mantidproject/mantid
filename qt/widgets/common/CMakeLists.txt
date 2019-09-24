@@ -30,6 +30,7 @@ set(QT5_SRC_FILES
     src/HintingLineEdit.cpp
     # todo: move this to the instrument view library when the slice
     # viewer library is removed
+    src/IFunctionModel.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
@@ -409,6 +410,7 @@ set(SRC_FILES
     src/FunctionMultiDomainPresenter.cpp
     src/FunctionTreeView.cpp
     src/HintingLineEdit.cpp
+    src/IFunctionModel.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/LineEditWithClear.cpp
@@ -672,6 +674,7 @@ set(
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
+  inc/MantidQtWidgets/Common/IFunctionModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataSelector.h
   inc/MantidQtWidgets/Common/IMuonFitFunctionModel.h
