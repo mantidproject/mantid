@@ -28,9 +28,9 @@ Usage
 
     # Create the workspace to hold the already corrected incident spectrum
     incident_wksp_name = 'incident_spectrum_wksp'
-    binning_incident = "%s,%s,%s" % (0.1, 0.02, 5.0)
-    binning_for_calc = "%s,%s,%s" % (0.2, 0.02, 4.0)
-    binning_for_fit = "%s,%s,%s" % (0.15, 0.02, 4.5)
+    binning_incident = "0.1,0.02,5.0"
+    binning_for_calc = "0.2,0.02,4.0"
+    binning_for_fit = "0.15,0.02,4.5"
     incident_wksp = CreateSampleWorkspace(
         OutputWorkspace=incident_wksp_name,
         NumBanks=10,
@@ -41,32 +41,32 @@ Usage
     incident_wksp = ConvertToPointData(InputWorkspace=incident_wksp)
 
     # Spectrum function given in Milder et al. Eq (5)
-    def incidentSpectrum(wavelengths, phiMax, phiEpi, alpha, lambda1, lambda2,
-                         lamdaT):
-        deltaTerm = 1. / (1. + np.exp((wavelengths - lambda1) / lambda2))
-        term1 = phiMax * (
-            lambdaT**4. / wavelengths**5.) * np.exp(-(lambdaT / wavelengths)**2.)
-        term2 = phiEpi * deltaTerm / (wavelengths**(1 + 2 * alpha))
-        return term1 + term2
+    def incident_spectrum(wavelengths, phi_max, phi_epi, alpha, lambda_1, lambda_2,
+                         lamda_t):
+        delta_term = 1. / (1. + np.exp((wavelengths - lambda_1) / lambda_2))
+        term_1 = phi_max * (
+            lambda_t**4. / wavelengths**5.) * np.exp(-(lambda_t / wavelengths)**2.)
+        term_2 = phi_epi * delta_term / (wavelengths**(1 + 2 * alpha))
+        return term_1 + term_2
 
     # Variables for polyethlyene moderator at 300K
-    phiMax = 6324
-    phiEpi = 786
+    phi_max = 6324
+    phi_epi = 786
     alpha = 0.099
-    lambda1 = 0.67143
-    lambda2 = 0.06075
-    lambdaT = 1.58
+    lambda_1 = 0.67143
+    lambda_2 = 0.06075
+    lambda_t = 1.58
 
     # Add the incident spectrum to the workspace
     corrected_spectrum = incidentSpectrum(
-        incident_wksp.readX(0), phiMax, phiEpi, alpha, lambda1, lambda2, lambdaT)
+        incident_wksp.readX(0), phi_max, phi_epi, alpha, lambda_1, lambda_2, lambda_t)
     incident_wksp.setY(0, corrected_spectrum)
 
     incident_spectrum = FitIncidentSpectrum(
         InputWorkspace='incident_wksp',
         OutputWorkspace='fit_wksp',
-        BinningForCalc='0.2,0.01,4',
-        BinningForFit='0.2,0.01,4')
+        BinningForCalc=binning_for_calc,
+        BinningForFit=binning_for_fit)
     SetSampleMaterial(
         InputWorkspace='fit_wksp',
         ChemicalFormula='Co')

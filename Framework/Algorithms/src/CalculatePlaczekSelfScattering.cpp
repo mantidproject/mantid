@@ -38,8 +38,8 @@ std::map<std::string, std::string>
 CalculatePlaczekSelfScattering::validateInputs() {
   std::map<std::string, std::string> issues;
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const Geometry::DetectorInfo det_info = inWS->detectorInfo();
-  if (det_info.size() == 0) {
+  const Geometry::DetectorInfo detInfo = inWS->detectorInfo();
+  if (detInfo.size() == 0) {
     issues["InputWorkspace"] =
         "Input workspace does not have detector information";
   }
@@ -59,32 +59,31 @@ void CalculatePlaczekSelfScattering::exec() {
   API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
   const double factor =
       1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
-  const double neutron_mass = factor * 1.674927471e-27; // neutron mass
+  const double neutronMass = factor * 1.674927471e-27; // neutron mass
   // get sample information : mass, total scattering length, and concentration
   // of each species
-  auto atom_species =
-      CalculatePlaczekSelfScattering::get_sample_species_info(inWS);
+  auto atomSpecies = getSampleSpeciesInfo(inWS);
   // calculate summation term w/ neutron mass over molecular mass ratio
-  double summation_term = 0.0;
-  for (auto t = atom_species.begin(); t != atom_species.end(); t++) {
-    summation_term += t->second["concentration"] * t->second["b_sqrd_bar"] *
-                      neutron_mass / t->second["mass"];
+  double summationTerm = 0.0;
+  for (auto t = atomSpecies.begin(); t != atomSpecies.end(); t++) {
+    summationTerm += t->second["concentration"] * t->second["bSqrdBar"] *
+                      neutronMass / t->second["mass"];
   }
   // get incident spectrum and 1st derivative
-  const MantidVec x_lambda = inWS->readX(0);
+  const MantidVec xLambda = inWS->readX(0);
   const MantidVec incident = inWS->readY(0);
-  const MantidVec incident_prime = inWS->readY(1);
-  double dx = (x_lambda[1] - x_lambda[0]) / 2.0;
-  std::vector<double> phi_1;
-  for (size_t i = 0; i < x_lambda.size() - 1; i++) {
-    phi_1.push_back((x_lambda[i] + dx) * incident_prime[i] / incident[i]);
+  const MantidVec incidentPrime = inWS->readY(1);
+  double dx = (xLambda[1] - xLambda[0]) / 2.0;
+  std::vector<double> phi1;
+  for (size_t i = 0; i < xLambda.size() - 1; i++) {
+    phi1.push_back((xLambda[i] + dx) * incidentPrime[i] / incident[i]);
   }
-  // set detector law term (eps_1)
-  const double lambda_D = 1.44;
-  std::vector<double> eps_1;
-  for (size_t i = 0; i < x_lambda.size(); i++) {
-    double x_term = -x_lambda[i] / lambda_D;
-    eps_1.push_back(x_term * exp(x_term) / (1.0 - exp(x_term)));
+  // set detector law term (eps1)
+  const double lambdaD = 1.44;
+  std::vector<double> eps1;
+  for (size_t i = 0; i < xLambda.size(); i++) {
+    double xTerm = -xLambda[i] / lambdaD;
+    eps1.push_back(xTerm * exp(xTerm) / (1.0 - exp(xTerm)));
   }
   /* Placzek
      Original Placzek inelastic correction Ref (for constant wavelength, reactor
@@ -96,35 +95,46 @@ void CalculatePlaczekSelfScattering::exec() {
      3433-3451 NOTE: Powles's Equation for inelastic self-scattering is equal to
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
-  MantidVec x_lambdas;
-  MantidVec placzek_correction;
-  const Geometry::DetectorInfo det_info = inWS->detectorInfo();
-  int NSpec = 0;
-  for (size_t det_index = 0; det_index < det_info.size(); det_index++) {
-    if (det_info.isMonitor(det_index) != true) {
-      NSpec += 1;
-      const double path_length = det_info.l1() + det_info.l2(det_index);
-      const double f = det_info.l1() / path_length;
-      const double sin_theta_by_2 = sin(det_info.twoTheta(det_index) / 2.0);
-      for (size_t x_index = 0; x_index < x_lambda.size() - 1; x_index++) {
-        const double term1 = (f - 1.0) * phi_1[x_index];
-        const double term2 = f * eps_1[x_index];
+
+
+  MantidVec xLambdas;
+  MantidVec placzekCorrection;
+  size_t nReserve = 0;
+  const Geometry::DetectorInfo detInfo = inWS->detectorInfo();
+  for (size_t detIndex = 0; detIndex < detInfo.size(); detIndex++) {
+    if (!detInfo.isMonitor(detIndex)) {
+      nReserve += 1;
+    }
+  }
+  xLambdas.reserve(nReserve);
+  placzekCorrection.reserve(nReserve);
+
+  int nSpec = 0;
+  for (size_t detIndex = 0; detIndex < detInfo.size(); detIndex++) {
+    if (!detInfo.isMonitor(detIndex)) {
+      const double pathLength = detInfo.l1() + detInfo.l2(detIndex);
+      const double f = detInfo.l1() / pathLength;
+      const double sinThetaBy2 = sin(detInfo.twoTheta(detIndex) / 2.0);
+      for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
+        const double term1 = (f - 1.0) * phi1[xIndex];
+        const double term2 = f * eps1[xIndex];
         const double term3 = f - 3;
-        const double inelastic_placzek_self_correction =
-            2.0 * (term1 - term2 + term3) * sin_theta_by_2 * sin_theta_by_2 *
-            summation_term;
-        x_lambdas.push_back(x_lambda[x_index]);
-        placzek_correction.push_back(inelastic_placzek_self_correction);
+        const double inelasticPlaczekSelfCorrection =
+            2.0 * (term1 - term2 + term3) * sinThetaBy2 * sinThetaBy2 *
+            summationTerm;
+        xLambdas.push_back(xLambda[xIndex]);
+        placzekCorrection.push_back(inelasticPlaczekSelfCorrection);
       }
-      x_lambdas.push_back(x_lambda.back());
+      xLambdas.push_back(xLambda.back());
+      nSpec += 1;
     }
   }
   Mantid::API::Algorithm_sptr ChildAlg =
       createChildAlgorithm("CreateWorkspace");
-  ChildAlg->setProperty("DataX", x_lambdas);
-  ChildAlg->setProperty("DataY", placzek_correction);
+  ChildAlg->setProperty("DataX", xLambdas);
+  ChildAlg->setProperty("DataY", placzekCorrection);
   ChildAlg->setProperty("UnitX", "Wavelength");
-  ChildAlg->setProperty("NSpec", NSpec);
+  ChildAlg->setProperty("NSpec", nSpec);
   ChildAlg->setProperty("ParentWorkspace", inWS);
   ChildAlg->setProperty("Distribution", true);
   ChildAlg->execute();
@@ -133,30 +143,29 @@ void CalculatePlaczekSelfScattering::exec() {
 }
 
 const std::map<std::string, std::map<std::string, double>>
-CalculatePlaczekSelfScattering::get_sample_species_info(
-    API::MatrixWorkspace_sptr ws) {
+getSampleSpeciesInfo(API::MatrixWorkspace_sptr ws) {
   // get sample information : mass, total scattering length, and concentration
   // of each species
-  double total_stoich = 0.0;
-  std::map<std::string, std::map<std::string, double>> atom_species;
+  double totalStoich = 0.0;
+  std::map<std::string, std::map<std::string, double>> atomSpecies;
   const Kernel::Material::ChemicalFormula formula =
       ws->sample().getMaterial().chemicalFormula();
-  const double x_section = ws->sample().getMaterial().totalScatterXSection();
-  const double b_sqrd_bar = x_section / (4.0 * M_PI);
+  const double xSection = ws->sample().getMaterial().totalScatterXSection();
+  const double bSqrdBar = xSection / (4.0 * M_PI);
 
   for (auto t = formula.begin(); t != formula.end(); t++) {
     const Kernel::Material::FormulaUnit element = *t;
-    std::map<std::string, double> atom_map;
-    atom_map["mass"] = element.atom->mass;
-    atom_map["stoich"] = element.multiplicity;
-    atom_map["b_sqrd_bar"] = b_sqrd_bar;
-    atom_species[element.atom->symbol] = atom_map;
-    total_stoich += element.multiplicity;
+    std::map<std::string, double> atomMap;
+    atomMap["mass"] = element.atom->mass;
+    atomMap["stoich"] = element.multiplicity;
+    atomMap["bSqrdBar"] = bSqrdBar;
+    atomSpecies[element.atom->symbol] = atomMap;
+    totalStoich += element.multiplicity;
   }
-  for (auto t = atom_species.begin(); t != atom_species.end(); t++) {
-    t->second["concentration"] = t->second["stoich"] / total_stoich;
+  for (auto t = atomSpecies.begin(); t != atomSpecies.end(); t++) {
+    t->second["concentration"] = t->second["stoich"] / totalStoich;
   }
-  return atom_species;
+  return atomSpecies;
 }
 
 } // namespace Algorithms
