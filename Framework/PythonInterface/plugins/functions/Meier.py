@@ -34,43 +34,50 @@ class Meier(IFunction1D):
         OmegaQ = 2 * np.pi * FreqQ
         gau = np.exp(- 0.5 * (sigma * x) ** 2)
         Lor = np.exp(- Lambda * x)
-
-        def W(m):
-            return np.sqrt((2 * m - 1) ** 2 * (OmegaD + OmegaQ) ** 2 + OmegaD ** 2 * (J * (J + 1) - m * (m - 1)))
-
-        def lamp(m):
-            lampValue = 0
-            if m == J + 1:
-                lampValue = (OmegaQ * J ** 2) - (OmegaD * J)
+        J2 = round(2 * J)
+        J = J2/2
+        Wm = []
+        lamp = []
+        lamm = []
+        cosSQ2alpha = []
+        sinSQ2alpha = []
+        cosSQalpha = []
+        sinSQalpha = []
+        
+        for i in range(0 , int(J2 + 2)):
+            m = i - J
+            q1 = (OmegaQ + OmegaD) * (2 * m - 1)
+            q2 = OmegaD * np.sqrt(J * (J + 1) - m * (m - 1))
+            qq = q1 ** 2 + q2 ** 2
+            q3 = OmegaQ * (2 * m ** 2 - 2 * m + 1) + OmegaD
+            Wm.append(np.sqrt(qq))
+            if i < J2 + 1:
+                lamp.append(0.5 * (q3 + Wm[i]))
             else:
-                lampValue = 0.5 * (OmegaQ * (2 * m * m - 2 * m + 1) + OmegaD + W(m))
-            return lampValue
-
-        def lamm(m):
-            lammValue = 0
-            if m == -J:
-                lammValue = (OmegaQ * J ** 2) - (OmegaD * J)
+                lamp.append(OmegaQ * J ** 2 - OmegaD * J)
+            if i > 0:
+                lamm.append(0.5 * (q3 - Wm[i]))
             else:
-                lammValue = 0.5 * (OmegaQ * (2 * m ** 2 - 2 * m + 1) + OmegaD - W(m))
-            return lammValue
-
-        def alpha(m):
-            if m == 0.5:
-                alphaValue = np.pi / 4
+                lamm.append(OmegaQ * J ** 2 - OmegaD * J)
+            if qq > 0:
+                cosSQ2alpha.append(q1 ** 2 / qq)
             else:
-                alphaValue= 0.5 * np.arctan(OmegaD * np.sqrt(J * (J + 1) - m * (m - 1)) / ((1 - 2 * m) * (OmegaD + OmegaQ)))
-            return alphaValue
+                cosSQ2alpha.apend(0)
+            sinSQ2alpha.append(1 - cosSQ2alpha[i])
+            cosSQalpha.append(0.5 * (1 + np.sqrt(cosSQ2alpha[i])))
+            sinSQalpha.append(1 - cosSQalpha[i])
 
         tz = 0
         tx = 0
-        for mm in np.arange(- J + 1, J + 1, 1):
-            tz = tz + np.cos(2 * alpha(mm)) ** 2 + np.sin(2 * alpha(mm)) ** 2 * np.cos((lamp(mm) - lamm(mm)) * x)
-        Pz=(1 + tz) / (2 * J + 1)
-        for mm in np.arange(- J, J + 1, 1):
-            a = np.cos(alpha(mm + 1)) ** 2 * np.sin(alpha(mm)) ** 2 * np.cos((lamp(mm + 1) - lamp(mm)) * x)
-            b = np.cos(alpha(mm + 1)) ** 2 * np.cos(alpha(mm)) ** 2 * np.cos((lamp(mm + 1) - lamm(mm)) * x)
-            c = np.sin(alpha(mm + 1)) ** 2 * np.sin(alpha(mm)) ** 2 * np.cos((lamm(mm + 1) - lamp(mm)) * x)
-            d = np.sin(alpha(mm + 1)) ** 2 * np.cos(alpha(mm)) ** 2 * np.cos((lamm(mm + 1) - lamm(mm)) * x)
+        for i in range(1, int(J2) + 1):
+            tz = tz + cosSQ2alpha[i] + sinSQ2alpha[i] * np.cos((lamp[i] - lamm[i]) * x)
+        Pz = (1 + tz) / (2 * J + 1)
+
+        for i in range(0, int(J2) + 1):
+            a = cosSQalpha[i+1] * sinSQalpha[i] * np.cos((lamp[i + 1] - lamp[i]) * x)
+            b = cosSQalpha[i+1] * cosSQalpha[i] * np.cos((lamp[i + 1] - lamm[i]) * x)
+            c = sinSQalpha[i+1] * sinSQalpha[i] * np.cos((lamm[i + 1] - lamp[i]) * x)
+            d = sinSQalpha[i+1] * cosSQalpha[i] * np.cos((lamm[i + 1] - lamm[i]) * x)
             tx = tx + a + b + c + d
         Px = tx / (2 * J + 1)
         return A0 * gau * Lor * (1./3.) * (2 * Px + Pz)
