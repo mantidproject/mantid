@@ -71,6 +71,7 @@ private:
   bool m_writeDX;
   bool m_writeID;
   bool m_isCommonBins;
+  bool m_writeSpectrumAxisValue;
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
