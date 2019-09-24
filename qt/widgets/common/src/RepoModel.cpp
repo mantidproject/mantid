@@ -263,73 +263,76 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
 
     // return the data for the DecorationRole
     if (role == Qt::DecorationRole) {
-			if (index.column() == 0) {
-				inf = repo_ptr->fileInfo(path.toStdString());
+      if (index.column() == 0) {
+        inf = repo_ptr->fileInfo(path.toStdString());
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-				if (inf.directory) {
-					status = repo_ptr->fileStatus(path.toStdString());
-					if (status == Mantid::API::REMOTE_ONLY) {
-						auto icon = QIcon(":/folder-remote.png");
-						return icon;
-					}
-					else
-						return QIcon(":/folder.png");
-				}
-				else {
-					int pos = QString(path).lastIndexOf('.');
-					if (pos < 0)
-						return QIcon(":/unknown.png");
-					if (path.contains("readme", Qt::CaseInsensitive))
-						return QIcon(":/txt_file.png");
+        if (inf.directory) {
+          status = repo_ptr->fileStatus(path.toStdString());
+          if (status == Mantid::API::REMOTE_ONLY)
+            return QIcon::fromTheme("folder-remote",
+                                    QIcon(QPixmap(":/win/folder-remote")));
+          else
+            return QIcon::fromTheme("folder", QIcon(QPixmap(":/win/folder")));
+        } else {
+          int pos = QString(path).lastIndexOf('.');
+          if (pos < 0)
+            return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
+          if (path.contains("readme", Qt::CaseInsensitive))
+            return QIcon::fromTheme("text-x-readme",
+                                    QIcon(QPixmap(":/win/txt_file.png")));
 
-					QString extension = QString(path).remove(0, pos);
-					if (extension == ".cpp" || extension == ".CPP" || extension == ".c" ||
-						extension == ".C")
-						return QIcon(":/unknown.png");
-					else if (extension == ".py" || extension == ".PY")
-						return QIcon(":/text-x-python.png");
-					else if (extension == ".ui")
-						return QIcon(":/document.png");
-					else if (extension == ".docx" || extension == ".doc" ||
-						extension == ".odf")
-						return QIcon(":/office-document.png");
-					else if (extension == ".pdf")
-						return QIcon(":/file_pdf.png");
-					else
-						return QIcon(":/unknown.png");
-				}
+          QString extension = QString(path).remove(0, pos);
+          if (extension == ".cpp" || extension == ".CPP" || extension == ".c" ||
+              extension == ".C")
+            return QIcon::fromTheme("text-x-c++",
+                                    QIcon(QPixmap(":/win/unknown")));
+          else if (extension == ".py" || extension == ".PY")
+            return QIcon::fromTheme("text-x-python",
+                                    QIcon(QPixmap(":/win/text-x-python")));
+          else if (extension == ".ui")
+            return QIcon::fromTheme("document",
+                                    QIcon(QPixmap(":/win/document")));
+          else if (extension == ".docx" || extension == ".doc" ||
+                   extension == ".odf")
+            return QIcon::fromTheme("x-office-document",
+                                    QIcon(QPixmap(":/win/office-document")));
+          else if (extension == ".pdf")
+            return QIcon::fromTheme("application-pdf",
+                                    QIcon(QPixmap(":/win/file_pdf")));
+          else
+            return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
+        }
 #else
-				if (inf.directory) {
-					status = repo_ptr->fileStatus(path.toStdString());
-					if (status == Mantid::API::REMOTE_ONLY) {
-						return Icons::getIcon("mdi.folder-network-outline", "black", 1.2);
-					}
-					else
-						return Icons::getIcon("mdi.folder-open-outline", "black", 1.2);
-				}
-				else {
-					int pos = QString(path).lastIndexOf('.');
-					if (pos < 0)
-						return Icons::getIcon("mdi.file-question", "black", 1.2);
-					if (path.contains("readme", Qt::CaseInsensitive))
-						return Icons::getIcon("mdi.file-document-outline", "black", 1.2);
+        if (inf.directory) {
+          status = repo_ptr->fileStatus(path.toStdString());
+          if (status == Mantid::API::REMOTE_ONLY) {
+            return Icons::getIcon("mdi.folder-network-outline", "black", 1.2);
+          } else
+            return Icons::getIcon("mdi.folder-open-outline", "black", 1.2);
+        } else {
+          int pos = QString(path).lastIndexOf('.');
+          if (pos < 0)
+            return Icons::getIcon("mdi.file-question", "black", 1.2);
+          if (path.contains("readme", Qt::CaseInsensitive))
+            return Icons::getIcon("mdi.file-document-outline", "black", 1.2);
 
-					QString extension = QString(path).remove(0, pos);
-					if (extension == ".py" || extension == ".PY")
-						return Icons::getIcon("mdi.language-python", "black", 1.2);
-					else if (extension == ".ui")
-						return Icons::getIcon("mdi.file-document-box-outline", "black", 1.2);
-					else if (extension == ".docx" || extension == ".doc" ||
-						extension == ".odf")
-						return Icons::getIcon("mdi.file-outline", "black", 1.2);
-					else if (extension == ".pdf")
-						return Icons::getIcon("mdi.file-pdf-outline", "black", 1.2);
-					else
-						return Icons::getIcon("mdi.file-question", "black", 1.2);
-				}
+          QString extension = QString(path).remove(0, pos);
+          if (extension == ".py" || extension == ".PY")
+            return Icons::getIcon("mdi.language-python", "black", 1.2);
+          else if (extension == ".ui")
+            return Icons::getIcon("mdi.file-document-box-outline", "black",
+                                  1.2);
+          else if (extension == ".docx" || extension == ".doc" ||
+                   extension == ".odf")
+            return Icons::getIcon("mdi.file-outline", "black", 1.2);
+          else if (extension == ".pdf")
+            return Icons::getIcon("mdi.file-pdf-outline", "black", 1.2);
+          else
+            return Icons::getIcon("mdi.file-question", "black", 1.2);
+        }
 
 #endif
-			}
+      }
     } // end decorationRole
 
     // tool tip role

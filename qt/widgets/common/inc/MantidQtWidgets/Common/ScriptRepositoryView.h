@@ -69,7 +69,7 @@ public:
   ~ScriptRepositoryView() override;
 
 signals:
-  // allow Mantid Plot to open a python file to be seen
+  // allow Mantid to open a python file to be seen
   void loadScript(const QString /*_t1*/);
 
 protected slots:
