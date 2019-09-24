@@ -1974,7 +1974,7 @@ void SANSRunWindow::markError(QLabel *label) {
  * Select the base directory for the data
  */
 void SANSRunWindow::selectDataDir() {
-  MantidQt::API::ManageUserDirectories::openUserDirsDialog(this);
+  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
 }
 
 /**
@@ -3480,9 +3480,8 @@ void SANSRunWindow::checkList() {
   // split up the comma separated list ignoring spaces
   Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try {
-    for (const auto &i :
-         in) { // try a lexical cast, we don't need its result only
-               // if there was an error
+    for (const auto &i : in) { // try a lexical cast, we don't need its result
+                               // only if there was an error
       boost::lexical_cast<double>(i);
     }
     // there were no errors

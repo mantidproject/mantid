@@ -30,6 +30,7 @@ Improvements
 - If a spectrum has a label, this will now be used instead of the spectrum number in the legend when the spectrum is plotted.
 - The dialog for selecting spectra to plot now has the spectrum number input field selected by default.
 - There are now icons alongside the colormap names in the plot options dialog.
+- The help button in the Manage User Directories widget has been restored.
 - Hex codes can now be inputted directly into the color selectors in figure options.
 - There is now a button on the plot window's toolbar to generate a script that will re-create the current figure.
 - It is now possible to fit table workspaces in the fit browser and in a script.

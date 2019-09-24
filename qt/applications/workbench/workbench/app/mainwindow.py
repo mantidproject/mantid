@@ -48,7 +48,7 @@ from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 from mantidqt.interfacemanager import InterfaceManager  # noqa
-from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
+from mantidqt.widgets import manageuserdirectories  # noqa
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, plugins,
                                widget_updates_disabled)  # noqa
@@ -601,7 +601,7 @@ class MainWindow(QMainWindow):
         self.project.load()
 
     def open_manage_directories(self):
-        ManageUserDirectories(self).exec_()
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def open_settings_window(self):
         settings = SettingsPresenter(self)
