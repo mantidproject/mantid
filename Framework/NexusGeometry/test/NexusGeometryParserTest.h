@@ -112,7 +112,19 @@ public:
         "/home/spu92482/Downloads/DETGEOM_example_3.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
-
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 4);
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+    auto *shape1Mesh =
+        dynamic_cast<const Geometry::MeshObject2D *>(&shape1); // Test detectors
+    auto *shape2Mesh = dynamic_cast<const Geometry::MeshObject2D *>(&shape2);
+    TS_ASSERT(shape1Mesh);
+    TS_ASSERT(shape2Mesh);
+    TS_ASSERT_EQUALS(shape1Mesh, shape2Mesh); // pixel shape - all identical.
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 1);
+    TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 3);
     // auto componentInfo = *beamline.first;
   }
   void test_detector_shape_as_cylinders() {
