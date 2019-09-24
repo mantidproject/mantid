@@ -25,6 +25,7 @@ def pair_name():
         name.append("pair_" + str(i+1))
     return name
 
+
 @start_qapplication
 class PairingTablePresenterTest(unittest.TestCase):
 

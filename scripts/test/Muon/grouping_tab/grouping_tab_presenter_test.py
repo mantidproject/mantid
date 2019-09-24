@@ -20,6 +20,13 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import Pairi
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
+def pair_name():
+    name = []
+    for i in range(21):
+        name.append("pair_" + str(i+1))
+    return name
+
+
 @start_qapplication
 class GroupingTabPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -31,7 +38,6 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.gui_context = self.context.gui_context
         self.group_context=self.context.group_pair_context  
 
- 
         self.model = GroupingTabModel(context=self.context)
 
         self.grouping_table_view = GroupingTableView()
@@ -52,6 +58,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
                                               self.pairing_table_widget)
 
         self.presenter.create_update_thread = mock.MagicMock(return_value=mock.MagicMock())
+        self.presenter.pairing_table_widget.handle_add_pair_button_clicked = mock.MagicMock()
         self.view.display_warning_box = mock.MagicMock()
         self.grouping_table_view.warning_popup = mock.MagicMock()
         self.pairing_table_view.warning_popup = mock.MagicMock()
@@ -79,14 +86,14 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def test_context_menu_add_pair_adds_pair_if_two_groups_selected(self):
         self.assertEqual(self.pairing_table_view.num_rows(), 2)
         self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
-        self.grouping_table_view.contextMenuEvent(0)
+        self.grouping_table_view.contextMenuEvent(2)
         self.grouping_table_view.add_pair_action.triggered.emit(True)
 
         self.assertEqual(self.pairing_table_view.num_rows(), 3)
 
     def test_context_menu_add_pair_adds_correct_pair_if_two_groups_selected(self):
         self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
-        self.grouping_table_view.contextMenuEvent(0)
+        self.grouping_table_view.contextMenuEvent(2)
         self.grouping_table_view.add_pair_action.triggered.emit(True)
 
         pair_name = "pair_0"
@@ -179,6 +186,10 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.presenter.grouping_table_widget.remove_last_row_in_view_and_model()
 
         self.assertEqual(self.model.pair_names, ['long1'])
+
+    def test_that_adding_pair_with_context_menu_allows_for_name_specification(self):
+        self.presenter.add_pair_from_grouping_table("first", "second")
+        self.pairing_table_widget.handle_add_pair_button_clicked.assert_called_once_with("first", "second")
 
 
 if __name__ == '__main__':

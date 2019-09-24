@@ -85,7 +85,8 @@ class GroupingTabPresenter(object):
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
 
-    def add_pair_from_grouping_table(self, group_name1, group_name2):
+    def add_pair_from_grouping_table(self, group_name1="", group_name2=""):
+
         """
         If user requests to add a pair from the grouping table.
         """
