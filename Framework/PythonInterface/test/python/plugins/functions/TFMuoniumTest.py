@@ -29,7 +29,7 @@ class TFMuoniumTest(unittest.TestCase):
 			self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
 	def test_do_fit(self):
-		do_a_fit(np.arange(0.1, 16, 0.2), 'TFMuonium', guess = dict(A0 = 0.5, Field = 5, A = 600, Phi = 0.0), target = dict(A0 = 0.5, Field = 5, A = 600, Phi = 0.0), atol = 0.01)
+		do_a_fit(np.arange(0.1, 16, 0.2), 'TFMuonium', guess = dict(A0 = 0.55, Field = 5.5, A = 605, Phi = 0.0), target = dict(A0 = 0.5, Field = 5, A = 600, Phi = 0.0), atol = 0.01)
 
 if __name__ == '__main__':
 	unittest.main()
