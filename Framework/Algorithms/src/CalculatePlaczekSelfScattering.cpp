@@ -96,7 +96,6 @@ void CalculatePlaczekSelfScattering::exec() {
      Howe's Equation for P(theta) by adding the elastic self-scattering
   */
 
-
   MantidVec xLambdas;
   MantidVec placzekCorrection;
   size_t nReserve = 0;
