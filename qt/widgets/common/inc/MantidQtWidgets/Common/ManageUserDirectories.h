@@ -46,7 +46,6 @@ private slots:
 private:
   Ui::ManageUserDirectories m_uiForm;
   QString m_userPropFile;
-  static std::unique_ptr<ManageUserDirectories> m_currentlyOpenMUD;
 };
 
 } // namespace API
