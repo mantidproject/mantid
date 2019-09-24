@@ -151,6 +151,9 @@ private:
   mutable std::string m_yColName;
   /// Store the Y Error column name
   mutable std::string m_errColName;
+
+  /// Flag to indicate if no error column was found
+  mutable bool m_noErrCol;
 };
 
 } // namespace CurveFitting
