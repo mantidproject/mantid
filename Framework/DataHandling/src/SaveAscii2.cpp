@@ -33,8 +33,6 @@ DECLARE_ALGORITHM(SaveAscii2)
 using namespace Kernel;
 using namespace API;
 
-
-
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
