@@ -36,13 +36,16 @@ public:
   /// Default constuctor required by Qt meta-type system
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
-  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
+          QString scriptPath = "");
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
-  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
+          QString scriptPath = "");
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
-  Message(const char *text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
+          QString scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
 
@@ -51,10 +54,15 @@ public:
   inline QString text() const { return m_text; }
   /// @returns The message priority
   inline Priority priority() const { return m_priority; }
+  /// @returns The name of the script the message came from
+  inline QString scriptPath() const { return m_scriptPath; }
+  /// Set the script name. This is useful if a script is renamed
+  void setScriptPath(const QString &scriptPath) { m_scriptPath = scriptPath; }
 
 private:
   QString m_text;
   Priority m_priority;
+  QString m_scriptPath;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

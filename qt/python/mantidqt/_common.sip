@@ -80,6 +80,19 @@ public:
   MessageDisplay(QWidget *parent = 0);
   MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
+  QPlainTextEdit *getTextEdit();
+  void filterMessages();
+  QMenu *generateContextMenu();
+  void filePathModified(const QString &oldPath, const QString &newPath);
+
+  bool showFrameworkOutput();
+  void setShowFrameworkOutput(const bool &show);
+  bool showAllScriptOutput();
+  void setShowAllScriptOutput(const bool &show);
+  bool showActiveScriptOutput();
+  void setShowActiveScriptOutput(const bool &show);
+  QString activeScript();
+  void setActiveScript(const QString &scriptPath);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -87,6 +100,7 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
+  void appendPython(const QString &text, const int &priority, const QString &fileName);
   void setSource(const QString &source);
 };
 
@@ -252,7 +266,7 @@ class BaseDecoder {
 %End
 public:
   virtual QWidget * decode(const QMap<QString, QVariant> &map,
-                          const std::string &directory) = 0;
+                           const std::string &directory) = 0;
   virtual QList<QString> tags() = 0;
 private:
   BaseDecoder();
