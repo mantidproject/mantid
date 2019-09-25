@@ -29,7 +29,7 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
   const double xSection = ws->sample().getMaterial().totalScatterXSection();
   const double bSqrdBar = xSection / (4.0 * M_PI);
 
-  for (auto element : formula) {
+  for (const Kernel::Material::Material::FormulaUnit element : formula) {
     const std::map<std::string, double> atomMap{
         {"mass", element.atom->mass},
         {"stoich", element.multiplicity},
