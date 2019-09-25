@@ -2101,7 +2101,7 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list,
 
 /**
   Round all of the components of the V3D to the nearest integer.
-  @param hkl_list   Vector of V3D objects whose components will be rounded.
+  @param hkl V3D object whose components will be rounded.
 */
 void IndexingUtils::RoundHKL(Mantid::Kernel::V3D &hkl) {
   for (size_t i = 0; i < 3; i++) {
@@ -2438,17 +2438,17 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB,
 }
 
 /**
-  Calculate the Miller Indices for each of the specified Q vectors, using the
-  inverse of the specified UB matrix. If the peaks could not be indexed it is
+  Calculate the Miller Indices for the specified Q vector, using the
+  inverse of the specified UB matrix. If the peak could not be indexed it is
   set to (0,0,0)
 
-  @param UB             A 3x3 matrix of doubles holding the inverse UB matrix.
-  The matrix is not checked for validity
-  @param q_vectors      std::vector of V3D objects that contains the list of
-                        q_vectors that are to be indexed.
-  @param tolerance      The maximum allowed distance between each component
-                        of UB^(-1)*Q and the nearest integer value, required to
-                        to count the peak as indexed by UB.
+  @param inverseUB A 3x3 matrix of doubles holding the inverse UB matrix.
+                   The matrix is not checked for validity
+  @param q_vector  std::vector of V3D objects that contains the list of
+                   q_vectors that are to be indexed.
+  @param tolerance The maximum allowed distance between each component
+                   of UB^(-1)*Q and the nearest integer value, required to
+                   to count the peak as indexed by UB.
   @param miller_indices This vector returns a list of Miller Indices, with
                         one entry for each given Q vector.
 
@@ -2460,13 +2460,29 @@ bool IndexingUtils::CalculateMillerIndices(const DblMatrix &inverseUB,
                                            const V3D &q_vector,
                                            double tolerance,
                                            V3D &miller_indices) {
-  miller_indices = inverseUB * q_vector / (2.0 * M_PI);
+  miller_indices = CalculateMillerIndices(inverseUB, q_vector);
   if (ValidIndex(miller_indices, tolerance)) {
     return true;
   } else {
     miller_indices = V3D(0, 0, 0);
     return false;
   }
+}
+
+/**
+  Calculate the Miller Indices for the specified Q vector, using the
+  inverse of the specified UB matrix.
+
+  @param inverseUB A 3x3 matrix of doubles holding the inverse UB matrix.
+                   The matrix is not checked for validity
+  @param q_vector V3D object containing Q vector in sample frame
+
+  @return The indexes of the given peak. They have not been tested for validity
+
+ */
+V3D IndexingUtils::CalculateMillerIndices(const DblMatrix &inverseUB,
+                                          const V3D &q_vector) {
+  return inverseUB * q_vector / (2.0 * M_PI);
 }
 
 /**

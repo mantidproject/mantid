@@ -113,7 +113,7 @@ public:
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
-  void setIntHKL(const Mantid::Kernel::V3D HKL) override;
+  void setIntHKL(const Kernel::V3D &HKL) override;
   void setIntMNP(const Mantid::Kernel::V3D &MNP) override;
   void setSamplePos(double samX, double samY, double samZ) override;
   void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;

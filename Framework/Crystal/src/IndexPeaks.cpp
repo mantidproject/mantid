@@ -26,6 +26,7 @@ using DataObjects::PeaksWorkspace_sptr;
 using Geometry::IndexingUtils;
 using Geometry::OrientedLattice;
 using Kernel::DblMatrix;
+using Kernel::Logger;
 using Kernel::V3D;
 
 namespace {
@@ -48,6 +49,7 @@ struct SatelliteIndexingArgs {
   const double tolerance;
   const int maxOrder;
   const std::vector<V3D> modVectors;
+  const bool crossTerms;
 };
 
 struct IndexPeaksArgs {
@@ -72,7 +74,7 @@ struct IndexPeaksArgs {
     return {peaksWS, alg.getProperty(TOLERANCE), alg.getProperty(ROUNDHKLS),
             alg.getProperty(COMMONUB),
             SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE), maxOrder,
-                                  modVectorsToUse}};
+                                  modVectorsToUse, lattice.getCrossTerm()}};
   }
 
   PeaksWorkspace_sptr workspace;
@@ -174,6 +176,81 @@ DblMatrix optimizeUBMatrix(const DblMatrix &ubOrig,
   return optimizedUB;
 }
 
+/// Tie together a modulated peak number with its offset
+using MNPOffset = std::tuple<double, double, double, V3D>;
+
+/**
+ * Calculate a list of HKL offsets from the given modulation vectors.
+ * @param maxOrder Integer specifying the multiples of the modulation vector.
+ * @param modVectors A list of modulation vectors form the user
+ * @param crossTerms If true then compute products of the modulation vectors
+ * @return A list of (m, n, p, V3D) were m,n,p specifies the modulation
+ * structure number and V3D specifies the offset to be tested
+ */
+std::vector<MNPOffset>
+calculateOffsetsToTest(const int maxOrder, const std::vector<V3D> &modVectors,
+                       const bool crossTerms) {
+  assert(modVectors.size() <= 3);
+
+  std::vector<MNPOffset> offsets;
+  if (crossTerms && modVectors.size() > 1) {
+    const auto &modVector0{modVectors[0]}, modVector1{modVectors[1]};
+    if (modVectors.size() == 2) {
+      // Calculate m*mod_vec1 + n*mod_vec2 for combinations of m, n in
+      // [-maxOrder,maxOrder]
+      offsets.reserve(2 * maxOrder);
+      for (auto m = -maxOrder; m <= maxOrder; ++m) {
+        for (auto n = -maxOrder; n <= maxOrder; ++n) {
+          if (m == 0 && n == 0)
+            continue;
+          offsets.emplace_back(
+              std::make_tuple(m, n, 0, modVector0 * m + modVector1 * n));
+        }
+      }
+    } else {
+      // Calculate m*mod_vec1 + n*mod_vec2 + p*mod_vec3 for combinations of m,
+      // n, p in
+      // [-maxOrder,maxOrder]
+      const auto &modVector2{modVectors[2]};
+      offsets.reserve(3 * maxOrder);
+      for (auto m = -maxOrder; m <= maxOrder; ++m) {
+        for (auto n = -maxOrder; n <= maxOrder; ++n) {
+          for (auto p = -maxOrder; p <= maxOrder; ++p) {
+            if (m == 0 && n == 0 && p == 0)
+              continue;
+            offsets.emplace_back(std::make_tuple(
+                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p));
+          }
+        }
+      }
+    }
+  } else {
+    // No cross terms: Compute coeff*mod_vec_i for each modulation vector
+    // separately for coeff in [-maxOrder, maxOrder]
+    for (auto i = 0u; i < modVectors.size(); ++i) {
+      const auto &modVector = modVectors[i];
+      for (int order = -maxOrder; order <= maxOrder; ++order) {
+        if (order == 0)
+          continue;
+        V3D offset{modVector * order};
+        switch (i) {
+        case 0:
+          offsets.emplace_back(std::make_tuple(order, 0, 0, std::move(offset)));
+          break;
+        case 1:
+          offsets.emplace_back(std::make_tuple(0, order, 0, std::move(offset)));
+          break;
+        case 2:
+          offsets.emplace_back(std::make_tuple(0, 0, order, std::move(offset)));
+          break;
+        }
+      }
+    }
+  }
+
+  return offsets;
+}
+
 /// <IntHKL, IntMNP, error>
 using IndexedSatelliteInfo = std::tuple<V3D, V3D, double>;
 
@@ -190,85 +267,39 @@ using IndexedSatelliteInfo = std::tuple<V3D, V3D, double>;
 
  * @param mainHKL The HKL of a failed attempt to index a fundamental
  reflection
- * @param maxOrder The highest order of to search away from the peak
- * @param modVectors
- * @param tolerance
- * @return
+ * @param maxOrder The highest multiple of the offset vector  to search away
+ from the peak
+ * @param modVectors The list of offset vectors
+ * @param tolerance Tolerance used to accept/reject a candidate peak
+ * @param crossTerms If true use combinations of offset vectors for search,
+ i.e.
+ *                   candidateHKL = mainHKL - m*mod_1 - n*mod_2 - p*mod_3
+ * @return (IntHKL, IntMNP, error) if a peak was indexed, otherwise none
  */
-boost::optional<IndexedSatelliteInfo>
-indexSatellite(const V3D &mainHKL, int maxOrder,
-               const std::vector<V3D> &modVectors, double tolerance) {
-  assert(modVectors.size() <= 3);
 
+boost::optional<IndexedSatelliteInfo>
+indexSatellite(const V3D &mainHKL, const int maxOrder,
+               const std::vector<V3D> &modVectors, const double tolerance,
+               const bool crossTerms) {
+  const auto offsets = calculateOffsetsToTest(maxOrder, modVectors, crossTerms);
   bool foundSatellite{false};
-  V3D candidateIntHKL, candidateMNP;
-  for (auto i = 0u; i < modVectors.size(); ++i) {
-    const auto &modVector = modVectors[i];
-    for (int order = -maxOrder; order <= maxOrder; ++order) {
-      if (order == 0)
-        continue;
-      candidateIntHKL = mainHKL - modVector * order;
-      if (IndexingUtils::ValidIndex(candidateIntHKL, tolerance)) {
-        candidateMNP[i] = order;
-        foundSatellite = true;
-        // we deliberately don't break and use the last valid
-        // reflection we find.
-      }
+  V3D indexedIntHKL, indexedMNP;
+  for (const auto &mnpOffset : offsets) {
+    const auto candidateIntHKL = mainHKL - std::get<3>(mnpOffset);
+    const V3D candidateMNP{std::get<0>(mnpOffset), std::get<1>(mnpOffset),
+                           std::get<2>(mnpOffset)};
+    if (IndexingUtils::ValidIndex(candidateIntHKL, tolerance)) {
+      indexedIntHKL = candidateIntHKL;
+      indexedMNP = candidateMNP;
+      foundSatellite = true;
+      // we deliberately don't break and use the last valid
+      // reflection we find.
     }
   }
   if (foundSatellite)
-    return std::make_tuple(candidateIntHKL, candidateMNP,
-                           candidateIntHKL.hklError());
+    return std::make_tuple(indexedIntHKL, indexedMNP, indexedIntHKL.hklError());
   else
     return boost::none;
-}
-
-/**
- * Attempt to index any unindexed peaks as if they were satellites and set
- * the HKLs of any indexed peaks.
- *
- * @param peaks A list of peaks, with some possibly indexed as main
- * reflections
- * @param millerIndices A list of miller indices calculated from attempting
- * to index the peaks in the peaks list as fundamental peaks. The size is
- * assumed to match the size of peaks.
- * @param roundHKLs If true round the output HKL indices
- * @param args Additional arguments relating to the satellites peaks
- * @returns A PeakIndexingStats object describing the output
- */
-PeakIndexingStats indexSatellites(const std::vector<Peak *> &peaks,
-                                  std::vector<V3D> &millerIndices,
-                                  const bool roundHKLs,
-                                  const Prop::SatelliteIndexingArgs &args) {
-  PeakIndexingStats stats;
-
-  for (auto i = 0u; i < peaks.size(); ++i) {
-    auto peak = peaks[i];
-    auto &mainHKL{millerIndices[i]};
-
-    // TODO: THIS TEST IS WRONG AS WE HAVE NOT SET THE HKL YET!!!!
-    if (peak->isIndexed()) {
-      if (roundHKLs)
-        IndexingUtils::RoundHKL(mainHKL);
-      peak->setHKL(mainHKL);
-      peak->setIntHKL(mainHKL);
-      peak->setIntMNP(V3D(0, 0, 0));
-    } else {
-      auto result = indexSatellite(mainHKL, args.maxOrder, args.modVectors,
-                                   args.tolerance);
-      if (result) {
-        const auto &satelliteInfo = result.get();
-        if (roundHKLs)
-          IndexingUtils::RoundHKL(mainHKL);
-        peak->setHKL(mainHKL);
-        peak->setIntHKL(std::get<0>(satelliteInfo));
-        peak->setIntMNP(std::get<1>(satelliteInfo));
-        stats.numIndexed++;
-        stats.error += std::get<2>(satelliteInfo) / 3.;
-      }
-    }
-  }
-  return stats;
 }
 
 /**
@@ -301,45 +332,71 @@ indexPeaks(const std::vector<Peak *> &peaks, DblMatrix ub,
   ub.Invert();
   for (auto i = 0u; i < peaks.size(); ++i) {
     const auto peak = peaks[i];
-    V3D millerIndices;
-    if (IndexingUtils::CalculateMillerIndices(ub, qSample[i], mainTolerance,
-                                              millerIndices)) {
+    V3D nominalHKL = IndexingUtils::CalculateMillerIndices(ub, qSample[i]);
+    if (IndexingUtils::ValidIndex(nominalHKL, mainTolerance)) {
       stats.main.numIndexed++;
-      stats.main.error += millerIndices.hklError() / 3.0;
+      stats.main.error += nominalHKL.hklError() / 3.0;
       if (roundHKLs) {
-        IndexingUtils::RoundHKL(millerIndices);
+        IndexingUtils::RoundHKL(nominalHKL);
       }
-      peak->setHKL(millerIndices);
-      peak->setIntHKL(millerIndices);
+      peak->setHKL(nominalHKL);
+      peak->setIntHKL(nominalHKL);
       peak->setIntMNP(V3D(0, 0, 0));
+    } else if (satelliteArgs.maxOrder > 0) {
+      auto result = indexSatellite(
+          nominalHKL, satelliteArgs.maxOrder, satelliteArgs.modVectors,
+          satelliteArgs.tolerance, satelliteArgs.crossTerms);
+      if (result) {
+        const auto &satelliteInfo = result.get();
+        if (roundHKLs)
+          IndexingUtils::RoundHKL(nominalHKL);
+        peak->setHKL(nominalHKL);
+        peak->setIntHKL(std::get<0>(satelliteInfo));
+        peak->setIntMNP(std::get<1>(satelliteInfo));
+        stats.satellites.numIndexed++;
+        stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
+      }
     }
-
-    //  std::vector<V3D> millerIndices;
-    //  millerIndices.reserve(qSample.size());
-    //  CombinedIndexingStats stats;
-    //  double averageError{0.0};
-    //  stats.main.numIndexed = IndexingUtils::CalculateMillerIndices(
-    //      ub, qSample, mainTolerance, millerIndices, averageError);
-    //  stats.main.error = averageError * stats.main.numIndexed;
-
-    //  if (static_cast<size_t>(stats.main.numIndexed) != nPeaks &&
-    //      satelliteArgs.maxOrder > 0) {
-    //    stats.satellites =
-    //        indexSatellites(peaks, millerIndices, roundHKLs, satelliteArgs);
-    //  } else {
-    //    if (roundHKLs)
-    //      IndexingUtils::RoundHKLs(millerIndices);
-
-    //    std::for_each(std::begin(peaks), std::end(peaks),
-    //                  [&millerIndices, i = 0u ](Peak * peak) mutable {
-    //                    peak->setHKL(millerIndices[i]);
-    //                    peak->setIntHKL(millerIndices[i]);
-    //                    peak->setIntMNP(V3D(0, 0, 0));
-    //                    ++i;
-    //                  });
-    //  }
   }
   return stats;
+}
+
+/**
+ * Log the results of indexing
+ * @param out A stream reference to write to
+ * @param indexingInfo Summary of indexing results
+ * @param runNo Run number or -1 if all runs indexed together
+ * @param nPeaksTotal The number of peaks in total that were attempted for
+ * indexing
+ * @param args Arguments passed to the algorithm
+ */
+void logIndexingResults(std::ostream &out,
+                        const CombinedIndexingStats &indexingInfo,
+                        const int runNo, const size_t nPeaksTotal,
+                        const Prop::IndexPeaksArgs &args) {
+  if (runNo >= 0)
+    out << "Run " << runNo;
+  else
+    out << "All runs";
+  out << " indexed " << indexingInfo.totalNumIndexed() << " peaks out of "
+      << nPeaksTotal;
+  if (args.satellites.maxOrder > 0) {
+    out << " of which, " << indexingInfo.main.numIndexed
+        << " main Bragg peaks are indexed with tolerance of "
+        << args.mainTolerance << ", " << indexingInfo.satellites.numIndexed
+        << " satellite peaks are indexed with tolerance of "
+        << args.satellites.tolerance << '\n';
+    out << "  Average error in h,k,l for indexed peaks =  "
+        << indexingInfo.averageError() << '\n';
+    out << "  Average error in h,k,l for indexed main peaks =  "
+        << indexingInfo.main.error << '\n';
+    out << "  Average error in h,k,l for indexed satellite peaks =  "
+        << indexingInfo.satellites.error << '\n';
+  } else {
+    out << " with tolerance of " << args.mainTolerance << '\n';
+    out << "  Average error in h,k,l for indexed peaks =  "
+        << indexingInfo.mainError() << '\n';
+  }
 }
 
 } // namespace
@@ -441,327 +498,15 @@ void IndexPeaks::exec() {
                   });
     const bool optimizeUB{true};
     for (const auto &runPeaks : peaksPerRun) {
-      indexingInfo += indexPeaks(runPeaks.second, sampleUB, args.mainTolerance,
-                                 args.roundHKLs, optimizeUB, args.satellites);
+      const auto &peaks = runPeaks.second;
+      const auto indexedInRun =
+          indexPeaks(peaks, sampleUB, args.mainTolerance, args.roundHKLs,
+                     optimizeUB, args.satellites);
+      logIndexingResults(g_log.notice(), indexedInRun, runPeaks.first,
+                         peaks.size(), args);
+      indexingInfo += indexedInRun;
     }
   }
-
-  // else {
-  //    assert(false);
-  //    auto ws = args.workspace;
-  //    const auto &o_lattice = ws->sample().getOrientedLattice();
-  //    const auto &UB = o_lattice.getUB();
-  //    const bool round_hkls = this->getProperty(Prop::ROUNDHKLS);
-  //    std::vector<Peak> &peaks = ws->getPeaks();
-  //    const size_t n_peaks = static_cast<size_t>(ws->getNumberPeaks());
-  //    int total_indexed{0}, total_main{0}, total_sate{0};
-  //    double average_error{0.}, average_main_error{0.},
-  //    average_sate_error{0.}; const double tolerance =
-  //    this->getProperty("Tolerance");
-
-  //    double total_error{0.}, total_main_error{0.}, total_sate_error{0.};
-  //    double satetolerance = this->getProperty("ToleranceForSatellite");
-
-  //    // get list of run numbers in this peaks workspace
-  //    std::vector<int> run_numbers;
-  //    for (const auto &peak : peaks) {
-  //      int run = peak.getRunNumber();
-  //      bool found = false;
-  //      size_t k = 0;
-  //      while (k < run_numbers.size() && !found) {
-  //        if (run == run_numbers[k])
-  //          found = true;
-  //        else
-  //          k++;
-  //      }
-  //      if (!found)
-  //        run_numbers.push_back(run);
-  //    }
-
-  //    // index the peaks for each run separately, using a UB matrix
-  //    optimized
-  //    // for that run
-
-  //    for (const int run : run_numbers) {
-  //      std::vector<V3D> miller_indices;
-  //      std::vector<V3D> q_vectors;
-
-  //      for (const auto &peak : peaks) {
-  //        if (peak.getRunNumber() == run)
-  //          q_vectors.push_back(peak.getQSampleFrame());
-  //      }
-
-  //      DblMatrix tempUB(UB);
-
-  //      int num_indexed = 0;
-  //      double original_error = 0;
-  //      int original_indexed = IndexingUtils::CalculateMillerIndices(
-  //          tempUB, q_vectors, tolerance, miller_indices, original_error);
-
-  //      IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded
-  //      for
-  //      // Optimize_UB to work
-  //      num_indexed = original_indexed;
-  //      average_error = original_error;
-
-  //      bool done = false;
-  //      if (num_indexed < 3) // can't optimize without at least 3
-  //      {                    // peaks
-  //        done = true;
-  //      }
-
-  //      int iteration = 0;
-  //      while (iteration < 4 && !done) // try repeatedly optimizing 4 times
-  //      {                              // which is usually sufficient
-  //        try {
-  //          IndexingUtils::Optimize_UB(tempUB, miller_indices, q_vectors);
-  //        } catch (...) // If there is any problem, such as too few
-  //        {             // independent peaks, just use the original UB
-  //          tempUB = UB;
-  //          done = true;
-  //        }
-
-  //        num_indexed = IndexingUtils::CalculateMillerIndices(
-  //            tempUB, q_vectors, tolerance, miller_indices, average_error);
-
-  //        IndexingUtils::RoundHKLs(miller_indices); // HKLs must be rounded
-  //        for
-  //        // Optimize_UB to work
-
-  //        if (num_indexed < original_indexed) // just use the original UB
-  //        {
-  //          num_indexed = original_indexed;
-  //          average_error = original_error;
-  //          done = true;
-  //        }
-
-  //        iteration++;
-  //      }
-
-  //      // If data not modulated, recalculate fractional HKL
-  //      if (o_lattice.getMaxOrder() == 0) {
-  //        // If user wants fractional hkls, recalculate them
-  //        if (!round_hkls) {
-  //          num_indexed = IndexingUtils::CalculateMillerIndices(
-  //              tempUB, q_vectors, tolerance, miller_indices,
-  //              average_error);
-  //        }
-  //        total_indexed += num_indexed;
-  //        total_main += num_indexed;
-  //        total_error += average_error * num_indexed;
-  //        total_main_error += average_error * num_indexed;
-
-  //        // tell the user how many were indexed in each run
-  //        if (run_numbers.size() > 1) {
-  //          g_log.notice() << "Run " << run << ": indexed " << num_indexed
-  //                         << " Peaks out of " << q_vectors.size()
-  //                         << " with tolerance of " << tolerance << '\n';
-  //          g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-  //                         << average_error << '\n';
-  //        }
-
-  //        size_t miller_index_counter = 0;
-  //        for (auto &peak : peaks) {
-  //          if (peak.getRunNumber() == run) {
-  //            peak.setHKL(miller_indices[miller_index_counter]);
-  //            peak.setIntHKL(miller_indices[miller_index_counter]);
-  //            peak.setIntMNP(V3D(0, 0, 0));
-  //            miller_index_counter++;
-  //          }
-  //        }
-
-  //      } else {
-  //        g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() <<
-  //        '\n'; int ModDim = 0; int main_indexed = 0; int sate_indexed = 0;
-  //        double main_error = 0;
-  //        double sate_error = 0;
-  //        const int maxOrder = o_lattice.getMaxOrder();
-  //        const bool crossTerm = o_lattice.getCrossTerm();
-  //        const V3D offsets1 = o_lattice.getModVec(0);
-  //        const V3D offsets2 = o_lattice.getModVec(1);
-  //        const V3D offsets3 = o_lattice.getModVec(2);
-
-  //        if (offsets1 == V3D(0, 0,
-  //        0))test_zero_satellite_tol_only_indexes_main_refl_with_modvectors_from_ub
-  //          throw std::runtime_error("Invalid Modulation Vector");
-  //        else if (offsets2 == V3D(0, 0, 0))
-  //          ModDim = 1;
-  //        else if (offsets3 == V3D(0, 0, 0))
-  //          ModDim = 2;
-  //        else
-  //          ModDim = 3;
-
-  //        IndexingUtils::CalculateMillerIndices(tempUB, q_vectors, 1.0,
-  //                                              miller_indices,
-  //                                              average_error);
-
-  //        // Index satellite peaks
-  //        size_t miller_index_counter = 0;
-  //        for (auto &peak : peaks) {
-  //          if (peak.getRunNumber() == run) {
-  //            peak.setHKL(miller_indices[miller_index_counter]);
-  //            miller_index_counter++;
-  //            auto hkl = peak.getHKL();
-  //            bool suc_indexed = false;
-
-  //            if (IndexingUtils::ValidIndex(hkl, tolerance)) {
-  //              if (round_hkls) {
-  //                IndexingUtils::RoundHKL(hkl);
-  //                peak.setHKL(hkl);
-  //              }
-  //              peak.setIntHKL(hkl);
-  //              peak.setIntMNP(V3D(0, 0, 0));
-  //              suc_indexed = true;
-  //              main_indexed++;
-  //              main_error += hkl.hklError();
-  //            } else if (!crossTerm) {
-  //              if (ModDim > 0) {
-  //                for (int order = -maxOrder; order <= maxOrder; order++) {
-  //                  if (order == 0)
-  //                    continue; // exclude order 0
-  //                  V3D hkl1(hkl);
-  //                  hkl1 -= offsets1 * order;
-  //                  if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-  //                    peak.setIntHKL(hkl1);
-  //                    peak.setIntMNP(V3D(order, 0, 0));
-  //                    suc_indexed = true;
-  //                    sate_indexed++;
-  //                    sate_error += hkl1.hklError();
-  //                  }
-  //                }
-  //              }
-  //              if (ModDim > 1) {
-  //                for (int order = -maxOrder; order <= maxOrder; order++) {
-  //                  if (order == 0)
-  //                    continue; // exclude order 0
-  //                  V3D hkl1(hkl);
-  //                  hkl1 -= offsets2 * order;
-  //                  if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-  //                    peak.setIntHKL(hkl1);
-  //                    peak.setIntMNP(V3D(0, order, 0));
-  //                    suc_indexed = true;
-  //                    sate_indexed++;
-  //                    sate_error += hkl1.hklError();
-  //                  }
-  //                }
-  //              }
-  //              if (ModDim > 2) {
-  //                for (int order = -maxOrder; order <= maxOrder; order++) {
-  //                  if (order == 0)
-  //                    continue; // exclude order 0
-  //                  V3D hkl1(hkl);
-  //                  hkl1 -= offsets3 * order;
-  //                  if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-  //                    peak.setIntHKL(hkl1);
-  //                    peak.setIntMNP(V3D(0, 0, order));
-  //                    suc_indexed = true;
-  //                    sate_indexed++;
-  //                    sate_error += hkl1.hklError();
-  //                  }
-  //                }
-  //              }
-  //            } else {
-  //              if (ModDim == 1) {
-  //                for (int order = -maxOrder; order <= maxOrder; order++) {
-  //                  if (order == 0)
-  //                    continue; // exclude order 0
-  //                  V3D hkl1(hkl);
-  //                  hkl1 -= offsets1 * order;
-  //                  if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-  //                    peak.setIntHKL(hkl1);
-  //                    peak.setIntMNP(V3D(order, 0, 0));
-  //                    suc_indexed = true;
-  //                    sate_indexed++;
-  //                    sate_error += hkl1.hklError();
-  //                  }
-  //                }
-  //              }
-  //              if (ModDim == 2) {
-  //                for (int m = -maxOrder; m <= maxOrder; m++)
-  //                  for (int n = -maxOrder; n <= maxOrder; n++) {
-  //                    if (m == 0 && n == 0)
-  //                      continue; // exclude 0,0
-  //                    V3D hkl1(hkl);
-  //                    hkl1 -= offsets1 * m + offsets2 * n;
-  //                    if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-  //                      peak.setIntHKL(hkl1);
-  //                      peak.setIntMNP(V3D(m, n, 0));
-  //                      suc_indexed = true;
-  //                      sate_indexed++;
-  //                      sate_error += hkl1.hklError();
-  //                    }
-  //                  }
-  //              }
-  //              if (ModDim == 3) {
-  //                for (int m = -maxOrder; m <= maxOrder; m++)
-  //                  for (int n = -maxOrder; n <= maxOrder; n++)
-  //                    for (int p = -maxOrder; p <= maxOrder; p++) {
-  //                      if (m == 0 && n == 0 && p == 0)
-  //                        continue; // exclude 0,0,0
-  //                      V3D hkl1(hkl);
-  //                      hkl1 -= offsets1 * m + offsets2 * n + offsets3 * p;
-  //                      if (IndexingUtils::ValidIndex(hkl1, satetolerance))
-  //                      {
-  //                        peak.setIntHKL(hkl1);
-  //                        peak.setIntMNP(V3D(m, n, p));
-  //                        suc_indexed = true;
-  //                        sate_indexed++;
-  //                        sate_error += hkl1.hklError();
-  //                      }
-  //                    }
-  //              }
-  //            }
-  //            if (!suc_indexed) {
-  //              peak.setHKL(V3D(0, 0, 0));
-  //              peak.setIntHKL(V3D(0, 0, 0));
-  //              peak.setIntMNP(V3D(0, 0, 0));
-  //            }
-  //          }
-  //        }
-
-  //        num_indexed = main_indexed + sate_indexed;
-  //        total_main += main_indexed;
-  //        total_sate += sate_indexed;
-  //        total_main_error += main_error / 3;
-  //        total_sate_error += sate_error / 3;
-  //        total_indexed += main_indexed + sate_indexed;
-  //        total_error += main_error / 3 + sate_error / 3;
-
-  //        if (run_numbers.size() > 1) {
-  //          g_log.notice() << "Run " << run << ": indexed " << num_indexed
-  //                         << " Peaks out of " << q_vectors.size() << '\n';
-  //          g_log.notice() << "of which, " << main_indexed
-  //                         << " Main Bragg Peaks are indexed with tolerance
-  //                         of "
-  //                         << tolerance << ", " << sate_indexed
-  //                         << " Satellite Peaks are indexed with tolerance
-  //                         of "
-  //                         << satetolerance << '\n';
-  //        }
-  //      }
-  //    }
-
-  //    if (total_indexed > 0)
-  //      average_error = total_error / total_indexed;
-  //    else
-  //      average_error = 0;
-
-  //    if (total_main > 0)
-  //      average_main_error = total_main_error / total_main;
-  //    else
-  //      average_main_error = 0;
-
-  //    if (total_sate > 0)
-  //      average_sate_error = total_sate_error / total_sate;
-  //    else
-  //      average_sate_error = 0;
-
-  //    indexingInfo.numMainIndexed = total_main;
-  //    indexingInfo.numSatIndexed = total_sate;
-  //    indexingInfo.averageError = average_error;
-  //    indexingInfo.mainError = average_main_error;
-  //    indexingInfo.satelliteError = average_sate_error;
-  //}
 
   setProperty("NumIndexed", indexingInfo.totalNumIndexed());
   setProperty("MainNumIndexed", indexingInfo.main.numIndexed);
@@ -770,37 +515,11 @@ void IndexPeaks::exec() {
   setProperty("MainError", indexingInfo.mainError());
   setProperty("SatelliteError", indexingInfo.satelliteError());
 
-  if (args.satellites.maxOrder > 0) {
-    g_log.notice() << "ALL Runs: indexed " << indexingInfo.totalNumIndexed()
-                   << " Peaks out of " << args.workspace->getNumberPeaks()
-                   << " with tolerance of " << args.mainTolerance << '\n';
-    g_log.notice() << "Out of " << indexingInfo.totalNumIndexed()
-                   << " Indexed Peaks " << indexingInfo.main.numIndexed
-                   << " are Main Bragg Peaks, and "
-                   << indexingInfo.satellites.numIndexed
-                   << " are satellite peaks " << '\n';
-
-    g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                   << indexingInfo.averageError() << '\n';
-    g_log.notice() << "Average error in h,k,l for indexed main peaks =  "
-                   << indexingInfo.main.error << '\n';
-    g_log.notice() << "Average error in h,k,l for indexed satellite peaks =  "
-                   << indexingInfo.satellites.error << '\n';
-
-    // Show the lattice parameters
-    g_log.notice() << args.workspace->sample().getOrientedLattice() << "\n";
-  } else {
-    // tell the user how many were indexed overall and the overall average
-    // error
-    g_log.notice() << "ALL Runs: indexed " << indexingInfo.totalNumIndexed()
-                   << " Peaks out of " << args.workspace->getNumberPeaks()
-                   << " with tolerance of " << args.mainTolerance << '\n';
-    g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                   << indexingInfo.main.error << '\n';
-
-    // Show the lattice parameters
-    g_log.notice() << args.workspace->sample().getOrientedLattice() << "\n";
-  }
+  // Final results
+  logIndexingResults(g_log.notice(), indexingInfo, -1,
+                     args.workspace->getNumberPeaks(), args);
+  // Show the lattice parameters
+  g_log.notice() << args.workspace->sample().getOrientedLattice() << "\n";
 }
 
 } // namespace Crystal

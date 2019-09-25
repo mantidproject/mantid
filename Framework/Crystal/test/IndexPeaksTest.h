@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -32,7 +33,8 @@ template <int NPeaks>
 PeaksWorkspace_sptr
 createPeaksWorkspace(const MinimalPeaksList<NPeaks> &testPeaksInfo,
                      const std::vector<double> &ub, const int maxOrder = -1,
-                     const std::vector<V3D> &modVectors = std::vector<V3D>()) {
+                     const std::vector<V3D> &modVectors = std::vector<V3D>(),
+                     const bool crossTerms = false) {
   auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(NPeaks);
   OrientedLattice lattice;
   lattice.setUB(ub);
@@ -49,6 +51,7 @@ createPeaksWorkspace(const MinimalPeaksList<NPeaks> &testPeaksInfo,
     lattice.setModVec1(modVecOrDefault(0));
     lattice.setModVec2(modVecOrDefault(1));
     lattice.setModVec3(modVecOrDefault(2));
+    lattice.setCrossTerm(crossTerms);
   }
   peaksWS->mutableSample().setOrientedLattice(&lattice);
 
@@ -71,28 +74,30 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceMainReflOnly() {
   // peaks from TOPAZ_3007.peaks: 0, 1, 2, 10, 42 with sign for Q swapped
   // as we don't use the crystallographic convention
   constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
-      MinimalPeak{3007, V3D(-3.52961, 3.13589, 1.0899)},
+      MinimalPeak{3008, V3D(-3.52961, 3.13589, 1.0899)},
       MinimalPeak{3007, V3D(-2.42456, 2.29581, 1.71147)},
       MinimalPeak{3007, V3D(-3.04393, 3.05739, 2.03727)},
       MinimalPeak{3007, V3D(-4.02271, 2.4073, 1.62228)},
-      MinimalPeak{3007, V3D(-4.04552, 1.59916, 3.71776)}};
+      MinimalPeak{3008, V3D(-4.04552, 1.59916, 3.71776)}};
   return createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
 }
 
 PeaksWorkspace_sptr
 createTestPeaksWorkspaceWithSatellites(const int maxOrder,
-                                       const std::vector<V3D> &modVectors) {
+                                       const std::vector<V3D> &modVectors,
+                                       const bool crossTerms = false) {
   constexpr int npeaks{5};
   const std::vector<double> ub = {0.269,  -0.01, 0.033, 0.081, -0.191,
                                   -0.039, 0.279, 0.347, -0.02};
   constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
       MinimalPeak{1, V3D(-3.691, -0.694, 3.762)},     // main
-      MinimalPeak{1, V3D(-1.234, -0.225, 1.25212)},   // satellite
+      MinimalPeak{2, V3D(-1.234, -0.225, 1.25212)},   // satellite
       MinimalPeak{1, V3D(-3.824, 0.728, 1.711)},      // main
       MinimalPeak{1, V3D(0.872, -0.1998, 2.7476)},    // satellite
-      MinimalPeak{1, V3D(-1.54093, 0.129343, 1.445)}, // satellite
+      MinimalPeak{2, V3D(-1.54093, 0.129343, 1.445)}, // satellite
   };
-  return createPeaksWorkspace<npeaks>(testPeaksInfo, ub, maxOrder, modVectors);
+  return createPeaksWorkspace<npeaks>(testPeaksInfo, ub, maxOrder, modVectors,
+                                      crossTerms);
 }
 
 std::unique_ptr<IndexPeaks>
@@ -132,9 +137,6 @@ public:
 
   void test_no_commonUB_optimizes_UB_per_run_for_no_satellites() {
     const auto ws = createTestPeaksWorkspaceMainReflOnly();
-    // Change some run numbers
-    ws->getPeak(0).setRunNumber(3008);
-    ws->getPeak(4).setRunNumber(3008);
 
     auto alg = indexPeaks(
         ws,
@@ -175,15 +177,15 @@ public:
 
     // Check the output properties
     assertNumberPeaksIndexed(*alg, 5, 5, 0);
-    assertErrorsAsExpected(*alg, 0.00639, 0.00639, 0.);
+    assertErrorsAsExpected(*alg, 0.0088322, 0.0088322, 0.);
 
     // spot check a few peaks for
     // fractional Miller indices
-    const V3D peak_0_hkl_d(4.00682, 0.97956, 5.99368); // first peak
-    const V3D peak_1_hkl_d(2.99838, -0.99760, 4.00141);
-    const V3D peak_2_hkl_d(3.99737, -0.99031, 5.00250);
-    const V3D peak_3_hkl_d(2.99419, 0.01736, 7.00538);
-    const V3D peak_4_hkl_d(2.00277, -4.00813, 6.99744); // last peak
+    const V3D peak_0_hkl_d(4.03064, 0.988507, 6.01094); // first peak
+    const V3D peak_1_hkl_d(3, -1, 4);
+    const V3D peak_2_hkl_d(4, -1, 5);
+    const V3D peak_3_hkl_d(3, -0, 7);
+    const V3D peak_4_hkl_d(1.97067, -4.02836, 6.97828); // last peak
 
     const auto &peaks = ws->getPeaks();
     V3D error = peak_0_hkl_d - peaks[0].getHKL();
@@ -216,7 +218,7 @@ public:
 
     // Check the output properties
     assertNumberPeaksIndexed(*alg, 5, 5, 0);
-    assertErrorsAsExpected(*alg, 0.00639, 0.00639, 0.);
+    assertErrorsAsExpected(*alg, 0.0088322, 0.0088322, 0.);
 
     // spot check a few peaks for
     // integer Miller indices
@@ -253,10 +255,6 @@ public:
                              {"ToleranceForSatellite", sateTolerance}});
 
     assertNumberPeaksIndexed(*alg, 2, 2, 0);
-    std::cerr << "\n";
-    for (int i = 0; i < peaksWS->getNumberPeaks(); ++i) {
-      std::cerr << peaksWS->getPeak(i).getHKL() << "\n";
-    }
     assertIndexesAsExpected(*peaksWS,
                             {V3D(-1, 2, -9), V3D(0, 0, 0), V3D(-1, 1, -10),
                              V3D(0, 0, 0), V3D(0, 0, 0)});
@@ -293,20 +291,139 @@ public:
     assertErrorsAsExpected(*alg, 0.0140447, 0.0140447, 0.);
   }
 
-  void xtest_exec_with_common_ub_and_non_zero_mod_vectors_indexes_both() {
+  void
+  test_exec_with_common_ub_and_non_zero_mod_vectors_indexes_both_with_roundhkl() {
     const auto peaksWS =
         createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
-    const auto sateTolerance{"1."};
+    const auto sateTolerance{"0.4"};
 
     const auto alg =
         indexPeaks(peaksWS, {{"CommonUBForAll", "1"},
                              {"ToleranceForSatellite", sateTolerance}});
 
     assertNumberPeaksIndexed(*alg, 5, 2, 3);
-    assertIndexesAsExpected(*peaksWS,
-                            {V3D(-1, 2, -9), V3D(0, 0, 0), V3D(-1, 1, -10),
-                             V3D(0, 0, 0), V3D(0, 0, 0)});
-    assertErrorsAsExpected(*alg, 0.0140447, 0.0140447, 0.);
+    const std::vector<V3D> expectedHKL{V3D(-1, 2, -9), V3D(-0, 1, -3),
+                                       V3D(-1, 1, -10), V3D(1, 1, -1),
+                                       V3D(-0, 1, -5)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3),
+                                          V3D(-1, 1, -10), V3D(0, 1, -1),
+                                          V3D(-1, 1, -5)};
+
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.1995736054, 0.0140447, 0.32325956);
+
+    //    const auto peaksWS2 =
+    //        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667,
+    //        0.333)});
+
+    //    Mantid::Crystal::IndexPeaksWithSatellites indexer;
+    //    indexer.initialize();
+    //    indexer.setProperty("PeaksWorkspace", peaksWS2);
+    //    indexer.setProperty("CommonUBForAll", "1");
+    //    indexer.setProperty("Tolerance", "0.15");
+    //    indexer.setProperty("ToleranceForSatellite", "0.4");
+    //    indexer.setProperty("RoundHKLs", "0");
+    //    indexer.setProperty("MaxOrder", 1);
+    //    indexer.setProperty("ModVector1", "0.333,-0.667,0.333");
+    //    indexer.execute();
+
+    //    std::cerr << "\n"
+    //              << indexer.getPropertyValue("MainNumIndexed") << "   "
+    //              << indexer.getPropertyValue("MainError") << "   "
+    //              << indexer.getPropertyValue("SateNumIndexed") << "   "
+    //              << indexer.getPropertyValue("SatelliteError") << "   "
+    //              << indexer.getPropertyValue("AverageError") << "\n";
+  }
+
+  void
+  test_exec_with_common_ub_and_non_zero_mod_vectors_indexes_both_no_roundhkl() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
+    const auto sateTolerance{"0.4"};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "1"},
+                             {"ToleranceForSatellite", sateTolerance},
+                             {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3),
+                                          V3D(-1, 1, -10), V3D(0, 1, -1),
+                                          V3D(-1, 1, -5)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.1995736054, 0.0140447, 0.3232596);
+  }
+
+  void
+  test_exec_no_common_ub_and_non_zero_mod_vectors_indexes_both_no_roundhkl() {
+    const auto peaksWS =
+        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667, 0.333)});
+    const auto sateTolerance{"0.4"};
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                             {"Tolerance", "0.15"},
+                             {"ToleranceForSatellite", sateTolerance},
+                             {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3),
+                                          V3D(-1, 1, -10), V3D(0, 1, -1),
+                                          V3D(-1, 1, -5)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.1995736, 0.0140447, 0.323256);
+  }
+
+  void test_exec_with_three_mod_vectors_no_cross_terms() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites(
+        1,
+        {V3D(-0.1, 0.1, 0.1), V3D(0.1, 0.2, -0.3), V3D(0.333, 0.667, -0.333)});
+
+    const auto alg = indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                                          {"ToleranceForSatellite", "0.4"},
+                                          {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, -0, -3),
+                                          V3D(-1, 1, -10), V3D(0, -0, -1),
+                                          V3D(-1, 0, -4)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.12383213164, 0.0140447, 0.1970237718);
+  }
+
+  void test_exec_with_three_mod_vectors_and_cross_terms() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites(
+        1,
+        {V3D(0.333, 0.667, -0.333), V3D(-0.333, 0.667, 0.333),
+         V3D(0.333, -0.667, 0.333)},
+        true);
+
+    const auto alg = indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                                          {"ToleranceForSatellite", "0.2"},
+                                          {"RoundHKLs", "0"}});
+
+    assertNumberPeaksIndexed(*alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 2, -3),
+                                          V3D(-1, 1, -10), V3D(0, 2, -1),
+                                          V3D(-0, 0, -5)};
+    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(*alg, 0.02236871, 0.0140447, 0.027918076);
   }
 
   // --------------------------- Failure tests -----------------------------
@@ -328,12 +445,43 @@ public:
   }
 
 private:
+  // Check that all main indexed peaks match as expected
   void assertIndexesAsExpected(const PeaksWorkspace_sptr::element_type &peaksWS,
-                               const std::vector<V3D> &expectedIndexes) {
-    assert(static_cast<size_t>(peaksWS.getNumberPeaks()) ==
-           expectedIndexes.size());
-    for (auto i = 0u; i < expectedIndexes.size(); ++i) {
-      TS_ASSERT_EQUALS(expectedIndexes[i], peaksWS.getPeak(i).getHKL())
+                               const std::vector<V3D> &expectedHKL) {
+    assert(static_cast<size_t>(peaksWS.getNumberPeaks()) == expectedHKL.size());
+    for (auto i = 0u; i < expectedHKL.size(); ++i) {
+      const auto &expectedIndex = expectedHKL[i];
+      TSM_ASSERT_DELTA("Unexpected index for HKL at index " + std::to_string(i),
+                       expectedIndex.norm(), peaksWS.getPeak(i).getHKL().norm(),
+                       1e-5)
+      const V3D expectedIntHKL{std::round(expectedIndex[0]),
+                               std::round(expectedIndex[1]),
+                               std::round(expectedIndex[2])};
+      TSM_ASSERT_EQUALS("Unexpected index "
+                        "for IntHKL at "
+                        "index " +
+                            std::to_string(i),
+                        expectedIntHKL, peaksWS.getPeak(i).getIntHKL())
+    }
+  }
+
+  // Check that all main/satellite indexed peaks match as expected
+  void assertIndexesAsExpected(const PeaksWorkspace_sptr::element_type &peaksWS,
+                               const std::vector<V3D> &expectedHKL,
+                               const std::vector<V3D> &expectedIntHKL) {
+    assert(static_cast<size_t>(peaksWS.getNumberPeaks()) == expectedHKL.size());
+    assert(expectedIntHKL.size() == expectedHKL.size());
+
+    for (auto i = 0u; i < expectedHKL.size(); ++i) {
+      TSM_ASSERT_DELTA("Unexpected index for HKL at index " + std::to_string(i),
+                       expectedHKL[i].norm(),
+                       peaksWS.getPeak(i).getHKL().norm(), 1e-5)
+      TSM_ASSERT_DELTA("Unexpected index "
+                       "for IntHKL at "
+                       "index " +
+                           std::to_string(i),
+                       expectedIntHKL[i].norm(),
+                       peaksWS.getPeak(i).getIntHKL().norm(), 1e-8)
     }
   }
 

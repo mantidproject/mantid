@@ -812,7 +812,7 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
  *
  * @param HKL :: vector with integer x,y,z -> h,k,l
  */
-void Peak::setIntHKL(V3D HKL) {
+void Peak::setIntHKL(const V3D &HKL) {
   m_intHKL = V3D(std::round(HKL[0]), std::round(HKL[1]), std::round(HKL[2]));
 }
 
