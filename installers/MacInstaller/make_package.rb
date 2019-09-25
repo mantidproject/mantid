@@ -67,11 +67,29 @@ BUNDLED_PY_MODULES = [
   'zmq'
 ].freeze
 BUNDLED_PY_MODULES_MANTIDPLOT = [
-  'PyQt4'
+  'PyQt4/__init__.py',
+  'PyQt4/Qt.so',
+  'PyQt4/QtCore.so',
+  'PyQt4/QtGui.so',
+  'PyQt4/QtOpenGL.so',
+  'PyQt4/QtSql.so',
+  'PyQt4/QtSvg.so',
+  'PyQt4/QtXml.so',
+  'PyQt4/uic'
 ].freeze
-BUNDLED_PY_MODULES_WORKBENCH = %w[
-  PyQt5
-  psutil
+BUNDLED_PY_MODULES_WORKBENCH = [
+  'PyQt5/__init__.py',
+  'PyQt5/Qt.so',
+  'PyQt5/QtCore.so',
+  'PyQt5/QtGui.so',
+  'PyQt5/QtOpenGL.so',
+  'PyQt5/QtPrintSupport.so',
+  'PyQt5/QtSql.so',
+  'PyQt5/QtSvg.so',
+  'PyQt5/QtWidgets.so',
+  'PyQt5/QtXml.so',
+  'PyQt5/uic',
+  'psutil'
 ].freeze
 DEBUG = 1
 FRAMEWORK_IDENTIFIER = '.framework'
@@ -181,8 +199,16 @@ def deploy_python_framework(destination, host_python_exe,
   FileUtils.rm bundle_site_packages
   FileUtils.mkdir bundle_site_packages
   bundled_packages.each do |package|
+    package_dir = Pathname.new(package).dirname
+    if package_dir == Pathname.new('.')
+      destination = bundle_site_packages
+    else
+      destination = bundle_site_packages + package_dir
+      FileUtils.makedirs destination
+    end
+    
     # use cp rather than FileUtils as cp will automatically follow symlinks
-    execute("cp -r #{src_site_packages + package} #{bundle_site_packages}")
+    execute("cp -r #{src_site_packages + package} #{destination}")
   end
   make_writable(bundle_site_packages)
 
@@ -496,6 +522,11 @@ end
 host_python_exe = Pathname.new(ARGV[1])
 fatal("Python executable #{python_exe} not found") unless host_python_exe.exist?
 $PARAVIEW_BUILD_DIR = ARGV[2] if ARGV.length == 3
+if $PARAVIEW_BUILD_DIR.length == 0
+  # assume a non vates build
+  # set to some string that will not be found at the start of an otool dependency
+  $PARAVIEW_BUILD_DIR = '__NOTUSED__'
+end
 
 # Bundle paths
 bundle_path = Pathname.new(ARGV[0])
@@ -521,6 +552,7 @@ end
 # into the bundle and the main layout exists.
 deploy_python_framework(contents_frameworks, host_python_exe,
                         bundled_packages)
+exit 1
 install_qt_plugins(bundle_path, bundled_qt_plugins, host_qt_plugins_dir,
                    QT_PLUGINS_BLACKLIST)
 fixup_binaries(bundle_path, contents_frameworks, extra_binaries)
