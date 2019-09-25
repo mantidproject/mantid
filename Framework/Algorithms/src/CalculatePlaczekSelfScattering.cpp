@@ -37,7 +37,7 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
     atomSpecies[element.atom->symbol] = atomMap;
     totalStoich += element.multiplicity;
   }
-  for (const auto atom : atomSpecies) {
+  for (auto atom : atomSpecies) {
     atom.second["concentration"] = atom.second["stoich"] / totalStoich;
   }
   return atomSpecies;
