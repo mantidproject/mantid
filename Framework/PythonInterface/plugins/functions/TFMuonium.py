@@ -11,16 +11,16 @@ import numpy as np
 
 
 class TFMuonium(IFunction1D):
-    
+
     def category(self):
         return "Muon"
 
-    def init(self):	
+    def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
         self.declareParameter("Field", 5, 'B-field (G)')
         self.declareParameter("A", 600, 'Isotropic hyperfine coupling constant (MHz)')
         self.declareParameter("Phi", 0.0, 'Phase')
-     
+
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
         B = self.getParameterValue("Field")
