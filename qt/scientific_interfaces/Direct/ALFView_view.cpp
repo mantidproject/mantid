@@ -17,8 +17,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_view::ALFView_view(QWidget *parent)
-    : QWidget(parent), m_run(nullptr),
-      m_loadRunObservable(nullptr), m_browseObservable(nullptr) {
+    : QWidget(parent), m_run(nullptr), m_loadRunObservable(nullptr),
+      m_browseObservable(nullptr) {
   QSplitter *MainLayout = new QSplitter(Qt::Vertical, this);
   QWidget *loadBar = new QWidget();
   m_loadRunObservable = new observable();
@@ -56,12 +56,12 @@ void ALFView_view::runChanged() {
 } // emit newRun(); }
 
 void ALFView_view::browse() {
-  auto file = QFileDialog::getOpenFileName(this, "Open a file",
-                                           "", "File (*.nxs)");
+  auto file =
+      QFileDialog::getOpenFileName(this, "Open a file", "", "File (*.nxs)");
   if (file.isEmpty()) {
     return;
   }
-  //emit browsedToRun(file.toStdString());
+  // emit browsedToRun(file.toStdString());
   m_browseObservable->notify(file.toStdString());
 }
 

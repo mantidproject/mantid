@@ -27,7 +27,6 @@ const std::string wsName = "ALFData";
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 void ALFView_model::loadEmptyInstrument() {
   Mantid::API::IAlgorithm_sptr alg =
       Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
@@ -75,9 +74,8 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
   if (unit == "dSpacing") {
     isItDSpace = true;
   }
-  std::map<std::string, bool> result = {
-    {"IsValidInstrument", isItALF},
-    {"IsItDSpace", isItDSpace}};
+  std::map<std::string, bool> result = {{"IsValidInstrument", isItALF},
+                                        {"IsItDSpace", isItDSpace}};
 
   return result;
 }
@@ -117,7 +115,7 @@ int ALFView_model::currentRun() {
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
     return ws->getRunNumber();
-  } catch(...) {
+  } catch (...) {
     return -999; // special error code
   }
 }

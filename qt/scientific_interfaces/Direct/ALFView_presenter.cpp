@@ -10,14 +10,14 @@
 
 #include "MantidAPI/FileFinder.h"
 
-#include<functional>
+#include <functional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
-    : m_view(view), m_model(model), m_currentRun(0),
-      m_loadRunObserver(nullptr), m_browseObserver(nullptr) {
+    : m_view(view), m_model(model), m_currentRun(0), m_loadRunObserver(nullptr),
+      m_browseObserver(nullptr) {
   m_loadRunObserver = new loadObserver();
   m_browseObserver = new generalObserver();
   m_model->loadEmptyInstrument();

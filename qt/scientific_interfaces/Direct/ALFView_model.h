@@ -12,17 +12,17 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_model{
+class ALFView_model {
 public:
   void loadEmptyInstrument();
-int loadData(const std::string &name);
-std::map<std::string, bool> isDataValid();
-void transformData();
-void rename();
-void remove();
-int currentRun();
+  int loadData(const std::string &name);
+  std::map<std::string, bool> isDataValid();
+  void transformData();
+  void rename();
+  void remove();
+  int currentRun();
 }; // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace CustomInterfaces
 } // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALFVIEWMODEL_H_ */

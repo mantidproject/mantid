@@ -7,26 +7,26 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_
 
+#include "ALFView_model.h"
+#include "ALFView_view.h"
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "ALFView_view.h"
-#include "ALFView_model.h"
 #include "observerPattern.h"
 
 namespace MantidQt {
-	namespace CustomInterfaces {
+namespace CustomInterfaces {
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
  */
-        class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject{
-          Q_OBJECT
+class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
+  Q_OBJECT
 
 public:
-  ALFView_presenter( ALFView_view *view, ALFView_model *model);
+  ALFView_presenter(ALFView_view *view, ALFView_model *model);
   ~ALFView_presenter(){};
   void initLayout();
 
 private slots:
-  void loadRunNumber(); 
+  void loadRunNumber();
   void loadBrowsedFile(const std::string);
 
 private:
@@ -37,11 +37,8 @@ private:
   int m_currentRun;
   loadObserver *m_loadRunObserver;
   generalObserver *m_browseObserver;
-        };
-}// customInterfaces
-}// MantidQt
-
-
-
+};
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALFVIEWPRESENTER_H_ */
