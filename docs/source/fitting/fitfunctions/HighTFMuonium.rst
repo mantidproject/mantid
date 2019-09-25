@@ -19,7 +19,7 @@ where,
 
 :math:`g_\mu = 0.01355342` ,
 
-:math:`g_eu = 2.8024` ,
+:math:`g_e = 2.8024` ,
 
 :math:`\omega_2 = \Omega - \omega_-` ,
 
