@@ -172,12 +172,12 @@ void SaveAscii2::exec() {
   m_writeSpectrumAxisValue = getProperty("WriteSpectrumAxisValue");
 
   if (m_writeSpectrumAxisValue) {
-      auto spectrumAxis = m_ws->getAxis(1);
-      if (dynamic_cast<BinEdgeAxis*>(spectrumAxis)) {
-          m_axisProxy = std::make_unique<BinEdgeAxisProxy>(spectrumAxis);
-      } else {
-          m_axisProxy = std::make_unique<AxisProxy>(spectrumAxis);
-      }
+    auto spectrumAxis = m_ws->getAxis(1);
+    if (dynamic_cast<BinEdgeAxis *>(spectrumAxis)) {
+      m_axisProxy = std::make_unique<BinEdgeAxisProxy>(spectrumAxis);
+    } else {
+      m_axisProxy = std::make_unique<AxisProxy>(spectrumAxis);
+    }
   }
 
   // Check whether we need to write the fourth column
