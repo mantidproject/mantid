@@ -19,7 +19,29 @@ namespace Mantid {
 namespace Algorithms {
 
 std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(const API::MatrixWorkspace_sptr ws);
+getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
+  // get sample information : mass, total scattering length, and concentration
+  // of each species
+  double totalStoich = 0.0;
+  std::map<std::string, std::map<std::string, double>> atomSpecies;
+  const Kernel::Material::ChemicalFormula formula =
+      ws->sample().getMaterial().chemicalFormula();
+  const double xSection = ws->sample().getMaterial().totalScatterXSection();
+  const double bSqrdBar = xSection / (4.0 * M_PI);
+
+  for (auto element : formula) {
+    const std::map<std::string, double> atomMap{
+        {"mass", element.atom->mass},
+        {"stoich", element.multiplicity},
+        {"bSqrdBar", bSqrdBar}};
+    atomSpecies[element.atom->symbol] = atomMap;
+    totalStoich += element.multiplicity;
+  }
+  for (auto atom : atomSpecies) {
+    atom.second["concentration"] = atom.second["stoich"] / totalStoich;
+  }
+  return atomSpecies;
+}
 
 DECLARE_ALGORITHM(CalculatePlaczekSelfScattering)
 
@@ -68,9 +90,9 @@ void CalculatePlaczekSelfScattering::exec() {
   auto atomSpecies = getSampleSpeciesInfo(inWS);
   // calculate summation term w/ neutron mass over molecular mass ratio
   double summationTerm = 0.0;
-  for (auto t = atomSpecies.begin(); t != atomSpecies.end(); t++) {
-    summationTerm += t->second["concentration"] * t->second["bSqrdBar"] *
-                     neutronMass / t->second["mass"];
+  for (auto atom : atomSpecies) {
+    summationTerm += atom.second["concentration"] * atom.second["bSqrdBar"] *
+                     neutronMass / atom.second["mass"];
   }
   // get incident spectrum and 1st derivative
   const MantidVec xLambda = inWS->readX(0);
@@ -142,32 +164,6 @@ void CalculatePlaczekSelfScattering::exec() {
   ChildAlg->execute();
   outWS = ChildAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outWS);
-}
-
-std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(const API::MatrixWorkspace_sptr ws) {
-  // get sample information : mass, total scattering length, and concentration
-  // of each species
-  double totalStoich = 0.0;
-  std::map<std::string, std::map<std::string, double>> atomSpecies;
-  const Kernel::Material::ChemicalFormula formula =
-      ws->sample().getMaterial().chemicalFormula();
-  const double xSection = ws->sample().getMaterial().totalScatterXSection();
-  const double bSqrdBar = xSection / (4.0 * M_PI);
-
-  for (auto t = formula.begin(); t != formula.end(); t++) {
-    const Kernel::Material::FormulaUnit element = *t;
-    const std::map<std::string, double> atomMap{
-        {"mass", element.atom->mass},
-        {"stoich", element.multiplicity},
-        {"bSqrdBar", bSqrdBar}};
-    atomSpecies[element.atom->symbol] = atomMap;
-    totalStoich += element.multiplicity;
-  }
-  for (auto t = atomSpecies.begin(); t != atomSpecies.end(); t++) {
-    t->second["concentration"] = t->second["stoich"] / totalStoich;
-  }
-  return atomSpecies;
 }
 
 } // namespace Algorithms
