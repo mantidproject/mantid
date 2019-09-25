@@ -153,16 +153,16 @@ void CalculatePlaczekSelfScattering::exec() {
       nSpec += 1;
     }
   }
-  Mantid::API::Algorithm_sptr ChildAlg =
+  Mantid::API::Algorithm_sptr childAlg =
       createChildAlgorithm("CreateWorkspace");
-  ChildAlg->setProperty("DataX", xLambdas);
-  ChildAlg->setProperty("DataY", placzekCorrection);
-  ChildAlg->setProperty("UnitX", "Wavelength");
-  ChildAlg->setProperty("NSpec", nSpec);
-  ChildAlg->setProperty("ParentWorkspace", inWS);
-  ChildAlg->setProperty("Distribution", true);
-  ChildAlg->execute();
-  outWS = ChildAlg->getProperty("OutputWorkspace");
+  childAlg->setProperty("DataX", xLambdas);
+  childAlg->setProperty("DataY", placzekCorrection);
+  childAlg->setProperty("UnitX", "Wavelength");
+  childAlg->setProperty("NSpec", nSpec);
+  childAlg->setProperty("ParentWorkspace", inWS);
+  childAlg->setProperty("Distribution", true);
+  childAlg->execute();
+  outWS = childAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outWS);
 }
 

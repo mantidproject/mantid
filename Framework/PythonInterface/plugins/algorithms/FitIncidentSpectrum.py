@@ -30,9 +30,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
                'Outputs a workspace containing the functionalized fit and its first ' \
                'derivative.'
 
-    def seeAlso(self):
-        return []
-
     def version(self):
         return 1
 

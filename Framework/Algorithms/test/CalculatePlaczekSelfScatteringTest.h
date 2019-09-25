@@ -26,19 +26,19 @@ using Mantid::MantidVec;
 
 // generate incident spectrum data
 std::vector<double>
-generate_incident_spectrum(const Mantid::HistogramData::HistogramX &lambda,
-                           double phi_max = 6324.0, double phi_epi = 786.0,
-                           double alpha = 0.099, double lambda_1 = 0.67143,
-                           double lambda_2 = 0.06075, double lambda_T = 1.58) {
+generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda,
+                           double phiMax = 6324.0, double phiEpi = 786.0,
+                           double alpha = 0.099, double lambda1 = 0.67143,
+                           double lambda2 = 0.06075, double lambdaT = 1.58) {
   std::vector<double> amplitude;
   const double dx = (lambda[1] - lambda[0]) / 2.0;
   for (double x : lambda) {
     if (x != lambda.back()) {
-      double delta_term = 1.0 / (1.0 + exp(((x + dx) - lambda_1) / lambda_2));
-      double term1 = phi_max * (pow(lambda_T, 4.0) / pow((x + dx), 5.0)) *
-                     exp(-pow((lambda_T / (x + dx)), 2.0));
+      double deltaTerm = 1.0 / (1.0 + exp(((x + dx) - lambda1) / lambda2));
+      double term1 = phiMax * (pow(lambdaT, 4.0) / pow((x + dx), 5.0)) *
+                     exp(-pow((lambdaT / (x + dx)), 2.0));
       double term2 =
-          phi_epi * delta_term / (pow((x + dx), (1.0 + 2.0 * alpha)));
+          phiEpi * deltaTerm / (pow((x + dx), (1.0 + 2.0 * alpha)));
       amplitude.push_back(term1 + term2);
     }
   }
@@ -46,22 +46,22 @@ generate_incident_spectrum(const Mantid::HistogramData::HistogramX &lambda,
 }
 
 // generate incident spectrum derivitive
-std::vector<double> generate_incident_spectrum_prime(
-    const Mantid::HistogramData::HistogramX &lambda, double phi_max = 6324.0,
-    double phi_epi = 786.0, double alpha = 0.099, double lambda_1 = 0.67143,
-    double lambda_2 = 0.06075, double lambda_T = 1.58) {
+std::vector<double> generateIncidentSpectrumPrime(
+    const Mantid::HistogramData::HistogramX &lambda, double phiMax = 6324.0,
+    double phiEpi = 786.0, double alpha = 0.099, double lambda1 = 0.67143,
+    double lambda2 = 0.06075, double lambdaT = 1.58) {
   std::vector<double> amplitude;
   const double dx = (lambda[1] - lambda[0]) / 2.0;
   for (double x : lambda) {
     if (x != lambda.back()) {
-      double delta_term = 1.0 / (1.0 + exp(((x + dx) - lambda_1) / lambda_2));
+      double deltaTerm = 1.0 / (1.0 + exp(((x + dx) - lambda1) / lambda2));
       double term1 =
-          phi_max * pow(lambda_T, 4.0) * exp(-pow((lambda_T / (x + dx)), 2.0)) *
-          (-5 * pow((x + dx), -6.0) + 2 * pow((x + dx), -8.0) * lambda_T);
-      double term2 = -phi_epi / pow((x + dx), (1.0 + 2.0 * alpha)) *
-                     delta_term *
+          phiMax * pow(lambdaT, 4.0) * exp(-pow((lambdaT / (x + dx)), 2.0)) *
+          (-5 * pow((x + dx), -6.0) + 2 * pow((x + dx), -8.0) * lambdaT);
+      double term2 = -phiEpi / pow((x + dx), (1.0 + 2.0 * alpha)) *
+                     deltaTerm *
                      ((1.0 + 2.0 * alpha) / (x + dx) +
-                      (1 / delta_term - 1) / lambda_2 * delta_term);
+                      (1 / deltaTerm - 1) / lambda2 * deltaTerm);
       amplitude.push_back(term1 + term2);
     }
   }
@@ -69,45 +69,45 @@ std::vector<double> generate_incident_spectrum_prime(
 }
 
 // generate spectrum with detector info
-MatrixWorkspace_sptr generate_incident_spectrum_with_detector_data() {
-  const double x_start = 0.2;
-  const double x_end = 4.0;
-  const double x_inc = 0.01;
+MatrixWorkspace_sptr generateIncidentSpectrumWithDetectorData() {
+  const double xStart = 0.2;
+  const double xEnd = 4.0;
+  const double xInc = 0.01;
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
   alg->initialize();
   alg->setProperty("OutputWorkspace", "incident_spectrum_ws");
-  alg->setProperty("XMin", x_start);
-  alg->setProperty("XMax", x_end);
-  alg->setProperty("BinWidth", x_inc);
+  alg->setProperty("XMin", xStart);
+  alg->setProperty("XMax", xEnd);
+  alg->setProperty("BinWidth", xInc);
   alg->setProperty("BankPixelWidth", 1);
   alg->execute();
   // get the output workspace from ADS
-  MatrixWorkspace_sptr out_ws =
+  MatrixWorkspace_sptr outWs =
       Mantid::API::AnalysisDataService::Instance()
           .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
-  Mantid::HistogramData::HistogramX x = out_ws->x(0);
-  std::vector<double> y = generate_incident_spectrum(x);
-  out_ws->setCounts(0, y);
-  std::vector<double> y_prime = generate_incident_spectrum_prime(x);
-  out_ws->setCounts(1, y_prime);
-  return out_ws;
+  Mantid::HistogramData::HistogramX x = outWs->x(0);
+  std::vector<double> y = generateIncidentSpectrum(x);
+  outWs->setCounts(0, y);
+  std::vector<double> yPrime = generateIncidentSpectrumPrime(x);
+  outWs->setCounts(1, yPrime);
+  return outWs;
 }
 
 // generate spectrum without detector info
-MatrixWorkspace_sptr generate_incident_spectrum_without_detector_data() {
-  const double x_start = 0.2;
-  const double x_end = 4.0;
-  const double x_inc = 0.01;
+MatrixWorkspace_sptr generateIncidentSpectrumWithoutDetectorData() {
+  const double xStart = 0.2;
+  const double xEnd = 4.0;
+  const double xInc = 0.01;
   std::vector<double> x;
   std::vector<double> y;
-  std::vector<double> y_prime;
-  for (int i = 0; i < (x_end - x_start) / x_inc; i++) {
-    x.push_back(x_start + i * x_inc);
+  std::vector<double> yPrime;
+  for (int i = 0; i < (xEnd - xStart) / xInc; i++) {
+    x.push_back(xStart + i * xInc);
   }
-  y = generate_incident_spectrum(x);
-  y_prime = generate_incident_spectrum_prime(x);
-  for (double prime : y_prime) {
+  y = generateIncidentSpectrum(x);
+  yPrime = generateIncidentSpectrumPrime(x);
+  for (double prime : yPrime) {
     y.push_back(prime);
   }
   Algorithm_sptr alg =
@@ -119,15 +119,15 @@ MatrixWorkspace_sptr generate_incident_spectrum_without_detector_data() {
   alg->setProperty("NSpec", 2);
   alg->execute();
   // retreve output workspace from ADS
-  MatrixWorkspace_sptr out_ws =
+  MatrixWorkspace_sptr outWs =
       Mantid::API::AnalysisDataService::Instance()
           .retrieveWS<Mantid::API::MatrixWorkspace>("incident_spectrum_ws");
-  return out_ws;
+  return outWs;
 }
 
 // Add sample to workspace
 MatrixWorkspace_sptr
-add_sample_material_to_workspace(MatrixWorkspace_sptr in_ws) {
+addSampleMaterialToWorkspace(MatrixWorkspace_sptr inWs) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("SetSampleMaterial");
   alg->initialize();
@@ -135,7 +135,7 @@ add_sample_material_to_workspace(MatrixWorkspace_sptr in_ws) {
   alg->setProperty("ChemicalFormula", "(Li7)2-C-H4-N-Cl6");
   alg->setProperty("SampleNumberDensity", 0.1);
   alg->execute();
-  return (in_ws);
+  return (inWs);
 }
 
 class CalculatePlaczekSelfScatteringTest : public CxxTest::TestSuite {
@@ -151,26 +151,26 @@ public:
 
   void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
-  void test_Init() {
+  void testInit() {
     CalculatePlaczekSelfScattering alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_CalculatePlaczekSelfScattering_executes() {
-    MatrixWorkspace_sptr ws = generate_incident_spectrum_with_detector_data();
-    ws = add_sample_material_to_workspace(ws);
+  void testCalculatePlaczekSelfScatteringExecutes() {
+    MatrixWorkspace_sptr ws = generateIncidentSpectrumWithDetectorData();
+    ws = addSampleMaterialToWorkspace(ws);
     auto alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", "incident_spectrum_ws");
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
-  void test_CalculatePlaczekSelfScattering_does_not_run_with_no_detectors() {
+  void testCalculatePlaczekSelfScatteringDoesNotRunWithNoDetectors() {
     MatrixWorkspace_sptr ws =
-        generate_incident_spectrum_without_detector_data();
-    ws = add_sample_material_to_workspace(ws);
+        generateIncidentSpectrumWithoutDetectorData();
+    ws = addSampleMaterialToWorkspace(ws);
 
     auto alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", "incident_spectrum_ws");
@@ -178,8 +178,8 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error)
   }
 
-  void test_CalculatePlaczekSelfScattering_does_not_run_with_no_sample() {
-    MatrixWorkspace_sptr ws = generate_incident_spectrum_with_detector_data();
+  void testCalculatePlaczekSelfScatteringDoesNotRunWithNoSample() {
+    MatrixWorkspace_sptr ws = generateIncidentSpectrumWithDetectorData();
 
     auto alg = makeAlgorithm();
     alg->setProperty("InputWorkspace", "incident_spectrum_ws");
