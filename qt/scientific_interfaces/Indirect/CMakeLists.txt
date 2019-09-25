@@ -13,10 +13,12 @@ set(
   ConvFitModel.cpp
   DensityOfStates.cpp
   Elwin.cpp
+  FunctionTemplateBrowser.cpp
   ILLEnergyTransfer.cpp
   ISISCalibration.cpp
   ISISDiagnostics.cpp
   ISISEnergyTransfer.cpp
+  IndexTypes.cpp
   IndirectAddWorkspaceDialog.cpp
   IndirectBayes.cpp
   IndirectBayesTab.cpp
@@ -89,6 +91,7 @@ set(
   QT4_INC_FILES
   ConvFitModel.h
   DllConfig.h
+  IndexTypes.h
   IndirectDataValidationHelper.h
   IndirectFitData.h
   IndirectFitOutput.h
@@ -103,6 +106,7 @@ set(
   IqtFitModel.h
   JumpFitModel.h
   MSDFitModel.h
+  ParameterEstimation.h
 )
 
 set(
@@ -118,6 +122,7 @@ set(
   CorrectionsTab.h
   DensityOfStates.h
   Elwin.h
+  FunctionTemplateBrowser.h
   IAddWorkspaceDialog.h
   IIndirectFitDataView.h
   IIndirectFitOutputOptionsView.h
