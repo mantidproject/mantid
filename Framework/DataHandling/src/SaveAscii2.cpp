@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -31,6 +32,8 @@ DECLARE_ALGORITHM(SaveAscii2)
 
 using namespace Kernel;
 using namespace API;
+
+
 
 /// Empty constructor
 SaveAscii2::SaveAscii2()
@@ -122,7 +125,8 @@ void SaveAscii2::init() {
       "RaggedWorkspace", true,
       "If true, ensure that more than one xspectra is used. "); // in testing
 
-  declareProperty("WriteSpectrumAxisValue", false, "Write the spectrum axis value if requested");
+  declareProperty("WriteSpectrumAxisValue", false,
+                  "Write the spectrum axis value if requested");
 }
 
 /**
@@ -166,6 +170,15 @@ void SaveAscii2::exec() {
   const bool writeHeader = getProperty("ColumnHeader");
   const bool appendToFile = getProperty("AppendToFile");
   m_writeSpectrumAxisValue = getProperty("WriteSpectrumAxisValue");
+
+  if (m_writeSpectrumAxisValue) {
+      auto spectrumAxis = m_ws->getAxis(1);
+      if (dynamic_cast<BinEdgeAxis*>(spectrumAxis)) {
+          m_axisProxy = std::make_unique<BinEdgeAxisProxy>(spectrumAxis);
+      } else {
+          m_axisProxy = std::make_unique<AxisProxy>(spectrumAxis);
+      }
+  }
 
   // Check whether we need to write the fourth column
   m_writeDX = getProperty("WriteXError");
@@ -297,8 +310,7 @@ void SaveAscii2::exec() {
 void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
 
   if (m_writeSpectrumAxisValue) {
-    auto axis = m_ws->getAxis(1);
-    file << axis->getValue(wsIndex) << '\n';
+    file << m_axisProxy->getCentre(wsIndex) << '\n';
   } else {
     for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
       auto value = m_metaDataMap[*iter][wsIndex];

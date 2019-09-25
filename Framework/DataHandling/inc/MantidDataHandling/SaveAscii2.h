@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
@@ -23,6 +24,25 @@ are saved in columns.
 @author Keith Brown, ISIS, Placement student from the University of Derby
 @date 10/10/13
 */
+namespace {
+
+struct AxisProxy {
+  AxisProxy(Mantid::API::Axis *ax) : a(ax) {}
+  virtual double getCentre(const int index) { return a->getValue(index); }
+  virtual ~AxisProxy() { delete a; }
+protected:
+  Mantid::API::Axis *a;
+};
+
+struct BinEdgeAxisProxy : AxisProxy {
+  using AxisProxy::AxisProxy;
+  double getCentre(const int index) override {
+    return (a->getValue(index) + a->getValue(index + 1)) / 2.;
+  }
+};
+
+} // namespace
+
 class DLLExport SaveAscii2 : public API::Algorithm {
 public:
   /// Default constructor
@@ -75,6 +95,7 @@ private:
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
+  std::unique_ptr<AxisProxy> m_axisProxy;
 };
 } // namespace DataHandling
 } // namespace Mantid
