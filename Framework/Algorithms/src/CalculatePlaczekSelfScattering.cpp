@@ -29,7 +29,7 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
   const double xSection = ws->sample().getMaterial().totalScatterXSection();
   const double bSqrdBar = xSection / (4.0 * M_PI);
 
-  for (auto element : formula) {
+  for (const auto element : formula) {
     const std::map<std::string, double> atomMap{
         {"mass", element.atom->mass},
         {"stoich", element.multiplicity},
@@ -37,7 +37,7 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
     atomSpecies[element.atom->symbol] = atomMap;
     totalStoich += element.multiplicity;
   }
-  for (auto atom : atomSpecies) {
+  for (const auto atom : atomSpecies) {
     atom.second["concentration"] = atom.second["stoich"] / totalStoich;
   }
   return atomSpecies;
