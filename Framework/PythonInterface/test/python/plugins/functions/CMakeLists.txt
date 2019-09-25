@@ -5,8 +5,6 @@ set(TEST_PY_FILES
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     TFMuoniumTest.py
-    FmuFTest.py
-    CombGaussLorentzKTTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
