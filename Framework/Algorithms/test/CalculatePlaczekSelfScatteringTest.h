@@ -27,9 +27,9 @@ using Mantid::MantidVec;
 // generate incident spectrum data
 std::vector<double>
 generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda,
-                           double phiMax = 6324.0, double phiEpi = 786.0,
-                           double alpha = 0.099, double lambda1 = 0.67143,
-                           double lambda2 = 0.06075, double lambdaT = 1.58) {
+                         double phiMax = 6324.0, double phiEpi = 786.0,
+                         double alpha = 0.099, double lambda1 = 0.67143,
+                         double lambda2 = 0.06075, double lambdaT = 1.58) {
   std::vector<double> amplitude;
   const double dx = (lambda[1] - lambda[0]) / 2.0;
   for (double x : lambda) {
@@ -37,8 +37,7 @@ generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda,
       double deltaTerm = 1.0 / (1.0 + exp(((x + dx) - lambda1) / lambda2));
       double term1 = phiMax * (pow(lambdaT, 4.0) / pow((x + dx), 5.0)) *
                      exp(-pow((lambdaT / (x + dx)), 2.0));
-      double term2 =
-          phiEpi * deltaTerm / (pow((x + dx), (1.0 + 2.0 * alpha)));
+      double term2 = phiEpi * deltaTerm / (pow((x + dx), (1.0 + 2.0 * alpha)));
       amplitude.push_back(term1 + term2);
     }
   }
@@ -46,10 +45,11 @@ generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda,
 }
 
 // generate incident spectrum derivitive
-std::vector<double> generateIncidentSpectrumPrime(
-    const Mantid::HistogramData::HistogramX &lambda, double phiMax = 6324.0,
-    double phiEpi = 786.0, double alpha = 0.099, double lambda1 = 0.67143,
-    double lambda2 = 0.06075, double lambdaT = 1.58) {
+std::vector<double>
+generateIncidentSpectrumPrime(const Mantid::HistogramData::HistogramX &lambda,
+                              double phiMax = 6324.0, double phiEpi = 786.0,
+                              double alpha = 0.099, double lambda1 = 0.67143,
+                              double lambda2 = 0.06075, double lambdaT = 1.58) {
   std::vector<double> amplitude;
   const double dx = (lambda[1] - lambda[0]) / 2.0;
   for (double x : lambda) {
@@ -58,8 +58,7 @@ std::vector<double> generateIncidentSpectrumPrime(
       double term1 =
           phiMax * pow(lambdaT, 4.0) * exp(-pow((lambdaT / (x + dx)), 2.0)) *
           (-5 * pow((x + dx), -6.0) + 2 * pow((x + dx), -8.0) * lambdaT);
-      double term2 = -phiEpi / pow((x + dx), (1.0 + 2.0 * alpha)) *
-                     deltaTerm *
+      double term2 = -phiEpi / pow((x + dx), (1.0 + 2.0 * alpha)) * deltaTerm *
                      ((1.0 + 2.0 * alpha) / (x + dx) +
                       (1 / deltaTerm - 1) / lambda2 * deltaTerm);
       amplitude.push_back(term1 + term2);
@@ -168,8 +167,7 @@ public:
   }
 
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoDetectors() {
-    MatrixWorkspace_sptr ws =
-        generateIncidentSpectrumWithoutDetectorData();
+    MatrixWorkspace_sptr ws = generateIncidentSpectrumWithoutDetectorData();
     ws = addSampleMaterialToWorkspace(ws);
 
     auto alg = makeAlgorithm();
