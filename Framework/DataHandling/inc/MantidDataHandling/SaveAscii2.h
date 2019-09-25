@@ -28,6 +28,7 @@ struct AxisProxy {
   AxisProxy(Mantid::API::Axis *ax) : a(ax) {}
   virtual double getCentre(const int index) { return a->getValue(index); }
   virtual ~AxisProxy() = default;
+
 protected:
   Mantid::API::Axis *a;
 };
