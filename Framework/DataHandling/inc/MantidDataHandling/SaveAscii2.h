@@ -21,16 +21,13 @@ namespace DataHandling {
 Saves a workspace or selected spectra in a coma-separated ascii file. Spectra
 are saved in columns.
 
-@author Keith Brown, ISIS, Placement student from the University of Derby
-@date 10/10/13
 */
 namespace {
 
 struct AxisProxy {
   AxisProxy(Mantid::API::Axis *ax) : a(ax) {}
   virtual double getCentre(const int index) { return a->getValue(index); }
-  virtual ~AxisProxy() { delete a; }
-
+  virtual ~AxisProxy() = default;
 protected:
   Mantid::API::Axis *a;
 };
