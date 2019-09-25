@@ -125,8 +125,7 @@ MatrixWorkspace_sptr generateIncidentSpectrumWithoutDetectorData() {
 }
 
 // Add sample to workspace
-MatrixWorkspace_sptr
-addSampleMaterialToWorkspace(MatrixWorkspace_sptr inWs) {
+MatrixWorkspace_sptr addSampleMaterialToWorkspace(MatrixWorkspace_sptr inWs) {
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("SetSampleMaterial");
   alg->initialize();
