@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITDATAVIEW_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IIndirectFitDataViewLegacy_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IIndirectFitDataViewLegacy_H_
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -18,12 +18,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IIndirectFitDataView : public QTabWidget {
+class MANTIDQT_INDIRECT_DLL IIndirectFitDataViewLegacy : public QTabWidget {
   Q_OBJECT
 
 public:
-  IIndirectFitDataView(QWidget *parent = nullptr) : QTabWidget(parent){};
-  virtual ~IIndirectFitDataView(){};
+  IIndirectFitDataViewLegacy(QWidget *parent = nullptr) : QTabWidget(parent){};
+  virtual ~IIndirectFitDataViewLegacy(){};
 
   virtual QTableWidget *getDataTable() const = 0;
   virtual bool isMultipleDataTabSelected() const = 0;
@@ -51,12 +51,8 @@ public:
   virtual void readSettings(QSettings const &settings) = 0;
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
 
-  virtual void setXRange(std::pair<double, double> const &range) = 0;
-
 public slots:
   virtual void displayWarning(std::string const &warning) = 0;
-  virtual void setStartX(double) = 0;
-  virtual void setEndX(double) = 0;
 
 signals:
   void sampleLoaded(QString const & /*_t1*/);
@@ -65,8 +61,6 @@ signals:
   void removeClicked();
   void multipleDataViewSelected();
   void singleDataViewSelected();
-  void startXChanged(double);
-  void endXChanged(double);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

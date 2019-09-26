@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitDataView.h"
+#include "IIndirectFitDataViewLegacy.h"
 #include "IndirectDataTablePresenter.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFittingModel.h"
@@ -57,7 +57,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIIndirectFitDataView : public IIndirectFitDataView {
+class MockIIndirectFitDataView : public IIndirectFitDataViewLegacy {
 public:
   /// Signals
   void emitSampleLoaded(QString const &name) { emit sampleLoaded(name); }

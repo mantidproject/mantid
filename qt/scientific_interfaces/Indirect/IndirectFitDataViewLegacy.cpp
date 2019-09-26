@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectFitDataView.h"
+#include "IndirectFitDataViewLegacy.h"
 
 using namespace Mantid::API;
 
@@ -20,13 +20,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitDataView::IndirectFitDataView(QWidget *parent)
-    : IIndirectFitDataView(parent), m_dataForm(new Ui::IndirectFitDataForm) {
+IndirectFitDataViewLegacy::IndirectFitDataViewLegacy(QWidget *parent)
+    : IIndirectFitDataViewLegacy(parent), m_dataForm(new Ui::IndirectFitDataForm) {
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();
-  m_dataForm->dsbStartX->setRange(-1e100, 1e100);
-  m_dataForm->dsbEndX->setRange(-1e100, 1e100);
 
   connect(m_dataForm->dsSample, SIGNAL(dataReady(const QString &)), this,
           SIGNAL(sampleLoaded(const QString &)));
@@ -35,10 +33,6 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   connect(m_dataForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_dataForm->pbRemove, SIGNAL(clicked()), this,
           SIGNAL(removeClicked()));
-  connect(m_dataForm->dsbStartX, SIGNAL(valueChanged(double)), this,
-          SIGNAL(startXChanged(double)));
-  connect(m_dataForm->dsbEndX, SIGNAL(valueChanged(double)), this,
-          SIGNAL(endXChanged(double)));
 
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(emitViewSelected(int)));
 
@@ -46,110 +40,92 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
   m_dataForm->dsResolution->isOptional(true);
 }
 
-QTableWidget *IndirectFitDataView::getDataTable() const {
+QTableWidget *IndirectFitDataViewLegacy::getDataTable() const {
   return m_dataForm->tbFitData;
 }
 
-bool IndirectFitDataView::isMultipleDataTabSelected() const {
+bool IndirectFitDataViewLegacy::isMultipleDataTabSelected() const {
   return currentIndex() == 1;
 }
 
-bool IndirectFitDataView::isResolutionHidden() const {
+bool IndirectFitDataViewLegacy::isResolutionHidden() const {
   return m_dataForm->dsResolution->isHidden();
 }
 
-std::string IndirectFitDataView::getSelectedSample() const {
+std::string IndirectFitDataViewLegacy::getSelectedSample() const {
   return m_dataForm->dsSample->getCurrentDataName().toStdString();
 }
 
-std::string IndirectFitDataView::getSelectedResolution() const {
+std::string IndirectFitDataViewLegacy::getSelectedResolution() const {
   return m_dataForm->dsResolution->getCurrentDataName().toStdString();
 }
 
-void IndirectFitDataView::readSettings(const QSettings &settings) {
+void IndirectFitDataViewLegacy::readSettings(const QSettings &settings) {
   const auto group = settings.group();
   m_dataForm->dsSample->readSettings(group);
   m_dataForm->dsResolution->readSettings(group);
 }
 
-void IndirectFitDataView::disableMultipleDataTab() { setTabEnabled(1, false); }
+void IndirectFitDataViewLegacy::disableMultipleDataTab() { setTabEnabled(1, false); }
 
-QStringList IndirectFitDataView::getSampleWSSuffices() const {
+QStringList IndirectFitDataViewLegacy::getSampleWSSuffices() const {
   return m_dataForm->dsSample->getWSSuffixes();
 }
 
-QStringList IndirectFitDataView::getSampleFBSuffices() const {
+QStringList IndirectFitDataViewLegacy::getSampleFBSuffices() const {
   return m_dataForm->dsSample->getFBSuffixes();
 }
 
-QStringList IndirectFitDataView::getResolutionWSSuffices() const {
+QStringList IndirectFitDataViewLegacy::getResolutionWSSuffices() const {
   return m_dataForm->dsResolution->getWSSuffixes();
 }
 
-QStringList IndirectFitDataView::getResolutionFBSuffices() const {
+QStringList IndirectFitDataViewLegacy::getResolutionFBSuffices() const {
   return m_dataForm->dsResolution->getFBSuffixes();
 }
 
-void IndirectFitDataView::setSampleWSSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setSampleWSSuffices(const QStringList &suffices) {
   m_dataForm->dsSample->setWSSuffixes(suffices);
 }
 
-void IndirectFitDataView::setSampleFBSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setSampleFBSuffices(const QStringList &suffices) {
   m_dataForm->dsSample->setFBSuffixes(suffices);
 }
 
-void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setResolutionWSSuffices(const QStringList &suffices) {
   m_dataForm->dsResolution->setWSSuffixes(suffices);
 }
 
-void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setResolutionFBSuffices(const QStringList &suffices) {
   m_dataForm->dsResolution->setFBSuffixes(suffices);
 }
 
-bool IndirectFitDataView::isSampleWorkspaceSelectorVisible() const {
+bool IndirectFitDataViewLegacy::isSampleWorkspaceSelectorVisible() const {
   return m_dataForm->dsSample->isWorkspaceSelectorVisible();
 }
 
-void IndirectFitDataView::setSampleWorkspaceSelectorIndex(
+void IndirectFitDataViewLegacy::setSampleWorkspaceSelectorIndex(
     const QString &workspaceName) {
   m_dataForm->dsSample->setWorkspaceSelectorIndex(workspaceName);
   m_dataForm->dsSample->setSelectorIndex(1);
 }
 
-void IndirectFitDataView::setXRange(std::pair<double, double> const &range) {
-  m_dataForm->dsbStartX->setRange(range.first, range.second);
-  m_dataForm->dsbEndX->setRange(range.first, range.second);
-  auto const dx = fabs(range.second - range.first) / 10.0;
-  m_dataForm->dsbStartX->setSingleStep(dx);
-  m_dataForm->dsbEndX->setSingleStep(dx);
-  m_dataForm->dsbStartX->setValue(range.first);
-  m_dataForm->dsbEndX->setValue(range.second);
-}
-
-void IndirectFitDataView::setStartX(double value) {
-  m_dataForm->dsbStartX->setValue(value);
-}
-
-void IndirectFitDataView::setEndX(double value) {
-  m_dataForm->dsbEndX->setValue(value);
-}
-
 UserInputValidator &
-IndirectFitDataView::validate(UserInputValidator &validator) {
+IndirectFitDataViewLegacy::validate(UserInputValidator &validator) {
   if (currentIndex() == 0)
     return validateSingleData(validator);
   return validateMultipleData(validator);
 }
 
 UserInputValidator &
-IndirectFitDataView::validateMultipleData(UserInputValidator &validator) {
+IndirectFitDataViewLegacy::validateMultipleData(UserInputValidator &validator) {
   if (m_dataForm->tbFitData->rowCount() == 0)
     validator.addErrorMessage("No input data has been provided.");
   return validator;
 }
 
 UserInputValidator &
-IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
+IndirectFitDataViewLegacy::validateSingleData(UserInputValidator &validator) {
   validator = validateSample(validator);
   if (!isResolutionHidden())
     validator = validateResolution(validator);
@@ -157,7 +133,7 @@ IndirectFitDataView::validateSingleData(UserInputValidator &validator) {
 }
 
 UserInputValidator &
-IndirectFitDataView::validateSample(UserInputValidator &validator) {
+IndirectFitDataViewLegacy::validateSample(UserInputValidator &validator) {
   const auto sampleIsLoaded = isWorkspaceLoaded(getSelectedSample());
   validator.checkDataSelectorIsValid("Sample Input", m_dataForm->dsSample);
 
@@ -167,7 +143,7 @@ IndirectFitDataView::validateSample(UserInputValidator &validator) {
 }
 
 UserInputValidator &
-IndirectFitDataView::validateResolution(UserInputValidator &validator) {
+IndirectFitDataViewLegacy::validateResolution(UserInputValidator &validator) {
   const auto resolutionIsLoaded = isWorkspaceLoaded(getSelectedResolution());
   validator.checkDataSelectorIsValid("Resolution Input",
                                      m_dataForm->dsResolution);
@@ -177,17 +153,17 @@ IndirectFitDataView::validateResolution(UserInputValidator &validator) {
   return validator;
 }
 
-void IndirectFitDataView::displayWarning(const std::string &warning) {
+void IndirectFitDataViewLegacy::displayWarning(const std::string &warning) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning",
                        QString::fromStdString(warning));
 }
 
-void IndirectFitDataView::setResolutionHidden(bool hide) {
+void IndirectFitDataViewLegacy::setResolutionHidden(bool hide) {
   m_dataForm->lbResolution->setHidden(hide);
   m_dataForm->dsResolution->setHidden(hide);
 }
 
-void IndirectFitDataView::emitViewSelected(int index) {
+void IndirectFitDataViewLegacy::emitViewSelected(int index) {
   if (index == 0)
     emit singleDataViewSelected();
   else

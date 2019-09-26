@@ -20,7 +20,7 @@ class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
     : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
+  ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataViewLegacy *view);
 
 private slots:
   void setModelResolution(const QString &name);

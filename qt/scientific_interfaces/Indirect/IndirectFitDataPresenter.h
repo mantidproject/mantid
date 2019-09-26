@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
 
 #include "IAddWorkspaceDialog.h"
-#include "IIndirectFitDataView.h"
+#include "IIndirectFitDataViewLegacy.h"
 #include "IndirectDataTablePresenter.h"
 #include "IndirectFittingModel.h"
 
@@ -28,9 +28,9 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IIndirectFitDataView *view);
+                           IIndirectFitDataViewLegacy *view);
   IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
+      IndirectFittingModel *model, IIndirectFitDataViewLegacy *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   ~IndirectFitDataPresenter();
 
@@ -80,7 +80,7 @@ signals:
   void updateAvailableFitTypes();
 
 protected:
-  IIndirectFitDataView const *getView() const;
+  IIndirectFitDataViewLegacy const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
@@ -105,7 +105,7 @@ private:
   IndirectFittingModel *m_model;
   PrivateFittingData m_singleData;
   PrivateFittingData m_multipleData;
-  IIndirectFitDataView *m_view;
+  IIndirectFitDataViewLegacy *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };
 

@@ -34,7 +34,7 @@ set(
   IndirectFitAnalysisTab.cpp
   IndirectFitData.cpp
   IndirectFitDataPresenter.cpp
-  IndirectFitDataView.cpp
+  IndirectFitDataViewLegacy.cpp
   IndirectFitOutput.cpp
   IndirectFitOutputOptionsModel.cpp
   IndirectFitOutputOptionsPresenter.cpp
@@ -124,7 +124,7 @@ set(
   Elwin.h
   FunctionTemplateBrowser.h
   IAddWorkspaceDialog.h
-  IIndirectFitDataView.h
+  IIndirectFitDataViewLegacy.h
   IIndirectFitOutputOptionsView.h
   IIndirectFitPlotView.h
   IIndirectSettingsView.h
@@ -142,7 +142,7 @@ set(
   IndirectEditResultsDialog.h
   IndirectFitAnalysisTab.h
   IndirectFitDataPresenter.h
-  IndirectFitDataView.h
+  IndirectFitDataViewLegacy.h
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h
   IndirectFitPlotPresenter.h
@@ -204,7 +204,7 @@ set(
   IndirectDataReduction.ui
   IndirectDiffractionReduction.ui
   IndirectEditResultsDialog.ui
-  IndirectFitDataView.ui
+  IndirectFitDataViewLegacy.ui
   IndirectFitOutputOptions.ui
   IndirectFitPreviewPlot.ui
   IndirectInterfaceSettings.ui

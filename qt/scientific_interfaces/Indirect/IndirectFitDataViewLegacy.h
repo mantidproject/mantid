@@ -9,7 +9,7 @@
 
 #include "ui_IndirectFitDataView.h"
 
-#include "IIndirectFitDataView.h"
+#include "IIndirectFitDataViewLegacy.h"
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -20,11 +20,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataView : public IIndirectFitDataView {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataViewLegacy : public IIndirectFitDataViewLegacy {
   Q_OBJECT
 public:
-  IndirectFitDataView(QWidget *parent = nullptr);
-  ~IndirectFitDataView() override = default;
+  IndirectFitDataViewLegacy(QWidget *parent = nullptr);
+  ~IndirectFitDataViewLegacy() override = default;
 
   QTableWidget *getDataTable() const override;
   virtual bool isMultipleDataTabSelected() const override;
@@ -51,15 +51,11 @@ public:
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
 
-  void setXRange(std::pair<double, double> const &range) override;
-
 public slots:
   void displayWarning(const std::string &warning) override;
 
 protected slots:
   void emitViewSelected(int index);
-  void setStartX(double) override;
-  void setEndX(double) override;
 
 private:
   UserInputValidator &validateMultipleData(UserInputValidator &validator);

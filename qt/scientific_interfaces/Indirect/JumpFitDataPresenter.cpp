@@ -14,7 +14,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFitDataPresenter::JumpFitDataPresenter(
-    JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
+    JumpFitModel *model, IIndirectFitDataViewLegacy *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
     : IndirectFitDataPresenter(model, view,
                                std::make_unique<JumpFitDataTablePresenter>(

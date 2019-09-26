@@ -22,7 +22,7 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataView" name="fitDataView" native="true">
+     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataViewLegacy" name="fitDataView" native="true">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -168,9 +168,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataView</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataViewLegacy</class>
    <extends>QWidget</extends>
-   <header>IndirectFitDataView.h</header>
+   <header>IndirectFitDataViewLegacy.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

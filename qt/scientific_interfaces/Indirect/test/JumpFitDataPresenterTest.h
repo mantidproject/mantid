@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitDataView.h"
+#include "IIndirectFitDataViewLegacy.h"
 #include "JumpFitDataPresenter.h"
 #include "JumpFitModel.h"
 
@@ -70,7 +70,7 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockJumpFitDataView : public IIndirectFitDataView {
+class MockJumpFitDataView : public IIndirectFitDataViewLegacy {
 public:
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
