@@ -44,6 +44,10 @@ class TFMuonium(IFunction1D):
         a14 = 1 / (1 + (w14 / (2 * np.pi * fcut)) ** 2)
         a34 = 1 / (1 + (w34 / (2 * np.pi * fcut)) ** 2)
         a23 = 1 / (1 + (w23 / (2 * np.pi * fcut)) ** 2)
-        return A0 * 0.25 * ((1 + delta) * a12 * np.cos(w12 * x + phi) + (1 - delta) * a14 * np.cos(w14 * x + phi) + (1 + delta) * a34 * np.cos(w34 * x + phi) + (1 - delta) * a23 * np.cos(w23 * x + phi))
+        Term1 = (1 + delta) * a12 * np.cos(w12 * x + phi)
+        Term2 = (1 - delta) * a14 * np.cos(w14 * x + phi)
+        Term3 = (1 + delta) * a34 * np.cos(w34 * x + phi)
+        Term4 = (1 - delta) * a23 * np.cos(w23 * x + phi)
+        return A0 * 0.25 * (Term1 + Term2 + Term3 + Term4)
 
 FunctionFactory.subscribe(TFMuonium)
