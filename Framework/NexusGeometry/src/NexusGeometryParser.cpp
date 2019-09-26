@@ -59,45 +59,16 @@ std::vector<R> convertVector(const std::vector<T> &toConvert) {
   return target;
 }
 
-template <typename ExpectedT> void validateStorageType(const DataSet &data) {
-
-  const auto typeClass = data.getTypeClass();
-  const size_t sizeOfType = data.getDataType().getSize();
-  // Early check to prevent reinterpretation of underlying data.
-  if (std::is_floating_point<ExpectedT>::value) {
-    if (H5T_FLOAT != typeClass) {
-      throw std::runtime_error("Storage type mismatch. Expecting to extract a "
-                               "floating point number");
-    }
-    if (sizeOfType != sizeof(ExpectedT)) {
-      throw std::runtime_error(
-          "Storage type mismatch for floats. This operation "
-          "is dangerous. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
-    }
-  } else if (std::is_integral<ExpectedT>::value) {
-    if (H5T_INTEGER != typeClass) {
-      throw std::runtime_error(
-          "Storage type mismatch. Expecting to extract a integer");
-    }
-    if (sizeOfType > sizeof(ExpectedT)) {
-      // endianness not checked
-      throw std::runtime_error(
-          "Storage type mismatch for integer. Result "
-          "would result in truncation. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
-    }
-  }
-}
-
 template <typename ValueType>
 std::vector<ValueType> extractVector(const DataSet &data) {
-  validateStorageType<ValueType>(data);
+
+  // validateStorageType<ValueType>(data); HERE
   DataSpace dataSpace = data.getSpace();
   std::vector<ValueType> values;
   values.resize(dataSpace.getSelectNpoints());
   // Read data into vector
   data.read(values.data(), data.getDataType(), dataSpace);
+
   return values;
 }
 
@@ -108,6 +79,22 @@ class Parser {
 private:
   // Logger object
   std::unique_ptr<AbstractLogger> m_logger;
+
+  template <typename T>
+  std::vector<double> toNexusFloat(const T &host, const std::string &dSetName) {
+
+    DataSet data = openDataSet(host, dSetName);
+    std::vector<double> nexusData;
+    auto storageType = data.getDataType().getSize();
+    if (storageType == sizeof(float)) {
+      auto values = extractVector<float>(data);
+      nexusData = convertVector<float, double>(values);
+    } else if (storageType == sizeof(double)) {
+      auto values = extractVector<double>(data);
+      nexusData = values;
+    }
+    return nexusData;
+  }
 
   /**
    * The function allows us to determine where problems are and logs key
@@ -439,7 +426,7 @@ private:
         get1DDataset<int32_t>(shapeGroup, "faces"));
     const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
         get1DDataset<int32_t>(shapeGroup, "winding_order"));
-    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
+    const auto vertices = toNexusFloat(shapeGroup, VERTICES);
     return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                                 vertices);
   }

@@ -14,6 +14,7 @@
 namespace Mantid {
 namespace NexusGeometry {
 
+const int COMPRESSION_LEVEL = 1;
 const H5G_obj_t GROUP_TYPE = static_cast<H5G_obj_t>(0);
 const H5G_obj_t DATASET_TYPE = static_cast<H5G_obj_t>(1);
 const std::vector<std::string> nexus_geometry_extensions = {".nxs", ".hdf5"};

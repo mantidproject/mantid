@@ -802,7 +802,7 @@ public:
     TODO:
     */
   void writeMesh(H5::Group &grp, const std::vector<double> &vertices,
-                 const std::vector<uint32_t> windingOrder, const size_t nFaces,
+                 const std::vector<uint32_t> &windingOrder, const size_t nFaces,
                  const size_t nVertices, std::vector<size_t> detFaces = {}) {
 
     H5::DataSet dFaces, dVertices, dWindingOrder;
@@ -821,9 +821,9 @@ public:
     vplist.setChunk(2, vchunks);
     vplist.setDeflate(6);
 
-    dVertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace,
-                                  vplist);
-    writeToDataset(dVertices, vertices, H5::PredType::NATIVE_DOUBLE, vspace);
+    dVertices =
+        grp.createDataSet(VERTICES, H5::PredType::NATIVE_FLOAT, vspace, vplist);
+    writeToDataset(dVertices, vertices, H5::PredType::NATIVE_FLOAT, vspace);
     writeStrAttribute(dVertices, UNITS, METRES);
 
     // winding order
@@ -913,7 +913,8 @@ public:
       hsize_t cchunks[2] = {nCylinders, 3};
       H5::DSetCreatPropList cplist;
       cplist.setChunk(2, cchunks);
-      cplist.setDeflate(6);
+      cplist.setDeflate(COMPRESSION_LEVEL);
+
       cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_INT, cspace,
                                     cplist);
     } else {
@@ -933,7 +934,7 @@ public:
     hsize_t vchunks[2] = {static_cast<hsize_t>(3 * nCylinders), 3};
     H5::DSetCreatPropList vplist;
     vplist.setChunk(2, vchunks);
-    vplist.setDeflate(6);
+    vplist.setDeflate(COMPRESSION_LEVEL);
 
     vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace,
                                  vplist);
@@ -1336,7 +1337,7 @@ private:
     hsize_t chunks[1] = {nDetectorsInBank};
     H5::DSetCreatPropList plist;
     plist.setChunk(1, chunks);
-    plist.setDeflate(6);
+    plist.setDeflate(COMPRESSION_LEVEL);
 
     if (!xIsZero) {
       xPixelOffset = grp.createDataSet(
@@ -1559,7 +1560,8 @@ private:
       hsize_t chunks[1] = {csize};
       H5::DSetCreatPropList plist;
       plist.setChunk(1, chunks);
-      plist.setDeflate(6);
+      plist.setDeflate(COMPRESSION_LEVEL);
+
       dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space, plist);
     } else {
       dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);

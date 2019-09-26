@@ -1210,7 +1210,7 @@ MeshObjects.
     */
 
     // create RAII file resource for testing
-    FileResource fileResource("test_cylindrical.hdf5", true);
+    FileResource fileResource("test_cylindrical.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     const auto mesh = ComponentCreationHelper::createCubeFromTriangles(5);
@@ -1360,7 +1360,7 @@ MeshObjects.
         makeTestInstrument("unit_testing/SMALLFAKE_example_geometry.hdf5");
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FileResource fileResource("test_resave_example.hdf5", true);
+    FileResource fileResource("test_resave_example.hdf5");
     std::string destinationFile = fileResource.fullPath();
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
