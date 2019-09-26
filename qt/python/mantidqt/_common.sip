@@ -832,3 +832,27 @@ public:
     QWidget *getParamWidget(const QString &paramName) const;
     double getParameter(const QString &paramName) const;
 };
+
+// ---
+//
+// ---
+
+class MWRunFiles : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+%End
+public:
+MWRunFiles(QWidget *parent = nullptr);
+void setLabelMinWidth(const int);
+void liveButtonSetChecked(bool);
+bool liveButtonIsChecked();
+QString getText() /PyName=text/;
+bool isValid();
+void setUserInput(const QVariant &);
+void setText(const QString&);
+signals:
+void fileEditingFinished();
+void fileFindingFinished();
+void liveButtonPressed(bool);
+};
