@@ -50,7 +50,8 @@ public:
     return "Calculate the intensity as a function of momentum transfer and "
            "energy.";
   }
-
+  /// validate the inputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's version for identification
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
@@ -64,7 +65,6 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-
   /// Init the theta index
   void initAngularCachesNonPSD(const API::MatrixWorkspace &workspace);
   /// Get angles and calculate angular widths.
