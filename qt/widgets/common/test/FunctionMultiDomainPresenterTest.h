@@ -62,7 +62,7 @@ public:
     }
   }
 
-  void setParameterConstraint(const QString &, const QString &) override {}
+  void setParameterConstraint(const QString &/*paramName*/, const QString &/*constraint*/) override {}
 
   void setGlobalParameters(const QStringList &globals) override {
     m_globals = globals;
