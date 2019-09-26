@@ -9,30 +9,27 @@
 
 #include "DllConfig.h"
 
-#include "IndexTypes.h"
-#include "IndirectFitPlotModel.h"
+#include "IndirectFitPlotModelLegacy.h"
 #include "IndirectPlotter.h"
 
-#include "IIndirectFitPlotView.h"
+#include "IIndirectFitPlotViewLegacy.h"
 #include "LazyAsyncRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenterLegacy : public QObject {
   Q_OBJECT
 public:
-  IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IIndirectFitPlotView *view,
+  IndirectFitPlotPresenterLegacy(IndirectFittingModel *model,
+                           IIndirectFitPlotViewLegacy *view,
                            IPyRunner *pythonRunner = nullptr);
 
-  DatasetIndex getSelectedDataIndex() const;
-  WorkspaceIndex getSelectedSpectrum() const;
-  SpectrumRowIndex getSelectedSpectrumIndex() const;
-  SpectrumRowIndex getSelectedDomainIndex() const;
-  bool isCurrentlySelected(DatasetIndex dataIndex,
-                           WorkspaceIndex spectrum) const;
+  std::size_t getSelectedDataIndex() const;
+  std::size_t getSelectedSpectrum() const;
+  int getSelectedSpectrumIndex() const;
+  bool isCurrentlySelected(std::size_t dataIndex, std::size_t spectrum) const;
 
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
@@ -40,7 +37,7 @@ public:
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
-  void updatePlotSpectrum(WorkspaceIndex spectrum);
+  void updatePlotSpectrum(int spectrum);
   void hideMultipleDataSelection();
   void showMultipleDataSelection();
   void updateRangeSelectors();
@@ -55,10 +52,10 @@ public slots:
   void disablePlotGuessInSeparateWindow();
 
 signals:
-  void selectedFitDataChanged(DatasetIndex /*_t1*/);
+  void selectedFitDataChanged(std::size_t /*_t1*/);
   void noFitDataSelected();
-  void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
-  void fitSingleSpectrum(DatasetIndex /*_t1*/, WorkspaceIndex /*_t2*/);
+  void plotSpectrumChanged(std::size_t /*_t1*/);
+  void fitSingleSpectrum(std::size_t /*_t1*/, std::size_t /*_t2*/);
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
   void fwhmChanged(double /*_t1*/);
@@ -70,8 +67,8 @@ private slots:
   void setModelEndX(double value);
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
-  void setActiveIndex(DatasetIndex index);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
+  void setActiveIndex(std::size_t index);
+  void setActiveSpectrum(std::size_t spectrum);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
   void updateGuess(bool doPlotGuess);
@@ -84,11 +81,11 @@ private:
   void disableAllDataSelection();
   void enableAllDataSelection();
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
-                 WorkspaceIndex spectrum);
+                 std::size_t spectrum);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
-               WorkspaceIndex spectrum);
+               std::size_t spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
-                      WorkspaceIndex spectrum);
+                      std::size_t spectrum);
   void clearInput();
   void clearFit();
   void clearDifference();
@@ -103,10 +100,10 @@ private:
   void updateBackgroundSelector();
   void emitSelectedFitDataChanged();
 
-  void plotSpectrum(WorkspaceIndex spectrum) const;
+  void plotSpectrum(std::size_t spectrum) const;
 
-  std::unique_ptr<IndirectFitPlotModel> m_model;
-  IIndirectFitPlotView *m_view;
+  std::unique_ptr<IndirectFitPlotModelLegacy> m_model;
+  IIndirectFitPlotViewLegacy *m_view;
 
   bool m_plotGuessInSeparateWindow;
   QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;

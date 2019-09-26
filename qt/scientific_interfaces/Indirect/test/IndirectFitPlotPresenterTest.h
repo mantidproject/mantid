@@ -11,7 +11,7 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitPlotViewLegacy.h"
-#include "IndirectFitPlotPresenter.h"
+#include "IndirectFitPlotPresenterLegacy.h"
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -200,12 +200,12 @@ public:
   }
 
   void setUp() override {
-    /// Note that the IndirectFitPlotModel could not be mocked as the Presenter
+    /// Note that the IndirectFitPlotModelLegacy could not be mocked as the Presenter
     /// takes an IndirectFittingModel. This means the IndirectFittingModel is
     /// mocked instead - which is a good substitute anyway
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_fittingModel = std::make_unique<NiceMock<MockIndirectFittingModel>>();
-    m_presenter = std::make_unique<IndirectFitPlotPresenter>(
+    m_presenter = std::make_unique<IndirectFitPlotPresenterLegacy>(
         std::move(m_fittingModel.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace m_ads("WorkspaceName", createWorkspace(10));
@@ -631,7 +631,7 @@ public:
 private:
   std::unique_ptr<MockIndirectFitPlotView> m_view;
   std::unique_ptr<MockIndirectFittingModel> m_fittingModel;
-  std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
+  std::unique_ptr<IndirectFitPlotPresenterLegacy> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;
 };

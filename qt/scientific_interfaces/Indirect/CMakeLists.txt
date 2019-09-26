@@ -39,8 +39,8 @@ set(
   IndirectFitOutputOptionsModel.cpp
   IndirectFitOutputOptionsPresenter.cpp
   IndirectFitOutputOptionsView.cpp
-  IndirectFitPlotModel.cpp
-  IndirectFitPlotPresenter.cpp
+  IndirectFitPlotModelLegacy.cpp
+  IndirectFitPlotPresenterLegacy.cpp
   IndirectFitPlotViewLegacy.cpp
   IndirectFittingModel.cpp
   IndirectInstrumentConfig.cpp
@@ -96,8 +96,8 @@ set(
   IndirectFitData.h
   IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
-  IndirectFitPlotModel.h
-  IndirectFitPlotPresenter.h
+  IndirectFitPlotModelLegacy.h
+  IndirectFitPlotPresenterLegacy.h
   IndirectFittingModel.h
   IndirectPlotOptionsModel.h
   IndirectSettingsHelper.h
@@ -145,7 +145,7 @@ set(
   IndirectFitDataViewLegacy.h
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h
-  IndirectFitPlotPresenter.h
+  IndirectFitPlotPresenterLegacy.h
   IndirectFitPlotViewLegacy.h
   IndirectInstrumentConfig.h
   IndirectInterface.h

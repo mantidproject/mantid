@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitPlotModel.h"
+#include "IndirectFitPlotModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
@@ -44,7 +44,7 @@ IFunction_sptr getFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
 }
 
-/// A dummy class used to create a model to pass to IndirectFitPlotModel's
+/// A dummy class used to create a model to pass to IndirectFitPlotModelLegacy's
 /// constructor
 class DummyModel
     : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
@@ -166,13 +166,13 @@ IndirectFittingModel *getModelWithFitOutputData() {
   return model;
 }
 
-IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
-  return IndirectFitPlotModel(createModelWithMultipleWorkspaces(
+IndirectFitPlotModelLegacy getFitPlotModel(bool setFitFunction = true) {
+  return IndirectFitPlotModelLegacy(createModelWithMultipleWorkspaces(
       10, setFitFunction, "Workspace1", "Workspace2"));
 }
 
-IndirectFitPlotModel getFitPlotModelWithFitData() {
-  return IndirectFitPlotModel(getModelWithFitOutputData());
+IndirectFitPlotModelLegacy getFitPlotModelWithFitData() {
+  return IndirectFitPlotModelLegacy(getModelWithFitOutputData());
 }
 
 } // namespace

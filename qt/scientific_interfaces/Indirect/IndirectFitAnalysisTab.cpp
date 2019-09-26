@@ -273,7 +273,7 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotViewLegacy *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenterLegacy>(
       m_fittingModel.get(), view, this);
 }
 

@@ -11,7 +11,7 @@
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
-#include "IndirectFitPlotPresenter.h"
+#include "IndirectFitPlotPresenterLegacy.h"
 #include "IndirectFittingModel.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
@@ -229,7 +229,7 @@ private:
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
-  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<IndirectFitPlotPresenterLegacy> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
 

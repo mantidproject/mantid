@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectFitPlotModel.h"
+#include "IndirectFitPlotModelLegacy.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -113,150 +113,124 @@ namespace IDA {
 
 using namespace Mantid::API;
 
-IndirectFitPlotModel::IndirectFitPlotModel(IndirectFittingModel *fittingModel)
-    : m_fittingModel(fittingModel), m_activeIndex{0}, m_activeSpectrum{0} {}
+IndirectFitPlotModelLegacy::IndirectFitPlotModelLegacy(IndirectFittingModel *fittingModel)
+    : m_fittingModel(fittingModel), m_activeIndex(0), m_activeSpectrum(0) {}
 
-IndirectFitPlotModel::~IndirectFitPlotModel() {
+IndirectFitPlotModelLegacy::~IndirectFitPlotModelLegacy() {
   deleteExternalGuessWorkspace();
 }
 
-void IndirectFitPlotModel::setActiveIndex(DatasetIndex index) {
+void IndirectFitPlotModelLegacy::setActiveIndex(std::size_t index) {
   m_activeIndex = index;
 }
 
-void IndirectFitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) {
+void IndirectFitPlotModelLegacy::setActiveSpectrum(std::size_t spectrum) {
   m_activeSpectrum = spectrum;
 }
 
-void IndirectFitPlotModel::setStartX(double startX) {
+void IndirectFitPlotModelLegacy::setStartX(double startX) {
   if (getRange().second > startX)
-    m_fittingModel->setStartX(startX, m_activeIndex);
+    m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
 }
 
-void IndirectFitPlotModel::setEndX(double endX) {
+void IndirectFitPlotModelLegacy::setEndX(double endX) {
   if (getRange().first < endX)
-    m_fittingModel->setEndX(endX, m_activeIndex);
+    m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
 }
 
-void IndirectFitPlotModel::setFWHM(double) {
-  // m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
-  // setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
-  //                      fwhm);
+void IndirectFitPlotModelLegacy::setFWHM(double fwhm) {
+  m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
+  setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
+                        fwhm);
 }
 
-void IndirectFitPlotModel::setBackground(double background) {
+void IndirectFitPlotModelLegacy::setBackground(double background) {
   m_fittingModel->setDefaultParameterValue("A0", background, m_activeIndex);
   setFirstBackground(m_fittingModel->getFittingFunction(), background);
 }
 
-void IndirectFitPlotModel::deleteExternalGuessWorkspace() {
+void IndirectFitPlotModelLegacy::deleteExternalGuessWorkspace() {
   if (AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME))
     deleteWorkspace(INPUT_AND_GUESS_NAME);
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::getWorkspace() const {
+MatrixWorkspace_sptr IndirectFitPlotModelLegacy::getWorkspace() const {
   return m_fittingModel->getWorkspace(m_activeIndex);
 }
 
-Spectra IndirectFitPlotModel::getSpectra() const {
+Spectra IndirectFitPlotModelLegacy::getSpectra() const {
   return m_fittingModel->getSpectra(m_activeIndex);
 }
 
-std::pair<double, double> IndirectFitPlotModel::getRange() const {
+std::pair<double, double> IndirectFitPlotModelLegacy::getRange() const {
   return m_fittingModel->getFittingRange(m_activeIndex, m_activeSpectrum);
 }
 
-std::pair<double, double> IndirectFitPlotModel::getWorkspaceRange() const {
+std::pair<double, double> IndirectFitPlotModelLegacy::getWorkspaceRange() const {
   const auto xValues = getWorkspace()->x(0);
   return {xValues.front(), xValues.back()};
 }
 
-std::pair<double, double> IndirectFitPlotModel::getResultRange() const {
+std::pair<double, double> IndirectFitPlotModelLegacy::getResultRange() const {
   const auto xValues = getResultWorkspace()->x(0);
   return {xValues.front(), xValues.back()};
 }
 
-DatasetIndex IndirectFitPlotModel::getActiveDataIndex() const {
+std::size_t IndirectFitPlotModelLegacy::getActiveDataIndex() const {
   return m_activeIndex;
 }
 
-WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const {
+std::size_t IndirectFitPlotModelLegacy::getActiveSpectrum() const {
   return m_activeSpectrum;
 }
 
-DatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
+std::size_t IndirectFitPlotModelLegacy::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-SpectrumRowIndex IndirectFitPlotModel::getActiveDomainIndex() const {
-  SpectrumRowIndex index{0};
-  for (DatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
-    if (iws < m_activeIndex) {
-      index += SpectrumRowIndex{m_fittingModel->getNumberOfSpectra(iws)};
-    } else {
-      auto const spectra = m_fittingModel->getSpectra(iws);
-      try {
-        index += spectra.indexOf(m_activeSpectrum);
-      } catch (const std::runtime_error &) {
-        if (m_activeSpectrum.value != 0)
-          throw;
-      }
-      break;
-    }
-  }
-  return index;
-}
-
-std::string IndirectFitPlotModel::getFitDataName(DatasetIndex index) const {
+std::string IndirectFitPlotModelLegacy::getFitDataName(std::size_t index) const {
   if (m_fittingModel->getWorkspace(index))
     return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
   return "";
 }
 
-std::string IndirectFitPlotModel::getFitDataName() const {
+std::string IndirectFitPlotModelLegacy::getFitDataName() const {
   return getFitDataName(m_activeIndex);
 }
 
-std::string IndirectFitPlotModel::getLastFitDataName() const {
+std::string IndirectFitPlotModelLegacy::getLastFitDataName() const {
   auto const workspaceCount = m_fittingModel->numberOfWorkspaces();
-  if (workspaceCount.value > 0)
-    return getFitDataName(workspaceCount - DatasetIndex{1});
+  if (workspaceCount > 0)
+    return getFitDataName(workspaceCount - 1);
   return "";
 }
 
-boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
+boost::optional<double> IndirectFitPlotModelLegacy::getFirstHWHM() const {
   auto fwhm = findFirstFWHM(m_fittingModel->getFittingFunction());
   if (fwhm)
     return *fwhm / 2.0;
   return boost::none;
 }
 
-boost::optional<double> IndirectFitPlotModel::getFirstPeakCentre() const {
+boost::optional<double> IndirectFitPlotModelLegacy::getFirstPeakCentre() const {
   return findFirstPeakCentre(m_fittingModel->getFittingFunction());
 }
 
-boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
-  auto const spectra = m_fittingModel->getSpectra(m_activeIndex);
-  if (spectra.empty())
-    return boost::optional<double>();
-  auto index = spectra.indexOf(m_activeSpectrum);
-  IFunction_sptr fun = m_fittingModel->getFittingFunction();
-  if (!fun)
-    return boost::optional<double>();
-  return findFirstBackgroundLevel(fun->getFunction(index.value));
+boost::optional<double> IndirectFitPlotModelLegacy::getFirstBackgroundLevel() const {
+  return findFirstBackgroundLevel(m_fittingModel->getFittingFunction());
 }
 
-double IndirectFitPlotModel::calculateHWHMMaximum(double minimum) const {
+double IndirectFitPlotModelLegacy::calculateHWHMMaximum(double minimum) const {
   const auto peakCentre = getFirstPeakCentre().get_value_or(0.);
   return peakCentre + (peakCentre - minimum);
 }
 
-double IndirectFitPlotModel::calculateHWHMMinimum(double maximum) const {
+double IndirectFitPlotModelLegacy::calculateHWHMMinimum(double maximum) const {
   const auto peakCentre = getFirstPeakCentre().get_value_or(0.);
   return peakCentre - (maximum - peakCentre);
 }
 
-bool IndirectFitPlotModel::canCalculateGuess() const {
+bool IndirectFitPlotModelLegacy::canCalculateGuess() const {
   const auto function = m_fittingModel->getFittingFunction();
   if (!function)
     return false;
@@ -267,35 +241,34 @@ bool IndirectFitPlotModel::canCalculateGuess() const {
   return getWorkspace() && !isEmptyModel;
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
+MatrixWorkspace_sptr IndirectFitPlotModelLegacy::getResultWorkspace() const {
   const auto location =
       m_fittingModel->getResultLocation(m_activeIndex, m_activeSpectrum);
 
   if (location) {
     const auto group = location->result.lock();
     if (group)
-      return castToMatrixWorkspace(group->getItem(location->index.value));
+      return castToMatrixWorkspace(group->getItem(location->index));
   }
   return nullptr;
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
+MatrixWorkspace_sptr IndirectFitPlotModelLegacy::getGuessWorkspace() const {
   const auto range = getRange();
   return createGuessWorkspace(
-      getWorkspace(),
-      m_fittingModel->getSingleFunction(m_activeIndex, m_activeSpectrum),
-      m_activeSpectrum.value, range.first, range.second);
+      getWorkspace(), m_fittingModel->getFittingFunction(),
+      boost::numeric_cast<int>(m_activeSpectrum), range.first, range.second);
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
+MatrixWorkspace_sptr IndirectFitPlotModelLegacy::appendGuessToInput(
     MatrixWorkspace_sptr guessWorkspace) const {
   const auto range = getRange();
-  return createInputAndGuessWorkspace(getWorkspace(), guessWorkspace,
-                                      m_activeSpectrum.value, range.first,
-                                      range.second);
+  return createInputAndGuessWorkspace(
+      getWorkspace(), guessWorkspace,
+      boost::numeric_cast<int>(m_activeSpectrum), range.first, range.second);
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
+MatrixWorkspace_sptr IndirectFitPlotModelLegacy::createInputAndGuessWorkspace(
     MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace,
     int spectrum, double startX, double endX) const {
   guessWorkspace->setInstrument(inputWS->getInstrument());
@@ -316,7 +289,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   return inputAndGuess;
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
+MatrixWorkspace_sptr IndirectFitPlotModelLegacy::createGuessWorkspace(
     MatrixWorkspace_sptr inputWorkspace, IFunction_const_sptr func,
     int workspaceIndex, double startX, double endX) const {
   auto croppedWS = cropWorkspace(inputWorkspace, startX, endX, workspaceIndex,
@@ -332,7 +305,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
 }
 
 std::vector<double>
-IndirectFitPlotModel::computeOutput(IFunction_const_sptr func,
+IndirectFitPlotModelLegacy::computeOutput(IFunction_const_sptr func,
                                     const std::vector<double> &dataX) const {
   if (dataX.empty())
     return std::vector<double>();
@@ -347,7 +320,7 @@ IndirectFitPlotModel::computeOutput(IFunction_const_sptr func,
   return dataY;
 }
 
-IAlgorithm_sptr IndirectFitPlotModel::createWorkspaceAlgorithm(
+IAlgorithm_sptr IndirectFitPlotModelLegacy::createWorkspaceAlgorithm(
     std::size_t numberOfSpectra, const std::vector<double> &dataX,
     const std::vector<double> &dataY) const {
   IAlgorithm_sptr createWsAlg =
@@ -363,7 +336,7 @@ IAlgorithm_sptr IndirectFitPlotModel::createWorkspaceAlgorithm(
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
+IndirectFitPlotModelLegacy::extractSpectra(MatrixWorkspace_sptr inputWS,
                                      int startIndex, int endIndex,
                                      double startX, double endX) const {
   auto extractSpectraAlg =
@@ -382,7 +355,7 @@ IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
+IndirectFitPlotModelLegacy::appendSpectra(MatrixWorkspace_sptr inputWS,
                                     MatrixWorkspace_sptr spectraWS) const {
   auto appendSpectraAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendSpectraAlg->initialize();
@@ -396,7 +369,7 @@ IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::cropWorkspace(MatrixWorkspace_sptr inputWS, double startX,
+IndirectFitPlotModelLegacy::cropWorkspace(MatrixWorkspace_sptr inputWS, double startX,
                                     double endX, int startIndex,
                                     int endIndex) const {
   const auto cropAlg = AlgorithmManager::Instance().create("CropWorkspace");
@@ -413,7 +386,7 @@ IndirectFitPlotModel::cropWorkspace(MatrixWorkspace_sptr inputWS, double startX,
   return cropAlg->getProperty("OutputWorkspace");
 }
 
-void IndirectFitPlotModel::deleteWorkspace(const std::string &name) const {
+void IndirectFitPlotModelLegacy::deleteWorkspace(const std::string &name) const {
   auto deleteWorkspaceAlg =
       AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteWorkspaceAlg->initialize();

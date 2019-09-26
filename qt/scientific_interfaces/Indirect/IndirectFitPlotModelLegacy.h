@@ -7,7 +7,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 
-#include "IndexTypes.h"
 #include "IndirectFittingModel.h"
 
 #include "MantidAPI/IAlgorithm.h"
@@ -21,10 +20,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitPlotModel {
+class DLLExport IndirectFitPlotModelLegacy {
 public:
-  IndirectFitPlotModel(IndirectFittingModel *fittingModel);
-  ~IndirectFitPlotModel();
+  IndirectFitPlotModelLegacy(IndirectFittingModel *fittingModel);
+  ~IndirectFitPlotModelLegacy();
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
@@ -34,11 +33,10 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   appendGuessToInput(Mantid::API::MatrixWorkspace_sptr guessWorkspace) const;
 
-  DatasetIndex getActiveDataIndex() const;
-  WorkspaceIndex getActiveSpectrum() const;
-  DatasetIndex numberOfWorkspaces() const;
-  SpectrumRowIndex getActiveDomainIndex() const;
-  std::string getFitDataName(DatasetIndex index) const;
+  std::size_t getActiveDataIndex() const;
+  std::size_t getActiveSpectrum() const;
+  std::size_t numberOfWorkspaces() const;
+  std::string getFitDataName(std::size_t index) const;
   std::string getFitDataName() const;
   std::string getLastFitDataName() const;
   std::pair<double, double> getRange() const;
@@ -51,8 +49,8 @@ public:
   double calculateHWHMMinimum(double maximum) const;
   bool canCalculateGuess() const;
 
-  void setActiveIndex(DatasetIndex index);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
+  void setActiveIndex(std::size_t index);
+  void setActiveSpectrum(std::size_t spectrum);
   void setStartX(double startX);
   void setEndX(double endX);
   void setFWHM(double fwhm);
@@ -94,8 +92,8 @@ private:
   void deleteWorkspace(const std::string &name) const;
 
   IndirectFittingModel *m_fittingModel;
-  DatasetIndex m_activeIndex;
-  WorkspaceIndex m_activeSpectrum;
+  std::size_t m_activeIndex;
+  std::size_t m_activeSpectrum;
 };
 
 } // namespace IDA
