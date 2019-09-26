@@ -77,8 +77,8 @@ public:
     auto *shape1Mesh =
         dynamic_cast<const Geometry::MeshObject2D *>(&shape1); // Test detectors
     auto *shape2Mesh = dynamic_cast<const Geometry::MeshObject2D *>(&shape2);
-    TS_ASSERT(shape1Mesh);
-    TS_ASSERT(shape2Mesh);
+    ETS_ASSERT(shape1Mesh);
+    ETS_ASSERT(shape2Mesh);
     TS_ASSERT_EQUALS(shape1Mesh, shape2Mesh); // pixel shape - all identical.
     TSM_ASSERT_EQUALS("Same objects, same address", &shape1,
                       &shape2); // Shapes are shared when identical
@@ -102,8 +102,8 @@ public:
         dynamic_cast<const Geometry::CSGObject *>(&shape1); // Test detectors
     auto *shape2Cylinder = dynamic_cast<const Geometry::CSGObject *>(&shape2);
 
-    TS_ASSERT(shape1Cylinder);
-    TS_ASSERT(shape2Cylinder);
+    ETS_ASSERT(shape1Cylinder);
+    ETS_ASSERT(shape2Cylinder);
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(), 0.25);
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), 0.5);
     TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(),
@@ -138,8 +138,32 @@ public:
         "/Users/spu92482/Downloads/DETGEOM_example_4.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
+    auto &compInfo = *beamline.first;
+    auto &detInfo = *beamline.second;
+    TS_ASSERT_EQUALS(detInfo.size(), 3);
+    auto &shape1 = compInfo.shape(0);
+    auto &shape2 = compInfo.shape(1);
+    auto &shape3 = compInfo.shape(2);
+    TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
+                       &shape2); // Shapes are not shared
+    TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
+                       &shape3); // Shapes are not shared
+    const auto *shape1Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape1);
+    const auto *shape2Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape2);
+    const auto *shape3Cylinder =
+        dynamic_cast<const Geometry::CSGObject *>(&shape3);
 
-    // auto componentInfo = *beamline.first;
+    ETS_ASSERT(shape1Cylinder);
+    ETS_ASSERT(shape2Cylinder);
+    ETS_ASSERT(shape3Cylinder);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().radius(), 0.5);
+    TS_ASSERT_EQUALS(shape2Cylinder->shapeInfo().radius(), 0.5);
+    TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().radius(), 0.5);
+    TS_ASSERT_EQUALS(shape1Cylinder->shapeInfo().height(), 0.4);
+    TS_ASSERT_EQUALS(shape2Cylinder->shapeInfo().height(), 0.3); // 0.3
+    TS_ASSERT_EQUALS(shape3Cylinder->shapeInfo().height(), 0.2); // 0.5- 0.3
   }
 };
 

@@ -459,9 +459,9 @@ private:
       auto cylinderIndex = cylinderIndexToDetId[i];
       auto detId = cylinderIndexToDetId[i + 1];
 
-      auto centreIndex = cPoints[cylinderIndex * 3];
-      auto radiusIndex = cPoints[cylinderIndex * 3 + 1];
-      auto otherIndex = cPoints[cylinderIndex * 3 + 2];
+      auto centreIndex = cPoints[cylinderIndex * 3] * 3;
+      auto radiusIndex = cPoints[cylinderIndex * 3 + 1] * 3;
+      auto otherIndex = cPoints[cylinderIndex * 3 + 2] * 3;
 
       Eigen::Matrix<double, 3, 3> vSorted;
       auto centre = Kernel::V3D{vPoints[centreIndex], vPoints[centreIndex + 1],
