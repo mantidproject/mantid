@@ -126,6 +126,11 @@ void OptimizeLatticeForCellType::exec() {
     DataObjects::PeaksWorkspace_sptr peakWS(i_run->clone());
     AnalysisDataService::Instance().addOrReplace("_peaks", peakWS);
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
+    auto ol = peakWS->sample().getOrientedLattice();
+    DblMatrix modUB = peakWS->mutableSample().getOrientedLattice().getModUB();
+    int maxOrder = peakWS->mutableSample().getOrientedLattice().getMaxOrder();
+    bool crossTerms =
+        peakWS->mutableSample().getOrientedLattice().getCrossTerm();
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
 
@@ -170,6 +175,11 @@ void OptimizeLatticeForCellType::exec() {
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
     OrientedLattice o_lattice;
     o_lattice.setUB(UBnew);
+    if (maxOrder > 0) {
+      o_lattice.setModUB(modUB);
+      o_lattice.setMaxOrder(maxOrder);
+      o_lattice.setCrossTerm(crossTerms);
+    }
     o_lattice.set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
                   refinedCell.alpha(), refinedCell.beta(), refinedCell.gamma());
     o_lattice.setError(refinedCell.errora(), refinedCell.errorb(),

@@ -28,7 +28,7 @@ PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    "Params", "ResampleX", "Dspacing",
                    "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
-                   "CompressStartTime", "UnwrapRef", "LowResRef",
+                   "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
