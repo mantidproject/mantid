@@ -172,9 +172,10 @@ void SaveAscii2::exec() {
   if (m_writeSpectrumAxisValue) {
     auto spectrumAxis = m_ws->getAxis(1);
     if (dynamic_cast<BinEdgeAxis *>(spectrumAxis)) {
-      m_axisProxy = std::make_unique<BinEdgeAxisProxy>(spectrumAxis);
+      m_axisProxy =
+          std::make_unique<AxisHelper::BinEdgeAxisProxy>(spectrumAxis);
     } else {
-      m_axisProxy = std::make_unique<AxisProxy>(spectrumAxis);
+      m_axisProxy = std::make_unique<AxisHelper::AxisProxy>(spectrumAxis);
     }
   }
 
