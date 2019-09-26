@@ -234,7 +234,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         self._action_set_as(self.model.marked_columns.add_x, 1)
 
     def action_set_as_y(self):
-        self._action_set_as(self.model.marked_columns.add_y , 2)
+        self._action_set_as(self.model.marked_columns.add_y, 2)
 
     def action_set_as_y_err(self, related_y_column, label_index):
         """
@@ -333,9 +333,10 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 return
         x = self.model.get_column(selected_x)
 
-        fig, ax = self.plot.subplots()
+        fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
         fig.canvas.set_window_title(self.model.get_name())
         ax.set_xlabel(self.model.get_column_header(selected_x))
+        ax.wsName = self.model.get_name()
 
         plot_func = self._get_plot_function_from_type(ax, plot_type)
         kwargs = {}
@@ -357,7 +358,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 return
 
             ax.set_ylabel(column_label)
-        ax.legend()
+        ax.legend().draggable()
         fig.show()
 
     def _get_plot_function_from_type(self, ax, type):

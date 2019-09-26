@@ -14,6 +14,10 @@
 
 using namespace MantidQt::API;
 
+namespace {
+std::unique_ptr<ManageUserDirectories> CURRENTLY_OPEN_MUD;
+}
+
 ManageUserDirectories::ManageUserDirectories(QWidget *parent)
     : MantidDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
@@ -48,10 +52,6 @@ void ManageUserDirectories::initLayout() {
 
   connect(m_uiForm.pbSaveBrowse, SIGNAL(clicked()), this,
           SLOT(selectSaveDir()));
-}
-
-void ManageUserDirectories::setHelpButtonVisible(const bool &visible) {
-  m_uiForm.pbHelp->setVisible(visible);
 }
 
 void ManageUserDirectories::loadProperties() {
@@ -281,11 +281,17 @@ void ManageUserDirectories::selectSaveDir() {
     m_uiForm.leDefaultSave->setText(path);
   }
 }
-/** Opens a manage directories dialog and gives it focus
- *  @param parent :: the parent window, probably the window that called it
- */
-void ManageUserDirectories::openUserDirsDialog(QWidget *parent) {
-  ManageUserDirectories *ad = new ManageUserDirectories(parent);
-  ad->show();
-  ad->setFocus();
+
+void ManageUserDirectories::openManageUserDirectories() {
+  if (CURRENTLY_OPEN_MUD) {
+    CURRENTLY_OPEN_MUD->raise();
+  } else {
+    CURRENTLY_OPEN_MUD = std::make_unique<ManageUserDirectories>();
+    CURRENTLY_OPEN_MUD->show();
+  }
+}
+
+void ManageUserDirectories::closeEvent(QCloseEvent *event) {
+  CURRENTLY_OPEN_MUD.reset();
+  QWidget::closeEvent(event);
 }
