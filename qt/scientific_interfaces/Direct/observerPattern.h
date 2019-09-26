@@ -38,7 +38,7 @@ public:
 
 class loadObserver : public observer {
 public:
-  loadObserver(): m_slot(nullptr){ };
+  loadObserver() : m_slot(nullptr){};
   ~loadObserver(){};
   void setSlot(std::function<void()> &func) { m_slot = func; };
   void update() override { m_slot(); };

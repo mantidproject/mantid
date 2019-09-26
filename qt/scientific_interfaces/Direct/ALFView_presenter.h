@@ -37,7 +37,6 @@ private:
   int m_currentRun;
   loadObserver *m_loadRunObserver;
   generalObserver *m_browseObserver;
-
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

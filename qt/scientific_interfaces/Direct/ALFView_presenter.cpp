@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
     : m_view(view), m_model(model), m_currentRun(0), m_loadRunObserver(nullptr),
-      m_browseObserver(nullptr){
+      m_browseObserver(nullptr) {
   m_loadRunObserver = new loadObserver();
   m_browseObserver = new generalObserver();
   m_model->loadEmptyInstrument();
@@ -26,13 +26,13 @@ ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
 void ALFView_presenter::initLayout() {
   // connect to new run
   m_view->observeLoadRun(m_loadRunObserver);
-  std::function<void()> loadBinder = std::bind(&ALFView_presenter::loadRunNumber, this);
+  std::function<void()> loadBinder =
+      std::bind(&ALFView_presenter::loadRunNumber, this);
   m_loadRunObserver->setSlot(loadBinder);
   // connect to browse run
   m_view->observeBrowse(m_browseObserver);
-  std::function<void(std::string)>  browseBinder = std::bind(
-      &ALFView_presenter::loadBrowsedFile, this,
-                              std::placeholders::_1);
+  std::function<void(std::string)> browseBinder = std::bind(
+      &ALFView_presenter::loadBrowsedFile, this, std::placeholders::_1);
   m_browseObserver->setSlot(browseBinder);
 }
 
