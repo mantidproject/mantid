@@ -11,7 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <stdexcept>
-
+#include <string>
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/GridDomain.h"
 

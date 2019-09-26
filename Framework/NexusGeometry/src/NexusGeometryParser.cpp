@@ -531,61 +531,35 @@ private:
                      const std::vector<float> &vertices,
                      const std::unordered_map<int, uint32_t> &detIdToIndex,
                      const std::vector<uint32_t> &faceIndices,
-                     const size_t vertsPerFace,
                      std::vector<std::vector<Eigen::Vector3d>> &detFaceVerts,
                      std::vector<std::vector<uint32_t>> &detFaceIndices,
                      std::vector<std::vector<uint32_t>> &detWindingOrder,
                      std::vector<int32_t> &detIds) {
-    const size_t vertStride = 3;
-    std::fill(detFaceIndices.begin(), detFaceIndices.end(),
-              std::vector<uint32_t>(1, 0));
     for (size_t i = 0; i < detFaces.size(); i += 2) {
-      const auto faceIndex = faceIndices[detFaces[i]];
+      const auto faceIndexOfDetector = detFaces[i];
+      const auto faceIndex = faceIndices[faceIndexOfDetector];
+      auto nextFaceIndex = windingOrder.size();
+      if (faceIndexOfDetector + 1 < detFaces.size())
+        nextFaceIndex = faceIndices[faceIndexOfDetector + 1];
+      const auto nVertsInFace = nextFaceIndex - faceIndex;
       const auto detID = detFaces[i + 1];
       const auto detIndex = detIdToIndex.at(detID);
       auto &vertsForDet = detFaceVerts[detIndex];
       auto &detWinding = detWindingOrder[detIndex];
-      auto &detIndices = detFaceIndices[detIndex];
-      vertsForDet.reserve(vertsPerFace);
-      detWinding.reserve(vertsPerFace);
-      // Use face index to index into winding order.
-      for (size_t j = faceIndex; j < vertsPerFace + faceIndex; ++j) {
-        for (size_t v = 0; v < vertsPerFace; ++v) {
-          const auto vi = windingOrder[faceIndex + v] * vertStride;
-          vertsForDet.emplace_back(vertices[vi], vertices[vi + 1],
-                                   vertices[vi + 2]);
-          detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
-        }
+      vertsForDet.reserve(nVertsInFace);
+      detWinding.reserve(nVertsInFace);
+      detFaceIndices[detIndex].push_back(
+          faceIndex); // Associate face with detector index
+                      // Use face index to index into winding order.
+      for (size_t v = 0; v < nVertsInFace; ++v) {
+        const auto vi = windingOrder[faceIndex + v] * 3;
+        vertsForDet.emplace_back(vertices[vi], vertices[vi + 1],
+                                 vertices[vi + 2]);
+        detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
       }
-
       // Index -> Id
       detIds[detIndex] = detID;
-      detIndices.push_back(static_cast<uint32_t>(vertsForDet.size()));
     }
-    /*
-        std::fill(detFaceIndices.begin(), detFaceIndices.end(),
-                  std::vector<uint32_t>(1, 0));
-        for (size_t i = 0; i < windingOrder.size(); i += vertsPerFace) {
-          auto detFaceId = detFaces[detFaceIndex];
-          // Id -> Index
-          auto detIndex = detIdToIndex.at(detFaceId);
-          auto &detVerts = detFaceVerts[detIndex];
-          auto &detIndices = detFaceIndices[detIndex];
-          auto &detWinding = detWindingOrder[detIndex];
-          detVerts.reserve(vertsPerFace);
-          detWinding.reserve(vertsPerFace);
-          for (size_t v = 0; v < vertsPerFace; ++v) {
-            const auto vi = windingOrder[i + v] * vertStride;
-            detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi +
-       2]); detWinding.push_back(static_cast<uint32_t>(detWinding.size()));
-          }
-          // Index -> Id
-          detIds[detIndex] = detFaceId;
-          detIndices.push_back(static_cast<uint32_t>(detVerts.size()));
-          // Detector faces is 2N detectors
-          detFaceIndex += 2;
-        }
-        */
   }
 
   void parseNexusMeshAndAddDetectors(
@@ -595,30 +569,30 @@ private:
       const std::vector<float> &vertices, const size_t numDets,
       const std::unordered_map<int, uint32_t> &detIdToIndex,
       const std::string &name, InstrumentBuilder &builder) {
-    auto vertsPerFace = windingOrder.size() / faceIndices.size();
     std::vector<std::vector<Eigen::Vector3d>> detFaceVerts(numDets);
     std::vector<std::vector<uint32_t>> detFaceIndices(numDets);
     std::vector<std::vector<uint32_t>> detWindingOrder(numDets);
     std::vector<int> detIds(numDets);
 
     extractFacesAndIDs(detFaces, windingOrder, vertices, detIdToIndex,
-                       faceIndices, vertsPerFace, detFaceVerts, detFaceIndices,
+                       faceIndices, detFaceVerts, detFaceIndices,
                        detWindingOrder, detIds);
 
     for (size_t i = 0; i < numDets; ++i) {
       auto &detVerts = detFaceVerts[i];
-      const auto &detIndices = detFaceIndices[i];
+      const auto &faceIndices = detFaceIndices[i];
       const auto &detWinding = detWindingOrder[i];
       // Calculate polygon centre
-      auto centre = std::accumulate(detVerts.begin() + 1, detVerts.end(),
-                                    detVerts.front()) /
-                    detVerts.size();
+      Eigen::Vector3d centre =
+          std::accumulate(detVerts.begin() + 1, detVerts.end(),
+                          detVerts.front()) /
+          detVerts.size();
 
       // translate shape to origin for shape coordinates.
       std::for_each(detVerts.begin(), detVerts.end(),
                     [&centre](Eigen::Vector3d &val) { val -= centre; });
 
-      auto shape = NexusShapeFactory::createFromOFFMesh(detIndices, detWinding,
+      auto shape = NexusShapeFactory::createFromOFFMesh(faceIndices, detWinding,
                                                         detVerts);
       builder.addDetectorToLastBank(name + "_" + std::to_string(i), detIds[i],
                                     centre, std::move(shape));

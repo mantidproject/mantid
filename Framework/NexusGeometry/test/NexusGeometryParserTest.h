@@ -66,7 +66,7 @@ public:
   void test_pixel_shape_as_mesh() {
 
     auto instrument = NexusGeometryParser::createInstrument(
-        "/home/spu92482/Downloads/DETGEOM_example_1.nxs",
+        "/Users/spu92482/Downloads/DETGEOM_example_1.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
     auto &compInfo = *beamline.first;
@@ -80,12 +80,14 @@ public:
     TS_ASSERT(shape1Mesh);
     TS_ASSERT(shape2Mesh);
     TS_ASSERT_EQUALS(shape1Mesh, shape2Mesh); // pixel shape - all identical.
+    TSM_ASSERT_EQUALS("Same objects, same address", &shape1,
+                      &shape2); // Shapes are shared when identical
     TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 2);
     TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 4);
   }
   void test_pixel_shape_as_cylinders() {
     auto instrument = NexusGeometryParser::createInstrument(
-        "/home/spu92482/Downloads/DETGEOM_example_2.nxs",
+        "/Users/spu92482/Downloads/DETGEOM_example_2.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
     auto &compInfo = *beamline.first;
@@ -94,6 +96,8 @@ public:
     auto &shape1 = compInfo.shape(0);
     auto &shape2 = compInfo.shape(1);
 
+    TSM_ASSERT_EQUALS("Same objects, same address", &shape1,
+                      &shape2); // Shapes are shared when identical
     auto *shape1Cylinder =
         dynamic_cast<const Geometry::CSGObject *>(&shape1); // Test detectors
     auto *shape2Cylinder = dynamic_cast<const Geometry::CSGObject *>(&shape2);
@@ -109,7 +113,7 @@ public:
   }
   void test_detector_shape_as_mesh() {
     auto instrument = NexusGeometryParser::createInstrument(
-        "/home/spu92482/Downloads/DETGEOM_example_3.nxs",
+        "/Users/spu92482/Downloads/DETGEOM_example_3.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
     auto &compInfo = *beamline.first;
@@ -117,19 +121,21 @@ public:
     TS_ASSERT_EQUALS(detInfo.size(), 4);
     auto &shape1 = compInfo.shape(0);
     auto &shape2 = compInfo.shape(1);
+    TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
+                       &shape2); // Shapes are not shared
     auto *shape1Mesh =
         dynamic_cast<const Geometry::MeshObject2D *>(&shape1); // Test detectors
     auto *shape2Mesh = dynamic_cast<const Geometry::MeshObject2D *>(&shape2);
     TS_ASSERT(shape1Mesh);
     TS_ASSERT(shape2Mesh);
-    TS_ASSERT_EQUALS(shape1Mesh, shape2Mesh); // pixel shape - all identical.
     TS_ASSERT_EQUALS(shape1Mesh->numberOfTriangles(), 1);
     TS_ASSERT_EQUALS(shape1Mesh->numberOfVertices(), 3);
-    // auto componentInfo = *beamline.first;
+    TS_ASSERT_EQUALS(shape2Mesh->numberOfTriangles(), 1);
+    TS_ASSERT_EQUALS(shape2Mesh->numberOfVertices(), 3);
   }
   void test_detector_shape_as_cylinders() {
     auto instrument = NexusGeometryParser::createInstrument(
-        "/home/spu92482/Downloads/DETGEOM_example_4.nxs",
+        "/Users/spu92482/Downloads/DETGEOM_example_4.nxs",
         std::make_unique<testing::NiceMock<MockLogger>>());
     auto beamline = extractBeamline(*instrument);
 

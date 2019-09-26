@@ -14,6 +14,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <string>
 
 // Forward Declares
 namespace NeXus {
