@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitPlotView.h"
+#include "IIndirectFitPlotViewLegacy.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFittingModel.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -49,7 +49,7 @@ IFunction_sptr getFunctionWithWorkspaceName(std::string const &workspaceName) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectFitPlotView : public IIndirectFitPlotView {
+class MockIndirectFitPlotView : public IIndirectFitPlotViewLegacy {
 public:
   /// Signals
   void emitSelectedFitDataChanged(std::size_t index) {

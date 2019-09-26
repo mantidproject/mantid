@@ -43,7 +43,7 @@
           </widget>
          </item>
          <item>
-          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotView" name="pvFitPlotView" native="true"/>
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotViewLegacy" name="pvFitPlotView" native="true"/>
          </item>
         </layout>
        </item>
@@ -162,9 +162,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotView</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotViewLegacy</class>
    <extends>QWidget</extends>
-   <header>IndirectFitPlotView.h</header>
+   <header>IndirectFitPlotViewLegacy.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

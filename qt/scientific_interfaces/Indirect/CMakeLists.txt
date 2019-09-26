@@ -41,7 +41,7 @@ set(
   IndirectFitOutputOptionsView.cpp
   IndirectFitPlotModel.cpp
   IndirectFitPlotPresenter.cpp
-  IndirectFitPlotView.cpp
+  IndirectFitPlotViewLegacy.cpp
   IndirectFittingModel.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
@@ -126,7 +126,7 @@ set(
   IAddWorkspaceDialog.h
   IIndirectFitDataViewLegacy.h
   IIndirectFitOutputOptionsView.h
-  IIndirectFitPlotView.h
+  IIndirectFitPlotViewLegacy.h
   IIndirectSettingsView.h
   ILLEnergyTransfer.h
   IndirectAddWorkspaceDialog.h
@@ -146,7 +146,7 @@ set(
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h
   IndirectFitPlotPresenter.h
-  IndirectFitPlotView.h
+  IndirectFitPlotViewLegacy.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h

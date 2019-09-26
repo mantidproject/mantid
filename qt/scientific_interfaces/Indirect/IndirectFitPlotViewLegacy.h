@@ -10,50 +10,48 @@
 #include "ui_IndirectFitPreviewPlot.h"
 
 #include "DllConfig.h"
-#include "IIndirectFitPlotView.h"
+#include "IIndirectFitPlotViewLegacy.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotView : public IIndirectFitPlotView {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy : public IIndirectFitPlotViewLegacy {
   Q_OBJECT
 
 public:
-  IndirectFitPlotView(QWidget *parent = nullptr);
-  virtual ~IndirectFitPlotView() override;
+  IndirectFitPlotViewLegacy(QWidget *parent = nullptr);
+  virtual ~IndirectFitPlotViewLegacy() override;
 
-  WorkspaceIndex getSelectedSpectrum() const override;
-  SpectrumRowIndex getSelectedSpectrumIndex() const override;
-  DatasetIndex getSelectedDataIndex() const override;
-  DatasetIndex dataSelectionSize() const override;
+  std::size_t getSelectedSpectrum() const override;
+  int getSelectedSpectrumIndex() const override;
+  int getSelectedDataIndex() const override;
+  std::size_t dataSelectionSize() const override;
   bool isPlotGuessChecked() const override;
 
   void hideMultipleDataSelection() override;
   void showMultipleDataSelection() override;
 
-  void setAvailableSpectra(WorkspaceIndex minimum,
-                           WorkspaceIndex maximum) override;
+  void setAvailableSpectra(std::size_t minimum, std::size_t maximum) override;
   void setAvailableSpectra(
-      const std::vector<WorkspaceIndex>::const_iterator &from,
-      const std::vector<WorkspaceIndex>::const_iterator &to) override;
+      const std::vector<std::size_t>::const_iterator &from,
+      const std::vector<std::size_t>::const_iterator &to) override;
 
   void setMinimumSpectrum(int minimum) override;
   void setMaximumSpectrum(int maximum) override;
-  void setPlotSpectrum(WorkspaceIndex spectrum) override;
+  void setPlotSpectrum(int spectrum) override;
   void appendToDataSelection(const std::string &dataName) override;
   void setNameInDataSelection(const std::string &dataName,
-                              DatasetIndex index) override;
+                              std::size_t index) override;
   void clearDataSelection() override;
 
   void plotInTopPreview(const QString &name,
                         Mantid::API::MatrixWorkspace_sptr workspace,
-                        WorkspaceIndex spectrum,
-                        Qt::GlobalColor colour) override;
+                        std::size_t spectrum, Qt::GlobalColor colour) override;
   void plotInBottomPreview(const QString &name,
                            Mantid::API::MatrixWorkspace_sptr workspace,
-                           WorkspaceIndex spectrum,
+                           std::size_t spectrum,
                            Qt::GlobalColor colour) override;
 
   void removeFromTopPreview(const QString &name) override;

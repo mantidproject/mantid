@@ -12,7 +12,7 @@
 #include "IndirectFitPlotModel.h"
 #include "IndirectPlotter.h"
 
-#include "IIndirectFitPlotView.h"
+#include "IIndirectFitPlotViewLegacy.h"
 #include "LazyAsyncRunner.h"
 
 namespace MantidQt {
@@ -23,7 +23,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 public:
   IndirectFitPlotPresenter(IndirectFittingModel *model,
-                           IIndirectFitPlotView *view,
+                           IIndirectFitPlotViewLegacy *view,
                            IPyRunner *pythonRunner = nullptr);
 
   std::size_t getSelectedDataIndex() const;
@@ -103,7 +103,7 @@ private:
   void plotSpectrum(std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitPlotModel> m_model;
-  IIndirectFitPlotView *m_view;
+  IIndirectFitPlotViewLegacy *m_view;
 
   bool m_plotGuessInSeparateWindow;
   QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;

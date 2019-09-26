@@ -10,11 +10,11 @@
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
-using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
+using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotViewLegacy;
 
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
-  explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
+  explicit UpdateAvailableSpectra(IIndirectFitPlotViewLegacy *view) : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) {
     m_view->setAvailableSpectra(spectra.first, spectra.second);
@@ -25,7 +25,7 @@ public:
   }
 
 private:
-  IIndirectFitPlotView *m_view;
+  IIndirectFitPlotViewLegacy *m_view;
 };
 } // namespace
 
@@ -36,7 +36,7 @@ namespace IDA {
 using namespace Mantid::API;
 
 IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
-                                                   IIndirectFitPlotView *view,
+                                                   IIndirectFitPlotViewLegacy *view,
                                                    IPyRunner *pythonRunner)
     : m_model(new IndirectFitPlotModel(model)), m_view(view),
       m_plotGuessInSeparateWindow(false),

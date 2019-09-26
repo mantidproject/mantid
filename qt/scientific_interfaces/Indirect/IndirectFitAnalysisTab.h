@@ -37,7 +37,7 @@ public:
                          QWidget *parent = nullptr);
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
-  void setPlotView(IIndirectFitPlotView *view);
+  void setPlotView(IIndirectFitPlotViewLegacy *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void
