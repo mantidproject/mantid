@@ -391,18 +391,20 @@ class SPowderSemiEmpiricalCalculator(object):
 
             elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
 
-                angles = abins.parameters.angles
-                first_angle = angles[0]
+                instrument_params = AbinsParameters.instruments[self._instrument.get_name()]
+
+                first_angle = instrument_params['angles'][0]
                 self._instrument.set_detector_angle(angle=first_angle)
-                intend = ANGLE_MESSAGE_INDENTATION
+                indent = ANGLE_MESSAGE_INDENTATION
+
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq)
-                self._report_progress(msg=intend + "Calculation for the detector at angle %s (atom=%s)" %
+                self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                    (first_angle, atom))
                 opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
 
-                for angle in angles[1:]:
-                    self._report_progress(msg=intend + "Calculation for the detector at angle %s (atom=%s)" %
+                for angle in instrument_params['angles'][1:]:
+                    self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                        (angle, atom))
                     self._instrument.set_detector_angle(angle=angle)
                     q2 = self._instrument.calculate_q_powder(input_data=local_freq)
@@ -421,9 +423,9 @@ class SPowderSemiEmpiricalCalculator(object):
                                                                                             s_dft=value_dft,
                                                                                             scheme=broadening_scheme)
 
-            local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
-                                                                       freq=local_freq,
-                                                                       coeff=local_coeff)
+            # local_freq, local_coeff = self._calculate_s_over_threshold(s=rebined_broad_spectrum,
+            #                                                            freq=local_freq,
+            #                                                            coeff=local_coeff)
         else:
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)
 
@@ -468,7 +470,7 @@ class SPowderSemiEmpiricalCalculator(object):
         # in case of 2D instrument rebin over q
         # TODO: THIS NEEDS CLOSER EXAMINATION
         if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-            q_size = abins.parameters.instruments['TwoDMap']['q_size']
+            q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
             temp_full_s = np.zeros(shape=(q_size + 1, rebinned_broad_spectrum.size),
                                    dtype=FLOAT_TYPE)
 
@@ -486,8 +488,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebinned_broad_spectrum = temp_full_s[:-1]
 
         # calculate transition energies for construction of higher order quantum event
-        local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft, freq=local_freq,
-                                                                   coeff=local_coeff, atom=atom, order=order)
+        local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft, freq=local_freq, coeff=local_coeff)
 
         if return_freq:
             return local_freq, local_coeff, rebinned_broad_spectrum

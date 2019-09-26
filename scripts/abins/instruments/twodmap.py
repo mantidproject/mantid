@@ -66,9 +66,7 @@ class TwoDMap(Instrument):
             broadened_spectrum = s_dft
 
         else:
-            sigma = np.zeros(shape=frequencies.size, dtype=FLOAT_TYPE)
-            sigma.fill(self._calculate_sigma())
-
+            sigma = np.full(frequencies.size, self._calculate_sigma(), dtype=FLOAT_TYPE)
             points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma, scheme=scheme)
 
         return points_freq, broadened_spectrum
@@ -100,4 +98,4 @@ class TwoDMap(Instrument):
         Calculates width of Gaussian resolution function.
         :return: width of Gaussian resolution function
         """
-        return self._e_init * abins.parameters.instruments['TwoDMap']['resolution']
+        return self._e_init * abins.parameters.instruments[self._name]['resolution']

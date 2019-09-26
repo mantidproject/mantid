@@ -517,7 +517,7 @@ class Abins(PythonAlgorithm):
                                           nucleons_number=nucleons_number)
 
             # total workspaces [data is 2d array of S]
-            elif s_points.shape[0] == abins.parameters.q_size:
+            elif s_points.shape[0] == abins.parameters.instruments[self._instrument.get_name()]['q_size']:
                 self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
                                           nucleons_number=nucleons_number)
 
@@ -574,7 +574,7 @@ class Abins(PythonAlgorithm):
 
         freq_axis = NumericAxis.create(n_freq_bins)
 
-        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.q_size + 1)
+        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=abins.parameters.instruments[self._instrument.get_name()]['q_size'] + 1)
 
         freq_offset = (self._bins[1] - self._bins[0]) / 2
         for i, freq in enumerate(self._bins[1:]):
@@ -650,7 +650,8 @@ class Abins(PythonAlgorithm):
                 s_atoms = np.zeros_like(ws.dataY(0))
 
             if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-                n_q, n_energy_bins = abins.parameters.q_size, ws.getDimension(1).getNBins()
+                n_q = abins.parameters.instruments[self._instrument.get_name()]['q_size']
+                n_energy_bins = ws.getDimension(1).getNBins()
                 s_atoms = np.zeros([n_q, n_energy_bins])
 
             # collect all S

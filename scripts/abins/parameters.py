@@ -26,7 +26,7 @@ instruments = {
         'delta_width': 0.1,  # width of narrow Gaussian which approximates Dirac delta
         'q_size': 60,  # Number of q slices
         'e_init': [4100.0],  # Incident energies in cm-1
-        'angles': np.arange(3.0, 140.0, 1), # All measurement angles for direct sweeps
+        'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
         },
     'TOSCA': {
         #    TOSCA parameters for calculating Q^2
