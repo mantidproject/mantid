@@ -409,8 +409,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: s for the first quantum order event for the given atom
         """
         trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
 
         s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
 
@@ -431,8 +431,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the second quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
 
         dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
         q4 = q2 ** 2
@@ -459,16 +459,13 @@ class SPowderSemiEmpiricalCalculator(object):
         # np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
         # np.take(b_tensor, indices=indices[:, 0], axis=0)))
 
-        s = q4 * dw * (np.prod(np.take(b_trace, indices=indices), axis=1) +
-
-                       np.einsum('kli, kil->k',
-                       np.take(b_tensor, indices=indices[:, 0], axis=0),
-                       np.take(b_tensor, indices=indices[:, 1], axis=0)) +
-
-                       np.einsum('kli, kil->k',
-                       np.take(b_tensor, indices=indices[:, 1], axis=0),
-                       np.take(b_tensor, indices=indices[:, 0], axis=0))) / (30.0 * factor)
-
+        s = q4 * dw * (np.prod(np.take(b_trace, indices=indices), axis=1)
+                       + np.einsum('kli, kil->k',
+                                   np.take(b_tensor, indices=indices[:, 0], axis=0),
+                                   np.take(b_tensor, indices=indices[:, 1], axis=0))
+                       + np.einsum('kli, kil->k',
+                                   np.take(b_tensor, indices=indices[:, 1], axis=0),
+                                   np.take(b_tensor, indices=indices[:, 0], axis=0))) / (30.0 * factor)
         return s
 
     # noinspection PyUnusedLocal,PyUnusedLocal
@@ -485,10 +482,10 @@ class SPowderSemiEmpiricalCalculator(object):
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the third quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 9.0 / 1086.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
-            np.exp(-q2 * a_trace / 3.0 * coth * coth)
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        s = (9.0 / 1086.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1)
+             * np.exp(-q2 * a_trace / 3.0 * coth * coth))
 
         return s
 
@@ -506,10 +503,10 @@ class SPowderSemiEmpiricalCalculator(object):
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the forth quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE /
-                             (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
-        s = 27.0 / 49250.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1) * \
-            np.exp(-q2 * a_trace / 3.0 * coth * coth)
+        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        s = (27.0 / 49250.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1)
+             * np.exp(-q2 * a_trace / 3.0 * coth * coth))
 
         return s
 
