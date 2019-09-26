@@ -22,7 +22,7 @@ class SData(AbinsModules.GeneralData):
             raise ValueError("Invalid value of temperature.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsModules.AbinsConstants.ALL_SAMPLE_FORMS:
+        if sample_form in AbinsConstants.ALL_SAMPLE_FORMS:
             self._sample_form = sample_form
         else:
             raise ValueError("Invalid sample form %s" % sample_form)
@@ -41,16 +41,16 @@ class SData(AbinsModules.GeneralData):
             raise ValueError("New value of S  should have a form of a dict.")
 
         for item in items:
-            if AbinsModules.AbinsConstants.ATOM_LABEL in item:
+            if AbinsConstants.ATOM_LABEL in item:
 
                 if not isinstance(items[item], dict):
                     raise ValueError("New value of item from S data should have a form of dictionary.")
 
-                if sorted(items[item].keys()) != sorted(AbinsModules.AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
+                if sorted(items[item].keys()) != sorted(AbinsConstants.ALL_KEYWORDS_ATOMS_S_DATA):
                     raise ValueError("Invalid structure of the dictionary.")
 
-                for order in items[item][AbinsModules.AbinsConstants.S_LABEL]:
-                    if not isinstance(items[item][AbinsModules.AbinsConstants.S_LABEL][order], np.ndarray):
+                for order in items[item][AbinsConstants.S_LABEL]:
+                    if not isinstance(items[item][AbinsConstants.S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
 
             elif "frequencies" == item:
@@ -58,7 +58,7 @@ class SData(AbinsModules.GeneralData):
                 bins = np.arange(start=AbinsParameters.sampling['min_wavenumber'],
                                  stop=AbinsParameters.sampling['max_wavenumber'] + step,
                                  step=step,
-                                 dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+                                 dtype=AbinsConstants.FLOAT_TYPE)
 
                 freq_points = bins[:-1] + (step / 2)
                 if not np.array_equal(items[item], freq_points):

@@ -54,8 +54,8 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        min_order = AbinsModules.AbinsConstants.FUNDAMENTALS
-        max_order = AbinsModules.AbinsConstants.FUNDAMENTALS + AbinsModules.AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS
+        min_order = AbinsConstants.FUNDAMENTALS
+        max_order = AbinsConstants.FUNDAMENTALS + AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS
         if isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order:
             self._quantum_order_num = quantum_order_num
         else:
@@ -84,10 +84,10 @@ class SPowderSemiEmpiricalCalculator(object):
                 temperature=self._temperature))
 
         self._freq_generator = AbinsModules.FrequencyPowderGenerator()
-        self._calculate_order = {AbinsModules.AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
-                                 AbinsModules.AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
-                                 AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
-                                 AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
+        self._calculate_order = {AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
+                                 AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
+                                 AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
+                                 AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
         self._bin_width = bin_width  # This is only here to store in s_data. Is that necessary/useful?
         self._bins = np.arange(start=AbinsParameters.sampling['min_wavenumber'],
@@ -117,7 +117,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # calculate S
         calculate_s_powder = None
-        if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+        if self._instrument.get_name() in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
             calculate_s_powder = self._calculate_s_powder_1d
 
         s_data = calculate_s_powder()
@@ -167,8 +167,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :param addition: S to be added
         """
         for atom in range(self._num_atoms):
-            for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                               self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+            for order in range(AbinsConstants.FUNDAMENTALS,
+                               self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
                 temp = addition["atom_%s" % atom]["s"]["order_%s" % order]
                 current_val["atom_%s" % atom]["s"]["order_%s" % order] += temp
 
@@ -238,7 +238,7 @@ class SPowderSemiEmpiricalCalculator(object):
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
         frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
-        indx = frequencies > AbinsModules.AbinsConstants.ACOUSTIC_PHONON_THRESHOLD
+        indx = frequencies > AbinsConstants.ACOUSTIC_PHONON_THRESHOLD
         self._fundamentals_freq = frequencies[indx]
 
         self._weight = dft_data["datasets"]["weights"][int(k_point)]
@@ -275,11 +275,11 @@ class SPowderSemiEmpiricalCalculator(object):
 
         local_freq = np.copy(self._fundamentals_freq)
         local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size,
-                                dtype=AbinsModules.AbinsConstants.INT_TYPE)
+                                dtype=AbinsConstants.INT_TYPE)
         fund_coeff = np.copy(local_coeff)
 
-        for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                           self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+        for order in range(AbinsConstants.FUNDAMENTALS,
+                           self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
             # in case there is large number of transitions chop it into chunks and process chunk by chunk
             if local_freq.size * self._fundamentals_freq.size > AbinsParameters.performance['optimal_size']:
@@ -293,7 +293,7 @@ class SPowderSemiEmpiricalCalculator(object):
                     part_loc_coeff = np.copy(local_coeff)
 
                     # number of transitions can only go up
-                    for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+                    for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
                         part_loc_freq, part_loc_coeff, part_broad_spectrum = self._helper_atom(
                             atom=atom, local_freq=part_loc_freq, local_coeff=part_loc_coeff,
@@ -325,21 +325,21 @@ class SPowderSemiEmpiricalCalculator(object):
         l_size = local_freq.size
         opt_size = float(AbinsParameters.performance['optimal_size'])
 
-        chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsModules.AbinsConstants.MAX_ORDER - order))))
+        chunk_size = max(1.0, np.floor(opt_size / (l_size * 2**(AbinsConstants.MAX_ORDER - order))))
         chunk_num = int(np.ceil(float(fund_size) / chunk_size))
         new_dim = int(chunk_num * chunk_size)
-        new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsModules.AbinsConstants.INT_TYPE)
+        new_fundamentals = np.zeros(shape=new_dim, dtype=AbinsConstants.FLOAT_TYPE)
+        new_fundamentals_coeff = np.zeros(shape=new_dim, dtype=AbinsConstants.INT_TYPE)
         new_fundamentals[:fund_size] = self._fundamentals_freq
         new_fundamentals_coeff[:fund_size] = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size,
-                                                       dtype=AbinsModules.AbinsConstants.INT_TYPE)
+                                                       dtype=AbinsConstants.INT_TYPE)
 
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
         total_size = self._freq_size
-        for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
-            s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        for lg_order in range(order, self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
+            s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsConstants.FLOAT_TYPE)
 
         return new_fundamentals, new_fundamentals_coeff
 
@@ -364,7 +364,7 @@ class SPowderSemiEmpiricalCalculator(object):
         if local_freq.any():  # check if local_freq has non-zero values
 
             q2 = None
-            if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+            if self._instrument.get_name() in AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq)
 
             value_dft = self._calculate_order[order](q2=q2,
@@ -409,8 +409,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :returns: s for the first quantum order event for the given atom
         """
         trace_ba = np.einsum('kli, il->k', b_tensor, a_tensor)
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
-                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
 
         s = q2 * b_trace / 3.0 * np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
 
@@ -431,8 +431,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the second quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
-                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
 
         dw = np.exp(-q2 * a_trace / 3.0 * coth * coth)
         q4 = q2 ** 2
@@ -482,8 +482,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the third quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
-                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
         s = (9.0 / 1086.0 * q2 ** 3 * np.prod(np.take(b_trace, indices=indices), axis=1)
              * np.exp(-q2 * a_trace / 3.0 * coth * coth))
 
@@ -503,8 +503,8 @@ class SPowderSemiEmpiricalCalculator(object):
         :param b_trace: frequency dependent MSD trace for the given atom
         :returns: s for the forth quantum order event for the given atom
         """
-        coth = 1.0 / np.tanh(frequencies * AbinsModules.AbinsConstants.CM1_2_HARTREE
-                             / (2.0 * self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE))
+        coth = 1.0 / np.tanh(frequencies * AbinsConstants.CM1_2_HARTREE
+                             / (2.0 * self._temperature * AbinsConstants.K_2_HARTREE))
         s = (27.0 / 49250.0 * q2 ** 4 * np.prod(np.take(b_trace, indices=indices), axis=1)
              * np.exp(-q2 * a_trace / 3.0 * coth * coth))
 
@@ -559,8 +559,8 @@ class SPowderSemiEmpiricalCalculator(object):
             n_atom = len([key for key in data["datasets"]["data"].keys() if "atom" in key])
             for i in range(n_atom):
                 temp_data["atom_%s" % i] = {"s": dict()}
-                for j in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                               self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+                for j in range(AbinsConstants.FUNDAMENTALS,
+                               self._quantum_order_num + AbinsConstants.S_LAST_INDEX):
 
                     temp_val = data["datasets"]["data"]["atom_%s" % i]["s"]["order_%s" % j]
                     temp_data["atom_%s" % i]["s"].update({"order_%s" % j: temp_val})
