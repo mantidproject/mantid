@@ -6,11 +6,11 @@ set(TEST_PY_FILES
     CombGaussLorentzKTTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
-    FmuFTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
+    FmuFTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
