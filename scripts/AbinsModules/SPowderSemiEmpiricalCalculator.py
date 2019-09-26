@@ -245,7 +245,8 @@ class SPowderSemiEmpiricalCalculator(object):
         # free memory
         gc.collect()
 
-    def _report_progress(self, msg):
+    @staticmethod
+    def _report_progress(msg):
         """
         :param msg:  message to print out
         """
@@ -591,5 +592,7 @@ class SPowderSemiEmpiricalCalculator(object):
             self._report_progress("Warning: " + str(err) + " Data has to be calculated.")
             data = self.calculate_data()
             self._report_progress(str(data) + " has been calculated.")
+
+        data.check_thresholds()
 
         return data
