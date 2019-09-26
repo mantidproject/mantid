@@ -8,9 +8,8 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from numpy import finfo, float32
-from qtpy.QtCore import Qt, QRegExp
-from qtpy.QtGui import QRegExpValidator, QDoubleValidator
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import QWidget, QMessageBox
 
 from mantidqt.utils.qt import load_ui
