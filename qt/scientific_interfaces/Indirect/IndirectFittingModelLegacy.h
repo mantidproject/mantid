@@ -25,16 +25,16 @@ enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
 
 class IndirectFittingModelLegacy;
 
-struct PrivateFittingData {
+struct PrivateFittingDataLegacy {
   friend class IndirectFittingModelLegacy;
 
 public:
-  PrivateFittingData();
-  PrivateFittingData &operator=(PrivateFittingData &&fittingData);
+  PrivateFittingDataLegacy();
+  PrivateFittingDataLegacy &operator=(PrivateFittingDataLegacy &&fittingData);
 
 private:
-  PrivateFittingData(PrivateFittingData &&privateData);
-  PrivateFittingData(std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data);
+  PrivateFittingDataLegacy(PrivateFittingDataLegacy &&privateData);
+  PrivateFittingDataLegacy(std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data);
   std::vector<std::unique_ptr<IndirectFitDataLegacy>> m_data;
 };
 
@@ -72,7 +72,7 @@ public:
 
   virtual std::vector<std::string> getSpectrumDependentAttributes() const = 0;
 
-  void setFittingData(PrivateFittingData &&fittingData);
+  void setFittingData(PrivateFittingDataLegacy &&fittingData);
   void setSpectra(const std::string &spectra, std::size_t dataIndex);
   void setSpectra(Spectra &&spectra, std::size_t dataIndex);
   void setSpectra(const Spectra &spectra, std::size_t dataIndex);
@@ -90,7 +90,7 @@ public:
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const Spectra &spectra);
   virtual void removeWorkspace(std::size_t index);
-  virtual PrivateFittingData clearWorkspaces();
+  virtual PrivateFittingDataLegacy clearWorkspaces();
   void setFittingMode(FittingMode mode);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   virtual void setDefaultParameterValue(const std::string &name, double value,

@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTER_H_
 
 #include "IndexTypes.h"
-#include "IndirectFittingModelLegacy.h"
+#include "IndirectFittingModel.h"
 
 #include <QTableWidget>
 
@@ -27,10 +27,10 @@ using DataPositionType = IndexCollectionType<DatasetIndex, SpectrumRowIndex>;
 class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectDataTablePresenter(IndirectFittingModelLegacy *model,
+  IndirectDataTablePresenter(IndirectFittingModel *model,
                              QTableWidget *dataTable);
 
-  IndirectDataTablePresenter(IndirectFittingModelLegacy *model,
+  IndirectDataTablePresenter(IndirectFittingModel *model,
                              QTableWidget *dataTable,
                              const QStringList &headers);
 
@@ -134,7 +134,7 @@ private:
   void updateDataPositionsInCells(DatasetIndex from, DatasetIndex to);
 
   DataPositionType m_dataPositions;
-  IndirectFittingModelLegacy *m_model;
+  IndirectFittingModel *m_model;
   QTableWidget *m_dataTable;
 };
 

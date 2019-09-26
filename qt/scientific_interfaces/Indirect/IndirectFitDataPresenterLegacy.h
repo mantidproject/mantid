@@ -103,8 +103,8 @@ private:
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModelLegacy *m_model;
-  PrivateFittingData m_singleData;
-  PrivateFittingData m_multipleData;
+  PrivateFittingDataLegacy m_singleData;
+  PrivateFittingDataLegacy m_multipleData;
   IIndirectFitDataViewLegacy *m_view;
   std::unique_ptr<IndirectDataTablePresenterLegacy> m_tablePresenter;
 };

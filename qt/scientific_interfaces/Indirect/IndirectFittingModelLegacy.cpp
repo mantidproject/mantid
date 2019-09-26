@@ -320,17 +320,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-PrivateFittingData::PrivateFittingData() : m_data() {}
+PrivateFittingDataLegacy::PrivateFittingDataLegacy() : m_data() {}
 
-PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
+PrivateFittingDataLegacy::PrivateFittingDataLegacy(PrivateFittingDataLegacy &&privateData)
     : m_data(std::move(privateData.m_data)) {}
 
-PrivateFittingData::PrivateFittingData(
+PrivateFittingDataLegacy::PrivateFittingDataLegacy(
     std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data)
     : m_data(std::move(data)) {}
 
-PrivateFittingData &PrivateFittingData::
-operator=(PrivateFittingData &&fittingData) {
+PrivateFittingDataLegacy &PrivateFittingDataLegacy::
+operator=(PrivateFittingDataLegacy &&fittingData) {
   m_data = std::move(fittingData.m_data);
   return *this;
 }
@@ -461,7 +461,7 @@ Mantid::API::IFunction_sptr IndirectFittingModelLegacy::getFittingFunction() con
   return m_activeFunction;
 }
 
-void IndirectFittingModelLegacy::setFittingData(PrivateFittingData &&fittingData) {
+void IndirectFittingModelLegacy::setFittingData(PrivateFittingDataLegacy &&fittingData) {
   m_fittingData = std::move(fittingData.m_data);
 }
 
@@ -576,7 +576,7 @@ void IndirectFittingModelLegacy::removeFittingData(std::size_t index) {
     m_defaultParameters.erase(m_defaultParameters.begin() + index);
 }
 
-PrivateFittingData IndirectFittingModelLegacy::clearWorkspaces() {
+PrivateFittingDataLegacy IndirectFittingModelLegacy::clearWorkspaces() {
   m_fitOutput.reset();
   return std::move(m_fittingData);
 }

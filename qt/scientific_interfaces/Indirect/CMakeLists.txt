@@ -28,6 +28,7 @@ set(
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
   IndirectDataTablePresenterLegacy.cpp
+  IndirectDataTablePresenter.cpp
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
@@ -36,6 +37,10 @@ set(
   IndirectFitDataPresenterLegacy.cpp
   IndirectFitDataViewLegacy.cpp
   IndirectFitOutputLegacy.cpp
+  IndirectFitData.cpp
+  IndirectFitDataPresenter.cpp
+  IndirectFitDataView.cpp
+  IndirectFitOutput.cpp
   IndirectFitOutputOptionsModel.cpp
   IndirectFitOutputOptionsPresenter.cpp
   IndirectFitOutputOptionsView.cpp
@@ -43,6 +48,10 @@ set(
   IndirectFitPlotPresenterLegacy.cpp
   IndirectFitPlotViewLegacy.cpp
   IndirectFittingModelLegacy.cpp
+  IndirectFitPlotModel.cpp
+  IndirectFitPlotPresenter.cpp
+  IndirectFitPlotView.cpp
+  IndirectFittingModel.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
@@ -72,6 +81,7 @@ set(
   Iqt.cpp
   IqtFit.cpp
   IqtFitModel.cpp
+  IndirectFitPropertyBrowser.cpp
   JumpFit.cpp
   JumpFitAddWorkspaceDialog.cpp
   JumpFitDataPresenter.cpp
@@ -95,10 +105,15 @@ set(
   IndirectDataValidationHelper.h
   IndirectFitDataLegacy.h
   IndirectFitOutputLegacy.h
+  IndirectFitData.h
+  IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
   IndirectFitPlotModelLegacy.h
   IndirectFitPlotPresenterLegacy.h
   IndirectFittingModelLegacy.h
+  IndirectFitPlotModel.h
+  IndirectFitPlotPresenter.h
+  IndirectFittingModel.h
   IndirectPlotOptionsModel.h
   IndirectSettingsHelper.h
   IndirectToolsTab.h
@@ -125,8 +140,10 @@ set(
   FunctionTemplateBrowser.h
   IAddWorkspaceDialog.h
   IIndirectFitDataViewLegacy.h
+  IIndirectFitDataView.h
   IIndirectFitOutputOptionsView.h
   IIndirectFitPlotViewLegacy.h
+  IIndirectFitPlotView.h
   IIndirectSettingsView.h
   ILLEnergyTransfer.h
   IndirectAddWorkspaceDialog.h
@@ -138,15 +155,20 @@ set(
   IndirectDataReduction.h
   IndirectDataReductionTab.h
   IndirectDataTablePresenterLegacy.h
+  IndirectDataTablePresenter.h
   IndirectDiffractionReduction.h
   IndirectEditResultsDialog.h
   IndirectFitAnalysisTab.h
   IndirectFitDataPresenterLegacy.h
   IndirectFitDataViewLegacy.h
+  IndirectFitDataPresenter.h
+  IndirectFitDataView.h
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h
   IndirectFitPlotPresenterLegacy.h
   IndirectFitPlotViewLegacy.h
+  IndirectFitPlotPresenter.h
+  IndirectFitPlotView.h
   IndirectInstrumentConfig.h
   IndirectInterface.h
   IndirectLoadILL.h
@@ -171,6 +193,7 @@ set(
   IndirectTransmissionCalc.h
   IndirectTransmission.h
   IqtFit.h
+  IndirectFitPropertyBrowser.h
   Iqt.h
   ISISCalibration.h
   ISISDiagnostics.h
@@ -205,6 +228,7 @@ set(
   IndirectDiffractionReduction.ui
   IndirectEditResultsDialog.ui
   IndirectFitDataViewLegacy.ui
+  IndirectFitDataView.ui
   IndirectFitOutputOptions.ui
   IndirectFitPreviewPlot.ui
   IndirectInterfaceSettings.ui

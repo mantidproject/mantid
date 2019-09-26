@@ -23,7 +23,7 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 public:
-  IndirectFitPlotPresenter(IndirectFittingModelLegacy *model,
+  IndirectFitPlotPresenter(IndirectFittingModel *model,
                            IIndirectFitPlotView *view,
                            IPyRunner *pythonRunner = nullptr);
 
