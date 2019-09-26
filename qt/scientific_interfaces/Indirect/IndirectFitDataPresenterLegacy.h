@@ -8,9 +8,8 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
 
 #include "IAddWorkspaceDialog.h"
-#include "IIndirectFitDataView.h"
-#include "IndexTypes.h"
-#include "IndirectDataTablePresenter.h"
+#include "IIndirectFitDataViewLegacy.h"
+#include "IndirectDataTablePresenterLegacy.h"
 #include "IndirectFittingModel.h"
 
 #include "DllConfig.h"
@@ -23,17 +22,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenterLegacy
     : public QObject,
       public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IndirectFittingModel *model,
-                           IIndirectFitDataView *view);
-  IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
-      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
-  ~IndirectFitDataPresenter();
+  IndirectFitDataPresenterLegacy(IndirectFittingModel *model,
+                           IIndirectFitDataViewLegacy *view);
+  IndirectFitDataPresenterLegacy(
+      IndirectFittingModel *model, IIndirectFitDataViewLegacy *view,
+      std::unique_ptr<IndirectDataTablePresenterLegacy> tablePresenter);
+  ~IndirectFitDataPresenterLegacy();
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
@@ -44,25 +43,19 @@ public:
   void setMultiInputResolutionWSSuffixes();
   void setMultiInputResolutionFBSuffixes();
 
-  void setStartX(double startX, DatasetIndex dataIndex,
-                 WorkspaceIndex spectrumIndex);
-  void setStartX(double startX, DatasetIndex dataIndex);
-  void setEndX(double endX, DatasetIndex dataIndex,
-               WorkspaceIndex spectrumIndex);
-  void setEndX(double endX, DatasetIndex dataIndex);
-  void setExclude(const std::string &exclude, DatasetIndex dataIndex,
-                  WorkspaceIndex spectrumIndex);
+  void setStartX(double startX, std::size_t dataIndex, int spectrumIndex);
+  void setEndX(double endX, std::size_t dataIndex, int spectrumIndex);
+  void setExclude(const std::string &exclude, std::size_t dataIndex,
+                  int spectrumIndex);
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
   void replaceHandle(const std::string &workspaceName,
                      const Workspace_sptr &workspace) override;
-  DataForParameterEstimationCollection
-  getDataForParameterEstimation(EstimationDataSelector selector) const;
 
 public slots:
-  void updateSpectraInTable(DatasetIndex dataIndex);
+  void updateSpectraInTable(std::size_t dataIndex);
 
 protected slots:
   void setModelWorkspace(const QString &name);
@@ -77,18 +70,17 @@ signals:
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double, DatasetIndex, WorkspaceIndex);
-  void startXChanged(double);
-  void endXChanged(double, DatasetIndex, WorkspaceIndex);
-  void endXChanged(double);
-  void excludeRegionChanged(const std::string &, DatasetIndex, WorkspaceIndex);
+  void startXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
+  void endXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
+  void excludeRegionChanged(const std::string & /*_t1*/, std::size_t /*_t2*/,
+                            std::size_t /*_t3*/);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
   void updateAvailableFitTypes();
 
 protected:
-  IIndirectFitDataView const *getView() const;
+  IIndirectFitDataViewLegacy const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
@@ -102,7 +94,8 @@ private slots:
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
-  void updateDataInTable(DatasetIndex dataIndex);
+  void updateDataInTable(std::size_t dataIndex);
+
   void selectReplacedWorkspace(const QString &workspaceName);
 
   virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
@@ -112,8 +105,8 @@ private:
   IndirectFittingModel *m_model;
   PrivateFittingData m_singleData;
   PrivateFittingData m_multipleData;
-  IIndirectFitDataView *m_view;
-  std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
+  IIndirectFitDataViewLegacy *m_view;
+  std::unique_ptr<IndirectDataTablePresenterLegacy> m_tablePresenter;
 };
 
 } // namespace IDA

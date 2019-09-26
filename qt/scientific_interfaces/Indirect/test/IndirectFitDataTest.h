@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitData.h"
+#include "IndirectFitDataLegacy.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
@@ -22,12 +22,12 @@ using namespace Mantid::IndirectFitDataCreationHelper;
 
 namespace {
 
-std::unique_ptr<IndirectFitData>
+std::unique_ptr<IndirectFitDataLegacy>
 getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
   Spectra const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
-  IndirectFitData data(workspace, spec);
-  return std::make_unique<IndirectFitData>(data);
+  IndirectFitDataLegacy data(workspace, spec);
+  return std::make_unique<IndirectFitDataLegacy>(data);
 }
 
 } // namespace
@@ -48,7 +48,7 @@ public:
         std::make_pair(0u, workspace->getNumberHistograms() - 1);
 
     workspace->setTitle("Test Title");
-    IndirectFitData const data(workspace, spec);
+    IndirectFitDataLegacy const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.workspace(), workspace);
     TS_ASSERT_EQUALS(data.workspace()->getTitle(), "Test Title");
@@ -159,7 +159,7 @@ public:
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
     auto workspace = boost::make_shared<Workspace2D>();
     Spectra const spec = std::make_pair(0u, 0u);
-    IndirectFitData const data(workspace, spec);
+    IndirectFitDataLegacy const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }
@@ -168,7 +168,7 @@ public:
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_spectra() {
     auto const workspace = createWorkspace(1);
     DiscontinuousSpectra<std::size_t> const spec("");
-    IndirectFitData const data(workspace, spec);
+    IndirectFitDataLegacy const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }

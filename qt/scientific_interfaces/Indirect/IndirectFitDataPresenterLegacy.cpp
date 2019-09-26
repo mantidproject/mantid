@@ -4,22 +4,22 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataPresenterLegacy.h"
 #include "IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitDataPresenter::IndirectFitDataPresenter(IndirectFittingModel *model,
-                                                   IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view,
-                               std::make_unique<IndirectDataTablePresenter>(
+IndirectFitDataPresenterLegacy::IndirectFitDataPresenterLegacy(IndirectFittingModel *model,
+                                                   IIndirectFitDataViewLegacy *view)
+    : IndirectFitDataPresenterLegacy(model, view,
+                               std::make_unique<IndirectDataTablePresenterLegacy>(
                                    model, view->getDataTable())) {}
 
-IndirectFitDataPresenter::IndirectFitDataPresenter(
-    IndirectFittingModel *model, IIndirectFitDataView *view,
-    std::unique_ptr<IndirectDataTablePresenter> tablePresenter)
+IndirectFitDataPresenterLegacy::IndirectFitDataPresenterLegacy(
+    IndirectFittingModel *model, IIndirectFitDataViewLegacy *view,
+    std::unique_ptr<IndirectDataTablePresenterLegacy> tablePresenter)
     : m_model(model), m_view(view),
       m_tablePresenter(std::move(tablePresenter)) {
   observeReplace(true);
@@ -47,148 +47,132 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SLOT(removeSelectedData()));
   connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataRemoved()));
   connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataChanged()));
-  connect(m_view, SIGNAL(startXChanged(double)), this,
-          SIGNAL(startXChanged(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this,
-          SIGNAL(endXChanged(double)));
 
   connect(m_tablePresenter.get(),
-          SIGNAL(startXChanged(double, DatasetIndex, WorkspaceIndex)), this,
-          SIGNAL(startXChanged(double, DatasetIndex, WorkspaceIndex)));
+          SIGNAL(startXChanged(double, std::size_t, std::size_t)), this,
+          SIGNAL(startXChanged(double, std::size_t, std::size_t)));
   connect(m_tablePresenter.get(),
-          SIGNAL(endXChanged(double, DatasetIndex, WorkspaceIndex)), this,
-          SIGNAL(endXChanged(double, DatasetIndex, WorkspaceIndex)));
+          SIGNAL(endXChanged(double, std::size_t, std::size_t)), this,
+          SIGNAL(endXChanged(double, std::size_t, std::size_t)));
   connect(m_tablePresenter.get(),
-          SIGNAL(excludeRegionChanged(const std::string &, DatasetIndex,
-                                      WorkspaceIndex)),
+          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
+                                      std::size_t)),
           this,
-          SIGNAL(excludeRegionChanged(const std::string &, DatasetIndex,
-                                      WorkspaceIndex)));
+          SIGNAL(excludeRegionChanged(const std::string &, std::size_t,
+                                      std::size_t)));
 }
 
-IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
+IndirectFitDataPresenterLegacy::~IndirectFitDataPresenterLegacy() { observeReplace(false); }
 
-IIndirectFitDataView const *IndirectFitDataPresenter::getView() const {
+IIndirectFitDataViewLegacy const *IndirectFitDataPresenterLegacy::getView() const {
   return m_view;
 }
 
-void IndirectFitDataPresenter::setSampleWSSuffices(
+void IndirectFitDataPresenterLegacy::setSampleWSSuffices(
     const QStringList &suffices) {
   m_view->setSampleWSSuffices(suffices);
 }
 
-void IndirectFitDataPresenter::setSampleFBSuffices(
+void IndirectFitDataPresenterLegacy::setSampleFBSuffices(
     const QStringList &suffices) {
   m_view->setSampleFBSuffices(suffices);
 }
 
-void IndirectFitDataPresenter::setResolutionWSSuffices(
+void IndirectFitDataPresenterLegacy::setResolutionWSSuffices(
     const QStringList &suffices) {
   m_view->setResolutionWSSuffices(suffices);
 }
 
-void IndirectFitDataPresenter::setResolutionFBSuffices(
+void IndirectFitDataPresenterLegacy::setResolutionFBSuffices(
     const QStringList &suffices) {
   m_view->setResolutionFBSuffices(suffices);
 }
 
-void IndirectFitDataPresenter::setMultiInputSampleWSSuffixes() {
+void IndirectFitDataPresenterLegacy::setMultiInputSampleWSSuffixes() {
   if (m_addWorkspaceDialog)
     m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
 }
 
-void IndirectFitDataPresenter::setMultiInputSampleFBSuffixes() {
+void IndirectFitDataPresenterLegacy::setMultiInputSampleFBSuffixes() {
   if (m_addWorkspaceDialog)
     m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
 }
 
-void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes() {
+void IndirectFitDataPresenterLegacy::setMultiInputResolutionWSSuffixes() {
   if (m_addWorkspaceDialog)
     setMultiInputResolutionWSSuffixes(m_addWorkspaceDialog.get());
 }
 
-void IndirectFitDataPresenter::setMultiInputResolutionFBSuffixes() {
+void IndirectFitDataPresenterLegacy::setMultiInputResolutionFBSuffixes() {
   if (m_addWorkspaceDialog)
     setMultiInputResolutionFBSuffixes(m_addWorkspaceDialog.get());
 }
 
-void IndirectFitDataPresenter::setMultiInputResolutionFBSuffixes(
+void IndirectFitDataPresenterLegacy::setMultiInputResolutionFBSuffixes(
     IAddWorkspaceDialog *dialog) {
   UNUSED_ARG(dialog);
 }
 
-void IndirectFitDataPresenter::setMultiInputResolutionWSSuffixes(
+void IndirectFitDataPresenterLegacy::setMultiInputResolutionWSSuffixes(
     IAddWorkspaceDialog *dialog) {
   UNUSED_ARG(dialog);
 }
-void IndirectFitDataPresenter::setStartX(double startX, DatasetIndex dataIndex,
-                                         WorkspaceIndex spectrumIndex) {
+
+void IndirectFitDataPresenterLegacy::setStartX(double startX, std::size_t dataIndex,
+                                         int spectrumIndex) {
   m_tablePresenter->setStartX(startX, dataIndex, spectrumIndex);
-  m_view->setStartX(startX);
 }
 
-void IndirectFitDataPresenter::setStartX(double startX,
-                                         DatasetIndex dataIndex) {
-  m_tablePresenter->setStartX(startX, dataIndex);
-  m_view->setStartX(startX);
-}
-
-void IndirectFitDataPresenter::setEndX(double endX, DatasetIndex dataIndex,
-                                       WorkspaceIndex spectrumIndex) {
+void IndirectFitDataPresenterLegacy::setEndX(double endX, std::size_t dataIndex,
+                                       int spectrumIndex) {
   m_tablePresenter->setEndX(endX, dataIndex, spectrumIndex);
-  m_view->setEndX(endX);
 }
 
-void IndirectFitDataPresenter::setEndX(double endX, DatasetIndex dataIndex) {
-  m_tablePresenter->setEndX(endX, dataIndex);
-  m_view->setEndX(endX);
-}
-
-void IndirectFitDataPresenter::setExclude(const std::string &exclude,
-                                          DatasetIndex dataIndex,
-                                          WorkspaceIndex spectrumIndex) {
+void IndirectFitDataPresenterLegacy::setExclude(const std::string &exclude,
+                                          std::size_t dataIndex,
+                                          int spectrumIndex) {
   m_tablePresenter->setExclude(exclude, dataIndex, spectrumIndex);
 }
 
-void IndirectFitDataPresenter::setModelFromSingleData() {
+void IndirectFitDataPresenterLegacy::setModelFromSingleData() {
   m_multipleData = m_model->clearWorkspaces();
   m_model->setFittingData(std::move(m_singleData));
   emit dataChanged();
 }
 
-void IndirectFitDataPresenter::setModelFromMultipleData() {
+void IndirectFitDataPresenterLegacy::setModelFromMultipleData() {
   m_singleData = m_model->clearWorkspaces();
   m_model->setFittingData(std::move(m_multipleData));
   emit dataChanged();
 }
 
-void IndirectFitDataPresenter::updateSpectraInTable(DatasetIndex dataIndex) {
+void IndirectFitDataPresenterLegacy::updateSpectraInTable(std::size_t dataIndex) {
   if (m_view->isMultipleDataTabSelected())
     m_tablePresenter->updateData(dataIndex);
 }
 
-void IndirectFitDataPresenter::updateDataInTable(DatasetIndex dataIndex) {
+void IndirectFitDataPresenterLegacy::updateDataInTable(std::size_t dataIndex) {
   if (m_tablePresenter->isTableEmpty())
     m_tablePresenter->addData(dataIndex);
   else
     m_tablePresenter->updateData(dataIndex);
 }
 
-void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
+void IndirectFitDataPresenterLegacy::setResolutionHidden(bool hide) {
   m_view->setResolutionHidden(hide);
 }
 
-void IndirectFitDataPresenter::setModelWorkspace(const QString &name) {
+void IndirectFitDataPresenterLegacy::setModelWorkspace(const QString &name) {
   observeReplace(false);
   setSingleModelData(name.toStdString());
   observeReplace(true);
 }
 
-void IndirectFitDataPresenter::loadSettings(const QSettings &settings) {
+void IndirectFitDataPresenterLegacy::loadSettings(const QSettings &settings) {
   m_view->readSettings(settings);
 }
 
-void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
+void IndirectFitDataPresenterLegacy::replaceHandle(const std::string &workspaceName,
                                              const Workspace_sptr &workspace) {
   UNUSED_ARG(workspace)
   if (m_model->hasWorkspace(workspaceName) &&
@@ -196,13 +180,7 @@ void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
     selectReplacedWorkspace(QString::fromStdString(workspaceName));
 }
 
-DataForParameterEstimationCollection
-IndirectFitDataPresenter::getDataForParameterEstimation(
-    EstimationDataSelector selector) const {
-  return m_model->getDataForParameterEstimation(selector);
-}
-
-void IndirectFitDataPresenter::selectReplacedWorkspace(
+void IndirectFitDataPresenterLegacy::selectReplacedWorkspace(
     const QString &workspaceName) {
   if (m_view->isSampleWorkspaceSelectorVisible()) {
     setModelWorkspace(workspaceName);
@@ -212,18 +190,16 @@ void IndirectFitDataPresenter::selectReplacedWorkspace(
 }
 
 UserInputValidator &
-IndirectFitDataPresenter::validate(UserInputValidator &validator) {
+IndirectFitDataPresenterLegacy::validate(UserInputValidator &validator) {
   return m_view->validate(validator);
 }
 
-void IndirectFitDataPresenter::showAddWorkspaceDialog() {
+void IndirectFitDataPresenterLegacy::showAddWorkspaceDialog() {
   if (!m_addWorkspaceDialog)
     m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(m_view->getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(m_view->getSampleFBSuffices());
   m_addWorkspaceDialog->updateSelectedSpectra();
-  //  setMultiInputSampleWSSuffixes();
-  //  setMultiInputSampleFBSuffixes();
+  setMultiInputSampleWSSuffixes();
+  setMultiInputSampleFBSuffixes();
   m_addWorkspaceDialog->show();
   connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
   connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,
@@ -231,15 +207,15 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() {
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
-IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
+IndirectFitDataPresenterLegacy::getAddWorkspaceDialog(QWidget *parent) const {
   return std::make_unique<AddWorkspaceDialog>(parent);
 }
 
-void IndirectFitDataPresenter::addData() {
+void IndirectFitDataPresenterLegacy::addData() {
   addData(m_addWorkspaceDialog.get());
 }
 
-void IndirectFitDataPresenter::closeDialog() {
+void IndirectFitDataPresenterLegacy::closeDialog() {
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this,
              SLOT(addData()));
   disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this,
@@ -247,10 +223,10 @@ void IndirectFitDataPresenter::closeDialog() {
   m_addWorkspaceDialog->close();
 }
 
-void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
+void IndirectFitDataPresenterLegacy::addData(IAddWorkspaceDialog const *dialog) {
   try {
     addDataToModel(dialog);
-    m_tablePresenter->addData(m_model->numberOfWorkspaces() - DatasetIndex{1});
+    m_tablePresenter->addData(m_model->numberOfWorkspaces() - 1);
     emit dataAdded();
     emit dataChanged();
   } catch (const std::runtime_error &ex) {
@@ -258,7 +234,7 @@ void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
   }
 }
 
-void IndirectFitDataPresenter::addDataToModel(
+void IndirectFitDataPresenterLegacy::addDataToModel(
     IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog =
           dynamic_cast<AddWorkspaceDialog const *>(dialog))
@@ -266,18 +242,12 @@ void IndirectFitDataPresenter::addDataToModel(
                           indirectDialog->workspaceIndices());
 }
 
-void IndirectFitDataPresenter::setSingleModelData(const std::string &name) {
+void IndirectFitDataPresenterLegacy::setSingleModelData(const std::string &name) {
   m_model->clearWorkspaces();
   addModelData(name);
-  auto const dataIndex = DatasetIndex{0};
-  auto const spectra = m_model->getSpectra(dataIndex);
-  if (!spectra.empty()) {
-    auto const range = m_model->getFittingRange(dataIndex, spectra.front());
-    m_view->setXRange(range);
-  }
 }
 
-void IndirectFitDataPresenter::addModelData(const std::string &name) {
+void IndirectFitDataPresenterLegacy::addModelData(const std::string &name) {
   try {
     m_model->addWorkspace(name);
   } catch (const std::runtime_error &ex) {
@@ -287,7 +257,7 @@ void IndirectFitDataPresenter::addModelData(const std::string &name) {
   }
 }
 
-void IndirectFitDataPresenter::displayWarning(const std::string &warning) {
+void IndirectFitDataPresenterLegacy::displayWarning(const std::string &warning) {
   m_view->displayWarning(warning);
 }
 

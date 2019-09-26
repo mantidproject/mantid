@@ -28,7 +28,7 @@ namespace IDA {
 
 ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenter(model, dataTable, convFitHeaders()),
+    : IndirectDataTablePresenterLegacy(model, dataTable, convFitHeaders()),
       m_convFitModel(model) {
   auto header = dataTable->horizontalHeader();
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -48,7 +48,7 @@ std::string ConvFitDataTablePresenter::getResolutionName(int row) const {
 
 void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
                                               std::size_t spectrum, int row) {
-  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
+  IndirectDataTablePresenterLegacy::addTableEntry(dataIndex, spectrum, row);
 
   const auto resolution = m_convFitModel->getResolution(dataIndex);
   const auto name = resolution ? resolution->getName() : "";
@@ -62,7 +62,7 @@ void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
 void ConvFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
                                                  std::size_t spectrum,
                                                  int row) {
-  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
+  IndirectDataTablePresenterLegacy::updateTableEntry(dataIndex, spectrum, row);
 
   const auto &name = m_convFitModel->getResolution(dataIndex)->getName();
   setCellText(QString::fromStdString(name), row, 1);

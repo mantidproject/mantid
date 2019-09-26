@@ -268,7 +268,7 @@ void IndirectFitAnalysisTab::connectDataAndFitBrowserPresenters() {
 }
 
 void IndirectFitAnalysisTab::setFitDataPresenter(
-    std::unique_ptr<IndirectFitDataPresenter> presenter) {
+    std::unique_ptr<IndirectFitDataPresenterLegacy> presenter) {
   m_dataPresenter = std::move(presenter);
 }
 

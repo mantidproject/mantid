@@ -16,7 +16,7 @@ namespace IDA {
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataViewLegacy *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
-    : IndirectFitDataPresenter(model, view,
+    : IndirectFitDataPresenterLegacy(model, view,
                                std::make_unique<JumpFitDataTablePresenter>(
                                    model, view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(0),
@@ -196,7 +196,7 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
 void JumpFitDataPresenter::closeDialog() {
   if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
-  IndirectFitDataPresenter::closeDialog();
+  IndirectFitDataPresenterLegacy::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>

@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
 
-#include "IndirectFitData.h"
+#include "IndirectFitDataLegacy.h"
 #include "IndirectFitOutput.h"
 
 #include "DllConfig.h"
@@ -34,8 +34,8 @@ public:
 
 private:
   PrivateFittingData(PrivateFittingData &&privateData);
-  PrivateFittingData(std::vector<std::unique_ptr<IndirectFitData>> &&data);
-  std::vector<std::unique_ptr<IndirectFitData>> m_data;
+  PrivateFittingData(std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data);
+  std::vector<std::unique_ptr<IndirectFitDataLegacy>> m_data;
 };
 
 /*
@@ -148,7 +148,7 @@ private:
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function,
                       const std::string &input,
-                      IndirectFitData *initialFitData) const;
+                      IndirectFitDataLegacy *initialFitData) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
   virtual std::string sequentialFitOutputName() const = 0;
@@ -173,7 +173,7 @@ private:
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  IndirectFitData *fitData, std::size_t spectrum) const;
+                  IndirectFitDataLegacy *fitData, std::size_t spectrum) const;
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
                  const FitDataIterator &fitDataBegin,
@@ -186,7 +186,7 @@ private:
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData *fitData, std::size_t spectrum);
+                 IndirectFitDataLegacy *fitData, std::size_t spectrum);
 
   virtual void addOutput(IndirectFitOutput *fitOutput,
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
@@ -198,10 +198,10 @@ private:
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
                          Mantid::API::ITableWorkspace_sptr parameterTable,
                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                         IndirectFitData *fitData, std::size_t spectrum) const;
+                         IndirectFitDataLegacy *fitData, std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitOutput> m_fitOutput;
-  std::vector<std::unique_ptr<IndirectFitData>> m_fittingData;
+  std::vector<std::unique_ptr<IndirectFitDataLegacy>> m_fittingData;
   Mantid::API::IFunction_sptr m_activeFunction;
   Mantid::API::IFunction_sptr m_fitFunction;
   std::vector<std::unordered_map<std::string, ParameterValue>>

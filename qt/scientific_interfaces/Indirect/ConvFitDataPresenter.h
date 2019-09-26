@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFITDATAPRESENTER_H_
 
 #include "ConvFitModel.h"
-#include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataPresenterLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -17,7 +17,7 @@ namespace IDA {
 class ConvFitAddWorkspaceDialog;
 
 class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
-    : public IndirectFitDataPresenter {
+    : public IndirectFitDataPresenterLegacy {
   Q_OBJECT
 public:
   ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataViewLegacy *view);

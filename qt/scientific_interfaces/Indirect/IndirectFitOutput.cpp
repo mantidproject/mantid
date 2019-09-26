@@ -71,9 +71,9 @@ void applyData(F &&functor, const FitDataIterator &fitDataBegin,
 void extractParametersFromTable(
     ITableWorkspace_sptr tableWs, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd,
-    std::unordered_map<IndirectFitData const *, ParameterValues> &parameters) {
+    std::unordered_map<IndirectFitDataLegacy const *, ParameterValues> &parameters) {
   TableRowExtractor extractRowFromTable(tableWs);
-  auto extract = [&](IndirectFitData const *inputData) {
+  auto extract = [&](IndirectFitDataLegacy const *inputData) {
     auto &values = extractOrAddDefault(parameters, inputData);
     return [&](std::size_t index, std::size_t spectrum) {
       values[spectrum] = extractRowFromTable(index);
@@ -148,7 +148,7 @@ bool containsMultipleData(const std::string &name) {
 }
 
 std::string constructResultName(const std::string &name,
-                                IndirectFitData const *fitData) {
+                                IndirectFitDataLegacy const *fitData) {
   if (containsMultipleData(name)) {
     const auto formatString = cutLastOf(name, "_Results") + "_%1%_s%2%_Result";
     return fitData->displayName(formatString, "_to_");
@@ -169,7 +169,7 @@ void renameResult(Workspace_sptr resultWorkspace,
 }
 
 void renameResult(Workspace_sptr resultWorkspace,
-                  IndirectFitData const *fitData) {
+                  IndirectFitDataLegacy const *fitData) {
   const auto name = resultWorkspace->getName();
   const auto newName = constructResultName(name, fitData);
   if (newName != name)
@@ -177,7 +177,7 @@ void renameResult(Workspace_sptr resultWorkspace,
 }
 
 void renameResult(WorkspaceGroup_sptr resultWorkspace,
-                  IndirectFitData const *fitData) {
+                  IndirectFitDataLegacy const *fitData) {
   for (auto const &workspace : *resultWorkspace)
     renameResult(workspace, fitData);
 }
@@ -275,14 +275,14 @@ IndirectFitOutput::IndirectFitOutput(WorkspaceGroup_sptr resultGroup,
 IndirectFitOutput::IndirectFitOutput(WorkspaceGroup_sptr resultGroup,
                                      ITableWorkspace_sptr parameterTable,
                                      WorkspaceGroup_sptr resultWorkspace,
-                                     IndirectFitData const *fitData,
+                                     IndirectFitDataLegacy const *fitData,
                                      std::size_t spectrum) {
   m_parameters[fitData] = ParameterValues();
   m_outputResultLocations[fitData] = ResultLocations();
   addOutput(resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }
 
-bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData,
+bool IndirectFitOutput::isSpectrumFit(IndirectFitDataLegacy const *fitData,
                                       std::size_t spectrum) const {
   auto values = m_parameters.find(fitData);
   return values != m_parameters.end() &&
@@ -290,7 +290,7 @@ bool IndirectFitOutput::isSpectrumFit(IndirectFitData const *fitData,
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFitOutput::getParameters(IndirectFitData const *fitData,
+IndirectFitOutput::getParameters(IndirectFitDataLegacy const *fitData,
                                  std::size_t spectrum) const {
   return getValueOr(m_parameters,
                     std::unordered_map<std::string, ParameterValue>(), fitData,
@@ -298,7 +298,7 @@ IndirectFitOutput::getParameters(IndirectFitData const *fitData,
 }
 
 boost::optional<ResultLocation>
-IndirectFitOutput::getResultLocation(IndirectFitData const *fitData,
+IndirectFitOutput::getResultLocation(IndirectFitDataLegacy const *fitData,
                                      std::size_t spectrum) const {
   return getValueOr(m_outputResultLocations,
                     boost::optional<ResultLocation>(boost::none), fitData,
@@ -329,7 +329,7 @@ void IndirectFitOutput::mapParameterNames(
 
 void IndirectFitOutput::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
-    IndirectFitData const *fitData) {
+    IndirectFitDataLegacy const *fitData) {
   const auto parameterIt = m_parameters.find(fitData);
   if (parameterIt != m_parameters.end()) {
     for (const auto &values : parameterIt->second)
@@ -340,7 +340,7 @@ void IndirectFitOutput::mapParameterNames(
 
 void IndirectFitOutput::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
-    IndirectFitData const *fitData, std::size_t spectrum) {
+    IndirectFitDataLegacy const *fitData, std::size_t spectrum) {
   auto &parameters = m_parameters[fitData][spectrum];
   parameters = mapKeys(parameters, parameterNameChanges);
 }
@@ -360,7 +360,7 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
 void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
                                   ITableWorkspace_sptr parameterTable,
                                   WorkspaceGroup_sptr resultWorkspace,
-                                  IndirectFitData const *fitData,
+                                  IndirectFitDataLegacy const *fitData,
                                   std::size_t spectrum) {
   TableRowExtractor extractRowFromTable(parameterTable);
   m_parameters[fitData][spectrum] = extractRowFromTable(0);
@@ -370,7 +370,7 @@ void IndirectFitOutput::addOutput(WorkspaceGroup_sptr resultGroup,
   m_resultGroup = resultGroup;
 }
 
-void IndirectFitOutput::removeOutput(IndirectFitData const *fitData) {
+void IndirectFitOutput::removeOutput(IndirectFitDataLegacy const *fitData) {
   m_parameters.erase(fitData);
   m_outputResultLocations.erase(fitData);
 }
@@ -399,7 +399,7 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
       resultIndices;
   std::size_t index = 0;
 
-  auto update = [&](IndirectFitData const *inputData) {
+  auto update = [&](IndirectFitDataLegacy const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
     auto ws = inputData->workspace().get();
     auto &indices = findOrCreateDefaultInMap(resultIndices, ws);
@@ -411,7 +411,7 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
 void IndirectFitOutput::updateFitResultsFromStructured(
     WorkspaceGroup_sptr resultGroup, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) {
-  auto update = [&](IndirectFitData const *inputData) {
+  auto update = [&](IndirectFitDataLegacy const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
     return [&](std::size_t index, std::size_t spectrum) {
       fitResults[spectrum] = ResultLocation(resultGroup, index);

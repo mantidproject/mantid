@@ -11,8 +11,8 @@
 #include <gmock/gmock.h>
 
 #include "IIndirectFitDataViewLegacy.h"
-#include "IndirectDataTablePresenter.h"
-#include "IndirectFitDataPresenter.h"
+#include "IndirectDataTablePresenterLegacy.h"
+#include "IndirectFitDataPresenterLegacy.h"
 #include "IndirectFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -141,9 +141,9 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
 
-    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenter>(
+    m_dataTablePresenter = std::make_unique<IndirectDataTablePresenterLegacy>(
         std::move(m_model.get()), std::move(m_table.get()));
-    m_presenter = std::make_unique<IndirectFitDataPresenter>(
+    m_presenter = std::make_unique<IndirectFitDataPresenterLegacy>(
         std::move(m_model.get()), std::move(m_view.get()),
         std::move(m_dataTablePresenter));
 
@@ -311,11 +311,11 @@ private:
   }
 
   std::unique_ptr<QTableWidget> m_table;
-  std::unique_ptr<IndirectDataTablePresenter> m_dataTablePresenter;
+  std::unique_ptr<IndirectDataTablePresenterLegacy> m_dataTablePresenter;
 
   std::unique_ptr<MockIIndirectFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;
-  std::unique_ptr<IndirectFitDataPresenter> m_presenter;
+  std::unique_ptr<IndirectFitDataPresenterLegacy> m_presenter;
 
   SetUpADSWithWorkspace *m_ads;
 };

@@ -27,13 +27,13 @@ set(
   IndirectDataAnalysisTab.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
-  IndirectDataTablePresenter.cpp
+  IndirectDataTablePresenterLegacy.cpp
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
   IndirectFitAnalysisTab.cpp
-  IndirectFitData.cpp
-  IndirectFitDataPresenter.cpp
+  IndirectFitDataLegacy.cpp
+  IndirectFitDataPresenterLegacy.cpp
   IndirectFitDataViewLegacy.cpp
   IndirectFitOutput.cpp
   IndirectFitOutputOptionsModel.cpp
@@ -93,7 +93,7 @@ set(
   DllConfig.h
   IndexTypes.h
   IndirectDataValidationHelper.h
-  IndirectFitData.h
+  IndirectFitDataLegacy.h
   IndirectFitOutput.h
   IndirectFitOutputOptionsModel.h
   IndirectFitPlotModelLegacy.h
@@ -137,11 +137,11 @@ set(
   IndirectDataAnalysisTab.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
-  IndirectDataTablePresenter.h
+  IndirectDataTablePresenterLegacy.h
   IndirectDiffractionReduction.h
   IndirectEditResultsDialog.h
   IndirectFitAnalysisTab.h
-  IndirectFitDataPresenter.h
+  IndirectFitDataPresenterLegacy.h
   IndirectFitDataViewLegacy.h
   IndirectFitOutputOptionsPresenter.h
   IndirectFitOutputOptionsView.h

@@ -63,7 +63,7 @@ private:
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  IndirectFitData *fitData,
+                  IndirectFitDataLegacy *fitData,
                   std::size_t spectrum) const override;
 
   void addOutput(IndirectFitOutput *fitOutput,
@@ -76,7 +76,7 @@ private:
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData *fitData, std::size_t spectrum) const override;
+                 IndirectFitDataLegacy *fitData, std::size_t spectrum) const override;
   void addExtendedResolution(std::size_t index);
   void addSampleLogs();
 

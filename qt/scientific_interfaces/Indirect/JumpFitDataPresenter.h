@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 
-#include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataPresenterLegacy.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
 
@@ -19,7 +19,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
-    : public IndirectFitDataPresenter {
+    : public IndirectFitDataPresenterLegacy {
   Q_OBJECT
 public:
   JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataViewLegacy *view,

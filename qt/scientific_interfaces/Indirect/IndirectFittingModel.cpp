@@ -124,7 +124,7 @@ bool equivalentFunctions(IFunction_const_sptr func1,
   return false;
 }
 
-std::ostringstream &addInputString(IndirectFitData *fitData,
+std::ostringstream &addInputString(IndirectFitDataLegacy *fitData,
                                    std::ostringstream &stream) {
   const auto &name = fitData->workspace()->getName();
   if (!name.empty()) {
@@ -139,7 +139,7 @@ std::ostringstream &addInputString(IndirectFitData *fitData,
 }
 
 std::string constructInputString(
-    const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
+    const std::vector<std::unique_ptr<IndirectFitDataLegacy>> &fittingData) {
   std::ostringstream input;
   for (const auto &fitData : fittingData)
     addInputString(fitData.get(), input);
@@ -164,7 +164,7 @@ void addInputDataToSimultaneousFit(IAlgorithm_sptr fitAlgorithm,
 
 void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
-    const std::unique_ptr<IndirectFitData> &fitData, std::size_t &counter) {
+    const std::unique_ptr<IndirectFitDataLegacy> &fitData, std::size_t &counter) {
   const auto workspace = fitData->workspace();
   const auto addData = [&](std::size_t spectrum) {
     const auto suffix = counter == 0 ? "" : "_" + std::to_string(counter);
@@ -178,7 +178,7 @@ void addInputDataToSimultaneousFit(
 
 void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
-    const std::unique_ptr<IndirectFitData> &fitData,
+    const std::unique_ptr<IndirectFitDataLegacy> &fitData,
     const std::pair<double, double> &range, const std::vector<double> &exclude,
     std::size_t &counter) {
   const auto workspace = fitData->workspace();
@@ -193,7 +193,7 @@ void addInputDataToSimultaneousFit(
 
 void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
-    const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
+    const std::vector<std::unique_ptr<IndirectFitDataLegacy>> &fittingData) {
   std::size_t counter = 0;
   for (const auto &data : fittingData)
     addInputDataToSimultaneousFit(fitAlgorithm, data, counter);
@@ -201,7 +201,7 @@ void addInputDataToSimultaneousFit(
 
 void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
-    const std::vector<std::unique_ptr<IndirectFitData>> &fittingData,
+    const std::vector<std::unique_ptr<IndirectFitDataLegacy>> &fittingData,
     const std::pair<double, double> &range,
     const std::vector<double> &exclude) {
   std::size_t counter = 0;
@@ -246,7 +246,7 @@ void cleanTemporaries(const std::string &base) {
 }
 
 void cleanTemporaries(const std::string &base,
-                      const std::unique_ptr<IndirectFitData> &fitData) {
+                      const std::unique_ptr<IndirectFitDataLegacy> &fitData) {
   removeFromADSIfExists(base);
 
   const auto clean = [&](std::size_t index, std::size_t /*unused*/) {
@@ -257,7 +257,7 @@ void cleanTemporaries(const std::string &base,
 
 void cleanTemporaries(
     const std::string &algorithmName,
-    const std::vector<std::unique_ptr<IndirectFitData>> &fittingData) {
+    const std::vector<std::unique_ptr<IndirectFitDataLegacy>> &fittingData) {
   const auto prefix = "__" + algorithmName + "_ws";
   for (auto i = 0u; i < fittingData.size(); ++i)
     cleanTemporaries(prefix + std::to_string(i + 1), fittingData[i]);
@@ -326,7 +326,7 @@ PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)
     : m_data(std::move(privateData.m_data)) {}
 
 PrivateFittingData::PrivateFittingData(
-    std::vector<std::unique_ptr<IndirectFitData>> &&data)
+    std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data)
     : m_data(std::move(data)) {}
 
 PrivateFittingData &PrivateFittingData::
@@ -533,14 +533,14 @@ void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                         const Spectra &spectra) {
   if (!m_fittingData.empty() &&
       equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
-    m_fittingData.back()->combine(IndirectFitData(workspace, spectra));
+    m_fittingData.back()->combine(IndirectFitDataLegacy(workspace, spectra));
   else
     addNewWorkspace(workspace, spectra);
 }
 
 void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
                                            const Spectra &spectra) {
-  m_fittingData.emplace_back(new IndirectFitData(workspace, spectra));
+  m_fittingData.emplace_back(new IndirectFitDataLegacy(workspace, spectra));
   m_defaultParameters.emplace_back(
       createDefaultParameters(m_fittingData.size() - 1));
 }
@@ -642,7 +642,7 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
 void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
                                      ITableWorkspace_sptr parameterTable,
                                      WorkspaceGroup_sptr resultWorkspace,
-                                     IndirectFitData *fitData,
+                                     IndirectFitDataLegacy *fitData,
                                      std::size_t spectrum) {
   if (m_previousModelSelected && m_fitOutput)
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
@@ -664,7 +664,7 @@ IndirectFitOutput IndirectFittingModel::createFitOutput(
 IndirectFitOutput IndirectFittingModel::createFitOutput(
     Mantid::API::WorkspaceGroup_sptr resultGroup,
     Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitData *fitData,
+    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitDataLegacy *fitData,
     std::size_t spectrum) const {
   return IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
                            fitData, spectrum);
@@ -683,7 +683,7 @@ void IndirectFittingModel::addOutput(IndirectFitOutput *fitOutput,
 void IndirectFittingModel::addOutput(
     IndirectFitOutput *fitOutput, Mantid::API::WorkspaceGroup_sptr resultGroup,
     Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitData *fitData,
+    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitDataLegacy *fitData,
     std::size_t spectrum) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
                        spectrum);
@@ -810,7 +810,7 @@ IndirectFittingModel::createSequentialFit(IFunction_sptr function) const {
 
 IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
     IFunction_sptr function, const std::string &input,
-    IndirectFitData *initialFitData) const {
+    IndirectFitDataLegacy *initialFitData) const {
   auto fitAlgorithm = sequentialFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);

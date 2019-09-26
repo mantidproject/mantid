@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataPresenter.h"
+#include "IndirectFitDataPresenterLegacy.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenterLegacy.h"
@@ -36,7 +36,7 @@ public:
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
 
-  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
+  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenterLegacy> presenter);
   void setPlotView(IIndirectFitPlotViewLegacy *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
@@ -228,7 +228,7 @@ private:
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
-  std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
+  std::unique_ptr<IndirectFitDataPresenterLegacy> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenterLegacy> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;

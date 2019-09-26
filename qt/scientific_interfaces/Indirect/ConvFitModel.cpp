@@ -670,7 +670,7 @@ IndirectFitOutput
 ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                               Mantid::API::ITableWorkspace_sptr parameterTable,
                               Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                              IndirectFitData *fitData,
+                              IndirectFitDataLegacy *fitData,
                               std::size_t spectrum) const {
   auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
                                   fitData, spectrum);
@@ -699,7 +699,7 @@ void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
                              WorkspaceGroup_sptr resultWorkspace,
-                             IndirectFitData *fitData,
+                             IndirectFitDataLegacy *fitData,
                              std::size_t spectrum) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
                        spectrum);
