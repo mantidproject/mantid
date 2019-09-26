@@ -34,6 +34,7 @@ Improvements
 - Hex codes can now be inputted directly into the color selectors in figure options.
 - There is now a button on the plot window's toolbar to generate a script that will re-create the current figure.
 - It is now possible to fit table workspaces in the fit browser and in a script.
+- It is now possible to input axis limits in the figure options using scientific notation.
 
 Bugfixes
 ########
