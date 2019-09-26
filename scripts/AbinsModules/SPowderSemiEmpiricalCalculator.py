@@ -16,6 +16,7 @@ except ImportError:
     PATHOS_FOUND = False
 import numpy as np
 
+
 # noinspection PyMethodMayBeStatic
 class SPowderSemiEmpiricalCalculator(object):
     """
@@ -261,9 +262,9 @@ class SPowderSemiEmpiricalCalculator(object):
         logger.notice(msg)
 
     def _calculate_s_powder_one_atom(self, atom=None):
-         s = self._calculate_s_powder_one_atom_core(atom=atom)
+        s = self._calculate_s_powder_one_atom_core(atom=atom)
 
-         return s
+        return s
 
     def _calculate_s_powder_one_atom_core(self, atom=None):
         """

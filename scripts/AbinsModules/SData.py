@@ -9,6 +9,7 @@ import numpy as np
 import AbinsModules
 from AbinsModules import AbinsConstants, AbinsParameters
 
+
 class SData(AbinsModules.GeneralData):
     """
     Class for storing S(Q, omega)
@@ -79,7 +80,7 @@ class SData(AbinsModules.GeneralData):
         """
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
-        Warnings will be raised if [max(S) * s_relative_threshold] is less than s_absolute_threshold. These 
+        Warnings will be raised if [max(S) * s_relative_threshold] is less than s_absolute_threshold. These
         thresholds are defined in the AbinsParameters.sampling dictionary.
 
         :param return_cases: If True, return a list of cases where S was small compared to threshold.
@@ -103,8 +104,9 @@ class SData(AbinsModules.GeneralData):
         if len(warning_cases) > 0:
             logger.warning("Warning: some contributions had small S compared to threshold.")
             logger.warning("The minimum S threshold ({}) is greater than {}% of the "
-                        "maximum S for the following:".format(absolute_threshold,
-                                                              relative_threshold * 100))
+                           "maximum S for the following:".format(absolute_threshold,
+                                                                 relative_threshold * 100))
+
             # Sort the warnings by atom number, order number
             # Assuming that keys will be of form "atom_1", "atom_2", ...
             # and "order_1", "order_2", ...
