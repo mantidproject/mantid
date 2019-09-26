@@ -51,7 +51,7 @@ private:
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);
   void updateParameterTypes(JumpFitAddWorkspaceDialog *dialog);
   std::vector<std::string> getParameterTypes(std::size_t dataIndex) const;
-  void addWorkspace(IndirectFittingModel *model, const std::string &name);
+  void addWorkspace(IndirectFittingModelLegacy *model, const std::string &name);
   void setModelSpectrum(int index);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;

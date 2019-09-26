@@ -161,7 +161,7 @@ JumpFitDataPresenter::getParameterTypes(std::size_t dataIndex) const {
   return types;
 }
 
-void JumpFitDataPresenter::addWorkspace(IndirectFittingModel *model,
+void JumpFitDataPresenter::addWorkspace(IndirectFittingModelLegacy *model,
                                         const std::string &name) {
   if (model->numberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);

@@ -65,7 +65,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model,
+IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModelLegacy *model,
                                                QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
 
@@ -357,7 +357,7 @@ bool IndirectFitAnalysisTab::isRangeCurrentlySelected(
          m_plotPresenter->isCurrentlySelected(dataIndex, spectrum);
 }
 
-IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
+IndirectFittingModelLegacy *IndirectFitAnalysisTab::fittingModel() const {
   return m_fittingModel.get();
 }
 

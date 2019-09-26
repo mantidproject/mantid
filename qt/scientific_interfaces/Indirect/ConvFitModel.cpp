@@ -486,7 +486,7 @@ std::string ConvFitModel::singleFitOutputName(std::size_t index,
 }
 
 Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
-  auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
+  auto function = shallowCopy(IndirectFittingModelLegacy::getFittingFunction());
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
 
   IFunction_sptr background(nullptr);
@@ -513,7 +513,7 @@ MatrixWorkspace_sptr ConvFitModel::getResolution(std::size_t index) const {
 }
 
 CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
-  auto function = IndirectFittingModel::getMultiDomainFunction();
+  auto function = IndirectFittingModelLegacy::getMultiDomainFunction();
   const std::string base = "__ConvFitResolution";
 
   for (auto i = 0u; i < function->nFunctions(); ++i)
@@ -539,7 +539,7 @@ void ConvFitModel::setFitFunction(IFunction_sptr function) {
     background = composite->getFunction(*m_backgroundIndex);
   m_backgroundString = background ? backgroundString(background) : "";
 
-  IndirectFittingModel::setFitFunction(function);
+  IndirectFittingModelLegacy::setFitFunction(function);
 }
 
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
@@ -548,7 +548,7 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
 
 void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                 const Spectra &spectra) {
-  IndirectFittingModel::addWorkspace(workspace, spectra);
+  IndirectFittingModelLegacy::addWorkspace(workspace, spectra);
 
   const auto dataSize = numberOfWorkspaces();
   if (m_resolution.size() < dataSize)
@@ -560,7 +560,7 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void ConvFitModel::removeWorkspace(std::size_t index) {
-  IndirectFittingModel::removeWorkspace(index);
+  IndirectFittingModelLegacy::removeWorkspace(index);
 
   const auto newSize = numberOfWorkspaces();
   while (m_resolution.size() > newSize)
@@ -632,7 +632,7 @@ ConvFitModel::createDefaultParameters(std::size_t index) const {
 
 std::unordered_map<std::string, std::string>
 ConvFitModel::mapDefaultParameterNames() const {
-  const auto initialMapping = IndirectFittingModel::mapDefaultParameterNames();
+  const auto initialMapping = IndirectFittingModelLegacy::mapDefaultParameterNames();
   std::unordered_map<std::string, std::string> mapping;
   for (const auto &map : initialMapping) {
     auto mapped = m_parameterNameChanges.find(map.second);
@@ -656,34 +656,34 @@ void ConvFitModel::addSampleLogs() {
   }
 }
 
-IndirectFitOutput ConvFitModel::createFitOutput(
+IndirectFitOutputLegacy ConvFitModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
     WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) const {
-  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
+  auto output = IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
                                   fitDataBegin, fitDataEnd);
   output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);
   return output;
 }
 
-IndirectFitOutput
+IndirectFitOutputLegacy
 ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                               Mantid::API::ITableWorkspace_sptr parameterTable,
                               Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                               IndirectFitDataLegacy *fitData,
                               std::size_t spectrum) const {
-  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
+  auto output = IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
                                   fitData, spectrum);
   output.mapParameterNames(m_parameterNameChanges, fitData, spectrum);
   return output;
 }
 
 void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  IndirectFittingModel::addOutput(fitAlgorithm);
+  IndirectFittingModelLegacy::addOutput(fitAlgorithm);
   addSampleLogs();
 }
 
-void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
+void ConvFitModel::addOutput(IndirectFitOutputLegacy *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
                              WorkspaceGroup_sptr resultWorkspace,
@@ -695,7 +695,7 @@ void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
                                fitDataEnd);
 }
 
-void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
+void ConvFitModel::addOutput(IndirectFitOutputLegacy *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
                              WorkspaceGroup_sptr resultWorkspace,

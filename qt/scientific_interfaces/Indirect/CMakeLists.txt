@@ -35,14 +35,14 @@ set(
   IndirectFitDataLegacy.cpp
   IndirectFitDataPresenterLegacy.cpp
   IndirectFitDataViewLegacy.cpp
-  IndirectFitOutput.cpp
+  IndirectFitOutputLegacy.cpp
   IndirectFitOutputOptionsModel.cpp
   IndirectFitOutputOptionsPresenter.cpp
   IndirectFitOutputOptionsView.cpp
   IndirectFitPlotModelLegacy.cpp
   IndirectFitPlotPresenterLegacy.cpp
   IndirectFitPlotViewLegacy.cpp
-  IndirectFittingModel.cpp
+  IndirectFittingModelLegacy.cpp
   IndirectInstrumentConfig.cpp
   IndirectInterface.cpp
   IndirectLoadILL.cpp
@@ -94,11 +94,11 @@ set(
   IndexTypes.h
   IndirectDataValidationHelper.h
   IndirectFitDataLegacy.h
-  IndirectFitOutput.h
+  IndirectFitOutputLegacy.h
   IndirectFitOutputOptionsModel.h
   IndirectFitPlotModelLegacy.h
   IndirectFitPlotPresenterLegacy.h
-  IndirectFittingModel.h
+  IndirectFittingModelLegacy.h
   IndirectPlotOptionsModel.h
   IndirectSettingsHelper.h
   IndirectToolsTab.h

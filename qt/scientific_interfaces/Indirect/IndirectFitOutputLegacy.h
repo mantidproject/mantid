@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITOUTPUT_H_
 
-#include "IndirectFitData.h"
+#include "IndirectFitDataLegacy.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -30,47 +30,47 @@ struct ParameterValue {
 };
 
 struct ResultLocation {
-  ResultLocation() = default;
-  ResultLocation(Mantid::API::WorkspaceGroup_sptr group, GroupIndex i)
+  ResultLocation() : result(), index(0) {}
+  ResultLocation(Mantid::API::WorkspaceGroup_sptr group, std::size_t i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
-  GroupIndex index = GroupIndex{0};
+  std::size_t index;
 };
 
 using ParameterValues =
-    std::map<WorkspaceIndex, std::unordered_map<std::string, ParameterValue>>;
+    std::unordered_map<std::size_t,
+                       std::unordered_map<std::string, ParameterValue>>;
 
-using ResultLocations = std::map<WorkspaceIndex, ResultLocation>;
+using ResultLocations = std::unordered_map<std::size_t, ResultLocation>;
 
 using FitDataIterator =
-    std::vector<std::unique_ptr<IndirectFitData>>::const_iterator;
+    std::vector<std::unique_ptr<IndirectFitDataLegacy>>::const_iterator;
 
 /*
-    IndirectFitOutput - Stores the output of a QENS fit and provides
+    IndirectFitOutputLegacy - Stores the output of a QENS fit and provides
     convenient access to the output parameters.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFitOutput {
+class MANTIDQT_INDIRECT_DLL IndirectFitOutputLegacy {
 public:
-  IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  IndirectFitOutputLegacy(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
                     Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                     const FitDataIterator &fitDataBegin,
                     const FitDataIterator &fitDataEnd);
 
-  IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  IndirectFitOutputLegacy(Mantid::API::WorkspaceGroup_sptr resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
                     Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                    IndirectFitData const *fitData, WorkspaceIndex spectrum);
+                    IndirectFitDataLegacy const *fitData, std::size_t spectrum);
 
-  bool isSpectrumFit(IndirectFitData const *fitData,
-                     WorkspaceIndex spectrum) const;
+  bool isSpectrumFit(IndirectFitDataLegacy const *fitData,
+                     std::size_t spectrum) const;
 
   std::unordered_map<std::string, ParameterValue>
-  getParameters(IndirectFitData const *fitData, WorkspaceIndex spectrum) const;
+  getParameters(IndirectFitDataLegacy const *fitData, std::size_t spectrum) const;
 
   boost::optional<ResultLocation>
-  getResultLocation(IndirectFitData const *fitData,
-                    WorkspaceIndex spectrum) const;
+  getResultLocation(IndirectFitDataLegacy const *fitData, std::size_t spectrum) const;
   std::vector<std::string> getResultParameterNames() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const;
@@ -80,10 +80,10 @@ public:
       const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      IndirectFitData const *fitData);
+      IndirectFitDataLegacy const *fitData);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      IndirectFitData const *fitData, WorkspaceIndex spectrum);
+      IndirectFitDataLegacy const *fitData, std::size_t spectrum);
 
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -93,9 +93,9 @@ public:
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitData const *fitData, WorkspaceIndex spectrum);
+                 IndirectFitDataLegacy const *fitData, std::size_t spectrum);
 
-  void removeOutput(IndirectFitData const *fitData);
+  void removeOutput(IndirectFitDataLegacy const *fitData);
 
 private:
   void updateFitResults(Mantid::API::WorkspaceGroup_sptr resultGroup,
@@ -115,8 +115,8 @@ private:
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
-  std::unordered_map<IndirectFitData const *, ParameterValues> m_parameters;
-  std::unordered_map<IndirectFitData const *, ResultLocations>
+  std::unordered_map<IndirectFitDataLegacy const *, ParameterValues> m_parameters;
+  std::unordered_map<IndirectFitDataLegacy const *, ResultLocations>
       m_outputResultLocations;
 };
 

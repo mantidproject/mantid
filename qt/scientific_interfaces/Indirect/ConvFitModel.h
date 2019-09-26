@@ -7,15 +7,15 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport ConvFitModel : public IndirectFittingModel {
+class DLLExport ConvFitModel : public IndirectFittingModelLegacy {
 public:
-  using IndirectFittingModel::addWorkspace;
+  using IndirectFittingModelLegacy::addWorkspace;
 
   ConvFitModel();
   ~ConvFitModel() override;
@@ -53,26 +53,26 @@ private:
   std::unordered_map<std::string, std::string>
   mapDefaultParameterNames() const override;
 
-  IndirectFitOutput
+  IndirectFitOutputLegacy
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                   const FitDataIterator &fitDataBegin,
                   const FitDataIterator &fitDataEnd) const override;
-  IndirectFitOutput
+  IndirectFitOutputLegacy
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                   IndirectFitDataLegacy *fitData,
                   std::size_t spectrum) const override;
 
-  void addOutput(IndirectFitOutput *fitOutput,
+  void addOutput(IndirectFitOutputLegacy *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                  const FitDataIterator &fitDataBegin,
                  const FitDataIterator &fitDataEnd) const override;
-  void addOutput(IndirectFitOutput *fitOutput,
+  void addOutput(IndirectFitOutputLegacy *fitOutput,
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,

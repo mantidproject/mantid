@@ -103,11 +103,11 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectDataTablePresenter::IndirectDataTablePresenter(
-    IndirectFittingModel *model, QTableWidget *dataTable)
+    IndirectFittingModelLegacy *model, QTableWidget *dataTable)
     : IndirectDataTablePresenter(model, dataTable, defaultHeaders()) {}
 
 IndirectDataTablePresenter::IndirectDataTablePresenter(
-    IndirectFittingModel *model, QTableWidget *dataTable,
+    IndirectFittingModelLegacy *model, QTableWidget *dataTable,
     const QStringList &headers)
     : m_model(model), m_dataTable(dataTable) {
   setHorizontalHeaders(headers);

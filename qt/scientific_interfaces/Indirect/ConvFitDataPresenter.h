@@ -34,7 +34,7 @@ private:
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
   void addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
-                    IndirectFittingModel *model);
+                    IndirectFittingModelLegacy *model);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
   void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;

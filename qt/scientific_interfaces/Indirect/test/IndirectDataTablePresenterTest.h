@@ -11,7 +11,7 @@
 #include <gmock/gmock.h>
 
 #include "IndirectDataTablePresenterLegacy.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -55,7 +55,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IndirectFittingModel {
+class MockIndirectDataTableModel : public IndirectFittingModelLegacy {
 public:
   /// Public methods
   MOCK_CONST_METHOD2(getFittingRange,

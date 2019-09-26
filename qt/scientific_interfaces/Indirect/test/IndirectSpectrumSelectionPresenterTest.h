@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -93,7 +93,7 @@ public:
 /// Note that there is limited (if any) interaction going from this model to the
 /// IndirectSpectrumSelectionView, meaning that not many methods are required
 /// for mocking.
-class MockIndirectSpectrumSelectionModel : public IndirectFittingModel {
+class MockIndirectSpectrumSelectionModel : public IndirectFittingModelLegacy {
 public:
   /// Public methods
   MOCK_CONST_METHOD2(getExcludeRegion,

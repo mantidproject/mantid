@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitOutput.h"
+#include "IndirectFitOutputLegacy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -87,12 +87,12 @@ WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
   return group;
 }
 
-std::unique_ptr<IndirectFitOutput>
+std::unique_ptr<IndirectFitOutputLegacy>
 createFitOutput(WorkspaceGroup_sptr resultGroup,
                 ITableWorkspace_sptr parameterTable,
                 WorkspaceGroup_sptr resultWorkspace, IndirectFitDataLegacy *fitData,
                 std::size_t spectrum) {
-  return std::make_unique<IndirectFitOutput>(
+  return std::make_unique<IndirectFitOutputLegacy>(
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }
 
@@ -314,7 +314,7 @@ public:
 
 private:
   /// This will return fit output with workspaces still stored in the ADS
-  std::unique_ptr<IndirectFitOutput> getFitOutputData() {
+  std::unique_ptr<IndirectFitOutputLegacy> getFitOutputData() {
     storeWorkspacesInADS(m_workspacesGroup, m_resultGroup, m_parameterTable);
     return createFitOutput(m_workspacesGroup, m_parameterTable, m_resultGroup,
                            m_fitData.get(), 0);

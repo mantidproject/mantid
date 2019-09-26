@@ -13,7 +13,7 @@
 #include "IIndirectFitDataViewLegacy.h"
 #include "IndirectDataTablePresenterLegacy.h"
 #include "IndirectFitDataPresenterLegacy.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -94,9 +94,9 @@ public:
 };
 
 /// Mock object to mock the model
-class MockIndirectFitDataModel : public IndirectFittingModel {
+class MockIndirectFitDataModel : public IndirectFittingModelLegacy {
 public:
-  using IndirectFittingModel::addWorkspace;
+  using IndirectFittingModelLegacy::addWorkspace;
 
   /// Public Methods
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));

@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTER_H_
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include <QTableWidget>
 
@@ -24,10 +24,10 @@ namespace IDA {
 class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenterLegacy : public QObject {
   Q_OBJECT
 public:
-  IndirectDataTablePresenterLegacy(IndirectFittingModel *model,
+  IndirectDataTablePresenterLegacy(IndirectFittingModelLegacy *model,
                              QTableWidget *dataTable);
 
-  IndirectDataTablePresenterLegacy(IndirectFittingModel *model,
+  IndirectDataTablePresenterLegacy(IndirectFittingModelLegacy *model,
                              QTableWidget *dataTable,
                              const QStringList &headers);
 
@@ -120,7 +120,7 @@ private:
   void updateDataPositionsInCells(std::size_t from, std::size_t to);
 
   std::vector<int> m_dataPositions;
-  IndirectFittingModel *m_model;
+  IndirectFittingModelLegacy *m_model;
   QTableWidget *m_dataTable;
 };
 

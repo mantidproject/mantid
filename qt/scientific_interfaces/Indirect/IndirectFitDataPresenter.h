@@ -11,7 +11,7 @@
 #include "IIndirectFitDataView.h"
 #include "IndexTypes.h"
 #include "IndirectDataTablePresenter.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
@@ -28,10 +28,10 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
       public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
-  IndirectFitDataPresenter(IndirectFittingModel *model,
+  IndirectFitDataPresenter(IndirectFittingModelLegacy *model,
                            IIndirectFitDataView *view);
   IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
+      IndirectFittingModelLegacy *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   ~IndirectFitDataPresenter();
 
@@ -109,7 +109,7 @@ private:
   virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
-  IndirectFittingModel *m_model;
+  IndirectFittingModelLegacy *m_model;
   PrivateFittingData m_singleData;
   PrivateFittingData m_multipleData;
   IIndirectFitDataView *m_view;

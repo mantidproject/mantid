@@ -12,7 +12,7 @@
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenterLegacy.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
 
@@ -33,7 +33,7 @@ class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  IndirectFitAnalysisTab(IndirectFittingModel *model,
+  IndirectFitAnalysisTab(IndirectFittingModelLegacy *model,
                          QWidget *parent = nullptr);
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenterLegacy> presenter);
@@ -122,7 +122,7 @@ public slots:
   void setBrowserWorkspace() override;
 
 protected:
-  IndirectFittingModel *fittingModel() const;
+  IndirectFittingModelLegacy *fittingModel() const;
 
   void run() override;
 
@@ -226,7 +226,7 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
 
-  std::unique_ptr<IndirectFittingModel> m_fittingModel;
+  std::unique_ptr<IndirectFittingModelLegacy> m_fittingModel;
   MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   std::unique_ptr<IndirectFitDataPresenterLegacy> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenterLegacy> m_plotPresenter;

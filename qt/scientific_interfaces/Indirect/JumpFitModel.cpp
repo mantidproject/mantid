@@ -226,13 +226,13 @@ void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
 
   const auto hwhmWorkspace =
       createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  IndirectFittingModel::addNewWorkspace(hwhmWorkspace,
+  IndirectFittingModelLegacy::addNewWorkspace(hwhmWorkspace,
                                         createSpectra(*spectrum));
 }
 
 void JumpFitModel::removeWorkspace(std::size_t index) {
   m_jumpParameters.erase(getWorkspace(index)->getName());
-  IndirectFittingModel::removeFittingData(index);
+  IndirectFittingModelLegacy::removeFittingData(index);
 }
 
 JumpFitParameters &

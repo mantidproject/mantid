@@ -117,7 +117,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
-    IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
+    IndirectFittingModelLegacy *model, IndirectSpectrumSelectionView *view)
     : QObject(nullptr), m_model(model), m_view(view), m_activeIndex(0),
       m_maskIndex(0) {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),

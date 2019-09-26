@@ -7,13 +7,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFITMODEL_H_
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport MSDFitModel : public IndirectFittingModel {
+class DLLExport MSDFitModel : public IndirectFittingModelLegacy {
 public:
   void setFitType(const std::string &fitType);
 

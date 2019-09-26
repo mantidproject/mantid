@@ -7,13 +7,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFITMODEL_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFITMODEL_H_
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IqtFitModel : public IndirectFittingModel {
+class DLLExport IqtFitModel : public IndirectFittingModelLegacy {
 public:
   IqtFitModel();
 

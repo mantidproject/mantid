@@ -185,19 +185,19 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFitModel::IqtFitModel()
-    : IndirectFittingModel(), m_makeBetaGlobal(false),
+    : IndirectFittingModelLegacy(), m_makeBetaGlobal(false),
       m_constrainIntensities(false) {}
 
 CompositeFunction_sptr IqtFitModel::getMultiDomainFunction() const {
   if (m_makeBetaGlobal)
     return createFunctionWithGlobalBeta(getFittingFunction());
-  return IndirectFittingModel::getMultiDomainFunction();
+  return IndirectFittingModelLegacy::getMultiDomainFunction();
 }
 
 IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
   if (m_makeBetaGlobal)
     return createSimultaneousFitWithEqualRange(getMultiDomainFunction());
-  return IndirectFittingModel::getFittingAlgorithm();
+  return IndirectFittingModelLegacy::getFittingAlgorithm();
 }
 
 std::vector<std::string> IqtFitModel::getSpectrumDependentAttributes() const {
@@ -244,7 +244,7 @@ void IqtFitModel::setFitTypeString(const std::string &fitType) {
 }
 
 void IqtFitModel::setFitFunction(Mantid::API::IFunction_sptr function) {
-  IndirectFittingModel::setFitFunction(function);
+  IndirectFittingModelLegacy::setFitFunction(function);
   if (m_constrainIntensities)
     constrainIntensities(function);
 }

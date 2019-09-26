@@ -47,7 +47,7 @@ IFunction_sptr getFunction(std::string const &functionString) {
 /// A dummy class used to create a model to pass to IndirectFitPlotModelLegacy's
 /// constructor
 class DummyModel
-    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
+    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModelLegacy {
 public:
   ~DummyModel(){};
 
@@ -66,16 +66,16 @@ private:
   }
 };
 
-void setFittingFunction(IndirectFittingModel *model,
+void setFittingFunction(IndirectFittingModelLegacy *model,
                         std::string const &functionString,
                         bool setFitFunction) {
   if (setFitFunction)
     model->setFitFunction(getFunction(functionString));
 }
 
-IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
+IndirectFittingModelLegacy *getEmptyDummyModel() { return new DummyModel(); }
 
-IndirectFittingModel *
+IndirectFittingModelLegacy *
 createModelWithSingleWorkspace(std::string const &workspaceName,
                                int const &numberOfSpectra,
                                bool setFitFunction) {
@@ -87,14 +87,14 @@ createModelWithSingleWorkspace(std::string const &workspaceName,
   return model;
 }
 
-void addWorkspacesToModel(IndirectFittingModel *model,
+void addWorkspacesToModel(IndirectFittingModelLegacy *model,
                           int const &numberOfSpectra) {
   UNUSED_ARG(model);
   UNUSED_ARG(numberOfSpectra);
 }
 
 template <typename Name, typename... Names>
-void addWorkspacesToModel(IndirectFittingModel *model,
+void addWorkspacesToModel(IndirectFittingModelLegacy *model,
                           int const &numberOfSpectra, Name const &workspaceName,
                           Names const &... workspaceNames) {
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
@@ -104,7 +104,7 @@ void addWorkspacesToModel(IndirectFittingModel *model,
 }
 
 template <typename Name, typename... Names>
-IndirectFittingModel *createModelWithMultipleWorkspaces(
+IndirectFittingModelLegacy *createModelWithMultipleWorkspaces(
     int const &numberOfSpectra, bool setFitFunction, Name const &workspaceName,
     Names const &... workspaceNames) {
   auto model = createModelWithSingleWorkspace(workspaceName, numberOfSpectra,
@@ -113,7 +113,7 @@ IndirectFittingModel *createModelWithMultipleWorkspaces(
   return model;
 }
 
-IndirectFittingModel *createModelWithSingleInstrumentWorkspace(
+IndirectFittingModelLegacy *createModelWithSingleInstrumentWorkspace(
     std::string const &workspaceName, int const &xLength, int const &yLength) {
   auto model = getEmptyDummyModel();
   SetUpADSWithWorkspace ads(workspaceName,
@@ -140,7 +140,7 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
   return alg;
 }
 
-IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
+IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModelLegacy *model,
                                      MatrixWorkspace_sptr workspace,
                                      std::string const &workspaceName) {
   setFittingFunction(model, getFittingFunctionString(workspaceName), true);
@@ -149,7 +149,7 @@ IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
   return alg;
 }
 
-IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model,
+IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModelLegacy *model,
                                         MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
   auto const alg = getSetupFitAlgorithm(model, workspace, workspaceName);
@@ -157,7 +157,7 @@ IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model,
   return alg;
 }
 
-IndirectFittingModel *getModelWithFitOutputData() {
+IndirectFittingModelLegacy *getModelWithFitOutputData() {
   auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
   auto const modelWorkspace = model->getWorkspace(0);
 

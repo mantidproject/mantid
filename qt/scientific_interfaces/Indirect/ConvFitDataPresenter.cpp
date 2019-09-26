@@ -63,7 +63,7 @@ void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
 }
 
 void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
-                                        IndirectFittingModel *model) {
+                                        IndirectFittingModelLegacy *model) {
   model->addWorkspace(dialog->workspaceName(), dialog->workspaceIndices());
 }
 

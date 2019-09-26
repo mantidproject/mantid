@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -35,7 +35,7 @@ IFunction_sptr getFunction(std::string const &functionString) {
 
 /// A dummy model used to inherit the methods which need testing
 class DummyModel
-    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
+    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModelLegacy {
 public:
   ~DummyModel(){};
 

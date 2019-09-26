@@ -11,14 +11,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectFitDataPresenterLegacy::IndirectFitDataPresenterLegacy(IndirectFittingModel *model,
+IndirectFitDataPresenterLegacy::IndirectFitDataPresenterLegacy(IndirectFittingModelLegacy *model,
                                                    IIndirectFitDataViewLegacy *view)
     : IndirectFitDataPresenterLegacy(model, view,
                                std::make_unique<IndirectDataTablePresenterLegacy>(
                                    model, view->getDataTable())) {}
 
 IndirectFitDataPresenterLegacy::IndirectFitDataPresenterLegacy(
-    IndirectFittingModel *model, IIndirectFitDataViewLegacy *view,
+    IndirectFittingModelLegacy *model, IIndirectFitDataViewLegacy *view,
     std::unique_ptr<IndirectDataTablePresenterLegacy> tablePresenter)
     : m_model(model), m_view(view),
       m_tablePresenter(std::move(tablePresenter)) {

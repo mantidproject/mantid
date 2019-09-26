@@ -12,7 +12,7 @@
 
 #include "IIndirectFitPlotViewLegacy.h"
 #include "IndirectFitPlotPresenterLegacy.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -145,7 +145,7 @@ public:
   MOCK_METHOD1(setHWHMMaximum, void(double maximum));
 };
 
-class MockIndirectFittingModel : public IndirectFittingModel {
+class MockIndirectFittingModel : public IndirectFittingModelLegacy {
 public:
   /// Public methods
   MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(std::size_t index));
@@ -201,7 +201,7 @@ public:
 
   void setUp() override {
     /// Note that the IndirectFitPlotModelLegacy could not be mocked as the Presenter
-    /// takes an IndirectFittingModel. This means the IndirectFittingModel is
+    /// takes an IndirectFittingModelLegacy. This means the IndirectFittingModelLegacy is
     /// mocked instead - which is a good substitute anyway
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_fittingModel = std::make_unique<NiceMock<MockIndirectFittingModel>>();

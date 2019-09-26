@@ -8,7 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTMODEL_H_
 
 #include "IndexTypes.h"
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
@@ -23,7 +23,7 @@ namespace IDA {
 
 class DLLExport IndirectFitPlotModel {
 public:
-  IndirectFitPlotModel(IndirectFittingModel *fittingModel);
+  IndirectFitPlotModel(IndirectFittingModelLegacy *fittingModel);
   ~IndirectFitPlotModel();
 
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
@@ -93,7 +93,7 @@ private:
 
   void deleteWorkspace(const std::string &name) const;
 
-  IndirectFittingModel *m_fittingModel;
+  IndirectFittingModelLegacy *m_fittingModel;
   DatasetIndex m_activeIndex;
   WorkspaceIndex m_activeSpectrum;
 };

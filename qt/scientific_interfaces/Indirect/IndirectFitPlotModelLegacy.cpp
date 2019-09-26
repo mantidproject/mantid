@@ -113,7 +113,7 @@ namespace IDA {
 
 using namespace Mantid::API;
 
-IndirectFitPlotModelLegacy::IndirectFitPlotModelLegacy(IndirectFittingModel *fittingModel)
+IndirectFitPlotModelLegacy::IndirectFitPlotModelLegacy(IndirectFittingModelLegacy *fittingModel)
     : m_fittingModel(fittingModel), m_activeIndex(0), m_activeSpectrum(0) {}
 
 IndirectFitPlotModelLegacy::~IndirectFitPlotModelLegacy() {

@@ -35,7 +35,7 @@ namespace IDA {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenterLegacy::IndirectFitPlotPresenterLegacy(IndirectFittingModel *model,
+IndirectFitPlotPresenterLegacy::IndirectFitPlotPresenterLegacy(IndirectFittingModelLegacy *model,
                                                    IIndirectFitPlotViewLegacy *view,
                                                    IPyRunner *pythonRunner)
     : m_model(new IndirectFitPlotModelLegacy(model)), m_view(view),
