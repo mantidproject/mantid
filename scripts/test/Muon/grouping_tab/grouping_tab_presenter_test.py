@@ -86,20 +86,10 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def test_context_menu_add_pair_adds_pair_if_two_groups_selected(self):
         self.assertEqual(self.pairing_table_view.num_rows(), 2)
         self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
-        self.grouping_table_view.contextMenuEvent(2)
+        self.grouping_table_view.contextMenuEvent(0)
         self.grouping_table_view.add_pair_action.triggered.emit(True)
 
-        self.assertEqual(self.pairing_table_view.num_rows(), 3)
-
-    def test_context_menu_add_pair_adds_correct_pair_if_two_groups_selected(self):
-        self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
-        self.grouping_table_view.contextMenuEvent(2)
-        self.grouping_table_view.add_pair_action.triggered.emit(True)
-
-        pair_name = "pair_0"
-
-        self.assertEqual(self.group_context[pair_name].forward_group, "fwd")
-        self.assertEqual(self.group_context[pair_name].backward_group, "bwd")
+        self.presenter.pairing_table_widget.handle_add_pair_button_clicked.assert_called_once_with('fwd', 'bwd')
 
     def test_that_clear_button_clears_model_and_view(self):
         self.view.clear_grouping_button.clicked.emit(True)
