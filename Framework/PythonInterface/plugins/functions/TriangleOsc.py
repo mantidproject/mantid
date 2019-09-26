@@ -8,18 +8,17 @@
 
 from mantid.api import IFunction1D, FunctionFactory
 import numpy as np
-import math
+
 
 class TriangleOsc(IFunction1D):
 
     def category(self):
         return "Muon"
 
-    def init(self):	
+    def init(self):
         self.declareParameter("A0", 0.2)
         self.declareParameter("Freq", 1, 'Frequency of the triangular oscillation (MHz)')
         self.declareParameter("Phi", 0.0,'Phase')
-
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
