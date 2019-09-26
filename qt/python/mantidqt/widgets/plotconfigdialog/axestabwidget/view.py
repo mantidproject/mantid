@@ -9,8 +9,9 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from numpy import finfo, float32
-from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget
+from qtpy.QtCore import Qt, QRegExp
+from qtpy.QtGui import QRegExpValidator, QDoubleValidator
+from qtpy.QtWidgets import QWidget, QMessageBox
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
@@ -26,12 +27,12 @@ class AxesTabWidgetView(QWidget):
                           baseinstance=self)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-        # Set maxima and minima for the axis limit spin boxes
+        # Set validator for the axis limit spin boxes
         for axis in ['x', 'y']:
             for limit in ['upper', 'lower']:
-                spin_box = getattr(self, '%s%s_limit_spin_box' % (axis, limit))
-                spin_box.setRange(finfo(float32).min,
-                                  finfo(float32).max)
+                line_edit = getattr(self, '%s%s_limit_line_edit' % (axis, limit))
+                validator = QDoubleValidator()
+                line_edit.setValidator(validator)
 
     def populate_select_axes_combo_box(self, axes_names):
         self.select_axes_combo_box.addItems(axes_names)
@@ -55,10 +56,10 @@ class AxesTabWidgetView(QWidget):
 
     # X-Axis getters
     def get_xlower_limit(self):
-        return self.xlower_limit_spin_box.value()
+        return self.xlower_limit_line_edit.text()
 
     def get_xupper_limit(self):
-        return self.xupper_limit_spin_box.value()
+        return self.xupper_limit_line_edit.text()
 
     def get_xlabel(self):
         return self.xlabel_line_edit.text()
@@ -68,10 +69,10 @@ class AxesTabWidgetView(QWidget):
 
     # Y-Axis getters
     def get_ylower_limit(self):
-        return self.ylower_limit_spin_box.value()
+        return self.ylower_limit_line_edit.text()
 
     def get_yupper_limit(self):
-        return self.yupper_limit_spin_box.value()
+        return self.yupper_limit_line_edit.text()
 
     def get_ylabel(self):
         return self.ylabel_line_edit.text()
@@ -81,10 +82,10 @@ class AxesTabWidgetView(QWidget):
 
     # X-Axis setters
     def set_xlower_limit(self, limit):
-        self.xlower_limit_spin_box.setValue(limit)
+        self.xlower_limit_line_edit.setText(str(limit))
 
     def set_xupper_limit(self, limit):
-        self.xupper_limit_spin_box.setValue(limit)
+        self.xupper_limit_line_edit.setText(str(limit))
 
     def set_xlabel(self, label):
         self.xlabel_line_edit.setText(label)
@@ -94,13 +95,16 @@ class AxesTabWidgetView(QWidget):
 
     # Y-Axis setters
     def set_ylower_limit(self, limit):
-        self.ylower_limit_spin_box.setValue(limit)
+        self.ylower_limit_line_edit.setText(str(limit))
 
     def set_yupper_limit(self, limit):
-        self.yupper_limit_spin_box.setValue(limit)
+        self.yupper_limit_line_edit.setText(str(limit))
 
     def set_ylabel(self, label):
         self.ylabel_line_edit.setText(label)
 
     def set_yscale(self, scale):
         self.yscale_combo_box.setCurrentText(scale.title())
+
+    def error_occurred(self, exception):
+        QMessageBox.critical(self, 'Error', exception)
