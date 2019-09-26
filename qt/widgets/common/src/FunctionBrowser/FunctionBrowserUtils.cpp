@@ -76,10 +76,8 @@ splitConstraintString(const QString &constraint) {
   if (expr.size() == 3) { // lower < param < upper
     try {
       // check that the first and third terms are numbers
-      double d1 = boost::lexical_cast<double>(expr[0].str());
-      (void)d1;
-      double d2 = boost::lexical_cast<double>(expr[2].str());
-      (void)d2;
+      boost::lexical_cast<double>(expr[0].str());
+      boost::lexical_cast<double>(expr[2].str());
       if (expr[1].operator_name() == "<" && expr[2].operator_name() == "<") {
         lowerBoundStr = QString::fromStdString(expr[0].str());
         upperBoundStr = QString::fromStdString(expr[2].str());
@@ -95,8 +93,7 @@ splitConstraintString(const QString &constraint) {
     size_t paramPos = 0;
     try // find position of the parameter name in expression
     {
-      double d = boost::lexical_cast<double>(expr[1].name());
-      (void)d;
+      boost::lexical_cast<double>(expr[1].name());
     } catch (...) {
       paramPos = 1;
     }

@@ -284,7 +284,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
       }
     } else {
       auto const i = getCurrentDataset();
-      setLocalParameterValue(name, static_cast<int>(i),
+      setLocalParameterValue(name, i,
                              valueColumn->toDouble(0),
                              errorColumn->toDouble(0));
     }

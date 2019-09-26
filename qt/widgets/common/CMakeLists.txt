@@ -898,6 +898,7 @@ set(TEST_FILES
     test/FindFilesWorkerTest.h
     test/FunctionModelTest.h
     test/FunctionMultiDomainPresenterTest.h
+    test/FunctionBrowserUtilsTest.h
     test/LogValueFinderTest.h
     test/InterfaceManagerTest.h
     test/NonOrthogonalTest.h
