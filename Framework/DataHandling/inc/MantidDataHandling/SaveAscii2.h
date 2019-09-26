@@ -22,7 +22,7 @@ Saves a workspace or selected spectra in a coma-separated ascii file. Spectra
 are saved in columns.
 
 */
-namespace {
+namespace AxisHelper {
 
 struct AxisProxy {
   AxisProxy(Mantid::API::Axis *ax) : a(ax) {}
@@ -94,7 +94,7 @@ private:
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
-  std::unique_ptr<AxisProxy> m_axisProxy;
+  std::unique_ptr<AxisHelper::AxisProxy> m_axisProxy;
 };
 } // namespace DataHandling
 } // namespace Mantid
