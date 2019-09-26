@@ -22,7 +22,7 @@ class ALFView_view : public QWidget {
   Q_OBJECT
 
 public:
-  ALFView_view(QWidget *parent = nullptr);
+  explicit ALFView_view(QWidget *parent = nullptr);
   int getRunNumber();
   void setRunQuietly(const QString runNumber);
   void observeLoadRun(observer *listener) {
