@@ -166,7 +166,7 @@ public:
   void testShowSlitCalculatorSetsInstrument() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "TEST_INSTRUMENT");
-    expectSlitCalculatorInstrumentUpdated();
+    expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyShowSlitCalculatorRequested();
     verifyAndClear();
   }
@@ -263,7 +263,7 @@ public:
   void testUpdateInstrumentUpdatesInstrumentInSlitCalculator() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
-    expectSlitCalculatorInstrumentUpdated();
+    expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
@@ -404,7 +404,7 @@ private:
         .Times(1);
   }
 
-  void expectSlitCalculatorInstrumentUpdated() {
+  void expectSlitCalculatorInstrumentUpdated(std::string const &instrument) {
     EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
         .Times(1);
     EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
