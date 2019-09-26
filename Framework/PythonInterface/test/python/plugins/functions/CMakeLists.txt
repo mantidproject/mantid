@@ -3,13 +3,13 @@
 set(TEST_PY_FILES
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
-    MeierTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
     StretchedExpFTTest.py
     AttributeTest.py
+    MeierTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
