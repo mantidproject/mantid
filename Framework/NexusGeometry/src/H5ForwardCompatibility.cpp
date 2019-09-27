@@ -20,7 +20,6 @@ namespace H5ForwardCompatibility {
  * support HDF5 version < 1.8.13
  * https://portal.hdfgroup.org/display/HDF5/Software+Changes+from+Release+to+Release+for+HDF5-1.8
  */
-
 ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
   // H5Iget_name will get buf_size-1 chars of the name to null terminate it
   ssize_t name_size = H5Iget_name(obj.getId(), obj_name, buf_size);
