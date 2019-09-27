@@ -286,10 +286,16 @@ public:
     auto beamline = extractBeamline(*instrument);
     auto &compInfo = *beamline.first;
     auto &detInfo = *beamline.second;
-    TS_ASSERT_EQUALS(detInfo.size(), 3);
+
+    ETS_ASSERT_EQUALS(detInfo.size(), 3);
+
+    TS_ASSERT(Kernel::toVector3d(compInfo.relativePosition(0))
+                  .isApprox(Eigen::Vector3d(0.0, -0.4 / 2, 0.0)));
+
     auto &shape1 = compInfo.shape(0);
     auto &shape2 = compInfo.shape(1);
     auto &shape3 = compInfo.shape(2);
+
     TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,
                        &shape2); // Shapes are not shared
     TSM_ASSERT_DIFFERS("Different objects, different addresses", &shape1,

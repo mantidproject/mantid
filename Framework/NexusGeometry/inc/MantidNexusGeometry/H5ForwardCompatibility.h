@@ -28,6 +28,7 @@ namespace H5ForwardCompatibility {
 
 ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size);
 std::string getObjName(const H5::H5Object &obj);
+std::string getObjName(const H5::H5File &obj);
 
 } // namespace H5ForwardCompatibility
 } // namespace NexusGeometry

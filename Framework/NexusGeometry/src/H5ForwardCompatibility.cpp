@@ -36,6 +36,7 @@ ssize_t getObjName(const H5::H5Object &obj, char *obj_name, size_t buf_size) {
   return (name_size);
 }
 
+std::string getObjName(const H5::H5File &) { return "File Object"; }
 std::string getObjName(const H5::H5Object &obj) {
   std::string obj_name; // object name to return
 

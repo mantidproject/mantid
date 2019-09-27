@@ -515,29 +515,20 @@ private:
       auto cylinderIndex = cylinderIndexToDetId[i];
       auto detId = cylinderIndexToDetId[i + 1];
 
-      auto centreIndex = cPoints[cylinderIndex * 3] * 3;
-      auto radiusIndex = cPoints[cylinderIndex * 3 + 1] * 3;
-      auto otherIndex = cPoints[cylinderIndex * 3 + 2] * 3;
-
       Eigen::Matrix<double, 3, 3> vSorted;
-      auto centre = Kernel::V3D{vPoints[centreIndex], vPoints[centreIndex + 1],
-                                vPoints[centreIndex + 2]};
-      auto radius = Kernel::V3D{vPoints[radiusIndex], vPoints[radiusIndex + 1],
-                                vPoints[radiusIndex + 2]};
-      auto other = Kernel::V3D{vPoints[otherIndex], vPoints[otherIndex + 1],
-                               vPoints[otherIndex + 2]};
-      vSorted(0) = centre[0];
-      vSorted(1) = centre[1];
-      vSorted(2) = centre[2];
-      vSorted(3) = radius[0];
-      vSorted(4) = radius[1];
-      vSorted(5) = radius[2];
-      vSorted(6) = other[0];
-      vSorted(7) = other[1];
-      vSorted(8) = other[2];
+      for (uint8_t j = 0; j < 3; ++j) {
+        auto vertexIndex = cPoints[cylinderIndex * 3 + j] * 3;
+        vSorted(j * 3) = vPoints[vertexIndex];
+        vSorted(j * 3 + 1) = vPoints[vertexIndex + 1];
+        vSorted(j * 3 + 2) = vPoints[vertexIndex + 2];
+      }
+      const auto centre = vSorted.col(0);
+      const auto other = vSorted.col(2);
+
+      // Note that tube optimisation is not used here. That should be applied as
+      // future optimisation.
       builder.addDetectorToLastBank(name + "_" + std::to_string(cylinderIndex),
-                                    detId,
-                                    Kernel::toVector3d((centre + other) / 2),
+                                    detId, (centre + other) / 2,
                                     NexusShapeFactory::createCylinder(vSorted));
     }
   }
@@ -707,6 +698,10 @@ private:
    */
   boost::shared_ptr<const Geometry::IObject>
   parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
+    // Note in the following we are NOT looking for named groups, only groups
+    // that have NX_class attributes of either NX_CYLINDER or NX_OFF. That way
+    // we handle groups called any of the allowed - shape, pixel_shape,
+    // detector_shape
     auto cylinderical = utilities::findGroup(detectorGroup, NX_CYLINDER);
     auto off = utilities::findGroup(detectorGroup, NX_OFF);
     searchTubes = false;
@@ -806,6 +801,8 @@ public:
       // Get the pixel detIds
       auto detectorIds = getDetectorIds(detectorGroup);
 
+      // We preferentially deal with DETECTOR_SHAPE type shapes. Pixel offsets
+      // not needed for this processing
       auto detector_shape =
           utilities::findGroupByName(detectorGroup, DETECTOR_SHAPE);
       if (detector_shape) {
