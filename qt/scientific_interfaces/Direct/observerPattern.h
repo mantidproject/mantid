@@ -14,8 +14,8 @@ class observable;
 
 class observer {
 public:
-  virtual void update(){};
-  virtual void update(std::string arg){};
+  virtual void update()=0;
+  virtual void update(std::string arg)=0;
 };
 
 class observable {
@@ -42,6 +42,7 @@ public:
   ~loadObserver(){};
   void setSlot(std::function<void()> &func) { m_slot = func; };
   void update() override { m_slot(); };
+  void update(std::string) { m_slot(); };
 
 private:
   std::function<void()> m_slot;
@@ -53,6 +54,7 @@ public:
   ~generalObserver(){};
   void setSlot(std::function<void(std::string)> &func) { m_slot = func; };
   void update(std ::string arg) override { m_slot(arg); };
+  void update() override { m_slot(""); };
 
 private:
   std::function<void(std::string)> m_slot;
