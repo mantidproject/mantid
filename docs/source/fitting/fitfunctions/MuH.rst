@@ -29,9 +29,11 @@ and :math:`\phi` (rad) is the phase at time :math:`t=0`.
    import matplotlib.pyplot as plt
    import numpy as np
    x = np.arange(0.1,16,0.1)
-   y = FunctionWrapper("MuH", A0 = 0.5, FreqD = 0.5, Lambda = 0.3, Sigma = 0.05)
+   y = FunctionWrapper("MuH", A0 = 0.5, FreqD = 0.5, Lambda = 0.3, Sigma = 0.05, Phi = 0.0)
    fig, ax=plt.subplots()
    ax.plot(x, y(x))
+   ax.set_xlabel('t($\mu$s)')
+   ax.set_ylabel('A(t)')
 
 .. attributes::
 
