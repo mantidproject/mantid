@@ -112,10 +112,11 @@ void createEventWorkspace(const int &maxToF, const double &binWidth,
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (auto i = 0u; i < events.size(); ++i) {
+  for (size_t i = 0; i < events.size(); ++i) {
     dataWorkspace->getSpectrum(i) = events[i];
-    dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
-    dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
+    const int index = static_cast<int>(i + 1);
+    dataWorkspace->getSpectrum(i).setSpectrumNo(index);
+    dataWorkspace->getSpectrum(i).setDetectorID(index);
   }
   dataWorkspace->setAllX(HistogramData::BinEdges{xAxis});
   dataWorkspace->getAxis(0)->unit() =

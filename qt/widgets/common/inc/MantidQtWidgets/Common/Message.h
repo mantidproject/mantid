@@ -48,6 +48,8 @@ public:
           QString scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
+  /// Copy assignment
+  Message &operator=(const Message &msg);
 
 public:
   /// @returns The message text
