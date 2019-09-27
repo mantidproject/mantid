@@ -19,11 +19,19 @@ Fitting function for use by Muon scientists defined by:
 
 :math:`\sigma` is the gaussian decay rate,
 
-:math:`\omega_D = 2 \pi \nu` where :math:`\nu` (MHz) is the oscillating frequency,
+:math:`\omega_D = 2 \pi \nu_D` where :math:`\nu_D` (MHz) is the oscillating frequency,
 
 and :math:`\phi` (rad) is the phase at time :math:`t=0`.
 
-.. figure:: /images/MuH.png
+.. plot::
+	
+   from mantid.simpleapi import FunctionWrapper
+   import matplotlib.pyplot as plt
+   import numpy as np
+   x = np.arange(0.1,16,0.1)
+   y = FunctionWrapper("MuH", A0 = 0.5, FreqD = 0.5, Lambda = 0.3, Sigma = 0.05)
+   fig, ax=plt.subplots()
+   ax.plot(x, y(x))
 
 .. attributes::
 
