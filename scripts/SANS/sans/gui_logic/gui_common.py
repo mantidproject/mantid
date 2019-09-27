@@ -169,7 +169,7 @@ def get_instrument_from_gui_selection(gui_selection):
         raise RuntimeError("Instrument selection is not valid.")
 
 
-def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
+def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func_to_get_line_edit_val):
     # Get the last location of the user file
     settings = QSettings()
     settings.beginGroup(q_settings_group_key)
@@ -180,7 +180,7 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
     open_file_dialog(line_edit_field, filter_for_dialog, last_path)
 
     # Save the new location
-    new_path, _ = os.path.split(func())
+    new_path = func_to_get_line_edit_val()
     if new_path:
         set_setting(q_settings_group_key, q_settings_key, new_path)
 
