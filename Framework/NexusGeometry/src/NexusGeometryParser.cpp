@@ -136,6 +136,44 @@ private:
     return extractVector<ValueType>(data);
   }
 
+  template <typename T>
+  std::vector<int64_t> readNXInts(const T &object, const std::string &dsName) {
+    std::vector<int64_t> ints;
+    const auto nxintsize = object.openDataSet(dsName).getDataType().getSize();
+    if (nxintsize == sizeof(int32_t)) {
+      ints = convertVector<int32_t, int64_t>(
+          get1DDataset<int32_t>(object, dsName));
+    } else if (nxintsize == sizeof(int64_t)) {
+      ints = get1DDataset<int64_t>(object, dsName);
+    } else {
+      std::stringstream ss;
+      ss << "Cannot handle reading ints of size " << nxintsize << " from "
+         << dsName << " in " << H5_OBJ_NAME(object)
+         << ". Only 64 and 32 bit signed ints handled";
+      throw std::runtime_error(ss.str());
+    }
+
+    return ints;
+  }
+  template <typename T>
+  std::vector<double> readNXFloats(const T &object, const std::string &dsName) {
+    std::vector<double> floats;
+    const auto nxfloatsize = object.openDataSet(dsName).getDataType().getSize();
+    if (nxfloatsize == sizeof(float_t)) {
+      floats = convertVector<float_t, double_t>(
+          get1DDataset<float_t>(object, dsName));
+    } else if (nxfloatsize == sizeof(double_t)) {
+      floats = get1DDataset<double_t>(object, dsName);
+    } else {
+      std::stringstream ss;
+      ss << "Cannot handle reading ints of size " << nxfloatsize << " from "
+         << dsName << " in " << H5_OBJ_NAME(object)
+         << ". Only 64 and 32 bit floats handled";
+      throw std::runtime_error(ss.str());
+    }
+    return floats;
+  }
+
   std::string get1DStringDataset(const std::string &dataset,
                                  const Group &group) {
     // Open data set
@@ -254,13 +292,13 @@ private:
     for (unsigned int i = 0; i < detectorGroup.getNumObjs(); i++) {
       H5std_string objName = detectorGroup.getObjnameByIdx(i);
       if (objName == X_PIXEL_OFFSET) {
-        xValues = get1DDataset<double>(detectorGroup, objName);
+        xValues = readNXFloats(detectorGroup, objName);
       }
       if (objName == Y_PIXEL_OFFSET) {
-        yValues = get1DDataset<double>(detectorGroup, objName);
+        yValues = readNXFloats(detectorGroup, objName);
       }
       if (objName == Z_PIXEL_OFFSET) {
-        zValues = get1DDataset<double>(detectorGroup, objName);
+        zValues = readNXFloats(detectorGroup, objName);
       }
     }
 
@@ -339,7 +377,7 @@ private:
       DataSet transformation = openDataSet(file, dependency);
 
       // Get magnitude of current transformation
-      double magnitude = get1DDataset<double>(file, dependency)[0];
+      double magnitude = readNXFloats(file, dependency)[0];
       // Containers for transformation data
       Eigen::Vector3d transformVector(0.0, 0.0, 0.0);
       H5std_string transformType;
@@ -446,8 +484,7 @@ private:
     }
     H5std_string verticesData = "vertices";
     // 1D reads row first, then columns
-    std::vector<double> vPoints =
-        get1DDataset<double>(shapeGroup, verticesData);
+    auto vPoints = readNXFloats(shapeGroup, verticesData);
     if (cylinderIndexToDetId.size() != 2 * detectorIds.size())
       throw std::runtime_error("numbers of detector with shape cylinder does "
                                "not match number of detectors");
@@ -487,24 +524,14 @@ private:
     }
   }
 
-  // Parse cylinder nexus geometry
   boost::shared_ptr<const Geometry::IObject>
   parseNexusCylinder(const Group &shapeGroup) {
     H5std_string pointsToVertices = "cylinders";
-    const auto nxintsize =
-        shapeGroup.openDataSet(pointsToVertices).getDataType().getSize();
-    std::vector<int64_t> cPoints;
-    if (nxintsize == sizeof(int32_t)) {
-      cPoints = convertVector<int32_t, int64_t>(
-          get1DDataset<int32_t>(shapeGroup, pointsToVertices));
-    } else {
-      cPoints = get1DDataset<int64_t>(shapeGroup, pointsToVertices);
-    }
+    auto cPoints = readNXInts(shapeGroup, pointsToVertices);
 
     H5std_string verticesData = "vertices";
     // 1D reads row first, then columns
-    std::vector<double> vPoints =
-        get1DDataset<double>(shapeGroup, verticesData);
+    auto vPoints = readNXFloats(shapeGroup, verticesData);
     Eigen::Map<Eigen::Matrix<double, 3, 3>> vertices(vPoints.data());
     // Read points into matrix, sorted by cPoints ordering
     Eigen::Matrix<double, 3, 3> vSorted;
@@ -655,7 +682,16 @@ private:
     }
   }
 
-  /// Choose what shape type to parse
+  /**
+   * Parse and return any sub-group providing shape information as Geometry
+   * IObject.
+   *
+   * Null object return if no shape can be found.
+   * @param detectorGroup : parent group possibily containing sub-group relating
+   * to shape
+   * @param searchTubes : out parameter, true if tubes can be searched
+   * @return shared pointer holding IObject subtype or null shared pointer
+   */
   boost::shared_ptr<const Geometry::IObject>
   parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
     auto cylinderical = utilities::findGroup(detectorGroup, NX_CYLINDER);
@@ -666,8 +702,7 @@ private:
                                "geometries as subgroups, not both");
     }
     if (cylinderical) {
-      if (utilities::isNamed(*cylinderical, PIXEL_SHAPE))
-        searchTubes = true;
+      searchTubes = true;
       return parseNexusCylinder(*cylinderical);
     } else if (off)
       return parseNexusMesh(*off);

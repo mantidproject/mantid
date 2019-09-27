@@ -17,6 +17,14 @@ namespace NexusGeometry {
 
 // Utilities common for parsing and saving
 namespace utilities {
+template <typename T, typename R>
+std::vector<R> convertVector(const std::vector<T> &toConvert) {
+  std::vector<R> target(toConvert.size());
+  for (size_t i = 0; i < target.size(); ++i) {
+    target[i] = R(toConvert[i]);
+  }
+  return target;
+}
 
 boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup,
                                          const H5std_string &name);
