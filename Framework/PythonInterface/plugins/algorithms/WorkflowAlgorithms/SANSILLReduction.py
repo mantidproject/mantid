@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress
+from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
 from math import fabs
@@ -38,17 +38,30 @@ class SANSILLReduction(PythonAlgorithm):
         return issues
 
     @staticmethod
+    def _get_solid_angle_method(instrument):
+        if instrument in ['D11', 'D11lr']:
+            return 'Rectangle'
+        else:
+            return 'GenericShape'
+
+    @staticmethod
+    def _make_solid_angle_name(ws):
+        return mtd[ws].getInstrument().getName()+'_'+str(int(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
+
+    @staticmethod
     def _check_distances_match(ws1, ws2):
         """
             Checks if the detector distance between two workspaces are close enough
             @param ws1 : workspace 1
             @param ws2 : workspace 2
-            @return true if the detector distance difference is less than 1 cm
         """
         tolerance = 0.01 #m
         l2_1 = ws1.getRun().getLogData('L2').value
         l2_2 = ws2.getRun().getLogData('L2').value
-        return fabs(l2_1 - l2_2) < tolerance
+        r1 = ws1.getRunNumber()
+        r2 = ws2.getRunNumber()
+        if fabs(l2_1 - l2_2) > tolerance:
+            logger.warning('Different distances detected! {0}: {1}, {2}: {3}'.format(r1, l2_1, r2, l2_2))
 
     @staticmethod
     def _check_processed_flag(ws, value):
@@ -63,6 +76,11 @@ class SANSILLReduction(PythonAlgorithm):
         """
         return '<infinite-cylinder id="flux"><centre x="0.0" y="0.0" z="0.0"/><axis x="0.0" y="0.0" z="1.0"/>' \
                '<radius val="{0}"/></infinite-cylinder>'.format(radius)
+
+    @staticmethod
+    def _mask(ws, masked_ws):
+        if masked_ws.detectorInfo().hasMaskedDetectors():
+            MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
 
     def PyInit(self):
 
@@ -100,7 +118,7 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Choose the normalisation type.')
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam raduis [m]; used for beam center finding and transmission calculations.')
+                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
 
         self.setPropertySettings('BeamRadius',
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
@@ -193,17 +211,27 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('FluxOutputWorkspace', beam)
 
+        self.declareProperty('CacheSolidAngle', False, doc='Whether or not to cache the solid angle workspace.')
+
+        self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
+                                                          'used only if the absolute scale is done by dividing to water.')
+
+        self.declareProperty(MatrixWorkspaceProperty('DefaultMaskedInputWorkspace', '',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='Workspace to copy the mask from; for example, the bad detector edges.')
+
+        self.setPropertySettings('DefaultMaskedInputWorkspace', EnabledWhenProperty(sample, reference, LogicOperator.Or))
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
+        monID = 100000 if self._instrument != 'D33' else 500000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
-            monID = 100000
-            if mtd[ws].getInstrument().getName() == 'D33':
-                monID = 500000
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
             if mtd[mon].readY(0)[0] == 0:
                 raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
@@ -220,6 +248,9 @@ class SANSILLReduction(PythonAlgorithm):
                     raise RuntimeError('Unable to normalise to time; duration found is 0 seconds.')
             else:
                 raise RuntimeError('Normalise to timer requested, but timer information is not available.')
+        # regardless on normalisation, mask out the monitors, but do not extract them, since extracting is slow
+        # masking however is needed to get more reasonable scales in the instrument view
+        MaskDetectors(Workspace=ws, DetectorList=[monID, monID+1])
 
     def _process_beam(self, ws):
         """
@@ -275,8 +306,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace name
             @param beam_ws: empty beam workspace
         """
-        if not self._check_distances_match(mtd[ws], beam_ws):
-            self.log().warning('Different detector distances found for empty beam and transmission runs!')
+        self._check_distances_match(mtd[ws], beam_ws)
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=beam_ws, OutputWorkspace=ws)
         radius = self.getProperty('BeamRadius').value
         shapeXML = self._cylinder(radius)
@@ -312,28 +342,29 @@ class SANSILLReduction(PythonAlgorithm):
         if reference_ws:
             if not self._check_processed_flag(reference_ws, 'Reference'):
                 self.log().warning('Reference input workspace is not processed as reference.')
-            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws)
+            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
+            self._mask(ws, reference_ws)
             coll_ws = reference_ws
         else:
             sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
             if sensitivity_in:
                 if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
                     self.log().warning('Sensitivity input workspace is not processed as sensitivity.')
-                Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws)
+                Divide(LHSWorkspace=ws, RHSWorkspace=sensitivity_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                self._mask(ws, sensitivity_in)
             flux_in = self.getProperty('FluxInputWorkspace').value
             if flux_in:
                 coll_ws = flux_in
                 flux_ws = ws + '_flux'
                 if self._mode == 'TOF':
                     RebinToWorkspace(WorkspaceToRebin=flux_in, WorkspaceToMatch=ws, OutputWorkspace=flux_ws)
-                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws)
+                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     DeleteWorkspace(flux_ws)
                 else:
-                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws)
+                    Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
         if coll_ws:
-            if not self._check_distances_match(mtd[ws], coll_ws):
-                self.log().warning(
-                    'Different detector distances found for the reference/flux and sample runs!')
+            self._check_distances_match(mtd[ws], coll_ws)
             sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
             ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
             flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
@@ -366,8 +397,7 @@ class SANSILLReduction(PythonAlgorithm):
             AddSampleLog(Workspace=ws, LogName='BeamCenterX', LogText=str(beam_x), LogType='Number')
             AddSampleLog(Workspace=ws, LogName='BeamCenterY', LogText=str(beam_y), LogType='Number')
             MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
-        if not self._check_distances_match(mtd[ws], beam_ws):
-            self.log().warning('Different detector distances found for empty beam and sample runs!')
+        self._check_distances_match(mtd[ws], beam_ws)
 
     def _apply_transmission(self, ws, transmission_ws):
         """
@@ -400,24 +430,14 @@ class SANSILLReduction(PythonAlgorithm):
         """
         if not self._check_processed_flag(container_ws, 'Container'):
             self.log().warning('Container input workspace is not processed as container.')
-        if not self._check_distances_match(mtd[ws], container_ws):
-            self.log().warning(
-                'Different detector distances found for container and sample runs!')
+        self._check_distances_match(mtd[ws], container_ws)
         Minus(LHSWorkspace=ws, RHSWorkspace=container_ws, OutputWorkspace=ws)
 
-    def _apply_mask(self, ws, mask_ws):
-        """
-            Applies the mask
-            @param ws: input workspace
-            @param mask_ws: input masked workspace
-        """
-        masked_ws = ws + '_mask'
-        CloneWorkspace(InputWorkspace=mask_ws, OutputWorkspace=masked_ws)
-        ExtractMonitors(InputWorkspace=masked_ws, DetectorWorkspace=masked_ws)
-        MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
-        DeleteWorkspace(masked_ws)
-
     def _apply_parallax(self, ws):
+        """
+            Applies the parallax correction
+            @param ws : the input workspace
+        """
         self.log().information('Performing parallax correction')
         if self._instrument == 'D33':
             components = ['back_detector', 'front_detector_top', 'front_detector_bottom',
@@ -444,14 +464,40 @@ class SANSILLReduction(PythonAlgorithm):
         else:
             self.log().information('No tau available in IPF, skipping dead time correction.')
 
+    def _finalize(self, ws, process):
+        if process != 'Transmission':
+            if self._instrument == 'D33':
+                CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+            else:
+                CalculateDynamicRange(Workspace=ws)
+        mtd[ws].getRun().addProperty('ProcessedAs', process, True)
+        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
+        self.setProperty('OutputWorkspace', mtd[ws[2:]])
+
+    def _apply_masks(self, ws):
+        # apply the default mask, e.g. the bad detector edges
+        default_mask_ws = self.getProperty('DefaultMaskedInputWorkspace').value
+        if default_mask_ws:
+            self._mask(ws, default_mask_ws)
+        # apply the beam stop mask
+        mask_ws = self.getProperty('MaskedInputWorkspace').value
+        if mask_ws:
+            self._mask(ws, mask_ws)
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Reference', 'Sample']
         progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
-        LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+        # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
+        # instead we load and list, and merge once with merge runs
+        LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+        if isinstance(mtd[ws], WorkspaceGroup):
+            tmp = '__tmp'+ws
+            MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
+            DeleteWorkspaces(ws)
+            RenameWorkspace(InputWorkspace=tmp, OutputWorkspace=ws)
         self._normalise(ws)
-        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         self._instrument = mtd[ws].getInstrument().getName()
         run = mtd[ws].getRun()
         if run.hasProperty('tof_mode'):
@@ -476,18 +522,23 @@ class SANSILLReduction(PythonAlgorithm):
                     transmission_ws = self.getProperty('TransmissionInputWorkspace').value
                     if transmission_ws:
                         self._apply_transmission(ws, transmission_ws)
-                    solid_angle = ws + '_sa'
-                    SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
-                    Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws)
-                    DeleteWorkspace(solid_angle)
+                    solid_angle = self._make_solid_angle_name(ws)
+                    cache = self.getProperty('CacheSolidAngle').value
+                    if cache:
+                        if not mtd.doesExist(solid_angle):
+                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
+                                       Method=self._get_solid_angle_method(self._instrument))
+                    else:
+                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                    Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
+                    if not cache:
+                        DeleteWorkspace(solid_angle)
                     progress.report()
                     if process in ['Reference', 'Sample']:
                         container_ws = self.getProperty('ContainerInputWorkspace').value
                         if container_ws:
                             self._apply_container(ws, container_ws)
-                        mask_ws = self.getProperty('MaskedInputWorkspace').value
-                        if mask_ws:
-                            self._apply_mask(ws, mask_ws)
+                        self._apply_masks(ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         # parallax (gondola) effect
@@ -501,14 +552,7 @@ class SANSILLReduction(PythonAlgorithm):
                         elif process == 'Sample':
                             self._process_sample(ws)
                             progress.report()
-        if process != 'Transmission':
-            if self._instrument == 'D33':
-                CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
-            else:
-                CalculateDynamicRange(Workspace=ws)
-        mtd[ws].getRun().addProperty('ProcessedAs', process, True)
-        RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
-        self.setProperty('OutputWorkspace', mtd[ws[2:]])
+        self._finalize(ws, process)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLReduction)

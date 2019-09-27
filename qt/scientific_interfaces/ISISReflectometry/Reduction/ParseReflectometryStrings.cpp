@@ -100,11 +100,11 @@ boost::optional<boost::optional<double>>
 parseScaleFactor(std::string const &scaleFactor) {
   if (isEntirelyWhitespace(scaleFactor)) {
     return boost::optional<double>(boost::none);
-  } else {
-    auto value = parseDouble(scaleFactor);
-    if (value.is_initialized())
-      return value;
   }
+
+  auto value = parseDouble(scaleFactor);
+  if (value.is_initialized() && value != 0.0)
+    return value;
   return boost::none;
 }
 

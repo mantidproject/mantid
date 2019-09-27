@@ -34,6 +34,12 @@ void CloneWorkspace::init() {
 
 void CloneWorkspace::exec() {
   Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  Workspace_const_sptr outputWorkspace = getProperty("OutputWorkspace");
+  if (inputWorkspace == outputWorkspace) {
+    g_log.information("Inplace operation requested, doing nothing");
+    return; // nothing to do
+  }
+
   MatrixWorkspace_const_sptr inputMatrix =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
   IMDWorkspace_sptr inputMD =

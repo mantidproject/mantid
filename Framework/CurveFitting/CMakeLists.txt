@@ -34,6 +34,7 @@ set(SRC_FILES
     src/CostFunctions/CostFuncLeastSquares.cpp
     src/CostFunctions/CostFuncRwp.cpp
     src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
+    src/CostFunctions/CostFuncPoisson.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
     src/FuncMinimizers/BFGS_Minimizer.cpp
@@ -197,6 +198,7 @@ set(INC_FILES
     inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
+    inc/MantidCurveFitting/CostFunctions/CostFuncPoisson.h
     inc/MantidCurveFitting/DllConfig.h
     inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
@@ -358,6 +360,7 @@ set(TEST_FILES
     CostFunctions/CostFuncFittingTest.h
     CostFunctions/CostFuncUnweightedLeastSquaresTest.h
     CostFunctions/LeastSquaresTest.h
+    CostFuncPoissonTest.h
     FitMWTest.h
     FortranMatrixTest.h
     FortranVectorTest.h

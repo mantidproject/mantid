@@ -283,9 +283,11 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 self._deltaQ = MonochromaticScalarQCartesian(wavelength, delta_wavelength, x1, y1, x2, y2, x3, y3, l1, l2)
         else:
-            pos1 = source_aperture.find('(') + 1
-            pos3 = source_aperture.find(')')
-            r1 = float(source_aperture[pos1:pos3]) * to_meter
+            if '(' in source_aperture:
+                pos1 = source_aperture.find('(') + 1
+                pos3 = source_aperture.find(')')
+                source_aperture = source_aperture[pos1:pos3]
+            r1 = float(source_aperture) * to_meter
             r2 = run.getLogData('Beam.sample_ap_x_or_diam').value * to_meter
             if is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')

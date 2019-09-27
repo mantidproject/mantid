@@ -11,8 +11,8 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
 from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
     CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
-    LoadDiffCal, Load, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RebinToWorkspace, RemoveLogs, \
-    RenameWorkspace, SaveNexusProcessed
+    LoadDiffCal, Load, LoadIDFFromNexus, LoadNexusProcessed, PDDetermineCharacterizations, Plus, \
+    RebinToWorkspace, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
 import numpy as np
 
@@ -28,7 +28,7 @@ PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    "Params", "ResampleX", "Dspacing",
                    "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
-                   "CompressStartTime", "UnwrapRef", "LowResRef",
+                   "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
@@ -366,8 +366,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 self.__setupCalibration(chunkname)
 
             # copy the necessary logs onto the workspace
-            if haveAccumulationForFile and len(chunks) > 1 and canSkipLoadingLogs:
+            if len(chunks) > 1 and canSkipLoadingLogs and haveAccumulationForFile:
                 CopyLogs(InputWorkspace=wkspname, OutputWorkspace=chunkname, MergeStrategy='WipeExisting')
+                # re-load instrument so detector positions that depend on logs get initialized
+                try:
+                    LoadIDFFromNexus(Workspace=chunkname, Filename=filename, InstrumentParentPath='/entry')
+                except RuntimeError as e:
+                    self.log().warning('Reloading instrument using "LoadIDFFromNexus" failed: {}'.format(e))
 
             # get the underlying loader name if we used the generic one
             if self.__loaderName == 'Load':

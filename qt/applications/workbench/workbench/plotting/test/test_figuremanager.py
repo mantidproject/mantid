@@ -7,22 +7,9 @@
 #  This file is part of the mantid workbench.
 import unittest
 
-try:
-    from unittest import MagicMock, patch
-except ImportError:
-    from mock import MagicMock, patch
-
+from mantid.py3compat.mock import MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
-
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
-
-
-class MockLine2d(object):
-    def __init__(self, y):
-        self.y = y
-
-    def get_ydata(self):
-        return self.y
 
 
 @start_qapplication

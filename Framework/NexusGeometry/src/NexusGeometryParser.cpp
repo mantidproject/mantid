@@ -12,10 +12,11 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
-
+#include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
+#include "MantidNexusGeometry/NexusGeometryUtilities.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
 #include <Eigen/Core>
@@ -106,7 +107,7 @@ std::vector<ValueType> extractVector(const DataSet &data) {
 class Parser {
 private:
   // Logger object
-  std::unique_ptr<Logger> m_logger;
+  std::unique_ptr<AbstractLogger> m_logger;
 
   /**
    * The function allows us to determine where problems are and logs key
@@ -154,8 +155,19 @@ private:
       auto nCharacters = dataType.getSize();
       std::vector<char> value(nCharacters);
       data.read(value.data(), dataType, data.getSpace());
-      return std::string(value.begin(), value.end());
+      auto str = std::string(value.begin(), value.end());
+      str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
+      return str;
     }
+  }
+
+  // Provided to support invalid or null-termination character strings
+  std::string readOrSubsitute(const std::string &dataset, const Group &group,
+                              std::string &substitue) {
+    auto read = get1DStringDataset(dataset, group);
+    if (read.empty())
+      read = substitue;
+    return read;
   }
 
   /** Open subgroups of parent group
@@ -194,60 +206,10 @@ private:
     return subGroups;
   }
 
-  /// Find a single dataset inside parent group (returns first match). Unset for
-  /// no match.
-  boost::optional<DataSet> findDataset(const Group &parentGroup,
-                                       const H5std_string &name) {
-    // Iterate over children, and determine if a group
-    for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
-      if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
-        H5std_string childPath = parentGroup.getObjnameByIdx(i);
-        // Open the sub group
-        if (childPath == name) {
-          auto childDataset = openDataSet(parentGroup, childPath);
-          return boost::optional<DataSet>(childDataset);
-        }
-      }
-    }
-    return boost::optional<DataSet>{}; // Empty
-  }
-  /// Find a single group inside parent (returns first match). class type must
-  /// match NX_class. Unset for no match.
-  boost::optional<Group> findGroup(const Group &parentGroup,
-                                   const H5std_string &CLASS_TYPE) {
-    // Iterate over children, and determine if a group
-    for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
-      if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
-        H5std_string childPath = parentGroup.getObjnameByIdx(i);
-        // Open the sub group
-        auto childGroup = parentGroup.openGroup(childPath);
-        // Iterate through attributes to find NX_class
-        for (uint32_t attribute_index = 0;
-             attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
-             ++attribute_index) {
-          // Test attribute at current index for NX_class
-          Attribute attribute = childGroup.openAttribute(attribute_index);
-          if (attribute.getName() == NX_CLASS) {
-            // Get attribute data type
-            DataType dataType = attribute.getDataType();
-            // Get the NX_class type
-            H5std_string classType;
-            attribute.read(dataType, classType);
-            // If group of correct type, return the childGroup
-            if (classType == CLASS_TYPE) {
-              return boost::optional<Group>(childGroup);
-            }
-          }
-        }
-      }
-    }
-    return boost::optional<Group>{}; // Empty
-  }
-
   // Get the instrument name
   std::string instrumentName(const Group &root) {
-    Group entryGroup = *findGroup(root, NX_ENTRY);
-    Group instrumentGroup = *findGroup(entryGroup, NX_INSTRUMENT);
+    Group entryGroup = *utilities::findGroup(root, NX_ENTRY);
+    Group instrumentGroup = *utilities::findGroup(entryGroup, NX_INSTRUMENT);
     return get1DStringDataset("name", instrumentGroup);
   }
 
@@ -426,7 +388,7 @@ private:
         double angle = magnitude;
         if (isDegrees(transformUnits)) {
           // Convert angle from degrees to radians
-          angle *= PI / DEGREES_IN_SEMICIRCLE;
+          angle *= M_PI / DEGREES_IN_SEMICIRCLE;
         }
         Eigen::AngleAxisd rotation(angle, transformVector);
         transforms = rotation * transforms;
@@ -442,7 +404,7 @@ private:
   std::vector<Mantid::detid_t> getDetectorIds(const Group &detectorGroup) {
 
     std::vector<Mantid::detid_t> detIds;
-    if (!findDataset(detectorGroup, DETECTOR_IDS))
+    if (!utilities::findDataset(detectorGroup, DETECTOR_IDS))
       throw std::invalid_argument("Mantid requires the following named dataset "
                                   "to be present in NXDetectors: " +
                                   DETECTOR_IDS);
@@ -632,12 +594,13 @@ private:
   // Parse source and add to instrument
   void parseAndAddSource(const H5File &file, const Group &root,
                          InstrumentBuilder &builder) {
-    Group entryGroup = *findGroup(root, NX_ENTRY);
-    Group instrumentGroup = *findGroup(entryGroup, NX_INSTRUMENT);
-    Group sourceGroup = *findGroup(instrumentGroup, NX_SOURCE);
+    Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
+    Group instrumentGroup =
+        utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
+    Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
     std::string sourceName = "Unspecfied";
-    if (findDataset(sourceGroup, "name"))
-      sourceName = get1DStringDataset("name", sourceGroup);
+    if (utilities::findDataset(sourceGroup, "name"))
+      sourceName = readOrSubsitute("name", sourceGroup, sourceName);
     auto sourceTransformations = getTransformations(file, sourceGroup);
     auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
     builder.addSource(sourceName, sourceTransformations * defaultPos);
@@ -646,14 +609,14 @@ private:
   // Parse sample and add to instrument
   void parseAndAddSample(const H5File &file, const Group &root,
                          InstrumentBuilder &builder) {
-    Group entryGroup = *findGroup(root, NX_ENTRY);
-    Group sampleGroup = *findGroup(entryGroup, NX_SAMPLE);
+    Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
+    Group sampleGroup = utilities::findGroupOrThrow(entryGroup, NX_SAMPLE);
     auto sampleTransforms = getTransformations(file, sampleGroup);
     Eigen::Vector3d samplePos =
         sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
     std::string sampleName = "Unspecified";
-    if (findDataset(sampleGroup, "name"))
-      sampleName = get1DStringDataset("name", sampleGroup);
+    if (utilities::findDataset(sampleGroup, "name"))
+      sampleName = readOrSubsitute("name", sampleGroup, sampleName);
     builder.addSample(sampleName, samplePos);
   }
 
@@ -668,7 +631,7 @@ private:
       for (auto &inst : instrumentGroups) {
         std::vector<Group> monitorGroups = openSubGroups(inst, NX_MONITOR);
         for (auto &monitor : monitorGroups) {
-          if (!findDataset(monitor, DETECTOR_ID))
+          if (!utilities::findDataset(monitor, DETECTOR_ID))
             throw std::invalid_argument("NXmonitors must have " + DETECTOR_ID);
           auto detectorId = get1DDataset<int64_t>(monitor, DETECTOR_ID)[0];
           bool proxy = false;
@@ -683,7 +646,7 @@ private:
   }
 
 public:
-  explicit Parser(std::unique_ptr<Logger> &&logger)
+  explicit Parser(std::unique_ptr<AbstractLogger> &&logger)
       : m_logger(std::move(logger)) {}
 
   std::unique_ptr<const Mantid::Geometry::Instrument>
@@ -701,7 +664,7 @@ public:
       // Absolute bank rotation
       auto bankRotation = Eigen::Quaterniond(transforms.rotation());
       std::string bankName;
-      if (findDataset(detectorGroup, BANK_NAME))
+      if (utilities::findDataset(detectorGroup, BANK_NAME))
         bankName = get1DStringDataset(BANK_NAME,
                                       detectorGroup); // local_name is optional
       builder.addBank(bankName, bankPos, bankRotation);
@@ -750,7 +713,7 @@ public:
 
 std::unique_ptr<const Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName,
-                                      std::unique_ptr<Logger> logger) {
+                                      std::unique_ptr<AbstractLogger> logger) {
 
   const H5File file(fileName, H5F_ACC_RDONLY);
   auto rootGroup = file.openGroup("/");

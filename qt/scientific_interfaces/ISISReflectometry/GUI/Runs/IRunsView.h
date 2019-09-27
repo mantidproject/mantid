@@ -33,10 +33,10 @@ subclass.
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsViewSubscriber {
 public:
   virtual void notifySearch() = 0;
-  virtual void notifyAutoreductionResumed() = 0;
-  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyResumeAutoreductionRequested() = 0;
+  virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyTransfer() = 0;
-  virtual void notifyInstrumentChanged() = 0;
+  virtual void notifyChangeInstrumentRequested() = 0;
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;
@@ -80,8 +80,8 @@ public:
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 int defaultInstrumentIndex) = 0;
+  virtual void
+  setInstrumentList(const std::vector<std::string> &instruments) = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;

@@ -30,7 +30,6 @@ ExperimentPresenter::ExperimentPresenter(
 
 void ExperimentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  notifySettingsChanged();
 }
 
 Experiment const &ExperimentPresenter::experiment() const { return m_model; }
@@ -42,9 +41,9 @@ void ExperimentPresenter::notifySettingsChanged() {
 }
 
 void ExperimentPresenter::notifyRestoreDefaultsRequested() {
-  // Notify main presenter first to make sure instrument is up to date
-  m_mainPresenter->notifyRestoreDefaultsRequested();
-  restoreDefaults();
+  // Trigger a reload of the instrument to get up-to-date settings.
+  // After the instrument is updated, the defaults will be restored.
+  m_mainPresenter->notifyUpdateInstrumentRequested();
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {
@@ -105,15 +104,24 @@ void ExperimentPresenter::updateWidgetEnabledState() {
   updateFloodCorrectionEnabledState();
 }
 
-void ExperimentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyReductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void ExperimentPresenter::instrumentChanged(std::string const &instrumentName) {
+void ExperimentPresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   restoreDefaults();
 }

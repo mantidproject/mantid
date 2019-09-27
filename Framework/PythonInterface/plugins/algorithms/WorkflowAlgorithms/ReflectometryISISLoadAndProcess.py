@@ -25,14 +25,14 @@ class Prop:
     SECOND_TRANS_RUNS = 'SecondTransmissionRunList'
     SLICE = 'SliceWorkspace'
     NUMBER_OF_SLICES = 'NumberOfSlices'
-    QMIN='MomentumTransferMin'
-    QSTEP='MomentumTransferStep'
-    QMAX='MomentumTransferMax'
-    GROUP_TOF='GroupTOFWorkspaces'
-    RELOAD='ReloadInvalidWorkspaces'
-    OUTPUT_WS='OutputWorkspace'
-    OUTPUT_WS_BINNED='OutputWorkspaceBinned'
-    OUTPUT_WS_LAM='OutputWorkspaceWavelength'
+    QMIN = 'MomentumTransferMin'
+    QSTEP = 'MomentumTransferStep'
+    QMAX = 'MomentumTransferMax'
+    GROUP_TOF = 'GroupTOFWorkspaces'
+    RELOAD = 'ReloadInvalidWorkspaces'
+    OUTPUT_WS = 'OutputWorkspace'
+    OUTPUT_WS_BINNED = 'OutputWorkspaceBinned'
+    OUTPUT_WS_LAM = 'OutputWorkspaceWavelength'
 
 
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
@@ -74,19 +74,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                                                  values=[],
                                                  validator=mandatoryInputRuns),
                              doc='A list of run numbers or workspace names for the input runs. '
-                             'Multiple runs will be summed before reduction.')
+                                 'Multiple runs will be summed before reduction.')
         self.declareProperty(StringArrayProperty(Prop.FIRST_TRANS_RUNS,
                                                  values=[]),
                              doc='A list of run numbers or workspace names for the first transmission run. '
-                             'Multiple runs will be summed before reduction.')
+                                 'Multiple runs will be summed before reduction.')
         self.declareProperty(StringArrayProperty(Prop.SECOND_TRANS_RUNS,
                                                  values=[]),
                              doc='A list of run numbers or workspace names for the second transmission run. '
-                             'Multiple runs will be summed before reduction.')
+                                 'Multiple runs will be summed before reduction.')
         self._declareSliceAlgorithmProperties()
         self._declareReductionAlgorithmProperties()
-        self.declareProperty(Prop.GROUP_TOF, True, doc = 'If true, group the input TOF workspace')
-        self.declareProperty(Prop.RELOAD, True, doc = 'If true, reload input workspaces if they are of the incorrect type')
+        self.declareProperty(Prop.GROUP_TOF, True, doc='If true, group the input TOF workspace')
+        self.declareProperty(Prop.RELOAD, True,
+                             doc='If true, reload input workspaces if they are of the incorrect type')
         self.declareProperty(WorkspaceProperty(Prop.OUTPUT_WS, '',
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Output),
@@ -132,7 +133,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _declareSliceAlgorithmProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
-        self.declareProperty(Prop.SLICE, False, doc = 'If true, slice the input workspace')
+        self.declareProperty(Prop.SLICE, False, doc='If true, slice the input workspace')
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
         self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval']
@@ -201,8 +202,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
             if not AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
+                message = 'Monitors workspace ' + workspace_name + '_monitors does not exist'
                 if self._reload:
-                    message = 'Monitors workspace ' + workspace_name + '_monitors does not exist'
                     self.log().information(message)
                     _removeWorkspace(workspace_name)
                     return False
@@ -236,12 +237,36 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Not found
         return None
 
+    def _collapse_workspace_groups(self, workspaces):
+        """Given a list of workspaces, which themselves could be groups of workspaces,
+        return a new list of workspaces which are TOF"""
+        ungrouped_workspaces = []
+        delete_ws_group_flag = True
+        for ws_name in workspaces:
+            ws = AnalysisDataService.retrieve(ws_name)
+            if isinstance(ws, WorkspaceGroup):
+                ungrouped_workspaces += self._collapse_workspace_groups(ws.getNames())
+                if delete_ws_group_flag is True:
+                    AnalysisDataService.remove(ws_name)
+            else:
+                if (ws.getAxis(0).getUnit().unitID()) == 'TOF':
+                    ungrouped_workspaces.append(ws_name)
+                else:
+                    # Do not remove the workspace group from the ADS if a non-TOF workspace exists
+                    delete_ws_group_flag = False
+        return ungrouped_workspaces
+
     def _group_workspaces(self, workspaces, output_ws_name):
         """
         Groups all the given workspaces into a group with the given name. If the group
         already exists it will add them to that group.
         """
         if not self.getProperty(Prop.GROUP_TOF).value:
+            return
+
+        workspaces = self._collapse_workspace_groups(workspaces)
+
+        if not workspaces:
             return
 
         if AnalysisDataService.doesExist(output_ws_name):
@@ -275,7 +300,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _loadRun(self, run, isTrans):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
-        workspace_name=self._prefixedName(run, isTrans)
+        workspace_name = self._prefixedName(run, isTrans)
         if not isTrans and self._slicingEnabled():
             LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
@@ -320,7 +345,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if self.getProperty(Prop.NUMBER_OF_SLICES).isDefault:
             return
         number_of_slices = self.getProperty(Prop.NUMBER_OF_SLICES).value
-        run=AnalysisDataService.retrieve(workspace_name).run()
+        run = AnalysisDataService.retrieve(workspace_name).run()
         total_duration = (run.endTime() - run.startTime()).total_seconds()
         slice_duration = total_duration / number_of_slices
         alg.setProperty("TimeInterval", slice_duration)
@@ -333,7 +358,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         we can end up with more slices than we expect"""
         if alg.getProperty("TimeInterval").isDefault:
             return
-        run=AnalysisDataService.retrieve(workspace_name).run()
+        run = AnalysisDataService.retrieve(workspace_name).run()
         alg.setProperty("StartTime", str(run.startTime()))
         alg.setProperty("StopTime", str(run.endTime()))
 
@@ -423,7 +448,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
 
 def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
-    workspace=AnalysisDataService.retrieve(workspace_name)
+    workspace = AnalysisDataService.retrieve(workspace_name)
     if isinstance(workspace, WorkspaceGroup):
         raise RuntimeError('Slicing workspace groups is not supported')
     if not workspace.run().hasProperty('proton_charge'):
