@@ -20,7 +20,7 @@ class MuH(IFunction1D):
         self.declareParameter("NuD", 0.5, 'Oscillating Frequency (MHz)' )
         self.declareParameter("Lambda", 0.3, 'Exponential decay rate')
         self.declareParameter("Sigma", 0.05, 'Gaussian decay rate')
-        self.declareParameter("Phi", 0.05, 'Phase (rad)')
+        self.declareParameter("Phi", 0.0, 'Phase (rad)')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
