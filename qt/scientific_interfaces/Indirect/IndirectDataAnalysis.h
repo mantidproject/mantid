@@ -30,20 +30,20 @@ enum IDATabChoice { ELWIN, MSD_FIT, IQT, IQT_FIT, CONV_FIT, JUMP_FIT };
 static const unsigned int NUM_DECIMALS = 6;
 
 // Forward Declaration
-class IndirectDataAnalysisTab;
+class IndirectDataAnalysisTabLegacy;
 
 /**
  * The IndirectDataAnalysis class is the main class that handles the interface
  *and controls
  * its tabs.
  *
- * Is a friend to the IndirectDataAnalysisTab class.
+ * Is a friend to the IndirectDataAnalysisTabLegacy class.
  */
 class IndirectDataAnalysis : public IndirectInterface {
   Q_OBJECT
 
-  /// Allow IndirectDataAnalysisTab to have access.
-  friend class IndirectDataAnalysisTab;
+  /// Allow IndirectDataAnalysisTabLegacy to have access.
+  friend class IndirectDataAnalysisTabLegacy;
 
 public:
   /// The name of the interface as registered into the factory
@@ -93,7 +93,7 @@ private:
       m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
-  std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;
+  std::map<unsigned int, IndirectDataAnalysisTabLegacy *> m_tabs;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

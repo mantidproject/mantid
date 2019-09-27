@@ -24,6 +24,7 @@ set(
   IndirectBayesTab.cpp
   IndirectCorrections.cpp
   IndirectDataAnalysis.cpp
+  IndirectDataAnalysisTabLegacy.cpp
   IndirectDataAnalysisTab.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
@@ -151,6 +152,7 @@ set(
   IndirectBayesTab.h
   IndirectCorrections.h
   IndirectDataAnalysis.h
+  IndirectDataAnalysisTabLegacy.h
   IndirectDataAnalysisTab.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h

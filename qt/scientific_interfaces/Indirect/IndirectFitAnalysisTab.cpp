@@ -67,7 +67,7 @@ namespace IDA {
 
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModelLegacy *model,
                                                QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
+    : IndirectDataAnalysisTabLegacy(parent), m_fittingModel(model) {}
 
 void IndirectFitAnalysisTab::setup() {
   setupFitTab();

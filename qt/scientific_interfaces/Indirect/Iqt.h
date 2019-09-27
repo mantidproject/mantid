@@ -7,13 +7,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectDataAnalysisTabLegacy.h"
 #include "ui_Iqt.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport Iqt : public IndirectDataAnalysisTab {
+class DLLExport Iqt : public IndirectDataAnalysisTabLegacy {
   Q_OBJECT
 
 public:

@@ -101,7 +101,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
+    : IndirectDataAnalysisTabLegacy(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
       m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
@@ -504,8 +504,8 @@ void Elwin::newPreviewFileSelected(int index) {
  * Replots the preview plot.
  */
 void Elwin::plotInput() {
-  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
-  IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
+  IndirectDataAnalysisTabLegacy::plotInput(m_uiForm.ppPlot);
+  IndirectDataAnalysisTabLegacy::updatePlotRange("ElwinIntegrationRange",
                                            m_uiForm.ppPlot, "IntegrationStart",
                                            "IntegrationEnd");
 

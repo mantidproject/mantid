@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
 
-#include "IndirectDataAnalysisTab.h"
+#include "IndirectDataAnalysisTabLegacy.h"
 #include "IndirectFitDataPresenterLegacy.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
@@ -29,7 +29,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
+class DLLExport IndirectFitAnalysisTab : public IndirectDataAnalysisTabLegacy {
   Q_OBJECT
 
 public:
