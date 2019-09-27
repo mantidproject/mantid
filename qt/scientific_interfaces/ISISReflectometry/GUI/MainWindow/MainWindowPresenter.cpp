@@ -38,6 +38,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param view :: [input] The view we are managing
  * @param messageHandler :: Interface to a class that displays messages to
  * the user
+ * @param slitCalculator :: Interface to the Slit Calculator dialog
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
