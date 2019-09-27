@@ -181,6 +181,29 @@ private:
     }
     return ints;
   }
+
+  template <typename T>
+  typename std::enable_if<std::is_base_of<H5::H5Object, T>::value,
+                          std::string>::type
+  unsupportedNXFloatMessage(size_t nxfloatsize, const T &object,
+                            const std::string &dsName) {
+    std::stringstream ss;
+    ss << "Cannot handle reading ints of size " << nxfloatsize << " from "
+       << dsName << " in " << H5_OBJ_NAME(object)
+       << ". Only 64 and 32 bit floats handled";
+    return ss.str();
+  }
+  template <typename T>
+  typename std::enable_if<!std::is_base_of<H5::H5Object, T>::value,
+                          std::string>::type
+  unsupportedNXFloatMessage(size_t nxfloatsize, const T &,
+                            const std::string &dsName) {
+    std::stringstream ss;
+    ss << "Cannot handle reading ints of size " << nxfloatsize << " from "
+       << dsName << ". Only 64 and 32 bit floats handled";
+    return ss.str();
+  }
+
   // Read NXFloats - provides abstraction for reading different sized integers
   // arrays http://download.nexusformat.org/doc/html/nxdl-types.html#nx-float
   template <typename T>
@@ -193,11 +216,8 @@ private:
     } else if (nxfloatsize == sizeof(double_t)) {
       floats = get1DDataset<double_t>(object, dsName);
     } else {
-      std::stringstream ss;
-      ss << "Cannot handle reading ints of size " << nxfloatsize << " from "
-         << dsName << " in " << H5_OBJ_NAME(object)
-         << ". Only 64 and 32 bit floats handled";
-      throw std::runtime_error(ss.str());
+      throw std::runtime_error(
+          unsupportedNXFloatMessage(nxfloatsize, object, dsName));
     }
     return floats;
   }
