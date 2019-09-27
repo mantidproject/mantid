@@ -7,7 +7,10 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include <stdexcept>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -48,6 +51,42 @@ const std::string ConvertWANDSCDtoMDE::summary() const {
   return "TODO: FILL IN A SUMMARY";
 }
 
+std::map<std::string, std::string> ConvertWANDSCDtoMDE::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  std::vector<double> minVals = this->getProperty("MinValues");
+  std::vector<double> maxVals = this->getProperty("MaxValues");
+
+  if (minVals.size() != maxVals.size()) {
+    std::stringstream msg;
+    msg << "Rank of MinValues != MaxValues (" << minVals.size()
+        << "!=" << maxVals.size() << ")";
+    result["MinValues"] = msg.str();
+    result["MaxValues"] = msg.str();
+  } else {
+    std::stringstream msg;
+
+    size_t rank = minVals.size();
+    for (size_t i = 0; i < rank; ++i) {
+      if (minVals[i] >= maxVals[i]) {
+        if (msg.str().empty())
+          msg << "max not bigger than min ";
+        else
+          msg << ", ";
+        msg << "at index=" << (i + 1) << " (" << minVals[i]
+            << ">=" << maxVals[i] << ")";
+      }
+    }
+
+    if (!msg.str().empty()) {
+      result["MinValues"] = msg.str();
+      result["MaxValues"] = msg.str();
+    }
+  }
+
+  return result;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -60,12 +99,33 @@ void ConvertWANDSCDtoMDE::init() {
       std::make_unique<WorkspaceProperty<API::IMDEventWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "An output workspace.");
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "wavelength", Mantid::EMPTY_DBL(), Direction::Input),
+                  "wavelength");
+  declareProperty(std::make_unique<ArrayProperty<double>>("MinValues"),
+                  "It has to be N comma separated values, where N is the "
+                  "number of dimensions of the target workspace. Values "
+                  "smaller then specified here will not be added to "
+                  "workspace.\n Number N is defined by properties 4,6 and 7 "
+                  "and "
+                  "described on *MD Transformation factory* page. See also "
+                  ":ref:`algm-ConvertToMDMinMaxLocal`");
+
+  declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues"),
+                  "A list of the same size and the same units as MinValues "
+                  "list. Values higher or equal to the specified by "
+                  "this list will be ignored");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertWANDSCDtoMDE::exec() {
+  double wavelength = this->getProperty("wavelength");
+  if (wavelength == Mantid::EMPTY_DBL()) {
+    throw std::invalid_argument("wavelength not entered!");
+  }
+
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
   auto s1 = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
@@ -80,20 +140,19 @@ void ConvertWANDSCDtoMDE::exec() {
   Mantid::API::IMDEventWorkspace_sptr outputWS;
   outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
   Mantid::Geometry::QSample frame;
-  outputWS->addDimension(Geometry::MDHistoDimension_sptr(
-      new Geometry::MDHistoDimension("Q_sample_x", "Q_sample_x", frame,
-                                     static_cast<coord_t>(-10),
-                                     static_cast<coord_t>(10), 1)));
+  std::vector<double> minVals = this->getProperty("MinValues");
+  std::vector<double> maxVals = this->getProperty("MaxValues");
+  outputWS->addDimension(boost::make_shared<Geometry::MDHistoDimension>(
+      "Q_sample_x", "Q_sample_x", frame, static_cast<coord_t>(minVals[0]),
+      static_cast<coord_t>(maxVals[0]), 1));
 
-  outputWS->addDimension(Geometry::MDHistoDimension_sptr(
-      new Geometry::MDHistoDimension("Q_sample_y", "Q_sample_y", frame,
-                                     static_cast<coord_t>(-10),
-                                     static_cast<coord_t>(10), 1)));
+  outputWS->addDimension(boost::make_shared<Geometry::MDHistoDimension>(
+      "Q_sample_y", "Q_sample_y", frame, static_cast<coord_t>(minVals[1]),
+      static_cast<coord_t>(maxVals[1]), 1));
 
-  outputWS->addDimension(Geometry::MDHistoDimension_sptr(
-      new Geometry::MDHistoDimension("Q_sample_z", "Q_sample_z", frame,
-                                     static_cast<coord_t>(-10),
-                                     static_cast<coord_t>(10), 1)));
+  outputWS->addDimension(boost::make_shared<Geometry::MDHistoDimension>(
+      "Q_sample_z", "Q_sample_z", frame, static_cast<coord_t>(minVals[2]),
+      static_cast<coord_t>(maxVals[2]), 1));
   outputWS->setCoordinateSystem(Mantid::Kernel::QSample);
   outputWS->initialize();
 
@@ -107,7 +166,7 @@ void ConvertWANDSCDtoMDE::exec() {
       boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
-  double k = 2 * M_PI / 1.488;
+  double k = 2. * M_PI / wavelength;
   for (size_t n = 0; n < s1.size(); n++) {
     Matrix<double> goniometer(3, 3, true);
     goniometer[0][0] = cos(s1[n] * M_PI / 180);
