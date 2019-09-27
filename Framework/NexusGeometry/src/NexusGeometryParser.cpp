@@ -539,7 +539,7 @@ private:
       const auto faceIndexOfDetector = detFaces[i];
       const auto faceIndex = faceIndices[faceIndexOfDetector];
       auto nextFaceIndex = windingOrder.size();
-      if (faceIndexOfDetector + 1 < detFaces.size())
+      if (faceIndexOfDetector + 1 < faceIndices.size())
         nextFaceIndex = faceIndices[faceIndexOfDetector + 1];
       const auto nVertsInFace = nextFaceIndex - faceIndex;
       const auto detID = detFaces[i + 1];
@@ -641,9 +641,8 @@ private:
                                "geometries as subgroups, not both");
     }
     if (cylinderical) {
-      if (H5_OBJ_NAME((*cylinderical)) == PIXEL_SHAPE) {
+      if (utilities::isNamed(*cylinderical, PIXEL_SHAPE))
         searchTubes = true;
-      }
       return parseNexusCylinder(*cylinderical);
     } else if (off)
       return parseNexusMesh(*off);
@@ -748,19 +747,22 @@ public:
       // Extract shape
       auto detShape = parseNexusShape(detectorGroup, searchTubes);
 
-      if (detShape && searchTubes) {
+      if (searchTubes) {
         auto tubes = TubeHelpers::findAndSortTubes(*detShape, detectorPixels,
                                                    detectorIds);
         builder.addTubes(bankName, tubes, detShape);
-      } else {
-        for (size_t i = 0; i < detectorIds.size(); ++i) {
-          auto index = static_cast<int>(i);
-          std::string name = bankName + "_" + std::to_string(index);
 
-          Eigen::Vector3d relativePos = detectorPixels.col(index);
-          builder.addDetectorToLastBank(name, detectorIds[index], relativePos,
-                                        detShape);
-        }
+        // Even if tubes are searched, we do NOT guarantee all detectors will be
+        // in tube formation, so must continue to process non-tube detectors
+        detectorIds = TubeHelpers::notInTubes(tubes, detectorIds);
+      }
+      for (size_t i = 0; i < detectorIds.size(); ++i) {
+        auto index = static_cast<int>(i);
+        std::string name = bankName + "_" + std::to_string(index);
+
+        Eigen::Vector3d relativePos = detectorPixels.col(index);
+        builder.addDetectorToLastBank(name, detectorIds[index], relativePos,
+                                      detShape);
       }
     }
     // Sort the detectors

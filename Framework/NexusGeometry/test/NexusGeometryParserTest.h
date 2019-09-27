@@ -238,6 +238,7 @@ public:
     auto &compInfo = *beamline.first;
     auto &detInfo = *beamline.second;
     TS_ASSERT_EQUALS(detInfo.size(), 4);
+
     auto &shape1 = compInfo.shape(0);
     auto &shape2 = compInfo.shape(1);
 

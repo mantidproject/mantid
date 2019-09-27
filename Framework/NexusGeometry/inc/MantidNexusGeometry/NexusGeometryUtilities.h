@@ -33,6 +33,7 @@ std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
 boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup,
                                            const H5std_string &name);
 bool hasAttribute(const H5::Group &group, const std::string attributeValue);
+bool isNamed(const H5::H5Object &obj, const std::string &name);
 } // namespace utilities
 } // namespace NexusGeometry
 } // namespace Mantid
