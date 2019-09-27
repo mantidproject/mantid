@@ -23,6 +23,7 @@ Improved
 - Rows and Groups inside of the Runs table will now have their state reset when the underlying reduced workspace is replaced or renamed
 - The polarization correction inputs have been simplified to a single checkbox which when ticked will apply polarization corrections based on properties in the instrument parameters file.
 - Batch names will now have a unique number assigned to it, and there will no longer be multiple batches of the same name.
+- The Instrument is now synchronised across all Batch tabs.
 
 Algorithms
 ----------

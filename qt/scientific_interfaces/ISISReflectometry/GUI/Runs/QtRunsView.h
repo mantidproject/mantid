@@ -19,17 +19,12 @@
 
 namespace MantidQt {
 
-namespace MantidWidgets {
-class SlitCalculator;
-} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-
-using MantidWidgets::SlitCalculator;
 
 /** QtRunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -56,8 +51,7 @@ public:
   ISearchModel &mutableSearchResults() override;
 
   // Setter methods
-  void setInstrumentList(const std::vector<std::string> &instruments,
-                         int defaultInstrumentIndex) override;
+  void setInstrumentList(const std::vector<std::string> &instruments) override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
   void setAutoreducePauseButtonEnabled(bool enabled) override;
@@ -108,8 +102,6 @@ private:
 
   // the interface
   Ui::RunsWidget m_ui;
-  // the slit calculator
-  SlitCalculator *m_calculator;
 
   QtRunsTableView *m_tableView;
 
@@ -130,7 +122,6 @@ private slots:
   void onStartMonitorComplete();
   void onSearchComplete();
   void onInstrumentChanged(int index);
-  void onShowSlitCalculatorRequested();
   void onShowSearchContextMenuRequested(const QPoint &pos);
 };
 

@@ -205,12 +205,12 @@ void RunsTablePresenter::removeGroupsFromModel(
     removeGroup(m_model.mutableReductionJobs(), *it);
 }
 
-void RunsTablePresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyReductionResumed();
+void RunsTablePresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
-void RunsTablePresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyReductionPaused();
+void RunsTablePresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
 }
 
 void RunsTablePresenter::notifyInsertRowRequested() {
@@ -237,10 +237,9 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   }
 }
 
-void RunsTablePresenter::notifyInstrumentChanged() {
+void RunsTablePresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getInstrumentName();
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
@@ -250,7 +249,8 @@ void RunsTablePresenter::updateWidgetEnabledState() {
   auto const autoreducing = isAutoreducing();
 
   m_view->setJobsTableEnabled(!processing && !autoreducing);
-  m_view->setInstrumentSelectorEnabled(!processing && !autoreducing);
+  m_view->setInstrumentSelectorEnabled(!isAnyBatchProcessing() &&
+                                       !isAnyBatchAutoreducing());
   m_view->setProcessButtonEnabled(!processing && !autoreducing);
   m_view->setActionEnabled(IRunsTableView::Action::Process,
                            !processing && !autoreducing);
@@ -272,15 +272,38 @@ void RunsTablePresenter::updateWidgetEnabledState() {
                            !processing && !autoreducing);
 }
 
-void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
+void RunsTablePresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
+void RunsTablePresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsTablePresenter::notifyAnyBatchReductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchReductionPaused() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   m_view->setInstrumentName(instrumentName);
 }
 
@@ -844,6 +867,14 @@ bool RunsTablePresenter::isProcessing() const {
 
 bool RunsTablePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsTablePresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
+}
+
+bool RunsTablePresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {

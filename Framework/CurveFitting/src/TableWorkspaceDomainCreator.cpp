@@ -123,7 +123,8 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
     TableWorkspaceDomainCreator::DomainType domainType)
     : IDomainCreator(fit, std::vector<std::string>(1, workspacePropertyName),
                      domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(0) {
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(0),
+      m_noErrCol(false) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -138,7 +139,8 @@ TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
 TableWorkspaceDomainCreator::TableWorkspaceDomainCreator(
     TableWorkspaceDomainCreator::DomainType domainType)
     : IDomainCreator(nullptr, std::vector<std::string>(), domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10) {}
+      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10),
+      m_noErrCol(false) {}
 
 /**
  * Declare properties that specify the dataset within the workspace to fit to.
@@ -278,6 +280,8 @@ void TableWorkspaceDomainCreator::createDomain(
       if (!m_ignoreInvalidData)
         throw std::runtime_error("Infinte number or NaN found in input data.");
       y = 0.0; // leaving inf or nan would break the fit
+    } else if (m_noErrCol) {
+      weight = 1.0;
     } else if (!std::isfinite(error)) {
       // nan or inf error
       if (!m_ignoreInvalidData)
@@ -779,6 +783,7 @@ void TableWorkspaceDomainCreator::setAndValidateWorkspace(
   // if no error column has been found a column is added with 0 errors
   if (columnNames.size() == 2) {
     m_errColName = "AddedErrorColumn";
+    m_noErrCol = true;
     auto columnAdded = m_tableWorkspace->addColumn("double", m_errColName);
     if (!columnAdded)
       throw std::invalid_argument("No error column provided.");

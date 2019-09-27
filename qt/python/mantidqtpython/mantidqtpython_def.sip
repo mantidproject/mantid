@@ -150,7 +150,6 @@ class ManageUserDirectories : QDialog
 %End
 public:
     ManageUserDirectories();
-    static void openUserDirsDialog(QWidget *parent);
 };
 
 class InterfaceManager

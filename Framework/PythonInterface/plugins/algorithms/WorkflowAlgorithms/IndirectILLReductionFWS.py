@@ -184,9 +184,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._criteria = '($/entry0/instrument/Doppler/maximum_delta_energy$ == 0. or ' \
                          '$/entry0/instrument/Doppler/velocity_profile$ == 1)'
 
-        # make sure observable entry also exists (value is not important)
-        self._criteria += ' and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
-
         # force sort x-axis, if interpolation is requested
         if ((self._back_option == 'Interpolate' and self._background_files) or
                 (self._calib_option == 'Interpolate' and self._calibration_files) or

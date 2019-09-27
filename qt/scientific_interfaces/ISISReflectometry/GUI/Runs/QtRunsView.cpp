@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
-#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include <QMenu>
 #include <QMessageBox>
 
@@ -30,8 +29,7 @@ using namespace MantidQt::Icons;
 QtRunsView::QtRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
       m_searchNotifyee(nullptr), m_searchModel(),
-      m_calculator(new SlitCalculator(this)), m_tableView(makeRunsTableView()),
-      m_timer() {
+      m_tableView(makeRunsTableView()), m_timer() {
   initLayout();
   m_ui.tableSearchResults->setModel(&m_searchModel);
 }
@@ -173,15 +171,13 @@ void QtRunsView::setStopMonitorButtonEnabled(bool enabled) {
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available
-@param defaultInstrumentIndex : The index of the instrument to have selected by
 default
 */
-void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments,
-                                   int defaultInstrumentIndex) {
+void QtRunsView::setInstrumentList(
+    const std::vector<std::string> &instruments) {
   m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
-  m_ui.comboSearchInstrument->setCurrentIndex(defaultInstrumentIndex);
 }
 
 /**
@@ -238,7 +234,7 @@ This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void QtRunsView::on_actionAutoreduce_triggered() {
-  m_notifyee->notifyAutoreductionResumed();
+  m_notifyee->notifyResumeAutoreductionRequested();
 }
 
 /**
@@ -246,22 +242,13 @@ This slot conducts a search operation before notifying the presenter that the
 "pause autoreduce" button has been pressed
 */
 void QtRunsView::on_actionAutoreducePause_triggered() {
-  m_notifyee->notifyAutoreductionPaused();
+  m_notifyee->notifyPauseAutoreductionRequested();
 }
 
 /**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
 void QtRunsView::on_actionTransfer_triggered() { m_notifyee->notifyTransfer(); }
-
-/**
-This slot shows the slit calculator
-*/
-void QtRunsView::onShowSlitCalculatorRequested() {
-  m_calculator->setCurrentInstrumentName(
-      m_ui.comboSearchInstrument->currentText().toStdString());
-  m_calculator->show();
-}
 
 /**
 This slot is triggered when the user right clicks on the search results table
@@ -282,11 +269,9 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
  * @param index : The index of the combo box
  */
 void QtRunsView::onInstrumentChanged(int index) {
+  UNUSED_ARG(index);
   m_ui.textSearch->clear();
-  m_calculator->setCurrentInstrumentName(
-      m_ui.comboSearchInstrument->itemText(index).toStdString());
-  m_calculator->processInstrumentHasBeenChanged();
-  m_notifyee->notifyInstrumentChanged();
+  m_notifyee->notifyChangeInstrumentRequested();
 }
 
 /**

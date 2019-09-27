@@ -777,7 +777,7 @@ void ProjectionSurface::clearComparisonPeaks() {
  */
 void ProjectionSurface::setPeakLabelPrecision(int n) {
   if (n < 1) {
-    QMessageBox::critical(nullptr, "MantidPlot - Error",
+    QMessageBox::critical(nullptr, "Mantid - Error",
                           "Precision must be a positive number");
     return;
   }
