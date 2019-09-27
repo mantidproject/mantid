@@ -156,6 +156,26 @@ private:
     return ints;
   }
   template <typename T>
+  std::vector<uint32_t> readNXUInts32(const T &object,
+                                      const std::string &dsName) {
+    std::vector<uint32_t> ints;
+    const auto nxintsize = object.openDataSet(dsName).getDataType().getSize();
+    if (nxintsize == sizeof(int32_t)) {
+      ints = convertVector<int32_t, uint32_t>(
+          get1DDataset<int32_t>(object, dsName));
+    } else if (nxintsize == sizeof(int64_t)) {
+      ints = convertVector<int64_t, uint32_t>(
+          get1DDataset<int64_t>(object, dsName));
+    } else {
+      std::stringstream ss;
+      ss << "Cannot handle reading ints of size " << nxintsize << " from "
+         << dsName << " in " << H5_OBJ_NAME(object)
+         << ". Only 64 and 32 bit signed ints handled";
+      throw std::runtime_error(ss.str());
+    }
+    return ints;
+  }
+  template <typename T>
   std::vector<double> readNXFloats(const T &object, const std::string &dsName) {
     std::vector<double> floats;
     const auto nxfloatsize = object.openDataSet(dsName).getDataType().getSize();
@@ -633,12 +653,9 @@ private:
                                 const std::string &bankName) {
     // Load mapping between detector IDs and faces, winding order of vertices
     // for faces, and face corner vertices.
-    const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "detector_faces"));
-    const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "faces"));
-    const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "winding_order"));
+    const auto detFaces = readNXUInts32(shapeGroup, "detector_faces");
+    const auto faceIndices = readNXUInts32(shapeGroup, "faces");
+    const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
     const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
 
     // Sanity check entries
