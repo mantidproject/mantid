@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from mantid.py3compat.mock import patch, MagicMock
+from mantid.py3compat.mock import patch
 from Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 
 VANADIUM_NUMBER = 307521
@@ -53,7 +53,7 @@ class CalibrationModelTest(unittest.TestCase):
         plot_difc_zero.assert_not_called()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True)
         plot_van.assert_called_once()
-        plot_difc_zero.assert_called_once()
+        self.assertEqual(plot_difc_zero.call_count, 2)
 
 
 if __name__ == '__main__':

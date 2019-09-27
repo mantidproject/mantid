@@ -117,5 +117,22 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton_close</sender>
+   <signal>pressed()</signal>
+   <receiver>EngDIffMainGUI</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>589</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

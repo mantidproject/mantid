@@ -833,10 +833,9 @@ public:
     double getParameter(const QString &paramName) const;
 };
 
-// ---
-//
-// ---
-
+// ---------------------------------
+// MWRunFiles
+// ---------------------------------
 class MWRunFiles : QWidget
 {
 %TypeHeaderCode
@@ -844,13 +843,18 @@ class MWRunFiles : QWidget
 %End
 public:
 MWRunFiles(QWidget *parent = nullptr);
+
+void setLabelText(const QString &text);
 void setLabelMinWidth(const int);
 void liveButtonSetChecked(bool);
 bool liveButtonIsChecked();
-QString getText() /PyName=text/;
+QString getText();
+QString getFirstFilename() const;
 bool isValid();
 void setUserInput(const QVariant &);
 void setText(const QString&);
+void setInstrumentOverride(const QString &instName);
+
 signals:
 void fileEditingFinished();
 void fileFindingFinished();

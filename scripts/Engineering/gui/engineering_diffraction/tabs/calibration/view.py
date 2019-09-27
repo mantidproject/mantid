@@ -18,13 +18,25 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def __init__(self, parent=None):
         super(CalibrationView, self).__init__(parent)
         self.setupUi(self)
+        self.finder_calib.setLabelText("Calibration Sample #")
+        self.finder_calib.setInstrumentOverride("ENGINX")
 
-    def on_browse_vanadium_clicked(self, slot):
-        self.button_browseVanadium.clicked.connect(slot)
+        self.finder_vanadium.setLabelText("Vanadium #")
+        self.finder_vanadium.setInstrumentOverride("ENGINX")
+        self.setup_tabbing_order()
 
-
-    def on_browse_calibration_clicked(self, slot):
-        self.button_browseCalib.clicked.connect(slot)
-
-    def on_calibrate_clicked(self, slot):
+    def set_on_calibrate_clicked(self, slot):
         self.button_calibrate.clicked.connect(slot)
+
+    def get_vanadium_filename(self):
+        return self.finder_vanadium.getFirstFilename()
+
+    def get_calib_filename(self):
+        return self.finder_calib.getFirstFilename()
+
+    def get_plot_output(self):
+        return self.check_plotOutput.isChecked()
+
+    def setup_tabbing_order(self):
+        # TODO
+        print()
