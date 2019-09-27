@@ -72,7 +72,7 @@ contains two child event workspaces, one for the added event data and one
 for the added monitor data.
 
 With **'Overlay Event Workspaces' Disabled** the event data from the files
-is added using the event the :doc:`Plus Algorithm <../algorithms/Plus-v1>`.
+is added using the event the :ref:`Plus Algorithm <algm-Plus>`.
 Timestamps of the events and of the logs are not
 changed as indicated in the image below.
 
@@ -101,7 +101,7 @@ operation. The working principle is illustrated below:
    Adding two workspaces by overlaying them
 
 Note that the underlying mechanism for time shifting is provided by the
-:doc:`ChangeTimeZero Algorithm <../algorithms/ChangeTimeZero-v1>`.
+:ref:`ChangeTimeZero Algorithm <algm-ChangeTimeZero>`.
 Using this option will result in a change to the history of the underlying
 data.
 
