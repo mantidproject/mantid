@@ -290,7 +290,7 @@ void IndirectFitAnalysisTab::setOutputOptionsView(
 }
 
 void IndirectFitAnalysisTab::setFitPropertyBrowser(
-    MantidWidgets::IndirectFitPropertyBrowser *browser) {
+    MantidWidgets::IndirectFitPropertyBrowserLegacy *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
 }

@@ -19,13 +19,13 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowser
+class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowserLegacy
     : public FitPropertyBrowser {
   Q_OBJECT
 
 public:
   /// Constructor.
-  IndirectFitPropertyBrowser(QWidget *parent = nullptr,
+  IndirectFitPropertyBrowserLegacy(QWidget *parent = nullptr,
                              QObject *mantidui = nullptr);
   /// Initialise the layout.
   void init() override;

@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
@@ -61,12 +61,12 @@ namespace MantidWidgets {
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
  */
-IndirectFitPropertyBrowser::IndirectFitPropertyBrowser(QWidget *parent,
+IndirectFitPropertyBrowserLegacy::IndirectFitPropertyBrowserLegacy(QWidget *parent,
                                                        QObject *mantidui)
     : FitPropertyBrowser(parent, mantidui), m_functionsInComboBox(nullptr),
       m_backgroundHandler(nullptr) {}
 
-void IndirectFitPropertyBrowser::init() {
+void IndirectFitPropertyBrowserLegacy::init() {
   QWidget *w = new QWidget(this);
   setFeatures(QDockWidget::DockWidgetFloatable |
               QDockWidget::DockWidgetMovable);
@@ -185,7 +185,7 @@ void IndirectFitPropertyBrowser::init() {
 /**
  * @return  The selected background function.
  */
-IFunction_sptr IndirectFitPropertyBrowser::background() const {
+IFunction_sptr IndirectFitPropertyBrowserLegacy::background() const {
   if (m_backgroundHandler != nullptr)
     return m_backgroundHandler->function()->clone();
   else
@@ -196,7 +196,7 @@ IFunction_sptr IndirectFitPropertyBrowser::background() const {
  * @return  The function index of the selected background. None if no background
  *          is selected.
  */
-boost::optional<size_t> IndirectFitPropertyBrowser::backgroundIndex() const {
+boost::optional<size_t> IndirectFitPropertyBrowserLegacy::backgroundIndex() const {
   if (m_backgroundHandler != nullptr) {
     const auto prefix = m_backgroundHandler->functionPrefix();
 
@@ -211,7 +211,7 @@ boost::optional<size_t> IndirectFitPropertyBrowser::backgroundIndex() const {
  * @return          The function index of the specified function in the browser.
  */
 boost::optional<size_t>
-IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
+IndirectFitPropertyBrowserLegacy::functionIndex(IFunction_sptr function) const {
   for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
     if (compositeFunction()->getFunction(i) == function)
       return i;
@@ -222,7 +222,7 @@ IndirectFitPropertyBrowser::functionIndex(IFunction_sptr function) const {
 /**
  * @return  The selected fit type in the fit type combo box.
  */
-QString IndirectFitPropertyBrowser::selectedFitType() const {
+QString IndirectFitPropertyBrowserLegacy::selectedFitType() const {
   const auto index = m_enumManager->value(m_functionsInComboBox);
   return m_enumManager->enumNames(m_functionsInComboBox)[index];
 }
@@ -230,7 +230,7 @@ QString IndirectFitPropertyBrowser::selectedFitType() const {
 /**
  * @return  The name of the selected background function.
  */
-QString IndirectFitPropertyBrowser::backgroundName() const {
+QString IndirectFitPropertyBrowserLegacy::backgroundName() const {
   auto background = enumValue(m_backgroundSelection);
   if (background.isEmpty())
     return "None";
@@ -241,7 +241,7 @@ QString IndirectFitPropertyBrowser::backgroundName() const {
 /**
  * @return  A map from parameter name to a tie expression.
  */
-QHash<QString, QString> IndirectFitPropertyBrowser::getTies() const {
+QHash<QString, QString> IndirectFitPropertyBrowserLegacy::getTies() const {
   QHash<QString, QString> ties;
   getCompositeTies(getHandler(), ties);
   return ties;
@@ -253,7 +253,7 @@ QHash<QString, QString> IndirectFitPropertyBrowser::getTies() const {
  * @param ties    The map in which to store the tie expression under the tied
  *                parameter.
  */
-void IndirectFitPropertyBrowser::getCompositeTies(
+void IndirectFitPropertyBrowserLegacy::getCompositeTies(
     PropertyHandler *handler, QHash<QString, QString> &ties) const {
   for (size_t i = 0u; i < handler->cfun()->nFunctions(); ++i) {
     auto nextHandler = handler->getHandler(i);
@@ -270,7 +270,7 @@ void IndirectFitPropertyBrowser::getCompositeTies(
  * @param ties    The map in which to store the tie expression under the tied
  *                parameter.
  */
-void IndirectFitPropertyBrowser::getTies(PropertyHandler *handler,
+void IndirectFitPropertyBrowserLegacy::getTies(PropertyHandler *handler,
                                          QHash<QString, QString> &ties) const {
   const auto prefix = handler->functionPrefix() + ".";
   auto tieProperties = handler->getTies();
@@ -283,7 +283,7 @@ void IndirectFitPropertyBrowser::getTies(PropertyHandler *handler,
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
+size_t IndirectFitPropertyBrowserLegacy::numberOfCustomFunctions(
     const std::string &functionName) const {
   auto count = m_customFunctionCount.find(functionName);
   if (count != m_customFunctionCount.end())
@@ -297,7 +297,7 @@ size_t IndirectFitPropertyBrowser::numberOfCustomFunctions(
  * @return              All values of the parameter with the specified name, in
  *                      the function with the specified name.
  */
-std::vector<double> IndirectFitPropertyBrowser::parameterValue(
+std::vector<double> IndirectFitPropertyBrowserLegacy::parameterValue(
     const std::string &functionName, const std::string &parameterName) const {
   std::vector<double> values;
   const auto composite = compositeFunction();
@@ -319,7 +319,7 @@ std::vector<double> IndirectFitPropertyBrowser::parameterValue(
  * @param parameterName The name of the parameter to set.
  * @param value         The value to set.
  */
-void IndirectFitPropertyBrowser::setParameterValue(
+void IndirectFitPropertyBrowserLegacy::setParameterValue(
     const std::string &functionName, const std::string &parameterName,
     double value) {
   const auto composite = compositeFunction();
@@ -342,7 +342,7 @@ void IndirectFitPropertyBrowser::setParameterValue(
  * @param parameterName The name of the parameter to set.
  * @param value         The value to set.
  */
-void IndirectFitPropertyBrowser::setParameterValue(
+void IndirectFitPropertyBrowserLegacy::setParameterValue(
     IFunction_sptr function, const std::string &parameterName, double value) {
   if (function->hasParameter(parameterName)) {
     function->setParameter(parameterName, value);
@@ -355,7 +355,7 @@ void IndirectFitPropertyBrowser::setParameterValue(
  *
  * @param backgroundName  The name of the background to add.
  */
-void IndirectFitPropertyBrowser::setBackground(
+void IndirectFitPropertyBrowserLegacy::setBackground(
     const std::string &backgroundName) {
   if (m_backgroundHandler != nullptr && backgroundIndex()) {
     MantidQt::API::SignalBlocker blocker(this);
@@ -375,7 +375,7 @@ void IndirectFitPropertyBrowser::setBackground(
  *
  * @param convolveMembers If true, members are to be convolved.
  */
-void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveMembers) {
+void IndirectFitPropertyBrowserLegacy::setConvolveMembers(bool convolveMembers) {
   m_boolManager->setValue(m_convolveMembers, convolveMembers);
 }
 
@@ -385,7 +385,7 @@ void IndirectFitPropertyBrowser::setConvolveMembers(bool convolveMembers) {
  * @param settingName The name of the custom setting.
  * @param enabled     True if custom setting should be enabled, false otherwise.
  */
-void IndirectFitPropertyBrowser::setCustomSettingEnabled(
+void IndirectFitPropertyBrowserLegacy::setCustomSettingEnabled(
     const QString &settingName, bool enabled) {
   m_customSettings[settingName]->setEnabled(enabled);
 }
@@ -395,7 +395,7 @@ void IndirectFitPropertyBrowser::setCustomSettingEnabled(
  *
  * @param backgrounds A list of the names of available backgrouns to set.
  */
-void IndirectFitPropertyBrowser::setBackgroundOptions(
+void IndirectFitPropertyBrowserLegacy::setBackgroundOptions(
     const QStringList &backgrounds) {
   const auto currentlyHidden =
       m_enumManager->enumNames(m_backgroundSelection).isEmpty();
@@ -409,16 +409,16 @@ void IndirectFitPropertyBrowser::setBackgroundOptions(
   m_enumManager->setEnumNames(m_backgroundSelection, backgrounds);
 }
 
-void IndirectFitPropertyBrowser::updateErrors() {
+void IndirectFitPropertyBrowserLegacy::updateErrors() {
   getHandler()->updateErrors();
 }
 
-void IndirectFitPropertyBrowser::updateTies() {
+void IndirectFitPropertyBrowserLegacy::updateTies() {
   for (auto i = 0u; i < compositeFunction()->nParams(); ++i)
     updateTie(i);
 }
 
-void IndirectFitPropertyBrowser::updateTie(std::size_t index) {
+void IndirectFitPropertyBrowserLegacy::updateTie(std::size_t index) {
   const auto function = compositeFunction();
   const auto tie = function->getTie(index);
   const auto tieString = tie ? tie->asString() : "";
@@ -428,7 +428,7 @@ void IndirectFitPropertyBrowser::updateTie(std::size_t index) {
     addTie(QString::fromStdString(tieString));
 }
 
-void IndirectFitPropertyBrowser::addTie(const QString &tieString) {
+void IndirectFitPropertyBrowserLegacy::addTie(const QString &tieString) {
   const auto index = tieString.split(".").first().right(1).toInt();
   const auto handler = getHandler()->getHandler(index);
 
@@ -436,7 +436,7 @@ void IndirectFitPropertyBrowser::addTie(const QString &tieString) {
     handler->addTie(tieString);
 }
 
-void IndirectFitPropertyBrowser::removeTie(const QString &parameterName) {
+void IndirectFitPropertyBrowserLegacy::removeTie(const QString &parameterName) {
   const auto parts = parameterName.split(".");
   const auto index = parts.first().right(1).toInt();
   const auto name = parts.last();
@@ -448,13 +448,13 @@ void IndirectFitPropertyBrowser::removeTie(const QString &parameterName) {
   }
 }
 
-void IndirectFitPropertyBrowser::clearErrors() { getHandler()->clearErrors(); }
+void IndirectFitPropertyBrowserLegacy::clearErrors() { getHandler()->clearErrors(); }
 
 /**
  * @param settingKey  The key of the boolean setting whose value to retrieve.
  * @return            The value of the boolean setting with the specified key.
  */
-bool IndirectFitPropertyBrowser::boolSettingValue(
+bool IndirectFitPropertyBrowserLegacy::boolSettingValue(
     const QString &settingKey) const {
   return m_boolManager->value(m_customSettings[settingKey]);
 }
@@ -466,7 +466,7 @@ bool IndirectFitPropertyBrowser::boolSettingValue(
  * @param settingKey  The key of the custom boolean setting.
  * @param value       The value to set the boolean custom setting to.
  */
-void IndirectFitPropertyBrowser::setCustomBoolSetting(const QString &settingKey,
+void IndirectFitPropertyBrowserLegacy::setCustomBoolSetting(const QString &settingKey,
                                                       bool value) {
   m_boolManager->setValue(m_customSettings[settingKey], value);
 }
@@ -475,7 +475,7 @@ void IndirectFitPropertyBrowser::setCustomBoolSetting(const QString &settingKey,
  * @param settingKey  The key of the integer setting whose value to retrieve.
  * @return            The value of the integer setting with the specified key.
  */
-int IndirectFitPropertyBrowser::intSettingValue(
+int IndirectFitPropertyBrowserLegacy::intSettingValue(
     const QString &settingKey) const {
   return m_intManager->value(m_customSettings[settingKey]);
 }
@@ -484,7 +484,7 @@ int IndirectFitPropertyBrowser::intSettingValue(
  * @param settingKey  The key of the double setting whose value to retrieve.
  * @return            The value of the double setting with the specified key.
  */
-double IndirectFitPropertyBrowser::doubleSettingValue(
+double IndirectFitPropertyBrowserLegacy::doubleSettingValue(
     const QString &settingKey) const {
   return m_doubleManager->value(m_customSettings[settingKey]);
 }
@@ -494,7 +494,7 @@ double IndirectFitPropertyBrowser::doubleSettingValue(
  * @return            The value of the enum setting with the specified key.
  */
 QString
-IndirectFitPropertyBrowser::enumSettingValue(const QString &settingKey) const {
+IndirectFitPropertyBrowserLegacy::enumSettingValue(const QString &settingKey) const {
   return enumValue(m_customSettings[settingKey]);
 }
 
@@ -505,7 +505,7 @@ IndirectFitPropertyBrowser::enumSettingValue(const QString &settingKey) const {
  * @param settingName   The display name of the boolean setting to add.
  * @param defaultValue  The default value of the boolean setting.
  */
-void IndirectFitPropertyBrowser::addBoolCustomSetting(
+void IndirectFitPropertyBrowserLegacy::addBoolCustomSetting(
     const QString &settingKey, const QString &settingName, bool defaultValue) {
   auto settingProperty = m_boolManager->addProperty(settingName);
   m_boolManager->setValue(settingProperty, defaultValue);
@@ -519,7 +519,7 @@ void IndirectFitPropertyBrowser::addBoolCustomSetting(
  * @param settingName   The display name of the integer setting to add.
  * @param defaultValue  The default value of the integer setting.
  */
-void IndirectFitPropertyBrowser::addIntCustomSetting(const QString &settingKey,
+void IndirectFitPropertyBrowserLegacy::addIntCustomSetting(const QString &settingKey,
                                                      const QString &settingName,
                                                      int defaultValue) {
   auto settingProperty = m_intManager->addProperty(settingName);
@@ -534,7 +534,7 @@ void IndirectFitPropertyBrowser::addIntCustomSetting(const QString &settingKey,
  * @param settingName   The display name of the double setting to add.
  * @param defaultValue  The default value of the double setting.
  */
-void IndirectFitPropertyBrowser::addDoubleCustomSetting(
+void IndirectFitPropertyBrowserLegacy::addDoubleCustomSetting(
     const QString &settingKey, const QString &settingName,
     double defaultValue) {
   auto settingProperty = m_doubleManager->addProperty(settingName);
@@ -549,7 +549,7 @@ void IndirectFitPropertyBrowser::addDoubleCustomSetting(
  * @param settingName   The display name of the enum setting to add.
  * @param options       The available options in the enum setting.
  */
-void IndirectFitPropertyBrowser::addEnumCustomSetting(
+void IndirectFitPropertyBrowserLegacy::addEnumCustomSetting(
     const QString &settingKey, const QString &settingName,
     const QStringList &options) {
   auto settingProperty = m_enumManager->addProperty(settingName);
@@ -564,7 +564,7 @@ void IndirectFitPropertyBrowser::addEnumCustomSetting(
  * @param settingKey      The key of the custom setting to add.
  * @param settingProperty The property to display in the fit property browser.
  */
-void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
+void IndirectFitPropertyBrowserLegacy::addCustomSetting(const QString &settingKey,
                                                   QtProperty *settingProperty) {
   m_customSettingsGroup->addSubProperty(settingProperty);
 
@@ -592,7 +592,7 @@ void IndirectFitPropertyBrowser::addCustomSetting(const QString &settingKey,
  *                      otherwise.
  * @param defaultValue  The default value of the optional double setting.
  */
-void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
+void IndirectFitPropertyBrowserLegacy::addOptionalDoubleSetting(
     const QString &settingKey, const QString &settingName,
     const QString &optionKey, const QString &optionName, bool enabled,
     double defaultValue) {
@@ -614,7 +614,7 @@ void IndirectFitPropertyBrowser::addOptionalDoubleSetting(
  * @param enabled         True if the setting should start enabled, false
  *                        otherwise.
  */
-void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
+void IndirectFitPropertyBrowserLegacy::addOptionalSetting(const QString &settingKey,
                                                     QtProperty *settingProperty,
                                                     const QString &optionKey,
                                                     const QString &optionName,
@@ -637,7 +637,7 @@ void IndirectFitPropertyBrowser::addOptionalSetting(const QString &settingKey,
  * @param changesFunction Boolean specifying whether the setting affects the
  *                        fitting function.
  */
-void IndirectFitPropertyBrowser::setCustomSettingChangesFunction(
+void IndirectFitPropertyBrowserLegacy::setCustomSettingChangesFunction(
     const QString &settingKey, bool changesFunction) {
   if (changesFunction)
     m_functionChangingSettings.insert(m_customSettings[settingKey]);
@@ -654,7 +654,7 @@ void IndirectFitPropertyBrowser::setCustomSettingChangesFunction(
  * @param functions     The functions to be added when the check-box is checked.
  * @param defaultValue  The default value of the check-box.
  */
-void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
+void IndirectFitPropertyBrowserLegacy::addCheckBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     bool defaultValue) {
   auto boolProperty = createFunctionGroupProperty(groupName, m_boolManager);
@@ -674,7 +674,7 @@ void IndirectFitPropertyBrowser::addCheckBoxFunctionGroup(
  * @param maximum       The maximum value of the spinner.
  * @param defaultValue  The default value of the spinner.
  */
-void IndirectFitPropertyBrowser::addSpinnerFunctionGroup(
+void IndirectFitPropertyBrowserLegacy::addSpinnerFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions,
     int minimum, int maximum, int defaultValue) {
   auto intProperty = createFunctionGroupProperty(groupName, m_intManager);
@@ -693,7 +693,7 @@ void IndirectFitPropertyBrowser::addSpinnerFunctionGroup(
  *                  combo-box.
  * @param functions The functions added by the option.
  */
-void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
+void IndirectFitPropertyBrowserLegacy::addComboBoxFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   if (m_functionsInComboBox == nullptr) {
     m_functionsInComboBox =
@@ -712,7 +712,7 @@ void IndirectFitPropertyBrowser::addComboBoxFunctionGroup(
  * Removes all current Fit Type options from the fit type combo-box in this
  * property browser.
  */
-void IndirectFitPropertyBrowser::clearFitTypeComboBox() {
+void IndirectFitPropertyBrowserLegacy::clearFitTypeComboBox() {
   m_enumManager->setEnumNames(m_functionsInComboBox, {"None"});
 }
 
@@ -723,7 +723,7 @@ void IndirectFitPropertyBrowser::clearFitTypeComboBox() {
  * @param groupName The name of the function group.
  * @param functions The functions associated to the function group.
  */
-void IndirectFitPropertyBrowser::addCustomFunctionGroup(
+void IndirectFitPropertyBrowserLegacy::addCustomFunctionGroup(
     const QString &groupName, const std::vector<IFunction_sptr> &functions) {
   m_groupToFunctionList[groupName] = functions;
 
@@ -743,7 +743,7 @@ void IndirectFitPropertyBrowser::addCustomFunctionGroup(
  * @param multiples The number of times to add the functions in the function
  *                  group.
  */
-void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
+void IndirectFitPropertyBrowserLegacy::addCustomFunctions(QtProperty *prop,
                                                     const QString &groupName,
                                                     const int &multiples) {
   for (int i = 0; i < multiples; ++i) {
@@ -763,7 +763,7 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
  * @param prop      The property in which to display the functions.
  * @param groupName The name of the function group.
  */
-void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
+void IndirectFitPropertyBrowserLegacy::addCustomFunctions(QtProperty *prop,
                                                     const QString &groupName) {
   if (!m_functionHandlers.contains(prop))
     m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
@@ -779,7 +779,7 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
  * @param prop      The property in which to display the functions.
  * @param functions The functions to add.
  */
-void IndirectFitPropertyBrowser::addCustomFunctions(
+void IndirectFitPropertyBrowserLegacy::addCustomFunctions(
     QtProperty *prop, const std::vector<IFunction_sptr> &functions) {
   MantidQt::API::SignalBlocker blocker(this);
   for (const auto &function : functions) {
@@ -791,7 +791,7 @@ void IndirectFitPropertyBrowser::addCustomFunctions(
 /**
  * Clears the functions in this indirect fit property browser.
  */
-void IndirectFitPropertyBrowser::clear() {
+void IndirectFitPropertyBrowserLegacy::clear() {
   clearAllCustomFunctions();
   FitPropertyBrowser::clear();
 }
@@ -799,7 +799,7 @@ void IndirectFitPropertyBrowser::clear() {
 /**
  * Clears all custom functions in this fit property browser.
  */
-void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
+void IndirectFitPropertyBrowserLegacy::clearAllCustomFunctions() {
   for (const auto &prop : m_functionHandlers.keys()) {
     if (m_functionsAsCheckBox.contains(prop))
       m_boolManager->setValue(prop, false);
@@ -817,7 +817,7 @@ void IndirectFitPropertyBrowser::clearAllCustomFunctions() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(
+void IndirectFitPropertyBrowserLegacy::updatePlotGuess(
     MatrixWorkspace_const_sptr sampleWorkspace) {
   if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
@@ -831,7 +831,7 @@ void IndirectFitPropertyBrowser::updatePlotGuess(
  * @param prop        The property to clear of custom functions.
  * @param emitSignals If True, will emit Qt signals.
  */
-void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop,
+void IndirectFitPropertyBrowserLegacy::clearCustomFunctions(QtProperty *prop,
                                                       bool emitSignals) {
   clearCustomFunctions(prop);
   m_functionHandlers[prop].clear();
@@ -848,7 +848,7 @@ void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop,
  *
  * @param prop        The property to clear of custom functions.
  */
-void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::clearCustomFunctions(QtProperty *prop) {
   MantidQt::API::SignalBlocker blocker(this);
   for (const auto &functionHandler : m_functionHandlers[prop]) {
 
@@ -870,7 +870,7 @@ void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
  *                        property to precede others in this indirect
  *                        fit property.
  */
-QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
+QtProperty *IndirectFitPropertyBrowserLegacy::createFunctionGroupProperty(
     const QString &groupName, QtAbstractPropertyManager *propertyManager,
     bool atFront) {
   auto functionProperty = propertyManager->addProperty(groupName);
@@ -893,7 +893,7 @@ QtProperty *IndirectFitPropertyBrowser::createFunctionGroupProperty(
  *
  * @param handler The handler containing the function to be removed.
  */
-void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
+void IndirectFitPropertyBrowserLegacy::removeFunction(PropertyHandler *handler) {
 
   for (const auto &prop : m_functionHandlers.keys()) {
     auto &functionHandlers = m_functionHandlers[prop];
@@ -919,7 +919,7 @@ void IndirectFitPropertyBrowser::removeFunction(PropertyHandler *handler) {
  *
  * @param prop  The property of the removed custom function.
  */
-void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::customFunctionRemoved(QtProperty *prop) {
 
   if (m_functionsAsSpinner.contains(prop)) {
     disconnect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this,
@@ -945,23 +945,23 @@ void IndirectFitPropertyBrowser::customFunctionRemoved(QtProperty *prop) {
   }
 }
 
-void IndirectFitPropertyBrowser::setWorkspaceIndex(int i) {
+void IndirectFitPropertyBrowserLegacy::setWorkspaceIndex(int i) {
   FitPropertyBrowser::setWorkspaceIndex(i);
 }
 
-void IndirectFitPropertyBrowser::setFitEnabled(bool enable) {
+void IndirectFitPropertyBrowserLegacy::setFitEnabled(bool enable) {
   FitPropertyBrowser::setFitEnabled(enable);
 }
 
 /**
  * Schedules a fit.
  */
-void IndirectFitPropertyBrowser::fit() { emit fitScheduled(); }
+void IndirectFitPropertyBrowserLegacy::fit() { emit fitScheduled(); }
 
 /**
  * Schedules a sequential fit.
  */
-void IndirectFitPropertyBrowser::sequentialFit() {
+void IndirectFitPropertyBrowserLegacy::sequentialFit() {
   emit sequentialFitScheduled();
 }
 
@@ -970,7 +970,7 @@ void IndirectFitPropertyBrowser::sequentialFit() {
  *
  * @param prop  The property containing the enum value which was changed.
  */
-void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::enumChanged(QtProperty *prop) {
 
   if (prop == m_functionsInComboBox) {
     clearCustomFunctions(prop, false);
@@ -989,7 +989,7 @@ void IndirectFitPropertyBrowser::enumChanged(QtProperty *prop) {
  *
  * @param prop  The property containing the boolean value which was changed.
  */
-void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::boolChanged(QtProperty *prop) {
   const auto propertyName = prop->propertyName();
 
   if (m_optionProperties.contains(prop)) {
@@ -1016,7 +1016,7 @@ void IndirectFitPropertyBrowser::boolChanged(QtProperty *prop) {
  *
  * @param prop  The property containing the integer value which was changed.
  */
-void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::intChanged(QtProperty *prop) {
 
   if (m_functionsAsSpinner.contains(prop)) {
     auto multiples = m_intManager->value(prop);
@@ -1034,7 +1034,7 @@ void IndirectFitPropertyBrowser::intChanged(QtProperty *prop) {
  *
  * @param prop  The property containing the double value which was changed.
  */
-void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::doubleChanged(QtProperty *prop) {
   if (m_customSettings.values().contains(prop)) {
     emit customDoubleChanged(prop->propertyName(),
                              m_doubleManager->value(prop));
@@ -1048,7 +1048,7 @@ void IndirectFitPropertyBrowser::doubleChanged(QtProperty *prop) {
  *
  * @param prop The custom setting property which was changed.
  */
-void IndirectFitPropertyBrowser::customChanged(QtProperty *prop) {
+void IndirectFitPropertyBrowserLegacy::customChanged(QtProperty *prop) {
   if (m_functionChangingSettings.contains(prop))
     emit functionChanged();
 }
@@ -1057,7 +1057,7 @@ void IndirectFitPropertyBrowser::customChanged(QtProperty *prop) {
  * @param prop  The property whose enum value to extract.
  * @return      The enum value of the specified property.
  */
-QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
+QString IndirectFitPropertyBrowserLegacy::enumValue(QtProperty *prop) const {
   const auto values = m_enumManager->enumNames(prop);
   if (values.isEmpty())
     return "";
@@ -1070,7 +1070,7 @@ QString IndirectFitPropertyBrowser::enumValue(QtProperty *prop) const {
  *
  * @param isVisible True if the browser is visible, false otherwise.
  */
-void IndirectFitPropertyBrowser::browserVisibilityChanged(bool isVisible) {
+void IndirectFitPropertyBrowserLegacy::browserVisibilityChanged(bool isVisible) {
   if (!isVisible)
     emit browserClosed();
 }

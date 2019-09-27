@@ -16,7 +16,7 @@
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
 
-#include "MantidQtWidgets/Common/IndirectFitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h"
 
 #include <boost/optional.hpp>
 
@@ -41,7 +41,7 @@ public:
   void setSpectrumSelectionView(IndirectSpectrumSelectionView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
   void
-  setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowser *browser);
+  setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowserLegacy *browser);
 
   virtual std::string tabName() const = 0;
 
@@ -227,7 +227,7 @@ private:
   void setPDFWorkspace(std::string const &workspaceName);
 
   std::unique_ptr<IndirectFittingModelLegacy> m_fittingModel;
-  MantidWidgets::IndirectFitPropertyBrowser *m_fitPropertyBrowser;
+  MantidWidgets::IndirectFitPropertyBrowserLegacy *m_fitPropertyBrowser;
   std::unique_ptr<IndirectFitDataPresenterLegacy> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenterLegacy> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;

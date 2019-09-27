@@ -38,7 +38,7 @@
           <enum>QLayout::SetNoConstraint</enum>
          </property>
          <item>
-          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowserLegacy" name="fitPropertyBrowser">
            <widget class="QWidget" name="dockWidgetContents_2"/>
           </widget>
          </item>
@@ -156,9 +156,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowser</class>
+   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowserLegacy</class>
    <extends>QDockWidget</extends>
-   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowser.h</header>
+   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
