@@ -62,7 +62,6 @@ void ALFView_presenter::loadRunNumber() {
     return;
   }
   const std::string runNumber = "ALF" + std::to_string(newRun);
-  std::string filePath;
   // check its a valid run number
   try {
     Mantid::API::FileFinder::Instance().findRuns(runNumber)[0];
