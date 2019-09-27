@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <string>
 
+#include <string>
+
 namespace Mantid {
 namespace API {
 

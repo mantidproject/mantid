@@ -10,6 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include <Eigen/Dense>
 #include <stdexcept>
 
 namespace Mantid {
@@ -167,20 +168,24 @@ void ConvertWANDSCDtoMDE::exec() {
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   double k = 2. * M_PI / wavelength;
+  std::vector<Eigen::Vector3d> q_lab_pre;
+  q_lab_pre.reserve(azimuthal.size());
+  for (size_t m = 0; m < azimuthal.size(); ++m) {
+    q_lab_pre.push_back({-sin(twotheta[m]) * cos(azimuthal[m]) * k,
+                         -sin(twotheta[m]) * sin(azimuthal[m]) * k,
+                         (1. - cos(twotheta[m])) * k});
+  }
+
   for (size_t n = 0; n < s1.size(); n++) {
-    Matrix<double> goniometer(3, 3, true);
-    goniometer[0][0] = cos(s1[n] * M_PI / 180);
-    goniometer[0][2] = sin(s1[n] * M_PI / 180);
-    goniometer[2][0] = -sin(s1[n] * M_PI / 180);
-    goniometer[2][2] = cos(s1[n] * M_PI / 180);
-    goniometer.Invert();
+    Eigen::Matrix<double, 3, 3> goniometer;
+    goniometer(0, 0) = cos(s1[n] * M_PI / 180);
+    goniometer(0, 2) = sin(s1[n] * M_PI / 180);
+    goniometer(2, 0) = -sin(s1[n] * M_PI / 180);
+    goniometer(2, 2) = cos(s1[n] * M_PI / 180);
+    goniometer = goniometer.inverse();
     for (size_t m = 0; m < azimuthal.size(); m++) {
-      std::vector<double> q_lab(3);
       std::vector<Mantid::coord_t> q_sample(3);
-      q_lab[0] = -sin(twotheta[m]) * cos(azimuthal[m]) * k;
-      q_lab[1] = -sin(twotheta[m]) * sin(azimuthal[m]) * k;
-      q_lab[2] = (1 - cos(twotheta[m])) * k;
-      q_lab = goniometer * q_lab;
+      auto q_lab = goniometer * q_lab_pre[m];
       q_sample[0] = static_cast<Mantid::coord_t>(q_lab[0]);
       q_sample[1] = static_cast<Mantid::coord_t>(q_lab[1]);
       q_sample[2] = static_cast<Mantid::coord_t>(q_lab[2]);
