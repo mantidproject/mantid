@@ -17,18 +17,18 @@ class MuH(IFunction1D):
 
     def init(self):
         self.declareParameter("A0", 0.5, 'Amplitude')
-        self.declareParameter("FreqD", 0.5, 'Frequency (MHz)' )
+        self.declareParameter("NuD", 0.5, 'Frequency (MHz)' )
         self.declareParameter("Lambda", 0.3, 'Exponential decay rate')
         self.declareParameter("Sigma", 0.05, 'Gaussian decay rate')
         self.declareParameter("Phi", 0.05, 'Phase (rad)')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
-        FreqD = self.getParameterValue("FreqD")
+        NuD = self.getParameterValue("NuD")
         Lambda = self.getParameterValue("Lambda")
         sigma = self.getParameterValue("Sigma")
         phi = self.getParameterValue("Phi")
-        OmegaD = FreqD * 2 * np.pi
+        OmegaD = NuD * 2 * np.pi
         gau = np.exp(-0.5 * (x * sigma) ** 2)
         Lor = np.exp( - Lambda * x)
         return A0 * gau * Lor * (1 + np.cos(OmegaD * x + phi) + 2 * np.cos(0.5 * OmegaD * x + phi) + 2 * np.cos(1.5 * OmegaD * x + phi)) / 6
