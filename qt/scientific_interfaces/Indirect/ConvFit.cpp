@@ -36,7 +36,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new ConvFitModel, parent),
+    : IndirectFitAnalysisTabLegacy(new ConvFitModel, parent),
       m_uiForm(new Ui::ConvFit) {
   m_uiForm->setupUi(parent);
   m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
@@ -121,7 +121,7 @@ void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
     m_convFittingModel->setTemperature(boost::none);
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
-  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
+  IndirectFitAnalysisTabLegacy::setupFit(fitAlgorithm);
 }
 
 void ConvFit::setModelResolution(const QString &resolutionName) {

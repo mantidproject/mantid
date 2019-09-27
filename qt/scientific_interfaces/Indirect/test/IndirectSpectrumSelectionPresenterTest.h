@@ -11,7 +11,7 @@
 #include <gmock/gmock.h>
 
 #include "IndirectFittingModelLegacy.h"
-#include "IndirectSpectrumSelectionPresenter.h"
+#include "IndirectSpectrumSelectionPresenterLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
@@ -49,7 +49,7 @@ static QApplicationHolder MAIN_QAPPLICATION;
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionView {
+class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionViewLegacy {
 public:
   /// Signals
   void emitSelectedSpectraChanged(std::string const &spectra) {
@@ -91,7 +91,7 @@ public:
 };
 
 /// Note that there is limited (if any) interaction going from this model to the
-/// IndirectSpectrumSelectionView, meaning that not many methods are required
+/// IndirectSpectrumSelectionViewLegacy, meaning that not many methods are required
 /// for mocking.
 class MockIndirectSpectrumSelectionModel : public IndirectFittingModelLegacy {
 public:
@@ -133,7 +133,7 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockIndirectSpectrumSelectionView>>();
     m_model = std::make_unique<NiceMock<MockIndirectSpectrumSelectionModel>>();
-    m_presenter = std::make_unique<IndirectSpectrumSelectionPresenter>(
+    m_presenter = std::make_unique<IndirectSpectrumSelectionPresenterLegacy>(
         std::move(m_model.get()), std::move(m_view.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(10));
@@ -362,7 +362,7 @@ public:
 private:
   std::unique_ptr<MockIndirectSpectrumSelectionView> m_view;
   std::unique_ptr<MockIndirectSpectrumSelectionModel> m_model;
-  std::unique_ptr<IndirectSpectrumSelectionPresenter> m_presenter;
+  std::unique_ptr<IndirectSpectrumSelectionPresenterLegacy> m_presenter;
 };
 
 #endif

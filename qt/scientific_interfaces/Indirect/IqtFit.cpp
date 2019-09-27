@@ -34,7 +34,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectFitAnalysisTab(new IqtFitModel, parent),
+    : IndirectFitAnalysisTabLegacy(new IqtFitModel, parent),
       m_uiForm(new Ui::IqtFit) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
@@ -120,7 +120,7 @@ std::string IqtFit::fitTypeString() const {
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   fitAlgorithm->setProperty("ExtractMembers",
                             boolSettingValue("ExtractMembers"));
-  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
+  IndirectFitAnalysisTabLegacy::setupFit(fitAlgorithm);
 }
 
 void IqtFit::runClicked() { runTab(); }

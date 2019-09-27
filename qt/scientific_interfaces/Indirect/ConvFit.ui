@@ -71,7 +71,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true">
+             <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionViewLegacy" name="svSpectrumView" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>1</horstretch>
@@ -150,9 +150,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionViewLegacy</class>
    <extends>QWidget</extends>
-   <header>IndirectSpectrumSelectionView.h</header>
+   <header>IndirectSpectrumSelectionViewLegacy.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

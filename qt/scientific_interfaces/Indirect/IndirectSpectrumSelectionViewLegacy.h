@@ -7,7 +7,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
 
-#include "IndexTypes.h"
 #include "ui_IndirectSpectrumSelector.h"
 
 #include "DllConfig.h"
@@ -23,26 +22,26 @@ namespace IDA {
 
 enum class SpectrumSelectionMode { RANGE, STRING };
 
-class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionView
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionViewLegacy
     : public API::MantidWidget {
   Q_OBJECT
 
 public:
-  IndirectSpectrumSelectionView(QWidget *parent = nullptr);
-  virtual ~IndirectSpectrumSelectionView() override;
+  IndirectSpectrumSelectionViewLegacy(QWidget *parent = nullptr);
+  virtual ~IndirectSpectrumSelectionViewLegacy() override;
 
   SpectrumSelectionMode selectionMode() const;
 
-  virtual WorkspaceIndex minimumSpectrum() const;
-  virtual WorkspaceIndex maximumSpectrum() const;
+  virtual std::size_t minimumSpectrum() const;
+  virtual std::size_t maximumSpectrum() const;
 
   virtual std::string spectraString() const;
   virtual std::string maskString() const;
 
   virtual void displaySpectra(const std::string &spectraString);
-  virtual void displaySpectra(std::pair<WorkspaceIndex, WorkspaceIndex> minmax);
+  virtual void displaySpectra(int minimum, int maximum);
 
-  virtual void setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  virtual void setSpectraRange(int minimum, int maximum);
 
   void setSpectraRegex(const std::string &regex);
   void setMaskBinsRegex(const std::string &regex);
@@ -59,13 +58,13 @@ public:
   virtual void clear();
 
 public slots:
-  virtual void setMinimumSpectrum(WorkspaceIndex spectrum);
-  virtual void setMaximumSpectrum(WorkspaceIndex spectrum);
-  void setMaskSpectrum(WorkspaceIndex spectrum);
+  virtual void setMinimumSpectrum(std::size_t spectrum);
+  virtual void setMaximumSpectrum(std::size_t spectrum);
+  void setMaskSpectrum(std::size_t spectrum);
 
   virtual void setSpectraString(const std::string &spectraString);
   virtual void setMaskString(const std::string &maskString);
-  void setMaskSpectraList(const std::vector<WorkspaceIndex> &maskSpectra);
+  void setMaskSpectraList(const std::vector<std::size_t> &maskSpectra);
 
   void hideSpectrumSelector();
   void showSpectrumSelector();
@@ -75,16 +74,14 @@ public slots:
   void clearMaskString();
 
 signals:
-  void selectedSpectraChanged(const std::string &);
-  void selectedSpectraChanged(WorkspaceIndex, WorkspaceIndex);
-  void spectraSelectionWidgetChanged(int);
-  void maskSpectrumChanged(WorkspaceIndex);
-  void maskChanged(const std::string &);
+  void selectedSpectraChanged(const std::string & /*_t1*/);
+  void selectedSpectraChanged(std::size_t /*_t1*/, std::size_t /*_t2*/);
+  void maskSpectrumChanged(int /*_t1*/);
+  void maskChanged(const std::string & /*_t1*/);
 
 private slots:
   void emitMaskChanged();
   void emitMaskSpectrumChanged(const QString &spectrum);
-  void emitMaskSpectrumChanged(int spectrum);
   void emitSpectraChanged(int modeIndex);
   void emitSpectraStringChanged();
   void emitSpectraRangeChanged();
@@ -93,8 +90,8 @@ private slots:
   void enableMaskLineEdit(int doEnable);
 
 private:
-  void setSpectraRangeMinimum(WorkspaceIndex minimum);
-  void setSpectraRangeMaximum(WorkspaceIndex maximum);
+  void setSpectraRangeMinimum(int minimum);
+  void setSpectraRangeMaximum(int maximum);
   void displaySpectraList();
   QValidator *createValidator(const QString &regex);
 

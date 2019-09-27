@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectSpectrumSelectionPresenter.h"
+#include "IndirectSpectrumSelectionPresenterLegacy.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
@@ -20,19 +20,20 @@ namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
-struct SetViewSpectra {
-  explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
+struct SetViewSpectra : boost::static_visitor<> {
+  explicit SetViewSpectra(IndirectSpectrumSelectionViewLegacy *view) : m_view(view) {}
 
-  void operator()(const Spectra &spectra) const {
-    if (spectra.isContinuous()) {
-      m_view->displaySpectra(spectra.getMinMax());
-    } else {
-      m_view->displaySpectra(spectra.getString());
-    }
+  void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
+    m_view->displaySpectra(static_cast<int>(spectra.first),
+                           static_cast<int>(spectra.second));
+  }
+
+  void operator()(const DiscontinuousSpectra<std::size_t> &spectra) const {
+    m_view->displaySpectra(spectra.getString());
   }
 
 private:
-  IndirectSpectrumSelectionView *m_view;
+  IndirectSpectrumSelectionViewLegacy *m_view;
 };
 
 std::string OR(const std::string &lhs, const std::string &rhs) {
@@ -115,23 +116,23 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
-    IndirectFittingModel *model, IndirectSpectrumSelectionView *view)
-    : QObject(nullptr), m_model(model),
-      m_view(view), m_activeIndex{0}, m_maskIndex{0} {
+IndirectSpectrumSelectionPresenterLegacy::IndirectSpectrumSelectionPresenterLegacy(
+    IndirectFittingModelLegacy *model, IndirectSpectrumSelectionViewLegacy *view)
+    : QObject(nullptr), m_model(model), m_view(view), m_activeIndex(0),
+      m_maskIndex(0) {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
           this, SLOT(updateSpectraList(const std::string &)));
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
           this, SLOT(setMaskSpectraList(const std::string &)));
   connect(m_view.get(),
-          SIGNAL(selectedSpectraChanged(WorkspaceIndex, WorkspaceIndex)), this,
-          SLOT(updateSpectraRange(WorkspaceIndex, WorkspaceIndex)));
+          SIGNAL(selectedSpectraChanged(std::size_t, std::size_t)), this,
+          SLOT(updateSpectraRange(std::size_t, std::size_t)));
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
           this, SLOT(displaySpectraList(const std::string &)));
 
-  connect(m_view.get(), SIGNAL(maskSpectrumChanged(WorkspaceIndex)), this,
-          SLOT(setMaskIndex(WorkspaceIndex)));
-  connect(m_view.get(), SIGNAL(maskSpectrumChanged(WorkspaceIndex)), this,
+  connect(m_view.get(), SIGNAL(maskSpectrumChanged(int)), this,
+          SLOT(setMaskIndex(int)));
+  connect(m_view.get(), SIGNAL(maskSpectrumChanged(int)), this,
           SLOT(displayBinMask()));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SLOT(setBinMask(const std::string &)));
@@ -139,44 +140,33 @@ IndirectSpectrumSelectionPresenter::IndirectSpectrumSelectionPresenter(
           SLOT(displayBinMask()));
   connect(m_view.get(), SIGNAL(maskChanged(const std::string &)), this,
           SIGNAL(maskChanged(const std::string &)));
-  connect(m_view.get(), SIGNAL(spectraSelectionWidgetChanged(int)), this,
-          SLOT(initSpectraSelectionWidget(int)));
 
   m_view->setSpectraRegex(Regexes::SPECTRA_LIST);
   m_view->setMaskBinsRegex(Regexes::MASK_LIST);
   m_view->setEnabled(false);
 }
 
-IndirectSpectrumSelectionPresenter::~IndirectSpectrumSelectionPresenter() {}
+IndirectSpectrumSelectionPresenterLegacy::~IndirectSpectrumSelectionPresenterLegacy() {}
 
-void IndirectSpectrumSelectionPresenter::disableView() {
+void IndirectSpectrumSelectionPresenterLegacy::disableView() {
   MantidQt::API::SignalBlocker blocker(m_view.get());
   m_view->setDisabled(true);
 }
 
-void IndirectSpectrumSelectionPresenter::enableView() {
+void IndirectSpectrumSelectionPresenterLegacy::enableView() {
   m_view->setEnabled(true);
 }
 
-void IndirectSpectrumSelectionPresenter::initSpectraSelectionWidget(int index) {
-  auto spectra = m_model->getSpectra(m_activeIndex);
-  if (index == 0) {
-    m_view->displaySpectra(spectra.getMinMax());
-  } else {
-    m_view->displaySpectra(spectra.getString());
-  }
+void IndirectSpectrumSelectionPresenterLegacy::setActiveIndexToZero() {
+  setActiveModelIndex(0);
 }
 
-void IndirectSpectrumSelectionPresenter::setActiveIndexToZero() {
-  setActiveModelIndex(DatasetIndex{0});
-}
-
-void IndirectSpectrumSelectionPresenter::updateSpectra() {
+void IndirectSpectrumSelectionPresenterLegacy::updateSpectra() {
   const auto ws = m_model->getWorkspace(m_activeIndex);
   if (ws) {
-    const auto spectra = m_model->getSpectra(m_activeIndex);
-    setSpectraRange(spectra.front(), spectra.back());
-    SetViewSpectra(m_view.get())(spectra);
+    setSpectraRange(0, ws->getNumberHistograms() - 1);
+    const auto activeSpectra = m_model->getSpectra(m_activeIndex);
+    boost::apply_visitor(SetViewSpectra(m_view.get()), activeSpectra);
     enableView();
   } else {
     m_view->clear();
@@ -184,18 +174,20 @@ void IndirectSpectrumSelectionPresenter::updateSpectra() {
   }
 }
 
-void IndirectSpectrumSelectionPresenter::setActiveModelIndex(
-    DatasetIndex index) {
+void IndirectSpectrumSelectionPresenterLegacy::setActiveModelIndex(
+    std::size_t index) {
   m_activeIndex = index;
   updateSpectra();
 }
 
-void IndirectSpectrumSelectionPresenter::setSpectraRange(
-    WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  m_view->setSpectraRange(minimum, maximum);
+void IndirectSpectrumSelectionPresenterLegacy::setSpectraRange(std::size_t minimum,
+                                                         std::size_t maximum) {
+  int minimumInt = boost::numeric_cast<int>(minimum);
+  int maximumInt = boost::numeric_cast<int>(maximum);
+  m_view->setSpectraRange(minimumInt, maximumInt);
 }
 
-void IndirectSpectrumSelectionPresenter::setModelSpectra(
+void IndirectSpectrumSelectionPresenterLegacy::setModelSpectra(
     Spectra const &spectra) {
   try {
     m_model->setSpectra(spectra, m_activeIndex);
@@ -209,36 +201,33 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
   }
 }
 
-void IndirectSpectrumSelectionPresenter::updateSpectraList(
+void IndirectSpectrumSelectionPresenterLegacy::updateSpectraList(
     std::string const &spectraList) {
-  setModelSpectra(Spectra(createSpectraString(spectraList)));
+  setModelSpectra(
+      DiscontinuousSpectra<std::size_t>(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
-void IndirectSpectrumSelectionPresenter::updateSpectraRange(
-    WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  setModelSpectra(Spectra(minimum, maximum));
+void IndirectSpectrumSelectionPresenterLegacy::updateSpectraRange(
+    std::size_t minimum, std::size_t maximum) {
+  setModelSpectra(std::make_pair(minimum, maximum));
   emit spectraChanged(m_activeIndex);
 }
 
-void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
+void IndirectSpectrumSelectionPresenterLegacy::setMaskSpectraList(
     std::string const &spectra) {
-  if (m_spectraError.empty()) {
-    auto const intVec = vectorFromString<int>(spectra);
-    std::vector<WorkspaceIndex> vec(intVec.size());
-    std::transform(intVec.begin(), intVec.end(), vec.begin(),
-                   [](int i) { return WorkspaceIndex{i}; });
-    m_view->setMaskSpectraList(vec);
-  } else
+  if (m_spectraError.empty())
+    m_view->setMaskSpectraList(vectorFromString<std::size_t>(spectra));
+  else
     m_view->setMaskSpectraList({});
 }
 
-void IndirectSpectrumSelectionPresenter::displaySpectraList(
+void IndirectSpectrumSelectionPresenterLegacy::displaySpectraList(
     std::string const &spectra) {
   m_view->displaySpectra(createSpectraString(spectra));
 }
 
-void IndirectSpectrumSelectionPresenter::setBinMask(
+void IndirectSpectrumSelectionPresenterLegacy::setBinMask(
     std::string const &maskString) {
   auto validator = validateMaskBinsString();
 
@@ -251,27 +240,27 @@ void IndirectSpectrumSelectionPresenter::setBinMask(
   }
 }
 
-void IndirectSpectrumSelectionPresenter::setMaskIndex(WorkspaceIndex index) {
-  if (index.value >= 0)
-    m_maskIndex = index;
+void IndirectSpectrumSelectionPresenterLegacy::setMaskIndex(int index) {
+  if (index >= 0)
+    m_maskIndex = boost::numeric_cast<std::size_t>(index);
 }
 
-void IndirectSpectrumSelectionPresenter::displayBinMask() {
+void IndirectSpectrumSelectionPresenterLegacy::displayBinMask() {
   m_view->setMaskString(m_model->getExcludeRegion(m_activeIndex, m_maskIndex));
 }
 
 UserInputValidator &
-IndirectSpectrumSelectionPresenter::validate(UserInputValidator &validator) {
+IndirectSpectrumSelectionPresenterLegacy::validate(UserInputValidator &validator) {
   validator = validateSpectraString(validator);
   return m_view->validateMaskBinsString(validator);
 }
 
-UserInputValidator IndirectSpectrumSelectionPresenter::validateSpectraString() {
+UserInputValidator IndirectSpectrumSelectionPresenterLegacy::validateSpectraString() {
   UserInputValidator validator;
   return validateSpectraString(validator);
 }
 
-UserInputValidator &IndirectSpectrumSelectionPresenter::validateSpectraString(
+UserInputValidator &IndirectSpectrumSelectionPresenterLegacy::validateSpectraString(
     UserInputValidator &validator) {
   validator = m_view->validateSpectraString(validator);
 
@@ -281,7 +270,7 @@ UserInputValidator &IndirectSpectrumSelectionPresenter::validateSpectraString(
 }
 
 UserInputValidator
-IndirectSpectrumSelectionPresenter::validateMaskBinsString() {
+IndirectSpectrumSelectionPresenterLegacy::validateMaskBinsString() {
   UserInputValidator uiv;
   return m_view->validateMaskBinsString(uiv);
 }

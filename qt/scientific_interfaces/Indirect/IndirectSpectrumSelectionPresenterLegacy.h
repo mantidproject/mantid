@@ -7,8 +7,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
 
-#include "IndirectFittingModel.h"
-#include "IndirectSpectrumSelectionView.h"
+#include "IndirectFittingModelLegacy.h"
+#include "IndirectSpectrumSelectionViewLegacy.h"
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -23,23 +23,23 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenter
+class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenterLegacy
     : public QObject {
   Q_OBJECT
 public:
-  IndirectSpectrumSelectionPresenter(IndirectFittingModel *model,
-                                     IndirectSpectrumSelectionView *view);
-  ~IndirectSpectrumSelectionPresenter() override;
+  IndirectSpectrumSelectionPresenterLegacy(IndirectFittingModelLegacy *model,
+                                     IndirectSpectrumSelectionViewLegacy *view);
+  ~IndirectSpectrumSelectionPresenterLegacy() override;
   UserInputValidator &validate(UserInputValidator &validator);
 
 signals:
-  void spectraChanged(DatasetIndex /*_t1*/);
+  void spectraChanged(std::size_t /*_t1*/);
   void maskChanged(std::string const & /*_t1*/);
   void invalidSpectraString(QString const &errorMessage);
   void invalidMaskBinsString(QString const &errorMessage);
 
 public slots:
-  void setActiveModelIndex(DatasetIndex index);
+  void setActiveModelIndex(std::size_t index);
   void setActiveIndexToZero();
   void updateSpectra();
   void displayBinMask();
@@ -50,23 +50,22 @@ private slots:
   void setBinMask(std::string const &maskString);
   void setMaskSpectraList(std::string const &spectraList);
   void updateSpectraList(std::string const &spectraList);
-  void updateSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  void updateSpectraRange(std::size_t minimum, std::size_t maximum);
   void displaySpectraList(std::string const &spectra);
-  void setMaskIndex(WorkspaceIndex index);
-  void initSpectraSelectionWidget(int index);
+  void setMaskIndex(int index);
 
 private:
-  void setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  void setSpectraRange(std::size_t minimum, std::size_t maximum);
   void setModelSpectra(Spectra const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);
   UserInputValidator validateMaskBinsString();
 
-  IndirectFittingModel *m_model;
-  std::unique_ptr<IndirectSpectrumSelectionView> m_view;
-  DatasetIndex m_activeIndex;
-  WorkspaceIndex m_maskIndex;
+  IndirectFittingModelLegacy *m_model;
+  std::unique_ptr<IndirectSpectrumSelectionViewLegacy> m_view;
+  std::size_t m_activeIndex;
+  std::size_t m_maskIndex;
   std::string m_spectraError;
 };
 

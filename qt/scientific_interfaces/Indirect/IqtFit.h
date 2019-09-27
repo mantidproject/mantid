@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
-#include "IndirectFitAnalysisTab.h"
+#include "IndirectFitAnalysisTabLegacy.h"
 #include "IqtFitModel.h"
 
 #include "MantidAPI/CompositeFunction.h"
@@ -27,7 +27,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IqtFit : public IndirectFitAnalysisTab {
+class DLLExport IqtFit : public IndirectFitAnalysisTabLegacy {
   Q_OBJECT
 
 public:

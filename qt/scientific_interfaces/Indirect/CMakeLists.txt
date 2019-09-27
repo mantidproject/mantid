@@ -33,6 +33,7 @@ set(
   IndirectDataValidationHelper.cpp
   IndirectDiffractionReduction.cpp
   IndirectEditResultsDialog.cpp
+  IndirectFitAnalysisTabLegacy.cpp
   IndirectFitAnalysisTab.cpp
   IndirectFitDataLegacy.cpp
   IndirectFitDataPresenterLegacy.cpp
@@ -70,6 +71,8 @@ set(
   IndirectSettingsView.cpp
   IndirectSimulation.cpp
   IndirectSimulationTab.cpp
+  IndirectSpectrumSelectionPresenterLegacy.cpp
+  IndirectSpectrumSelectionViewLegacy.cpp
   IndirectSpectrumSelectionPresenter.cpp
   IndirectSpectrumSelectionView.cpp
   IndirectSqw.cpp
@@ -160,6 +163,7 @@ set(
   IndirectDataTablePresenter.h
   IndirectDiffractionReduction.h
   IndirectEditResultsDialog.h
+  IndirectFitAnalysisTabLegacy.h
   IndirectFitAnalysisTab.h
   IndirectFitDataPresenterLegacy.h
   IndirectFitDataViewLegacy.h
@@ -185,6 +189,8 @@ set(
   IndirectSettingsView.h
   IndirectSimulation.h
   IndirectSimulationTab.h
+  IndirectSpectrumSelectionPresenterLegacy.h
+  IndirectSpectrumSelectionViewLegacy.h
   IndirectSpectrumSelectionPresenter.h
   IndirectSpectrumSelectionView.h
   IndirectSqw.h
