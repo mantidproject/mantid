@@ -30,6 +30,8 @@ JobTreeView::JobTreeView(QStringList const &columnHeadings,
   setModel(&m_mainModel);
   setHeaderLabels(columnHeadings);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  // Ensure single / double click / tab all edits the current cell
+  setEditTriggers(QAbstractItemView::AllEditTriggers);
   setItemDelegate(new CellDelegate(this, *this, m_filteredModel, m_mainModel));
   setContextMenuPolicy(Qt::ActionsContextMenu);
   enableFiltering();
