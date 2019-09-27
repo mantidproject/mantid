@@ -10,10 +10,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <stdexcept>
-#include <string>
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/GridDomain.h"
+#include <stdexcept>
+#include <string>
 
 namespace Mantid {
 namespace API {
