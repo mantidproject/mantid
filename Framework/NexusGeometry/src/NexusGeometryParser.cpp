@@ -27,6 +27,7 @@
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <numeric>
+#include <sstream>
 #include <tuple>
 #include <type_traits>
 
@@ -562,7 +563,7 @@ private:
     }
   }
 
-  void parseNexusMeshAndAddDetectors(
+  void extractNexusMeshAndAddDetectors(
       const std::vector<uint32_t> &detFaces,
       const std::vector<uint32_t> &faceIndices,
       const std::vector<uint32_t> &windingOrder,
@@ -599,34 +600,58 @@ private:
     }
   }
 
+  void parseMeshAndAddDetectors(InstrumentBuilder &builder,
+                                const Group &shapeGroup,
+                                const std::vector<Mantid::detid_t> &detectorIds,
+                                const std::string &bankName) {
+    // Load mapping between detector IDs and faces, winding order of vertices
+    // for faces, and face corner vertices.
+    const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
+        get1DDataset<int32_t>(shapeGroup, "detector_faces"));
+    const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
+        get1DDataset<int32_t>(shapeGroup, "faces"));
+    const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
+        get1DDataset<int32_t>(shapeGroup, "winding_order"));
+    const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
+
+    // Sanity check entries
+    if (detFaces.size() != 2 * detectorIds.size())
+      throw std::runtime_error("Expect to have as many detector_face entries "
+                               "as detector_number entries");
+    if (detFaces.size() % 2 != 0)
+      throw std::runtime_error("Unequal pairs of face incides to detector "
+                               "indices in detector_faces");
+    if (detFaces.size() / 2 > faceIndices.size())
+      throw std::runtime_error(
+          "Cannot have more detector_faces entries than faces entries");
+    if (vertices.size() % 3 != 0)
+      throw std::runtime_error(
+          "Unequal triple entries for vertices. Must be 3 * n entries");
+
+    // Build a map of detector IDs to the index of occurrence in the
+    // "detector_number" dataset
+    std::unordered_map<int, uint32_t> detIdToIndex;
+    for (uint32_t i = 0; i < detectorIds.size(); ++i) {
+      detIdToIndex.emplace(detectorIds[i], i);
+    }
+
+    extractNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder,
+                                    vertices, detectorIds.size(), detIdToIndex,
+                                    bankName, builder);
+  }
+
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                        const std::vector<Mantid::detid_t> &detectorIds,
                        const std::string &bankName) {
-    if (utilities::hasAttribute(shapeGroup, NX_OFF)) {
-      // Load mapping between detector IDs and faces, winding order of vertices
-      // for faces, and face corner vertices.
-      const std::vector<uint32_t> detFaces = convertVector<int32_t, uint32_t>(
-          get1DDataset<int32_t>(shapeGroup, "detector_faces"));
-      const std::vector<uint32_t> faceIndices =
-          convertVector<int32_t, uint32_t>(
-              get1DDataset<int32_t>(shapeGroup, "faces"));
-      const std::vector<uint32_t> windingOrder =
-          convertVector<int32_t, uint32_t>(
-              get1DDataset<int32_t>(shapeGroup, "winding_order"));
-      const auto vertices = get1DDataset<float>(shapeGroup, "vertices");
-
-      // Build a map of detector IDs to the index of occurrence in the
-      // "detector_number" dataset
-      std::unordered_map<int, uint32_t> detIdToIndex;
-      for (uint32_t i = 0; i < detectorIds.size(); ++i) {
-        detIdToIndex.emplace(detectorIds[i], i);
-      }
-
-      parseNexusMeshAndAddDetectors(detFaces, faceIndices, windingOrder,
-                                    vertices, detectorIds.size(), detIdToIndex,
-                                    bankName, builder);
-    } else if (utilities::hasAttribute(shapeGroup, NX_CYLINDER)) {
+    if (utilities::hasNXAttribute(shapeGroup, NX_OFF)) {
+      parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName);
+    } else if (utilities::hasNXAttribute(shapeGroup, NX_CYLINDER)) {
       parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
+    } else {
+      std::stringstream ss;
+      ss << "Shape group " << H5_OBJ_NAME(shapeGroup)
+         << " has unknown geometry type specified via " << NX_CLASS;
+      throw std::runtime_error(ss.str());
     }
   }
 

@@ -46,7 +46,7 @@ boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup,
   return boost::optional<H5::Group>();
 }
 
-bool hasAttribute(const H5::Group &group, const std::string attributeValue) {
+bool hasNXAttribute(const H5::Group &group, const std::string &attributeValue) {
   bool result = false;
   for (uint32_t attribute_index = 0;
        attribute_index < static_cast<uint32_t>(group.getNumAttrs());
@@ -86,7 +86,7 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
       // Open the sub group
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      if (hasAttribute(childGroup, classType)) {
+      if (hasNXAttribute(childGroup, classType)) {
         return boost::optional<Group>(childGroup);
       }
     }
@@ -106,7 +106,7 @@ std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
       // Open the sub group
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      if (hasAttribute(childGroup, classType))
+      if (hasNXAttribute(childGroup, classType))
         groups.push_back(childGroup);
     }
   }
