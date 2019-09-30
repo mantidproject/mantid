@@ -21,7 +21,7 @@ where,
    import matplotlib.pyplot as plt
    import numpy as np
    x = np.arange(0.1,16,0.1)
-   y = FunctionWrapper("SilverBaseline", A0 = 0.5, NuD = 0.5, Lambda = 0.3, Sigma = 0.05, Phi = 0.0)
+   y = FunctionWrapper("SilverBaseline")
    fig, ax=plt.subplots()
    ax.plot(x, y(x))
    ax.set_xlabel('t($\mu$s)')
