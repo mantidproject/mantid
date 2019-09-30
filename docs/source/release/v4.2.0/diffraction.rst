@@ -41,13 +41,15 @@ Improvements
 
 - :ref:`SaveHKL <algm-SaveHKL>` now saves the tbar and transmission values for shapes and materials provided by :ref:`SetSample <algm-SetSample>`.
 - :ref:`SelectCellOfType <algm-SelectCellOfType>` and :ref:`SelectCellWithForm <algm-SelectCellWithForm>` now return the transformation matrix
+- :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
+  a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
 
 
 Bug Fixes
 #########
 
-- :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` & :ref:`IndexPeaks <algm-IndexPeaks>` have been fixed
-  so that they correctly report the number of main & satellite reflections that have been indexed. Also, if a satellite
+- :ref:`IndexPeaks <algm-IndexPeaks>` has been fixed
+  so that it correctly reports the number of main & satellite reflections that have been indexed. Also, if a satellite
   peak cannot be indexed its HKL is reset to 000 rather than accidentally setting it to the HKL of the main reflection.
 
 Imaging
