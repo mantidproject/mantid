@@ -444,6 +444,27 @@ public:
     }
   }
 
+  void test_negative_max_order_throws_error() {
+    IndexPeaks alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1), std::invalid_argument)
+  }
+
+  void test_modvector_with_length_not_three_list_throws() {
+    IndexPeaks alg;
+    alg.initialize();
+
+    for (const auto &propName : {"ModVector1", "ModVector2", "ModVector3"}) {
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0"),
+                       std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"),
+                       std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
+                       std::invalid_argument)
+    }
+  }
+
 private:
   // Check that all main indexed peaks match as expected
   void assertIndexesAsExpected(const PeaksWorkspace_sptr::element_type &peaksWS,

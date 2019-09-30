@@ -9,6 +9,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/optional/optional.hpp>
@@ -38,6 +40,11 @@ const std::string TOLERANCE{"Tolerance"};
 const std::string SATE_TOLERANCE{"ToleranceForSatellite"};
 const std::string ROUNDHKLS{"RoundHKLs"};
 const std::string COMMONUB{"CommonUBForAll"};
+const std::string MAXORDER{"MaxOrder"};
+const std::string MODVECTOR1{"ModVector1"};
+const std::string MODVECTOR2{"ModVector2"};
+const std::string MODVECTOR3{"ModVector3"};
+const std::string CROSSTERMS{"CrossTerms"};
 const std::string AVERAGE_ERR{"AverageError"};
 const std::string NUM_INDEXED{"NumIndexed"};
 const std::string MAIN_NUM_INDEXED{"MainNumIndexed"};
@@ -404,9 +411,11 @@ void logIndexingResults(std::ostream &out,
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
-  using Mantid::API::WorkspaceProperty;
-  using Mantid::Kernel::BoundedValidator;
-  using Mantid::Kernel::Direction;
+  using API::WorkspaceProperty;
+  using Kernel::ArrayLengthValidator;
+  using Kernel::ArrayProperty;
+  using Kernel::BoundedValidator;
+  using Kernel::Direction;
 
   // -- inputs --
   this->declareProperty(
@@ -414,16 +423,38 @@ void IndexPeaks::init() {
           Prop::PEAKSWORKSPACE, "", Direction::InOut),
       "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-  this->declareProperty(Prop::TOLERANCE, 0.15, mustBePositive,
+  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double>>();
+  mustBePositiveDbl->setLower(0.0);
+  this->declareProperty(Prop::TOLERANCE, 0.15, mustBePositiveDbl,
                         "Main peak indexing tolerance", Direction::Input);
-  this->declareProperty(Prop::SATE_TOLERANCE, 0.15, mustBePositive,
+  this->declareProperty(Prop::SATE_TOLERANCE, 0.15, mustBePositiveDbl,
                         "Satellite peak indexing tolerance", Direction::Input);
   this->declareProperty(Prop::ROUNDHKLS, true,
                         "Round H, K and L values to integers");
   this->declareProperty(Prop::COMMONUB, false,
                         "Index all orientations with a common UB");
+  auto mustBeLengthThree = boost::make_shared<ArrayLengthValidator<double>>(3);
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
+                            Prop::MODVECTOR1, "0.0,0.0,0.0", mustBeLengthThree),
+                        "Modulation Vector 1: dh, dk, dl");
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                            Prop::MODVECTOR2, "0.0,0.0,0.0", mustBeLengthThree),
+                        "Modulation Vector 2: dh, dk, dl");
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                            Prop::MODVECTOR3, "0.0,0.0,0.0", mustBeLengthThree),
+                        "Modulation Vector 3: dh, dk, dl");
+  auto mustBePositiveOrZero = boost::make_shared<BoundedValidator<int>>();
+  mustBePositiveOrZero->setLower(0);
+  this->declareProperty(
+      Prop::MAXORDER, 0, mustBePositiveOrZero,
+      "Maximum order to apply Modulation Vectors. Default = 0",
+      Direction::Input);
+
+  this->declareProperty(
+      Prop::CROSSTERMS, false,
+      "Include combinations of modulation vectors in satelhte search",
+      Direction::Input);
+
   // -- outputs --
   this->declareProperty(Prop::NUM_INDEXED, 0,
                         "Gets set with the number of indexed peaks.",
