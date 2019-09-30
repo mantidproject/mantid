@@ -37,31 +37,6 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-// void updateParameters(
-//    IFunction_sptr function,
-//    std::unordered_map<std::string, ParameterValueNew> const &parameters) {
-//  if (!function)
-//    return;
-//  for (auto i = 0u; i < function->nParams(); ++i) {
-//    auto const value = parameters.find(function->parameterName(i));
-//    if (value != parameters.end()) {
-//      function->setParameter(i, value->second.value);
-//      if (value->second.error)
-//        function->setError(i, *value->second.error);
-//    }
-//  }
-//}
-
-// void updateAttributes(
-//    IFunction_sptr function, std::vector<std::string> const &attributeNames,
-//    std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
-//  for (const auto &attributeName : attributeNames) {
-//    auto const value = attributes.find(attributeName);
-//    if (value != attributes.end())
-//      function->setAttribute(attributeName, value->second);
-//  }
-//}
-
 } // namespace
 
 namespace MantidQt {

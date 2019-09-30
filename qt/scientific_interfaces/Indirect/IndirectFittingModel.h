@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODELLEGACY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODELLEGACY_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
 
 #include "IndexTypes.h"
 #include "IndirectFitData.h"

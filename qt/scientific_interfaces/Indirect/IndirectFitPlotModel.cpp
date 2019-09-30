@@ -96,6 +96,13 @@ void setFunctionParameters(IFunction_sptr function, const std::string &category,
     setFunctionParameters(composite, category, parameterName, value);
 }
 
+void setFunctionParameters(MultiDomainFunction_sptr function, const std::string &category,
+                           const std::string &parameterName, double value){
+                           for (auto i = 0u; i < function->nFunctions(); ++i)
+    setFunctionParameters(function->getFunction(i), category, parameterName,
+                          value);  
+                           }
+
 void setFirstBackground(IFunction_sptr function, double value) {
   firstFunctionWithParameter(function, "Background", "A0")
       ->setParameter("A0", value);
@@ -138,10 +145,10 @@ void IndirectFitPlotModel::setEndX(double endX) {
     m_fittingModel->setEndX(endX, m_activeIndex);
 }
 
-void IndirectFitPlotModel::setFWHM(double) {
-  // m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
-  // setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
-  //                      fwhm);
+void IndirectFitPlotModel::setFWHM(double fwhm) {
+  m_fittingModel->setDefaultParameterValue("FWHM", fwhm, m_activeIndex);
+  setFunctionParameters(m_fittingModel->getFittingFunction(), "Peak", "FWHM",
+                       fwhm);
 }
 
 void IndirectFitPlotModel::setBackground(double background) {
