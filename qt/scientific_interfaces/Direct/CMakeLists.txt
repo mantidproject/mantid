@@ -7,8 +7,7 @@ set(SRC_FILES
 set(MOC_FILES
     ALFView.h
     ALFView_view.h
-    ALFView_presenter.h
-    ALFView_model.h)
+    ALFView_presenter.h)
 
 set(INC_FILES
     DllConfig.h)
