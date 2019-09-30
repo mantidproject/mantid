@@ -35,6 +35,7 @@ Improvements
 - There is now a button on the plot window's toolbar to generate a script that will re-create the current figure.
 - There is now a "Filter by" menu in the message display's context menu, allowing you to filter output by script.
 - It is now possible to fit table workspaces in the fit browser and in a script.
+- The keyboard shortcuts Ctrl++ and Ctrl+- can now be used to increase/decrease the font size in the script editor.
 
 Bugfixes
 ########
