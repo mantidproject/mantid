@@ -22,6 +22,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
+/// Default constructor. Marks algorithm as deprecated.
+IndexPeaksWithSatellites::IndexPeaksWithSatellites()
+    : API::Algorithm(), API::DeprecatedAlgorithm() {
+  useAlgorithm("IndexPeaks");
+}
+
 /** Initialize the algorithm's properties.
  */
 void IndexPeaksWithSatellites::init() {
