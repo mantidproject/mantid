@@ -778,7 +778,8 @@ void ScriptingWindow::initWindowMenuActions() {
   // geometry state
   connect(m_hide, SIGNAL(triggered()), this, SIGNAL(hideMe()));
 
-  // The keyboard shortcuts are set in ScriptEditor.cpp so they are manually added to the menu text here.
+  // The keyboard shortcuts are set in ScriptEditor.cpp so they are manually
+  // added to the menu text here.
   m_zoomIn = new QAction(("&Increase font size\tCtrl++"), this);
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(zoomIn()));
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(trackZoomIn()));
