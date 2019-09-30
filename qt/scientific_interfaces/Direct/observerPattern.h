@@ -14,8 +14,8 @@ class observable;
 
 class observer {
 public:
-  virtual void update()=0;
-  virtual void update(std::string arg)=0;
+  virtual void update() = 0;
+  virtual void update(std::string arg) = 0;
 };
 
 class observable {
