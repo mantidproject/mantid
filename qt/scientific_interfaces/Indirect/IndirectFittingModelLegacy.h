@@ -21,7 +21,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
+enum class FittingModeLegacy { SEQUENTIAL, SIMULTANEOUS };
 
 class IndirectFittingModelLegacy;
 
@@ -91,7 +91,7 @@ public:
                             const Spectra &spectra);
   virtual void removeWorkspace(std::size_t index);
   virtual PrivateFittingDataLegacy clearWorkspaces();
-  void setFittingMode(FittingMode mode);
+  void setFittingMode(FittingModeLegacy mode);
   virtual void setFitFunction(Mantid::API::IFunction_sptr function);
   virtual void setDefaultParameterValue(const std::string &name, double value,
                                         std::size_t dataIndex);
@@ -102,7 +102,7 @@ public:
   template <typename F>
   void applySpectra(std::size_t index, const F &functor) const;
 
-  FittingMode getFittingMode() const;
+  FittingModeLegacy getFittingMode() const;
   std::unordered_map<std::string, ParameterValue>
   getParameterValues(std::size_t dataIndex, std::size_t spectrum) const;
   std::unordered_map<std::string, ParameterValue>
@@ -123,7 +123,7 @@ public:
                             std::size_t index);
 
 protected:
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
+  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingModeLegacy mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
@@ -207,7 +207,7 @@ private:
   std::vector<std::unordered_map<std::string, ParameterValue>>
       m_defaultParameters;
   bool m_previousModelSelected;
-  FittingMode m_fittingMode;
+  FittingModeLegacy m_fittingMode;
 };
 
 template <typename F>

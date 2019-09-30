@@ -105,7 +105,7 @@
            <item row="2" column="0">
             <widget class="QLabel" name="lbSpecMin">
              <property name="text">
-              <string>Spectra Min:</string>
+              <string>SpectraNew Min:</string>
              </property>
             </widget>
            </item>
@@ -129,7 +129,7 @@
            <item row="4" column="0">
             <widget class="QLabel" name="lbSpecMax">
              <property name="text">
-              <string>Spectra Max:</string>
+              <string>SpectraNew Max:</string>
              </property>
             </widget>
            </item>

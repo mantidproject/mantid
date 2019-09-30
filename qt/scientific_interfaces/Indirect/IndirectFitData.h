@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATALEGACY_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATALEGACY_H_
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -30,14 +30,14 @@ namespace IDA {
  *
  * Holds a string and vector representation.
  */
-class MANTIDQT_INDIRECT_DLL Spectra {
+class MANTIDQT_INDIRECT_DLL SpectraNew {
 public:
-  explicit Spectra(const std::string &str);
-  Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum);
-  Spectra(const Spectra &vec);
-  Spectra(Spectra &&vec);
-  Spectra &operator=(const Spectra &vec);
-  Spectra &operator=(Spectra &&vec);
+  explicit SpectraNew(const std::string &str);
+  SpectraNew(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  SpectraNew(const SpectraNew &vec);
+  SpectraNew(SpectraNew &&vec);
+  SpectraNew &operator=(const SpectraNew &vec);
+  SpectraNew &operator=(SpectraNew &&vec);
   bool empty() const;
   SpectrumRowIndex size() const;
   std::string getString() const;
@@ -55,22 +55,22 @@ public:
   const WorkspaceIndex &operator[](SpectrumRowIndex index) const {
     return m_vec[index.value];
   }
-  bool operator==(Spectra const &spec) const;
+  bool operator==(SpectraNew const &spec) const;
   bool isContinuous() const;
   SpectrumRowIndex indexOf(WorkspaceIndex i) const;
-  Spectra combine(const Spectra &other) const;
+  SpectraNew combine(const SpectraNew &other) const;
 
 private:
-  explicit Spectra(const std::set<WorkspaceIndex> &indices);
+  explicit SpectraNew(const std::set<WorkspaceIndex> &indices);
   void checkContinuous();
   std::vector<WorkspaceIndex> m_vec;
   bool m_isContinuous;
 };
 
-template <typename F> struct ApplySpectra {
-  explicit ApplySpectra(F &&functor) : m_functor(std::forward<F>(functor)) {}
+template <typename F> struct ApplySpectraNew {
+  explicit ApplySpectraNew(F &&functor) : m_functor(std::forward<F>(functor)) {}
 
-  void operator()(const Spectra &spectra) const {
+  void operator()(const SpectraNew &spectra) const {
     for (const auto &spectrum : spectra)
       m_functor(spectrum);
   }
@@ -79,11 +79,11 @@ private:
   F m_functor;
 };
 
-template <typename F> struct ApplyEnumeratedSpectra {
-  ApplyEnumeratedSpectra(F &&functor, WorkspaceIndex start = WorkspaceIndex{0})
+template <typename F> struct ApplyEnumeratedSpectraNew {
+  ApplyEnumeratedSpectraNew(F &&functor, WorkspaceIndex start = WorkspaceIndex{0})
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
-  WorkspaceIndex operator()(const Spectra &spectra) const {
+  WorkspaceIndex operator()(const SpectraNew &spectra) const {
     auto i = m_start;
     for (const auto &spectrum : spectra)
       m_functor(i++, spectrum);
@@ -96,7 +96,7 @@ private:
 };
 
 template <class T>
-std::vector<T> vectorFromString(const std::string &listString) {
+std::vector<T> vectorFromStringNew(const std::string &listString) {
   try {
     return Mantid::Kernel::ArrayProperty<T>("vector", listString);
   } catch (const std::runtime_error &) {
@@ -112,7 +112,7 @@ std::vector<T> vectorFromString(const std::string &listString) {
 class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
   IndirectFitData(Mantid::API::MatrixWorkspace_sptr workspace,
-                  const Spectra &spectra);
+                  const SpectraNew &spectra);
 
   std::string displayName(const std::string &formatString,
                           const std::string &rangeDelimiter) const;
@@ -121,7 +121,7 @@ public:
   std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
-  const Spectra &spectra() const;
+  const SpectraNew &spectra() const;
   WorkspaceIndex getSpectrum(SpectrumRowIndex index) const;
   SpectrumRowIndex numberOfSpectra() const;
   bool zeroSpectra() const;
@@ -132,20 +132,20 @@ public:
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
 
   template <typename F> void applySpectra(F &&functor) const {
-    ApplySpectra<F>(std::forward<F>(functor))(m_spectra);
+    ApplySpectraNew<F>(std::forward<F>(functor))(m_spectra);
   }
 
   template <typename F>
   WorkspaceIndex
   applyEnumeratedSpectra(F &&functor,
                          WorkspaceIndex start = WorkspaceIndex{0}) const {
-    return ApplyEnumeratedSpectra<F>(std::forward<F>(functor),
+    return ApplyEnumeratedSpectraNew<F>(std::forward<F>(functor),
                                      start)(m_spectra);
   }
 
   void setSpectra(std::string const &spectra);
-  void setSpectra(Spectra &&spectra);
-  void setSpectra(Spectra const &spectra);
+  void setSpectra(SpectraNew &&spectra);
+  void setSpectra(SpectraNew const &spectra);
   void setStartX(double const &startX, WorkspaceIndex const &index);
   void setStartX(double const &startX);
   void setEndX(double const &endX, WorkspaceIndex const &spectrum);
@@ -154,10 +154,10 @@ public:
                               WorkspaceIndex const &spectrum);
 
 private:
-  void validateSpectra(Spectra const &spectra);
+  void validateSpectra(SpectraNew const &spectra);
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
-  Spectra m_spectra;
+  SpectraNew m_spectra;
   std::map<WorkspaceIndex, std::string> m_excludeRegions;
   std::map<WorkspaceIndex, std::pair<double, double>> m_ranges;
 };

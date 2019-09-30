@@ -96,8 +96,8 @@ private:
   QString getText(SpectrumRowIndex row, int column) const;
   SpectrumRowIndex getNextPosition(DatasetIndex index) const;
   DatasetIndex getDataIndex(SpectrumRowIndex row) const;
-  boost::optional<Spectra> getSpectra(DatasetIndex dataIndex) const;
-  boost::optional<Spectra> getSpectra(SpectrumRowIndex start,
+  boost::optional<SpectraNew> getSpectra(DatasetIndex dataIndex) const;
+  boost::optional<SpectraNew> getSpectra(SpectrumRowIndex start,
                                       SpectrumRowIndex end) const;
   boost::optional<SpectrumRowIndex>
   getRowIndex(DatasetIndex dataIndex, WorkspaceIndex spectrumIndex) const;

@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODEL_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODELLEGACY_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODELLEGACY_H_
 
 #include "IndexTypes.h"
 #include "IndirectFitData.h"
@@ -31,7 +31,7 @@ using IndirectFitDataCollectionType =
     IndexCollectionType<DatasetIndex, std::unique_ptr<IndirectFitData>>;
 using DefaultParametersType =
     IndexCollectionType<DatasetIndex,
-                        std::unordered_map<std::string, ParameterValue>>;
+                        std::unordered_map<std::string, ParameterValueNew>>;
 
 struct PrivateFittingData {
   friend class IndirectFittingModel;
@@ -58,7 +58,7 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(DatasetIndex index) const;
-  Spectra getSpectra(DatasetIndex index) const;
+  SpectraNew getSpectra(DatasetIndex index) const;
   virtual std::pair<double, double>
   getFittingRange(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
   virtual std::string getExcludeRegion(DatasetIndex dataIndex,
@@ -84,8 +84,8 @@ public:
 
   void setFittingData(PrivateFittingData &&fittingData);
   void setSpectra(const std::string &spectra, DatasetIndex dataIndex);
-  void setSpectra(Spectra &&spectra, DatasetIndex dataIndex);
-  void setSpectra(const Spectra &spectra, DatasetIndex dataIndex);
+  void setSpectra(SpectraNew &&spectra, DatasetIndex dataIndex);
+  void setSpectra(const SpectraNew &spectra, DatasetIndex dataIndex);
   virtual void setStartX(double startX, DatasetIndex dataIndex,
                          WorkspaceIndex spectrum);
   virtual void setStartX(double startX, DatasetIndex dataIndex);
@@ -99,9 +99,9 @@ public:
   virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
-  void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
+  void addWorkspace(const std::string &workspaceName, const SpectraNew &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra);
+                            const SpectraNew &spectra);
   virtual void removeWorkspace(DatasetIndex index);
   virtual PrivateFittingData clearWorkspaces();
   void setFittingMode(FittingMode mode);
@@ -116,13 +116,13 @@ public:
   void applySpectra(DatasetIndex index, const F &functor) const;
 
   FittingMode getFittingMode() const;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueNew>
   getParameterValues(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueNew>
   getFitParameters(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
-  std::unordered_map<std::string, ParameterValue>
+  std::unordered_map<std::string, ParameterValueNew>
   getDefaultParameters(DatasetIndex dataIndex) const;
-  boost::optional<ResultLocation>
+  boost::optional<ResultLocationNew>
   getResultLocation(DatasetIndex dataIndex, WorkspaceIndex spectrum) const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getResultGroup() const;
@@ -154,7 +154,7 @@ protected:
                                         DatasetIndex index,
                                         WorkspaceIndex spectrum) const;
   void addNewWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                       const Spectra &spectra);
+                       const SpectraNew &spectra);
   void removeFittingData(DatasetIndex index);
 
 private:
@@ -172,7 +172,7 @@ private:
   virtual std::string simultaneousFitOutputName() const = 0;
   virtual std::string singleFitOutputName(DatasetIndex index,
                                           WorkspaceIndex spectrum) const = 0;
-  virtual std::unordered_map<std::string, ParameterValue>
+  virtual std::unordered_map<std::string, ParameterValueNew>
   createDefaultParameters(DatasetIndex index) const;
 
   virtual std::string getResultXAxisUnit() const;
@@ -184,8 +184,8 @@ private:
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
                   Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                  const FitDataIterator &fitDataBegin,
-                  const FitDataIterator &fitDataEnd) const;
+                  const FitDataIteratorNew &fitDataBegin,
+                  const FitDataIteratorNew &fitDataEnd) const;
   virtual IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                   Mantid::API::ITableWorkspace_sptr parameterTable,
@@ -193,13 +193,13 @@ private:
                   IndirectFitData *fitData, WorkspaceIndex spectrum) const;
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd);
+                 const FitDataIteratorNew &fitDataBegin,
+                 const FitDataIteratorNew &fitDataEnd);
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 const FitDataIterator &fitDataBegin,
-                 const FitDataIterator &fitDataEnd);
+                 const FitDataIteratorNew &fitDataBegin,
+                 const FitDataIteratorNew &fitDataEnd);
   void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
@@ -209,8 +209,8 @@ private:
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
                          Mantid::API::ITableWorkspace_sptr parameterTable,
                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                         const FitDataIterator &fitDataBegin,
-                         const FitDataIterator &fitDataEnd) const;
+                         const FitDataIteratorNew &fitDataBegin,
+                         const FitDataIteratorNew &fitDataEnd) const;
   virtual void addOutput(IndirectFitOutput *fitOutput,
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
                          Mantid::API::ITableWorkspace_sptr parameterTable,

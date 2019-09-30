@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEWLEGACY_H_
+#define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONVIEWLEGACY_H_
 
 #include "ui_IndirectSpectrumSelector.h"
 
@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-enum class SpectrumSelectionMode { RANGE, STRING };
+enum class SpectrumSelectionModeLegacy { RANGE, STRING };
 
 class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionViewLegacy
     : public API::MantidWidget {
@@ -30,7 +30,7 @@ public:
   IndirectSpectrumSelectionViewLegacy(QWidget *parent = nullptr);
   virtual ~IndirectSpectrumSelectionViewLegacy() override;
 
-  SpectrumSelectionMode selectionMode() const;
+  SpectrumSelectionModeLegacy selectionMode() const;
 
   virtual std::size_t minimumSpectrum() const;
   virtual std::size_t maximumSpectrum() const;

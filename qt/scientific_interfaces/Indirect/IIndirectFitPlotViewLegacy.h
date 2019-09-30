@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEWLEGACY_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEWLEGACY_H_
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"

@@ -53,12 +53,12 @@ class RangeSelector;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataAnalysisTabLegacy : public IndirectTab {
+class DLLExport IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
   /// Constructor
-  IndirectDataAnalysisTabLegacy(QWidget *parent = nullptr);
+  IndirectDataAnalysisTab(QWidget *parent = nullptr);
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(

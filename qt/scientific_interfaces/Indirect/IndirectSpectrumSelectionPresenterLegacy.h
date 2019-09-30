@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTER_H_
+#ifndef MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTERLEGACY_H_
+#define MANTID_CUSTOMINTERFACES_INDIRECTSPECTRUMSELECTIONPRESENTERLEGACY_H_
 
 #include "IndirectFittingModelLegacy.h"
 #include "IndirectSpectrumSelectionViewLegacy.h"

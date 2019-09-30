@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATABLEGACY_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IDATABLEGACY_H_
 
 #include "IndirectDataAnalysis.h"
 #include "IndirectPlotOptionsPresenter.h"
@@ -162,6 +162,7 @@ private:
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
+  virtual void setBrowserWorkspace() {};
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
@@ -177,4 +178,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACESIDA_IDATABLEGACY_H_ */

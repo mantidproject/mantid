@@ -210,7 +210,7 @@ IndirectSpectrumSelectionView::createValidator(const QString &regex) {
 UserInputValidator &IndirectSpectrumSelectionView::validateSpectraString(
     UserInputValidator &uiv) const {
   if (selectionMode() == SpectrumSelectionMode::STRING)
-    uiv.checkFieldIsValid("Spectra", m_selector->leSpectra,
+    uiv.checkFieldIsValid("SpectraNew", m_selector->leSpectra,
                           m_selector->lbSpectraError);
   return uiv;
 }

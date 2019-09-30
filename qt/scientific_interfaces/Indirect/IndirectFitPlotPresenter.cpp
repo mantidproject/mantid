@@ -10,14 +10,14 @@
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
-using MantidQt::CustomInterfaces::IDA::Spectra;
+using MantidQt::CustomInterfaces::IDA::SpectraNew;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
   explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
 
-  void operator()(const Spectra &spectra) {
+  void operator()(const SpectraNew &spectra) {
     if (spectra.isContinuous()) {
       auto const minmax = spectra.getMinMax();
       m_view->setAvailableSpectra(minmax.first, minmax.second);

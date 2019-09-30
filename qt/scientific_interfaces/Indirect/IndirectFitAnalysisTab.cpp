@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTab.h"
 // #include "ui_ConvFit.h"
-// #include "ui_IqtFit.h"
+#include "ui_IqtFit.h"
 // #include "ui_JumpFit.h"
 // #include "ui_MSDFit.h"
 
@@ -39,7 +39,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 
 // void updateParameters(
 //    IFunction_sptr function,
-//    std::unordered_map<std::string, ParameterValue> const &parameters) {
+//    std::unordered_map<std::string, ParameterValueNew> const &parameters) {
 //  if (!function)
 //    return;
 //  for (auto i = 0u; i < function->nParams(); ++i) {
@@ -400,7 +400,7 @@ void IndirectFitAnalysisTab::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTab::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> &) {
+    const std::unordered_map<std::string, ParameterValueNew> &) {
   try {
     updateFitBrowserParameterValues();
   } catch (const std::out_of_range &) {

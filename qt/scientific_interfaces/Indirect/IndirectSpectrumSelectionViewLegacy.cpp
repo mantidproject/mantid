@@ -51,8 +51,8 @@ IndirectSpectrumSelectionViewLegacy::IndirectSpectrumSelectionViewLegacy(QWidget
 
 IndirectSpectrumSelectionViewLegacy::~IndirectSpectrumSelectionViewLegacy() {}
 
-SpectrumSelectionMode IndirectSpectrumSelectionViewLegacy::selectionMode() const {
-  return static_cast<SpectrumSelectionMode>(
+SpectrumSelectionModeLegacy IndirectSpectrumSelectionViewLegacy::selectionMode() const {
+  return static_cast<SpectrumSelectionModeLegacy>(
       m_selector->swSpectraSelection->currentIndex());
 }
 
@@ -78,14 +78,14 @@ void IndirectSpectrumSelectionViewLegacy::displaySpectra(
     const std::string &spectraString) {
   setSpectraString(spectraString);
   m_selector->cbSelectionMode->setCurrentIndex(
-      static_cast<int>(SpectrumSelectionMode::STRING));
+      static_cast<int>(SpectrumSelectionModeLegacy::STRING));
 }
 
 void IndirectSpectrumSelectionViewLegacy::displaySpectra(int minimum, int maximum) {
   setMinimumSpectrum(minimum);
   setMaximumSpectrum(maximum);
   m_selector->cbSelectionMode->setCurrentIndex(
-      static_cast<int>(SpectrumSelectionMode::RANGE));
+      static_cast<int>(SpectrumSelectionModeLegacy::RANGE));
 }
 
 void IndirectSpectrumSelectionViewLegacy::setSpectraRange(int minimum, int maximum) {
@@ -199,7 +199,7 @@ IndirectSpectrumSelectionViewLegacy::createValidator(const QString &regex) {
 
 UserInputValidator &IndirectSpectrumSelectionViewLegacy::validateSpectraString(
     UserInputValidator &uiv) const {
-  if (selectionMode() == SpectrumSelectionMode::STRING)
+  if (selectionMode() == SpectrumSelectionModeLegacy::STRING)
     uiv.checkFieldIsValid("Spectra", m_selector->leSpectra,
                           m_selector->lbSpectraError);
   return uiv;
@@ -239,15 +239,15 @@ void IndirectSpectrumSelectionViewLegacy::clearMaskString() {
 }
 
 void IndirectSpectrumSelectionViewLegacy::enableMaskLineEdit(int doEnable) {
-  if (doEnable >= 0 || selectionMode() == SpectrumSelectionMode::RANGE)
+  if (doEnable >= 0 || selectionMode() == SpectrumSelectionModeLegacy::RANGE)
     m_selector->leMaskBins->setEnabled(true);
   else
     m_selector->leMaskBins->setEnabled(false);
 }
 
 void IndirectSpectrumSelectionViewLegacy::emitSpectraChanged(int modeIndex) {
-  const auto mode = static_cast<SpectrumSelectionMode>(modeIndex);
-  if (mode == SpectrumSelectionMode::RANGE)
+  const auto mode = static_cast<SpectrumSelectionModeLegacy>(modeIndex);
+  if (mode == SpectrumSelectionModeLegacy::RANGE)
     emitSpectraRangeChanged();
   else
     emitSpectraStringChanged();

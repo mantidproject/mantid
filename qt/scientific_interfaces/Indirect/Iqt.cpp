@@ -150,7 +150,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTabLegacy(parent), m_iqtTree(nullptr), m_iqtResFileType() {
+    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
       m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraTiled));
@@ -438,7 +438,7 @@ void Iqt::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
-void Iqt::plotInput() { IndirectDataAnalysisTabLegacy::plotInput(m_uiForm.ppPlot); }
+void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
 void Iqt::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
@@ -471,7 +471,7 @@ void Iqt::plotInput(const QString &wsname) {
   setPreviewSpectrumMaximum(
       static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1);
 
-  IndirectDataAnalysisTabLegacy::plotInput(m_uiForm.ppPlot);
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {

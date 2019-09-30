@@ -7,14 +7,14 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
-#include "IndirectDataAnalysisTabLegacy.h"
+#include "IndirectDataAnalysisTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_Elwin.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport Elwin : public IndirectDataAnalysisTabLegacy {
+class DLLExport Elwin : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:

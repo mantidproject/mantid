@@ -16,7 +16,7 @@
 #include <QRegExpValidator>
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::Spectra;
+using MantidQt::CustomInterfaces::IDA::SpectraNew;
 using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace Regexes {
@@ -84,13 +84,13 @@ std::string pairsToString(
   return boost::algorithm::join(pairStrings, ",");
 }
 
-boost::optional<Spectra> pairsToSpectra(
+boost::optional<SpectraNew> pairsToSpectra(
     const std::vector<std::pair<WorkspaceIndex, WorkspaceIndex>> &pairs) {
   if (pairs.empty())
     return boost::none;
   else if (pairs.size() == 1)
-    return Spectra(pairs[0].first, pairs[0].second);
-  return Spectra(pairsToString(pairs));
+    return SpectraNew(pairs[0].first, pairs[0].second);
+  return SpectraNew(pairsToString(pairs));
 }
 
 QVariant getVariant(std::size_t i) {
@@ -202,14 +202,14 @@ IndirectDataTablePresenter::getDataIndex(SpectrumRowIndex row) const {
       m_dataTable->item(row.value, 0)->data(Qt::UserRole).toInt()};
 }
 
-boost::optional<Spectra>
+boost::optional<SpectraNew>
 IndirectDataTablePresenter::getSpectra(DatasetIndex dataIndex) const {
   if (m_dataPositions.size() > dataIndex)
     return getSpectra(m_dataPositions[dataIndex], getNextPosition(dataIndex));
   return boost::none;
 }
 
-boost::optional<Spectra>
+boost::optional<SpectraNew>
 IndirectDataTablePresenter::getSpectra(SpectrumRowIndex start,
                                        SpectrumRowIndex end) const {
   std::vector<std::pair<WorkspaceIndex, WorkspaceIndex>> spectraPairs;

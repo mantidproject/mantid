@@ -23,7 +23,7 @@ using namespace Mantid::Kernel::Strings;
 struct SetViewSpectra {
   explicit SetViewSpectra(IndirectSpectrumSelectionView *view) : m_view(view) {}
 
-  void operator()(const Spectra &spectra) const {
+  void operator()(const SpectraNew &spectra) const {
     if (spectra.isContinuous()) {
       m_view->displaySpectra(spectra.getMinMax());
     } else {
@@ -196,7 +196,7 @@ void IndirectSpectrumSelectionPresenter::setSpectraRange(
 }
 
 void IndirectSpectrumSelectionPresenter::setModelSpectra(
-    Spectra const &spectra) {
+    SpectraNew const &spectra) {
   try {
     m_model->setSpectra(spectra, m_activeIndex);
     m_spectraError.clear();
@@ -211,20 +211,20 @@ void IndirectSpectrumSelectionPresenter::setModelSpectra(
 
 void IndirectSpectrumSelectionPresenter::updateSpectraList(
     std::string const &spectraList) {
-  setModelSpectra(Spectra(createSpectraString(spectraList)));
+  setModelSpectra(SpectraNew(createSpectraString(spectraList)));
   emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::updateSpectraRange(
     WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  setModelSpectra(Spectra(minimum, maximum));
+  setModelSpectra(SpectraNew(minimum, maximum));
   emit spectraChanged(m_activeIndex);
 }
 
 void IndirectSpectrumSelectionPresenter::setMaskSpectraList(
     std::string const &spectra) {
   if (m_spectraError.empty()) {
-    auto const intVec = vectorFromString<int>(spectra);
+    auto const intVec = vectorFromStringNew<int>(spectra);
     std::vector<WorkspaceIndex> vec(intVec.size());
     std::transform(intVec.begin(), intVec.end(), vec.begin(),
                    [](int i) { return WorkspaceIndex{i}; });

@@ -227,7 +227,7 @@ IndirectDataTablePresenterLegacy::getRowIndex(std::size_t dataIndex,
 
 void IndirectDataTablePresenterLegacy::setStartX(double startX, std::size_t dataIndex,
                                            int spectrumIndex) {
-  if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
+  if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setStartX(startX);
   else if (auto row = getRowIndex(dataIndex, spectrumIndex))
     setStartX(startX, *row);
@@ -235,7 +235,7 @@ void IndirectDataTablePresenterLegacy::setStartX(double startX, std::size_t data
 
 void IndirectDataTablePresenterLegacy::setEndX(double endX, std::size_t dataIndex,
                                          int spectrumIndex) {
-  if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
+  if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setEndX(endX);
   else if (auto row = getRowIndex(dataIndex, spectrumIndex))
     setEndX(endX, *row);
@@ -244,7 +244,7 @@ void IndirectDataTablePresenterLegacy::setEndX(double endX, std::size_t dataInde
 void IndirectDataTablePresenterLegacy::setExclude(const std::string &exclude,
                                             std::size_t dataIndex,
                                             int spectrumIndex) {
-  if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
+  if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setExcludeRegion(exclude);
   else if (auto row = getRowIndex(dataIndex, spectrumIndex))
     setExcludeRegion(exclude, *row);
@@ -449,7 +449,7 @@ void IndirectDataTablePresenterLegacy::clearTable() {
 
 void IndirectDataTablePresenterLegacy::setStartX(double startX, int index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
-  if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
+  if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setStartX(startX);
   else
     m_dataTable->item(index, startXColumn())->setText(makeNumber(startX));
@@ -457,7 +457,7 @@ void IndirectDataTablePresenterLegacy::setStartX(double startX, int index) {
 
 void IndirectDataTablePresenterLegacy::setEndX(double endX, int index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
-  if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
+  if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setEndX(endX);
   else
     m_dataTable->item(index, endXColumn())->setText(makeNumber(endX));
@@ -466,7 +466,7 @@ void IndirectDataTablePresenterLegacy::setEndX(double endX, int index) {
 void IndirectDataTablePresenterLegacy::setExcludeRegion(const std::string &exclude,
                                                   int index) {
   MantidQt::API::SignalBlocker blocker(m_dataTable);
-  if (FittingMode::SEQUENTIAL == m_model->getFittingMode())
+  if (FittingModeLegacy::SEQUENTIAL == m_model->getFittingMode())
     setExcludeRegion(exclude);
   else
     m_dataTable->item(index, excludeColumn())

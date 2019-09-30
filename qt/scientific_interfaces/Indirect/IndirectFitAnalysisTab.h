@@ -101,7 +101,7 @@ protected slots:
   void executeFit();
   void updateParameterValues();
   void updateParameterValues(
-      const std::unordered_map<std::string, ParameterValue> &parameters);
+      const std::unordered_map<std::string, ParameterValueNew> &parameters);
   void updateFitBrowserParameterValues();
   void updateDataReferences();
   void updateResultOptions();

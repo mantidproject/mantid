@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitAnalysisTabLegacy.h"
 #include "ui_ConvFit.h"
-#include "ui_IqtFit.h"
+// #include "ui_IqtFit.h"
 #include "ui_JumpFit.h"
 #include "ui_MSDFit.h"
 
@@ -67,7 +67,7 @@ namespace IDA {
 
 IndirectFitAnalysisTabLegacy::IndirectFitAnalysisTabLegacy(IndirectFittingModelLegacy *model,
                                                QWidget *parent)
-    : IndirectDataAnalysisTabLegacy(parent), m_fittingModel(model) {}
+    : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
 
 void IndirectFitAnalysisTabLegacy::setup() {
   setupFitTab();
@@ -353,7 +353,7 @@ std::size_t IndirectFitAnalysisTabLegacy::getSelectedSpectrum() const {
 
 bool IndirectFitAnalysisTabLegacy::isRangeCurrentlySelected(
     std::size_t dataIndex, std::size_t spectrum) const {
-  return FittingMode::SEQUENTIAL == m_fittingModel->getFittingMode() ||
+  return FittingModeLegacy::SEQUENTIAL == m_fittingModel->getFittingMode() ||
          m_plotPresenter->isCurrentlySelected(dataIndex, spectrum);
 }
 

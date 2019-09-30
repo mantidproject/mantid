@@ -124,9 +124,7 @@ void IndirectDataAnalysis::loadSettings() {
 /**
  * Sets the active workspace in the selected tab
  */
-void IndirectDataAnalysis::tabChanged(int index) {
-  m_tabs[index]->setActiveWorkspace();
-}
+void IndirectDataAnalysis::tabChanged(int index) {}
 
 std::string IndirectDataAnalysis::documentationPage() const {
   return "Indirect Data Analysis";

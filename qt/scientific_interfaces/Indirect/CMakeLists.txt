@@ -24,7 +24,7 @@ set(
   IndirectBayesTab.cpp
   IndirectCorrections.cpp
   IndirectDataAnalysis.cpp
-  IndirectDataAnalysisTabLegacy.cpp
+  IndirectDataAnalysisTab.cpp
   IndirectDataAnalysisTab.cpp
   IndirectDataReduction.cpp
   IndirectDataReductionTab.cpp
@@ -86,6 +86,9 @@ set(
   IqtFit.cpp
   IqtFitModel.cpp
   IndirectFitPropertyBrowser.cpp
+  IndirectFunctionBrowser/IqtFunctionModel.cpp
+  IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+  IndirectFunctionBrowser/IqtTemplatePresenter.cpp
   JumpFit.cpp
   JumpFitAddWorkspaceDialog.cpp
   JumpFitDataPresenter.cpp
@@ -155,7 +158,7 @@ set(
   IndirectBayesTab.h
   IndirectCorrections.h
   IndirectDataAnalysis.h
-  IndirectDataAnalysisTabLegacy.h
+  IndirectDataAnalysisTab.h
   IndirectDataAnalysisTab.h
   IndirectDataReduction.h
   IndirectDataReductionTab.h
@@ -201,6 +204,8 @@ set(
   IndirectTransmissionCalc.h
   IndirectTransmission.h
   IqtFit.h
+  IndirectFunctionBrowser/IqtTemplateBrowser.h
+  IndirectFunctionBrowser/IqtTemplatePresenter.h
   IndirectFitPropertyBrowser.h
   Iqt.h
   ISISCalibration.h

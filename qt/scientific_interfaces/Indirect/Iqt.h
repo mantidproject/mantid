@@ -7,13 +7,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
-#include "IndirectDataAnalysisTabLegacy.h"
+#include "IndirectDataAnalysisTab.h"
 #include "ui_Iqt.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport Iqt : public IndirectDataAnalysisTabLegacy {
+class DLLExport Iqt : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
@@ -25,7 +25,6 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
-  void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
 

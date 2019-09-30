@@ -348,10 +348,10 @@ std::vector<std::string> IndirectFittingModel::getWorkspaceNames() const {
   return names;
 }
 
-Spectra IndirectFittingModel::getSpectra(DatasetIndex index) const {
+SpectraNew IndirectFittingModel::getSpectra(DatasetIndex index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->spectra();
-  return Spectra("");
+  return SpectraNew("");
 }
 
 std::pair<double, double>
@@ -477,17 +477,17 @@ void IndirectFittingModel::setFittingData(PrivateFittingData &&fittingData) {
 
 void IndirectFittingModel::setSpectra(const std::string &spectra,
                                       DatasetIndex dataIndex) {
-  setSpectra(Spectra(spectra), dataIndex);
+  setSpectra(SpectraNew(spectra), dataIndex);
 }
 
-void IndirectFittingModel::setSpectra(Spectra &&spectra,
+void IndirectFittingModel::setSpectra(SpectraNew &&spectra,
                                       DatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
-  m_fittingData[dataIndex]->setSpectra(std::forward<Spectra>(spectra));
+  m_fittingData[dataIndex]->setSpectra(std::forward<SpectraNew>(spectra));
 }
 
-void IndirectFittingModel::setSpectra(const Spectra &spectra,
+void IndirectFittingModel::setSpectra(const SpectraNew &spectra,
                                       DatasetIndex dataIndex) {
   if (m_fittingData.empty())
     return;
@@ -533,7 +533,7 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
       workspaceName);
   addWorkspace(
       ws,
-      Spectra(WorkspaceIndex{0},
+      SpectraNew(WorkspaceIndex{0},
               WorkspaceIndex{static_cast<int>(ws->getNumberHistograms()) - 1}));
 }
 
@@ -545,18 +545,18 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
   if (workspaceName.empty() || !doesExistInADS(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
 
-  addWorkspace(workspaceName, Spectra(spectra));
+  addWorkspace(workspaceName, SpectraNew(spectra));
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
-                                        const Spectra &spectra) {
+                                        const SpectraNew &spectra) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(ws, spectra);
 }
 
 void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
-                                        const Spectra &spectra) {
+                                        const SpectraNew &spectra) {
   if (!m_fittingData.empty() &&
       equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
     m_fittingData.back()->combine(IndirectFitData(workspace, spectra));
@@ -565,7 +565,7 @@ void IndirectFittingModel::addWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFittingModel::addNewWorkspace(MatrixWorkspace_sptr workspace,
-                                           const Spectra &spectra) {
+                                           const SpectraNew &spectra) {
   m_fittingData.emplace_back(new IndirectFitData(workspace, spectra));
   m_defaultParameters.emplace_back(
       createDefaultParameters(m_fittingData.last()));
@@ -620,7 +620,7 @@ void IndirectFittingModel::setDefaultParameterValue(const std::string &name,
                                                     double value,
                                                     DatasetIndex dataIndex) {
   if (m_defaultParameters.size() > dataIndex)
-    m_defaultParameters[dataIndex][name] = ParameterValue(value);
+    m_defaultParameters[dataIndex][name] = ParameterValueNew(value);
 }
 
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
@@ -628,8 +628,8 @@ void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) {
+                                     const FitDataIteratorNew &fitDataBegin,
+                                     const FitDataIteratorNew &fitDataEnd) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
@@ -653,8 +653,8 @@ void IndirectFittingModel::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm,
 void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
                                      ITableWorkspace_sptr parameterTable,
                                      WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) {
+                                     const FitDataIteratorNew &fitDataBegin,
+                                     const FitDataIteratorNew &fitDataEnd) {
   if (m_previousModelSelected && m_fitOutput)
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
@@ -681,8 +681,8 @@ void IndirectFittingModel::addOutput(WorkspaceGroup_sptr resultGroup,
 
 IndirectFitOutput IndirectFittingModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
+    WorkspaceGroup_sptr resultWorkspace, const FitDataIteratorNew &fitDataBegin,
+    const FitDataIteratorNew &fitDataEnd) const {
   return IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
                            fitDataBegin, fitDataEnd);
 }
@@ -700,8 +700,8 @@ void IndirectFittingModel::addOutput(IndirectFitOutput *fitOutput,
                                      WorkspaceGroup_sptr resultGroup,
                                      ITableWorkspace_sptr parameterTable,
                                      WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) const {
+                                     const FitDataIteratorNew &fitDataBegin,
+                                     const FitDataIteratorNew &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
                        fitDataBegin, fitDataEnd);
 }
@@ -719,7 +719,7 @@ FittingMode IndirectFittingModel::getFittingMode() const {
   return m_fittingMode;
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueNew>
 IndirectFittingModel::getParameterValues(DatasetIndex index,
                                          WorkspaceIndex spectrum) const {
   if (m_fittingData.size() > index) {
@@ -730,22 +730,22 @@ IndirectFittingModel::getParameterValues(DatasetIndex index,
       return getDefaultParameters(index);
     return combine(getDefaultParameters(index), parameters);
   }
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueNew>();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueNew>
 IndirectFittingModel::getFitParameters(DatasetIndex index,
                                        WorkspaceIndex spectrum) const {
   if (m_fitOutput)
     return m_fitOutput->getParameters(m_fittingData[index].get(), spectrum);
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueNew>();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueNew>
 IndirectFittingModel::getDefaultParameters(DatasetIndex index) const {
   if (index < m_defaultParameters.size())
     return mapKeys(m_defaultParameters[index], mapDefaultParameterNames());
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueNew>();
 }
 
 std::unordered_map<std::string, std::string>
@@ -755,9 +755,9 @@ IndirectFittingModel::mapDefaultParameterNames() const {
   return std::unordered_map<std::string, std::string>();
 }
 
-std::unordered_map<std::string, ParameterValue>
+std::unordered_map<std::string, ParameterValueNew>
 IndirectFittingModel::createDefaultParameters(DatasetIndex /*unused*/) const {
-  return std::unordered_map<std::string, ParameterValue>();
+  return std::unordered_map<std::string, ParameterValueNew>();
 }
 
 std::string IndirectFittingModel::getResultXAxisUnit() const {
@@ -766,7 +766,7 @@ std::string IndirectFittingModel::getResultXAxisUnit() const {
 
 std::string IndirectFittingModel::getResultLogName() const { return "axis-1"; }
 
-boost::optional<ResultLocation>
+boost::optional<ResultLocationNew>
 IndirectFittingModel::getResultLocation(DatasetIndex index,
                                         WorkspaceIndex spectrum) const {
   if (/*m_previousModelSelected && */ m_fitOutput &&
@@ -893,7 +893,7 @@ IAlgorithm_sptr IndirectFittingModel::createSimultaneousFitWithEqualRange(
   auto const dataIndex = DatasetIndex{0};
   auto const workspaceIndex = getSpectra(dataIndex).front();
   auto exclude =
-      vectorFromString<double>(getExcludeRegion(dataIndex, workspaceIndex));
+      vectorFromStringNew<double>(getExcludeRegion(dataIndex, workspaceIndex));
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData,
                                 getFittingRange(dataIndex, workspaceIndex),
                                 exclude);

@@ -336,7 +336,7 @@ operator=(PrivateFittingDataLegacy &&fittingData) {
 }
 
 IndirectFittingModelLegacy::IndirectFittingModelLegacy()
-    : m_previousModelSelected(false), m_fittingMode(FittingMode::SEQUENTIAL) {}
+    : m_previousModelSelected(false), m_fittingMode(FittingModeLegacy::SEQUENTIAL) {}
 
 bool IndirectFittingModelLegacy::hasWorkspace(
     std::string const &workspaceName) const {
@@ -371,7 +371,7 @@ IndirectFittingModelLegacy::getFittingRange(std::size_t dataIndex,
                                       std::size_t spectrum) const {
   if (dataIndex < m_fittingData.size() &&
       !m_fittingData[dataIndex]->zeroSpectra()) {
-    if (FittingMode::SEQUENTIAL == m_fittingMode)
+    if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
       return m_fittingData.front()->getRange(0);
     return m_fittingData[dataIndex]->getRange(spectrum);
   }
@@ -382,7 +382,7 @@ std::string IndirectFittingModelLegacy::getExcludeRegion(std::size_t dataIndex,
                                                    std::size_t spectrum) const {
   if (dataIndex < m_fittingData.size() &&
       !m_fittingData[dataIndex]->zeroSpectra()) {
-    if (FittingMode::SEQUENTIAL == m_fittingMode)
+    if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
       return m_fittingData.back()->getExcludeRegion(0);
     return m_fittingData[dataIndex]->getExcludeRegion(spectrum);
   }
@@ -482,7 +482,7 @@ void IndirectFittingModelLegacy::setSpectra(const Spectra &spectra,
 
 void IndirectFittingModelLegacy::setStartX(double startX, std::size_t dataIndex,
                                      std::size_t spectrum) {
-  if (FittingMode::SEQUENTIAL == m_fittingMode)
+  if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setStartX(startX, 0);
   else
     m_fittingData[dataIndex]->setStartX(startX, spectrum);
@@ -490,7 +490,7 @@ void IndirectFittingModelLegacy::setStartX(double startX, std::size_t dataIndex,
 
 void IndirectFittingModelLegacy::setEndX(double endX, std::size_t dataIndex,
                                    std::size_t spectrum) {
-  if (FittingMode::SEQUENTIAL == m_fittingMode)
+  if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setEndX(endX, 0);
   else
     m_fittingData[dataIndex]->setEndX(endX, spectrum);
@@ -499,7 +499,7 @@ void IndirectFittingModelLegacy::setEndX(double endX, std::size_t dataIndex,
 void IndirectFittingModelLegacy::setExcludeRegion(const std::string &exclude,
                                             std::size_t dataIndex,
                                             std::size_t spectrum) {
-  if (FittingMode::SEQUENTIAL == m_fittingMode)
+  if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setExcludeRegionString(exclude, 0);
   else
     m_fittingData[dataIndex]->setExcludeRegionString(exclude, spectrum);
@@ -581,7 +581,7 @@ PrivateFittingDataLegacy IndirectFittingModelLegacy::clearWorkspaces() {
   return std::move(m_fittingData);
 }
 
-void IndirectFittingModelLegacy::setFittingMode(FittingMode mode) {
+void IndirectFittingModelLegacy::setFittingMode(FittingModeLegacy mode) {
   m_fittingMode = mode;
 }
 
@@ -689,7 +689,7 @@ void IndirectFittingModelLegacy::addOutput(
                        spectrum);
 }
 
-FittingMode IndirectFittingModelLegacy::getFittingMode() const {
+FittingModeLegacy IndirectFittingModelLegacy::getFittingMode() const {
   return m_fittingMode;
 }
 
@@ -770,8 +770,8 @@ IAlgorithm_sptr IndirectFittingModelLegacy::getFittingAlgorithm() const {
 }
 
 IAlgorithm_sptr
-IndirectFittingModelLegacy::getFittingAlgorithm(FittingMode mode) const {
-  if (mode == FittingMode::SEQUENTIAL)
+IndirectFittingModelLegacy::getFittingAlgorithm(FittingModeLegacy mode) const {
+  if (mode == FittingModeLegacy::SEQUENTIAL)
     return createSequentialFit(getFittingFunction());
   else
     return createSimultaneousFit(getMultiDomainFunction());
