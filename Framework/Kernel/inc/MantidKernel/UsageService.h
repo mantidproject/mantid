@@ -9,7 +9,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
-#include <MantidTypes/Core/DateAndTime.h>
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <json/value.h>
 

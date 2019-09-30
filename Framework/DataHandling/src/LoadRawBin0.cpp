@@ -45,7 +45,7 @@ void LoadRawBin0::init() {
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
+      std::make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if "
       "explicitly set.");
 }
@@ -93,7 +93,7 @@ void LoadRawBin0::exec() {
   auto channelsVec = boost::make_shared<HistogramData::HistogramX>(1, 0);
   m_timeChannelsVec.push_back(channelsVec);
 
-  double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
+  auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
   int64_t histCurrent = -1;
 
   // Create the 2D workspace for the output xlength and ylength is one

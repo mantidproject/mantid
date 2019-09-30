@@ -114,6 +114,15 @@ const std::string sasProcessTermCan = "can_trans_run";
 const std::string sasProcessTermUserFile = "user_file";
 const std::string sasProcessUserFileInLogs = "UserFile";
 
+// SASnote
+const std::string sasNoteClassAttr = "SASnote";
+const std::string nxNoteClassAttr = "NXnote";
+const std::string sasNoteGroupName = "sasnote";
+const std::string sasProcessTermSampleTrans = "sample_trans_run";
+const std::string sasProcessTermSampleDirect = "sample_direct_run";
+const std::string sasProcessTermCanScatter = "can_scatter_run";
+const std::string sasProcessTermCanDirect = "can_direct_run";
+
 // SAStransmission_spectrum
 const std::string sasTransmissionSpectrumClassAttr = "SAStransmission_spectrum";
 const std::string nxTransmissionSpectrumClassAttr = "NXdata";

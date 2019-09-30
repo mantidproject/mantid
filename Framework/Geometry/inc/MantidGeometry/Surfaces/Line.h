@@ -49,7 +49,7 @@ private:
   int lambdaPair(
       const int ix,
       const std::pair<std::complex<double>, std::complex<double>> &SQ,
-      std::list<Kernel::V3D> &PntOut) const;
+      std::vector<Kernel::V3D> &PntOut) const;
 
 public:
   Line();
@@ -57,10 +57,14 @@ public:
   Line *clone() const;
 
   Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
-  Kernel::V3D getOrigin() const { return Origin; } ///< returns the origin
-  Kernel::V3D getDirect() const { return Direct; } ///< returns the direction
-  double distance(const Kernel::V3D &) const;      ///< distance from line
-  int isValid(const Kernel::V3D &) const;          ///< Is the point on the line
+  const Kernel::V3D &getOrigin() const {
+    return Origin;
+  } ///< returns the origin
+  const Kernel::V3D &getDirect() const {
+    return Direct;
+  }                                           ///< returns the direction
+  double distance(const Kernel::V3D &) const; ///< distance from line
+  int isValid(const Kernel::V3D &) const;     ///< Is the point on the line
   void print() const;
 
   void rotate(const Kernel::Matrix<double> &);
@@ -69,10 +73,10 @@ public:
   int setLine(const Kernel::V3D &,
               const Kernel::V3D &); ///< input Origin + direction
 
-  int intersect(std::list<Kernel::V3D> &, const Quadratic &) const;
-  int intersect(std::list<Kernel::V3D> &, const Cylinder &) const;
-  int intersect(std::list<Kernel::V3D> &, const Plane &) const;
-  int intersect(std::list<Kernel::V3D> &, const Sphere &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Quadratic &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Cylinder &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Plane &) const;
+  int intersect(std::vector<Kernel::V3D> &, const Sphere &) const;
 };
 
 } // namespace Geometry

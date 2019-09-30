@@ -55,11 +55,11 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._RAW_WS_NAME]
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms())
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms())
+        self.assertEqual(outWS.blocksize(), 1)
         spectrumInfo = outWS.spectrumInfo()
         for i in range(outWS.getNumberHistograms()):
-            self.assertEquals(outWS.readY(i)[0], 0)
+            self.assertEqual(outWS.readY(i)[0], 0)
             self.assertFalse(spectrumInfo.isMasked(i))
 
     def testBackgroundDiagnostics(self):
@@ -89,16 +89,16 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), spectraCount)
+        self.assertEqual(outWS.blocksize(), 1)
         spectrumInfo = outWS.spectrumInfo()
         for i in range(spectraCount):
             self.assertFalse(spectrumInfo.isMasked(i))
             ys = outWS.readY(i)
             if i in highBkgIndices + lowBkgIndices:
-                self.assertEquals(ys[0], 1)
+                self.assertEqual(ys[0], 1)
             else:
-                self.assertEquals(ys[0], 0)
+                self.assertEqual(ys[0], 0)
 
     def testDirectBeamMasking(self):
         beamWSName = 'beam_masking_ws'
@@ -140,14 +140,14 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), beamWS.getNumberHistograms())
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), beamWS.getNumberHistograms())
+        self.assertEqual(outWS.blocksize(), 1)
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i >= 92 and i < 105:
-                self.assertEquals(ys[0], 1)
+                self.assertEqual(ys[0], 1)
             else:
-                self.assertEquals(ys[0], 0)
+                self.assertEqual(ys[0], 0)
 
     def testElasticPeakDiagnostics(self):
         inWS = mtd[self._RAW_WS_NAME]
@@ -176,16 +176,16 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), spectraCount)
+        self.assertEqual(outWS.blocksize(), 1)
         spectrumInfo = outWS.spectrumInfo()
         for i in range(spectraCount):
             self.assertFalse(spectrumInfo.isMasked(i))
             ys = outWS.readY(i)
             if i in highPeakIndices + lowPeakIndices:
-                self.assertEquals(ys[0], 1)
+                self.assertEqual(ys[0], 1)
             else:
-                self.assertEquals(ys[0], 0)
+                self.assertEqual(ys[0], 0)
 
     def testMaskedComponents(self):
         inWS = mtd[self._RAW_WS_NAME]
@@ -204,16 +204,16 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), spectraCount)
+        self.assertEqual(outWS.blocksize(), 1)
         for i in range(spectraCount):
             Ys = outWS.readY(i)
             detector = outWS.getDetector(i)
             componentName = detector.getFullName()
             if 'tube_1' in componentName:
-                self.assertEquals(Ys[0], 1)
+                self.assertEqual(Ys[0], 1)
             else:
-                self.assertEquals(Ys[0], 0)
+                self.assertEqual(Ys[0], 0)
 
     def testOutputIsUsable(self):
         inWS = mtd[self._RAW_WS_NAME]
@@ -238,8 +238,8 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), spectraCount)
-        self.assertEquals(outWS.blocksize(), 1)
+        self.assertEqual(outWS.getNumberHistograms(), spectraCount)
+        self.assertEqual(outWS.blocksize(), 1)
         kwargs = {
             'Workspace': self._RAW_WS_NAME,
             'MaskedWorkspace': outWSName,

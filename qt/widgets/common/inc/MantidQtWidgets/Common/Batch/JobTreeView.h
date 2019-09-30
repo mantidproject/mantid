@@ -43,7 +43,7 @@ public:
                          std::unique_ptr<HintStrategy> hintStrategy) override;
   void setHintsForColumn(int column, HintStrategy *hintStrategy) override;
 
-  void subscribe(JobTreeViewSubscriber &subscriber) override;
+  void subscribe(JobTreeViewSubscriber *subscriber) override;
 
   RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
                                std::vector<Cell> const &rowText) override;
@@ -52,6 +52,9 @@ public:
   RowLocation appendChildRowOf(RowLocation const &parent) override;
   RowLocation appendChildRowOf(RowLocation const &parentLocation,
                                std::vector<Cell> const &rowText) override;
+  void appendAndEditAtChildRow() override;
+  void appendAndEditAtRowBelow() override;
+  void editAtRowAbove() override;
 
   void removeRowAt(RowLocation const &location) override;
   void removeAllRows() override;
@@ -96,6 +99,8 @@ public:
   QModelIndexList
   findImplicitlySelected(QModelIndexList const &selectedRows) const;
 
+  int currentColumn() const override;
+
   Cell deadCell() const override;
   using QTreeView::edit;
 
@@ -104,6 +109,9 @@ protected:
   bool edit(const QModelIndex &index, EditTrigger trigger,
             QEvent *event) override;
   void setHeaderLabels(QStringList const &columnHeadings);
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void removeSelectedRequested();
   void copySelectedRequested();
   void cutSelectedRequested();
@@ -112,14 +120,13 @@ protected:
 
 protected slots:
   void commitData(QWidget * /*editor*/) override;
+  void selectionChanged(const QItemSelection &selected,
+                        const QItemSelection &deselected) override;
 
 private:
   // The view property values for an uneditable, unselectable cell.
   static Cell const g_deadCell;
 
-  void appendAndEditAtChildRow();
-  void appendAndEditAtRowBelow();
-  void editAtRowAbove();
   bool indexesAreOnSameRow(QModelIndex const &a, QModelIndex const &b) const;
 
   QModelIndexForMainModel

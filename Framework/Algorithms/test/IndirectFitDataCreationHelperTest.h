@@ -117,7 +117,7 @@ public:
   test_that_createWorkspaceWithTextAxis_throws_when_the_number_of_spectra_is_not_equal_to_the_number_of_labels() {
     auto const labels = std::vector<std::string>({"f0.Width", "f1.EISF"});
     TS_ASSERT_THROWS(createWorkspaceWithTextAxis(6, labels),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -132,7 +132,7 @@ public:
   test_that_createWorkspaceWithBinValues_throws_when_the_number_of_bins_is_not_equal_to_the_number_of_labels() {
     auto const labels = getNumericAxisLabels();
     TS_ASSERT_THROWS(createWorkspaceWithBinValues(3, labels, 2),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void

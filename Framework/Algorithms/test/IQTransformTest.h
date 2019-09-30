@@ -200,7 +200,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(iq.setPropertyValue("TransformType", "General"));
 
     // Check it fails if constants not set
-    TS_ASSERT_THROWS(iq.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(iq.execute(), const std::invalid_argument &);
 
     std::vector<double> constants(10, 2.0);
     TS_ASSERT_THROWS_NOTHING(

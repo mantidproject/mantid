@@ -20,11 +20,14 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
+#include "MantidNexusGeometry/JSONGeometryParser.h"
 
 GNU_DIAG_OFF("conversion")
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/hs00_event_histogram_generated.h"
 GNU_DIAG_ON("conversion")
+
+#include <json/json.h>
 
 using namespace HistoSchema;
 
@@ -55,9 +58,9 @@ namespace LiveData {
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic,
-    const std::string &sampleEnvTopic)
+    const std::string &sampleEnvTopic, const std::string &chopperTopic)
     : IKafkaStreamDecoder(broker, histoTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic),
+                          sampleEnvTopic, chopperTopic),
       m_workspace() {}
 
 /**
@@ -203,38 +206,57 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 
 void KafkaHistoStreamDecoder::initLocalCaches(
     const std::string &rawMsgBuffer, const RunStartStruct &runStartData) {
+  m_runId = runStartData.runId;
+
+  const auto jsonGeometry = runStartData.nexusStructure;
+  const auto instName = runStartData.instrumentName;
+
+  DataObjects::Workspace2D_sptr histoBuffer;
   if (rawMsgBuffer.empty()) {
-    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
-                             "Empty message received from spectrum-detector "
-                             "topic. Unable to continue");
+    /* Load the instrument to get the number of spectra :c */
+    auto ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+    loadInstrument<API::MatrixWorkspace>(instName, ws, jsonGeometry);
+    const auto nspec = ws->getInstrument()->getNumberDetectors();
+
+    // Create buffer
+    histoBuffer = boost::static_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
+    histoBuffer->setInstrument(ws->getInstrument());
+    histoBuffer->rebuildSpectraMapping();
+    histoBuffer->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("TOF");
+    histoBuffer->setYUnit("Counts");
+  } else {
+    auto spDetMsg = GetSpectraDetectorMapping(
+        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+    auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
+    auto nudet = spDetMsg->detector_id()->size();
+    if (nudet != nspec) {
+      std::ostringstream os;
+      os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
+            "spectra/detector mapping. Expected matched length arrays but "
+            "found nspec="
+         << nspec << ", ndet=" << nudet;
+      throw std::runtime_error(os.str());
+    }
+
+    // Create buffer
+    histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
+        "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
+        spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
+
+    // Load the instrument if possible but continue if we can't
+    if (!instName.empty()) {
+      loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer,
+                                               jsonGeometry);
+      if (rawMsgBuffer.empty()) {
+        histoBuffer->rebuildSpectraMapping();
+      }
+    } else {
+      g_log.warning(
+          "Empty instrument name received. Continuing without instrument");
+    }
   }
-  auto spDetMsg = GetSpectraDetectorMapping(
-      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  auto nspec = static_cast<uint32_t>(spDetMsg->n_spectra());
-  auto nudet = spDetMsg->detector_id()->size();
-  if (nudet != nspec) {
-    std::ostringstream os;
-    os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
-          "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec="
-       << nspec << ", ndet=" << nudet;
-    throw std::runtime_error(os.str());
-  }
-
-  m_runNumber = runStartData.runNumber;
-
-  // Create buffer
-  auto histoBuffer = createBufferWorkspace<DataObjects::Workspace2D>(
-      "Workspace2D", static_cast<size_t>(spDetMsg->n_spectra()),
-      spDetMsg->spectrum()->data(), spDetMsg->detector_id()->data(), nudet);
-
-  // Load the instrument if possible but continue if we can't
-  auto instName = runStartData.instrumentName;
-  if (!instName.empty())
-    loadInstrument<DataObjects::Workspace2D>(instName, histoBuffer);
-  else
-    g_log.warning(
-        "Empty instrument name received. Continuing without instrument");
 
   auto &mutableRun = histoBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
@@ -244,14 +266,14 @@ void KafkaHistoStreamDecoder::initLocalCaches(
   auto timeString = m_runStart.toISO8601String();
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  mutableRun.addProperty(RUN_NUMBER_PROPERTY,
-                         std::to_string(runStartData.runNumber));
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY, runStartData.runId);
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
 
   // Cache spec->index mapping. We assume it is the same across all periods
-  m_specToIdx = histoBuffer->getSpectrumToWorkspaceIndexMap();
+  m_specToIdx =
+      histoBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
   const size_t nperiods = runStartData.nPeriods;

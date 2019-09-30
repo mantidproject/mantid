@@ -127,7 +127,8 @@ public:
 
     // throws file not exist from ChildAlgorithm
     saver.setRethrows(true);
-    TS_ASSERT_THROWS(saver.execute(), Mantid::Kernel::Exception::FileError);
+    TS_ASSERT_THROWS(saver.execute(),
+                     const Mantid::Kernel::Exception::FileError &);
     TS_ASSERT(Poco::File(outputFile).exists());
 
     if (Poco::File(outputFile).exists())

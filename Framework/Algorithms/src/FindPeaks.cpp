@@ -63,9 +63,9 @@ FindPeaks::FindPeaks()
 /** Initialize and declare properties.
  */
 void FindPeaks::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace to search");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the workspace to search");
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
@@ -87,12 +87,12 @@ void FindPeaks::init() {
                   "candidates,\n"
                   "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");
 
-  declareProperty(make_unique<ArrayProperty<double>>("FitWindows"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("FitWindows"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of windows to fit. The number of values must be "
                   "exactly double the number of specified peaks.");
@@ -131,7 +131,7 @@ void FindPeaks::init() {
                   "option is turned off.");
 
   // The found peaks in a table
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PeaksList", "", Direction::Output),
                   "The name of the TableWorkspace in which to store the list "
                   "of peaks found");
@@ -343,7 +343,7 @@ void FindPeaks::findPeaksGivenStartingPoints(
   std::size_t numPeaks = peakcentres.size();
 
   // Loop over the spectra searching for peaks
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
 
   for (const auto spec : m_indexSet) {
     const auto &vecX = m_dataWS->x(spec);
@@ -435,7 +435,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
 
   // The optimum number of points in the smoothing, according to Mariscotti, is
   // 0.6*fwhm
-  int w = static_cast<int>(0.6 * m_inputPeakFWHM);
+  auto w = static_cast<int>(0.6 * m_inputPeakFWHM);
   // w must be odd
   if (!(w % 2))
     ++w;
@@ -453,7 +453,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
   const int tolerance = getProperty("Tolerance");
 
   // Loop over the spectra searching for peaks
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_indexSet.size());
 
   for (size_t k_out = 0; k_out < m_indexSet.size(); ++k_out) {
     const size_t k = m_indexSet[k_out];
@@ -588,7 +588,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
 
         // Use i0, i2 and i4 to find out i_min and i_max, i0: right, i2: left,
         // i4: centre
-        int wssize = static_cast<int>(m_dataWS->x(k).size());
+        auto wssize = static_cast<int>(m_dataWS->x(k).size());
 
         int iwidth = i0 - i2;
         if (iwidth <= 0)
@@ -678,7 +678,7 @@ void FindPeaks::calculateStandardDeviation(
   // phi values were needed (see Marriscotti p.312)
   static_assert(g_z == 5, "Value of z has changed!");
   // Have to adjust for fact that I normalise Si (unlike the paper)
-  const int factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
+  const auto factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
 
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
@@ -1061,8 +1061,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
     /// name. This should be fixed but it causes different behaviour which
     /// breaks several unit tests. The issue to deal with this is #13950. Other
     /// related issues are #13667, #15978 and #19773.
-    int fitresult = peaklisttablews->Int(0, 6);
-    g_log.information() << "fitresult=" << fitresult << "\n";
+    const int hiddenFitresult = peaklisttablews->Int(0, 6);
+    g_log.information() << "fitresult=" << hiddenFitresult << "\n";
   }
 
   // Local check whether FindPeakBackground gives a reasonable value
@@ -1142,7 +1142,7 @@ std::string FindPeaks::estimatePeakParameters(
     const std::vector<double> &vecbkgdparvalues, size_t &iobscentre,
     double &height, double &fwhm, double &leftfwhm, double &rightfwhm) {
   // Search for maximum considering background
-  double bg0 = vecbkgdparvalues[0];
+  const double bg0 = vecbkgdparvalues[0];
   double bg1 = 0;
   double bg2 = 0;
   if (vecbkgdparvalues.size() >= 2) {
@@ -1153,7 +1153,7 @@ std::string FindPeaks::estimatePeakParameters(
 
   // Starting value
   iobscentre = i_min;
-  double tmpx = vecX[i_min];
+  const double tmpx = vecX[i_min];
   height = vecY[i_min] - (bg0 + bg1 * tmpx + bg2 * tmpx * tmpx);
   double lowest = height;
 
@@ -1163,8 +1163,8 @@ std::string FindPeaks::estimatePeakParameters(
 
   // Searching
   for (size_t i = i_min + 1; i <= i_max; ++i) {
-    double tmpx = vecX[i];
-    double tmpheight = vecY[i] - (bg0 + bg1 * tmpx + bg2 * tmpx * tmpx);
+    const double x = vecX[i];
+    const double tmpheight = vecY[i] - (bg0 + bg1 * x + bg2 * x * x);
 
     if (tmpheight > height) {
       iobscentre = i;
@@ -1344,7 +1344,7 @@ void FindPeaks::estimatePeakRange(const HistogramX &vecX, size_t i_centre,
   double peakrightbound = vecX[i_centre] + 6. * rightfwhm;
 
   // Deal with case the peak boundary is too close to fit window
-  size_t ipeakleft = static_cast<size_t>(getIndex(vecX, peakleftbound));
+  auto ipeakleft = static_cast<size_t>(getIndex(vecX, peakleftbound));
   if (ipeakleft <= i_min) {
     size_t numbkgdpts = (i_centre - i_min) / 6;
     // FIXME - 3 is a magic number
@@ -1357,7 +1357,7 @@ void FindPeaks::estimatePeakRange(const HistogramX &vecX, size_t i_centre,
     peakleftbound = vecX[ipeakleft];
   }
 
-  size_t ipeakright = static_cast<size_t>(getIndex(vecX, peakrightbound));
+  auto ipeakright = static_cast<size_t>(getIndex(vecX, peakrightbound));
   if (ipeakright >= i_max) {
     size_t numbkgdpts = (i_max - i_centre) / 6;
     // FIXME - 3 is a magic number

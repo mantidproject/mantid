@@ -56,7 +56,7 @@ public:
     fn.setParameter("Height", 1.5);
     fn.setParameter("Lifetime", 5.0);
     fn.setParameter("Stretching", 0.4);
-    TS_ASSERT_THROWS(fn.function(x, y), std::runtime_error);
+    TS_ASSERT_THROWS(fn.function(x, y), const std::runtime_error &);
   }
 };
 

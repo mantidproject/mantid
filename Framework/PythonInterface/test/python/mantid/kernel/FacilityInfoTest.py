@@ -21,16 +21,16 @@ class FacilityInfoTest(unittest.TestCase):
     def test_attributes_are_as_expected(self):
         test_facility = self._get_test_facility()
 
-        self.assertEquals(test_facility.name(), "ISIS")
-        self.assertEquals(test_facility.zeroPadding(), 5)
-        self.assertEquals(test_facility.delimiter(), "")
-        self.assertEquals(len(test_facility.extensions()), 7)
-        self.assertEquals(test_facility.preferredExtension(), ".nxs")
-        self.assertEquals(len(test_facility.archiveSearch()), 1)
-        self.assertTrue(len(test_facility.instruments()) > 30)
+        self.assertEqual(test_facility.name(), "ISIS")
+        self.assertEqual(test_facility.zeroPadding(), 5)
+        self.assertEqual(test_facility.delimiter(), "")
+        self.assertEqual(len(test_facility.extensions()), 7)
+        self.assertEqual(test_facility.preferredExtension(), ".nxs")
+        self.assertEqual(len(test_facility.archiveSearch()), 1)
+        self.assertGreater(len(test_facility.instruments()), 30)
         self.assertTrue(len(test_facility.instruments("Neutron Diffraction"))> 10)
         self.assertTrue(isinstance(test_facility.instrument("WISH"), InstrumentInfo))
-        self.assertEquals(test_facility.timezone(), "Europe/London")
+        self.assertEqual(test_facility.timezone(), "Europe/London")
 
     def test_timezones(self):
         # verify that all of the timezones can get converted by pytz
@@ -39,7 +39,7 @@ class FacilityInfoTest(unittest.TestCase):
                 continue # don't test empty strings
             tz = pytz.timezone(facility.timezone())
             print(facility.name(), tz)
-            self.assertEquals(str(tz), facility.timezone())
+            self.assertEqual(str(tz), facility.timezone())
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,12 +16,13 @@ Cell::Cell(std::string const &contentText, std::string const &backgroundColor,
     : m_contentText(contentText), m_backgroundColor(backgroundColor),
       m_borderThickness(borderThickness), m_borderOpacity(borderOpacity),
       m_borderColor(borderColor), m_iconFilePath(), m_isEditable(isEditable),
-      m_toolTip("") {}
+      m_toolTip(""), m_direction(Direction::INPUT) {}
 
 Cell::Cell(std::string const &contentText)
     : m_contentText(contentText), m_backgroundColor("white"),
       m_borderThickness(1), m_borderOpacity(255), m_borderColor("darkGrey"),
-      m_iconFilePath(), m_isEditable(true), m_toolTip("") {}
+      m_iconFilePath(), m_isEditable(true), m_toolTip(""),
+      m_direction(Direction::INPUT) {}
 
 std::string const &Cell::contentText() const { return m_contentText; }
 
@@ -53,7 +54,17 @@ void Cell::setBackgroundColor(std::string const &backgroundColor) {
   m_backgroundColor = backgroundColor;
 }
 
+void Cell::setForegroundColor(std::string const &foregroundColor) {
+  m_foregroundColor = foregroundColor;
+  if (m_foregroundColor == OUTPUT_FOREGROUND_COLOR)
+    m_direction = Direction::OUTPUT;
+  else
+    m_direction = Direction::INPUT;
+}
+
 std::string const &Cell::backgroundColor() const { return m_backgroundColor; }
+
+std::string const &Cell::foregroundColor() const { return m_foregroundColor; }
 
 void Cell::setBorderOpacity(int borderOpacity) {
   m_borderOpacity = borderOpacity;
@@ -70,6 +81,20 @@ void Cell::setEditable(bool isEditable) { m_isEditable = isEditable; }
 void Cell::disableEditing() { m_isEditable = false; }
 
 void Cell::enableEditing() { m_isEditable = true; }
+
+bool Cell::isInput() const { return m_direction == Direction::INPUT; }
+
+bool Cell::isOutput() const { return m_direction == Direction::OUTPUT; }
+
+void Cell::setInput() {
+  m_direction = Direction::INPUT;
+  m_foregroundColor = INPUT_FOREGROUND_COLOR;
+}
+
+void Cell::setOutput() {
+  m_direction = Direction::OUTPUT;
+  m_foregroundColor = OUTPUT_FOREGROUND_COLOR;
+}
 
 std::ostream &operator<<(std::ostream &os, Cell const &cell) {
   os << '|' << cell.contentText() << '|';

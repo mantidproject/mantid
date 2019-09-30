@@ -24,11 +24,39 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
 /**
+ * @brief Set the shape via an XML string on the given experiment
+ * @param expt A reference to the experiment holding the sample object
+ * @param shapeXML XML defining the object's shape
+ */
+void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt,
+                                       const std::string &shapeXML) {
+  Geometry::ShapeFactory sFactory;
+  // Create the object
+  auto shape = sFactory.createShape(shapeXML);
+  // Check it's valid and attach it to the workspace sample but preserve any
+  // material
+  if (shape->hasValidShape()) {
+    const auto mat = expt.sample().getMaterial();
+    shape->setMaterial(mat);
+    expt.mutableSample().setShape(shape);
+  } else {
+    std::ostringstream msg;
+    msg << "Object has invalid shape.";
+    if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
+      msg << " TopRule = " << csgShape->topRule()
+          << ", number of surfaces = " << csgShape->getSurfacePtr().size()
+          << "\n";
+    }
+    throw std::runtime_error(msg.str());
+  }
+}
+
+/**
  * Initialize the algorithm
  */
 void CreateSampleShape::init() {
   using namespace Mantid::Kernel;
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The workspace with which to associate the sample ");
   declareProperty("ShapeXML", "",
@@ -42,28 +70,7 @@ void CreateSampleShape::init() {
 void CreateSampleShape::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
-  // Get the XML definition
-  std::string shapeXML = getProperty("ShapeXML");
-
-  Geometry::ShapeFactory sFactory;
-  // Create the object
-  auto shape = sFactory.createShape(shapeXML);
-  // Check it's valid and attach it to the workspace sample but preserve any
-  // material
-  if (shape->hasValidShape()) {
-    const auto mat = workspace->sample().getMaterial();
-    shape->setMaterial(mat);
-    workspace->mutableSample().setShape(shape);
-  } else {
-    std::ostringstream msg;
-    msg << "Object has invalid shape.";
-    if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
-      msg << " TopRule = " << csgShape->topRule()
-          << ", number of surfaces = " << csgShape->getSurfacePtr().size()
-          << "\n";
-    }
-    throw std::runtime_error(msg.str());
-  }
+  setSampleShape(*workspace, getProperty("ShapeXML"));
   // Done!
   progress(1);
 }

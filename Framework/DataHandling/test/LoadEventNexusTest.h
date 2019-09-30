@@ -349,7 +349,8 @@ public:
 
     // Test that asking not to load the logs did what it should
     // Make sure that we throw if we try to read a log (that shouldn't be there)
-    TS_ASSERT_THROWS(WS->getLog("proton_charge"), std::invalid_argument);
+    TS_ASSERT_THROWS(WS->getLog("proton_charge"),
+                     const std::invalid_argument &);
 
     //----- Now we re-load with precounting and compare memory use ----
     LoadEventNexus ld2;
@@ -1009,6 +1010,19 @@ public:
     // libraries, so we need a mutex.
     auto hdf5Mutex = boost::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+  }
+
+  void test_load_fails_on_corrupted_run() {
+    // Some ISIS runs can be corrupted by instrument noise,
+    // resulting in incorrect period numbers.
+    // LoadEventNexus should fail in this case.
+    LoadEventNexus loader;
+
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setPropertyValue("Filename", "SANS2D00059115_corrupted.nxs");
+    TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
   }
 
 private:

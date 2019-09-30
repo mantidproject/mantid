@@ -41,10 +41,10 @@ const std::string SavePDFGui::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SavePDFGui::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".gr"),
                   "The filename to use for the saved data");
 }
@@ -59,7 +59,7 @@ std::map<std::string, std::string> SavePDFGui::validateInputs() {
     return result;
   }
 
-  const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int>(inputWS->getNumberHistograms());
   if (nHist != 1) {
     result["InputWorkspace"] = "Workspace must contain only one spectrum";
   } else if (std::string(inputWS->getAxis(0)->unit()->label()) != "Angstrom") {

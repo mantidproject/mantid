@@ -43,8 +43,8 @@ int MonitorLiveData::version() const { return 1; }
 /** Initialize the algorithm's properties.
  */
 void MonitorLiveData::init() {
-  declareProperty(make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
-                                                         Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      "UpdateEvery", 60.0, Direction::Input),
                   "Frequency of updates, in seconds. Default 60.");
 
   this->initProps();
@@ -164,7 +164,7 @@ void MonitorLiveData::exec() {
 
       // Time to run LoadLiveData again
       Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");
-      LoadLiveData *loadAlg = dynamic_cast<LoadLiveData *>(alg.get());
+      auto *loadAlg = dynamic_cast<LoadLiveData *>(alg.get());
       if (!loadAlg)
         throw std::runtime_error("Error creating LoadLiveData Child Algorithm");
 

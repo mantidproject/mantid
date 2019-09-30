@@ -41,16 +41,17 @@ DECLARE_ALGORITHM(MuonRemoveExpDecay)
  *
  */
 void MuonRemoveExpDecay::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "The name of the input 2D workspace.");
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "The name of the input 2D workspace.");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output 2D workspace.");
   std::vector<int> empty;
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra",
-                                                      std::move(empty)),
+      std::make_unique<Kernel::ArrayProperty<int>>("Spectra", std::move(empty)),
       "The workspace indices to remove the exponential decay from.");
 }
 
@@ -62,7 +63,7 @@ void MuonRemoveExpDecay::exec() {
 
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
+  auto numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
@@ -97,7 +98,7 @@ void MuonRemoveExpDecay::exec() {
   }
 
   // Do the specified spectra only
-  int specLength = static_cast<int>(spectra.size());
+  auto specLength = static_cast<int>(spectra.size());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION

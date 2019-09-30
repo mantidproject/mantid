@@ -27,15 +27,15 @@ using namespace Kernel;
  * Declare the algorithm properties
  */
 void ExtractMask::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "A workspace whose masking is to be extracted");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "A workspace containing the masked spectra as zeroes and ones.");
 
-  declareProperty(make_unique<ArrayProperty<detid_t>>(
+  declareProperty(std::make_unique<ArrayProperty<detid_t>>(
                       "DetectorList", boost::make_shared<NullValidator>(),
                       Direction::Output),
                   "A comma separated list or array containing a list of masked "
@@ -51,7 +51,7 @@ void ExtractMask::exec() {
   // convert input to a mask workspace
   auto inputMaskWS =
       boost::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
-  bool inputWSIsSpecial = bool(inputMaskWS);
+  auto inputWSIsSpecial = bool(inputMaskWS);
   if (inputWSIsSpecial) {
     g_log.notice() << "Input workspace is a MaskWorkspace.\n";
   }
@@ -73,7 +73,7 @@ void ExtractMask::exec() {
   maskWS->setTitle(inputWS->getTitle());
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *maskWS))

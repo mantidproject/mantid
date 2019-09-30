@@ -172,7 +172,6 @@ bool MantidEVWorker::loadAndConvertToMD(
     const bool load_det_cal, const std::string &det_cal_file,
     const std::string &det_cal_file2, const std::string &axisCORELLI) {
   try {
-    IAlgorithm_sptr alg;
     if (load_data) {
       bool topaz = false;
       // Limits and filtering only done for topaz
@@ -227,7 +226,7 @@ bool MantidEVWorker::loadAndConvertToMD(
     std::ostringstream max_str;
     max_str << maxQ << "," << maxQ << "," << maxQ;
 
-    alg = AlgorithmManager::Instance().create("ConvertToMD");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertToMD");
     alg->setProperty("InputWorkspace", ev_ws_name);
     alg->setProperty("OutputWorkspace", md_ws_name);
     alg->setProperty("OverwriteExisting", true);

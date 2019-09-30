@@ -204,7 +204,7 @@ MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
 distance_threshold = 0.9 * 6.28 / float(max_d)
 peaks_ws = FindPeaksMD( MDEW, MaxPeaks=num_peaks_to_find,
                         PeakDistanceThreshold=distance_threshold )
-AnalysisDataService.remove( MDEW.getName() )
+AnalysisDataService.remove( MDEW.name() )
 
 # Read or find UB for the run
 if read_UB:

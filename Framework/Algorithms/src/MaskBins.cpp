@@ -32,8 +32,8 @@ void MaskBins::init() {
       "InputWorkspace",
       "The name of the input workspace. Must contain histogram data.",
       boost::make_shared<HistogramValidator>());
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the Workspace containing the masked bins.");
 
   // This validator effectively makes these properties mandatory
@@ -46,7 +46,7 @@ void MaskBins::init() {
   declareProperty("XMax", std::numeric_limits<double>::max(), required,
                   "The value to end masking at.");
 
-  this->declareProperty(make_unique<ArrayProperty<int64_t>>("SpectraList"),
+  this->declareProperty(std::make_unique<ArrayProperty<int64_t>>("SpectraList"),
                         "Deprecated, use InputWorkspaceIndexSet.");
 }
 
@@ -111,7 +111,7 @@ void MaskBins::exec() {
         this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
 
       // Loop over masking each bin in the range
-      for (int j = static_cast<int>(startBinLoop);
+      for (auto j = static_cast<int>(startBinLoop);
            j < static_cast<int>(endBinLoop); ++j) {
         outputWS->maskBin(wi, j);
       }

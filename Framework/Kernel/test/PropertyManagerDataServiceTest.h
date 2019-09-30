@@ -30,7 +30,7 @@ public:
   void testAdd() {
     // Adding an Instrument with empty name should throw
     TS_ASSERT_THROWS(PropertyManagerDataService::Instance().add("", inst1),
-                     std::runtime_error);
+                     const std::runtime_error &);
     // This should not throw, valid name
     TS_ASSERT_THROWS_NOTHING(
         PropertyManagerDataService::Instance().add("inst1", inst1));
@@ -40,7 +40,7 @@ public:
     // AddorReplace an Instrument with empty name should throw
     TS_ASSERT_THROWS(
         PropertyManagerDataService::Instance().addOrReplace("", inst2),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(
         PropertyManagerDataService::Instance().addOrReplace("inst2", inst2));
     TS_ASSERT_EQUALS(inst2.use_count(), 2);
@@ -69,7 +69,7 @@ public:
     // Should throw if the instrument can not be retrieved
     TS_ASSERT_THROWS(
         PropertyManagerDataService::Instance().retrieve("notregistered"),
-        Mantid::Kernel::Exception::NotFoundError);
+        const Mantid::Kernel::Exception::NotFoundError &);
   }
   void testRemove() {
     // Removing a non-existing data Object should give a warning in the Log but

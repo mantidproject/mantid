@@ -39,12 +39,12 @@ void MergeMD::init() {
   // declare arbitrary number of input m_workspaces as a list of strings at the
   // moment
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input MDWorkspaces as a comma-separated list");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 
@@ -226,7 +226,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // workspace
   std::vector<API::IMDNode *> boxes;
   box2->getBoxes(boxes, 1000, true);
-  int numBoxes = int(boxes.size());
+  auto numBoxes = int(boxes.size());
 
   bool fileBasedSource(false);
   if (ws2->isFileBacked())
@@ -238,7 +238,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
     for (int i = 0; i < numBoxes; i++) {
       PARALLEL_START_INTERUPT_REGION
-      MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
       if (box && !box->getIsMasked()) {
         // Copy the events from WS2 and add them into WS1
         const std::vector<MDE> &events = box->getConstEvents();

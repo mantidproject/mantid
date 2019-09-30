@@ -285,9 +285,7 @@ void PropertyWidget::setPreviousValue(const QString &previousValue) {
   setValue(m_previousValue);
 
   // Handle input workspace options that have been set to a workspace
-  // previously,
-  // but where the workspace no longer exists.
-  const auto currentValue = getValue().toStdString();
+  // previously, but where the workspace no longer exists.
   if (getValue() != previousValue) {
     m_previousValue = "";
     setValue(m_previousValue);

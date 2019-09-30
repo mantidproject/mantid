@@ -7,7 +7,7 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from TofConverter import converterGUI
-from gui_helper import get_qapplication
+from mantidqt.gui_helper import get_qapplication
 
 app, within_mantid = get_qapplication()
 

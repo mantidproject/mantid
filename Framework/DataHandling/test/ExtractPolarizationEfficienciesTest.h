@@ -55,7 +55,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_wrong_method() {
@@ -66,7 +66,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_no_lambda() {
@@ -78,7 +78,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_space_sep() {
@@ -132,7 +132,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_non_number() {
@@ -144,7 +144,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_new_line_sep() {
@@ -178,7 +178,7 @@ public:
     alg.setRethrows(true);
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_Fredrikze() {

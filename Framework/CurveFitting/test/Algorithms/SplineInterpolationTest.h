@@ -176,11 +176,11 @@ public:
             SplineFunc(), spectra, 0, 20, 1, true);
 
     // Add an axis
-    TextAxis *vAxis = new TextAxis(spectra);
+    auto vAxis = std::make_unique<TextAxis>(spectra);
     vAxis->setLabel(0, "a");
     vAxis->setLabel(1, "b");
     vAxis->setLabel(2, "c");
-    iws->replaceAxis(1, vAxis);
+    iws->replaceAxis(1, std::move(vAxis));
 
     SplineInterpolation alg;
     runAlgorithm(alg, order, iws, mws);

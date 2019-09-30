@@ -194,7 +194,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         # move selection to the next column or row
         col = col + 1
 
-        if col >= self.columnCount:
+        if col >= self.columnCount():
             row = row + 1
             col = 0
 

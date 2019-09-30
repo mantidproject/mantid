@@ -8,8 +8,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -98,7 +98,7 @@ GNU_DIAG_OFF("cast-qual")
 void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   std::lock_guard<std::recursive_mutex> lock(PYALG_REGISTER_MUTEX);
 
-  static PyObject *const pyAlgClass =
+  static auto *const pyAlgClass =
       (PyObject *)
           converter::registered<Algorithm>::converters.to_python_target_type();
   // obj could be or instance/class, check instance first
@@ -114,9 +114,10 @@ void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
   }
   boost::python::object classType(handle<>(borrowed(classObject)));
   // Takes ownership of instantiator and replaces any existing algorithm
+  std::unique_ptr<Mantid::Kernel::AbstractInstantiator<Algorithm>> temp =
+      std::make_unique<PythonObjectInstantiator<Algorithm>>(classType);
   auto descr =
-      self.subscribe(new PythonObjectInstantiator<Algorithm>(classType),
-                     AlgorithmFactoryImpl::OverwriteCurrent);
+      self.subscribe(std::move(temp), AlgorithmFactoryImpl::OverwriteCurrent);
 
   // Python algorithms cannot yet act as loaders so remove any registered ones
   // from the FileLoaderRegistry

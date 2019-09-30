@@ -245,7 +245,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         atten.setPropertyValue("SampleNumberDensity", "0.07192"));
     atten.setRethrows(true); // needed for the next check to work
-    TS_ASSERT_THROWS(atten.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(atten.execute(), const std::runtime_error &);
     TS_ASSERT(!atten.isExecuted());
 
     AnalysisDataService::Instance().remove(flatWS);
@@ -317,7 +317,7 @@ public:
     absAlg.setPropertyValue("OutputWorkspace", ENV_WS);
     absAlg.setProperty("ScatterFrom", "Environment");
     absAlg.setProperty("EMode", "Elastic");
-    TS_ASSERT_THROWS(absAlg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(absAlg.execute(), const std::runtime_error &);
 
     // verify the sample term is bigger than the container term because the
     // material contains Li7

@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 import re
@@ -58,9 +64,14 @@ class GroupingTablePresenter(object):
         return True
 
     def validate_detector_ids(self, text):
-        if re.match(run_utils.run_string_regex, text) and max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
-                and min(run_utils.run_string_to_list(text, False)) > 0:
-            return True
+        try:
+            if re.match(run_utils.run_string_regex, text) and run_utils.run_string_to_list(text, False) and \
+                max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors\
+                    and min(run_utils.run_string_to_list(text, False)) > 0:
+                return True
+        except OverflowError:
+            pass
+
         self._view.warning_popup("Invalid detector list.")
         return False
 

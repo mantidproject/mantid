@@ -199,7 +199,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
 
   auto &vecX = m_dataWS->x(m_wsIndex);
 
-  int i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
+  auto i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
   int i_maxindex = static_cast<int>(vecX.size()) - 1;
 
   m_sstream << "FWHM to guess. Range = " << minfwhm << ", " << maxfwhm
@@ -499,7 +499,7 @@ void FitOneSinglePeak::highBkgdFit() {
     g_log.warning(outss.str());
 
     size_t numpts = i_maxFitX - i_minFitX;
-    size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
+    auto shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
     const auto &Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())
@@ -1067,16 +1067,16 @@ FitPeak::FitPeak()
 /** Declare properties
  */
 void FitPeak::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing fitted peak.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "ParameterTableWorkspace", "", Direction::Output),
       "Name of the table workspace containing the fitted parameters. ");
 
@@ -1092,16 +1092,15 @@ void FitPeak::init() {
                   boost::make_shared<StringListValidator>(peakFullNames),
                   "Peak function type. ");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<string>>("PeakParameterNames"),
-      "List of peak parameter names. ");
+  declareProperty(std::make_unique<ArrayProperty<string>>("PeakParameterNames"),
+                  "List of peak parameter names. ");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      std::make_unique<ArrayProperty<double>>("PeakParameterValues"),
       "List of peak parameter values.  They must have a 1-to-1 "
       "mapping to PeakParameterNames list. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "FittedPeakParameterValues", Direction::Output),
                   "Fitted peak parameter values. ");
 
@@ -1113,25 +1112,25 @@ void FitPeak::init() {
                   "Type of Background.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<string>>("BackgroundParameterNames"),
+      std::make_unique<ArrayProperty<string>>("BackgroundParameterNames"),
       "List of background parameter names. ");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
+      std::make_unique<ArrayProperty<double>>("BackgroundParameterValues"),
       "List of background parameter values.  "
       "They must have a 1-to-1 mapping to BackgroundParameterNames list. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "FittedBackgroundParameterValues", Direction::Output),
                   "Fitted background parameter values. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("FitWindow"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("FitWindow"),
                   "Enter a comma-separated list of the expected X-position of "
                   "windows to fit. "
                   "The number of values must be 2.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PeakRange"),
+      std::make_unique<ArrayProperty<double>>("PeakRange"),
       "Enter a comma-separated list of expected x-position as peak range. "
       "The number of values must be 2.");
 
@@ -1504,22 +1503,20 @@ void FitPeak::setupOutput(
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
   auto &vecX = m_dataWS->x(m_wsIndex);
-  size_t i_minFitX = getIndex(vecX, m_minFitX);
-  size_t i_maxFitX = getIndex(vecX, m_maxFitX);
+  const size_t i_minFitX = getIndex(vecX, m_minFitX);
+  const size_t i_maxFitX = getIndex(vecX, m_maxFitX);
 
   // Data workspace
-  size_t nspec = 3;
+  const size_t nspec = 3;
   // Get a vector for fit window
 
-  size_t vecsize = i_maxFitX - i_minFitX + 1;
-  vector<double> vecoutx(vecsize);
+  vector<double> vecoutx(i_maxFitX - i_minFitX + 1);
   for (size_t i = i_minFitX; i <= i_maxFitX; ++i)
     vecoutx[i - i_minFitX] = vecX[i];
 
   // Create workspace
-  size_t sizex = vecoutx.size();
-  size_t sizey = vecoutx.size();
-
+  const size_t sizex = vecoutx.size();
+  const auto sizey = sizex;
   HistogramBuilder builder;
   builder.setX(sizex);
   builder.setY(sizey);
@@ -1557,8 +1554,8 @@ void FitPeak::setupOutput(
   // Parameter vector
   vector<double> vec_fitpeak;
   vec_fitpeak.reserve(m_peakParameterNames.size());
-  for (auto &peakParameterName : m_peakParameterNames) {
-    vec_fitpeak.push_back(m_peakFunc->getParameter(peakParameterName));
+  for (const auto &peakParameterName : m_peakParameterNames) {
+    vec_fitpeak.emplace_back(m_peakFunc->getParameter(peakParameterName));
   }
 
   setProperty("FittedPeakParameterValues", vec_fitpeak);
@@ -1567,7 +1564,7 @@ void FitPeak::setupOutput(
   vector<double> vec_fitbkgd;
   vec_fitpeak.reserve(m_bkgdParameterNames.size());
   for (auto &bkgdParameterName : m_bkgdParameterNames) {
-    vec_fitbkgd.push_back(m_bkgdFunc->getParameter(bkgdParameterName));
+    vec_fitbkgd.emplace_back(m_bkgdFunc->getParameter(bkgdParameterName));
   }
 
   setProperty("FittedBackgroundParameterValues", vec_fitbkgd);

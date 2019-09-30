@@ -1,15 +1,64 @@
 # Create egg link to binary output directory
-add_python_package(workbench EXECUTABLE)
+if(WIN32)
+  # handled separately below
+  set(_exclude_on_install "resources\.pyc?")
+else()
+  set(_exclude_on_install "")
+endif()
+add_python_package(workbench
+  EXECUTABLE
+  EXCLUDE_FROM_INSTALL ${_exclude_on_install}
+  INSTALL_LIB_DIRS "${WORKBENCH_LIB_DIR}"
+  INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
+)
 
-# Configure resources data in place for ease of development. The output file is
-# added to the toplevel gitignore
-set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
-set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
-add_custom_command(OUTPUT ${_output_res_py}
-                   COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_qrc_file}
-                   COMMENT "Generating workbench resources module"
-                   DEPENDS ${_qrc_file})
-add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
+set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
+
+if (WIN32)
+
+  function (CREATE_QRC_FILE_TEMPLATE BUILD_TYPE)
+    # Set path and file content variables
+    set(_paths_qrc_file ${CMAKE_CURRENT_BINARY_DIR}/resources.qrc.${BUILD_TYPE})
+    set(_qt_conf_file ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.${BUILD_TYPE})
+    set(_qrc_file_contents "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n")
+
+    # Write qt.conf.BUILD_TYPE file and get resources file name
+    if (${BUILD_TYPE} STREQUAL "build")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${THIRD_PARTY_DIR}/lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
+      set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+    elseif(${BUILD_TYPE} STREQUAL "install")
+      file (WRITE ${_qt_conf_file} "[Paths]\nPrefix = ../lib/qt5\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
+      file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/qt.conf.webengine "[Paths]\nPrefix = ../\n")
+      set(_output_res_py ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install)
+    endif()
+
+    # Write resources.qrc.BUILD_TYPE
+    file (WRITE ${_paths_qrc_file} ${_qrc_file_contents})
+
+    # Add command to generate resources.py file
+    add_custom_command(OUTPUT ${_output_res_py}
+                      COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file} ${_paths_qrc_file}
+                      COMMENT "Generating workbench resources module for ${BUILD_TYPE}: ${_output_res_py}"
+                      DEPENDS ${_images_qrc_file} ${_paths_qrc_file})
+  endfunction()
+
+  # Run function for each build type
+  foreach(BUILD_TYPE "build" "install")
+    CREATE_QRC_FILE_TEMPLATE(${BUILD_TYPE})
+  endforeach()
+  add_custom_target(workbench_resources ALL
+                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  # Install rule for package's resources.py
+  install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install
+            DESTINATION bin/workbench/app RENAME resources.py)
+else()
+  set (_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  add_custom_command(OUTPUT ${_output_res_py}
+                     COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file}
+                     COMMENT "Generating workbench resources module"
+                     DEPENDS ${_images_qrc_file})
+  add_custom_target(workbench_resources ALL DEPENDS ${_output_res_py})
+endif()
 
 # Dependency chain
 add_dependencies(workbench workbench_resources mantidqt)
@@ -18,12 +67,20 @@ add_dependencies(workbench workbench_resources mantidqt)
 set(TEST_FILES
     workbench/config/test/test_user.py
     workbench/test/test_import.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratoraxes.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorfigure.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorlines.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgeneratorutils.py
+    workbench/plotting/plotscriptgenerator/test/test_plotscriptgenerator.py
+    workbench/plotting/test/test_figureinteraction.py
     workbench/plotting/test/test_figuremanager.py
+    workbench/plotting/test/test_figureerrorsmanager.py
     workbench/plotting/test/test_globalfiguremanager.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py
     workbench/plugins/test/test_workspacewidget.py
+    workbench/utils/test/test_workspacehistorygeneration.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py
@@ -43,13 +100,6 @@ set(PYUNITTEST_QT_API pyqt5)
 pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}
   workbench ${TEST_FILES}
 )
-
-if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
-  set(PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/$<CONFIG>/workbench-script.pyw
-      -x)
-else()
-  set(PYUNITTEST_RUNNER ${CMAKE_BINARY_DIR}/bin/workbench -x)
-endif()
 
 # Install MantidWorkbench for OSX
 if( APPLE )

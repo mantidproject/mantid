@@ -1531,7 +1531,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
 
     CHECKED_FSEEK(debug, f, LAYER + 0x11, SEEK_SET);
     CHECKED_FREAD(debug, &c, 1, 1, f);
-    short width = 0;
+    int width = 0; // Change from short to int so no conversion later
     CHECKED_FSEEK(debug, f, LAYER + 0x4A, SEEK_SET);
     CHECKED_FREAD(debug, &width, 2, 1, f);
     if (IsBigEndian())
@@ -1778,7 +1778,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
 
       CHECKED_FSEEK(debug, f, LAYER + 0x11, SEEK_SET);
       CHECKED_FREAD(debug, &c, 1, 1, f);
-      short width = 0;
+      int width = 0;
       CHECKED_FSEEK(debug, f, LAYER + 0x4A, SEEK_SET);
       CHECKED_FREAD(debug, &width, 2, 1, f);
       if (IsBigEndian())

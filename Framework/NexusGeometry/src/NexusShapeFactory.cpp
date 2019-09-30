@@ -18,7 +18,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 #include <iterator>
@@ -35,7 +34,7 @@ std::unique_ptr<const Geometry::IObject> createCylinderShape(
     const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
     const std::string &algebra, std::vector<double> &boundingBox,
     Geometry::detail::ShapeInfo &&shapeInfo) {
-  auto shape = Mantid::Kernel::make_unique<Geometry::CSGObject>();
+  auto shape = std::make_unique<Geometry::CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(surfaces);
   // Boundingbox x,y,z:max; x,y,z:min
@@ -90,6 +89,17 @@ createTriangularFaces(const std::vector<uint32_t> &faceIndices,
   return triangularFaces;
 }
 } // namespace
+
+DLLExport std::unique_ptr<const Geometry::IObject>
+createCylinder(const std::vector<uint32_t> &cylinderPoints,
+               const std::vector<Eigen::Vector3d> &vertices) {
+  // Read points into matrix, sorted by cPoints ordering
+  Eigen::Matrix<double, 3, 3> vSorted;
+  for (int i = 0; i < 3; ++i) {
+    vSorted.col(cylinderPoints[i]) = vertices[i];
+  }
+  return createCylinder(vSorted);
+}
 
 /** Refer to NX_Cylinder definition here
  * http://download.nexusformat.org/doc/html/classes/base_classes/NXcylindrical_geometry.html?highlight=nxcylindrical_geometry
@@ -205,10 +215,10 @@ createMesh(std::vector<uint32_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices) {
 
   if (Geometry::MeshObject2D::pointsCoplanar(vertices))
-    return Mantid::Kernel::make_unique<Geometry::MeshObject2D>(
+    return std::make_unique<Geometry::MeshObject2D>(
         std::move(triangularFaces), std::move(vertices), Kernel::Material{});
   else
-    return Mantid::Kernel::make_unique<Geometry::MeshObject>(
+    return std::make_unique<Geometry::MeshObject>(
         std::move(triangularFaces), std::move(vertices), Kernel::Material{});
 }
 } // namespace NexusShapeFactory

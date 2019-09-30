@@ -37,7 +37,7 @@ public:
     SaveBankScatteringAngles testAlg;
     testAlg.initialize();
     TS_ASSERT_THROWS(testAlg.setProperty("InputWorkspace", "ws"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     ADS.remove("ws");
   }

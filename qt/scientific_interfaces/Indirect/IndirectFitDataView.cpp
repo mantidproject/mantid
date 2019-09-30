@@ -35,6 +35,9 @@ IndirectFitDataView::IndirectFitDataView(QWidget *parent)
           SIGNAL(removeClicked()));
 
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(emitViewSelected(int)));
+
+  m_dataForm->dsSample->isOptional(true);
+  m_dataForm->dsResolution->isOptional(true);
 }
 
 QTableWidget *IndirectFitDataView::getDataTable() const {
@@ -95,6 +98,16 @@ void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffices) {
 
 void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffices) {
   m_dataForm->dsResolution->setFBSuffixes(suffices);
+}
+
+bool IndirectFitDataView::isSampleWorkspaceSelectorVisible() const {
+  return m_dataForm->dsSample->isWorkspaceSelectorVisible();
+}
+
+void IndirectFitDataView::setSampleWorkspaceSelectorIndex(
+    const QString &workspaceName) {
+  m_dataForm->dsSample->setWorkspaceSelectorIndex(workspaceName);
+  m_dataForm->dsSample->setSelectorIndex(1);
 }
 
 UserInputValidator &

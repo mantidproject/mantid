@@ -4,7 +4,7 @@ project(Vates)
 include(CommonVatesSetup)
 
 # Select either building Paraview plugins
-set(USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. ")
+option(USE_PARAVIEW "Create paraview plugins" ON)
 
 # Paraview dependencies built if Paraview is found
 if(ParaView_FOUND AND USE_PARAVIEW)
@@ -12,9 +12,9 @@ if(ParaView_FOUND AND USE_PARAVIEW)
   include(${PARAVIEW_USE_FILE})
 
   function(set_pvplugin_properties target QT_VERSION vers)
-    # Workaround Qt compiler detection 
+    # Workaround Qt compiler detection
     # https://forum.qt.io/topic/43778/error-when-initializing-qstringlist-using-initializer-list/3
-    # https://bugreports.qt.io/browse/QTBUG-39142 
+    # https://bugreports.qt.io/browse/QTBUG-39142
 	# This is only required for Qt4
     if(vers EQUAL 4)
       set_target_properties(${_target}

@@ -245,7 +245,7 @@ public:
    * Start test Radius Filter.
    */
   void testRadiusThrowsIfNegativeCutoff() {
-    TS_ASSERT_THROWS(RadiusFilter(-1), std::invalid_argument);
+    TS_ASSERT_THROWS(RadiusFilter(-1), const std::invalid_argument &);
   }
 
   void testRadiusFiltering() {
@@ -272,7 +272,7 @@ public:
     alg.initialize();
     TSM_ASSERT_THROWS("Cannot have number of neighbours < 1",
                       alg.setProperty("NumberOfNeighbours", -1),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testWithNonIntegerNumberOfNeighbours() {
@@ -280,7 +280,7 @@ public:
     alg.initialize();
     TSM_ASSERT_THROWS("Cannot have non-integer number of neighbours",
                       alg.setProperty("NumberOfNeighbours", 1.1),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void testWithValidNumberOfNeighbours() {

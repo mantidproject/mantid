@@ -54,13 +54,13 @@ int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
 void LoadQKK::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".nx.hdf"),
                   "The input filename of the stored data");
   // Declare the OutputWorkspace property. This sets the name of the workspace
   // to be filled with the data
   // from the file.
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 }
 

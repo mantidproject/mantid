@@ -59,7 +59,7 @@ public:
     TS_ASSERT_EQUALS(copiedAxis.unit()->unitID(), "Wavelength");
     TS_ASSERT(copiedAxis.isNumeric());
     TS_ASSERT_EQUALS(copiedAxis(0), 5.5);
-    TS_ASSERT_THROWS(copiedAxis(1), Exception::IndexError);
+    TS_ASSERT_THROWS(copiedAxis(1), const Exception::IndexError &);
   }
 
   void testClone() {
@@ -99,13 +99,15 @@ public:
   void testIsText() { TS_ASSERT(!numericAxis->isText()); }
 
   void testOperatorBrackets() {
-    TS_ASSERT_THROWS((*numericAxis)(-1), Exception::IndexError);
-    TS_ASSERT_THROWS((*numericAxis)(5), Exception::IndexError);
+    TS_ASSERT_THROWS((*numericAxis)(-1), const Exception::IndexError &);
+    TS_ASSERT_THROWS((*numericAxis)(5), const Exception::IndexError &);
   }
 
   void testSetValue() {
-    TS_ASSERT_THROWS(numericAxis->setValue(-1, 1.1), Exception::IndexError);
-    TS_ASSERT_THROWS(numericAxis->setValue(5, 1.1), Exception::IndexError);
+    TS_ASSERT_THROWS(numericAxis->setValue(-1, 1.1),
+                     const Exception::IndexError &);
+    TS_ASSERT_THROWS(numericAxis->setValue(5, 1.1),
+                     const Exception::IndexError &);
 
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_THROWS_NOTHING(numericAxis->setValue(i, i + 0.5));
@@ -114,8 +116,8 @@ public:
   }
 
   void testSpectraNo() {
-    TS_ASSERT_THROWS(numericAxis->spectraNo(-1), std::domain_error);
-    TS_ASSERT_THROWS(numericAxis->spectraNo(5), std::domain_error);
+    TS_ASSERT_THROWS(numericAxis->spectraNo(-1), const std::domain_error &);
+    TS_ASSERT_THROWS(numericAxis->spectraNo(5), const std::domain_error &);
   }
 
   void testConversionToBins() {
@@ -215,8 +217,8 @@ public:
       axis.setValue(i, static_cast<double>(i));
     }
 
-    TS_ASSERT_THROWS(axis.indexOfValue(-0.6), std::out_of_range);
-    TS_ASSERT_THROWS(axis.indexOfValue(4.6), std::out_of_range);
+    TS_ASSERT_THROWS(axis.indexOfValue(-0.6), const std::out_of_range &);
+    TS_ASSERT_THROWS(axis.indexOfValue(4.6), const std::out_of_range &);
   }
 
 private:

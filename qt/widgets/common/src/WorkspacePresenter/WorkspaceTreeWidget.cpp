@@ -5,27 +5,27 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
-#include <MantidGeometry/Instrument.h>
-#include <MantidKernel/make_unique.h>
-#include <MantidQtWidgets/Common/AlgorithmDialog.h>
-#include <MantidQtWidgets/Common/AlgorithmInputHistory.h>
-#include <MantidQtWidgets/Common/FlowLayout.h>
-#include <MantidQtWidgets/Common/InterfaceManager.h>
-#include <MantidQtWidgets/Common/LineEditWithClear.h>
-#include <MantidQtWidgets/Common/MantidDisplayBase.h>
-#include <MantidQtWidgets/Common/MantidTreeWidget.h>
-#include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
-#include <MantidQtWidgets/Common/WorkspaceIcons.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h>
-#include <MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h>
-#include <MantidQtWidgets/Common/pixmaps.h>
+#include "MantidGeometry/Instrument.h"
 
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/IMDEventWorkspace.h>
-#include <MantidAPI/IMDWorkspace.h>
-#include <MantidAPI/IPeaksWorkspace.h>
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/FlowLayout.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/LineEditWithClear.h"
+#include "MantidQtWidgets/Common/MantidDisplayBase.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
+#include "MantidQtWidgets/Common/WorkspaceIcons.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <Poco/Path.h>
 
@@ -196,9 +196,9 @@ WorkspacePresenterWN_wptr WorkspaceTreeWidget::getPresenterWeakPtr() {
 StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
-
+  names.reserve(static_cast<size_t>(items.size()));
   for (auto &item : items)
-    names.push_back(item->text(0).toStdString());
+    names.emplace_back(item->text(0).toStdString());
 
   return names;
 }
@@ -481,10 +481,10 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
   QRegExp filterRegEx(text, Qt::CaseInsensitive);
 
   // show all items
-  QTreeWidgetItemIterator it(m_tree);
-  while (*it) {
-    (*it)->setHidden(false);
-    ++it;
+  QTreeWidgetItemIterator unhideIter(m_tree);
+  while (*unhideIter) {
+    (*unhideIter)->setHidden(false);
+    ++unhideIter;
   }
 
   int hiddenCount = 0;

@@ -74,11 +74,8 @@ bool WhiteList::isShown(int index) const { return m_isShown.at(index); }
 /** Check whether any of the columns are marked as a key column
  */
 bool WhiteList::hasKeyColumns() const {
-  for (auto isKey : m_isKey) {
-    if (isKey)
-      return true;
-  }
-  return false;
+  return std::any_of(m_isKey.cbegin(), m_isKey.cend(),
+                     [](const auto isKey) { return isKey; });
 }
 
 /** Returns true if the contents of this column should be used to identify the

@@ -40,8 +40,9 @@ std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const {
 std::vector<std::string>
 CompositePeaksPresenterVsi::getPeaksWorkspaceNames() const {
   std::vector<std::string> peaksWorkspaceNames;
+  peaksWorkspaceNames.reserve(m_peaksPresenters.size());
   for (const auto &presenter : m_peaksPresenters) {
-    peaksWorkspaceNames.push_back(presenter->getPeaksWorkspaceName());
+    peaksWorkspaceNames.emplace_back(presenter->getPeaksWorkspaceName());
   }
   return peaksWorkspaceNames;
 }
@@ -95,8 +96,9 @@ void CompositePeaksPresenterVsi::addPresenter(
 std::vector<Mantid::API::IPeaksWorkspace_sptr>
 CompositePeaksPresenterVsi::getPeaksWorkspaces() const {
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
+  peaksWorkspaces.reserve(m_peaksPresenters.size());
   for (const auto &presenter : m_peaksPresenters) {
-    peaksWorkspaces.push_back(presenter->getPeaksWorkspace());
+    peaksWorkspaces.emplace_back(presenter->getPeaksWorkspace());
   }
   return peaksWorkspaces;
 }

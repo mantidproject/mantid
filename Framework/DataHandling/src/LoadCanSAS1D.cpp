@@ -93,10 +93,10 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init() {
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the CanSAS1D file to load");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
 }
@@ -163,7 +163,7 @@ void LoadCanSAS1D::exec() {
 MatrixWorkspace_sptr
 LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
                         std::string &runName) {
-  Element *workspaceElem = dynamic_cast<Element *>(workspaceData);
+  auto *workspaceElem = dynamic_cast<Element *>(workspaceData);
   check(workspaceElem, "<SASentry>");
   runName = workspaceElem->getAttribute("name");
 
@@ -206,7 +206,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   //"I" and "Idev" text nodes and fill X,Y,E vectors
   for (unsigned long index = 0; index < nBins; ++index) {
     Node *idataElem = idataElemList->item(index);
-    Element *elem = dynamic_cast<Element *>(idataElem);
+    auto *elem = dynamic_cast<Element *>(idataElem);
     if (elem) {
       // setting X vector
       std::string nodeVal;
@@ -308,7 +308,7 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
   // the following code registers the workspace with the AnalysisDataService and
   // with the workspace group, I'm taking this oone trust I don't know why it's
   // done this way sorry, Steve
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       propName, newWorkName, Direction::Output));
   container->addWorkspace(newWork);
   setProperty(propName, newWork);
@@ -354,7 +354,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
     Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
     for (unsigned int i = 0; i < terms->length(); ++i) {
       Node *term = terms->item(i);
-      Element *elem = dynamic_cast<Element *>(term);
+      auto *elem = dynamic_cast<Element *>(term);
       if (elem) {
         const std::string termName = elem->getAttribute("name");
         if (termName == "user_file") {

@@ -82,6 +82,10 @@ public:
   MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
   MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
 
+  MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
+  MOCK_METHOD1(setSampleWorkspaceSelectorIndex,
+               void(QString const &workspaceName));
+
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
 
@@ -95,6 +99,8 @@ public:
   using IndirectFittingModel::addWorkspace;
 
   /// Public Methods
+  MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
+
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
 
@@ -275,6 +281,14 @@ public:
     EXPECT_CALL(*m_view, readSettings(_)).Times(Exactly(1));
 
     m_presenter->loadSettings(settings);
+  }
+
+  void test_that_replaceHandle_will_check_if_the_model_has_a_workspace() {
+    std::string const workspacename("DummyName");
+
+    EXPECT_CALL(*m_model, hasWorkspace(workspacename)).Times(Exactly(1));
+
+    m_presenter->replaceHandle(workspacename, createWorkspace(5));
   }
 
 private:

@@ -32,7 +32,7 @@ void PoldiBasicChopper::loadConfiguration(
   std::vector<double> slitPositions(numberOfSlits);
   for (size_t i = 0; i < numberOfSlits; ++i) {
     slitPositions[i] =
-        chopperGroup->getChild(static_cast<const int>(i))->getPos().X();
+        chopperGroup->getChild(static_cast<int>(i))->getPos().X();
   }
 
   double distance = chopperGroup->getPos().norm() * 1000.0;

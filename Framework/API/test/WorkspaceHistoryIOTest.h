@@ -384,7 +384,7 @@ public:
 
     WorkspaceHistory history;
     // will throw nothing as it will return with only a warning, no exception
-    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
 
     TS_ASSERT_EQUALS(0, histories.size());
@@ -400,7 +400,7 @@ public:
     NexusTestHelper testfile(true);
     failiure_testfile_setup(2, testfile);
     WorkspaceHistory history;
-    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
     // three will still exist as it doesn't really care about the author
     TS_ASSERT_EQUALS(3, histories.size());
@@ -411,7 +411,7 @@ public:
     NexusTestHelper testfile(true);
     failiure_testfile_setup(3, testfile);
     WorkspaceHistory history;
-    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
 
     // three will still exist as it doesn't really care about the author
@@ -425,7 +425,7 @@ public:
     WorkspaceHistory history;
     // this WILL throw as it looks for a data field using
     // ::NeXus::File::readData() and it won't be found
-    TS_ASSERT_THROWS_ANYTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_ANYTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
     // only one will exist as it will throw on the second (wihtout the data) and
     // skip the rest
@@ -438,7 +438,7 @@ public:
     failiure_testfile_setup(5, testfile);
     WorkspaceHistory history;
     // won't throw as it'll simply ignore the bad data
-    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
 
     // only two will exist as it will ignore the second (with only the single
@@ -453,7 +453,7 @@ public:
     WorkspaceHistory history;
     // nothign will throw but nothing will be loaded either as the data is
     // invalid
-    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_NOTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
     // size should be zero as nothing went in the file
     TS_ASSERT_EQUALS(0, histories.size());
@@ -466,7 +466,7 @@ public:
     WorkspaceHistory history;
     // this will throw on the second due to the unformatted data - the function
     // expects well formatted data
-    TS_ASSERT_THROWS_ANYTHING(history.loadNexus(testfile.file));
+    TS_ASSERT_THROWS_ANYTHING(history.loadNexus(testfile.file.get()));
     const auto &histories = history.getAlgorithmHistories();
     // only one will exist as it will throw on the second (with the bad data)
     // and skip the rest

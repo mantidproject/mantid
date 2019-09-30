@@ -35,17 +35,17 @@ DECLARE_ALGORITHM(SaveIsawDetCal)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawDetCal::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".DetCal"),
-      "Path to an ISAW-style .detcal file to save.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".DetCal"),
+                  "Path to an ISAW-style .detcal file to save.");
 
   declareProperty("TimeOffset", 0.0, "Offsets to be applied to times");
   declareProperty(
-      make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
+      std::make_unique<ArrayProperty<string>>("BankNames", Direction::Input),
       "Optional: Only select the specified banks");
   declareProperty("AppendFile", false,
                   "Append to file if true.\n"

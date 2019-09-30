@@ -124,7 +124,7 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
                 os.remove(filepath)
             # Save
             svw.saveImage(filepath)
-            self.assertEquals(os.path.isfile(filepath), True,
+            self.assertEqual(os.path.isfile(filepath), True,
                               "Screenshot was not written out as expected.")
             if os.path.isfile(filepath):
                 os.remove(filepath)

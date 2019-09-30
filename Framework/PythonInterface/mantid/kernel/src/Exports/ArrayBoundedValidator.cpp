@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/make_unique.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/default_call_policies.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -30,7 +30,7 @@ ArrayBoundedValidator<T> *
 createExclusiveArrayBoundedValidator(object lower = object(),
                                      object upper = object(),
                                      const bool exclusive = false) {
-  auto validator = Mantid::Kernel::make_unique<ArrayBoundedValidator<T>>();
+  auto validator = std::make_unique<ArrayBoundedValidator<T>>();
   if (lower.ptr() != Py_None) {
     validator->setLower(extract<T>(lower));
     validator->setLowerExclusive(exclusive);

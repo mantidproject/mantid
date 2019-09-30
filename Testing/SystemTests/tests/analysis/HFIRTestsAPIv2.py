@@ -370,7 +370,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.00001)
+        self.assertLess(math.fabs(delta), 0.00001)
 
     def test_reduction_iqxqy(self):
         '''
@@ -425,7 +425,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
             0.1000351,0.10489929,0.11]
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.00001)
+        self.assertLess(math.fabs(delta), 0.00001)
         print(data)
 
     def test_no_solid_angle(self):
@@ -481,7 +481,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.00001)
+        self.assertLess(math.fabs(delta), 0.00001)
 
     def test_straight_Q1D(self):
         GPSANS()
@@ -514,7 +514,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.00001)
+        self.assertLess(math.fabs(delta), 0.00001)
 
     def test_transmission(self):
         GPSANS()
@@ -550,7 +550,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.001)
+        self.assertLess(math.fabs(delta), 0.001)
 
     def test_spreader_transmission(self):
         GPSANS()
@@ -703,7 +703,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         # Check that I(q) is the same for both data sets
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.00001)
+        self.assertLess(math.fabs(delta), 0.00001)
 
     def test_SampleGeometry_functions(self):
         print("SKIPPING test_SampleGeometry_functions()")
@@ -734,7 +734,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         # Check that I(q) is the same for both data sets
         deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
-        self.assertTrue(math.fabs(delta) < 0.1)
+        self.assertLess(math.fabs(delta), 0.1)
 
     def test_noDC_eff_with_DC(self):
         ref = [28.06525, 136.94662, -16.20412, 0.00000, 147.79915, 146.42713, 302.00869,

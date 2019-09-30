@@ -7,8 +7,8 @@
 #ifndef MPLCPP_BACKENDQT_H
 #define MPLCPP_BACKENDQT_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 #include <QtGlobal>
 
 /*
@@ -36,7 +36,7 @@ namespace Widgets {
 namespace MplCpp {
 
 /// Import and return the backend module for this version of Qt
-MANTID_MPLCPP_DLL Python::Object backendModule();
+MANTID_MPLCPP_DLL Common::Python::Object backendModule();
 
 } // namespace MplCpp
 } // namespace Widgets

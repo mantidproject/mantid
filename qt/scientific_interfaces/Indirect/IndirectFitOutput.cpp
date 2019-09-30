@@ -401,8 +401,8 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
 
   auto update = [&](IndirectFitData const *inputData) {
     auto &fitResults = extractOrAddDefault(m_outputResultLocations, inputData);
-    auto workspace = inputData->workspace().get();
-    auto &indices = findOrCreateDefaultInMap(resultIndices, workspace);
+    auto ws = inputData->workspace().get();
+    auto &indices = findOrCreateDefaultInMap(resultIndices, ws);
     return UnstructuredResultAdder(resultGroup, fitResults, indices, index);
   };
   applyData(update, fitDataBegin, fitDataEnd);

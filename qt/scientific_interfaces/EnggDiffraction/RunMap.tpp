@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,8 +22,8 @@ const T &RunMap<NumBanks, T>::get(const RunLabel &runLabel) const {
   validateBankID(runLabel.bank);
   if (!contains(runLabel)) {
     throw std::invalid_argument("Tried to access invalid run number " +
-                                std::to_string(runLabel.runNumber) +
-                                " for bank " + std::to_string(runLabel.bank));
+                                runLabel.runNumber + " for bank " +
+                                std::to_string(runLabel.bank));
   }
   return m_map[runLabel.bank].at(runLabel.runNumber);
 }
@@ -49,8 +50,8 @@ std::vector<RunLabel> RunMap<NumBanks, T>::getRunLabels() const {
 }
 
 template <size_t NumBanks, typename T>
-std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
-  std::set<int> runNumbers;
+std::set<std::string> RunMap<NumBanks, T>::getAllRunNumbers() const {
+  std::set<std::string> runNumbers;
 
   for (const auto &bank : m_map) {
     for (const auto &runLabel : bank) {
@@ -63,21 +64,20 @@ std::set<int> RunMap<NumBanks, T>::getAllRunNumbers() const {
 
 template <size_t NumBanks, typename T>
 size_t RunMap<NumBanks, T>::size() const {
-  size_t numElements = 0;
+  const size_t numElements = std::accumulate(
+      m_map.cbegin(), m_map.cend(), static_cast<size_t>(0),
+      [](size_t sum, const auto &bank) { return sum + bank.size(); });
 
-  for (const auto &bank : m_map) {
-    numElements += bank.size();
-  }
   return numElements;
 }
 
 template <size_t NumBanks, typename T>
 void RunMap<NumBanks, T>::validateBankID(const size_t bank) const {
-  if (bank < 0 || bank >= NumBanks) {
+  if (bank >= NumBanks) {
     throw std::invalid_argument("Tried to access invalid bank: " +
                                 std::to_string(bank));
   }
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

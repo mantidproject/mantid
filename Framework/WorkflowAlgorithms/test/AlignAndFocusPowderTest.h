@@ -58,7 +58,7 @@ public:
   void testException() {
     AlignAndFocusPowder align_and_focus;
     align_and_focus.initialize();
-    TS_ASSERT_THROWS(align_and_focus.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(align_and_focus.execute(), const std::runtime_error &);
   }
 
   /* Test AlignAndFocusPowder for HRP38692 raw data */

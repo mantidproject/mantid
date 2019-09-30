@@ -80,7 +80,7 @@ class TestAlgorithmObserver(unittest.TestCase):
         observer.observeFinish(algorithm)
         algorithm.execute()
         self.assertTrue(observer.finish_handled)
-        self.assertTrue(observer.error_message is None)
+        self.assertEqual(observer.error_message, None)
 
     def test_error_handle(self):
         algorithm = AlgorithmManager.create("MockAlgorithm", -1)

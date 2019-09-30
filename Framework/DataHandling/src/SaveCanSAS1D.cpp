@@ -22,6 +22,8 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <list>
+
 namespace {
 void encode(std::string &data) {
   std::string buffer;
@@ -66,11 +68,11 @@ DECLARE_ALGORITHM(SaveCanSAS1D)
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<>>(
+      std::make_unique<API::WorkspaceProperty<>>(
           "InputWorkspace", "", Kernel::Direction::Input,
           boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 
@@ -558,11 +560,10 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
   }
 
   std::list<std::string> detList;
+  using std::placeholders::_1;
   boost::algorithm::split(detList, detectorNames,
-                          std::bind2nd(std::equal_to<char>(), ','));
-  for (std::list<std::string>::const_iterator itr = detList.begin();
-       itr != detList.end(); ++itr) {
-    std::string detectorName = *itr;
+                          std::bind(std::equal_to<char>(), _1, ','));
+  for (auto detectorName : detList) {
     boost::algorithm::trim(detectorName);
 
     // get first component with name detectorName in IDF

@@ -44,7 +44,7 @@ const std::string AverageLogData::category() const {
 /** Initialize the algorithm's properties.
  */
 void AverageLogData::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace that contains a Sample log property, and "
                   "a proton charge property.");
@@ -71,9 +71,8 @@ void AverageLogData::exec() {
                              " in the workspace.");
   }
 
-  Kernel::TimeSeriesProperty<double> *slog =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          inputWS->run().getLogData(logname));
+  auto *slog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData(logname));
   if (!slog) {
     throw std::runtime_error("Problem reading property " + logname);
   }

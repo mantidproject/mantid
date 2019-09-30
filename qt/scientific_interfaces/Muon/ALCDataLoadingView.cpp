@@ -8,29 +8,19 @@
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
-#include "MantidQtWidgets/Plotting/Qwt/ErrorCurve.h"
 
 #include <QMessageBox>
 
-#include <qwt_symbol.h>
+using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 /// This is the string "Auto", used for last file
 const std::string ALCDataLoadingView::g_autoString = "Auto";
 
-ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_dataCurve(new QwtPlotCurve()),
-      m_dataErrorCurve(nullptr) {}
+ALCDataLoadingView::ALCDataLoadingView(QWidget *widget) : m_widget(widget) {}
 
-ALCDataLoadingView::~ALCDataLoadingView() {
-  m_dataCurve->detach();
-  delete m_dataCurve;
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-}
+ALCDataLoadingView::~ALCDataLoadingView() {}
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
@@ -46,15 +36,11 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.lastRunAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
 
-  m_ui.dataPlot->setCanvasBackground(Qt::white);
-  m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
-  m_ui.dataPlot->setAxisFont(QwtPlot::yLeft, m_widget->font());
+  m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
-  m_dataCurve->setStyle(QwtPlotCurve::NoCurve);
-  m_dataCurve->setSymbol(
-      QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(7, 7)));
-  m_dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-  m_dataCurve->attach(m_ui.dataPlot);
+  // Error bars on the plot
+  QStringList plotsWithErrors{"Data"};
+  m_ui.dataPlot->setLinesWithErrors(plotsWithErrors);
 
   // The following lines disable the groups' titles when the
   // group is disabled
@@ -162,23 +148,21 @@ ALCDataLoadingView::timeRange() const {
   return boost::make_optional(range);
 }
 
-void ALCDataLoadingView::setDataCurve(const QwtData &data,
-                                      const std::vector<double> &errors) {
+void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
+                                      std::size_t const &workspaceIndex) {
+  // These kwargs ensure only the data points are plotted with no line
+  QHash<QString, QVariant> kwargs;
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  m_ui.dataPlot->setCurveStyle("Data", -1);
+  m_ui.dataPlot->setCurveSymbol("Data", 0);
+#else
+  kwargs.insert("linestyle", QString("None").toLatin1().constData());
+  kwargs.insert("marker", QString(".").toLatin1().constData());
+#endif
 
-  // Set data
-  m_dataCurve->setData(data);
-
-  // Set errors
-  if (m_dataErrorCurve) {
-    m_dataErrorCurve->detach();
-    delete m_dataErrorCurve;
-  }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
-  m_dataErrorCurve->attach(m_ui.dataPlot);
-  m_dataErrorCurve->setItemAttribute(QwtPlotItem::AutoScale, true);
-
-  m_ui.dataPlot->replot();
+  m_ui.dataPlot->clear();
+  m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
+                             kwargs);
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {

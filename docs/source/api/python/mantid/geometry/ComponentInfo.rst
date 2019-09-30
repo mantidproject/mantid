@@ -4,36 +4,36 @@
 
 This is a python binding to the C++ class Mantid::Geometry::ComponentInfo.
 
-Most of the information concerning ``ComponentInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document.
+Most of the information concerning :py:obj:`~mantid.geometry.ComponentInfo` can be found in the :ref:`Instrument Access Layers <InstrumentAccessLayers>` document.
 
 --------
 Purpose
 --------
-The purpose of the ``ComponentInfo`` object is to allow the user to access geometric information about the components which are part of a beamline. A component is any physical item or group of items that is registered for the purpose of data reduction. The ``ComponentInfo`` object can be used to access information such as the total number of components in the beamline, the absolute position of a component as well as the absolute rotation of a component. ``ComponentInfo`` provides tree like access to the beamline including all the detectors.
+The purpose of the :py:obj:`~mantid.geometry.ComponentInfo` object is to allow the user to access geometric information about the components which are part of a beamline. A component is any physical item or group of items that is registered for the purpose of data reduction. The :py:obj:`~mantid.geometry.ComponentInfo` object can be used to access information such as the total number of components in the beamline, the absolute position of a component as well as the absolute rotation of a component. :py:obj:`~mantid.geometry.ComponentInfo` provides tree like access to the beamline including all the detectors.
 
 Many users may need this extra information so that they can have a better understanding of the beamline they are using and the components that make up the beamline - e.g. detectors, banks, choppers. This extra information is easy and fast to access.
 
-ComponentInfo is one of three objects that the user can gain access to from a workspace.
+:py:obj:`~mantid.geometry.ComponentInfo` is one of three objects that the user can gain access to from a workspace.
 The other two are:
 
- * ``SpectrumInfo``
- * ``DetectorInfo``
+ * :py:obj:`~mantid.api.SpectrumInfo`
+ * :py:obj:`~mantid.geometry.DetectorInfo`
 
 ---------
 Indexing
 ---------
-The ``ComponentInfo`` object is accessed by an index going from 0 to N-1 where N is the number of components.
-The component index for a detector is EQUAL to the detector index. In other words, a detector with a detector index of 5 when working with a ``DetectorInfo`` object and will have a component index of 5 when working with a ``ComponentInfo`` object.
+The :py:obj:`~mantid.geometry.ComponentInfo` object is accessed by an index going from 0 to N-1 where N is the number of components.
+The component index for a detector is EQUAL to the detector index. In other words, a detector with a detector index of 5 when working with a ``DetectorInfo`` object and will have a component index of 5 when working with a :py:obj:`~mantid.geometry.ComponentInfo` object.
 
-Another way to think about this is that the first 0 to n-1 components referenced in ``ComponentInfo`` are detectors, where n is the total number of detectors.
+Another way to think about this is that the first 0 to n-1 components referenced in :py:obj:`~mantid.geometry.ComponentInfo` are detectors, where n is the total number of detectors.
 
 -------
 Usage
 -------
 
 **Example 1 - Creating a ComponentInfo Object:**
-This example shows how to obtain a ``ComponentInfo`` object from a workspace object.
-The return value is a ``ComponentInfo`` object.
+This example shows how to obtain a :py:obj:`~mantid.geometry.ComponentInfo` object from a workspace object.
+The return value is a :py:obj:`~mantid.geometry.ComponentInfo` object.
 
 .. testcode:: CreateComponentInfoObject
 

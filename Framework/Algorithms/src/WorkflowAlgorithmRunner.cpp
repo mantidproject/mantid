@@ -67,7 +67,7 @@ void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
     Column_sptr outputColumn = table->getColumn(ioPair.second);
     for (size_t i = 0; i < table->rowCount(); ++i) {
       inputColumn->cell<std::string>(i).clear();
-      std::string &outputValue = outputColumn->cell<std::string>(i);
+      auto &outputValue = outputColumn->cell<std::string>(i);
       if (!isHardCodedWorkspaceName(outputValue)) {
         outputValue.clear();
       }
@@ -79,7 +79,7 @@ void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
   for (const auto &ioPair : ioMapping) {
     Column_sptr outputColumn = table->getColumn(ioPair.second);
     for (size_t i = 0; i < table->rowCount(); ++i) {
-      std::string &outputValue = outputColumn->cell<std::string>(i);
+      auto &outputValue = outputColumn->cell<std::string>(i);
       if (isHardCodedWorkspaceName(outputValue)) {
         outputValue = tidyWorkspaceName(outputValue);
       }
@@ -94,10 +94,10 @@ void WorkflowAlgorithmRunner::init() {
   declareProperty(PropertyNames::ALGORITHM, "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Name of the algorithm to run");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       PropertyNames::SETUP_TABLE.c_str(), "", Direction::Input),
                   "Table workspace containing the setup of the runs.");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       PropertyNames::IO_MAP.c_str(), "", Direction::Input),
                   "Table workspace mapping algorithm outputs to inputs.");
 }

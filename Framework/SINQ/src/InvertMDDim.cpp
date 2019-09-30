@@ -30,9 +30,9 @@ using namespace Mantid;
 // It is used to print out information, warning and error messages
 
 void InvertMDDim::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
 }
 
@@ -48,7 +48,7 @@ void InvertMDDim::exec() {
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
-  int rank = static_cast<int>(inWS->getNumDims());
+  auto rank = static_cast<int>(inWS->getNumDims());
   auto idx = new int[rank];
   if (idx == nullptr || outWS == nullptr) {
     throw std::runtime_error("Out of memory in InvertMDDim");

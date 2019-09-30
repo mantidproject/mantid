@@ -534,7 +534,7 @@ bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak) {
 }
 
 void PoldiPeakSearch::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace2D>>(
                       "InputWorkspace", "", Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
@@ -555,7 +555,7 @@ void PoldiPeakSearch::init() {
   declareProperty("MinimumPeakHeight", 0.0, "Minimum peak height.",
                   Direction::Input);
 
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Workspace containing detected peaks.");
 }

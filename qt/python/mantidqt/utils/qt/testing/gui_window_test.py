@@ -9,13 +9,25 @@
 #
 from __future__ import print_function
 import inspect
+import platform
 import sys
 from unittest import TestCase
 
 from mantidqt.utils.qt.testing.gui_test_runner import open_in_window
-from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication
-from qtpy.QtCore import Qt, QMetaObject, QTime
+from qtpy import PYQT_VERSION
+from qtpy.QtWidgets import QPushButton, QMenu, QAction, QApplication, QWidget
+from qtpy.QtGui import QMouseEvent
+from qtpy.QtCore import Qt, QMetaObject, QTime, QEvent
 from qtpy.QtTest import QTest
+
+
+def on_ubuntu_or_darwin():
+    return ('Ubuntu' in platform.platform() and sys.version[0] == '2' or
+            sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
+
+
+def not_on_windows():
+    return sys.platform != 'win32'
 
 
 def trigger_action(action):
@@ -29,6 +41,39 @@ def find_action_with_text(widget, text):
     raise RuntimeError("Couldn't find action with text \"{}\"".format(text))
 
 
+def print_tree(widget, indent=0):
+    if indent == 0:
+        print('Children widgets of ', widget.objectName(), type(widget))
+    space = ' ' * indent
+    for w in widget.children():
+        if isinstance(w, QWidget):
+            text = '({})'.format(w.text()) if hasattr(w, 'text') else ''
+            print('{}{} {} {}'.format(space, w, w.objectName(), text))
+            print_tree(w, indent + 4)
+
+
+def discover_children(widget, child_type=QWidget):
+    print('Children widgets of ', widget.objectName(), type(widget))
+    for w in widget.findChildren(child_type):
+        text = '({})'.format(w.text()) if hasattr(w, 'text') else ''
+        print(w, w.objectName(), text)
+
+
+def get_child(widget, object_name, child_type=QWidget, timeout=3):
+    t = QTime()
+    t.start()
+    timeout *= 1000
+    children = []
+    while len(children) == 0 and t.elapsed() < timeout:
+        children = widget.findChildren(child_type, object_name)
+        # QApplication.processEvents()
+    if len(children) == 0:
+        raise RuntimeError("Widget doesn't have child with name {}".format(object_name))
+    if len(children) > 1:
+        print('Widget has more than 1 child with name {}'.format(object_name))
+    return children[0]
+
+
 def drag_mouse(widget, from_pos, to_pos):
     QTest.mousePress(widget, Qt.LeftButton, Qt.NoModifier, from_pos)
     yield
@@ -38,6 +83,13 @@ def drag_mouse(widget, from_pos, to_pos):
     yield 0.1
     QTest.mouseRelease(widget, Qt.LeftButton, Qt.NoModifier, to_pos)
     yield 0.1
+
+
+def click_on(widget, pos, pause=0):
+    QTest.mouseMove(widget, pos)
+    yield pause
+    QTest.mouseClick(widget, Qt.LeftButton, Qt.NoModifier, pos)
+    yield pause
 
 
 def mouse_click(widget, pos, button=Qt.LeftButton):
@@ -147,6 +199,26 @@ class GuiTestBase(object):
     def click_button(self, name):
         button = self.get_button(name)
         QMetaObject.invokeMethod(button, 'click', Qt.QueuedConnection)
+
+    def show_context_menu(self, widget, pos, pause=0):
+        QTest.mouseMove(widget, pos)
+        yield pause
+        QTest.mouseClick(widget, Qt.RightButton, Qt.NoModifier, pos)
+        yield pause
+        ev = QMouseEvent(QEvent.ContextMenu, pos, Qt.RightButton, Qt.NoButton, Qt.NoModifier)
+        QApplication.postEvent(widget, ev)
+        yield self.wait_for_popup()
+
+    def mouse_trigger_action(self, name, pause=0):
+        menu = self.get_active_popup_widget()
+        a, m = self.get_action(name, get_menu=True)
+        pos = menu.actionGeometry(a).center()
+        QTest.mouseMove(menu, pos)
+        yield pause
+        self.hover_action(name)
+        QTest.mousePress(menu, Qt.LeftButton, Qt.NoModifier, pos)
+        yield pause
+        QTest.mouseRelease(menu, Qt.LeftButton, Qt.NoModifier, pos)
 
 
 def is_test_method(value):

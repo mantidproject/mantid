@@ -428,8 +428,9 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
 
   // Cache voigt function over yfine
   std::vector<double> minusYFine(NFINE_Y);
+  using std::placeholders::_1;
   std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(),
-                 std::bind2nd(std::multiplies<double>(), -1.0));
+                 std::bind(std::multiplies<double>(), _1, -1.0));
   std::vector<double> ym(
       NFINE_Y); // Holds result of (y[i] - yfine) for each original y
   m_voigt.resize(ncoarseY);
@@ -441,7 +442,7 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
     const double yi = yspace[i];
     std::transform(
         minusYFine.begin(), minusYFine.end(), ym.begin(),
-        std::bind2nd(std::plus<double>(), yi)); // yfine is actually -yfine
+        std::bind(std::plus<double>(), _1, yi)); // yfine is actually -yfine
     m_resolutionFunction->voigtApprox(voigt, ym, 0, 1.0);
   }
 

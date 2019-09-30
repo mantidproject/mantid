@@ -23,12 +23,12 @@ using namespace Kernel;
 using namespace API;
 
 void Transpose::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<CommonBinsValidator>()),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The output workspace.");
 }
 
@@ -119,16 +119,16 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
 
   // Create a new numeric axis for Y the same length as the old X array
   // Values come from input X
-  API::NumericAxis *newYAxis(nullptr);
+  std::unique_ptr<API::NumericAxis> newYAxis(nullptr);
   if (inputWorkspace->isHistogramData()) {
-    newYAxis = new API::BinEdgeAxis(inX.rawData());
+    newYAxis = std::make_unique<API::BinEdgeAxis>(inX.rawData());
   } else {
-    newYAxis = new API::NumericAxis(inX.rawData());
+    newYAxis = std::make_unique<API::NumericAxis>(inX.rawData());
   }
 
   newYAxis->unit() = inputWorkspace->getAxis(0)->unit();
   outputWorkspace->getAxis(0)->unit() = inputWorkspace->getAxis(1)->unit();
-  outputWorkspace->replaceAxis(1, newYAxis);
+  outputWorkspace->replaceAxis(1, std::move(newYAxis));
   setProperty("OutputWorkspace", outputWorkspace);
   return outputWorkspace;
 }

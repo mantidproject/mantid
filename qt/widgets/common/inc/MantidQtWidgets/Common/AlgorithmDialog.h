@@ -24,8 +24,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "AlgorithmDialogFactory.h"
 #include "DllOption.h"
-#include "InterfaceFactory.h"
 
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here
@@ -207,10 +207,15 @@ signals:
   /// Emitted when alg completes and dialog is staying open
   void algCompletedSignal();
 
+  void closeEventCalled();
+
 protected slots:
 
   /// A default slot that can be used for an OK button.
   void accept() override;
+
+  /// A default slot that can be used for a rejected button.
+  void reject() override;
 
   /// Help button clicked;
   virtual void helpClicked();

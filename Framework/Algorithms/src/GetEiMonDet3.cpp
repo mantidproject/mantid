@@ -105,19 +105,19 @@ void GetEiMonDet3::init() {
                                       API::IndexType::WorkspaceIndex>(
       Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.",
       tofWorkspace);
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::MONITOR_WORKSPACE.c_str(), "",
                       Kernel::Direction::Input, API::PropertyMode::Optional,
                       tofWorkspace),
                   "A Workspace containing the monitor spectrum; if empty, " +
                       Prop::DETECTOR_WORKSPACE + " will be used.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           Prop::MONITOR_EPP_TABLE, "", Kernel::Direction::Input,
           API::PropertyMode::Optional),
       "An EPP table corresponding to " + Prop::MONITOR_WORKSPACE);
   setPropertySettings(Prop::MONITOR_EPP_TABLE,
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           Prop::MONITOR_WORKSPACE, Kernel::IS_NOT_DEFAULT));
   declareProperty(Prop::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Usable monitor's workspace index.");

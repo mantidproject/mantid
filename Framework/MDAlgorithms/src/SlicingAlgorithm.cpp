@@ -52,13 +52,13 @@ void SlicingAlgorithm::initSlicingProps() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+        std::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                         Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
             "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
-    setPropertySettings(propName, make_unique<VisibleWhenProperty>(
+    setPropertySettings(propName, std::make_unique<VisibleWhenProperty>(
                                       "AxisAligned", IS_EQUAL_TO, "1"));
     setPropertyGroup(propName, "Axis-Aligned Binning");
   }
@@ -69,7 +69,7 @@ void SlicingAlgorithm::initSlicingProps() {
 
   auto ps = [] {
     std::unique_ptr<IPropertySettings> settings =
-        make_unique<VisibleWhenProperty>("AxisAligned", IS_EQUAL_TO, "0");
+        std::make_unique<VisibleWhenProperty>("AxisAligned", IS_EQUAL_TO, "0");
     return settings;
   };
   for (size_t i = 0; i < dimChars.size(); i++) {
@@ -77,8 +77,8 @@ void SlicingAlgorithm::initSlicingProps() {
     dim[0] = dimChars[i];
     std::string propName = "BasisVector" + dim;
     declareProperty(
-        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+        std::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                         Direction::Input),
         "Description of the basis vector of the " + Strings::toString(i) +
             "th output dimension."
             "Format: 'name, units, x,y,z,..'.\n"
@@ -91,23 +91,23 @@ void SlicingAlgorithm::initSlicingProps() {
     setPropertyGroup(propName, grpName);
   }
   declareProperty(
-      make_unique<ArrayProperty<double>>("Translation", Direction::Input),
+      std::make_unique<ArrayProperty<double>>("Translation", Direction::Input),
       "Coordinates in the INPUT workspace that corresponds to "
       "(0,0,0) in the OUTPUT workspace.\n"
       "Enter as a comma-separated string.\n"
       "Default: 0 in all dimensions (no translation).");
 
-  declareProperty(
-      make_unique<ArrayProperty<double>>("OutputExtents", Direction::Input),
-      "The minimum, maximum edges of space of each dimension of "
-      "the OUTPUT workspace, as a comma-separated list");
+  declareProperty(std::make_unique<ArrayProperty<double>>("OutputExtents",
+                                                          Direction::Input),
+                  "The minimum, maximum edges of space of each dimension of "
+                  "the OUTPUT workspace, as a comma-separated list");
 
   declareProperty(
-      make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
+      std::make_unique<ArrayProperty<int>>("OutputBins", Direction::Input),
       "The number of bins for each dimension of the OUTPUT workspace.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("NormalizeBasisVectors",
-                                                       true, Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "NormalizeBasisVectors", true, Direction::Input),
                   "Normalize the given basis vectors to unity. \n"
                   "If true, then a distance of 1 in the INPUT dimensions = 1 "
                   "in the OUTPUT dimensions.\n"
@@ -115,8 +115,8 @@ void SlicingAlgorithm::initSlicingProps() {
                   "INPUT dimension = 1 in the OUTPUT dimensions.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("ForceOrthogonal", false,
+                                                Direction::Input),
       "Force the input basis vectors to form an orthogonal coordinate system. "
       "Only works in 3 dimension!");
 

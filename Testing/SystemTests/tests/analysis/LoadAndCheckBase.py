@@ -54,13 +54,13 @@ class LoadAndCheckBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
 
     def do_check_workspace_shape(self, ws1, ws2):
         self.assertTrue(ws1.getNumberHistograms(), ws2.getNumberHistograms())
-        self.assertTrue(len(ws1.readX(0)) == len(ws2.readX(0)))
-        self.assertTrue(len(ws1.readY(0)) == len(ws2.readY(0)))
+        self.assertEqual(len(ws1.readX(0)),  len(ws2.readX(0)))
+        self.assertEqual(len(ws1.readY(0)),  len(ws2.readY(0)))
 
     def do_check_instrument_applied(self, ws1, ws2):
         instrument_name = self.get_expected_instrument_name()
-        self.assertTrue(ws1.getInstrument().getName() == instrument_name)
-        self.assertTrue(ws2.getInstrument().getName() == instrument_name)
+        self.assertEqual(ws1.getInstrument().getName(),  instrument_name)
+        self.assertEqual(ws2.getInstrument().getName(),  instrument_name)
 
     def runTest(self):
         Load(Filename=self.get_nexus_workspace_filename(), OutputWorkspace='nexus')

@@ -27,13 +27,13 @@ class GridSpecTest(unittest.TestCase):
     def test_overMax(self):
         self.engine = gridspecEngine(max_plot=10)
         result = self.engine.getGridSpec(100)
-        self.assertEquals(result, None)
+        self.assertEqual(result, None)
 
     def test_returnType(self):
         gridspec = GridSpec(1,1)
         self.engine = gridspecEngine()
         result = self.engine.getGridSpec(1)
-        self.assertEquals(type(result),type(gridspec))
+        self.assertEqual(type(result),type(gridspec))
 
 
 if __name__ == "__main__":

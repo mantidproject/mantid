@@ -5,7 +5,8 @@ set ( _PyStoG_download_dir ${CMAKE_CURRENT_BINARY_DIR}/../PyStoG-download )
 set ( _PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/pystog )
 set ( _PyStoG_source_test_dir ${_PyStoG_download_dir}/src/PyStoG/tests )
 set ( _PyStoG_scripts_dir ${CMAKE_CURRENT_BINARY_DIR}/pystog )
-set ( _PyStoG_test_dir ${CMAKE_CURRENT_BINARY_DIR}/test/pystog/tests )
+set ( _PyStoG_test_root_dir ${CMAKE_CURRENT_BINARY_DIR}/test/pystog )
+set ( _PyStoG_test_dir ${_PyStoG_test_root_dir}/tests )
 
 ExternalProject_Add ( PyStoG
   PREFIX ${_PyStoG_download_dir}
@@ -75,9 +76,8 @@ file (COPY ${_PyStoG_download_dir}/src/PyStoG/data/test_data
        DESTINATION ${_PyStoG_test_dir})
 
 # register the tests
-if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( ${_PyStoG_test_dir} python.scripts.pystog ${_test_files} )
-endif()
+set(PYUNITTEST_PYTHONPATH_EXTRA ${_PyStoG_test_root_dir})
+pyunittest_add_test ( ${_PyStoG_test_dir} python.scripts.pystog ${_test_files} )
 
 # create the "simple" __init__.py
 set ( _PyStoG_INIT_CONTENTS "from pystog.converter import Converter

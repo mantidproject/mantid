@@ -25,7 +25,7 @@ public:
     Mantid::Geometry::GeneralFrame frame("My General Frame", "Furlongs");
     TSM_ASSERT_THROWS("Should throw if min > max!",
                       MDHistoDimension("name", "id", frame, min, max, 15),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
   }
 
   void test_constructor() {

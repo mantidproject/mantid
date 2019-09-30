@@ -64,24 +64,24 @@ public:
     FunctionDomain1DVector domain3(x3);
     FunctionValues values3(domain3);
 
-    TS_ASSERT_THROWS(values3 += values1, std::runtime_error);
+    TS_ASSERT_THROWS(values3 += values1, const std::runtime_error &);
   }
 
   void testFitData() {
     FunctionDomain1DVector domain(x);
     FunctionValues values1(domain);
 
-    TS_ASSERT_THROWS(values1.getFitData(0), std::runtime_error);
-    TS_ASSERT_THROWS(values1.getFitWeight(0), std::runtime_error);
+    TS_ASSERT_THROWS(values1.getFitData(0), const std::runtime_error &);
+    TS_ASSERT_THROWS(values1.getFitWeight(0), const std::runtime_error &);
 
     values1.setFitData(5, 10.1);
     for (size_t i = 0; i < values1.size(); ++i) {
       TS_ASSERT_EQUALS(values1.getFitData(i), i == 5 ? 10.1 : 0.0);
-      TS_ASSERT_THROWS(values1.getFitWeight(i), std::runtime_error);
+      TS_ASSERT_THROWS(values1.getFitWeight(i), const std::runtime_error &);
     }
 
     std::vector<double> y(9);
-    TS_ASSERT_THROWS(values1.setFitData(y), std::invalid_argument);
+    TS_ASSERT_THROWS(values1.setFitData(y), const std::invalid_argument &);
 
     y.resize(10);
     for (size_t i = 0; i < y.size(); ++i) {
@@ -101,11 +101,11 @@ public:
     values1.setFitWeight(5, 10.1);
     for (size_t i = 0; i < values1.size(); ++i) {
       TS_ASSERT_EQUALS(values1.getFitWeight(i), i == 5 ? 10.1 : 0.0);
-      TS_ASSERT_THROWS(values1.getFitData(i), std::runtime_error);
+      TS_ASSERT_THROWS(values1.getFitData(i), const std::runtime_error &);
     }
 
     std::vector<double> y(9);
-    TS_ASSERT_THROWS(values1.setFitWeights(y), std::invalid_argument);
+    TS_ASSERT_THROWS(values1.setFitWeights(y), const std::invalid_argument &);
 
     y.resize(10);
     for (size_t i = 0; i < y.size(); ++i) {

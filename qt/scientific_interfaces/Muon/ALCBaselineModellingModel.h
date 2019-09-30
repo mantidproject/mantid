@@ -21,10 +21,7 @@ namespace CustomInterfaces {
 class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingModel
     : public IALCBaselineModellingModel {
 public:
-  // -- IALCBaselineModellingModel interface
-  // -----------------------------------------------------
-
-  Mantid::API::MatrixWorkspace_const_sptr data() const override;
+  Mantid::API::MatrixWorkspace_sptr data() const override;
 
   void fit(Mantid::API::IFunction_const_sptr function,
            const std::vector<Section> &sections) override;
@@ -33,7 +30,11 @@ public:
     return m_fittedFunction;
   }
 
-  Mantid::API::MatrixWorkspace_const_sptr correctedData() const override;
+  Mantid::API::MatrixWorkspace_sptr correctedData() const override;
+
+  Mantid::API::MatrixWorkspace_sptr
+  baselineData(Mantid::API::IFunction_const_sptr function,
+               const std::vector<double> &xValues) const override;
 
   Mantid::API::ITableWorkspace_sptr parameterTable() const {
     return m_parameterTable;
@@ -45,10 +46,10 @@ public:
   // ----------------------------------------------
 
   /// Set the data we should fit baseline for
-  void setData(Mantid::API::MatrixWorkspace_const_sptr data);
+  void setData(Mantid::API::MatrixWorkspace_sptr data);
 
   /// Set the corrected data resulting from fit
-  void setCorrectedData(Mantid::API::MatrixWorkspace_const_sptr data);
+  void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data);
 
   /// Export data + baseline + corrected data as a single workspace
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
@@ -61,7 +62,7 @@ public:
 
 private:
   /// Data used for fitting
-  Mantid::API::MatrixWorkspace_const_sptr m_data;
+  Mantid::API::MatrixWorkspace_sptr m_data;
 
   /// Result function of the last fit
   Mantid::API::IFunction_const_sptr m_fittedFunction;

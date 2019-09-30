@@ -48,12 +48,12 @@ public:
     PropertyWithValue<std::vector<double>> pvd("vector_double_val",
                                                std::vector<double>(2, 1.4));
 
-    pi.saveProperty(th.file);
-    pu.saveProperty(th.file);
-    pd.saveProperty(th.file);
-    pf.saveProperty(th.file);
-    ps.saveProperty(th.file);
-    pvd.saveProperty(th.file);
+    pi.saveProperty(th.file.get());
+    pu.saveProperty(th.file.get());
+    pd.saveProperty(th.file.get());
+    pf.saveProperty(th.file.get());
+    ps.saveProperty(th.file.get());
+    pvd.saveProperty(th.file.get());
 
     TimeSeriesProperty<int> tspi("int_series");
     tspi.addValue(DateAndTime("2011-01-01T00:00:01"), 1234);
@@ -71,30 +71,39 @@ public:
     tsps.addValue(DateAndTime("2011-01-01T00:00:01"), "help me i");
     tsps.addValue(DateAndTime("2011-01-01T00:01:02"), "am stuck in a NXS file");
 
-    tspi.saveProperty(th.file);
-    tspd.saveProperty(th.file);
-    tspb.saveProperty(th.file);
-    tsps.saveProperty(th.file);
+    tspi.saveProperty(th.file.get());
+    tspd.saveProperty(th.file.get());
+    tspb.saveProperty(th.file.get());
+    tsps.saveProperty(th.file.get());
 
     // ---- Now re-load and compare to the original ones
     // ----------------------------
     th.reopenFile();
 
-    check_prop(PropertyNexus::loadProperty(th.file, "int_val").get(), &pi);
-    check_prop(PropertyNexus::loadProperty(th.file, "uint_val").get(), &pu);
-    check_prop(PropertyNexus::loadProperty(th.file, "double_val").get(), &pd);
-    check_prop(PropertyNexus::loadProperty(th.file, "float_val").get(), &pf);
-    check_prop(PropertyNexus::loadProperty(th.file, "string_val").get(), &ps);
-    check_prop(PropertyNexus::loadProperty(th.file, "vector_double_val").get(),
-               &pvd);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "int_val").get(),
+               &pi);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "uint_val").get(),
+               &pu);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "double_val").get(),
+               &pd);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "float_val").get(),
+               &pf);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "string_val").get(),
+               &ps);
+    check_prop(
+        PropertyNexus::loadProperty(th.file.get(), "vector_double_val").get(),
+        &pvd);
 
-    check_prop(PropertyNexus::loadProperty(th.file, "int_series").get(), &tspi);
-    check_prop(PropertyNexus::loadProperty(th.file, "double_series").get(),
-               &tspd);
-    check_prop(PropertyNexus::loadProperty(th.file, "bool_series").get(),
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "int_series").get(),
+               &tspi);
+    check_prop(
+        PropertyNexus::loadProperty(th.file.get(), "double_series").get(),
+        &tspd);
+    check_prop(PropertyNexus::loadProperty(th.file.get(), "bool_series").get(),
                &tspb);
-    check_prop(PropertyNexus::loadProperty(th.file, "string_series").get(),
-               &tsps);
+    check_prop(
+        PropertyNexus::loadProperty(th.file.get(), "string_series").get(),
+        &tsps);
   }
 };
 

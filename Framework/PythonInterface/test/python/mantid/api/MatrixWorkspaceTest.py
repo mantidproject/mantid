@@ -10,11 +10,11 @@ import unittest
 import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
-
 from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
                         ExperimentInfo, AnalysisDataService, WorkspaceFactory)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
+from mantid.simpleapi import CreateSampleWorkspace, Rebin
 import numpy as np
 from six.moves import range
 
@@ -37,58 +37,58 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(issubclass(MatrixWorkspace, Workspace))
 
     def test_meta_information(self):
-        self.assertEquals(self._test_ws.id(), "Workspace2D")
-        self.assertEquals(self._test_ws.name(), "")
-        self.assertEquals(self._test_ws.getTitle(), "Test histogram")
-        self.assertEquals(self._test_ws.getComment(), "")
-        self.assertEquals(self._test_ws.isDirty(), False)
-        self.assertTrue(self._test_ws.getMemorySize() > 0.0)
-        self.assertEquals(self._test_ws.threadSafe(), True)
+        self.assertEqual(self._test_ws.id(), "Workspace2D")
+        self.assertEqual(self._test_ws.name(), "")
+        self.assertEqual(self._test_ws.getTitle(), "Test histogram")
+        self.assertEqual(self._test_ws.getComment(), "")
+        self.assertEqual(self._test_ws.isDirty(), False)
+        self.assertGreater(self._test_ws.getMemorySize(), 0.0)
+        self.assertEqual(self._test_ws.threadSafe(), True)
 
     def test_workspace_data_information(self):
-        self.assertEquals(self._test_ws.getNumberHistograms(), 2)
-        self.assertEquals(self._test_ws.blocksize(), 102)
-        self.assertEquals(self._test_ws.YUnit(), "Counts")
-        self.assertEquals(self._test_ws.YUnitLabel(), "Counts")
+        self.assertEqual(self._test_ws.getNumberHistograms(), 2)
+        self.assertEqual(self._test_ws.blocksize(), 102)
+        self.assertEqual(self._test_ws.YUnit(), "Counts")
+        self.assertEqual(self._test_ws.YUnitLabel(), "Counts")
 
     def test_axes(self):
         # Workspace axes
-        self.assertEquals(self._test_ws.axes(), 2)
+        self.assertEqual(self._test_ws.axes(), 2)
         xaxis = self._test_ws.getAxis(0)
         yaxis = self._test_ws.getAxis(1)
 
         self.assertTrue(xaxis.isNumeric())
         self.assertTrue(yaxis.isSpectra())
 
-        self.assertEquals(xaxis.length(), 103)
-        self.assertEquals(yaxis.length(), 2)
+        self.assertEqual(xaxis.length(), 103)
+        self.assertEqual(yaxis.length(), 2)
 
         xunit = xaxis.getUnit()
-        self.assertEquals(xunit.caption(), "Time-of-flight")
-        self.assertEquals(str(xunit.symbol()), "microsecond")
-        self.assertEquals(xunit.unitID(), "TOF")
+        self.assertEqual(xunit.caption(), "Time-of-flight")
+        self.assertEqual(str(xunit.symbol()), "microsecond")
+        self.assertEqual(xunit.unitID(), "TOF")
 
         yunit = yaxis.getUnit()
-        self.assertEquals(yunit.caption(), "Spectrum")
-        self.assertEquals(str(yunit.symbol()), "")
-        self.assertEquals(yunit.unitID(), "Label")
+        self.assertEqual(yunit.caption(), "Spectrum")
+        self.assertEqual(str(yunit.symbol()), "")
+        self.assertEqual(yunit.unitID(), "Label")
 
     def test_detector_retrieval(self):
         det = self._test_ws.getDetector(0)
         self.assertTrue(isinstance(det, Detector))
-        self.assertEquals(det.getID(), 1)
+        self.assertEqual(det.getID(), 1)
         self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0, 0, 11), V3D(0, 0, 1)))
 
     def test_spectrum_retrieval(self):
         # Spectrum
         spec = self._test_ws.getSpectrum(1)
-        self.assertEquals(spec.getSpectrumNo(), 2)
+        self.assertEqual(spec.getSpectrumNo(), 2)
         self.assertTrue(spec.hasDetectorID(2))
         ids = spec.getDetectorIDs()
         expected = [2]
-        self.assertEquals(len(expected), len(ids))
+        self.assertEqual(len(expected), len(ids))
         for i in range(len(ids)):
-            self.assertEquals(expected[i], ids[i])
+            self.assertEqual(expected[i], ids[i])
 
     def test_detector_two_theta(self):
         det = self._test_ws.getDetector(1)
@@ -108,7 +108,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Have got a MatrixWorkspace back and not just the generic interface
         self.assertTrue(isinstance(propValue, MatrixWorkspace))
         mem = propValue.getMemorySize()
-        self.assertTrue((mem > 0))
+        self.assertGreater(mem, 0)
 
         AnalysisDataService.remove(wsname)
 
@@ -121,13 +121,13 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Have got a MatrixWorkspace back and not just the generic interface
         self.assertTrue(isinstance(value, MatrixWorkspace))
         mem = value.getMemorySize()
-        self.assertTrue((mem > 0))
+        self.assertGreater(mem, 0)
 
         AnalysisDataService.remove(wsname)
 
     def test_read_data_members_give_readonly_numpy_array(self):
         def do_numpy_test(arr):
-            self.assertEquals(type(arr), np.ndarray)
+            self.assertEqual(type(arr), np.ndarray)
             self.assertFalse(arr.flags.writeable)
 
         x = self._test_ws.readX(0)
@@ -235,16 +235,16 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         blocksize = workspace.blocksize()
         for arr in (x_np, y_np, e_np):
-            self.assertEquals(type(arr), np.ndarray)
+            self.assertEqual(type(arr), np.ndarray)
 
         if nhist > 1:
-            self.assertEquals(x_np.shape, (nhist, blocksize + 1))  # 2 rows, 103 columns
-            self.assertEquals(y_np.shape, (nhist, blocksize))  # 2 rows, 102 columns
-            self.assertEquals(e_np.shape, (nhist, blocksize))  # 2 rows, 102 columns
+            self.assertEqual(x_np.shape, (nhist, blocksize + 1))  # 2 rows, 103 columns
+            self.assertEqual(y_np.shape, (nhist, blocksize))  # 2 rows, 102 columns
+            self.assertEqual(e_np.shape, (nhist, blocksize))  # 2 rows, 102 columns
         else:
-            self.assertEquals(x_np.shape, (blocksize + 1,))  # 2 rows, 103 columns
-            self.assertEquals(y_np.shape, (blocksize,))  # 2 rows, 102 columns
-            self.assertEquals(e_np.shape, (blocksize,))  # 2 rows, 102 columns
+            self.assertEqual(x_np.shape, (blocksize + 1,))  # 2 rows, 103 columns
+            self.assertEqual(y_np.shape, (blocksize,))  # 2 rows, 102 columns
+            self.assertEqual(e_np.shape, (blocksize,))  # 2 rows, 102 columns
 
         for i in range(start, end):
             if nhist > 1:
@@ -256,15 +256,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
                 y_arr = y_np
                 e_arr = e_np
             for j in range(blocksize):
-                self.assertEquals(x_arr[j], workspace.readX(i)[j])
-                self.assertEquals(y_arr[j], workspace.readY(i)[j])
-                self.assertEquals(e_arr[j], workspace.readE(i)[j])
+                self.assertEqual(x_arr[j], workspace.readX(i)[j])
+                self.assertEqual(y_arr[j], workspace.readY(i)[j])
+                self.assertEqual(e_arr[j], workspace.readE(i)[j])
             # Extra X boundary
-            self.assertEquals(x_arr[blocksize], workspace.readX(i)[blocksize])
+            self.assertEqual(x_arr[blocksize], workspace.readX(i)[blocksize])
 
     def test_data_members_give_writable_numpy_array(self):
         def do_numpy_test(arr):
-            self.assertEquals(type(arr), np.ndarray)
+            self.assertEqual(type(arr), np.ndarray)
             self.assertTrue(arr.flags.writeable)
 
         x = self._test_ws.dataX(0)
@@ -282,7 +282,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ynow = y[0]
         ynow *= 2.5
         y[0] = ynow
-        self.assertEquals(self._test_ws.readY(0)[0], ynow)
+        self.assertEqual(self._test_ws.readY(0)[0], ynow)
 
     def test_operators_with_workspaces_in_ADS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='a', DataX=[
@@ -360,11 +360,11 @@ class MatrixWorkspaceTest(unittest.TestCase):
         raw = AnalysisDataService['raw']
         history = raw.getHistory()
         last = history.lastAlgorithm()
-        self.assertEquals(last.name(), "Rebin")
-        self.assertEquals(last.getPropertyValue("InputWorkspace"), "raw")
+        self.assertEqual(last.name(), "Rebin")
+        self.assertEqual(last.getPropertyValue("InputWorkspace"), "raw")
         first = history[0]
-        self.assertEquals(first.name(), "CreateWorkspace")
-        self.assertEquals(first.getPropertyValue("OutputWorkspace"), "raw")
+        self.assertEqual(first.name(), "CreateWorkspace")
+        self.assertEqual(first.getPropertyValue("OutputWorkspace"), "raw")
         AnalysisDataService.remove('raw')
 
     def test_setTitleAndComment(self):
@@ -373,10 +373,10 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1 = AnalysisDataService['ws1']
         title = 'test_title'
         ws1.setTitle(title)
-        self.assertEquals(title, ws1.getTitle())
+        self.assertEqual(title, ws1.getTitle())
         comment = 'Some comment on this workspace.'
         ws1.setComment(comment)
-        self.assertEquals(comment, ws1.getComment())
+        self.assertEqual(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.name())
 
     def test_setGetMonitorWS(self):
@@ -398,7 +398,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         monWs.setTitle("My Fake Monitor workspace")
 
         monWs1 = ws1.getMonitorWorkspace()
-        self.assertEquals(monWs.getTitle(), monWs1.getTitle())
+        self.assertEqual(monWs.getTitle(), monWs1.getTitle())
 
         ws1.clearMonitorWorkspace()
         try:
@@ -422,11 +422,19 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def test_spectrumInfo(self):
         specInfo = self._test_ws.spectrumInfo()
-        self.assertEquals(specInfo.isMasked(0), False)
-        self.assertEquals(specInfo.isMasked(1), False)
+        self.assertEqual(specInfo.isMasked(0), False)
+        self.assertEqual(specInfo.isMasked(1), False)
 
     def test_isCommonBins(self):
         self.assertTrue(self._test_ws.isCommonBins())
+
+    def test_isCommonLogBins(self):
+        self.assertFalse(self._test_ws.isCommonLogBins())
+        ws=CreateSampleWorkspace('Event')
+        ws=Rebin(ws, '1,-1,10000')
+        self.assertTrue(ws.isCommonLogBins())
+        ws=Rebin(ws, '1,-0.1,10000')
+        self.assertTrue(ws.isCommonLogBins())
 
     def test_hasMaskedBins(self):
         numBins = 10

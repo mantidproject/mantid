@@ -49,8 +49,8 @@ class GuiStateDirectorTest(unittest.TestCase):
         except ValueError:
             has_raised = True
         self.assertFalse(has_raised)
-        self.assertTrue(state.wavelength.wavelength_low == [1.5])
-        self.assertTrue(state.wavelength.wavelength_high == [12.5])
+        self.assertEqual(state.wavelength.wavelength_low,  [1.5])
+        self.assertEqual(state.wavelength.wavelength_high,  [12.5])
 
     def test_that_will_raise_when_models_are_incomplete(self):
         table_index_model = TableIndexModel(0, "", "", "", "", "", "",
@@ -68,8 +68,8 @@ class GuiStateDirectorTest(unittest.TestCase):
 
         state = director.create_state(0)
         self.assertTrue(isinstance(state, State))
-        self.assertTrue(state.wavelength.wavelength_low == [3.14])
-        self.assertTrue(state.wavelength.wavelength_high == [10.3])
+        self.assertEqual(state.wavelength.wavelength_low,  [3.14])
+        self.assertEqual(state.wavelength.wavelength_high,  [10.3])
 
     def test_that_shift_and_scale_set_on_state_from_options_column(self):
         table_model = self._get_table_model(option_string="MergeScale=1.2,MergeShift=0.5")

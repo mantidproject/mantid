@@ -430,8 +430,8 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos,
         }
 
         // two thousand-chars after one other are not valid
-        const int len = copy.size();
-        for (int i = 0; i < len - 1; ++i) {
+        const int copyLen = copy.size();
+        for (int i = 0; i < copyLen - 1; ++i) {
           if (copy.at(i) == thousand && copy.at(i + 1) == thousand) {
             QSBDEBUG() << __FILE__ << __LINE__ << "state is set to Invalid";
             state = QValidator::Invalid;

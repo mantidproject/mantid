@@ -15,7 +15,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidMDAlgorithms/LoadSQW2.h"
 
 #include <Poco/TemporaryFile.h>
@@ -125,20 +125,20 @@ public:
   void test_Filename_Property_Throws_If_Not_Found() {
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS(alg->setPropertyValue("Filename", "x.sqw"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Unknown_Q3DFrame_Is_Not_Accepted() {
     auto alg = createAlgorithm();
     TS_ASSERT_THROWS(alg->setPropertyValue("Q3DFrames", "Unknown"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Unsupported_SQW_Type_Throws_Error() {
     auto algm = createAlgorithm();
     algm->setProperty("Filename", "horace_dnd_test_file.sqw");
     algm->setRethrows(true);
-    TS_ASSERT_THROWS(algm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algm->execute(), const std::runtime_error &);
   }
 
 private:
@@ -173,7 +173,7 @@ private:
   }
 
   IAlgorithm_uptr createAlgorithm() {
-    IAlgorithm_uptr alg(Mantid::Kernel::make_unique<LoadSQW2>());
+    IAlgorithm_uptr alg(std::make_unique<LoadSQW2>());
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("OutputWorkspace", "__unused_value_for_child_algorithm");

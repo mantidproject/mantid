@@ -358,12 +358,12 @@ void IndirectFitPropertyBrowser::setParameterValue(
 void IndirectFitPropertyBrowser::setBackground(
     const std::string &backgroundName) {
   if (m_backgroundHandler != nullptr && backgroundIndex()) {
-    MantidQt::API::SignalBlocker<QObject> blocker(this);
+    MantidQt::API::SignalBlocker blocker(this);
     FitPropertyBrowser::removeFunction(m_backgroundHandler);
   }
 
   if (backgroundName != "None") {
-    MantidQt::API::SignalBlocker<QObject> blocker(this);
+    MantidQt::API::SignalBlocker blocker(this);
     m_backgroundHandler = addFunction(backgroundName);
   } else
     m_backgroundHandler = nullptr;
@@ -781,7 +781,7 @@ void IndirectFitPropertyBrowser::addCustomFunctions(QtProperty *prop,
  */
 void IndirectFitPropertyBrowser::addCustomFunctions(
     QtProperty *prop, const std::vector<IFunction_sptr> &functions) {
-  MantidQt::API::SignalBlocker<QObject> blocker(this);
+  MantidQt::API::SignalBlocker blocker(this);
   for (const auto &function : functions) {
     m_functionHandlers[prop] << addFunction(function->asString());
     m_customFunctionCount[function->name()] += 1;
@@ -849,7 +849,7 @@ void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop,
  * @param prop        The property to clear of custom functions.
  */
 void IndirectFitPropertyBrowser::clearCustomFunctions(QtProperty *prop) {
-  MantidQt::API::SignalBlocker<QObject> blocker(this);
+  MantidQt::API::SignalBlocker blocker(this);
   for (const auto &functionHandler : m_functionHandlers[prop]) {
 
     if (functionHandler->parentHandler() != nullptr) {

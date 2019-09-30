@@ -52,9 +52,9 @@ class EmbeddedFindReplaceDialogView(DialogBase, DialogForm):
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-        arrow_up_icon = get_icon("fa.arrow-up")
-        arrow_down_icon = get_icon("fa.arrow-down")
-        x_icon = get_icon("fa.times")
+        arrow_up_icon = get_icon("mdi.arrow-up")
+        arrow_down_icon = get_icon("mdi.arrow-down")
+        x_icon = get_icon("mdi.close")
 
         self.next_button.setIcon(arrow_down_icon)
         self.previous_button.setIcon(arrow_up_icon)

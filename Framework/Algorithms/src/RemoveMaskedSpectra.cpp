@@ -42,17 +42,17 @@ const std::string RemoveMaskedSpectra::summary() const {
 /** Initialize the algorithm's properties.
  */
 void RemoveMaskedSpectra::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "An input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
+                                                        Direction::Input,
+                                                        PropertyMode::Optional),
                   "If given but not as a MaskWorkspace, the masking from "
                   "this workspace will be used. If given as a "
                   "MaskWorkspace, the masking is read from its Y values.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 
@@ -97,7 +97,7 @@ void RemoveMaskedSpectra::makeIndexList(
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
       if (mask->y(i)[0] == 0.0) {
-        indices.push_back(static_cast<size_t>(i));
+        indices.push_back(i);
       }
     }
   } else {
@@ -106,7 +106,7 @@ void RemoveMaskedSpectra::makeIndexList(
       if (!spectrumInfo.hasDetectors(i))
         continue;
       if (!spectrumInfo.isMasked(i))
-        indices.push_back(static_cast<size_t>(i));
+        indices.push_back(i);
     }
   }
 }

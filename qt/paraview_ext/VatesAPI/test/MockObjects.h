@@ -94,7 +94,11 @@ public:
                             size_t index4));
   MOCK_CONST_METHOD0(getNonIntegratedDimensions,
                      Mantid::Geometry::VecIMDDimension_const_sptr());
-  MOCK_METHOD1(setMDMasking, void(Mantid::Geometry::MDImplicitFunction *));
+  MOCK_METHOD1(mockSetMDMasking,
+               void(Mantid::Geometry::MDImplicitFunction *ptr));
+  void setMDMasking(std::unique_ptr<Mantid::Geometry::MDImplicitFunction> ptr) {
+    mockSetMDMasking(ptr.get());
+  }
   MOCK_METHOD0(clearMDMasking, void());
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());

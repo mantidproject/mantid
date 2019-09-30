@@ -136,7 +136,6 @@ int relstopX(const std::vector<double> &xvOld, const gsl_vector *xvNew,
 void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
   assert(numParameters() == xv.size());
 
-  OptimizerResult ret = Success;
   double ICM(HUGE_VAL), minf_penalty(HUGE_VAL), rho(0.0);
   double fcur(0.0), minf(HUGE_VAL), penalty(0.0);
   std::vector<double> xcur(xv), lambda(numEqualityConstraints(), 0),
@@ -207,7 +206,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
     if ((feasible &&
          (!minfIsFeasible || penalty <= minf_penalty || fcur < minf)) ||
         (!minfIsFeasible && penalty <= minf_penalty)) {
-      ret = Success;
+      OptimizerResult ret = Success;
       if (feasible) {
         if (relstop(minf, fcur, FTOL_REL, FTOL_ABS))
           ret = FTolReached;
@@ -222,7 +221,6 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
         break;
     }
     if (ICM == 0.0) {
-      ret = FTolReached;
       break;
     }
   } while (auglagIters < m_maxIter);
@@ -240,7 +238,7 @@ namespace {
  * @return Value at the current parameter point
  */
 double costf(const gsl_vector *v, void *params) {
-  FunctionData *d = static_cast<FunctionData *>(params);
+  auto *d = static_cast<FunctionData *>(params);
 
   double lagrangian = (*d->userfunc)(d->n, v->data);
   for (size_t i = 0; i < d->eqmatrix->numRows(); ++i) {
@@ -264,7 +262,7 @@ double costf(const gsl_vector *v, void *params) {
  * @param df Holder for output  derivatives
  */
 void costdf(const gsl_vector *v, void *params, gsl_vector *df) {
-  FunctionData *d = static_cast<FunctionData *>(params);
+  auto *d = static_cast<FunctionData *>(params);
   double f0 = costf(v, params);
   gsl_vector *tmp = d->tmp;
   std::copy(v->data, v->data + d->n, tmp->data);

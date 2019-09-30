@@ -7,15 +7,18 @@
 #  This file is part of the mantid workbench.
 from __future__ import absolute_import, unicode_literals
 
+import unittest
+
 from qtpy.QtWidgets import QApplication
 
 from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 
 
-class InstrumentViewTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
     def test_window_deleted_correctly(self):
         ws = CreateSampleWorkspace()
         LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap=False)

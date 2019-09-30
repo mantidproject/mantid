@@ -129,7 +129,7 @@ public:
   /// Set the default function type
   void setDefaultFunctionType(const std::string &fnType);
   /// Get the default peak type
-  std::string defaultPeakType() const;
+  std::string defaultPeakType();
   /// Set the default peak type
   void setDefaultPeakType(const std::string &fnType);
   /// Get the default background type
@@ -169,6 +169,8 @@ public:
   int maxIterations() const;
   /// Get the peak radius for peak functions
   int getPeakRadius() const;
+  /// Get the X limits of the workspace
+  QVector<double> getXRange();
 
   /// Get the start X
   double startX() const;
@@ -180,6 +182,12 @@ public:
   void setEndX(double end) override;
   /// Set both start and end X
   void setXRange(double start, double end);
+  /// Get the name of the X column
+  QString getXColumnName() const;
+  /// Get the name of the Y column
+  QString getYColumnName() const;
+  /// Get the name of the Error column
+  QString getErrColumnName() const;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue
@@ -263,12 +271,14 @@ public:
   /// Returns the list of workspaces that are currently been worked on by the
   /// fit property browser.
   QStringList getWorkspaceNames();
-  /// Create a MatrixWorkspace from a TableWorkspace
-  Mantid::API::Workspace_sptr createMatrixFromTableWorkspace() const;
 
   /// Allow or disallow sequential fits (depending on whether other conditions
   /// are met)
   void allowSequentialFits(bool allow) override;
+
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QMenu *getFitMenu() const { return m_fitMenu; }
 
   // Methods intended for testing only
 
@@ -277,6 +287,7 @@ public:
   // Methods intended for interfacing with the workbench fitting tools
 
   void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+  void addAllowedTableWorkspace(const QString &wsName);
   QString addFunction(const QString &fnName);
   PropertyHandler *getPeakHandler(const QString &prefix);
   void setPeakCentreOf(const QString &prefix, double value);
@@ -654,6 +665,8 @@ private:
   ///   keys are workspace names,
   ///   values are lists of workspace indices
   QMap<QString, QList<int>> m_allowedSpectra;
+  /// If set it contains the table workspace name to be fitted in this browser:
+  QString m_allowedTableWorkspace;
   /// Store workspace index to revert to in case validation fails
   int m_oldWorkspaceIndex;
 

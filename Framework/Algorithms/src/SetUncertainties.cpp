@@ -82,9 +82,9 @@ void SetUncertainties::init() {
   auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   mustBePositiveInt->setLower(0);
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
   std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO,
                                          CUSTOM};
@@ -93,19 +93,19 @@ void SetUncertainties::init() {
                   "How to reset the uncertainties");
   declareProperty("SetErrorTo", 1.000, mustBePositive,
                   "The error value to set when using custom mode");
-  setPropertySettings("SetErrorTo", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("SetErrorTo", std::make_unique<VisibleWhenProperty>(
                                         "SetError", IS_EQUAL_TO, "custom"));
 
   declareProperty("IfEqualTo", 0.000, mustBePositive,
                   "Which error values in the input workspace should be "
                   "replaced when using custom mode");
-  setPropertySettings("IfEqualTo", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("IfEqualTo", std::make_unique<VisibleWhenProperty>(
                                        "SetError", IS_EQUAL_TO, "custom"));
 
   declareProperty("Precision", 3, mustBePositiveInt,
                   "How many decimal places of ``IfEqualTo`` are taken into "
                   "account for matching when using custom mode");
-  setPropertySettings("Precision", Kernel::make_unique<VisibleWhenProperty>(
+  setPropertySettings("Precision", std::make_unique<VisibleWhenProperty>(
                                        "SetError", IS_EQUAL_TO, "custom"));
 }
 

@@ -28,7 +28,8 @@ public:
 
   void testExistsThrowsIfMapDoesNotExist() {
     using Mantid::PythonInterface::PythonException;
-    TS_ASSERT_THROWS(MantidColorMap::exists("NotAColormap"), PythonException);
+    TS_ASSERT_THROWS(MantidColorMap::exists("NotAColormap"),
+                     const PythonException &);
   }
 };
 

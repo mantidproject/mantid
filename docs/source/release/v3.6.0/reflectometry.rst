@@ -78,9 +78,7 @@ processing table using the measurement logs in the isis nexus files.
 If the measurement log is invalid it result in a failed transfer and the
 row in the search table corresponding to this run will be highlighted.
 Hovering the cursor over failed transfers will show you why the transfer
-failed i.e "Invalid measurement ID" see ISIS REFL interface documentation
-:ref:`documentation <interface-isis-refl-measure-based-search-transfer>`
-for the full description of these changes.
+failed i.e "Invalid measurement ID".
 
 Momentum Transfer calculations
 ##############################

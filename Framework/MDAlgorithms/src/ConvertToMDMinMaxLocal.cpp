@@ -33,9 +33,9 @@ const std::string ConvertToMDMinMaxLocal::name() const {
 void ConvertToMDMinMaxLocal::init() {
   ConvertToMDParent::init();
 
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
       "MinValues", Direction::Output));
-  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
       "MaxValues", Direction::Output));
 }
 
@@ -142,7 +142,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
   pQtransf->initialize(WSDescription);
 
   //
-  long nHist = static_cast<long>(inWS->getNumberHistograms());
+  auto nHist = static_cast<long>(inWS->getNumberHistograms());
   auto detIDMap =
       WSDescription.m_PreprDetTable->getColVector<size_t>("detIDMap");
 

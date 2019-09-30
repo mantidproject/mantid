@@ -51,11 +51,13 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
         spDetInfoTopic(m_instrumentName +
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX),
         sampleEnvTopic(m_instrumentName +
-                       KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
+                       KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
+        chopperTimestampTopic(m_instrumentName +
+                              KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX);
 
-    m_decoder = Kernel::make_unique<KafkaHistoStreamDecoder>(
+    m_decoder = std::make_unique<KafkaHistoStreamDecoder>(
         std::make_shared<KafkaBroker>(address.toString()), histoTopic,
-        runInfoTopic, spDetInfoTopic, sampleEnvTopic);
+        runInfoTopic, spDetInfoTopic, sampleEnvTopic, chopperTimestampTopic);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaHistoListener::connect - Connection Error: "
                   << exc.what() << "\n";

@@ -46,9 +46,9 @@ class StateReductionBuilderTest(unittest.TestCase):
         state = builder.build()
 
         # Assert
-        self.assertTrue(state.user_specified_output_name == user_specified_output_name)
-        self.assertTrue(state.zero_free_correction == zero_free_correction)
-        self.assertTrue(state.file_format == file_format)
+        self.assertEqual(state.user_specified_output_name,  user_specified_output_name)
+        self.assertEqual(state.zero_free_correction,  zero_free_correction)
+        self.assertEqual(state.file_format,  file_format)
 
 
 if __name__ == '__main__':

@@ -94,11 +94,11 @@ const std::string FindReflectometryLines2::summary() const {
 /// Initialize the algorithm's properties.
 void FindReflectometryLines2::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input),
       "A reflectometry workspace.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output,
           API::PropertyMode::Optional),
       "A workspace containing the fractional workspace index of "
@@ -170,7 +170,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   double const height = *maxValueIt;
   // determine initial centre: index of the maximum value
   size_t const maxIndex = std::distance(Ys.cbegin(), maxValueIt);
-  double const centreIndex = static_cast<double>(maxIndex);
+  auto const centreIndex = static_cast<double>(maxIndex);
   int const startIndex = getProperty(Prop::START_INDEX);
   double const centreByMax = static_cast<double>(startIndex) + centreIndex;
   g_log.debug() << "Line maximum position: " << centreByMax << '\n';
@@ -188,7 +188,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
                        "value as line center.\n";
     return centreByMax;
   }
-  double const fwhm =
+  auto const fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
                 << '\n';

@@ -65,9 +65,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // transaction id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     StopRemoteTransaction2 alg2;
@@ -76,7 +76,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg2.setPropertyValue("TransactionID", "john_missing"));
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
   }
 
@@ -84,13 +84,13 @@ public:
     StopRemoteTransaction2 stop;
     TS_ASSERT_THROWS_NOTHING(stop.initialize();)
     TS_ASSERT_THROWS(stop.setPropertyValue("Compute", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(stop.setPropertyValue("Transaction", "whatever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(stop.setPropertyValue("JobID", "whichever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(stop.setPropertyValue("ID", "whichever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {

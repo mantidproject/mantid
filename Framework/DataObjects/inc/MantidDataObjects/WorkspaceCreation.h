@@ -9,7 +9,6 @@
 
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidKernel/make_unique.h"
 
 #include <memory>
 #include <type_traits>
@@ -96,11 +95,11 @@ MANTID_DATAOBJECTS_DLL HistogramData::Histogram
 stripData(HistogramData::Histogram histogram);
 
 template <class T> std::unique_ptr<T> createHelper() {
-  return Kernel::make_unique<T>();
+  return std::make_unique<T>();
 }
 
 template <class T> std::unique_ptr<T> createConcreteHelper() {
-  return Kernel::make_unique<T>();
+  return std::make_unique<T>();
 }
 
 template <>
@@ -186,7 +185,7 @@ template <class T, class IndexArg, class HistArg,
           typename std::enable_if<!std::is_base_of<
               API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
-  auto ws = Kernel::make_unique<T>();
+  auto ws = std::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return ws;
 }
@@ -197,7 +196,7 @@ template <class T, class IndexArg, class HistArg,
 std::unique_ptr<T>
 create(const boost::shared_ptr<const Geometry::Instrument> instrument,
        const IndexArg &indexArg, const HistArg &histArg) {
-  auto ws = Kernel::make_unique<T>();
+  auto ws = std::make_unique<T>();
   ws->setInstrument(std::move(instrument));
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return std::move(ws);

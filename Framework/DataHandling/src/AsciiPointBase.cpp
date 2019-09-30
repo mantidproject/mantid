@@ -30,11 +30,12 @@ using namespace API;
 /// Initialisation method.
 void AsciiPointBase::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input),
       "The name of the workspace containing the data you want to save.");
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, ext()),
-                  "The filename of the output file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ext()),
+      "The filename of the output file.");
   extraProps();
 }
 
@@ -72,7 +73,7 @@ void AsciiPointBase::exec() {
     throw std::runtime_error("Cannot treat InputWorkspace");
   try {
     m_length = m_ws->y(0).size();
-  } catch (std::range_error) {
+  } catch (const std::range_error &) {
     g_log.error("InputWorkspace does not contain data");
   }
   extraHeaders(file);

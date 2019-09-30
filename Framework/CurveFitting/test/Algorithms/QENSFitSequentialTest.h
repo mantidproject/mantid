@@ -53,7 +53,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_convolution_fit() {

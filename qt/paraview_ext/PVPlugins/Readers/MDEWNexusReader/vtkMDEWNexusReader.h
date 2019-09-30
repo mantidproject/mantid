@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef _vtkMDEWNexusReader_h
 #define _vtkMDEWNexusReader_h
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "vtkUnstructuredGridAlgorithm.h"

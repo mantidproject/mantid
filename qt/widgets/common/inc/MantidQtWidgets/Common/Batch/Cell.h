@@ -20,6 +20,11 @@ namespace Batch {
 
 class EXPORT_OPT_MANTIDQT_COMMON Cell {
 public:
+  // Cell values may be user inputs or algorithm outputs
+  enum class Direction { INPUT, OUTPUT };
+  static constexpr const char *INPUT_FOREGROUND_COLOR = "#000000";
+  static constexpr const char *OUTPUT_FOREGROUND_COLOR = "#808080";
+
   Cell(std::string const &contentText);
   Cell(std::string const &contentText, std::string const &backgroundColor,
        int borderThickness, std::string const &color, int borderOpacity,
@@ -36,6 +41,8 @@ public:
 
   void setBackgroundColor(std::string const &backgroundColor);
   std::string const &backgroundColor() const;
+  void setForegroundColor(std::string const &foregroundColor);
+  std::string const &foregroundColor() const;
 
   void setBorderOpacity(int transparency);
   int borderOpacity() const;
@@ -51,15 +58,22 @@ public:
   void disableEditing();
   void enableEditing();
 
+  bool isInput() const;
+  bool isOutput() const;
+  void setInput();
+  void setOutput();
+
 private:
   std::string m_contentText;
   std::string m_backgroundColor;
+  std::string m_foregroundColor;
   int m_borderThickness;
   int m_borderOpacity;
   std::string m_borderColor;
   std::string m_iconFilePath;
   bool m_isEditable;
   std::string m_toolTip;
+  Direction m_direction;
 };
 
 EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,

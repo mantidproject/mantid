@@ -31,59 +31,48 @@ SpectrumInfoPythonIterator make_pyiterator(SpectrumInfo &spectrumInfo) {
 void export_SpectrumInfo() {
   class_<SpectrumInfo, boost::noncopyable>("SpectrumInfo", no_init)
       .def("__iter__", make_pyiterator)
-
       .def("__len__", &SpectrumInfo::size, arg("self"),
            "Returns the number of spectra.")
-
       .def("size", &SpectrumInfo::size, arg("self"),
            "Returns the number of spectra.")
-
       .def("isMonitor", &SpectrumInfo::isMonitor, (arg("self"), arg("index")),
            "Returns True if the detector(s) associated with the spectrum are "
            "monitors.")
-
       .def("isMasked", &SpectrumInfo::isMasked, (arg("self"), arg("index")),
            "Returns True if the detector(s) associated with the spectrum are "
            "masked.")
-
       .def("setMasked", &SpectrumInfo::setMasked,
            (arg("self"), arg("index"), arg("masked")),
            "Set the mask flag of the spectrum with the given index.")
-
       .def("twoTheta", &SpectrumInfo::twoTheta, (arg("self"), arg("index")),
            "Returns the scattering angle 2 theta in radians w.r.t. beam "
            "direction.")
-
       .def("signedTwoTheta", &SpectrumInfo::signedTwoTheta,
            (arg("self"), arg("index")),
            "Returns the signed scattering angle 2 theta in radians w.r.t. beam "
            "direction.")
-
+      .def("azimuthal", &SpectrumInfo::azimuthal, (arg("self"), arg("index")),
+           "Returns the out-of-plane angle in radians angle w.r.t. to "
+           "vecPointingHorizontal "
+           "direction.")
       .def("l1", &SpectrumInfo::l1, arg("self"),
            "Returns the distance from the source to the sample.")
-
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),
            "Returns the distance from the sample to the spectrum.")
-
       .def("hasDetectors", &SpectrumInfo::hasDetectors, (arg("self")),
            "Returns True if the spectrum is associated with detectors in the "
            "instrument.")
-
       .def("hasUniqueDetector", &SpectrumInfo::hasUniqueDetector,
            (arg("self"), arg("index")),
            "Returns True if the spectrum is associated with exactly one "
            "detector.")
-
       .def("position", &SpectrumInfo::position, (arg("self"), arg("index")),
            "Returns the absolute position of the spectrum with the given "
            "index.")
-
       .def("sourcePosition", &SpectrumInfo::sourcePosition, arg("self"),
            "Returns the absolute source position.")
-
       .def("samplePosition", &SpectrumInfo::samplePosition, arg("self"),
            "Returns the absolute sample position.")
-
       .def("getSpectrumDefinition", &SpectrumInfo::spectrumDefinition,
            return_value_policy<return_by_value>(), (arg("self"), arg("index")),
            "Returns the SpectrumDefinition of the spectrum with the given "

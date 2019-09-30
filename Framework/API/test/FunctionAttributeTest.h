@@ -54,7 +54,7 @@ public:
     att.setDouble(1.1);
     TS_ASSERT_EQUALS(att.asDouble(), 1.1);
 
-    TS_ASSERT_THROWS(att.setInt(100), std::runtime_error);
+    TS_ASSERT_THROWS(att.setInt(100), const std::runtime_error &);
 
     att.fromString("0.5");
     TS_ASSERT_EQUALS(att.asDouble(), 0.5);

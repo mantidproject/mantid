@@ -18,18 +18,18 @@ class UsageServiceTest(unittest.TestCase):
 
     def test_getSetEnabled(self):
         UsageService.setEnabled(False)
-        self.assertEquals(UsageService.isEnabled(),False)
+        self.assertEqual(UsageService.isEnabled(),False)
         UsageService.setEnabled(True)
-        self.assertEquals(UsageService.isEnabled(),True)
+        self.assertEqual(UsageService.isEnabled(),True)
         UsageService.setEnabled(False)
-        self.assertEquals(UsageService.isEnabled(),False)
+        self.assertEqual(UsageService.isEnabled(),False)
 
     def test_getSetApplication(self):
-        self.assertEquals(UsageService.getApplicationName(), "python")
+        self.assertEqual(UsageService.getApplicationName(), "python")
         UsageService.setApplicationName("python unit tests")
-        self.assertEquals(UsageService.getApplicationName(), "python unit tests")
+        self.assertEqual(UsageService.getApplicationName(), "python unit tests")
         UsageService.setApplicationName("python")
-        self.assertEquals(UsageService.getApplicationName(), "python")
+        self.assertEqual(UsageService.getApplicationName(), "python")
 
     def test_setInterval(self):
         UsageService.setEnabled(False)

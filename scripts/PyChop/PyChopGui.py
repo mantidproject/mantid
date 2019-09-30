@@ -27,8 +27,8 @@ from qtpy.QtCore import (QEventLoop, Qt)  # noqa
 from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu, QLabel,
                             QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
                             QTextEdit, QVBoxLayout, QWidget)  # noqa
-from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
-from MPLwidgets import NavigationToolbar2QT as NavigationToolbar
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider

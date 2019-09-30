@@ -30,11 +30,11 @@ std::string CENTRE("Centre");
 std::string LEFT("Left");
 
 void FilterByLogValue::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
@@ -88,7 +88,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   // Check that the log exists for the given input workspace
   std::string logname = getPropertyValue("LogName");
   try {
-    ITimeSeriesProperty *log =
+    auto *log =
         dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
     if (log == nullptr) {
       errors["LogName"] = "'" + logname + "' is not a time-series log.";
@@ -141,7 +141,7 @@ void FilterByLogValue::exec() {
   // Now make the splitter vector
   TimeSplitterType splitter;
   // This'll throw an exception if the log doesn't exist. That is good.
-  ITimeSeriesProperty *log =
+  auto *log =
       dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
   if (log) {
     if (PulseFilter) {

@@ -7,25 +7,21 @@
 #  This file is part of the mantid workbench.
 import unittest
 
-try:
-    from unittest import MagicMock, patch
-except ImportError:
-    from mock import MagicMock, patch
-
-from mantidqt.utils.qt.testing import GuiTest
-
+from mantid.py3compat.mock import MagicMock, patch
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figuremanager import FigureCanvasQTAgg, FigureManagerWorkbench
 
 
-class FigureManagerWorkbenchTest(GuiTest):
+@start_qapplication
+class FigureManagerWorkbenchTest(unittest.TestCase):
 
-    @patch("workbench.plotting.qappthreadcall.QAppThreadCall")
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_construction(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
         fig = MagicMock()
         canvas = FigureCanvasQTAgg(fig)
         fig_mgr = FigureManagerWorkbench(canvas, 1)
-        self.assertTrue(fig_mgr is not None)
+        self.assertNotEqual(fig_mgr, None)
 
 
 if __name__ == "__main__":

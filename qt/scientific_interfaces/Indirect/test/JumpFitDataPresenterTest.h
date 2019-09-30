@@ -92,6 +92,10 @@ public:
   MOCK_METHOD1(setResolutionWSSuffices, void(QStringList const &suffices));
   MOCK_METHOD1(setResolutionFBSuffices, void(QStringList const &suffices));
 
+  MOCK_CONST_METHOD0(isSampleWorkspaceSelectorVisible, bool());
+  MOCK_METHOD1(setSampleWorkspaceSelectorIndex,
+               void(QString const &workspaceName));
+
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
 

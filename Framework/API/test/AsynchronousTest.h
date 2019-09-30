@@ -11,7 +11,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/NObserver.h>
@@ -49,7 +49,7 @@ public:
     const std::string summary() const override { return "Test summary"; }
 
     void init() override {
-      declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      declareProperty(std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
     }
 

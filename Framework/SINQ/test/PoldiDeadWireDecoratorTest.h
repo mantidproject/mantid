@@ -73,7 +73,7 @@ public:
     PoldiDeadWireDecorator decorator(std::set<int>(), m_detector);
 
     TS_ASSERT_THROWS(decorator.setDeadWires(m_invalidDeadWires),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 };
 

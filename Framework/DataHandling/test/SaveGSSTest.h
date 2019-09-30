@@ -12,7 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/FileComparisonHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -308,7 +308,7 @@ private:
   std::unique_ptr<SaveGSS> setupSaveGSSAlg(const std::string &filePath,
                                            const std::string &wsName,
                                            const std::string &formatMode) {
-    auto saver = Kernel::make_unique<SaveGSS>();
+    auto saver = std::make_unique<SaveGSS>();
     saver->initialize();
     saver->setRethrows(true);
     // Set properties

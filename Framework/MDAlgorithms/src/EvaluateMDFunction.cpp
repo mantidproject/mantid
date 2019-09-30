@@ -46,16 +46,15 @@ const std::string EvaluateMDFunction::summary() const {
  */
 void EvaluateMDFunction::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "An input workspace that provides dimensions for the output.");
   declareProperty(
-      Kernel::make_unique<API::FunctionProperty>("Function", Direction::InOut),
+      std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

@@ -27,7 +27,7 @@
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -118,7 +118,6 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
       throw Kernel::Exception::FileError("Unable to parse File (" +
                                              descriptor.filename() + ")",
                                          e.displayText());
-
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse File:",
                                          descriptor.filename());
@@ -137,10 +136,10 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input xml file to load");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the Output workspace");
 
@@ -169,8 +168,9 @@ void LoadSpice2D::exec() {
 
   setInputPropertiesAsMemberProperties();
   setTimes();
+  const std::vector<std::string> tags_to_ignore{"Detector", "DetectorWing"};
   std::map<std::string, std::string> metadata =
-      m_xmlHandler.get_metadata("Detector");
+      m_xmlHandler.get_metadata(tags_to_ignore);
 
   setSansSpiceXmlFormatVersion(metadata);
   setWavelength(metadata);
@@ -196,7 +196,7 @@ void LoadSpice2D::exec() {
   // it tests if there is metadata tagged with the wing detector
   // if so, puts the detector in the right angle
   if (metadata.find("Motor_Positions/det_west_wing_rot") != metadata.end()) {
-    double angle = boost::lexical_cast<double>(
+    auto angle = boost::lexical_cast<double>(
         metadata["Motor_Positions/det_west_wing_rot"]);
     rotateDetector(-angle);
   }
@@ -282,7 +282,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     from_string<double>(m_dwavelength, s, std::dec);
 
     // 20160720: New wavelength will be a ratio
-    // HUGLY HACK! Comparing dates...
+    // UGLY HACK! Comparing dates...
     DateAndTime changingDate("2016-06-13 00:00:00");
     if (m_startTime >= changingDate) {
       g_log.debug() << "Using wavelength spread as a ratio" << '\n';
@@ -472,7 +472,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
                 << "\n";
 
   // The maximum value for the trapDiametersInUse is the trap in use
-  std::vector<double>::iterator trapDiameterInUseIt =
+  auto trapDiameterInUseIt =
       std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
   if (trapDiameterInUseIt != trapDiametersInUse.end())
     trapDiameterInUse = *trapDiameterInUseIt;

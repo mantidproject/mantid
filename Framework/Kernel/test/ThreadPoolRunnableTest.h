@@ -7,12 +7,13 @@
 #ifndef MANTID_KERNEL_THREADPOOLRUNNABLETEST_H_
 #define MANTID_KERNEL_THREADPOOLRUNNABLETEST_H_
 
-#include <MantidKernel/System.h>
-#include <MantidKernel/Timer.h>
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/System.h"
+#include "MantidKernel/ThreadPoolRunnable.h"
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/Timer.h"
 
-#include <MantidKernel/ThreadPoolRunnable.h>
-#include <MantidKernel/ThreadScheduler.h>
+#include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -21,7 +22,8 @@ int ThreadPoolRunnableTest_value;
 class ThreadPoolRunnableTest : public CxxTest::TestSuite {
 public:
   void test_constructor() {
-    TS_ASSERT_THROWS(new ThreadPoolRunnable(0, nullptr), std::invalid_argument);
+    TS_ASSERT_THROWS(std::make_unique<ThreadPoolRunnable>(0, nullptr),
+                     const std::invalid_argument &);
   }
 
   //=======================================================================================
@@ -30,10 +32,11 @@ public:
   };
 
   void test_run() {
-    ThreadPoolRunnable *tpr;
-    ThreadScheduler *sc = new ThreadSchedulerFIFO();
-    tpr = new ThreadPoolRunnable(0, sc);
-    sc->push(new SimpleTask());
+    std::unique_ptr<ThreadPoolRunnable> tpr;
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerFIFO>();
+    tpr = std ::make_unique<ThreadPoolRunnable>(0, sc.get());
+    sc->push(std::make_shared<SimpleTask>());
     TS_ASSERT_EQUALS(sc->size(), 1);
 
     // Run it
@@ -44,8 +47,6 @@ public:
     TS_ASSERT_EQUALS(ThreadPoolRunnableTest_value, 1234);
     // Nothing more in the queue.
     TS_ASSERT_EQUALS(sc->size(), 0);
-    delete tpr;
-    delete sc;
   }
 
   //=======================================================================================
@@ -59,13 +60,14 @@ public:
   };
 
   void test_run_throws() {
-    ThreadPoolRunnable *tpr;
-    ThreadScheduler *sc = new ThreadSchedulerFIFO();
-    tpr = new ThreadPoolRunnable(0, sc);
+    std::unique_ptr<ThreadPoolRunnable> tpr;
+    std::unique_ptr<ThreadScheduler> sc =
+        std::make_unique<ThreadSchedulerFIFO>();
+    tpr = std::make_unique<ThreadPoolRunnable>(0, sc.get());
 
     // Put 10 tasks in
     for (size_t i = 0; i < 10; i++)
-      sc->push(new TaskThatThrows());
+      sc->push(std::make_shared<TaskThatThrows>());
 
     // The task throws but the runnable just aborts instead
     ThreadPoolRunnableTest_value = 0;
@@ -81,9 +83,6 @@ public:
     std::runtime_error e = sc->getAbortException();
     std::string what = e.what();
     TS_ASSERT_EQUALS(what, "Test exception from TaskThatThrows.");
-
-    delete tpr;
-    delete sc;
   }
 };
 

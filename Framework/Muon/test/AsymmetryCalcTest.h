@@ -139,11 +139,11 @@ public:
     asymCalc.setPropertyValue("ForwardSpectra", "1");
     asymCalc.setPropertyValue("BackwardSpectra", "3");
     // Bad spectrum number for BackwardSpectra
-    TS_ASSERT_THROWS(asymCalc.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(asymCalc.execute(), const std::runtime_error &);
     asymCalc.setPropertyValue("BackwardSpectra", "1");
     asymCalc.setPropertyValue("ForwardSpectra", "3");
     // Bad spectrum number for ForwardSpectra
-    TS_ASSERT_THROWS(asymCalc.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(asymCalc.execute(), const std::runtime_error &);
   }
 
   /**

@@ -184,7 +184,7 @@ public:
     alg->setRethrows(true);
 
     alg->setProperty("InputWorkspace", createTestWorkspaceWithFoilChanger());
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     TS_ASSERT(!alg->isExecuted());
   }
 
@@ -194,7 +194,7 @@ public:
 
     alg->setProperty("InputWorkspace", createTestWorkspaceWithFoilChanger());
     alg->setPropertyValue("ComptonFunction", "name=Gaussian");
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     TS_ASSERT(!alg->isExecuted());
   }
 
@@ -205,7 +205,7 @@ public:
     alg->setProperty("InputWorkspace", createTestWorkspaceWithFoilChanger());
     alg->setPropertyValue("ComptonFunction",
                           "name=GaussianComptonProfile;name=Gaussian");
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
     TS_ASSERT(!alg->isExecuted());
   }
 

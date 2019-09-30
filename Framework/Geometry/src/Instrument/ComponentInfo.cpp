@@ -12,7 +12,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
+
 #include <Eigen/Geometry>
 #include <exception>
 #include <iterator>
@@ -222,6 +222,13 @@ Kernel::V3D ComponentInfo::samplePosition() const {
 bool ComponentInfo::hasSource() const { return m_componentInfo->hasSource(); }
 
 bool ComponentInfo::hasSample() const { return m_componentInfo->hasSample(); }
+
+bool ComponentInfo::hasDetectors(const size_t componentIndex) const {
+  if (isDetector(componentIndex))
+    return false;
+  const auto range = m_componentInfo->detectorRangeInSubtree(componentIndex);
+  return range.begin() < range.end();
+}
 
 size_t ComponentInfo::source() const { return m_componentInfo->source(); }
 

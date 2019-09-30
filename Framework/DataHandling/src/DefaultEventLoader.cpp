@@ -10,7 +10,6 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::Kernel;
 
@@ -39,11 +38,11 @@ void DefaultEventLoader::load(LoadEventNexus *alg, EventWorkspaceCollection &ws,
   size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
   if (loader.splitProcessing)
     numProg += bankNames.size() * 3; // 3 = second proc task
-  auto prog = Kernel::make_unique<API::Progress>(loader.alg, 0.3, 1.0, numProg);
+  auto prog = std::make_unique<API::Progress>(loader.alg, 0.3, 1.0, numProg);
 
   for (size_t i = bankRange.first; i < bankRange.second; i++) {
     if (bankNumEvents[i] > 0)
-      pool.schedule(new LoadBankFromDiskTask(
+      pool.schedule(std::make_shared<LoadBankFromDiskTask>(
           loader, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
           prog.get(), diskIOMutex, *scheduler, periodLog));
   }

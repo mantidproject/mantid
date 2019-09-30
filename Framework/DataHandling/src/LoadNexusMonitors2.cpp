@@ -125,18 +125,18 @@ bool isEventMonitor(::NeXus::File &file) {
 /// Initialization method.
 void LoadNexusMonitors2::init() {
   declareProperty(
-      Kernel::make_unique<API::FileProperty>("Filename", "",
-                                             API::FileProperty::Load, ".nxs"),
+      std::make_unique<API::FileProperty>("Filename", "",
+                                          API::FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
   declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+      std::make_unique<Kernel::PropertyWithValue<std::string>>(
           "NXentryName", "", Kernel::Direction::Input),
       "Optional: Name of the NXentry to load if it's not the default.");
 
@@ -188,6 +188,8 @@ void LoadNexusMonitors2::exec() {
       throw std::invalid_argument(
           m_filename + " does not contain an entry named " + m_top_entry_name);
     }
+    file.openGroup(m_top_entry_name, "NXentry"); // Open as will need to be
+    // open for subsequent operations
   }
   prog1.report();
 
@@ -538,9 +540,12 @@ size_t LoadNexusMonitors2::getMonitorInfo(::NeXus::File &file,
       string_map_t inner_entries = file.getEntries(); // get list of entries
       if (inner_entries.find("monitor_number") != inner_entries.end()) {
         // get monitor number from field in file
-        file.openData("monitor_number");
-        file.getData(&info.detNum);
-        file.closeData();
+        const auto detNum = NeXus::NeXusIOHelper::readNexusValue<int64_t>(
+            file, "monitor_number");
+        if (detNum > std::numeric_limits<detid_t>::max()) {
+          throw std::runtime_error("Monitor number too larger to represent");
+        }
+        info.detNum = static_cast<detid_t>(detNum);
       } else {
         // default creates it from monitor name
         Poco::Path monPath(entry_name);

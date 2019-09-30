@@ -22,7 +22,7 @@
 // lifetime policies.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <MantidKernel/DllConfig.h>
+#include "MantidKernel/DllConfig.h"
 #include <cassert>
 #include <cstdlib>
 #include <functional>

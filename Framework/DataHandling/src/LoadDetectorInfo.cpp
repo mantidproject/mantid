@@ -45,14 +45,14 @@ LoadDetectorInfo::LoadDetectorInfo()
 void LoadDetectorInfo::init() {
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "The name of the workspace to that the detector information "
       "will be loaded into.");
 
   const std::vector<std::string> exts{".dat", ".raw", ".sca", ".nxs"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
-                                        exts),
+      std::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
+                                     exts),
       "A **raw, dat, nxs** or **sca** file that contains information about the "
       "detectors in the "
       "workspace. The description of **dat** and **nxs** file format is "
@@ -198,7 +198,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
   auto &pmap = m_workspace->instrumentParameters();
   auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   for (int i = 0; i < numDets; ++i) {
-    detid_t detID = static_cast<detid_t>(iraw.udet[i]);
+    auto detID = static_cast<detid_t>(iraw.udet[i]);
     int code = iraw.code[i];
     try {
       size_t index = wsDetInfo.indexOf(detID);
@@ -259,7 +259,7 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
   auto &wsDetInfo = m_workspace->mutableDetectorInfo();
-  int numDets = static_cast<int>(detInfo.ids.size());
+  auto numDets = static_cast<int>(detInfo.ids.size());
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = detInfo.ids[i];
     int code = detInfo.codes[i];

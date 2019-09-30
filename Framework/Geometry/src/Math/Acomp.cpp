@@ -758,7 +758,7 @@ literals
   }
   // Doesn't work because literal map is a reference
   //  for_each(Comp.begin(),Comp.end(),
-  // std::bind2nd(std::mem_fun(&Acomp::getLiterals),literalMap));
+  // std::bind2nd(std::mem_fun(&Acomp::getLiterals), literalMap));
 }
 
 int Acomp::isSimple() const
@@ -836,8 +836,9 @@ i.e. one pass.
     Work.erase(uend, Work.end());
     Tmod.clear(); // erase all at the start
     // set PI status to 1
+    using std::placeholders::_1;
     for_each(Work.begin(), Work.end(),
-             std::bind2nd(std::mem_fun_ref(&BnId::setPI), 1));
+             std::bind(std::mem_fun_ref(&BnId::setPI), _1, 1));
 
     // Collect into pairs which have a difference of +/- one
     // object
@@ -951,8 +952,9 @@ It is set on exit (to the EPI)
     }
   }
   // Remove dead items from active list
+  using std::placeholders::_1;
   DNFactive.erase(remove_if(DNFactive.begin(), DNFactive.end(),
-                            std::bind2nd(std::less<int>(), 0)),
+                            std::bind(std::less<int>(), _1, 0)),
                   DNFactive.end());
 
   /// DEBUG PRINT
@@ -984,8 +986,8 @@ It is set on exit (to the EPI)
     cm++;
   }
 
-  const int Dsize(static_cast<int>(DNFactive.size()));
-  const int Psize(static_cast<int>(PIactive.size()));
+  const auto Dsize(static_cast<int>(DNFactive.size()));
+  const auto Psize(static_cast<int>(PIactive.size()));
   // icount == depth of search ie
   int vecI, di; // variable for later
   for (int Icount = 1; Icount < Psize; Icount++) {
@@ -1205,7 +1207,7 @@ the Base state.
 
   // Deal with case of a single object (then join
   // doesn't matter
-  int retJoin = static_cast<int>(Units.size() + Comp.size());
+  auto retJoin = static_cast<int>(Units.size() + Comp.size());
   if (retJoin != 1) // single unit is alway ok
     retJoin = 1 - Intersect;
 
@@ -1515,8 +1517,9 @@ ab -> a'+b'
 */
 {
   Intersect = 1 - Intersect;
+  using std::placeholders::_1;
   transform(Units.begin(), Units.end(), Units.begin(),
-            std::bind2nd(std::multiplies<int>(), -1));
+            std::bind(std::multiplies<int>(), _1, -1));
   sort(Units.begin(), Units.end()); /// Resort the list. use reverse?
 
   for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::complement));

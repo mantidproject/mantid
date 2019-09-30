@@ -7,6 +7,7 @@
 #ifndef MANTIDNEXUSGEOMETRY_PARSER_H_
 #define MANTIDNEXUSGEOMETRY_PARSER_H_
 
+#include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
 #include <string>
@@ -16,12 +17,14 @@ namespace Geometry {
 class Instrument;
 }
 namespace NexusGeometry {
-/** NexusGeometryParser : Responsible for parsing a nexus geometry file and
+
+namespace NexusGeometryParser {
+/** createInstrument : Responsible for parsing a nexus geometry file and
   creating an in-memory Mantid instrument.
 */
-namespace NexusGeometryParser {
 MANTID_NEXUSGEOMETRY_DLL std::unique_ptr<const Mantid::Geometry::Instrument>
-createInstrument(const std::string &fileName);
+createInstrument(const std::string &fileName,
+                 std::unique_ptr<AbstractLogger> logger);
 MANTID_NEXUSGEOMETRY_DLL std::string
 getMangledName(const std::string &fileName, const std::string &instName);
 } // namespace NexusGeometryParser

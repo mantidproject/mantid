@@ -57,13 +57,13 @@ const std::string CreateUserDefinedBackground::summary() const {
  * Initialize the algorithm's properties.
  */
 void CreateUserDefinedBackground::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input workspace containing data and background");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "BackgroundPoints", "", Direction::Input),
                   "Table containing user-defined background points");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputBackgroundWorkspace", "", Direction::Output),
                   "Workspace containing background to be subtracted");
 }

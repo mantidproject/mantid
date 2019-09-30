@@ -47,7 +47,7 @@ public:
         masker.setPropertyValue("OutputWorkspace", resultWorkspaceName));
 
     // Check that execution fails if XMin & XMax not set
-    TS_ASSERT_THROWS(masker.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(masker.execute(), const std::runtime_error &);
     TS_ASSERT(!masker.isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("XMin", "20.0"));

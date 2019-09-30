@@ -77,6 +77,7 @@ public:
     return getSpectrumWithoutInvalidation(index);
   }
   const EventList &getSpectrum(const size_t index) const override;
+  EventList *getSpectrumUnsafe(const size_t index);
 
   //------------------------------------------------------------
 
@@ -169,10 +170,10 @@ private:
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */
-  std::vector<EventList *> data;
+  std::vector<std::unique_ptr<EventList>> data;
 
   /// Container for the MRU lists of the event lists contained.
-  mutable EventWorkspaceMRU *mru;
+  mutable std::unique_ptr<EventWorkspaceMRU> mru;
 };
 
 /// shared pointer to the EventWorkspace class

@@ -15,9 +15,11 @@ import unittest
 from qtpy.QtWidgets import QMessageBox
 
 from mantid.api import AnalysisDataService as ADS
+from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from mantid.py3compat import mock
 from mantidqt.project.project import Project
+from mantidqt.utils.qt.testing import start_qapplication
 
 
 class FakeGlobalFigureManager(object):
@@ -29,6 +31,11 @@ def fake_window_finding_function():
     return []
 
 
+def _raise(exception):
+    raise exception
+
+
+@start_qapplication
 class ProjectTest(unittest.TestCase):
     def setUp(self):
         self.fgfm = FakeGlobalFigureManager()
@@ -97,7 +104,7 @@ class ProjectTest(unittest.TestCase):
 
     def test_offer_save_does_something_if_saved_is_false(self):
         self.project._offer_save_message_box = mock.MagicMock(return_value=QMessageBox.Yes)
-        self.project.save = mock.MagicMock()
+        self.project.save = mock.MagicMock(return_value=None)
 
         # Add something to the ads so __saved is set to false
         CreateSampleWorkspace(OutputWorkspace="ws1")
@@ -105,6 +112,15 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(self.project.offer_save(None), False)
         self.assertEqual(self.project.save.call_count, 1)
         self.assertEqual(self.project._offer_save_message_box.call_count, 1)
+
+    def test_offer_save_does_nothing_if_save_is_cancelled(self):
+        self.project._offer_save_message_box = mock.MagicMock(return_value=QMessageBox.Yes)
+        self.project.save = mock.MagicMock(return_value=True)
+
+        # Add something to the ads so __saved is set to false
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+
+        self.assertEqual(self.project.offer_save(None), True)
 
     def test_adding_to_ads_calls_any_change_handle(self):
         self.project.anyChangeHandle = mock.MagicMock()
@@ -160,6 +176,47 @@ class ProjectTest(unittest.TestCase):
         ADS.addToGroup("NewGroup", "ws3")
 
         self.assertEqual(1, self.project.anyChangeHandle.call_count)
+
+    def test_large_file_dialog_appears_for_large_file(self):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        self.project._get_project_size = mock.MagicMock(return_value=
+                                                        int(ConfigService.getString("projectSaving.warningSize")) + 1)
+        self.project._offer_large_size_confirmation = mock.MagicMock()
+        self.project._save()
+        self.assertEqual(self.project._offer_large_size_confirmation.call_count, 1)
+
+    def test_large_file_dialog_does_not_appear_for_small_file(self):
+        CreateSampleWorkspace(OutputWorkspace="ws1")
+        self.project._get_project_size = mock.MagicMock(return_value=
+                                                        int(ConfigService.getString("projectSaving.warningSize")) - 1)
+        self.project._offer_large_size_confirmation = mock.MagicMock()
+        self.project._save()
+        self.assertEqual(self.project._offer_large_size_confirmation.call_count, 0)
+
+    def test_is_loading_is_False_after_error_thrown_during_load(self):
+        with mock.patch.object(self.project, '_load_file_dialog', lambda: _raise(IOError)):
+            try:
+                self.project.load()
+            except IOError:
+                pass
+        self.assertFalse(self.project.is_loading)
+
+    def test_is_loading_is_False_after_None_returned_from_load_dialog(self):
+        # None is returned from the load dialog when a user clicks Cancel
+        with mock.patch.object(self.project, '_load_file_dialog', lambda: None):
+            try:
+                self.project.load()
+            except IOError:
+                pass
+        self.assertFalse(self.project.is_loading)
+
+    def test_is_saving_is_False_if_error_thrown_during_save(self):
+        with mock.patch.object(self.project, '_get_project_size', lambda x: _raise(IOError)):
+            try:
+                self.project._save()
+            except IOError:
+                pass
+        self.assertFalse(self.project.is_saving)
 
 
 if __name__ == "__main__":

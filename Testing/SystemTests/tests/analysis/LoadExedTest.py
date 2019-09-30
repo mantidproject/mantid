@@ -19,6 +19,6 @@ class LoadExedTest(systemtesting.MantidSystemTest):
         # check that it did create a workspace.
         self.assertTrue(ms.mtd.doesExist('test'))
         #check that it has the correct number of histograms
-        self.assertEquals(ms.mtd['test'].getNumberHistograms(),20400)
+        self.assertEqual(ms.mtd['test'].getNumberHistograms(),20400)
         #check that phi sample Log is correct
-        self.assertEquals(ms.mtd['test'].getRun().getLogData('phi').value,-6.000005)
+        self.assertEqual(ms.mtd['test'].getRun().getLogData('phi').value,-6.000005)

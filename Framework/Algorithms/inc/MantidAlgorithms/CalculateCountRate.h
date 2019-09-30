@@ -83,7 +83,6 @@ protected: // for testing, actually private
   void histogramEvents(const DataObjects::EventList &el,
                        std::mutex *spectraLocks);
 
-  void normalizeVisWs(int64_t wsIndex);
   void buildVisWSNormalization(std::vector<double> &normalization);
 
   /// should algo generate visualization VS

@@ -25,10 +25,10 @@ using namespace Geometry;
 using namespace Mantid::PhysicalConstants;
 
 void HRPDSlabCanAbsorption::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -158,13 +158,11 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption() {
   double sigma_s = getProperty("SampleScatteringXSection");      // in barns
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
+  if (sampleMaterial.totalScatterXSection() != 0.0) {
     if (rho == EMPTY_DBL())
       rho = sampleMaterial.numberDensity();
     if (sigma_s == EMPTY_DBL())
-      sigma_s =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
+      sigma_s = sampleMaterial.totalScatterXSection();
     if (sigma_atten == EMPTY_DBL())
       sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   } else // Save input in Sample with wrong atomic number and name

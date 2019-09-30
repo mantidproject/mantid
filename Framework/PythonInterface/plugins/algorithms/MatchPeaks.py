@@ -235,7 +235,7 @@ class MatchPeaks(PythonAlgorithm):
         @return          :: bin numbers of the peak positions
         """
 
-        fit_table_name = input_ws.getName() + '_epp'
+        fit_table_name = input_ws.name() + '_epp'
 
         if isinstance(input_ws, MatrixWorkspace):
             fit_table = FindEPP(InputWorkspace=input_ws, OutputWorkspace=fit_table_name)

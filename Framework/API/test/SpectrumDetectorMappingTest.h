@@ -28,7 +28,8 @@ public:
 
   void test_workspace_constructor() {
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws), std::invalid_argument);
+    TS_ASSERT_THROWS(SpectrumDetectorMapping map(ws),
+                     const std::invalid_argument &);
   }
 
   void test_workspace_constructor_fills_map() {
@@ -53,7 +54,7 @@ public:
   void test_vector_constructor_unequal_lengths() {
     TS_ASSERT_THROWS(SpectrumDetectorMapping(std::vector<specnum_t>(2),
                                              std::vector<detid_t>(1)),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void check_the_map(const SpectrumDetectorMapping &map) {
@@ -123,9 +124,9 @@ public:
     specnum_t specs[2];
     detid_t detids[2];
     TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr, detids, 10),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(SpectrumDetectorMapping(specs, nullptr, 10),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_array_constructor() {
@@ -155,9 +156,12 @@ public:
     SpectrumDetectorMapping map(ws);
     // The happy path is tested in the methods above. Just test invalid entry
     // here.
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1), std::out_of_range);
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(0), std::out_of_range);
-    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(-1), std::out_of_range);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(1),
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(0),
+                     const std::out_of_range &);
+    TS_ASSERT_THROWS(map.getDetectorIDsForSpectrumNo(-1),
+                     const std::out_of_range &);
   }
 };
 

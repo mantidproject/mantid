@@ -14,9 +14,9 @@ class CheckForSampleLogsTest(unittest.TestCase):
     def test_simple(self):
         w = simpleapi.Load('CNCS_7860_event.nxs')
         result = simpleapi.CheckForSampleLogs(w)
-        self.assertEquals(result, '')
+        self.assertEqual(result, '')
         result = simpleapi.CheckForSampleLogs(w, 'Phase1')
-        self.assertEquals(result, '')
+        self.assertEqual(result, '')
         result = simpleapi.CheckForSampleLogs(w, 'Phrase1')
         self.assertNotEquals(result, '')
 

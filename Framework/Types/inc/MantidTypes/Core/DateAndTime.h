@@ -7,7 +7,7 @@
 #ifndef MANTID_TYPES_DATE_AND_TIME_H
 #define MANTID_TYPES_DATE_AND_TIME_H
 
-#include <MantidTypes/DllConfig.h>
+#include "MantidTypes/DllConfig.h"
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
@@ -79,10 +79,14 @@ public:
   int nanoseconds() const;
   int64_t totalNanoseconds() const;
 
-  bool operator==(const DateAndTime &rhs) const;
+  inline bool operator==(const DateAndTime &rhs) const {
+    return _nanoseconds == rhs._nanoseconds;
+  }
   bool operator==(const boost::posix_time::ptime &rhs) const;
   bool operator!=(const DateAndTime &rhs) const;
-  bool operator<(const DateAndTime &rhs) const;
+  inline bool operator<(const DateAndTime &rhs) const {
+    return _nanoseconds < rhs._nanoseconds;
+  }
   bool operator<=(const DateAndTime &rhs) const;
   bool operator>(const DateAndTime &rhs) const;
   bool operator>=(const DateAndTime &rhs) const;

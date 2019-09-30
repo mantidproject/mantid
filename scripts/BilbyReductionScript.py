@@ -274,10 +274,10 @@ class RunBilbyReduction:
             ws_tranSam = mantid_api.LoadBBY(transm_file)
             ws_tranEmp = mantid_api.LoadBBY(ws_emp_file)  # empty beam for transmission
             transm_mask = current_file["mask_transmission"] + '.xml'
-            ws_tranMsk = mantid_api.LoadMask('Bilby', transm_mask)
+            ws_tranMsk = mantid_api.LoadMask('BILBY', transm_mask)
 
             sam_mask_file = current_file["mask"] + '.xml'
-            ws_samMsk = mantid_api.LoadMask('Bilby', sam_mask_file)
+            ws_samMsk = mantid_api.LoadMask('BILBY', sam_mask_file)
 
             # scaling: attenuation
             att_pos = float(ws_tranSam.run().getProperty("att_pos").value)

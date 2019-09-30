@@ -127,11 +127,11 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
   declareProperty(
@@ -174,7 +174,7 @@ void CompareWorkspaces::init() {
 
   declareProperty("Result", false, Direction::Output);
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
@@ -266,7 +266,7 @@ void CompareWorkspaces::processGroups(
     boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
 
   // Check their sizes
-  const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
+  const auto totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
   if (groupOne->getNumberOfEntries() != groupTwo->getNumberOfEntries()) {
     recordMismatch("GroupWorkspaces size mismatch.");
     return;
@@ -411,12 +411,12 @@ void CompareWorkspaces::doComparison() {
   if (ews1 && ews2) {
     // we have to create the progress before the call to compareEventWorkspaces,
     // because it uses the m_progress and it will segfault if not created
-    m_progress = make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
+    m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
     // Compare event lists to see whether 2 event workspaces match each other
     if (!compareEventWorkspaces(*ews1, *ews2))
       return;
   } else {
-    m_progress = make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
+    m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
   }
 
   // ==============================================================================
@@ -753,7 +753,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     // Don't check spectra axis as that just takes it values from the ISpectrum
     // (see checkSpectraMap)
     if (ax1->isNumeric() && ax2->isNumeric()) {
-      const NumericAxis *na1 = static_cast<const NumericAxis *>(ax1);
+      const auto *na1 = static_cast<const NumericAxis *>(ax1);
       const double tolerance = getProperty("Tolerance");
       if (!na1->equalWithinTolerance(*ax2, tolerance)) {
         recordMismatch(axis_name + " values mismatch");
@@ -873,7 +873,7 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
 /// @retval false The masking does not match
 bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
                                      API::MatrixWorkspace_const_sptr ws2) {
-  const int numHists = static_cast<int>(ws1->getNumberHistograms());
+  const auto numHists = static_cast<int>(ws1->getNumberHistograms());
 
   for (int i = 0; i < numHists; ++i) {
     const bool ws1_masks = ws1->hasMaskedBins(i);

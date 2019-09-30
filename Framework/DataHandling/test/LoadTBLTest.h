@@ -363,7 +363,7 @@ public:
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", m_wsName));
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
 
     cleanupafterwards();
   }
@@ -389,7 +389,7 @@ public:
     m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", m_wsName));
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     cleanupafterwards();
   }
 

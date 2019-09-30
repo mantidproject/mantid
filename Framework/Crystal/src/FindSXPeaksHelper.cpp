@@ -12,7 +12,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/graph/adjacency_list.hpp>
@@ -307,12 +307,12 @@ PeakFindingStrategy::getBounds(const HistogramData::HistogramX &x) const {
   auto lowit = (m_minValue == EMPTY_DBL())
                    ? x.begin()
                    : std::lower_bound(x.begin(), x.end(), m_minValue);
-
+  using std::placeholders::_1;
   auto highit =
       (m_maxValue == EMPTY_DBL())
           ? x.end()
           : std::find_if(lowit, x.end(),
-                         std::bind2nd(std::greater<double>(), m_maxValue));
+                         std::bind(std::greater<double>(), _1, m_maxValue));
 
   return std::make_pair(lowit, highit);
 }
@@ -475,7 +475,7 @@ std::vector<std::unique_ptr<PeakContainer>> AllPeaksStrategy::getAllPeaks(
     if (!isRecording && !isAboveThreshold) {
       continue;
     } else if (!isRecording && isAboveThreshold) {
-      currentPeak = Mantid::Kernel::make_unique<PeakContainer>(y);
+      currentPeak = std::make_unique<PeakContainer>(y);
       currentPeak->startRecord(it);
       isRecording = true;
     } else if (isRecording && !isAboveThreshold) {

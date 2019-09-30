@@ -850,7 +850,7 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS(dE.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
   }
 
   void testDeltaE_fromTOF() {
@@ -867,7 +867,7 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
   }
   void testDERange() {
     std::vector<double> sample, rezult;
@@ -948,7 +948,7 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS(dEk.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
   }
 
   void testDeltaEk_fromTOF() {
@@ -965,7 +965,7 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS(dEk.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
   }
   void testDE_kRange() {
     std::vector<double> sample, rezult;
@@ -1046,7 +1046,7 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
   }
 
   void testDeltaEf_fromTOF() {
@@ -1063,7 +1063,7 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
   }
 
   void testDE_fRange() {
@@ -1407,11 +1407,11 @@ public:
   }
 
   void test_that_singleToTOF_throws_for_the_Degrees_unit() {
-    TS_ASSERT_THROWS(degrees.singleToTOF(1.0), std::runtime_error);
+    TS_ASSERT_THROWS(degrees.singleToTOF(1.0), const std::runtime_error &);
   }
 
   void test_that_singleFromTOF_throws_for_the_Degrees_unit() {
-    TS_ASSERT_THROWS(degrees.singleFromTOF(1.0), std::runtime_error);
+    TS_ASSERT_THROWS(degrees.singleFromTOF(1.0), const std::runtime_error &);
   }
 
   //----------------------------------------------------------------------
@@ -1433,11 +1433,12 @@ public:
   }
 
   void test_that_singleToTOF_throws_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_THROWS(temperature.singleToTOF(1.0), std::runtime_error);
+    TS_ASSERT_THROWS(temperature.singleToTOF(1.0), const std::runtime_error &);
   }
 
   void test_that_singleFromTOF_throws_for_the_TemperatureKelvin_unit() {
-    TS_ASSERT_THROWS(temperature.singleFromTOF(1.0), std::runtime_error);
+    TS_ASSERT_THROWS(temperature.singleFromTOF(1.0),
+                     const std::runtime_error &);
   }
 
   //----------------------------------------------------------------------

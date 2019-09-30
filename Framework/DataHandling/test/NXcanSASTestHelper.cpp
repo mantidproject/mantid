@@ -192,12 +192,12 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   // number of histograms.
   if (ws->getAxis(1)->length() != ws->getNumberHistograms()) {
     auto oldAxis = ws->getAxis(1);
-    auto const newAxis =
-        new Mantid::API::NumericAxis(ws->getNumberHistograms());
+    auto newAxis =
+        std::make_unique<Mantid::API::NumericAxis>(ws->getNumberHistograms());
     for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
       newAxis->setValue(index, oldAxis->getValue(index));
     }
-    ws->replaceAxis(1, newAxis);
+    ws->replaceAxis(1, std::move(newAxis));
   }
 
   ws->getAxis(1)->unit() =

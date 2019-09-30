@@ -140,9 +140,9 @@ class NotebookBuilderTest : public CxxTest::TestSuite {
     }
 
     void init() override {
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
     }
     void exec() override {

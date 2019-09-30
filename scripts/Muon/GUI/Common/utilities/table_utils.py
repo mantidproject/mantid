@@ -8,13 +8,17 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 from functools import wraps
-from qtpy import QtWidgets, QtCore
-
+import sys
+from qtpy import QtWidgets, QtCore, QtGui
 
 """
 This module contains the methods for
 adding information to tables.
 """
+
+
+def default_validator(_text):
+    return True
 
 
 class ValidatedTableItem(QtWidgets.QTableWidgetItem):
@@ -55,10 +59,6 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
 
         return wrapper
 
-    @staticmethod
-    def default_validator(_text):
-        return True
-
     def __init__(self, validator=default_validator):
         """
         :param validator: A predicate function (returns True/False) taking a single string as argument
@@ -70,6 +70,10 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
     def validator(self, text):
         return self._validator(text)
 
+    def set_validator(self, validator):
+        self._validator = validator
+        self._modify_setData()
+
     def _modify_setData(self):
         """
         Modify the setData method.
@@ -77,10 +81,10 @@ class ValidatedTableItem(QtWidgets.QTableWidgetItem):
         setattr(self, "setData", self.validator_before_set(self.setData, self.validator))
 
 
-def setRowName(table, row, name):
+def setRowName(table, row, name, col=0):
     text = QtWidgets.QTableWidgetItem((name))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
-    table.setItem(row, 0, text)
+    table.setItem(row, col, text)
 
 
 def addComboToTable(table,row,options,col=1):
@@ -90,10 +94,11 @@ def addComboToTable(table,row,options,col=1):
     return combo
 
 
-def addDoubleToTable(table,value,row,col=1):
-    numberWidget = QtWidgets.QTableWidgetItem(str(value))
-    table.setItem(row,col, numberWidget)
-    return numberWidget
+def addDoubleToTable(table,value,row,col=1, minimum=0.0):
+    number_widget = QtWidgets.QLineEdit(str(value))
+    number_widget.setValidator(QtGui.QDoubleValidator(minimum, sys.float_info.max, 3))
+    table.setCellWidget(row,col, number_widget)
+    return number_widget
 
 
 def addCheckBoxToTable(table,state,row,col=1):
@@ -105,6 +110,20 @@ def addCheckBoxToTable(table,state,row,col=1):
         box.setCheckState(QtCore.Qt.Unchecked)
 
     table.setItem(row,col, box)
+    return box
+
+
+def addCheckBoxWidgetToTable(table,state,row,col=1):
+    check_box_widget = QtWidgets.QWidget()
+    layout = QtWidgets.QHBoxLayout(check_box_widget)
+    layout.setAlignment(QtCore.Qt.AlignCenter)
+    layout.setContentsMargins(0, 0, 0, 0)
+    box = QtWidgets.QCheckBox()
+    box.setChecked(state)
+
+    layout.addWidget(box)
+
+    table.setCellWidget(row,col, check_box_widget)
     return box
 
 

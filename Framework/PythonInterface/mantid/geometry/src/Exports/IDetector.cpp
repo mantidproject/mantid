@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/IDetector.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -17,6 +17,7 @@ GET_POINTER_SPECIALIZATION(IDetector)
 
 void export_IDetector() {
   register_ptr_to_python<boost::shared_ptr<IDetector>>();
+  register_ptr_to_python<boost::shared_ptr<const IDetector>>();
 
   class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector",
                                                               no_init)

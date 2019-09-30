@@ -33,7 +33,7 @@ EQSANSTofStructure::EQSANSTofStructure()
       low_tof_cut(0.), high_tof_cut(0.) {}
 
 void EQSANSTofStructure::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");

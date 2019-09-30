@@ -220,7 +220,7 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
   // get the size of the file in bytes and reset the handle back to the
   // beginning
   handle.seekg(0, std::ios::end);
-  const size_t filesize = static_cast<size_t>(handle.tellg());
+  const auto filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
   if (filesize % objSize == 0)
@@ -256,25 +256,25 @@ void LoadEventPreNexus2::init() {
   // which files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
-      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
-                                        eventExts),
+      std::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                     eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS + NUM_EXT);
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
-                                        FileProperty::OptionalLoad, ".dat"),
+      std::make_unique<FileProperty>(MAP_PARAM, "", FileProperty::OptionalLoad,
+                                     ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // which pixels to load
-  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
+  declareProperty(std::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -289,7 +289,7 @@ void LoadEventPreNexus2::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+  setPropertySettings("TotalChunks", std::make_unique<VisibleWhenProperty>(
                                          "ChunkNumber", IS_NOT_DEFAULT));
 
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
@@ -302,13 +302,13 @@ void LoadEventPreNexus2::init() {
                   "  Parallel: Use all available cores.");
 
   // the output workspace name
-  declareProperty(Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IEventWorkspace>>(
                       OUT_PARAM, "", Direction::Output),
                   "The name of the workspace that will be created, filled "
                   "with the read-in "
                   "data and stored in the [[Analysis Data Service]].");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "EventNumberWorkspace", "", Direction::Output,
                       PropertyMode::Optional),
                   "Workspace with number of events per pulse");
@@ -351,7 +351,7 @@ void LoadEventPreNexus2::exec() {
     throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
   }
 
-  prog = make_unique<Progress>(this, 0.0, 1.0, 100);
+  prog = std::make_unique<Progress>(this, 0.0, 1.0, 100);
 
   // b. what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
@@ -864,7 +864,7 @@ void LoadEventPreNexus2::procEvents(
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = workspace->getSpectrum(wi);
@@ -976,7 +976,7 @@ void LoadEventPreNexus2::procEventsLinear(
   // Starting pulse time
   DateAndTime pulsetime;
   int64_t pulse_i = 0;
-  int64_t numPulses = static_cast<int64_t>(num_pulses);
+  auto numPulses = static_cast<int64_t>(num_pulses);
   if (event_indices.size() < num_pulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -1231,13 +1231,14 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
 
   // Open the file; will throw if there is any problem
   BinaryFile<PixelType> pixelmapFile(filename);
-  PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
+  auto max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
   this->pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
+  using std::placeholders::_1;
   if (std::find_if(pixelmap.begin(), pixelmap.end(),
-                   std::bind2nd(std::greater<PixelType>(), max_pid)) !=
+                   std::bind(std::greater<PixelType>(), _1, max_pid)) !=
       pixelmap.end()) {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading "
                         "without mapping file");

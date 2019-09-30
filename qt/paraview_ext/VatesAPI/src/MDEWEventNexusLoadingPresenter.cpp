@@ -54,7 +54,7 @@ bool MDEWEventNexusLoadingPresenter::canReadFile() const {
     return false;
   }
 
-  auto file = Kernel::make_unique<::NeXus::File>(this->m_filename);
+  auto file = std::make_unique<::NeXus::File>(this->m_filename);
   // MDEventWorkspace file has a different name for the entry
   try {
     file->openGroup("MDEventWorkspace", "NXentry");

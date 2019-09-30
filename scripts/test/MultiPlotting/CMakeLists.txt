@@ -7,6 +7,7 @@ set(TEST_PY_FILES
     QuickEditWidget_test.py
     MultiPlottingContext_test.py
     MultiPlotWidget_test.py
+    SubplotADSObserver_test.py
     Subplot_test.py
     SubPlotContext_test.py
     Gridspec_test.py

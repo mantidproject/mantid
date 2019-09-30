@@ -27,7 +27,7 @@ public:
   void testNameValueConstructor() {
     RectangularDetector q("Name");
     TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    TS_ASSERT_THROWS(q[0], const std::runtime_error &);
 
     TS_ASSERT_EQUALS(q.getName(), "Name");
     TS_ASSERT(!q.getParent());
@@ -47,7 +47,7 @@ public:
 
     TS_ASSERT_EQUALS(q->getName(), "Child");
     TS_ASSERT_EQUALS(q->nelements(), 0);
-    TS_ASSERT_THROWS((*q)[0], std::runtime_error);
+    TS_ASSERT_THROWS((*q)[0], const std::runtime_error &);
     // check the parent
     TS_ASSERT(q->getParent());
     TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
@@ -114,10 +114,10 @@ public:
     TS_ASSERT_EQUALS(det->ysize(), 200.0);
 
     // Go out of bounds
-    TS_ASSERT_THROWS(det->getAtXY(-1, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXY(0, -1), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXY(100, 0), std::runtime_error);
-    TS_ASSERT_THROWS(det->getAtXY(0, 205), std::runtime_error);
+    TS_ASSERT_THROWS(det->getAtXY(-1, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXY(0, -1), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXY(100, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(det->getAtXY(0, 205), const std::runtime_error &);
 
     // Check some ids
     TS_ASSERT_EQUALS(det->getAtXY(0, 0)->getID() - 1000000, 0);

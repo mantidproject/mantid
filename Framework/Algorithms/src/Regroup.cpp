@@ -41,15 +41,15 @@ void Regroup::init() {
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<API::HistogramValidator>();
   wsVal->add<API::CommonBinsValidator>();
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsVal),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of regrouping.");
 
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "Params", boost::make_shared<RebinParamsValidator>()),
       "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }
@@ -65,7 +65,7 @@ void Regroup::exec() {
 
   const bool dist = inputW->isDistribution();
 
-  const int histnumber = static_cast<int>(inputW->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inputW->getNumberHistograms());
   HistogramData::BinEdges XValues_new(0);
   auto &XValues_old = inputW->x(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
@@ -185,13 +185,14 @@ int Regroup::newAxis(const std::vector<double> &params,
                      std::vector<int> &xoldIndex) {
   double xcurr, xs;
   int ibound(2), istep(1), inew(0);
-  int ibounds = static_cast<int>(
+  auto ibounds = static_cast<int>(
       params.size()); // highest index in params array containing a bin boundary
   int isteps = ibounds - 1; // highest index in params array containing a step
 
   xcurr = params[0];
+  using std::placeholders::_1;
   auto iup = std::find_if(xold.cbegin(), xold.cend(),
-                          std::bind2nd(std::greater_equal<double>(), xcurr));
+                          std::bind(std::greater_equal<double>(), _1, xcurr));
   if (iup != xold.end()) {
     xcurr = *iup;
     xnew.push_back(xcurr);
@@ -211,7 +212,7 @@ int Regroup::newAxis(const std::vector<double> &params,
 
     // find nearest x_i that is >= xcurr
     iup = std::find_if(xold.begin(), xold.end(),
-                       std::bind2nd(std::greater_equal<double>(), xcurr + xs));
+                       std::bind(std::greater_equal<double>(), _1, xcurr + xs));
     if (iup != xold.end()) {
       if (*iup <= params[ibound]) {
         xcurr = *iup;

@@ -22,6 +22,7 @@
 #include "Fit.h"
 #include "LogisticFit.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 #include "Matrix.h"
 #include "MultiPeakFit.h"
 #include "MyParser.h"
@@ -29,7 +30,6 @@
 #include "PluginFit.h"
 #include "PolynomialFit.h"
 #include "SigmoidalFit.h"
-#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QCloseEvent>
 #include <QComboBox>

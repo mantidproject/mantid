@@ -12,7 +12,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
@@ -98,7 +98,7 @@ void vtkMDHexFactory::doCreate(
   // True for boxes that we will use
   // We do not use vector<bool> here because of the parallelization below
   // Simultaneous access to different elements of vector<bool> is not safe
-  auto useBox = Mantid::Kernel::make_unique<bool[]>(numBoxes);
+  auto useBox = std::make_unique<bool[]>(numBoxes);
   memset(useBox.get(), 0, sizeof(bool) * numBoxes);
 
   // Create the data set (will outlive this object - output of create)
@@ -214,7 +214,7 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
     if (nd > 3) {
       // Slice from >3D down to 3D
       this->slice = true;
-      this->sliceMask = Mantid::Kernel::make_unique<bool[]>(nd);
+      this->sliceMask = std::make_unique<bool[]>(nd);
       this->sliceImplicitFunction = boost::make_shared<MDImplicitFunction>();
 
       // Make the mask of dimensions

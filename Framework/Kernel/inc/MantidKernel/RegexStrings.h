@@ -26,8 +26,6 @@ MANTID_KERNEL_DLL int StrComp(const std::string &, const boost::regex &, T &,
                               const int = 0);
 
 /// Find is a pattern matches
-MANTID_KERNEL_DLL int StrLook(const char *, const boost::regex &);
-/// Find is a pattern matches
 MANTID_KERNEL_DLL int StrLook(const std::string &, const boost::regex &);
 
 /// Split  a line into component parts
@@ -53,10 +51,6 @@ int StrFullCut(std::string &, const boost::regex &, T &, const int = -1);
 /// Cut out the searched section and returns component
 template <typename T>
 int StrFullCut(std::string &, const boost::regex &, std::vector<T> &);
-
-/// Extract a section from a string
-MANTID_KERNEL_DLL int StrRemove(std::string &, std::string &,
-                                const boost::regex &);
 
 /// Find a compmonent in a Regex in a file
 template <typename T>

@@ -74,9 +74,9 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
         self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
         x_axis = out_ws.readX(0)
-        self.assertEquals(x_axis[0], bands[0])
-        self.assertEquals(x_axis[-1], bands[-1])
-        self.assertEquals(out_ws.readY(0)[0], 1.0)
+        self.assertEqual(x_axis[0], bands[0])
+        self.assertEqual(x_axis[-1], bands[-1])
+        self.assertEqual(out_ws.readY(0)[0], 1.0)
         
     def test_execute_multiple_bands_no_solid_angle(self):
         alg = AlgorithmManager.create("DetectorFloodWeighting")
@@ -96,9 +96,9 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
         self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
         x_axis = out_ws.readX(0)
-        self.assertEquals(x_axis[0], bands[0])
-        self.assertEquals(x_axis[-1], bands[-1])
-        self.assertEquals(out_ws.readY(0)[0], 1.0)
+        self.assertEqual(x_axis[0], bands[0])
+        self.assertEqual(x_axis[-1], bands[-1])
+        self.assertEqual(out_ws.readY(0)[0], 1.0)
 
     def test_execute_multiple_bands_no_solid_angle_with_transmission(self):
         alg = AlgorithmManager.create("DetectorFloodWeighting")
@@ -119,9 +119,9 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         self.assertEqual("Wavelength", out_ws.getAxis(0).getUnit().unitID())
         self.assertEqual(in_ws.getNumberHistograms(), out_ws.getNumberHistograms(), msg="Number of histograms should be unchanged.")
         x_axis = out_ws.readX(0)
-        self.assertEquals(x_axis[0], bands[0])
-        self.assertEquals(x_axis[-1], bands[-1])
-        self.assertEquals(out_ws.readY(0)[0], 1.0)
+        self.assertEqual(x_axis[0], bands[0])
+        self.assertEqual(x_axis[-1], bands[-1])
+        self.assertEqual(out_ws.readY(0)[0], 1.0)
 
 
     def test_execute_single_with_solid_angle(self):

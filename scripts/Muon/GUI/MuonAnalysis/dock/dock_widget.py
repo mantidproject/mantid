@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 from Muon.GUI.Common.context_example.context_example_widget import ContextExampleWidget
 from Muon.GUI.Common.dummy.dummy_widget import DummyWidget
@@ -16,7 +16,7 @@ from Muon.GUI.Common.dock.dock_view import DockView
 from Muon.GUI.Common.muon_context.muon_context import *
 
 
-class DockWidget(QtGui.QWidget):
+class DockWidget(QtWidgets.QWidget):
 
     """
     This is a special case of the widget class structure.
@@ -30,7 +30,7 @@ class DockWidget(QtGui.QWidget):
     def __init__(self, context, parent=None):
         super(DockWidget, self).__init__(parent)
 
-        self.dockWidget = QtGui.QWidget()
+        self.dockWidget = QtWidgets.QWidget()
 
         self.dock_view = DockView(self)
 
@@ -51,7 +51,7 @@ class DockWidget(QtGui.QWidget):
         self.dock_view.makeTabs()
         self.dock_view.keepDocksOpen()
 
-        QHbox = QtGui.QHBoxLayout()
+        QHbox = QtWidgets.QHBoxLayout()
         QHbox.addWidget(self.dock_view)
 
         self.dockWidget.setLayout(QHbox)

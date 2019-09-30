@@ -38,10 +38,10 @@ using namespace HistogramData;
 void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
 
@@ -329,7 +329,7 @@ MatrixWorkspace_sptr
 ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
                              const double &factor, const double &power) {
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
                                                // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
@@ -451,7 +451,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   using namespace Geometry;
 
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   Kernel::Unit_const_sptr outputUnit = m_outputUnit;
@@ -650,7 +650,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
  */
 void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
-  bool isInputEvents = static_cast<bool>(eventWS);
+  auto isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
   if (WS->isCommonBins() && !isInputEvents) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
@@ -664,7 +664,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     }
   } else {
     // either events or ragged boundaries
-    int numberOfSpectra_i = static_cast<int>(numberOfSpectra);
+    auto numberOfSpectra_i = static_cast<int>(numberOfSpectra);
     PARALLEL_FOR_IF(Kernel::threadSafe(*WS))
     for (int j = 0; j < numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
@@ -729,13 +729,13 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 
     result = create<MatrixWorkspace>(*workspace, BinEdges(bins));
 
-    for (size_t i = 0; i < numSpec; ++i) {
-      auto &X = workspace->x(i);
-      auto &Y = workspace->y(i);
-      auto &E = workspace->e(i);
-      result->mutableX(i).assign(X.begin() + first, X.end());
-      result->mutableY(i).assign(Y.begin() + first, Y.end());
-      result->mutableE(i).assign(E.begin() + first, E.end());
+    for (size_t wsIndex = 0; wsIndex < numSpec; ++wsIndex) {
+      auto &X = workspace->x(wsIndex);
+      auto &Y = workspace->y(wsIndex);
+      auto &E = workspace->e(wsIndex);
+      result->mutableX(wsIndex).assign(X.begin() + first, X.end());
+      result->mutableY(wsIndex).assign(Y.begin() + first, Y.end());
+      result->mutableE(wsIndex).assign(E.begin() + first, E.end());
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a

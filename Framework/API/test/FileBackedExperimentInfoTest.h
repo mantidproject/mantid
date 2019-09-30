@@ -98,32 +98,6 @@ public:
     TS_ASSERT(pmap.size() > 0);
   }
 
-  void test_cacheDetectorGroupings() {
-    auto fileBacked = createTestObject();
-
-    std::set<Mantid::detid_t> group{1, 2};
-    Mantid::det2group_map mapping;
-    mapping.emplace(1, group);
-    fileBacked->cacheDetectorGroupings(mapping);
-  }
-
-  void test_ModeratorModelMethods() {
-    auto fileBacked = createTestObject();
-    ModeratorModel *source = new FakeSource;
-    TS_ASSERT_THROWS_NOTHING(fileBacked->setModeratorModel(source));
-    const ModeratorModel &fetched = fileBacked->moderatorModel();
-    const ModeratorModel &constInput =
-        const_cast<const Mantid::API::ModeratorModel &>(*source);
-    TS_ASSERT_EQUALS(&fetched, &constInput);
-  }
-
-  void test_chopperModelMethods() {
-    auto fileBacked = createTestObject();
-
-    TS_ASSERT_THROWS_NOTHING(fileBacked->setChopperModel(new FakeChopper));
-    TS_ASSERT_THROWS_NOTHING(fileBacked->chopperModel(0));
-  }
-
   void test_sample() {
     auto fileBacked = createTestObject();
 
@@ -167,7 +141,7 @@ public:
   void test_getEFixed() {
     auto fileBacked = createTestObject();
 
-    TS_ASSERT_THROWS(fileBacked->getEFixed(10100), std::runtime_error);
+    TS_ASSERT_THROWS(fileBacked->getEFixed(10100), const std::runtime_error &);
   }
 
   void test_setEFixed() {
@@ -183,7 +157,7 @@ public:
     // Create the file backed experiment info, shouldn't be loaded yet
     FileBackedExperimentInfo fileBacked(m_filename, "/not/right/path");
 
-    TS_ASSERT_THROWS(fileBacked.toString(), std::runtime_error);
+    TS_ASSERT_THROWS(fileBacked.toString(), const std::runtime_error &);
   }
 
 private:

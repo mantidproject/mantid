@@ -53,15 +53,15 @@ const std::string WienerSmooth::summary() const {
 /** Initialize the algorithm's properties.
  */
 void WienerSmooth::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
                   "An input workspace.");
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
+      std::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
       "Workspace indices for spectra to process. "
       "If empty smooth all spectra.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 }
 
@@ -97,7 +97,7 @@ void WienerSmooth::exec() {
   const size_t nOutputSpectra = wsIndexList.size();
 
   // smooth the first spectrum to find out the output blocksize
-  size_t wsIndex = static_cast<size_t>(wsIndexList.front());
+  auto wsIndex = static_cast<size_t>(wsIndexList.front());
   auto first = smoothSingleSpectrum(inputWS, wsIndex);
 
   // create full output workspace by copying all settings from tinputWS
@@ -109,13 +109,13 @@ void WienerSmooth::exec() {
   // not possible
   // at he moment and as it turned out not straight-forward to implement
   auto inAxis = inputWS->getAxis(1);
-  auto outAxis = inAxis->clone(nOutputSpectra, outputWS.get());
-  outputWS->replaceAxis(1, outAxis);
+  auto outAxis =
+      std::unique_ptr<API::Axis>(inAxis->clone(nOutputSpectra, outputWS.get()));
 
   bool isSpectra = outAxis->isSpectra();
   bool isNumeric = outAxis->isNumeric();
   auto inTextAxis = dynamic_cast<API::TextAxis *>(inAxis);
-  auto outTextAxis = dynamic_cast<API::TextAxis *>(outAxis);
+  auto outTextAxis = dynamic_cast<API::TextAxis *>(outAxis.get());
 
   // Initialise the progress reporting object
   API::Progress progress(this, 0.0, 1.0, nOutputSpectra);
@@ -141,7 +141,7 @@ void WienerSmooth::exec() {
     }
     progress.report();
   }
-
+  outputWS->replaceAxis(1, std::move(outAxis));
   // set the output
   setProperty("OutputWorkspace", outputWS);
 }
@@ -300,7 +300,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     }
     double cd2 = log(cd1);
     wf[i] = cd1 / (1.0 + cd1);
-    double j = static_cast<double>(i + 1);
+    auto j = static_cast<double>(i + 1);
     xx += j * j;
     xy += j * cd2;
     ym += cd2;
@@ -311,7 +311,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     g_log.debug() << "Noise start index " << i0 << '\n';
 
     // high frequency filter values: smooth decreasing function
-    double ri0f = static_cast<double>(i0 + 1);
+    auto ri0f = static_cast<double>(i0 + 1);
     double xm = (1.0 + ri0f) / 2;
     ym /= ri0f;
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
@@ -326,7 +326,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
       g_log.warning() << "Failed to build Wiener filter: no smoothing.\n";
       ri1 = static_cast<double>(i0);
     }
-    size_t i1 = static_cast<size_t>(ri1);
+    auto i1 = static_cast<size_t>(ri1);
     if (i1 > n2)
       i1 = n2;
     for (size_t i = i0; i < i1; ++i) {

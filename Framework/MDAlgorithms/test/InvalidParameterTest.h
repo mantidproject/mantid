@@ -50,7 +50,7 @@ public:
     InvalidParameter invalidParam;
     TSM_ASSERT_THROWS("Should have thrown runtime_error exception as it is not "
                       "possible to represent and invalid parameter in xml.",
-                      invalidParam.toXMLString(), std::runtime_error);
+                      invalidParam.toXMLString(), const std::runtime_error &);
   }
 };
 

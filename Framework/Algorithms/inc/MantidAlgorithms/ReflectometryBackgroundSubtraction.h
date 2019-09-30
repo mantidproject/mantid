@@ -26,11 +26,15 @@ public:
   const std::string summary() const override;
 
 private:
-  void calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
-                                          std::vector<specnum_t> spectraList);
+  void
+  calculateAverageSpectrumBackground(API::MatrixWorkspace_sptr inputWS,
+                                     const std::vector<specnum_t> &spectraList);
   void calculatePolynomialBackground(API::MatrixWorkspace_sptr inputWS,
-                                     std::vector<double> spectrumRanges);
-  std::vector<double> findSpectrumRanges(std::vector<specnum_t> spectraList);
+                                     const std::vector<double> &spectrumRanges);
+  std::vector<double>
+  findSpectrumRanges(const std::vector<specnum_t> &spectraList);
+  void calculatePixelBackground(API::MatrixWorkspace_sptr inputWS,
+                                const std::vector<double> &indexRanges);
 
   /** Overridden Algorithm methods **/
 

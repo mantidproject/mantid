@@ -53,7 +53,7 @@ public:
     sort.initialize();
     // Not an event workspace
     TS_ASSERT_THROWS(sort.setPropertyValue("InputWorkspace", "workspace2d"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // This one will be ok
     sort.setPropertyValue("InputWorkspace", wsName);
     sort.setPropertyValue("SortBy", "X Value");

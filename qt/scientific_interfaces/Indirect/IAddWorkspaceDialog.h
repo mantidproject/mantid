@@ -22,6 +22,8 @@ public:
   virtual void setWSSuffices(const QStringList &suffices) = 0;
   virtual void setFBSuffices(const QStringList &suffices) = 0;
 
+  virtual void updateSelectedSpectra() = 0;
+
 signals:
   void addData();
   void closeDialog();

@@ -35,10 +35,11 @@ IValidator_sptr StartsWithValidator::clone() const {
  * any of the allowed values"
  */
 std::string StartsWithValidator::checkValidity(const std::string &value) const {
-  for (const auto &allowedValue : m_allowedValues) {
-    if (value.substr(0, allowedValue.size()) == allowedValue) {
-      return "";
-    }
+  if (std::any_of(m_allowedValues.cbegin(), m_allowedValues.cend(),
+                  [&value](const auto &val) {
+                    return value.substr(0, val.size()) == val;
+                  })) {
+    return "";
   }
   if (isEmpty(value))
     return "Select a value";

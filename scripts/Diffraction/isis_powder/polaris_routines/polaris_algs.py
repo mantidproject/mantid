@@ -12,7 +12,6 @@ from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 from isis_powder.polaris_routines import polaris_advanced_config
-from six import PY3
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
@@ -34,6 +33,12 @@ def _get_run_numbers_for_key(current_mode_run_numbers, key):
 
 def _get_current_mode_dictionary(run_number_string, inst_settings):
     mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    if inst_settings.mode is None:
+        ws = mantid.Load('POLARIS'+run_number_string+'.nxs')
+        mode, cropping_vals = _determine_chopper_mode(ws)
+        inst_settings.mode = mode
+        inst_settings.focused_cropping_values = cropping_vals
+        mantid.DeleteWorkspace(ws)
     # Get the current mode "Rietveld" or "PDF" run numbers
     return common.cal_map_dictionary_key_helper(mapping_dict, inst_settings.mode)
 
@@ -56,15 +61,6 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
                                      vanadium_string=vanadium_runs, grouping_file_name=grouping_file_name)
 
 
-def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
-    bragg_masking_list = _read_masking_file(mask_path)
-    masked_workspace_list = _apply_bragg_peaks_masking(bank_spectra, mask_list=bragg_masking_list)
-    output = common.spline_workspaces(focused_vanadium_spectra=masked_workspace_list,
-                                      num_splines=spline_number)
-    common.remove_intermediate_workspace(masked_workspace_list)
-    return output
-
-
 def save_unsplined_vanadium(vanadium_ws, output_path):
     converted_workspaces = []
 
@@ -78,14 +74,14 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
         ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
         converted_workspaces.append(ws)
 
-    converted_group = mantid.GroupWorkspaces(",".join(ws.getName() for ws in converted_workspaces))
+    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
     mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
     mantid.DeleteWorkspace(converted_group)
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.getName(), Target="MomentumTransfer")
+    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
     if merge_banks:
         raise RuntimeError("Merging banks is currently not supported")
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
@@ -121,43 +117,15 @@ def _obtain_focused_run(run_number, focus_file_path):
     return focused_ws
 
 
-def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
-    output_workspaces = list(workspaces_to_mask)
-
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
-            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
-                                                          OutputWorkspace=output_name,
-                                                          XMin=mask_params[0], XMax=mask_params[1])
-    return output_workspaces
-
-
-def _read_masking_file(masking_file_path):
-    all_banks_masking_list = []
-    bank_masking_list = []
-    ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
-
-    # Python 3 requires the encoding to be included so an Angstrom
-    # symbol can be read, I'm assuming all file read here are
-    # `latin-1` which may not be true in the future. Python 2 `open`
-    # doesn't have an encoding option
-    if PY3:
-        encoding = {"encoding": "latin-1"}
+def _determine_chopper_mode(ws):
+    if ws.getRun().hasProperty('Frequency'):
+        frequency = ws.getRun()['Frequency'].lastValue()
+        print("No chopper mode provided")
+        if frequency == 50:
+            print("automatically chose Rietveld")
+            return 'Rietveld', polaris_advanced_config.rietveld_focused_cropping_values
+        if frequency == 0:
+            print("automatically chose PDF")
+            return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
     else:
-        encoding = {}
-    with open(masking_file_path, **encoding) as mask_file:
-        for line in mask_file:
-            if line.startswith(ignore_line_prefixes):
-                # Push back onto new bank
-                if bank_masking_list:
-                    all_banks_masking_list.append(bank_masking_list)
-                bank_masking_list = []
-            else:
-                # Parse and store in current list
-                line.rstrip()
-                bank_masking_list.append(line.split())
-
-    if bank_masking_list:
-        all_banks_masking_list.append(bank_masking_list)
-    return all_banks_masking_list
+        raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")

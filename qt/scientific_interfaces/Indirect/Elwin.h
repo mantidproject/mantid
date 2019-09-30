@@ -29,10 +29,8 @@ private slots:
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
-  void updateAvailablePlotSpectra();
   void runClicked();
   void saveClicked();
-  void plotClicked();
   void updateIntegrationRange();
 
 private:
@@ -40,6 +38,7 @@ private:
   void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
+  void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
                             const QPair<double, double> &range);
@@ -50,18 +49,9 @@ private:
   std::vector<std::string> getOutputWorkspaceNames();
   QString getOutputBasename();
 
-  void updatePlotSpectrumOptions();
-  void updateAvailablePlotWorkspaces();
-  QString getPlotWorkspaceName() const;
-  void setPlotSpectrumValue(int value);
-  void setPlotSpectrumMinMax(int minimum, int maximum);
-  int getPlotSpectrumIndex() const;
-
   void setRunIsRunning(const bool &running);
-  void setPlotResultIsPlotting(const bool &plotting);
   void setButtonsEnabled(const bool &enabled);
   void setRunEnabled(const bool &enabled);
-  void setPlotResultEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
 
   Ui::Elwin m_uiForm;

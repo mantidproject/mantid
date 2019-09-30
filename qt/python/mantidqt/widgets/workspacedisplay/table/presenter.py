@@ -139,6 +139,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         table.setRowCount(num_rows)
 
         num_cols = self.model.get_number_of_columns()
+        table.setColumnCount(num_cols)
 
         # the table should be editable if the ws is not PeaksWS
         editable = not self.model.is_peaks_workspace()
@@ -217,7 +218,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
         for column_index in range(self.view.columnCount()):
             self.view.showColumn(column_index)
 
-    def _action_set_as(self, add_to_list_func):
+    def _action_set_as(self, add_to_list_func, type):
         try:
             selected_columns = self._get_selected_columns()
         except ValueError:
@@ -225,14 +226,15 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
 
         for col in selected_columns:
             add_to_list_func(col)
+            self.model.set_column_type(col, type)
 
         self.update_column_headers()
 
     def action_set_as_x(self):
-        self._action_set_as(self.model.marked_columns.add_x)
+        self._action_set_as(self.model.marked_columns.add_x, 1)
 
     def action_set_as_y(self):
-        self._action_set_as(self.model.marked_columns.add_y)
+        self._action_set_as(self.model.marked_columns.add_y, 2)
 
     def action_set_as_y_err(self, related_y_column, label_index):
         """
@@ -253,10 +255,11 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         self.model.marked_columns.add_y_err(err_column)
+        self.model.set_column_type(selected_column, 5)
         self.update_column_headers()
 
     def action_set_as_none(self):
-        self._action_set_as(self.model.marked_columns.remove)
+        self._action_set_as(self.model.marked_columns.remove, 0)
 
     def action_sort(self, sort_ascending):
         """
@@ -330,9 +333,10 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 return
         x = self.model.get_column(selected_x)
 
-        fig, ax = self.plot.subplots()
+        fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
         fig.canvas.set_window_title(self.model.get_name())
         ax.set_xlabel(self.model.get_column_header(selected_x))
+        ax.wsName = self.model.get_name()
 
         plot_func = self._get_plot_function_from_type(ax, plot_type)
         kwargs = {}
@@ -354,7 +358,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 return
 
             ax.set_ylabel(column_label)
-        ax.legend()
+        ax.legend().draggable()
         fig.show()
 
     def _get_plot_function_from_type(self, ax, type):

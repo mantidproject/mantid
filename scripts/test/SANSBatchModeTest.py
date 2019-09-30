@@ -181,10 +181,10 @@ class TestGeometrySettings(unittest.TestCase):
         self.assertTrue("SampleWidth" in geometry_settings)
         self.assertTrue("SampleThickness" in geometry_settings)
 
-        self.assertTrue(geometry_settings["Geometry"] == "Disc")
-        self.assertTrue(geometry_settings["SampleHeight"] == 1.)
-        self.assertTrue(geometry_settings["SampleWidth"] == 1.)
-        self.assertTrue(geometry_settings["SampleThickness"] == 1.)
+        self.assertEqual(geometry_settings["Geometry"],  "Disc")
+        self.assertEqual(geometry_settings["SampleHeight"],  1.)
+        self.assertEqual(geometry_settings["SampleWidth"],  1.)
+        self.assertEqual(geometry_settings["SampleThickness"],  1.)
 
 
 if __name__ == "__main__":

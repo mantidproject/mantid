@@ -74,7 +74,7 @@ const std::string MDNormDirectSC::name() const { return "MDNormDirectSC"; }
  * Initialize the algorithm's properties.
  */
 void MDNormDirectSC::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
@@ -86,8 +86,8 @@ void MDNormDirectSC::init() {
     dim[0] = dimChars[i];
     std::string propName = "AlignedDim" + dim;
     declareProperty(
-        Kernel::make_unique<PropertyWithValue<std::string>>(propName, "",
-                                                            Direction::Input),
+        std::make_unique<PropertyWithValue<std::string>>(propName, "",
+                                                         Direction::Input),
         "Binning parameters for the " + Strings::toString(i) +
             "th dimension.\n"
             "Enter it as a comma-separated list of values with the format: "
@@ -99,37 +99,37 @@ void MDNormDirectSC::init() {
   solidAngleValidator->add<CommonBinsValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("SolidAngleWorkspace", "",
-                                       Direction::Input, PropertyMode::Optional,
-                                       solidAngleValidator),
+      std::make_unique<WorkspaceProperty<>>(
+          "SolidAngleWorkspace", "", Direction::Input, PropertyMode::Optional,
+          solidAngleValidator),
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
-                                                       Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SkipSafetyCheck", false, Direction::Input),
                   "If set to true, the algorithm does "
                   "not check history if the workspace was modified since the"
                   "ConvertToMD algorithm was run, and assume that the direct "
                   "geometry inelastic mode is used.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate normalization "
                   "from multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryDataWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "An input MDHistoWorkspace used to accumulate data from "
                   "multiple MDEventWorkspaces. If unspecified a blank "
                   "MDHistoWorkspace will be created.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputNormalizationWorkspace", "", Direction::Output),
                   "A name for the output normalization MDHistoWorkspace.");
 }
@@ -318,12 +318,12 @@ MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization,
   std::vector<coord_t> otherDimValues;
   for (size_t i = 4; i < m_inputWS->getNumDims(); i++) {
     const auto dimension = m_inputWS->getDimension(i);
-    float dimMin = static_cast<float>(dimension->getMinimum());
-    float dimMax = static_cast<float>(dimension->getMaximum());
+    auto dimMin = static_cast<float>(dimension->getMinimum());
+    auto dimMax = static_cast<float>(dimension->getMaximum());
     auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         currentRun.getProperty(dimension->getName()));
     if (dimProp) {
-      coord_t value = static_cast<coord_t>(dimProp->firstValue());
+      auto value = static_cast<coord_t>(dimProp->firstValue());
       otherDimValues.push_back(value);
       // in the original MD data no time was spent measuring between dimMin and
       // dimMax
@@ -483,7 +483,7 @@ void MDNormDirectSC::calculateNormalization(
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mapping
-  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
+  const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
@@ -498,9 +498,9 @@ void MDNormDirectSC::calculateNormalization(
   std::vector<std::array<double, 4>> intersections;
   std::vector<coord_t> pos, posNew;
   double progStep = 0.7 / m_numExptInfos;
-  auto prog =
-      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
-                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
+  auto prog = std::make_unique<API::Progress>(
+      this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.),
+      ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {

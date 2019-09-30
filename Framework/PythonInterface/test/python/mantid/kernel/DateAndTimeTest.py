@@ -21,21 +21,21 @@ class DateAndTimeTest(unittest.TestCase):
 
     def test_construction_with_ISO_string_produces_expected_object(self):
         dt = DateAndTime(self.iso_str)
-        self.assertEquals(self.iso_str_plus_space, str(dt))
-        self.assertEquals(dt.totalNanoseconds(), 598471118000000000)
+        self.assertEqual(self.iso_str_plus_space, str(dt))
+        self.assertEqual(dt.totalNanoseconds(), 598471118000000000)
 
     def test_construction_with_total_nano_seconds(self):
         dt = DateAndTime(598471118000000000)
-        self.assertEquals(self.iso_str_plus_space, str(dt))
+        self.assertEqual(self.iso_str_plus_space, str(dt))
 
     def test_convert_to_np(self):
         dt = DateAndTime(598471118000000000)
-        dt_np = timedelta64(dt.total_nanoseconds(), 'ns') + datetime64('1990-01-01T00:00')
+        dt_np = timedelta64(dt.totalNanoseconds(), 'ns') + datetime64('1990-01-01T00:00')
 
         # convert both into ISO8601 strings up to the seconds
         dt = str(dt)[:19]
         dt_np = str(dt_np)[:19]
-        self.assertEquals(dt, dt_np)
+        self.assertEqual(dt, dt_np)
 
     def test_convert_from_np(self):
         if LooseVersion(numpy.__version__) < LooseVersion('1.9'):
@@ -50,7 +50,7 @@ class DateAndTimeTest(unittest.TestCase):
         length = min(len(dt), len(dt_np))
         dt = dt[:length]
         dt_np = dt_np[:length]
-        self.assertEquals(dt, dt_np)
+        self.assertEqual(dt, dt_np)
 
 
 if __name__ == "__main__":

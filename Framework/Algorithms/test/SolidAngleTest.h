@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/SolidAngle.h"
@@ -155,15 +156,19 @@ public:
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF")
 
     const size_t numberOfSpectra = output2D->getNumberHistograms();
-    TS_ASSERT_EQUALS(numberOfSpectra, 10);
+    size_t unmaskedSpectra{0};
+    auto spectrumInfo = output2D->spectrumInfo();
     for (size_t i = 0; i < numberOfSpectra; ++i) {
       // all of the values should fall in this range for INES
-      TS_ASSERT_DELTA(output2D->y(i)[0], 0.0013, 0.0001);
-
-      TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
-      TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
+      if (!spectrumInfo.isMasked(i)) {
+        TS_ASSERT_DELTA(output2D->y(i)[0], 0.0013, 0.0001);
+        TS_ASSERT_DELTA(output2D->x(i)[0], 0.0, 0.000001);
+        TS_ASSERT_DELTA(output2D->x(i)[1], 10000.0, 0.000001);
+        TS_ASSERT_DELTA(output2D->e(i)[0], 0.0, 0.000001);
+        ++unmaskedSpectra;
+      }
     }
+    TS_ASSERT_EQUALS(unmaskedSpectra, 10);
   }
 
   void testCorrectWithIndex() {
@@ -204,10 +209,14 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(output2);
     const size_t numberOfSpectra1 = output2D_1->getNumberHistograms();
     const size_t numberOfSpectra2 = output2D_2->getNumberHistograms();
-    for (size_t i = 50, j = 0; i < numberOfSpectra1 && j < numberOfSpectra2;
-         i++, j++) {
+    TS_ASSERT_EQUALS(numberOfSpectra1, numberOfSpectra2);
+    auto spectrumInfo1 = output2D_1->spectrumInfo();
+    auto spectrumInfo2 = output2D_2->spectrumInfo();
+    for (size_t i = 0; i < numberOfSpectra1; i++) {
       // all values after the start point of the second workspace should match
-      TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(j)[0]);
+      if (!(spectrumInfo2.isMasked(i) || spectrumInfo2.isMasked(i))) {
+        TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(i)[0]);
+      }
     }
   }
 
@@ -215,6 +224,29 @@ private:
   std::string inputSpace;
   std::string outputSpace;
   enum { Nhist = 144 };
+};
+
+class SolidAngleTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    FrameworkManager::Instance();
+    m_creator.initialize();
+    m_creator.setProperty("NumBanks", 100);
+    m_creator.setProperty("BankPixelWidth", 200);
+    m_creator.setPropertyValue("OutputWorkspace", "__ws");
+    m_creator.execute();
+    m_testee.initialize();
+    MatrixWorkspace_sptr ws = m_creator.getProperty("OutputWorkspace");
+    m_testee.setPropertyValue("InputWorkspace", "__ws");
+    m_testee.setPropertyValue("OutputWorkspace", "__ws");
+  }
+  void testSolidAnglePerformance() {
+    TS_ASSERT_THROWS_NOTHING(m_testee.execute());
+  }
+
+private:
+  SolidAngle m_testee;
+  CreateSampleWorkspace m_creator;
 };
 
 #endif /*SOLIDANGLETEST_H_*/

@@ -90,10 +90,10 @@ public:
 
 protected:
   /// The most-recently-used list of dataY histograms
-  mutable std::vector<mru_listY *> m_bufferedDataY;
+  mutable std::vector<std::unique_ptr<mru_listY>> m_bufferedDataY;
 
   /// The most-recently-used list of dataE histograms
-  mutable std::vector<mru_listE *> m_bufferedDataE;
+  mutable std::vector<std::unique_ptr<mru_listE>> m_bufferedDataE;
 
   /// Mutex when adding entries in the MRU list
   mutable Poco::RWLock m_changeMruListsMutexE;

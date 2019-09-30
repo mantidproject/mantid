@@ -21,24 +21,25 @@ using namespace API;
 using HistogramData::Histogram;
 
 void SmoothData::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the input workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the input workspace");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> npts0{3};
   auto min = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
   min->setLower(3);
   // The number of points to use in the smoothing.
   declareProperty(
-      Kernel::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
-                                              std::move(min), Direction::Input),
+      std::make_unique<ArrayProperty<int>>("NPoints", std::move(npts0),
+                                           std::move(min), Direction::Input),
       "The number of points to average over (minimum 3). If an even number is\n"
       "given, it will be incremented by 1 to make it odd (default value 3)");
   declareProperty(
-      make_unique<WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
+      std::make_unique<
+          WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: GroupingWorkspace to use for vector of NPoints.");
 }
@@ -58,7 +59,7 @@ void SmoothData::exec() {
 
   // Check that the number of points in the smoothing isn't larger than the
   // spectrum length
-  const int vecSize = static_cast<int>(inputWorkspace->blocksize());
+  const auto vecSize = static_cast<int>(inputWorkspace->blocksize());
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace =
@@ -66,7 +67,6 @@ void SmoothData::exec() {
 
   Progress progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
-  // Loop over all the spectra in the workspace
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms());
        ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -76,6 +76,7 @@ void SmoothData::exec() {
       if (group < 0)
         npts = 3;
       else
+        // group is never 0. We can safely subtract.
         npts = nptsGroup[group - 1];
     }
     if (npts >= vecSize) {
@@ -126,7 +127,7 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
     if (group <= 0)
       return -1;
     ++it;
-    for (; it != dets.end(); ++it) // Loop other all other udets
+    for (; it != dets.end(); ++it) // Loop all other udets
     {
       if (udet2group.at(*it) != group)
         return -1;
@@ -174,7 +175,7 @@ Histogram smooth(const Histogram &histogram, int npts) {
   // current point. Note that the statistical error will be reduced by
   // sqrt(npts) because more
   // data is now contributing to each point.
-  const int vecSize = static_cast<int>(histogram.size());
+  const auto vecSize = static_cast<int>(histogram.size());
   for (int k = halfWidth + 1; k < vecSize - halfWidth; ++k) {
     const int kp = k + halfWidth;
     const int km = k - halfWidth - 1;

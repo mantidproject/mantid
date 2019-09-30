@@ -25,6 +25,8 @@ public:
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
 
+  void updateSelectedSpectra() override;
+
 private slots:
   void selectAllSpectra(int state);
   void workspaceChanged(const QString &workspaceName);

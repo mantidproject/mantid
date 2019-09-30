@@ -63,7 +63,7 @@ void IFunction1D::calcNumericalDerivative1D(Jacobian *jacobian,
     }
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_IFUNCTION1D_TCC

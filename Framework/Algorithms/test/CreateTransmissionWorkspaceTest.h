@@ -95,13 +95,13 @@ public:
   void test_check_first_transmission_workspace_not_tof_or_wavelength_throws() {
     auto alg = construct_standard_algorithm();
     TS_ASSERT_THROWS(alg->setProperty("FirstTransmissionRun", m_NotTOF),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_check_second_transmission_workspace_not_tof_throws() {
     auto alg = construct_standard_algorithm();
     TS_ASSERT_THROWS(alg->setProperty("SecondTransmissionRun", m_NotTOF),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_end_overlap_must_be_greater_than_start_overlap_or_throw() {
@@ -112,7 +112,7 @@ public:
     alg->setProperty("Params", params);
     alg->setProperty("StartOverlap", 0.6);
     alg->setProperty("EndOverlap", 0.4);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_must_provide_wavelengths() {
@@ -124,20 +124,20 @@ public:
     alg->setProperty("SecondTransmissionRun", m_TOF);
     alg->setPropertyValue("OutputWorkspace", "demo_ws");
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
 
     alg->setProperty("FirstTransmissionRun", m_TOF);
     alg->setProperty("SecondTransmissionRun", m_TOF);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setRethrows(true);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_wavelength_min_greater_wavelength_max_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void
@@ -145,7 +145,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorBackgroundWavelengthMin", 1.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void
@@ -153,7 +153,7 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_execute_one_tranmission() {

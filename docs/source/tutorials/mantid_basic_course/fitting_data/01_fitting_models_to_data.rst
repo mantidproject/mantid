@@ -1,4 +1,4 @@
-.. _01_fitting_models_to_data:
+﻿.. _01_fitting_models_to_data:
 
 ======================
 Fitting Models To Data 
@@ -188,7 +188,7 @@ but your chances of a successful fit increase this way.
 Saving a model
 --------------
 
-If you have spend a considerable amount of type setting up a model you
+If you have spent a considerable amount of type setting up a model you
 can save it and then load it later.
 
 |SaveSetup.png| |ArrowRight.png| |SaveSetupDialog.png|
@@ -201,13 +201,13 @@ Tying and constraining fit parameters
 -------------------------------------
 
 Mantid fitting framework allows you to tie or constrain parameters
-during the fit. We define tying as setting a parameter equal to a result
-of an expression involving other parameters of the same function. The
-expression can be a constant (doesn't involve any parameters), in this
-case we call the tied parameter fixed.
+during the fit. We define tying as setting a parameter equal to an expression
+involving other parameters from any of the selected functions. The
+expression can be a constant (doesn't involve any parameters), in which
+case we would say the parameter is fixed.
 
-By constraining we understand setting conditions on acceptable values of
-a parameter. For example limiting its value from below or above.
+Constraining a parameter is where its value is kept above a lower bound,
+below an upper bound or both.
 
 To set a constraint or a tie right click on a parameter name:
 

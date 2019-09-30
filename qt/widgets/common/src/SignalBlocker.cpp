@@ -5,52 +5,28 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SignalBlocker.h"
-#include <QAction>
-#include <QComboBox>
-#include <QPushButton>
-#include <stdexcept>
+#if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
+
+#include <cassert>
 
 namespace MantidQt {
 namespace API {
 
 /**
- * Constructor
+ * Enable signals for the wrapped object
  * @param obj : QObject to block signals for.
  */
-template <typename Type>
-SignalBlocker<Type>::SignalBlocker(Type *obj) : m_obj(obj) {
-  if (m_obj == nullptr) {
-    throw std::runtime_error("Object to block is NULL");
-  }
+SignalBlocker::SignalBlocker(QObject *obj) : m_obj(obj) {
+  assert(m_obj != nullptr);
   m_obj->blockSignals(true);
 }
 
-/** Destructor
+/**
+ * Enable signals for the wrapped object
  */
-template <typename Type> SignalBlocker<Type>::~SignalBlocker() {
-  // Release blocking if possible
-  if (m_obj != nullptr) {
-    m_obj->blockSignals(false);
-  }
-}
-
-template <typename Type> Type *SignalBlocker<Type>::operator->() {
-  if (m_obj != nullptr) {
-    return m_obj;
-  } else {
-    throw std::runtime_error("SignalBlocker cannot access released object");
-  }
-}
-
-template <typename Type> void SignalBlocker<Type>::release() {
-  m_obj = nullptr;
-}
-
-// Template instances we need.
-template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QObject>;
-template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QAction>;
-template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QPushButton>;
-template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QComboBox>;
+SignalBlocker::~SignalBlocker() { m_obj->blockSignals(false); }
 
 } // namespace API
 } // namespace MantidQt
+
+#endif

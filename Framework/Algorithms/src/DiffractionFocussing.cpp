@@ -41,14 +41,14 @@ using API::WorkspaceProperty;
  *
  */
 void DiffractionFocussing::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
-  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
-                                            FileProperty::Load, ".cal"),
+  declareProperty(std::make_unique<FileProperty>("GroupingFileName", "",
+                                                 FileProperty::Load, ".cal"),
                   "The name of the CalFile with grouping data");
 }
 
@@ -87,7 +87,7 @@ void DiffractionFocussing::exec() {
   }
 
   int iprogress = 0;
-  int iprogress_count = static_cast<int>(groupNumbers.size());
+  auto iprogress_count = static_cast<int>(groupNumbers.size());
   int iprogress_step = iprogress_count / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
@@ -230,7 +230,7 @@ void DiffractionFocussing::calculateRebinParams(
     min = 1e-6;
 
   // step is easy
-  double n = static_cast<double>(workspace->blocksize());
+  auto n = static_cast<double>(workspace->blocksize());
   step = (log(max) - log(min)) / n;
 }
 

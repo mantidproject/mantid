@@ -35,12 +35,12 @@ DECLARE_ALGORITHM(LoadIsawSpectrum)
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {
-  declareProperty(make_unique<FileProperty>("SpectraFile", "",
-                                            API::FileProperty::Load, ".dat"),
+  declareProperty(std::make_unique<FileProperty>(
+                      "SpectraFile", "", API::FileProperty::Load, ".dat"),
                   "Incident spectrum and detector efficiency correction file.");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "An output Workspace containing spectra for each detector bank.");
   // 3 properties for getting the right instrument
   getInstrument3WaysInit(this);
@@ -236,21 +236,21 @@ void LoadIsawSpectrum::getInstrument3WaysInit(Algorithm *alg) {
   std::string grpName("Specify the Instrument");
 
   alg->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
-  alg->declareProperty(make_unique<PropertyWithValue<std::string>>(
+  alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                            "InstrumentName", "", Direction::Input),
                        "Optional: Name of the instrument to base the "
                        "GroupingWorkspace on which to base the "
                        "GroupingWorkspace.");
 
-  alg->declareProperty(make_unique<FileProperty>("InstrumentFilename", "",
-                                                 FileProperty::OptionalLoad,
-                                                 ".xml"),
-                       "Optional: Path to the instrument definition file on "
-                       "which to base the GroupingWorkspace.");
+  alg->declareProperty(
+      std::make_unique<FileProperty>("InstrumentFilename", "",
+                                     FileProperty::OptionalLoad, ".xml"),
+      "Optional: Path to the instrument definition file on "
+      "which to base the GroupingWorkspace.");
 
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);

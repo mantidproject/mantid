@@ -23,7 +23,7 @@ class MultipleFilePropertyTest(unittest.TestCase):
         filenames = prop.value
         self.assertTrue(isinstance(filenames, list))
         self.assertTrue(isinstance(filenames[0], str))
-        self.assertEquals(len(filenames), 1)
+        self.assertEqual(len(filenames), 1)
 
     def test_value_member_returns_python_list_for_multiple_files(self):
         algorithm = create_algorithm('Load', Filename='MUSR15189,15190,15191.nxs',OutputWorkspace='w',
@@ -31,7 +31,7 @@ class MultipleFilePropertyTest(unittest.TestCase):
         prop = algorithm.getProperty("Filename")
         filenames = prop.value
         self.assertTrue(isinstance(filenames, list))
-        self.assertEquals(len(filenames), 3)
+        self.assertEqual(len(filenames), 3)
 
     def test_value_member_returns_nested_python_list_for_summed_files(self):
         algorithm = create_algorithm('Load', Filename='MUSR15189,15190+15191.nxs',OutputWorkspace='w',
@@ -40,7 +40,7 @@ class MultipleFilePropertyTest(unittest.TestCase):
         filenames = prop.value
         self.assertTrue(isinstance(filenames, list))
         self.assertTrue(isinstance(filenames[0], str))
-        self.assertEquals(len(filenames[1]), 2)
+        self.assertEqual(len(filenames[1]), 2)
 
 if __name__ == '__main__':
     unittest.main()

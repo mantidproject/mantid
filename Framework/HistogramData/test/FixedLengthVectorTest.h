@@ -137,7 +137,8 @@ public:
     std::vector<double> src(10, 0);
     FixedLengthVectorTester dest(5);
 
-    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()), std::logic_error);
+    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()),
+                     const std::logic_error &);
   }
 
   void test_length_value_assignment() {
@@ -155,7 +156,7 @@ public:
   void test_value_assignment_fail() {
     FixedLengthVectorTester dest(3);
 
-    TS_ASSERT_THROWS(dest.assign(20, 4.5), std::logic_error);
+    TS_ASSERT_THROWS(dest.assign(20, 4.5), const std::logic_error &);
   }
 
   void test_copy_assignment() {
@@ -170,7 +171,7 @@ public:
   void test_copy_assignment_fail() {
     const FixedLengthVectorTester src(2, 0.1);
     FixedLengthVectorTester dest(1);
-    TS_ASSERT_THROWS(dest = src, std::logic_error);
+    TS_ASSERT_THROWS(dest = src, const std::logic_error &);
   }
 
   void test_move_assignment() {
@@ -185,7 +186,7 @@ public:
   void test_move_assignment_fail() {
     FixedLengthVectorTester src(2, 0.1);
     FixedLengthVectorTester dest(1);
-    TS_ASSERT_THROWS(dest = std::move(src), std::logic_error);
+    TS_ASSERT_THROWS(dest = std::move(src), const std::logic_error &);
   }
 
   void test_initializer_list_assignment() {
@@ -206,7 +207,7 @@ public:
 
   void test_initializer_list_assignment_fail() {
     FixedLengthVectorTester values(2);
-    TS_ASSERT_THROWS((values = {0.1, 0.2, 0.3}), std::logic_error);
+    TS_ASSERT_THROWS((values = {0.1, 0.2, 0.3}), const std::logic_error &);
   }
 
   void test_vector_constructor() {

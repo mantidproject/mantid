@@ -8,33 +8,31 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-import mantid
-from mantid.kernel import config
-
+from mantid.py3compat import mock
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_reduction_selection,
                                        get_string_for_gui_from_reduction_mode,
                                        get_batch_file_dir_from_path,
                                        add_dir_to_datasearch,
-                                       remove_dir_from_datasearch)
+                                       remove_dir_from_datasearch,
+                                       SANSGuiPropertiesHandler)
 from sans.common.enums import (SANSInstrument, ISISReductionMode)
-import os
 
 
 class GuiCommonTest(unittest.TestCase):
     def _assert_same(self, collection1, collection2):
         for element1, element2 in zip(collection1, collection2):
-            self.assertTrue(element1 == element2)
+            self.assertEqual(element1,  element2)
 
     def _assert_same_map(self, map1, map2):
-        self.assertTrue(len(map1) == len(map2))
+        self.assertEqual(len(map1),  len(map2))
 
         for key, value in map1.items():
             self.assertTrue(key in map2)
-            self.assertTrue(map1[key] == map2[key])
+            self.assertEqual(map1[key],  map2[key])
 
     def do_test_reduction_mode_string(self, instrument, reduction_mode, reduction_mode_string):
         setting = get_string_for_gui_from_reduction_mode(reduction_mode, instrument)
-        self.assertTrue(setting == reduction_mode_string)
+        self.assertEqual(setting,  reduction_mode_string)
 
     def test_that_gets_reduction_mode_string_for_gui(self):
         sans_settings = get_reduction_mode_strings_for_gui(SANSInstrument.SANS2D)
@@ -123,6 +121,17 @@ class GuiCommonTest(unittest.TestCase):
 
         expected_result = "A/Path/;A/Final/Path/"
         self.assertEqual(expected_result, result)
+
+
+class SANSGuiPropertiesHandlerTest(unittest.TestCase):
+    @staticmethod
+    def test_that_default_functions_are_called_on_initialisation():
+        with mock.patch.object(SANSGuiPropertiesHandler, "_load_property", lambda x, y, z: "default_value"):
+            default_property_setup_mock = mock.Mock()
+            default_values_input = {"a_default_property": (default_property_setup_mock, str)}
+            SANSGuiPropertiesHandler(default_values_input)
+
+            default_property_setup_mock.assert_called_once_with("default_value")
 
 
 if __name__ == '__main__':

@@ -6,11 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
 import mantid.simpleapi as mantid
+
+# A bug on the instrument when recording historic NeXus files (< 2015) caused
+# corrupted data. Use raw files for now until sufficient time has past and old
+# data is unlikely to be reanalysed.
+RAW_DATA_EXT = '.raw'
+
+# Constants
+PROMPT_PULSE_INTERVAL = 20000.0
+PROMPT_PULSE_RIGHT_WIDTH = 140.0
+PROMPT_PULSE_LEFT_WIDTH = 30.0
 
 
 class HRPD(AbstractInst):
@@ -24,12 +36,6 @@ class HRPD(AbstractInst):
                                    calibration_dir=self._inst_settings.calibration_dir,
                                    output_dir=self._inst_settings.output_dir,
                                    inst_prefix="HRPD")
-
-        # Cannot load older .nxs files into Mantid from HRPD
-        # because of a long-term bug which was not reported.
-        # Instead, ask Mantid to use .raw files in this case
-        if not self._inst_settings.file_extension:
-            self._inst_settings.file_extension = ".raw"
 
         self._cached_run_details = {}
         self._sample_details = None
@@ -59,6 +65,57 @@ class HRPD(AbstractInst):
     def mask_prompt_pulses_if_necessary(self, ws_list):
         for ws in ws_list:
             self._mask_prompt_pulses(ws)
+
+    def should_subtract_empty_inst(self):
+        return self._inst_settings.subtract_empty_inst
+
+    def create_solid_angle_corrections(self, vanadium, run_details):
+        """
+        Creates the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
+        :param vanadium: The vanadium used to create this
+        :param run_details: the run details of to use
+        """
+        if not self._inst_settings.do_solid_angle:
+            return
+        solid_angle = mantid.SolidAngle(InputWorkspace=vanadium)
+        solid_angle = mantid.Scale(InputWorkspace=solid_angle, Factor=100, Operation='Multiply')
+
+        eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=solid_angle)
+        eff = mantid.ConvertUnits(InputWorkspace=eff, Target='Wavelength')
+        eff = mantid.Integration(InputWorkspace=eff, RangeLower=1.4, RangeUpper=3)
+
+        correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=eff)
+        correction = mantid.Scale(InputWorkspace=correction, Factor=1e-5,
+                                  Operation='Multiply')
+        name = "sac" + common.generate_splined_name(run_details.run_number, [])
+        path = run_details.van_paths
+
+        mantid.SaveNexus(InputWorkspace=correction, Filename=os.path.join(path, name))
+        common.remove_intermediate_workspace(eff)
+        common.remove_intermediate_workspace(correction)
+
+    def get_solid_angle_corrections(self, vanadium, run_details):
+        if not self._inst_settings.do_solid_angle:
+            return
+        name = "sac" + common.generate_splined_name(vanadium, [])
+        path = run_details.van_paths
+        try:
+            solid_angle = mantid.Load(Filename=os.path.join(path,name))
+            return solid_angle
+        except ValueError:
+            raise RuntimeError("Could not find " + os.path.join(path, name)+" please run create_vanadium with "
+                                                                            "\"do_solid_angle_corrections=True\"")
+
+    def _generate_input_file_name(self, run_number, file_ext=""):
+        """
+        Generates a name which Mantid uses within Load to find the file.
+        :param run_number: The run number to convert into a valid format for Mantid
+        :param file_ext: An optional file extension to add to force a particular format
+        :return: A filename that will allow Mantid to find the correct run for that instrument.
+        """
+        if not file_ext:
+            file_ext = RAW_DATA_EXT
+        return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
@@ -98,19 +155,25 @@ class HRPD(AbstractInst):
         return self._cached_run_details[run_number_string_key]
 
     def _mask_prompt_pulses(self, ws):
-        left_crop = 30
-        right_crop = 140
-        for i in range(6):
-            middle = 100000 + 20000 * i
-            min_crop = middle - left_crop
-            max_crop = middle + right_crop
-            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
+        """
+        HRPD has a long flight path from the moderator resulting
+        in sharp peaks from the proton pulse that maintain their
+        sharp resolution. Here we mask these pulses out that occur
+        at 20ms intervals.
 
-    def _spline_vanadium_ws(self, focused_vanadium_banks, instrument_version=''):
-        spline_coeff = self._inst_settings.spline_coeff
-        output = hrpd_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_banks,
-                                                         spline_number=spline_coeff)
-        return output
+        :param ws: The workspace containing the pulses. It is
+        masked in place.
+        """
+        # The number of pulse can vary depending on the data range
+        # Compute number of pulses that occur at each 20ms interval.
+        x_data = ws.readX(0)
+        pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
+        pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
+        for i in range(pulse_min, pulse_max):
+            centre = PROMPT_PULSE_INTERVAL * float(i)
+            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws,
+                            XMin=centre - PROMPT_PULSE_LEFT_WIDTH,
+                            XMax=centre + PROMPT_PULSE_RIGHT_WIDTH)
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(

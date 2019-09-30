@@ -34,12 +34,12 @@ const string RemovePromptPulse::category() const {
 /** Initialize the algorithm's properties.
  */
 void RemovePromptPulse::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "An output workspace.");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();
@@ -59,7 +59,7 @@ double getMedian(const API::Run &run, const std::string &name) {
   if (!run.hasProperty(name)) {
     return Mantid::EMPTY_DBL();
   }
-  Kernel::TimeSeriesProperty<double> *log =
+  auto *log =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
   if (!log)
     return Mantid::EMPTY_DBL();

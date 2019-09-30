@@ -84,11 +84,7 @@ public:
   using AbstractFactory = AbstractInstantiator<Base>;
   /// Destroys the DynamicFactory and deletes the instantiators for
   /// all registered classes.
-  virtual ~DynamicFactory() {
-    for (const auto &item : _map) {
-      delete item.second;
-    }
-  }
+  virtual ~DynamicFactory() {}
 
   /// Creates a new instance of the class with the given name.
   /// The class must have been registered with subscribe() (typically done via a
@@ -130,7 +126,7 @@ public:
   /// and the instantiator is deleted.
   /// @param className :: the name of the class you wish to subscribe
   template <class C> void subscribe(const std::string &className) {
-    subscribe(className, new Instantiator<C, Base>);
+    subscribe(className, std::make_unique<Instantiator<C, Base>>());
   }
 
   /// Registers the instantiator for the given class with the DynamicFactory.
@@ -145,21 +141,17 @@ public:
   ///                   factory with the same className, else throws
   ///                   std::runtime_error (default=ThrowOnExisting)
   void subscribe(const std::string &className,
-                 AbstractFactory *pAbstractFactory,
+                 std::unique_ptr<AbstractFactory> pAbstractFactory,
                  SubscribeAction replace = ErrorIfExists) {
     if (className.empty()) {
-      delete pAbstractFactory;
       throw std::invalid_argument("Cannot register empty class name");
     }
 
     auto it = _map.find(className);
     if (it == _map.end() || replace == OverwriteCurrent) {
-      if (it != _map.end() && it->second)
-        delete it->second;
-      _map[className] = pAbstractFactory;
+      _map[className] = std::move(pAbstractFactory);
       sendUpdateNotificationIfEnabled();
     } else {
-      delete pAbstractFactory;
       throw std::runtime_error(className + " is already registered.\n");
     }
   }
@@ -171,7 +163,6 @@ public:
   void unsubscribe(const std::string &className) {
     auto it = _map.find(className);
     if (!className.empty() && it != _map.end()) {
-      delete it->second;
       _map.erase(it);
       sendUpdateNotificationIfEnabled();
     } else {
@@ -194,9 +185,8 @@ public:
     names.reserve(_map.size());
     std::transform(
         _map.cbegin(), _map.cend(), std::back_inserter(names),
-        [](const std::pair<std::string, AbstractFactory *> &mapPair) {
-          return mapPair.first;
-        });
+        [](const std::pair<const std::string, std::unique_ptr<AbstractFactory>>
+               &mapPair) { return mapPair.first; });
     return names;
   }
 
@@ -222,7 +212,8 @@ private:
   }
 
   /// A typedef for the map of registered classes
-  using FactoryMap = std::map<std::string, AbstractFactory *, Comparator>;
+  using FactoryMap =
+      std::map<std::string, std::unique_ptr<AbstractFactory>, Comparator>;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
   /// Flag marking whether we should dispatch notifications

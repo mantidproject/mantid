@@ -12,13 +12,12 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
@@ -63,6 +62,9 @@ GNU_DIAG_OFF("conversion")
 // Overloads for yIndexOfX function which has 2 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_yIndexOfXOverloads,
                                        MatrixWorkspace::yIndexOfX, 1, 3)
+// Overloads for YUnitLabel which has 1 optional argument
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
+                                       YUnitLabel, 0, 2)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
@@ -224,6 +226,48 @@ std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
   return self.maskedBinsIndices(i);
 }
 
+/**
+ * Raw Pointer wrapper of replaceAxis to allow it to work with python
+ * @param self
+ * @param axisIndex :: The index of the axis to replace
+ * @param newAxis :: A pointer to the new axis. The class will take ownership.
+ */
+void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
+                       Axis *newAxis) {
+  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
+}
+
+/**
+ * Wrapper around MatrixWorkspace::getSignalAtCoord API to allow us to pass in a
+ * numpy array of coordinates and get a numpy array of signals out.
+ * @param self :: A Matrix Workspace
+ * @param npCoords :: An NDArray of coordinates with shape (n, 2)
+ * @param normalization :: MDNormalization object specifying normalization type
+ */
+object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
+                        const Mantid::API::MDNormalization &normalization) {
+  if (npCoords.get_shape()[1] != 2) {
+    throw std::invalid_argument("MatrixWorkspace::getSignalAtCoord - Input "
+                                "array must have shape (n, 2)");
+  }
+  // Create our output array
+  Py_intptr_t length = len(npCoords);
+  auto *signalValues = new Mantid::signal_t[length];
+
+  // Convert coords to a vector
+  std::vector<Mantid::coord_t> coords =
+      NDArrayToVector<Mantid::coord_t>(npCoords)();
+
+  // Fill output array
+  for (int i = 0; i < length; ++i) {
+    std::array<Mantid::coord_t, 2> coord = {{coords[2 * i], coords[2 * i + 1]}};
+    signalValues[i] = self.getSignalAtCoord(coord.data(), normalization);
+  }
+  PyObject *npSignalArray = Impl::wrapWithNDArray(
+      signalValues, 1, &length, NumpyWrapMode::ReadOnly, OwnershipMode::Python);
+  return object(handle<>(npSignalArray));
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -284,8 +328,10 @@ void export_MatrixWorkspace() {
            arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
-      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),
-           "Returns the caption for the Y axis")
+      .def("YUnitLabel", &MatrixWorkspace::YUnitLabel,
+           MatrixWorkspace_YUnitLabelOverloads(
+               (arg("self"), arg("useLatex"), arg("plotAsDistribution")),
+               "Returns the caption for the Y axis"))
       .def("hasMaskedBins", &MatrixWorkspace::hasMaskedBins,
            (arg("self"), arg("workspaceIndex")),
            "Returns true if this spectrum contains any masked bins")
@@ -325,7 +371,7 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("newVal")),
            "Set distribution flag. If True the workspace has been divided by "
            "the bin-width.")
-      .def("replaceAxis", &MatrixWorkspace::replaceAxis,
+      .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
            "Replaces one of the workspace's axes with the new one provided.")
 
@@ -411,6 +457,9 @@ void export_MatrixWorkspace() {
            "Note: This can fail for large workspaces as numpy will require a "
            "block "
            "of memory free that will fit all of the data.")
+      .def("getSignalAtCoord", &getSignalAtCoord,
+           args("self", "coords", "normalization"),
+           "Return signal for array of coordinates")
       //-------------------------------------- Operators
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),
@@ -429,7 +478,9 @@ void export_MatrixWorkspace() {
       .def("clearMonitorWorkspace", &clearMonitorWorkspace, args("self"),
            "Forget about monitor workspace, attached to the current workspace")
       .def("isCommonBins", &MatrixWorkspace::isCommonBins,
-           "Returns true if the workspace has common X bins.");
+           "Returns true if the workspace has common X bins.")
+      .def("isCommonLogBins", &MatrixWorkspace::isCommonLogBins,
+           "Returns true if the workspace has common X bins with log spacing.");
 
   RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

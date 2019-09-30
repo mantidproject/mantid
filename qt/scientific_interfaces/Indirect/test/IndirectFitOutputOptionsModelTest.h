@@ -211,16 +211,16 @@ public:
   }
 
   void test_that_plotResult_will_throw_when_there_is_no_result_workspace_set() {
-    TS_ASSERT_THROWS(m_model->plotResult("HWHM"), std::runtime_error);
+    TS_ASSERT_THROWS(m_model->plotResult("HWHM"), const std::runtime_error &);
   }
 
   void test_that_plotPDF_will_throw_when_there_is_no_pdf_workspace_set() {
     TS_ASSERT_THROWS(m_model->plotPDF("WorkspaceName", "HWHM"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_that_saveResult_will_throw_when_there_is_no_result_workspace_set() {
-    TS_ASSERT_THROWS(m_model->saveResult(), std::runtime_error);
+    TS_ASSERT_THROWS(m_model->saveResult(), const std::runtime_error &);
   }
 
   void
@@ -286,7 +286,7 @@ public:
     auto const outputName("Output_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult("", singleBinName, outputName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -295,7 +295,7 @@ public:
     auto const outputName("Output_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, "", outputName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void
@@ -304,7 +304,7 @@ public:
     auto const singleBinName("Workspace_s0_Result");
 
     TS_ASSERT_THROWS(m_model->replaceFitResult(inputName, singleBinName, ""),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

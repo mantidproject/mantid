@@ -10,7 +10,6 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <memory>
@@ -130,7 +129,7 @@ vector.
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
   size_t numElements = data.size();
-  size_t numRows = static_cast<size_t>(sqrt(double(numElements)));
+  auto numRows = static_cast<size_t>(sqrt(double(numElements)));
   size_t numRowsSquare = numRows * numRows;
   if (numElements != numRowsSquare) {
     throw(std::invalid_argument(
@@ -615,11 +614,11 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
   // array so we can expose the memory to Python APIs via numpy which expects
   // this
   // style of memory layout.
-  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRows * m_numColumns));
+  auto allocatedMemory = std::make_unique<T[]>((m_numRows * m_numColumns));
 
   // Next allocate an array of pointers for the rows (X). This partitions
   // the 1D array into a 2D array for callers.
-  auto rowPtrs = Kernel::make_unique<T *[]>(m_numRows);
+  auto rowPtrs = std::make_unique<T *[]>(m_numRows);
 
   for (size_t i = 0; i < m_numRows; i++) {
     // Calculate offsets into the allocated memory array (Y)
@@ -840,8 +839,8 @@ Has a in place transpose for a square matrix case.
   // irregular matrix
   // get some memory
 
-  auto allocatedMemory = Kernel::make_unique<T[]>((m_numRows * m_numColumns));
-  auto transposePtrs = Kernel::make_unique<T *[]>(m_numRows);
+  auto allocatedMemory = std::make_unique<T[]>((m_numRows * m_numColumns));
+  auto transposePtrs = std::make_unique<T *[]>(m_numRows);
 
   for (size_t i = 0; i < m_numColumns; i++) {
     // Notice how this partitions using Rows (X) instead of Cols(Y)
@@ -973,7 +972,7 @@ using LU decomposition
   Matrix<T> Lcomp(*this);
   Lcomp.lubcmp(indx.data(), determinant);
 
-  double det = static_cast<double>(determinant);
+  auto det = static_cast<double>(determinant);
   for (size_t j = 0; j < m_numRows; j++)
     det *= Lcomp.m_rawData[j][j];
 
@@ -1186,7 +1185,7 @@ into a triangular matrix
   }
 
   for (int i = static_cast<int>(m_numRows) - 1; i >= 0; i--) {
-    double sum = static_cast<T>(b[i]);
+    double sum = b[i];
     for (int j = i + 1; j < static_cast<int>(m_numRows); j++)
       sum -= m_rawData[i][j] * b[j];
     b[i] = sum / m_rawData[i][i];
@@ -1631,7 +1630,7 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
   size_t row(0), col(0);
   while (!is.eof() && std::getline(is, value_str, delimiter)) {
     try {
-      T value = boost::lexical_cast<T>(value_str);
+      auto value = boost::lexical_cast<T>(value_str);
       in.m_rawData[row][col] = value;
     } catch (boost::bad_lexical_cast &) {
       throw std::invalid_argument(

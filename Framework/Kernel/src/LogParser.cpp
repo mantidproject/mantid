@@ -16,8 +16,8 @@
 #include <fstream>
 
 // constants for the new style icp event commands
-const char *START_COLLECTION = "START_COLLECTION";
-const char *STOP_COLLECTION = "STOP_COLLECTION";
+constexpr const char *START_COLLECTION = "START_COLLECTION";
+constexpr const char *STOP_COLLECTION = "STOP_COLLECTION";
 
 using std::size_t;
 
@@ -29,12 +29,6 @@ namespace {
 /// static logger
 Logger g_log("LogParser");
 } // namespace
-
-/// @returns the name of the log created that defines the status during a run
-const std::string LogParser::statusLogName() { return std::string("running"); }
-
-/// @returns the name of the log that contains all of the periods
-const std::string LogParser::periodsLogName() { return std::string("periods"); }
 
 /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.
 @param logFName :: The name of the log file
@@ -205,7 +199,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   m_periods.reset(periods);
   m_status.reset(status);
 
-  const Kernel::TimeSeriesProperty<std::string> *icpLog =
+  const auto *icpLog =
       dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
     periods->addValue(Types::Core::DateAndTime(), 1);
@@ -257,7 +251,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
  *  @return times requested period was active
  */
 Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
-  Kernel::TimeSeriesProperty<int> *periods =
+  auto *periods =
       dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
@@ -282,7 +276,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
  */
 Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
   Kernel::PropertyWithValue<int> *currentPeriodProperty =
-      new Kernel::PropertyWithValue<int>("current_period", period);
+      new Kernel::PropertyWithValue<int>(currentPeriodLogName(), period);
   return currentPeriodProperty;
 }
 
@@ -332,8 +326,7 @@ bool LogParser::isICPEventLogNewStyle(
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
  */
 double timeMean(const Kernel::Property *p) {
-  const Kernel::TimeSeriesProperty<double> *dp =
-      dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
+  const auto *dp = dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
   if (!dp) {
     throw std::runtime_error("Property of a wrong type. Cannot be cast to a "
                              "TimeSeriesProperty<double>.");

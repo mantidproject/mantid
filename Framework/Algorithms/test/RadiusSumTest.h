@@ -38,7 +38,8 @@ public:
     { // check numbins, min and max radius
       auto alg = algInstance();
       // check numbins is only integer > 1
-      TS_ASSERT_THROWS(alg->setProperty("NumBins", -3), std::invalid_argument);
+      TS_ASSERT_THROWS(alg->setProperty("NumBins", -3),
+                       const std::invalid_argument &);
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("MinRadius", 1.0));
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("MaxRadius", 0.1));
       MatrixWorkspace_sptr goodWS = RingProfileTest::create_2d_workspace();
@@ -58,11 +59,11 @@ public:
       std::vector<double> justOne(1);
       justOne[0] = -0.35;
       TS_ASSERT_THROWS(alg->setProperty("Centre", justOne),
-                       std::invalid_argument);
+                       const std::invalid_argument &);
 
       std::vector<double> fourInputs(4, -0.45);
       TS_ASSERT_THROWS(alg->setProperty("Centre", fourInputs),
-                       std::invalid_argument);
+                       const std::invalid_argument &);
 
       TS_ASSERT_THROWS_NOTHING(
           alg->setPropertyValue("OutputWorkspace", outWSName));

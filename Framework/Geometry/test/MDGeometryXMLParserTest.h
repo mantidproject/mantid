@@ -183,7 +183,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getNonMappedDimensions(), std::runtime_error);
+        xmlParser.getNonMappedDimensions(), const std::runtime_error &);
   }
 
   void testGetXDimensionThrows() {
@@ -191,7 +191,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getXDimension(), std::runtime_error);
+        xmlParser.getXDimension(), const std::runtime_error &);
   }
 
   void testGetYDimensionThrows() {
@@ -199,7 +199,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getYDimension(), std::runtime_error);
+        xmlParser.getYDimension(), const std::runtime_error &);
   }
 
   void testGetZDimensionThrows() {
@@ -207,7 +207,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getZDimension(), std::runtime_error);
+        xmlParser.getZDimension(), const std::runtime_error &);
   }
 
   void testGetTDimensionThrows() {
@@ -215,7 +215,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getTDimension(), std::runtime_error);
+        xmlParser.getTDimension(), const std::runtime_error &);
   }
 
   void testGetAllDimensionsThrows() {
@@ -223,7 +223,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getAllDimensions(), std::runtime_error);
+        xmlParser.getAllDimensions(), const std::runtime_error &);
   }
 
   void testGetNonIntegratedDimensionsThrows() {
@@ -231,7 +231,7 @@ public:
     MDGeometryXMLParser xmlParser(constructXML("qy", "qx", "en", "qz"));
     TSM_ASSERT_THROWS(
         "execute not called before using getter. Should have thrown",
-        xmlParser.getNonIntegratedDimensions(), std::runtime_error);
+        xmlParser.getNonIntegratedDimensions(), const std::runtime_error &);
   }
 
   void testGetAllDimensions() {
@@ -358,7 +358,7 @@ public:
                                                                    // schema.
     xmlParser.SetRootNodeCheck(
         "SomeOtherSchemaElement"); // This won't match so should throw!
-    TS_ASSERT_THROWS(xmlParser.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(xmlParser.execute(), const std::runtime_error &);
   }
 };
 

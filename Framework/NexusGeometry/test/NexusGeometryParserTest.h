@@ -20,9 +20,11 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
+#include "mockobjects.h"
 #include <H5Cpp.h>
 #include <Poco/Glob.h>
 #include <chrono>
+#include <gmock/gmock.h>
 #include <string>
 
 using namespace Mantid;
@@ -41,6 +43,7 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
   auto beamline = instrument.makeBeamline(pmap);
   return {std::move(std::get<0>(beamline)), std::move(std::get<1>(beamline))};
 }
+
 } // namespace
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
@@ -56,7 +59,8 @@ public:
     const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
         nexusFilename, true, Poco::Glob::GLOB_DEFAULT);
 
-    return NexusGeometryParser::createInstrument(fullpath);
+    return NexusGeometryParser::createInstrument(
+        fullpath, std::make_unique<MockLogger>());
   }
 
   void test_basic_instrument_information() {
@@ -227,8 +231,8 @@ public:
 
   void test_load_wish() {
     auto start = std::chrono::high_resolution_clock::now();
-    auto wishInstrument =
-        NexusGeometryParser::createInstrument(m_wishHDF5DefinitionPath);
+    auto wishInstrument = NexusGeometryParser::createInstrument(
+        m_wishHDF5DefinitionPath, std::make_unique<MockLogger>());
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating WISH instrument took: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
@@ -241,8 +245,8 @@ public:
 
   void test_load_sans2d() {
     auto start = std::chrono::high_resolution_clock::now();
-    auto sansInstrument =
-        NexusGeometryParser::createInstrument(m_sans2dHDF5DefinitionPath);
+    auto sansInstrument = NexusGeometryParser::createInstrument(
+        m_sans2dHDF5DefinitionPath, std::make_unique<MockLogger>());
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating SANS2D instrument took: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
@@ -255,8 +259,8 @@ public:
 
   void test_load_loki() {
     auto start = std::chrono::high_resolution_clock::now();
-    auto sansInstrument =
-        NexusGeometryParser::createInstrument(m_lokiHDF5DefinitionPath);
+    auto sansInstrument = NexusGeometryParser::createInstrument(
+        m_lokiHDF5DefinitionPath, std::make_unique<MockLogger>());
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating LOKI instrument took: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(stop -

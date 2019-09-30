@@ -115,7 +115,7 @@ public:
 
     TableWorkspace_sptr ws = makeData1();
 
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
@@ -247,7 +247,7 @@ public:
 
     TableWorkspace_sptr ws = makeData2();
 
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
@@ -312,7 +312,7 @@ public:
 
     TableWorkspace_sptr ws = makeData1();
 
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);
@@ -378,7 +378,7 @@ public:
     creator.declareDatasetProperties();
 
     TableWorkspace_sptr ws = makeData2();
-    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+    manager.declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
     manager.setProperty("InputWorkspace", ws);

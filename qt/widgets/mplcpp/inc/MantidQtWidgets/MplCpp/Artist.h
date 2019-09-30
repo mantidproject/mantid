@@ -7,8 +7,8 @@
 #ifndef MPLCPP_ARTIST_H
 #define MPLCPP_ARTIST_H
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -17,12 +17,12 @@ namespace MplCpp {
 /**
  * Wraps a matplotlib.artist object with a C++ interface
  */
-class MANTID_MPLCPP_DLL Artist : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Artist : public Common::Python::InstanceHolder {
 public:
   // Holds a reference to the matplotlib artist object
-  explicit Artist(Python::Object obj);
+  explicit Artist(Common::Python::Object obj);
 
-  void set(Python::Dict kwargs);
+  void set(Common::Python::Dict kwargs);
   void remove();
 };
 

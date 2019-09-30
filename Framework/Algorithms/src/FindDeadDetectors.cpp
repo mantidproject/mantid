@@ -21,12 +21,12 @@ using namespace API;
 
 /// Initialisation method.
 void FindDeadDetectors::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the input workspace");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Name of the input workspace");
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
 
@@ -88,7 +88,7 @@ void FindDeadDetectors::exec() {
   // iterate over the data values setting the live and dead values
   g_log.information() << "Marking dead detectors\n";
   const int64_t numSpec = integratedWorkspace->getNumberHistograms();
-  const double numSpec_d = static_cast<double>(numSpec);
+  const auto numSpec_d = static_cast<double>(numSpec);
   int64_t iprogress_step = numSpec / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;

@@ -29,7 +29,7 @@ public:
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings(
         "MyValidatorProp",
-        make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
+        std::make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
 
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
@@ -47,7 +47,7 @@ public:
     alg.declareProperty("MySecondValidatorProp", 456);
     alg.setPropertySettings(
         "MySecondValidatorProp",
-        make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
+        std::make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_DEFAULT));
     prop = alg.getPointerToProperty("MySecondValidatorProp");
     TSM_ASSERT("Starts off visible", prop->getSettings()->isVisible(&alg));
     alg.setProperty("MyIntProp", 123);
@@ -61,8 +61,9 @@ public:
     // Make a property with its validator. Will be Visible when that other one
     // is the default
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", make_unique<VisibleWhenProperty>(
-                                                   "MyIntProp", IS_DEFAULT));
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        std::make_unique<VisibleWhenProperty>("MyIntProp", IS_DEFAULT));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -79,7 +80,7 @@ public:
     alg.declareProperty("MyValidatorProp", 456);
     alg.setPropertySettings(
         "MyValidatorProp",
-        make_unique<VisibleWhenProperty>("MyIntProp", IS_EQUAL_TO, "234"));
+        std::make_unique<VisibleWhenProperty>("MyIntProp", IS_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -95,9 +96,9 @@ public:
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings(
-        "MyValidatorProp",
-        make_unique<VisibleWhenProperty>("MyIntProp", IS_NOT_EQUAL_TO, "234"));
+    alg.setPropertySettings("MyValidatorProp",
+                            std::make_unique<VisibleWhenProperty>(
+                                "MyIntProp", IS_NOT_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -220,8 +221,8 @@ private:
   getCombinationProperty(const VisibleWhenProperty &condOne,
                          const VisibleWhenProperty &condTwo,
                          eLogicOperator logicalOperator) {
-    return Kernel::make_unique<VisibleWhenProperty>(condOne, condTwo,
-                                                    logicalOperator);
+    return std::make_unique<VisibleWhenProperty>(condOne, condTwo,
+                                                 logicalOperator);
   }
 };
 

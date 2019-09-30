@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <MantidParallel/IO/EventsListsShmemManager.h>
+#include "MantidParallel/IO/EventsListsShmemManager.h"
 #include <random>
 #include <sstream>
 

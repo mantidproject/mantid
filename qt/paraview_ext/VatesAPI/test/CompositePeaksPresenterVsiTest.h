@@ -39,14 +39,15 @@ public:
     // Arrange
     CompositePeaksPresenterVsi presenter;
     // Assert
-    TS_ASSERT_THROWS(presenter.getPeaksWorkspace(), std::runtime_error);
+    TS_ASSERT_THROWS(presenter.getPeaksWorkspace(), const std::runtime_error &);
   }
 
   void testThatGettingPeaksWorkspaceNameDirectlyIsNotAllowed() {
     // Arrange
     CompositePeaksPresenterVsi presenter;
     // Assert
-    TS_ASSERT_THROWS(presenter.getPeaksWorkspaceName(), std::runtime_error);
+    TS_ASSERT_THROWS(presenter.getPeaksWorkspaceName(),
+                     const std::runtime_error &);
   }
 
   void testThatGetListOfNamesOfSubPresenters() {

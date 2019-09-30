@@ -135,20 +135,20 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
         # Check the units
         axis = workspace.getAxis(0)
         unit = axis.getUnit()
-        self.assertTrue(unit.unitID() == "Wavelength")
+        self.assertEqual(unit.unitID(),  "Wavelength")
 
         # Check the spectrum
-        self.assertTrue(len(workspace.dataY(0)) == 3)
-        self.assertTrue(workspace.getNumberHistograms() == 1)
+        self.assertEqual(len(workspace.dataY(0)),  3)
+        self.assertEqual(workspace.getNumberHistograms(),  1)
         single_spectrum = workspace.getSpectrum(0)
-        self.assertTrue(single_spectrum.getSpectrumNo() == expected_monitor_spectrum)
+        self.assertEqual(single_spectrum.getSpectrumNo(),  expected_monitor_spectrum)
 
         # Check the values
         tolerance = 1e-8
         for e1, e2, in zip(workspace.dataX(0), expected_lambda):
             self.assertTrue(abs(e1 - e2) < tolerance)
         for e1, e2, in zip(workspace.dataY(0), expected_signal):
-            self.assertTrue(abs(e1-e2) < tolerance)
+            self.assertLess(abs(e1-e2), tolerance)
 
     def test_that_gets_normalization_for_general_background_and_no_prompt_peak(self):
         # Arrange

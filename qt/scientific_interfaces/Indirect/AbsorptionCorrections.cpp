@@ -117,6 +117,11 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
     : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
+  std::map<std::string, std::string> actions;
+  actions["Plot Spectra"] = "Plot Wavelength";
+  actions["Plot Bins"] = "Plot Angle";
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraBin, "", actions));
 
   QRegExp regex(R"([A-Za-z0-9\-\(\)]*)");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
@@ -131,7 +136,6 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(algorithmComplete(bool)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   // Handle density units
   connect(m_uiForm.cbSampleDensity,
@@ -160,6 +164,10 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
   connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
           SLOT(doValidation()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSampleInput->isOptional(true);
+  m_uiForm.dsCanInput->isOptional(true);
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {}
@@ -438,6 +446,19 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsCanInput->readSettings(settings.group());
 }
 
+void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("CalculateMonteCarlo");
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
+                                               : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
+                                               : noSuffixes);
+  m_uiForm.dsCanInput->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
+                                            : getExtensions(tabName));
+  m_uiForm.dsCanInput->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
+                                            : noSuffixes);
+}
+
 void AbsorptionCorrections::processWavelengthWorkspace() {
   auto correctionsWs = getADSWorkspaceGroup(m_pythonExportWsName);
   if (correctionsWs) {
@@ -485,8 +506,8 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   setRunIsRunning(false);
   if (!error) {
     processWavelengthWorkspace();
+    setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
   } else {
-    setPlotResultEnabled(false);
     setSaveResultEnabled(false);
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
@@ -590,21 +611,10 @@ void AbsorptionCorrections::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void AbsorptionCorrections::plotClicked() {
-  setPlotResultIsPlotting(true);
-  auto const plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false)) {
-    if (plotType == "All" || plotType == "Wavelength")
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-    if (plotType == "All" || plotType == "Angle")
-      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
-  }
-  setPlotResultIsPlotting(false);
+void AbsorptionCorrections::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
-
-void AbsorptionCorrections::runClicked() { runTab(); }
 
 void AbsorptionCorrections::setSampleDensityOptions(QString const &method) {
   setComboBoxOptions(m_uiForm.cbSampleDensity, getDensityOptions(method));
@@ -630,12 +640,12 @@ void AbsorptionCorrections::setCanDensityUnit(QString const &text) {
 }
 
 void AbsorptionCorrections::setSampleDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spSampleDensity);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spSampleDensity);
   m_uiForm.spSampleDensity->setValue(getSampleDensityValue(text));
 }
 
 void AbsorptionCorrections::setCanDensityValue(QString const &text) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_uiForm.spCanDensity);
+  MantidQt::API::SignalBlocker blocker(m_uiForm.spCanDensity);
   m_uiForm.spCanDensity->setValue(getCanDensityValue(text));
 }
 
@@ -704,29 +714,18 @@ void AbsorptionCorrections::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
 }
 
-void AbsorptionCorrections::setPlotResultEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotOutput->setEnabled(enabled);
-}
-
 void AbsorptionCorrections::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
 void AbsorptionCorrections::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
 void AbsorptionCorrections::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
-}
-
-void AbsorptionCorrections::setPlotResultIsPlotting(bool plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

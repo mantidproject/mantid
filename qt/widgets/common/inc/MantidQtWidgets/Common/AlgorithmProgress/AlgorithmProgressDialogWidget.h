@@ -4,11 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMPROGRESSDIALOGWIDGET_H
-#define ALGORITHMPROGRESSDIALOGWIDGET_H
+#ifndef MANTID_MANTIDWIDGETS_ALGORITHMPROGRESSDIALOGWIDGET_H
+#define MANTID_MANTIDWIDGETS_ALGORITHMPROGRESSDIALOGWIDGET_H
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
+#include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressDialogWidget.h"
 
 #include <QDialog>
 #include <QPushButton>
@@ -25,7 +26,8 @@ class QProgressBar;
  */
 namespace MantidQt {
 namespace MantidWidgets {
-class AlgorithmProgressDialogWidget : public QDialog {
+class AlgorithmProgressDialogWidget : public QDialog,
+                                      public IAlgorithmProgressDialogWidget {
   Q_OBJECT
 public:
   AlgorithmProgressDialogWidget(QWidget *parent, AlgorithmProgressModel &model);
@@ -33,7 +35,7 @@ public:
   /// Adds an algorithm to the dialog. Returns the item in the tree widget, and
   /// the progress bar within it
   std::pair<QTreeWidgetItem *, QProgressBar *>
-  addAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+  addAlgorithm(Mantid::API::IAlgorithm_sptr alg) override;
 
 protected:
   void closeEvent(QCloseEvent *event) override;

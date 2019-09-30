@@ -251,6 +251,7 @@ class ConvToMDEventsWSIndexingTest : public CxxTest::TestSuite {
   public:
     virtual Points generate() const = 0;
     virtual std::string description() const = 0;
+    virtual ~InputGenerator() = default;
   };
 
   class SimpleInput : public InputGenerator {

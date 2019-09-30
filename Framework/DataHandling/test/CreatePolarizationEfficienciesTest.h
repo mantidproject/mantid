@@ -48,7 +48,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setPropertyValue("OutputWorkspace", "dummy");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_mixed_input() {
@@ -64,7 +64,7 @@ public:
     alg.setPropertyValue("Ap", "0,1,0,0");
     alg.setPropertyValue("F1", "0,0,1,0");
     alg.setPropertyValue("F2", "0,0,0,1");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
   void test_histo() {

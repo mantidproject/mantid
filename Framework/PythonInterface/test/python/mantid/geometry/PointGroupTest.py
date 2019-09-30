@@ -20,9 +20,9 @@ class PointGroupTest(unittest.TestCase):
 
     def test_getInfo(self):
         pg = PointGroupFactory.createPointGroup("m-3m")
-        self.assertEquals(pg.getName(), "m-3m (Cubic)")
-        self.assertEquals(pg.getHMSymbol(), "m-3m")
-        self.assertEquals(pg.getCrystalSystem(), PointGroup.CrystalSystem.Cubic)
+        self.assertEqual(pg.getName(), "m-3m (Cubic)")
+        self.assertEqual(pg.getHMSymbol(), "m-3m")
+        self.assertEqual(pg.getCrystalSystem(), PointGroup.CrystalSystem.Cubic)
 
     def test_isEquivalent(self):
         hkl1 = V3D(1, 1, 1)
@@ -43,21 +43,21 @@ class PointGroupTest(unittest.TestCase):
         self.assertTrue(hkl1 in equivalents)
         self.assertTrue(hkl2 in equivalents)
 
-        self.assertEquals(len(equivalents), 2)
+        self.assertEqual(len(equivalents), 2)
 
     def test_getReflectionFamily(self):
         hkl1 = V3D(0, 0, 1)
         hkl2 = V3D(-1, 0, 0)
 
         pg = PointGroupFactory.createPointGroup("m-3m")
-        self.assertEquals(pg.getReflectionFamily(hkl1), pg.getReflectionFamily(hkl2))
+        self.assertEqual(pg.getReflectionFamily(hkl1), pg.getReflectionFamily(hkl2))
 
     def test_getLatticeSystem(self):
         pg_rhombohedral = PointGroupFactory.createPointGroup("3m r")
         pg_hexagonal = PointGroupFactory.createPointGroup("3m")
 
-        self.assertEquals(pg_rhombohedral.getLatticeSystem(), PointGroup.LatticeSystem.Rhombohedral)
-        self.assertEquals(pg_hexagonal.getLatticeSystem(), PointGroup.LatticeSystem.Hexagonal)
+        self.assertEqual(pg_rhombohedral.getLatticeSystem(), PointGroup.LatticeSystem.Rhombohedral)
+        self.assertEqual(pg_hexagonal.getLatticeSystem(), PointGroup.LatticeSystem.Hexagonal)
 
     def test_to_string(self):
         pg = PointGroupFactory.createPointGroup("m-3m")

@@ -26,10 +26,10 @@ const std::string FilterByXValue::category() const {
 }
 
 void FilterByXValue::init() {
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty("XMin", EMPTY_DBL(),
@@ -76,7 +76,7 @@ void FilterByXValue::exec() {
   xmin *= 0.999999999;
   xmax *= 1.000000001;
 
-  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Check if we're doing thing in-place.
   if (inputWS != outputWS) {

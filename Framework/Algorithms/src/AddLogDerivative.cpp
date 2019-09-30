@@ -30,7 +30,8 @@ DECLARE_ALGORITHM(AddLogDerivative)
  */
 void AddLogDerivative::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::InOut),
       "An input/output workspace. The new log will be added to it.");
   declareProperty(
       "LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),
@@ -102,8 +103,8 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
   DateAndTime start = input->nthTime(0);
   std::vector<DateAndTime> timeFull;
   timeFull.reserve(times.size());
-  for (double time : times)
-    timeFull.push_back(start + time);
+  for (const double time : times)
+    timeFull.emplace_back(start + time);
 
   // Create the TSP out of it
   auto out = new TimeSeriesProperty<double>(name);
@@ -133,8 +134,7 @@ void AddLogDerivative::exec() {
   if (!prop)
     throw std::invalid_argument("Log " + LogName +
                                 " not found in the workspace sample logs.");
-  TimeSeriesProperty<double> *tsp =
-      dynamic_cast<TimeSeriesProperty<double> *>(prop);
+  auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
   if (!tsp)
     throw std::invalid_argument("Log " + LogName +
                                 " is not a numerical series "

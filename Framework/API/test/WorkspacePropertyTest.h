@@ -77,7 +77,7 @@ public:
 
   void testConstructor() {
     TS_ASSERT_THROWS(WorkspaceProperty<Workspace>("test", "", 3),
-                     std::out_of_range)
+                     const std::out_of_range &)
   }
 
   void testValue() {
@@ -296,7 +296,7 @@ public:
 
     // Since no workspace has been assigned to this output property, it should
     // throw
-    TS_ASSERT_THROWS(wsp2->store(), std::runtime_error)
+    TS_ASSERT_THROWS(wsp2->store(), const std::runtime_error &)
     // So now create and assign the workspace and test again
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create(

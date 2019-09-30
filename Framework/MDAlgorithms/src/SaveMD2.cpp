@@ -41,17 +41,17 @@ DECLARE_ALGORITHM(SaveMD2)
 /** Initialize the algorithm's properties.
  */
 void SaveMD2::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace.");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Optional if UpdateFileBackEnd is checked.");
   // Filename is NOT used if UpdateFileBackEnd
-  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
                                       "UpdateFileBackEnd", IS_EQUAL_TO, "0"));
 
   declareProperty(
@@ -59,17 +59,28 @@ void SaveMD2::init() {
       "Only for MDEventWorkspaces with a file back end: check this to update "
       "the NXS file on disk\n"
       "to reflect the current data structure. Filename parameter is ignored.");
-  setPropertySettings(
-      "UpdateFileBackEnd",
-      make_unique<EnabledWhenProperty>("MakeFileBacked", IS_EQUAL_TO, "0"));
+  setPropertySettings("UpdateFileBackEnd",
+                      std::make_unique<EnabledWhenProperty>("MakeFileBacked",
+                                                            IS_EQUAL_TO, "0"));
 
   declareProperty("MakeFileBacked", false,
                   "For an MDEventWorkspace that was created in memory:\n"
                   "This saves it to a file AND makes the workspace into a "
                   "file-backed one.");
-  setPropertySettings(
-      "MakeFileBacked",
-      make_unique<EnabledWhenProperty>("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
+  setPropertySettings("MakeFileBacked",
+                      std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd",
+                                                            IS_EQUAL_TO, "0"));
+  declareProperty(
+      "SaveHistory", true,
+      "Option to not save the Mantid history in the file. Only for MDHisto");
+  declareProperty(
+      "SaveInstrument", true,
+      "Option to not save the instrument in the file. Only for MDHisto");
+  declareProperty(
+      "SaveSample", true,
+      "Option to not save the sample in the file. Only for MDHisto");
+  declareProperty("SaveLogs", true,
+                  "Option to not save the logs in the file. Only for MDHisto");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -94,8 +105,9 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   file->putAttr("SaveMDVersion", 2);
 
   // Write out the coordinate system
-  file->writeData("coordinate_system",
-                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+  if (getProperty("SaveSample"))
+    file->writeData("coordinate_system",
+                    static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
@@ -104,28 +116,36 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   file->putAttr("QConvention", m_QConvention);
 
   // Write out the visual normalization
-  file->writeData("visual_normalization",
-                  static_cast<uint32_t>(ws->displayNormalization()));
+  if (getProperty("SaveSample"))
+    file->writeData("visual_normalization",
+                    static_cast<uint32_t>(ws->displayNormalization()));
 
   // Save the algorithm history under "process"
-  ws->getHistory().saveNexus(file);
+  if (getProperty("SaveHistory"))
+    ws->getHistory().saveNexus(file);
 
   // Save all the ExperimentInfos
-  for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
-    ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
-    std::string groupName = "experiment" + Strings::toString(i);
-    if (ei) {
-      // Can't overwrite entries. Just add the new ones
-      file->makeGroup(groupName, "NXgroup", true);
-      file->putAttr("version", 1);
-      ei->saveExperimentInfoNexus(file);
-      file->closeGroup();
+  if (getProperty("SaveInstrument") || (getProperty("SaveSample")) ||
+      getProperty("SaveLogs")) {
+    for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
+      ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
+      std::string groupName = "experiment" + Strings::toString(i);
+      if (ei) {
+        // Can't overwrite entries. Just add the new ones
+        file->makeGroup(groupName, "NXgroup", true);
+        file->putAttr("version", 1);
+        ei->saveExperimentInfoNexus(file, getProperty("SaveInstrument"),
+                                    getProperty("SaveSample"),
+                                    getProperty("SaveLogs"));
+        file->closeGroup();
+      }
     }
   }
 
   // Write out the affine matrices
-  MDBoxFlatTree::saveAffineTransformMatricies(
-      file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+  if (getProperty("SaveSample"))
+    MDBoxFlatTree::saveAffineTransformMatricies(
+        file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!

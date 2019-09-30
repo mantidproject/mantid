@@ -11,6 +11,7 @@
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Material.h"
@@ -39,7 +40,7 @@ DECLARE_ALGORITHM(SaveHKL)
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
@@ -66,14 +67,14 @@ void SaveHKL::init() {
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
                   "Radius of the sample in centimeters");
   declareProperty("PowerLambda", 4.0, "Power of lambda ");
-  declareProperty(make_unique<FileProperty>("SpectraFile", "",
-                                            API::FileProperty::OptionalLoad,
-                                            ".dat"),
-                  " Spectrum data read from a spectrum file.");
-
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".hkl"),
-      "Path to an hkl file to save.");
+      std::make_unique<FileProperty>("SpectraFile", "",
+                                     API::FileProperty::OptionalLoad, ".dat"),
+      " Spectrum data read from a spectrum file.");
+
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, ".hkl"),
+                  "Path to an hkl file to save.");
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
@@ -84,7 +85,7 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "SaveHKLOutput", Direction::Output),
                   "Output PeaksWorkspace");
   declareProperty(
@@ -95,7 +96,7 @@ void SaveHKL::init() {
       "Extra columns (22 total) in file if true for direction cosines.\n"
       "If false, original 14 columns (default).");
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
                   "DirectionCosines if workspace does not have lattice.");
@@ -106,11 +107,11 @@ void SaveHKL::init() {
 void SaveHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
-  ws = getProperty("InputWorkspace");
+  m_ws = getProperty("InputWorkspace");
 
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
-  if (peaksW != ws)
-    peaksW = ws->clone();
+  if (peaksW != m_ws)
+    peaksW = m_ws->clone();
   auto inst = peaksW->getInstrument();
   std::vector<Peak> peaks = peaksW->getPeaks();
   double scaleFactor = getProperty("ScalePeaks");
@@ -230,55 +231,59 @@ void SaveHKL::exec() {
   std::vector<std::vector<double>> spectra;
   std::vector<std::vector<double>> time;
   int iSpec = 0;
+
   m_smu = getProperty("LinearScatteringCoef"); // in 1/cm
   m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
-  m_radius = getProperty("Radius");            // in cm
   m_power_th = getProperty("PowerLambda");     // in cm
-  const Material &sampleMaterial = peaksW->sample().getMaterial();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
-    double rho = sampleMaterial.numberDensity();
-    if (m_smu == EMPTY_DBL())
-      m_smu =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-          rho;
-    if (m_amu == EMPTY_DBL())
-      m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
-    g_log.notice() << "Sample number density = " << rho
-                   << " atoms/Angstrom^3\n";
-    g_log.notice() << "Cross sections for wavelength = "
-                   << NeutronAtom::ReferenceLambda << "Angstroms\n"
-                   << "    Coherent = " << sampleMaterial.cohScatterXSection()
-                   << " barns\n"
-                   << "    Incoherent = "
-                   << sampleMaterial.incohScatterXSection() << " barns\n"
-                   << "    Total = " << sampleMaterial.totalScatterXSection()
-                   << " barns\n"
-                   << "    Absorption = " << sampleMaterial.absorbXSection()
-                   << " barns\n";
-  } else if (m_smu != EMPTY_DBL() &&
-             m_amu != EMPTY_DBL()) // Save input in Sample
-                                   // with wrong atomic
-                                   // number and name
-  {
-    NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
-    auto shape = boost::shared_ptr<IObject>(
-        peaksW->sample().getShape().cloneWithMaterial(
-            Material("SetInSaveHKL", neutron, 1.0)));
-    peaksW->mutableSample().setShape(shape);
-  }
-  if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
-    g_log.notice() << "LinearScatteringCoef = " << m_smu << " 1/cm\n"
-                   << "LinearAbsorptionCoef = " << m_amu << " 1/cm\n"
-                   << "Radius = " << m_radius << " cm\n"
-                   << "Power Lorentz corrections = " << m_power_th << " \n";
+
+  // Function to calculate total attenuation for a track
+  auto calculateAttenuation = [](const Track &path, double lambda) {
+    double factor(1.0);
+    for (const auto &segment : path) {
+      const double length = segment.distInsideObject;
+      const auto &segObj = *(segment.object);
+      const auto &segMat = segObj.material();
+      factor *= segMat.attenuation(length, lambda);
+    }
+    return factor;
+  };
+
   API::Run &run = peaksW->mutableRun();
-  if (run.hasProperty("Radius")) {
-    if (m_radius == EMPTY_DBL())
-      m_radius = run.getPropertyValueAsType<double>("Radius");
+
+  double radius = getProperty("Radius"); // in cm
+  if (radius != EMPTY_DBL()) {
+    run.addProperty<double>("Radius", radius, true);
   } else {
-    run.addProperty<double>("Radius", m_radius, true);
+    if (run.hasProperty("Radius"))
+      radius = run.getPropertyValueAsType<double>("Radius");
   }
+
+  const auto sourcePos = inst->getSource()->getPos();
+  const auto samplePos = inst->getSample()->getPos();
+  const auto reverseBeamDir = normalize(samplePos - sourcePos);
+
+  const Material &sampleMaterial = peaksW->sample().getMaterial();
+  const IObject *sampleShape{nullptr};
+  // special case of sphere else assume the sample shape and material have been
+  // set already
+  if (radius != EMPTY_DBL()) {
+    // create sphere shape
+    auto sphere = ShapeFactory::createSphere(V3D(), radius * 0.01);
+    if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) {
+      // Save input in Sample with wrong atomic number and name
+      NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
+      sphere->setMaterial(Material("SetInSaveHKL", neutron, 1.0));
+    } else {
+      sphere->setMaterial(sampleMaterial);
+      const double rho = sampleMaterial.numberDensity();
+      m_smu = sampleMaterial.totalScatterXSection() * rho;
+      m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    }
+    peaksW->mutableSample().setShape(sphere);
+  } else if (peaksW->sample().getShape().hasValidShape()) {
+    sampleShape = &(peaksW->sample().getShape());
+  }
+
   if (correctPeaks) {
     std::vector<double> spec(11);
     std::string STRING;
@@ -310,8 +315,7 @@ void SaveHKL::exec() {
       infile.close();
     }
   }
-  // ============================== Save all Peaks
-  // =========================================
+  // =================== Save all Peaks ======================================
   std::set<size_t> banned;
   // Go through each peak at this run / bank
 
@@ -367,8 +371,6 @@ void SaveHKL::exec() {
                        bankName.end());
         Strings::convert(bankName, bank);
 
-        double tbar = 0;
-
         // Two-theta = polar angle = scattering angle = between +Z vector and
         // the
         // scattered beam
@@ -379,9 +381,25 @@ void SaveHKL::exec() {
           banned.insert(wi);
           continue;
         }
-        double transmission = 0;
-        if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) {
-          transmission = absor_sphere(scattering, lambda, tbar);
+
+        double transmission{0}, tbar{0};
+        if (radius != EMPTY_DBL()) {
+          // keep original method if radius is provided
+          transmission = absorbSphere(radius, scattering, lambda, tbar);
+        } else if (sampleShape) {
+          Track beforeScatter(samplePos, reverseBeamDir);
+          sampleShape->interceptSurface(beforeScatter);
+          const auto detDir = normalize(p.getDetPos() - samplePos);
+          Track afterScatter(samplePos, detDir);
+          sampleShape->interceptSurface(afterScatter);
+
+          transmission = calculateAttenuation(beforeScatter, lambda) *
+                         calculateAttenuation(afterScatter, lambda);
+          const auto &mat = sampleShape->material();
+          const auto mu =
+              (mat.totalScatterXSection() + mat.absorbXSection(lambda)) *
+              mat.numberDensity();
+          tbar = -std::log(transmission) / mu;
         }
 
         // Anvred write from Art Schultz/
@@ -523,9 +541,9 @@ void SaveHKL::exec() {
           // This is the scattered beam direction
           V3D dir = p.getDetPos() - inst->getSample()->getPos();
 
-          // "Azimuthal" angle: project the scattered beam direction onto the XY
-          // plane,
-          // and calculate the angle between that and the +X axis (right-handed)
+          // "Azimuthal" angle: project the scattered beam direction onto the
+          // XY plane, and calculate the angle between that and the +X axis
+          // (right-handed)
           double az = atan2(dir.Y(), dir.X());
           R_IPNS[0] = std::cos(twoth) * l2;
           R_IPNS[1] = std::cos(az) * std::sin(twoth) * l2;
@@ -615,7 +633,8 @@ void SaveHKL::exec() {
   }
   peaksW->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", peaksW);
-}
+} // namespace Crystal
+
 /**
  *       function to calculate a spherical absorption correction
  *       and tbar. based on values in:
@@ -632,7 +651,8 @@ p *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
  *
  *       a. j. schultz, june, 2008
  */
-double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
+double SaveHKL::absorbSphere(double radius, double twoth, double wl,
+                             double &tbar) {
   int i;
   double mu, mur; // mu is the linear absorption coefficient,
   // r is the radius of the spherical sample.
@@ -646,7 +666,7 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
 
   mu = m_smu + (m_amu / 1.8f) * wl;
 
-  mur = mu * m_radius;
+  mur = mu * radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;
@@ -731,7 +751,7 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
-      ws->getInstrument()->getComponentByName(bankName);
+      m_ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
   if (parent->type() == "RectangularDetector") {
@@ -741,7 +761,7 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-    if (ws->getInstrument()->getName() ==
+    if (m_ws->getInstrument()->getName() ==
         "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;

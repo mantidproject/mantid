@@ -54,18 +54,20 @@ DECLARE_ALGORITHM(PhaseQuadMuon)
  *
  */
 void PhaseQuadMuon::init() {
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
-                  "Name of the input workspace containing the spectra");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
+      "Name of the input workspace containing the spectra");
 
   declareProperty(
-      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "PhaseTable", "", Direction::Input),
       "Name of the table containing the detector phases and asymmetries");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Name of the output workspace");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Name of the output workspace");
 }
 
 /** Executes the algorithm

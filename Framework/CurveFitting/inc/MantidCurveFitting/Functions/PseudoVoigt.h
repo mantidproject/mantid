@@ -36,15 +36,26 @@ namespace Functions {
 class DLLExport PseudoVoigt : public API::IPeakFunction {
 public:
   double centre() const override { return getParameter("PeakCentre"); }
-  double height() const override { return getParameter("Height"); }
+  double intensity() const override { return getParameter("Intensity"); }
+  double height() const override;
   double fwhm() const override { return getParameter("FWHM"); }
 
   void setCentre(const double c) override { setParameter("PeakCentre", c); }
-  void setHeight(const double h) override { setParameter("Height", h); }
-  void setFwhm(const double w) override { setParameter("FWHM", w); }
+  void setHeight(const double h) override;
+  void setFwhm(const double w) override;
+  void setIntensity(const double newIntensity) override {
+    setParameter("Intensity", newIntensity);
+  }
 
   std::string name() const override { return "PseudoVoigt"; }
   const std::string category() const override { return "Peak"; }
+
+  /// Set i-th parameter
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override;
+  /// set by name
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true) override;
 
 protected:
   void functionLocal(double *out, const double *xValues,
@@ -54,6 +65,17 @@ protected:
                           const size_t nData) override;
 
   void init() override;
+
+private:
+  /// historty of the order to be set
+  std::vector<size_t> m_set_history_distances;
+  void update_set_history(size_t set_index);
+  /// get the parameter (by index) to calculate according to parameter set
+  /// history
+  size_t get_parameter_to_calculate_from_set();
+  bool estimate_parameter_value();
+
+  double m_height;
 };
 
 } // namespace Functions

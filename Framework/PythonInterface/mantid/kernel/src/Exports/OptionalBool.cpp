@@ -7,7 +7,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IValidator.h"
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/core/PropertyWithValueExporter.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
@@ -80,11 +80,11 @@ public:
 
     auto optBool = fromPyObj(value);
     if (isNone(validator)) {
-      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
-          name, optBool, direction);
+      return std::make_unique<PropertyWithValue<OptionalBool>>(name, optBool,
+                                                               direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
+      return std::make_unique<PropertyWithValue<OptionalBool>>(
           name, optBool, propValidator->clone(), direction);
     }
   }

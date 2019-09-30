@@ -8,7 +8,7 @@
 #define TASKTEST_H_
 
 #include "MantidKernel/Task.h"
-#include <MantidKernel/Timer.h>
+#include "MantidKernel/Timer.h"
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 

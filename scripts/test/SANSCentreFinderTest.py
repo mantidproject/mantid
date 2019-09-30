@@ -177,14 +177,14 @@ class TestPositionProvider(unittest.TestCase):
         provider = cf.PositionProviderXY(increment_coord1,increment_coord2,tolerance)
 
         # Act and Assert
-        self.assertTrue(increment_coord1 == provider.get_increment_coord1())
-        self.assertTrue(increment_coord2 == provider.get_increment_coord2())
+        self.assertEqual(increment_coord1,  provider.get_increment_coord1())
+        self.assertEqual(increment_coord2,  provider.get_increment_coord2())
 
         provider.half_and_reverse_increment_coord1()
         provider.half_and_reverse_increment_coord2()
 
-        self.assertTrue(-increment_coord1/2.0 == provider.get_increment_coord1())
-        self.assertTrue(-increment_coord2/2.0 == provider.get_increment_coord2())
+        self.assertEqual(-increment_coord1/2.0,  provider.get_increment_coord1())
+        self.assertEqual(-increment_coord2/2.0,  provider.get_increment_coord2())
 
     def test_that_AngleY_increment_provider_halves_the_step(self):
         # Arrange
@@ -197,14 +197,14 @@ class TestPositionProvider(unittest.TestCase):
         provider = cf.PositionProviderAngleY(increment_coord1,increment_coord2,tolerance,tolerance_angle, bench_rotation, coord1_scale_factor)
 
         # Act and Assert
-        self.assertTrue(increment_coord1 == provider.get_increment_coord1())
-        self.assertTrue(increment_coord2 == provider.get_increment_coord2())
+        self.assertEqual(increment_coord1,  provider.get_increment_coord1())
+        self.assertEqual(increment_coord2,  provider.get_increment_coord2())
 
         provider.half_and_reverse_increment_coord1()
         provider.half_and_reverse_increment_coord2()
 
-        self.assertTrue(-increment_coord1/2.0 == provider.get_increment_coord1())
-        self.assertTrue(-increment_coord2/2.0 == provider.get_increment_coord2())
+        self.assertEqual(-increment_coord1/2.0,  provider.get_increment_coord1())
+        self.assertEqual(-increment_coord2/2.0,  provider.get_increment_coord2())
 
     def test_that_XY_increment_is_smaller_than_tolerance(self):
         # Arrange

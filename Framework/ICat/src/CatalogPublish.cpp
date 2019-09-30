@@ -35,10 +35,10 @@ DECLARE_ALGORITHM(CatalogPublish)
 
 /// Init method to declare algorithm properties
 void CatalogPublish::init() {
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "FileName", "", API::FileProperty::OptionalLoad),
                   "The file to publish.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input,
                       API::PropertyMode::Optional),
                   "The workspace to publish.");

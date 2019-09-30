@@ -29,11 +29,11 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void HFIRLoad::init() {
-  declareProperty(make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, ".xml"),
                   "The name of the input file to load");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Then name of the output workspace");
   declareProperty(
       "NoBeamCenter", false,
@@ -132,7 +132,7 @@ void HFIRLoad::exec() {
 
   // If the load algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("LoadAlgorithm");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -200,8 +200,7 @@ void HFIRLoad::exec() {
   } else {
     const std::string sddName = "total-sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     if (!dp) {
       throw std::runtime_error("Could not cast (interpret) the property " +
                                sddName + " as a floating point numeric value.");
@@ -246,8 +245,7 @@ void HFIRLoad::exec() {
   } catch (...) {
     Mantid::Kernel::Property *prop =
         dataWS->run().getProperty("source-sample-distance");
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     src_to_sample = *dp;
     output_message +=
         "   Could not compute SSD from number of guides, taking: " +
@@ -256,8 +254,7 @@ void HFIRLoad::exec() {
 
   const std::string sampleADName = "sample-aperture-diameter";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(sampleADName);
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
     throw std::runtime_error("Could not cast (interpret) the property " +
                              sampleADName +
@@ -305,13 +302,15 @@ void HFIRLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterX", center_x));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterX",
+                                                      center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
-          "LatestBeamCenterY", center_y));
+      reductionManager->declareProperty(
+          std::make_unique<PropertyWithValue<double>>("LatestBeamCenterY",
+                                                      center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", center_y);
 

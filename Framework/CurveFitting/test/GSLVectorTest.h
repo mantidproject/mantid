@@ -175,7 +175,7 @@ public:
     TS_ASSERT_EQUALS(v1[1], 88);
     TS_ASSERT_EQUALS(v1[2], 888);
 
-    TS_ASSERT_THROWS(v1 += makeVector3(), std::runtime_error);
+    TS_ASSERT_THROWS(v1 += makeVector3(), const std::runtime_error &);
   }
 
   void test_minus_operator() {
@@ -187,7 +187,7 @@ public:
     TS_ASSERT_EQUALS(v1[1], 22);
     TS_ASSERT_EQUALS(v1[2], 222);
 
-    TS_ASSERT_THROWS(v1 -= makeVector3(), std::runtime_error);
+    TS_ASSERT_THROWS(v1 -= makeVector3(), const std::runtime_error &);
   }
 
   void test_times_operator() {
@@ -212,7 +212,7 @@ public:
     auto v1 = makeVector1();
     auto v2 = makeVector2();
     TS_ASSERT_DELTA(v1.dot(v2), 3.0 * 5.0 + 33.0 * 55.0 + 333.0 * 555.0, 1e-10);
-    TS_ASSERT_THROWS(v1.dot(makeVector3()), std::runtime_error);
+    TS_ASSERT_THROWS(v1.dot(makeVector3()), const std::runtime_error &);
   }
 
   void test_find_min_element() {

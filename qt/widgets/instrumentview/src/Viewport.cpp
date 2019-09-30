@@ -416,12 +416,9 @@ void Viewport::initRotationFrom(int a, int b) {
 void Viewport::generateRotationTo(int a, int b) {
   Mantid::Kernel::V3D newpoint;
   projectOnSphere(a, b, newpoint);
-  Mantid::Kernel::V3D diff(m_lastpoint);
-  // Difference between old point and new point
-  diff -= newpoint;
   // Angle is given in degrees as the dot product of the two vectors
   double angle = m_rotationspeed * newpoint.angle(m_lastpoint);
-  diff = m_lastpoint.cross_prod(newpoint);
+  const auto diff = m_lastpoint.cross_prod(newpoint);
   // Create a quaternion from the angle and vector direction
   Mantid::Kernel::Quat temp(angle, diff);
   // Left multiply

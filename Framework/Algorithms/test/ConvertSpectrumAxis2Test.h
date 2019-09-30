@@ -59,7 +59,8 @@ private:
     TS_ASSERT(thetaAxis->isNumeric());
 
     // Check axis is correct length for the workspaces.
-    TS_ASSERT_THROWS((*thetaAxis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*thetaAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     // Check the outputs for the workspaces are correct.
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -97,7 +98,8 @@ private:
     TS_ASSERT_EQUALS(input->e(1), output->e(1));
 
     // Check workspace axes are of correct length.
-    TS_ASSERT_THROWS((*thetaAxis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*thetaAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
   }
 
   void clean_up_workspaces(const std::string inputWS,
@@ -195,7 +197,7 @@ public:
         conv.setPropertyValue("OutputWorkspace", outputWS));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", target));
 
-    TS_ASSERT_THROWS(conv.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(conv.execute(), const std::invalid_argument &);
     TS_ASSERT(!conv.isExecuted());
 
     // Clean up workspaces.
@@ -228,7 +230,8 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 0.0878, 1.0000e-4);
 
     // Check axis is correct length
-    TS_ASSERT_THROWS((*qAxis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*qAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_EQUALS(input->x(0), output->x(0));
     TS_ASSERT_EQUALS(input->y(0), output->y(0));
@@ -270,7 +273,8 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 2 * M_PI / DBL_MIN, 1e-10);
 
     // Check axis is correct length
-    TS_ASSERT_THROWS((*qAxis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*qAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_EQUALS(input->x(0), output->x(0));
     TS_ASSERT_EQUALS(input->y(0), output->y(0));
@@ -312,7 +316,8 @@ public:
     TS_ASSERT_DELTA((*q2Axis)(2), 0.00771, 1.0000e-5);
 
     // Check axis is correct length
-    TS_ASSERT_THROWS((*q2Axis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*q2Axis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT_EQUALS(input->x(0), output->x(0));
     TS_ASSERT_EQUALS(input->y(0), output->y(0));
@@ -374,7 +379,8 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 0.0439, 1.0000e-4);
 
     // Check axis is of correct length.
-    TS_ASSERT_THROWS((*qAxis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*qAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     // Clean up workspaces.
     clean_up_workspaces(inputWS, outputWS);
@@ -428,7 +434,8 @@ public:
     TS_ASSERT_DELTA((*qAxis)(2), 0.004393, 1.0000e-6);
 
     // Check axis is of correct length.
-    TS_ASSERT_THROWS((*qAxis)(3), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*qAxis)(3),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     TS_ASSERT(conv.isExecuted());
 

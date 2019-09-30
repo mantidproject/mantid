@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
+#include <memory>
 
 #if defined(_MSC_VER)
 #pragma warning(push, 0)
@@ -36,7 +37,6 @@ NexusTestHelper::~NexusTestHelper() {
   if (!file)
     return;
   file->close();
-  delete file;
   if (deleteFile) {
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
@@ -53,7 +53,7 @@ void NexusTestHelper::createFile(std::string barefilename) {
               barefilename);
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
-  file = new ::NeXus::File(filename, NXACC_CREATE5);
+  file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
   file->makeGroup("test_entry", "NXentry", true);
 }
 
@@ -64,7 +64,6 @@ void NexusTestHelper::reopenFile() {
     throw std::runtime_error(
         "NexusTestHelper: you must call createFile() before reopenFile().");
   file->close();
-  delete file;
-  file = new ::NeXus::File(filename, NXACC_READ);
+  file = std::make_unique<::NeXus::File>(filename, NXACC_READ);
   file->openGroup("test_entry", "NXentry");
 }

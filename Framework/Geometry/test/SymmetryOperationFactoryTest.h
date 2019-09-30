@@ -39,7 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
     TS_ASSERT_THROWS(SymmetryOperationFactory::Instance().createSymOp("fake2"),
-                     Mantid::Kernel::Exception::ParseError);
+                     const Mantid::Kernel::Exception::ParseError &);
 
     // createSymOp also works when an operation is not subscribed
     TS_ASSERT_THROWS_NOTHING(
@@ -75,7 +75,7 @@ public:
     opStrings.emplace_back("doesNotWork");
     TS_ASSERT_THROWS(
         symOps = SymmetryOperationFactory::Instance().createSymOps(opStrings),
-        Mantid::Kernel::Exception::ParseError);
+        const Mantid::Kernel::Exception::ParseError &);
   }
 
   void testCreateSymOpsString() {
@@ -95,10 +95,10 @@ public:
 
     TS_ASSERT_THROWS(
         SymmetryOperationFactory::Instance().createSymOps(invalidSep),
-        Mantid::Kernel::Exception::ParseError);
+        const Mantid::Kernel::Exception::ParseError &);
     TS_ASSERT_THROWS(
         SymmetryOperationFactory::Instance().createSymOps(invalidOne),
-        Mantid::Kernel::Exception::ParseError);
+        const Mantid::Kernel::Exception::ParseError &);
   }
 
   void testUnsubscribe() {

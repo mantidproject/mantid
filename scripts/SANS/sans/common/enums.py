@@ -275,7 +275,7 @@ class RebinType(object):
 #  SaveType
 # --------------------------
 @string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus")
+@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus", "NoType")
 class SaveType(object):
     """
     Defines the save types available
@@ -349,7 +349,8 @@ class OutputMode(object):
 @string_convertible
 @serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
                    "Output", "UserFile", "SampleScatterPeriod", "SampleTransmissionPeriod", "SampleDirectPeriod",
-                   "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod",)
+                   "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod", "SampleThickness", "SampleHeight",
+                   "SampleWidth")
 class BatchReductionEntry(object):
     """
     Defines the entries of a batch reduction file.

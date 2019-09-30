@@ -22,13 +22,13 @@ DECLARE_ALGORITHM(LoadNexusMonitors)
 /// Initialization method.
 void LoadNexusMonitors::init() {
   declareProperty(
-      Kernel::make_unique<API::FileProperty>("Filename", "",
-                                             API::FileProperty::Load, ".nxs"),
+      std::make_unique<API::FileProperty>("Filename", "",
+                                          API::FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the NeXus file to "
       "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 }
@@ -69,7 +69,7 @@ void LoadNexusMonitors::exec() {
       ssPropName << "OutputWorkspace"
                  << "_" << i + 1;
       declareProperty(
-          Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+          std::make_unique<API::WorkspaceProperty<API::Workspace>>(
               ssPropName.str(), ssWsName.str(), Kernel::Direction::Output),
           "Additional output workspace for multi period monitors.");
       setProperty(ssPropName.str(), ws_group->getItem(i));

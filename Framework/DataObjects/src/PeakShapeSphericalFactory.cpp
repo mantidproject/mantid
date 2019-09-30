@@ -7,7 +7,7 @@
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <MantidKernel/VMD.h>
+#include "MantidKernel/VMD.h"
 #include <json/json.h>
 
 namespace Mantid {
@@ -31,7 +31,7 @@ PeakShapeSphericalFactory::create(const std::string &source) const {
 
       const std::string algorithmName(root["algorithm_name"].asString());
       const int algorithmVersion(root["algorithm_version"].asInt());
-      const SpecialCoordinateSystem frame(
+      const auto frame(
           static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
       const double radius(root["radius"].asDouble());
 

@@ -28,12 +28,12 @@ using namespace API;
  */
 void RenameWorkspaces::init() {
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>(
+      std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Names of the Input Workspaces");
   // WorkspaceNames - List of new names
-  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+  declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "WorkspaceNames", Direction::Input),
                   "New Names of the Workspaces");
   // --or--
@@ -146,7 +146,7 @@ void RenameWorkspaces::exec() {
   for (size_t i = 0; i < nWs; ++i) {
     std::ostringstream os;
     os << "OutputWorkspace_" << i + 1;
-    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
         os.str(), newWsName[i], Direction::Output));
     auto alg = createChildAlgorithm("RenameWorkspace");
     alg->setPropertyValue("InputWorkspace", inputWsName[i]);

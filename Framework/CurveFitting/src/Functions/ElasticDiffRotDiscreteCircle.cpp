@@ -12,7 +12,7 @@
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/make_unique.h"
+
 // 3rd party library headers (N/A)
 // standard library headers
 #include <cmath>
@@ -46,11 +46,11 @@ ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle() {
  */
 void ElasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Height and Radius
-  auto HeightConstraint = Kernel::make_unique<BConstraint>(
+  auto HeightConstraint = std::make_unique<BConstraint>(
       this, "Height", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(HeightConstraint));
 
-  auto RadiusConstraint = Kernel::make_unique<BConstraint>(
+  auto RadiusConstraint = std::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 }

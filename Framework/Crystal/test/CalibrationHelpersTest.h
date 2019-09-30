@@ -52,7 +52,7 @@ public:
     // Check what happens if l1 is negative
     TS_ASSERT_THROWS(CalibrationHelpers::adjustUpSampleAndSourcePositions(
                          -l1, positionSampleNew, wsNew->mutableComponentInfo()),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     CalibrationHelpers::adjustUpSampleAndSourcePositions(
         l1, positionSampleNew, wsNew->mutableComponentInfo());

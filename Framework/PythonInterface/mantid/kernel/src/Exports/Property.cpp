@@ -8,9 +8,9 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -28,6 +28,29 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
+
+namespace {
+
+//
+// gcc 7 with std=c++17 has an issue attaching the EMPTY_*
+// functions with add_static_property when attempting to cast
+// the function pointer to a "const volatile void *":
+//
+//   arg_to_python.hpp:211:66: error: invalid conversion from 'double (*)()
+//   noexcept'
+//                             to 'const volatile void*' [-fpermissive]
+//
+// The noexcept specification appears to prevent the cast in the
+// boost python layer. These functions provide a pass through without the
+// noexcept specifier.
+
+constexpr inline double emptyDouble() { return Mantid::EMPTY_DBL(); }
+
+constexpr inline int emptyInt() { return Mantid::EMPTY_INT(); }
+
+constexpr inline long emptyLong() { return Mantid::EMPTY_LONG(); }
+
+} // namespace
 
 GET_POINTER_SPECIALIZATION(Property)
 GNU_DIAG_OFF("unused-local-typedef")
@@ -116,7 +139,7 @@ void export_Property() {
                                   return_value_policy<return_by_value>()),
                     "Return the object managing this property's settings")
 
-      .add_static_property("EMPTY_DBL", &Mantid::EMPTY_DBL)
-      .add_static_property("EMPTY_INT", &Mantid::EMPTY_INT)
-      .add_static_property("EMPTY_LONG", &Mantid::EMPTY_LONG);
+      .add_static_property("EMPTY_DBL", emptyDouble)
+      .add_static_property("EMPTY_INT", emptyInt)
+      .add_static_property("EMPTY_LONG", emptyLong);
 }

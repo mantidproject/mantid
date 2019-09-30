@@ -5,12 +5,49 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from six import iterkeys
+from six import PY2, iterkeys
 import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
+from isis_powder.routines.param_map_entry import ParamMapEntry
+
+# Common param mapping entries
+PARAM_MAPPING = [
+    ParamMapEntry(ext_name="nxs_filename", int_name="nxs_filename"),
+    ParamMapEntry(ext_name="gss_filename", int_name="gss_filename"),
+    ParamMapEntry(ext_name="dat_files_directory", int_name="dat_files_directory"),
+    ParamMapEntry(ext_name="tof_xye_filename", int_name="tof_xye_filename"),
+    ParamMapEntry(ext_name="dspacing_xye_filename", int_name="dspacing_xye_filename"),
+]
+
+# Set of defaults for the advanced config settings
+ADVANCED_CONFIG = {
+    "nxs_filename": "{fileext}{inst}{runno}{suffix}.nxs",
+    "gss_filename": "{fileext}{inst}{runno}{suffix}.gsas",
+    "dat_files_directory": "dat_files",
+    "tof_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-TOF.dat",
+    "dspacing_xye_filename": "{fileext}{instshort}{runno}{suffix}-b_{{bankno}}-d.dat"
+}
+
+
+def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
+    """
+    Mask a series of peaks defined by the lower/upper bounds
+    :param workspaces_to_mask: Mask these workspaces
+    :param mask_list: A list of pairs of peak X min/max for masking
+    :return: A list of masked workspaces
+    """
+    output_workspaces = list(workspaces_to_mask)
+
+    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
+        output_name = "masked_vanadium-" + str(ws_index + 1)
+        for mask_params in bank_mask_list:
+            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
+                                                          OutputWorkspace=output_name,
+                                                          XMin=mask_params[0], XMax=mask_params[1])
+    return output_workspaces
 
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
@@ -129,7 +166,7 @@ def extract_ws_spectra(ws_to_split):
     num_spectra = ws_to_split.getNumberHistograms()
     spectra_bank_list = []
     for i in range(0, num_spectra):
-        output_name = ws_to_split.getName() + "-" + str(i + 1)
+        output_name = ws_to_split.name() + "-" + str(i + 1)
         # Have to use crop workspace as extract single spectrum struggles with the variable bin widths
         spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
                                                       StartWorkspaceIndex=i, EndWorkspaceIndex=i))
@@ -460,6 +497,48 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     return ws_to_correct
 
 
+def read_masking_file(masking_file_path):
+    """
+    Read a masking file in the ISIS powder format:
+
+        # bank N(plus any other comments)
+        peak_min0 peak_max0
+        peak_min1 peak_max1
+        ...
+        # bank M(plus any other comments)
+        peak_min0 peak_max0
+        peak_min1 peak_max1
+        ...
+    :param masking_file_path: The full path to a masking file
+    :return: A list of peak min/max values for each bank
+    """
+    all_banks_masking_list = []
+    bank_masking_list = []
+
+    # Python > 3 requires the encoding to be included so an Angstrom
+    # symbol can be read, I'm assuming all file read here are
+    # `latin-1` which may not be true in the future. Python 2 `open`
+    # doesn't have an encoding option
+    if PY2:
+        encoding = {}
+    else:
+        encoding = {"encoding": "latin-1"}
+    with open(masking_file_path, **encoding) as mask_file:
+        for line in mask_file:
+            if 'bank' in line:
+                # Push back onto new bank
+                if bank_masking_list:
+                    all_banks_masking_list.append(bank_masking_list)
+                bank_masking_list = []
+            else:
+                # Parse and store in current list
+                bank_masking_list.append(line.strip().split())
+    # deal with final bank
+    if bank_masking_list:
+        all_banks_masking_list.append(bank_masking_list)
+    return all_banks_masking_list
+
+
 def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
     """
     Implementation of cropping the single workspace in TOF. First converts to TOF, crops then converts
@@ -517,6 +596,7 @@ def _load_raw_files(run_number_string, instrument, file_ext=None):
     :return: A list of loaded workspaces
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
+    file_ext = "" if file_ext is None else file_ext
     load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
     return load_raw_ws
 
@@ -534,20 +614,11 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
     _check_load_range(list_of_runs_to_load=run_numbers_list)
 
     for run_number in run_numbers_list:
-        file_name = instrument._generate_input_file_name(run_number=run_number)
-        file_name = file_name + str(file_ext) if file_ext else file_name
+        file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
         read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
     return read_ws_list
-
-
-def _strip_vanadium_peaks(workspaces_to_strip):
-    out_list = []
-    for i, ws in enumerate(workspaces_to_strip):
-        out_name = ws.getName() + "_toSpline-" + str(i+1)
-        out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
-    return out_list
 
 
 def _sum_ws_range(ws_list):

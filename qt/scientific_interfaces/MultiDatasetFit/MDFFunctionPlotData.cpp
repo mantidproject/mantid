@@ -114,9 +114,9 @@ void MDFFunctionPlotData::updateFunction(const Mantid::API::IFunction &fun) {
   }
   // Copy the parameters
   for (size_t i = 0; i < fun.nParams(); ++i) {
-    auto name = fun.parameterName(i);
-    auto value = fun.getParameter(i);
-    m_function->setParameter(name, value);
+    const auto paramName = fun.parameterName(i);
+    const auto paramValue = fun.getParameter(i);
+    m_function->setParameter(paramName, paramValue);
   }
 }
 

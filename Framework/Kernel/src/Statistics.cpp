@@ -99,18 +99,18 @@ double getMedian(const vector<TYPE> &data, const size_t num_data,
  */
 template <typename TYPE>
 std::vector<double> getZscore(const vector<TYPE> &data) {
+  std::vector<double> Zscore;
   if (data.size() < 3) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  std::vector<double> Zscore;
   Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
-    double tmp = static_cast<double>(*it);
+    auto tmp = static_cast<double>(*it);
     Zscore.push_back(fabs((stats.mean - tmp) / stats.standard_deviation));
   }
   return Zscore;
@@ -122,14 +122,14 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
 template <typename TYPE>
 std::vector<double> getWeightedZscore(const vector<TYPE> &data,
                                       const vector<TYPE> &weights) {
+  std::vector<double> Zscore;
   if (data.size() < 3) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
-  std::vector<double> Zscore;
   Statistics stats = getStatistics(data);
   if (stats.standard_deviation == 0.) {
-    std::vector<double> Zscore(data.size(), 0.);
+    Zscore.resize(data.size(), 0.);
     return Zscore;
   }
   double sumWeights = 0.0;
@@ -213,7 +213,7 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
     double var = variance(acc);
 
     if (flags & StatOptions::CorrectedStdDev) {
-      double ndofs = static_cast<double>(data.size());
+      auto ndofs = static_cast<double>(data.size());
       var *= ndofs / (ndofs - 1.0);
     }
     statistics.standard_deviation = std::sqrt(var);
@@ -364,9 +364,9 @@ std::vector<double> getMomentsAboutOrigin(const std::vector<TYPE> &x,
     // reduce item lookup - and central x for histogram
     const double xVal = .5 * static_cast<double>(x[j] + x[j + 1]);
     // this variable will be (x^n)*y
-    double temp = static_cast<double>(y[j]); // correct for histogram
+    auto temp = static_cast<double>(y[j]); // correct for histogram
     if (isDensity) {
-      const double xDelta = static_cast<double>(x[j + 1] - x[j]);
+      const auto xDelta = static_cast<double>(x[j + 1] - x[j]);
       temp = .5 * (temp + static_cast<double>(y[j + 1])) * xDelta;
     }
 
@@ -429,7 +429,7 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
     // this variable will be (x^n)*y
     double temp;
     if (isDensity) {
-      const double xDelta = static_cast<double>(x[j + 1] - x[j]);
+      const auto xDelta = static_cast<double>(x[j + 1] - x[j]);
       temp = xVal * .5 * static_cast<double>(y[j] + y[j + 1]) * xDelta;
     } else {
       temp = xVal * static_cast<double>(y[j]);

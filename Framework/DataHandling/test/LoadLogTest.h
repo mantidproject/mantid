@@ -55,7 +55,7 @@ public:
 
     outputSpace = "LoadLogTest-threeColumnFile";
     TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
 
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
@@ -106,7 +106,7 @@ public:
 
     outputSpace = "LoadLogTest-singleLogFile";
     TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace),
-                     std::invalid_argument)
+                     const std::invalid_argument &)
     // Create an empty workspace and put it in the AnalysisDataService
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);

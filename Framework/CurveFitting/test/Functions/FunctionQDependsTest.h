@@ -144,11 +144,11 @@ private:
     // create an axis of Q-values
     std::vector<double> qvalues{
         0.3, 0.5, 0.5, 0.9}; // as many elements as the value of variable nhist
-    auto momenta = new Mantid::API::NumericAxis(qvalues);
+    auto momenta = std::make_unique<Mantid::API::NumericAxis>(qvalues);
     momenta->setUnit("MomentumTransfer");
     // create the matrix workspace
     auto ws = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nbins);
-    ws->replaceAxis(1, momenta);
+    ws->replaceAxis(1, std::move(momenta));
     return ws;
   }
 

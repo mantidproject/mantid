@@ -7,11 +7,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 
-//----------------------
-// Includes
-//----------------------
+#include "IndirectInterface.h"
 #include "IndirectTab.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
+
 #include "ui_IndirectCorrections.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -43,7 +41,7 @@ class CorrectionsTab;
  *
  * Is a friend to the CorrectionsTab class.
  */
-class IndirectCorrections : public MantidQt::API::UserSubWindow {
+class IndirectCorrections : public IndirectInterface {
   Q_OBJECT
 
   /// Allow CorrectionsTab to have access.
@@ -74,14 +72,12 @@ private:
 private slots:
   /// Called when the user clicks the Py button
   void exportTabPython();
-  /// Opens a directory dialog.
-  void openDirectoryDialog();
-  /// Opens the Mantid Wiki web page of the current tab.
-  void help();
-  /// Slot showing a message box to the user
-  void showMessageBox(const QString &message);
 
 private:
+  std::string documentationPage() const override;
+
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+
   /// UI form containing all Qt elements.
   Ui::IndirectCorrections m_uiForm;
 

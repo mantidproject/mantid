@@ -17,7 +17,8 @@ parser.add_argument('--application', dest='application')
 
 command_line_args = parser.parse_args()
 
-sys.path.insert(0, command_line_args.directory)
+if command_line_args.directory:
+    sys.path.insert(0, command_line_args.directory)
 
 import mantid  # noqa
 

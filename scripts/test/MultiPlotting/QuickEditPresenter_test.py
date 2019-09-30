@@ -20,9 +20,9 @@ class QuickEditPresenterTest(unittest.TestCase):
     def test_add_subplot(self):
         name = "new plot"
         self.pres.add_subplot(name)
-        self.assertEquals(self.view.add_subplot.call_count, 1)
-        self.assertEquals(self.view.find_index.call_count, 1)
-        self.assertEquals(self.view.set_index.call_count, 1)
+        self.assertEqual(self.view.add_subplot.call_count, 1)
+        self.assertEqual(self.view.find_index.call_count, 1)
+        self.assertEqual(self.view.set_index.call_count, 1)
 
     def test_connect_autoscale(self):
         self.pres.connect_autoscale_changed(self.slot)
@@ -53,7 +53,7 @@ class QuickEditPresenterTest(unittest.TestCase):
         output = self.pres.all()
         # should miss out all
         for k in range(len(output)):
-            self.assertEquals(names[k+1], output[k])
+            self.assertEqual(names[k+1], output[k])
 
     def test_set_plot_x_range(self):
         self.pres.set_plot_x_range([0,1])
@@ -66,32 +66,32 @@ class QuickEditPresenterTest(unittest.TestCase):
     def test_set_errors_TT(self):
         self.view.get_errors = mock.MagicMock(return_value = True)
         self.pres.set_errors(True)
-        self.assertEquals(self.view.set_errors.call_count,0)
+        self.assertEqual(self.view.set_errors.call_count,0)
        
     def test_set_errors_TF(self):
         self.view.get_errors = mock.MagicMock(return_value = True)
         self.pres.set_errors(False)
-        self.assertEquals(self.view.set_errors.call_count,1)
+        self.assertEqual(self.view.set_errors.call_count,1)
         self.view.set_errors.assert_called_with(False)
 
     def test_set_errors_FT(self):
         self.view.get_errors = mock.MagicMock(return_value = False)
         self.pres.set_errors(True)
-        self.assertEquals(self.view.set_errors.call_count,1)
+        self.assertEqual(self.view.set_errors.call_count,1)
         self.view.set_errors.assert_called_with(True)
 
     def test_set_errors_FF(self):
         self.view.get_errors = mock.MagicMock(return_value = False)
         self.pres.set_errors(False)
-        self.assertEquals(self.view.set_errors.call_count,0)
+        self.assertEqual(self.view.set_errors.call_count,0)
 
 
     def test_rmSubplot(self):
         self.pres.rm_subplot("test")
 
-        self.assertEquals(self.view.rm_subplot.call_count, 1)
-        self.assertEquals(self.view.find_index.call_count, 2)
-        self.assertEquals(self.view.set_index.call_count, 1)
+        self.assertEqual(self.view.rm_subplot.call_count, 1)
+        self.assertEqual(self.view.find_index.call_count, 2)
+        self.assertEqual(self.view.set_index.call_count, 1)
 
 
 if __name__ == "__main__":

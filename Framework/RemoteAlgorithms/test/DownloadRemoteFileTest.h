@@ -65,21 +65,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // Transaction id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(
         alg1.setPropertyValue("RemoteFileName", "file name"));
 
-    TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg1.execute(), const std::runtime_error &);
     TS_ASSERT(!alg1.isExecuted());
 
     DownloadRemoteFile alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     // file name missing
     TS_ASSERT_THROWS(alg2.setPropertyValue("ComputeResource", "missing!"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("TransactionID", "id001"));
 
-    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg2.execute(), const std::runtime_error &);
     TS_ASSERT(!alg2.isExecuted());
 
     DownloadRemoteFile alg3;
@@ -89,7 +89,7 @@ public:
         alg3.setPropertyValue("RemoteFileName", "file name"));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("TransactionID", "id001"));
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(alg3.execute(), const std::runtime_error &);
     TS_ASSERT(!alg3.isExecuted());
   }
 
@@ -97,11 +97,11 @@ public:
     DownloadRemoteFile dl;
     TS_ASSERT_THROWS_NOTHING(dl.initialize();)
     TS_ASSERT_THROWS(dl.setPropertyValue("Compute", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(dl.setPropertyValue("TransID", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(dl.setPropertyValue("FileName", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {

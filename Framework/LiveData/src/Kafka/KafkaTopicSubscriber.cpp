@@ -21,6 +21,7 @@ using RdKafka::TopicMetadata;
 namespace {
 /// Timeout for message consume
 const int CONSUME_TIMEOUT_MS = 30000;
+const std::string MAX_MESSAGE_SIZE = "100000000";
 /// A reference to the static logger
 Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger logger("KafkaTopicSubscriber");
@@ -34,27 +35,13 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
-  conf->set("message.max.bytes", "25000000", errorMsg);
-  conf->set("fetch.message.max.bytes", "25000000", errorMsg);
-  conf->set("replica.fetch.max.bytes", "25000000", errorMsg);
+  conf->set("message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("fetch.message.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
+  conf->set("replica.fetch.max.bytes", MAX_MESSAGE_SIZE, errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("offset.store.method", "none", errorMsg);
   conf->set("api.version.request", "true", errorMsg);
-  return conf;
-}
-
-/// Create and return a topic configuration object for a given global
-/// configuration
-std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
-  auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
-  std::string errorMsg;
-  // default to start consumption from the end of the topic
-  // NB, can be circumvented by calling assign rather than subscribe
-  conf->set("auto.offset.reset", "largest", errorMsg);
-
-  // tie the global config to this topic configuration
-  globalConf->set("default_topic_conf", conf.get(), errorMsg);
   return conf;
 }
 } // namespace
@@ -71,6 +58,7 @@ const std::string KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX = "_eventSum";
 const std::string KafkaTopicSubscriber::RUN_TOPIC_SUFFIX = "_runInfo";
 const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 const std::string KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX = "_sampleEnv";
+const std::string KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX = "_choppers";
 
 /**
  * Construct a topic subscriber
@@ -292,7 +280,6 @@ void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
 void KafkaTopicSubscriber::createConsumer() {
   // Create configurations
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
-  auto topicConf = createTopicConfiguration(globalConf.get());
 
   std::string errorMsg;
   m_consumer = std::unique_ptr<KafkaConsumer>(

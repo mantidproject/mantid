@@ -167,7 +167,7 @@ public:
           array1d_double);
       TS_ASSERT_THROWS(
           H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
-          boost::numeric::positive_overflow);
+          const boost::numeric::positive_overflow &);
       TS_ASSERT_THROWS_NOTHING(
           H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"));
 

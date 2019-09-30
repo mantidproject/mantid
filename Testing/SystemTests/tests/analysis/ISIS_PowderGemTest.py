@@ -13,13 +13,14 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Gem
+from isis_powder import Gem, SampleDetails
 
 DIRS = config['datasearch.directories'].split(';')
 
 # Setup various path details
 
 inst_name = "GEM"
+user_name = "Test"
 # Relative to system data folder
 working_folder_name = "ISIS_Powder"
 
@@ -30,7 +31,8 @@ output_folder_name = "output"
 # Relative to input folder
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "gem_system_test_mapping.yaml")
-spline_rel_path = os.path.join("17_1", "VanSplined_83608_offsets_2011_cycle111b.cal.nxs")
+cycle = "17_1"
+spline_rel_path = os.path.join(cycle, "VanSplined_83608_offsets_2011_cycle111b.cal.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -42,10 +44,10 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+generated_offset = os.path.join(calibration_dir, "19_1")
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config['datasearch.directories']
 
@@ -57,7 +59,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return self.calibration_results.getName(),\
+        return self.calibration_results.name(), \
                "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
 
     def cleanup(self):
@@ -69,8 +71,63 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
 
 
-class FocusTest(systemtesting.MantidSystemTest):
+class FocusTestMixin(object):
+    focus_results = None
+    existing_config = config['datasearch.directories']
 
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def doTest(self, absorb_corrections):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus(absorb_corrections)
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
+
+class FocusTestNoAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        self.doTest(absorb_corrections=False)
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir,
+                                                                  os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
+                            msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, cycle, user_name)
+        assert_output_file_exists(user_output, 'GEM83605.nxs')
+        assert_output_file_exists(user_output, 'GEM83605.gsas')
+        output_dat_dir = os.path.join(user_output, 'dat_files')
+        for bankno in range(1, 7):
+            assert_output_file_exists(output_dat_dir, 'GEM83605-b_{}-TOF.dat'.format(bankno))
+            assert_output_file_exists(output_dat_dir, 'GEM83605-b_{}-d.dat'.format(bankno))
+
+        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
+
+
+class FocusTestWithAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        self.doTest(absorb_corrections=True)
+
+    def validate(self):
+        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty_abscorr.nxs"
+
+
+class CreateCalTest(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config['datasearch.directories']
 
@@ -80,15 +137,19 @@ class FocusTest(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus()
+
+        self.focus_results = run_calibration()
 
     def validate(self):
-        return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
+        self.tolerance = 1e-5
+        if systemtesting.using_gsl_v1():
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_groupedGSAS1.nxs"
+        else:
+            return self.focus_results.name(), "ISIS_Powder-GEM87618_grouped.nxs"
 
     def cleanup(self):
         try:
-            _try_delete(spline_path)
-            _try_delete(output_dir)
+            _try_delete(generated_offset)
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -121,7 +182,7 @@ def run_vanadium_calibration():
     return splined_ws
 
 
-def run_focus():
+def run_focus(absorb_corrections):
     run_number = 83605
     sample_empty = 83608  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
@@ -133,9 +194,22 @@ def run_focus():
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(mode="PDF")
+    if absorb_corrections:
+
+        sample = SampleDetails(height=5.0, radius=0.3, center=[0,0,0], shape='cylinder')
+        sample.set_material(chemical_formula='(Li7)14 Mg1.05 Si2 S12.05',
+                            number_density=0.001641)
+        inst_object.set_sample_details(sample=sample, mode="Rietveld")
+
     return inst_object.focus(run_number=run_number, input_mode="Individual", vanadium_normalisation=True,
-                             do_absorb_corrections=False, sample_empty=sample_empty,
+                             do_absorb_corrections=absorb_corrections, multiple_scattering=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
+
+
+def run_calibration():
+    iron_run = 87618
+    inst_object = setup_inst_object(mode="PDF")
+    return inst_object.create_cal(run_number=iron_run)
 
 
 def setup_mantid_paths():
@@ -143,8 +217,6 @@ def setup_mantid_paths():
 
 
 def setup_inst_object(mode):
-    user_name = "Test"
-
     inst_obj = Gem(user_name=user_name, calibration_mapping_file=calibration_map_path,
                    calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
     return inst_obj
@@ -158,4 +230,4 @@ def _try_delete(path):
         else:
             os.remove(path)
     except OSError:
-        print ("Could not delete output file at: ", path)
+        print("Could not delete output file at: ", path)

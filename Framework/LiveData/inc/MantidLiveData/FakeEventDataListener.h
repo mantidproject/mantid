@@ -47,8 +47,8 @@ private:
 
   DataObjects::EventWorkspace_sptr
       m_buffer; ///< Used to buffer events between calls to extractData()
-  Kernel::PseudoRandomNumberGenerator
-      *m_rand; ///< Used in generation of random events
+  std::unique_ptr<Kernel::PseudoRandomNumberGenerator>
+      m_rand; ///< Used in generation of random events
   Poco::Timer
       m_timer;    ///< Used to call the event-generating function on a schedule
   int m_datarate; ///< The data rate to (attempt to) generate in events/sec

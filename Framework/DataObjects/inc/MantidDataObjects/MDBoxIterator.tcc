@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -264,13 +264,14 @@ TMDE(signal_t MDBoxIterator)::getSignal() const {
 TMDE(signal_t MDBoxIterator)::getError() const { return m_current->getError(); }
 
 /// Return a list of vertexes defining the volume pointed to
-TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(size_t &numVertices) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(
+    size_t &numVertices) const {
   return m_current->getVertexesArray(numVertices);
 }
 
-TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(size_t &numVertices,
-                                               const size_t outDimensions,
-                                               const bool *maskDim) const {
+TMDE(std::unique_ptr<coord_t[]> MDBoxIterator)::getVertexesArray(
+    size_t &numVertices, const size_t outDimensions,
+    const bool *maskDim) const {
   return m_current->getVertexesArray(numVertices, outDimensions, maskDim);
 }
 
@@ -350,5 +351,5 @@ TMDE(bool MDBoxIterator)::isWithinBounds(size_t) const {
   throw std::runtime_error("MDBoxIterator does not implement isWithinBounds");
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

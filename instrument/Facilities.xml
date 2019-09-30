@@ -157,6 +157,14 @@
     </livedata>
   </instrument>
 
+  <instrument name="NGEM">
+    <technique>Neutron Diffraction</technique>
+    <zeropadding size="8"/>
+    <livedata>
+      <connection name="histo" address="NDXGEM:6789" listener="ISISHistoDataListener" />
+    </livedata>
+  </instrument>
+
   <instrument name="OSIRIS" shortname="OSI" beamline="N6">
     <zeropadding size="8" startRunNumber="99780" prefix="OSIRIS"/>
     <technique>Neutron Diffraction</technique>
@@ -419,19 +427,19 @@
       <technique>technique</technique>
    </instrument>
 
-   <instrument name="GPSANS">
+   <instrument name="GPSANS" shortname="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="CG2" shortname="CG2">
+      <technique>Small Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="BIOSANS"  shortname="CG3">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
    <instrument name="HIRESSANS">
-      <technique>Small Angle Scattering</technique>
-   </instrument>
-
-   <instrument name="CG2">
-      <technique>Small Angle Scattering</technique>
-   </instrument>
-
-   <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
 
@@ -593,6 +601,18 @@
 
    <instrument name="SWANS" shortname="SWANS" beamline="7">
       <technique>Small Wide Angle Scattering</technique>
+   </instrument>
+
+   <instrument name="ZEEMANS" beamline="998">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+   </instrument>
+
+   <instrument name="CHESS" beamline="999">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
    </instrument>
 
 </facility>
@@ -799,15 +819,24 @@
   <instrument name="LTF">
     <technique>Muon spectroscopy</technique>
   </instrument>
+
+  <!-- Added to allow general PSI instrument for Muon -->
+  <instrument name="PSI">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
 </facility>
 
 <!--  Reactor Orphee (France) -->
-<facility name="LLB" FileExtensions=".nxs,.hdf">
+<facility name="LLB" FileExtensions=".nxs,.hdf,.xml">
   <timezone>Europe/Paris</timezone>
-
   <instrument name="MIBEMOL">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
+  </instrument>
+  <instrument name="5C1">
+    <technique>Neutron Diffraction</technique>
+    <technique>Powder Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
   </instrument>
 </facility>
 
@@ -851,25 +880,33 @@
 <facility name="ANSTO" FileExtensions=".nxs,.tar,.hdf">
   <timezone>Australia/Sydney</timezone>
 
-  <instrument name="Bilby">
+  <instrument name="BILBY" shortname="BBY">
+    <zeropadding size="7"/>
     <technique>Small Angle Scattering</technique>
   </instrument>
 
-  <instrument name="EMUau">
+  <instrument name="EMUau" shortname="EMU">
+    <zeropadding size="7"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
 
-  <instrument name="PELICAN">
+  <instrument name="PELICAN" shortname="PLN">
+    <zeropadding size="7"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>Inelastic Neutron Scattering</technique>
   </instrument>
-  
+
 </facility>
 
 <!-- HZB -->
 <facility name="HZB" FileExtensions=".nxs">
    <timezone>Europe/Berlin</timezone>
+
+  <instrument name="NEAT">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
 
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>
@@ -883,6 +920,13 @@
   </instrument>
   <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
+  </instrument>
+   <instrument name="V20_DENEX" shortname="V20_DENEX" >
+    <zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+    <livedata default="event">
+      <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
 </facility>
 
@@ -926,12 +970,18 @@
   </instrument>
 
 </facility>
+
 <!--  ESS  -->
 <facility name="ESS" FileExtensions=".nxs,.hdf5">
- <timezone>Europe/Copenhagen</timezone>
+  <timezone>Europe/Copenhagen</timezone>
+
   <instrument name="LOKI">
     <technique>Small Angle Scattering</technique>
+    <livedata>
+      <connection name="test_event" address="localhost:9092" listener="KafkaEventListener" />
+    </livedata>
   </instrument>
+
 </facility>
 
 </facilities>

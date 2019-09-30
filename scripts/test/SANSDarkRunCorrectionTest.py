@@ -147,7 +147,7 @@ class DarkRunCorrectionTest(unittest.TestCase):
 
         # Assert only that it runs and produces an output workspace
         # The algorithm correctness has already been tested in SANSDarkRunBackgroundCorrectionTest
-        self.assertTrue(out_ws is not None)
+        self.assertNotEqual(out_ws, None)
 
         # Clean up
         if not use_real_data:

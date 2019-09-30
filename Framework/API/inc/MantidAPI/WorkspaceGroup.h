@@ -109,6 +109,8 @@ public:
   void remove(const std::string &wsName) {
     AnalysisDataService::Instance().removeFromGroup(this->getName(), wsName);
   }
+  /// Does a workspace exist within the group or any groups within this group
+  bool containsInChildren(const std::string &wsName) const;
   /// Does a workspace exist within the group
   bool contains(const std::string &wsName) const;
   /// Does a workspace exist within the group

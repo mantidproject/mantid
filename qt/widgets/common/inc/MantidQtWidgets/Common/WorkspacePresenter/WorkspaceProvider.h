@@ -7,7 +7,7 @@
 #ifndef MANTID_MANTIDWIDGETS_WORKSPACEPROVIDER_H_
 #define MANTID_MANTIDWIDGETS_WORKSPACEPROVIDER_H_
 
-#include <MantidAPI/Workspace_fwd.h>
+#include "MantidAPI/Workspace_fwd.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <map>

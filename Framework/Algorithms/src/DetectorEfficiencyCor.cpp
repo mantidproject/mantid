@@ -94,12 +94,12 @@ void DetectorEfficiencyCor::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                   Direction::Input, val),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input, val),
                   "The workspace to correct for detector efficiency");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "The name of the workspace in which to store the result. Each histogram "
       "from the input workspace maps to a histogram in this workspace that has "
       "just one value which indicates if there was a bad detector.");
@@ -129,8 +129,8 @@ void DetectorEfficiencyCor::exec() {
   m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
 
   int64_t numHists = m_inputWS->getNumberHistograms();
-  double numHists_d = static_cast<double>(numHists);
-  const int64_t progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
+  auto numHists_d = static_cast<double>(numHists);
+  const auto progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
   auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
@@ -271,7 +271,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
         *wavItr = calculateOneOverK(*xItr, *(xItr + 1));
       }
       const double oneOverWave = *wavItr;
-      const double nDets(static_cast<double>(spectrumDefinition.size()));
+      const auto nDets(static_cast<double>(spectrumDefinition.size()));
       const double factor =
           1.0 / nDets / detectorEfficiency(det_const * oneOverWave);
       *youtItr += (*yinItr) * factor;

@@ -40,6 +40,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <memory>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -860,7 +861,7 @@ public:
     }
     SaveNexusProcessed alg;
     TS_ASSERT_THROWS_NOTHING(
-        alg.saveSpectraDetectorMapNexus(*ws, th.file, wsIndex);)
+        alg.saveSpectraDetectorMapNexus(*ws, th.file.get(), wsIndex);)
     TS_ASSERT_THROWS_NOTHING(th.file->openData("detector_index"))
     std::vector<int32_t> data;
     TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
@@ -896,7 +897,7 @@ public:
     }
     SaveNexusProcessed alg;
     TS_ASSERT_THROWS_NOTHING(
-        alg.saveSpectrumNumbersNexus(*ws, th.file, wsIndex);)
+        alg.saveSpectrumNumbersNexus(*ws, th.file.get(), wsIndex);)
     TS_ASSERT_THROWS_NOTHING(th.file->openData("spectra"))
     std::vector<int32_t> data;
     TS_ASSERT_THROWS_NOTHING(th.file->getData(data))
@@ -904,6 +905,31 @@ public:
     for (size_t i{0}; i < data.size(); ++i) {
       TS_ASSERT_EQUALS(data[i], i * 11)
     }
+  }
+
+  void test_when_nested_workspaces_are_being_saved() {
+    Workspace2D_sptr ws1 = boost::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr ws2 = boost::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+
+    Mantid::API::WorkspaceGroup_sptr gws1 =
+        boost::make_shared<WorkspaceGroup>();
+    gws1->addWorkspace(ws1);
+    gws1->addWorkspace(ws2);
+    Mantid::API::WorkspaceGroup_sptr gws2 =
+        boost::make_shared<WorkspaceGroup>();
+    gws2->addWorkspace(gws1);
+    AnalysisDataService::Instance().addOrReplace("gws2", gws2);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        saveAlg.setPropertyValue("InputWorkspace", "gws2"));
+    std::string file = "namesdoesntmatterasitshouldntsaveanyway.nxs";
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS(saveAlg.execute(), const std::runtime_error &);
+    TS_ASSERT(!saveAlg.isExecuted());
   }
 
 private:
@@ -976,7 +1002,7 @@ private:
       algToBeTested.initialize();
 
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
 
     // create dummy 2D-workspace
     Workspace2D_sptr localWorkspace2D =

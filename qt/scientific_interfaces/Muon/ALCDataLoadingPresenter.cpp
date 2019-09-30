@@ -7,14 +7,12 @@
 #include "ALCDataLoadingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 #include "MuonAnalysisHelper.h"
 
 #include <Poco/ActiveResult.h>
@@ -136,8 +134,8 @@ void ALCDataLoadingPresenter::changeWatchState(int state) {
 void ALCDataLoadingPresenter::load(const std::string &lastFile) {
   m_view->disableAll();
   // Use Path.toString() to ensure both are in same (native) format
-  Poco::Path firstRun(m_view->firstRun());
-  Poco::Path lastRun(lastFile);
+  Poco::Path firstRunPath(m_view->firstRun());
+  Poco::Path lastRunPath(lastFile);
 
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
@@ -152,8 +150,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
-    alg->setProperty("FirstRun", firstRun.toString());
-    alg->setProperty("LastRun", lastRun.toString());
+    alg->setProperty("FirstRun", firstRunPath.toString());
+    alg->setProperty("LastRun", lastRunPath.toString());
     alg->setProperty("LogValue", m_view->log());
     alg->setProperty("Function", m_view->function());
     alg->setProperty("Type", m_view->calculationType());
@@ -221,8 +219,7 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
-    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_loadedData, 0)),
-                         QwtHelper::curveErrorsFromWs(m_loadedData, 0));
+    m_view->setDataCurve(m_loadedData);
 
     emit dataChanged();
 
@@ -239,20 +236,21 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   try //... to load the first run
   {
-    IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadMuonNexus");
-    load->setChild(true); // Don't want workspaces in the ADS
-    load->setProperty("Filename", m_view->firstRun());
+    IAlgorithm_sptr loadAlg =
+        AlgorithmManager::Instance().create("LoadMuonNexus");
+    loadAlg->setChild(true); // Don't want workspaces in the ADS
+    loadAlg->setProperty("Filename", m_view->firstRun());
     // We need logs only but we have to use LoadMuonNexus
     // (can't use LoadMuonLogs as not all the logs would be
     // loaded), so we load the minimum amount of data, i.e., one spectrum
-    load->setPropertyValue("SpectrumMin", "1");
-    load->setPropertyValue("SpectrumMax", "1");
-    load->setPropertyValue("OutputWorkspace", "__NotUsed");
-    load->execute();
+    loadAlg->setPropertyValue("SpectrumMin", "1");
+    loadAlg->setPropertyValue("SpectrumMax", "1");
+    loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
+    loadAlg->execute();
 
-    loadedWs = load->getProperty("OutputWorkspace");
-    firstGoodData = load->getProperty("FirstGoodData");
-    timeZero = load->getProperty("TimeZero");
+    loadedWs = loadAlg->getProperty("OutputWorkspace");
+    firstGoodData = loadAlg->getProperty("FirstGoodData");
+    timeZero = loadAlg->getProperty("TimeZero");
   } catch (...) {
     m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
     m_view->setAvailablePeriods(
@@ -294,24 +292,18 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
-  if (m_loadedData) {
-
+  if (m_loadedData)
     return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
-
-  } else {
-
-    return MatrixWorkspace_sptr();
-  }
+  return MatrixWorkspace_sptr();
 }
 
-void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
+void ALCDataLoadingPresenter::setData(MatrixWorkspace_sptr data) {
 
   if (data) {
     // Set the data
     m_loadedData = data;
     // Plot the data
-    m_view->setDataCurve(*(QwtHelper::curveDataFromWs(m_loadedData, 0)),
-                         QwtHelper::curveErrorsFromWs(m_loadedData, 0));
+    m_view->setDataCurve(m_loadedData);
 
   } else {
     std::invalid_argument("Cannot load an empty workspace");
@@ -330,14 +322,14 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
     const auto backward = Mantid::Kernel::Strings::parseRange(
         isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
     if (!groupingOK) {
-      return groupingOK;
+      return false;
     }
     detectors.insert(detectors.end(), backward.begin(), backward.end());
-    for (const int det : detectors) {
-      if (det < 0 || det > static_cast<int>(m_numDetectors)) {
-        groupingOK = false;
-        break;
-      }
+    if (std::any_of(detectors.cbegin(), detectors.cend(),
+                    [this](const auto det) {
+                      return det < 0 || det > static_cast<int>(m_numDetectors);
+                    })) {
+      groupingOK = false;
     }
   }
   return groupingOK;

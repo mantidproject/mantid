@@ -280,6 +280,17 @@ public:
     TS_ASSERT_DELTA(a.angle(d), M_PI, 0.0001);
   }
 
+  void testCosAngle() {
+    a(2.0, 0.0, 0.0);
+    b(0.0, 1.0, 0.0);
+    c(1.0, 1.0, 0.0);
+    d(-1.0, 0.0, 0.0);
+    TS_ASSERT_DELTA(a.cosAngle(a), 1.0, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(b), 0.0, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(c), M_SQRT1_2, 0.0001);
+    TS_ASSERT_DELTA(a.cosAngle(d), -1.0, 0.0001);
+  }
+
   void testRotate() {
     V3D direc(1, 1, 1);
     const double theta = 45.0 * M_PI / 180.0;
@@ -418,10 +429,10 @@ public:
     NexusTestHelper th(true);
     th.createFile("V3DTest.nxs");
     V3D a(1, 2, 3);
-    a.saveNexus(th.file, "vector");
+    a.saveNexus(th.file.get(), "vector");
     th.reopenFile();
     V3D b;
-    b.loadNexus(th.file, "vector");
+    b.loadNexus(th.file.get(), "vector");
     TS_ASSERT_EQUALS(a, b);
   }
 
@@ -468,7 +479,7 @@ public:
 
   void test_toCrystllographic() {
     V3D a0;
-    TS_ASSERT_THROWS(a0.toMillerIndexes(), std::invalid_argument);
+    TS_ASSERT_THROWS(a0.toMillerIndexes(), const std::invalid_argument &);
 
     V3D a1(0.1, 0.2, 5);
     TS_ASSERT_THROWS_NOTHING(a1.toMillerIndexes());

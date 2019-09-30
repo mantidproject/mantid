@@ -9,7 +9,7 @@
 
 #include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "EnggDiffFittingModelMock.h"
@@ -32,8 +32,8 @@ class EnggDiffFittingPresenterNoThread : public EnggDiffFittingPresenter {
 public:
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view)
       : EnggDiffFittingPresenterNoThread(
-            view, Mantid::Kernel::make_unique<
-                      testing::NiceMock<MockEnggDiffFittingModel>>()) {}
+            view,
+            std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>()) {}
 
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view,
                                    std::unique_ptr<IEnggDiffFittingModel> model)
@@ -75,8 +75,8 @@ public:
 
   void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffFittingView>());
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
 
     m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
         m_view.get(), std::move(mockModel), nullptr, nullptr));
@@ -113,8 +113,8 @@ public:
 
   void test_load_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
@@ -140,8 +140,8 @@ public:
 
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
 
@@ -194,8 +194,8 @@ public:
   // produce a warning
   void test_fitting_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
@@ -234,8 +234,8 @@ public:
   // Fit All Peaks test begin here
   void test_fit_all_runno_valid_single_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
@@ -244,7 +244,7 @@ public:
         .Times(1)
         .WillOnce(Return("2.3445,3.3433,4.5664"));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
         .WillOnce(Return(std::vector<RunLabel>({runLabel})));
@@ -272,8 +272,8 @@ public:
   // produce a warning
   void test_fit_all_with_invalid_expected_peaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
@@ -284,7 +284,7 @@ public:
         .WillOnce(Return(",3.5,7.78,r43d"));
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
         .WillOnce(Return(std::vector<RunLabel>({runLabel})));
@@ -313,8 +313,7 @@ public:
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
-        Mantid::Kernel::make_unique<
-            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -343,8 +342,7 @@ public:
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
-        Mantid::Kernel::make_unique<
-            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -379,8 +377,7 @@ public:
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
-        Mantid::Kernel::make_unique<
-            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -407,8 +404,7 @@ public:
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
-        Mantid::Kernel::make_unique<
-            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -579,8 +575,7 @@ public:
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView,
-        Mantid::Kernel::make_unique<
-            testing::NiceMock<MockEnggDiffFittingModel>>(),
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
         nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
@@ -605,8 +600,8 @@ public:
 
   void test_removeRun() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
         &mockView, std::move(mockModel), nullptr, nullptr);
@@ -614,11 +609,11 @@ public:
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>("123_1")));
-    EXPECT_CALL(*mockModel_ptr, removeRun(RunLabel(123, 1)));
+    EXPECT_CALL(*mockModel_ptr, removeRun(RunLabel("123", 1)));
     EXPECT_CALL(*mockModel_ptr, getRunLabels())
         .Times(1)
         .WillOnce(Return(
-            std::vector<RunLabel>({RunLabel(123, 2), RunLabel(456, 1)})));
+            std::vector<RunLabel>({RunLabel("123", 2), RunLabel("456", 1)})));
     EXPECT_CALL(mockView, updateFittingListWidget(
                               std::vector<std::string>({"123_2", "456_1"})));
 
@@ -632,13 +627,13 @@ public:
 
   void test_updatePlotFittedPeaksValidFittedPeaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(2)
         .WillRepeatedly(Return(boost::optional<std::string>("123_1")));
@@ -667,13 +662,13 @@ public:
 
   void test_updatePlotFittedPeaksNoFittedPeaks() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(1)
         .WillOnce(Return(boost::optional<std::string>("123_1")));
@@ -702,13 +697,13 @@ public:
 
   void test_updatePlotSuccessfulFitPlotPeaksDisabled() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
-    auto mockModel = Mantid::Kernel::make_unique<
-        testing::NiceMock<MockEnggDiffFittingModel>>();
+    auto mockModel =
+        std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>();
     auto *mockModel_ptr = mockModel.get();
 
     EnggDiffFittingPresenterNoThread pres(&mockView, std::move(mockModel));
 
-    const RunLabel runLabel(123, 1);
+    const RunLabel runLabel("123", 1);
     EXPECT_CALL(mockView, getFittingListWidgetCurrentValue())
         .Times(2)
         .WillRepeatedly(Return(boost::optional<std::string>("123_1")));

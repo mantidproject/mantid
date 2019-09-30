@@ -469,7 +469,7 @@ public:
     fft->setProperty("InputWorkspace", inputWS);
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
     fft->setPropertyValue("Real", "0");
-    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(fft->execute(), const std::runtime_error &);
   }
 
   // Test that unevenly spaced X values are accepted if the property is set to
@@ -500,7 +500,7 @@ public:
     fft->setProperty("InputWorkspace", inputWS);
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
     fft->setPropertyValue("Real", "0");
-    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(fft->execute(), const std::runtime_error &);
   }
 
   void testRealOutOfRange_Throws() {
@@ -511,7 +511,7 @@ public:
     fft->setProperty("InputWorkspace", inputWS);
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
     fft->setPropertyValue("Real", "100");
-    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(fft->execute(), const std::runtime_error &);
   }
 
   void testImaginaryOutOfRange_Throws() {
@@ -523,7 +523,7 @@ public:
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
     fft->setPropertyValue("Real", "0");
     fft->setPropertyValue("Imaginary", "100");
-    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(fft->execute(), const std::runtime_error &);
   }
 
   void testRealImaginarySizeMismatch_Throws() {
@@ -537,7 +537,7 @@ public:
     fft->setPropertyValue("Real", "0");
     fft->setPropertyValue("Imaginary", "0");
     fft->setProperty("InputImagWorkspace", inImagWS);
-    TS_ASSERT_THROWS(fft->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(fft->execute(), const std::runtime_error &);
   }
 
   /**

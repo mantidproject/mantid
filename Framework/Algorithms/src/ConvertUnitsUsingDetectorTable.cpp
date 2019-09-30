@@ -62,10 +62,10 @@ void ConvertUnitsUsingDetectorTable::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<API::WorkspaceUnitValidator>();
   wsValidator->add<API::HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
   declareProperty("Target", "",
@@ -75,7 +75,7 @@ void ConvertUnitsUsingDetectorTable::init() {
                   "registered in\n"
                   "the Unit Factory)");
   declareProperty(
-      make_unique<WorkspaceProperty<TableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "DetectorParameters", "", Direction::Input, PropertyMode::Optional),
       "Name of a TableWorkspace containing the detector parameters "
       "to use instead of the IDF.");
@@ -143,7 +143,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
   const auto &spectraColumn = paramWS->getColVector<int>("spectra");
 
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   // Get the unit object for each workspace

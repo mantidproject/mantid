@@ -9,15 +9,11 @@
 
 #include "DllOption.h"
 #include "MantidKernel/ConfigService.h"
+
+#include <Poco/NObserver.h>
 #include <QComboBox>
 #include <QStringList>
 
-#include <Poco/AutoPtr.h>
-#include <Poco/NObserver.h>
-
-//----------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------
 namespace Mantid {
 namespace Kernel {
 class FacilityInfo;

@@ -85,7 +85,7 @@ class POLDITruncateDataTest(systemtesting.MantidSystemTest):
         self.assertEqual(len(cropped.readX(0)), 400)
 
         truncated = PoldiTruncateData(cropped)
-        self.assertTrue(truncated is None)
+        self.assertEqual(truncated, None)
 
         PoldiTruncateData(InputWorkspace=cropped, OutputWorkspace="NamedWorkspaceTest")
         self.assertTrue(not mtd.doesExist("NamedWorkspaceTest"))

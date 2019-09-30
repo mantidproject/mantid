@@ -50,15 +50,15 @@ const std::string SplineSmoothing::category() const {
 /** Initialize the algorithm's properties.
  */
 void SplineSmoothing::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The workspace on which to perform the smoothing algorithm.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The workspace containing the calculated points");
 
-  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspaceDeriv", "", Direction::Output,
                       PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
@@ -87,7 +87,7 @@ void SplineSmoothing::init() {
 void SplineSmoothing::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
 
-  int histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  auto histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   int order = static_cast<int>(getProperty("DerivOrder"));
 
   m_inputWorkspacePointData = convertBinnedData(m_inputWorkspace);
@@ -187,12 +187,12 @@ SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
       WorkspaceFactory::Instance().create(inws, size);
 
   // create labels for output workspace
-  auto tAxis = new API::TextAxis(size);
+  auto tAxis = std::make_unique<API::TextAxis>(size);
   for (int i = 0; i < size; ++i) {
     const std::string index = std::to_string(i);
     tAxis->setLabel(i, "Y" + index);
   }
-  outputWorkspace->replaceAxis(1, tAxis);
+  outputWorkspace->replaceAxis(1, std::move(tAxis));
 
   return outputWorkspace;
 }
@@ -302,13 +302,12 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
                                          const double *xs,
                                          const double *ys) const {
   // resize the number of attributes
-  int num_points = static_cast<int>(points.size());
+  auto num_points = static_cast<int>(points.size());
   std::vector<double> breakPoints;
   breakPoints.reserve(num_points);
-
   // set each of the x and y points to redefine the spline
   for (auto const &point : points) {
-    breakPoints.push_back(xs[point]);
+    breakPoints.emplace_back(xs[point]);
   }
   m_cspline->setAttribute("BreakPoints",
                           API::IFunction::Attribute(breakPoints));
@@ -336,7 +335,7 @@ void SplineSmoothing::selectSmoothingPoints(
   // retrieving number of breaks
   int maxBreaks = static_cast<int>(getProperty("MaxNumberOfBreaks"));
 
-  int xSize = static_cast<int>(xs.size());
+  auto xSize = static_cast<int>(xs.size());
 
   // evenly space initial points over data set
   int delta;

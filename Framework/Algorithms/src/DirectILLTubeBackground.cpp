@@ -230,19 +230,19 @@ const std::string DirectILLTubeBackground::summary() const {
  */
 void DirectILLTubeBackground::init() {
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input),
       "A workspace to fit the backgrounds to.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "The fitted backgrounds.");
   declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Kernel::ArrayProperty<std::string>>(
           Prop::COMPONENTS, std::vector<std::string>()),
       "A list of component names for which to calculate the backgrounds.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           Prop::EPP_WS, "", Kernel::Direction::Input),
       "A table workspace containing results from the FindEPP algorithm.");
   auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
@@ -256,7 +256,7 @@ void DirectILLTubeBackground::init() {
   declareProperty(Prop::POLYNOMIAL_DEGREE, 0, nonnegativeInt,
                   "The degree of the background polynomial.");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::DIAGNOSTICS_WS, "", Kernel::Direction::Input,
           API::PropertyMode::Optional),
       "Detector diagnostics workspace for masking.");

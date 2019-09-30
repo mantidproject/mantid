@@ -49,7 +49,7 @@ QString getIndexString(const std::string &workspaceName) {
 
 std::unique_ptr<QRegExpValidator> createValidator(const QString &regex,
                                                   QObject *parent) {
-  return Mantid::Kernel::make_unique<QRegExpValidator>(QRegExp(regex), parent);
+  return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
 }
 
 QString OR(const QString &lhs, const QString &rhs) {
@@ -121,6 +121,12 @@ void ConvFitAddWorkspaceDialog::setResolutionWSSuffices(
 void ConvFitAddWorkspaceDialog::setResolutionFBSuffices(
     const QStringList &suffices) {
   m_uiForm.dsResolution->setFBSuffixes(suffices);
+}
+
+void ConvFitAddWorkspaceDialog::updateSelectedSpectra() {
+  auto const state =
+      m_uiForm.ckAllSpectra->isChecked() ? Qt::Checked : Qt::Unchecked;
+  selectAllSpectra(state);
 }
 
 void ConvFitAddWorkspaceDialog::selectAllSpectra(int state) {

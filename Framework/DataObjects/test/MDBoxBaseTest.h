@@ -266,7 +266,7 @@ public:
     TS_ASSERT_DELTA(b.getExtents(1).getMin(), -4.0, 1e-6);
     TS_ASSERT_DELTA(b.getExtents(1).getMax(), +12.0, 1e-6);
 
-    TS_ASSERT_THROWS(b.setExtents(2, 0, 1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(b.setExtents(2, 0, 1.0), const std::invalid_argument &);
 
     coord_t center[2];
     b.getCenter(center);

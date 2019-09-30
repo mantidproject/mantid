@@ -25,11 +25,11 @@ using namespace Kernel;
 using namespace API;
 
 void StripPeaks::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "The name of the input workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace.");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
@@ -46,7 +46,7 @@ void StripPeaks::init() {
                   "candidates,\n"
                   "Mariscotti recommends 2 (default 4)");
 
-  declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
                   "X-position of the centre of the peaks. Only peaks near "
                   "these positions will be fitted.");
@@ -267,7 +267,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
 
     // Get central bin values using points
     auto binCenters = outputWS->points(peakslist->getRef<int>("spectrum", i));
-    const int spectrumLength = static_cast<int>(Y.size());
+    const auto spectrumLength = static_cast<int>(Y.size());
     for (int j = 0; j < spectrumLength; ++j) {
       double x = binCenters[j];
       // Skip if not anywhere near this peak

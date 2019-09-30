@@ -14,7 +14,7 @@
 #include <gtest/gtest.h>
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 
@@ -129,7 +129,7 @@ public:
 
   void testhasTDimensionWhenIntegrated() {
     ConcreteMDHWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
+        std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws =
@@ -143,7 +143,7 @@ public:
 
   void testHasTDimensionWhenNotIntegrated() {
     ConcreteMDHWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
+        std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws =
@@ -157,7 +157,7 @@ public:
 
   void testHasTimeLabelWithTDimension() {
     ConcreteMDHWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
+        std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws =
@@ -171,7 +171,7 @@ public:
 
   void testCanSetAxisLabelsFrom3DData() {
     ConcreteMDHWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
+        std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
@@ -189,7 +189,7 @@ public:
 
   void testCanSetAxisLabelsFrom4DData() {
     ConcreteMDHWLoadingPresenter presenter(
-        Mantid::Kernel::make_unique<NiceMock<MockMDLoadingView>>());
+        std::make_unique<NiceMock<MockMDLoadingView>>());
 
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);

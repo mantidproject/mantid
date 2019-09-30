@@ -304,11 +304,11 @@ const std::string UnwrapMonitorsInTOF::summary() const {
  */
 void UnwrapMonitorsInTOF::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "An output workspace.");
   declareProperty<double>("WavelengthMin", specialWavelengthCutoff,

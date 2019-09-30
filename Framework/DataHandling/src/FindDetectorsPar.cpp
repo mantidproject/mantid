@@ -40,8 +40,8 @@ void FindDetectorsPar::init() {
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The name of the workspace that will be used as input for the algorithm");
   //
   declareProperty("ReturnLinearRanges", false,
@@ -51,9 +51,9 @@ void FindDetectorsPar::init() {
   // optional par or phx file
   const std::vector<std::string> fileExts{".par", ".phx"};
 
-  declareProperty(Kernel::make_unique<FileProperty>("ParFile", "not_used.par",
-                                                    FileProperty::OptionalLoad,
-                                                    fileExts),
+  declareProperty(std::make_unique<FileProperty>("ParFile", "not_used.par",
+                                                 FileProperty::OptionalLoad,
+                                                 fileExts),
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
@@ -71,7 +71,7 @@ void FindDetectorsPar::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   // Number of spectra
-  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // try to load par file if one is availible
   std::string fileName = this->getProperty("ParFile");
@@ -100,7 +100,7 @@ void FindDetectorsPar::exec() {
   this->m_nDetectors = 0;
 
   Progress progress(this, 0.0, 1.0, 100);
-  const int progStep = static_cast<int>(ceil(double(nHist) / 100.0));
+  const auto progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
@@ -142,7 +142,7 @@ void FindDetectorsPar::setOutputTable() {
     return;
   // Store the result in a table workspace
   try {
-    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputParTableWS", "", Direction::Output));
   } catch (std::exception &err) {
     g_log.information() << " findDetecotorsPar: unsuccessfully declaring "

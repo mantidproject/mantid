@@ -51,7 +51,7 @@ public:
 
 std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
 MockEnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
-  return Mantid::Kernel::make_unique<FakeEnggDiffMultiRunFittingWidgetAdder>();
+  return std::make_unique<FakeEnggDiffMultiRunFittingWidgetAdder>();
 }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

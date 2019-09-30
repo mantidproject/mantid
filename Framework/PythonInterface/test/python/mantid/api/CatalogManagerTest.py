@@ -15,7 +15,7 @@ from mantid.api import CatalogManager
 class CatalogManagerTest(unittest.TestCase):
 
     def test_get_catalog_manager_does_not_return_None(self):
-        self.assertTrue(CatalogManager is not None )
+        self.assertNotEqual(CatalogManager, None )
 
     def test_count_active_sessions(self):
         self.assertEqual(0, CatalogManager.numberActiveSessions(), "Should have zero active sessions without logging on.")

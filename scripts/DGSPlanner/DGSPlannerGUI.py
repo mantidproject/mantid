@@ -15,8 +15,8 @@ import sys
 import mantid
 from .ValidateOL import ValidateOL
 import matplotlib
-from gui_helper import show_interface_help
-from MPLwidgets import *
+from mantidqt.gui_helper import show_interface_help
+from mantidqt.MPLwidgets import *
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot

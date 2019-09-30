@@ -214,7 +214,7 @@ public:
     alg.setProperty("WavelengthMin", wavelengthMin);
     alg.setProperty("WavelengthMax", wavelengthMax);
     TSM_ASSERT_THROWS("Negative wavelength cutoffs are not allowed.",
-                      alg.execute(), std::runtime_error);
+                      alg.execute(), const std::runtime_error &);
   }
 
 private:

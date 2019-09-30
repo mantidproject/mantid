@@ -21,10 +21,11 @@ bool LoadStl::areEqualVertices(Kernel::V3D const &v1,
 }
 
 void LoadStl::changeToVector() {
-  m_verticies.resize(vertexSet.size());
+  m_vertices.resize(vertexSet.size());
   for (auto const &mapValue : vertexSet) {
-    m_verticies[mapValue.second] = mapValue.first;
+    m_vertices[mapValue.second] = mapValue.first;
   }
 }
+
 } // namespace DataHandling
 } // namespace Mantid

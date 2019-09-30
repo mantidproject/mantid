@@ -4,22 +4,23 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
+import math
+import numpy as np
+
+import mantid.simpleapi as ms
 from mantid import logger, mtd
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         ITableWorkspaceProperty, PropertyMode, WorkspaceFactory, Progress)
 from mantid.kernel import Direction, IntArrayProperty
-import mantid.simpleapi as ms
-import math
-import numpy as np
 
-#pylint: disable=too-many-instance-attributes
+
+# pylint: disable=too-many-instance-attributes
 
 
 class Symmetrise(PythonAlgorithm):
-
     _sample = None
     _x_min = None
     _x_max = None
@@ -53,7 +54,7 @@ class Symmetrise(PythonAlgorithm):
                                                      Direction.Output, PropertyMode.Optional),
                              doc='Name to call the properties output table workspace.')
 
-    #pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals
     def PyExec(self):
         workflow_prog = Progress(self, start=0.0, end=0.3, nreports=4)
         workflow_prog.report('Setting up algorithm')
@@ -70,7 +71,6 @@ class Symmetrise(PythonAlgorithm):
                                          OutputWorkspace='__symm',
                                          StartWorkspaceIndex=min_spectrum_index,
                                          EndWorkspaceIndex=max_spectrum_index)
-
         # Find the smallest data array in the first spectra
         len_x = len(cropped_input.readX(0))
         len_y = len(cropped_input.readY(0))
@@ -241,23 +241,21 @@ class Symmetrise(PythonAlgorithm):
         Finds the points in the array that match the cut points.
 
         @param sample_x - Sample X axis data
-        @param sample_array_len - Lengh of data array for sample data
+        @param sample_array_len - Length of data array for sample data
         """
+        # Find array index of the first negative XMin
         delta_x = sample_x[1] - sample_x[0]
-
-        # Find array index of negative XMin
         negative_min_diff = np.absolute(sample_x + self._x_min)
         self._negative_min_index = np.where(negative_min_diff < delta_x)[0][-1]
         self._check_bounds(self._negative_min_index, sample_array_len, label='Negative')
 
-        # Find array index of positive XMin
+        # Find array index of the first positive XMin, that is smaller than the required
         positive_min_diff = np.absolute(sample_x + sample_x[self._negative_min_index])
         self._positive_min_index = np.where(positive_min_diff < delta_x)[0][-1]
         self._check_bounds(self._positive_min_index, sample_array_len, label='Positive')
 
-        # Find array index of positive XMax
-        positive_max_diff = np.absolute(sample_x - self._x_max)
-        self._positive_max_index = np.where(positive_max_diff < delta_x)[0][-1]
+        # Find array index of the first positive XMax, that is smaller than the required
+        self._positive_max_index = np.where(sample_x < self._x_max)[0][-1]
         if self._positive_max_index == sample_array_len:
             self._positive_max_index -= 1
         self._check_bounds(self._positive_max_index, sample_array_len, label='Positive')

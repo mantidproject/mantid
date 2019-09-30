@@ -16,6 +16,10 @@ This interface contains loaders for data created by various simulation software.
 Action Buttons
 ~~~~~~~~~~~~~~
 
+Settings
+  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  customize the settings for the Indirect interfaces.
+
 ?
   Opens this help page.
 
@@ -61,8 +65,11 @@ Instrument Resolution
 Run
   Runs the processing configured on the current tab.
 
-Plot
-  Plots either a spectra or contour plot (or both) of the output data.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
+
+Plot Contour
+  If enabled, it will plot the selected output workspace as a contour plot.
 
 Save Result
   Saves the result in the default save directory.
@@ -91,8 +98,8 @@ Sort by Q Vectors
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  If clicked will create a spectra plot of the output data.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Save Result
   Saves the result in the default save directory.
@@ -174,8 +181,8 @@ Other Options
 Run
   Runs the processing configured on the current tab.
 
-Plot Result
-  If clicked will create a spectra plot of the outputted data.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Save Result
   Saves the result in the default save directory.

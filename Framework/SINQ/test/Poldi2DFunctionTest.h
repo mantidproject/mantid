@@ -82,7 +82,7 @@ public:
     function2D->function(domain, values);
 
     for (size_t i = 0; i < values.size(); ++i) {
-      TS_ASSERT_THROWS(values.getFitWeight(i), std::runtime_error);
+      TS_ASSERT_THROWS(values.getFitWeight(i), const std::runtime_error &);
     }
 
     function2D->iterationFinished();

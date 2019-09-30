@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidPythonInterface/kernel/DataServiceExporter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/ToWeakPtr.h"
+#include "MantidPythonInterface/core/DataServiceExporter.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/ToWeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
@@ -93,7 +93,7 @@ void export_WorkspaceGroup() {
            return_value_policy<Policies::ToWeakPtr>(),
            "Returns the item at the given index")
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
-           "Retuns true if the workspace group is multi-period")
+           "Returns true if the workspace group is multi-period")
       // ------------ Operators --------------------------------
       .def("__len__", &WorkspaceGroup::getNumberOfEntries, arg("self"),
            "Gets the number of entries in the workspace group")

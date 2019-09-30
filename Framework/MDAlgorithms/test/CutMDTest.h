@@ -174,7 +174,7 @@ public:
     algCutMD->setProperty("P2Bin", "0.1");
     algCutMD->setProperty("P3Bin", "0.1");
     algCutMD->setProperty("P4Bin", "0.1");
-    TS_ASSERT_THROWS(algCutMD->execute(), std::runtime_error)
+    TS_ASSERT_THROWS(algCutMD->execute(), const std::runtime_error &)
 
     AnalysisDataService::Instance().remove(wsName);
   }

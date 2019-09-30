@@ -15,7 +15,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -56,15 +56,15 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
  */
 void InelasticDiffRotDiscreteCircle::init() {
   // Ensure positive values for Intensity, Radius, and decay
-  auto IntensityConstraint = Kernel::make_unique<BConstraint>(
+  auto IntensityConstraint = std::make_unique<BConstraint>(
       this, "Intensity", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(IntensityConstraint));
 
-  auto RadiusConstraint = Kernel::make_unique<BConstraint>(
+  auto RadiusConstraint = std::make_unique<BConstraint>(
       this, "Radius", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(RadiusConstraint));
 
-  auto DecayConstraint = Kernel::make_unique<BConstraint>(
+  auto DecayConstraint = std::make_unique<BConstraint>(
       this, "Decay", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(std::move(DecayConstraint));
 }
@@ -84,7 +84,6 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   auto R = this->getParameter("Radius");
   auto rate = m_hbar / this->getParameter("Decay"); // micro-eV or mili-eV
   auto N = this->getAttribute("N").asInt();
-  auto S = this->getParameter("Shift");
 
   // Retrieve Q-value from the appropriate attribute
   double Q;
@@ -112,15 +111,16 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   }
 
   std::vector<double> ratel(N);
-  for (int l = 1; l < N; l++) { // l goes up to N-1
+  for (int l = 1; l < N; l++) {
     // notice that 0 < l/N < 1
     ratel[l] = rate * 4 * pow(sin(M_PI * l / N), 2);
   }
 
+  const auto shift = this->getParameter("Shift");
   for (size_t i = 0; i < nData; i++) {
-    double w = xValues[i] - S;
+    double w = xValues[i] - shift;
     double S = 0.0;
-    for (int l = 1; l < N; l++) { // l goes up to N-1
+    for (int l = 1; l < N; l++) {
       double lorentzian = ratel[l] / (ratel[l] * ratel[l] + w * w);
       double al = 0.0;
       for (int k = 1; k < N; k++) { // case k==N after the loop

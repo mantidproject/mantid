@@ -30,12 +30,12 @@ using Geometry::IDetector_const_sptr;
 
 /// Initialisation method.
 void FindDetectorsOutsideLimits::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace2D");
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
   declareProperty(
@@ -87,7 +87,7 @@ void FindDetectorsOutsideLimits::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   int minIndex = getProperty("StartWorkspaceIndex");
   int maxIndex = getProperty("EndWorkspaceIndex");
-  const int inputLength = static_cast<int>(inputWS->getNumberHistograms());
+  const auto inputLength = static_cast<int>(inputWS->getNumberHistograms());
   if (isEmpty(maxIndex))
     maxIndex = inputLength - 1;
   if (maxIndex < minIndex) {
@@ -118,7 +118,7 @@ void FindDetectorsOutsideLimits::exec() {
   const double deadValue(1.0); // delete the data
 
   const int diagLength = maxIndex - minIndex;
-  const int progStep = static_cast<int>(std::ceil(diagLength / 100.0));
+  const auto progStep = static_cast<int>(std::ceil(diagLength / 100.0));
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();

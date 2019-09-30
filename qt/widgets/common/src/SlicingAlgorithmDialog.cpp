@@ -364,11 +364,6 @@ void SlicingAlgorithmDialog::loadSettings() {
       settings.value("AlwaysCalculateExtents", 1).toInt();
   ui.ck_calculate->setChecked(alwaysCalculateExtents);
 
-  const QString alignedDimensions =
-      settings.value("AlignedDimensions", "").toString();
-  const QString nonAlignedDimensions =
-      settings.value("NonAlignedDimensions", "").toString();
-
   settings.endGroup();
 }
 

@@ -117,7 +117,7 @@ private:
     alg.setRethrows(true);
     alg.setPropertyValue("Filename", infile.getFileName());
     alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
   }
 
 public:

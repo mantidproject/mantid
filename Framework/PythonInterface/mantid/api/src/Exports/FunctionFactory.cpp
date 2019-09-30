@@ -9,8 +9,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -123,7 +123,7 @@ std::recursive_mutex FUNCTION_REGISTER_MUTEX;
  */
 void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
-  static PyTypeObject *baseClass = const_cast<PyTypeObject *>(
+  static auto *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
   // object mantidapi(handle<>(PyImport_ImportModule("mantid.api")));
   // object ifunction = mantidapi.attr("IFunction");
@@ -143,7 +143,7 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   }
   // Instantiator will store a reference to the class object, so increase
   // reference count with borrowed template
-  auto *creator = new PythonObjectInstantiator<IFunction>(
+  auto creator = std::make_unique<PythonObjectInstantiator<IFunction>>(
       object(handle<>(borrowed(classObject))));
 
   // Can the function be created and initialized? It really shouldn't go in
@@ -152,7 +152,8 @@ void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
   func->initialize();
 
   // Takes ownership of instantiator
-  self.subscribe(func->name(), creator, FunctionFactoryImpl::OverwriteCurrent);
+  self.subscribe(func->name(), std::move(creator),
+                 FunctionFactoryImpl::OverwriteCurrent);
 }
 ///@endcond
 } // namespace

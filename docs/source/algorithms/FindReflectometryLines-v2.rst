@@ -21,9 +21,9 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - FindReflectometryLines2**
+**Example - FindReflectometryLines**
 
-.. testcode:: FindReflectometryLines2Example
+.. testcode:: FindReflectometryLinesExample
 
    LoadISISNexus('POLREF00004699.nxs', OutputWorkspace='ws', LoadMonitors='Exclude')
    # 'ws' is a group workspace -> OutputWorkspace is a group as well
@@ -39,7 +39,7 @@ Usage
 
 Output:
 
-.. testoutput:: FindReflectometryLines2Example
+.. testoutput:: FindReflectometryLinesExample
 
    Line position in the 1st workspace: 25.7
    Line position in the 2nd workspace: 25.7

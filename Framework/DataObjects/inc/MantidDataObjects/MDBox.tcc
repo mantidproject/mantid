@@ -28,10 +28,9 @@ TMDE(MDBox)::~MDBox() {
                                // workspace
     {
       if (this->m_BoxController->isFileBacked()) {
-        this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+        this->m_BoxController->getFileIO()->objectDeleted(m_Saveable.get());
       }
     }
-    delete m_Saveable;
   }
 }
 //-----------------------------------------------------------------------------------------------
@@ -74,8 +73,8 @@ TMDE(MDBox)::MDBox(API::BoxController *const splitter, const uint32_t depth,
  */
 TMDE(MDBox)::MDBox(
     API::BoxController_sptr &splitter, const uint32_t depth,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter.get(), depth, boxID, extentsVector),
       m_Saveable(nullptr), m_bIsMasked(false) {
@@ -92,14 +91,13 @@ TMDE(MDBox)::MDBox(
  */
 TMDE(MDBox)::MDBox(
     API::BoxController *const splitter, const uint32_t depth,
-    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-        extentsVector,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
     const size_t nBoxEvents, const size_t boxID)
     : MDBoxBase<MDE, nd>(splitter, depth, boxID, extentsVector),
       m_Saveable(nullptr), m_bIsMasked(false) {
   initMDBox(nBoxEvents);
 }
-
 
 /**
  * contructor for explicit creation of MDGridBox with known
@@ -111,11 +109,13 @@ TMDE(MDBox)::MDBox(
  * @param end :: iterator before ened (not included)
  */
 template <typename MDE, size_t nd>
-MDBox<MDE, nd>::MDBox(Mantid::API::BoxController *const bc, const uint32_t depth,
-      const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-      &extentsVector, EventIterator begin, EventIterator end) :
-      MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), m_Saveable(nullptr),
-      m_bIsMasked(false)  {
+MDBox<MDE, nd>::MDBox(
+    Mantid::API::BoxController *const bc, const uint32_t depth,
+    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+        &extentsVector,
+    EventIterator begin, EventIterator end)
+    : MDBoxBase<MDE, nd>(bc, depth, 0, extentsVector), m_Saveable(nullptr),
+      m_bIsMasked(false) {
   data = std::vector<MDE>(begin, end);
   MDBoxBase<MDE, nd>::calcCaches(data.begin(), data.end());
   if (this->m_BoxController->isFileBacked())
@@ -163,7 +163,7 @@ TMDE(void MDBox)::clear() {
   // used as free
   // if (this->m_BoxController->useWriteBuffer())
   if (m_Saveable)
-    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
+    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable.get());
 
   // Clear all contents
   this->m_signal = 0.0;
@@ -172,8 +172,10 @@ TMDE(void MDBox)::clear() {
   this->clearDataFromMemory();
 }
 
-TMDE(Kernel::ISaveable *MDBox)::getISaveable() { return m_Saveable; }
-TMDE(Kernel::ISaveable *MDBox)::getISaveable() const { return m_Saveable; }
+TMDE(Kernel::ISaveable *MDBox)::getISaveable() { return m_Saveable.get(); }
+TMDE(Kernel::ISaveable *MDBox)::getISaveable() const {
+  return m_Saveable.get();
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Clear the data[] vector ONLY but does not change the file-backed settings.
@@ -230,8 +232,9 @@ TMDE(void MDBox)::getBoxes(
  * @param cond :: condition to check
  *(leaves on the tree)
  */
-TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, const std::function<bool(API::IMDNode *)> &cond) {
-  if(cond(this))
+TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
+                           const std::function<bool(API::IMDNode *)> &cond) {
+  if (cond(this))
     outBoxes.emplace_back(this);
 }
 
@@ -240,7 +243,7 @@ TMDE(void MDBox)::getBoxes(std::vector<API::IMDNode *>& outBoxes, const std::fun
  * in memory, or on disk or partially on memory and partially on disk
  * for partially loaded object substantially relies on correct settings of
  * wasSaved and isLoaded switches of iSaveable object
-*/
+ */
 TMDE(uint64_t MDBox)::getNPoints() const {
   if (!m_Saveable)
     return data.size();
@@ -274,7 +277,7 @@ TMDE(std::vector<MDE> &MDBox)::getEvents() {
 
     // Tell the to-write buffer to discard the object (when no longer busy) as
     // it has not been modified
-    this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+    this->m_BoxController->getFileIO()->toWrite(m_Saveable.get());
     // else: do nothing if the events are already in memory.
     return data;
   }
@@ -303,7 +306,7 @@ TMDE(const std::vector<MDE> &MDBox)::getConstEvents() const {
 
     // Tell the to-write buffer to discard the object (when no longer busy) as
     // it has not been modified
-    this->m_BoxController->getFileIO()->toWrite(m_Saveable);
+    this->m_BoxController->getFileIO()->toWrite(m_Saveable.get());
     // else: do nothing if the events are already in memory.
     return data;
   }
@@ -322,11 +325,11 @@ TMDE(void MDBox)::releaseEvents() {
 
 /** The method to convert events in a box into a table of
  * coordinates/signal/errors casted into coord_t type
-  *   Used to save events from plain binary file
-  *   @returns coordTable -- vector of events parameters in the form signal,
+ *   Used to save events from plain binary file
+ *   @returns coordTable -- vector of events parameters in the form signal,
  * error, [detID,rinId], eventsCoordinates....
-  *   @return nColumns    -- number of parameters for each event
-  */
+ *   @return nColumns    -- number of parameters for each event
+ */
 TMDE(void MDBox)::getEventsData(std::vector<coord_t> &coordTable,
                                 size_t &nColumns) const {
   double signal, errorSq;
@@ -593,11 +596,10 @@ TMDE(void MDBox)::generalBin(
  * @param[out] errorSquared :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
  */
-TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
-                                  const coord_t radiusSquared, signal_t &signal,
-                                  signal_t &errorSquared,
-                                  const coord_t innerRadiusSquared,
-                                  const bool useOnePercentBackgroundCorrection) const {
+TMDE(void MDBox)::integrateSphere(
+    Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
+    signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
+    const bool useOnePercentBackgroundCorrection) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
   if (innerRadiusSquared == 0.0) {
@@ -630,8 +632,10 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
               });
 
     // Remove top 1% of background
-    const size_t endIndex = useOnePercentBackgroundCorrection ?
-        static_cast<size_t>(0.99 * static_cast<double>(vals.size())) : vals.size();
+    const size_t endIndex =
+        useOnePercentBackgroundCorrection
+            ? static_cast<size_t>(0.99 * static_cast<double>(vals.size()))
+            : vals.size();
 
     for (size_t k = 0; k < endIndex; k++) {
       signal += vals[k].first;
@@ -766,9 +770,9 @@ TMDE(void MDBox)::unmask() { m_bIsMasked = false; }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 /** Create and Add several events. No bounds checking is made!
-  *
-  *@return number of events rejected (0 as nothing is rejected here)
-  */
+ *
+ *@return number of events rejected (0 as nothing is rejected here)
+ */
 TMDE(size_t MDBox)::buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
                                       const std::vector<coord_t> &Coord,
                                       const std::vector<uint16_t> &runIndex,
@@ -858,17 +862,17 @@ TMDE(size_t MDBox)::addEvents(const std::vector<MDE> &events) {
 }
 
 /**Make this box file-backed
-* @param fileLocation -- the starting position of this box data are/should be
-* located in the direct access file
-* @param fileSize     -- the size this box data occupy in the file (in the units
-* of the number of events)
-* @param markSaved    -- set to true if the data indeed are physically there and
-* one can indeed read then from there
-*/
+ * @param fileLocation -- the starting position of this box data are/should be
+ * located in the direct access file
+ * @param fileSize     -- the size this box data occupy in the file (in the
+ * units of the number of events)
+ * @param markSaved    -- set to true if the data indeed are physically there
+ * and one can indeed read then from there
+ */
 TMDE(void MDBox)::setFileBacked(const uint64_t fileLocation,
                                 const size_t fileSize, const bool markSaved) {
   if (!m_Saveable)
-    m_Saveable = new MDBoxSaveable(this);
+    m_Saveable = std::make_unique<MDBoxSaveable>(this);
 
   m_Saveable->setFilePosition(fileLocation, fileSize, markSaved);
 }
@@ -880,12 +884,12 @@ TMDE(void MDBox)::setFileBacked() {
 }
 
 /**Save the box data to specific disk position using the class, responsible for
-  *the file IO.
-  *
-  *@param FileSaver -- the pointer to the class, responsible for File IO
-  *operations
-  *@param position  -- the position of the data within the class.
-*/
+ *the file IO.
+ *
+ *@param FileSaver -- the pointer to the class, responsible for File IO
+ *operations
+ *@param position  -- the position of the data within the class.
+ */
 TMDE(void MDBox)::saveAt(API::IBoxControllerIO *const FileSaver,
                          uint64_t position) const {
   if (data.empty())
@@ -924,14 +928,14 @@ TMDE(void MDBox)::reserveMemoryForLoad(uint64_t size) {
 }
 
 /**Load the box data of specified size from the disk location provided using the
-*class, respoinsible for the file IO and append them to exisiting events
+ *class, respoinsible for the file IO and append them to exisiting events
  * Clear events vector first if overwriting the exisitng events is necessary.
  *
-* @param FileSaver    -- the pointer to the class, responsible for file IO
-* @param filePosition -- the place in the direct access file, where necessary
-*data are located
-* @param nEvents      -- number of events reqested to load
-*/
+ * @param FileSaver    -- the pointer to the class, responsible for file IO
+ * @param filePosition -- the place in the direct access file, where necessary
+ *data are located
+ * @param nEvents      -- number of events reqested to load
+ */
 TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver,
                                  uint64_t filePosition, size_t nEvents) {
   if (nEvents == 0)
@@ -961,14 +965,13 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver,
  * not entirely fool-proof, as if the data is actually loaded is controlled by
  *isLoaded switch in ISaveable
  * and this switch has to be set up correctly
-*/
+ */
 TMDE(void MDBox)::clearFileBacked(bool loadDiskBackedData) {
   if (m_Saveable) {
     if (loadDiskBackedData)
       m_Saveable->load();
     // tell disk buffer that there are no point of tracking this box any more.
-    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
-    delete m_Saveable;
+    this->m_BoxController->getFileIO()->objectDeleted(m_Saveable.get());
     m_Saveable = nullptr;
   }
 }

@@ -188,10 +188,10 @@ public:
     TS_ASSERT(!f.isFixed(2));
     TS_ASSERT(f.isFixed(3));
 
-    TS_ASSERT_THROWS(f.activeParameter(1), std::runtime_error);
-    TS_ASSERT_THROWS(f.activeParameter(3), std::runtime_error);
-    TS_ASSERT_THROWS(f.setActiveParameter(1, 0), std::runtime_error);
-    TS_ASSERT_THROWS(f.setActiveParameter(3, 0), std::runtime_error);
+    TS_ASSERT_THROWS(f.activeParameter(1), const std::runtime_error &);
+    TS_ASSERT_THROWS(f.activeParameter(3), const std::runtime_error &);
+    TS_ASSERT_THROWS(f.setActiveParameter(1, 0), const std::runtime_error &);
+    TS_ASSERT_THROWS(f.setActiveParameter(3, 0), const std::runtime_error &);
   }
 
   void testUnfix() {

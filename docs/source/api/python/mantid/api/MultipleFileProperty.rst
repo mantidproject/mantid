@@ -13,7 +13,7 @@ to load (and optionally sum together) into Mantid.
 
 This functionality is offered via the ``Filename`` property of
 :ref:`algm-Load`, and so is available by calling the algorithm or by
-using the LoadDialog window in the usual way.
+using the LoadDialog window in the usual way. :class:`~mantid.kernel.IntArrayProperty` accepts similar syntax for specifying ranges.
 
 Syntax
 ======

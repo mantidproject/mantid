@@ -84,9 +84,9 @@ public:
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3695)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->y(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(7000)[0], 0.0, 1.0E-5);
     // Check if filename is saved
     TS_ASSERT_EQUALS(load.getPropertyValue("InputFile"),
                      gws->run().getProperty("Filename")->value());
@@ -117,9 +117,9 @@ public:
         API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->y(0)[0], 1.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->y(3695)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(3695)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->y(3696)[0], 2.0, 1.0E-5);
-    TS_ASSERT_DELTA(gws->y(7000)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->y(7000)[0], 0.0, 1.0E-5);
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);

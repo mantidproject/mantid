@@ -43,11 +43,11 @@ const std::string PoldiPeakSummary::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PoldiPeakSummary::init() {
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input workspace containing a table with peaks from a POLDI "
                   "fit routine.");
-  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output table workspace that contains ");
 }

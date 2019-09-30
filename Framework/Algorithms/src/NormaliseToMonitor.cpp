@@ -77,8 +77,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
 // function which modifies the allowed values for the list of monitors.
 void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
                                     Kernel::Property *const pProp) {
-  Kernel::PropertyWithValue<int> *piProp =
-      dynamic_cast<Kernel::PropertyWithValue<int> *>(pProp);
+  auto *piProp = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProp);
   if (!piProp) {
     throw(std::invalid_argument(
         "modify allowed value has been called on wrong property"));
@@ -159,11 +158,9 @@ bool MonIDPropChanger::monitorIdReader(
 
 bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
                                        const size_t timeIndex) {
-
-  for (const auto &spec : specDef)
-    if (spec.second != timeIndex)
-      return false;
-  return true;
+  return std::none_of(
+      specDef.cbegin(), specDef.cend(),
+      [timeIndex](const auto &spec) { return spec.second != timeIndex; });
 }
 
 // Register with the algorithm factory
@@ -185,12 +182,12 @@ void NormaliseToMonitor::init() {
   validator->add<RawCountValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       validator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, validator),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Name to use for the output workspace");
   // should be any spectrum number, but named this property MonitorSpectrum to
   // keep compatibility with previous scripts
@@ -213,18 +210,18 @@ void NormaliseToMonitor::init() {
       "to empty data and the field then can accepts any MonitorID "
       "within the InputWorkspace.");
   // set up the validator, which would verify if spectrum is correct
-  setPropertySettings("MonitorID", Kernel::make_unique<MonIDPropChanger>(
+  setPropertySettings("MonitorID", std::make_unique<MonIDPropChanger>(
                                        "InputWorkspace", "MonitorSpectrum",
                                        "MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("MonitorWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional, validator),
-      "A workspace containing one or more spectra to normalize the "
-      "InputWorkspace by.");
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "MonitorWorkspace", "", Direction::Input,
+                      PropertyMode::Optional, validator),
+                  "A workspace containing one or more spectra to normalize the "
+                  "InputWorkspace by.");
   setPropertySettings("MonitorWorkspace",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "MonitorSpectrum", IS_DEFAULT));
 
   declareProperty("MonitorWorkspaceIndex", 0,
@@ -237,7 +234,7 @@ void NormaliseToMonitor::init() {
                   "will be normalized by first spectra (with index 0)",
                   Direction::InOut);
   setPropertySettings("MonitorWorkspaceIndex",
-                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                      std::make_unique<Kernel::EnabledWhenProperty>(
                           "MonitorSpectrum", IS_DEFAULT));
 
   // If users set either of these optional properties two things happen
@@ -256,8 +253,8 @@ void NormaliseToMonitor::init() {
       "end of the integration range are also included");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("NormFactorWS", "", Direction::Output,
-                                       PropertyMode::Optional),
+      std::make_unique<WorkspaceProperty<>>(
+          "NormFactorWS", "", Direction::Output, PropertyMode::Optional),
       "Name of the workspace, containing the normalization factor.\n"
       "If this name is empty, normalization workspace is not returned. If the "
       "name coincides with the output workspace name, _normFactor suffix is "

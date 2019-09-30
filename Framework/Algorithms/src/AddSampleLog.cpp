@@ -41,7 +41,7 @@ using namespace API;
 using Types::Core::DateAndTime;
 
 void AddSampleLog::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut),
                   "Workspace to add the log entry to");
   declareProperty("LogName", "",
@@ -70,7 +70,7 @@ void AddSampleLog::init() {
 
   // add optional workspace which contains the data of the TimeSeriesProperty
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "TimeSeriesWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional workspace contain the data");
   declareProperty(
@@ -343,15 +343,14 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
       getTimes(data_ws, ws_index, epochtime, is_second, run_obj);
   if (value_is_int) {
     // integer property
-    TimeSeriesProperty<int> *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(
         run_obj.getProperty(property_name));
     std::vector<int> value_vec = getIntValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   } else {
     // double property
-    TimeSeriesProperty<double> *int_prop =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            run_obj.getProperty(property_name));
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<double> *>(
+        run_obj.getProperty(property_name));
     std::vector<double> value_vec = getDblValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   }
@@ -388,7 +387,7 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
     double timedbl = dataws->readX(workspace_index)[i];
     if (is_second)
       timedbl *= 1.E9;
-    int64_t entry_i64 = static_cast<int64_t>(timedbl);
+    auto entry_i64 = static_cast<int64_t>(timedbl);
     Types::Core::DateAndTime entry(timeshift + entry_i64);
     timevec.push_back(entry);
   }
@@ -407,7 +406,7 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   Types::Core::DateAndTime runstart(0);
   try {
     runstart = run_obj.startTime();
-  } catch (std::runtime_error &) {
+  } catch (const std::runtime_error &) {
     // Swallow the error - startTime will just be 0
   }
 

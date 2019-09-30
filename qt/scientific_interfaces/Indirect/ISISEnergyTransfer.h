@@ -8,6 +8,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ISISENERGYTRANSFER_H_
 
 #include "IndirectDataReductionTab.h"
+
 #include "MantidKernel/System.h"
 #include "ui_ISISEnergyTransfer.h"
 
@@ -33,6 +34,7 @@ public slots:
   bool validate() override;
 
 private slots:
+  void handleDataReady(QString const &dataName) override;
   void algorithmComplete(bool error);
 
   void setCurrentGroupingOption(QString const &option);
@@ -55,7 +57,6 @@ private slots:
       bool error); //< Called when the Plot Raw algorithmm chain completes
   /// Handles running, plotting and saving
   void runClicked();
-  void plotClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -69,10 +70,15 @@ private:
                                      QMap<QString, QString> const &instDetails,
                                      QString const &instrumentProperty);
 
+  void setFileExtensionsByName(bool filter) override;
+
   std::pair<std::string, std::string> createMapFile(
       const std::string
           &groupType); ///< create the mapping file with which to group results
-  std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
+
+  void plotWorkspace(std::string const &workspaceName,
+                     std::string const &plotType);
+  void saveWorkspace(std::string const &workspaceName);
 
   bool numberInCorrectRange(std::size_t const &spectraNumber) const;
   QString checkCustomGroupingNumbersInRange(
@@ -80,15 +86,17 @@ private:
   QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
 
+  void loadDetailedBalance(std::string const &filename);
+
   void setRunEnabled(bool enable);
-  void setPlotEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
   void setSaveEnabled(bool enable);
-  void setPlotIsPlotting(bool plotting);
+  void setButtonsEnabled(bool enable);
   void setPlotTimeIsPlotting(bool plotting);
 
   std::string m_outputGroupName;
   std::vector<std::string> m_outputWorkspaces;
+
   Ui::ISISEnergyTransfer m_uiForm;
 };
 } // namespace CustomInterfaces

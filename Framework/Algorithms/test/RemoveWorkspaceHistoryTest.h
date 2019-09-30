@@ -30,9 +30,9 @@ private:
     const std::string category() const override { return "Dummy"; }
 
     void init() override {
-      declareProperty(
-          make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
-          "");
+      declareProperty(std::make_unique<WorkspaceProperty<>>("Workspace", "",
+                                                            Direction::InOut),
+                      "");
       declareProperty("Input1", 2);
       declareProperty("Input2", 1);
       declareProperty("Output1", -1, Direction::Output);

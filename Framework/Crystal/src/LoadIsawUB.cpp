@@ -8,8 +8,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Strings.h"
-#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <fstream>
 
 using namespace Mantid::Kernel::Strings;
@@ -29,14 +29,14 @@ using namespace Mantid::API;
  */
 void LoadIsawUB::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
-                                                Direction::InOut),
+      std::make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                     Direction::InOut),
       "An input workspace to which to add the lattice information.");
 
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "Path to an ISAW-style UB matrix text file.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "Path to an ISAW-style UB matrix text file.");
 
   declareProperty("CheckUMatrix", true,
                   "If True (default) then a check is "
@@ -149,7 +149,7 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
   /* The method in OrientedLattice gets both the lattice parameters and the U
    * matrix from the UB matrix.
    * This is compatible (same results) with the ISAW lattice parameters */
-  OrientedLattice *latt = new OrientedLattice();
+  auto latt = std::make_unique<OrientedLattice>();
   latt->setUB(ub);
   latt->setError(latVals[0], latVals[1], latVals[2], latVals[3], latVals[4],
                  latVals[5]);
@@ -191,17 +191,16 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
                                 "PeaksWorkspace or a MDWorkspace.");
 
   // Save it into the workspace
-  ws->mutableSample().setOrientedLattice(latt);
+  ws->mutableSample().setOrientedLattice(latt.get());
 
   // Save it to every experiment info in MD workspaces
   if ((MDWS != nullptr) && (MDWS->getNumExperimentInfo() > 1)) {
     for (uint16_t i = 1; i < MDWS->getNumExperimentInfo(); i++) {
       ws = MDWS->getExperimentInfo(i);
-      ws->mutableSample().setOrientedLattice(latt);
+      ws->mutableSample().setOrientedLattice(latt.get());
     }
   }
 
-  delete latt;
   this->setProperty("InputWorkspace", ws1);
 }
 

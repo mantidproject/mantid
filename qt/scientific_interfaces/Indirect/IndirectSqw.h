@@ -31,12 +31,10 @@ public:
   bool validate() override;
 
 private slots:
-  void plotRqwContour();
+  void handleDataReady(QString const &dataName) override;
   void sqwAlgDone(bool error);
 
   void runClicked();
-  void plotSpectrumClicked();
-  void plotContourClicked();
   void saveClicked();
 
   void updateRunButton(bool enabled = true,
@@ -45,19 +43,16 @@ private slots:
                        QString const tooltip = "");
 
 private:
-  Mantid::API::MatrixWorkspace_const_sptr
-  getADSWorkspace(std::string const &name) const;
+  void plotRqwContour(std::string const &sampleName);
+  void setDefaultQAndEnergy();
+  void setQRange(std::tuple<double, double> const &axisRange);
+  void setEnergyRange(std::tuple<double, double> const &axisRange);
+  void setFileExtensionsByName(bool filter) override;
+
   std::size_t getOutWsNumberOfSpectra() const;
 
-  void setPlotSpectrumIndexMax(int maximum);
-
   void setRunEnabled(bool enabled);
-  void setPlotSpectrumEnabled(bool enabled);
-  void setPlotContourEnabled(bool enabled);
   void setSaveEnabled(bool enabled);
-  void setOutputButtonsEnabled(std::string const &enableOutputButtons);
-  void setPlotSpectrumIsPlotting(bool plotting);
-  void setPlotContourIsPlotting(bool plotting);
 
   Ui::IndirectSqw m_uiForm;
 };

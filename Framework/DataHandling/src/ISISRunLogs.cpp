@@ -9,7 +9,6 @@
 
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -32,14 +31,14 @@ ISISRunLogs::ISISRunLogs(const API::Run &icpRun) {
   for (const auto icpLogName : {"icp_event", "icpevent"}) {
     try {
       Kernel::Property *icpLog = icpRun.getLogData(icpLogName);
-      m_logParser = Kernel::make_unique<LogParser>(icpLog);
+      m_logParser = std::make_unique<LogParser>(icpLog);
       return;
     } catch (std::runtime_error &) {
     }
   }
   // If it does not exist then pass in a NULL log to indicate that period 1
   // should be assumed
-  m_logParser = Kernel::make_unique<LogParser>(nullptr);
+  m_logParser = std::make_unique<LogParser>(nullptr);
 }
 
 /**
@@ -57,12 +56,12 @@ void ISISRunLogs::addStatusLog(API::Run &exptRun) {
  */
 void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   auto periodLog = m_logParser->createPeriodLog(period);
-  auto logFilter = std::unique_ptr<LogFilter>();
-  const TimeSeriesProperty<bool> *maskProp(nullptr);
+  std::unique_ptr<LogFilter> logFilter{nullptr};
+  const TimeSeriesProperty<bool> *maskProp{nullptr};
   try {
     auto runningLog =
         exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
-    logFilter = Kernel::make_unique<LogFilter>(runningLog);
+    logFilter = std::make_unique<LogFilter>(*runningLog);
   } catch (std::exception &) {
     g_log.warning(
         "Cannot find status log. Logs will be not be filtered by run status");
@@ -75,6 +74,8 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
       maskProp = logFilter->filter();
     } else
       maskProp = periodLog;
+  } else if (logFilter) {
+    maskProp = logFilter->filter();
   }
   // Filter logs if we have anything to filter on
   if (maskProp)
@@ -87,7 +88,7 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   } catch (std::runtime_error &) {
     // Already has one
   }
-}
+} // namespace DataHandling
 
 /**
  * Add the period log to a run.

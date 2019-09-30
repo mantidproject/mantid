@@ -13,6 +13,7 @@
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+#include "MantidCurveFitting/TableWorkspaceDomainCreator.h"
 
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -39,6 +40,13 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
                                     IDomainCreator::DomainType domainType) {
 
   IDomainCreator *creator = nullptr;
+  Workspace_sptr ws;
+
+  try {
+    ws = manager->getProperty("InputWorkspace");
+  } catch (...) {
+    // InputWorkspace is not needed for some fit function so continue
+  }
 
   // ILatticeFunction requires API::LatticeDomain.
   if (dynamic_cast<const ILatticeFunction *>(fun)) {
@@ -50,6 +58,9 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
     creator = new SeqDomainSpectrumCreator(manager, workspacePropertyName);
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
+  } else if (boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+    creator = new TableWorkspaceDomainCreator(manager, workspacePropertyName,
+                                              domainType);
   } else {
     bool histogramFit =
         manager->getPropertyValue("EvaluationType") == "Histogram";
@@ -73,10 +84,10 @@ const std::string IFittingAlgorithm::category() const { return "Optimization"; }
  */
 void IFittingAlgorithm::init() {
   declareProperty(
-      make_unique<API::FunctionProperty>("Function", Direction::InOut),
+      std::make_unique<API::FunctionProperty>("Function", Direction::InOut),
       "Parameters defining the fitting function and its initial values");
 
-  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "Name of the input Workspace");
   declareProperty("IgnoreInvalidData", false,
@@ -159,7 +170,7 @@ void IFittingAlgorithm::setFunction() {
       m_workspacePropertyNames[i] = workspacePropertyName;
       if (!existsProperty(workspacePropertyName)) {
         declareProperty(
-            Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+            std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                 workspacePropertyName, "", Kernel::Direction::Input),
             "Name of the input Workspace");
       }
@@ -179,8 +190,6 @@ void IFittingAlgorithm::setFunction() {
  */
 void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
                                      bool addProperties) {
-  // get the workspace
-  API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
   // m_function->setWorkspace(ws);
   const size_t n = std::string("InputWorkspace").size();
   const std::string suffix =

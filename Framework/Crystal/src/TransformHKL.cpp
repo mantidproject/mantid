@@ -33,7 +33,7 @@ const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 /** Initialize the algorithm's properties.
  */
 void TransformHKL::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -41,7 +41,7 @@ void TransformHKL::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>(
+      std::make_unique<PropertyWithValue<double>>(
           "Tolerance", 0.15, std::move(mustBePositive), Direction::Input),
       "Indexing Tolerance (0.15)");
 
@@ -53,16 +53,16 @@ void TransformHKL::init() {
   auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "HKLTransform", std::move(identity_matrix), std::move(threeBythree)),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "
       "numbers");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 }
@@ -135,13 +135,12 @@ void TransformHKL::exec() {
   std::vector<V3D> q_vectors;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getHKL());
-    if (IndexingUtils::ValidIndex(hkl, tolerance)) {
-      num_indexed++;
-      miller_indices.push_back(hkl_tran * hkl);
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-      peaks[i].setHKL(hkl_tran * hkl);
-    } else // mark as NOT indexed
-      peaks[i].setHKL(V3D(0.0, 0.0, 0.0));
+    V3D ihkl(peaks[i].getIntHKL());
+    peaks[i].setIntHKL(hkl_tran * ihkl);
+    miller_indices.push_back(hkl_tran * ihkl);
+    peaks[i].setHKL(hkl_tran * hkl);
+    q_vectors.push_back(peaks[i].getQSampleFrame());
+    num_indexed++;
   }
 
   double average_error =

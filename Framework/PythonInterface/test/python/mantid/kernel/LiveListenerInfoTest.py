@@ -22,9 +22,9 @@ class LiveListenerInfoTest(unittest.TestCase):
         info = self._get_test_listener()
 
         # Just testing functionality; values can be updated if needed
-        self.assertEquals(info.name(), "histo")
-        self.assertEquals(info.listener(), "ISISHistoDataListener")
-        self.assertEquals(info.address(), "NDXCRISP:6789")
+        self.assertEqual(info.name(), "histo")
+        self.assertEqual(info.listener(), "ISISHistoDataListener")
+        self.assertEqual(info.address(), "NDXCRISP:6789")
 
 
 if __name__ == '__main__':

@@ -26,8 +26,8 @@ public:
   void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->initialize(2, 11, 10);
-    auto newAxis = new NumericAxis(2);
-    ws->replaceAxis(1, newAxis);
+    auto newAxis = std::make_unique<NumericAxis>(2);
+    ws->replaceAxis(1, std::move(newAxis));
     NumericAxisValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }

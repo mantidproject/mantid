@@ -9,14 +9,17 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+import unittest
+
 from qtpy.QtWidgets import QTableWidgetItem
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.projectrecovery.recoverygui.recoveryfailureview import RecoveryFailureView
 
 
-class RecoveryFailureViewTest(GuiTest):
+@start_qapplication
+class RecoveryFailureViewTest(unittest.TestCase):
     def setUp(self):
         self.prw = RecoveryFailureView(mock.MagicMock())
 

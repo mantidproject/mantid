@@ -89,15 +89,15 @@ const std::string ApplyFloodWorkspace::category() const {
 
 void ApplyFloodWorkspace::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::INPUT_WORKSPACE, "", Direction::Input),
                   "The workspace to correct.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::FLOOD_WORKSPACE, "", Direction::Input),
                   "The flood workspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::OUTPUT_WORKSPACE, "", Direction::Output),
                   "The corrected workspace.");
 }

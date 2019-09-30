@@ -11,7 +11,7 @@ import numpy as np
 import os
 
 from qtpy.QtWidgets import QSizePolicy
-from MPLwidgets import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 

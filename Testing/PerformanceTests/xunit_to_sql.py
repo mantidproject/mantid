@@ -40,10 +40,6 @@ def handle_testcase(case, suite_name):
     except:
         time = 0.0
     try:
-        total_time = float(case.getAttribute("totalTime"))
-    except:
-        total_time = 0.0
-    try:
         cpu_fraction = float(case.getAttribute("CPUFraction"))
     except:
         cpu_fraction = 0.0

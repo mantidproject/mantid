@@ -46,6 +46,19 @@
     <item>
      <layout class="QHBoxLayout" name="layout_bottom">
       <item>
+       <widget class="QPushButton" name="pbSettings">
+        <property name="maximumSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbHelp">
         <property name="enabled">
          <bool>true</bool>
@@ -58,8 +71,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>20</width>
-          <height>20</height>
+          <width>25</width>
+          <height>25</height>
          </size>
         </property>
         <property name="text">
@@ -92,6 +105,8 @@
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../MantidPlot/icons/icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

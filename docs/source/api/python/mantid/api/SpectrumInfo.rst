@@ -4,30 +4,30 @@
 
 This is a python binding to the C++ class Mantid::API::SpectrumInfo.
 
-Most of the information concerning ``SpectrumInfo`` can be found in the `Instrument Access Layers <https://github.com/mantidproject/mantid/blob/9e3d799d40fda4a5ca08887e8c47f41c3316da91/docs/source/concepts/InstrumentAccessLayers.rst>`_ document.
+Most of the information concerning :py:obj:`~mantid.api.SpectrumInfo` can be found in the :ref:`Instrument Access Layers <InstrumentAccessLayers>` document.
 
 --------
 Purpose
 --------
-The purpose of the ``SpectrumInfo`` object is to allow the user to access information about the spectra being used in an experiment. The ``SpectrumInfo`` object can be used to access information such as the number of spectra, the absolute position of a spectrum as well as the distance from the sample to the source. There are many other methods available as well.
+The purpose of the :py:obj:`~mantid.api.SpectrumInfo` object is to allow the user to access information about the spectra being used in an experiment. The :py:obj:`~mantid.api.SpectrumInfo` object can be used to access information such as the number of spectra, the absolute position of a spectrum as well as the distance from the sample to the source. There are many other methods available as well.
 
 A spectrum corresponds to (a group of) one or more detectors. However if no instrument/beamline has been set then the number of detectors will be zero. An example test case details this below.
 
-Many users may need more information about the spectra in an experiment so that they can have a better understanding of the beamline they are using. This information is easy and fast to access via ``SpectrumInfo``.
+Many users may need more information about the spectra in an experiment so that they can have a better understanding of the beamline they are using. This information is easy and fast to access via :py:obj:`~mantid.api.SpectrumInfo`.
 
-``SpectrumInfo`` is one of three objects that the user can gain access to from a workspace object.
+:py:obj:`~mantid.api.SpectrumInfo` is one of three objects that the user can gain access to from a workspace object.
 The other two are:
 
-* ``DetectorInfo``
-* ``ComponentInfo``
+* :py:obj:`~mantid.geometry.ComponentInfo`
+* :py:obj:`~mantid.geometry.DetectorInfo`
 
 ------
 Usage
 ------
 
 **Example 1 - Creating a SpectrumInfo Object:**
-This example shows how to obtain a ``SpectrumInfo`` object from a workspace object.
-The return value is a ``SpectrumInfo`` object.
+This example shows how to obtain a :py:obj:`~mantid.api.SpectrumInfo` object from a workspace object.
+The return value is a :py:obj:`~mantid.api.SpectrumInfo` object.
 
 .. testcode:: CreateSpectrumInfoObject
 
@@ -116,7 +116,8 @@ The returned object can then be used to call other methods that belong to ``Spec
 
 	# Get a SpectrumDefinition object
 	spectrumDefinition = info.getSpectrumDefinition(0)
-	print(type(spectrumDefinition))
+	from mantid.api import SpectrumDefinition
+	print("The type is SpectrumDefinition: {}".format(isinstance(spectrumDefinition, SpectrumDefinition)))
 
 Output:
 
@@ -124,7 +125,7 @@ Output:
 
 	10.0
 	[0,0,-10]
-	<class '_api.SpectrumDefinition'>
+	The type is SpectrumDefinition: True
 
 
 *bases:* :py:obj:`mantid.api.SpectrumInfo`
@@ -135,4 +136,3 @@ Output:
     :members:
     :undoc-members:
     :inherited-members:
-

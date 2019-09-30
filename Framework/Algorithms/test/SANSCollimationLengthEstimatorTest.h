@@ -241,7 +241,7 @@ public:
         "Should throw an exception since we don't have the requested method "
         "implemneted",
         collimationLengthEstimator.provideCollimationLength(testWorkspace),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_that_missing_guide_cutoff_produces_a_default_value() {

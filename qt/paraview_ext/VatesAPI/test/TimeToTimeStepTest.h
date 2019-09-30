@@ -106,14 +106,14 @@ public:
     TSM_ASSERT_THROWS(
         "Range is negative, should throw.",
         TimeToTimeStep::construct(dimensionMin, dimensionMax, nBins),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testUseWithDefaultConstructorThrows() {
     Mantid::VATES::TimeToTimeStep converter;
     TSM_ASSERT_THROWS(
         "Constructing via default constructor should throw when used.",
-        converter(1), std::runtime_error);
+        converter(1), const std::runtime_error &);
   }
 };
 

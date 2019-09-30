@@ -604,8 +604,8 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    Mantid::API::Axis *const newAxis = new Mantid::API::NumericAxis(2);
-    ws2->replaceAxis(1, newAxis);
+    auto newAxis = std::make_unique<Mantid::API::NumericAxis>(2);
+    ws2->replaceAxis(1, std::move(newAxis));
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -666,14 +666,15 @@ public:
         WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     // Put numeric axes on these workspaces as checkAxes won't test values on
     // spectra axes
-    Axis *newAxisWS1 = new NumericAxis(ws1local->getAxis(1)->length());
+    auto newAxisWS1 =
+        std::make_unique<NumericAxis>(ws1local->getAxis(1)->length());
     newAxisWS1->setValue(0, 1);
     newAxisWS1->setValue(1, 2);
-    Axis *newAxisWS2 = new NumericAxis(ws2->getAxis(1)->length());
+    auto newAxisWS2 = std::make_unique<NumericAxis>(ws2->getAxis(1)->length());
     newAxisWS2->setValue(0, 1);
     newAxisWS2->setValue(1, 2);
-    ws1local->replaceAxis(1, newAxisWS1);
-    ws2->replaceAxis(1, newAxisWS2);
+    ws1local->replaceAxis(1, std::move(newAxisWS1));
+    ws2->replaceAxis(1, std::move(newAxisWS2));
 
     // Check that it's all good
     TS_ASSERT((Mantid::API::equals(ws1local, ws2)));

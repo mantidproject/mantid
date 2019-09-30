@@ -87,11 +87,11 @@ int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadILLSANS::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "Name of the nexus file to load");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Load, ".nxs"),
+                  "Name of the nexus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -254,7 +254,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
     throw std::runtime_error(
         "The time bins have not the same dimension for all the 5 detectors!");
   }
-  const size_t numberOfHistograms = static_cast<size_t>(
+  const auto numberOfHistograms = static_cast<size_t>(
       dataRear.dim0() * dataRear.dim1() + dataRight.dim0() * dataRight.dim1() +
       dataLeft.dim0() * dataLeft.dim1() + dataDown.dim0() * dataDown.dim1() +
       dataUp.dim0() * dataUp.dim1());
@@ -316,7 +316,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
                                            channelWidthSum, channelWidthTimes);
       binningUp = getVariableTimeBinning(firstEntry, distancePrefix + "5",
                                          channelWidthSum, channelWidthTimes);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       vtof = false;
     }
     if (!vtof) {
@@ -400,36 +400,22 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     NeXus::NXInt &data, const std::vector<double> &timeBinning,
     size_t firstIndex = 0) {
 
-  g_log.debug("Loading the data into the workspace:");
-  g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << '\n';
-  g_log.debug() << "\t"
-                << "Number of Tubes : data.dim0() = " << data.dim0() << '\n';
-  g_log.debug() << "\t"
-                << "Number of Pixels : data.dim1() = " << data.dim1() << '\n';
-  g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << '\n';
-  g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << '\n';
-
   // Workaround to get the number of tubes / pixels
   const size_t numberOfTubes = data.dim0();
   const size_t numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
-  size_t spec = firstIndex;
 
-  for (size_t i = 0; i < numberOfTubes; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
       const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
-      m_localWorkspace->setHistogram(spec, binEdges, std::move(histoCounts));
-      ++spec;
+      m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
     }
   }
 
-  g_log.debug() << "Data loading inti WS done....\n";
-
-  return spec;
+  return firstIndex + numberOfTubes * numberOfPixelsPerTube;
 }
 
 /**
@@ -618,6 +604,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   double wavelength =
       entry.getFloat(instrumentNamePath + "/selector/wavelength");
   g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
+  // round the wavelength to avoid unnecessary rebinning during merge runs
+  wavelength = std::round(wavelength * 100) / 100.;
 
   if (wavelength <= 0) {
     g_log.debug() << "Mode = " << entry.getFloat("mode") << '\n';
@@ -632,13 +620,16 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     const std::string entryResolution = instrumentNamePath + "/selector/";
     try {
       wavelengthRes = entry.getFloat(entryResolution + "wavelength_res");
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       try {
         wavelengthRes = entry.getFloat(entryResolution + "wave_length_res");
-      } catch (std::runtime_error) {
+      } catch (const std::runtime_error &) {
         g_log.warning("Could not find wavelength resolution, assuming 10%");
       }
     }
+    // round also the wavelength res to avoid unnecessary rebinning during merge
+    // runs
+    wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
     double ei = m_loader.calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);

@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QMessageBox>
+#include <QStringList>
 #include <QTableWidget>
 
 namespace {
@@ -72,19 +73,20 @@ void DataController::addWorkspace() {
       }
 
       if (!matrixWorkspaces.empty()) {
+        QStringList datasetNames;
         for (auto &matrixWorkspace : matrixWorkspaces) {
           auto name = QString::fromStdString((*matrixWorkspace).getName());
           for (auto &index : indices) {
             addWorkspaceSpectrum(name, index, *matrixWorkspace);
+            datasetNames << name + " (" + QString::number(index) + ")";
           }
         }
-        emit spectraAdded(
-            static_cast<int>(indices.size() * matrixWorkspaces.size()));
+        emit spectraAdded(datasetNames);
         emit dataTableUpdated();
       }
     } else {
       QMessageBox::warning(
-          owner(), "MantidPlot - Warning",
+          owner(), "Mantid - Warning",
           QString("Workspace \"%1\" doesn't exist.").arg(wsName));
     }
   }

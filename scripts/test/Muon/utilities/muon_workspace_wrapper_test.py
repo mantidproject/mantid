@@ -90,13 +90,6 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         MuonWorkspaceWrapper(workspace=table_workspace)
 
-    def test_that_cannot_initialize_with_WorkspaceGroup_object(self):
-        group_workspace = api.WorkspaceGroup()
-        assert isinstance(group_workspace, WorkspaceGroup)
-
-        with self.assertRaises(AttributeError):
-            MuonWorkspaceWrapper(workspace=group_workspace)
-
     def test_that_cannot_initialize_with_non_workspace_objects(self):
         with self.assertRaises(AttributeError):
             MuonWorkspaceWrapper(workspace="string")
@@ -219,16 +212,6 @@ class MuonWorkspaceTest(unittest.TestCase):
         self.assertTrue(simpleapi.mtd.doesExist("name1"))
         workspace_handle.workspace = workspace2
         self.assertFalse(simpleapi.mtd.doesExist("name1"))
-
-    def test_that_setting_a_new_workspace_resets_the_name_to_empty_string(self):
-        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
-        workspace_handle.show("name1")
-
-        workspace2 = create_simple_workspace(data_x=[5, 6, 7, 8], data_y=[20, 20, 20, 20])
-
-        self.assertEqual(workspace_handle.name, "name1")
-        workspace_handle.workspace = workspace2
-        self.assertEqual(workspace_handle.name, "")
 
 
 class MuonWorkspaceAddDirectoryTest(unittest.TestCase):

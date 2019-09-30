@@ -45,7 +45,7 @@ public:
         gatherer.setProperty("OutputWorkspace", "something"));
     // Haven't set InputWorkspace and this will be the root process, so it
     // should complain
-    TS_ASSERT_THROWS(gatherer.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(gatherer.execute(), const std::runtime_error &);
     TS_ASSERT(!gatherer.isExecuted());
   }
 

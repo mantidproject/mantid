@@ -27,22 +27,22 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(table, ITableWorkspace))
 
     def test_meta_information_is_correct(self):
-        self.assertEquals(self._test_ws.columnCount(), 19)
-        self.assertEquals(self._test_ws.rowCount(), 1)
+        self.assertEqual(self._test_ws.columnCount(), 19)
+        self.assertEqual(self._test_ws.rowCount(), 1)
 
         column_names = self._test_ws.getColumnNames()
-        self.assertEquals(len(column_names), 19)
-        self.assertEquals(type(column_names), list)
+        self.assertEqual(len(column_names), 19)
+        self.assertEqual(type(column_names), list)
 
     def test_cell_access_returns_variables_as_native_python_types(self):
         self.assertAlmostEquals(self._test_ws.cell('r_gd_prtn_chrg',0), 10.040912628173828, 15)
         self.assertAlmostEquals(self._test_ws.cell(0, 7), 10.040912628173828, 15)
 
-        self.assertEquals(self._test_ws.cell('r_goodfrm', 0), 9229)
-        self.assertEquals(self._test_ws.cell(0, 9), 9229)
+        self.assertEqual(self._test_ws.cell('r_goodfrm', 0), 9229)
+        self.assertEqual(self._test_ws.cell(0, 9), 9229)
 
-        self.assertEquals(self._test_ws.cell('r_enddate', 0), "18-DEC-2008")
-        self.assertEquals(self._test_ws.cell(0, 16), "18-DEC-2008")
+        self.assertEqual(self._test_ws.cell('r_enddate', 0), "18-DEC-2008")
+        self.assertEqual(self._test_ws.cell(0, 16), "18-DEC-2008")
 
     def _create_test_table(self):
         table = WorkspaceFactory.createTable()
@@ -59,15 +59,15 @@ class ITableWorkspaceTest(unittest.TestCase):
         found_rows = 0
         for i in test_table:
             found_rows += 1
-        self.assertEquals(found_rows, expected_nrows)
+        self.assertEqual(found_rows, expected_nrows)
 
     def test_table_is_resized_correctly(self):
         table = WorkspaceFactory.createTable()
-        self.assertEquals(len(table), 0)
+        self.assertEqual(len(table), 0)
         table.setRowCount(5)
-        self.assertEquals(len(table), 5)
+        self.assertEqual(len(table), 5)
         self.assertTrue(table.addColumn(type="int",name="index"))
-        self.assertEquals(table.columnCount(), 1)
+        self.assertEqual(table.columnCount(), 1)
 
     def test_setcell_sets_the_correct_cell(self):
         test_table = self._create_test_table()
@@ -75,25 +75,25 @@ class ITableWorkspaceTest(unittest.TestCase):
         col = 1
         row = 2
         test_table.setCell(row, col, data)
-        self.assertEquals(test_table.cell(row,col), data)
+        self.assertEqual(test_table.cell(row,col), data)
         data = '12'
         col = 'name'
         test_table.setCell(col, row, data)
-        self.assertEquals(test_table.cell(col,row), data)
+        self.assertEqual(test_table.cell(col,row), data)
 
     def test_adding_table_data_using_dictionary(self):
         table = WorkspaceFactory.createTable()
         table.addColumn(type="int",name="index")
-        self.assertEquals(table.columnCount(), 1)
+        self.assertEqual(table.columnCount(), 1)
         table.addColumn(type="str",name="value")
-        self.assertEquals(table.columnCount(), 2)
+        self.assertEqual(table.columnCount(), 2)
 
         nextrow = {'index':1, 'value':'10'}
         table.addRow(nextrow)
-        self.assertEquals(len(table), 1)
+        self.assertEqual(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(1, insertedrow['index'])
-        self.assertEquals('10', insertedrow['value'])
+        self.assertEqual(1, insertedrow['index'])
+        self.assertEqual('10', insertedrow['value'])
 
         incorrect_type = {'index':1, 'value':10}
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -104,16 +104,16 @@ class ITableWorkspaceTest(unittest.TestCase):
     def test_adding_table_data_using_list(self):
         table = WorkspaceFactory.createTable()
         table.addColumn(type="int",name="index")
-        self.assertEquals(table.columnCount(), 1)
+        self.assertEqual(table.columnCount(), 1)
         table.addColumn(type="str",name="value")
-        self.assertEquals(table.columnCount(), 2)
+        self.assertEqual(table.columnCount(), 2)
 
         values = [1, '10']
         table.addRow(values)
-        self.assertEquals(len(table), 1)
+        self.assertEqual(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(1, insertedrow['index'])
-        self.assertEquals('10', insertedrow['value'])
+        self.assertEqual(1, insertedrow['index'])
+        self.assertEqual('10', insertedrow['value'])
 
         incorrect_type = [1, 10]
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -121,16 +121,16 @@ class ITableWorkspaceTest(unittest.TestCase):
     def test_adding_table_data_using_tuple(self):
         table = WorkspaceFactory.createTable()
         table.addColumn(type="int",name="index")
-        self.assertEquals(table.columnCount(), 1)
+        self.assertEqual(table.columnCount(), 1)
         table.addColumn(type="str",name="value")
-        self.assertEquals(table.columnCount(), 2)
+        self.assertEqual(table.columnCount(), 2)
 
         values = (1, '10')
         table.addRow(values)
-        self.assertEquals(len(table), 1)
+        self.assertEqual(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(1, insertedrow['index'])
-        self.assertEquals('10', insertedrow['value'])
+        self.assertEqual(1, insertedrow['index'])
+        self.assertEqual('10', insertedrow['value'])
 
         incorrect_type = (1, 10)
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -138,25 +138,25 @@ class ITableWorkspaceTest(unittest.TestCase):
     def test_adding_table_data_using_numpy(self):
         table = WorkspaceFactory.createTable()
         table.addColumn(type="int",name="index")
-        self.assertEquals(table.columnCount(), 1)
+        self.assertEqual(table.columnCount(), 1)
         table.addColumn(type="int",name="value")
-        self.assertEquals(table.columnCount(), 2)
+        self.assertEqual(table.columnCount(), 2)
 
         nextrow = [1, 10]
         values32 = numpy.array(nextrow).astype(numpy.int32)
         values64 = numpy.array(nextrow).astype(numpy.int64)
 
         table.addRow(values32)
-        self.assertEquals(len(table), 1)
+        self.assertEqual(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(1, insertedrow['index'])
-        self.assertEquals(10, insertedrow['value'])
+        self.assertEqual(1, insertedrow['index'])
+        self.assertEqual(10, insertedrow['value'])
 
         table.addRow(values64)
-        self.assertEquals(len(table), 2)
+        self.assertEqual(len(table), 2)
         insertedrow = table.row(1)
-        self.assertEquals(1, insertedrow['index'])
-        self.assertEquals(10, insertedrow['value'])
+        self.assertEqual(1, insertedrow['index'])
+        self.assertEqual(10, insertedrow['value'])
 
         incorrect_type = numpy.array(['1', '10'])
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -177,7 +177,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addColumn(type='V3D', name='pos')
         table.addRow([V3D(1,1,1)])
 
-        self.assertEquals(V3D(1,1,1), table.cell(0, 0))
+        self.assertEqual(V3D(1,1,1), table.cell(0, 0))
 
     def test_set_and_extract_vector_columns(self):
         table = WorkspaceFactory.createTable()
@@ -196,20 +196,20 @@ class ITableWorkspaceTest(unittest.TestCase):
 
         table.addColumn("int", "index")
         table.addColumn("int", "value", 3)
-        self.assertEquals(table.columnCount(), 2)
+        self.assertEqual(table.columnCount(), 2)
 
-        self.assertEquals(table.getPlotType(0), -1000) # default plot type
-        self.assertEquals(table.getPlotType(1), 3)
+        self.assertEqual(table.getPlotType(0), -1000) # default plot type
+        self.assertEqual(table.getPlotType(1), 3)
 
         table.setPlotType(0, 1)
         table.setPlotType("value", 2)
 
-        self.assertEquals(table.getPlotType("index"), 1)
-        self.assertEquals(table.getPlotType("value"), 2)
+        self.assertEqual(table.getPlotType("index"), 1)
+        self.assertEqual(table.getPlotType("value"), 2)
 
         table.addRow([1, 2])
         table.addRow([3, 4])
-        self.assertEquals(table.rowCount(), 2)
+        self.assertEqual(table.rowCount(), 2)
 
     def test_column_types(self):
         table = WorkspaceFactory.createTable()
@@ -243,7 +243,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow(values)
 
         data = table.toDict()
-        self.assertEquals(data, expected_output)
+        self.assertEqual(data, expected_output)
 
     def test_pickle_table_workspace(self):
         from mantid.kernel import V3D

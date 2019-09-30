@@ -702,7 +702,6 @@ void InstrumentWidget::saveImage(QString filename) {
 
   if (ext.isEmpty()) {
     filename += defaultExt;
-    ext = QFileInfo(filename).completeSuffix();
   } else {
     if (!formats.contains(ext.toLatin1())) {
       QString msg("Unsupported file extension. Choose one of the following: ");
@@ -1369,7 +1368,7 @@ Workspace_sptr InstrumentWidget::getWorkspaceFromADS(const std::string &name) {
 
   try {
     workspace = AnalysisDataService::Instance().retrieve(name);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     QMessageBox::warning(this, "Mantid - Warning",
                          "No workspace called '" +
                              QString::fromStdString(name) + "' found. ");

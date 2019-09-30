@@ -38,6 +38,7 @@ class AlgorithmProgressDialogPresenter;
 class AlgorithmProgressModel : public Mantid::API::AlgorithmObserver {
 public:
   AlgorithmProgressModel(AlgorithmProgressPresenter *presenter);
+  ~AlgorithmProgressModel() override;
 
   /// Observes ALL starting algorithms. Triggered when a new algorithm
   /// is constructed, and will attach itself as an observer

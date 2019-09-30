@@ -162,7 +162,7 @@ public:
 
     // error: Vector of FWHMs must either have same size as Temperatures (1)
     // or have size 1. std::runtime_error
-    TS_ASSERT_THROWS(cf.buildSource(), std::runtime_error);
+    TS_ASSERT_THROWS(cf.buildSource(), const std::runtime_error &);
   }
 
   void xtest_build_7() {

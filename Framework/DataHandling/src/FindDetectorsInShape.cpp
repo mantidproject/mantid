@@ -26,7 +26,7 @@ using namespace API;
 using namespace Geometry;
 
 void FindDetectorsInShape::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty("ShapeXML", "",
@@ -57,7 +57,7 @@ void FindDetectorsInShape::exec() {
 
   // progress
   detid2det_map::size_type objCmptCount = detectorInfo.size();
-  int iprogress_step = static_cast<int>(objCmptCount / 100);
+  auto iprogress_step = static_cast<int>(objCmptCount / 100);
   if (iprogress_step == 0)
     iprogress_step = 1;
   int iprogress = 0;

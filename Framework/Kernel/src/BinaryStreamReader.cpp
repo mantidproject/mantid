@@ -172,6 +172,16 @@ BinaryStreamReader &BinaryStreamReader::operator>>(std::string &value) {
 }
 
 /**
+ * Read a uint16_t from the stream
+ * @param value The value is stored in the given stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::operator>>(uint16_t &value) {
+  readFromStream(m_istrm, value);
+  return *this;
+}
+
+/**
  * Read a uint32_t from the stream
  * @param value The value is stored in the given stream
  * @return A reference to the BinaryStreamReader object

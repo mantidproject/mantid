@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include <MantidKernel/StringTokenizer.h>
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -47,10 +47,10 @@ void UpdateInstrumentFromFile::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "Anonymous",
-                                                      Direction::InOut),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "Workspace", "Anonymous", Direction::InOut),
       "The name of the workspace in which to store the imported instrument");
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load,
                       std::vector<std::string>{".raw", ".nxs", ".s*"}),
                   "The filename of the input file.\n"
@@ -126,12 +126,10 @@ void UpdateInstrumentFromFile::exec() {
   }
 
   LoadRawHelper isisRAW;
-  auto *descriptor = new Kernel::FileDescriptor(filename);
+  auto descriptor = std::make_unique<Kernel::FileDescriptor>(filename);
   if (isisRAW.confidence(*descriptor) > 0) {
-    delete descriptor;
     updateFromRaw(filename);
   } else {
-    delete descriptor;
     throw std::invalid_argument("File \"" + filename +
                                 "\" is not a valid input file.");
   }
@@ -237,7 +235,7 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     }
 
     bool skip{false};
-    size_t index = static_cast<size_t>(-1);
+    auto index = static_cast<size_t>(-1);
     const Geometry::IDetector *det{nullptr};
     if (isSpectrum) {
       auto it = specToIndex.find(detOrSpec);
@@ -399,7 +397,7 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
 void UpdateInstrumentFromFile::setDetectorPositions(
     const std::vector<int32_t> &detID, const std::vector<float> &l2,
     const std::vector<float> &theta, const std::vector<float> &phi) {
-  const int numDetector = static_cast<int>(detID.size());
+  const auto numDetector = static_cast<int>(detID.size());
   g_log.information() << "Setting new positions for " << numDetector
                       << " detectors\n";
 

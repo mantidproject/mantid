@@ -513,11 +513,10 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
   for (size_t i = 0; i < vectors.size(); i++)
     in.emplace_back(vectors[i][0], vectors[i][1], vectors[i][2]);
   out = V3D::makeVectorsOrthogonal(in);
-
   std::vector<VMDBase> retVal;
   retVal.reserve(out.size());
-  for (auto &vector : out)
-    retVal.emplace_back(vector);
+  std::copy(std::make_move_iterator(out.begin()),
+            std::make_move_iterator(out.end()), std::back_inserter(retVal));
   return retVal;
 }
 

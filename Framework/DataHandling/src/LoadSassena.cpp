@@ -124,7 +124,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     throw Kernel::Exception::FileError(
         "Unable to read " + setName + " dataset info:", m_filename);
   }
-  int nq = static_cast<int>(dims[0]); // number of q-vectors
+  auto nq = static_cast<int>(dims[0]); // number of q-vectors
   std::vector<double> buf(nq * 3);
 
   herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
@@ -189,7 +189,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                          const HistogramData::Points &qvmod,
                          const std::vector<int> &sorting_indexes) {
 
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto nq = static_cast<int>(qvmod.size()); // number of q-vectors
   std::vector<double> buf(nq * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
@@ -249,10 +249,10 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
     return;
   }
-  int nnt = static_cast<int>(dims[1]); // number of non-negative time points
-  int nt = 2 * nnt - 1;                // number of time points
+  auto nnt = static_cast<int>(dims[1]); // number of non-negative time points
+  int nt = 2 * nnt - 1;                 // number of time points
 
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto nq = static_cast<int>(qvmod.size()); // number of q-vectors
   std::vector<double> buf(nq * nnt * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
@@ -312,25 +312,26 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   unitPtr->setLabel("Time", "picoseconds");
 
   // Create a numeric axis to replace the default vertical one
-  API::Axis *const verticalAxisRe = new API::NumericAxis(nq);
-  API::Axis *const verticalAxisIm = new API::NumericAxis(nq);
-
-  wsRe->replaceAxis(1, verticalAxisRe);
-  wsIm->replaceAxis(1, verticalAxisIm);
+  auto verticalAxisRe = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisIm = std::make_unique<API::NumericAxis>(nq);
+  auto verticalAxisReRaw = verticalAxisRe.get();
+  auto verticalAxisImRaw = verticalAxisIm.get();
+  wsRe->replaceAxis(1, std::move(verticalAxisRe));
+  wsIm->replaceAxis(1, std::move(verticalAxisIm));
 
   // Now set the axis values
   for (int i = 0; i < nq; ++i) {
-    verticalAxisRe->setValue(i, qvmod[i]);
-    verticalAxisIm->setValue(i, qvmod[i]);
+    verticalAxisReRaw->setValue(i, qvmod[i]);
+    verticalAxisImRaw->setValue(i, qvmod[i]);
   }
 
   // Set the axis units
-  verticalAxisRe->unit() =
+  verticalAxisReRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxisRe->title() = "|Q|";
-  verticalAxisIm->unit() =
+  verticalAxisReRaw->title() = "|Q|";
+  verticalAxisImRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxisIm->title() = "|Q|";
+  verticalAxisImRaw->title() = "|Q|";
 
   // Set the X axis title (for conversion to MD)
   wsRe->getAxis(0)->title() = "Energy transfer";
@@ -354,18 +355,18 @@ void LoadSassena::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   const std::vector<std::string> exts{".h5", ".hd5"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, exts),
                   "A Sassena file");
   // Declare the OutputWorkspace property
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the group workspace to be created.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
                       "TimeUnit", 1.0, Kernel::Direction::Input),
                   "The Time unit in between data points, in picoseconds. "
                   "Default is 1.0 picosec.");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<bool>>(
                       "SortByQVectors", true, Kernel::Direction::Input),
                   "Sort structure factors by increasing momentum transfer?");
 }

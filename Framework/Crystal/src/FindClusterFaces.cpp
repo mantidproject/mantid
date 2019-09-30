@@ -58,7 +58,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
 
     for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i) {
       Mantid::Geometry::IPeak &peak = filterWorkspace->getPeak(i);
-      const int labelIdAtPeakCenter =
+      const auto labelIdAtPeakCenter =
           static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
         allowedLabels.emplace(labelIdAtPeakCenter, i);
@@ -128,7 +128,7 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
 
   const auto neighbours = mdIterator->findNeighbourIndexesFaceTouching();
   for (auto neighbourLinearIndex : neighbours) {
-    const int neighbourId =
+    const auto neighbourId =
         static_cast<int>(clusterImage->getSignalAt(neighbourLinearIndex));
 
     if (neighbourId <= emptyLabelId) {
@@ -173,7 +173,7 @@ void executeUnFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
   const double radius = -1;
   do {
     const Mantid::signal_t signalValue = mdIterator->getSignal();
-    const int id = static_cast<int>(signalValue);
+    const auto id = static_cast<int>(signalValue);
 
     if (id > emptyLabelId) {
       const size_t linearIndex = mdIterator->getLinearIndex();
@@ -213,7 +213,7 @@ void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
   PeakClusterProjection projection(clusterImage);
   do {
     const Mantid::signal_t signalValue = mdIterator->getSignal();
-    const int id = static_cast<int>(signalValue);
+    const auto id = static_cast<int>(signalValue);
 
     auto it = optionalAllowedLabels->find(id);
     if (it != optionalAllowedLabels->end()) {
@@ -271,12 +271,12 @@ const std::string FindClusterFaces::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindClusterFaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input image workspace consisting of cluster ids.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "FilterWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional filtering peaks workspace. Used to restrict face finding to "
       "clusters in image which correspond to peaks in the workspace.");
@@ -284,21 +284,21 @@ void FindClusterFaces::init() {
   declareProperty("LimitRows", true,
                   "Limit the report output to a maximum number of rows");
 
-  declareProperty(make_unique<PropertyWithValue<int>>(
+  declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
                       boost::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
-  setPropertySettings(
-      "MaximumRows", make_unique<EnabledWhenProperty>("LimitRows", IS_DEFAULT));
+  setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
+                                         "LimitRows", IS_DEFAULT));
 
   declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "",
-                                                      Direction::Output),
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "An output table workspace containing cluster face information.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("TruncatedOutput", false,
-                                                       Direction::Output),
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "TruncatedOutput", false, Direction::Output),
                   "Indicates that the output results were truncated if True");
 }
 
@@ -325,7 +325,7 @@ void FindClusterFaces::exec() {
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
   auto mdIterators = clusterImage->createIterators(nThreads); // Iterators
-  const int nIterators =
+  const auto nIterators =
       static_cast<int>(mdIterators.size()); // Number of iterators yielded.
   VecClusterFaces clusterFaces(nIterators);
   size_t nSteps = 1000;

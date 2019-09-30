@@ -25,7 +25,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IndexPeaksWithSatellites::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -33,13 +33,13 @@ void IndexPeaksWithSatellites::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, mustBePositive, Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
-                                             mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "ToleranceForSatellite", 0.15, mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
   this->declareProperty("RoundHKLs", true,
@@ -47,57 +47,57 @@ void IndexPeaksWithSatellites::init() {
 
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
-  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                             std::string("ModVector1"), "0.0,0.0,0.0"),
                         "Modulation Vector 1: dh, dk, dl");
 
-  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                             std::string("ModVector2"), "0.0,0.0,0.0"),
                         "Modulation Vector 2: dh, dk, dl");
 
-  this->declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+  this->declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
                             std::string("ModVector3"), "0.0,0.0,0.0"),
                         "Modulation Vector 3: dh, dk, dl");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
+      std::make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply Modulation Vectors. Default = 0");
 
   this->declareProperty("GetModVectorsFromUB", false,
                         "If false Modulation Vectors will be read from input");
 
-  this->declareProperty(make_unique<PropertyWithValue<bool>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<bool>>(
                             "CrossTerms", false, Direction::Input),
                         "Include cross terms (false)");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
                             "TotalNumIndexed", 0, Direction::Output),
                         "Gets set with the number of Total indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("MainNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "MainNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("SateNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "SateNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("MainError", 0.0,
-                                             Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("MainError", 0.0,
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Main Peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
-                                             Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
 }
 
@@ -307,13 +307,12 @@ void IndexPeaksWithSatellites::exec() {
             hkl[0] = peaks[i].getH();
             hkl[1] = peaks[i].getK();
             hkl[2] = peaks[i].getL();
-            bool suc_indexed = false;
+            bool peak_main_indexed{false}, peak_sat_indexed{false};
 
             if (IndexingUtils::ValidIndex(hkl, tolerance)) {
               peaks[i].setIntHKL(hkl);
               peaks[i].setIntMNP(V3D(0, 0, 0));
-              suc_indexed = true;
-              main_indexed++;
+              peak_main_indexed = true;
               double h_error = fabs(round(hkl[0]) - hkl[0]);
               double k_error = fabs(round(hkl[1]) - hkl[1]);
               double l_error = fabs(round(hkl[2]) - hkl[2]);
@@ -330,8 +329,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -347,8 +345,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(0, order, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -364,8 +361,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(0, 0, order));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -382,8 +378,7 @@ void IndexPeaksWithSatellites::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peaks[i].setIntHKL(hkl1);
                     peaks[i].setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -400,8 +395,7 @@ void IndexPeaksWithSatellites::exec() {
                     if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                       peaks[i].setIntHKL(hkl1);
                       peaks[i].setIntMNP(V3D(m, n, 0));
-                      suc_indexed = true;
-                      sate_indexed++;
+                      peak_sat_indexed = true;
                       sate_error += hkl1.hklError();
                     }
                   }
@@ -422,14 +416,20 @@ void IndexPeaksWithSatellites::exec() {
                       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                         peaks[i].setIntHKL(hkl1);
                         peaks[i].setIntMNP(V3D(m, n, p));
-                        suc_indexed = true;
-                        sate_indexed++;
+                        peak_sat_indexed = true;
                         sate_error += hkl1.hklError();
                       }
                     }
               }
             }
-            if (!suc_indexed) {
+            if (peak_main_indexed) {
+              main_indexed++;
+              peaks[i].setIntHKL(V3D(0, 0, 0));
+              peaks[i].setIntMNP(V3D(0, 0, 0));
+            } else if (peak_sat_indexed)
+              sate_indexed++;
+            else {
+              peaks[i].setHKL(V3D(0, 0, 0));
               peaks[i].setIntHKL(V3D(0, 0, 0));
               peaks[i].setIntMNP(V3D(0, 0, 0));
             }

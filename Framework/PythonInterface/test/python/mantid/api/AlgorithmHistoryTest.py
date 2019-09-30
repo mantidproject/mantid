@@ -55,20 +55,20 @@ class AlgorithmHistoryTest(unittest.TestCase):
         history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
 
-        self.assertEquals(history.size(), 2)
-        self.assertEquals(len(alg_hists), 2)
+        self.assertEqual(history.size(), 2)
+        self.assertEqual(len(alg_hists), 2)
 
         parent_alg = history.getAlgorithmHistory(1)
 
-        self.assertEquals(parent_alg.name(), "ParentAlg")
-        self.assertEquals(parent_alg.version(), 1)
-        self.assertEquals(parent_alg.childHistorySize(), 1)
+        self.assertEqual(parent_alg.name(), "ParentAlg")
+        self.assertEqual(parent_alg.version(), 1)
+        self.assertEqual(parent_alg.childHistorySize(), 1)
 
         child_alg = parent_alg.getChildAlgorithmHistory(0)
 
-        self.assertEquals(child_alg.name(), "ChildAlg")
-        self.assertEquals(child_alg.version(), 1)
-        self.assertEquals(child_alg.childHistorySize(), 0)
+        self.assertEqual(child_alg.name(), "ChildAlg")
+        self.assertEqual(child_alg.version(), 1)
+        self.assertEqual(child_alg.childHistorySize(), 0)
 
     def test_disable_history(self):
         ws_name = '__tmp_test_algorithm_history'
@@ -78,8 +78,8 @@ class AlgorithmHistoryTest(unittest.TestCase):
         history = ws.getHistory()
         alg_hists = history.getAlgorithmHistories()
 
-        self.assertEquals(history.size(), 1)
-        self.assertEquals(len(alg_hists), 1)
+        self.assertEqual(history.size(), 1)
+        self.assertEqual(len(alg_hists), 1)
 
     #-------------------------------------------------------------------------
     # Test Helper Functions

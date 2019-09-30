@@ -26,6 +26,8 @@ class IndirectILLReductionFWS(unittest.TestCase):
     # EFWS+IFWS, one wing
     _run_one_wing_mixed = '083072:083077'
 
+    _observable_omega = '252832'
+
     def setUp(self):
         # set instrument and append datasearch directory
         config['default.facility'] = 'ILL'
@@ -53,9 +55,9 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         runs_log2 = mtd['out_red'].getItem(1).getRun().getLogData('ReducedRunsList').value
 
-        self.assertEquals(runs_log1,'170299,170301,170303',"Reduced runs list mismatch.")
+        self.assertEqual(runs_log1,'170299,170301,170303',"Reduced runs list mismatch.")
 
-        self.assertEquals(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
+        self.assertEqual(runs_log2,'170300,170302,170304',"Reduced runs list mismatch.")
 
     def test_one_wing(self):
 
@@ -68,25 +70,39 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self._check_workspace_group(mtd['out_red'], 3, 18, 2)
 
+    def test_omega_scan(self):
+
+        args = {'Run': self._observable_omega,
+                'Observable': 'SamS_Rot.value',
+                'OutputWorkspace': 'out'}
+
+        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
+
+        self._check_workspace_group(mtd['out_red'], 1, 18, 1)
+
+        self.assertEquals(mtd['out_red'].getItem(0).readX(0)[0], 90)
+
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup),
                         "{0} should be a group workspace".format(wsgroup.getName()))
 
-        self.assertEquals(wsgroup.getNumberOfEntries(), nentries,
+        self.assertEqual(wsgroup.getNumberOfEntries(), nentries,
                           "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
 
         item = wsgroup.getItem(0)
 
-        name = item.getName()
+        name = item.name()
 
         self.assertTrue(isinstance(item, MatrixWorkspace),
                         "{0} should be a matrix workspace".format(name))
 
-        self.assertEquals(item.getNumberHistograms(), nspectra,
+        self.assertEqual(item.getNumberHistograms(), nspectra,
                           "{0} should contain {1} spectra".format(name, nspectra))
 
-        self.assertEquals(item.blocksize(), nbins,
+        self.assertEqual(item.blocksize(), nbins,
                           "{0} should contain {1} bins".format(name, nbins))
 
         self.assertTrue(item.getSampleDetails(),

@@ -12,6 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadILLIndirect2.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLIndirect2;
@@ -24,10 +25,6 @@ public:
     return new LoadILLIndirect2Test();
   }
   static void destroySuite(LoadILLIndirect2Test *suite) { delete suite; }
-
-  LoadILLIndirect2Test()
-      : m_dataFile2013("ILLIN16B_034745.nxs"),
-        m_dataFile2015("ILLIN16B_127500.nxs") {}
 
   void test_Init() {
     LoadILLIndirect2 loader;
@@ -46,7 +43,7 @@ public:
   }
 
   void test_Load_2013_Format() {
-    doExecTest(m_dataFile2013, 2057); // all single detectors
+    doExecTest(m_dataFile2013, 2057, 1024); // all single detectors
   }
 
   void test_Load_2015_Format() {
@@ -66,7 +63,30 @@ public:
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 
-  void doExecTest(const std::string &file, int numHist) {
+  void test_bats() { doExecTest(m_batsFile); }
+
+  void test_first_tube_33() {
+    LoadILLIndirect2 loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize())
+    TS_ASSERT(loader.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", m_bats33degree));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", "__out_ws"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    MatrixWorkspace_sptr output2D =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("__out_ws");
+    const Mantid::API::Run &runlogs = output2D->run();
+    TS_ASSERT(runlogs.hasProperty("PSD.PSD angle 1"));
+    TS_ASSERT_DELTA(runlogs.getLogAsSingleValue("PSD.PSD angle 1"), 33.1, 0.01);
+    const auto &detInfo = output2D->detectorInfo();
+    constexpr double degToRad = M_PI / 180.;
+    TS_ASSERT_DELTA(detInfo.twoTheta(65), 33.1 * degToRad, 0.01)
+  }
+
+  void doExecTest(const std::string &file, int numHist = 2051,
+                  int numChannels = 2048) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
@@ -83,12 +103,10 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
 
-    if (!output)
-      return;
-
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
+    TS_ASSERT_EQUALS(output2D->blocksize(), numChannels);
 
     const Mantid::API::Run &runlogs = output->run();
     TS_ASSERT(runlogs.hasProperty("Facility"));
@@ -99,8 +117,10 @@ public:
   }
 
 private:
-  std::string m_dataFile2013;
-  std::string m_dataFile2015;
+  std::string m_dataFile2013{"ILLIN16B_034745.nxs"};
+  std::string m_dataFile2015{"ILLIN16B_127500.nxs"};
+  std::string m_batsFile{"ILL/IN16B/215962.nxs"};
+  std::string m_bats33degree{"ILL/IN16B/247933.nxs"};
 };
 
 class LoadILLIndirect2TestPerformance : public CxxTest::TestSuite {

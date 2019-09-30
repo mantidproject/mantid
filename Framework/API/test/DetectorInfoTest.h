@@ -72,7 +72,7 @@ public:
 
   void test_l1_no_instrument() {
     TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_l1_no_instrument_call_once_regression() {
@@ -82,9 +82,9 @@ public:
     // call to `l1` can be repeated. If the bug is reintroduced this test will
     // not fail but FREEZE.
     TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(m_workspaceNoInstrument.detectorInfo().l1(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_isMonitor() {
@@ -141,8 +141,8 @@ public:
     TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(2), 0.0199973, 1e-6);
     // Monitors
-    TS_ASSERT_THROWS(detectorInfo.twoTheta(3), std::logic_error);
-    TS_ASSERT_THROWS(detectorInfo.twoTheta(4), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(3), const std::logic_error &);
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(4), const std::logic_error &);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -160,8 +160,8 @@ public:
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(2), 0.0199973, 1e-6);
     // Monitors
-    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), std::logic_error);
-    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), const std::logic_error &);
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), const std::logic_error &);
   }
 
   void test_position() {
@@ -432,7 +432,7 @@ public:
     auto ws1 = makeWorkspace(1);
     auto ws2 = makeWorkspace(2);
     TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:
@@ -440,7 +440,7 @@ private:
   WorkspaceTester m_workspaceNoInstrument;
 
   std::unique_ptr<MatrixWorkspace> makeWorkspace(size_t numSpectra) {
-    auto ws = Kernel::make_unique<WorkspaceTester>();
+    auto ws = std::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {

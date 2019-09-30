@@ -40,9 +40,9 @@ void copyDataRange(MatrixWorkspace_const_sptr inputWorkspace,
                    MatrixWorkspace_sptr destWorkspace, int const &specMin,
                    int const &specMax, double const &xMin, double const &xMax,
                    int yInsertionIndex, int const &xInsertionIndex) {
-  int const xMinIndex =
+  auto const xMinIndex =
       static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0, 0.000001));
-  int const xMaxIndex =
+  auto const xMaxIndex =
       static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0, 0.000001));
 
   copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex,
@@ -75,12 +75,12 @@ const std::string CopyDataRange::summary() const {
 
 void CopyDataRange::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The workspace containing a range of data to be used for the "
                   "replacement.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "DestWorkspace", "", Direction::Input),
                   "The workspace to have range of data replaced.");
 
@@ -108,7 +108,7 @@ void CopyDataRange::init() {
                   "The index denoting the x position for the start of the data "
                   "replacement in the DestWorkspace.");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace.");
 }

@@ -45,11 +45,11 @@ class StateSliceEventBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertTrue(state.shape is SampleShape.FlatPlate)
-        self.assertTrue(state.scale == 1.0)
-        self.assertTrue(state.thickness == 3.6)
-        self.assertTrue(state.width == 3.7)
-        self.assertTrue(state.height == 5.8)
+        self.assertEqual(state.shape,  SampleShape.FlatPlate)
+        self.assertEqual(state.scale,  1.0)
+        self.assertEqual(state.thickness,  3.6)
+        self.assertEqual(state.width,  3.7)
+        self.assertEqual(state.height,  5.8)
 
 
 if __name__ == '__main__':

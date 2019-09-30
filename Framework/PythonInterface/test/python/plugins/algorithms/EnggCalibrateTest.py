@@ -90,10 +90,10 @@ class EnggCalibrateTest(unittest.TestCase):
                                                          VanIntegrationWorkspace=self.__class__._van_integ_tbl,
                                                          VanCurvesWorkspace=self.__class__._van_curves_ws,
                                                          ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
-            self.assertEquals(difa, 0)
+            self.assertEqual(difa, 0)
             self.assertGreater(difc, 0)
             self.assertLess(abs(zero), 1000)
-            self.assertEquals(peaks.rowCount(), 3)
+            self.assertEqual(peaks.rowCount(), 3)
 
         except RuntimeError:
             pass
@@ -112,16 +112,16 @@ class EnggCalibrateTest(unittest.TestCase):
                                                          ExpectedPeaks=[-4, 40, 323],
                                                          ExpectedPeaksFromFile=filename,
                                                          Bank='2')
-            self.assertEquals(difa, 0)
+            self.assertEqual(difa, 0)
             self.assertGreater(difc, 0)
             self.assertLess(abs(zero), 1000)
-            self.assertEquals(peaks.rowCount(), 3)
+            self.assertEqual(peaks.rowCount(), 3)
 
         except RuntimeError:
             pass
 
     def check_3peaks_values(self, difa, difc, zero):
-        self.assertEquals(difa, 0)
+        self.assertEqual(difa, 0)
 
         # There are platform specific differences in final parameter values
         # For example in earlier versions, debian: 369367.57492582797; win7: 369242.28850305633

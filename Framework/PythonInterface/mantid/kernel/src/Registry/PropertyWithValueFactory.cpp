@@ -178,13 +178,13 @@ PropertyWithValueFactory::createTimeSeries(const std::string &name,
    * since extract<> seems to get confused sometimes.
    */
   if (PyBool_Check(obj)) {
-    return Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
+    return std::make_unique<TimeSeriesProperty<bool>>(name);
   } else if (extract<int>(val).check()) {
-    return Mantid::Kernel::make_unique<TimeSeriesProperty<int>>(name);
+    return std::make_unique<TimeSeriesProperty<int>>(name);
   } else if (extract<double>(val).check()) {
-    return Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(name);
+    return std::make_unique<TimeSeriesProperty<double>>(name);
   } else if (extract<std::string>(val).check()) {
-    return Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
+    return std::make_unique<TimeSeriesProperty<std::string>>(name);
   }
 
   // If we reach here an error has occurred as there are no type to create

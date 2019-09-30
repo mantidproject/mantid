@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
-#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
+#include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -351,6 +351,9 @@ void export_UnitCell() {
            "right-handed coordinate system and using the Busing-Levy "
            "convention. This will return a :class:`numpy.ndarray` with shape "
            "``(3,3)``.")
+      .def("getMaxOrder", &UnitCell::getMaxOrder, arg("self"),
+           "Returns the number of modulation vectors. This will return an "
+           "int.")
       .def("recalculateFromGstar", &recalculateFromGstar,
            (arg("self"), arg("NewGstar")),
            "Recalculate the unit cell parameters from a metric tensor. This "

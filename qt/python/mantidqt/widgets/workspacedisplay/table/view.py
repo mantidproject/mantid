@@ -30,7 +30,7 @@ class PreciseDoubleFactory(QItemEditorFactory):
         if user_type == QVariant.Double:
             widget.setFrame(True)
             widget.setDecimals(16)
-            widget.setRange(sys.float_info.min, sys.float_info.max)
+            widget.setRange(-sys.float_info.max, sys.float_info.max)
 
         return widget
 
@@ -42,11 +42,8 @@ class TableWorkspaceDisplayView(QTableWidget):
         super(TableWorkspaceDisplayView, self).__init__(parent)
 
         self.presenter = presenter
-        self.COPY_ICON = mantidqt.icons.get_icon("fa.files-o")
-        self.DELETE_ROW = mantidqt.icons.get_icon("fa.minus-square-o")
-        self.STATISTICS_ON_ROW = mantidqt.icons.get_icon('fa.fighter-jet')
-        self.GRAPH_ICON = mantidqt.icons.get_icon('fa.line-chart')
-        self.TBD = mantidqt.icons.get_icon('fa.question')
+        self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
+        self.DELETE_ROW = mantidqt.icons.get_icon("mdi.minus-box-outline")
 
         item_delegate = QStyledItemDelegate(self)
         item_delegate.setItemEditorFactory(PreciseDoubleFactory())

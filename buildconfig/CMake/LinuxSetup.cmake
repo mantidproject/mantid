@@ -15,7 +15,7 @@ endif ()
 ###########################################################################
 # If required, find tcmalloc
 ###########################################################################
-set ( USE_TCMALLOC ON CACHE BOOL "If true, use LD_PRELOAD=libtcmalloc.so in startup scripts" )
+option ( USE_TCMALLOC "If true, use LD_PRELOAD=libtcmalloc.so in startup scripts" ON )
 # If not wanted, just carry on without it
 if ( USE_TCMALLOC )
   find_package ( Tcmalloc )

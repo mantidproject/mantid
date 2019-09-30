@@ -9,6 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.muon_file_utils import filter_for_extensions
+from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import DEADTIME_DATA_FILE,\
+    DEADTIME_WORKSPACE
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):
@@ -29,6 +31,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_first_good_data_checkState_changed(self.handle_loaded_first_good_data_checkState_change)
         self._view.on_first_good_data_changed(self.handle_user_changes_first_good_data)
 
+        self._view.on_last_good_data_checkState_changed(self.handle_loaded_last_good_data_checkState_change)
+        self._view.on_last_good_data_changed(self.handle_user_changes_last_good_data)
+
         self._view.on_fixed_rebin_edit_changed(self.handle_fixed_rebin_changed)
         self._view.on_variable_rebin_edit_changed(self.handle_variable_rebin_changed)
 
@@ -44,6 +49,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self.handle_loaded_time_zero_checkState_change()
         self.handle_loaded_first_good_data_checkState_change()
+        self.handle_loaded_last_good_data_checkState_change()
+        #self.handle_user_selects_dead_time_from_data()
 
     def show(self):
         self._view.show()
@@ -56,6 +63,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
 
+        last_good_data = self._model.get_last_good_data()
+        self._view.set_last_good_data(last_good_data)
+
         if self._view.time_zero_state():
             time_zero = self._model.get_file_time_zero()
             self._view.set_time_zero(time_zero)
@@ -64,10 +74,12 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._view.set_time_zero(time_zero)
 
         self._view.set_instrument(self._model._data.instrument)
+        self.handle_user_selects_dead_time_from_data()
 
     def clear_view(self):
         self._view.set_time_zero(0.0)
         self._view.set_first_good_data(0.0)
+        self._view.set_last_good_data(0.0)
         self._view.set_combo_boxes_to_default()
         self._view.set_checkboxes_to_defualt()
 
@@ -106,6 +118,20 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self._model.set_first_good_data_source(False)
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
+
+    def handle_user_changes_last_good_data(self):
+        last_good_data = self._view.get_last_good_data()
+        self._model.set_user_last_good_data(last_good_data)
+
+    def handle_loaded_last_good_data_checkState_change(self):
+        if self._view.last_good_data_state():
+            self._model.set_last_good_data_source(True)
+            last_good_data = self._model.get_last_good_data()
+            self._view.set_last_good_data(last_good_data)
+        else:
+            self._model.set_last_good_data_source(False)
+            last_good_data = self._model.get_last_good_data()
+            self._view.set_last_good_data(last_good_data)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Rebin
@@ -157,7 +183,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             return
 
         # switch the view to the "from table workspace" option
-        self._view.set_dead_time_selection(2)
+        self._view.set_dead_time_selection(DEADTIME_WORKSPACE)
         is_set = self._view.set_dead_time_file_selection_text(name)
         if not is_set:
             self._view.warning_popup("Dead time table cannot be loaded")
@@ -166,12 +192,21 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         """User chooses to load dead time from the currently loaded workspace."""
         dtc = self._model.get_dead_time_table_from_data()
         if dtc is not None:
-            self._model.set_dead_time_from_data()
             dead_times = dtc.toDict()['dead-time']
             dead_time_text = self.dead_time_from_data_text(dead_times)
             self._view.set_dead_time_label(dead_time_text)
         else:
             self._view.set_dead_time_label("No loaded dead time")
+
+        index = self._view.dead_time_selector.currentIndex()
+        if index == DEADTIME_DATA_FILE:
+            self._model.set_dead_time_from_data()
+            self._view.dead_time_label_3.setVisible(True)
+        elif index == DEADTIME_WORKSPACE:
+            self._view.dead_time_label_3.hide()
+            self._model.set_user_dead_time_from_ADS()
+        else:
+            self._model.set_dead_time_to_none()
 
     def set_dead_time_text_to_default(self):
         """by default the dead time text should onl contain 0.0."""

@@ -221,35 +221,35 @@ public:
   test_that_the_algorithm_throws_when_provided_a_StartWorkspaceIndex_which_is_larger_than_the_EndWorkspaceIndex() {
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 2, 1, 2.1,
                                     2.4, 0, 0, OUTPUT_NAME);
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_an_EndWorkspaceIndex_which_is_larger_than_the_number_of_histograms_in_the_input_workspace() {
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 5, 2.1,
                                     2.4, 0, 0, OUTPUT_NAME);
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_xMin_which_comes_later_on_than_larger_than_xMax() {
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.4,
                                     2.1, 0, 0, OUTPUT_NAME);
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_y_direction() {
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 4, 0, OUTPUT_NAME);
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
   }
 
   void
   test_that_the_algorithm_throws_when_provided_a_block_of_data_which_will_not_fit_in_the_destination_workspace_in_the_x_direction() {
     auto algorithm = setUpAlgorithm(INPUT_NAME, DESTINATION_NAME, 0, 3, 2.1,
                                     2.4, 0, 4, OUTPUT_NAME);
-    TS_ASSERT_THROWS(algorithm->execute(), std::runtime_error);
+    TS_ASSERT_THROWS(algorithm->execute(), const std::runtime_error &);
   }
 
 private:

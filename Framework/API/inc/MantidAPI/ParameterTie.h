@@ -12,7 +12,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ParameterReference.h"
+
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace mu {
@@ -53,7 +55,7 @@ public:
   std::vector<ParameterReference> getRHSParameters() const;
 
 protected:
-  mu::Parser *m_parser; ///< math parser
+  std::unique_ptr<mu::Parser> m_parser; ///< math parser
   /// Store for parameters used in the tie. The map's key is address used by the
   /// mu::Parser
   std::map<double *, ParameterReference> m_varMap;

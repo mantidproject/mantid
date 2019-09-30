@@ -38,7 +38,7 @@ size_t PoldiSpectrumLinearBackground::getTimeBinCount() const {
 /// Calculates the function values as f(x) = A1 * wi
 void PoldiSpectrumLinearBackground::function1DSpectrum(
     const FunctionDomain1DSpectrum &domain, FunctionValues &values) const {
-  double wsIndexDouble = static_cast<double>(domain.getWorkspaceIndex());
+  auto wsIndexDouble = static_cast<double>(domain.getWorkspaceIndex());
 
   values.setCalculated(wsIndexDouble * getParameter(0));
 }
@@ -46,7 +46,7 @@ void PoldiSpectrumLinearBackground::function1DSpectrum(
 /// Sets the Jacobian, which is wi at any point.
 void PoldiSpectrumLinearBackground::functionDeriv1DSpectrum(
     const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
-  double wsIndexDouble = static_cast<double>(domain.getWorkspaceIndex());
+  auto wsIndexDouble = static_cast<double>(domain.getWorkspaceIndex());
 
   for (size_t i = 0; i < domain.size(); ++i) {
     jacobian.set(i, 0, wsIndexDouble);
@@ -57,7 +57,7 @@ void PoldiSpectrumLinearBackground::poldiFunction1D(
     const std::vector<int> &indices, const FunctionDomain1D &domain,
     FunctionValues &values) const {
   double backgroundDetector = getParameter(0);
-  double wireCount = static_cast<double>(indices.size());
+  auto wireCount = static_cast<double>(indices.size());
   double distributionFactor = wireCount * wireCount *
                               static_cast<double>(m_timeBinCount) /
                               (2.0 * static_cast<double>(domain.size()));

@@ -41,9 +41,9 @@ def _choosemarker(markers, index):
 
 def _clearmath(s):
     """Return string s with special math characters removed."""
+    s = s.replace(r'\AA', 'A')
     for c in ['%', '_', '$', '&',  '\\', '^', '{', '}',]:
         s = s.replace(c, '')
-    s = s.replace(u'\u00c5', 'A')
     return s
 
 
@@ -55,7 +55,7 @@ def _configurematplotlib(params):
 def _chooseylabel(workspace, axes):
     """Set the correct y label for profile axes."""
     yUnitLabel = workspace.YUnitLabel()
-    if yUnitLabel == "X''(Q,E)":
+    if yUnitLabel == "Dynamic susceptibility":
         axes.set_ylabel(r"$\chi''(Q,E)$")
     elif yUnitLabel == 'g^{neutron}(E) (arb. units)':
         axes.set_ylabel(r'$g(E)$')
@@ -73,7 +73,7 @@ def _cutcentreandwidth(line):
     aMin = axis.getMin()
     aMax = axis.getMax()
     centre = (aMin + aMax) / 2.
-    width = aMax - aMin
+    width = (aMax - aMin) / 2.
     return centre, width
 
 
@@ -87,8 +87,8 @@ def _denormalizeline(line):
     Es *= height
 
 
-def _dostitle(workspaces, figure):
-    """Add title to density-of-states figure."""
+def _dostitle(workspaces, axes):
+    """Add title to density-of-states axes."""
     workspaces = _normwslist(workspaces)
     if len(workspaces) == 1:
         title = _singledatatitle(workspaces[0])
@@ -98,7 +98,7 @@ def _dostitle(workspaces, figure):
         instrument = _instrumentname(logs)
         if instrument is not None:
             title = instrument + ' ' + title
-    figure.suptitle(title)
+    axes.set_title(title)
 
 
 def _energylimits(workspaces):
@@ -106,7 +106,8 @@ def _energylimits(workspaces):
     workspaces = _normwslist(workspaces)
     eMax = 0.
     for ws in workspaces:
-        Xs = workspaces[0].getAxis(1).extractValues()
+        axisIndex = 0 if ws.getAxis(0).getUnit().name() == 'Energy transfer' else 1
+        Xs = ws.getAxis(axisIndex).extractValues()
         eMax = max(eMax, Xs[-1])
     eMin = -eMax
     logs = workspaces[0].run()
@@ -124,7 +125,7 @@ def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     if axes.get_xscale() == 'linear':
         axes.set_xlim(xmin=0.)
-    axes.set_xlabel(u'$Q$ (\u00c5$^{-1}$)')
+    axes.set_xlabel(r'$Q$ ($\mathrm{\AA}^{-1}$)')
     if axes.get_yscale() == 'linear':
         axes.set_ylim(0.)
 
@@ -175,6 +176,16 @@ def _instrumentname(logs):
         return logs.getProperty('instrument.name').value
     else:
         return None
+
+
+def _singlecutinfo(cuts, widths):
+    """Return False if there are more than one cut and width."""
+    isSingleCutInfo = True
+    if isinstance(cuts, collections.Iterable):
+        isSingleCutInfo = len(cuts) == 1
+    if isinstance(widths, collections.Iterable):
+        isSingleCutInfo = len(widths) == 1
+    return isSingleCutInfo
 
 
 def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
@@ -242,21 +253,22 @@ def _mantidsubplotsetup():
     return {'projection': 'mantid'}
 
 
-def _profiletitle(workspaces, cuts, scan, units, figure):
-    """Add title to line profile figure."""
+def _profiletitle(workspaces, cuts, isSingleCutInfo, scan, units, axes):
+    """Add title to line profile axes."""
     workspaces = _normwslist(workspaces)
     cuts = _normwslist(cuts)
-    if len(cuts) == 1:
+    if len(workspaces) == 1:
         title = _singledatatitle(workspaces[0])
-        centre, width = _cutcentreandwidth(cuts[0])
-        title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
     else:
         title = _plottingtime()
         logs = workspaces[0].run()
         instrument = _instrumentname(logs)
         if instrument is not None:
             title = instrument + ' ' + title
-    figure.suptitle(title)
+    if isSingleCutInfo:
+        centre, width = _cutcentreandwidth(cuts[0])
+        title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
+    axes.set_title(title)
 
 
 def _removesingularity(ws, epsilon):
@@ -309,21 +321,21 @@ def _singledatatitle(workspace):
     if run is not None:
         title = title + ' #{:06d}'.format(run)
     title = title + '\n' + _plottingtime() + '\n'
-    T = _sampletemperature(logs)
-    if T is not None:
-        T = _applyiftimeseries(T, numpy.mean)
-        title = title + r'$T$ = {:0.1f} K'.format(T)
     ei = _incidentenergy(logs)
     if ei is not None:
         title = title + r' $E_i$ = {:0.2f} meV'.format(ei)
+    T = _sampletemperature(logs)
+    if T is not None:
+        T = _applyiftimeseries(T, numpy.mean)
+        title = title + r' $T$ = {:0.1f} K'.format(T)
     return title
 
 
-def _SofQWtitle(workspace, figure):
-    """Add title to SofQW figure."""
+def _SofQWtitle(workspace, axes):
+    """Add title to SofQW axes."""
     workspace = _normws(workspace)
     title = _singledatatitle(workspace)
-    figure.suptitle(title)
+    axes.set_title(title)
 
 
 def _wavelength(logs):
@@ -341,14 +353,14 @@ def _workspacelabel(workspace):
     logs = workspace.run()
     run = _runnumber(logs)
     if run is not None:
-        label = label + r'#{:06d} '.format(run)
+        label = label + r'#{:06d}'.format(run)
+    ei = _incidentenergy(logs)
+    if ei is not None:
+        label =  label + r' $E_i$ = {:0.2f} meV'.format(ei)
     T = _sampletemperature(logs)
     if T is not None:
         T = _applyiftimeseries(T, numpy.mean)
-        label = label + r'$T$ = {:0.1f} K '.format(T)
-    ei = _incidentenergy(logs)
-    if ei is not None:
-        label =  label + r'$E_i$ = {:0.2f} meV'.format(ei)
+        label = label + r' $T$ = {:0.1f} K'.format(T)
     return label
 
 
@@ -498,7 +510,7 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
             raise RuntimeError("Cannot cut in const E. The workspace '{}' is not in units of energy transfer.".format(str(ws)))
     figure, axes, cutWSList = plotcuts(direction, workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, r'$E$', 'meV', figure)
+    _profiletitle(workspaces, cutWSList, _singlecutinfo(E, dE), r'$E$', 'meV', axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileE(axes)
@@ -542,9 +554,9 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     for ws in workspaces:
         if ws.getAxis(axisIndex).getUnit().unitID() != qID:
             raise RuntimeError("Cannot cut in const Q. The workspace '{}' is not in units of momentum transfer.".format(str(ws)))
-    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', u'\u00c5$^{-1}$', style, keepCutWorkspaces,
+    figure, axes, cutWSList = plotcuts(direction, workspaces, Q, dQ, r'$Q$', r'$\mathrm{\AA}^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, r'$Q$', u'\u00c5$^{-1}$', figure)
+    _profiletitle(workspaces, cutWSList, _singlecutinfo(Q, dQ), r'$Q$', r'$\mathrm{\AA}^{-1}$', axes)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileQ(workspaces, axes)
@@ -603,8 +615,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 if wsStr == '':
                     wsStr = str(wsCount)
                 quantityStr = _clearmath(quantity)
-                unitStr = _clearmath(unit)
-                wsName = 'cut_{}_{}={}+-{}{}'.format(wsStr, quantityStr, cut, width, unitStr)
+                wsName = 'cut_{}_{}={}+-{}'.format(wsStr, quantityStr, cut, width,)
                 if keepCutWorkspaces:
                     cutWSList.append(wsName)
                 line = LineProfile(ws, cut, width, Direction=direction,
@@ -650,7 +661,7 @@ def plotDOS(workspaces, labels=None, style='l', xscale='linear', yscale='linear'
     if labels is None:
         labels = [_workspacelabel(ws) for ws in workspaces]
     figure, axes = _plotsinglehistogram(workspaces, labels, style, xscale, yscale)
-    _dostitle(workspaces, figure)
+    _dostitle(workspaces, axes)
     if len(workspaces) > 1:
         axes.legend()
     return figure, axes
@@ -709,11 +720,11 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     :type colorscale: str
     :returns: a tuple of (:mod:`matplotlib.Figure`, :mod:`matplotlib.Axes`)
     """
-    # Accept both workspace names and actual workspaces.
     workspace = _normws(workspace)
     if not _validate._isSofQW(workspace):
         logger.warning("The workspace '{}' does not look like proper S(Q,W) data. Trying to plot nonetheless.".format(str(workspace)))
-    isSusceptibility = workspace.YUnit() == 'Dynamic susceptibility'
+    qHorizontal = workspace.getAxis(0).getUnit().name() == 'q'
+    isSusceptibility = workspace.YUnitLabel() == 'Dynamic susceptibility'
     figure, axes = subplots()
     if QMin is None:
         QMin = 0.
@@ -725,7 +736,8 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         else:
             EMin, unusedEMax = _energylimits(workspace)
     if EMax is None:
-        EAxis = workspace.getAxis(1).extractValues()
+        EAxisIndex = 1 if qHorizontal else 0
+        EAxis = workspace.getAxis(EAxisIndex).extractValues()
         EMax = EAxis[-1]
     if VMax is None:
         vertMax = EMax if EMax is not None else numpy.inf
@@ -751,14 +763,25 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         colorbar.set_label(r"$\chi''(Q,E)$ (arb. units)")
     else:
         colorbar.set_label(r'$S(Q,E)$ (arb. units)')
-    axes.set_xlim(left=QMin)
-    axes.set_xlim(right=QMax)
-    axes.set_ylim(bottom=EMin)
-    if EMax is not None:
-        axes.set_ylim(top=EMax)
-    axes.set_xlabel(u'$Q$ (\u00c5$^{-1}$)')
-    axes.set_ylabel('Energy (meV)')
-    _SofQWtitle(workspace, figure)
+    if qHorizontal:
+        xLimits = {'left': QMin, 'right': QMax}
+        yLimits = {'bottom': EMin}
+        if EMax is not None:
+            yLimits['top'] = EMax
+        xLabel = r'$Q$ ($\mathrm{\AA}^{-1}$)'
+        yLabel = 'Energy (meV)'
+    else:
+        xLimits = {'left': EMin}
+        if EMax is not None:
+            xLimits['right'] = EMax
+        yLimits = {'bottom': QMin, 'top': QMax}
+        xLabel = 'Energy (meV)'
+        yLabel = r'$Q$ ($\mathrm{\AA}^{-1}$)'
+    axes.set_xlim(**xLimits)
+    axes.set_ylim(**yLimits)
+    axes.set_xlabel(xLabel)
+    axes.set_ylabel(yLabel)
+    _SofQWtitle(workspace, axes)
     return figure, axes
 
 
@@ -771,7 +794,9 @@ def subplots(**kwargs):
     :type kwargs: dict
     :returns: a tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`)
     """
-    return pyplot.subplots(subplot_kw=_mantidsubplotsetup(), **kwargs)
+    figure, axes = pyplot.subplots(subplot_kw=_mantidsubplotsetup(), **kwargs)
+    figure.set_tight_layout(True)
+    return figure, axes
 
 
 def validQ(workspace, E=0.0):
@@ -786,19 +811,40 @@ def validQ(workspace, E=0.0):
     :returns: a tuple of (:math:`Q_{min}`, :math:`Q_{max}`)
     """
     workspace = _normws(workspace)
-    vertBins = workspace.getAxis(1).extractValues()
-    if len(vertBins) > workspace.getNumberHistograms():
-        vertBins = _bincentres(vertBins)
-    elasticIndex = numpy.argmin(numpy.abs(vertBins - E))
-    ys = workspace.readY(int(elasticIndex))
-    validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
-    xs = workspace.readX(int(elasticIndex))
-    lower = xs[numpy.amin(validIndices)]
-    upperIndex = numpy.amax(validIndices)
-    if len(xs) > len(ys):
-        upperIndex = upperIndex + 1
-    upper = xs[upperIndex]
-    return lower, upper
+    if workspace.getAxis(0).getUnit().name() == 'q':
+        vertPoints = workspace.getAxis(1).extractValues()
+        if len(vertPoints) > workspace.getNumberHistograms():
+            vertPoints = _bincentres(vertPoints)
+        elasticIndex = int(numpy.argmin(numpy.abs(vertPoints - E)))
+        ys = workspace.readY(elasticIndex)
+        validIndices = numpy.argwhere(numpy.logical_not(numpy.isnan(ys)))
+        xs = workspace.readX(elasticIndex)
+        lower = xs[numpy.amin(validIndices)]
+        upperIndex = numpy.amax(validIndices)
+        if len(xs) > len(ys):
+            upperIndex = upperIndex + 1
+        upper = xs[upperIndex]
+        return lower, upper
+    else:
+        horPoints = workspace.readX(0)
+        nPoints = len(workspace.readY(0))
+        if len(horPoints) > nPoints:
+            horPoints = _bincentres(horPoints)
+        elasticIndex = int(numpy.argmin(numpy.abs(horPoints - E)))
+        vertPoints = workspace.getAxis(1).extractValues()
+        if len(vertPoints) > workspace.getNumberHistograms():
+            vertPoints = _bincentres(vertPoints)
+        lower = numpy.inf
+        upper = -numpy.inf
+        for i in range(workspace.getNumberHistograms()):
+            y = workspace.readY(i)[elasticIndex]
+            if not numpy.isnan(y):
+                q = vertPoints[i]
+                if q < lower:
+                    lower = q
+                if q > upper:
+                    upper = q
+        return lower, upper
 
 
 def wsreport(workspace):

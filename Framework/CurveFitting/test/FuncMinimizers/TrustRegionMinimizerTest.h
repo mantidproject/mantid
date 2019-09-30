@@ -206,7 +206,7 @@ public:
     fun->setParameter("b", 2.);
 
     fun->addConstraint(
-        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
+        std::make_unique<BoundaryConstraint>(fun.get(), "a", 0, 0.5));
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
@@ -244,7 +244,7 @@ public:
     // lower bound is made > 0 because function's derivative over "a" at a=0 is
     // 0
     fun->addConstraint(
-        Kernel::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
+        std::make_unique<BoundaryConstraint>(fun.get(), "a", 0.001, 2.0));
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();

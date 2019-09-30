@@ -119,8 +119,8 @@ public:
 
   void test_out_of_range() {
     const auto in = makeWorkspace();
-    TS_ASSERT_THROWS(maskInstrumentInplace(in, {0}), std::out_of_range);
-    TS_ASSERT_THROWS(maskInstrumentInplace(in, {5}), std::out_of_range);
+    TS_ASSERT_THROWS(maskInstrumentInplace(in, {0}), const std::out_of_range &);
+    TS_ASSERT_THROWS(maskInstrumentInplace(in, {5}), const std::out_of_range &);
   }
 };
 

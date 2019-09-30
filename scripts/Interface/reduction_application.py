@@ -13,7 +13,7 @@ import six
 import sys
 import os
 import traceback
-from gui_helper import get_qapplication
+from mantidqt.gui_helper import get_qapplication
 from qtpy.QtWidgets import (QAction, QDialog, QFileDialog, QMainWindow, QMessageBox)  # noqa
 from qtpy.QtCore import (QFile, QFileInfo, QSettings)  # noqa
 from mantid.kernel import Logger

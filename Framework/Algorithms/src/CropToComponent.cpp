@@ -63,15 +63,15 @@ const std::string CropToComponent::summary() const {
  */
 void CropToComponent::init() {
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "An input workspace.");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "An output workspace.");
   declareProperty(
-      Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
+      std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
           "ComponentNames"),
       "List of component names which are used to crop the workspace."
       "to.");

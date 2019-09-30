@@ -5,10 +5,10 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
-#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Converters/ContainerDtype.h"
+#include "MantidPythonInterface/core/Converters/DateAndTime.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -107,6 +107,11 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))             \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))     \
       .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))               \
+      .def("filterByTime",                                                     \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
+                                               const DateAndTime &)) &         \
+               TimeSeriesProperty<TYPE>::filterByTime,                         \
+           (arg("self"), arg("start"), arg("stop")))                           \
       .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"),     \
            "returns :class:`mantid.kernel.DateAndTime`")                       \
       .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue, arg("self"))   \

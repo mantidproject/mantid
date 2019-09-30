@@ -50,7 +50,7 @@ const std::string EstimateDivergence::summary() const {
 /** Initialize the algorithm's properties.
  */
 void EstimateDivergence::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to have divergence calculated from");
 
@@ -67,7 +67,7 @@ void EstimateDivergence::init() {
                   "Other horizontal divergence parameter");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output),
       "Workspace containing the divergence of each detector/spectrum");
 }
@@ -107,13 +107,19 @@ void EstimateDivergence::exec() {
     const double vertical = vertical_numerator / (sintwotheta * sintwotheta);
 
     // solid angle
-    double solidangle = 0.0;
-    for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
-      // No scanning support for solidAngle currently, use only first component
-      // of index, ignore time index
-      if (!detectorInfo.isMasked(index.first))
-        solidangle += componentInfo.solidAngle(index.first, samplepos);
-    }
+    auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+    // No scanning support for solidAngle currently, use only first component
+    // of index, ignore time index
+    const double solidangle = std::accumulate(
+        spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+        [&componentInfo, &detectorInfo, &samplepos](const auto sum,
+                                                    const auto &index) {
+          if (!detectorInfo.isMasked(index.first)) {
+            return sum + componentInfo.solidAngle(index.first, samplepos);
+          } else {
+            return sum;
+          }
+        });
     solidangletotal += solidangle;
     const double deltatwotheta = sqrt(solidangle);
 

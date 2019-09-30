@@ -27,22 +27,22 @@ using namespace Geometry;
 
 void HFIRDarkCurrentSubtraction::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
 
   declareProperty(
-      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
-                                     ".xml"),
+      std::make_unique<API::FileProperty>("Filename", "",
+                                          API::FileProperty::Load, ".xml"),
       "The name of the input event Nexus file to load as dark current.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputDarkCurrentWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -65,7 +65,7 @@ void HFIRDarkCurrentSubtraction::exec() {
   // If the load algorithm isn't in the reduction properties, add it
   const bool persistent = getProperty("PersistentCorrection");
   if (!reductionManager->existsProperty("DarkCurrentAlgorithm") && persistent) {
-    auto algProp = make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
+    auto algProp = std::make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -118,7 +118,7 @@ void HFIRDarkCurrentSubtraction::exec() {
     }
 
     setProperty("OutputDarkCurrentWorkspace", darkWS);
-    reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+    reductionManager->declareProperty(std::make_unique<WorkspaceProperty<>>(
         entryName, "", Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);

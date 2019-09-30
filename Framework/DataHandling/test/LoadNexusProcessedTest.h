@@ -625,7 +625,7 @@ public:
       {
         TS_ASSERT_THROWS(ConstColumnVector<int64_t> column =
                              ws->getVector("Integer"),
-                         std::runtime_error);
+                         const std::runtime_error &);
         ConstColumnVector<int> column = ws->getVector("Integer");
         TS_ASSERT_EQUALS(column[0], 5);
         TS_ASSERT_EQUALS(column[1], 3);
@@ -1310,10 +1310,10 @@ private:
       }
     }
     if (numericAxis) {
-      auto numericAxis = new NumericAxis(2);
+      auto numericAxis = std::make_unique<NumericAxis>(2);
       numericAxis->setValue(0, 10.0);
       numericAxis->setValue(1, 20.0);
-      inputWs->replaceAxis(1, numericAxis);
+      inputWs->replaceAxis(1, std::move(numericAxis));
     }
 
     // Save workspace

@@ -66,7 +66,7 @@ public:
     // compute resource missing
     TS_ASSERT_THROWS_NOTHING(qar.setPropertyValue("JobID", "john_missing"));
 
-    TS_ASSERT_THROWS(qar.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(qar.execute(), const std::runtime_error &);
     TS_ASSERT(!qar.isExecuted());
   }
 
@@ -74,11 +74,11 @@ public:
     QueryAllRemoteJobs qar;
     TS_ASSERT_THROWS_NOTHING(qar.initialize();)
     TS_ASSERT_THROWS(qar.setPropertyValue("ComputeRes", "anything"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qar.setPropertyValue("TransactionID", "whatever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
     TS_ASSERT_THROWS(qar.setPropertyValue("ID", "whichever"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_propertiesOK() {

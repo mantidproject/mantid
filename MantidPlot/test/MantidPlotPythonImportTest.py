@@ -30,7 +30,7 @@ class MantidPlotPythonImportTest(unittest.TestCase):
     def test_ConjoinFilesExistsAsAFunction(self):
         # This means the Python algs were loaded
         self.assertTrue('ConjoinFiles' in globals())
-        self.assertEquals(type(ConjoinFiles),types.FunctionType)
+        self.assertEqual(type(ConjoinFiles),types.FunctionType)
 
     def test_V3D_is_New_API_Version(self):
         import mantid

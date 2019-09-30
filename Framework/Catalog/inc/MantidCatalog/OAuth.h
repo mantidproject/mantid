@@ -9,7 +9,6 @@
 
 #include "MantidCatalog/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/optional.hpp>
 

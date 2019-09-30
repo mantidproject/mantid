@@ -26,7 +26,7 @@ class QtWidgetFinder(object):
         if not expected_count:
             self.assertGreaterThan(0, len(all))
         else:
-            self.assertEquals(expected_count, len(all))
+            self.assertEqual(expected_count, len(all))
 
     def assert_widget_not_present(self, name):
         all = self.find_qt_widget_by_name(name)

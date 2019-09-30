@@ -152,7 +152,7 @@ public:
       correctToFile.initialize();
 
     // Executing now should throw since none of the properties have been set
-    TS_ASSERT_THROWS(correctToFile.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(correctToFile.execute(), const std::runtime_error &);
 
     // Register this with the service
     using namespace Mantid::API;

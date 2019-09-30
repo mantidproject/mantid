@@ -58,14 +58,13 @@ const std::string CalculateDynamicRange::summary() const {
  */
 void CalculateDynamicRange::init() {
   auto unitValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::InOut, unitValidator),
                   "An input workspace.");
 
-  declareProperty(
-      Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
-          "ComponentNames"),
-      "List of component names to calculate the q ranges for.");
+  declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
+                      "ComponentNames"),
+                  "List of component names to calculate the q ranges for.");
 }
 
 /**

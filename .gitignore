@@ -164,8 +164,11 @@ Desktop.ini
 # PyCharm IDE
 .idea/
 
-# VSCode cache
+# VSCode
 .vscode/
+XDG_CACHE_HOME/
+# The file that contains metadata for VSCode Workspace
+*.code-workspace
 
 # Mac OS X Finder
 .DS_Store

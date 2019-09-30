@@ -118,7 +118,8 @@ public:
     TS_ASSERT_EQUALS(tw.getColumn("Name"), strCol);
     TS_ASSERT_EQUALS(tw.getColumn("Position"), v3dCol);
     // Test trying to add existing column returns null pointer
-    TS_ASSERT_THROWS(tw.addColumn("int", "Number"), std::invalid_argument);
+    TS_ASSERT_THROWS(tw.addColumn("int", "Number"),
+                     const std::invalid_argument &);
 
     tw.getRef<int>("Number", 1) = 17;
     tw.cell<std::string>(2, 1) = "STRiNG";
@@ -214,13 +215,13 @@ public:
     TableWorkspace tw(2);
     tw.addColumn("str", "Name");
     tw.addColumn("int", "Number");
-    TS_ASSERT_THROWS(tw.String(0, 1), std::runtime_error);
-    TS_ASSERT_THROWS(tw.Int(0, 3), std::range_error);
-    TS_ASSERT_THROWS(tw.Int(3, 1), std::range_error);
+    TS_ASSERT_THROWS(tw.String(0, 1), const std::runtime_error &);
+    TS_ASSERT_THROWS(tw.Int(0, 3), const std::range_error &);
+    TS_ASSERT_THROWS(tw.Int(3, 1), const std::range_error &);
 
     {
       TableRow row = tw.appendRow();
-      TS_ASSERT_THROWS(row << "One" << 1 << 2, std::range_error);
+      TS_ASSERT_THROWS(row << "One" << 1 << 2, const std::range_error &);
     }
 
     {
@@ -228,12 +229,12 @@ public:
       int i;
       double d;
       TableRow row = tw.getFirstRow();
-      TS_ASSERT_THROWS(row >> str >> i >> d, std::range_error);
+      TS_ASSERT_THROWS(row >> str >> i >> d, const std::range_error &);
     }
 
     {
       TableRow row = tw.getFirstRow();
-      TS_ASSERT_THROWS(row.row(3), std::range_error);
+      TS_ASSERT_THROWS(row.row(3), const std::range_error &);
     }
   }
 
@@ -378,7 +379,8 @@ public:
     TS_ASSERT_EQUALS(d, 0.0);
     TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("T")->toDouble(0));
     TS_ASSERT_EQUALS(d, 1.0);
-    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0), std::invalid_argument);
+    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0),
+                     const std::invalid_argument &);
   }
   void testGetVectorSetVectorValues() {
 
@@ -388,7 +390,8 @@ public:
     tw.addColumn("str", "String");
 
     auto &SizeTData = tw.getColVector<size_t>("SizeT");
-    TS_ASSERT_THROWS(tw.getColVector<int>("Double"), std::runtime_error);
+    TS_ASSERT_THROWS(tw.getColVector<int>("Double"),
+                     const std::runtime_error &);
     std::vector<double> &DoublData = tw.getColVector<double>("Double");
     std::vector<std::string> &StrData = tw.getColVector<std::string>("String");
 
@@ -404,7 +407,7 @@ public:
     StrData[2] = "3";
 
     auto SizeTDataI = tw.getColVector<size_t>(0);
-    TS_ASSERT_THROWS(tw.getColVector<int>(1), std::runtime_error);
+    TS_ASSERT_THROWS(tw.getColVector<int>(1), const std::runtime_error &);
     auto DoublDataI = tw.getColVector<double>(1);
     auto StrDataI = tw.getColVector<std::string>(2);
 

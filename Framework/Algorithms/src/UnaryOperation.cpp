@@ -20,10 +20,10 @@ namespace Algorithms {
  *  Defines input and output workspace properties
  */
 void UnaryOperation::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       inputPropName(), "", Direction::Input),
                   "The name of the input workspace");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       outputPropName(), "", Direction::Output),
                   "The name to use for the output workspace (can be the same "
                   "as the input one).");
@@ -111,7 +111,7 @@ void UnaryOperation::execEvent() {
   // Now fetch any properties defined by concrete algorithm
   retrieveProperties();
 
-  int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
+  auto numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {

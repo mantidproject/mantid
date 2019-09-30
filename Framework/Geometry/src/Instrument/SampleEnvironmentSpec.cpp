@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
-#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -40,8 +39,7 @@ SampleEnvironmentSpec::findContainer(const std::string &id) const {
  */
 SampleEnvironment_uptr
 SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
-  auto env = Mantid::Kernel::make_unique<SampleEnvironment>(
-      m_name, findContainer(canID));
+  auto env = std::make_unique<SampleEnvironment>(m_name, findContainer(canID));
   for (const auto &component : m_components) {
     env->add(component);
   }

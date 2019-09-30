@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -35,17 +35,18 @@ void export_Instrument() {
            "represents the source")
 
       .def("getComponentByName",
-           (boost::shared_ptr<IComponent>(Instrument::*)(const std::string &)) &
+           (boost::shared_ptr<const IComponent>(Instrument::*)(
+               const std::string &, int) const) &
                Instrument::getComponentByName,
-           (arg("self"), arg("cname")),
+           (arg("self"), arg("cname"), arg("nlevels") = 0),
            "Returns the named :class:`~mantid.geometry.Component`")
 
-      .def(
-          "getDetector",
-          (boost::shared_ptr<IDetector>(Instrument::*)(const detid_t &) const) &
-              Instrument::getDetector,
-          (arg("self"), arg("detector_id")),
-          "Returns the :class:`~mantid.geometry.Detector` with the given ID")
+      .def("getDetector",
+           (boost::shared_ptr<const IDetector>(Instrument::*)(const detid_t &)
+                const) &
+               Instrument::getDetector,
+           (arg("self"), arg("detector_id")),
+           "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &

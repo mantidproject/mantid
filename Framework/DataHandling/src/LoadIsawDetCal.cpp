@@ -44,19 +44,18 @@ using namespace DataObjects;
 /** Initialisation method
  */
 void LoadIsawDetCal::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
 
   const auto exts =
       std::vector<std::string>({".DetCal", ".detcal", ".peaks", ".integrate"});
-  declareProperty(
-      Kernel::make_unique<API::MultipleFileProperty>("Filename", exts),
-      "The input filename of the ISAW DetCal file (Two files "
-      "allowed for SNAP) ");
+  declareProperty(std::make_unique<API::MultipleFileProperty>("Filename", exts),
+                  "The input filename of the ISAW DetCal file (Two files "
+                  "allowed for SNAP) ");
 
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename2", "", API::FileProperty::OptionalLoad, exts),
                   "The input filename of the second ISAW DetCal file (West "
                   "banks for SNAP) ");
@@ -223,7 +222,7 @@ void LoadIsawDetCal::exec() {
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           if (run.hasProperty("T0")) {
-            double T0IDF = run.getPropertyValueAsType<double>("T0");
+            auto T0IDF = run.getPropertyValueAsType<double>("T0");
             alg1->setProperty("Offset", mT0 - T0IDF);
           } else {
             alg1->setProperty("Offset", mT0);

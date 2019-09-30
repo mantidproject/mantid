@@ -49,7 +49,7 @@ ReadGroupsFromFile::ReadGroupsFromFile() : API::Algorithm(), calibration() {}
 void ReadGroupsFromFile::init() {
 
   // The name of the instrument
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InstrumentWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace that refers to the instrument of interest. You "
@@ -59,8 +59,8 @@ void ReadGroupsFromFile::init() {
   // The calibration file that contains the grouping information
   const std::vector<std::string> exts{".cal", ".xml"};
   declareProperty(
-      Kernel::make_unique<FileProperty>("GroupingFileName", "",
-                                        FileProperty::Load, exts),
+      std::make_unique<FileProperty>("GroupingFileName", "", FileProperty::Load,
+                                     exts),
       "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
       "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
@@ -69,9 +69,10 @@ void ReadGroupsFromFile::init() {
                   boost::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");
   // The output workspace (2D) that will contain the group information
-  declareProperty(make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "The name of the output workspace");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
+          "OutputWorkspace", "", Direction::Output),
+      "The name of the output workspace");
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -112,7 +113,7 @@ void ReadGroupsFromFile::exec() {
 
   // Determine whether the user wants to see unselected detectors or not
   const std::string su = getProperty("ShowUnselected");
-  bool showunselected = bool(su == "True");
+  auto showunselected = bool(su == "True");
   bool success = false;
 
   for (int64_t i = 0; i < nHist; i++) {
@@ -210,11 +211,10 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
         "XML group file contains no group elements:", filename);
   }
 
-  unsigned int nGroups = static_cast<unsigned int>(groups->length());
+  auto nGroups = static_cast<unsigned int>(groups->length());
   for (unsigned int i = 0; i < nGroups; i++) {
     // Get the "detids" element from the grouping file
-    Poco::XML::Element *elem =
-        static_cast<Poco::XML::Element *>(groups->item(i));
+    auto *elem = static_cast<Poco::XML::Element *>(groups->item(i));
     Poco::XML::Element *group = elem->getChildElement("detids");
 
     if (!group) {

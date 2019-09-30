@@ -126,7 +126,7 @@ public:
     MatrixWorkspace_sptr nif(new NotInFactory);
     nif->initialize(1, 1, 1);
     TS_ASSERT_THROWS(child = WorkspaceFactory::Instance().create(nif),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void testAccordingToSize() {
@@ -145,10 +145,10 @@ public:
 
     TS_ASSERT_THROWS(
         WorkspaceFactory::Instance().create("NotInFactory", 1, 1, 1),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         WorkspaceFactory::Instance().create("NotInFactory", 10, 10, 10),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 };
 

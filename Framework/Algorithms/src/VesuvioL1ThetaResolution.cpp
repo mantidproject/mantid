@@ -67,7 +67,7 @@ void VesuvioL1ThetaResolution::init() {
   positiveDouble->setLower(DBL_EPSILON);
 
   const std::vector<std::string> exts{".par", ".dat"};
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       "PARFile", "", FileProperty::FileAction::OptionalLoad,
                       exts, Direction::Input),
                   "PAR file containing calibrated detector positions.");
@@ -88,19 +88,19 @@ void VesuvioL1ThetaResolution::init() {
                   "Bin width for theta distribution.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                            Direction::Output),
       "Output workspace containing mean and standard deviation of resolution "
       "per detector.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("L1Distribution", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("L1Distribution", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Distribution of lengths of the final flight path.");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("ThetaDistribution", "",
-                                                   Direction::Output,
-                                                   PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaDistribution", "",
+                                                        Direction::Output,
+                                                        PropertyMode::Optional),
                   "Distribution of scattering angles.");
 }
 
@@ -122,12 +122,12 @@ void VesuvioL1ThetaResolution::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", 4, numHist, numHist);
 
   // Set vertical axis to statistic labels
-  auto specAxis = new TextAxis(4);
+  auto specAxis = std::make_unique<TextAxis>(4);
   specAxis->setLabel(0, "l1_Mean");
   specAxis->setLabel(1, "l1_StdDev");
   specAxis->setLabel(2, "theta_Mean");
   specAxis->setLabel(3, "theta_StdDev");
-  m_outputWorkspace->replaceAxis(1, specAxis);
+  m_outputWorkspace->replaceAxis(1, std::move(specAxis));
 
   // Set X axis to spectrum numbers
   m_outputWorkspace->getAxis(0)->setUnit("Label");
@@ -145,9 +145,10 @@ void VesuvioL1ThetaResolution::exec() {
     m_l1DistributionWs->setYUnitLabel("Events");
 
     // Set X axis
-    auto xAxis = m_l1DistributionWs->getAxis(0);
-    xAxis->setUnit("Label");
-    auto labelUnit = boost::dynamic_pointer_cast<Units::Label>(xAxis->unit());
+    auto distributionXAxis = m_l1DistributionWs->getAxis(0);
+    distributionXAxis->setUnit("Label");
+    auto labelUnit =
+        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("l1");
   }
@@ -160,9 +161,10 @@ void VesuvioL1ThetaResolution::exec() {
     m_thetaDistributionWs->setYUnitLabel("Events");
 
     // Set X axis
-    auto xAxis = m_thetaDistributionWs->getAxis(0);
-    xAxis->setUnit("Label");
-    auto labelUnit = boost::dynamic_pointer_cast<Units::Label>(xAxis->unit());
+    auto distributionXAxis = m_thetaDistributionWs->getAxis(0);
+    distributionXAxis->setUnit("Label");
+    auto labelUnit =
+        boost::dynamic_pointer_cast<Units::Label>(distributionXAxis->unit());
     if (labelUnit)
       labelUnit->setLabel("theta");
   }

@@ -322,7 +322,7 @@ double fac(double n) {
   if (n == 0.0)
     return 1.0;
   double f = 1.0;
-  int m = static_cast<int>(std::floor(n));
+  auto m = static_cast<int>(std::floor(n));
   for (int i = 1; i <= m; ++i) {
     f *= i;
   }
@@ -556,7 +556,7 @@ void intcalc(double r0, double gj, double z, const DoubleFortranMatrix &jt2,
 //-------------------------------------
 double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
                            double temp) {
-  int dim = static_cast<int>(dimj);
+  auto dim = static_cast<int>(dimj);
   double occupation_factor = 0.0;
   if (temp == 0.0) {
     temp = 1.0;
@@ -587,7 +587,7 @@ void zeeman(ComplexFortranMatrix &hamiltonian, const int nre,
   // Negative nre means arbitrary J, with abs(nre) = 2J. dimj=2J+1
   auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   auto j = 0.5 * (dimj - 1.0);
-  int dim = static_cast<int>(dimj);
+  auto dim = static_cast<int>(dimj);
   hamiltonian.allocate(1, dim, 1, dim);
   hamiltonian.zero();
   //-------------------------------------------------------------------
@@ -800,7 +800,7 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
   rbext(2) = imag(static_cast<ComplexType>(rbex(1, -1))) * M_SQRT2;
   rbext(3) = real(static_cast<ComplexType>(rbex(1, 0)));
 
-  int dim = static_cast<int>(dimj);
+  auto dim = static_cast<int>(dimj);
   hamiltonian.allocate(1, dim, 1, dim);
   hamiltonian.zero();
   //-------------------------------------------------------------------
@@ -875,24 +875,23 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
   //	only those excitations are taken into account whose intensities are
   //	greater equal than di
 
-  int dim = static_cast<int>(energy.size());
+  const auto dim = static_cast<int>(energy.size());
   IntFortranVector tempDegeneration(dim);
   DoubleFortranVector tempEnergies(dim);
 
   // find out how many degenerated energy levels exists
   tempEnergies(1) = 0.0;
   tempDegeneration(1) = 1;
-  int k = 1;
-  for (int i = 2; i <= dim; ++i) { // do i=2,dim
-    if (std::fabs(tempEnergies(k) - energy(i)) >= de) {
-      k = k + 1;
-      tempEnergies(k) = energy(i);
-      tempDegeneration(k) = 1;
+  int n_energies = 1;
+  for (int i = 2; i <= dim; ++i) {
+    if (std::fabs(tempEnergies(n_energies) - energy(i)) >= de) {
+      n_energies += 1;
+      tempEnergies(n_energies) = energy(i);
+      tempDegeneration(n_energies) = 1;
     } else {
-      tempDegeneration(k) = tempDegeneration(k) + 1;
+      tempDegeneration(n_energies) = tempDegeneration(n_energies) + 1;
     }
   }
-  int n_energies = k;
 
   // Resize the output arrays
   degeneration.allocate(n_energies);
@@ -901,11 +900,11 @@ void deg_on(const DoubleFortranVector &energy, const DoubleFortranMatrix &mat,
 
   // store the intensities of the degenarated levels
   i_energies.zero();
-  for (int i = 1; i <= dim; ++i) { // do i=1,dim
+  for (int i = 1; i <= dim; ++i) {
     int ii = no(i, tempDegeneration, n_energies);
     degeneration(ii) = tempDegeneration(ii);
     e_energies(ii) = tempEnergies(ii);
-    for (int k = 1; k <= dim; ++k) { // do k=1,dim
+    for (int k = 1; k <= dim; ++k) {
       int kk = no(k, tempDegeneration, n_energies);
       i_energies(ii, kk) = i_energies(ii, kk) + mat(i, k);
     }
@@ -928,7 +927,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
                           IntFortranVector &degeneration,
                           DoubleFortranVector &e_energies,
                           DoubleFortranMatrix &i_energies) {
-  int dim = static_cast<int>(energies.size());
+  auto dim = static_cast<int>(energies.size());
   auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   if (static_cast<double>(dim) != dimj) {
     throw std::runtime_error("calculateIntensities was called for a wrong ion");
@@ -968,7 +967,7 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
                           const DoubleFortranMatrix &i_energies, double de,
                           double di, DoubleFortranVector &e_excitations,
                           DoubleFortranVector &i_excitations) {
-  int n_energies = static_cast<int>(e_energies.size());
+  auto n_energies = static_cast<int>(e_energies.size());
   auto dimj = n_energies;
   // Calculate transition energies (excitations) and corresponding
   // intensities.

@@ -43,14 +43,14 @@ public:
   /** Add a Task to the queue.
    * @param newTask :: Task to add to queue
    */
-  virtual void push(Task *newTask) = 0;
+  virtual void push(std::shared_ptr<Task> newTask) = 0;
 
   //-----------------------------------------------------------------------------------
   /** Retrieves the next Task to execute.
    * @param threadnum :: ID of the calling thread.
    * @return a Task pointer to execute.
    */
-  virtual Task *pop(size_t threadnum) = 0;
+  virtual std::shared_ptr<Task> pop(size_t threadnum) = 0;
 
   //-----------------------------------------------------------------------------------
   /** Signal to the scheduler that a task is complete.
@@ -139,7 +139,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) override {
+  void push(std::shared_ptr<Task> newTask) override {
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
@@ -148,9 +148,9 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  Task *pop(size_t threadnum) override {
+  std::shared_ptr<Task> pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = nullptr;
+    std::shared_ptr<Task> temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -174,9 +174,7 @@ public:
   //-------------------------------------------------------------------------------
   void clear() override {
     m_queueLock.lock();
-    // Empty out the queue and delete the pointers!
-    for (auto &task : m_queue)
-      delete task;
+    // Empty out the queue
     m_queue.clear();
     m_cost = 0;
     m_costExecuted = 0;
@@ -185,7 +183,7 @@ public:
 
 protected:
   /// Queue of tasks
-  std::deque<Task *> m_queue;
+  std::deque<std::shared_ptr<Task>> m_queue;
 };
 
 //===========================================================================
@@ -200,9 +198,9 @@ protected:
 class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
 
   //-------------------------------------------------------------------------------
-  Task *pop(size_t threadnum) override {
+  std::shared_ptr<Task> pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = nullptr;
+    std::shared_ptr<Task> temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -243,7 +241,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  void push(Task *newTask) override {
+  void push(std::shared_ptr<Task> newTask) override {
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
@@ -252,9 +250,9 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  Task *pop(size_t threadnum) override {
+  std::shared_ptr<Task> pop(size_t threadnum) override {
     UNUSED_ARG(threadnum);
-    Task *temp = nullptr;
+    std::shared_ptr<Task> temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
     // change before you get the next item.
@@ -281,8 +279,6 @@ public:
   void clear() override {
     m_queueLock.lock();
     // Empty out the queue and delete the pointers!
-    for (auto &taskPair : m_map)
-      delete taskPair.second;
     m_map.clear();
     m_cost = 0;
     m_costExecuted = 0;
@@ -291,7 +287,7 @@ public:
 
 protected:
   /// A multimap keeps tasks sorted by the key (cost)
-  std::multimap<double, Task *> m_map;
+  std::multimap<double, std::shared_ptr<Task>> m_map;
 };
 
 } // namespace Kernel

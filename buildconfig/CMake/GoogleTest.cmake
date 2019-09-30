@@ -15,7 +15,7 @@ else()
   message(STATUS "Using gtest in ExternalProject")
 
   # Prevent overriding the parent project's compiler/linker
-  # settings on Windows
+  # settings on Windows. Force overwrites previous cache value.
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
   # Download and unpack googletest at configure time

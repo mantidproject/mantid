@@ -45,7 +45,7 @@ class MuscatSofQWTest(unittest.TestCase):
         self.assertAlmostEqual(x_data[-1], 0.5)
         self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
 
-        self.assertEquals(sqw_ws.blocksize(), 200)
+        self.assertEqual(sqw_ws.blocksize(), 200)
 
 
     def test_energy_max(self):
@@ -67,7 +67,7 @@ class MuscatSofQWTest(unittest.TestCase):
         self.assertAlmostEqual(x_data[-1], 1.0)
         self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
 
-        self.assertEquals(sqw_ws.blocksize(), 400)
+        self.assertEqual(sqw_ws.blocksize(), 400)
 
 
     def test_energy_increment(self):
@@ -89,7 +89,7 @@ class MuscatSofQWTest(unittest.TestCase):
         self.assertAlmostEqual(x_data[-1], 0.5)
         self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
 
-        self.assertEquals(sqw_ws.blocksize(), 10)
+        self.assertEqual(sqw_ws.blocksize(), 10)
 
 
 if __name__ == '__main__':

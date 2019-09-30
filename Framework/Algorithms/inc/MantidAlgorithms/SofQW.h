@@ -124,13 +124,14 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
       DataObjects::create<Workspace>(inputWorkspace, yLength - 1, xAxis);
 
   // Create a binned numeric axis to replace the default vertical one
-  API::Axis *const verticalAxis = new API::BinEdgeAxis(qAxis);
-  outputWorkspace->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<API::BinEdgeAxis>(qAxis);
+  auto verticalAxisRaw = verticalAxis.get();
+  outputWorkspace->replaceAxis(1, std::move(verticalAxis));
 
   // Set the axis units
-  verticalAxis->unit() =
+  verticalAxisRaw->unit() =
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
-  verticalAxis->title() = "|Q|";
+  verticalAxisRaw->title() = "|Q|";
 
   // Set the X axis title (for conversion to MD)
   outputWorkspace->getAxis(0)->title() = "Energy transfer";

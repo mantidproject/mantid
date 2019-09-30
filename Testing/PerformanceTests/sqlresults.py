@@ -18,10 +18,9 @@ import datetime
 import testresult
 import os
 import shutil
-import math
 import random
 
-#====================================================================================
+
 def getSourceDir():
     """Returns the location of the source code."""
     import os
@@ -32,36 +31,34 @@ def getSourceDir():
     return os.path.dirname(script)
 
 
-#=====================================================================
 # These are the table fields, in order
 TABLE_FIELDS = ['date', 'name', 'type', 'host', 'environment', 'runner',
                  'revision', 'commitid', 'runtime', 'cpu_fraction',
                  'success',
                  'status', 'logarchive', 'variables']
 
-#=====================================================================
+
 # The default path to the database file
 database_file = os.path.join(getSourceDir(), "MantidSystemTests.db")
 
-#=====================================================================
+
 def get_database_filename():
     """Return the path to the database to use """
     return database_file
 
-#=====================================================================
+
 def set_database_filename(value):
     """Override the default database location"""
     global database_file
     database_file = value
 
-#=====================================================================
+
 def SQLgetConnection():
     """ Get a connection to the SQL database """
     # These are automatic conversion factors
     return sqlite3.connect(get_database_filename())
 
 
-#=====================================================================
 def get_TestResult_from_row(row):
     """Return a filled TestResult object from a "row"
     obtained by selecting * from the TestRuns table
@@ -79,7 +76,6 @@ def get_TestResult_from_row(row):
     return (res)
 
 
-#=====================================================================
 def get_latest_result(name=''):
     """Returns a TestResult object corresponding to the
     last result in the table
@@ -102,7 +98,7 @@ def get_latest_result(name=''):
     else:
         return None
 
-#=====================================================================
+
 def get_results(name, type="", where_clause='', orderby_clause=''):
     """Return a list of testresult.TestResult objects
     generated from looking up in the table
@@ -151,7 +147,6 @@ def get_results(name, type="", where_clause='', orderby_clause=''):
     return out
 
 
-#=====================================================================
 def get_all_field_values(field_name, where_clause=""):
     """Return a list of every entry of the given
     field (e.g. 'name' or 'environment').
@@ -166,7 +161,7 @@ def get_all_field_values(field_name, where_clause=""):
     c = db.cursor()
 
     query = "SELECT (%s) FROM TestRuns " % field_name
-    if (where_clause != ""):
+    if where_clause != "":
         query += "WHERE " + where_clause
 
     c.execute(query)
@@ -178,7 +173,7 @@ def get_all_field_values(field_name, where_clause=""):
 
     return out
 
-#=====================================================================
+
 def get_latest_revison():
     """ Return the latest revision number """
     # Now get the latest revision
@@ -187,12 +182,12 @@ def get_latest_revison():
     query = "SELECT (revision) FROM Revisions ORDER BY revision DESC LIMIT 1;"
     c.execute(query)
     rows = c.fetchall()
-    if (len(rows)>0):
+    if len(rows) > 0:
         return int(rows[0][0])
     else:
         return 0
 
-#=====================================================================
+
 def add_revision():
     """ Adds an entry with the current date/time to the table.
     Retrieve the index of that entry = the "revision".
@@ -205,7 +200,6 @@ def add_revision():
     return get_latest_revison()
 
 
-#=====================================================================
 def get_all_test_names(where_clause=""):
     """Returns a set containing all the UNIQUE test names in the database.
     ----
@@ -213,7 +207,6 @@ def get_all_test_names(where_clause=""):
     return set(get_all_field_values('name', where_clause))
 
 
-#=====================================================================
 def setup_database():
     """ Routine to set up the mysql database the first time.
     WARNING: THIS DELETES ANY TABLES ALREADY THERE
@@ -263,7 +256,6 @@ class SQLResultReporter(reporters.ResultReporter):
     def __init__(self):
         pass
 
-
     def dispatchResults(self, result):
         '''
         Construct the SQL commands and send them to the database
@@ -301,7 +293,6 @@ class SQLResultReporter(reporters.ResultReporter):
         dbcxn.close()
 
 
-#============================================================================================
 def generate_fake_data(num_extra = 0):
     """ Make up some data for a database """
     print("Generating fake data...")
@@ -324,7 +315,6 @@ def generate_fake_data(num_extra = 0):
     print("... Fake data made.")
 
 
-#=====================================================================
 if __name__ == "__main__":
     set_database_filename("SqlResults.test.db")
     generate_fake_data()

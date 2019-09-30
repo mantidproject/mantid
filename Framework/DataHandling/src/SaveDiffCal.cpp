@@ -56,23 +56,23 @@ const std::string SaveDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SaveDiffCal::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "CalibrationWorkspace", "", Direction::Input),
                   "An output workspace.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
+      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An GroupingWorkspace workspace giving the grouping info.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MaskWorkspace>>(
+      std::make_unique<WorkspaceProperty<MaskWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Save, ".h5"),
-                  "Path to the .h5 file that will be created.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
+      "Path to the .h5 file that will be created.");
 }
 
 std::map<std::string, std::string> SaveDiffCal::validateInputs() {
@@ -132,7 +132,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(
       auto &ids = ws->getSpectrum(i).getDetectorIDs();
       auto found = m_detidToIndex.find(*(ids.begin()));
       if (found != m_detidToIndex.end()) {
-        int32_t value = static_cast<int32_t>(ws->getValue(found->first));
+        auto value = static_cast<int32_t>(ws->getValue(found->first));
         // in maskworkspace 0=use, 1=dontuse - backwards from the file
         if (isMask) {
           if (value == 0)

@@ -49,53 +49,54 @@ void LiveDataAlgorithm::initProps() {
   auto listeners = LiveListenerFactory::Instance().getKeys();
   listeners.push_back(""); // Allow not specifying a listener too
 
-  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>("Connection", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "Connection", "", Direction::Input),
                   "Selects the listener connection entry to use. "
                   "Default connection will be used if not specified");
 
   declareProperty(
-      Kernel::make_unique<PropertyWithValue<std::string>>(
+      std::make_unique<PropertyWithValue<std::string>>(
           "Listener", "", boost::make_shared<StringListValidator>(listeners)),
       "Name of the listener class to use. "
       "If specified, overrides class specified by Connection.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>("Address", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "Address", "", Direction::Input),
                   "Address for the listener to connect to. "
                   "If specified, overrides address specified by Connection.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>("StartTime", "",
-                                                              Direction::Input),
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "StartTime", "", Direction::Input),
                   "Absolute start time, if you selected FromTime.\n"
                   "Specify the date/time in UTC time, in ISO8601 format, e.g. "
                   "2010-09-14T04:20:12.95");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("ProcessingAlgorithm", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("ProcessingAlgorithm",
+                                                       "", Direction::Input),
       "Name of the algorithm that will be run to process each chunk of data.\n"
       "Optional. If blank, no processing will occur.");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("ProcessingProperties", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("ProcessingProperties",
+                                                       "", Direction::Input),
       "The properties to pass to the ProcessingAlgorithm, as a single string.\n"
       "The format is propName=value;propName=value");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingScript", "", Direction::Input),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
 
-  declareProperty(make_unique<FileProperty>("ProcessingScriptFilename", "",
-                                            FileProperty::OptionalLoad, "py"),
+  declareProperty(std::make_unique<FileProperty>("ProcessingScriptFilename", "",
+                                                 FileProperty::OptionalLoad,
+                                                 "py"),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
@@ -120,25 +121,25 @@ void LiveDataAlgorithm::initProps() {
       "events\n"
       "may cause significant slowdowns when the run becomes large!");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "PostProcessingAlgorithm", "", Direction::Input),
                   "Name of the algorithm that will be run to process the "
                   "accumulated data.\n"
                   "Optional. If blank, no post-processing will occur.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "PostProcessingProperties", "", Direction::Input),
                   "The properties to pass to the PostProcessingAlgorithm, as a "
                   "single string.\n"
                   "The format is propName=value;propName=value");
 
   declareProperty(
-      make_unique<PropertyWithValue<std::string>>("PostProcessingScript", "",
-                                                  Direction::Input),
+      std::make_unique<PropertyWithValue<std::string>>("PostProcessingScript",
+                                                       "", Direction::Input),
       "A Python script that will be run to process the accumulated data.");
   declareProperty(
-      make_unique<FileProperty>("PostProcessingScriptFilename", "",
-                                FileProperty::OptionalLoad, "py"),
+      std::make_unique<FileProperty>("PostProcessingScriptFilename", "",
+                                     FileProperty::OptionalLoad, "py"),
       " Python script that will be run to process the accumulated data.");
 
   std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
@@ -151,7 +152,7 @@ void LiveDataAlgorithm::initProps() {
                   "monitoring continues with cleared ones.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace>>(
+      std::make_unique<WorkspaceProperty<Workspace>>(
           "AccumulationWorkspace", "", Direction::Output,
           PropertyMode::Optional, LockMode::NoLock),
       "Optional, unless performing PostProcessing:\n"
@@ -159,12 +160,12 @@ void LiveDataAlgorithm::initProps() {
       " This is the workspace after accumulation but before post-processing "
       "steps.");
 
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output,
                       PropertyMode::Mandatory, LockMode::NoLock),
                   "Name of the processed output workspace.");
 
-  declareProperty(make_unique<PropertyWithValue<std::string>>(
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "LastTimeStamp", "", Direction::Output),
                   "The time stamp of the last event, frame or pulse recorded.\n"
                   "Date/time is in UTC time, in ISO8601 format, e.g. "

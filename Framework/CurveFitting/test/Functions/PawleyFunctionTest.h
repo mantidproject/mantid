@@ -114,7 +114,7 @@ public:
 
     // invalid string
     TS_ASSERT_THROWS(fn.setAttributeValue("LatticeSystem", "invalid"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testLatticeSystemConstraintsCubic() {
@@ -128,11 +128,11 @@ public:
     fn.setParameter("a", 3.0);
     TS_ASSERT_EQUALS(fn.getParameter("a"), 3.0);
 
-    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("c"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("b"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("c"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), const std::invalid_argument &);
 
     UnitCell cell = fn.getUnitCellFromParameters();
     cellParametersAre(cell, 3.0, 3.0, 3.0, 90.0, 90.0, 90.0);
@@ -151,10 +151,10 @@ public:
     fn.setParameter("c", 5.0);
     TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
 
-    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("b"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), const std::invalid_argument &);
 
     UnitCell cell = fn.getUnitCellFromParameters();
     cellParametersAre(cell, 3.0, 3.0, 5.0, 90.0, 90.0, 90.0);
@@ -173,10 +173,10 @@ public:
     fn.setParameter("c", 5.0);
     TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
 
-    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("b"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), const std::invalid_argument &);
 
     UnitCell cell = fn.getUnitCellFromParameters();
     cellParametersAre(cell, 3.0, 3.0, 5.0, 90.0, 90.0, 120.0);
@@ -195,10 +195,10 @@ public:
     fn.setParameter("Alpha", 101.0);
     TS_ASSERT_EQUALS(fn.getParameter("Alpha"), 101.0);
 
-    TS_ASSERT_THROWS(fn.getParameter("b"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("c"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("b"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("c"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), const std::invalid_argument &);
 
     UnitCell cell = fn.getUnitCellFromParameters();
     cellParametersAre(cell, 3.0, 3.0, 3.0, 101.0, 101.0, 101.0);
@@ -219,9 +219,9 @@ public:
     fn.setParameter("c", 5.0);
     TS_ASSERT_EQUALS(fn.getParameter("c"), 5.0);
 
-    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Beta"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Beta"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), const std::invalid_argument &);
 
     UnitCell cell = fn.getUnitCellFromParameters();
     cellParametersAre(cell, 3.0, 4.0, 5.0, 90.0, 90.0, 90.0);
@@ -244,8 +244,8 @@ public:
     fn.setParameter("Beta", 101.0);
     TS_ASSERT_EQUALS(fn.getParameter("Beta"), 101.0);
 
-    TS_ASSERT_THROWS(fn.getParameter("Alpha"), std::invalid_argument);
-    TS_ASSERT_THROWS(fn.getParameter("Gamma"), std::invalid_argument);
+    TS_ASSERT_THROWS(fn.getParameter("Alpha"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(fn.getParameter("Gamma"), const std::invalid_argument &);
 
     UnitCell cell = fn.getUnitCellFromParameters();
     cellParametersAre(cell, 3.0, 4.0, 5.0, 90.0, 101.0, 90.0);
@@ -311,10 +311,10 @@ public:
 
     // works only with IPeakFunctions
     TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "Chebyshev"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
 
     TS_ASSERT_THROWS(fn.setAttributeValue("ProfileFunction", "DoesNotExist"),
-                     Exception::NotFoundError);
+                     const Exception::NotFoundError &);
   }
 
   void testPawleyFunctionInitialization() {

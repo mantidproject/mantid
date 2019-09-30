@@ -452,7 +452,7 @@ FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
     prop = m_stringManager->addProperty(propName);
     m_stringManager->setValue(prop, QString::fromStdString(property->value()));
   } else {
-    QMessageBox::warning(this, "MantidPlot - Error",
+    QMessageBox::warning(this, "Mantid - Error",
                          "Type of minimizer's property " + propName +
                              " is not yet supported by the browser.");
     return nullptr;

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="TransRunStartOverlap">
+    <value val="12.0"/>
+  </parameter>
+
+  <parameter name="TransRunEndOverlap"> 
+    <value val="10.0"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

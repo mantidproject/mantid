@@ -19,8 +19,6 @@ from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWork
                              ConjoinWorkspaces
 
 
-
-
 class PlotFunctions3DTest(unittest.TestCase):
 
     @classmethod

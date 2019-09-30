@@ -55,11 +55,11 @@ class NormaliseSpectraTest(unittest.TestCase):
 
     def _check_spectrum_less_than(self, y_data, upper_boundary):
         for i in range(len(y_data)):
-            self.assertTrue(y_data[i] <= upper_boundary)
+            self.assertLessEqual(y_data[i], upper_boundary)
 
     def _check_spectrum_more_than(self, y_data, lower_boundary):
         for i in range(len(y_data)):
-            self.assertTrue(y_data[i] >= lower_boundary)
+            self.assertGreaterEqual(y_data[i], lower_boundary)
 
 #--------------------------------Helper Functions-----------------------------------------
     def _create_workspace(self, nhists, out_name, data_string):

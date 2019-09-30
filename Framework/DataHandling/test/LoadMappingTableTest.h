@@ -60,7 +60,7 @@ public:
     if (!loader.isInitialized())
       loader.initialize();
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(loader.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(loader.execute(), const std::runtime_error &);
     // Now set it...
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", outputSpace);

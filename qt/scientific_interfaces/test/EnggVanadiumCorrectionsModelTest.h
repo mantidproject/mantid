@@ -47,7 +47,8 @@ public:
 private:
   std::pair<Mantid::API::ITableWorkspace_sptr,
             Mantid::API::MatrixWorkspace_sptr>
-  calculateCorrectionWorkspaces(const std::string &runNumber) const override;
+  calculateCorrectionWorkspaces(
+      const std::string &vanadiumRunNumber) const override;
 };
 
 inline TestEnggVanadiumCorrectionsModel::TestEnggVanadiumCorrectionsModel(
@@ -59,8 +60,7 @@ inline TestEnggVanadiumCorrectionsModel::TestEnggVanadiumCorrectionsModel(
 inline std::pair<Mantid::API::ITableWorkspace_sptr,
                  Mantid::API::MatrixWorkspace_sptr>
 TestEnggVanadiumCorrectionsModel::calculateCorrectionWorkspaces(
-    const std::string &runNumber) const {
-  UNUSED_ARG(runNumber);
+    const std::string &) const {
   m_calculateCorrectionsCalled = true;
 
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
@@ -122,13 +122,11 @@ public:
     TS_ASSERT(correctionWorkspaces.second);
 
     Poco::Path curvesWSPath(m_inputDir.path());
-    curvesWSPath.append(CURRENT_INSTRUMENT +
-                        "00000123_precalculated_vanadium_run_bank_curves.nxs");
+    curvesWSPath.append("123_precalculated_vanadium_run_bank_curves.nxs");
     TS_ASSERT(Poco::File(curvesWSPath).exists());
 
     Poco::Path integWSPath(m_inputDir.path());
-    integWSPath.append(CURRENT_INSTRUMENT +
-                       "00000123_precalculated_vanadium_run_integration.nxs");
+    integWSPath.append("123_precalculated_vanadium_run_integration.nxs");
     TS_ASSERT(Poco::File(integWSPath).exists());
   }
 
@@ -193,13 +191,11 @@ private:
       Mantid::API::ITableWorkspace_sptr integratedWS,
       Mantid::API::MatrixWorkspace_sptr curvesWS) {
     Poco::Path curvesWSPath(m_inputDir.path());
-    curvesWSPath.append(CURRENT_INSTRUMENT +
-                        "00000123_precalculated_vanadium_run_bank_curves.nxs");
+    curvesWSPath.append("123_precalculated_vanadium_run_bank_curves.nxs");
     saveNexus(curvesWSPath.toString(), curvesWS);
 
     Poco::Path integWSPath(m_inputDir.path());
-    integWSPath.append(CURRENT_INSTRUMENT +
-                       "00000123_precalculated_vanadium_run_integration.nxs");
+    integWSPath.append("123_precalculated_vanadium_run_integration.nxs");
     saveNexus(integWSPath.toString(), integratedWS);
   }
 };

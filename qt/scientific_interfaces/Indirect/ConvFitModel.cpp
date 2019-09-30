@@ -187,6 +187,8 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
     return boost::none;
   } catch (std::invalid_argument const &) {
     return boost::none;
+  } catch (std::exception const &) {
+    return boost::none;
   }
 }
 

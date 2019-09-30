@@ -90,10 +90,10 @@ void CreateEPP::init() {
   auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
   inputWSValidator->add(boost::make_shared<API::InstrumentValidator>());
   inputWSValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("TOF"));
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, inputWSValidator),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The calculated output EPP table.");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();

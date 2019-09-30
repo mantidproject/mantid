@@ -65,9 +65,9 @@ private:
   TimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);
 
   /// Owned pointer to the filtered property
-  boost::scoped_ptr<TimeSeriesProperty<double>> m_prop;
+  std::unique_ptr<TimeSeriesProperty<double>> m_prop;
   /// Owned pointer to the filter mask
-  boost::scoped_ptr<TimeSeriesProperty<bool>> m_filter;
+  std::unique_ptr<TimeSeriesProperty<bool>> m_filter;
 };
 
 } // namespace Kernel

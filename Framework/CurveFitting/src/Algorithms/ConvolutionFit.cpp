@@ -205,8 +205,8 @@ void addEISFToTable(ITableWorkspace_sptr &tableWs) {
   // Get height data from parameter table
   const auto height = searchForFitParameters("Height", tableWs).at(0);
   const auto heightErr = searchForFitParameters("Height_Err", tableWs).at(0);
-  auto heightY = tableWs->getColumn(height)->numeric_fill<>();
-  auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
+  const auto heightY = tableWs->getColumn(height)->numeric_fill();
+  const auto heightE = tableWs->getColumn(heightErr)->numeric_fill();
 
   // Get amplitude column names
   const auto ampIndices = searchForFitParameters("Amplitude", tableWs);
@@ -219,8 +219,8 @@ void addEISFToTable(ITableWorkspace_sptr &tableWs) {
 
   for (auto i = 0u; i < maxSize; ++i) {
     // Get amplitude from column in table workspace
-    auto ampY = tableWs->getColumn(ampIndices[i])->numeric_fill<>();
-    auto ampErr = tableWs->getColumn(ampErrorIndices[i])->numeric_fill<>();
+    auto ampY = tableWs->getColumn(ampIndices[i])->numeric_fill();
+    auto ampErr = tableWs->getColumn(ampErrorIndices[i])->numeric_fill();
     auto eisfAndError = calculateEISFAndError(heightY, heightE, ampY, ampErr);
 
     // Append the calculated values to the table workspace

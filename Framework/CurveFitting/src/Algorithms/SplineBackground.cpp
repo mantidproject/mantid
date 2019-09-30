@@ -28,10 +28,10 @@ using namespace API;
 
 /// Initialisation method
 void SplineBackground::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace.");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -54,7 +54,7 @@ void SplineBackground::exec() {
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
   /* this is the data to be fitted */
-  const int numBins = static_cast<int>(calculateNumBinsToProcess(inWS.get()));
+  const auto numBins = static_cast<int>(calculateNumBinsToProcess(inWS.get()));
 
   if (numBins < ncoeffs) {
     throw std::out_of_range("Too many basis functions (NCoeff)");

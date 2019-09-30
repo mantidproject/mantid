@@ -36,7 +36,9 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   /// Algorithm's category for identification
-  const std::string category() const override { return "MDAlgorithms\\Peaks"; }
+  const std::string category() const override {
+    return "MDAlgorithms\\Peaks;Crystal\\Integration";
+  }
 
 private:
   /// Initialise the properties

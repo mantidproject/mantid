@@ -93,7 +93,7 @@ public:
   }
 
   void test_isHDF_Throws_With_Invalid_Filename() {
-    TS_ASSERT_THROWS(NexusDescriptor::isHDF(""), std::invalid_argument);
+    TS_ASSERT_THROWS(NexusDescriptor::isHDF(""), const std::invalid_argument &);
   }
 
   //=================================== NexusDescriptor methods
@@ -105,17 +105,17 @@ public:
   }
 
   void test_Constructor_Throws_With_Empty_filename() {
-    TS_ASSERT_THROWS(NexusDescriptor(""), std::invalid_argument);
+    TS_ASSERT_THROWS(NexusDescriptor(""), const std::invalid_argument &);
   }
 
   void test_Constructor_Throws_With_NonExistant_filename() {
     TS_ASSERT_THROWS(NexusDescriptor("__ThisShouldBeANonExistantFile.txt"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Constructor_Throws_When_Given_File_Not_Identified_As_HDF() {
     TS_ASSERT_THROWS(NexusDescriptor fd(m_testNonHDFPath),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_File_Handle_Returned_By_Data_Is_Valid() {

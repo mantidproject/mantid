@@ -6,13 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_MANTIDWIDGETS_DISPLAYCURVEFIT_H_
 #define MANTID_MANTIDWIDGETS_DISPLAYCURVEFIT_H_
-// includes for interface development
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "MantidQtWidgets/Plotting/Qwt/RangeSelector.h"
 #include "ui_DisplayCurveFit.h"
-// includes for workspace handling
-#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -55,7 +55,8 @@ public:
   };
   DisplayCurveFit(QWidget *parent = nullptr);
   ~DisplayCurveFit() override;
-  void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
+  void setAxisRange(QPair<double, double> range,
+                    AxisID axisID = AxisID::XBottom);
   curveTypes
   getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace);
   QPair<double, double> getCurveRange(const curveType &atype);

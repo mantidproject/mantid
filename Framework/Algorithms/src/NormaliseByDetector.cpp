@@ -63,11 +63,11 @@ void NormaliseByDetector::init() {
   compositeValidator->add(boost::make_shared<API::HistogramValidator>());
 
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, compositeValidator),
       "An input workspace in wavelength");
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -166,7 +166,7 @@ use.
 MatrixWorkspace_sptr
 NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
   const size_t nHistograms = inWS->getNumberHistograms();
-  const size_t progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
+  const auto progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
   Progress prog(this, 0.0, 1.0, progress_items);
   // Clone the input workspace to create a template for the denominator
   // workspace.

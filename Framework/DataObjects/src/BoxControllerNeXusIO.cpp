@@ -144,12 +144,12 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName,
       throw Kernel::Exception::FileError("Can not open file to read ",
                                          m_fileName);
   }
-  int nDims = static_cast<int>(this->m_bc->getNDims());
+  auto nDims = static_cast<int>(this->m_bc->getNDims());
 
   bool group_exists;
-  m_File = MDBoxFlatTree::createOrOpenMDWSgroup(
+  m_File = std::unique_ptr<::NeXus::File>(MDBoxFlatTree::createOrOpenMDWSgroup(
       m_fileName, nDims, m_EventsTypesSupported[m_EventType], m_ReadOnly,
-      group_exists);
+      group_exists));
 
   // we are in MD workspace Class  group now
   std::map<std::string, std::string> groupEntries;
@@ -269,7 +269,7 @@ void BoxControllerNeXusIO::prepareNxSdata_CurVersion() {
   // check if the number of dimensions in the file corresponds to the number of
   // dimesnions to read.
   size_t nFileDim;
-  size_t ndim2 = static_cast<size_t>(info.dims[1]);
+  auto ndim2 = static_cast<size_t>(info.dims[1]);
   switch (m_EventType) {
   case (LeanEvent):
     nFileDim = ndim2 - 2;
@@ -345,7 +345,7 @@ void BoxControllerNeXusIO::saveGenericBlock(
 
   // ugly cast but why would putSlab change the data?. This is NeXus bug which
   // makes putSlab method non-constant
-  std::vector<Type> &mData = const_cast<std::vector<Type> &>(DataBlock);
+  auto &mData = const_cast<std::vector<Type> &>(DataBlock);
 
   {
     m_File->putSlab<Type>(mData, start, dims);
@@ -491,8 +491,6 @@ void BoxControllerNeXusIO::closeFile() {
     m_File->closeGroup(); // close events group
     m_File->closeGroup(); // close workspace group
     m_File->close();      // close NeXus file
-
-    delete m_File;
     m_File = nullptr;
   }
 }

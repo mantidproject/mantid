@@ -43,32 +43,35 @@ public:
     Counts counts{10, 1, 3, 4, 7};
     // X Mode Points
     TS_ASSERT_THROWS(rebin(Histogram(points, counts), edges),
-                     std::runtime_error);
+                     const std::runtime_error &);
     // No YMode set
     TS_ASSERT_THROWS(
         rebin(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testRebinFailsCentralBinEdgesInvalid() {
     std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), InvalidBinEdgesError);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges),
+                     const InvalidBinEdgesError &);
   }
 
   void testRebinFailsStartBinEdgesInvalid() {
     std::vector<double> binEdges{1, 1, 3, 4, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), InvalidBinEdgesError);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges),
+                     const InvalidBinEdgesError &);
   }
 
   void testRebinEndCentralBinEdgesInvalid() {
     std::vector<double> binEdges{1, 2, 3, 4, 5, 5};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), InvalidBinEdgesError);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges),
+                     const InvalidBinEdgesError &);
   }
 
   void testNegativeBinEdges() {
@@ -85,7 +88,7 @@ public:
     Histogram hist(BinEdges(std::move(binEdges)), Counts(5, 10));
     BinEdges edges{1, 2, 3, 4, 5, 6};
 
-    TS_ASSERT_THROWS(rebin(hist, edges), InvalidBinEdgesError);
+    TS_ASSERT_THROWS(rebin(hist, edges), const InvalidBinEdgesError &);
   }
 
   void testRebinFailsInputAndOutputBinEdgesInvalid() {
@@ -93,7 +96,7 @@ public:
     Histogram hist(BinEdges(binEdges), Counts(5, 10));
     BinEdges edges(std::move(binEdges));
 
-    TS_ASSERT_THROWS(rebin(hist, edges), InvalidBinEdgesError);
+    TS_ASSERT_THROWS(rebin(hist, edges), const InvalidBinEdgesError &);
   }
 
   void testRebinIdenticalBins() {

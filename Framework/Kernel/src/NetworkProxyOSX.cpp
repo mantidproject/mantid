@@ -230,13 +230,14 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString, logger);
 
   bool foundHttpProxy = false;
-  for (const auto &proxyInfo : info) {
-    if (proxyInfo.isHttpProxy()) {
-      foundHttpProxy = true;
-      httpProxy = proxyInfo;
-      break;
-    }
+  auto proxyIt =
+      std::find_if(info.cbegin(), info.cend(),
+                   [](const auto &proxy) { return proxy.isHttpProxy(); });
+  if (proxyIt != info.cend()) {
+    foundHttpProxy = true;
+    httpProxy = *proxyIt;
   }
+
   // Query the http proxy settings second.
   if (!foundHttpProxy) {
     ProxyInfo tempProxy = httpProxyFromSystem(dict);

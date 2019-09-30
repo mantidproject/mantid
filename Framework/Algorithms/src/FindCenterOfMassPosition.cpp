@@ -33,7 +33,7 @@ void FindCenterOfMassPosition::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
@@ -108,7 +108,7 @@ void FindCenterOfMassPosition::exec() {
   // first spectra
   int n_monitors =
       static_cast<int>(inputWS->getInstrument()->getMonitors().size());
-  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Find center of mass and iterate until we converge
   // to within a quarter of a pixel
@@ -131,7 +131,7 @@ void FindCenterOfMassPosition::exec() {
 
       // Get the current spectrum
       const MantidVec &YIn = inputWS->readY(i);
-      double y = static_cast<double>((i - n_monitors) % n_pixel_x);
+      auto y = static_cast<double>((i - n_monitors) % n_pixel_x);
       double x = floor(static_cast<double>(i - n_monitors) / n_pixel_y);
 
       if (x >= xmin && x <= xmax && y >= ymin && y <= ymax) {
@@ -209,7 +209,7 @@ void FindCenterOfMassPosition::exec() {
   // otherwise use an ArrayProperty
   if (!output.empty()) {
     // Store the result in a table workspace
-    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
 
     // Set the name of the new workspace
@@ -228,7 +228,7 @@ void FindCenterOfMassPosition::exec() {
     setProperty("OutputWorkspace", m_result);
   } else {
     // Store the results using an ArrayProperty
-    declareProperty(make_unique<ArrayProperty<double>>(
+    declareProperty(std::make_unique<ArrayProperty<double>>(
         "CenterOfMass", boost::make_shared<NullValidator>(),
         Direction::Output));
     std::vector<double> center_of_mass;

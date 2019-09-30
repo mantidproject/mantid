@@ -224,9 +224,7 @@ FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {
-  delete this->m_eventFile;
-}
+FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {}
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
@@ -249,7 +247,7 @@ int FilterEventsByLogValuePreNexus::confidence(
   // get the size of the file in bytes and reset the handle back to the
   // beginning
   handle.seekg(0, std::ios::end);
-  const size_t filesize = static_cast<size_t>(handle.tellg());
+  const auto filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
   if (filesize % objSize == 0)
@@ -265,25 +263,25 @@ void FilterEventsByLogValuePreNexus::init() {
   // File files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
-      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
-                                        eventExts),
+      std::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                     eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS + NUM_EXT);
-  declareProperty(Kernel::make_unique<FileProperty>(
+  declareProperty(std::make_unique<FileProperty>(
                       PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
-                                        FileProperty::OptionalLoad, ".dat"),
+      std::make_unique<FileProperty>(MAP_PARAM, "", FileProperty::OptionalLoad,
+                                     ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // Pixels to load
-  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
+  declareProperty(std::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -298,7 +296,7 @@ void FilterEventsByLogValuePreNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+  setPropertySettings("TotalChunks", std::make_unique<VisibleWhenProperty>(
                                          "ChunkNumber", IS_NOT_DEFAULT));
 
   // Loading option
@@ -313,13 +311,13 @@ void FilterEventsByLogValuePreNexus::init() {
 
   // the output workspace name
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
-          OUT_PARAM, "", Direction::Output),
+      std::make_unique<WorkspaceProperty<IEventWorkspace>>(OUT_PARAM, "",
+                                                           Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 
   // Optional output table workspace
-  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "EventLogTableWorkspace", "", PropertyMode::Optional),
                   "Optional output table workspace containing the event log "
                   "(pixel) information. ");
@@ -336,11 +334,11 @@ void FilterEventsByLogValuePreNexus::init() {
   declareProperty("NumberOfEventsToExamine", EMPTY_INT(),
                   "Number of events on the pixel ID to get examined. ");
 
-  declareProperty(Kernel::make_unique<ArrayProperty<int>>("LogPixelIDs"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("LogPixelIDs"),
                   "Pixel IDs for event log. Must have 2 (or more) entries. ");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("LogPIxelTags"),
+      std::make_unique<ArrayProperty<std::string>>("LogPIxelTags"),
       "Pixel ID tags for event log. Must have same items as 'LogPixelIDs'. ");
 
   declareProperty("AcceleratorFrequency", 60,
@@ -364,7 +362,7 @@ void FilterEventsByLogValuePreNexus::init() {
  */
 void FilterEventsByLogValuePreNexus::exec() {
   // Process inputs
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, 100);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, 100);
   processProperties();
 
   // Read input files
@@ -422,7 +420,7 @@ void FilterEventsByLogValuePreNexus::exec() {
   // Save output
   setProperty<IEventWorkspace_sptr>(OUT_PARAM, m_localWorkspace);
   if (m_functionMode == "Filter") {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<IEventWorkspace>>(
                         "OutputFilteredWorkspace", "WS_A", Direction::Output),
                     "");
     setProperty<IEventWorkspace_sptr>("OutputFilteredWorkspace",
@@ -1028,7 +1026,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = workspace->getSpectrum(wi);
@@ -1123,7 +1121,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
   //----------------------------------------------------------------------------------
   // Pulse ID and pulse time
   DateAndTime pulsetime;
-  int64_t numPulses = static_cast<int64_t>(m_numPulses);
+  auto numPulses = static_cast<int64_t>(m_numPulses);
   if (m_vecEventIndex.size() < m_numPulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -1637,7 +1635,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(m_localWorkspace->getNumberHistograms());
            iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = m_localWorkspace->getSpectrum(wi);
@@ -1727,7 +1725,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   //----------------------------------------------------------------------------------
   // Pulse ID and pulse time
   DateAndTime pulsetime;
-  int64_t numPulses = static_cast<int64_t>(m_numPulses);
+  auto numPulses = static_cast<int64_t>(m_numPulses);
   if (m_vecEventIndex.size() < m_numPulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -2274,13 +2272,14 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
 
   // Open the file; will throw if there is any problem
   BinaryFile<PixelType> pixelmapFile(filename);
-  PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
+  auto max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
   this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
+  using std::placeholders::_1;
   if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),
-                   std::bind2nd(std::greater<PixelType>(), max_pid)) !=
+                   std::bind(std::greater<PixelType>(), _1, max_pid)) !=
       m_pixelmap.end()) {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading "
                         "without mapping file");
@@ -2304,7 +2303,7 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
 void FilterEventsByLogValuePreNexus::openEventFile(
     const std::string &filename) {
   // Open the file
-  m_eventFile = new BinaryFile<DasEvent>(filename);
+  m_eventFile = std::make_unique<BinaryFile<DasEvent>>(filename);
   m_numEvents = m_eventFile->getNumElements();
   g_log.debug() << "File contains " << m_numEvents << " event records.\n";
 

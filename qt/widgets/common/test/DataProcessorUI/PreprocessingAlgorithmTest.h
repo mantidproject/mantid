@@ -36,13 +36,14 @@ public:
 
   void test_invalid_algorithms() {
     // Algorithm with a single input ws property
-    TS_ASSERT_THROWS(PreprocessingAlgorithm("Rebin"), std::invalid_argument);
+    TS_ASSERT_THROWS(PreprocessingAlgorithm("Rebin"),
+                     const std::invalid_argument &);
     // Algorithm with more than two input ws properties
     TS_ASSERT_THROWS(PreprocessingAlgorithm("ReflectometryReductionOneAuto"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     // Algorithm with two input ws properties but no output ws properties
     TS_ASSERT_THROWS(PreprocessingAlgorithm("ConjoinWorkspaces"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_valid_algorithms() {

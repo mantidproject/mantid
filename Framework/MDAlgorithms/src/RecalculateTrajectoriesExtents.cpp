@@ -49,10 +49,10 @@ const std::string RecalculateTrajectoriesExtents::summary() const {
 /** Initialize the algorithm's properties.
  */
 void RecalculateTrajectoriesExtents::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace. Must be in Q_sample frame.");
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Copy of the input MDEventWorkspace with the corrected "
                   "trajectory extents.");
@@ -172,7 +172,7 @@ void RecalculateTrajectoriesExtents::exec() {
         *(outWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
 
     const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-    const int64_t nspectra = static_cast<int64_t>(spectrumInfo.size());
+    const auto nspectra = static_cast<int64_t>(spectrumInfo.size());
     std::vector<double> lowValues, highValues;
 
     auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(

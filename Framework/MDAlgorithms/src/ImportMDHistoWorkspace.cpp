@@ -43,7 +43,7 @@ const std::string ImportMDHistoWorkspace::category() const {
  */
 void ImportMDHistoWorkspace::init() {
   std::vector<std::string> fileExtensions{".txt"};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type txt");
 

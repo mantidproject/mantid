@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/WindowIcons.h"
 #include "MantidQtWidgets/Common/WorkspaceIcons.h"
 
+#include <sstream>
 #include <unordered_set>
 
 using namespace Mantid::API;
@@ -101,8 +102,9 @@ std::vector<std::string> ProjectSaveModel::getWindowNames(
     const std::vector<std::string> &wsNames) const {
   std::vector<std::string> names;
   auto windows = getUniqueWindows(wsNames);
+  names.reserve(windows.size());
   for (auto window : windows) {
-    names.push_back(window->getWindowName());
+    names.emplace_back(window->getWindowName());
   }
   return names;
 }
@@ -113,8 +115,9 @@ std::vector<std::string> ProjectSaveModel::getWindowNames(
  */
 std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
   std::vector<std::string> names;
+  names.reserve(m_workspaceWindows.size());
   for (auto &item : m_workspaceWindows) {
-    names.push_back(item.first);
+    names.emplace_back(item.first);
   }
 
   std::sort(names.begin(), names.end());
@@ -225,4 +228,39 @@ bool ProjectSaveModel::hasWindows(const std::string &wsName) const {
   }
 
   return false;
+}
+
+/**
+ * @brief Check if the project size will be larger than the warning size defined
+ * in mantid.properties.
+ *
+ * @param wsNames A vector of workspace names as strings.
+ * @return true If larger warning.
+ * @return false If equal or less than warning.
+ */
+bool ProjectSaveModel::needsSizeWarning(
+    const std::vector<std::string> &wsNames) {
+  std::istringstream iss(Mantid::Kernel::ConfigService::Instance().getString(
+      "projectSaving.warningSize"));
+  size_t warningSize;
+  iss >> warningSize;
+  const size_t totalSize = getProjectSize(wsNames);
+  return totalSize > warningSize;
+}
+
+/**
+ * @brief Get the project size from a list of workspace names.
+ *
+ * @param wsNames List of workspace names to look up.
+ * @return size_t The size of the project in bytes.
+ */
+size_t
+ProjectSaveModel::getProjectSize(const std::vector<std::string> &wsNames) {
+  size_t totalSize = 0;
+  for (const auto &ws : wsNames) {
+    totalSize += Mantid::API::AnalysisDataService::Instance()
+                     .retrieve(ws)
+                     ->getMemorySize();
+  }
+  return totalSize;
 }

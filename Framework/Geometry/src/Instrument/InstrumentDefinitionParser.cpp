@@ -23,7 +23,6 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/make_unique.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -590,7 +589,7 @@ void InstrumentDefinitionParser::appendLocations(
   const Element *pRootLocationsElem = pLocationsDoc->documentElement();
   const bool assembly = isAssembly(pCompElem->getAttribute("type"));
 
-  Poco::XML::Element *pElem =
+  auto *pElem =
       dynamic_cast<Poco::XML::Element *>(pRootLocationsElem->firstChild());
 
   while (pElem) {
@@ -966,14 +965,20 @@ void InstrumentDefinitionParser::setValidityRange(
   }
 }
 
-PointingAlong axisNameToAxisType(std::string &input) {
+PointingAlong axisNameToAxisType(const std::string &label, std::string &input) {
   PointingAlong direction;
   if (input == "x") {
     direction = X;
   } else if (input == "y") {
     direction = Y;
-  } else {
+  } else if (input == "z") {
     direction = Z;
+  } else {
+    std::stringstream msg;
+    msg << "Cannot create \"" << label
+        << "\" with axis direction other than \"x\", \"y\", or \"z\", found \""
+        << input << "\"";
+    throw Kernel::Exception::InstrumentDefinitionError(msg.str());
   }
   return direction;
 }
@@ -1079,9 +1084,9 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     }
 
     // Convert to input types
-    PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
-    PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
-    PointingAlong thetaSign = axisNameToAxisType(s_thetaSign);
+    PointingAlong alongBeam = axisNameToAxisType("along-beam", s_alongBeam);
+    PointingAlong pointingUp = axisNameToAxisType("pointing-up", s_pointingUp);
+    PointingAlong thetaSign = axisNameToAxisType("theta-sign", s_thetaSign);
     Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
@@ -1099,7 +1104,7 @@ std::vector<std::string> InstrumentDefinitionParser::buildExcludeList(
   unsigned long numberExcludeEle = pNLexclude->length();
   std::vector<std::string> newExcludeList;
   for (unsigned long i = 0; i < numberExcludeEle; i++) {
-    Element *pExElem = static_cast<Element *>(pNLexclude->item(i));
+    auto *pExElem = static_cast<Element *>(pNLexclude->item(i));
     if (pExElem->hasAttribute("sub-part"))
       newExcludeList.push_back(pExElem->getAttribute("sub-part"));
   }
@@ -1256,8 +1261,7 @@ void InstrumentDefinitionParser::appendAssembly(
   // create outline object for the assembly
   if (pType->hasAttribute("outline") &&
       pType->getAttribute("outline") != "no") {
-    Geometry::ObjCompAssembly *objAss =
-        dynamic_cast<Geometry::ObjCompAssembly *>(ass);
+    auto *objAss = dynamic_cast<Geometry::ObjCompAssembly *>(ass);
     if (!objAss) {
       throw std::logic_error(
           "Failed to cast ICompAssembly object to ObjCompAssembly");
@@ -1472,8 +1476,7 @@ void InstrumentDefinitionParser::createGridDetector(
               boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
           if (detector) {
             // Make default facing for the pixel
-            Geometry::IComponent *comp =
-                static_cast<IComponent *>(detector.get());
+            auto *comp = static_cast<IComponent *>(detector.get());
             if (m_haveDefaultFacing)
               makeXYplaneFaceComponent(comp, m_defaultFacing);
             // Mark it as a detector (add to the instrument cache)
@@ -1572,8 +1575,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
             boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           // Make default facing for the pixel
-          Geometry::IComponent *comp =
-              static_cast<IComponent *>(detector.get());
+          auto *comp = static_cast<IComponent *>(detector.get());
           if (m_haveDefaultFacing)
             makeXYplaneFaceComponent(comp, m_defaultFacing);
           // Mark it as a detector (add to the instrument cache)
@@ -1659,7 +1661,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   Node *pNode = tags.nextNode();
 
   while (pNode) {
-    Element *check = static_cast<Element *>(pNode);
+    auto *check = static_cast<Element *>(pNode);
     if (pNode->nodeName() == "type" && check->hasAttribute("is")) {
       std::string is = check->getAttribute("is");
       if (StructuredDetector::compareName(is) &&
@@ -1688,7 +1690,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
   while (pNode) {
     if (pNode->nodeName() == "vertex") {
-      Element *pVertElem = static_cast<Element *>(pNode);
+      auto *pVertElem = static_cast<Element *>(pNode);
 
       if (pVertElem->hasAttribute("x"))
         xValues.push_back(attrToDouble(pVertElem, "x"));
@@ -1717,8 +1719,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
             boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           // Make default facing for the pixel
-          Geometry::IComponent *comp =
-              static_cast<IComponent *>(detector.get());
+          auto *comp = static_cast<IComponent *>(detector.get());
           if (m_haveDefaultFacing)
             makeXYplaneFaceComponent(comp, m_defaultFacing);
           // Mark it as a detector (add to the instrument cache)
@@ -1823,9 +1824,6 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     if (category == "SamplePos" || category == "samplePos") {
       m_instrument->markAsSamplePos(comp);
     }
-    if (category == "ChopperPos" || category == "chopperPos") {
-      m_instrument->markAsChopperPoint(comp);
-    }
 
     // set location for this newly added comp and set facing if specified in
     // instrument def. file. Also
@@ -1926,7 +1924,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
     Node *pNode = it.nextNode();
     while (pNode) {
       if (pNode->nodeName() == "id") {
-        Element *pIDElem = static_cast<Element *>(pNode);
+        auto *pIDElem = static_cast<Element *>(pNode);
 
         if (pIDElem->hasAttribute("val")) {
           int valID = std::stoi(pIDElem->getAttribute("val"));
@@ -2199,7 +2197,7 @@ void InstrumentDefinitionParser::setLogfile(
           ((pNL_comp->item(i))->nodeName()) == "parameter"))
       continue;
 
-    Element *pParamElem = static_cast<Element *>(pNL_comp->item(i));
+    auto *pParamElem = static_cast<Element *>(pNL_comp->item(i));
 
     if (!pParamElem->hasAttribute("name"))
       throw Kernel::Exception::InstrumentDefinitionError(
@@ -2345,11 +2343,11 @@ void InstrumentDefinitionParser::setLogfile(
     size_t numberMax = pNLMax->length();
 
     if (numberMin >= 1) {
-      Element *pMin = static_cast<Element *>(pNLMin->item(0));
+      auto *pMin = static_cast<Element *>(pNLMin->item(0));
       constraint[0] = pMin->getAttribute("val");
     }
     if (numberMax >= 1) {
-      Element *pMax = static_cast<Element *>(pNLMax->item(0));
+      auto *pMax = static_cast<Element *>(pNLMax->item(0));
       constraint[1] = pMax->getAttribute("val");
     }
 
@@ -2362,8 +2360,7 @@ void InstrumentDefinitionParser::setLogfile(
     size_t numberPenaltyFactor = pNL_penaltyFactor->length();
 
     if (numberPenaltyFactor >= 1) {
-      Element *pPenaltyFactor =
-          static_cast<Element *>(pNL_penaltyFactor->item(0));
+      auto *pPenaltyFactor = static_cast<Element *>(pNL_penaltyFactor->item(0));
       penaltyFactor = pPenaltyFactor->getAttribute("val");
     }
 
@@ -2375,7 +2372,7 @@ void InstrumentDefinitionParser::setLogfile(
         boost::make_shared<Interpolation>();
 
     if (numberLookUp >= 1) {
-      Element *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
+      auto *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
 
       if (pLookUp->hasAttribute("interpolation"))
         interpolation->setMethod(pLookUp->getAttribute("interpolation"));
@@ -2406,7 +2403,7 @@ void InstrumentDefinitionParser::setLogfile(
       unsigned long numberPoint = pNLpoint->length();
 
       for (unsigned long j = 0; j < numberPoint; j++) {
-        Element *pPoint = static_cast<Element *>(pNLpoint->item(j));
+        auto *pPoint = static_cast<Element *>(pNLpoint->item(j));
         double x = attrToDouble(pPoint, "x");
         double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);
@@ -2420,7 +2417,7 @@ void InstrumentDefinitionParser::setLogfile(
     std::string resultUnit;
 
     if (numberFormula >= 1) {
-      Element *pFormula = static_cast<Element *>(pNLFormula->item(0));
+      auto *pFormula = static_cast<Element *>(pNLFormula->item(0));
       formula = pFormula->getAttribute("eq");
       if (pFormula->hasAttribute("unit")) {
         std::vector<std::string>::iterator it;
@@ -2445,7 +2442,7 @@ void InstrumentDefinitionParser::setLogfile(
 
     if (numberDescription >= 1) {
       // use only first description from a list
-      Element *pDescription = static_cast<Element *>(pNLDescription->item(0));
+      auto *pDescription = static_cast<Element *>(pNLDescription->item(0));
       description = pDescription->getAttribute("is");
     }
 
@@ -2496,7 +2493,7 @@ void InstrumentDefinitionParser::setComponentLinks(
   while (curNode) {
     if (curNode->nodeType() == Node::ELEMENT_NODE &&
         curNode->nodeName() == elemName) {
-      Element *curElem = static_cast<Element *>(curNode);
+      auto *curElem = static_cast<Element *>(curNode);
 
       if (progress) {
         if (progress->hasCancellationBeenRequested())
@@ -2682,7 +2679,7 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  auto physical = Kernel::make_unique<Instrument>(*m_instrument);
+  auto physical = std::make_unique<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
   m_instrument->setPhysicalInstrument(std::move(physical));
 
@@ -2715,7 +2712,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
            // neutronic position
     {
       // This should only happen for detectors
-      Detector *det = dynamic_cast<Detector *>(component.first);
+      auto *det = dynamic_cast<Detector *>(component.first);
       if (det)
         m_instrument->removeDetector(det);
     }
@@ -2795,7 +2792,7 @@ void InstrumentDefinitionParser::adjust(
       allComponentInType;                   // used to hold <component>'s found
   std::vector<std::string> allLocationName; // used to check if loc names unique
   for (unsigned long i = 0; i < numLocation; i++) {
-    Element *pLoc = static_cast<Element *>(pNL->item(i));
+    auto *pLoc = static_cast<Element *>(pNL->item(i));
 
     // The location element is required to be a child of a component element.
     // Get this component element
@@ -2816,7 +2813,7 @@ void InstrumentDefinitionParser::adjust(
           " appears at least twice. See www.mantidproject.org/IDF.");
 
     // create dummy component to hold coord. sys. of cuboid
-    CompAssembly *baseCoor = new CompAssembly(
+    auto baseCoor = std::make_unique<CompAssembly>(
         "base"); // dummy assembly used to get to end assembly if nested
     ICompAssembly *endComponent = nullptr; // end assembly, its purpose is to
                                            // hold the shape coordinate system
@@ -2825,27 +2822,23 @@ void InstrumentDefinitionParser::adjust(
     // and nested <location> elements
     // of pLoc
     std::string shapeTypeName =
-        getShapeCoorSysComp(baseCoor, pLoc, getTypeElement, endComponent);
+        getShapeCoorSysComp(baseCoor.get(), pLoc, getTypeElement, endComponent);
 
     // translate and rotate cuboid according to shape coordinate system in
     // endComponent
     std::string cuboidStr = translateRotateXMLcuboid(
         endComponent, getTypeElement[shapeTypeName], locationElementName);
 
-    delete baseCoor;
-
     // if <translate-rotate-combined-shape-to> is specified
     if (pTransRot) {
-      baseCoor = new CompAssembly("base");
+      baseCoor = std::make_unique<CompAssembly>("base");
 
-      setLocation(baseCoor, pTransRot, m_angleConvertConst);
+      setLocation(baseCoor.get(), pTransRot, m_angleConvertConst);
 
       // Translate and rotate shape xml string according to
       // <translate-rotate-combined-shape-to>
-      cuboidStr =
-          translateRotateXMLcuboid(baseCoor, cuboidStr, locationElementName);
-
-      delete baseCoor;
+      cuboidStr = translateRotateXMLcuboid(baseCoor.get(), cuboidStr,
+                                           locationElementName);
     }
 
     DOMParser pParser;
@@ -2983,7 +2976,7 @@ InstrumentDefinitionParser::convertLocationsElement(
   // Number of <location> this <locations> element is shorthand for
   size_t nElements(0);
   if (pElem->hasAttribute("n-elements")) {
-    int n = boost::lexical_cast<int>(
+    auto n = boost::lexical_cast<int>(
         Strings::strip(pElem->getAttribute("n-elements")));
 
     if (n <= 0) {
@@ -3006,6 +2999,16 @@ InstrumentDefinitionParser::convertLocationsElement(
   if (pElem->hasAttribute("name-count-start")) {
     nameCountStart = boost::lexical_cast<int>(
         Strings::strip(pElem->getAttribute("name-count-start")));
+  }
+
+  int nameCountIncrement(1);
+  if (pElem->hasAttribute("name-count-increment")) {
+    nameCountIncrement = boost::lexical_cast<int>(
+        Strings::strip(pElem->getAttribute("name-count-increment")));
+
+    if (nameCountIncrement <= 0)
+      throw Exception::InstrumentDefinitionError(
+          "name-count-increment must be greater than zero.");
   }
 
   // A list of numeric attributes which are allowed to have corresponding -end
@@ -3048,7 +3051,7 @@ InstrumentDefinitionParser::convertLocationsElement(
       }
 
       double from = attrValues[rangeAttr];
-      double to = boost::lexical_cast<double>(
+      auto to = boost::lexical_cast<double>(
           Strings::strip(pElem->getAttribute(endAttr)));
 
       rangeAttrSteps[rangeAttr] =
@@ -3066,7 +3069,9 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
+      pLoc->setAttribute(
+          "name",
+          name + std::to_string(nameCountStart + (i * nameCountIncrement)));
     }
 
     // Copy values of all the attributes set
@@ -3124,7 +3129,7 @@ InstrumentDefinitionParser::getShapeElement(const Poco::XML::Element *pElem,
         "XML element: <" + pElem->tagName() +
         "> must contain exactly one sub-element with name: <" + name + ">.");
   }
-  Element *retVal = static_cast<Element *>(pNL->item(0));
+  auto *retVal = static_cast<Element *>(pNL->item(0));
   return retVal;
 }
 
@@ -3216,7 +3221,7 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(
   if (pNL->length() == 0) {
     return pType->getAttribute("name");
   } else if (pNL->length() == 1) {
-    Element *pElem = static_cast<Element *>(pNL->item(0));
+    auto *pElem = static_cast<Element *>(pNL->item(0));
     return getShapeCoorSysComp(ass, pElem, getTypeElement, endAssembly);
   } else {
     throw Exception::InstrumentDefinitionError(

@@ -111,10 +111,10 @@ public:
     FunctionValues_sptr values;
 
     TS_ASSERT_THROWS(dc.createDomainFromPeakTable(invalid, domain, values, 0),
-                     std::runtime_error);
+                     const std::runtime_error &);
 
     TS_ASSERT_THROWS(dc.createDomainFromPeakTable(empty, domain, values, 0),
-                     std::range_error);
+                     const std::range_error &);
   }
 
   void testCreateDomainPeaksWorkspace() {

@@ -122,7 +122,7 @@ void addMultiPeriodLogsTo(MatrixWorkspace_sptr ws, int period,
 
 void addPChargeLogTo(MatrixWorkspace_sptr ws, const double pChargeAccum) {
   auto pchargeLog =
-      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
+      std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
   const Types::Core::DateAndTime runstart(20000000000);
   const int64_t pulsedt = 100 * 1000 * 1000;
@@ -162,7 +162,7 @@ public:
       norm.initialize();
 
     // Check it fails if properties haven't been set
-    TS_ASSERT_THROWS(norm.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(norm.execute(), const std::runtime_error &);
     TS_ASSERT(!norm.isExecuted());
   }
 

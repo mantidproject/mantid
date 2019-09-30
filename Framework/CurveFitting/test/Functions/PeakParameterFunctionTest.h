@@ -101,9 +101,10 @@ public:
     FunctionValues values(domain);
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
-    TS_ASSERT_THROWS(fn->function(domain, values), std::invalid_argument);
+    TS_ASSERT_THROWS(fn->function(domain, values),
+                     const std::invalid_argument &);
     TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void testNoFunctionSet() {
@@ -118,8 +119,9 @@ public:
     FunctionValues values(domain);
     Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
-    TS_ASSERT_THROWS(fn->function(domain, values), std::runtime_error);
-    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian), std::runtime_error);
+    TS_ASSERT_THROWS(fn->function(domain, values), const std::runtime_error &);
+    TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
+                     const std::runtime_error &);
   }
 
   void testBeforeDecoratedFunctionSet() {
@@ -132,7 +134,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(fn->setDecoratedFunction("Gaussian"));
     TS_ASSERT_THROWS(fn->setDecoratedFunction("Chebyshev"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 };
 

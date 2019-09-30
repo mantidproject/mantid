@@ -53,8 +53,8 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
 
   m_function = m_leastSquares->getFittingFunction();
   auto &values = *m_leastSquares->getValues();
-  int n = static_cast<int>(m_leastSquares->nParams());
-  int m = static_cast<int>(values.size());
+  auto n = static_cast<int>(m_leastSquares->nParams());
+  auto m = static_cast<int>(values.size());
   if (n > m) {
     throw std::runtime_error("More parameters than data.");
   }
@@ -83,7 +83,7 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
   m_function->function(domain, values);
-  int m = static_cast<int>(values.size());
+  auto m = static_cast<int>(values.size());
   if (f.len() != m) {
     f.allocate(m);
   }
@@ -102,8 +102,8 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
-  int n = static_cast<int>(m_leastSquares->nParams());
-  int m = static_cast<int>(values.size());
+  auto n = static_cast<int>(m_leastSquares->nParams());
+  auto m = static_cast<int>(values.size());
   if (J.len1() != m || J.len2() != n) {
     J.allocate(m, n);
   }
@@ -127,7 +127,7 @@ void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
                                   DoubleFortranMatrix &h) const {
   UNUSED_ARG(x);
   UNUSED_ARG(f);
-  int n = static_cast<int>(m_leastSquares->nParams());
+  auto n = static_cast<int>(m_leastSquares->nParams());
   if (h.len1() != n || h.len2() != n) {
     h.allocate(n, n);
   }
@@ -247,7 +247,6 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
   w.iter = w.iter + 1;
   inform.iter = w.iter;
 
-  double rho = -NLLS::ONE; // intialize rho as a negative value
   bool success = false;
   int no_reductions = 0;
   double normFnew = 0.0;
@@ -279,7 +278,7 @@ bool TrustRegionMinimizer::iterate(size_t /*iteration*/) {
     //             m_k(0)  - m_k(d)         predicted_reduction
     //
     // if model is good, rho should be close to one
-    rho = calculateRho(w.normF, normFnew, md, options);
+    auto rho = calculateRho(w.normF, normFnew, md, options);
     if (!std::isfinite(rho) || rho <= options.eta_successful) {
       if ((w.use_second_derivatives) && (options.model == 3) &&
           (no_reductions == 1)) {
@@ -886,7 +885,6 @@ void solveSubproblemMain(int n, double radius, double f,
   inform.x_norm = ZERO;
   inform.obj = f;
   inform.hard_case = false;
-  double delta_lambda = ZERO;
 
   //  Check that arguments are OK
   if (n < 0) {
@@ -1090,7 +1088,7 @@ void solveSubproblemMain(int n, double radius, double f,
 
     //  compute the Newton correction (for beta = - 1)
 
-    delta_lambda = -(pi_beta(0) - pow((radius), beta)) / pi_beta(1);
+    auto delta_lambda = -(pi_beta(0) - pow((radius), beta)) / pi_beta(1);
 
     DoubleFortranVector lambda_new(3);
     int n_lambda = 1;
@@ -1182,7 +1180,8 @@ void solveSubproblemMain(int n, double radius, double f,
 
     //  check that the best Taylor improvement is significant
 
-    if (fabs(delta_lambda) < EPSILON_MCH * std::max(ONE, fabs(lambda))) {
+    if (std::abs(delta_lambda) <
+        EPSILON_MCH * std::max(ONE, std::abs(lambda))) {
       break;
     }
 

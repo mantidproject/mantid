@@ -33,9 +33,8 @@ using namespace DataObjects;
 
 void FindCenterOfMassPosition2::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
                   "If not empty, a table workspace of that "
@@ -84,7 +83,7 @@ void FindCenterOfMassPosition2::exec() {
 
   // Get the number of monitors. We assume that all monitors are stored in the
   // first spectra
-  const int numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
+  const auto numSpec = static_cast<int>(inputWSWvl->getNumberHistograms());
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, max_iteration);
@@ -167,6 +166,9 @@ void FindCenterOfMassPosition2::exec() {
 
       // Get the current spectrum
       auto &YIn = inputWS->y(i);
+      // Skip if NaN of inf
+      if (std::isnan(YIn[specID]) || std::isinf(YIn[specID]))
+        continue;
       const V3D pos = spectrumInfo.position(i);
       double x = pos.X();
       double y = pos.Y();
@@ -254,7 +256,7 @@ void FindCenterOfMassPosition2::exec() {
   // otherwise use an ArrayProperty
   if (!output.empty()) {
     // Store the result in a table workspace
-    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
 
     // Set the name of the new workspace
@@ -274,7 +276,7 @@ void FindCenterOfMassPosition2::exec() {
   } else {
     // Store the results using an ArrayProperty
     if (!existsProperty("CenterOfMass"))
-      declareProperty(make_unique<ArrayProperty<double>>(
+      declareProperty(std::make_unique<ArrayProperty<double>>(
           "CenterOfMass", boost::make_shared<NullValidator>(),
           Direction::Output));
     std::vector<double> center_of_mass;

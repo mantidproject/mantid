@@ -39,13 +39,13 @@ public:
     // bad order
     TS_ASSERT_THROWS(Mantid::HistogramData::estimatePolynomial(
                          3, histo, 0, histo.size(), bg0, bg1, bg2, chisq),
-                     std::runtime_error);
+                     const std::runtime_error &);
     // bad range i_max < i_min
     TS_ASSERT_THROWS(estimatePolynomial(2, histo, 1, 0, bg0, bg1, bg2, chisq),
-                     std::runtime_error);
+                     const std::runtime_error &);
     // bad range x.size() < i_max
     TS_ASSERT_THROWS(estimatePolynomial(2, histo, 0, 30, bg0, bg1, bg2, chisq),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_FlatData() {

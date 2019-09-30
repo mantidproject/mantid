@@ -106,10 +106,10 @@ int LoadISISNexus2::confidence(Kernel::NexusDescriptor &descriptor) const {
 /// Initialization method.
 void LoadISISNexus2::init() {
   const std::vector<std::string> exts{".nxs", ".n*"};
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
-                                                    FileProperty::Load, exts),
-                  "The name of the Nexus file to load");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
+      "The name of the Nexus file to load");
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       "OutputWorkspace", "", Direction::Output));
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
@@ -117,7 +117,7 @@ void LoadISISNexus2::init() {
   declareProperty("SpectrumMin", static_cast<int64_t>(0), mustBePositive);
   declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
                   mustBePositive);
-  declareProperty(make_unique<ArrayProperty<int64_t>>("SpectrumList"));
+  declareProperty(std::make_unique<ArrayProperty<int64_t>>("SpectrumList"));
   declareProperty("EntryNumber", static_cast<int64_t>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
@@ -333,7 +333,7 @@ void LoadISISNexus2::exec() {
         // warnings where necessary.
         validateMultiPeriodLogs(local_workspace);
       }
-      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
           prop_name + os.str(), base_name + os.str(), Direction::Output));
       wksp_group->addWorkspace(local_workspace);
       setProperty(prop_name + os.str(),
@@ -408,7 +408,7 @@ void LoadISISNexus2::exec() {
                 wksp_group->getItem(p - 1));
             data_ws->setMonitorWorkspace(monitor_workspace);
           }
-          declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+          declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
               monitorPropBase + os.str(), monitorWsNameBase + os.str(),
               Direction::Output));
           monitor_group->addWorkspace(monitor_workspace);
@@ -416,13 +416,13 @@ void LoadISISNexus2::exec() {
                       boost::static_pointer_cast<Workspace>(monitor_workspace));
         }
         // The group is the root property value
-        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
             monitorPropBase, monitorWsNameBase, Direction::Output));
         setProperty(monitorPropBase,
                     boost::dynamic_pointer_cast<Workspace>(monitor_group));
 
       } else {
-        declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
             monitorPropBase, monitorWsNameBase, Direction::Output));
         setProperty(monitorPropBase,
                     boost::static_pointer_cast<Workspace>(monitor_workspace));
@@ -604,7 +604,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
 
       // The spec_min - spec_max range needs to be added to the spec list
       for (int64_t i = spec_min; i < spec_max + 1; ++i) {
-        specnum_t spec_num = static_cast<specnum_t>(i);
+        auto spec_num = static_cast<specnum_t>(i);
         spec_list.push_back(spec_num);
         std::sort(spec_list.begin(), spec_list.end());
         // supplied range converted into the list, so no more supplied range
@@ -695,7 +695,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     auto generator = dataBlockComposite.getGenerator();
     int64_t hist = 0;
     for (; !generator->isDone(); generator->next()) {
-      specnum_t spec_num = static_cast<specnum_t>(generator->getValue());
+      auto spec_num = static_cast<specnum_t>(generator->getValue());
       m_wsInd2specNum_map.emplace(hist, spec_num);
       ++hist;
     }
@@ -1194,7 +1194,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
     // Iterate over each monitor and create a data block for each monitor
     for (const auto &monitor : monitors) {
-      int64_t monID = static_cast<int64_t>(monitor.first);
+      auto monID = static_cast<int64_t>(monitor.first);
       auto monTemp = DataBlock(chans);
       monTemp.setMinSpectrumID(monID);
       monTemp.setMaxSpectrumID(monID);

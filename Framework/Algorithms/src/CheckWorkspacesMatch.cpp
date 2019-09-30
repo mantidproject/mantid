@@ -43,11 +43,11 @@ using namespace Geometry;
 
 //----------------------------------------------------------------------------------------------
 void CheckWorkspacesMatch::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace1", "", Direction::Input),
                   "The name of the first input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
-                                                            Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace2", "", Direction::Input),
                   "The name of the second input workspace.");
 
   declareProperty(

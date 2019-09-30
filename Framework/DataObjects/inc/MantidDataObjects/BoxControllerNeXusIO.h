@@ -29,7 +29,7 @@ public:
   BoxControllerNeXusIO(API::BoxController *const bc);
 
   ///@return true if the file to write events is opened and false otherwise
-  bool isOpened() const override { return m_File != nullptr; }
+  bool isOpened() const override { return m_File.get() != nullptr; }
   /// get the full file name of the file used for IO operations
   const std::string &getFileName() const override { return m_fileName; }
   /**Return the size of the NeXus data block used in NeXus data array*/
@@ -61,7 +61,7 @@ public:
   // Auxiliary functions (non-virtual, used for testing)
   int64_t getNDataColums() const { return m_BlockSize[1]; }
   // get pointer to the Nexus file --> compatribility testing only.
-  ::NeXus::File *getFile() { return m_File; }
+  ::NeXus::File *getFile() { return m_File.get(); }
 
 private:
   /// Default size of the events block which can be written in the NeXus array
@@ -73,7 +73,7 @@ private:
   /// truncated to 64 bytes)
   std::string m_fileName;
   /// the file Handler responsible for Nexus IO operations;
-  ::NeXus::File *m_File;
+  std::unique_ptr<::NeXus::File> m_File;
   /// identifier if the file open only for reading or is  in read/write
   bool m_ReadOnly;
   /// The size of the events block which can be written in the neXus array at

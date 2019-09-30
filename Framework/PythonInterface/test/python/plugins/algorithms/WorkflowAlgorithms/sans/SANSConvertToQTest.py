@@ -121,14 +121,14 @@ class SANSConvertToQTest(unittest.TestCase):
 
         # Assert
         # We expect a q-based workspace with one histogram and 10 bins.
-        self.assertTrue(output_workspace.getNumberHistograms() == 1)
-        self.assertTrue(len(output_workspace.dataX(0)) == 11)
-        self.assertTrue(output_workspace.getAxis(0).getUnit().unitID() == "MomentumTransfer")
+        self.assertEqual(output_workspace.getNumberHistograms(),  1)
+        self.assertEqual(len(output_workspace.dataX(0)),  11)
+        self.assertEqual(output_workspace.getAxis(0).getUnit().unitID(),  "MomentumTransfer")
         self.assertFalse(output_workspace.hasDx(0))
         self.assertTrue(output_workspace.getAxis(0).isNumeric())
         self.assertTrue(output_workspace.getAxis(1).isSpectra())
-        self.assertTrue(sum_of_counts.getAxis(0).getUnit().unitID() == "MomentumTransfer")
-        self.assertTrue(sum_of_norms.getAxis(0).getUnit().unitID() == "MomentumTransfer")
+        self.assertEqual(sum_of_counts.getAxis(0).getUnit().unitID(),  "MomentumTransfer")
+        self.assertEqual(sum_of_norms.getAxis(0).getUnit().unitID(),  "MomentumTransfer")
 
     def test_that_converts_wavelength_workspace_to_q_for_2d(self):
         # Arrange
@@ -144,15 +144,15 @@ class SANSConvertToQTest(unittest.TestCase):
 
         # Assert
         # We expect a q-based workspace with 8 histograms and 8 bins
-        self.assertTrue(output_workspace.getNumberHistograms() == 8)
-        self.assertTrue(len(output_workspace.dataX(0)) == 9)
-        self.assertTrue(output_workspace.getAxis(0).getUnit().unitID() == "MomentumTransfer")
-        self.assertTrue(output_workspace.getAxis(1).getUnit().unitID() == "MomentumTransfer")
+        self.assertEqual(output_workspace.getNumberHistograms(),  8)
+        self.assertEqual(len(output_workspace.dataX(0)),  9)
+        self.assertEqual(output_workspace.getAxis(0).getUnit().unitID(),  "MomentumTransfer")
+        self.assertEqual(output_workspace.getAxis(1).getUnit().unitID(),  "MomentumTransfer")
         self.assertFalse(output_workspace.hasDx(0))
         self.assertTrue(output_workspace.getAxis(0).isNumeric())
         self.assertTrue(output_workspace.getAxis(1).isNumeric())
-        self.assertTrue(sum_of_counts.getAxis(0).getUnit().unitID() == "MomentumTransfer")
-        self.assertTrue(sum_of_norms.getAxis(0).getUnit().unitID() == "MomentumTransfer")
+        self.assertEqual(sum_of_counts.getAxis(0).getUnit().unitID(),  "MomentumTransfer")
+        self.assertEqual(sum_of_norms.getAxis(0).getUnit().unitID(),  "MomentumTransfer")
 
 
 if __name__ == '__main__':

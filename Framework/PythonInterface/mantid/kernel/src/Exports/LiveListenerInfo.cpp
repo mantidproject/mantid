@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/LiveListenerInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+#include "MantidPythonInterface/core/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

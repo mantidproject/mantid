@@ -43,23 +43,23 @@ const std::string TransformMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void TransformMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Any input MDWorkspace.");
 
   std::vector<double> defaultScaling(1, 1.0);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "Scaling", std::move(defaultScaling)),
                   "Scaling value multiplying each coordinate. Default "
                   "1.\nEither a single value or a list for each dimension.");
 
   std::vector<double> defaultOffset(1, 0.0);
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
                       "Offset", std::move(defaultOffset)),
                   "Offset value to add to each coordinate. Default 0.\nEither "
                   "a single value or a list for each dimension.");
 
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 }
@@ -83,7 +83,7 @@ void TransformMD::doTransform(
   PARALLEL_FOR_IF(!ws->isFileBacked())
   for (int i = 0; i < static_cast<int>(boxes.size()); i++) { // NOLINT
     PARALLEL_START_INTERUPT_REGION
-    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
+    auto *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxes[i]);
     if (box) {
       box->transformDimensions(m_scaling, m_offset);
     }

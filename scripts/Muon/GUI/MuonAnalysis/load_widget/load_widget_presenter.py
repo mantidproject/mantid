@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.observer_pattern import Observer, Observable
+from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObserver
 
 CO_ADD = 'Co-Add'
 SIMULTANEOUS = 'Simultaneous'
@@ -51,6 +51,8 @@ class LoadWidgetPresenter(object):
 
         self.disable_observer = LoadWidgetPresenter.DisableObserver(self)
         self.enable_observer = LoadWidgetPresenter.EnableObserver(self)
+
+        self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
@@ -111,6 +113,10 @@ class LoadWidgetPresenter(object):
         self.load_run_widget.set_current_instrument(
             self._model.instrument)
         self.loadNotifier.notify_subscribers()
+
+    def update_view_from_model(self):
+        self.load_run_widget.update_view_from_model(self._model.runs)
+        self.load_file_widget.update_view_from_model(self._model.filenames)
 
     @property
     def view(self):

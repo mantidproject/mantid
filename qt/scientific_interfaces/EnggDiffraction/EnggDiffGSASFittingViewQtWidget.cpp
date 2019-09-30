@@ -27,10 +27,9 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
     : m_userMessageProvider(userMessageProvider) {
 
   auto multiRunWidgetModel =
-      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetModel>();
+      std::make_unique<EnggDiffMultiRunFittingWidgetModel>();
   m_multiRunWidgetView =
-      Mantid::Kernel::make_unique<EnggDiffMultiRunFittingQtWidget>(
-          pythonRunner);
+      std::make_unique<EnggDiffMultiRunFittingQtWidget>(pythonRunner);
 
   auto multiRunWidgetPresenter =
       boost::make_shared<EnggDiffMultiRunFittingWidgetPresenter>(
@@ -41,7 +40,7 @@ EnggDiffGSASFittingViewQtWidget::EnggDiffGSASFittingViewQtWidget(
 
   setupUI();
 
-  auto model = Mantid::Kernel::make_unique<EnggDiffGSASFittingModel>();
+  auto model = std::make_unique<EnggDiffGSASFittingModel>();
   auto *model_ptr = model.get();
   m_presenter = boost::make_shared<EnggDiffGSASFittingPresenter>(
       std::move(model), this, multiRunWidgetPresenter, mainSettings);
@@ -135,9 +134,9 @@ std::vector<std::string>
 EnggDiffGSASFittingViewQtWidget::getFocusedFileNames() const {
   const auto filenamesQStringList = m_ui.lineEdit_runFile->text().split(",");
   std::vector<std::string> filenames;
-
+  filenames.reserve(filenamesQStringList.size());
   for (const auto &filenameQString : filenamesQStringList) {
-    filenames.push_back(filenameQString.toStdString());
+    filenames.emplace_back(filenameQString.toStdString());
   }
   return filenames;
 }
@@ -198,7 +197,7 @@ EnggDiffGSASFittingViewQtWidget::getPhaseFileNames() const {
   const auto fileNameQStrings = m_ui.lineEdit_phaseFiles->text().split(",");
   fileNameStrings.reserve(fileNameQStrings.size());
   for (const auto &fileNameQString : fileNameQStrings) {
-    fileNameStrings.push_back(fileNameQString.toStdString());
+    fileNameStrings.emplace_back(fileNameQString.toStdString());
   }
   return fileNameStrings;
 }

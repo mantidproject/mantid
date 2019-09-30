@@ -12,7 +12,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"

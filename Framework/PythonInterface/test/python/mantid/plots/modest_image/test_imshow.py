@@ -33,7 +33,7 @@ class ImshowTest(unittest.TestCase):
         for p in props:
             v1 = obj1.__getattribute__('get_%s' % p)()
             v2 = obj2.__getattribute__('get_%s' % p)()
-            self.assertEquals(v1, v2)
+            self.assertEqual(v1, v2)
 
     def check_axes_props(self, ax1, ax2):
         props = ['aspect']

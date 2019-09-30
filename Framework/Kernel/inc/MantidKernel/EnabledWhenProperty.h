@@ -29,20 +29,20 @@ declareProperty("PropA", 123);
 - Add a call like this:
 
 setPropertySettings("PropA",
-make_unique<EnabledWhenProperty>("OtherProperty",
+std::make_unique<EnabledWhenProperty>("OtherProperty",
 IS_EQUAL_TO, "2000");
 
 - This will make the property "PropA" show as enabled when
 "OtherProperty"'s value is equal to "2000". Similarly, you can use:
 
 setPropertySettings("PropA",
-make_unique<VisibleWhenProperty>("OtherProperty",
+std::make_unique<VisibleWhenProperty>("OtherProperty",
 IS_NOT_DEFAULT);
 
 - To combine them you create objects as detailed above and combine them
 in the constructor
 setPropertySettings("PropA",
-make_unique<VisibleWhenProperty>(conditionOne, conditionTwo, AND));
+std::make_unique<VisibleWhenProperty>(conditionOne, conditionTwo, AND));
 
 - This will make the property "PropA" show as visible when "OtherProperty"
 is NOT the default value for it.

@@ -142,7 +142,7 @@ NexusDescriptor::NexusDescriptor(const std::string &filename)
 
 /**
  */
-NexusDescriptor::~NexusDescriptor() { delete m_file; }
+NexusDescriptor::~NexusDescriptor() {}
 
 /// Returns the name & type of the first entry in the file
 const std::pair<std::string, std::string> &
@@ -220,7 +220,7 @@ void NexusDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
   m_extension = "." + Poco::Path(filename).getExtension();
 
-  m_file = new ::NeXus::File(this->filename());
+  m_file = std::make_unique<::NeXus::File>(this->filename());
 
   m_file->openPath("/");
   m_rootAttrs.clear();

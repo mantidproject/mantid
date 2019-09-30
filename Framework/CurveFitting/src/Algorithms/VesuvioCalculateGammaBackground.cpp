@@ -32,6 +32,7 @@ using namespace Kernel;
 using namespace CurveFitting;
 using namespace CurveFitting::Functions;
 using namespace std;
+using std::placeholders::_1;
 
 // Subscription
 DECLARE_ALGORITHM(VesuvioCalculateGammaBackground)
@@ -87,26 +88,27 @@ void VesuvioCalculateGammaBackground::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>(false); // point data
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace containing TOF data");
 
   declareProperty(
-      make_unique<API::FunctionProperty>("ComptonFunction", Direction::InOut),
+      std::make_unique<API::FunctionProperty>("ComptonFunction",
+                                              Direction::InOut),
       "Function that is able to compute the mass spectrum for the input data"
       "This will usually be the output from the Fitting");
 
-  declareProperty(make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+  declareProperty(std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
                   "Indices of the spectra to include in the correction. If "
                   "provided, the output only include these spectra\n"
                   "(Default: all spectra from input)");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("BackgroundWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("BackgroundWorkspace",
+                                                        "", Direction::Output),
                   "A new workspace containing the calculated background.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
-                                       Direction::Output),
+      std::make_unique<WorkspaceProperty<>>("CorrectedWorkspace", "",
+                                            Direction::Output),
       "A new workspace containing the calculated background subtracted from "
       "the input.");
 }
@@ -115,10 +117,10 @@ void VesuvioCalculateGammaBackground::exec() {
   retrieveInputs();
   createOutputWorkspaces();
 
-  const int64_t nhist = static_cast<int64_t>(m_indices.size());
+  const auto nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, nreports);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(
       Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))
@@ -254,7 +256,7 @@ void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
   // Correct for distance to the detector: 0.5/l2^2
   const double detDistCorr = 0.5 / detPar.l2 / detPar.l2;
   std::transform(ctdet.begin(), ctdet.end(), ctdet.begin(),
-                 std::bind2nd(std::multiplies<double>(), detDistCorr));
+                 std::bind(std::multiplies<double>(), _1, detDistCorr));
 }
 
 /**
@@ -301,7 +303,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
   if (reversed) {
     // The reversed ones should be (C0 - C1)
     std::transform(ctfoil.begin(), ctfoil.end(), ctfoil.begin(),
-                   std::bind2nd(std::multiplies<double>(), -1.0));
+                   std::bind(std::multiplies<double>(), _1, -1.0));
   }
 }
 
@@ -397,7 +399,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
   // Assumes the input is in seconds, transform it temporarily
   auto &tseconds = m_backgroundWS->mutableX(wsIndex);
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
-                 std::bind2nd(std::multiplies<double>(), 1e-6));
+                 std::bind(std::multiplies<double>(), _1, 1e-6));
 
   // retrieveInputs ensures we will get a composite function and that each
   // member is a ComptonProfile
@@ -428,7 +430,7 @@ std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
   }
   // Put X back microseconds
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
-                 std::bind2nd(std::multiplies<double>(), 1e6));
+                 std::bind(std::multiplies<double>(), _1, 1e6));
   return correctedVals;
 }
 

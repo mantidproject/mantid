@@ -39,13 +39,13 @@ public:
 
     TS_ASSERT_THROWS(
         TestableSymmetryOperationSymbolParser::parseIdentifier("1/4, x, -z-x"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         TestableSymmetryOperationSymbolParser::parseIdentifier("x, -z-x"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         TestableSymmetryOperationSymbolParser::parseIdentifier("y, x, -z-x, z"),
-        std::runtime_error);
+        const std::runtime_error &);
   }
 
   void testGetNormalizedIdentifier() {

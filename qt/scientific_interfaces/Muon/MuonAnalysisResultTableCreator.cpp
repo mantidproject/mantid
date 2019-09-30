@@ -234,11 +234,14 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
   if (const auto &wsGroup =
           AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
               "MuonSimulFit_" + label)) {
-    for (const auto &name : wsGroup->getNames()) {
-      if (name.find("_Parameters") != std::string::npos) {
-        return boost::dynamic_pointer_cast<ITableWorkspace>(
-            wsGroup->getItem(name));
-      }
+    const auto wsNames = wsGroup->getNames();
+    const auto found =
+        std::find_if(wsNames.cbegin(), wsNames.cend(), [](const auto &name) {
+          return name.find("_Parameters") != std::string::npos;
+        });
+    if (found != wsNames.cend()) {
+      return boost::dynamic_pointer_cast<ITableWorkspace>(
+          wsGroup->getItem(*found));
     }
     throw std::runtime_error("Could not retrieve parameters table for label " +
                              label);
@@ -255,8 +258,9 @@ MuonAnalysisResultTableCreator::tableFromLabel(const std::string &label) const {
  */
 void MuonAnalysisResultTableCreator::checkSameFitModel() const {
   std::vector<ITableWorkspace_sptr> paramTables;
+  paramTables.reserve(static_cast<size_t>(m_items.size()));
   for (const auto &item : m_items) {
-    paramTables.push_back(getFitParametersTable(item));
+    paramTables.emplace_back(getFitParametersTable(item));
   }
   if (!haveSameParameters(paramTables)) {
     throw std::runtime_error(
@@ -492,24 +496,27 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
 
     // Write log values in each column
     for (int i = 0; i < m_logs.size(); ++i) {
-      Mantid::API::Column_sptr col = table->getColumn(i);
+      // need to add one to the column number
+      // as the first (0th) one is done elsewhere
+      Mantid::API::Column_sptr col = table->getColumn(i + 1);
+      auto col_type = col->type();
+
       const auto &log = m_logs[i];
       const QVariant &val = logValues[log];
+
       QString valueToWrite;
       // Special case: if log is time in sec, subtract the first start time
       if (log.endsWith(" (s)")) {
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
-                 !log.endsWith(" (text)")) {
+      } else if (col_type == "double") {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
 
-      if (MuonAnalysisHelper::isNumber(val.toString()) &&
-          !log.endsWith(" (text)")) {
+      if (col_type == "double") {
         row << valueToWrite.toDouble();
       } else {
         row << valueToWrite.toStdString();

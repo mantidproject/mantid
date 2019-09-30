@@ -107,36 +107,36 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
 }
 
 void IndirectFitPlotView::setPlotSpectrum(int spectrum) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_plotForm->spPlotSpectrum);
+  MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
   m_plotForm->spPlotSpectrum->setValue(spectrum);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("Background");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setMinimum(value);
 }
 
 void IndirectFitPlotView::setFitRange(double minimum, double maximum) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("FitRange");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setRange(minimum, maximum);
 }
 
 void IndirectFitPlotView::setFitRangeMinimum(double minimum) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("FitRange");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setMinimum(minimum);
 }
 
 void IndirectFitPlotView::setFitRangeMaximum(double maximum) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("FitRange");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setMaximum(maximum);
 }
 
 void IndirectFitPlotView::appendToDataSelection(const std::string &dataName) {
-  MantidQt::API::SignalBlocker<QObject> blocker(m_plotForm->cbDataSelection);
+  MantidQt::API::SignalBlocker blocker(m_plotForm->cbDataSelection);
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));
 }
 
@@ -207,19 +207,19 @@ void IndirectFitPlotView::clear() {
 
 void IndirectFitPlotView::setHWHMRange(double minimum, double maximum) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("HWHM");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setRange(minimum, maximum);
 }
 
 void IndirectFitPlotView::setHWHMMaximum(double minimum) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("HWHM");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setMaximum(minimum);
 }
 
 void IndirectFitPlotView::setHWHMMinimum(double maximum) {
   auto selector = m_plotForm->ppPlotTop->getRangeSelector("HWHM");
-  MantidQt::API::SignalBlocker<QObject> blocker(selector);
+  MantidQt::API::SignalBlocker blocker(selector);
   selector->setMinimum(maximum);
 }
 

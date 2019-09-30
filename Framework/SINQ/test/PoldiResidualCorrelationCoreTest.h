@@ -127,7 +127,7 @@ public:
     TS_ASSERT_EQUALS(core.calculateAverage(numbers), 3.5);
 
     std::vector<double> empty;
-    TS_ASSERT_THROWS(core.calculateAverage(empty), std::runtime_error);
+    TS_ASSERT_THROWS(core.calculateAverage(empty), const std::runtime_error &);
   }
 
   void testCalculateAverageDeviationFromValue() {
@@ -139,7 +139,7 @@ public:
 
     std::vector<double> empty;
     TS_ASSERT_THROWS(core.calculateAverageDeviationFromValue(empty, 3.5),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

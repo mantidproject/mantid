@@ -45,7 +45,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_cow.h"
-#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -64,8 +63,7 @@ using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
-    : m_Progress(
-          Mantid::Kernel::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
+    : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
@@ -185,11 +183,12 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
 Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
 
   Workspace2D_sptr outputWS = create2DWorkspaceBinned(nHist, nBins);
-  auto const newAxis = new NumericAxis(nHist);
-  outputWS->replaceAxis(1, newAxis);
-  newAxis->unit() = boost::make_shared<Units::Degrees>();
+  auto newAxis = std::make_unique<NumericAxis>(nHist);
+  auto newAxisRaw = newAxis.get();
+  outputWS->replaceAxis(1, std::move(newAxis));
+  newAxisRaw->unit() = boost::make_shared<Units::Degrees>();
   for (int i = 0; i < nHist; ++i) {
-    newAxis->setValue(i, i + 1);
+    newAxisRaw->setValue(i, i + 1);
   }
 
   return outputWS;
@@ -263,7 +262,7 @@ create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
 
 Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
                              const std::set<int64_t> &maskedWorkspaceIndices) {
-  const int nhist = static_cast<int>(workspace->getNumberHistograms());
+  const auto nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
     auto instrument = boost::make_shared<Instrument>();
@@ -480,12 +479,53 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   // Set the X axes
   const auto &xVals = ws->x(0);
   const size_t xSize = xVals.size();
-  auto ax0 = new NumericAxis(xSize);
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
   ax0->setUnit("dSpacing");
   for (size_t i = 0; i < xSize; i++) {
     ax0->setValue(i, xVals[i]);
   }
-  ws->replaceAxis(0, ax0);
+  ws->replaceAxis(0, std::move(ax0));
+
+  // re-assign detector IDs to the rectangular detector
+  const auto detIds = inst->getDetectorIDs();
+  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); ++wi) {
+    ws->getSpectrum(wi).clearDetectorIDs();
+    if (clearEvents)
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detIds[wi]);
+  }
+  return ws;
+}
+
+/** Create an Eventworkspace with  instrument 2.0 that contains
+ *RectangularDetector's.
+ * X axis = 100 histogrammed bins from 0.0 in steps of 1.0.
+ * 200 events per pixel.
+ *
+ * @param numBanks :: number of rectangular banks
+ * @param numPixels :: each bank will be numPixels*numPixels
+ * @param clearEvents :: if true, erase the events from list
+ * @return The EventWorkspace
+ */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceWithFullInstrument2(int numBanks, int numPixels,
+                                        bool clearEvents) {
+  Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular2(numBanks,
+                                                                numPixels);
+  EventWorkspace_sptr ws =
+      createEventWorkspace2(numBanks * numPixels * numPixels, 100);
+  ws->setInstrument(inst);
+
+  // Set the X axes
+  const auto &xVals = ws->x(0);
+  const size_t xSize = xVals.size();
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
+  ax0->setUnit("dSpacing");
+  for (size_t i = 0; i < xSize; i++) {
+    ax0->setValue(i, xVals[i]);
+  }
+  ws->replaceAxis(0, std::move(ax0));
 
   // re-assign detector IDs to the rectangular detector
   const auto detIds = inst->getDetectorIDs();
@@ -820,7 +860,7 @@ EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
   retVal->initialize(numpixels, numbins, numbins - 1);
 
   // and X-axis for references:
-  auto pAxis0 = new NumericAxis(numbins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
   HistogramData::BinEdges axis(numbins, LinearGenerator(0.0, bin_delta));
@@ -843,7 +883,7 @@ EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
     events.addDetectorID(detid_t(i));
   }
   retVal->setAllX(axis);
-  retVal->replaceAxis(0, pAxis0);
+  retVal->replaceAxis(0, std::move(pAxis0));
 
   return retVal;
 }
@@ -959,8 +999,7 @@ void addTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  auto latt =
-      Mantid::Kernel::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
+  auto latt = std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 }
 
@@ -987,22 +1026,21 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
+  auto rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
   Mantid::API::MatrixWorkspace_sptr ws =
       createGroupedWorkspace2DWithRingsAndBoxes(rHist, 10, 0.1);
-  auto pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numBins);
   for (size_t i = 0; i < numBins; i++) {
     double dE = -1.0 + static_cast<double>(i) * 0.8;
     pAxis0->setValue(i, dE);
   }
   pAxis0->setUnit("DeltaE");
-  ws->replaceAxis(0, pAxis0);
+  ws->replaceAxis(0, std::move(pAxis0));
   if (has_oriented_lattice) {
-    auto latt =
-        Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+    auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
     ws->mutableSample().setOrientedLattice(latt.release());
 
     addTSPEntry(ws->mutableRun(), "phi", 0);
@@ -1067,7 +1105,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   }
 
   // set axis, correspondent to the X-values
-  auto pAxis0 = new NumericAxis(numBins);
+  auto pAxis0 = std::make_unique<NumericAxis>(numBins);
   const auto &E_transfer = ws->x(0);
   for (size_t i = 0; i < numBins; i++) {
     double E = 0.5 * (E_transfer[i] + E_transfer[i + 1]);
@@ -1076,11 +1114,10 @@ createProcessedInelasticWS(const std::vector<double> &L2,
 
   pAxis0->setUnit("DeltaE");
 
-  ws->replaceAxis(0, pAxis0);
+  ws->replaceAxis(0, std::move(pAxis0));
 
   // define oriented lattice which requested for processed ws
-  auto latt =
-      Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
+  auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 
   ws->mutableRun().addProperty(
@@ -1178,7 +1215,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set Q ('y') axis binning
   std::vector<double> qbins{0.0, 1.0, 4.0};
   std::vector<double> qaxis;
-  const int numY =
+  const auto numY =
       static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
 
   // Initialize the workspace
@@ -1195,8 +1232,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   HistogramData::BinEdges x1{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
 
   // Create a numeric axis to replace the default vertical one
-  Axis *const verticalAxis = new NumericAxis(numY);
-  outputWS->replaceAxis(1, verticalAxis);
+  auto verticalAxis = std::make_unique<NumericAxis>(numY);
 
   // Now set the axis values
   for (int i = 0; i < numHist; ++i) {
@@ -1209,6 +1245,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set the 'y' axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   verticalAxis->title() = "|Q|";
+  outputWS->replaceAxis(1, std::move(verticalAxis));
 
   // Set the X axis title (for conversion to MD)
   outputWS->getAxis(0)->title() = "Energy transfer";
@@ -1417,7 +1454,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   Mantid::DataObjects::TableWorkspace_sptr DetPos = createTableWorkspace(ws);
-  double Ei = ws->run().getPropertyValueAsType<double>("Ei");
+  auto Ei = ws->run().getPropertyValueAsType<double>("Ei");
   processDetectorsPositions(ws, DetPos, Ei);
 
   return DetPos;

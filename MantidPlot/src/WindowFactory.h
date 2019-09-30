@@ -14,7 +14,7 @@
 #include "MantidKernel/CaseInsensitiveMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <cstring>
@@ -117,7 +117,7 @@ public:
    * @param className :: the name of the class to subscribe
    */
   template <class C> void subscribe(const std::string &className) {
-    auto instantiator = Mantid::Kernel::make_unique<
+    auto instantiator = std::make_unique<
         ProjectWindowInstantiator<C, MantidQt::API::IProjectSerialisable>>();
     subscribe(className, std::move(instantiator));
   }

@@ -30,7 +30,7 @@ public:
     maker.execute();
     TS_ASSERT(maker.isExecuted());
 
-    std::unique_ptr<IFitFunction> fun = std::unique_ptr<IFitFunction>(
+    auto fun = std::unique_ptr<IFitFunction>(
         FunctionFactory::Instance().createInitialized(
             "name=UserFunctionMD,Formula=h*exp(-a*(x-c)^2),Workspace="
             "CreateMDFitWorkspaceTest_ws"));

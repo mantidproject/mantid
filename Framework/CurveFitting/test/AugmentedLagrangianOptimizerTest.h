@@ -48,12 +48,12 @@ public:
     AugmentedLagrangianOptimizer::ObjFunction userFunc;
     TS_ASSERT_THROWS(
         AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     equality = DblMatrix(1, nparams - 1); // cols < number parameters
     TS_ASSERT_THROWS(
         AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void
@@ -68,12 +68,12 @@ public:
     AugmentedLagrangianOptimizer::ObjFunction userFunc;
     TS_ASSERT_THROWS(
         AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        std::invalid_argument);
+        const std::invalid_argument &);
 
     inequality = DblMatrix(1, nparams - 1); // cols < number parameters
     TS_ASSERT_THROWS(
         AugmentedLagrangianOptimizer(nparams, userFunc, equality, inequality),
-        std::invalid_argument);
+        const std::invalid_argument &);
   }
 
   void test_minimizer_calls_user_function() {

@@ -24,7 +24,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void IndexPeaks::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -32,13 +32,13 @@ void IndexPeaks::init() {
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance", 0.15, mustBePositive,
-                                             Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "Tolerance", 0.15, mustBePositive, Direction::Input),
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
-                                             mustBePositive, Direction::Input),
+      std::make_unique<PropertyWithValue<double>>(
+          "ToleranceForSatellite", 0.15, mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
   this->declareProperty("RoundHKLs", true,
@@ -47,34 +47,34 @@ void IndexPeaks::init() {
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "Gets set with the number of indexed peaks.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "Gets set with the number of indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "Gets set with the average HKL indexing error.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
                             "TotalNumIndexed", 0, Direction::Output),
                         "Gets set with the number of Total indexed peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("MainNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "MainNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
-  this->declareProperty(make_unique<PropertyWithValue<int>>("SateNumIndexed", 0,
-                                                            Direction::Output),
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "SateNumIndexed", 0, Direction::Output),
                         "Gets set with the number of indexed main peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("MainError", 0.0,
-                                             Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("MainError", 0.0,
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Main Peaks.");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
-                                             Direction::Output),
+      std::make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
+                                                  Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
 }
 
@@ -107,7 +107,7 @@ void IndexPeaks::exec() {
   double average_sate_error;
   double tolerance = this->getProperty("Tolerance");
 
-  if (commonUB) {
+  if (commonUB && o_lattice.getModVec(0) == V3D(0, 0, 0)) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
@@ -204,8 +204,6 @@ void IndexPeaks::exec() {
         iteration++;
       }
 
-      g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
-
       if (o_lattice.getMaxOrder() ==
           0) // If data not modulated, recalculate fractional HKL
       {
@@ -236,6 +234,7 @@ void IndexPeaks::exec() {
           }
         }
       } else {
+        g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
         int ModDim = 0;
         int main_indexed = 0;
         int sate_indexed = 0;
@@ -267,13 +266,12 @@ void IndexPeaks::exec() {
             miller_index_counter++;
 
             auto hkl = peak.getHKL();
-            bool suc_indexed = false;
+            bool peak_main_indexed{false}, peak_sat_indexed{false};
 
             if (IndexingUtils::ValidIndex(hkl, tolerance)) {
               peak.setIntHKL(hkl);
               peak.setIntMNP(V3D(0, 0, 0));
-              suc_indexed = true;
-              main_indexed++;
+              peak_main_indexed = true;
               main_error += hkl.hklError();
             } else if (!crossTerm) {
               if (ModDim > 0) {
@@ -285,8 +283,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -300,8 +297,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(0, order, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -315,8 +311,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(0, 0, order));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -331,8 +326,7 @@ void IndexPeaks::exec() {
                   if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                     peak.setIntHKL(hkl1);
                     peak.setIntMNP(V3D(order, 0, 0));
-                    suc_indexed = true;
-                    sate_indexed++;
+                    peak_sat_indexed = true;
                     sate_error += hkl1.hklError();
                   }
                 }
@@ -347,8 +341,7 @@ void IndexPeaks::exec() {
                     if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                       peak.setIntHKL(hkl1);
                       peak.setIntMNP(V3D(m, n, 0));
-                      suc_indexed = true;
-                      sate_indexed++;
+                      peak_sat_indexed = true;
                       sate_error += hkl1.hklError();
                     }
                   }
@@ -364,14 +357,20 @@ void IndexPeaks::exec() {
                       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                         peak.setIntHKL(hkl1);
                         peak.setIntMNP(V3D(m, n, p));
-                        suc_indexed = true;
-                        sate_indexed++;
+                        peak_sat_indexed = true;
                         sate_error += hkl1.hklError();
                       }
                     }
               }
             }
-            if (!suc_indexed) {
+            if (peak_main_indexed) {
+              main_indexed++;
+              peak.setIntHKL(V3D(0, 0, 0));
+              peak.setIntMNP(V3D(0, 0, 0));
+            } else if (peak_sat_indexed)
+              sate_indexed++;
+            else {
+              peak.setHKL(V3D(0, 0, 0));
               peak.setIntHKL(V3D(0, 0, 0));
               peak.setIntMNP(V3D(0, 0, 0));
             }
@@ -414,7 +413,7 @@ void IndexPeaks::exec() {
       average_sate_error = 0;
   }
 
-  if (o_lattice.getMaxOrder() == 0 || commonUB) {
+  if (o_lattice.getMaxOrder() == 0) {
     // tell the user how many were indexed overall and the overall average error
     g_log.notice() << "ALL Runs: indexed " << total_indexed << " Peaks out of "
                    << n_peaks << " with tolerance of " << tolerance << '\n';

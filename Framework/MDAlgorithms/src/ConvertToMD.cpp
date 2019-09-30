@@ -49,19 +49,19 @@ DECLARE_ALGORITHM(ConvertToMD)
 
 void ConvertToMD::init() {
   ConvertToMDParent::init();
-  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output *MDEventWorkspace*.");
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("OverwriteExisting", true,
+                                                Direction::Input),
       "By default  (\"1\"), existing Output Workspace will be replaced. Select "
       "false (\"0\") if you want to add new events to the workspace, which "
       "already exist. "
       "\nChoosing \"0\" can be very inefficient for file-based workspaces");
 
-  declareProperty(make_unique<ArrayProperty<double>>("MinValues"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("MinValues"),
                   "It has to be N comma separated values, where N is the "
                   "number of dimensions of the target workspace. Values "
                   "smaller then specified here will not be added to "
@@ -73,7 +73,7 @@ void ConvertToMD::init() {
   // TODO:    " If a minimal target workspace range is higher then the one
   // specified here, the target workspace range will be used instead " );
 
-  declareProperty(make_unique<ArrayProperty<double>>("MaxValues"),
+  declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues"),
                   "A list of the same size and the same units as MinValues "
                   "list. Values higher or equal to the specified by "
                   "this list will be ignored");
@@ -88,8 +88,8 @@ void ConvertToMD::init() {
   mustBeMoreThan1->setLower(1);
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
-                                          mustBeMoreThan1),
+      std::make_unique<PropertyWithValue<int>>("MinRecursionDepth", 1,
+                                               mustBeMoreThan1),
       "Optional. If specified, then all the boxes will be split to this "
       "minimum recursion depth. 0 = no splitting, "
       "1 = one level of splitting, etc. \n Be careful using this since it can "
@@ -101,17 +101,17 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-      make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
-                                           Direction::Input),
+      std::make_unique<PropertyWithValue<bool>>("TopLevelSplitting", false,
+                                                Direction::Input),
       "This option causes a split of the top level, i.e. level0, of 50 for the "
       "first four dimensions.");
 
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
-                                ".nxs"),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                     ".nxs"),
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
-  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+  setPropertySettings("Filename", std::make_unique<EnabledWhenProperty>(
                                       "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
@@ -414,15 +414,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     }
   }
 
-  // Replacement for SpectraDetectorMap::createIDGroupsMap using the ISpectrum
-  // objects instead
-  auto mapping = boost::make_shared<det2group_map>();
-  for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
-    if (!dets.empty())
-      mapping->emplace(*dets.begin(), dets);
-  }
-
   // The last experiment info should always be the one that refers
   // to latest converting workspace. All others should have had this
   // information set already
@@ -431,7 +422,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     ExperimentInfo_sptr expt =
         mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
-    expt->cacheDetectorGroupings(*mapping);
   }
 }
 

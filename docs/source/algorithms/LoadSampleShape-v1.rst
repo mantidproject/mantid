@@ -9,7 +9,7 @@
 Description
 -----------
 
-Loads a shape into the sample of a workspace.
+Loads a shape into the sample of a workspace. The Sample will be rotated according to the rotation of the goniometer on the workspace, if there is one. The first angle used in `SetGoniometer` will be applied last.
 
 The following types of input file are supported:
 

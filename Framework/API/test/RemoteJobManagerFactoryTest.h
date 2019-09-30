@@ -88,12 +88,12 @@ public:
         "create() with inexistent and unsubscribed class should "
         "throw",
         jobManager = RemoteJobManagerFactory::Instance().create("Inexistent"),
-        std::runtime_error);
+        const std::runtime_error &);
 
     TSM_ASSERT_THROWS("create() with unsubscribed class should throw",
                       jobManager =
                           RemoteJobManagerFactory::Instance().create("FakeJM"),
-                      std::runtime_error);
+                      const std::runtime_error &);
   }
 
   // minimal positive test
@@ -104,7 +104,7 @@ public:
         "create() with class name that is not defined in facilities should "
         "throw",
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create("FakeJM"),
-        Mantid::Kernel::Exception::NotFoundError);
+        const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_exists() {
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_THROWS(
         Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
             "FakeJM"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
@@ -147,11 +147,11 @@ public:
     // these are not in the facilities file
     TS_ASSERT_THROWS(
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create("FakeJM"),
-        std::runtime_error);
+        const std::runtime_error &);
     TS_ASSERT_THROWS(
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create(
             "FakeJMDeriv"),
-        std::runtime_error);
+        const std::runtime_error &);
 
     keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
     size_t after = keys.size();
@@ -184,7 +184,7 @@ public:
         "create() with " + FermiName + "in a facility other than " + SNSFac +
             " should fail",
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create(FermiName),
-        Mantid::Kernel::Exception::NotFoundError);
+        const Mantid::Kernel::Exception::NotFoundError &);
 
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
@@ -208,7 +208,7 @@ public:
             " should throw because its job manager is not declared",
         Mantid::API::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
-        Mantid::Kernel::Exception::NotFoundError);
+        const Mantid::Kernel::Exception::NotFoundError &);
 
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());

@@ -4102,8 +4102,7 @@ void MantidUI::plotContour(bool accepted, int plotIndex,
                            const std::set<double> &customLogValues,
                            const QList<QString> &workspaceNames) {
   auto workspaces = getWorkspacesFromAds(workspaceNames);
-  auto plotter =
-      Mantid::Kernel::make_unique<MantidSurfaceContourPlotGenerator>(this);
+  auto plotter = std::make_unique<MantidSurfaceContourPlotGenerator>(this);
   plotter->plotContour(accepted, plotIndex, axisName, logName, customLogValues,
                        workspaces);
 }
@@ -4113,8 +4112,7 @@ void MantidUI::plotSurface(bool accepted, int plotIndex,
                            const std::set<double> &customLogValues,
                            const QList<QString> &workspaceNames) {
   auto workspaces = getWorkspacesFromAds(workspaceNames);
-  auto plotter =
-      Mantid::Kernel::make_unique<MantidSurfaceContourPlotGenerator>(this);
+  auto plotter = std::make_unique<MantidSurfaceContourPlotGenerator>(this);
   plotter->plotSurface(accepted, plotIndex, axisName, logName, customLogValues,
                        workspaces);
 }

@@ -45,7 +45,7 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
 
   m_workspaceName = map[QString("workspaceName")].toString();
 
-  const auto surfaceType = map[QString("surfaceType")].toString();
+  const auto surfaceType = map[QString("surfaceType")].toInt();
   obj.setSurfaceType(surfaceType);
 
   const auto currentTab = map[QString("currentTab")].toInt();
@@ -185,6 +185,7 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
 
     const auto spectraList = itemMap["spectra"].toList();
     std::vector<size_t> spectra;
+    spectra.reserve(static_cast<size_t>(spectraList.size()));
     for (const auto &spec : spectraList) {
       spectra.emplace_back(spec.value<size_t>());
     }

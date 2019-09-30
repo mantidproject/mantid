@@ -66,8 +66,8 @@ class WishDiffuseScattering(systemtesting.MantidSystemTest):
 
         #Quick sanity checks. No comparison with a saved workspace because SliceMD is too expensive compared to BinMD.
         result = mtd['test_rebin']
-        self.assertTrue(result.getNumDims() == 3)
-        self.assertTrue(result.getNPoints() == 8000000)
+        self.assertEqual(result.getNumDims(),  3)
+        self.assertEqual(result.getNPoints(),  8000000)
 
         return True
 

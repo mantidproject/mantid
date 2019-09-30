@@ -51,8 +51,6 @@ public slots:
   void handleErrorsEnabled(bool enabled);
   /// When number of datasets to fit changes, update function browser
   void updateNumberOfDatasets(int nDatasets);
-  /// When "edit local parameter" button is clicked, launch dialog
-  void editLocalParameterClicked(const QString &parName);
   /// When user changes dataset index, update function browser
   void handleDatasetIndexChanged(int index);
 

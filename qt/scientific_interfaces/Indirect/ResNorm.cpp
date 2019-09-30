@@ -16,6 +16,7 @@
 using namespace Mantid::API;
 
 namespace {
+Mantid::Kernel::Logger g_log("ResNorm");
 
 MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -79,6 +80,23 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsVanadium->isOptional(true);
+  m_uiForm.dsResolution->isOptional(true);
+}
+
+void ResNorm::setFileExtensionsByName(bool filter) {
+  QStringList const noSuffixes{""};
+  auto const tabName("ResNorm");
+  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes(tabName)
+                                            : getExtensions(tabName));
+  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes(tabName)
+                                            : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName)
+                                              : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName)
+                                              : noSuffixes);
 }
 
 void ResNorm::setup() {}
@@ -141,6 +159,8 @@ bool ResNorm::validate() {
  * Run the ResNorm v2 algorithm.
  */
 void ResNorm::run() {
+  m_uiForm.ppPlot->watchADS(false);
+
   auto const vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
 
@@ -176,6 +196,8 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     previewSpecChanged(m_previewSpec);
     // Copy and add sample logs to result workspaces
     processLogs();
+
+    m_uiForm.ppPlot->watchADS(true);
   } else {
     setPlotResultEnabled(false);
     setSaveResultEnabled(false);
@@ -276,15 +298,23 @@ void ResNorm::loadSettings(const QSettings &settings) {
  */
 void ResNorm::handleVanadiumInputReady(const QString &filename) {
   // Plot the vanadium
-  m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
+  try {
+    if (!m_uiForm.ppPlot->hasCurve("Resolution"))
+      m_uiForm.ppPlot->clear();
+
+    m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+    return;
+  }
 
   QPair<double, double> res;
-  QPair<double, double> const range =
-      m_uiForm.ppPlot->getCurveRange("Vanadium");
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
   auto const vanWs = getADSMatrixWorkspace(filename.toStdString());
-  m_uiForm.spPreviewSpectrum->setMaximum(
-      static_cast<int>(vanWs->getNumberHistograms()) - 1);
+  if (vanWs)
+    m_uiForm.spPreviewSpectrum->setMaximum(
+        static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
@@ -316,8 +346,14 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
  * @param filename Name of the workspace to plot
  */
 void ResNorm::handleResolutionInputReady(const QString &filename) {
-  // Plot the resolution
-  m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
+  try {
+    if (!m_uiForm.ppPlot->hasCurve("Vanadium"))
+      m_uiForm.ppPlot->clear();
+
+    m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
+  } catch (std::exception const &ex) {
+    g_log.warning(ex.what());
+  }
 }
 
 /**
@@ -326,7 +362,11 @@ void ResNorm::handleResolutionInputReady(const QString &filename) {
  * @param min :: The new value of the lower guide
  */
 void ResNorm::minValueChanged(double min) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMin"], min);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -335,7 +375,11 @@ void ResNorm::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void ResNorm::maxValueChanged(double max) {
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
   m_dblManager->setValue(m_properties["EMax"], max);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -345,16 +389,21 @@ void ResNorm::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void ResNorm::updateProperties(QtProperty *prop, double val) {
-  UNUSED_ARG(val);
-
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
-  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
-    auto bounds = qMakePair(getDoubleManagerProperty("EMin"),
-                            getDoubleManagerProperty("EMax"));
-    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     bounds);
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateProperties(QtProperty *, double)));
+
+  if (prop == m_properties["EMin"]) {
+    setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
+  } else if (prop == m_properties["EMax"]) {
+    setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"],
+                        eRangeSelector, val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
 }
 
 /**
@@ -365,10 +414,19 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
 void ResNorm::previewSpecChanged(int value) {
   m_previewSpec = value;
 
+  m_uiForm.ppPlot->clear();
+
   // Update vanadium plot
   if (m_uiForm.dsVanadium->isValid())
-    m_uiForm.ppPlot->addSpectrum(
-        "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+    try {
+      m_uiForm.ppPlot->addSpectrum(
+          "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+      m_uiForm.ppPlot->addSpectrum("Resolution",
+                                   m_uiForm.dsResolution->getCurrentDataName(),
+                                   0, Qt::blue);
+    } catch (std::exception const &ex) {
+      g_log.warning(ex.what());
+    }
 
   // Update fit plot
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
@@ -388,7 +446,11 @@ void ResNorm::previewSpecChanged(int value) {
 
       fit->mutableY(0) /= scaleFactors->cell<double>(m_previewSpec);
 
-      m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::green);
+      try {
+        m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::green);
+      } catch (std::exception const &ex) {
+        g_log.warning(ex.what());
+      }
 
       AnalysisDataService::Instance().addOrReplace(
           "__" + fitWsGroupName + "_scaled", fit);
@@ -402,24 +464,26 @@ void ResNorm::previewSpecChanged(int value) {
 
 void ResNorm::plotCurrentPreview() {
 
-  QStringList plotWorkspaces;
+  std::vector<std::string> plotWorkspaces;
   std::vector<int> plotIndices;
 
   if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
-    plotWorkspaces << m_uiForm.dsVanadium->getCurrentDataName();
+    plotWorkspaces.emplace_back(
+        m_uiForm.dsVanadium->getCurrentDataName().toStdString());
     plotIndices.push_back(m_previewSpec);
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
-    plotWorkspaces << m_uiForm.dsResolution->getCurrentDataName();
+    plotWorkspaces.emplace_back(
+        m_uiForm.dsResolution->getCurrentDataName().toStdString());
     plotIndices.push_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
     std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
 
-    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName + "_scaled");
+    plotWorkspaces.emplace_back("__" + fitWsGroupName + "_scaled");
     plotIndices.push_back(0);
   }
-  plotMultipleSpectra(plotWorkspaces, plotIndices);
+  m_plotter->plotCorrespondingSpectra(plotWorkspaces, plotIndices);
 }
 
 void ResNorm::runClicked() {
@@ -454,10 +518,9 @@ void ResNorm::plotClicked() {
 
   QString const plotOptions = m_uiForm.cbPlot->currentText();
   if (plotOptions == "Intensity" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Intensity", "0");
   if (plotOptions == "Stretch" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
-
+    m_plotter->plotSpectra(m_pythonExportWsName + "_Stretch", "0");
   setPlotResultIsPlotting(false);
 }
 

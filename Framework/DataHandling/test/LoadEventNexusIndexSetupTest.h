@@ -73,27 +73,27 @@ public:
   void test_makeIndexInfo_min_out_of_range() {
     for (const auto min : {0, 3, 13}) {
       LoadEventNexusIndexSetup indexSetup(m_ws, min, EMPTY_INT(), {});
-      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), const std::out_of_range &);
     }
   }
 
   void test_makeIndexInfo_max_out_of_range() {
     for (const auto max : {0, 3, 13}) {
       LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), max, {});
-      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), const std::out_of_range &);
     }
   }
 
   void test_makeIndexInfo_range_out_of_range() {
     for (const auto i : {0, 3, 13}) {
       LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {i});
-      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), const std::out_of_range &);
     }
   }
 
   void test_makeIndexInfo_range_includes_monitor() {
     LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {666});
-    TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+    TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), const std::out_of_range &);
   }
 
   void test_makeIndexInfo_min() {
@@ -335,7 +335,7 @@ public:
     auto spec = {1};
     auto udet = {666};
     TS_ASSERT_THROWS(indexSetup.makeIndexInfo({spec, udet}, false),
-                     std::out_of_range);
+                     const std::out_of_range &);
   }
 
   void test_makeIndexInfo_from_isis_spec_udet_monitors() {

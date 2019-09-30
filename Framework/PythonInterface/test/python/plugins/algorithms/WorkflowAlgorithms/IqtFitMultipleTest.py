@@ -43,102 +43,102 @@ class IqtFitMultipleTest(unittest.TestCase):
         # Check length of rows and columns
         rows = tableWS.rowCount()
         columns = tableWS.columnCount()
-        self.assertEquals(rows, 17)
-        self.assertEquals(columns, 11)
+        self.assertEqual(rows, 17)
+        self.assertEqual(columns, 11)
 
         # Check some column names
         column_names = tableWS.getColumnNames()
-        self.assertEquals('axis-1', column_names[0])
-        self.assertEquals('f0.A0', column_names[1])
-        self.assertEquals('f0.A0_Err', column_names[2])
+        self.assertEqual('axis-1', column_names[0])
+        self.assertEqual('f0.A0', column_names[1])
+        self.assertEqual('f0.A0_Err', column_names[2])
 
     def _validate_matrix_shape(self, matrixWS):
         # Check no. bins and no. hists
         nbins = matrixWS.blocksize()
         nhists = matrixWS.getNumberHistograms()
-        self.assertEquals(nbins, 17)
-        self.assertEquals(nhists, 4)
+        self.assertEqual(nbins, 17)
+        self.assertEqual(nhists, 4)
 
         # Check histogram names
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
-        self.assertEquals('f0.A0',text_axis.label(0))
-        self.assertEquals('f1.Height',text_axis.label(1))
-        self.assertEquals('f1.Lifetime',text_axis.label(2))
-        self.assertEquals('f1.Stretching',text_axis.label(3))
+        self.assertEqual('f0.A0',text_axis.label(0))
+        self.assertEqual('f1.Height',text_axis.label(1))
+        self.assertEqual('f1.Lifetime',text_axis.label(2))
+        self.assertEqual('f1.Stretching',text_axis.label(3))
 
         # Check bin units
-        self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
+        self.assertEqual('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
 
     def _validate_group_shape(self, groupWS):
         # Check number of workspaces and size
         nitems = groupWS.getNumberOfEntries()
-        self.assertEquals(nitems, 17)
+        self.assertEqual(nitems, 17)
         sub_ws = groupWS.getItem(0)
         nbins = sub_ws.blocksize()
         nhists = sub_ws.getNumberHistograms()
-        self.assertEquals(nbins, 49)
-        self.assertEquals(nhists, 3)
+        self.assertEqual(nbins, 49)
+        self.assertEqual(nhists, 3)
 
         # Check histogram names
         text_axis = sub_ws.getAxis(1)
         self.assertTrue(text_axis.isText())
-        self.assertEquals('Data',text_axis.label(0))
-        self.assertEquals('Calc',text_axis.label(1))
-        self.assertEquals('Diff',text_axis.label(2))
+        self.assertEqual('Data',text_axis.label(0))
+        self.assertEqual('Calc',text_axis.label(1))
+        self.assertEqual('Diff',text_axis.label(2))
 
         # Check bin units
-        self.assertEquals('ns', str(sub_ws.getAxis(0).getUnit().symbol()))
+        self.assertEqual('ns', str(sub_ws.getAxis(0).getUnit().symbol()))
 
 
     def _validate_table_values(self, tableWS):
         # Check column data
         column = tableWS.column(0)
-        self.assertEquals(round(column[0], 6), 0.483619)
-        self.assertEquals(round(column[1], 6), 0.607871)
-        self.assertEquals(round(column[-1], 5), 1.84519)
+        self.assertEqual(round(column[0], 6), 0.483619)
+        self.assertEqual(round(column[1], 6), 0.607871)
+        self.assertEqual(round(column[-1], 5), 1.84519)
 
         # Check row data
         row = tableWS.row(0)
-        self.assertEquals(round(row['axis-1'], 6),  0.483619)
-        self.assertEquals(round(row['f1.Height'], 6), 0.979517)
-        self.assertEquals(round(row['f1.Lifetime'], 6), 0.024672)
+        self.assertEqual(round(row['axis-1'], 6),  0.483619)
+        self.assertEqual(round(row['f1.Height'], 6), 0.979517)
+        self.assertEqual(round(row['f1.Lifetime'], 6), 0.024672)
 
     def _validate_matrix_values(self, matrixWS):
         # Check f0.A0
         a0 = matrixWS.readY(0)
-        self.assertEquals(round(a0[0], 7), 0.0204827)
-        self.assertEquals(round(a0[-1],7), 0.0229125)
+        self.assertEqual(round(a0[0], 7), 0.0204827)
+        self.assertEqual(round(a0[-1],7), 0.0229125)
 
         # Check f1.height
         height = matrixWS.readY(1)
-        self.assertEquals(round(height[0], 6), 0.979517)
-        self.assertEquals(round(height[-1],6), 0.977088)
+        self.assertEqual(round(height[0], 6), 0.979517)
+        self.assertEqual(round(height[-1],6), 0.977088)
 
         # Check f1.lifetime
         lifetime = matrixWS.readY(2)
-        self.assertEquals(round(lifetime[0], 6), 0.024672)
-        self.assertEquals(round(lifetime[-1],8), 0.00253487)
+        self.assertEqual(round(lifetime[0], 6), 0.024672)
+        self.assertEqual(round(lifetime[-1],8), 0.00253487)
 
         # Check f1.stretching
         stretching = matrixWS.readY(3)
-        self.assertEquals(round(stretching[0], 6), 0.781177)
-        self.assertEquals(round(stretching[-1],6), 0.781177)
+        self.assertEqual(round(stretching[0], 6), 0.781177)
+        self.assertEqual(round(stretching[-1],6), 0.781177)
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)
         # Check Data
         data = sub_ws.readY(0)
-        self.assertEquals(round(data[0], 5), 1)
-        self.assertEquals(round(data[-1],7),0.0450769)
+        self.assertEqual(round(data[0], 5), 1)
+        self.assertEqual(round(data[-1],7),0.0450769)
         # Check Calc
         calc = sub_ws.readY(1)
-        self.assertEquals(round(calc[0], 5), 1)
-        self.assertEquals(round(calc[-1],6),0.026465)
+        self.assertEqual(round(calc[0], 5), 1)
+        self.assertEqual(round(calc[-1],6),0.026465)
         # Check Diff
         diff = sub_ws.readY(2)
-        self.assertEquals(round(diff[0], 19), -5.31797e-14)
-        self.assertEquals(round(diff[-1],6), 0.018612)
+        self.assertEqual(round(diff[0], 19), -5.31797e-14)
+        self.assertEqual(round(diff[-1],6), 0.018612)
 
     def _validate_sample_log_values(self, matrixWS):
         run = matrixWS.getRun()

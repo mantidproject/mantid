@@ -49,19 +49,20 @@ from HFIR_4Circle_Reduction.hfctables import MatrixTable
 from mantid.kernel import Logger
 from qtpy.QtWidgets import (QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog)  # noqa
 from qtpy.QtCore import (QSettings)  # noqa
-from qtpy import QtCore  # noqa
+from qtpy import PYQT4  # noqa
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
     Logger("HFIR_4Circle_Reduction").information('Using legacy ui importer')
     from mantidplot import load_ui
 from qtpy.QtWidgets import (QVBoxLayout)
-try:
-    from mantidqtpython import MantidQt
-except ImportError as e:
-    NO_SCROLL = True
-else:
-    NO_SCROLL = False
+SCROLL_AVAILABLE = False
+if PYQT4:
+    try:
+        from mantidqtpython import MantidQt
+        SCROLL_AVAILABLE = True
+    except ImportError as e:
+        SCROLL_AVAILABLE = False
 if six.PY3:
     unicode = str
 
@@ -105,7 +106,7 @@ class MainWindow(QMainWindow):
         self._general_1d_plot_window = None
 
         # Make UI scrollable
-        if NO_SCROLL is False:
+        if SCROLL_AVAILABLE:
             self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
             self._scrollbars.setEnabled(True)  # Must follow after setupUi(self)!
 

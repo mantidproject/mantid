@@ -189,8 +189,9 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
 
   const auto subworkspaces = subdivideWidthWorkspace(workspace, widthSpectra);
   const auto hwhmWorkspace = appendAll(subworkspaces, hwhmName);
-  const auto axis = workspace->getAxis(1)->clone(hwhmWorkspace.get());
-  hwhmWorkspace->replaceAxis(1, dynamic_cast<TextAxis *>(axis));
+  auto axis = dynamic_cast<TextAxis *>(
+      workspace->getAxis(1)->clone(hwhmWorkspace.get()));
+  hwhmWorkspace->replaceAxis(1, std::unique_ptr<TextAxis>(axis));
 
   deleteTemporaryWorkspaces(subworkspaces);
 
@@ -249,16 +250,16 @@ JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace,
 
 std::unordered_map<std::string, JumpFitParameters>::const_iterator
 JumpFitModel::findJumpFitParameters(std::size_t dataIndex) const {
-  const auto workspace = getWorkspace(dataIndex);
-  if (!workspace)
+  const auto ws = getWorkspace(dataIndex);
+  if (!ws)
     return m_jumpParameters.end();
-  return m_jumpParameters.find(workspace->getName());
+  return m_jumpParameters.find(ws->getName());
 }
 
 std::string JumpFitModel::getFitParameterName(std::size_t dataIndex,
                                               std::size_t spectrum) const {
-  const auto workspace = getWorkspace(dataIndex);
-  const auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
+  const auto ws = getWorkspace(dataIndex);
+  const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
   return axis->label(spectrum);
 }
 
@@ -362,6 +363,8 @@ std::string JumpFitModel::singleFitOutputName(std::size_t index,
 }
 
 std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
+
+std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
 
 std::string JumpFitModel::constructOutputName() const {
   auto const name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);

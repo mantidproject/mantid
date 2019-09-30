@@ -39,6 +39,7 @@ public:
   IndexProperty *clone() const override;
 
   using Kernel::ArrayProperty<int64_t>::operator=;
+  using Kernel::ArrayProperty<int64_t>::operator const std::vector<int64_t> &;
 
   bool isDefault() const override;
   std::string isValid() const override;

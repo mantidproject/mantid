@@ -34,16 +34,16 @@ TOFSANSResolution::TOFSANSResolution()
 
 void TOFSANSResolution::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>(
+      std::make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::InOut,
           boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "ReducedWorkspace", "", Direction::Input, wsValidator),
                   "I(Q) workspace");
-  declareProperty(make_unique<ArrayProperty<double>>(
+  declareProperty(std::make_unique<ArrayProperty<double>>(
       "OutputBinning", boost::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
@@ -106,14 +106,14 @@ void TOFSANSResolution::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
 
   // Count histogram for normalization
-  const int xLength = static_cast<int>(iqWS->x(0).size());
+  const auto xLength = static_cast<int>(iqWS->x(0).size());
   std::vector<double> XNorm(xLength - 1, 0.0);
 
   // Create workspaces with each component of the resolution for debugging
   // purposes
   MatrixWorkspace_sptr thetaWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
+  declareProperty(std::make_unique<WorkspaceProperty<>>("ThetaError", "",
+                                                        Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
   thetaWS->setSharedX(0, iqWS->sharedX(0));
@@ -121,7 +121,7 @@ void TOFSANSResolution::exec() {
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
   declareProperty(
-      make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
+      std::make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
   tofWS->setSharedX(0, iqWS->sharedX(0));
@@ -130,7 +130,7 @@ void TOFSANSResolution::exec() {
   // Initialize Dq
   HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
 
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(reducedWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
@@ -158,7 +158,7 @@ void TOFSANSResolution::exec() {
 
     const auto &XIn = reducedWS->x(i);
     const auto &YIn = reducedWS->y(i);
-    const int wlLength = static_cast<int>(XIn.size());
+    const auto wlLength = static_cast<int>(XIn.size());
 
     std::vector<double> _dx(xLength - 1, 0.0);
     std::vector<double> _norm(xLength - 1, 0.0);

@@ -50,16 +50,16 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
     def _test_corrections_workspace(self, corr_ws):
         x_unit = corr_ws.getAxis(0).getUnit().unitID()
-        self.assertEquals(x_unit, 'Wavelength')
+        self.assertEqual(x_unit, 'Wavelength')
 
         y_unit = corr_ws.YUnitLabel()
-        self.assertEquals(y_unit, 'Attenuation factor')
+        self.assertEqual(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
-        self.assertEquals(num_hists, 10)
+        self.assertEqual(num_hists, 10)
 
         blocksize = corr_ws.blocksize()
-        self.assertEquals(blocksize, 1905)
+        self.assertEqual(blocksize, 1905)
 
     def tearDown(self):
         DeleteWorkspace(self._red_ws)
@@ -159,16 +159,16 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     **kwargs)
 
         x_unit = corrected.getAxis(0).getUnit().unitID()
-        self.assertEquals(x_unit, 'Wavelength')
+        self.assertEqual(x_unit, 'Wavelength')
 
         y_unit = corrected.YUnitLabel()
-        self.assertEquals(y_unit, 'Attenuation factor')
+        self.assertEqual(y_unit, 'Attenuation factor')
 
         num_hists = corrected.getNumberHistograms()
-        self.assertEquals(num_hists, 18)
+        self.assertEqual(num_hists, 18)
 
         blocksize = corrected.blocksize()
-        self.assertEquals(blocksize, 1024)
+        self.assertEqual(blocksize, 1024)
 
         DeleteWorkspace(ill_red_ws)
 
@@ -210,7 +210,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         matching, _ = CompareWorkspaces(
             self._corrected_flat_plate, output_workspace, Tolerance=1e-6)
-        self.assertEquals(matching, True)
+        self.assertEqual(matching, True)
 
     # TODO: add test for powder diffraction data
 

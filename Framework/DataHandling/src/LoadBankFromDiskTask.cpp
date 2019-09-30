@@ -10,7 +10,8 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/make_unique.h"
+#include <algorithm>
+
 #include "MantidNexus/NexusIOHelper.h"
 
 namespace Mantid {
@@ -189,7 +190,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Now we allocate the required arrays
-  auto event_id = Mantid::Kernel::make_unique<uint32_t[]>(m_loadSize[0]);
+  auto event_id = std::make_unique<uint32_t[]>(m_loadSize[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -216,13 +217,10 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     file.closeData();
 
     // determine the range of pixel ids
-    for (int64_t i = 0; i < m_loadSize[0]; ++i) {
-      const auto id = event_id[i];
-      if (id < m_min_id)
-        m_min_id = id;
-      if (id > m_max_id)
-        m_max_id = id;
-    }
+    m_min_id =
+        *(std::min_element(event_id.get(), event_id.get() + m_loadSize[0]));
+    m_max_id =
+        *(std::max_element(event_id.get(), event_id.get() + m_loadSize[0]));
 
     if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
       // All the detector IDs in the bank are higher than the highest 'known'
@@ -252,8 +250,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
  */
 std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto event_time_of_flight =
-      Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
+  auto event_time_of_flight = std::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   std::string key, tof_unit;
@@ -308,7 +305,7 @@ LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   m_have_weight = true;
 
   // Allocate the array
-  auto event_weight = Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
+  auto event_weight = std::make_unique<float[]>(m_loadSize[0]);
 
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
@@ -435,11 +432,9 @@ void LoadBankFromDiskTask::run() {
   }
 
   const auto bank_size = m_max_id - m_min_id;
-  const uint32_t minSpectraToLoad =
-      static_cast<uint32_t>(m_loader.alg->m_specMin);
-  const uint32_t maxSpectraToLoad =
-      static_cast<uint32_t>(m_loader.alg->m_specMax);
-  const uint32_t emptyInt = static_cast<uint32_t>(EMPTY_INT());
+  const auto minSpectraToLoad = static_cast<uint32_t>(m_loader.alg->m_specMin);
+  const auto maxSpectraToLoad = static_cast<uint32_t>(m_loader.alg->m_specMax);
+  const auto emptyInt = static_cast<uint32_t>(EMPTY_INT());
   // check that if a range of spectra were requested that these fit within
   // this bank
   if (minSpectraToLoad != emptyInt && m_min_id < minSpectraToLoad) {
@@ -472,8 +467,8 @@ void LoadBankFromDiskTask::run() {
     mid_id = (m_max_id + m_min_id) / 2;
 
   // No error? Launch a new task to process that data.
-  size_t numEvents = static_cast<size_t>(m_loadSize[0]);
-  size_t startAt = static_cast<size_t>(m_loadStart[0]);
+  auto numEvents = static_cast<size_t>(m_loadSize[0]);
+  auto startAt = static_cast<size_t>(m_loadStart[0]);
 
   // convert things to shared_arrays to share between tasks
   boost::shared_array<uint32_t> event_id_shrd(event_id.release());
@@ -483,13 +478,13 @@ void LoadBankFromDiskTask::run() {
   auto event_index_shrd =
       boost::make_shared<std::vector<uint64_t>>(std::move(event_index));
 
-  ProcessBankData *newTask1 = new ProcessBankData(
+  std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankData>(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
       numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
       event_weight_shrd, m_min_id, mid_id);
   scheduler.push(newTask1);
   if (m_loader.splitProcessing && (mid_id < m_max_id)) {
-    ProcessBankData *newTask2 = new ProcessBankData(
+    std::shared_ptr<Task> newTask2 = std::make_shared<ProcessBankData>(
         m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, (mid_id + 1), m_max_id);

@@ -101,19 +101,19 @@ class PythonAlgorithmTest(unittest.TestCase):
         alg = AlgorithmManager.createUnmanaged("TestPyAlgDefaultAttrs")
         testhelpers.assertRaisesNothing(self,alg.initialize)
 
-        self.assertEquals(alg.name(), "TestPyAlgDefaultAttrs")
-        self.assertEquals(alg.version(), 1)
-        self.assertEquals(alg.category(), "PythonAlgorithms")
-        self.assertEquals(alg.isRunning(), False)
+        self.assertEqual(alg.name(), "TestPyAlgDefaultAttrs")
+        self.assertEqual(alg.version(), 1)
+        self.assertEqual(alg.category(), "PythonAlgorithms")
+        self.assertEqual(alg.isRunning(), False)
         testhelpers.assertRaisesNothing(self, alg.cancel)
 
     def test_alg_with_overridden_attrs(self):
         testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "TestPyAlgOverriddenAttrs")
         alg = AlgorithmManager.createUnmanaged("TestPyAlgOverriddenAttrs")
-        self.assertEquals(alg.name(), "TestPyAlgOverriddenAttrs")
-        self.assertEquals(alg.version(), 2)
-        self.assertEquals(alg.category(), "BestAlgorithms")
-        self.assertEquals(alg.helpURL(), "Optional documentation URL")
+        self.assertEqual(alg.name(), "TestPyAlgOverriddenAttrs")
+        self.assertEqual(alg.version(), 2)
+        self.assertEqual(alg.category(), "BestAlgorithms")
+        self.assertEqual(alg.helpURL(), "Optional documentation URL")
 
     def test_alg_can_be_cancelled(self):
         alg = AlgorithmManager.createUnmanaged("CancellableAlg")

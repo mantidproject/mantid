@@ -52,6 +52,7 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
     def real_decorator(func, *args, **kwargs):
         def wrapper(self, *args):
             ws = MockWorkspace()
+            ws.setPlotType = Mock()
             view = Mock(spec=TableWorkspaceDisplayView)
             container = Mock(spec=StatusBarView)
             container.status_bar = Mock(spec=QStatusBar)
@@ -250,7 +251,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter(add_selection_model=True)
     def test_action_set_as(self, ws, view, twd):
         mock_func = Mock()
-        twd._action_set_as(mock_func)
+        twd._action_set_as(mock_func, 1)
 
         self.assertEqual(3, mock_func.call_count)
 
@@ -461,7 +462,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y)]
         twd.action_plot(PlotType.LINEAR)
 
-        twd.plot.subplots.assert_called_once_with()
+        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
         twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
         col_y_name = twd.model.get_column_header(col_as_y)
@@ -488,7 +489,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                                                                   MockQModelIndex(1, col_as_y2)]
         twd.action_plot(PlotType.LINEAR)
 
-        twd.plot.subplots.assert_called_once_with()
+        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
         twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
 
@@ -566,7 +567,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
         twd.action_plot(plot_type)
 
-        twd.plot.subplots.assert_called_once_with()
+        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
 
         twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
@@ -650,7 +651,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                 [MockQModelIndex(1, col_as_y1_err), MockQModelIndex(1, col_as_y2_err)])
         twd.action_plot(plot_type)
 
-        twd.plot.subplots.assert_called_once_with()
+        twd.plot.subplots.assert_called_once_with(subplot_kw={'projection': 'mantid'})
         twd.plot.mock_fig.canvas.set_window_title.assert_called_once_with(twd.model.get_name())
         twd.plot.mock_ax.set_xlabel.assert_called_once_with(twd.model.get_column_header(col_as_x))
 

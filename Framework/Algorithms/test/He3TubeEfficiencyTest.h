@@ -145,11 +145,11 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setPropertyValue("TubePressure", "-10"),
-                     invalid_argument);
+                     const invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeThickness", "-0.08"),
-                     invalid_argument);
+                     const invalid_argument &);
     TS_ASSERT_THROWS(alg.setPropertyValue("TubeTemperature", "-100"),
-                     invalid_argument);
+                     const invalid_argument &);
 
     AnalysisDataService::Instance().remove(inputWS);
   }

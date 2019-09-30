@@ -68,13 +68,6 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 # Helper code
 
 set(SRC_FILES
-    src/Converters/CloneToNumpy.cpp
-    src/Converters/DateAndTime.cpp
-    src/Converters/NDArrayToVector.cpp
-    src/Converters/NumpyFunctions.cpp
-    src/Converters/PyObjectToMatrix.cpp
-    src/Converters/PyObjectToV3D.cpp
-    src/Converters/PyObjectToVMD.cpp
     src/Registry/MappingTypeHandler.cpp
     src/Registry/PropertyManagerFactory.cpp
     src/Registry/PropertyWithValueFactory.cpp
@@ -82,46 +75,14 @@ set(SRC_FILES
     src/Registry/TypeRegistry.cpp)
 
 set(INC_FILES
-    ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
-    ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
-    ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
-    ${HEADER_DIR}/kernel/Converters/DateAndTime.h
-    ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
-    ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
-    ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
-    ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
-    ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
-    ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
-    ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
-    ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
-    ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
-    ${HEADER_DIR}/kernel/Policies/RemoveConst.h
-    ${HEADER_DIR}/kernel/Policies/ToWeakPtr.h
-    ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
-    ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
-    ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
-    ${HEADER_DIR}/kernel/Registry/PropertyManagerFactory.h
-    ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
-    ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
-    ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
-    ${HEADER_DIR}/kernel/Registry/TypeRegistry.h
-    ${HEADER_DIR}/kernel/Registry/RegisterWorkspacePtrToPython.h
-    ${HEADER_DIR}/kernel/DataServiceExporter.h
-    ${HEADER_DIR}/kernel/IsNone.h
-    ${HEADER_DIR}/kernel/PropertyWithValueExporter.h
-    ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
-    ${HEADER_DIR}/kernel/StlExportDefinitions.h
-    ${HEADER_DIR}/kernel/TypedValidatorExporter.h)
-
-set(PY_FILES __init__.py _aliases.py environment.py funcinspect.py plugins.py)
-
-# Add rule to copy over the pure Python files for the module
-set(OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel)
-
-if(CMAKE_GENERATOR STREQUAL Xcode)
-  # Set the output directory for the libraries.
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel)
-endif()
+    inc/MantidPythonInterface/kernel/Registry/MappingTypeHandler.h
+    inc/MantidPythonInterface/kernel/Registry/PropertyValueHandler.h
+    inc/MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h
+    inc/MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h
+    inc/MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h
+    inc/MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h
+    inc/MantidPythonInterface/kernel/Registry/TypeRegistry.h
+    inc/MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h)
 
 # Generate the packagesetup module for the build & install package
 set(PACKAGESETUP_PY packagesetup)
@@ -170,6 +131,8 @@ add_library(PythonKernelModule
             ${PYTHON_INSTALL_FILES})
 set_python_properties(PythonKernelModule _kernel)
 
+target_include_directories(PythonKernelModule PUBLIC inc)
+
 # Add the required dependencies
 target_link_libraries(PythonKernelModule
                       PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -196,29 +159,22 @@ endif()
 mtd_install_targets(TARGETS
                     PythonKernelModule
                     INSTALL_DIRS
-                    ${BIN_DIR}/mantid/kernel
-                    ${WORKBENCH_BIN_DIR}/mantid/kernel)
-
-# Pure Python files
-mtd_install_files(FILES
-                  ${PY_FILES}
-                  INSTALL_DIRS
-                  ${BIN_DIR}/mantid/kernel
-                  ${WORKBENCH_BIN_DIR}/mantid/kernel)
+                    ${LIB_DIR}/mantid/kernel
+                    ${WORKBENCH_LIB_DIR}/mantid/kernel)
 
 # packagesetup.py that will overwrite the ones from the built target
 mtd_install_files(FILES
                   ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
                   INSTALL_DIRS
-                  ${BIN_DIR}/mantid/kernel
-                  ${WORKBENCH_BIN_DIR}/mantid/kernel
+                  ${LIB_DIR}/mantid/kernel
+                  ${WORKBENCH_LIB_DIR}/mantid/kernel
                   RENAME
                   ${PACKAGESETUP_PY}.py)
 
 mtd_install_files(FILES
                   ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
                   INSTALL_DIRS
-                  ${BIN_DIR}/mantid/kernel
-                  ${WORKBENCH_BIN_DIR}/mantid/kernel
+                  ${LIB_DIR}/mantid/kernel
+                  ${WORKBENCH_LIB_DIR}/mantid/kernel
                   RENAME
                   ${MPISETUP_PY}.py)

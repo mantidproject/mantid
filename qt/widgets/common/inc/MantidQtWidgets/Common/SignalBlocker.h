@@ -9,28 +9,31 @@
 
 #include "DllOption.h"
 #include <QObject>
+#include <QtGlobal>
 
 namespace MantidQt {
 namespace API {
 
-/** SignalBlocker : RAII signal blocker. Not available in Qt until 5.3
+#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
+using SignalBlocker = QSignalBlocker;
+#else
+
+/**
+ * SignalBlocker : RAII signal blocker for Qt < v5.3
  */
-template <typename Type> class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker {
+class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker {
 
 private:
   /// Object to manage blocking
-  Type *m_obj;
+  QObject *m_obj;
 
 public:
-  /// Constructor
-  SignalBlocker(Type *obj);
-  /// Destructor
+  explicit SignalBlocker(QObject *obj);
   ~SignalBlocker();
-  /// Overriden function like behavior.
-  Type *operator->();
-  /// Release management
-  void release();
+  SignalBlocker(const SignalBlocker &) = delete;
 };
+
+#endif
 
 } // namespace API
 } // namespace MantidQt

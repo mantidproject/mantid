@@ -43,10 +43,10 @@ void UnwrapSNS::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Contains numbers counts against time of flight (TOF).");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "This workspace will be in the units of time of flight. (See "
                   "http://www.mantidproject.org/Units)");
@@ -108,7 +108,7 @@ void UnwrapSNS::exec() {
   this->getTofRangeData(false);
 
   // set up the progress bar
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != m_inputWS) {
@@ -178,7 +178,8 @@ void UnwrapSNS::execEvent() {
   auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
 
   // set up the progress bar
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress =
+      std::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());

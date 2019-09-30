@@ -48,11 +48,11 @@ void SphericalAbsorption::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input, wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -116,13 +116,11 @@ void SphericalAbsorption::retrieveBaseProperties() {
   double sigma_s = getProperty("ScatteringXSection");      // in barns
   double rho = getProperty("SampleNumberDensity");         // in Angstroms-3
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
-  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-      0.0) {
+  if (sampleMaterial.totalScatterXSection() != 0.0) {
     if (rho == EMPTY_DBL())
       rho = sampleMaterial.numberDensity();
     if (sigma_s == EMPTY_DBL())
-      sigma_s =
-          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
+      sigma_s = sampleMaterial.totalScatterXSection();
     if (sigma_atten == EMPTY_DBL())
       sigma_atten = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda);
   } else // Save input in Sample with wrong atomic number and name

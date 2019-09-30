@@ -85,7 +85,7 @@ typedef struct {
 
 /* wait until read len bytes, return <=0 on error */
 static int recv_all(SOCKET s, void *buffer, int len, int flags) {
-  char *cbuffer = reinterpret_cast<char *>(buffer);
+  auto *cbuffer = reinterpret_cast<char *>(buffer);
   int n, ntot;
   ntot = 0;
   while (len > 0) {
@@ -289,9 +289,10 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
   if (n != sizeof(comm)) {
     return -1;
   }
-  *command = reinterpret_cast<char *>(malloc(sizeof(comm.command) + 1));
-  strncpy(*command, comm.command, sizeof(comm.command));
-  (*command)[sizeof(comm.command)] = '\0';
+  const auto commCommandSize = sizeof(comm.command);
+  *command = reinterpret_cast<char *>(malloc(commCommandSize + 1));
+  strncpy(*command, comm.command, commCommandSize);
+  (*command)[commCommandSize] = '\0';
   len_data = comm.len - sizeof(comm); /* in bytes */
   if (len_data < 0) {
     return -1; /* error */
@@ -410,7 +411,7 @@ static isisds_error_report_t status_reporter = default_status_reporter;
 
 int isisds_report(int status, int code, const char *format, ...) {
   va_list ap;
-  char *message = reinterpret_cast<char *>(malloc(1024));
+  auto *message = reinterpret_cast<char *>(malloc(1024));
   va_start(ap, format);
   vsprintf(message, format, ap);
   va_end(ap);

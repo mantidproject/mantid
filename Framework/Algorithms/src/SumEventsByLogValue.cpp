@@ -30,15 +30,15 @@ using namespace API;
 
 void SumEventsByLogValue::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "The input EventWorkspace. Must contain 'raw' (unweighted) events");
   declareProperty(
-      make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
           "MonitorWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace containing the monitor counts relating to the input "
       "workspace");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm. The output workspace will be a "
@@ -51,7 +51,7 @@ void SumEventsByLogValue::init() {
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
-      make_unique<ArrayProperty<double>>(
+      std::make_unique<ArrayProperty<double>>(
           "OutputBinning", "", boost::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");
@@ -77,7 +77,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   // Check that the log exists for the given input workspace
   m_logName = getPropertyValue("LogName");
   try {
-    ITimeSeriesProperty *log = dynamic_cast<ITimeSeriesProperty *>(
+    auto *log = dynamic_cast<ITimeSeriesProperty *>(
         m_inputWorkspace->run().getLogData(m_logName));
     if (log == nullptr) {
       errors["LogName"] = "'" + m_logName + "' is not a time-series log.";
@@ -102,10 +102,8 @@ void SumEventsByLogValue::exec() {
   const Property *const log = m_inputWorkspace->run().getLogData(m_logName);
 
   // Now we need to know what type of property it is
-  const TimeSeriesProperty<int> *intLog =
-      dynamic_cast<const TimeSeriesProperty<int> *>(log);
-  const TimeSeriesProperty<double> *dblLog =
-      dynamic_cast<const TimeSeriesProperty<double> *>(log);
+  const auto *intLog = dynamic_cast<const TimeSeriesProperty<int> *>(log);
+  const auto *dblLog = dynamic_cast<const TimeSeriesProperty<double> *>(log);
 
   m_binningParams = getProperty("OutputBinning");
   // Binning parameters must be provided for floating point logs
@@ -153,7 +151,8 @@ void SumEventsByLogValue::createTableOutput(
 
   // Accumulate things in a local vector before transferring to the table
   std::vector<int> Y(xLength);
-  const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numSpec =
+      static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
@@ -424,7 +423,8 @@ void SumEventsByLogValue::createBinnedOutput(
   outputWorkspace->setYUnit("Counts");
 
   auto &Y = outputWorkspace->mutableY(0);
-  const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numSpec =
+      static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {

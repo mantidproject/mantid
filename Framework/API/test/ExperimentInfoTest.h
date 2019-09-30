@@ -7,9 +7,7 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -45,33 +43,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace NeXus;
 using Mantid::Types::Core::DateAndTime;
-
-class FakeChopper : public Mantid::API::ChopperModel {
-public:
-  boost::shared_ptr<ChopperModel> clone() const override {
-    return boost::make_shared<FakeChopper>(*this);
-  }
-
-  double calculatePulseTimeVariance() const override { return 0.0; }
-  double sampleTimeDistribution(const double) const override { return 0.0; }
-  double sampleJitterDistribution(const double) const override { return 0.0; }
-
-private:
-  void setParameterValue(const std::string &, const std::string &) override{};
-};
-
-class FakeSource : public Mantid::API::ModeratorModel {
-public:
-  boost::shared_ptr<ModeratorModel> clone() const override {
-    return boost::make_shared<FakeSource>(*this);
-  }
-  double emissionTimeMean() const override { return 0.0; }
-  double emissionTimeVariance() const override { return 0.0; }
-  double sampleTimeDistribution(const double) const override { return 0.0; }
-
-private:
-  void setParameterValue(const std::string &, const std::string &) override{};
-};
 
 class ExperimentInfoTest : public CxxTest::TestSuite {
 public:
@@ -110,56 +81,6 @@ public:
     TS_ASSERT_EQUALS(inst3->getName(), "MyTestInst");
   }
 
-  void test_Setting_A_New_Source_With_NULL_Ptr_Throws() {
-    ExperimentInfo ws;
-
-    TS_ASSERT_THROWS(ws.setModeratorModel(nullptr), std::invalid_argument);
-  }
-
-  void test_Retrieving_Source_Properties_Before_Set_Throws() {
-    ExperimentInfo ws;
-
-    TS_ASSERT_THROWS(ws.moderatorModel(), std::runtime_error);
-  }
-
-  void test_Setting_New_Source_Description_With_Valid_Object_Does_Not_Throw() {
-    using namespace Mantid::API;
-    ExperimentInfo ws;
-
-    ModeratorModel *source = new FakeSource;
-    TS_ASSERT_THROWS_NOTHING(ws.setModeratorModel(source));
-    const ModeratorModel &fetched = ws.moderatorModel();
-    const ModeratorModel &constInput =
-        const_cast<const Mantid::API::ModeratorModel &>(*source);
-    TS_ASSERT_EQUALS(&fetched, &constInput);
-  }
-
-  void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws() {
-    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
-
-    TS_ASSERT_THROWS(ws->setChopperModel(nullptr), std::invalid_argument);
-  }
-
-  void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds() {
-    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
-
-    TS_ASSERT_THROWS_NOTHING(ws->setChopperModel(new FakeChopper));
-    TS_ASSERT_THROWS_NOTHING(ws->chopperModel(0));
-  }
-
-  void test_Setting_A_New_Chopper_To_Existing_Index_Replaces_Current() {
-    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
-
-    TS_ASSERT_THROWS_NOTHING(ws->setChopperModel(new FakeChopper));
-    TS_ASSERT_THROWS(ws->chopperModel(1), std::invalid_argument);
-  }
-
-  void test_Getting_Chopper_At_Index_Greater_Than_Descriptions_Added_Throws() {
-    ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
-
-    TS_ASSERT_THROWS(ws->chopperModel(2), std::invalid_argument);
-  }
-
   void test_GetSetSample() {
     ExperimentInfo ws;
     ws.mutableSample().setName("test");
@@ -175,7 +96,7 @@ public:
   void test_GetLog_Throws_If_No_Log_Or_Instrument_Parameter_Exists() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.getLog("__NOTALOG__"), std::invalid_argument);
+    TS_ASSERT_THROWS(expt.getLog("__NOTALOG__"), const std::invalid_argument &);
   }
 
   void
@@ -186,7 +107,7 @@ public:
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
     TS_ASSERT_THROWS(expt.getLog(instPar),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void
@@ -222,7 +143,7 @@ public:
     ExperimentInfo expt;
 
     TS_ASSERT_THROWS(expt.getLogAsSingleValue("__NOTALOG__"),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void
@@ -233,7 +154,7 @@ public:
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
     TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void
@@ -270,7 +191,6 @@ public:
     TS_ASSERT_DELTA(ws2.sample().getOrientedLattice().c(), 3.0, 1e-4);
     TS_ASSERT_DELTA(ws2.run().getProtonCharge(), 1.234, 0.001);
     TS_ASSERT_EQUALS(ws2.getInstrument()->getName(), "MyTestInst");
-    TS_ASSERT_DIFFERS(&ws.moderatorModel(), &ws2.moderatorModel());
 
     // Changing stuff in the original workspace...
     ws.mutableSample().setName("test1");
@@ -295,8 +215,6 @@ public:
     boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
-    ws.setModeratorModel(new FakeSource);
-    ws.setChopperModel(new FakeChopper);
 
     ExperimentInfo ws2;
     ws2.copyExperimentInfoFrom(&ws);
@@ -312,8 +230,6 @@ public:
     boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
-    ws.setModeratorModel(new FakeSource);
-    ws.setChopperModel(new FakeChopper);
 
     ExperimentInfo *ws2 = ws.cloneExperimentInfo();
     do_compare_ExperimentInfo(ws, *ws2);
@@ -329,8 +245,6 @@ public:
     boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
-    ws.setModeratorModel(new FakeSource);
-    ws.setChopperModel(new FakeChopper);
 
     ExperimentInfo *ws2 = ws.cloneExperimentInfo();
 
@@ -373,7 +287,7 @@ public:
     ExperimentInfo_sptr exptInfo = createTestInfoWithDirectEModeLog();
 
     TS_ASSERT_THROWS(exptInfo->getEFixed(1),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     const Mantid::Kernel::Exception::NotFoundError &);
   }
 
   void test_correct_efixed_value_is_returned_for_direct_run() {
@@ -388,7 +302,7 @@ public:
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     Instrument_sptr inst = addInstrumentWithIndirectEmodeParameter(exptInfo);
 
-    TS_ASSERT_THROWS(exptInfo->getEFixed(), std::runtime_error);
+    TS_ASSERT_THROWS(exptInfo->getEFixed(), const std::runtime_error &);
   }
 
   void
@@ -397,7 +311,7 @@ public:
     addInstrumentWithIndirectEmodeParameter(exptInfo);
     IDetector_const_sptr det = exptInfo->getInstrument()->getDetector(3);
 
-    TS_ASSERT_THROWS(exptInfo->getEFixed(det), std::runtime_error);
+    TS_ASSERT_THROWS(exptInfo->getEFixed(det), const std::runtime_error &);
   }
 
   void
@@ -437,48 +351,6 @@ public:
         &spectrumInfo.detector(0));
     TS_ASSERT(!detGroup);
     TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
-  }
-
-  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
-    using namespace Mantid;
-    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
-    addInstrumentWithParameter(*exptInfo, "a", "b");
-
-    // Set a mapping
-    std::set<detid_t> group{1, 2};
-    Mantid::det2group_map mapping{{1, group}};
-    exptInfo->cacheDetectorGroupings(mapping);
-
-    const auto &spectrumInfo = exptInfo->spectrumInfo();
-    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
-        &spectrumInfo.detector(0));
-    TS_ASSERT(detGroup);
-    TS_ASSERT_EQUALS(detGroup->getDetectorIDs(), (std::vector<detid_t>{1, 2}));
-  }
-
-  void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {
-    ExperimentInfo expt;
-    Mantid::det2group_map mappings;
-
-    TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
-  }
-
-  void test_Getting_Group_For_Unknown_ID_Throws() {
-    ExperimentInfo expt;
-
-    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), std::out_of_range);
-  }
-
-  void
-  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_Group() {
-    ExperimentInfo expt;
-    Mantid::det2group_map mappings;
-    mappings.emplace(1, std::set<Mantid::detid_t>{2});
-    expt.cacheDetectorGroupings(mappings);
-
-    size_t index{0};
-    TS_ASSERT_THROWS_NOTHING(index = expt.groupOfDetectorID(1));
-    TS_ASSERT_EQUALS(index, 0);
   }
 
   struct fromToEntry {
@@ -628,14 +500,14 @@ public:
     inst1->setXmlText("");
     ws.setInstrument(inst1);
 
-    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file););
+    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file.get()););
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file, parameterStr));
+        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "GEM");
     TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) !=
@@ -654,14 +526,14 @@ public:
     inst1->setXmlText("");
     ws.setInstrument(inst1);
 
-    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file););
+    TS_ASSERT_THROWS_NOTHING(ws.saveExperimentInfoNexus(th.file.get()););
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING(
-        ws2.loadExperimentInfoNexus(filename, th.file, parameterStr));
+        ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "");
     TS_ASSERT_EQUALS(parameterStr, "");
@@ -687,14 +559,14 @@ public:
     // this occurs in ConvertToMD, copy methadata
     ei.mutableRun().addProperty("W_MATRIX", wTrVector, true);
 
-    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file));
+    TS_ASSERT_THROWS_NOTHING(ei.saveExperimentInfoNexus(th.file.get()));
 
     th.reopenFile();
 
     ExperimentInfo other;
     std::string InstrParameters;
-    TS_ASSERT_THROWS_NOTHING(
-        other.loadExperimentInfoNexus(filename, th.file, InstrParameters));
+    TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(
+        filename, th.file.get(), InstrParameters));
 
     std::vector<double> wMatrRestored =
         other.run().getPropertyValueAsType<std::vector<double>>("W_MATRIX");
@@ -1021,23 +893,6 @@ private:
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
     exptInfo->setInstrument(inst);
     return inst;
-  }
-
-  ExperimentInfo_sptr createTestInfoWithChopperPoints(const size_t npoints) {
-    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
-    boost::shared_ptr<Instrument> inst1 = boost::make_shared<Instrument>();
-    inst1->setName("MyTestInst");
-    auto source = new ObjComponent("source");
-    inst1->add(source);
-    inst1->markAsSource(source);
-
-    for (size_t i = 0; i < npoints; ++i) {
-      auto chopperPoint = new ObjComponent("ChopperPoint");
-      inst1->add(chopperPoint);
-      inst1->markAsChopperPoint(chopperPoint);
-    }
-    exptInfo->setInstrument(inst1);
-    return exptInfo;
   }
 };
 

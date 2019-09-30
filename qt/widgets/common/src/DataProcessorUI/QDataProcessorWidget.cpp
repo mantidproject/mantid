@@ -53,8 +53,7 @@ QDataProcessorWidget::QDataProcessorWidget(
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist,
-                                                                     group),
+          std::make_unique<GenericDataProcessorPresenter>(whitelist, group),
           parent) {}
 
 /** Delegating constructor
@@ -67,10 +66,9 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
-    : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, algorithm, group),
-          parent) {}
+    : QDataProcessorWidget(std::make_unique<GenericDataProcessorPresenter>(
+                               whitelist, algorithm, group),
+                           parent) {}
 
 /** Delegating constructor: pre-processing, no post-processing
  * @param whitelist :: [input] The white list
@@ -85,7 +83,7 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
     : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
+          std::make_unique<GenericDataProcessorPresenter>(
               whitelist, preprocessMap.asMap(), algorithm, group),
           parent) {}
 
@@ -100,10 +98,9 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
-    : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, algorithm, postprocessor, group),
-          parent) {}
+    : QDataProcessorWidget(std::make_unique<GenericDataProcessorPresenter>(
+                               whitelist, algorithm, postprocessor, group),
+                           parent) {}
 
 /** Delegating constructor: pre-processing, post-processing
  * @param whitelist :: [input] The white list
@@ -118,11 +115,10 @@ QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
-    : QDataProcessorWidget(
-          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-              whitelist, preprocessMap.asMap(), algorithm, postprocessor,
-              group),
-          parent) {}
+    : QDataProcessorWidget(std::make_unique<GenericDataProcessorPresenter>(
+                               whitelist, preprocessMap.asMap(), algorithm,
+                               postprocessor, group),
+                           parent) {}
 
 /** Destructor
  */
@@ -165,8 +161,8 @@ void QDataProcessorWidget::addActions(
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
-    m_commands.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
-        ui.rowToolBar, std::move(command)));
+    m_commands.push_back(
+        std::make_unique<QtCommandAdapter>(ui.rowToolBar, std::move(command)));
   }
 
   // Add actions to context menu

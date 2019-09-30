@@ -6,12 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-
 
 class HomeGroupingWidgetModel(object):
 
-    def __init__(self, context=MuonContext()):
+    def __init__(self, context=None):
         self._data = context.data_context
         self._context = context
 
@@ -20,6 +18,9 @@ class HomeGroupingWidgetModel(object):
 
     def get_pair_names(self):
         return self._context.group_pair_context.pair_names
+
+    def get_default_group_pair(self):
+        return self._context.group_pair_context.selected
 
     def is_group(self, name):
         return name in self.get_group_names()
@@ -39,6 +40,9 @@ class HomeGroupingWidgetModel(object):
             return pair.alpha
         else:
             return None
+
+    def update_selected_group_pair_in_context(self, name):
+        self._context.group_pair_context.selected = name
 
     # ------------------------------------------------------------------------------------------------------------------
     # Periods

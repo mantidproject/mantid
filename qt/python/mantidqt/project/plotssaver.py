@@ -8,11 +8,12 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from matplotlib import ticker
 import matplotlib.axis
+from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 try:
     from matplotlib.colors import to_hex
@@ -52,7 +53,7 @@ class PlotsSaver(object):
                 create_list.append(ax.creation_args)
                 self.figure_creation_args = ax.creation_args
             except AttributeError:
-                logger.debug("Axis had a axis without creation_args - Common with colorfill")
+                logger.debug("Axis had an axis without creation_args - Common with a Colorfill plot")
                 continue
             axes_list.append(self.get_dict_for_axes(ax))
 
@@ -64,7 +65,6 @@ class PlotsSaver(object):
 
     @staticmethod
     def get_dict_for_axes_colorbar(ax):
-        image = None
         cb_dict = {}
 
         # If an image is present (from imshow)
@@ -114,8 +114,8 @@ class PlotsSaver(object):
         legend_dict = {}
         legend = ax.get_legend()
         if legend is not None:
-            legend_dict["visible"] = legend.get_visible()
             legend_dict["exists"] = True
+            legend_dict.update(LegendProperties.from_legend(legend))
         else:
             legend_dict["exists"] = False
         ax_dict["legend"] = legend_dict

@@ -29,11 +29,11 @@ SLSQPMinimizer::minimize(const std::vector<double> &x0) const {
   assert(numParameters() == x0.size());
 
   // slsqp parameters
-  int m =
+  auto m =
       static_cast<int>(numEqualityConstraints() + numInequalityConstraints());
-  int meq = static_cast<int>(numEqualityConstraints());
+  auto meq = static_cast<int>(numEqualityConstraints());
   int la = std::max(1, m);
-  int n = static_cast<int>(numParameters());
+  auto n = static_cast<int>(numParameters());
 
   std::vector<double> x = x0;
   std::vector<double> xl(n, -1e12), xu(n, 1e12); // bounds

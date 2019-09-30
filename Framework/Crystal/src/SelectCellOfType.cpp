@@ -26,7 +26,7 @@ using namespace Mantid::Geometry;
 /** Initialize the algorithm's properties.
  */
 void SelectCellOfType::init() {
-  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
@@ -58,11 +58,11 @@ void SelectCellOfType::init() {
   this->declareProperty("Apply", false, "Update UB and re-index the peaks");
   this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");
 
-  this->declareProperty(
-      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
-      "The number of indexed peaks if apply==true.");
+  this->declareProperty(std::make_unique<PropertyWithValue<int>>(
+                            "NumIndexed", 0, Direction::Output),
+                        "The number of indexed peaks if apply==true.");
 
-  this->declareProperty(make_unique<PropertyWithValue<double>>(
+  this->declareProperty(std::make_unique<PropertyWithValue<double>>(
                             "AverageError", 0.0, Direction::Output),
                         "The average HKL indexing error if apply==true.");
 
@@ -104,9 +104,7 @@ void SelectCellOfType::exec() {
 
   g_log.notice(std::string(message));
 
-  Kernel::Matrix<double> T(UB);
-  T.Invert();
-  T = newUB * T;
+  DblMatrix T = info.GetHKL_Tran();
   g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
 
   if (apply) {
@@ -125,16 +123,27 @@ void SelectCellOfType::exec() {
 
     int num_indexed = 0;
     double average_error = 0.0;
-    std::vector<V3D> miller_indices;
-    std::vector<V3D> q_vectors;
-    for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-    }
 
-    num_indexed = IndexingUtils::CalculateMillerIndices(
-        newUB, q_vectors, tolerance, miller_indices, average_error);
-    for (size_t i = 0; i < n_peaks; i++) {
-      peaks[i].setHKL(miller_indices[i]);
+    if (o_lattice.getMaxOrder() == 0) {
+      std::vector<V3D> miller_indices;
+      std::vector<V3D> q_vectors;
+      for (size_t i = 0; i < n_peaks; i++) {
+        q_vectors.push_back(peaks[i].getQSampleFrame());
+      }
+      num_indexed = IndexingUtils::CalculateMillerIndices(
+          newUB, q_vectors, tolerance, miller_indices, average_error);
+
+      for (size_t i = 0; i < n_peaks; i++) {
+        peaks[i].setIntHKL(miller_indices[i]);
+        peaks[i].setHKL(miller_indices[i]);
+      }
+    } else {
+      num_indexed = static_cast<int>(num_indexed);
+      for (size_t i = 0; i < n_peaks; i++) {
+        average_error += (peaks[i].getHKL()).hklError();
+        peaks[i].setIntHKL(T * peaks[i].getIntHKL());
+        peaks[i].setHKL(T * peaks[i].getHKL());
+      }
     }
 
     // Tell the user what happened.

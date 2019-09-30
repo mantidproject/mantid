@@ -54,7 +54,6 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
         material_json["ScatteringXSection"] = material.scattering_cross_section
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
-
     previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
     ws_units = common_enums.WORKSPACE_UNITS
 
@@ -63,7 +62,8 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
         ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
                                             Target=ws_units.wavelength)
 
-    absorb_factors = mantid.HRPDSlabCanAbsorption(InputWorkspace=ws_to_correct)
+    absorb_factors = mantid.HRPDSlabCanAbsorption(InputWorkspace=ws_to_correct,
+                                                  Thickness=str(sample_details_obj.thickness()))
     ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=absorb_factors,
                                   OutputWorkspace=ws_to_correct)
     mantid.DeleteWorkspace(Workspace=absorb_factors)
@@ -95,41 +95,3 @@ def _get_run_numbers_for_key(tof_dict, key):
     err_message = "this must be under 'coupled' or 'decoupled' and the time of flight window eg 10-110."
     return common.cal_map_dictionary_key_helper(tof_dict, key=key,
                                                 append_to_error_message=err_message)
-
-
-def process_vanadium_for_focusing(bank_spectra, spline_number):
-    output = common.spline_workspaces(num_splines=spline_number, focused_vanadium_spectra=bank_spectra)
-    return output
-
-
-# The following 2 functions may be moved to common
-def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
-    output_workspaces = list(workspaces_to_mask)
-
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
-            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
-                                                          OutputWorkspace=output_name,
-                                                          XMin=mask_params[0], XMax=mask_params[1])
-    return output_workspaces
-
-
-def _read_masking_file(masking_file_path):
-    all_banks_masking_list = []
-    bank_masking_list = []
-    ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
-    with open(masking_file_path) as mask_file:
-        for line in mask_file:
-            if line.startswith(ignore_line_prefixes):
-                # Push back onto new bank
-                if bank_masking_list:
-                    all_banks_masking_list.append(bank_masking_list)
-                bank_masking_list = []
-            else:
-                # Parse and store in current list
-                line.rstrip()
-                bank_masking_list.append(line.split())
-    if bank_masking_list:
-        all_banks_masking_list.append(bank_masking_list)
-    return all_banks_masking_list

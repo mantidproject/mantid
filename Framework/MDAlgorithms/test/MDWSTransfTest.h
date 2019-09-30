@@ -93,13 +93,13 @@ public:
         "Forced HKL frame would not accept workspace without oriented lattice",
         Transf.getTransfMatrix(TargWSDescription, CnvrtToMD::HKLFrame,
                                CnvrtToMD::HKLScale),
-        std::invalid_argument);
+        const std::invalid_argument &);
     TSM_ASSERT_THROWS("Forced SampleFrame frame would not accept workspace "
                       "without goniometer defined",
                       Transf.getTransfMatrix(TargWSDescription,
                                              CnvrtToMD::SampleFrame,
                                              CnvrtToMD::HKLScale),
-                      std::invalid_argument);
+                      const std::invalid_argument &);
     spws->mutableSample().setOrientedLattice(pLattice.get());
 
     WorkspaceCreationHelper::setGoniometer(spws, 20, 0, 0);

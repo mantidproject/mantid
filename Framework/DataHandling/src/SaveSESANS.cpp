@@ -12,7 +12,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <cmath>
@@ -65,10 +64,10 @@ void SaveSESANS::init() {
   auto validOrientation = boost::make_shared<Kernel::StringListValidator>(
       std::set<std::string>{"X", "Y", "Z"});
 
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The name of the workspace to save");
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, fileExtensions),
                   "The name to use when saving the file");
 

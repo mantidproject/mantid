@@ -28,11 +28,11 @@ public:
   ComplexOpTest() : Algorithm() {}
   ~ComplexOpTest() override {}
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "InputWorkspace_1", "", Direction::Input));
-    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "InputWorkspace_2", "", Direction::Input));
-    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {

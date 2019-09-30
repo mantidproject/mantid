@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 
+#include <QCheckBox>
 #include <QDialog>
 #include <QDoubleValidator>
 #include <QEvent>
@@ -20,8 +21,10 @@
  * @param property :: A property to edit.
  * @param parent :: A widget parent for the editor widget.
  */
-DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent)
-    : QWidget(parent), m_property(property) {
+DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
+                                       bool hasOption, bool isOptionSet)
+    : QWidget(parent), m_property(property), m_hasOption(hasOption),
+      m_isOptionSet(isOptionSet) {
   QHBoxLayout *layout = new QHBoxLayout;
   m_editor = new DoubleEditor(property, this);
   layout->addWidget(m_editor);
@@ -32,6 +35,16 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent)
   m_button->setMaximumSize(20, 1000000);
   connect(m_button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(m_button);
+  if (hasOption) {
+    m_checkBox = new QCheckBox;
+    m_checkBox->setChecked(isOptionSet);
+    connect(m_checkBox, SIGNAL(toggled(bool)), this, SLOT(optionToggled(bool)));
+    layout->addWidget(m_checkBox);
+    if (isOptionSet) {
+      m_button->hide();
+    }
+  }
+
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   layout->setStretchFactor(m_button, 0);
@@ -77,7 +90,26 @@ void DoubleDialogEditor::updateProperty() {
       dynamic_cast<ParameterPropertyManager *>(m_property->propertyManager());
   if (mgr) {
     mgr->setValue(m_property, m_editor->text().toDouble());
+    mgr->setGlobal(m_property, m_isOptionSet);
   }
 }
 
 void DoubleDialogEditor::runDialog() { emit buttonClicked(m_property); }
+
+void DoubleDialogEditor::optionToggled(bool option) {
+  m_button->setVisible(!option);
+  m_isOptionSet = option;
+  updateProperty();
+}
+
+QWidget *DoubleDialogEditorFactory::createEditorForManager(
+    ParameterPropertyManager *mgr, QtProperty *property, QWidget *parent) {
+  bool isOptionSet = m_hasOption ? mgr->isGlobal(property) : false;
+  auto editor =
+      new DoubleDialogEditor(property, parent, m_hasOption, isOptionSet);
+  connect(editor, SIGNAL(buttonClicked(QtProperty *)), this,
+          SIGNAL(buttonClicked(QtProperty *)));
+  connect(editor, SIGNAL(closeEditor()), this, SIGNAL(closeEditor()),
+          Qt::QueuedConnection);
+  return editor;
+}

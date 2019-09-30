@@ -104,35 +104,35 @@ public:
   void test_Finder_Throws_If_Empty_Directory_List_Given() {
     std::vector<std::string> empty;
     TS_ASSERT_THROWS(SampleEnvironmentSpecFileFinder finder(empty),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
   }
 
   void test_Finder_Throws_If_Facility_Correct_Instrument_Incorrect() {
     SampleEnvironmentSpecFileFinder finder(
         std::vector<std::string>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find(m_facilityName, "unknown", m_envName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Finder_Throws_If_Facility_Incorrect_Instrument_Correct() {
     SampleEnvironmentSpecFileFinder finder(
         std::vector<std::string>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find("unknown", m_instName, m_envName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Finder_Throws_If_Facility_Instrument_Correct_Bad_Environment() {
     SampleEnvironmentSpecFileFinder finder(
         std::vector<std::string>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find(m_facilityName, m_instName, "unknown"),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
   void test_Finder_Throws_If_Filename_Found_But_Content_Invalid() {
     SampleEnvironmentSpecFileFinder finder(
         std::vector<std::string>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find(m_facilityName, m_instName, m_badName),
-                     std::runtime_error);
+                     const std::runtime_error &);
   }
 
 private:

@@ -12,7 +12,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -83,7 +83,7 @@ public:
     TSM_ASSERT_THROWS("By default, should throw when successor type is the "
                       "same as the container.",
                       factory.setSuccessor(std::move(uniqueSuccessor)),
-                      std::runtime_error);
+                      const std::runtime_error &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor));
   }

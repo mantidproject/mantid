@@ -27,28 +27,28 @@ public:
     std::string tooLong("1/2x,-4y,-2-z,x");
 
     TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooLong),
-                     Exception::ParseError);
+                     const Exception::ParseError &);
   }
 
   void test_throws_on_short_input() {
     std::string tooShort("2/3x,-x+y");
 
     TS_ASSERT_THROWS(parseMatrixVectorPair<double>(tooShort),
-                     Exception::ParseError);
+                     const Exception::ParseError &);
   }
 
   void test_throws_on_empty_element() {
     std::string emptyY("2/3x, ,-x+y");
 
     TS_ASSERT_THROWS(parseMatrixVectorPair<double>(emptyY),
-                     Exception::ParseError);
+                     const Exception::ParseError &);
   }
 
   void test_throws_on_zero_division() {
     std::string zeroDivision("2/0x,-4y,-2-z,x");
 
     TS_ASSERT_THROWS(parseMatrixVectorPair<double>(zeroDivision),
-                     Exception::ParseError);
+                     const Exception::ParseError &);
   }
 
   void test_parse_many_directions() {

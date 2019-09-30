@@ -42,7 +42,7 @@ class SimpleAPILoadTest(unittest.TestCase):
     def test_Load_returns_only_the_WorkspaceGroups_when_final_output_is_a_group_and_monitors_are_separated(self):
         outputs = Load('CSP78173.raw', LoadMonitors='Separate')
         self.assertTrue(isinstance(outputs, tuple))
-        self.assertEquals(len(outputs), 2)
+        self.assertEqual(len(outputs), 2)
 
         self.assertTrue(isinstance(outputs[0], WorkspaceGroup))
         self._do_name_check(outputs[0], 'outputs')
@@ -54,25 +54,25 @@ class SimpleAPILoadTest(unittest.TestCase):
             raw = Load('IRS21360.raw')
         except RuntimeError:
             self.fail("Load with a filename should not raise an exception")
-        self.assertEquals(116, raw.getNumberHistograms())
+        self.assertEqual(116, raw.getNumberHistograms())
 
     def test_Load_call_with_other_args_executes_correctly(self):
         try:
             raw = Load('IRS21360.raw',SpectrumMax=1)
         except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
-        self.assertEquals(1, raw.getNumberHistograms())
+        self.assertEqual(1, raw.getNumberHistograms())
 
     def test_Load_call_with_all_keyword_args_executes_correctly(self):
         raw = Load(Filename='IRS21360.raw', SpectrumMax=1)
-        self.assertEquals(1, raw.getNumberHistograms())
+        self.assertEqual(1, raw.getNumberHistograms())
 
     def test_Load_call_with_args_that_do_not_apply_executes_correctly(self):
         try:
             raw = Load('IRS21360.raw',SpectrumMax=1,Append=True)
         except RuntimeError:
             self.fail("Load with a filename and extra args should not raise an exception")
-        self.assertEquals(1, raw.getNumberHistograms())
+        self.assertEqual(1, raw.getNumberHistograms())
 
     def test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
         wsname = 'test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'

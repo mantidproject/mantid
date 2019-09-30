@@ -14,7 +14,6 @@
 
 using Mantid::PythonInterface::PythonException;
 using MantidQt::Widgets::MplCpp::Colormap;
-using MantidQt::Widgets::MplCpp::Python::Object;
 using MantidQt::Widgets::MplCpp::cmapExists;
 using MantidQt::Widgets::MplCpp::getCMap;
 
@@ -42,11 +41,12 @@ public:
 
   // ----------------------- Failure tests ------------------------
   void testgetCMapWithUnknownCMapThrowsException() {
-    TS_ASSERT_THROWS(getCMap("AnUnknownName"), PythonException);
+    TS_ASSERT_THROWS(getCMap("AnUnknownName"), const PythonException &);
   }
 
   void testConstructionWithNonColorMapObjectThrows() {
-    TS_ASSERT_THROWS(Colormap cmap(Object{}), std::invalid_argument);
+    TS_ASSERT_THROWS(Colormap cmap(MantidQt::Widgets::Common::Python::Object{}),
+                     const std::invalid_argument &);
   }
 };
 

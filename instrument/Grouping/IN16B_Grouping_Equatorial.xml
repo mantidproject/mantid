@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<detector-grouping instrument="IN16B">
+  <group name="equator"> <ids val="64,65,192,193,320,321,448,449,576,577,704,705,832,833,960,961,1088,1089,1216,1217,1344,1345,1472,1473,1600,1601,1728,1729,1856,1857,1984,1985"/> </group>
+</detector-grouping>

@@ -54,10 +54,10 @@ private:
     TS_ASSERT(p != nullptr)
     TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry",
                       fetchPeriodLog(workspace, expectedPeriodNumber - 1),
-                      Mantid::Kernel::Exception::NotFoundError);
+                      const Mantid::Kernel::Exception::NotFoundError &);
     TSM_ASSERT_THROWS("Shouldn't have a period greater than the expected entry",
                       fetchPeriodLog(workspace, expectedPeriodNumber + 1),
-                      Mantid::Kernel::Exception::NotFoundError);
+                      const Mantid::Kernel::Exception::NotFoundError &);
     Mantid::Kernel::TimeSeriesProperty<bool> *period_property =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(p);
     TS_ASSERT(period_property);
@@ -1608,7 +1608,7 @@ public:
     // Act + Assert
     TSM_ASSERT_THROWS("Should throw, since it does not makes sense to only "
                       "select monitors, but to also exclude them",
-                      ld.execute(), std::invalid_argument);
+                      ld.execute(), const std::invalid_argument &);
   }
 
   void
@@ -1629,7 +1629,7 @@ public:
     // Act + Assert
     TSM_ASSERT_THROWS("Should throw, since it does not makes sense to only "
                       "select monitors, but to also exclude them",
-                      ld.execute(), std::invalid_argument);
+                      ld.execute(), const std::invalid_argument &);
   }
 
   void
@@ -1647,7 +1647,7 @@ public:
     // Act + Assert
     TSM_ASSERT_THROWS("Should throw, since it does not makes sense to only "
                       "select monitors, but to also exclude them",
-                      ld.execute(), std::invalid_argument);
+                      ld.execute(), const std::invalid_argument &);
   }
 };
 

@@ -34,7 +34,7 @@ SaveDiffFittingAscii::SaveDiffFittingAscii()
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to "
                   "save to a TBL file");
@@ -42,7 +42,7 @@ void SaveDiffFittingAscii::init() {
   // Declare required parameters, filename with ext {.his} and input
   // workspace
   const std::vector<std::string> exts{".txt", ".csv", ""};
-  declareProperty(Kernel::make_unique<API::FileProperty>(
+  declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
 

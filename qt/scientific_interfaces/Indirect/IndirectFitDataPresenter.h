@@ -13,6 +13,7 @@
 #include "IndirectFittingModel.h"
 
 #include "DllConfig.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <QObject>
@@ -21,20 +22,26 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
+    : public QObject,
+      public AnalysisDataServiceObserver {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
                            IIndirectFitDataView *view);
-
   IndirectFitDataPresenter(
       IndirectFittingModel *model, IIndirectFitDataView *view,
       std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
+  ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+  void setMultiInputSampleWSSuffixes();
+  void setMultiInputSampleFBSuffixes();
+  void setMultiInputResolutionWSSuffixes();
+  void setMultiInputResolutionFBSuffixes();
 
   void setStartX(double startX, std::size_t dataIndex, int spectrumIndex);
   void setEndX(double endX, std::size_t dataIndex, int spectrumIndex);
@@ -43,6 +50,9 @@ public:
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
+
+  void replaceHandle(const std::string &workspaceName,
+                     const Workspace_sptr &workspace) override;
 
 public slots:
   void updateSpectraInTable(std::size_t dataIndex);
@@ -56,7 +66,6 @@ protected slots:
   virtual void closeDialog();
 
 signals:
-  void singleSampleLoaded();
   void singleResolutionLoaded();
   void dataAdded();
   void dataRemoved();
@@ -86,6 +95,11 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
   void updateDataInTable(std::size_t dataIndex);
+
+  void selectReplacedWorkspace(const QString &workspaceName);
+
+  virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
+  virtual void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog);
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;

@@ -30,7 +30,7 @@ class ExperimentInfoTest(unittest.TestCase):
     def test_information_access(self):
         inst = self._expt_ws.getInstrument()
         self.assertTrue(isinstance(inst, Instrument))
-        self.assertEquals(self._expt_ws.getRunNumber(), 48127)
+        self.assertEqual(self._expt_ws.getRunNumber(), 48127)
 
     def test_sample_access_returns_sample_object(self):
         sample = self._expt_ws.sample()
@@ -42,17 +42,17 @@ class ExperimentInfoTest(unittest.TestCase):
 
     def test_get_energy_mode(self):
         emode = self._expt_ws.getEMode()
-        self.assertEquals(emode, 0)
+        self.assertEqual(emode, 0)
 
     def test_detectorInfo(self):
         detInfo = self._expt_ws.detectorInfo()
         # No instrument in test workspace, so size is 0.
-        self.assertEquals(detInfo.size(), 0)
+        self.assertEqual(detInfo.size(), 0)
 
 #    def test_set_and_get_efixed(self):
 #      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
 #        ws.setEFixed(1, pi)
-#      self.assertEquals(ws.getEFixed(1), pi)
+#      self.assertEqual(ws.getEFixed(1), pi)
 
 if __name__ == '__main__':
     unittest.main()

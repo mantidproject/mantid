@@ -44,37 +44,37 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         ##########################################################################
         alg = BasicPropsAlg()
         props = alg.getProperties()
-        self.assertEquals(0, len(props))
+        self.assertEqual(0, len(props))
         alg.initialize()
         props = alg.getProperties()
         if sys.version_info[0] < 3:
-            self.assertEquals(7, len(props))
+            self.assertEqual(7, len(props))
         else:
-            self.assertEquals(6, len(props))
+            self.assertEqual(6, len(props))
 
         input = alg.getProperty("SimpleInput")
-        self.assertEquals(input.direction, Direction.Input)
-        self.assertEquals(input.value, 1)
+        self.assertEqual(input.direction, Direction.Input)
+        self.assertEqual(input.value, 1)
         if sys.version_info < (3,):
             input_long = alg.getProperty("SimpleLongInput")
-            self.assertEquals(input_long.direction, Direction.Input)
-            self.assertEquals(input_long.value, 5)
+            self.assertEqual(input_long.direction, Direction.Input)
+            self.assertEqual(input_long.value, 5)
         switch = alg.getProperty("Switch")
-        self.assertEquals(switch.direction, Direction.Input)
-        self.assertEquals(switch.value, True)
+        self.assertEqual(switch.direction, Direction.Input)
+        self.assertEqual(switch.value, True)
         output = alg.getProperty("SimpleOutput")
-        self.assertEquals(output.direction, Direction.Output)
-        self.assertEquals(output.value, 1.0)
+        self.assertEqual(output.direction, Direction.Output)
+        self.assertEqual(output.value, 1.0)
         str_prop = alg.getProperty("InputString")
-        self.assertEquals(str_prop.direction, Direction.Input)
-        self.assertEquals(str_prop.value, "")
+        self.assertEqual(str_prop.direction, Direction.Input)
+        self.assertEqual(str_prop.value, "")
 
         doc_prop_def_dir = alg.getProperty("PropWithDocDefaultDir")
-        self.assertEquals(doc_prop_def_dir.direction, Direction.Input)
-        self.assertEquals(doc_prop_def_dir.documentation, alg._testdocstring)
+        self.assertEqual(doc_prop_def_dir.direction, Direction.Input)
+        self.assertEqual(doc_prop_def_dir.documentation, alg._testdocstring)
         doc_prop_out_dir = alg.getProperty("PropWithDocOutputDir")
-        self.assertEquals(doc_prop_out_dir.direction, Direction.Output)
-        self.assertEquals(doc_prop_out_dir.documentation, alg._testdocstring)
+        self.assertEqual(doc_prop_out_dir.direction, Direction.Output)
+        self.assertEqual(doc_prop_out_dir.documentation, alg._testdocstring)
 
     def test_properties_obey_attached_validators(self):
         """
@@ -95,10 +95,10 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         alg = PropertiesWithValidation()
         alg.initialize()
         props = alg.getProperties()
-        self.assertEquals(2, len(props))
+        self.assertEqual(2, len(props))
 
         def_dir = alg.getProperty("NumPropWithDefaultDir")
-        self.assertEquals(def_dir.direction, Direction.Input)
+        self.assertEqual(def_dir.direction, Direction.Input)
         self.assertNotEquals("", def_dir.isValid)
         self.assertRaises(ValueError, alg.setProperty, "NumPropWithDefaultDir", -10)
         testhelpers.assertRaisesNothing(self, alg.setProperty, "NumPropWithDefaultDir", 11)
@@ -121,14 +121,14 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         alg = SpecializedProperties()
         alg.initialize()
         props = alg.getProperties()
-        self.assertEquals(2, len(props))
+        self.assertEqual(2, len(props))
 
         nodoc = alg.getProperty("NoDocString")
         self.assertTrue(isinstance(nodoc, FileProperty))
-        self.assertEquals("", nodoc.documentation)
+        self.assertEqual("", nodoc.documentation)
         withdoc = alg.getProperty("WithDocString")
         self.assertTrue(isinstance(withdoc, FileProperty))
-        self.assertEquals(alg._testdocstring, withdoc.documentation)
+        self.assertEqual(alg._testdocstring, withdoc.documentation)
 
 
     def test_passing_settings_object_connects_to_correct_object(self):
@@ -147,7 +147,7 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         alg = DummyAlg()
         alg.initialize()
         settings = alg.getProperty("BasicProp2").settings
-        self.assertTrue(settings is not None)
+        self.assertNotEqual(settings, None)
         self.assertTrue(settings.isEnabled(alg))
         alg.setProperty("BasicProp1", 2) # not default
         self.assertTrue(not settings.isEnabled(alg))

@@ -32,7 +32,7 @@ public:
       cansas1d.initialize();
 
     // No parameters have been set yet, so it should throw
-    TS_ASSERT_THROWS(cansas1d.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(cansas1d.execute(), const std::runtime_error &);
 
     // Set the file name
     cansas1d.setPropertyValue("Filename", inputFile);

@@ -83,7 +83,8 @@ public:
     TS_ASSERT_DELTA((*thetaAxis)(0), 6.0883, 0.0001);
     TS_ASSERT_DELTA((*thetaAxis)(1), 180.0, 0.0001);
     // Check axis is correct length
-    TS_ASSERT_THROWS((*thetaAxis)(2), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*thetaAxis)(2),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     // Data should be swapped over
     TS_ASSERT_EQUALS(input->x(0), output->x(1));
@@ -142,7 +143,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Target", "DeltaE"));
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("EMode", "Indirect"));
     conv.setRethrows(true);
-    TS_ASSERT_THROWS(conv.execute(), std::logic_error);
+    TS_ASSERT_THROWS(conv.execute(), const std::logic_error &);
 
     TS_ASSERT_THROWS_NOTHING(conv.setPropertyValue("Efixed", "1.845"));
     TS_ASSERT_THROWS_NOTHING(conv.execute());
@@ -166,7 +167,8 @@ public:
     TS_ASSERT_DELTA((*thetaAxis)(0), 0.00311225, 1e-08);
     TS_ASSERT_DELTA((*thetaAxis)(1), 0.00311225, 1e-08);
     // Check axis is correct length
-    TS_ASSERT_THROWS((*thetaAxis)(2), Mantid::Kernel::Exception::IndexError);
+    TS_ASSERT_THROWS((*thetaAxis)(2),
+                     const Mantid::Kernel::Exception::IndexError &);
 
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);

@@ -13,7 +13,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/make_unique.h"
+
 #include <limits>
 
 using namespace Mantid::API;
@@ -56,42 +56,42 @@ JoinISISPolarizationEfficiencies::seeAlso() const {
 void JoinISISPolarizationEfficiencies::init() {
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           Pp, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Pp polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           Ap, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Ap polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           Rho, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Rho polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           Alpha, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the Alpha polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           P1, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the P1 polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           P2, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the P2 polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           F1, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the F1 polarization efficiency.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           F2, "", Kernel::Direction::Input, PropertyMode::Optional),
       "A matrix workspaces containing the F2 polarization efficiency.");
 
@@ -128,14 +128,15 @@ MatrixWorkspace_sptr JoinISISPolarizationEfficiencies::createEfficiencies(
   auto const &inWS = interpolatedWorkspaces.front();
   MatrixWorkspace_sptr outWS = DataObjects::create<Workspace2D>(
       *inWS, labels.size(), inWS->histogram(0));
-  auto axis1 = new TextAxis(labels.size());
-  outWS->replaceAxis(1, axis1);
+  auto axis1 = std::make_unique<TextAxis>(labels.size());
+  auto axis1Raw = axis1.get();
+  outWS->replaceAxis(1, std::move(axis1));
   outWS->getAxis(0)->setUnit("Wavelength");
 
   for (size_t i = 0; i < interpolatedWorkspaces.size(); ++i) {
     auto &ws = interpolatedWorkspaces[i];
     outWS->setHistogram(i, ws->histogram(0));
-    axis1->setLabel(i, labels[i]);
+    axis1Raw->setLabel(i, labels[i]);
   }
 
   return outWS;

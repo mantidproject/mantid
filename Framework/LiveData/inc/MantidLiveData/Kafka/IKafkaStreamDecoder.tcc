@@ -1,13 +1,23 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
+#include "MantidNexusGeometry/JSONInstrumentBuilder.h"
+
+GNU_DIAG_OFF("conversion")
+#include "../src/Kafka/private/Schema/tdct_timestamps_generated.h"
+GNU_DIAG_ON("conversion")
 
 namespace {
 Mantid::Kernel::Logger logger("IKafkaStreamDecoder");
-}
+const std::string CHOPPER_MESSAGE_ID = "tdct";
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -70,32 +80,93 @@ boost::shared_ptr<T> IKafkaStreamDecoder::createBufferWorkspace(
   return buffer;
 }
 
+template <typename T>
+void loadFromAlgorithm(const std::string &name,
+                       boost::shared_ptr<T> workspace) {
+  auto alg =
+      API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  // Do not put the workspace in the ADS
+  alg->setChild(true);
+  alg->initialize();
+  alg->setPropertyValue("InstrumentName", name);
+  alg->setProperty("Workspace", workspace);
+  alg->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
+  alg->execute();
+}
+
 /**
  * Run LoadInstrument for the given instrument name. If it cannot succeed it
  * does nothing to the internal workspace
  * @param name Name of an instrument to load
  * @param workspace A pointer to the workspace receiving the instrument
+ * @param parseJSON flag which will extract geometry from
  */
 template <typename T>
 void IKafkaStreamDecoder::loadInstrument(const std::string &name,
-                                         boost::shared_ptr<T> workspace) {
+                                         boost::shared_ptr<T> workspace,
+                                         const std::string &jsonGeometry) {
   if (name.empty()) {
     logger.warning("Empty instrument name found");
     return;
   }
   try {
-    auto alg =
-        API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
-    // Do not put the workspace in the ADS
-    alg->setChild(true);
-    alg->initialize();
-    alg->setPropertyValue("InstrumentName", name);
-    alg->setProperty("Workspace", workspace);
-    alg->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
-    alg->execute();
+    if (jsonGeometry.empty())
+      loadFromAlgorithm<T>(name, workspace);
+    else {
+      NexusGeometry::JSONInstrumentBuilder builder(
+          "{\"nexus_structure\":" + jsonGeometry + "}");
+      workspace->setInstrument(builder.buildGeometry());
+    }
   } catch (std::exception &exc) {
-    logger.warning() << "Error loading instrument '" << name
-                    << "': " << exc.what() << "\n";
+    logger.warning() << "Error loading instrument '" << name << "': \""
+                     << exc.what()
+                     << "\". The streamed data will have no associated "
+                        "instrument geometry. \n";
+  }
+}
+
+/**
+ * Add chopper timestamps to the mutable run info of all workspaces used to
+ * buffer data from the kafka stream.
+ * @param workspaces buffer workspaces storing kafka data.
+ */
+template <typename T>
+void IKafkaStreamDecoder::writeChopperTimestampsToWorkspaceLogs(
+    std::vector<T> workspaces) {
+  if (!m_chopperStream)
+    return;
+
+  std::string buffer;
+  int64_t offset;
+  int32_t partition;
+  std::string topicName;
+  m_chopperStream->consumeMessage(&buffer, offset, partition, topicName);
+
+  if (buffer.empty())
+    return;
+
+  if (flatbuffers::BufferHasIdentifier(
+          reinterpret_cast<const uint8_t *>(buffer.c_str()),
+          CHOPPER_MESSAGE_ID.c_str())) {
+    auto chopperMsg =
+        Gettimestamp(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+
+    const auto *timestamps = chopperMsg->timestamps();
+    std::vector<uint64_t> mantidTimestamps;
+    std::copy(timestamps->begin(), timestamps->end(), mantidTimestamps.begin());
+    auto name = chopperMsg->name()->str();
+
+    for (auto workspace : workspaces) {
+      auto mutableRunInfo = workspace->mutableRun();
+      Kernel::ArrayProperty<uint64_t> *property;
+      if (mutableRunInfo.hasProperty(name)) {
+        property = dynamic_cast<Kernel::ArrayProperty<uint64_t> *>(
+            mutableRunInfo.getProperty(name));
+      } else {
+        property = new Mantid::Kernel::ArrayProperty<uint64_t>(name);
+      }
+      *property = mantidTimestamps;
+    }
   }
 }
 } // namespace LiveData

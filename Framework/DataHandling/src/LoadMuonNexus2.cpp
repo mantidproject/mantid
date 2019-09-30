@@ -249,7 +249,7 @@ void LoadMuonNexus2::doExec() {
       suffix << (period + 1);
       outws = outputWorkspace + "_" + suffix.str();
       std::string WSName = localWSName + "_" + suffix.str();
-      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
           outws, WSName, Direction::Output));
       if (wsGrpSptr)
         wsGrpSptr->addWorkspace(localWorkspace);
@@ -263,7 +263,7 @@ void LoadMuonNexus2::doExec() {
 
     int wsIndex = 0;
     localWorkspace->mutableX(0) = timeBins;
-    for (int spec = static_cast<int>(m_spec_min);
+    for (auto spec = static_cast<int>(m_spec_min);
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
       localWorkspace->setHistogram(
@@ -378,7 +378,7 @@ void LoadMuonNexus2::loadRunDetails(
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
 
-  int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
+  auto numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
   runDetails.addProperty("nspectra", numSpectra);
 
   m_filename = getPropertyValue("Filename");

@@ -27,11 +27,12 @@ using namespace Mantid::API;
 void SumRowColumn::init() {
   // Assume input workspace has correct spectra in it - no more and no less
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                            Direction::Input),
       "The input workspace, which must contain all the spectra from the bank "
       "of interest - no more and no less (so 128x128 or 192x192).");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                        Direction::Output),
                   "The name of the workspace in which to store the result.");
 
   // Need to select whether to sum rows or columns
@@ -72,7 +73,7 @@ void SumRowColumn::exec() {
   }
 
   // This is the dimension if all rows/columns are included
-  const int dim = static_cast<int>(std::sqrt(static_cast<double>(numSpec)));
+  const auto dim = static_cast<int>(std::sqrt(static_cast<double>(numSpec)));
 
   // Check the column range properties
   int start = getProperty("HOverVMin");

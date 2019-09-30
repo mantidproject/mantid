@@ -34,13 +34,13 @@ using namespace DataObjects;
 void SaveNexus::init() {
   // Declare required parameters, filename with ext {.nxs,.nx5,.xml} and input
   // workspace
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
 
   const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "Filename", "", FileProperty::Save, fileExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "",
+                                                 FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
   //
@@ -74,7 +74,7 @@ void SaveNexus::init() {
       "Number of last WorkspaceIndex to read, only for single period data.\n"
       "Not yet implemented.");
   declareProperty(
-      make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
+      std::make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "List of WorkspaceIndex numbers to read, only for single period data.\n"
       "Not yet implemented");
   declareProperty("Append", false,

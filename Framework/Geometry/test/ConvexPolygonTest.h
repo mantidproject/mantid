@@ -122,8 +122,8 @@ public:
   void test_Invalid_Index_Access_Throws_For_At() {
     using Mantid::Kernel::Exception::IndexError;
     ConvexPolygon triangle = makeEquilateralTriangle();
-    TS_ASSERT_THROWS(triangle.at(3), IndexError);
-    TS_ASSERT_THROWS(triangle.at(-1), IndexError);
+    TS_ASSERT_THROWS(triangle.at(3), const IndexError &);
+    TS_ASSERT_THROWS(triangle.at(-1), const IndexError &);
   }
 
 private:

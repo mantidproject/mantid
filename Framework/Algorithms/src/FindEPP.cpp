@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/FindEPP.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -45,10 +44,10 @@ const std::string FindEPP::summary() const {
 /** Initialize the algorithm's properties.
  */
 void FindEPP::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -61,7 +60,7 @@ void FindEPP::exec() {
 
   initWorkspace();
 
-  int64_t numberspectra = static_cast<int64_t>(m_inWS->getNumberHistograms());
+  auto numberspectra = static_cast<int64_t>(m_inWS->getNumberHistograms());
 
   // Loop over spectra
   PARALLEL_FOR_IF(threadSafe(*m_inWS, *m_outWS))
@@ -79,7 +78,7 @@ void FindEPP::exec() {
  * @param index : the workspace index
  */
 void FindEPP::fitGaussian(int64_t index) {
-  size_t spectrum = static_cast<size_t>(index);
+  auto spectrum = static_cast<size_t>(index);
   m_outWS->cell<int>(spectrum, 0) = static_cast<int>(spectrum);
 
   const auto &x = m_inWS->x(spectrum).rawData();
@@ -204,7 +203,7 @@ void FindEPP::initWorkspace() {
   m_outWS->addColumn("str", "FitStatus");
 
   const size_t numberSpectra = m_inWS->getNumberHistograms();
-  m_progress = make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
+  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numberSpectra);
 
   m_outWS->setRowCount(numberSpectra);
 }

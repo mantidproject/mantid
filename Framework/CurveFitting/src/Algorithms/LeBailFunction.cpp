@@ -929,7 +929,7 @@ void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
   std::stringstream parss;
   parss << "f0." << paramname;
   string parnamef0 = parss.str();
-  auto bc = Kernel::make_unique<Constraints::BoundaryConstraint>(
+  auto bc = std::make_unique<Constraints::BoundaryConstraint>(
       m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
   m_compsiteFunction->addConstraint(std::move(bc));
 }
@@ -1077,8 +1077,6 @@ LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
   auto vsiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
                             m_orderedProfileParameterNames.cend(), parname);
 
-  double parvalue = EMPTY_DBL();
-
   bool found = true;
   if (vsiter == m_orderedProfileParameterNames.end()) {
     // End of vector
@@ -1090,7 +1088,8 @@ LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
       found = false;
   }
 
-  // Get parmaeter
+  // Get parameter
+  double parvalue;
   if (found) {
     // It is a native peak parameter
     parvalue = peak->getParameter(parname);

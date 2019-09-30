@@ -34,10 +34,10 @@ using API::WorkspaceProperty;
  *
  */
 void Rebunch::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of rebinning");
 
@@ -61,10 +61,10 @@ void Rebunch::exec() {
   bool dist = inputW->isDistribution();
 
   // workspace independent determination of length
-  int histnumber = static_cast<int>(inputW->size() / inputW->blocksize());
+  auto histnumber = static_cast<int>(inputW->size() / inputW->blocksize());
 
-  int size_x = static_cast<int>(inputW->x(0).size());
-  int size_y = static_cast<int>(inputW->y(0).size());
+  auto size_x = static_cast<int>(inputW->x(0).size());
+  auto size_y = static_cast<int>(inputW->y(0).size());
 
   // signal is the same length for histogram and point data
   int ny = (size_y / n_bunch);

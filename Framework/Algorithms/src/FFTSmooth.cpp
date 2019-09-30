@@ -31,10 +31,10 @@ using namespace HistogramData;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth::init() {
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
@@ -60,7 +60,7 @@ void FFTSmooth::exec() {
   double x0 = m_inWS->x(spec)[0];
 
   // Symmetrize the input spectrum
-  int dn = static_cast<int>(m_inWS->y(0).size());
+  auto dn = static_cast<int>(m_inWS->y(0).size());
 
   HistogramBuilder builder;
   builder.setX(m_inWS->x(0).size() + dn);
@@ -147,7 +147,7 @@ void FFTSmooth::exec() {
  *  @param n :: The order of truncation
  */
 void FFTSmooth::truncate(int n) {
-  int my = static_cast<int>(m_unfilteredWS->y(0).size());
+  auto my = static_cast<int>(m_unfilteredWS->y(0).size());
   int ny = my / n;
 
   double f = double(ny) / my;
@@ -175,18 +175,19 @@ void FFTSmooth::truncate(int n) {
   xr.assign(X.begin(), X.begin() + nx);
   xi.assign(X.begin(), X.begin() + nx);
 
+  using std::placeholders::_1;
   std::transform(yr.begin(), yr.end(), yr.begin(),
-                 std::bind2nd(std::multiplies<double>(), f));
+                 std::bind(std::multiplies<double>(), _1, f));
   std::transform(yi.begin(), yi.end(), yi.begin(),
-                 std::bind2nd(std::multiplies<double>(), f));
+                 std::bind(std::multiplies<double>(), _1, f));
 }
 
 /** Smoothing by zeroing.
  *  @param n :: The order of truncation
  */
 void FFTSmooth::zero(int n) {
-  int mx = static_cast<int>(m_unfilteredWS->x(0).size());
-  int my = static_cast<int>(m_unfilteredWS->y(0).size());
+  auto mx = static_cast<int>(m_unfilteredWS->x(0).size());
+  auto my = static_cast<int>(m_unfilteredWS->y(0).size());
   int ny = my / n;
 
   if (ny == 0)

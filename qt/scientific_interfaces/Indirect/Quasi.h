@@ -54,6 +54,8 @@ private:
   void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
 
+  void setFileExtensionsByName(bool filter) override;
+
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
