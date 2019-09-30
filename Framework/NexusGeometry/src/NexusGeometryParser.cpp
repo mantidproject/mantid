@@ -155,8 +155,19 @@ private:
       auto nCharacters = dataType.getSize();
       std::vector<char> value(nCharacters);
       data.read(value.data(), dataType, data.getSpace());
-      return std::string(value.begin(), value.end());
+      auto str = std::string(value.begin(), value.end());
+      str.erase(std::find(str.begin(), str.end(), '\0'), str.end());
+      return str;
     }
+  }
+
+  // Provided to support invalid or null-termination character strings
+  std::string readOrSubsitute(const std::string &dataset, const Group &group,
+                              std::string &substitue) {
+    auto read = get1DStringDataset(dataset, group);
+    if (read.empty())
+      read = substitue;
+    return read;
   }
 
   /** Open subgroups of parent group
@@ -589,7 +600,7 @@ private:
     Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
     std::string sourceName = "Unspecfied";
     if (utilities::findDataset(sourceGroup, "name"))
-      sourceName = get1DStringDataset("name", sourceGroup);
+      sourceName = readOrSubsitute("name", sourceGroup, sourceName);
     auto sourceTransformations = getTransformations(file, sourceGroup);
     auto defaultPos = Eigen::Vector3d(0.0, 0.0, 0.0);
     builder.addSource(sourceName, sourceTransformations * defaultPos);
@@ -605,7 +616,7 @@ private:
         sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
     std::string sampleName = "Unspecified";
     if (utilities::findDataset(sampleGroup, "name"))
-      sampleName = get1DStringDataset("name", sampleGroup);
+      sampleName = readOrSubsitute("name", sampleGroup, sampleName);
     builder.addSample(sampleName, samplePos);
   }
 
