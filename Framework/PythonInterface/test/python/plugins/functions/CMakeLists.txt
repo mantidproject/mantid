@@ -4,7 +4,6 @@ set(TEST_PY_FILES
     BesselTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
-    StandardSCTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
@@ -14,7 +13,8 @@ set(TEST_PY_FILES
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
-    TeixeiraWaterTest.py)
+    TeixeiraWaterTest.py
+    StandardSCTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
