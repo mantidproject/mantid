@@ -27,9 +27,11 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
         # Main Window
         self.setupUi(self)
+        self.doc = "Engineering Diffraction 2"
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.calibration_presenter = None
+        self.set_on_help_clicked(self.open_help_window)
 
         self.setup_calibration()
 
@@ -39,8 +41,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
         self.tabs.addTab(cal_view, "Calibration")
 
-    def on_help_clicked(self):
-        self.pushButton_help.connect(self.open_help_window)
+    def set_on_help_clicked(self, slot):
+        self.pushButton_help.clicked.connect(slot)
 
     def open_help_window(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
