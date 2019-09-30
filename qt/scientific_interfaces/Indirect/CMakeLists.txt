@@ -404,8 +404,10 @@ set(
 
 set(RES_FILES IndirectInterfaceResources.qrc)
 
-# XML is required to parse the settings file
-find_package(Qt5 COMPONENTS Xml REQUIRED)
+if(ENABLE_WORKBENCH)
+  # XML is required to parse the settings file
+  find_package(Qt5 COMPONENTS Xml REQUIRED)
+endif()
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesIndirect

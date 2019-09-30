@@ -3215,9 +3215,7 @@ void MuonAnalysis::nowDataAvailable() {
 }
 
 void MuonAnalysis::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
+  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
 }
 
 /**

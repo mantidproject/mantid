@@ -147,15 +147,6 @@ PeakPickerTool::PeakPickerTool(
 
   connect(d_graph, SIGNAL(curveRemoved()), this, SLOT(curveRemoved()));
   connect(d_graph, SIGNAL(modifiedGraph()), this, SLOT(modifiedGraph()));
-
-  try { // if it's a MatrixWorkspace in the ADS
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            m_wsName.toStdString()));
-  } catch (...) { // or it can be a TableWorkspace
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        m_fitPropertyBrowser->createMatrixFromTableWorkspace());
-  }
 }
 
 PeakPickerTool::~PeakPickerTool() {

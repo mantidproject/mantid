@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 
-from mantidqt.widgets.manageuserdirectories import ManageUserDirectories
+from mantidqt.widgets import manageuserdirectories
 from mantidqt.interfacemanager import InterfaceManager
 
 
@@ -60,7 +60,7 @@ class HelpWidgetView(QtWidgets.QWidget):
         self.help_button.clicked.connect(slot)
 
     def show_directory_manager(self):
-        ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def _on_help_button_clicked(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
