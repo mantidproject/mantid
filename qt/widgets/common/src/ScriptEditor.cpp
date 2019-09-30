@@ -101,6 +101,12 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
   setEolMode(EolUnix);
 #endif
 
+  // Adding zoom shortcuts
+  new QShortcut(QKeySequence::ZoomOut, this, SLOT(zoomOut()));
+  // QKeySequence::ZoomIn doesn't work for some reason.
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal), this, SLOT(zoomIn()));
+  new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this, SLOT(zoomIn()));
+
   // Syntax highlighting and code completion
   setLexer(codelexer);
   readSettings();
