@@ -42,7 +42,7 @@ public:
   ~loadObserver(){};
   void setSlot(std::function<void()> &func) { m_slot = func; };
   void update() override { m_slot(); };
-  void update(std::string) { m_slot(); };
+  void update(std::string) override { m_slot(); };
 
 private:
   std::function<void()> m_slot;
