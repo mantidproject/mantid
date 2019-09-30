@@ -45,6 +45,7 @@ const std::string MODVECTOR1{"ModVector1"};
 const std::string MODVECTOR2{"ModVector2"};
 const std::string MODVECTOR3{"ModVector3"};
 const std::string CROSSTERMS{"CrossTerms"};
+const std::string SAVEMODINFO{"SaveModulationInfo"};
 const std::string AVERAGE_ERR{"AverageError"};
 const std::string NUM_INDEXED{"NumIndexed"};
 const std::string MAIN_NUM_INDEXED{"MainNumIndexed"};
@@ -61,33 +62,56 @@ struct SatelliteIndexingArgs {
 
 struct IndexPeaksArgs {
   static IndexPeaksArgs parse(const API::Algorithm &alg) {
-    PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
-    const auto &lattice = peaksWS->sample().getOrientedLattice();
+    const PeaksWorkspace_sptr peaksWS = alg.getProperty(PEAKSWORKSPACE);
+    const int maxOrderFromAlg = alg.getProperty(Prop::MAXORDER);
 
-    auto addIfNonZero = [](const V3D &modVec, std::vector<V3D> &modVectors) {
-      if (std::fabs(modVec[0]) > 0 && std::fabs(modVec[1]) > 0 &&
+    auto addIfNonZero = [](const auto &modVec, std::vector<V3D> &modVectors) {
+      if (std::fabs(modVec[0]) > 0 || std::fabs(modVec[1]) > 0 ||
           std::fabs(modVec[2]) > 0)
-        modVectors.emplace_back(modVec);
+        modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2]));
     };
-    const int maxOrder = lattice.getMaxOrder();
+
+    int maxOrderToUse{0};
     std::vector<V3D> modVectorsToUse;
-    if (maxOrder > 0) {
-      modVectorsToUse.reserve(3);
-      for (auto i = 0; i < 3; ++i) {
-        addIfNonZero(lattice.getModVec(i), modVectorsToUse);
+    modVectorsToUse.reserve(3);
+    bool crossTermToUse{false};
+    if (maxOrderFromAlg > 0) {
+      // Use inputs from algorithm
+      maxOrderToUse = maxOrderFromAlg;
+      crossTermToUse = alg.getProperty(Prop::CROSSTERMS);
+      std::vector<double> modVector = alg.getProperty(Prop::MODVECTOR1);
+      addIfNonZero(std::move(modVector), modVectorsToUse);
+      modVector = alg.getProperty(Prop::MODVECTOR2);
+      addIfNonZero(std::move(modVector), modVectorsToUse);
+      modVector = alg.getProperty(Prop::MODVECTOR3);
+      addIfNonZero(std::move(modVector), modVectorsToUse);
+    } else {
+      // Use lattice definitions if they exist
+      const auto &lattice = peaksWS->sample().getOrientedLattice();
+      maxOrderToUse = lattice.getMaxOrder();
+      if (maxOrderToUse > 0) {
+        for (auto i = 0; i < 3; ++i) {
+          addIfNonZero(lattice.getModVec(i), modVectorsToUse);
+        }
       }
+      crossTermToUse = lattice.getCrossTerm();
     }
 
-    return {peaksWS, alg.getProperty(TOLERANCE), alg.getProperty(ROUNDHKLS),
+    return {peaksWS,
+            alg.getProperty(TOLERANCE),
+            alg.getProperty(ROUNDHKLS),
             alg.getProperty(COMMONUB),
-            SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE), maxOrder,
-                                  modVectorsToUse, lattice.getCrossTerm()}};
+            alg.getProperty(SAVEMODINFO),
+            SatelliteIndexingArgs{alg.getProperty(SATE_TOLERANCE),
+                                  maxOrderToUse, modVectorsToUse,
+                                  crossTermToUse}};
   }
 
   PeaksWorkspace_sptr workspace;
   const double mainTolerance;
   const bool roundHKLs;
   const bool commonUB;
+  const bool storeModulationInfo;
   const SatelliteIndexingArgs satellites;
 };
 } // namespace Prop
@@ -452,8 +476,13 @@ void IndexPeaks::init() {
 
   this->declareProperty(
       Prop::CROSSTERMS, false,
-      "Include combinations of modulation vectors in satelhte search",
+      "Include combinations of modulation vectors in satellite search",
       Direction::Input);
+
+  this->declareProperty(
+      Prop::SAVEMODINFO, false,
+      "If true, update the OrientedLattice with the maxOrder, "
+      "modulation vectors & cross terms values input to the algorithm");
 
   // -- outputs --
   this->declareProperty(Prop::NUM_INDEXED, 0,
@@ -505,6 +534,16 @@ void IndexPeaks::exec() {
   if (args.workspace->getNumberPeaks() == 0) {
     g_log.warning("Empty peaks workspace. Nothing to index");
     return;
+  }
+
+  // save modulation input if asked
+  if (args.storeModulationInfo) {
+    auto &lattice = args.workspace->mutableSample().getOrientedLattice();
+    lattice.setMaxOrder(args.satellites.maxOrder);
+    lattice.setCrossTerm(args.satellites.crossTerms);
+    for (auto i = 0u; i < 3; ++i) {
+      lattice.setModVec1(args.satellites.modVectors[i]);
+    }
   }
 
   CombinedIndexingStats indexingInfo;

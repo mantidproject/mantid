@@ -82,10 +82,10 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceMainReflOnly() {
   return createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
 }
 
-PeaksWorkspace_sptr
-createTestPeaksWorkspaceWithSatellites(const int maxOrder,
-                                       const std::vector<V3D> &modVectors,
-                                       const bool crossTerms = false) {
+PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(
+    const int maxOrder = -1,
+    const std::vector<V3D> &modVectors = std::vector<V3D>(),
+    const bool crossTerms = false) {
   constexpr int npeaks{5};
   const std::vector<double> ub = {0.269,  -0.01, 0.033, 0.081, -0.191,
                                   -0.039, 0.279, 0.347, -0.02};
@@ -311,28 +311,6 @@ public:
 
     assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
     assertErrorsAsExpected(*alg, 0.1995736054, 0.0140447, 0.32325956);
-
-    //    const auto peaksWS2 =
-    //        createTestPeaksWorkspaceWithSatellites(1, {V3D(0.333, -0.667,
-    //        0.333)});
-
-    //    Mantid::Crystal::IndexPeaksWithSatellites indexer;
-    //    indexer.initialize();
-    //    indexer.setProperty("PeaksWorkspace", peaksWS2);
-    //    indexer.setProperty("CommonUBForAll", "1");
-    //    indexer.setProperty("Tolerance", "0.15");
-    //    indexer.setProperty("ToleranceForSatellite", "0.4");
-    //    indexer.setProperty("RoundHKLs", "0");
-    //    indexer.setProperty("MaxOrder", 1);
-    //    indexer.setProperty("ModVector1", "0.333,-0.667,0.333");
-    //    indexer.execute();
-
-    //    std::cerr << "\n"
-    //              << indexer.getPropertyValue("MainNumIndexed") << "   "
-    //              << indexer.getPropertyValue("MainError") << "   "
-    //              << indexer.getPropertyValue("SateNumIndexed") << "   "
-    //              << indexer.getPropertyValue("SatelliteError") << "   "
-    //              << indexer.getPropertyValue("AverageError") << "\n";
   }
 
   void
@@ -403,7 +381,7 @@ public:
     assertErrorsAsExpected(*alg, 0.12383213164, 0.0140447, 0.1970237718);
   }
 
-  void test_exec_with_three_mod_vectors_and_cross_terms() {
+  void test_exec_with_three_mod_vectors_and_cross_terms_from_lattice() {
     const auto peaksWS = createTestPeaksWorkspaceWithSatellites(
         1,
         {V3D(0.333, 0.667, -0.333), V3D(-0.333, 0.667, 0.333),
@@ -414,16 +392,54 @@ public:
                                           {"ToleranceForSatellite", "0.2"},
                                           {"RoundHKLs", "0"}});
 
-    assertNumberPeaksIndexed(*alg, 5, 2, 3);
-    const std::vector<V3D> expectedHKL{
-        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
-        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
-        V3D(-0.333695, 0.671228, -4.50819)};
-    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 2, -3),
-                                          V3D(-1, 1, -10), V3D(0, 2, -1),
-                                          V3D(-0, 0, -5)};
-    assertIndexesAsExpected(*peaksWS, expectedHKL, expectedIntHKL);
-    assertErrorsAsExpected(*alg, 0.02236871, 0.0140447, 0.027918076);
+    assertThreeModVectorWithCross(*alg, *peaksWS);
+  }
+
+  void
+  test_exec_with_three_mod_vectors_and_cross_terms_from_alg_input_no_lattice_update() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites();
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                             {"ToleranceForSatellite", "0.2"},
+                             {"RoundHKLs", "0"},
+                             {"MaxOrder", "1"},
+                             {"ModVector1", "0.333, 0.667, -0.333"},
+                             {"ModVector2", "-0.333, 0.667, 0.333"},
+                             {"ModVector3", "0.333, -0.667, 0.333"},
+                             {"CrossTerms", "1"}});
+
+    assertThreeModVectorWithCross(*alg, *peaksWS);
+    const auto &lattice = peaksWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(0, lattice.getMaxOrder())
+    TS_ASSERT_EQUALS(false, lattice.getCrossTerm())
+  }
+
+  void
+  test_exec_with_three_mod_vectors_and_cross_terms_from_alg_input_with_lattice_update() {
+    const auto peaksWS = createTestPeaksWorkspaceWithSatellites();
+
+    const auto alg =
+        indexPeaks(peaksWS, {{"CommonUBForAll", "0"},
+                             {"ToleranceForSatellite", "0.2"},
+                             {"RoundHKLs", "0"},
+                             {"MaxOrder", "1"},
+                             {"ModVector1", "0.333, 0.667, -0.333"},
+                             {"ModVector2", "-0.333, 0.667, 0.333"},
+                             {"ModVector3", "0.333, -0.667, 0.333"},
+                             {"CrossTerms", "1"},
+                             {"SaveModulationInfo", "1"}});
+
+    assertThreeModVectorWithCross(*alg, *peaksWS);
+    const auto &lattice = peaksWS->sample().getOrientedLattice();
+    TS_ASSERT_EQUALS(1, lattice.getMaxOrder())
+    TS_ASSERT_DELTA(V3D(0.333, 0.667, -0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(-0.333, 0.667, 0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_DELTA(V3D(0.333, -0.667, 0.333).norm(),
+                    lattice.getModVec(0).norm(), 1e-8)
+    TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
   }
 
   // --------------------------- Failure tests -----------------------------
@@ -451,21 +467,33 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("MaxOrder", -1), std::invalid_argument)
   }
 
-  void test_modvector_with_length_not_three_list_throws() {
+  void test_modvector_with_list_length_not_three_throws() {
     IndexPeaks alg;
     alg.initialize();
 
     for (const auto &propName : {"ModVector1", "ModVector2", "ModVector3"}) {
-      TS_ASSERT_THROWS(alg.setProperty(propName, "0"),
-                       std::invalid_argument)
-      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"),
-                       std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0"), std::invalid_argument)
+      TS_ASSERT_THROWS(alg.setProperty(propName, "0,0"), std::invalid_argument)
       TS_ASSERT_THROWS(alg.setProperty(propName, "0,0,0,0"),
                        std::invalid_argument)
     }
   }
 
 private:
+  void assertThreeModVectorWithCross(
+      const IndexPeaks &alg, const PeaksWorkspace_sptr::element_type &peaksWS) {
+    assertNumberPeaksIndexed(alg, 5, 2, 3);
+    const std::vector<V3D> expectedHKL{
+        V3D(-0.997659, 2.00538, -9.06112), V3D(-0.332659, 0.666681, -3.03773),
+        V3D(-0.998436, 1.01132, -9.99745), V3D(0.668401, 0.662732, -1.04211),
+        V3D(-0.333695, 0.671228, -4.50819)};
+    const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 2, -3),
+                                          V3D(-1, 1, -10), V3D(0, 2, -1),
+                                          V3D(-0, 0, -5)};
+    assertIndexesAsExpected(peaksWS, expectedHKL, expectedIntHKL);
+    assertErrorsAsExpected(alg, 0.02236871, 0.0140447, 0.027918076);
+  }
+
   // Check that all main indexed peaks match as expected
   void assertIndexesAsExpected(const PeaksWorkspace_sptr::element_type &peaksWS,
                                const std::vector<V3D> &expectedHKL) {
