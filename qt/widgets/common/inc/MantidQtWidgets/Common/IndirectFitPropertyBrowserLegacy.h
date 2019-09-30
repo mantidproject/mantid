@@ -26,7 +26,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IndirectFitPropertyBrowserLegacy
 public:
   /// Constructor.
   IndirectFitPropertyBrowserLegacy(QWidget *parent = nullptr,
-                             QObject *mantidui = nullptr);
+                                   QObject *mantidui = nullptr);
   /// Initialise the layout.
   void init() override;
 

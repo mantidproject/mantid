@@ -21,7 +21,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataViewLegacy::IndirectFitDataViewLegacy(QWidget *parent)
-    : IIndirectFitDataViewLegacy(parent), m_dataForm(new Ui::IndirectFitDataForm) {
+    : IIndirectFitDataViewLegacy(parent),
+      m_dataForm(new Ui::IndirectFitDataForm) {
   m_dataForm->setupUi(this);
   m_dataForm->dsResolution->hide();
   m_dataForm->lbResolution->hide();
@@ -66,7 +67,9 @@ void IndirectFitDataViewLegacy::readSettings(const QSettings &settings) {
   m_dataForm->dsResolution->readSettings(group);
 }
 
-void IndirectFitDataViewLegacy::disableMultipleDataTab() { setTabEnabled(1, false); }
+void IndirectFitDataViewLegacy::disableMultipleDataTab() {
+  setTabEnabled(1, false);
+}
 
 QStringList IndirectFitDataViewLegacy::getSampleWSSuffices() const {
   return m_dataForm->dsSample->getWSSuffixes();
@@ -84,19 +87,23 @@ QStringList IndirectFitDataViewLegacy::getResolutionFBSuffices() const {
   return m_dataForm->dsResolution->getFBSuffixes();
 }
 
-void IndirectFitDataViewLegacy::setSampleWSSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setSampleWSSuffices(
+    const QStringList &suffices) {
   m_dataForm->dsSample->setWSSuffixes(suffices);
 }
 
-void IndirectFitDataViewLegacy::setSampleFBSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setSampleFBSuffices(
+    const QStringList &suffices) {
   m_dataForm->dsSample->setFBSuffixes(suffices);
 }
 
-void IndirectFitDataViewLegacy::setResolutionWSSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setResolutionWSSuffices(
+    const QStringList &suffices) {
   m_dataForm->dsResolution->setWSSuffixes(suffices);
 }
 
-void IndirectFitDataViewLegacy::setResolutionFBSuffices(const QStringList &suffices) {
+void IndirectFitDataViewLegacy::setResolutionFBSuffices(
+    const QStringList &suffices) {
   m_dataForm->dsResolution->setFBSuffixes(suffices);
 }
 

@@ -35,7 +35,8 @@ struct TableRowExtractor {
 
     for (auto i = 1u; i < m_chiIndex; i += 2) {
       const auto &columnName = m_columns[i];
-      parameters[columnName] = ParameterValueNew(row.Double(i), row.Double(i + 1));
+      parameters[columnName] =
+          ParameterValueNew(row.Double(i), row.Double(i + 1));
     }
     return parameters;
   }
@@ -72,7 +73,8 @@ void applyData(F &&functor, const FitDataIteratorNew &fitDataBegin,
 void extractParametersFromTable(
     ITableWorkspace_sptr tableWs, const FitDataIteratorNew &fitDataBegin,
     const FitDataIteratorNew &fitDataEnd,
-    std::unordered_map<IndirectFitData const *, ParameterValuesNew> &parameters) {
+    std::unordered_map<IndirectFitData const *, ParameterValuesNew>
+        &parameters) {
   TableRowExtractor extractRowFromTable(tableWs);
   IDAWorkspaceIndex index;
   for (auto fitData = fitDataBegin; fitData < fitDataEnd; ++fitData) {
@@ -269,8 +271,8 @@ std::unordered_map<std::string, ParameterValueNew>
 IndirectFitOutput::getParameters(IndirectFitData const *fitData,
                                  WorkspaceIndex spectrum) const {
   return getValueOr(m_parameters,
-                    std::unordered_map<std::string, ParameterValueNew>(), fitData,
-                    spectrum);
+                    std::unordered_map<std::string, ParameterValueNew>(),
+                    fitData, spectrum);
 }
 
 boost::optional<ResultLocationNew>
@@ -298,7 +300,8 @@ WorkspaceGroup_sptr IndirectFitOutput::getLastResultGroup() const {
 
 void IndirectFitOutput::mapParameterNames(
     const std::unordered_map<std::string, std::string> &parameterNameChanges,
-    const FitDataIteratorNew &fitDataBegin, const FitDataIteratorNew &fitDataEnd) {
+    const FitDataIteratorNew &fitDataBegin,
+    const FitDataIteratorNew &fitDataEnd) {
   for (auto it = fitDataBegin; it < fitDataEnd; ++it)
     mapParameterNames(parameterNameChanges, it->get());
 }
@@ -382,7 +385,8 @@ void IndirectFitOutput::updateFitResultsFromUnstructured(
     for (const auto &spectrum : (**fitData).spectra()) {
       auto defaultIt = indices.find(spectrum);
       if (defaultIt != indices.end()) {
-        fitResults[spectrum] = ResultLocationNew(resultGroup, defaultIt->second);
+        fitResults[spectrum] =
+            ResultLocationNew(resultGroup, defaultIt->second);
       } else if (static_cast<int>(resultGroup->size()) > index.value) {
         fitResults[spectrum] = ResultLocationNew(resultGroup, index);
         indices[spectrum] = index;

@@ -17,7 +17,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitPlotViewLegacy::IndirectFitPlotViewLegacy(QWidget *parent)
-    : IIndirectFitPlotViewLegacy(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+    : IIndirectFitPlotViewLegacy(parent),
+      m_plotForm(new Ui::IndirectFitPreviewPlot) {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this,
@@ -82,7 +83,7 @@ void IndirectFitPlotViewLegacy::showMultipleDataSelection() {
 }
 
 void IndirectFitPlotViewLegacy::setAvailableSpectra(std::size_t minimum,
-                                              std::size_t maximum) {
+                                                    std::size_t maximum) {
   m_plotForm->swPlotSpectrum->setCurrentIndex(0);
   m_plotForm->spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum));
   m_plotForm->spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum));
@@ -135,13 +136,14 @@ void IndirectFitPlotViewLegacy::setFitRangeMaximum(double maximum) {
   selector->setMaximum(maximum);
 }
 
-void IndirectFitPlotViewLegacy::appendToDataSelection(const std::string &dataName) {
+void IndirectFitPlotViewLegacy::appendToDataSelection(
+    const std::string &dataName) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->cbDataSelection);
   m_plotForm->cbDataSelection->addItem(QString::fromStdString(dataName));
 }
 
-void IndirectFitPlotViewLegacy::setNameInDataSelection(const std::string &dataName,
-                                                 std::size_t index) {
+void IndirectFitPlotViewLegacy::setNameInDataSelection(
+    const std::string &dataName, std::size_t index) {
   m_plotForm->cbDataSelection->setItemText(boost::numeric_cast<int>(index),
                                            QString::fromStdString(dataName));
 }
@@ -194,7 +196,9 @@ void IndirectFitPlotViewLegacy::setFitSingleSpectrumEnabled(bool enable) {
   m_plotForm->pbFitSingle->setEnabled(enable);
 }
 
-void IndirectFitPlotViewLegacy::clearTopPreview() { m_plotForm->ppPlotTop->clear(); }
+void IndirectFitPlotViewLegacy::clearTopPreview() {
+  m_plotForm->ppPlotTop->clear();
+}
 
 void IndirectFitPlotViewLegacy::clearBottomPreview() {
   m_plotForm->ppPlotBottom->clear();
@@ -265,7 +269,8 @@ void IndirectFitPlotViewLegacy::setHWHMRangeVisible(bool visible) {
   m_plotForm->ppPlotTop->getRangeSelector("HWHM")->setVisible(visible);
 }
 
-void IndirectFitPlotViewLegacy::displayMessage(const std::string &message) const {
+void IndirectFitPlotViewLegacy::displayMessage(
+    const std::string &message) const {
   QMessageBox::information(parentWidget(), "MantidPlot - Warning",
                            QString::fromStdString(message));
 }
@@ -279,7 +284,8 @@ void IndirectFitPlotViewLegacy::emitPlotSpectrumChanged(int spectrum) {
   emit plotSpectrumChanged(boost::numeric_cast<std::size_t>(spectrum));
 }
 
-void IndirectFitPlotViewLegacy::emitPlotSpectrumChanged(const QString &spectrum) {
+void IndirectFitPlotViewLegacy::emitPlotSpectrumChanged(
+    const QString &spectrum) {
   emit plotSpectrumChanged(spectrum.toULongLong());
 }
 

@@ -27,8 +27,9 @@ class MANTIDQT_INDIRECT_DLL IndirectSpectrumSelectionPresenterLegacy
     : public QObject {
   Q_OBJECT
 public:
-  IndirectSpectrumSelectionPresenterLegacy(IndirectFittingModelLegacy *model,
-                                     IndirectSpectrumSelectionViewLegacy *view);
+  IndirectSpectrumSelectionPresenterLegacy(
+      IndirectFittingModelLegacy *model,
+      IndirectSpectrumSelectionViewLegacy *view);
   ~IndirectSpectrumSelectionPresenterLegacy() override;
   UserInputValidator &validate(UserInputValidator &validator);
 

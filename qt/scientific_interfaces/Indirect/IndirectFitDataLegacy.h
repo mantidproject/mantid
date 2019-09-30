@@ -144,7 +144,7 @@ private:
 class MANTIDQT_INDIRECT_DLL IndirectFitDataLegacy {
 public:
   IndirectFitDataLegacy(Mantid::API::MatrixWorkspace_sptr workspace,
-                  const Spectra &spectra);
+                        const Spectra &spectra);
 
   std::string displayName(const std::string &formatString,
                           const std::string &rangeDelimiter) const;

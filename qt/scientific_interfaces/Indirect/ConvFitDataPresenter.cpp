@@ -25,9 +25,10 @@ namespace IDA {
 
 ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model,
                                            IIndirectFitDataViewLegacy *view)
-    : IndirectFitDataPresenterLegacy(model, view,
-                               std::make_unique<ConvFitDataTablePresenter>(
-                                   model, view->getDataTable())),
+    : IndirectFitDataPresenterLegacy(
+          model, view,
+          std::make_unique<ConvFitDataTablePresenter>(model,
+                                                      view->getDataTable())),
       m_convModel(model) {
   setResolutionHidden(false);
 

@@ -34,7 +34,8 @@ public:
 
 private:
   PrivateFittingDataLegacy(PrivateFittingDataLegacy &&privateData);
-  PrivateFittingDataLegacy(std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data);
+  PrivateFittingDataLegacy(
+      std::vector<std::unique_ptr<IndirectFitDataLegacy>> &&data);
   std::vector<std::unique_ptr<IndirectFitDataLegacy>> m_data;
 };
 
@@ -123,7 +124,8 @@ public:
                             std::size_t index);
 
 protected:
-  Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingModeLegacy mode) const;
+  Mantid::API::IAlgorithm_sptr
+  getFittingAlgorithm(FittingModeLegacy mode) const;
   Mantid::API::IAlgorithm_sptr
   createSequentialFit(Mantid::API::IFunction_sptr function) const;
   Mantid::API::IAlgorithm_sptr
@@ -198,7 +200,8 @@ private:
                          Mantid::API::WorkspaceGroup_sptr resultGroup,
                          Mantid::API::ITableWorkspace_sptr parameterTable,
                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                         IndirectFitDataLegacy *fitData, std::size_t spectrum) const;
+                         IndirectFitDataLegacy *fitData,
+                         std::size_t spectrum) const;
 
   std::unique_ptr<IndirectFitOutputLegacy> m_fitOutput;
   std::vector<std::unique_ptr<IndirectFitDataLegacy>> m_fittingData;
@@ -212,7 +215,7 @@ private:
 
 template <typename F>
 void IndirectFittingModelLegacy::applySpectra(std::size_t index,
-                                        const F &functor) const {
+                                              const F &functor) const {
   if (m_fittingData.size() > 0)
     m_fittingData[index]->applySpectra(functor);
 }

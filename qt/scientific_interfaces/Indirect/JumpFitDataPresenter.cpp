@@ -13,12 +13,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-JumpFitDataPresenter::JumpFitDataPresenter(
-    JumpFitModel *model, IIndirectFitDataViewLegacy *view, QComboBox *cbParameterType,
-    QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
-    : IndirectFitDataPresenterLegacy(model, view,
-                               std::make_unique<JumpFitDataTablePresenter>(
-                                   model, view->getDataTable())),
+JumpFitDataPresenter::JumpFitDataPresenter(JumpFitModel *model,
+                                           IIndirectFitDataViewLegacy *view,
+                                           QComboBox *cbParameterType,
+                                           QComboBox *cbParameter,
+                                           QLabel *lbParameterType,
+                                           QLabel *lbParameter)
+    : IndirectFitDataPresenterLegacy(
+          model, view,
+          std::make_unique<JumpFitDataTablePresenter>(model,
+                                                      view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(0),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),

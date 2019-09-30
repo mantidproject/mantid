@@ -164,7 +164,8 @@ void addInputDataToSimultaneousFit(IAlgorithm_sptr fitAlgorithm,
 
 void addInputDataToSimultaneousFit(
     IAlgorithm_sptr fitAlgorithm,
-    const std::unique_ptr<IndirectFitDataLegacy> &fitData, std::size_t &counter) {
+    const std::unique_ptr<IndirectFitDataLegacy> &fitData,
+    std::size_t &counter) {
   const auto workspace = fitData->workspace();
   const auto addData = [&](std::size_t spectrum) {
     const auto suffix = counter == 0 ? "" : "_" + std::to_string(counter);
@@ -322,7 +323,8 @@ namespace IDA {
 
 PrivateFittingDataLegacy::PrivateFittingDataLegacy() : m_data() {}
 
-PrivateFittingDataLegacy::PrivateFittingDataLegacy(PrivateFittingDataLegacy &&privateData)
+PrivateFittingDataLegacy::PrivateFittingDataLegacy(
+    PrivateFittingDataLegacy &&privateData)
     : m_data(std::move(privateData.m_data)) {}
 
 PrivateFittingDataLegacy::PrivateFittingDataLegacy(
@@ -336,7 +338,8 @@ operator=(PrivateFittingDataLegacy &&fittingData) {
 }
 
 IndirectFittingModelLegacy::IndirectFittingModelLegacy()
-    : m_previousModelSelected(false), m_fittingMode(FittingModeLegacy::SEQUENTIAL) {}
+    : m_previousModelSelected(false),
+      m_fittingMode(FittingModeLegacy::SEQUENTIAL) {}
 
 bool IndirectFittingModelLegacy::hasWorkspace(
     std::string const &workspaceName) const {
@@ -368,7 +371,7 @@ Spectra IndirectFittingModelLegacy::getSpectra(std::size_t index) const {
 
 std::pair<double, double>
 IndirectFittingModelLegacy::getFittingRange(std::size_t dataIndex,
-                                      std::size_t spectrum) const {
+                                            std::size_t spectrum) const {
   if (dataIndex < m_fittingData.size() &&
       !m_fittingData[dataIndex]->zeroSpectra()) {
     if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
@@ -378,8 +381,9 @@ IndirectFittingModelLegacy::getFittingRange(std::size_t dataIndex,
   return std::make_pair(0., 0.);
 }
 
-std::string IndirectFittingModelLegacy::getExcludeRegion(std::size_t dataIndex,
-                                                   std::size_t spectrum) const {
+std::string
+IndirectFittingModelLegacy::getExcludeRegion(std::size_t dataIndex,
+                                             std::size_t spectrum) const {
   if (dataIndex < m_fittingData.size() &&
       !m_fittingData[dataIndex]->zeroSpectra()) {
     if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
@@ -391,8 +395,8 @@ std::string IndirectFittingModelLegacy::getExcludeRegion(std::size_t dataIndex,
 
 std::string
 IndirectFittingModelLegacy::createDisplayName(const std::string &formatString,
-                                        const std::string &rangeDelimiter,
-                                        std::size_t dataIndex) const {
+                                              const std::string &rangeDelimiter,
+                                              std::size_t dataIndex) const {
   if (m_fittingData.size() > dataIndex)
     return m_fittingData[dataIndex]->displayName(formatString, rangeDelimiter);
   else
@@ -402,8 +406,8 @@ IndirectFittingModelLegacy::createDisplayName(const std::string &formatString,
 
 std::string
 IndirectFittingModelLegacy::createOutputName(const std::string &formatString,
-                                       const std::string &rangeDelimiter,
-                                       std::size_t dataIndex) const {
+                                             const std::string &rangeDelimiter,
+                                             std::size_t dataIndex) const {
   return createDisplayName(formatString, rangeDelimiter, dataIndex) +
          "_Results";
 }
@@ -413,7 +417,7 @@ bool IndirectFittingModelLegacy::isMultiFit() const {
 }
 
 bool IndirectFittingModelLegacy::isPreviouslyFit(std::size_t dataIndex,
-                                           std::size_t spectrum) const {
+                                                 std::size_t spectrum) const {
   if (!m_previousModelSelected || !m_fitOutput ||
       m_fittingData.size() <= dataIndex)
     return false;
@@ -427,7 +431,8 @@ bool IndirectFittingModelLegacy::hasZeroSpectra(std::size_t dataIndex) const {
   return true;
 }
 
-boost::optional<std::string> IndirectFittingModelLegacy::isInvalidFunction() const {
+boost::optional<std::string>
+IndirectFittingModelLegacy::isInvalidFunction() const {
   if (!m_activeFunction)
     return std::string("No fit function has been defined");
 
@@ -442,7 +447,8 @@ std::size_t IndirectFittingModelLegacy::numberOfWorkspaces() const {
   return m_fittingData.size();
 }
 
-std::size_t IndirectFittingModelLegacy::getNumberOfSpectra(std::size_t index) const {
+std::size_t
+IndirectFittingModelLegacy::getNumberOfSpectra(std::size_t index) const {
   if (index < m_fittingData.size())
     return m_fittingData[index]->numberOfSpectra();
   else
@@ -451,37 +457,40 @@ std::size_t IndirectFittingModelLegacy::getNumberOfSpectra(std::size_t index) co
         "index provided is too large.");
 }
 
-std::vector<std::string> IndirectFittingModelLegacy::getFitParameterNames() const {
+std::vector<std::string>
+IndirectFittingModelLegacy::getFitParameterNames() const {
   if (m_fitOutput)
     return m_fitOutput->getResultParameterNames();
   return std::vector<std::string>();
 }
 
-Mantid::API::IFunction_sptr IndirectFittingModelLegacy::getFittingFunction() const {
+Mantid::API::IFunction_sptr
+IndirectFittingModelLegacy::getFittingFunction() const {
   return m_activeFunction;
 }
 
-void IndirectFittingModelLegacy::setFittingData(PrivateFittingDataLegacy &&fittingData) {
+void IndirectFittingModelLegacy::setFittingData(
+    PrivateFittingDataLegacy &&fittingData) {
   m_fittingData = std::move(fittingData.m_data);
 }
 
 void IndirectFittingModelLegacy::setSpectra(const std::string &spectra,
-                                      std::size_t dataIndex) {
+                                            std::size_t dataIndex) {
   setSpectra(DiscontinuousSpectra<std::size_t>(spectra), dataIndex);
 }
 
 void IndirectFittingModelLegacy::setSpectra(Spectra &&spectra,
-                                      std::size_t dataIndex) {
+                                            std::size_t dataIndex) {
   m_fittingData[dataIndex]->setSpectra(std::forward<Spectra>(spectra));
 }
 
 void IndirectFittingModelLegacy::setSpectra(const Spectra &spectra,
-                                      std::size_t dataIndex) {
+                                            std::size_t dataIndex) {
   m_fittingData[dataIndex]->setSpectra(spectra);
 }
 
 void IndirectFittingModelLegacy::setStartX(double startX, std::size_t dataIndex,
-                                     std::size_t spectrum) {
+                                           std::size_t spectrum) {
   if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setStartX(startX, 0);
   else
@@ -489,7 +498,7 @@ void IndirectFittingModelLegacy::setStartX(double startX, std::size_t dataIndex,
 }
 
 void IndirectFittingModelLegacy::setEndX(double endX, std::size_t dataIndex,
-                                   std::size_t spectrum) {
+                                         std::size_t spectrum) {
   if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setEndX(endX, 0);
   else
@@ -497,22 +506,23 @@ void IndirectFittingModelLegacy::setEndX(double endX, std::size_t dataIndex,
 }
 
 void IndirectFittingModelLegacy::setExcludeRegion(const std::string &exclude,
-                                            std::size_t dataIndex,
-                                            std::size_t spectrum) {
+                                                  std::size_t dataIndex,
+                                                  std::size_t spectrum) {
   if (FittingModeLegacy::SEQUENTIAL == m_fittingMode)
     m_fittingData.front()->setExcludeRegionString(exclude, 0);
   else
     m_fittingData[dataIndex]->setExcludeRegionString(exclude, spectrum);
 }
 
-void IndirectFittingModelLegacy::addWorkspace(const std::string &workspaceName) {
+void IndirectFittingModelLegacy::addWorkspace(
+    const std::string &workspaceName) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(ws, std::make_pair(0u, ws->getNumberHistograms() - 1));
 }
 
 void IndirectFittingModelLegacy::addWorkspace(const std::string &workspaceName,
-                                        const std::string &spectra) {
+                                              const std::string &spectra) {
   if (spectra.empty())
     throw std::runtime_error(
         "Fitting Data must consist of one or more spectra.");
@@ -523,14 +533,14 @@ void IndirectFittingModelLegacy::addWorkspace(const std::string &workspaceName,
 }
 
 void IndirectFittingModelLegacy::addWorkspace(const std::string &workspaceName,
-                                        const Spectra &spectra) {
+                                              const Spectra &spectra) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(ws, spectra);
 }
 
 void IndirectFittingModelLegacy::addWorkspace(MatrixWorkspace_sptr workspace,
-                                        const Spectra &spectra) {
+                                              const Spectra &spectra) {
   if (!m_fittingData.empty() &&
       equivalentWorkspaces(workspace, m_fittingData.back()->workspace()))
     m_fittingData.back()->combine(IndirectFitDataLegacy(workspace, spectra));
@@ -539,7 +549,7 @@ void IndirectFittingModelLegacy::addWorkspace(MatrixWorkspace_sptr workspace,
 }
 
 void IndirectFittingModelLegacy::addNewWorkspace(MatrixWorkspace_sptr workspace,
-                                           const Spectra &spectra) {
+                                                 const Spectra &spectra) {
   m_fittingData.emplace_back(new IndirectFitDataLegacy(workspace, spectra));
   m_defaultParameters.emplace_back(
       createDefaultParameters(m_fittingData.size() - 1));
@@ -590,9 +600,8 @@ void IndirectFittingModelLegacy::setFitFunction(IFunction_sptr function) {
   m_previousModelSelected = isPreviousModelSelected();
 }
 
-void IndirectFittingModelLegacy::setDefaultParameterValue(const std::string &name,
-                                                    double value,
-                                                    std::size_t dataIndex) {
+void IndirectFittingModelLegacy::setDefaultParameterValue(
+    const std::string &name, double value, std::size_t dataIndex) {
   if (m_defaultParameters.size() > dataIndex)
     m_defaultParameters[dataIndex][name] = ParameterValue(value);
 }
@@ -602,8 +611,8 @@ void IndirectFittingModelLegacy::addOutput(IAlgorithm_sptr fitAlgorithm) {
 }
 
 void IndirectFittingModelLegacy::addOutput(IAlgorithm_sptr fitAlgorithm,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) {
+                                           const FitDataIterator &fitDataBegin,
+                                           const FitDataIterator &fitDataEnd) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
@@ -612,8 +621,8 @@ void IndirectFittingModelLegacy::addOutput(IAlgorithm_sptr fitAlgorithm,
   addOutput(group, parameters, result, fitDataBegin, fitDataEnd);
 }
 
-void IndirectFittingModelLegacy::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm,
-                                              std::size_t index) {
+void IndirectFittingModelLegacy::addSingleFitOutput(
+    IAlgorithm_sptr fitAlgorithm, std::size_t index) {
   auto group = getOutputGroup(fitAlgorithm);
   auto parameters = getOutputParameters(fitAlgorithm);
   auto result = getOutputResult(fitAlgorithm);
@@ -625,10 +634,10 @@ void IndirectFittingModelLegacy::addSingleFitOutput(IAlgorithm_sptr fitAlgorithm
 }
 
 void IndirectFittingModelLegacy::addOutput(WorkspaceGroup_sptr resultGroup,
-                                     ITableWorkspace_sptr parameterTable,
-                                     WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) {
+                                           ITableWorkspace_sptr parameterTable,
+                                           WorkspaceGroup_sptr resultWorkspace,
+                                           const FitDataIterator &fitDataBegin,
+                                           const FitDataIterator &fitDataEnd) {
   if (m_previousModelSelected && m_fitOutput)
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitDataBegin, fitDataEnd);
@@ -640,10 +649,10 @@ void IndirectFittingModelLegacy::addOutput(WorkspaceGroup_sptr resultGroup,
 }
 
 void IndirectFittingModelLegacy::addOutput(WorkspaceGroup_sptr resultGroup,
-                                     ITableWorkspace_sptr parameterTable,
-                                     WorkspaceGroup_sptr resultWorkspace,
-                                     IndirectFitDataLegacy *fitData,
-                                     std::size_t spectrum) {
+                                           ITableWorkspace_sptr parameterTable,
+                                           WorkspaceGroup_sptr resultWorkspace,
+                                           IndirectFitDataLegacy *fitData,
+                                           std::size_t spectrum) {
   if (m_previousModelSelected && m_fitOutput)
     addOutput(m_fitOutput.get(), resultGroup, parameterTable, resultWorkspace,
               fitData, spectrum);
@@ -658,33 +667,33 @@ IndirectFitOutputLegacy IndirectFittingModelLegacy::createFitOutput(
     WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) const {
   return IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
-                           fitDataBegin, fitDataEnd);
+                                 fitDataBegin, fitDataEnd);
 }
 
 IndirectFitOutputLegacy IndirectFittingModelLegacy::createFitOutput(
     Mantid::API::WorkspaceGroup_sptr resultGroup,
     Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitDataLegacy *fitData,
-    std::size_t spectrum) const {
+    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+    IndirectFitDataLegacy *fitData, std::size_t spectrum) const {
   return IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
-                           fitData, spectrum);
+                                 fitData, spectrum);
 }
 
-void IndirectFittingModelLegacy::addOutput(IndirectFitOutputLegacy *fitOutput,
-                                     WorkspaceGroup_sptr resultGroup,
-                                     ITableWorkspace_sptr parameterTable,
-                                     WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIterator &fitDataBegin,
-                                     const FitDataIterator &fitDataEnd) const {
+void IndirectFittingModelLegacy::addOutput(
+    IndirectFitOutputLegacy *fitOutput, WorkspaceGroup_sptr resultGroup,
+    ITableWorkspace_sptr parameterTable, WorkspaceGroup_sptr resultWorkspace,
+    const FitDataIterator &fitDataBegin,
+    const FitDataIterator &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
                        fitDataBegin, fitDataEnd);
 }
 
 void IndirectFittingModelLegacy::addOutput(
-    IndirectFitOutputLegacy *fitOutput, Mantid::API::WorkspaceGroup_sptr resultGroup,
+    IndirectFitOutputLegacy *fitOutput,
+    Mantid::API::WorkspaceGroup_sptr resultGroup,
     Mantid::API::ITableWorkspace_sptr parameterTable,
-    Mantid::API::WorkspaceGroup_sptr resultWorkspace, IndirectFitDataLegacy *fitData,
-    std::size_t spectrum) const {
+    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+    IndirectFitDataLegacy *fitData, std::size_t spectrum) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
                        spectrum);
 }
@@ -695,7 +704,7 @@ FittingModeLegacy IndirectFittingModelLegacy::getFittingMode() const {
 
 std::unordered_map<std::string, ParameterValue>
 IndirectFittingModelLegacy::getParameterValues(std::size_t index,
-                                         std::size_t spectrum) const {
+                                               std::size_t spectrum) const {
   if (m_fittingData.size() > index) {
     const auto parameters = getFitParameters(index, spectrum);
     if (m_previousModelSelected)
@@ -709,7 +718,7 @@ IndirectFittingModelLegacy::getParameterValues(std::size_t index,
 
 std::unordered_map<std::string, ParameterValue>
 IndirectFittingModelLegacy::getFitParameters(std::size_t index,
-                                       std::size_t spectrum) const {
+                                             std::size_t spectrum) const {
   if (m_fitOutput)
     return m_fitOutput->getParameters(m_fittingData[index].get(), spectrum);
   return std::unordered_map<std::string, ParameterValue>();
@@ -730,7 +739,8 @@ IndirectFittingModelLegacy::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-IndirectFittingModelLegacy::createDefaultParameters(std::size_t /*unused*/) const {
+IndirectFittingModelLegacy::createDefaultParameters(
+    std::size_t /*unused*/) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 
@@ -738,11 +748,13 @@ std::string IndirectFittingModelLegacy::getResultXAxisUnit() const {
   return "MomentumTransfer";
 }
 
-std::string IndirectFittingModelLegacy::getResultLogName() const { return "axis-1"; }
+std::string IndirectFittingModelLegacy::getResultLogName() const {
+  return "axis-1";
+}
 
 boost::optional<ResultLocation>
 IndirectFittingModelLegacy::getResultLocation(std::size_t index,
-                                        std::size_t spectrum) const {
+                                              std::size_t spectrum) const {
   if (m_previousModelSelected && m_fitOutput && m_fittingData.size() > index)
     return m_fitOutput->getResultLocation(m_fittingData[index].get(), spectrum);
   return boost::none;
@@ -761,7 +773,8 @@ bool IndirectFittingModelLegacy::isPreviousModelSelected() const {
          equivalentFunctions(getFittingFunction(), m_fitFunction);
 }
 
-CompositeFunction_sptr IndirectFittingModelLegacy::getMultiDomainFunction() const {
+CompositeFunction_sptr
+IndirectFittingModelLegacy::getMultiDomainFunction() const {
   return createMultiDomainFunction(getFittingFunction(), numberOfWorkspaces());
 }
 
@@ -777,8 +790,9 @@ IndirectFittingModelLegacy::getFittingAlgorithm(FittingModeLegacy mode) const {
     return createSimultaneousFit(getMultiDomainFunction());
 }
 
-IAlgorithm_sptr IndirectFittingModelLegacy::getSingleFit(std::size_t dataIndex,
-                                                   std::size_t spectrum) const {
+IAlgorithm_sptr
+IndirectFittingModelLegacy::getSingleFit(std::size_t dataIndex,
+                                         std::size_t spectrum) const {
   const auto &fitData = m_fittingData[dataIndex];
   const auto ws = fitData->workspace();
   const auto range = fitData->getRange(spectrum);
@@ -829,8 +843,8 @@ IAlgorithm_sptr IndirectFittingModelLegacy::createSequentialFit(
   return fitAlgorithm;
 }
 
-IAlgorithm_sptr
-IndirectFittingModelLegacy::createSimultaneousFit(IFunction_sptr function) const {
+IAlgorithm_sptr IndirectFittingModelLegacy::createSimultaneousFit(
+    IFunction_sptr function) const {
   auto fitAlgorithm = simultaneousFitAlgorithm();
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData);
@@ -850,10 +864,9 @@ IAlgorithm_sptr IndirectFittingModelLegacy::createSimultaneousFitWithEqualRange(
   return fitAlgorithm;
 }
 
-std::string
-IndirectFittingModelLegacy::createSingleFitOutputName(const std::string &formatString,
-                                                std::size_t index,
-                                                std::size_t spectrum) const {
+std::string IndirectFittingModelLegacy::createSingleFitOutputName(
+    const std::string &formatString, std::size_t index,
+    std::size_t spectrum) const {
   if (m_fittingData.size() > index)
     return m_fittingData[index]->displayName(formatString, spectrum);
   else
@@ -865,7 +878,8 @@ std::string IndirectFittingModelLegacy::getOutputBasename() const {
   return cutLastOf(sequentialFitOutputName(), "_Results");
 }
 
-void IndirectFittingModelLegacy::cleanFailedRun(IAlgorithm_sptr fittingAlgorithm) {
+void IndirectFittingModelLegacy::cleanFailedRun(
+    IAlgorithm_sptr fittingAlgorithm) {
   cleanTemporaries(fittingAlgorithm->name(), m_fittingData);
 }
 

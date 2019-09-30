@@ -90,8 +90,8 @@ WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
 std::unique_ptr<IndirectFitOutputLegacy>
 createFitOutput(WorkspaceGroup_sptr resultGroup,
                 ITableWorkspace_sptr parameterTable,
-                WorkspaceGroup_sptr resultWorkspace, IndirectFitDataLegacy *fitData,
-                std::size_t spectrum) {
+                WorkspaceGroup_sptr resultWorkspace,
+                IndirectFitDataLegacy *fitData, std::size_t spectrum) {
   return std::make_unique<IndirectFitOutputLegacy>(
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }
@@ -254,7 +254,8 @@ public:
   test_that_addOutput_will_add_new_fitData_without_overwriting_existing_data() {
     auto const output = createFitOutput(m_workspacesGroup, m_parameterTable,
                                         m_resultGroup, m_fitData.get(), 0);
-    auto const data2 = std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
+    auto const data2 =
+        std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
 
     output->addOutput(m_workspacesGroup, m_parameterTable, m_resultGroup,
                       data2.get(), 0);
@@ -276,7 +277,8 @@ public:
   void test_that_removeOutput_will_not_delete_fitData_which_is_not_specified() {
     auto const output = createFitOutput(m_workspacesGroup, m_parameterTable,
                                         m_resultGroup, m_fitData.get(), 0);
-    auto const data2 = std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
+    auto const data2 =
+        std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
 
     output->addOutput(m_workspacesGroup, m_parameterTable, m_resultGroup,
                       data2.get(), 0);
@@ -290,7 +292,8 @@ public:
   test_that_removeOutput_does_not_throw_when_provided_fitData_which_does_not_exist() {
     auto const output = createFitOutput(m_workspacesGroup, m_parameterTable,
                                         m_resultGroup, m_fitData.get(), 0);
-    auto const data2 = std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
+    auto const data2 =
+        std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
 
     TS_ASSERT_THROWS_NOTHING(output->removeOutput(data2.get()));
   }

@@ -632,7 +632,8 @@ ConvFitModel::createDefaultParameters(std::size_t index) const {
 
 std::unordered_map<std::string, std::string>
 ConvFitModel::mapDefaultParameterNames() const {
-  const auto initialMapping = IndirectFittingModelLegacy::mapDefaultParameterNames();
+  const auto initialMapping =
+      IndirectFittingModelLegacy::mapDefaultParameterNames();
   std::unordered_map<std::string, std::string> mapping;
   for (const auto &map : initialMapping) {
     auto mapped = m_parameterNameChanges.find(map.second);
@@ -660,8 +661,8 @@ IndirectFitOutputLegacy ConvFitModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
     WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) const {
-  auto output = IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
-                                  fitDataBegin, fitDataEnd);
+  auto output = IndirectFitOutputLegacy(
+      resultGroup, parameterTable, resultWorkspace, fitDataBegin, fitDataEnd);
   output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);
   return output;
 }
@@ -672,8 +673,8 @@ ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                               Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                               IndirectFitDataLegacy *fitData,
                               std::size_t spectrum) const {
-  auto output = IndirectFitOutputLegacy(resultGroup, parameterTable, resultWorkspace,
-                                  fitData, spectrum);
+  auto output = IndirectFitOutputLegacy(resultGroup, parameterTable,
+                                        resultWorkspace, fitData, spectrum);
   output.mapParameterNames(m_parameterNameChanges, fitData, spectrum);
   return output;
 }

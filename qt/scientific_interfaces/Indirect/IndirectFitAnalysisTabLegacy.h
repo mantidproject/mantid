@@ -34,14 +34,15 @@ class DLLExport IndirectFitAnalysisTabLegacy : public IndirectDataAnalysisTab {
 
 public:
   IndirectFitAnalysisTabLegacy(IndirectFittingModelLegacy *model,
-                         QWidget *parent = nullptr);
+                               QWidget *parent = nullptr);
 
-  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenterLegacy> presenter);
+  void setFitDataPresenter(
+      std::unique_ptr<IndirectFitDataPresenterLegacy> presenter);
   void setPlotView(IIndirectFitPlotViewLegacy *view);
   void setSpectrumSelectionView(IndirectSpectrumSelectionViewLegacy *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
-  void
-  setFitPropertyBrowser(MantidWidgets::IndirectFitPropertyBrowserLegacy *browser);
+  void setFitPropertyBrowser(
+      MantidWidgets::IndirectFitPropertyBrowserLegacy *browser);
 
   virtual std::string tabName() const = 0;
 

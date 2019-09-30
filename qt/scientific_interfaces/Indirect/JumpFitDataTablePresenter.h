@@ -22,7 +22,8 @@ namespace IDA {
 /**
   Presenter for a table of data containing Widths/EISF.
 */
-class DLLExport JumpFitDataTablePresenter : public IndirectDataTablePresenterLegacy {
+class DLLExport JumpFitDataTablePresenter
+    : public IndirectDataTablePresenterLegacy {
   Q_OBJECT
 public:
   JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);

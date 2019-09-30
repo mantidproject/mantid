@@ -53,24 +53,27 @@ using FitDataIterator =
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputLegacy {
 public:
   IndirectFitOutputLegacy(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                    Mantid::API::ITableWorkspace_sptr parameterTable,
-                    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                    const FitDataIterator &fitDataBegin,
-                    const FitDataIterator &fitDataEnd);
+                          Mantid::API::ITableWorkspace_sptr parameterTable,
+                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                          const FitDataIterator &fitDataBegin,
+                          const FitDataIterator &fitDataEnd);
 
   IndirectFitOutputLegacy(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                    Mantid::API::ITableWorkspace_sptr parameterTable,
-                    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                    IndirectFitDataLegacy const *fitData, std::size_t spectrum);
+                          Mantid::API::ITableWorkspace_sptr parameterTable,
+                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                          IndirectFitDataLegacy const *fitData,
+                          std::size_t spectrum);
 
   bool isSpectrumFit(IndirectFitDataLegacy const *fitData,
                      std::size_t spectrum) const;
 
   std::unordered_map<std::string, ParameterValue>
-  getParameters(IndirectFitDataLegacy const *fitData, std::size_t spectrum) const;
+  getParameters(IndirectFitDataLegacy const *fitData,
+                std::size_t spectrum) const;
 
   boost::optional<ResultLocation>
-  getResultLocation(IndirectFitDataLegacy const *fitData, std::size_t spectrum) const;
+  getResultLocation(IndirectFitDataLegacy const *fitData,
+                    std::size_t spectrum) const;
   std::vector<std::string> getResultParameterNames() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultWorkspace() const;
   Mantid::API::WorkspaceGroup_sptr getLastResultGroup() const;
@@ -115,7 +118,8 @@ private:
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;
-  std::unordered_map<IndirectFitDataLegacy const *, ParameterValues> m_parameters;
+  std::unordered_map<IndirectFitDataLegacy const *, ParameterValues>
+      m_parameters;
   std::unordered_map<IndirectFitDataLegacy const *, ResultLocations>
       m_outputResultLocations;
 };

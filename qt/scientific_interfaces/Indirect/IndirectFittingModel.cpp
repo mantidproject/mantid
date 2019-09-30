@@ -532,8 +532,8 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName) {
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       workspaceName);
   addWorkspace(
-      ws,
-      SpectraNew(WorkspaceIndex{0},
+      ws, SpectraNew(
+              WorkspaceIndex{0},
               WorkspaceIndex{static_cast<int>(ws->getNumberHistograms()) - 1}));
 }
 
@@ -696,12 +696,11 @@ IndirectFitOutput IndirectFittingModel::createFitOutput(
                            fitData, spectrum);
 }
 
-void IndirectFittingModel::addOutput(IndirectFitOutput *fitOutput,
-                                     WorkspaceGroup_sptr resultGroup,
-                                     ITableWorkspace_sptr parameterTable,
-                                     WorkspaceGroup_sptr resultWorkspace,
-                                     const FitDataIteratorNew &fitDataBegin,
-                                     const FitDataIteratorNew &fitDataEnd) const {
+void IndirectFittingModel::addOutput(
+    IndirectFitOutput *fitOutput, WorkspaceGroup_sptr resultGroup,
+    ITableWorkspace_sptr parameterTable, WorkspaceGroup_sptr resultWorkspace,
+    const FitDataIteratorNew &fitDataBegin,
+    const FitDataIteratorNew &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
                        fitDataBegin, fitDataEnd);
 }

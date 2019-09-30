@@ -28,7 +28,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenterLegacy
   Q_OBJECT
 public:
   IndirectFitDataPresenterLegacy(IndirectFittingModelLegacy *model,
-                           IIndirectFitDataViewLegacy *view);
+                                 IIndirectFitDataViewLegacy *view);
   IndirectFitDataPresenterLegacy(
       IndirectFittingModelLegacy *model, IIndirectFitDataViewLegacy *view,
       std::unique_ptr<IndirectDataTablePresenterLegacy> tablePresenter);

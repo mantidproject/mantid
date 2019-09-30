@@ -49,7 +49,8 @@ static QApplicationHolder MAIN_QAPPLICATION;
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectSpectrumSelectionView : public IndirectSpectrumSelectionViewLegacy {
+class MockIndirectSpectrumSelectionView
+    : public IndirectSpectrumSelectionViewLegacy {
 public:
   /// Signals
   void emitSelectedSpectraChanged(std::string const &spectra) {
@@ -91,8 +92,8 @@ public:
 };
 
 /// Note that there is limited (if any) interaction going from this model to the
-/// IndirectSpectrumSelectionViewLegacy, meaning that not many methods are required
-/// for mocking.
+/// IndirectSpectrumSelectionViewLegacy, meaning that not many methods are
+/// required for mocking.
 class MockIndirectSpectrumSelectionModel : public IndirectFittingModelLegacy {
 public:
   /// Public methods

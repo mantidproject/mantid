@@ -23,8 +23,8 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenterLegacy : public QObject {
   Q_OBJECT
 public:
   IndirectFitPlotPresenterLegacy(IndirectFittingModelLegacy *model,
-                           IIndirectFitPlotViewLegacy *view,
-                           IPyRunner *pythonRunner = nullptr);
+                                 IIndirectFitPlotViewLegacy *view,
+                                 IPyRunner *pythonRunner = nullptr);
 
   std::size_t getSelectedDataIndex() const;
   std::size_t getSelectedSpectrum() const;

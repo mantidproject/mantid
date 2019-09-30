@@ -21,7 +21,8 @@ using namespace MantidQt::CustomInterfaces::IDA;
 using namespace Mantid::Kernel::Strings;
 
 struct SetViewSpectra : boost::static_visitor<> {
-  explicit SetViewSpectra(IndirectSpectrumSelectionViewLegacy *view) : m_view(view) {}
+  explicit SetViewSpectra(IndirectSpectrumSelectionViewLegacy *view)
+      : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) const {
     m_view->displaySpectra(static_cast<int>(spectra.first),
@@ -116,8 +117,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectSpectrumSelectionPresenterLegacy::IndirectSpectrumSelectionPresenterLegacy(
-    IndirectFittingModelLegacy *model, IndirectSpectrumSelectionViewLegacy *view)
+IndirectSpectrumSelectionPresenterLegacy::
+    IndirectSpectrumSelectionPresenterLegacy(
+        IndirectFittingModelLegacy *model,
+        IndirectSpectrumSelectionViewLegacy *view)
     : QObject(nullptr), m_model(model), m_view(view), m_activeIndex(0),
       m_maskIndex(0) {
   connect(m_view.get(), SIGNAL(selectedSpectraChanged(const std::string &)),
@@ -146,7 +149,8 @@ IndirectSpectrumSelectionPresenterLegacy::IndirectSpectrumSelectionPresenterLega
   m_view->setEnabled(false);
 }
 
-IndirectSpectrumSelectionPresenterLegacy::~IndirectSpectrumSelectionPresenterLegacy() {}
+IndirectSpectrumSelectionPresenterLegacy::
+    ~IndirectSpectrumSelectionPresenterLegacy() {}
 
 void IndirectSpectrumSelectionPresenterLegacy::disableView() {
   MantidQt::API::SignalBlocker blocker(m_view.get());
@@ -180,8 +184,8 @@ void IndirectSpectrumSelectionPresenterLegacy::setActiveModelIndex(
   updateSpectra();
 }
 
-void IndirectSpectrumSelectionPresenterLegacy::setSpectraRange(std::size_t minimum,
-                                                         std::size_t maximum) {
+void IndirectSpectrumSelectionPresenterLegacy::setSpectraRange(
+    std::size_t minimum, std::size_t maximum) {
   int minimumInt = boost::numeric_cast<int>(minimum);
   int maximumInt = boost::numeric_cast<int>(maximum);
   m_view->setSpectraRange(minimumInt, maximumInt);
@@ -249,18 +253,20 @@ void IndirectSpectrumSelectionPresenterLegacy::displayBinMask() {
   m_view->setMaskString(m_model->getExcludeRegion(m_activeIndex, m_maskIndex));
 }
 
-UserInputValidator &
-IndirectSpectrumSelectionPresenterLegacy::validate(UserInputValidator &validator) {
+UserInputValidator &IndirectSpectrumSelectionPresenterLegacy::validate(
+    UserInputValidator &validator) {
   validator = validateSpectraString(validator);
   return m_view->validateMaskBinsString(validator);
 }
 
-UserInputValidator IndirectSpectrumSelectionPresenterLegacy::validateSpectraString() {
+UserInputValidator
+IndirectSpectrumSelectionPresenterLegacy::validateSpectraString() {
   UserInputValidator validator;
   return validateSpectraString(validator);
 }
 
-UserInputValidator &IndirectSpectrumSelectionPresenterLegacy::validateSpectraString(
+UserInputValidator &
+IndirectSpectrumSelectionPresenterLegacy::validateSpectraString(
     UserInputValidator &validator) {
   validator = m_view->validateSpectraString(validator);
 

@@ -200,9 +200,10 @@ public:
   }
 
   void setUp() override {
-    /// Note that the IndirectFitPlotModelLegacy could not be mocked as the Presenter
-    /// takes an IndirectFittingModelLegacy. This means the IndirectFittingModelLegacy is
-    /// mocked instead - which is a good substitute anyway
+    /// Note that the IndirectFitPlotModelLegacy could not be mocked as the
+    /// Presenter takes an IndirectFittingModelLegacy. This means the
+    /// IndirectFittingModelLegacy is mocked instead - which is a good
+    /// substitute anyway
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_fittingModel = std::make_unique<NiceMock<MockIndirectFittingModel>>();
     m_presenter = std::make_unique<IndirectFitPlotPresenterLegacy>(

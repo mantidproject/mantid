@@ -14,7 +14,8 @@ using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotViewLegacy;
 
 struct UpdateAvailableSpectra : public boost::static_visitor<> {
 public:
-  explicit UpdateAvailableSpectra(IIndirectFitPlotViewLegacy *view) : m_view(view) {}
+  explicit UpdateAvailableSpectra(IIndirectFitPlotViewLegacy *view)
+      : m_view(view) {}
 
   void operator()(const std::pair<std::size_t, std::size_t> &spectra) {
     m_view->setAvailableSpectra(spectra.first, spectra.second);
@@ -35,9 +36,9 @@ namespace IDA {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenterLegacy::IndirectFitPlotPresenterLegacy(IndirectFittingModelLegacy *model,
-                                                   IIndirectFitPlotViewLegacy *view,
-                                                   IPyRunner *pythonRunner)
+IndirectFitPlotPresenterLegacy::IndirectFitPlotPresenterLegacy(
+    IndirectFittingModelLegacy *model, IIndirectFitPlotViewLegacy *view,
+    IPyRunner *pythonRunner)
     : m_model(new IndirectFitPlotModelLegacy(model)), m_view(view),
       m_plotGuessInSeparateWindow(false),
       m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
@@ -112,8 +113,8 @@ int IndirectFitPlotPresenterLegacy::getSelectedSpectrumIndex() const {
   return m_view->getSelectedSpectrumIndex();
 }
 
-bool IndirectFitPlotPresenterLegacy::isCurrentlySelected(std::size_t dataIndex,
-                                                   std::size_t spectrum) const {
+bool IndirectFitPlotPresenterLegacy::isCurrentlySelected(
+    std::size_t dataIndex, std::size_t spectrum) const {
   return getSelectedDataIndex() == dataIndex &&
          getSelectedSpectrum() == spectrum;
 }
@@ -134,7 +135,8 @@ void IndirectFitPlotPresenterLegacy::setModelEndX(double endX) {
   m_model->setEndX(endX);
 }
 
-void IndirectFitPlotPresenterLegacy::setModelHWHM(double minimum, double maximum) {
+void IndirectFitPlotPresenterLegacy::setModelHWHM(double minimum,
+                                                  double maximum) {
   m_model->setFWHM(maximum - minimum);
 }
 
@@ -234,7 +236,8 @@ void IndirectFitPlotPresenterLegacy::enableAllDataSelection() {
   m_view->enableFitRangeSelection(true);
 }
 
-void IndirectFitPlotPresenterLegacy::setFitSingleSpectrumIsFitting(bool fitting) {
+void IndirectFitPlotPresenterLegacy::setFitSingleSpectrumIsFitting(
+    bool fitting) {
   m_view->setFitSingleSpectrumText(fitting ? "Fitting..."
                                            : "Fit Single Spectrum");
 }
@@ -279,17 +282,17 @@ void IndirectFitPlotPresenterLegacy::updatePlotRange(
 }
 
 void IndirectFitPlotPresenterLegacy::plotInput(MatrixWorkspace_sptr workspace,
-                                         std::size_t spectrum) {
+                                               std::size_t spectrum) {
   m_view->plotInTopPreview("Sample", workspace, spectrum, Qt::black);
 }
 
 void IndirectFitPlotPresenterLegacy::plotFit(MatrixWorkspace_sptr workspace,
-                                       std::size_t spectrum) {
+                                             std::size_t spectrum) {
   m_view->plotInTopPreview("Fit", workspace, spectrum, Qt::red);
 }
 
-void IndirectFitPlotPresenterLegacy::plotDifference(MatrixWorkspace_sptr workspace,
-                                              std::size_t spectrum) {
+void IndirectFitPlotPresenterLegacy::plotDifference(
+    MatrixWorkspace_sptr workspace, std::size_t spectrum) {
   m_view->plotInBottomPreview("Difference", workspace, spectrum, Qt::blue);
 }
 
@@ -401,7 +404,8 @@ void IndirectFitPlotPresenterLegacy::emitFitSingleSpectrum() {
                          m_model->getActiveSpectrum());
 }
 
-void IndirectFitPlotPresenterLegacy::emitFWHMChanged(double minimum, double maximum) {
+void IndirectFitPlotPresenterLegacy::emitFWHMChanged(double minimum,
+                                                     double maximum) {
   emit fwhmChanged(maximum - minimum);
 }
 

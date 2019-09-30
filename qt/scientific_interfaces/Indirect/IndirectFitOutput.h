@@ -38,7 +38,8 @@ struct ResultLocationNew {
 };
 
 using ParameterValuesNew =
-    std::map<WorkspaceIndex, std::unordered_map<std::string, ParameterValueNew>>;
+    std::map<WorkspaceIndex,
+             std::unordered_map<std::string, ParameterValueNew>>;
 
 using ResultLocationsNew = std::map<WorkspaceIndex, ResultLocationNew>;
 
@@ -77,7 +78,8 @@ public:
 
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
-      const FitDataIteratorNew &fitDataBegin, const FitDataIteratorNew &fitDataEnd);
+      const FitDataIteratorNew &fitDataBegin,
+      const FitDataIteratorNew &fitDataEnd);
   void mapParameterNames(
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
       IndirectFitData const *fitData);

@@ -22,7 +22,8 @@ namespace IDA {
 /**
   Presenter for a table of convolution fitting data.
 */
-class DLLExport ConvFitDataTablePresenter : public IndirectDataTablePresenterLegacy {
+class DLLExport ConvFitDataTablePresenter
+    : public IndirectDataTablePresenterLegacy {
   Q_OBJECT
 public:
   ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable);

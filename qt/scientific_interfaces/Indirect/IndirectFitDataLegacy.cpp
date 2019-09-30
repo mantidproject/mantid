@@ -273,14 +273,14 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IndirectFitDataLegacy::IndirectFitDataLegacy(MatrixWorkspace_sptr workspace,
-                                 const Spectra &spectra)
+                                             const Spectra &spectra)
     : m_workspace(workspace), m_spectra(DiscontinuousSpectra<std::size_t>("")) {
   setSpectra(spectra);
 }
 
 std::string
 IndirectFitDataLegacy::displayName(const std::string &formatString,
-                             const std::string &rangeDelimiter) const {
+                                   const std::string &rangeDelimiter) const {
   const auto workspaceName = getBasename();
   const auto spectraString =
       boost::apply_visitor(SpectraToString(rangeDelimiter), m_spectra);
@@ -295,7 +295,7 @@ IndirectFitDataLegacy::displayName(const std::string &formatString,
 }
 
 std::string IndirectFitDataLegacy::displayName(const std::string &formatString,
-                                         std::size_t spectrum) const {
+                                               std::size_t spectrum) const {
   const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
@@ -336,7 +336,8 @@ IndirectFitDataLegacy::getRange(std::size_t spectrum) const {
   return getBinRange(m_workspace);
 }
 
-std::string IndirectFitDataLegacy::getExcludeRegion(std::size_t spectrum) const {
+std::string
+IndirectFitDataLegacy::getExcludeRegion(std::size_t spectrum) const {
   const auto region = m_excludeRegions.find(spectrum);
   if (region != m_excludeRegions.end())
     return region->second;
@@ -382,7 +383,7 @@ void IndirectFitDataLegacy::validateSpectra(Spectra const &spectra) {
 }
 
 void IndirectFitDataLegacy::setStartX(double const &startX,
-                                std::size_t const &spectrum) {
+                                      std::size_t const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.first = startX;
@@ -393,7 +394,8 @@ void IndirectFitDataLegacy::setStartX(double const &startX,
         "Unable to set StartX: Workspace no longer exists.");
 }
 
-void IndirectFitDataLegacy::setEndX(double const &endX, std::size_t const &spectrum) {
+void IndirectFitDataLegacy::setEndX(double const &endX,
+                                    std::size_t const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end())
     range->second.second = endX;
@@ -411,7 +413,8 @@ void IndirectFitDataLegacy::setExcludeRegionString(
     m_excludeRegions[spectrum] = excludeRegionString;
 }
 
-IndirectFitDataLegacy &IndirectFitDataLegacy::combine(IndirectFitDataLegacy const &fitData) {
+IndirectFitDataLegacy &
+IndirectFitDataLegacy::combine(IndirectFitDataLegacy const &fitData) {
   m_workspace = fitData.m_workspace;
   setSpectra(
       boost::apply_visitor(CombineSpectra(), m_spectra, fitData.m_spectra));

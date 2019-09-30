@@ -25,11 +25,11 @@ class MANTIDQT_INDIRECT_DLL IndirectDataTablePresenterLegacy : public QObject {
   Q_OBJECT
 public:
   IndirectDataTablePresenterLegacy(IndirectFittingModelLegacy *model,
-                             QTableWidget *dataTable);
+                                   QTableWidget *dataTable);
 
   IndirectDataTablePresenterLegacy(IndirectFittingModelLegacy *model,
-                             QTableWidget *dataTable,
-                             const QStringList &headers);
+                                   QTableWidget *dataTable,
+                                   const QStringList &headers);
 
   bool tableDatasetsMatchModel() const;
   bool isTableEmpty() const;

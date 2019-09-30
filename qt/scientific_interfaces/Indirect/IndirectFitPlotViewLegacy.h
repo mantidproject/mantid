@@ -17,7 +17,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy : public IIndirectFitPlotViewLegacy {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotViewLegacy
+    : public IIndirectFitPlotViewLegacy {
   Q_OBJECT
 
 public:

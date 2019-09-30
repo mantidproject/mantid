@@ -99,7 +99,8 @@ public:
   virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
-  void addWorkspace(const std::string &workspaceName, const SpectraNew &spectra);
+  void addWorkspace(const std::string &workspaceName,
+                    const SpectraNew &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                             const SpectraNew &spectra);
   virtual void removeWorkspace(DatasetIndex index);

@@ -76,7 +76,8 @@ private:
                  Mantid::API::WorkspaceGroup_sptr resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
                  Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                 IndirectFitDataLegacy *fitData, std::size_t spectrum) const override;
+                 IndirectFitDataLegacy *fitData,
+                 std::size_t spectrum) const override;
   void addExtendedResolution(std::size_t index);
   void addSampleLogs();
 

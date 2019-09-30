@@ -20,7 +20,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitDataViewLegacy : public IIndirectFitDataViewLegacy {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataViewLegacy
+    : public IIndirectFitDataViewLegacy {
   Q_OBJECT
 public:
   IndirectFitDataViewLegacy(QWidget *parent = nullptr);

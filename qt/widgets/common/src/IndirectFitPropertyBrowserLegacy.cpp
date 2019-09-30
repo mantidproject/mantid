@@ -61,8 +61,8 @@ namespace MantidWidgets {
  * @param parent :: The parent widget - must be an ApplicationWindow
  * @param mantidui :: The UI form for MantidPlot
  */
-IndirectFitPropertyBrowserLegacy::IndirectFitPropertyBrowserLegacy(QWidget *parent,
-                                                       QObject *mantidui)
+IndirectFitPropertyBrowserLegacy::IndirectFitPropertyBrowserLegacy(
+    QWidget *parent, QObject *mantidui)
     : FitPropertyBrowser(parent, mantidui), m_functionsInComboBox(nullptr),
       m_backgroundHandler(nullptr) {}
 
@@ -196,7 +196,8 @@ IFunction_sptr IndirectFitPropertyBrowserLegacy::background() const {
  * @return  The function index of the selected background. None if no background
  *          is selected.
  */
-boost::optional<size_t> IndirectFitPropertyBrowserLegacy::backgroundIndex() const {
+boost::optional<size_t>
+IndirectFitPropertyBrowserLegacy::backgroundIndex() const {
   if (m_backgroundHandler != nullptr) {
     const auto prefix = m_backgroundHandler->functionPrefix();
 
@@ -270,8 +271,8 @@ void IndirectFitPropertyBrowserLegacy::getCompositeTies(
  * @param ties    The map in which to store the tie expression under the tied
  *                parameter.
  */
-void IndirectFitPropertyBrowserLegacy::getTies(PropertyHandler *handler,
-                                         QHash<QString, QString> &ties) const {
+void IndirectFitPropertyBrowserLegacy::getTies(
+    PropertyHandler *handler, QHash<QString, QString> &ties) const {
   const auto prefix = handler->functionPrefix() + ".";
   auto tieProperties = handler->getTies();
   for (const auto parameter : tieProperties.keys())
@@ -375,7 +376,8 @@ void IndirectFitPropertyBrowserLegacy::setBackground(
  *
  * @param convolveMembers If true, members are to be convolved.
  */
-void IndirectFitPropertyBrowserLegacy::setConvolveMembers(bool convolveMembers) {
+void IndirectFitPropertyBrowserLegacy::setConvolveMembers(
+    bool convolveMembers) {
   m_boolManager->setValue(m_convolveMembers, convolveMembers);
 }
 
@@ -448,7 +450,9 @@ void IndirectFitPropertyBrowserLegacy::removeTie(const QString &parameterName) {
   }
 }
 
-void IndirectFitPropertyBrowserLegacy::clearErrors() { getHandler()->clearErrors(); }
+void IndirectFitPropertyBrowserLegacy::clearErrors() {
+  getHandler()->clearErrors();
+}
 
 /**
  * @param settingKey  The key of the boolean setting whose value to retrieve.
@@ -466,8 +470,8 @@ bool IndirectFitPropertyBrowserLegacy::boolSettingValue(
  * @param settingKey  The key of the custom boolean setting.
  * @param value       The value to set the boolean custom setting to.
  */
-void IndirectFitPropertyBrowserLegacy::setCustomBoolSetting(const QString &settingKey,
-                                                      bool value) {
+void IndirectFitPropertyBrowserLegacy::setCustomBoolSetting(
+    const QString &settingKey, bool value) {
   m_boolManager->setValue(m_customSettings[settingKey], value);
 }
 
@@ -493,8 +497,8 @@ double IndirectFitPropertyBrowserLegacy::doubleSettingValue(
  * @param settingKey  The key of the enum setting whose value to retrieve.
  * @return            The value of the enum setting with the specified key.
  */
-QString
-IndirectFitPropertyBrowserLegacy::enumSettingValue(const QString &settingKey) const {
+QString IndirectFitPropertyBrowserLegacy::enumSettingValue(
+    const QString &settingKey) const {
   return enumValue(m_customSettings[settingKey]);
 }
 
@@ -519,9 +523,8 @@ void IndirectFitPropertyBrowserLegacy::addBoolCustomSetting(
  * @param settingName   The display name of the integer setting to add.
  * @param defaultValue  The default value of the integer setting.
  */
-void IndirectFitPropertyBrowserLegacy::addIntCustomSetting(const QString &settingKey,
-                                                     const QString &settingName,
-                                                     int defaultValue) {
+void IndirectFitPropertyBrowserLegacy::addIntCustomSetting(
+    const QString &settingKey, const QString &settingName, int defaultValue) {
   auto settingProperty = m_intManager->addProperty(settingName);
   m_intManager->setValue(settingProperty, defaultValue);
   addCustomSetting(settingKey, settingProperty);
@@ -564,8 +567,8 @@ void IndirectFitPropertyBrowserLegacy::addEnumCustomSetting(
  * @param settingKey      The key of the custom setting to add.
  * @param settingProperty The property to display in the fit property browser.
  */
-void IndirectFitPropertyBrowserLegacy::addCustomSetting(const QString &settingKey,
-                                                  QtProperty *settingProperty) {
+void IndirectFitPropertyBrowserLegacy::addCustomSetting(
+    const QString &settingKey, QtProperty *settingProperty) {
   m_customSettingsGroup->addSubProperty(settingProperty);
 
   if (m_customSettings.isEmpty()) {
@@ -614,11 +617,9 @@ void IndirectFitPropertyBrowserLegacy::addOptionalDoubleSetting(
  * @param enabled         True if the setting should start enabled, false
  *                        otherwise.
  */
-void IndirectFitPropertyBrowserLegacy::addOptionalSetting(const QString &settingKey,
-                                                    QtProperty *settingProperty,
-                                                    const QString &optionKey,
-                                                    const QString &optionName,
-                                                    bool enabled) {
+void IndirectFitPropertyBrowserLegacy::addOptionalSetting(
+    const QString &settingKey, QtProperty *settingProperty,
+    const QString &optionKey, const QString &optionName, bool enabled) {
   auto optionProperty = m_boolManager->addProperty(optionName);
   m_customSettingsGroup->addSubProperty(optionProperty);
   m_optionProperties.insert(optionProperty);
@@ -743,9 +744,8 @@ void IndirectFitPropertyBrowserLegacy::addCustomFunctionGroup(
  * @param multiples The number of times to add the functions in the function
  *                  group.
  */
-void IndirectFitPropertyBrowserLegacy::addCustomFunctions(QtProperty *prop,
-                                                    const QString &groupName,
-                                                    const int &multiples) {
+void IndirectFitPropertyBrowserLegacy::addCustomFunctions(
+    QtProperty *prop, const QString &groupName, const int &multiples) {
   for (int i = 0; i < multiples; ++i) {
     if (!m_functionHandlers.contains(prop))
       m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
@@ -763,8 +763,8 @@ void IndirectFitPropertyBrowserLegacy::addCustomFunctions(QtProperty *prop,
  * @param prop      The property in which to display the functions.
  * @param groupName The name of the function group.
  */
-void IndirectFitPropertyBrowserLegacy::addCustomFunctions(QtProperty *prop,
-                                                    const QString &groupName) {
+void IndirectFitPropertyBrowserLegacy::addCustomFunctions(
+    QtProperty *prop, const QString &groupName) {
   if (!m_functionHandlers.contains(prop))
     m_functionHandlers.insert(prop, QVector<PropertyHandler *>());
 
@@ -832,7 +832,7 @@ void IndirectFitPropertyBrowserLegacy::updatePlotGuess(
  * @param emitSignals If True, will emit Qt signals.
  */
 void IndirectFitPropertyBrowserLegacy::clearCustomFunctions(QtProperty *prop,
-                                                      bool emitSignals) {
+                                                            bool emitSignals) {
   clearCustomFunctions(prop);
   m_functionHandlers[prop].clear();
 
@@ -893,7 +893,8 @@ QtProperty *IndirectFitPropertyBrowserLegacy::createFunctionGroupProperty(
  *
  * @param handler The handler containing the function to be removed.
  */
-void IndirectFitPropertyBrowserLegacy::removeFunction(PropertyHandler *handler) {
+void IndirectFitPropertyBrowserLegacy::removeFunction(
+    PropertyHandler *handler) {
 
   for (const auto &prop : m_functionHandlers.keys()) {
     auto &functionHandlers = m_functionHandlers[prop];
@@ -1070,7 +1071,8 @@ QString IndirectFitPropertyBrowserLegacy::enumValue(QtProperty *prop) const {
  *
  * @param isVisible True if the browser is visible, false otherwise.
  */
-void IndirectFitPropertyBrowserLegacy::browserVisibilityChanged(bool isVisible) {
+void IndirectFitPropertyBrowserLegacy::browserVisibilityChanged(
+    bool isVisible) {
   if (!isVisible)
     emit browserClosed();
 }
