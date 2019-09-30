@@ -111,14 +111,14 @@ class PhaseTablePresenter(object):
         return parameters
 
     def add_phase_quad_to_ADS(self, input_workspace, phasequad_workspace_name):
-        run = re.search('[0-9]+', input_workspace).group()
+        run = re.search('^{}([0-9, -]+)[;,_]?'.format(self.context.data_context.instrument), input_workspace).group(1)
 
         directory = get_base_data_directory(self.context, run)
 
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + phasequad_workspace_name)
         muon_workspace_wrapper.show()
 
-        self.context.phase_context.add_phase_quad(muon_workspace_wrapper)
+        self.context.phase_context.add_phase_quad(muon_workspace_wrapper, run)
         self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):

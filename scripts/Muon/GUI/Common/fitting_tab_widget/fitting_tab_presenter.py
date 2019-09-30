@@ -102,9 +102,9 @@ class FittingTabPresenter(object):
             guess_selection += self.context.get_names_of_workspaces_to_fit(
                 runs='All',
                 group_and_pair=name,
-                phasequad=True,
+                phasequad=False,
                 rebin=not self.view.fit_to_raw)
-        guess_selection = self._check_data_exists(guess_selection)
+        guess_selection = list(set(self._check_data_exists(guess_selection)))
         self.selected_data = guess_selection
 
     def handle_display_workspace_changed(self):
