@@ -131,6 +131,25 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testSettingsChangedResetsStateInModel() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    // Set success=true
+    getGroup(presenter, 0).setSuccess();
+    getRow(presenter, 0, 0)->setSuccess();
+    presenter.settingsChanged();
+    // Check success state is reset
+    TS_ASSERT_EQUALS(getGroup(presenter, 0).success(), false);
+    TS_ASSERT_EQUALS(getRow(presenter, 0, 0)->success(), false);
+  }
+
+  void testSettingsChangedResetsStateInView() {
+    auto presenter = makePresenter(m_view, oneGroupWithARowModel());
+    expectGroupStateCleared();
+    expectRowStateCleared();
+    presenter.settingsChanged();
+    verifyAndClearExpectations();
+  }
+
   void testRowStateChangedForDefaultRowAndGroup() {
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
     expectGroupStateCleared();
