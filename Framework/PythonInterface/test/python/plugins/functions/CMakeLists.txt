@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
+    MuHTest.py
     TeixeiraWaterTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
