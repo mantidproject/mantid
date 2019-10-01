@@ -111,7 +111,7 @@ public:
     verifyAndClearExpectations();
   }
 
-  void testNotifyInstrumentChanged() {
+  void testNotifyChangeInstrumentRequested() {
     auto presenter = makePresenter(m_view, ReductionJobs());
     auto const instrument = std::string("test_instrument");
     EXPECT_CALL(m_view, getInstrumentName())
@@ -120,6 +120,14 @@ public:
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
         .Times(1);
     presenter.notifyChangeInstrumentRequested();
+    verifyAndClearExpectations();
+  }
+
+  void testNotifyInstrumentChanged() {
+    auto presenter = makePresenter(m_view, ReductionJobs());
+    auto const instrument = std::string("test_instrument");
+    EXPECT_CALL(m_view, setInstrumentName(instrument)).Times(1);
+    presenter.notifyInstrumentChanged(instrument);
     verifyAndClearExpectations();
   }
 
