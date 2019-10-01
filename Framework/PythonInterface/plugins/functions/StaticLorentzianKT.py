@@ -21,12 +21,12 @@ class StaticLorentzianKT(IFunction1D):
         self.declareParameter("A0", 0.2)
         self.declareParameter("A", 0.1, 'Half-width of half maximum of Lorentzian distribution (microsecs)')
         self.declareParameter("B_L", 0.1, 'Longitudinal B-field (G)')
-        self.addConstraints("B >= 0")
+        self.addConstraints("B_L >= 0")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
         A = self.getParameterValue("A")
-        B = self.getParameterValue("B")
+        B = self.getParameterValue("B_L")
         gmu = 0.0135538817 * 2 * np.pi
         omega = gmu * B
         y = []
