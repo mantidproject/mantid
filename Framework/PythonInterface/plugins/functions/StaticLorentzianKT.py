@@ -19,7 +19,7 @@ class StaticLorentzianKT(IFunction1D):
     def init(self):	
         self.declareParameter("A0", 0.2)
         self.declareParameter("A", 0.1, 'Half-width of half maximum of Lorentzian distribution (microsecs)')
-        self.declareParameter("B", 0.1, 'B-field (G)')
+        self.declareParameter("B_L", 0.1, 'Longitudinal B-field (G)')
         self.addConstraints("B >= 0")
 
     def function1D(self, x):

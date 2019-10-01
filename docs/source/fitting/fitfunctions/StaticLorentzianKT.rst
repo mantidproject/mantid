@@ -11,17 +11,17 @@ Description
 
 ZF rotation for axial muonium
 
-.. math:: g_{z}^{L}(t,H_L) = A_0 \{1 - \frac{a}{\omega_{L}}j_1(\omega_{L}t)e^{-at}-\left(\frac{a}{\omega_L}\right)^2(j_o(\omega_{L}t)e^{-at}-1)-\left(1+\left(\frac{a}{\omega_L}\right)^2\right)a\int_{0}^{t}j_0(\omega_{L}\tau)e^{-a\tau}d\tau\}
+.. math:: g_{z}^{L}(t,B_L) = A_0 \{1 - \frac{a}{\omega_{L}}j_1(\omega_{L}t)e^{-at}-\left(\frac{a}{\omega_L}\right)^2(j_o(\omega_{L}t)e^{-at}-1)-\left(1+\left(\frac{a}{\omega_L}\right)^2\right)a\int_{0}^{t}j_0(\omega_{L}\tau)e^{-a\tau}d\tau\}
 
 where,
 
 :math:`L` refers to Lorentzian,
 
-:math:`H_L` refers to the longitudinal field applied to the z-axis,
+:math:`B_L` refers to the longitudinal field applied to the z-axis,
 
 :math:`j_{i}` are the spheical Bessel functions of the First Kind,
 
-:math:`\omega_L` is is the precessing angular frequency and its relationship is given by :math:`H_L= \omega_{L} / \gamma_{\mu}`,
+:math:`\omega_L` is is the precessing angular frequency and its relationship is given by :math:`B_L= \omega_{L} / \gamma_{\mu}`,
 
 :math:`\gamma_{\mu}` is the gyromagnetic ratio of muons,
 
