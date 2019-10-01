@@ -1,15 +1,15 @@
 .. _func-StaticLorentzianKT:
 
-=========
+==================
 StaticLorentzianKT
-=========
+==================
 
 .. index:: StaticLorentzianKT
 
 Description
 -----------
 
-ZF rotation for axial muonium
+Static Lorentzian Kubo-Toyabe function:
 
 .. math:: g_{z}^{L}(t,B_L) = A_0 \{1 - \frac{a}{\omega_{L}}j_1(\omega_{L}t)e^{-at}-\left(\frac{a}{\omega_L}\right)^2(j_o(\omega_{L}t)e^{-at}-1)-\left(1+\left(\frac{a}{\omega_L}\right)^2\right)a\int_{0}^{t}j_0(\omega_{L}\tau)e^{-a\tau}d\tau\}
 
