@@ -11,12 +11,13 @@ import numpy as np
 import scipy.special as sp
 from scipy.integrate import quad
 
+
 class StaticLorentzianKT(IFunction1D):
 
     def category(self):
         return "Muon"
 
-    def init(self):	
+    def init(self):
         self.declareParameter("A0", 0.2)
         self.declareParameter("A", 0.1, 'Half-width of half maximum of Lorentzian distribution (microsecs)')
         self.declareParameter("B_L", 0.1, 'Longitudinal B-field (G)')
