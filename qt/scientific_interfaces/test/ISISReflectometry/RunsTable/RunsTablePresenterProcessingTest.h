@@ -267,8 +267,9 @@ private:
   static constexpr const char *FAILURE = "#accbff"; // pale blue
 
   std::vector<Cell> rowCells(const char *colour) {
-    auto cells = std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""),
-                                   Cell(""), Cell(""), Cell(""), Cell("")};
+    auto cells =
+        std::vector<Cell>{Cell(""), Cell(""), Cell(""), Cell(""), Cell(""),
+                          Cell(""), Cell(""), Cell(""), Cell("")};
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
@@ -282,20 +283,6 @@ private:
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
-  }
-
-  Group &getGroup(RunsTablePresenter &presenter, int groupIndex) {
-    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
-    auto &group = reductionJobs.mutableGroups()[groupIndex];
-    return group;
-  }
-
-  Row *getRow(RunsTablePresenter &presenter, int groupIndex, int rowIndex) {
-    auto &reductionJobs = presenter.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[groupIndex]
-                     .mutableRows()[rowIndex]
-                     .get();
-    return row;
   }
 
   void expectGroupStateCleared() {
