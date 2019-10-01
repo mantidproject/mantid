@@ -16,6 +16,7 @@ set(TEST_PY_FILES
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
+    MuHTest.py
     TeixeiraWaterTest.py
     ZFMuonium)
 
