@@ -212,13 +212,15 @@ void TableWorkspaceDomainCreator::createDomain(
     throw std::runtime_error("Workspace contains no data.");
   }
 
-  auto X = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_xColName));
-  auto XData = X.data();
+  auto X = m_tableWorkspace->getColumn(m_xColName);
+  std::vector<double> XData;
+  for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
+    XData.push_back(X->toDouble(i));
+  }
 
   // find the fitting interval: from -> to
   size_t endRowNo = 0;
-  std::tie(m_startRowNo, endRowNo) = getXInterval();
+  std::tie(m_startRowNo, endRowNo) = getXInterval(XData);
   auto from = XData.begin() + m_startRowNo;
   auto to = XData.begin() + endRowNo;
   auto n = endRowNo - m_startRowNo;
@@ -269,11 +271,11 @@ void TableWorkspaceDomainCreator::createDomain(
   auto errors = m_tableWorkspace->getColumn(m_errColName);
   for (size_t i = m_startRowNo; i < endRowNo; ++i) {
     size_t j = i - m_startRowNo + i0;
-    auto y = Y->cell<double>(i);
-    auto error = errors->cell<double>(i);
+    auto y = Y->toDouble(i);
+    auto error = errors->toDouble(i);
     double weight = 0.0;
 
-    if (excludeFinder.isExcluded(X[i])) {
+    if (excludeFinder.isExcluded(XData[i])) {
       weight = 0.0;
     } else if (!std::isfinite(y)) {
       // nan or inf data
@@ -558,22 +560,29 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
   auto tAxis = std::make_unique<API::TextAxis>(nhistograms);
   ws->replaceAxis(1, std::move(tAxis));
 
-  auto &inputX = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_xColName));
-  auto &inputY = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_yColName));
-  auto &inputE = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_errColName));
+  auto inputX = m_tableWorkspace->getColumn(m_xColName);
+  auto inputY = m_tableWorkspace->getColumn(m_yColName);
+  auto inputE = m_tableWorkspace->getColumn(m_errColName);
+
+  std::vector<double> XData;
+  std::vector<double> YData;
+  std::vector<double> EData;
+  for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
+    XData.push_back(inputX->toDouble(i));
+    YData.push_back(inputY->toDouble(i));
+    EData.push_back(inputE->toDouble(i));
+  }
+
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
-    ws->mutableX(i).assign(inputX.data().begin() + m_startRowNo,
-                           inputX.data().begin() + m_startRowNo + nxvalues);
+    ws->mutableX(i).assign(XData.begin() + m_startRowNo,
+                           XData.begin() + m_startRowNo + nxvalues);
   }
   // Data values for the first histogram
-  ws->mutableY(0).assign(inputY.data().begin() + m_startRowNo,
-                         inputY.data().begin() + m_startRowNo + nyvalues);
-  ws->mutableE(0).assign(inputE.data().begin() + m_startRowNo,
-                         inputE.data().begin() + m_startRowNo + nyvalues);
+  ws->mutableY(0).assign(YData.begin() + m_startRowNo,
+                         YData.begin() + m_startRowNo + nyvalues);
+  ws->mutableE(0).assign(EData.begin() + m_startRowNo,
+                         EData.begin() + m_startRowNo + nyvalues);
 
   return ws;
 }
@@ -583,8 +592,13 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
  */
 size_t TableWorkspaceDomainCreator::getDomainSize() const {
   setParameters();
+  auto X = m_tableWorkspace->getColumn(m_xColName);
+  std::vector<double> XData;
+  for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
+    XData.push_back(X->toDouble(i));
+  }
   size_t startIndex, endIndex;
-  std::tie(startIndex, endIndex) = getXInterval();
+  std::tie(startIndex, endIndex) = getXInterval(XData);
   return endIndex - startIndex;
 }
 
@@ -617,10 +631,8 @@ void TableWorkspaceDomainCreator::setInitialValues(API::IFunction &function) {
  * Calculate size and starting iterator in the X array
  * @returns :: A pair of start iterator and size of the data.
  */
-std::pair<size_t, size_t> TableWorkspaceDomainCreator::getXInterval() const {
-  auto X = static_cast<DataObjects::TableColumn<double> &>(
-      *m_tableWorkspace->getColumn(m_xColName));
-  auto XData = X.data();
+std::pair<size_t, size_t>
+TableWorkspaceDomainCreator::getXInterval(std::vector<double> XData) const {
   const auto sizeOfData = XData.size();
   if (sizeOfData == 0) {
     throw std::runtime_error("Workspace contains no data.");
