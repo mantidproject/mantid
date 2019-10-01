@@ -61,6 +61,7 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   char const *const overrideLabel = "";
   m_topPlot->setOverrideAxisLabel(AxisID::XBottom, overrideLabel);
   m_bottomPlot->setOverrideAxisLabel(AxisID::YLeft, overrideLabel);
+  m_plotForm->dwMiniPlots->setFeatures(QDockWidget::NoDockWidgetFeatures);
 #endif
 
   m_plotForm->cbDataSelection->hide();
