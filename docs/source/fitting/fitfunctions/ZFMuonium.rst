@@ -29,7 +29,9 @@ where,
 
 :math:`A_0` is the amplitude,
 
-A (MHz) is the isotropic hyperfine coupling constant,
+FreqA (MHz) is the isotropic hyperfine coupling constant,
+
+FreqD (MHz) is the anisotropic hyperfine coupling constant,
 
 :math:`F_\text{cut}` is the frequency cut,
 
