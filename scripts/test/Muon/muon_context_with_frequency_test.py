@@ -54,7 +54,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.context.show_all_pairs()
         CreateWorkspace([0], [0], OutputWorkspace='EMU19489; PhaseQuad; PhaseTable EMU19489')
         self.context.phase_context.add_phase_quad(
-            MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'))
+            MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')
 
     def test_window(self):
         self.assertEquals("Frequency Domain Analysis", self.context.window_title)
