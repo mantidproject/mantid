@@ -63,24 +63,25 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
     converted_workspaces = []
+    if vanadium_ws.id() != "Workspace2D":
+        for ws_index in range(vanadium_ws.getNumberOfEntries()):
+            ws = vanadium_ws.getItem(ws_index)
+            previous_units = ws.getAxis(0).getUnit().unitID()
 
-    for ws_index in range(vanadium_ws.getNumberOfEntries()):
-        ws = vanadium_ws.getItem(ws_index)
-        previous_units = ws.getAxis(0).getUnit().unitID()
+            if previous_units != WORKSPACE_UNITS.tof:
+                ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
 
-        if previous_units != WORKSPACE_UNITS.tof:
-            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+            ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+            converted_workspaces.append(ws)
 
-        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
-        converted_workspaces.append(ws)
-
-    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
-    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
-    mantid.DeleteWorkspace(converted_group)
+        converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+        mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
+        mantid.DeleteWorkspace(converted_group)
+    else:
+        mantid.SaveNexus(InputWorkspace=vanadium_ws, Filename=output_path, Append=False)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, instrument=None, q_lims=None,
-                    grouping_file_path=None):
+def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
 
@@ -88,8 +89,6 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, instrument=N
         placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=pdf_output)
         pdf_output = mantid.Subtract(LHSWorkspace=pdf_output, RHSWorkspace=placzek_self_scattering)
 
-        pdf_output = mantid.DiffractionFocussing(InputWorkspace=pdf_output,
-                                                 GroupingFileName=grouping_file_path)
         pdf_output = mantid.MatchSpectra(InputWorkspace=pdf_output, ReferenceSpectrum=1)
         if type(q_lims) == str:
             q_min = []
