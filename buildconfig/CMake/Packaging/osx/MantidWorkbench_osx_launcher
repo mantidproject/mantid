@@ -11,9 +11,13 @@ if [[ "${1}" == -psn_* ]]; then
   shift 1
 fi
 
+# It was observed on Qt >= 5.12 that the QtWebEngineProcess would fail to load the icudtl.dat resources
+# from the .app bundle due to chromium sandboxing restrictions: dtrace shows EPERM error when accessing
+# the file.
 env PYTHONHOME=${PYTHONHOME} \
   env PYTHONPATH=${INSTALLDIR}:${PYTHONPATH} \
   env QT_PLUGIN_PATH=$PLUGIN_DIR \
+  env QTWEBENGINE_DISABLE_SANDBOX=1 \
   ${PYTHONHOME}/bin/python ${INSTALLDIR}/workbench-script $*
 
 if [ $? -ne 0 ]; then
