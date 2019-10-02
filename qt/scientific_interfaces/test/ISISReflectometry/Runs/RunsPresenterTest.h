@@ -581,7 +581,7 @@ public:
     auto presenter = makePresenter();
     auto instrument = std::string("INTER");
     auto updateInterval = std::string("20");
-    expectGetLiveDataOptions(instrument);
+    expectGetLiveDataOptions(instrument, updateInterval);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
     auto expected =
@@ -697,8 +697,8 @@ private:
   }
 
   AlgorithmRuntimeProps
-  defaultLiveMonitorAlgorithmOptions(const std::string &instrument,
-                                     const std::string &updateInterval) {
+  defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
+                                     const std::string &updateInterval = std::string("15")) {
     return AlgorithmRuntimeProps{
         {"Instrument", instrument},
         {"OutputWorkspace", "IvsQ_binned_live"},
@@ -992,17 +992,23 @@ private:
     ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(instrument));
   }
 
+  void expectGetUpdateInterval(std::string const &updateInterval) {
+    ON_CALL(m_view, getLiveDataUpdateInterval()).WillByDefault(Return(updateInterval));
+  }
+
   void expectGetLiveDataOptions(
       AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
-      std::string const &instrument = std::string("OFFSPEC")) {
+      std::string const &instrument = std::string("OFFSPEC"),
+      std::string const &updateInterval = std::string("15")) {
     expectSearchInstrument(instrument);
+    expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
         .WillOnce(Return(options));
   }
 
-  void expectGetLiveDataOptions(std::string const &instrument) {
-    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument);
+  void expectGetLiveDataOptions(std::string const &instrument, std::string const &updateInterval) {
+    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument, updateInterval);
   }
 
   boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
