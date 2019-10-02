@@ -1935,8 +1935,7 @@ QVector<double> FitPropertyBrowser::getXRange() {
       for (size_t i = 0; i < tbl->rowCount(); ++i) {
         xColumnData.push_back(col->toDouble(i));
       }
-    } catch (std::invalid_argument err) {
-
+    } catch (std::invalid_argument & err) {
       QMessageBox::critical(this, "Mantid - Error",
                             "The X column is not a number");
       throw std::invalid_argument(err);
