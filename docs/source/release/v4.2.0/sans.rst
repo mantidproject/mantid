@@ -18,7 +18,8 @@ New
 Improved
 ########
 
-- Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame>` to correct TOF by path to individual pixel
+- Option in :ref:`EQSANSCorrectFrame <algm-EQSANSCorrectFrame-v1>` to correct TOF by path to individual pixel
 - New CG2 definition file
+- :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection-v1>` now can be supplied any transmission workspace that is supported by :ref:`Divide <algm-Divide-v1>` .
 
 :ref:`Release 4.2.0 <v4.2.0>`
