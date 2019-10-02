@@ -31,7 +31,9 @@ class SpinGlass(IFunction1D):
         x = x[1 : np.size(x)]
         term1 = 4 * (a ** 2) * (1 - q) * x / nu
         term2 = q * (a ** 2) * (x ** 2)
-        SpinGlass = A0 * ((1. / 3.) * np.exp(- np.sqrt(term1)) +(2. / 3.) * (1 - (term2 / np.sqrt(term1 + term2))) * np.exp(- np.sqrt(term1 + term2)))
+        term13 = np.exp(- np.sqrt(term1))
+        term23 = 1 - (term2 / np.sqrt(term1 + term2))) * np.exp(- np.sqrt(term1 + term2)
+        SpinGlass = A0 * ((1. / 3.) * term13 +(2. / 3.) * term23)
         SpinGlass = np.insert(SpinGlass, 0, A0)
         return SpinGlass
 
