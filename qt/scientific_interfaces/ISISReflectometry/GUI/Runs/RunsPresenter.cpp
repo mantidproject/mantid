@@ -447,11 +447,12 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setLogging(false);
   auto const instrument = m_view->getSearchInstrument();
   auto const inputWorkspace = "TOF_live";
+  auto const updateInterval = m_view->getLiveDataUpdateInterval();
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("UpdateEvery", m_view->getLiveDataUpdateInterval());
+  alg->setProperty("UpdateEvery", updateInterval);
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
                    liveDataReductionOptions(inputWorkspace, instrument));
