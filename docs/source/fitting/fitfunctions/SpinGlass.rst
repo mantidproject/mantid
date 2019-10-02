@@ -13,7 +13,6 @@ Fitting function for use by Muon scientists defined by:
 
 .. math:: A(t) = A_0\left(\frac{1}{3}e^{-\sqrt{\Omega t}}+\frac{2}{3}\left(1-\frac{Qa^2t^2}{\sqrt{\Omega t+Qa^2t^2}}\right)e^{-\sqrt{\Omega t + Qa^2t^2}}\right)
 
-
 .. math:: \Omega = \frac{4(1-Q)a^2}{\nu}
 
 where,
@@ -39,7 +38,6 @@ Note that :math:`0<q<1` and :math:`\gamma>0`
    ax.plot(x, y(x))
    ax.set_xlabel('t($\mu$s)')
    ax.set_ylabel('A(t)')
-
 
 .. attributes::
 
