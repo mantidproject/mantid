@@ -65,35 +65,43 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         mantid.DeleteWorkspace(solid_angle)
 
     # Focus the spectra into banks
-    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
-                                             GroupingFileName=run_details.grouping_file_path)
+    if instrument._inst_settings.mode != 'PDF':
+        focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+                                                 GroupingFileName=run_details.grouping_file_path)
 
-    calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
-                                                     input_workspace=focused_ws,
-                                                     perform_vanadium_norm=perform_vanadium_norm,
-                                                     vanadium_splines=vanadium_path)
+        calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
+                                                         input_workspace=focused_ws,
+                                                         perform_vanadium_norm=perform_vanadium_norm,
+                                                         vanadium_splines=vanadium_path)
 
-    output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
+        output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
-    bin_widths = instrument._get_instrument_bin_widths()
-    if bin_widths:
-        # Reduce the bin width if required on this instrument
-        output_spectra = common.rebin_workspace_list(workspace_list=output_spectra,
-                                                     bin_width_list=bin_widths)
+        bin_widths = instrument._get_instrument_bin_widths()
+        if bin_widths:
+            # Reduce the bin width if required on this instrument
+            output_spectra = common.rebin_workspace_list(workspace_list=output_spectra,
+                                                         bin_width_list=bin_widths)
 
-    # Output
-    d_spacing_group, tof_group = instrument._output_focused_ws(output_spectra, run_details=run_details)
+        # Output
+        d_spacing_group, tof_group = instrument._output_focused_ws(output_spectra, run_details=run_details)
 
-    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
-                               unit_to_keep=instrument._get_unit_to_keep())
+        common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
+                                   unit_to_keep=instrument._get_unit_to_keep())
 
-    # Tidy workspaces from Mantid
-    common.remove_intermediate_workspace(input_workspace)
-    common.remove_intermediate_workspace(aligned_ws)
-    common.remove_intermediate_workspace(focused_ws)
-    common.remove_intermediate_workspace(output_spectra)
+        # Tidy workspaces from Mantid
+        common.remove_intermediate_workspace(input_workspace)
+        common.remove_intermediate_workspace(aligned_ws)
+        common.remove_intermediate_workspace(focused_ws)
+        common.remove_intermediate_workspace(output_spectra)
 
-    return d_spacing_group
+        return d_spacing_group
+    else:
+        calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
+                                                         input_workspace=aligned_ws,
+                                                         perform_vanadium_norm=perform_vanadium_norm,
+                                                         vanadium_splines=vanadium_path)
+        common.remove_intermediate_workspace(input_workspace)
+        return calibrated_spectra
 
 
 def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):

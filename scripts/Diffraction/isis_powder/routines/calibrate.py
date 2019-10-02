@@ -47,28 +47,33 @@ def create_van(instrument, run_details, absorb):
                                        CalibrationFile=run_details.offset_file_path)
     solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
     if solid_angle:
-        aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws,RHSWorkspace=solid_angle)
+        aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
-    focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
-                                                   GroupingFileName=run_details.grouping_file_path)
 
-    focused_spectra = common.extract_ws_spectra(focused_vanadium)
-    focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
+    if instrument._inst_settings.mode != 'PDF':
+        focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+                                                       GroupingFileName=run_details.grouping_file_path)
 
-    d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra,
-                                                               run_details=run_details)
+        focused_spectra = common.extract_ws_spectra(focused_vanadium)
+        focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
-    _create_vanadium_splines(focused_spectra, instrument, run_details)
+        d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra,
+                                                                   run_details=run_details)
 
-    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
-                               unit_to_keep=instrument._get_unit_to_keep())
+        _create_vanadium_splines(focused_spectra, instrument, run_details)
 
-    common.remove_intermediate_workspace(corrected_van_ws)
-    common.remove_intermediate_workspace(aligned_ws)
-    common.remove_intermediate_workspace(focused_vanadium)
-    common.remove_intermediate_workspace(focused_spectra)
+        common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
+                                   unit_to_keep=instrument._get_unit_to_keep())
 
-    return d_spacing_group
+        common.remove_intermediate_workspace(corrected_van_ws)
+        common.remove_intermediate_workspace(aligned_ws)
+        common.remove_intermediate_workspace(focused_vanadium)
+        common.remove_intermediate_workspace(focused_spectra)
+
+        return d_spacing_group
+    else:
+        common.remove_intermediate_workspace(corrected_van_ws)
+        return aligned_ws
 
 
 def _create_vanadium_splines(focused_spectra, instrument, run_details):

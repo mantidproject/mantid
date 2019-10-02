@@ -79,11 +79,41 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
+def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, instrument=None, q_lims=None,
+                    grouping_file_path=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
+
     if merge_banks:
-        raise RuntimeError("Merging banks is currently not supported")
+        placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=pdf_output)
+        pdf_output = mantid.Subtract(LHSWorkspace=pdf_output, RHSWorkspace=placzek_self_scattering)
+
+        pdf_output = mantid.DiffractionFocussing(InputWorkspace=pdf_output,
+                                                 GroupingFileName=grouping_file_path)
+        pdf_output = mantid.MatchSpectra(InputWorkspace=pdf_output, ReferenceSpectrum=1)
+        if type(q_lims) == str:
+            q_min = []
+            q_max = []
+            try:
+                with open(q_lims, 'r') as f:
+                    line_list = [line.rstrip('\n') for line in f]
+                    for line in line_list[:-1]:
+                        value_list = line.split()
+                        q_min.append(value_list[2])
+                        q_max.append(value_list[3])
+            except IOError:
+                raise RuntimeError("q_lims is not valid")
+        elif type(q_lims) == list:
+            q_min = q_lims[0, :]
+            q_max = q_lims[1, :]
+        else:
+            raise RuntimeError("q_lims is not valid")
+        pdf_x_array = pdf_output.readX()
+        bin_width = pdf_x_array[1] - pdf_x_array[0]
+        pdf_output = mantid.CropWorkspaceRagged(InputWorkspace=pdf_output, XMin=q_min, XMax=q_max)
+        pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=[q_min, bin_width, q_max])
+        pdf_output = mantid.SumSpectra(InputWorkspace=pdf_output, WeightedSum=True)
+
     pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
                                             Filter=True)
     pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
