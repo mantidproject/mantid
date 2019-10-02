@@ -696,9 +696,9 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  AlgorithmRuntimeProps
-  defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
-                                     const std::string &updateInterval = std::string("15")) {
+  AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(
+      const std::string &instrument = std::string("OFFSPEC"),
+      const std::string &updateInterval = std::string("15")) {
     return AlgorithmRuntimeProps{
         {"Instrument", instrument},
         {"OutputWorkspace", "IvsQ_binned_live"},
@@ -993,7 +993,8 @@ private:
   }
 
   void expectGetUpdateInterval(std::string const &updateInterval) {
-    ON_CALL(m_view, getLiveDataUpdateInterval()).WillByDefault(Return(updateInterval));
+    ON_CALL(m_view, getLiveDataUpdateInterval())
+        .WillByDefault(Return(updateInterval));
   }
 
   void expectGetLiveDataOptions(
@@ -1007,8 +1008,10 @@ private:
         .WillOnce(Return(options));
   }
 
-  void expectGetLiveDataOptions(std::string const &instrument, std::string const &updateInterval) {
-    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument, updateInterval);
+  void expectGetLiveDataOptions(std::string const &instrument,
+                                std::string const &updateInterval) {
+    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument,
+                             updateInterval);
   }
 
   boost::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
