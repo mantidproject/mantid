@@ -159,7 +159,7 @@ void ApplyTransmissionCorrection::exec() {
 
       const double exp_term = 0.5 / cos(spectrumInfo.twoTheta(i)) + 0.5;
       for (int j = 0; j < static_cast<int>(inputWS->y(0).size()); j++) {
-        correctionY[j] = 1.0 / pow(TrIn[j], exp_term);
+        correctionY[j] = pow(TrIn[j], -1. * exp_term); // 1 / TrIn^exp_term
         correctionE[j] =
             std::fabs(ETrIn[j] * exp_term / pow(TrIn[j], exp_term + 1.0));
       }
