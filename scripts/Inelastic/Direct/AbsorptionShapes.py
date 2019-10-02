@@ -7,6 +7,7 @@
 
 #pylind: disable=attribute-defined-outside-init
 from __future__ import (absolute_import, division, print_function)
+from mantid.kernel import funcinspect
 from mantid.simpleapi import *
 from mantid.api import (AlgorithmManager, Algorithm)
 import random
@@ -14,7 +15,7 @@ import random
 
 
 
-class anAbsrpnShape(object):
+class anAbsorptionShape(object):
     """ The parent class for all shapes, used to perform various adsorption corrections
     in direct inelastic analysis.
 
@@ -91,36 +92,38 @@ class anAbsrpnShape(object):
         # Test if the material property are recognized by SetSampleMaterial algorithm.
         SetSampleMaterial(self._testWorkspace,**Mater_properties)
     #
-    def correct_adsorption_fast(self,ws):
+    def correct_absorption(self,ws,**argi):
         """ Method to correct adsorption on a shape using fast (analytical) method if such method is available 
         
         Not available on arbitrary shapes
         """
-        raise RuntimeError('*** The correct_adsorbtion_fast is not implemented for an abstract shape')
+        raise RuntimeError('*** The correct_absorbtion_fast is not implemented for an abstract shape')
 
-    def correct_adsorption_MC(self,ws,**argi):
+    def correct_absorption_MC(self,ws,**argi):
+        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        
+        Not available on arbitrary shapes
         """
-        """
-        raise RuntimeError('*** Monte-Carlo adsorption corrections are not implemented for an abstract shape')
+        raise RuntimeError('*** Monte-Carlo absorption corrections are not implemented for an abstract shape')
 
 
-class AbsrpnCylinder(anAbsrpnShape):
+class Cylinder(anAbsorptionShape):
     """Define the absorption cylinder and calculate adsorbtion corrections from this cylinder
     
     Usage:
-    abs = AbsrpnCylinder(SampleMaterial,CylinderParameters)
+    abs = Cylinder(SampleMaterial,CylinderParameters)
     Define the absorption cylinder with SampleMaterial defined as described on 
-    anAbsrpnShape class and CylinderParameters in the form:
+    anAbsorptionShape class and CylinderParameters in the form:
     a) The list:
     CylinderParameters = [Height,Radus,[Axis]] 
     where Height, Radus are the cylinder height and radius in cm and 
     Axis, if present is the direction of the cylinder wrt to the bean direction [0,0,1]
     e.g.:
-    abs = AbsrpnCylinder(['Al',0.1],[10,2,[1,0,0],[0,0,0]])
+    abs = Cylinder(['Al',0.1],[10,2,[1,0,0],[0,0,0]])
     b) The diary: 
     CylinderParameters = {Height:Height_value,Radus:Radius_value,[Axis:axisValue],[Center:TheSampleCentre]} 
     e.g:
-    abs = AbsrpnCylinder(['Al',0.1],[Height:10,Radius:2,Axis:[1,0,0]])
+    abs = Cylinder(['Al',0.1],[Height:10,Radius:2,Axis:[1,0,0]])
 
     Correct absorbtion on the cylinder using CylinderAbsorption algorithm:
     ws = abs.correct_adsorption_fast(ws)
@@ -130,7 +133,7 @@ class AbsrpnCylinder(anAbsrpnShape):
     """
     def __init__(self,Material=None,CylinderParams=None):
 
-        anAbsrpnShape.__init__(self,Material)
+        anAbsorptionShape.__init__(self,Material)
         self.cylinder_shape = CylinderParams
     @property
     def cylinder_shape(self):
@@ -165,6 +168,85 @@ class AbsrpnCylinder(anAbsrpnShape):
 
         # Test if the material property are recognized by SetSampleMaterial algorithm.
         SetSample(self._testWorkspace,Geometry=shape_dict)
+
+    def correct_absorption(self,ws,**argi):
+        """ Method to correct adsorption on a cylinder using CylinderAbsorption algorithm
+
+        Inputs:
+        ws -- workspace to correct. Should be in the units of enery transfer,contain Ei and 
+               be processible in Direct mode.
+        **argi -- list of additional keyword arguments to provide as input for CylinderAdsorption algorithm
+                These argument should not be related to the sample as the sample should already be defined.
+
+        Returns:
+        1) absorption-corrected workspace
+        2) if two output arguments are provided, second would be workspace with adsorbtion corrections coefficients
+        """
+        n_outputs,var_names = funcinspect.lhs_info('both')
+        if n_outputs == 0:
+            return
+
+        correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
+        Mater_properties = self._Material
+        SetSampleMaterial(correction_base_ws,**Mater_properties)
+        shape_description = self._ShapeDescription
+        SetSample(correction_base_ws,Geometry=shape_description)
+        if len(argi) == 0:
+            adsrbtn_correctios = CylinderAbsorption(correction_base_ws)
+        else:
+            adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**argi)
+        adsrbtn_correctios = ConvertUnits(adsrbtn_correctios,'DeltaE',EMode='Direct')
+        ws = ws/adsrbtn_correctios
+
+
+        DeleteWorkspace(correction_base_ws)
+        RenameWorkspace(ws,var_names[0])
+        if n_outputs==1:
+            DeleteWorkspace(adsrbtn_correctios)
+            return ws
+        else: # n_outputs == 2
+            RenameWorkspace(adsrbtn_correctios,var_names[1])
+            return (ws,adsrbtn_correctios)
+    #
+    def correct_absorption_MC(self,ws,**argi):
+        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        Inputs:
+        ws -- workspace to correct. Should be in the units of enery transfer,contain Ei and 
+               be processible in Direct mode.
+        **argi -- list of additional keyword arguments to provide as input for CylinderAdsorption algorithm
+                These argument should not be related to the sample as the sample should already be defined.
+
+        Returns:
+        1) absorption-corrected workspace
+        2) if two output arguments are provided, second would be workspace with adsorbtion corrections coefficients
+        """
+
+        n_outputs,var_names = funcinspect.lhs_info('both')
+        if n_outputs == 0:
+            return
+
+        correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
+        Mater_properties = self._Material
+        SetSampleMaterial(correction_base_ws,**Mater_properties)
+        shape_description = self._ShapeDescription
+        SetSample(correction_base_ws,Geometry=shape_description)
+        if not 'NumberOfWavelengthPoints' in argi:
+            argi['NumberOfWavelengthPoints'] = 50
+
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**argi)
+
+        adsrbtn_correctios = ConvertUnits(adsrbtn_correctios,'DeltaE',EMode='Direct')
+        ws = ws/adsrbtn_correctios
+
+
+        DeleteWorkspace(correction_base_ws)
+        RenameWorkspace(ws,var_names[0])
+        if n_outputs==1:
+            DeleteWorkspace(adsrbtn_correctios)
+            return ws
+        else: # n_outputs == 2
+            RenameWorkspace(adsrbtn_correctios,var_names[1])
+            return (ws,adsrbtn_correctios)
 
 
 

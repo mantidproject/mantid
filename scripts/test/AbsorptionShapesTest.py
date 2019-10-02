@@ -9,14 +9,14 @@ import os
 from mantid.simpleapi import *
 from mantid import api
 import unittest
-from AbsorptionShapes import (anAbsrpnShape,AbsrpnCylinder)
+from AbsorptionShapes import (anAbsorptionShape,Cylinder)
 
 class AdsorbtionShapesTest(unittest.TestCase):
     def __init__(self, methodName):
         return super(AdsorbtionShapesTest, self).__init__(methodName)
 
     def test_an_Absrpn_shape_parent(self):
-        ash = anAbsrpnShape(['V']);
+        ash = anAbsorptionShape(['V']);
         res = ash.material;
         self.assertEqual(res['ChemicalFormula'],'V')
 
@@ -36,12 +36,12 @@ class AdsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['ChemicalFormula'],'Al')
         self.assertEqual(res['SampleNumberDensity'],0.5)
 
-        self.assertRaises(TypeError,anAbsrpnShape.material.__set__,ash,[1,2,3])
-        self.assertRaises(TypeError,anAbsrpnShape.material.__set__,ash,[1,2])
+        self.assertRaises(TypeError,anAbsorptionShape.material.__set__,ash,[1,2,3])
+        self.assertRaises(TypeError,anAbsorptionShape.material.__set__,ash,[1,2])
 
     def test_adsrp_cylinder(self):
-        ash = AbsrpnCylinder('V',[10,2]);
-        res = ash.cylinder_shape;
+        ash = Cylinder('V',[10,2])
+        res = ash.cylinder_shape
         self.assertEqual(res['Height'],10)
         self.assertEqual(res['Radius'],2)
 
@@ -52,12 +52,19 @@ class AdsorbtionShapesTest(unittest.TestCase):
         self.assertEqual(res['Axis'],[0,1,0])
         self.assertEqual(res['Center'],[0,0,-0.5])
 
-        ash.cylinder_shape = {'Height':50,'Radius':10,'Axis':[1,1,0],'Center':[0.,0.,0.5]}
+        ash.cylinder_shape = {'Height':50,'Radius':10,'Axis':[1,1,0],'Center':[0.,0.,0.]}
         res = ash.cylinder_shape;
         self.assertEqual(res['Height'],50)
         self.assertEqual(res['Radius'],10)
         self.assertEqual(res['Axis'],[1,1,0])
-        self.assertEqual(res['Center'],[0,0,0.5])
+        self.assertEqual(res['Center'],[0,0,0])
+
+        test_ws = CreateSampleWorkspace()
+        test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
+        cor_ws,corrections = ash.correct_absorption(test_ws)
+
+        mccor_ws,mc_correc = ash.correct_absorption_MC(test_ws)
+
 
 
 if __name__=="__main__":
