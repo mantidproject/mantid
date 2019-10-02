@@ -468,6 +468,20 @@ def parse_event_slice_setting(string_to_parse):
     def _does_match(compiled_regex, line):
         return compiled_regex.match(line) is not None
 
+    def _is_comma_separated_range(line):
+        stripped_line = line.replace(' ', '')
+        if ',' not in stripped_line:
+            return False
+
+        split_line = stripped_line.split(',')
+        for character in split_line:
+            if len(character) > 1 or len(character) == 0:
+                # We likely have something like 1,2- or 1,
+                return False
+            elif not character.isdigit():
+                raise ValueError("The character {0} is not a digit.".format(character))
+        return True
+
     def _extract_simple_slice(line):
         start, stop = line.split("-")
         start = float(start)
@@ -508,9 +522,21 @@ def parse_event_slice_setting(string_to_parse):
         else:
             return [-1., value]
 
+    def _extra_comma_separated_range(line):
+        list_of_vals = line.replace(' ', '').split(',')
+        output_list = []
+        for i, j in zip(list_of_vals, list_of_vals[1:]):
+            output_list.append([float(i), float(j)])
+
+        return output_list
+
     # Check if the input actually exists.
     if not string_to_parse:
         return None
+
+    # If it's a simple comma separated string of pairs skip regex
+    if _is_comma_separated_range(string_to_parse):
+        return _extra_comma_separated_range(string_to_parse)
 
     number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
     simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")

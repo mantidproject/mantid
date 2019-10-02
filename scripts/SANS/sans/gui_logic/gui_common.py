@@ -161,12 +161,10 @@ def get_detector_from_gui_selection(gui_selection):
     # TODO when we hit only Python 3 this should use casefold rather than lower
     case_folded_selection = gui_selection.lower()
 
-    if any(case_folded_selection == hab.lower() for hab in HAB_STRINGS):
+    if any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
         return DetectorType.HAB
-    elif any(case_folded_selection == lab.lower() for lab in LAB_STRINGS):
-        return DetectorType.LAB
     else:
-        raise RuntimeError("Detector type is unrecognised {0} from GUI selection".format(gui_selection))
+        return DetectorType.LAB
 
 
 def get_instrument_from_gui_selection(gui_selection):
