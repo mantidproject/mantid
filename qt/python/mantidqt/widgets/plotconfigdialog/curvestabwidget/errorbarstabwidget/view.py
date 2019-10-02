@@ -87,3 +87,6 @@ class ErrorbarsTabWidgetView(QWidget):
         self.set_cap_thickness(curve_props.capthick)
         self.set_error_every(curve_props.errorevery)
         self.set_color(curve_props.ecolor)
+
+    def set_apply_to_all_enabled(self, enable):
+        self.apply_to_all_button.setEnabled(enable)

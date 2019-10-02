@@ -79,7 +79,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
 
         x = np.arange(self._binning_for_calc[0], self._binning_for_calc[2], self._binning_for_calc[1])
         incident_index = 0
-        if not self._binning_for_fit.all():
+        if self._binning_for_fit.size == 0:
+            x_fit = np.array(self._input_ws.readX(incident_index))
+            y_fit = np.array(self._input_ws.readY(incident_index))
+        else:
             rebinned = Rebin(
                 self._input_ws,
                 Params=self._binning_for_fit,
@@ -87,9 +90,6 @@ class FitIncidentSpectrum(PythonAlgorithm):
                 StoreInADS=False)
             x_fit = np.array(rebinned.readX(incident_index))
             y_fit = np.array(rebinned.readY(incident_index))
-        else:
-            x_fit = np.array(self._input_ws.readX(incident_index))
-            y_fit = np.array(self._input_ws.readY(incident_index))
 
         if len(x_fit) != len(y_fit):
             x_fit = x_fit[:-1]
@@ -116,6 +116,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
             UnitX='Wavelength',
             NSpec=2,
             Distribution=False,
+            ParentWorkspace=self._input_ws,
             StoreInADS=False)
         self.setProperty("OutputWorkspace", output_workspace)
 

@@ -364,7 +364,7 @@ void SANSAddFiles::runPythonAddFiles() {
  *  output directory to be changed
  */
 void SANSAddFiles::outPathSel() {
-  MantidQt::API::ManageUserDirectories::openUserDirsDialog(this);
+  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
 }
 /** This slot opens a file browser allowing a user select files, which is
  * copied into the new2Add_edit ready to be copied to the listbox (toAdd_List)

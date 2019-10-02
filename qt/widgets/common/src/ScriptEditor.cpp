@@ -574,7 +574,7 @@ void ScriptEditor::replaceAll(const QString &searchString,
                                wrap, forward, 0, 0);
   // If find first fails then there is nothing to replace
   if (!found) {
-    QMessageBox::information(this, "MantidPlot - Find and Replace",
+    QMessageBox::information(this, "Mantid - Find and Replace",
                              "No matches found in current document.");
   }
 

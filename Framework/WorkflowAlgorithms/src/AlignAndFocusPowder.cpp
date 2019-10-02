@@ -9,6 +9,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -39,6 +40,45 @@ using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
 
+namespace {
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string UNFOCUS_WKSP("UnfocussedWorkspace");
+const std::string CAL_FILE("CalFileName");
+const std::string GROUP_FILE("GroupFilename");
+const std::string GROUP_WKSP("GroupingWorkspace");
+const std::string CAL_WKSP("CalibrationWorkspace");
+const std::string OFFSET_WKSP("OffsetsWorkspace");
+const std::string MASK_WKSP("MaskWorkspace");
+const std::string MASK_TABLE("MaskBinTable");
+const std::string BINNING("Params");
+const std::string RESAMPLEX("ResampleX");
+const std::string BIN_IN_D("Dspacing");
+const std::string D_MINS("DMin");
+const std::string D_MAXS("DMax");
+const std::string TOF_MIN("TMin");
+const std::string TOF_MAX("TMax");
+const std::string WL_MIN("CropWavelengthMin");
+const std::string WL_MAX("CropWavelengthMax");
+const std::string PRESERVE_EVENTS("PreserveEvents");
+const std::string REMOVE_PROMPT_PULSE("RemovePromptPulseWidth");
+const std::string COMPRESS_TOF_TOL("CompressTolerance");
+const std::string COMPRESS_WALL_TOL("CompressWallClockTolerance");
+const std::string COMPRESS_WALL_START("CompressStartTime");
+const std::string L1("PrimaryFlightPath");
+const std::string SPEC_IDS("SpectrumIDs");
+const std::string L2("L2");
+const std::string POLAR("Polar");
+const std::string AZIMUTHAL("Azimuthal");
+const std::string PM_NAME("ReductionProperties");
+const std::string LORENTZ("LorentzCorrection");
+const std::string UNWRAP_REF("UnwrapRef");
+const std::string LOWRES_REF("LowResRef");
+const std::string LOWRES_SPEC_OFF("LowResSpectrumOffset");
+} // namespace PropertyNames
+} // namespace
+
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
 
@@ -47,14 +87,15 @@ DECLARE_ALGORITHM(AlignAndFocusPowder)
  */
 void AlignAndFocusPowder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+                      PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "The input workspace");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
+                      PropertyNames::OUTPUT_WKSP, "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
   declareProperty(
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "UnfocussedWorkspace", "", Direction::Output, PropertyMode::Optional),
+          PropertyNames::UNFOCUS_WKSP, "", Direction::Output,
+          PropertyMode::Optional),
       "Treated data in d-spacing before focussing (optional). This will likely "
       "need rebinning.");
   // declareProperty(
@@ -63,84 +104,89 @@ void AlignAndFocusPowder::init() {
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
   declareProperty(std::make_unique<FileProperty>(
-                      "CalFileName", "", FileProperty::OptionalLoad,
+                      PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad,
                       std::vector<std::string>{".h5", ".hd5", ".hdf", ".cal"}),
                   "The name of the calibration file with offset, masking, and "
                   "grouping data");
   declareProperty(std::make_unique<FileProperty>(
-                      "GroupFilename", "", FileProperty::OptionalLoad,
+                      PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
                       std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
-          "GroupingWorkspace", "", Direction::InOut, PropertyMode::Optional),
-      "Optional: A GroupingWorkspace giving the grouping info.");
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
+                      PropertyNames::GROUP_WKSP, "", Direction::InOut,
+                      PropertyMode::Optional),
+                  "Optional: A GroupingWorkspace giving the grouping info.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "CalibrationWorkspace", "", Direction::InOut, PropertyMode::Optional),
+          PropertyNames::CAL_WKSP, "", Direction::InOut,
+          PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
   declareProperty(
       std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
-          "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
+          PropertyNames::OFFSET_WKSP, "", Direction::Input,
+          PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<MaskWorkspace>>(
-          "MaskWorkspace", "", Direction::InOut, PropertyMode::Optional),
-      "Optional: A workspace giving which detectors are masked.");
+  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>(
+                      PropertyNames::MASK_WKSP, "", Direction::InOut,
+                      PropertyMode::Optional),
+                  "Optional: A workspace giving which detectors are masked.");
   declareProperty(
       std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "MaskBinTable", "", Direction::Input, PropertyMode::Optional),
       "Optional: A workspace giving pixels and bins to mask.");
-  declareProperty(
-      std::make_unique<ArrayProperty<double>>(
-          "Params" /*, boost::make_shared<RebinParamsValidator>()*/),
+  declareProperty( // intentionally not using the RebinParamsValidator
+      std::make_unique<ArrayProperty<double>>(PropertyNames::BINNING),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
-  declareProperty("ResampleX", 0,
+  declareProperty(PropertyNames::RESAMPLEX, 0,
                   "Number of bins in x-axis. Non-zero value "
                   "overrides \"Params\" property. Negative "
                   "value means logarithmic binning.");
-  setPropertySettings(
-      "Params", std::make_unique<EnabledWhenProperty>("ResampleX", IS_DEFAULT));
-  declareProperty("Dspacing", true,
+  setPropertySettings(PropertyNames::BINNING,
+                      std::make_unique<EnabledWhenProperty>(
+                          PropertyNames::RESAMPLEX, IS_DEFAULT));
+  declareProperty(PropertyNames::BIN_IN_D, true,
                   "Bin in Dspace. (True is Dspace; False is TOF)");
-  declareProperty(std::make_unique<ArrayProperty<double>>("DMin"),
-                  "Minimum for Dspace axis. (Default 0.) ");
-  mapPropertyName("DMin", "d_min");
-  declareProperty(std::make_unique<ArrayProperty<double>>("DMax"),
-                  "Maximum for Dspace axis. (Default 0.) ");
-  mapPropertyName("DMax", "d_max");
-  declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
-  mapPropertyName("TMin", "tof_min");
-  declareProperty("TMax", EMPTY_DBL(),
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::D_MINS),
+      "Minimum for Dspace axis. (Default 0.) ");
+  mapPropertyName(PropertyNames::D_MINS, "d_min");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::D_MAXS),
+      "Maximum for Dspace axis. (Default 0.) ");
+  mapPropertyName(PropertyNames::D_MAXS, "d_max");
+  declareProperty(PropertyNames::TOF_MIN, EMPTY_DBL(),
+                  "Minimum for TOF axis. Defaults to 0. ");
+  mapPropertyName(PropertyNames::TOF_MIN, "tof_min");
+  declareProperty(PropertyNames::TOF_MAX, EMPTY_DBL(),
                   "Maximum for TOF or dspace axis. Defaults to 0. ");
-  mapPropertyName("TMax", "tof_max");
-  declareProperty("PreserveEvents", true,
+  mapPropertyName(PropertyNames::TOF_MAX, "tof_max");
+  declareProperty(PropertyNames::PRESERVE_EVENTS, true,
                   "If the InputWorkspace is an "
                   "EventWorkspace, this will preserve "
                   "the full event list (warning: this "
                   "will use much more memory!).");
-  declareProperty("RemovePromptPulseWidth", 0.,
+  declareProperty(PropertyNames::REMOVE_PROMPT_PULSE, 0.,
                   "Width of events (in "
                   "microseconds) near the prompt "
                   "pulse to remove. 0 disables");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
+  declareProperty(std::make_unique<PropertyWithValue<double>>(
+                      PropertyNames::COMPRESS_TOF_TOL, 1e-5, mustBePositive,
+                      Direction::Input),
+                  "Compress events (in "
+                  "microseconds) within this "
+                  "tolerance. (Default 1e-5)");
   declareProperty(
       std::make_unique<PropertyWithValue<double>>(
-          "CompressTolerance", 1e-5, mustBePositive, Direction::Input),
-      "Compress events (in "
-      "microseconds) within this "
-      "tolerance. (Default 1e-5)");
-  declareProperty(
-      std::make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
-                                                  EMPTY_DBL(), mustBePositive,
-                                                  Direction::Input),
+          PropertyNames::COMPRESS_WALL_TOL, EMPTY_DBL(), mustBePositive,
+          Direction::Input),
       "The tolerance (in seconds) on the wall-clock time for comparison. Unset "
       "means compressing all wall-clock times together disabling pulsetime "
       "resolution.");
@@ -148,38 +194,44 @@ void AlignAndFocusPowder::init() {
   auto dateValidator = boost::make_shared<DateTimeValidator>();
   dateValidator->allowEmpty(true);
   declareProperty(
-      "CompressStartTime", "", dateValidator,
+      PropertyNames::COMPRESS_WALL_START, "", dateValidator,
       "An ISO formatted date/time string specifying the timestamp for "
       "starting filtering. Ignored if WallClockTolerance is not specified. "
       "Default is start of run",
       Direction::Input);
-  declareProperty("UnwrapRef", 0.,
+  declareProperty(PropertyNames::LORENTZ, false,
+                  "Multiply each spectrum by "
+                  "sin(theta) where theta is "
+                  "half of the Bragg angle");
+  declareProperty(PropertyNames::UNWRAP_REF, 0.,
                   "Reference total flight path for frame "
                   "unwrapping. Zero skips the correction");
   declareProperty(
-      "LowResRef", 0.,
+      PropertyNames::LOWRES_REF, 0.,
       "Reference DIFC for resolution removal. Zero skips the correction");
   declareProperty(
       "CropWavelengthMin", 0.,
       "Crop the data at this minimum wavelength. Overrides LowResRef.");
-  mapPropertyName("CropWavelengthMin", "wavelength_min");
+  mapPropertyName(PropertyNames::WL_MIN, "wavelength_min");
   declareProperty("CropWavelengthMax", EMPTY_DBL(),
                   "Crop the data at this maximum wavelength. Forces use of "
                   "CropWavelengthMin.");
-  mapPropertyName("CropWavelengthMax", "wavelength_max");
-  declareProperty("PrimaryFlightPath", -1.0,
+  mapPropertyName(PropertyNames::WL_MAX, "wavelength_max");
+  declareProperty(PropertyNames::L1, -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
-  declareProperty(std::make_unique<ArrayProperty<int32_t>>("SpectrumIDs"),
-                  "Optional: Spectrum Nos (note that it is not detector ID or "
-                  "workspace indices).");
-  declareProperty(std::make_unique<ArrayProperty<double>>("L2"),
+  declareProperty(
+      std::make_unique<ArrayProperty<int32_t>>(PropertyNames::SPEC_IDS),
+      "Optional: Spectrum Nos (note that it is not detector ID or "
+      "workspace indices).");
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::L2),
                   "Optional: Secondary flight (L2) paths for each detector");
-  declareProperty(std::make_unique<ArrayProperty<double>>("Polar"),
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::POLAR),
                   "Optional: Polar angles (two thetas) for detectors");
-  declareProperty(std::make_unique<ArrayProperty<double>>("Azimuthal"),
-                  "Azimuthal angles (out-of-plain) for detectors");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::AZIMUTHAL),
+      "Azimuthal angles (out-of-plain) for detectors");
 
-  declareProperty("LowResSpectrumOffset", -1,
+  declareProperty(PropertyNames::LOWRES_SPEC_OFF, -1,
                   "Offset on spectrum No of low resolution spectra from high "
                   "resolution one. "
                   "If negative, then all the low resolution TOF will not be "
@@ -189,24 +241,26 @@ void AlignAndFocusPowder::init() {
                   "same spectrum Nos as the normal ones.  "
                   "Otherwise, the low resolution spectra will have spectrum "
                   "IDs offset from normal ones. ");
-  declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
+  declareProperty(PropertyNames::PM_NAME, "__powdereduction", Direction::Input);
 }
 
 std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
   std::map<std::string, std::string> result;
 
-  if (!isDefault("UnfocussedWorkspace")) {
-    if (getPropertyValue("OutputWorkspace") ==
-        getPropertyValue("UnfocussedWorkspace")) {
-      result["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace";
-      result["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace";
+  if (!isDefault(PropertyNames::UNFOCUS_WKSP)) {
+    if (getPropertyValue(PropertyNames::OUTPUT_WKSP) ==
+        getPropertyValue(PropertyNames::UNFOCUS_WKSP)) {
+      result[PropertyNames::OUTPUT_WKSP] =
+          "Cannot be the same as UnfocussedWorkspace";
+      result[PropertyNames::UNFOCUS_WKSP] =
+          "Cannot be the same as OutputWorkspace";
     }
   }
 
-  m_inputW = getProperty("InputWorkspace");
+  m_inputW = getProperty(PropertyNames::INPUT_WKSP);
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
-    result["InputWorkspace"] = "Cannot process empty event workspace";
+    result[PropertyNames::INPUT_WKSP] = "Cannot process empty event workspace";
 
   return result;
 }
@@ -273,7 +327,7 @@ AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &name,
  */
 void AlignAndFocusPowder::exec() {
   // retrieve the properties
-  m_inputW = getProperty("InputWorkspace");
+  m_inputW = getProperty(PropertyNames::INPUT_WKSP);
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
   try {
@@ -282,33 +336,37 @@ void AlignAndFocusPowder::exec() {
   } catch (Exception::NotFoundError &) {
     ; // not noteworthy
   }
-  std::string calFilename = getPropertyValue("CalFileName");
-  std::string groupFilename = getPropertyValue("GroupFilename");
-  m_calibrationWS = getProperty("CalibrationWorkspace");
-  m_maskWS = getProperty("MaskWorkspace");
-  m_groupWS = getProperty("GroupingWorkspace");
-  DataObjects::TableWorkspace_sptr maskBinTableWS = getProperty("MaskBinTable");
-  m_l1 = getProperty("PrimaryFlightPath");
-  specids = getProperty("SpectrumIDs");
-  l2s = getProperty("L2");
-  tths = getProperty("Polar");
-  phis = getProperty("Azimuthal");
-  m_params = getProperty("Params");
-  dspace = getProperty("DSpacing");
-  auto dmin = getVecPropertyFromPmOrSelf("DMin", m_dmins);
-  auto dmax = getVecPropertyFromPmOrSelf("DMax", m_dmaxs);
-  LRef = getProperty("UnwrapRef");
-  DIFCref = getProperty("LowResRef");
-  minwl = getProperty("CropWavelengthMin");
-  maxwl = getProperty("CropWavelengthMax");
+  std::string calFilename = getPropertyValue(PropertyNames::CAL_FILE);
+  std::string groupFilename = getPropertyValue(PropertyNames::GROUP_FILE);
+  m_calibrationWS = getProperty(PropertyNames::CAL_WKSP);
+  m_maskWS = getProperty(PropertyNames::MASK_WKSP);
+  m_groupWS = getProperty(PropertyNames::GROUP_WKSP);
+  DataObjects::TableWorkspace_sptr maskBinTableWS =
+      getProperty(PropertyNames::MASK_TABLE);
+  m_l1 = getProperty(PropertyNames::L1);
+  specids = getProperty(PropertyNames::SPEC_IDS);
+  l2s = getProperty(PropertyNames::L2);
+  tths = getProperty(PropertyNames::POLAR);
+  phis = getProperty(PropertyNames::AZIMUTHAL);
+  m_params = getProperty(PropertyNames::BINNING);
+  dspace = getProperty(PropertyNames::BIN_IN_D);
+  auto dmin = getVecPropertyFromPmOrSelf(PropertyNames::D_MINS, m_dmins);
+  auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
+  LRef = getProperty(PropertyNames::UNWRAP_REF);
+  DIFCref = getProperty(PropertyNames::LOWRES_REF);
+  const bool applyLorentz = getProperty(PropertyNames::LORENTZ);
+  minwl = getProperty(PropertyNames::WL_MIN);
+  maxwl = getProperty(PropertyNames::WL_MAX);
   if (maxwl == 0.)
     maxwl = EMPTY_DBL(); // python can only specify 0 for unused
-  tmin = getProperty("TMin");
-  tmax = getProperty("TMax");
-  m_preserveEvents = getProperty("PreserveEvents");
-  m_resampleX = getProperty("ResampleX");
-  const double compressEventsTolerance = getProperty("CompressTolerance");
-  const double wallClockTolerance = getProperty("CompressWallClockTolerance");
+  tmin = getProperty(PropertyNames::TOF_MIN);
+  tmax = getProperty(PropertyNames::TOF_MAX);
+  m_preserveEvents = getProperty(PropertyNames::PRESERVE_EVENTS);
+  m_resampleX = getProperty(PropertyNames::RESAMPLEX);
+  const double compressEventsTolerance =
+      getProperty(PropertyNames::COMPRESS_TOF_TOL);
+  const double wallClockTolerance =
+      getProperty(PropertyNames::COMPRESS_WALL_TOL);
   // determine some bits about d-space and binning
   if (m_resampleX != 0) {
     m_params.clear(); // ignore the normal rebin parameters
@@ -365,7 +423,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // Low resolution
-  int lowresoffset = getProperty("LowResSpectrumOffset");
+  int lowresoffset = getProperty(PropertyNames::LOWRES_SPEC_OFF);
   if (lowresoffset < 0) {
     m_processLowResTOF = false;
   } else {
@@ -376,7 +434,7 @@ void AlignAndFocusPowder::exec() {
   loadCalFile(calFilename, groupFilename);
 
   // Now setup the output workspace
-  m_outputW = getProperty("OutputWorkspace");
+  m_outputW = getProperty(PropertyNames::OUTPUT_WKSP);
   if (m_inputEW) {
     // event workspace
     if (m_outputW != m_inputW) {
@@ -428,8 +486,8 @@ void AlignAndFocusPowder::exec() {
       compressAlg->setProperty("Tolerance", compressEventsTolerance);
       if (!isEmpty(wallClockTolerance)) {
         compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
-        compressAlg->setPropertyValue("StartTime",
-                                      getPropertyValue("CompressStartTime"));
+        compressAlg->setPropertyValue(
+            "StartTime", getPropertyValue(PropertyNames::COMPRESS_WALL_START));
       }
       compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
@@ -463,7 +521,8 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // filter the input events if appropriate
-  double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
+  double removePromptPulseWidth =
+      getProperty(PropertyNames::REMOVE_PROMPT_PULSE);
   if (removePromptPulseWidth > 0.) {
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (m_outputEW->getNumberEvents() > 0) {
@@ -536,6 +595,21 @@ void AlignAndFocusPowder::exec() {
     m_outputW = convertUnits(m_outputW, "dSpacing");
   }
   m_progress->report();
+
+  // ----------------- WACKY LORENTZ THING HERE
+  // TODO should call LorentzCorrection as a sub-algorithm
+  if (applyLorentz) {
+    g_log.information() << "Applying Lorentz correction started at "
+                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
+
+    API::IAlgorithm_sptr alg = createChildAlgorithm("LorentzCorrection");
+    alg->setProperty("InputWorkspace", m_outputW);
+    alg->setProperty("OutputWorkspace", m_outputW);
+    alg->setPropertyValue("Type", "PowderTOF");
+    alg->executeAsChildAlg();
+    m_outputW = alg->getProperty("OutputWorkspace");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  }
 
   if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "TOF");
@@ -970,7 +1044,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
           m_instName + "_group");
   }
   if ((!m_calibrationWS) && (!calFilename.empty())) {
-    OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+    OffsetsWorkspace_sptr offsetsWS = getProperty(PropertyNames::OFFSET_WKSP);
     if (offsetsWS) {
       convertOffsetsToCal(offsetsWS);
     } else {
@@ -1031,21 +1105,21 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
 
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-    this->setPropertyValue("GroupingWorkspace", name);
+    this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
   }
   if (loadCalibration) {
     m_calibrationWS = alg->getProperty("OutputCalWorkspace");
 
     const std::string name = m_instName + "_cal";
     AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
-    this->setPropertyValue("CalibrationWorkspace", name);
+    this->setPropertyValue(PropertyNames::CAL_WKSP, name);
   }
   if (loadMask) {
     m_maskWS = alg->getProperty("OutputMaskWorkspace");
 
     const std::string name = m_instName + "_mask";
     AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
-    this->setPropertyValue("MaskWorkspace", name);
+    this->setPropertyValue(PropertyNames::MASK_WKSP, name);
   }
 }
 

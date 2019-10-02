@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 import unittest
 
 from matplotlib import use as mpl_use
+
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
@@ -216,6 +217,78 @@ class CurvesTabWidgetPresenterTest(unittest.TestCase):
         presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
         presenter.apply_properties()
         self.assertFalse(ax.containers[0][2][0].get_visible())
+
+    def make_figure_with_multiple_curves(self):
+        fig = figure()
+        ax = fig.add_subplot(111, projection='mantid')
+        ax.set_title('Axes 0')
+        ax.plot(self.ws, specNum=1, label='Workspace')
+        ax.plot(self.ws, specNum=1, label='Workspace 2')
+        ax.plot(self.ws, specNum=1, label='Workspace 3')
+        return fig
+
+    @patch.object(CurvesTabWidgetPresenter, "apply_properties")
+    def test_line_apply_to_all_button_sets_and_applies_properties_to_each_curve(self, mock_apply_properties):
+        fig = self.make_figure_with_multiple_curves()
+
+        presenter = self._generate_presenter(fig=fig)
+        presenter.line_apply_to_all()
+
+        self.assertEqual(presenter.view.line.set_style.call_count, 3)
+        self.assertEqual(presenter.view.line.set_draw_style.call_count, 3)
+        self.assertEqual(presenter.view.line.set_width.call_count, 3)
+        self.assertEqual(mock_apply_properties.call_count, 3)
+
+    @patch.object(CurvesTabWidgetPresenter, "apply_properties")
+    def test_marker_apply_to_all_button_sets_and_applies_properties_to_each_curve(self, mock_apply_properties):
+        fig = self.make_figure_with_multiple_curves()
+
+        presenter = self._generate_presenter(fig=fig)
+        presenter.marker_apply_to_all()
+
+        self.assertEqual(presenter.view.marker.set_style.call_count, 3)
+        self.assertEqual(presenter.view.marker.set_size.call_count, 3)
+        self.assertEqual(mock_apply_properties.call_count, 3)
+
+    @patch.object(CurvesTabWidgetPresenter, "apply_properties")
+    def test_errorbar_apply_to_all_button_sets_and_applies_properties_to_each_curve_if_hide_errorbars_is_unticked\
+            (self, mock_apply_properties):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        mock_view.errorbars.get_hide.return_value = False
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        presenter.errorbars_apply_to_all()
+
+        self.assertEqual(presenter.view.errorbars.set_hide.call_count, 3)
+        self.assertEqual(presenter.view.errorbars.set_width.call_count, 3)
+        self.assertEqual(presenter.view.errorbars.set_capsize.call_count, 3)
+        self.assertEqual(presenter.view.errorbars.set_cap_thickness.call_count, 3)
+        self.assertEqual(presenter.view.errorbars.set_error_every.call_count, 3)
+        self.assertEqual(mock_apply_properties.call_count, 3)
+
+    @patch.object(CurvesTabWidgetPresenter, "apply_properties")
+    def test_errorbar_apply_to_all_button_does_not_set_properties_if_hide_errorbars_is_ticked\
+            (self, mock_apply_properties):
+        fig = self.make_figure_with_multiple_curves()
+
+        mock_view = Mock(get_selected_ax_name=lambda: "Axes 0: (0, 0)",
+                         get_selected_curve_name=lambda: "Workspace")
+
+        mock_view.errorbars.get_hide.return_value = True
+
+        presenter = self._generate_presenter(fig=fig, mock_view=mock_view)
+        presenter.errorbars_apply_to_all()
+
+        self.assertEqual(presenter.view.errorbars.set_hide.call_count, 3)
+        self.assertEqual(presenter.view.errorbars.set_width.call_count, 0)
+        self.assertEqual(presenter.view.errorbars.set_capsize.call_count, 0)
+        self.assertEqual(presenter.view.errorbars.set_cap_thickness.call_count, 0)
+        self.assertEqual(presenter.view.errorbars.set_error_every.call_count, 0)
+        self.assertEqual(mock_apply_properties.call_count, 3)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,768 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+	        name="NEAT"
+        valid-from   ="2015-11-01 00:00:01"
+	    valid-to     ="2100-12-31 23:59:59"
+	    last-modified="2019-09-25 12:00:00">
+
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <location r="0.0" t="0.0" p="0.0" ang="0.0" axis-x="0.0" axis-y="0.0" axis-z="1.0"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
+	   y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+      <origin val="beam" />
+    </reference-frame>
+    <default-view view="3D" axis-view="Z-"/>
+    <!-- Comment "components-are-facing" out if you dont want the
+	 components defined in this file to face a position by default -->
+    <components-are-facing x="0.0" y="0.0" z="0.0" />
+  </defaults>
+
+  <!-- ***** SOURCE ***** -->
+  <component type="chopper_1">
+    <location z="-31.39102"> <facing val="none"/> </location>
+  </component>
+
+  <type name="chopper_1" is="Source">
+    <cylinder id="some-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+    <algebra val="some-shape" />
+  </type>
+
+  <!-- ***** SAMPLE POSITION ***** -->
+  <component type="sample_position">
+    <location> <facing val="none"/> </location>
+  </component>
+
+  <type name="sample_position" is="SamplePos">
+    <sphere id="some-shape">
+      <centre x="0.0"  y="0.0" z="0.0" />
+      <radius val="0.03" />
+    </sphere>
+    <algebra val="some-shape" />
+  </type>
+
+  <!-- MONITORS -->
+  <component type="monitors" idlist="monitors">
+    <location/>
+  </component>
+
+  <type name="monitors">
+    <component type="monitor">
+      <location r="1.083" t="180.0" p="0.0" name="monitor_1" />
+    </component>
+  </type>
+
+  <type name="monitor" is="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0" y="-0.1" z="-0.01"  />
+      <left-front-top-point  x="0.0" y="0.1" z="-0.01"  />
+      <left-back-bottom-point  x="0.001" y="-0.1" z="-0.01"  />
+      <right-front-bottom-point  x="0.0" y="-0.1" z="0.01"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+  <!-- ***** MONITOR ID LISTS ***** -->
+  <idlist idname="monitors">
+    <id start="415256" end="415256"/>
+  </idlist>
+
+  <!-- ***** DETECTOR MODULES ***** -->
+
+  <component type="NEAT_module" idlist="module_01" name="module_01">
+    <location r="3.0" t="138.96" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_02" name="module_02">
+    <location r="3.0" t="121.68" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_03" name="module_03">
+    <location r="3.0" t="104.4" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_04" name="module_04">
+    <location r="3.0" t="87.12" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_05" name="module_05">
+    <location r="3.0" t="69.84" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_06" name="module_06">
+    <location r="3.0" t="52.56" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_07" name="module_07">
+    <location r="3.0" t="35.28" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_08" name="module_08">
+    <location r="3.0" t="18.0" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_09" name="module_09">
+    <location r="3.0" t="0.72" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_10" name="module_10">
+    <location r="3.0" t="-16.56" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_11" name="module_11">
+    <location r="3.0" t="-33.84" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_12" name="module_12">
+    <location r="3.0" t="-51.12" p="0.0"/>
+  </component>
+
+  <component type="NEAT_module" idlist="module_13" name="module_13">
+    <location r="3.0" t="-68.4" p="0.0"/>
+  </component>
+
+  <!-- ***** DETECTOR TUBES ***** -->
+
+  <type name="NEAT_module">
+    <component type="NEAT_tube" outline="yes">
+      <location  x=" 0.43669508" z="-0.03195394" name="tube1" />
+      <location  x=" 0.40870292" z="-0.02797007" name="tube2" />
+      <location  x=" 0.38067447" z="-0.02425019" name="tube3" />
+      <location  x=" 0.35261219" z="-0.02079463" name="tube4" />
+      <location  x=" 0.32451860" z="-0.01760370" name="tube5" />
+      <location  x=" 0.29639618" z="-0.01467769" name="tube6" />
+      <location  x=" 0.26824743" z="-0.01201685" name="tube7" />
+      <location  x=" 0.24007486" z="-0.00962142" name="tube8" />
+      <location  x=" 0.21188096" z="-0.00749161" name="tube9" />
+      <location  x=" 0.18366824" z="-0.00562762" name="tube10" />
+      <location  x=" 0.15543920" z="-0.00402960" name="tube11" />
+      <location  x=" 0.12719636" z="-0.00269770" name="tube12" />
+      <location  x=" 0.09894222" z="-0.00163204" name="tube13" />
+      <location  x=" 0.07067929" z="-0.00083271" name="tube14" />
+      <location  x=" 0.04241009" z="-0.00029978" name="tube15" />
+      <location  x=" 0.01413711" z="-0.00003331" name="tube16" />
+      <location  x="-0.01413711" z="-0.00003331" name="tube17" />
+      <location  x="-0.04241009" z="-0.00029978" name="tube18" />
+      <location  x="-0.07067929" z="-0.00083271" name="tube19" />
+      <location  x="-0.09894222" z="-0.00163204" name="tube20" />
+      <location  x="-0.12719636" z="-0.00269770" name="tube21" />
+      <location  x="-0.15543920" z="-0.00402960" name="tube22" />
+      <location  x="-0.18366824" z="-0.00562762" name="tube23" />
+      <location  x="-0.21188096" z="-0.00749161" name="tube24" />
+      <location  x="-0.24007486" z="-0.00962142" name="tube25" />
+      <location  x="-0.26824743" z="-0.01201685" name="tube26" />
+      <location  x="-0.29639618" z="-0.01467769" name="tube27" />
+      <location  x="-0.32451860" z="-0.01760370" name="tube28" />
+      <location  x="-0.35261219" z="-0.02079463" name="tube29" />
+      <location  x="-0.38067447" z="-0.02425019" name="tube30" />
+      <location  x="-0.40870292" z="-0.02797007" name="tube31" />
+      <location  x="-0.43669508" z="-0.03195394" name="tube32" />
+    </component>
+  </type>
+
+  <type name="NEAT_tube" outline="yes">
+    <component type="pixel" >
+      <locations y="-1.0" y-end="1.0" name="pixel_" n-elements="256" />
+    </component>
+  </type>
+
+  <type name="pixel" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" />
+      <radius val="   1.270000E-02" />
+      <height val="   7.812500E-03" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+
+  <!-- ***** DETECTOR ID LISTS ***** -->
+
+  <idlist idname="module_01">
+    <id start="0" end="255" />
+    <id start="1000" end="1255" />
+    <id start="2000" end="2255" />
+    <id start="3000" end="3255" />
+    <id start="4000" end="4255" />
+    <id start="5000" end="5255" />
+    <id start="6000" end="6255" />
+    <id start="7000" end="7255" />
+    <id start="8000" end="8255" />
+    <id start="9000" end="9255" />
+    <id start="10000" end="10255" />
+    <id start="11000" end="11255" />
+    <id start="12000" end="12255" />
+    <id start="13000" end="13255" />
+    <id start="14000" end="14255" />
+    <id start="15000" end="15255" />
+    <id start="16000" end="16255" />
+    <id start="17000" end="17255" />
+    <id start="18000" end="18255" />
+    <id start="19000" end="19255" />
+    <id start="20000" end="20255" />
+    <id start="21000" end="21255" />
+    <id start="22000" end="22255" />
+    <id start="23000" end="23255" />
+    <id start="24000" end="24255" />
+    <id start="25000" end="25255" />
+    <id start="26000" end="26255" />
+    <id start="27000" end="27255" />
+    <id start="28000" end="28255" />
+    <id start="29000" end="29255" />
+    <id start="30000" end="30255" />
+    <id start="31000" end="31255" />
+  </idlist>
+  <idlist idname="module_02">
+    <id start="32000" end="32255" />
+    <id start="33000" end="33255" />
+    <id start="34000" end="34255" />
+    <id start="35000" end="35255" />
+    <id start="36000" end="36255" />
+    <id start="37000" end="37255" />
+    <id start="38000" end="38255" />
+    <id start="39000" end="39255" />
+    <id start="40000" end="40255" />
+    <id start="41000" end="41255" />
+    <id start="42000" end="42255" />
+    <id start="43000" end="43255" />
+    <id start="44000" end="44255" />
+    <id start="45000" end="45255" />
+    <id start="46000" end="46255" />
+    <id start="47000" end="47255" />
+    <id start="48000" end="48255" />
+    <id start="49000" end="49255" />
+    <id start="50000" end="50255" />
+    <id start="51000" end="51255" />
+    <id start="52000" end="52255" />
+    <id start="53000" end="53255" />
+    <id start="54000" end="54255" />
+    <id start="55000" end="55255" />
+    <id start="56000" end="56255" />
+    <id start="57000" end="57255" />
+    <id start="58000" end="58255" />
+    <id start="59000" end="59255" />
+    <id start="60000" end="60255" />
+    <id start="61000" end="61255" />
+    <id start="62000" end="62255" />
+    <id start="63000" end="63255" />
+  </idlist>
+  <idlist idname="module_03">
+    <id start="64000" end="64255" />
+    <id start="65000" end="65255" />
+    <id start="66000" end="66255" />
+    <id start="67000" end="67255" />
+    <id start="68000" end="68255" />
+    <id start="69000" end="69255" />
+    <id start="70000" end="70255" />
+    <id start="71000" end="71255" />
+    <id start="72000" end="72255" />
+    <id start="73000" end="73255" />
+    <id start="74000" end="74255" />
+    <id start="75000" end="75255" />
+    <id start="76000" end="76255" />
+    <id start="77000" end="77255" />
+    <id start="78000" end="78255" />
+    <id start="79000" end="79255" />
+    <id start="80000" end="80255" />
+    <id start="81000" end="81255" />
+    <id start="82000" end="82255" />
+    <id start="83000" end="83255" />
+    <id start="84000" end="84255" />
+    <id start="85000" end="85255" />
+    <id start="86000" end="86255" />
+    <id start="87000" end="87255" />
+    <id start="88000" end="88255" />
+    <id start="89000" end="89255" />
+    <id start="90000" end="90255" />
+    <id start="91000" end="91255" />
+    <id start="92000" end="92255" />
+    <id start="93000" end="93255" />
+    <id start="94000" end="94255" />
+    <id start="95000" end="95255" />
+  </idlist>
+  <idlist idname="module_04">
+    <id start="96000" end="96255" />
+    <id start="97000" end="97255" />
+    <id start="98000" end="98255" />
+    <id start="99000" end="99255" />
+    <id start="100000" end="100255" />
+    <id start="101000" end="101255" />
+    <id start="102000" end="102255" />
+    <id start="103000" end="103255" />
+    <id start="104000" end="104255" />
+    <id start="105000" end="105255" />
+    <id start="106000" end="106255" />
+    <id start="107000" end="107255" />
+    <id start="108000" end="108255" />
+    <id start="109000" end="109255" />
+    <id start="110000" end="110255" />
+    <id start="111000" end="111255" />
+    <id start="112000" end="112255" />
+    <id start="113000" end="113255" />
+    <id start="114000" end="114255" />
+    <id start="115000" end="115255" />
+    <id start="116000" end="116255" />
+    <id start="117000" end="117255" />
+    <id start="118000" end="118255" />
+    <id start="119000" end="119255" />
+    <id start="120000" end="120255" />
+    <id start="121000" end="121255" />
+    <id start="122000" end="122255" />
+    <id start="123000" end="123255" />
+    <id start="124000" end="124255" />
+    <id start="125000" end="125255" />
+    <id start="126000" end="126255" />
+    <id start="127000" end="127255" />
+  </idlist>
+  <idlist idname="module_05">
+    <id start="128000" end="128255" />
+    <id start="129000" end="129255" />
+    <id start="130000" end="130255" />
+    <id start="131000" end="131255" />
+    <id start="132000" end="132255" />
+    <id start="133000" end="133255" />
+    <id start="134000" end="134255" />
+    <id start="135000" end="135255" />
+    <id start="136000" end="136255" />
+    <id start="137000" end="137255" />
+    <id start="138000" end="138255" />
+    <id start="139000" end="139255" />
+    <id start="140000" end="140255" />
+    <id start="141000" end="141255" />
+    <id start="142000" end="142255" />
+    <id start="143000" end="143255" />
+    <id start="144000" end="144255" />
+    <id start="145000" end="145255" />
+    <id start="146000" end="146255" />
+    <id start="147000" end="147255" />
+    <id start="148000" end="148255" />
+    <id start="149000" end="149255" />
+    <id start="150000" end="150255" />
+    <id start="151000" end="151255" />
+    <id start="152000" end="152255" />
+    <id start="153000" end="153255" />
+    <id start="154000" end="154255" />
+    <id start="155000" end="155255" />
+    <id start="156000" end="156255" />
+    <id start="157000" end="157255" />
+    <id start="158000" end="158255" />
+    <id start="159000" end="159255" />
+  </idlist>
+  <idlist idname="module_06">
+    <id start="160000" end="160255" />
+    <id start="161000" end="161255" />
+    <id start="162000" end="162255" />
+    <id start="163000" end="163255" />
+    <id start="164000" end="164255" />
+    <id start="165000" end="165255" />
+    <id start="166000" end="166255" />
+    <id start="167000" end="167255" />
+    <id start="168000" end="168255" />
+    <id start="169000" end="169255" />
+    <id start="170000" end="170255" />
+    <id start="171000" end="171255" />
+    <id start="172000" end="172255" />
+    <id start="173000" end="173255" />
+    <id start="174000" end="174255" />
+    <id start="175000" end="175255" />
+    <id start="176000" end="176255" />
+    <id start="177000" end="177255" />
+    <id start="178000" end="178255" />
+    <id start="179000" end="179255" />
+    <id start="180000" end="180255" />
+    <id start="181000" end="181255" />
+    <id start="182000" end="182255" />
+    <id start="183000" end="183255" />
+    <id start="184000" end="184255" />
+    <id start="185000" end="185255" />
+    <id start="186000" end="186255" />
+    <id start="187000" end="187255" />
+    <id start="188000" end="188255" />
+    <id start="189000" end="189255" />
+    <id start="190000" end="190255" />
+    <id start="191000" end="191255" />
+  </idlist>
+  <idlist idname="module_07">
+    <id start="192000" end="192255" />
+    <id start="193000" end="193255" />
+    <id start="194000" end="194255" />
+    <id start="195000" end="195255" />
+    <id start="196000" end="196255" />
+    <id start="197000" end="197255" />
+    <id start="198000" end="198255" />
+    <id start="199000" end="199255" />
+    <id start="200000" end="200255" />
+    <id start="201000" end="201255" />
+    <id start="202000" end="202255" />
+    <id start="203000" end="203255" />
+    <id start="204000" end="204255" />
+    <id start="205000" end="205255" />
+    <id start="206000" end="206255" />
+    <id start="207000" end="207255" />
+    <id start="208000" end="208255" />
+    <id start="209000" end="209255" />
+    <id start="210000" end="210255" />
+    <id start="211000" end="211255" />
+    <id start="212000" end="212255" />
+    <id start="213000" end="213255" />
+    <id start="214000" end="214255" />
+    <id start="215000" end="215255" />
+    <id start="216000" end="216255" />
+    <id start="217000" end="217255" />
+    <id start="218000" end="218255" />
+    <id start="219000" end="219255" />
+    <id start="220000" end="220255" />
+    <id start="221000" end="221255" />
+    <id start="222000" end="222255" />
+    <id start="223000" end="223255" />
+  </idlist>
+  <idlist idname="module_08">
+    <id start="224000" end="224255" />
+    <id start="225000" end="225255" />
+    <id start="226000" end="226255" />
+    <id start="227000" end="227255" />
+    <id start="228000" end="228255" />
+    <id start="229000" end="229255" />
+    <id start="230000" end="230255" />
+    <id start="231000" end="231255" />
+    <id start="232000" end="232255" />
+    <id start="233000" end="233255" />
+    <id start="234000" end="234255" />
+    <id start="235000" end="235255" />
+    <id start="236000" end="236255" />
+    <id start="237000" end="237255" />
+    <id start="238000" end="238255" />
+    <id start="239000" end="239255" />
+    <id start="240000" end="240255" />
+    <id start="241000" end="241255" />
+    <id start="242000" end="242255" />
+    <id start="243000" end="243255" />
+    <id start="244000" end="244255" />
+    <id start="245000" end="245255" />
+    <id start="246000" end="246255" />
+    <id start="247000" end="247255" />
+    <id start="248000" end="248255" />
+    <id start="249000" end="249255" />
+    <id start="250000" end="250255" />
+    <id start="251000" end="251255" />
+    <id start="252000" end="252255" />
+    <id start="253000" end="253255" />
+    <id start="254000" end="254255" />
+    <id start="255000" end="255255" />
+  </idlist>
+  <idlist idname="module_09">
+    <id start="256000" end="256255" />
+    <id start="257000" end="257255" />
+    <id start="258000" end="258255" />
+    <id start="259000" end="259255" />
+    <id start="260000" end="260255" />
+    <id start="261000" end="261255" />
+    <id start="262000" end="262255" />
+    <id start="263000" end="263255" />
+    <id start="264000" end="264255" />
+    <id start="265000" end="265255" />
+    <id start="266000" end="266255" />
+    <id start="267000" end="267255" />
+    <id start="268000" end="268255" />
+    <id start="269000" end="269255" />
+    <id start="270000" end="270255" />
+    <id start="271000" end="271255" />
+    <id start="272000" end="272255" />
+    <id start="273000" end="273255" />
+    <id start="274000" end="274255" />
+    <id start="275000" end="275255" />
+    <id start="276000" end="276255" />
+    <id start="277000" end="277255" />
+    <id start="278000" end="278255" />
+    <id start="279000" end="279255" />
+    <id start="280000" end="280255" />
+    <id start="281000" end="281255" />
+    <id start="282000" end="282255" />
+    <id start="283000" end="283255" />
+    <id start="284000" end="284255" />
+    <id start="285000" end="285255" />
+    <id start="286000" end="286255" />
+    <id start="287000" end="287255" />
+  </idlist>
+  <idlist idname="module_10">
+    <id start="288000" end="288255" />
+    <id start="289000" end="289255" />
+    <id start="290000" end="290255" />
+    <id start="291000" end="291255" />
+    <id start="292000" end="292255" />
+    <id start="293000" end="293255" />
+    <id start="294000" end="294255" />
+    <id start="295000" end="295255" />
+    <id start="296000" end="296255" />
+    <id start="297000" end="297255" />
+    <id start="298000" end="298255" />
+    <id start="299000" end="299255" />
+    <id start="300000" end="300255" />
+    <id start="301000" end="301255" />
+    <id start="302000" end="302255" />
+    <id start="303000" end="303255" />
+    <id start="304000" end="304255" />
+    <id start="305000" end="305255" />
+    <id start="306000" end="306255" />
+    <id start="307000" end="307255" />
+    <id start="308000" end="308255" />
+    <id start="309000" end="309255" />
+    <id start="310000" end="310255" />
+    <id start="311000" end="311255" />
+    <id start="312000" end="312255" />
+    <id start="313000" end="313255" />
+    <id start="314000" end="314255" />
+    <id start="315000" end="315255" />
+    <id start="316000" end="316255" />
+    <id start="317000" end="317255" />
+    <id start="318000" end="318255" />
+    <id start="319000" end="319255" />
+  </idlist>
+  <idlist idname="module_11">
+    <id start="320000" end="320255" />
+    <id start="321000" end="321255" />
+    <id start="322000" end="322255" />
+    <id start="323000" end="323255" />
+    <id start="324000" end="324255" />
+    <id start="325000" end="325255" />
+    <id start="326000" end="326255" />
+    <id start="327000" end="327255" />
+    <id start="328000" end="328255" />
+    <id start="329000" end="329255" />
+    <id start="330000" end="330255" />
+    <id start="331000" end="331255" />
+    <id start="332000" end="332255" />
+    <id start="333000" end="333255" />
+    <id start="334000" end="334255" />
+    <id start="335000" end="335255" />
+    <id start="336000" end="336255" />
+    <id start="337000" end="337255" />
+    <id start="338000" end="338255" />
+    <id start="339000" end="339255" />
+    <id start="340000" end="340255" />
+    <id start="341000" end="341255" />
+    <id start="342000" end="342255" />
+    <id start="343000" end="343255" />
+    <id start="344000" end="344255" />
+    <id start="345000" end="345255" />
+    <id start="346000" end="346255" />
+    <id start="347000" end="347255" />
+    <id start="348000" end="348255" />
+    <id start="349000" end="349255" />
+    <id start="350000" end="350255" />
+    <id start="351000" end="351255" />
+  </idlist>
+  <idlist idname="module_12">
+    <id start="352000" end="352255" />
+    <id start="353000" end="353255" />
+    <id start="354000" end="354255" />
+    <id start="355000" end="355255" />
+    <id start="356000" end="356255" />
+    <id start="357000" end="357255" />
+    <id start="358000" end="358255" />
+    <id start="359000" end="359255" />
+    <id start="360000" end="360255" />
+    <id start="361000" end="361255" />
+    <id start="362000" end="362255" />
+    <id start="363000" end="363255" />
+    <id start="364000" end="364255" />
+    <id start="365000" end="365255" />
+    <id start="366000" end="366255" />
+    <id start="367000" end="367255" />
+    <id start="368000" end="368255" />
+    <id start="369000" end="369255" />
+    <id start="370000" end="370255" />
+    <id start="371000" end="371255" />
+    <id start="372000" end="372255" />
+    <id start="373000" end="373255" />
+    <id start="374000" end="374255" />
+    <id start="375000" end="375255" />
+    <id start="376000" end="376255" />
+    <id start="377000" end="377255" />
+    <id start="378000" end="378255" />
+    <id start="379000" end="379255" />
+    <id start="380000" end="380255" />
+    <id start="381000" end="381255" />
+    <id start="382000" end="382255" />
+    <id start="383000" end="383255" />
+  </idlist>
+  <idlist idname="module_13">
+    <id start="384000" end="384255" />
+    <id start="385000" end="385255" />
+    <id start="386000" end="386255" />
+    <id start="387000" end="387255" />
+    <id start="388000" end="388255" />
+    <id start="389000" end="389255" />
+    <id start="390000" end="390255" />
+    <id start="391000" end="391255" />
+    <id start="392000" end="392255" />
+    <id start="393000" end="393255" />
+    <id start="394000" end="394255" />
+    <id start="395000" end="395255" />
+    <id start="396000" end="396255" />
+    <id start="397000" end="397255" />
+    <id start="398000" end="398255" />
+    <id start="399000" end="399255" />
+    <id start="400000" end="400255" />
+    <id start="401000" end="401255" />
+    <id start="402000" end="402255" />
+    <id start="403000" end="403255" />
+    <id start="404000" end="404255" />
+    <id start="405000" end="405255" />
+    <id start="406000" end="406255" />
+    <id start="407000" end="407255" />
+    <id start="408000" end="408255" />
+    <id start="409000" end="409255" />
+    <id start="410000" end="410255" />
+    <id start="411000" end="411255" />
+    <id start="412000" end="412255" />
+    <id start="413000" end="413255" />
+    <id start="414000" end="414255" />
+    <id start="415000" end="415255" />
+  </idlist>
+
+  <!-- ***** DETECTOR PARAMETERS ***** -->
+  <component-link name="monitors">
+    <parameter name="DelayTime">
+      <value units="microseconds" val="0.0"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_01">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_02">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_03">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_04">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_05">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+    <parameter name="DelayTime">
+      <value units="microseconds" val="0.0"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_06">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+    <parameter name="DelayTime">
+      <value units="microseconds" val="0.0"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_07">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_08">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_09">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_10">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_11">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_12">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+  <component-link name="module_13">
+    <parameter name="TubePressure">
+      <value units="atm" val="3.0"/>
+    </parameter>
+    <parameter name="TubeThickness">
+      <value units="metre" val="0.0008"/>
+    </parameter>
+  </component-link>
+
+</instrument>
