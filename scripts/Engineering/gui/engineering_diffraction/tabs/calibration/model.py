@@ -7,11 +7,15 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+from os import path, makedirs
+from ntpath import basename
+
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import Load, EnggVanadiumCorrections, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
     CreateWorkspace, AppendSpectra
 from mantidqt.plotting.functions import plot
+from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 
 
 class CalibrationModel(object):
@@ -19,22 +23,38 @@ class CalibrationModel(object):
         self.VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
         self.CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
         self.INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
+        self.out_files_root_dir = path.join(path.expanduser("~"), "Engineering_Mantid/")
 
-    def create_new_calibration(self, vanadium_run_no, ceria_run_no, plot_output):
-        vanadium_corrections = self.calculate_vanadium_correction(vanadium_run_no)
+    def create_new_calibration(self,
+                               vanadium_path,
+                               ceria_path,
+                               plot_output,
+                               instrument,
+                               rb_num=None):
+        vanadium_corrections = self.calculate_vanadium_correction(vanadium_path)
         van_integration = vanadium_corrections[0]
         van_curves = vanadium_corrections[1]
-        ceria_workspace = self.load_ceria(ceria_run_no)
+        ceria_workspace = self.load_ceria(ceria_path)
         output = self.run_calibration(ceria_workspace, van_integration, van_curves)
         if plot_output:
-            self.plot_vanadium_curves()
+            self._plot_vanadium_curves()
             for i in range(2):
                 difc = [output[i].DIFC]
                 tzero = [output[i].TZERO]
                 self._plot_difc_zero(difc, tzero)
+        difc = [output[0].DIFC, output[1].DIFC]
+        tzero = [output[0].TZERO, output[1].TZERO]
+
+        calibration_dir = self.out_files_root_dir + "Calibration/"
+        self.create_output_files(calibration_dir, difc, tzero, ceria_path, vanadium_path,
+                                 instrument)
+        if rb_num:
+            calibration_dir = self.out_files_root_dir + "User/" + rb_num + "/Calibration/"
+            self.create_output_files(calibration_dir, difc, tzero, ceria_path, vanadium_path,
+                                     instrument)
 
     @staticmethod
-    def plot_vanadium_curves():
+    def _plot_vanadium_curves():
         van_curve_twin_ws = "__engggui_vanadium_curves_twin_ws"
 
         if Ads.doesExist(van_curve_twin_ws):
@@ -132,6 +152,53 @@ class CalibrationModel(object):
         curves_workspace = Ads.Instance().retrieve(self.CURVES_WORKSPACE_NAME)
         return integrated_workspace, curves_workspace
 
+    def create_output_files(self, calibration_dir, difc, tzero, ceria_path, vanadium_path,
+                            instrument):
+        if not path.exists(calibration_dir):
+            makedirs(calibration_dir)
+        filename, vanadium_no, ceria_no = self._generate_output_file_name(ceria_path,
+                                                                          vanadium_path,
+                                                                          instrument,
+                                                                          bank="all")
+        # Both Banks
+        file_path = calibration_dir + filename
+        write_ENGINX_GSAS_iparam_file(file_path,
+                                      difc,
+                                      tzero,
+                                      ceria_run=ceria_no,
+                                      vanadium_run=vanadium_no)
+        # North Bank
+        file_path = calibration_dir + self._generate_output_file_name(
+            ceria_path, vanadium_path, instrument, bank="north")[0]
+        write_ENGINX_GSAS_iparam_file(file_path, [difc[0]], [tzero[0]],
+                                      ceria_run=ceria_no,
+                                      vanadium_run=vanadium_no,
+                                      template_file="template_ENGINX_241391_236516_North_bank.prm",
+                                      bank_names=["North"])
+        # South Bank
+        file_path = calibration_dir + self._generate_output_file_name(
+            ceria_path, vanadium_path, instrument, bank="south")[0]
+        write_ENGINX_GSAS_iparam_file(file_path, [difc[1]], [tzero[1]],
+                                      ceria_run=ceria_no,
+                                      vanadium_run=vanadium_no,
+                                      template_file="template_ENGINX_241391_236516_South_bank.prm",
+                                      bank_names=["South"])
+
     @staticmethod
     def _generate_table_workspace_name(bank_num):
         return "engggui_calibration_bank_" + str(bank_num + 1)
+
+    @staticmethod
+    def _generate_output_file_name(ceria_path, vanadium_path, instrument, bank):
+        vanadium_no = path.splitext(basename(vanadium_path))[0].replace(instrument, '').lstrip('0')
+        ceria_no = path.splitext(basename(ceria_path))[0].replace(instrument, '').lstrip('0')
+        filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"
+        if bank == "all":
+            filename = filename + "all_banks.prm"
+        elif bank == "north":
+            filename = filename + "bank_North.prm"
+        elif bank == "south":
+            filename = filename + "bank_South.prm"
+        else:
+            raise ValueError("Invalid bank name entered")
+        return filename, vanadium_no, ceria_no

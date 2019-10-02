@@ -34,3 +34,24 @@ class CalibrationPresenterTest(unittest.TestCase):
         # Then
         self.presenter.on_calibrate_clicked()
         worker_method.assert_called_with("307521", "305738", True)
+
+    def test_controls_disabled_while_running(self):
+        self.presenter = presenter.CalibrationPresenter(self.model, self.view)
+
+        self.presenter.calibration_started()
+
+        self.view.set_calibrate_button_enabled.assert_called_with(False)
+        self.view.set_check_plot_output_enabled.assert_called_with(False)
+
+    def test_controls_enabled_when_done_running(self):
+        self.presenter = presenter.CalibrationPresenter(self.model, self.view)
+
+        self.presenter.calibration_started()
+
+        self.view.set_calibrate_button_enabled.assert_called_with(False)
+        self.view.set_check_plot_output_enabled.assert_called_with(False)
+
+        self.presenter.calibration_finished()
+
+        self.view.set_calibrate_button_enabled.assert_called_with(True)
+        self.view.set_check_plot_output_enabled.assert_called_with(True)

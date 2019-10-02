@@ -39,10 +39,21 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         cal_model = CalibrationModel()
         cal_view = CalibrationView(parent=self.tabs)
         self.calibration_presenter = CalibrationPresenter(cal_model, cal_view)
+        self.set_on_instrument_changed(self.calibration_presenter.set_instrument_override)
+        self.set_on_rb_num_changed(self.calibration_presenter.set_rb_number)
         self.tabs.addTab(cal_view, "Calibration")
 
     def set_on_help_clicked(self, slot):
         self.pushButton_help.clicked.connect(slot)
 
+    def set_on_rb_num_changed(self, slot):
+        self.lineEdit_RBNumber.textChanged.connect(slot)
+
+    def set_on_instrument_changed(self, slot):
+        self.comboBox_instrument.currentTextChanged.connect(slot)
+
     def open_help_window(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
+
+    def get_rb_no(self):
+        return self.lineEdit_RBNumber.text()

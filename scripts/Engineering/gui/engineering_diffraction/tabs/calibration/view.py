@@ -7,7 +7,6 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
-from mantidqt.widgets.filefinder import FileFinder
 
 from mantidqt.utils.qt import load_ui
 
@@ -15,18 +14,28 @@ Ui_calib, _ = load_ui(__file__, "calibration_tab.ui")
 
 
 class CalibrationView(QtWidgets.QWidget, Ui_calib):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, instrument="ENGINX"):
         super(CalibrationView, self).__init__(parent)
         self.setupUi(self)
         self.finder_calib.setLabelText("Calibration Sample #")
-        self.finder_calib.setInstrumentOverride("ENGINX")
+        self.finder_calib.setInstrumentOverride(instrument)
 
         self.finder_vanadium.setLabelText("Vanadium #")
-        self.finder_vanadium.setInstrumentOverride("ENGINX")
+        self.finder_vanadium.setInstrumentOverride(instrument)
         self.setup_tabbing_order()
 
     def set_on_calibrate_clicked(self, slot):
         self.button_calibrate.clicked.connect(slot)
+
+    def set_calibrate_button_enabled(self, enabled):
+        self.button_calibrate.setEnabled(enabled)
+
+    def set_check_plot_output_enabled(self, enabled):
+        self.check_plotOutput.setEnabled(enabled)
+
+    def set_instrument_override(self, instrument):
+        self.finder_vanadium.setInstrumentOverride(instrument)
+        self.finder_calib.setInstrumentOverride(instrument)
 
     def get_vanadium_filename(self):
         return self.finder_vanadium.getFirstFilename()
@@ -37,6 +46,5 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
 
-    def setup_tabbing_order(self):
-        # TODO
+    def setup_tabbing_order(self):  # TODO
         print()
