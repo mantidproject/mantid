@@ -97,10 +97,12 @@ HOMEBREW_PREFIX = '/usr/local'
 MANTID_PY_SO = ['_api.so', '_geometry.so', '_kernel.so'].freeze
 QT4_PLUGINS_DIR = Pathname.new('/usr/local/opt/qt@4/lib/qt4/plugins')
 QT5_PLUGINS_DIR = Pathname.new('/usr/local/opt/qt/plugins')
-QT_PLUGINS_COMMON = %w[imageformats sqldrivers iconengines].freeze
+QT_PLUGINS_COMMON = ['imageformats', 'sqldrivers', 'iconengines'].freeze
 QT_PLUGINS_BLACKLIST = ['libqsqlpsql.dylib'].freeze
 QT_CONF = '[Paths]
 Plugins = PlugIns
+Imports = Resources/qml
+Qml2Imports = Resources/qml
 '
 
 #---------------------------------------------------------
@@ -206,7 +208,7 @@ def deploy_python_framework(destination, host_python_exe,
       destination = bundle_site_packages + package_dir
       FileUtils.makedirs destination
     end
-    
+
     # use cp rather than FileUtils as cp will automatically follow symlinks
     execute("cp -r #{src_site_packages + package} #{destination}")
   end
@@ -246,17 +248,6 @@ def install_qt_plugins(bundle_path, bundled_qt_plugins, host_qt_plugins_dir,
   FileUtils.makedirs(contents_resources)
   File.open(contents_resources + 'qt.conf', 'w') do |file|
     file.write(QT_CONF)
-  end
-end
-
-# Copy a file if the destination does not exist
-# Params:
-# +src_file+:: Source file
-# +dest_file+:: Target file
-def copy_file_if_missing(src_file, dest_file)
-  unless dest_file.exist?
-    debug("Copying #{src_file} to #{dest_file}")
-    FileUtils.copy src_file, dest_file
   end
 end
 
@@ -410,19 +401,52 @@ def deploy_framework(dependency, library, _library_orig, destination)
       break
     end
   end
+
   dependency_target = destination + dependency.relative_path_from(dep_framework_top.parent)
-
-  FileUtils.makedirs(dependency_target.parent)
-  copy_file_if_missing(dependency, dependency_target)
-  make_writable(dependency_target)
-
+  dependency_target_dir = dependency_target.parent
   basename = dependency_target.basename
-  set_id(dependency_target, "@rpath/#{basename}")
-  puts dependency_target
+  if !dependency_target.exist?
+    FileUtils.makedirs(dependency_target.parent)
+    # library itself
+    FileUtils.copy dependency, dependency_target
+    make_writable(dependency_target)
+    set_id(dependency_target, "@rpath/#{basename}")
+    fixup_binary(dependency_target, dependency, destination)
+
+    # resources
+    src_resources = dependency.parent + 'Resources'
+    if src_resources.exist?
+      execute("cp -r #{src_resources} #{dependency_target_dir}")
+    end
+
+    # helpers
+    src_helpers = dependency.parent + 'Helpers'
+    if src_helpers.exist?
+      execute("cp -r #{src_helpers} #{dependency_target_dir}")
+      Dir[dependency_target_dir + 'Helpers/**/MacOS/*'].each do |binary|
+        binary = Pathname.new(binary)
+        make_writable(binary)
+        set_id(dependency_target, "@rpath/#{binary.basename}")
+        fixup_binary(binary, binary, destination)
+      end
+    end
+
+    # symlinks
+    bundle_framework_root = dependency_target_dir.parent.parent
+    version = dependency_target.parent.basename
+    Dir.chdir(bundle_framework_root + 'Versions') do
+      FileUtils.ln_s "#{version}", 'Current'
+    end
+    Dir.chdir(bundle_framework_root) do
+      FileUtils.ln_s 'Versions/Current/Resources', 'Resources'
+      FileUtils.ln_s 'Versions/Current/Helpers', 'Helpers'
+      FileUtils.ln_s "Versions/Current/#{basename}", "#{basename}"
+    end
+  end
+
   rel_path = dependency_target.parent.relative_path_from(library.parent)
   new_path = '@loader_path/' + rel_path.to_s + "/#{basename}"
   change_dependent_path(library, dependency, new_path)
-  fixup_binary(dependency_target, dependency, destination)
 end
 
 # Deploy a dependency in to the bundle. Copies the dependency into the bundle,
@@ -438,13 +462,15 @@ def deploy_dependency(dependency, library, _library_orig,
   basename = dependency.basename
   dependency_target = destination + Pathname.new(basename)
 
-  copy_file_if_missing(dependency, dependency_target)
-  make_writable(dependency_target)
-  set_id(dependency_target, "@rpath/#{basename}")
+  if !dependency_target.exist?
+    FileUtils.copy dependency, dependency_target
+    make_writable(dependency_target)
+    set_id(dependency_target, "@rpath/#{basename}")
+    fixup_binary(dependency_target, dependency, destination)
+  end
   rel_path = destination.relative_path_from(library.parent)
   new_path = '@loader_path/' + rel_path.to_s + "/#{basename}"
   change_dependent_path(library, dependency, new_path)
-  fixup_binary(dependency_target, dependency, destination)
 end
 
 # Create a list of dependencies for the given binary that only includes
@@ -499,10 +525,8 @@ def stop_if_bundle_not_self_contained(basepath, extra = [])
 
   unless problem_libraries.empty?
     msg = 'The bundle is not self contained. The following '\
-          "libraries link to others outside of the bundle:\n"
-    problem_libraries.each do |library|
-      msg << '  ' << library << "\n"
-    end
+          "libraries link to others outside of the bundle:\n"\
+          "#{problem_libraries.join('\n')}"
     fatal(msg)
   end
 end
@@ -536,7 +560,7 @@ contents_frameworks = bundle_path + 'Contents/Frameworks'
 # check we have a known bundle
 if bundle_path.to_s.end_with?('MantidWorkbench.app')
   bundled_packages = BUNDLED_PY_MODULES + BUNDLED_PY_MODULES_WORKBENCH
-  bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms']
+  bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
   extra_binaries = []
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
@@ -552,8 +576,11 @@ end
 # into the bundle and the main layout exists.
 deploy_python_framework(contents_frameworks, host_python_exe,
                         bundled_packages)
-exit 1
 install_qt_plugins(bundle_path, bundled_qt_plugins, host_qt_plugins_dir,
                    QT_PLUGINS_BLACKLIST)
+# We choose not to use macdeployqt as it uses @executable_path so we have to essentially
+# run over everything twice to switch to @loader_path for workbench where we don't have
+# an executable. It also fails to fixup the QWebEngine internal app so we might as well
+# do everything here and save runtime.
 fixup_binaries(bundle_path, contents_frameworks, extra_binaries)
 stop_if_bundle_not_self_contained(bundle_path)
