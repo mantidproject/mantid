@@ -26,19 +26,23 @@ from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
-from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
-                                                 GlobalMarkerEditor, ColorbarAxisEditor)
+from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
+                                                 SingleMarkerEditor, GlobalMarkerEditor,
+                                                 ColorbarAxisEditor)
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
-AXES_SCALE_MENU_OPTS = OrderedDict([
-    ("Lin x/Lin y", ("linear", "linear")),
-    ("Log x/Log y", ("log", "log")),
-    ("Lin x/Log y", ("linear", "log")),
-    ("Log x/Lin y", ("log", "linear"))]
-)
-VALID_LINE_STYLE = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
-VALID_COLORS = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
+AXES_SCALE_MENU_OPTS = OrderedDict(
+    [("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
+     ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
+VALID_LINE_STYLE = ['solid', 'dashed', 'dotted', 'dashdot']
+VALID_COLORS = {
+    'blue': '#1f77b4',
+    'orange': '#ff7f0e',
+    'green': '#2ca02c',
+    'red': '#d62728',
+    'purple': '#9467bd'
+}
 
 
 class FigureInteraction(object):
@@ -112,8 +116,8 @@ class FigureInteraction(object):
                     marker.set_move_cursor(Qt.ClosedHandCursor, x_pos, y_pos)
                 marker.mouse_move_start(x_pos, y_pos)
 
-        if (event.button == canvas.buttond.get(Qt.RightButton) and
-                not self.toolbar_manager.is_tool_active()):
+        if (event.button == canvas.buttond.get(Qt.RightButton)
+                and not self.toolbar_manager.is_tool_active()):
             if not marker_selected:
                 self._show_context_menu(event)
             else:
@@ -172,15 +176,15 @@ class FigureInteraction(object):
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
                 move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif (ax.xaxis.contains(event)[0] or
-                  any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
+            elif (ax.xaxis.contains(event)[0]
+                  or any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
                 move_and_show(XAxisEditor(canvas, ax))
-            elif (ax.yaxis.contains(event)[0] or
-                  any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
+            elif (ax.yaxis.contains(event)[0]
+                  or any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
                 if ax == axes[0]:
                     move_and_show(YAxisEditor(canvas, ax))
                 else:
-                    move_and_show(ColorbarAxisEditor(canvas,ax))
+                    move_and_show(ColorbarAxisEditor(canvas, ax))
 
     def _show_markers_menu(self, markers, event):
         """
@@ -271,10 +275,9 @@ class FigureInteraction(object):
         # Create menu
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
-        none_action = norm_menu.addAction(
-            'None', lambda: self._set_normalization_none(ax))
-        norm_action = norm_menu.addAction(
-            'Bin Width', lambda: self._set_normalization_bin_width(ax))
+        none_action = norm_menu.addAction('None', lambda: self._set_normalization_none(ax))
+        norm_action = norm_menu.addAction('Bin Width',
+                                          lambda: self._set_normalization_bin_width(ax))
         for action in [none_action, norm_action]:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
@@ -301,8 +304,10 @@ class FigureInteraction(object):
         marker_action_group = QActionGroup(marker_menu)
         x0, x1 = event.inaxes.get_xlim()
         y0, y1 = event.inaxes.get_ylim()
-        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
-        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
+        horizontal = marker_menu.addAction(
+            "Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
+        vertical = marker_menu.addAction(
+            "Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
         edit = marker_menu.addAction("Edit", lambda: self._global_edit_markers())
 
         for action in [horizontal, vertical, edit]:
@@ -312,11 +317,13 @@ class FigureInteraction(object):
 
     def _global_edit_markers(self):
         """Open a window that allows editing of all currently plotted markers"""
+
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
 
-        move_and_show(GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
+        move_and_show(
+            GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
 
     def _get_free_marker_name(self):
         """
@@ -340,7 +347,14 @@ class FigureInteraction(object):
                 return "{} {}".format(self.default_marker_name, proposed_number)
             proposed_number += 1
 
-    def _add_horizontal_marker(self, y_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
+    def _add_horizontal_marker(self,
+                               y_pos,
+                               lower,
+                               upper,
+                               axis,
+                               name=None,
+                               line_style='dashed',
+                               color=VALID_COLORS['green']):
         """
         Add a horizontal marker to the plot and append it to the list of open markers
         :param y_pos: position to plot the marker to
@@ -348,17 +362,32 @@ class FigureInteraction(object):
         :param upper: x value to stop the marker at
         :param name: label displayed beside the marker
         :param line_style: 'solid', 'dashed', etc.
-        :param color: 'C0', 'C1', 'r', etc.
+        :param color: 'r', 'g', 'b' etc. or some hex code
         """
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(self.canvas, color, y_pos, lower, upper, name=name,
-                              marker_type='YSingle', line_style=line_style, axis=axis)
+        marker = SingleMarker(
+            self.canvas,
+            color,
+            y_pos,
+            lower,
+            upper,
+            name=name,
+            marker_type='YSingle',
+            line_style=line_style,
+            axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
+    def _add_vertical_marker(self,
+                             x_pos,
+                             lower,
+                             upper,
+                             axis,
+                             name=None,
+                             line_style='dashed',
+                             color=VALID_COLORS['green']):
         """
         Add a vertical marker to the plot and append it to the list of open markers
         :param x_pos: position to plot the marker to
@@ -366,12 +395,20 @@ class FigureInteraction(object):
         :param upper: y value to stop the marker at
         :param name: label displayed beside the marker
         :param line_style: 'solid', 'dashed', etc.
-        :param color: 'C0', 'C1', 'r', etc.
+        :param color: 'r', 'g', 'b' etc. or some hex code
         """
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(self.canvas, color, x_pos, lower, upper, name=name,
-                              marker_type='XSingle', line_style=line_style, axis=axis)
+        marker = SingleMarker(
+            self.canvas,
+            color,
+            x_pos,
+            lower,
+            upper,
+            name=name,
+            marker_type='XSingle',
+            line_style=line_style,
+            axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
@@ -390,13 +427,16 @@ class FigureInteraction(object):
         """
         Open a dialog window to edit the marker properties (position, name, line style, colour)
         """
+
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
 
         used_names = [str(_marker.name) for _marker in self.markers]
         QApplication.restoreOverrideCursor()
-        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors, used_names))
+        move_and_show(
+            SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors,
+                               used_names))
 
     def _set_hover_cursor(self, x_pos, y_pos):
         """
@@ -471,16 +511,18 @@ class FigureInteraction(object):
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
                 arg_set_copy = copy(arg_set)
-                [arg_set_copy.pop(key) for key in ['function', 'workspaces', 'autoscale_on_update']
-                 if key in arg_set_copy.keys()]
+                [
+                    arg_set_copy.pop(key)
+                    for key in ['function', 'workspaces', 'autoscale_on_update']
+                    if key in arg_set_copy.keys()
+                ]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
                         arg_set['specNum'] = workspace.getSpectrum(
                             arg_set.pop('wkspIndex')).getSpectrumNo()
                     else:
-                        raise RuntimeError(
-                            "No spectrum number associated with plot of "
-                            "workspace '{}'".format(workspace.name()))
+                        raise RuntimeError("No spectrum number associated with plot of "
+                                           "workspace '{}'".format(workspace.name()))
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
                     if ws_artist.spec_num == arg_set.get('specNum'):
                         ws_artist.is_normalized = not is_normalized

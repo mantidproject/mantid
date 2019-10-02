@@ -296,7 +296,7 @@ class FigureInteractionTest(unittest.TestCase):
         data = MagicMock()
         axis = MagicMock()
         self.interactor._add_horizontal_marker(data, y0, y1, axis)
-        expected_call = call(self.interactor.canvas, 'C2', data, y0, y1,
+        expected_call = call(self.interactor.canvas, '#2ca02c', data, y0, y1,
                              name='marker 0',
                              marker_type='YSingle',
                              line_style='dashed',
@@ -311,7 +311,7 @@ class FigureInteractionTest(unittest.TestCase):
         data = MagicMock()
         axis = MagicMock()
         self.interactor._add_vertical_marker(data, x0, x1, axis)
-        expected_call = call(self.interactor.canvas, 'C2', data, x0, x1,
+        expected_call = call(self.interactor.canvas, '#2ca02c', data, x0, x1,
                              name='marker 0',
                              marker_type='XSingle',
                              line_style='dashed',

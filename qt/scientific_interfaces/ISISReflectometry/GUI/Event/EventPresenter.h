@@ -28,10 +28,10 @@ public:
   explicit EventPresenter(IEventView *view);
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
 
   void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;

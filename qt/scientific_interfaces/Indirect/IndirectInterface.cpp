@@ -49,12 +49,7 @@ IndirectInterface::getInterfaceSettings() const {
 }
 
 void IndirectInterface::manageUserDirectories() {
-  if (!m_manageUserDirectories) {
-    m_manageUserDirectories = std::make_unique<ManageUserDirectories>(this);
-    m_manageUserDirectories->setAttribute(Qt::WA_DeleteOnClose, false);
-  }
-  m_manageUserDirectories->setModal(true);
-  m_manageUserDirectories->show();
+  ManageUserDirectories::openManageUserDirectories();
 }
 
 void IndirectInterface::showMessageBox(QString const &message) {

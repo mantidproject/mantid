@@ -26,6 +26,8 @@ class IndirectILLReductionFWS(unittest.TestCase):
     # EFWS+IFWS, one wing
     _run_one_wing_mixed = '083072:083077'
 
+    _observable_omega = '252832'
+
     def setUp(self):
         # set instrument and append datasearch directory
         config['default.facility'] = 'ILL'
@@ -67,6 +69,20 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
 
         self._check_workspace_group(mtd['out_red'], 3, 18, 2)
+
+    def test_omega_scan(self):
+
+        args = {'Run': self._observable_omega,
+                'Observable': 'SamS_Rot.value',
+                'OutputWorkspace': 'out'}
+
+        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
+
+        self._check_workspace_group(mtd['out_red'], 1, 18, 1)
+
+        self.assertEquals(mtd['out_red'].getItem(0).readX(0)[0], 90)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 

@@ -40,22 +40,18 @@ namespace ISISReflectometry {
  * summed in a reduction.
  * @param instruments The names of the instruments to show as options for the
  * search.
- * @param defaultInstrumentIndex The index of the instrument to have selected by
- * default.
  * @param messageHandler :: A handler to pass messages to the user
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
-    int defaultInstrumentIndex, IMessageHandler *messageHandler)
+    IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments),
-      m_defaultInstrumentIndex(defaultInstrumentIndex),
-      m_thetaTolerance(thetaTolerance) {
+      m_instruments(instruments), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -77,9 +73,10 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  // Must do this after setting main presenter or notifications don't get
-  // through
-  m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
+}
+
+void RunsPresenter::initInstrumentList() {
+  m_view->setInstrumentList(m_instruments);
 }
 
 RunsTable const &RunsPresenter::runsTable() const {
@@ -114,7 +111,7 @@ void RunsPresenter::notifySearchComplete() {
 
 void RunsPresenter::notifySearchFailed() {
   if (isAutoreducing()) {
-    notifyAutoreductionPaused();
+    notifyPauseAutoreductionRequested();
   }
 }
 
@@ -123,31 +120,30 @@ void RunsPresenter::notifyTransfer() {
   notifyRowStateChanged();
 }
 
-void RunsPresenter::notifyInstrumentChanged() {
+void RunsPresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getSearchInstrument();
-  m_searcher->reset();
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  m_mainPresenter->notifyInstrumentChanged(instrumentName);
+void RunsPresenter::notifyChangeInstrumentRequested(
+    std::string const &instrumentName) {
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void RunsPresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyReductionResumed();
+void RunsPresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
-void RunsPresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyReductionPaused();
+void RunsPresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
 }
 
-void RunsPresenter::notifyAutoreductionResumed() {
-  m_mainPresenter->notifyAutoreductionResumed();
+void RunsPresenter::notifyResumeAutoreductionRequested() {
+  m_mainPresenter->notifyResumeAutoreductionRequested();
 }
 
-void RunsPresenter::notifyAutoreductionPaused() {
-  m_mainPresenter->notifyAutoreductionPaused();
+void RunsPresenter::notifyPauseAutoreductionRequested() {
+  m_mainPresenter->notifyPauseAutoreductionRequested();
 }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
@@ -173,15 +169,15 @@ void RunsPresenter::notifyRowOutputsChanged(
   tablePresenter()->notifyRowOutputsChanged(item);
 }
 
-void RunsPresenter::reductionResumed() {
+void RunsPresenter::notifyReductionResumed() {
   updateWidgetEnabledState();
-  tablePresenter()->reductionResumed();
+  tablePresenter()->notifyReductionResumed();
   notifyRowStateChanged();
 }
 
-void RunsPresenter::reductionPaused() {
+void RunsPresenter::notifyReductionPaused() {
   updateWidgetEnabledState();
-  tablePresenter()->reductionPaused();
+  tablePresenter()->notifyReductionPaused();
 }
 
 /** Resume autoreduction. Clears any existing table data first and then
@@ -216,25 +212,37 @@ bool RunsPresenter::resumeAutoreduction() {
   return true;
 }
 
-void RunsPresenter::autoreductionResumed() {
+void RunsPresenter::notifyAutoreductionResumed() {
   updateWidgetEnabledState();
-  tablePresenter()->autoreductionResumed();
+  tablePresenter()->notifyAutoreductionResumed();
   m_progressView->setAsEndlessIndicator();
 }
 
-void RunsPresenter::autoreductionPaused() {
+void RunsPresenter::notifyAutoreductionPaused() {
   m_runNotifier->stopPolling();
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
-  tablePresenter()->autoreductionPaused();
+  tablePresenter()->notifyAutoreductionPaused();
 }
 
-void RunsPresenter::anyBatchAutoreductionResumed() {
+void RunsPresenter::notifyAnyBatchReductionResumed() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchReductionResumed();
 }
 
-void RunsPresenter::anyBatchAutoreductionPaused() {
+void RunsPresenter::notifyAnyBatchReductionPaused() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchReductionPaused();
+}
+
+void RunsPresenter::notifyAnyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchAutoreductionResumed();
+}
+
+void RunsPresenter::notifyAnyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchAutoreductionPaused();
 }
 
 void RunsPresenter::autoreductionCompleted() {
@@ -243,9 +251,10 @@ void RunsPresenter::autoreductionCompleted() {
   updateWidgetEnabledState();
 }
 
-void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
-  tablePresenter()->instrumentChanged(instrumentName);
+  tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
@@ -289,7 +298,7 @@ void RunsPresenter::autoreduceNewRuns() {
   if (rowsToTransfer.size() > 0)
     transfer(rowsToTransfer, TransferMatch::Strict);
 
-  m_mainPresenter->notifyReductionResumed();
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
 bool RunsPresenter::isProcessing() const {
@@ -298,6 +307,10 @@ bool RunsPresenter::isProcessing() const {
 
 bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsPresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
 }
 
 bool RunsPresenter::isAnyBatchAutoreducing() const {
@@ -389,7 +402,8 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->updateMenuEnabledState(isProcessing());
 
   // Update components
-  m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
+  m_view->setInstrumentComboEnabled(!isAnyBatchProcessing() &&
+                                    !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&

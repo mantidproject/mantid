@@ -238,7 +238,7 @@ public:
     expectNotProcessingOrAutoreducing();
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.reductionPaused();
+    presenter.notifyReductionPaused();
     verifyAndClear();
   }
 
@@ -247,7 +247,7 @@ public:
     enableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -256,7 +256,7 @@ public:
     enableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -265,7 +265,7 @@ public:
     disableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -274,7 +274,7 @@ public:
     disableAutosave(presenter);
     expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
     verifyAndClear();
   }
 
@@ -283,7 +283,7 @@ public:
     enableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -292,7 +292,7 @@ public:
     enableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableFileFormatAndLocationControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -301,7 +301,7 @@ public:
     disableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, enableFileFormatAndLocationControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
@@ -310,7 +310,7 @@ public:
     disableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
