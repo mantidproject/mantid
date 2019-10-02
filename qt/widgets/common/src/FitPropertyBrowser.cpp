@@ -1936,10 +1936,10 @@ QVector<double> FitPropertyBrowser::getXRange() {
         xColumnData.push_back(col->toDouble(i));
       }
     } catch (std::invalid_argument err) {
-			
+
       QMessageBox::critical(this, "Mantid - Error",
                             "The X column is not a number");
-			throw std::invalid_argument(err);
+      throw std::invalid_argument(err);
     }
     std::sort(xColumnData.begin(), xColumnData.end());
     range.push_back(xColumnData.front());
