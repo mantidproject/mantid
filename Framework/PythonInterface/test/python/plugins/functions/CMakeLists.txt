@@ -1,20 +1,21 @@
 # Tests for Fit functions
 
 set(TEST_PY_FILES
+    AttributeTest.py
     BesselTest.py
+    CombGaussLorentzKTTest.py
     DSFinterp1DFitTest.py
     EISFDiffSphereTest.py
     FmuFTest.py
-    CombGaussLorentzKTTest.py
     EISFDiffCylinderTest.py
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
-    StretchedExpFTTest.py
-    AttributeTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
+    MuHTest.py
+    StretchedExpFTTest.py
     TeixeiraWaterTest.py
     TriangleOscTest.py)
 

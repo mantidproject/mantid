@@ -32,7 +32,6 @@
 #include <cmath>
 #include <list>
 #include <memory>
-#include <regex>
 #include <string>
 
 namespace Mantid {
@@ -1001,11 +1000,8 @@ private:
       // Find by class and by name
       auto results = utilities::findGroups(parent, classType);
       for (auto &result : results) {
-        auto resultName = H5_OBJ_NAME(result);
-        // resultName gives full path. We match the last name on the path
-        if (std::regex_match(resultName, std::regex(".*/" + name + "$"))) {
+        if (utilities::isNamed(result, name))
           return result;
-        }
       }
     }
     // We can't find it, or we are writing from scratch anyway
