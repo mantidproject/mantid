@@ -17,7 +17,7 @@ class SpinGlass(IFunction1D):
 
     def init(self):
         self.declareParameter("A0", 0.2, 'Asymmetry')
-        self.declareParameter("Width_a", 0.1, 'Half-width half maximum of the local field Lorentzian Distribution')
+        self.declareParameter("Width", 0.1, 'Half-width half maximum of the local field Lorentzian Distribution')
         self.declareParameter("Nu", 1, 'Rate of Markovian modulation')
         self.declareParameter("Q", 0.1, 'Order Parameter')
         self.addConstraints("Nu > 0")
@@ -25,7 +25,7 @@ class SpinGlass(IFunction1D):
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
-        a = self.getParameterValue("Width_a")
+        a = self.getParameterValue("Width")
         nu = self.getParameterValue("Nu")
         q = self.getParameterValue("Q")
         x = x[1 : np.size(x)]
