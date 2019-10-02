@@ -478,18 +478,31 @@ class StateDirectorISIS(object):
                          user_file_items, apply_to_value=convert_mm_to_m)
 
         # ---------------------------
-        # Monitor 4 offset; for now this is only SANS2D
+        # Monitor offsets
         # ---------------------------
-        if TransId.spec_shift in user_file_items:
-            monitor_n_shift = user_file_items[TransId.spec_shift]
+
+        def parse_shift(key_to_parse, spec_num):
+            monitor_n_shift = user_file_items[key_to_parse]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(monitor_n_shift, TransId.spec_shift)
+            check_if_contains_only_one_element(monitor_n_shift, key_to_parse)
             monitor_n_shift = monitor_n_shift[-1]
-            set_monitor_n_offset = getattr(self._move_builder, "set_monitor_n_offset", None)
-            if isinstance(set_monitor_n_offset, collections.Callable):
-                self._move_builder.set_monitor_n_offset(convert_mm_to_m(monitor_n_shift))
+
+            # Determine if the object has the set_monitor_X_offset method
+            set_monitor_4_offset = getattr(self._move_builder, "set_monitor_4_offset", dict())
+            set_monitor_5_offset = getattr(self._move_builder, "set_monitor_5_offset", dict())
+
+            if spec_num == 4 and isinstance(set_monitor_4_offset, collections.Callable):
+                self._move_builder.set_monitor_4_offset(convert_mm_to_m(monitor_n_shift))
+            elif spec_num == 5 and isinstance(set_monitor_5_offset, collections.Callable):
+                self._move_builder.set_monitor_5_offset(convert_mm_to_m(monitor_n_shift))
             else:
-                log_non_existing_field("set_monitor_n_offset")
+                log_non_existing_field("set_monitor_{0}_offset".format(spec_num))
+
+        if TransId.spec_4_shift in user_file_items:
+            parse_shift(key_to_parse=TransId.spec_4_shift, spec_num=4)
+
+        if TransId.spec_5_shift in user_file_items:
+            parse_shift(key_to_parse=TransId.spec_5_shift, spec_num=5)
 
         # ---------------------------
         # Beam Centre, this can be for HAB and LAB

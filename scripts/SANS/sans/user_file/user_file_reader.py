@@ -24,6 +24,7 @@ class UserFileReader(object):
         # 2. Exists and is a sequence type => extend the existing list
         # 3. Does not exist and is a standard value => create a list with that value and add it
         # 4. Does not exist and is a sequence type => add the list itself
+
         for key, value in parsed.items():
             if not isinstance(value, list):
                 value = [value]
