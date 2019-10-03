@@ -21,7 +21,7 @@ with
 
 :math:`A_0` is the amplitude,
 
-B(G) is applied B field,
+:math:`B` (G) is applied B field,
 
 :math:`B_0` (G) is the central B field of the resonance,
 
