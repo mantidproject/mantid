@@ -16,7 +16,7 @@ class ZFMuonium(IFunction1D):
     def category(self):
         return "Muon"
 
-    def init(self):	
+    def init(self):
         self.declareParameter("A0", 0.2)
         self.declareParameter("FreqA", 0.3, 'Isotropic hyperfine coupling constant (MHz)')
         self.declareParameter("FreqD", 0.2, 'Anisotropic hyperfine coupling constant (MHz)')
