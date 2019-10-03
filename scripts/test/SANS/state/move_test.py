@@ -90,7 +90,7 @@ class StateMoveWorkspaceSANS2DTest(unittest.TestCase):
         self.assertEqual(state.lab_detector_x,  0.0)
         self.assertEqual(state.lab_detector_z,  0.0)
         self.assertEqual(state.monitor_names,  {})
-        self.assertEqual(state.monitor_n_offset,  0.0)
+        self.assertEqual(state.monitor_4_offset,  0.0)
 
 
 class StateMoveWorkspaceLARMORTest(unittest.TestCase):
