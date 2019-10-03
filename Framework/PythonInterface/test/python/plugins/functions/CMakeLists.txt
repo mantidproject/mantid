@@ -17,6 +17,7 @@ set(TEST_PY_FILES
     MsdYiTest.py
     MuHTest.py
     SilverBaselineTest.py
+    StandardSCTest.py
     StaticLorentzianKTTest.py
     StretchedExpFTTest.py
     TeixeiraWaterTest.py
