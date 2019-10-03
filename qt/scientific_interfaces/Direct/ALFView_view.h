@@ -37,7 +37,7 @@ public slots:
   void fileLoaded();
 
 private:
-  QWidget * generateLoadWidget();
+  QWidget *generateLoadWidget();
   void warningBox(const QString message);
 
   Observable *m_loadRunObservable;
