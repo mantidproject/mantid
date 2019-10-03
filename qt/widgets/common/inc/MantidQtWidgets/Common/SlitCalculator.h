@@ -10,6 +10,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "ISlitCalculator.h"
 #include "MantidAPI/InstrumentDataService.h"
 
 #include "DllOption.h"
@@ -20,13 +21,15 @@ namespace MantidQt {
 namespace MantidWidgets {
 /** SlitCalculator : A calculator for Reflectometry instrument slits
  */
-class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog,
+                                                  public ISlitCalculator {
   Q_OBJECT
 public:
   SlitCalculator(QWidget *parent);
   ~SlitCalculator() override;
-  void setCurrentInstrumentName(std::string instrumentName);
-  void processInstrumentHasBeenChanged();
+  void setCurrentInstrumentName(std::string instrumentName) override;
+  void processInstrumentHasBeenChanged() override;
+  void show() override;
 
 protected:
   Ui::SlitCalculator ui;
