@@ -15,7 +15,7 @@ class RFresonance(IFunction1D):
     def category(self):
         return "Muon"
 
-    def init(self):	
+    def init(self):
         self.declareParameter("A0", 0.2)
         self.declareParameter("Boffset", 10, 'Relaxation rate (G)')
         self.declareParameter("B1", 10, 'Fluctuation (G)')
