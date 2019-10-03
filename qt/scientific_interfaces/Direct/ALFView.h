@@ -15,14 +15,17 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** ALCInterface : Custom interface for Avoided Level Crossing analysis
+/** ALFView : Custom interface for looking at ALF data
  */
 class MANTIDQT_DIRECT_DLL ALFView : public API::UserSubWindow {
   Q_OBJECT
 
 public:
   ALFView(QWidget *parent = nullptr);
-  ~ALFView(){};
+  ~ALFView() {
+    delete m_presenter;
+    delete m_model;
+  };
   static std::string name() { return "ALF View"; }
   static QString categoryInfo() { return "Direct"; }
 
@@ -30,6 +33,9 @@ protected:
   void initLayout() override;
 
 private:
+  //std::unique_ptr<ALFView_view> m_view;
+  //std::unique_ptr<ALFView_model> m_model;
+  //std::unique_ptr<ALFView_presenter> m_presenter;
   ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;

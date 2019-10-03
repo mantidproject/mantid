@@ -9,61 +9,59 @@
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QRegExpValidator>
-#include <QSplitter>
+#include <QSpinBox>
 #include <QVBoxLayout>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_view::ALFView_view(QWidget *parent)
-    : QWidget(parent), m_run(nullptr), m_loadRunObservable(nullptr),
-      m_browseObservable(nullptr) {
-  QSplitter *MainLayout = new QSplitter(Qt::Vertical, this);
-  QWidget *loadBar = new QWidget();
-  m_loadRunObservable = new observable();
-  m_browseObservable = new observable();
-  generateLoadWidget(loadBar);
-
-  MainLayout->addWidget(loadBar);
-  //  MainLayout->addWidget(widgetSplitter);
-  // this->addWidget(MainLayout);
+ALFView_view::ALFView_view(const std::string instrument, QWidget *parent)
+    : QSplitter(Qt::Vertical, parent), m_loadRunObservable(nullptr),
+       m_files(nullptr), m_instrument(QString::fromStdString(instrument)) {
+  generateLoadWidget();
+  this->addWidget(m_files);
 }
 
-void ALFView_view::generateLoadWidget(QWidget *loadBar) {
-  m_run = new QLineEdit("0");
-  m_run->setValidator(new QRegExpValidator(QRegExp("[0-9]*"), m_run));
-  connect(m_run, SIGNAL(editingFinished()), this, SLOT(runChanged()));
+void ALFView_view::generateLoadWidget() {
+  m_loadRunObservable = new Observable();
 
-  m_browse = new QPushButton("Browse");
-  connect(m_browse, SIGNAL(clicked()), this, SLOT(browse()));
-
-  QHBoxLayout *loadLayout = new QHBoxLayout(loadBar);
-  loadLayout->addWidget(m_run);
-  loadLayout->addWidget(m_browse);
+  m_files = new API::MWRunFiles(this);
+  m_files->allowMultipleFiles(false);
+  m_files->setInstrumentOverride(m_instrument);
+  m_files->isForRunFiles(true);
+  connect(m_files, SIGNAL(fileFindingFinished()), this, SLOT(fileLoaded()));
 }
 
-int ALFView_view::getRunNumber() { return m_run->text().toInt(); }
-
-void ALFView_view::setRunQuietly(const QString runNumber) {
-  m_run->blockSignals(true);
-  m_run->setText(runNumber);
-  m_run->blockSignals(false);
+std::string ALFView_view::getFile() {
+  auto name = m_files->getFilenames();
+  if (name.size() > 0)
+    return name[0].toStdString();
+  return "";
 }
 
-void ALFView_view::runChanged() {
-  m_loadRunObservable->notify();
-} // emit newRun(); }
+void ALFView_view::setRunQuietly(const std::string runNumber) {
+  m_files->setText(QString::fromStdString(runNumber));
+}
 
-void ALFView_view::browse() {
-  auto file =
-      QFileDialog::getOpenFileName(this, "Open a file", "", "File (*.nxs)");
-  if (file.isEmpty()) {
+void ALFView_view::fileLoaded() {
+  if (m_files->getText().isEmpty())
+    return;
+
+  if (!m_files->isValid()) {
+    warningBox(m_files->getFileProblem());
     return;
   }
-  // emit browsedToRun(file.toStdString());
-  m_browseObservable->notify(file.toStdString());
+  m_loadRunObservable->notify();
 }
+
+void ALFView_view::warningBox(const std::string message) {
+  warningBox(QString::fromStdString(message));
+}
+void ALFView_view::warningBox(const QString message) {
+    QMessageBox::warning(this, m_instrument + " view", message);
+  }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

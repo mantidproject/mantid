@@ -21,7 +21,10 @@ public:
   void rename();
   void remove();
   int currentRun();
-}; // namespace CustomInterfaces
+  bool isErrorCode(const int run);
+  std::string getInstrument();
+}; 
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

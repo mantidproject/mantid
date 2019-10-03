@@ -8,44 +8,42 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 
 #include "DllConfig.h"
-#include "observerPattern.h"
+#include "MantidQtWidgets/Common/ObserverPattern.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
+#include <string>
 #include <QLineEdit>
 #include <QObject>
 #include <QPushButton>
-#include <string>
+#include <QSplitter>
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALFView_view : public QWidget {
+class ALFView_view : public QSplitter {
   Q_OBJECT
 
 public:
-  explicit ALFView_view(QWidget *parent = nullptr);
-  int getRunNumber();
-  void setRunQuietly(const QString runNumber);
-  void observeLoadRun(observer *listener) {
+  explicit ALFView_view(const std::string instrument, QWidget *parent = nullptr);
+  std::string getFile();
+  void setRunQuietly(const std::string runNumber);
+  void observeLoadRun(Observer *listener) {
     m_loadRunObservable->attach(listener);
   };
-  void observeBrowse(observer *listner) {
-    m_browseObservable->attach(listner);
-  };
+  void warningBox(const std::string message);
 
-public slots:
-  void runChanged();
-  void browse();
-
-signals:
-  void newRun();
-  void browsedToRun(std::string);
+ public slots:
+   void fileLoaded();
 
 private:
-  void generateLoadWidget(QWidget *loadBar);
-  QLineEdit *m_run;
-  QPushButton *m_browse;
-  observable *m_loadRunObservable;
-  observable *m_browseObservable;
+  void generateLoadWidget();
+  void warningBox(const QString message);
+
+  Observable *m_loadRunObservable;
+  API::MWRunFiles *m_files;
+  QString m_instrument;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

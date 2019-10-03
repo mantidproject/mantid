@@ -1,4 +1,3 @@
-#include "ALFView_model.h"
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
@@ -6,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include "ALFView_model.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -19,20 +19,23 @@
 #include <utility>
 
 namespace {
-const std::string tmpName = "ALF_tmp";
-const std::string instrumentName = "ALF";
-const std::string wsName = "ALFData";
+const std::string TMPNAME = "ALF_tmp";
+const std::string INSTRUMENTNAME = "ALF";
+const std::string WSNAME = "ALFData";
+const int ERRORCODE = -999;
 } // namespace
 
+using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+
 void ALFView_model::loadEmptyInstrument() {
-  Mantid::API::IAlgorithm_sptr alg =
+  auto alg =
       Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
-  alg->setProperty("OutputWorkspace", wsName);
-  alg->setProperty("InstrumentName", instrumentName);
+  alg->setProperty("OutputWorkspace", WSNAME);
+  alg->setProperty("InstrumentName", INSTRUMENTNAME);
   alg->execute();
 }
 /*
@@ -42,15 +45,14 @@ void ALFView_model::loadEmptyInstrument() {
  * @return int:: the run number
  */
 int ALFView_model::loadData(const std::string &name) {
-  Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create("Load");
+  auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
-  alg->setProperty("OutputWorkspace", tmpName); // write to tmp ws
+  alg->setProperty("OutputWorkspace", TMPNAME); // write to tmp ws
   alg->execute();
-  Mantid::API::MatrixWorkspace_sptr ws =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>(tmpName);
+  auto ws =
+      AnalysisDataService::Instance()
+          .retrieveWS<MatrixWorkspace>(TMPNAME);
   return ws->getRunNumber();
 }
 /*
@@ -59,14 +61,14 @@ int ALFView_model::loadData(const std::string &name) {
  * @return pair<bool,bool>:: If the instrument is ALF, if it is d-spacing
  */
 std::map<std::string, bool> ALFView_model::isDataValid() {
-  Mantid::API::MatrixWorkspace_sptr ws =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>(tmpName);
+  auto ws =
+      AnalysisDataService::Instance()
+          .retrieveWS<MatrixWorkspace>(TMPNAME);
 
   bool isItALF = false;
   bool isItDSpace = false;
 
-  if (ws->getInstrument()->getName() == instrumentName) {
+  if (ws->getInstrument()->getName() == INSTRUMENTNAME) {
     isItALF = true;
   }
   auto axis = ws->getAxis(0);
@@ -85,40 +87,44 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
  * If already d-space does nothing.
  */
 void ALFView_model::transformData() {
-  Mantid::API::IAlgorithm_sptr normAlg =
-      Mantid::API::AlgorithmManager::Instance().create("NormaliseByCurrent");
+  auto normAlg =
+      AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
-  normAlg->setProperty("InputWorkspace", wsName);
-  normAlg->setProperty("OutputWorkspace", wsName);
+  normAlg->setProperty("InputWorkspace", WSNAME);
+  normAlg->setProperty("OutputWorkspace", WSNAME);
   normAlg->execute();
 
-  Mantid::API::IAlgorithm_sptr dSpacingAlg =
-      Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
+  auto dSpacingAlg =
+      AlgorithmManager::Instance().create("ConvertUnits");
   dSpacingAlg->initialize();
-  dSpacingAlg->setProperty("InputWorkspace", wsName);
+  dSpacingAlg->setProperty("InputWorkspace", WSNAME);
   dSpacingAlg->setProperty("Target", "dSpacing");
-  dSpacingAlg->setProperty("OutputWorkspace", wsName);
+  dSpacingAlg->setProperty("OutputWorkspace", WSNAME);
   dSpacingAlg->execute();
 }
 
 void ALFView_model::rename() {
-  Mantid::API::AnalysisDataService::Instance().rename(tmpName, wsName);
+  AnalysisDataService::Instance().rename(TMPNAME, WSNAME);
 }
 void ALFView_model::remove() {
-  Mantid::API::AnalysisDataService::Instance().remove(tmpName);
+  AnalysisDataService::Instance().remove(TMPNAME);
 }
 
 int ALFView_model::currentRun() {
   try {
 
-    Mantid::API::MatrixWorkspace_sptr ws =
-        Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
+    auto ws =
+        AnalysisDataService::Instance()
+            .retrieveWS<MatrixWorkspace>(WSNAME);
     return ws->getRunNumber();
   } catch (...) {
-    return -999; // special error code
+    return ERRORCODE;
   }
 }
+
+bool ALFView_model::isErrorCode(const int run) { return (run == ERRORCODE); }
+
+std::string ALFView_model::getInstrument() { return INSTRUMENTNAME; }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
