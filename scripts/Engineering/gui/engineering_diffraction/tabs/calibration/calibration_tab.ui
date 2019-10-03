@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>619</width>
-    <height>165</height>
+    <height>187</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -82,6 +82,9 @@ QGroupBox:title {
           </property>
           <item row="6" column="0" colspan="2">
            <widget class="QCheckBox" name="check_plotOutput">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>Plot Calibrated Workspace</string>
             </property>
@@ -122,6 +125,9 @@ QGroupBox:title {
           </item>
           <item row="6" column="2">
            <widget class="QPushButton" name="button_calibrate">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>Calibrate</string>
             </property>

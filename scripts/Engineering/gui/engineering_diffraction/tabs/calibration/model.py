@@ -156,8 +156,8 @@ class CalibrationModel(object):
                             instrument):
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
-        filename, vanadium_no, ceria_no = self._generate_output_file_name(ceria_path,
-                                                                          vanadium_path,
+        filename, vanadium_no, ceria_no = self._generate_output_file_name(vanadium_path,
+                                                                          ceria_path,
                                                                           instrument,
                                                                           bank="all")
         # Both Banks
@@ -169,7 +169,7 @@ class CalibrationModel(object):
                                       vanadium_run=vanadium_no)
         # North Bank
         file_path = calibration_dir + self._generate_output_file_name(
-            ceria_path, vanadium_path, instrument, bank="north")[0]
+            vanadium_path, ceria_path, instrument, bank="north")[0]
         write_ENGINX_GSAS_iparam_file(file_path, [difc[0]], [tzero[0]],
                                       ceria_run=ceria_no,
                                       vanadium_run=vanadium_no,
@@ -177,7 +177,7 @@ class CalibrationModel(object):
                                       bank_names=["North"])
         # South Bank
         file_path = calibration_dir + self._generate_output_file_name(
-            ceria_path, vanadium_path, instrument, bank="south")[0]
+            vanadium_path, ceria_path, instrument, bank="south")[0]
         write_ENGINX_GSAS_iparam_file(file_path, [difc[1]], [tzero[1]],
                                       ceria_run=ceria_no,
                                       vanadium_run=vanadium_no,
@@ -189,7 +189,7 @@ class CalibrationModel(object):
         return "engggui_calibration_bank_" + str(bank_num + 1)
 
     @staticmethod
-    def _generate_output_file_name(ceria_path, vanadium_path, instrument, bank):
+    def _generate_output_file_name(vanadium_path, ceria_path, instrument, bank):
         vanadium_no = path.splitext(basename(vanadium_path))[0].replace(instrument, '').lstrip('0')
         ceria_no = path.splitext(basename(ceria_path))[0].replace(instrument, '').lstrip('0')
         filename = instrument + "_" + vanadium_no + "_" + ceria_no + "_"

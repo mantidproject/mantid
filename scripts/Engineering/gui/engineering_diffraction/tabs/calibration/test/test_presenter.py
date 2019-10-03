@@ -20,38 +20,91 @@ class CalibrationPresenterTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.create_autospec(view.CalibrationView)
         self.model = mock.create_autospec(model.CalibrationModel)
+        self.presenter = presenter.CalibrationPresenter(self.model, self.view)
 
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
     def test_worker_started_with_right_params(self, worker_method):
-        # Given
-        self.presenter = presenter.CalibrationPresenter(self.model, self.view)
-
-        # When
         self.view.get_vanadium_filename.return_value = "307521"
         self.view.get_calib_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
 
-        # Then
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("307521", "305738", True)
+        worker_method.assert_called_with("307521", "305738", True, None)
 
-    def test_controls_disabled_while_running(self):
-        self.presenter = presenter.CalibrationPresenter(self.model, self.view)
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_not_started_while_finder_is_searching(self, worker_method):
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_calib_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = True
 
-        self.presenter.calibration_started()
+        self.presenter.on_calibrate_clicked()
+        worker_method.assert_not_called()
+
+    @patch(tab_path + ".presenter.CalibrationPresenter.validate_run_numbers")
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    def test_worker_not_started_when_run_numbers_invalid(self, worker_method, validator):
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_calib_filename.return_value = "305738"
+        self.view.get_plot_output.return_value = True
+        self.view.is_searching.return_value = False
+        validator.return_value = False
+
+        self.presenter.on_calibrate_clicked()
+        worker_method.assert_not_called()
+
+    def test_controls_disabled_disables_both(self):
+        self.presenter.disable_calibrate_buttons()
 
         self.view.set_calibrate_button_enabled.assert_called_with(False)
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
-    def test_controls_enabled_when_done_running(self):
-        self.presenter = presenter.CalibrationPresenter(self.model, self.view)
-
-        self.presenter.calibration_started()
+    def test_controls_enabled_enables_both(self):
+        self.presenter.disable_calibrate_buttons()
 
         self.view.set_calibrate_button_enabled.assert_called_with(False)
         self.view.set_check_plot_output_enabled.assert_called_with(False)
 
-        self.presenter.calibration_finished()
+        self.presenter.enable_calibrate_buttons()
 
         self.view.set_calibrate_button_enabled.assert_called_with(True)
         self.view.set_check_plot_output_enabled.assert_called_with(True)
+
+    @patch(tab_path + ".presenter.logger.warning")
+    def test_on_error_posts_to_logger_and_enables_controls(self, logger):
+        fail_info = 2024278
+
+        self.presenter._on_error(fail_info)
+
+        logger.assert_called_with(str(fail_info))
+        self.view.set_calibrate_button_enabled.assert_called_with(True)
+        self.view.set_check_plot_output_enabled.assert_called_with(True)
+
+    def test_validation_of_run_numbers(self):
+        self.view.get_calib_valid.return_value = False
+        self.view.get_vanadium_valid.return_value = False
+        result = self.presenter.validate_run_numbers()
+        self.assertFalse(result)
+
+        self.view.get_calib_valid.return_value = True
+        self.view.get_vanadium_valid.return_value = False
+        result = self.presenter.validate_run_numbers()
+        self.assertFalse(result)
+
+        self.view.get_calib_valid.return_value = False
+        self.view.get_vanadium_valid.return_value = True
+        result = self.presenter.validate_run_numbers()
+        self.assertFalse(result)
+
+        self.view.get_calib_valid.return_value = True
+        self.view.get_vanadium_valid.return_value = True
+        result = self.presenter.validate_run_numbers()
+        self.assertTrue(result)
+
+    def test_set_instrument_override(self):
+        instrument = "TEST"
+        self.presenter.set_instrument_override(instrument)
+
+        self.view.set_instrument_override.assert_called_with(instrument)
+        self.assertEqual(self.presenter.instrument, instrument)

@@ -842,21 +842,25 @@ class MWRunFiles : QWidget
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 %End
 public:
-MWRunFiles(QWidget *parent = nullptr);
+    MWRunFiles(QWidget *parent = nullptr);
 
-void setLabelText(const QString &text);
-void setLabelMinWidth(const int);
-void liveButtonSetChecked(bool);
-bool liveButtonIsChecked();
-QString getText();
-QString getFirstFilename() const;
-bool isValid();
-void setUserInput(const QVariant &);
-void setText(const QString&);
-void setInstrumentOverride(const QString &instName);
+    void setLabelText(const QString &text);
+    void setLabelMinWidth(const int);
+    void liveButtonSetChecked(bool);
+    bool liveButtonIsChecked();
+    QString getText();
+    QString getFirstFilename() const;
+    bool isSearching() const;
+    bool isValid();
+    void setUserInput(const QVariant &);
+    void setText(const QString&);
+    void setInstrumentOverride(const QString &instName);
 
 signals:
-void fileEditingFinished();
-void fileFindingFinished();
-void liveButtonPressed(bool);
+    void fileTextChanged(const QString & /*_t1*/);
+    void fileEditingFinished();
+    void fileFindingFinished();
+    void liveButtonPressed(bool);
+    void findingFiles();
+    void filesFound();
 };
