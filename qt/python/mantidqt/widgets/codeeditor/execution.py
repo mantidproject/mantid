@@ -9,12 +9,10 @@
 #
 from __future__ import absolute_import
 
-import inspect
 import os
 
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QApplication
-from six import iteritems
 
 from mantidqt.utils import AddedToSysPath
 from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback

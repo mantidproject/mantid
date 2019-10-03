@@ -16,8 +16,9 @@ from mantidqt.widgets.codeeditor.completion import CodeCompleter
 
 class CodeCompletionTest(unittest.TestCase):
 
-    def _get_completer(self, text, env_globals=None):
-        return CodeCompleter(Mock(text=lambda: text, fileName=lambda: ""), env_globals)
+    def _get_completer(self, text, env_globals=None, enable_jedi=True):
+        return CodeCompleter(Mock(text=lambda: text, fileName=lambda: ""), env_globals,
+                             enable_jedi=enable_jedi)
 
     def test_Rebin_call_tips_generated_on_construction_when_api_import_in_script(self):
         completer = self._get_completer("from mantid.simpleapi import *\n# My code")
@@ -27,6 +28,11 @@ class CodeCompletionTest(unittest.TestCase):
         self.assertTrue(len(call_tips) > 1)
         self.assertTrue(re.search("Rebin\(InputWorkspace, .*\)", ' '.join(call_tips)))
 
+    @patch('mantidqt.widgets.codeeditor.completion.jedi')
+    def test_jedi_is_not_called_on_construction_when_enable_jedi_is_False(self, jedi_mock):
+        self._get_completer("import numpy as np\n# My code", enable_jedi=False)
+        self.assertEqual(0, jedi_mock.Script.call_count)
+
     def test_simple_api_call_tips_not_generated_on_construction_if_api_import_not_in_script(self):
         completer = self._get_completer("import numpy as np\n# My code")
         update_completion_api_mock = completer.editor.updateCompletionAPI
@@ -35,9 +41,9 @@ class CodeCompletionTest(unittest.TestCase):
         self.assertFalse(bool(re.search("Rebin\(InputWorkspace, .*\)", ' '.join(call_tips))))
 
     def test_completion_api_is_updated_with_numpy_completions_when_cursor_position_changed(self):
-        completer = self._get_completer("import numpy as np\nnp.a")
+        completer = self._get_completer("import numpy as np\nnp.ar")
         completer._on_cursor_position_changed(1, 3)
-        self.assertIn('abs', completer.editor.addToCompletionAPI.call_args[0][0])
+        self.assertIn('array', completer._all_completions)
 
     def test_call_tips_are_still_visible_after_argument_inserted(self):
         completer = self._get_completer("import numpy as np\nnp.array(x, ")
