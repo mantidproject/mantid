@@ -43,6 +43,8 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict = {}
         self.populate_curve_combo_box_and_update_view()
 
+        self.set_apply_to_all_buttons_enabled()
+
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
             self.populate_curve_combo_box_and_update_view)
@@ -50,6 +52,12 @@ class CurvesTabWidgetPresenter:
             self.update_view)
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve)
+        self.view.line.apply_to_all_button.clicked.connect(
+            self.line_apply_to_all)
+        self.view.marker.apply_to_all_button.clicked.connect(
+            self.marker_apply_to_all)
+        self.view.errorbars.apply_to_all_button.clicked.connect(
+            self.errorbars_apply_to_all)
 
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
@@ -188,6 +196,9 @@ class CurvesTabWidgetPresenter:
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
+        self.set_apply_to_all_buttons_enabled()
+
+        ax = self.get_selected_ax()
         # Update the legend and redraw
         self.update_limits_and_legend(ax, self.legend_props)
         ax.figure.canvas.draw()
@@ -289,3 +300,83 @@ class CurvesTabWidgetPresenter:
         name = self._generate_curve_name(curve, curve.get_label())
         if name:
             self.curve_names_dict[name] = curve
+
+    def set_apply_to_all_buttons_enabled(self):
+        """
+        Enables the Apply to All buttons in the line, marker, and errorbar tabs
+        if there is more than one curve.
+        """
+        if len(self.curve_names_dict) > 1:
+            self.view.line.set_apply_to_all_enabled(True)
+            self.view.marker.set_apply_to_all_enabled(True)
+            self.view.errorbars.set_apply_to_all_enabled(True)
+        else:
+            self.view.line.set_apply_to_all_enabled(False)
+            self.view.marker.set_apply_to_all_enabled(False)
+            self.view.errorbars.set_apply_to_all_enabled(False)
+
+    def line_apply_to_all(self):
+        """
+        Applies the settings in the line tab for the current curve to all other curves.
+        """
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        line_style = self.view.line.get_style()
+        draw_style = self.view.line.get_draw_style()
+        width = self.view.line.get_width()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.line.set_style(line_style)
+            self.view.line.set_draw_style(draw_style)
+            self.view.line.set_width(width)
+
+            self.apply_properties()
+
+        self.fig.canvas.draw()
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+
+    def marker_apply_to_all(self):
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        marker_style = self.view.marker.get_style()
+        marker_size = self.view.marker.get_size()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.marker.set_style(marker_style)
+            self.view.marker.set_size(marker_size)
+
+            self.apply_properties()
+
+        self.fig.canvas.draw()
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+
+    def errorbars_apply_to_all(self):
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        checked = self.view.errorbars.get_hide()
+
+        if not checked:
+            width = self.view.errorbars.get_width()
+            capsize = self.view.errorbars.get_capsize()
+            cap_thickness = self.view.errorbars.get_cap_thickness()
+            error_every = self.view.errorbars.get_error_every()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.errorbars.set_hide(checked)
+
+            if not checked:
+                self.view.errorbars.set_width(width)
+                self.view.errorbars.set_capsize(capsize)
+                self.view.errorbars.set_cap_thickness(cap_thickness)
+                self.view.errorbars.set_error_every(error_every)
+
+            self.apply_properties()
+
+        self.fig.canvas.draw()
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)

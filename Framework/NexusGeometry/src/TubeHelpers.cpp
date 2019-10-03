@@ -6,6 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/TubeHelpers.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include <algorithm>
+#include <iterator>
+#include <tuple>
+#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -53,6 +57,27 @@ findAndSortTubes(const Mantid::Geometry::IObject &detShape,
               tubes.end());
 
   return tubes;
+}
+
+/**
+ * Establish detector ids for any detector that is NOT part of the tubes
+ *
+ * @param tubes
+ * @return vector of detector ids not part of tubes
+ */
+std::vector<Mantid::detid_t>
+notInTubes(const std::vector<detail::TubeBuilder> &tubes,
+           const std::vector<Mantid::detid_t> &detIDs) {
+  std::vector<Mantid::detid_t> used;
+  for (const auto &tube : tubes) {
+    for (const auto &id : tube.detIDs()) {
+      used.push_back(id);
+    }
+  }
+  std::vector<Mantid::detid_t> diff;
+  std::set_difference(detIDs.begin(), detIDs.end(), used.begin(), used.end(),
+                      std::inserter(diff, diff.begin()));
+  return diff;
 }
 } // namespace TubeHelpers
 } // namespace NexusGeometry

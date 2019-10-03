@@ -17,14 +17,14 @@ import csv
 import os
 import time
 import traceback
+from qtpy import PYQT4
 
 from mantid.api import (FileFinder)
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from mantid.py3compat import csv_open_type
-
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (BatchReductionEntry, FitType, ISISReductionMode, RangeStepType, RowState, SampleShape,
+from sans.common.enums import (BatchReductionEntry, ISISReductionMode, RangeStepType, RowState, SampleShape,
                                SaveType, SANSInstrument)
 from sans.gui_logic.gui_common import (add_dir_to_datasearch, get_reduction_mode_from_gui_selection,
                                        get_reduction_mode_strings_for_gui, get_string_for_gui_from_instrument,
@@ -33,21 +33,22 @@ from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
+from sans.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
+from sans.gui_logic.presenter.presenter_common import PresenterCommon
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
+from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.sans_batch import SANSCentreFinder
 from sans.user_file.user_file_reader import UserFileReader
-
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.work_handler import WorkHandler
 
-from qtpy import PYQT4
 IN_MANTIDPLOT = False
 if PYQT4:
     try:
@@ -89,7 +90,7 @@ class SaveDirectoryObserver(ConfigPropertyObserver):
         self.callback(new_value)
 
 
-class RunTabPresenter(object):
+class RunTabPresenter(PresenterCommon):
     class ConcreteRunTabListener(SANSDataProcessorGui.RunTabListener):
         def __init__(self, presenter):
             super(RunTabPresenter.ConcreteRunTabListener, self).__init__()
@@ -176,6 +177,9 @@ class RunTabPresenter(object):
             self._presenter.on_processing_error(error)
 
     def __init__(self, facility, view=None):
+        # We don't have access to state model really at this point
+        super(RunTabPresenter, self).__init__(view, None)
+
         self._facility = facility
         # Logger
         self.sans_logger = Logger("SANS")
@@ -186,12 +190,10 @@ class RunTabPresenter(object):
         self.progress = 0
 
         # Models that are being used by the presenter
-        self._state_model = None
         self._table_model = TableModel()
         self._table_model.subscribe_to_model_changes(self)
 
         # Presenter needs to have a handle on the view since it delegates it
-        self._view = None
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
@@ -202,6 +204,18 @@ class RunTabPresenter(object):
         # File information for the first input
         self._file_information = None
         self._clipboard = []
+
+        self._setup_sub_presenters()
+
+        # Check save dir for display
+        self._save_directory_observer = \
+            SaveDirectoryObserver(self._handle_output_directory_changed)
+
+    def _setup_sub_presenters(self):
+        # Holds a list of sub presenters which uses the CommonPresenter class to set views
+        # models and call update methods applicable to all presenters
+        # N.B. although this class implements the methods don't add it, as set_view will recurse
+        self._common_sub_presenters = []
 
         # Settings diagnostic tab presenter
         self._settings_diagnostic_tab_presenter = SettingsDiagnosticPresenter(self)
@@ -219,12 +233,12 @@ class RunTabPresenter(object):
         self._workspace_diagnostic_presenter = DiagnosticsPagePresenter(self, WorkHandler,
                                                                         run_integral, create_state,
                                                                         self._facility)
+        # Adjustment Tab presenter
+        self._settings_adjustment_presenter = SettingsAdjustmentPresenter(
+            model=SettingsAdjustmentModel(), view=self._view)
+        self._common_sub_presenters.append(self._settings_adjustment_presenter)
 
-        # Check save dir for display
-        self._save_directory_observer = \
-            SaveDirectoryObserver(self._handle_output_directory_changed)
-
-    def _default_gui_setup(self):
+    def default_gui_setup(self):
         """
         Provides a default setup of the GUI. This is important for the initial start up, when the view is being set.
         """
@@ -252,13 +266,6 @@ class RunTabPresenter(object):
         self._view.q_xy_step_type = [RangeStepType.to_string(RangeStepType.Lin),
                                      RangeStepType.to_string(RangeStepType.Log)]
 
-        # Set the fit options
-        fit_types = [FitType.to_string(FitType.Linear),
-                     FitType.to_string(FitType.Logarithmic),
-                     FitType.to_string(FitType.Polynomial)]
-        self._view.transmission_sample_fit_type = fit_types
-        self._view.transmission_can_fit_type = fit_types
-
     def _handle_output_directory_changed(self, new_directory):
         """
         Update the gui to display the new save location for workspaces
@@ -282,13 +289,17 @@ class RunTabPresenter(object):
         if view is not None:
             self._view = view
 
-            # Add a listener to the view
             listener = RunTabPresenter.ConcreteRunTabListener(self)
             self._view.add_listener(listener)
 
-            # Default gui setup
-            self._default_gui_setup()
+            self.default_gui_setup()
             self._view.disable_process_buttons()
+
+            for presenter in self._common_sub_presenters:
+                # TODO when the below presenters are converted to use a common presenter
+                # use this for in loop
+                presenter.set_view(view)
+                presenter.default_gui_setup()
 
             # Set appropriate view for the state diagnostic tab presenter
             self._settings_diagnostic_tab_presenter.set_view(self._view.settings_diagnostic_tab)
@@ -360,11 +371,13 @@ class RunTabPresenter(object):
                 self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             else:
                 try:
-                    # 4. Populate the model
-                    self._state_model = StateGuiModel(user_file_items)
+                    # 4. Populate the model and update sub-presenters
+                    self._model = StateGuiModel(user_file_items)
+                    self._settings_adjustment_presenter.set_model(
+                        SettingsAdjustmentModel(user_file_items=user_file_items))
                     # 5. Update the views.
-                    self._update_view_from_state_model()
-                    self._beam_centre_presenter.update_centre_positions(self._state_model)
+                    self.update_view_from_model()
+                    self._beam_centre_presenter.update_centre_positions(self._model)
 
                     self._beam_centre_presenter.on_update_rows()
                     self._masking_table_presenter.on_update_rows()
@@ -580,6 +593,7 @@ class RunTabPresenter(object):
 
             # MantidPlot and Workbench have different approaches to plotting
             output_graph = self.output_graph if PYQT4 else self.output_fig
+
             self.batch_process_runner.process_states(states,
                                                      self._view.use_optimizations,
                                                      self._view.output_mode,
@@ -872,10 +886,10 @@ class RunTabPresenter(object):
             return
 
         # Add the new mask file to state model
-        mask_files = self._state_model.mask_files
+        mask_files = self._model.mask_files
 
         mask_files.append(new_mask_file)
-        self._state_model.mask_files = mask_files
+        self._model.mask_files = mask_files
 
         # Make sure that the sub-presenters are up to date with this change
         self._masking_table_presenter.on_update_rows()
@@ -951,7 +965,7 @@ class RunTabPresenter(object):
         :return: a list of states.
         """
         # 1. Update the state model
-        state_model_with_view_update = self._get_state_model_with_view_update()
+        state_model_with_view_update = self.update_model_from_view()
         # 2. Update the table model
         table_model = self._table_model
         # 3. Go through each row and construct a state object
@@ -993,8 +1007,11 @@ class RunTabPresenter(object):
                 return states[row_index]
         return None
 
-    def _update_view_from_state_model(self):
+    def update_view_from_model(self):
         self._set_on_view("instrument")
+
+        for presenter in self._common_sub_presenters:
+            presenter.update_view_from_model()
 
         # Front tab view
         self._set_on_view("zero_error_free")
@@ -1024,25 +1041,6 @@ class RunTabPresenter(object):
         self._set_on_view("absolute_scale")
         self._set_on_view("z_offset")
 
-        # Adjustment tab
-        self._set_on_view("normalization_incident_monitor")
-        self._set_on_view("normalization_interpolate")
-
-        self._set_on_view("transmission_incident_monitor")
-        self._set_on_view("transmission_interpolate")
-        self._set_on_view("transmission_roi_files")
-        self._set_on_view("transmission_mask_files")
-        self._set_on_view("transmission_radius")
-        self._set_on_view("transmission_monitor")
-        self._set_on_view("transmission_mn_shift")
-
-        self._set_on_view_transmission_fit()
-
-        self._set_on_view("pixel_adjustment_det_1")
-        self._set_on_view("pixel_adjustment_det_2")
-        self._set_on_view("wavelength_adjustment_det_1")
-        self._set_on_view("wavelength_adjustment_det_2")
-
         # Q tab
         self._set_on_view_q_rebin_string()
         self._set_on_view("q_xy_max")
@@ -1068,61 +1066,6 @@ class RunTabPresenter(object):
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
 
-    def _set_on_view_transmission_fit_sample_settings(self):
-        # Set transmission_sample_use_fit
-        fit_type = self._state_model.transmission_sample_fit_type
-        use_fit = fit_type is not FitType.NoFit
-        self._view.transmission_sample_use_fit = use_fit
-
-        # Set the polynomial order for sample
-        polynomial_order = self._state_model.transmission_sample_polynomial_order if fit_type is FitType.Polynomial else 2  # noqa
-        self._view.transmission_sample_polynomial_order = polynomial_order
-
-        # Set the fit type for the sample
-        fit_type = fit_type if fit_type is not FitType.NoFit else FitType.Linear
-        self._view.transmission_sample_fit_type = fit_type
-
-        # Set the wavelength
-        wavelength_min = self._state_model.transmission_sample_wavelength_min
-        wavelength_max = self._state_model.transmission_sample_wavelength_max
-        if wavelength_min and wavelength_max:
-            self._view.transmission_sample_use_wavelength = True
-            self._view.transmission_sample_wavelength_min = wavelength_min
-            self._view.transmission_sample_wavelength_max = wavelength_max
-
-    def _set_on_view_transmission_fit(self):
-        # Steps for adding the transmission fit to the view
-        # 1. Check if individual settings exist. If so then set the view to separate, else set them to both
-        # 2. Apply the settings
-        separate_settings = self._state_model.has_transmission_fit_got_separate_settings_for_sample_and_can()
-        self._view.set_fit_selection(use_separate=separate_settings)
-
-        if separate_settings:
-            self._set_on_view_transmission_fit_sample_settings()
-
-            # Set transmission_sample_can_fit
-            fit_type_can = self._state_model.transmission_can_fit_type()
-            use_can_fit = fit_type_can is FitType.NoFit
-            self._view.transmission_can_use_fit = use_can_fit
-
-            # Set the polynomial order for can
-            polynomial_order_can = self._state_model.transmission_can_polynomial_order if fit_type_can is FitType.Polynomial else 2  # noqa
-            self._view.transmission_can_polynomial_order = polynomial_order_can
-
-            # Set the fit type for the can
-            fit_type_can = fit_type_can if fit_type_can is not FitType.NoFit else FitType.Linear
-            self.transmission_can_fit_type = fit_type_can
-
-            # Set the wavelength
-            wavelength_min = self._state_model.transmission_can_wavelength_min
-            wavelength_max = self._state_model.transmission_can_wavelength_max
-            if wavelength_min and wavelength_max:
-                self._view.transmission_can_use_wavelength = True
-                self._view.transmission_can_wavelength_min = wavelength_min
-                self._view.transmission_can_wavelength_max = wavelength_max
-        else:
-            self._set_on_view_transmission_fit_sample_settings()
-
     def _set_on_view_q_resolution_aperture(self):
         self._set_on_view("q_resolution_source_a")
         self._set_on_view("q_resolution_sample_a")
@@ -1132,15 +1075,15 @@ class RunTabPresenter(object):
         self._set_on_view("q_resolution_sample_w")
 
         # If we have h1, h2, w1, and w2 selected then we want to select the rectangular aperture.
-        is_rectangular = self._state_model.q_resolution_source_h and self._state_model.q_resolution_sample_h and \
-                         self._state_model.q_resolution_source_w and self._state_model.q_resolution_sample_w  # noqa
+        is_rectangular = self._model.q_resolution_source_h and self._model.q_resolution_sample_h and \
+                         self._model.q_resolution_source_w and self._model.q_resolution_sample_w  # noqa
         self._view.set_q_resolution_shape_to_rectangular(is_rectangular)
 
     def _set_on_view_q_rebin_string(self):
         """
         Maps the q_1d_rebin_string of the model to the q_1d_step and q_1d_step_type property of the view.
         """
-        rebin_string = self._state_model.q_1d_rebin_string
+        rebin_string = self._model.q_1d_rebin_string
         # Extract the min, max and step and step type from the rebin string
         elements = rebin_string.split(",")
         # If we have three elements then we want to set only the
@@ -1159,162 +1102,87 @@ class RunTabPresenter(object):
             self._view.q_1d_min_or_rebin_string = rebin_string
             self._view.q_1d_step_type = self._view.VARIABLE
 
-    def _set_on_view(self, attribute_name):
-        attribute = getattr(self._state_model, attribute_name)
-        if attribute or isinstance(attribute,
-                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
-            setattr(self._view, attribute_name, attribute)
-
-    def _set_on_view_with_view(self, attribute_name, view):
-        attribute = getattr(self._state_model, attribute_name)
-        if attribute or isinstance(attribute,
-                                   bool):  # We need to be careful here. We don't want to set empty strings, or None, but we want to set boolean values. # noqa
-            setattr(view, attribute_name, attribute)
-
-    def _get_state_model_with_view_update(self):
+    def update_model_from_view(self):
         """
         Goes through all sub presenters and update the state model based on the views.
 
         Note that at the moment we have set up the view and the model such that the name of a property must be the same
         in the view and the model. This can be easily changed, but it also provides a good cohesion.
         """
-        state_model = copy.deepcopy(self._state_model)
+        state_model = copy.deepcopy(self._model)
 
         # If we don't have a state model then return None
         if state_model is None:
             return state_model
+
+        for presenter in self._common_sub_presenters:
+            presenter.update_model_from_view()
+
         # Run tab view
-        self._set_on_state_model("zero_error_free", state_model)
-        self._set_on_state_model("save_types", state_model)
-        self._set_on_state_model("compatibility_mode", state_model)
-        self._set_on_state_model("event_slice_optimisation", state_model)
-        self._set_on_state_model("merge_scale", state_model)
-        self._set_on_state_model("merge_shift", state_model)
-        self._set_on_state_model("merge_scale_fit", state_model)
-        self._set_on_state_model("merge_shift_fit", state_model)
-        self._set_on_state_model("merge_q_range_start", state_model)
-        self._set_on_state_model("merge_q_range_stop", state_model)
-        self._set_on_state_model("merge_mask", state_model)
-        self._set_on_state_model("merge_max", state_model)
-        self._set_on_state_model("merge_min", state_model)
+        self._set_on_custom_model("zero_error_free", state_model)
+        self._set_on_custom_model("save_types", state_model)
+        self._set_on_custom_model("compatibility_mode", state_model)
+        self._set_on_custom_model("event_slice_optimisation", state_model)
+        self._set_on_custom_model("merge_scale", state_model)
+        self._set_on_custom_model("merge_shift", state_model)
+        self._set_on_custom_model("merge_scale_fit", state_model)
+        self._set_on_custom_model("merge_shift_fit", state_model)
+        self._set_on_custom_model("merge_q_range_start", state_model)
+        self._set_on_custom_model("merge_q_range_stop", state_model)
+        self._set_on_custom_model("merge_mask", state_model)
+        self._set_on_custom_model("merge_max", state_model)
+        self._set_on_custom_model("merge_min", state_model)
 
         # Settings tab
-        self._set_on_state_model("reduction_dimensionality", state_model)
-        self._set_on_state_model("reduction_mode", state_model)
-        self._set_on_state_model("event_slices", state_model)
-        self._set_on_state_model("event_binning", state_model)
+        self._set_on_custom_model("reduction_dimensionality", state_model)
+        self._set_on_custom_model("reduction_mode", state_model)
+        self._set_on_custom_model("event_slices", state_model)
+        self._set_on_custom_model("event_binning", state_model)
 
-        self._set_on_state_model("wavelength_step_type", state_model)
-        self._set_on_state_model("wavelength_min", state_model)
-        self._set_on_state_model("wavelength_max", state_model)
-        self._set_on_state_model("wavelength_step", state_model)
-        self._set_on_state_model("wavelength_range", state_model)
+        self._set_on_custom_model("wavelength_step_type", state_model)
+        self._set_on_custom_model("wavelength_min", state_model)
+        self._set_on_custom_model("wavelength_max", state_model)
+        self._set_on_custom_model("wavelength_step", state_model)
+        self._set_on_custom_model("wavelength_range", state_model)
 
-        self._set_on_state_model("absolute_scale", state_model)
-        self._set_on_state_model("z_offset", state_model)
-
-        # Adjustment tab
-        self._set_on_state_model("normalization_incident_monitor", state_model)
-        self._set_on_state_model("normalization_interpolate", state_model)
-
-        self._set_on_state_model("transmission_incident_monitor", state_model)
-        self._set_on_state_model("transmission_interpolate", state_model)
-        self._set_on_state_model("transmission_roi_files", state_model)
-        self._set_on_state_model("transmission_mask_files", state_model)
-        self._set_on_state_model("transmission_radius", state_model)
-        self._set_on_state_model("transmission_monitor", state_model)
-        self._set_on_state_model("transmission_mn_shift", state_model)
-
-        self._set_on_state_model_transmission_fit(state_model)
-
-        self._set_on_state_model("pixel_adjustment_det_1", state_model)
-        self._set_on_state_model("pixel_adjustment_det_2", state_model)
-        self._set_on_state_model("wavelength_adjustment_det_1", state_model)
-        self._set_on_state_model("wavelength_adjustment_det_2", state_model)
+        self._set_on_custom_model("absolute_scale", state_model)
+        self._set_on_custom_model("z_offset", state_model)
 
         # Q tab
         self._set_on_state_model_q_1d_rebin_string(state_model)
-        self._set_on_state_model("q_xy_max", state_model)
-        self._set_on_state_model("q_xy_step", state_model)
-        self._set_on_state_model("q_xy_step_type", state_model)
+        self._set_on_custom_model("q_xy_max", state_model)
+        self._set_on_custom_model("q_xy_step", state_model)
+        self._set_on_custom_model("q_xy_step_type", state_model)
 
-        self._set_on_state_model("gravity_on_off", state_model)
-        self._set_on_state_model("gravity_extra_length", state_model)
+        self._set_on_custom_model("gravity_on_off", state_model)
+        self._set_on_custom_model("gravity_extra_length", state_model)
 
-        self._set_on_state_model("use_q_resolution", state_model)
-        self._set_on_state_model("q_resolution_source_a", state_model)
-        self._set_on_state_model("q_resolution_sample_a", state_model)
-        self._set_on_state_model("q_resolution_source_h", state_model)
-        self._set_on_state_model("q_resolution_sample_h", state_model)
-        self._set_on_state_model("q_resolution_source_w", state_model)
-        self._set_on_state_model("q_resolution_sample_w", state_model)
-        self._set_on_state_model("q_resolution_delta_r", state_model)
-        self._set_on_state_model("q_resolution_collimation_length", state_model)
-        self._set_on_state_model("q_resolution_moderator_file", state_model)
+        self._set_on_custom_model("use_q_resolution", state_model)
+        self._set_on_custom_model("q_resolution_source_a", state_model)
+        self._set_on_custom_model("q_resolution_sample_a", state_model)
+        self._set_on_custom_model("q_resolution_source_h", state_model)
+        self._set_on_custom_model("q_resolution_sample_h", state_model)
+        self._set_on_custom_model("q_resolution_source_w", state_model)
+        self._set_on_custom_model("q_resolution_sample_w", state_model)
+        self._set_on_custom_model("q_resolution_delta_r", state_model)
+        self._set_on_custom_model("q_resolution_collimation_length", state_model)
+        self._set_on_custom_model("q_resolution_moderator_file", state_model)
 
-        self._set_on_state_model("r_cut", state_model)
-        self._set_on_state_model("w_cut", state_model)
+        self._set_on_custom_model("r_cut", state_model)
+        self._set_on_custom_model("w_cut", state_model)
 
         # Mask
-        self._set_on_state_model("phi_limit_min", state_model)
-        self._set_on_state_model("phi_limit_max", state_model)
-        self._set_on_state_model("phi_limit_use_mirror", state_model)
-        self._set_on_state_model("radius_limit_min", state_model)
-        self._set_on_state_model("radius_limit_max", state_model)
+        self._set_on_custom_model("phi_limit_min", state_model)
+        self._set_on_custom_model("phi_limit_max", state_model)
+        self._set_on_custom_model("phi_limit_use_mirror", state_model)
+        self._set_on_custom_model("radius_limit_min", state_model)
+        self._set_on_custom_model("radius_limit_max", state_model)
 
         # Beam Centre
         self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
         self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
 
         return state_model
-
-    def _set_on_state_model_transmission_fit(self, state_model):
-        # Behaviour depends on the selection of the fit
-        if self._view.use_same_transmission_fit_setting_for_sample_and_can():
-            use_fit = self._view.transmission_sample_use_fit
-            fit_type = self._view.transmission_sample_fit_type
-            polynomial_order = self._view.transmission_sample_polynomial_order
-            state_model.transmission_sample_fit_type = fit_type if use_fit else FitType.NoFit
-            state_model.transmission_can_fit_type = fit_type if use_fit else FitType.NoFit
-            state_model.transmission_sample_polynomial_order = polynomial_order
-            state_model.transmission_can_polynomial_order = polynomial_order
-
-            # Wavelength settings
-            if self._view.transmission_sample_use_wavelength:
-                wavelength_min = self._view.transmission_sample_wavelength_min
-                wavelength_max = self._view.transmission_sample_wavelength_max
-                state_model.transmission_sample_wavelength_min = wavelength_min
-                state_model.transmission_sample_wavelength_max = wavelength_max
-                state_model.transmission_can_wavelength_min = wavelength_min
-                state_model.transmission_can_wavelength_max = wavelength_max
-        else:
-            # Sample
-            use_fit_sample = self._view.transmission_sample_use_fit
-            fit_type_sample = self._view.transmission_sample_fit_type
-            polynomial_order_sample = self._view.transmission_sample_polynomial_order
-            state_model.transmission_sample_fit_type = fit_type_sample if use_fit_sample else FitType.NoFit
-            state_model.transmission_sample_polynomial_order = polynomial_order_sample
-
-            # Wavelength settings
-            if self._view.transmission_sample_use_wavelength:
-                wavelength_min = self._view.transmission_sample_wavelength_min
-                wavelength_max = self._view.transmission_sample_wavelength_max
-                state_model.transmission_sample_wavelength_min = wavelength_min
-                state_model.transmission_sample_wavelength_max = wavelength_max
-
-            # Can
-            use_fit_can = self._view.transmission_can_use_fit
-            fit_type_can = self._view.transmission_can_fit_type
-            polynomial_order_can = self._view.transmission_can_polynomial_order
-            state_model.transmission_can_fit_type = fit_type_can if use_fit_can else FitType.NoFit
-            state_model.transmission_can_polynomial_order = polynomial_order_can
-
-            # Wavelength settings
-            if self._view.transmission_can_use_wavelength:
-                wavelength_min = self._view.transmission_can_wavelength_min
-                wavelength_max = self._view.transmission_can_wavelength_max
-                state_model.transmission_can_wavelength_min = wavelength_min
-                state_model.transmission_can_wavelength_max = wavelength_max
 
     def _set_on_state_model_q_1d_rebin_string(self, state_model):
         q_1d_step_type = self._view.q_1d_step_type
@@ -1332,11 +1200,6 @@ class RunTabPresenter(object):
                 q_1d_rebin_string += str(q_1d_step_type_factor * q_1d_step) + ","
                 q_1d_rebin_string += str(q_1d_max)
                 state_model.q_1d_rebin_string = q_1d_rebin_string
-
-    def _set_on_state_model(self, attribute_name, state_model):
-        attribute = getattr(self._view, attribute_name)
-        if attribute is not None and attribute != '':
-            setattr(state_model, attribute_name, attribute)
 
     def get_cell_value(self, row, column):
         return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
@@ -1389,5 +1252,6 @@ class RunTabPresenter(object):
             self._view.enable_process_buttons()
 
         self._view.set_instrument_settings(instrument)
+        self._settings_adjustment_presenter.update_instrument(instrument)
         self._beam_centre_presenter.on_update_instrument(instrument)
         self._workspace_diagnostic_presenter.set_instrument_settings(instrument)
