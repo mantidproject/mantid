@@ -17,13 +17,13 @@ class RFresonance(IFunction1D):
 
     def init(self):	
         self.declareParameter("A0", 0.2)
-        self.declareParameter("Bcentre", 10, 'Relaxation rate (G)')
+        self.declareParameter("Boffset", 10, 'Relaxation rate (G)')
         self.declareParameter("B1", 10, 'Fluctuation (G)')
         self.declareParameter("B1GauWidth", 0.2, 'Width of resonance (MHz)')
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
-        Bcentre = self.getParameterValue("Bcentre")
+        Bcentre = self.getParameterValue("Boffset")
         B = self.getParameterValue("B1")
         width = self.getParameterValue("B1GauWidth")
         gmu = 0.0135538817 * 2 * np.pi
