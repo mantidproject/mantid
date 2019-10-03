@@ -29,7 +29,7 @@ class WISHSingleCrystalPeakPredictionTest(MantidSystemTest):
 
     def requiredMemoryMB(self):
         # Need lots of memory for full WISH dataset
-        return 16000
+        return 24000
 
     def cleanup(self):
         try:
