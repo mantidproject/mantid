@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     MsdPetersTest.py
     MsdYiTest.py
     MuHTest.py
+    RFresonanceTest.py
     StretchedExpFTTest.py
     TeixeiraWaterTest.py
     TriangleOscTest.py)
