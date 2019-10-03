@@ -69,7 +69,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.tab_direct = QtWidgets.QWidget(self.tabs)
         self.direct_grid = QtWidgets.QVBoxLayout()
         self.tab_direct.setLayout(self.direct_grid)
-        self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CNCS', 'HYSPEC', 'SEQUOIA',
+        self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CHESS', 'CNCS', 'HYSPEC', 'SEQUOIA',
                                  'IN4', 'IN5', 'IN6', 'FOCUS', 'MIBEMOL', 'DNS', 'TOFTOF']
         self.direct_inst_box = QtWidgets.QComboBox(self.tab_direct)
         for inst in self.direct_inst_list:
@@ -253,6 +253,8 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.tthlims = [2.838, 135.69]
         elif Inst == 'ARCS':
             self.tthlims = [2.373, 135.955]
+        elif Inst == 'CHESS':
+            self.tthlims = [0.0, 140.0]
         elif Inst == 'CNCS':
             self.tthlims = [3.806, 132.609]
         # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either
