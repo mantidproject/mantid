@@ -213,16 +213,17 @@ void TableWorkspaceDomainCreator::createDomain(
   }
 
   auto X = m_tableWorkspace->getColumn(m_xColName);
-  std::vector<double> XData;
+  std::vector<double> xData;
+  xData.reserve(m_tableWorkspace->rowCount());
   for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
-    XData.push_back(X->toDouble(i));
+    xData.push_back(X->toDouble(i));
   }
 
   // find the fitting interval: from -> to
   size_t endRowNo = 0;
-  std::tie(m_startRowNo, endRowNo) = getXInterval(XData);
-  auto from = XData.begin() + m_startRowNo;
-  auto to = XData.begin() + endRowNo;
+  std::tie(m_startRowNo, endRowNo) = getXInterval(xData);
+  auto from = xData.begin() + m_startRowNo;
+  auto to = xData.begin() + endRowNo;
   auto n = endRowNo - m_startRowNo;
 
   if (m_domainType != Simple) {
@@ -266,7 +267,7 @@ void TableWorkspaceDomainCreator::createDomain(
   }
 
   // Helps find points excluded form fit.
-  ExcludeRangeFinder excludeFinder(m_exclude, XData.front(), XData.back());
+  ExcludeRangeFinder excludeFinder(m_exclude, xData.front(), xData.back());
 
   auto errors = m_tableWorkspace->getColumn(m_errColName);
   for (size_t i = m_startRowNo; i < endRowNo; ++i) {
@@ -275,7 +276,7 @@ void TableWorkspaceDomainCreator::createDomain(
     auto error = errors->toDouble(i);
     double weight = 0.0;
 
-    if (excludeFinder.isExcluded(XData[i])) {
+    if (excludeFinder.isExcluded(xData[i])) {
       weight = 0.0;
     } else if (!std::isfinite(y)) {
       // nan or inf data
@@ -564,25 +565,29 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
   auto inputY = m_tableWorkspace->getColumn(m_yColName);
   auto inputE = m_tableWorkspace->getColumn(m_errColName);
 
-  std::vector<double> XData;
-  std::vector<double> YData;
-  std::vector<double> EData;
+  std::vector<double> xData;
+  std::vector<double> yData;
+  std::vector<double> eData;
+  xData.reserve(m_tableWorkspace->rowCount());
+  yData.reserve(m_tableWorkspace->rowCount());
+  eData.reserve(m_tableWorkspace->rowCount());
+
   for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
-    XData.push_back(inputX->toDouble(i));
-    YData.push_back(inputY->toDouble(i));
-    EData.push_back(inputE->toDouble(i));
+    xData.push_back(inputX->toDouble(i));
+    yData.push_back(inputY->toDouble(i));
+    eData.push_back(inputE->toDouble(i));
   }
 
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
-    ws->mutableX(i).assign(XData.begin() + m_startRowNo,
-                           XData.begin() + m_startRowNo + nxvalues);
+    ws->mutableX(i).assign(xData.begin() + m_startRowNo,
+                           xData.begin() + m_startRowNo + nxvalues);
   }
   // Data values for the first histogram
-  ws->mutableY(0).assign(YData.begin() + m_startRowNo,
-                         YData.begin() + m_startRowNo + nyvalues);
-  ws->mutableE(0).assign(EData.begin() + m_startRowNo,
-                         EData.begin() + m_startRowNo + nyvalues);
+  ws->mutableY(0).assign(yData.begin() + m_startRowNo,
+                         yData.begin() + m_startRowNo + nyvalues);
+  ws->mutableE(0).assign(eData.begin() + m_startRowNo,
+                         eData.begin() + m_startRowNo + nyvalues);
 
   return ws;
 }
@@ -593,12 +598,13 @@ TableWorkspaceDomainCreator::createEmptyResultWS(const size_t nhistograms,
 size_t TableWorkspaceDomainCreator::getDomainSize() const {
   setParameters();
   auto X = m_tableWorkspace->getColumn(m_xColName);
-  std::vector<double> XData;
+  std::vector<double> xData;
+  xData.reserve(m_tableWorkspace->rowCount());
   for (size_t i = 0; i < m_tableWorkspace->rowCount(); ++i) {
-    XData.push_back(X->toDouble(i));
+    xData.push_back(X->toDouble(i));
   }
   size_t startIndex, endIndex;
-  std::tie(startIndex, endIndex) = getXInterval(XData);
+  std::tie(startIndex, endIndex) = getXInterval(xData);
   return endIndex - startIndex;
 }
 
@@ -632,8 +638,8 @@ void TableWorkspaceDomainCreator::setInitialValues(API::IFunction &function) {
  * @returns :: A pair of start iterator and size of the data.
  */
 std::pair<size_t, size_t>
-TableWorkspaceDomainCreator::getXInterval(std::vector<double> XData) const {
-  const auto sizeOfData = XData.size();
+TableWorkspaceDomainCreator::getXInterval(std::vector<double> xData) const {
+  const auto sizeOfData = xData.size();
   if (sizeOfData == 0) {
     throw std::runtime_error("Workspace contains no data.");
   }
@@ -646,13 +652,13 @@ TableWorkspaceDomainCreator::getXInterval(std::vector<double> XData) const {
   Mantid::MantidVec::iterator from;
   Mantid::MantidVec::iterator to;
 
-  bool isXAscending = XData.front() < XData.back();
+  bool isXAscending = xData.front() < xData.back();
 
   if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-    m_startX = XData.front();
-    from = XData.begin();
-    m_endX = XData.back();
-    to = XData.end();
+    m_startX = xData.front();
+    from = xData.begin();
+    m_endX = xData.back();
+    to = xData.end();
   } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
     throw std::invalid_argument(
         "Both StartX and EndX must be given to set fitting interval.");
@@ -660,15 +666,15 @@ TableWorkspaceDomainCreator::getXInterval(std::vector<double> XData) const {
     if (m_startX > m_endX) {
       std::swap(m_startX, m_endX);
     }
-    from = std::lower_bound(XData.begin(), XData.end(), m_startX);
-    to = std::upper_bound(from, XData.end(), m_endX);
+    from = std::lower_bound(xData.begin(), xData.end(), m_startX);
+    to = std::upper_bound(from, xData.end(), m_endX);
   } else { // x is descending
     if (m_startX < m_endX) {
       std::swap(m_startX, m_endX);
     }
     from =
-        std::lower_bound(XData.begin(), XData.end(), m_startX, greaterIsLess);
-    to = std::upper_bound(from, XData.end(), m_endX, greaterIsLess);
+        std::lower_bound(xData.begin(), xData.end(), m_startX, greaterIsLess);
+    to = std::upper_bound(from, xData.end(), m_endX, greaterIsLess);
   }
 
   // Check whether the fitting interval defined by StartX and EndX is 0.
@@ -679,8 +685,8 @@ TableWorkspaceDomainCreator::getXInterval(std::vector<double> XData) const {
                                 "within the workspace interval.");
   }
 
-  return std::make_pair(std::distance(XData.begin(), from),
-                        std::distance(XData.begin(), to));
+  return std::make_pair(std::distance(xData.begin(), from),
+                        std::distance(xData.begin(), to));
 }
 
 /**
