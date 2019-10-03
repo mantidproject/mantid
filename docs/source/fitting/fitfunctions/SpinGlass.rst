@@ -39,6 +39,7 @@ Note that :math:`0<q<1` and :math:`\gamma>0`
    ax.set_xlabel('t($\mu$s)')
    ax.set_ylabel('A(t)')
 
+
 .. attributes::
 
 .. properties::
