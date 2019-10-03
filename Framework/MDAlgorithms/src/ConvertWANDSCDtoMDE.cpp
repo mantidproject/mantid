@@ -1,3 +1,10 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidMDAlgorithms/ConvertWANDSCDtoMDE.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -11,16 +18,10 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <Eigen/Dense>
-#include <stdexcept>
 
 namespace Mantid {
 namespace MDAlgorithms {
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
-// SPDX - License - Identifier: GPL - 3.0 +
+
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 using namespace Mantid::Geometry;
@@ -44,12 +45,13 @@ int ConvertWANDSCDtoMDE::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertWANDSCDtoMDE::category() const {
-  return "TODO: FILL IN A CATEGORY";
+  return "MDAlgorithm\\Creation";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertWANDSCDtoMDE::summary() const {
-  return "TODO: FILL IN A SUMMARY";
+  return "Convert from the detector vs scan index MDHistoWorkspace into a "
+         "MDEventWorkspace with units in Q_sample.";
 }
 
 std::map<std::string, std::string> ConvertWANDSCDtoMDE::validateInputs() {
@@ -111,7 +113,6 @@ void ConvertWANDSCDtoMDE::init() {
                   "and "
                   "described on *MD Transformation factory* page. See also "
                   ":ref:`algm-ConvertToMDMinMaxLocal`");
-
   declareProperty(std::make_unique<ArrayProperty<double>>("MaxValues"),
                   "A list of the same size and the same units as MinValues "
                   "list. Values higher or equal to the specified by "
@@ -184,7 +185,7 @@ void ConvertWANDSCDtoMDE::exec() {
     goniometer(2, 2) = cos(s1[n] * M_PI / 180);
     goniometer = goniometer.inverse();
     for (size_t m = 0; m < azimuthal.size(); m++) {
-      std::vector<Mantid::coord_t> q_sample(3);
+      Eigen::Vector3f q_sample;
       auto q_lab = goniometer * q_lab_pre[m];
       q_sample[0] = static_cast<Mantid::coord_t>(q_lab[0]);
       q_sample[1] = static_cast<Mantid::coord_t>(q_lab[1]);
@@ -202,8 +203,8 @@ void ConvertWANDSCDtoMDE::exec() {
   ThreadPool tp(ts);
   outputWS->splitAllIfNeeded(ts);
   tp.joinAll();
-  outputWS->refreshCache();
 
+  outputWS->refreshCache();
   outputWS->copyExperimentInfos(*inputWS);
   setProperty("OutputWorkspace", outputWS);
 }
