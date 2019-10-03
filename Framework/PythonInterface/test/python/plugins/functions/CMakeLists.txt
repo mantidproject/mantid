@@ -11,7 +11,6 @@ set(TEST_PY_FILES
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
-    AttributeTest.py
     MeierTest.py
     MsdGaussTest.py
     MsdPetersTest.py
