@@ -556,18 +556,19 @@ end
 bundle_path = Pathname.new(ARGV[0])
 contents_macos = bundle_path + 'Contents/MacOS'
 contents_frameworks = bundle_path + 'Contents/Frameworks'
+# additional executables not detectable by dependency analysis
+executables = ["#{contents_macos}/MantidNexusParallelLoader"]
 
 # check we have a known bundle
 if bundle_path.to_s.end_with?('MantidWorkbench.app')
   bundled_packages = BUNDLED_PY_MODULES + BUNDLED_PY_MODULES_WORKBENCH
   bundled_qt_plugins = QT_PLUGINS_COMMON + ['platforms', 'styles']
   host_qt_plugins_dir = QT5_PLUGINS_DIR
-  extra_binaries = []
 elsif bundle_path.to_s.end_with?('MantidPlot.app')
   bundled_packages = BUNDLED_PY_MODULES + BUNDLED_PY_MODULES_MANTIDPLOT
   bundled_qt_plugins = QT_PLUGINS_COMMON
   host_qt_plugins_dir = QT4_PLUGINS_DIR
-  extra_binaries = ["#{contents_macos}/MantidPlot"]
+  executables << "#{contents_macos}/MantidPlot"
 else
   fatal("Unknown bundle type #{bundle_path}. Expected MantidPlot.app or MantidWorkbench.app.")
 end
@@ -582,5 +583,5 @@ install_qt_plugins(bundle_path, bundled_qt_plugins, host_qt_plugins_dir,
 # run over everything twice to switch to @loader_path for workbench where we don't have
 # an executable. It also fails to fixup the QWebEngine internal app so we might as well
 # do everything here and save runtime.
-fixup_binaries(bundle_path, contents_frameworks, extra_binaries)
+fixup_binaries(bundle_path, contents_frameworks, executables)
 stop_if_bundle_not_self_contained(bundle_path)
