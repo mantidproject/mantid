@@ -150,7 +150,7 @@ class PythonFileInterpreter(QWidget):
         self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
 
         # Re-populate the completion API after execution success
-        self._presenter.model.sig_exec_success.connect(self.code_completer.update_completion_api)
+        self._presenter.model.sig_exec_success.connect(self.code_completer._update_completion_api)
 
     def closeEvent(self, event):
         self.deleteLater()

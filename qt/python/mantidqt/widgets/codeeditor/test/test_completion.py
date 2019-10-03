@@ -43,7 +43,9 @@ class CodeCompletionTest(unittest.TestCase):
     def test_completion_api_is_updated_with_numpy_completions_when_cursor_position_changed(self):
         completer = self._get_completer("import numpy as np\nnp.ar")
         completer._on_cursor_position_changed(1, 3)
-        self.assertIn('array', completer._all_completions)
+        update_completion_api_mock = completer.editor.updateCompletionAPI
+        completions = update_completion_api_mock.call_args_list[0][0][0]
+        self.assertTrue(bool(re.search("array<sep>", '<sep>'.join(completions))))
 
     def test_call_tips_are_still_visible_after_argument_inserted(self):
         completer = self._get_completer("import numpy as np\nnp.array(x, ")

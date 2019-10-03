@@ -21,113 +21,159 @@ import jedi
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 
+def get_function_spec(func):
+    """
+    Get the python function signature for the given function object. First
+    the args are inspected followed by varargs, which are set by some modules,
+    e.g. mantid.simpleapi algorithm functions
+
+    :param func: A Python function object
+    :returns: A string containing the function specification
+    """
+    try:
+        argspec = getfullargspec(func)
+    except TypeError:
+        return ''
+    # mantid algorithm functions have varargs set not args
+    args = argspec[0]
+    if args:
+        # For methods strip the self argument
+        if hasattr(func, 'im_func'):
+            args = args[1:]
+        defs = argspec[3]
+    elif argspec[1] is not None:
+        # Get from varargs/keywords
+        arg_str = argspec[1].strip().lstrip('\b').replace(',', ', ')
+        defs = []
+        # Keyword args
+        kwargs = argspec[2]
+        if kwargs is not None:
+            kwargs = kwargs.strip().lstrip('\b\b')
+            if kwargs == 'kwargs':
+                kwargs = '**' + kwargs + '=None'
+            arg_str += ', %s' % kwargs
+        # Any default argument appears in the string
+        # on the rhs of an equal
+        for arg in arg_str.split(', '):
+            arg = arg.strip()
+            if '=' in arg:
+                arg_token = arg.split('=')
+                args.append(arg_token[0])
+                defs.append(arg_token[1])
+            else:
+                args.append(arg)
+        if len(defs) == 0:
+            defs = None
+    else:
+        return ''
+
+    if defs is None:
+        call_tip = ', '.join(args)
+        call_tip = '(' + call_tip + ')'
+    else:
+        # The defaults list contains the default values for the last n arguments
+        diff = len(args) - len(defs)
+        call_tip = ''
+        for index in range(len(args) - 1, -1, -1):
+            def_index = index - diff
+            if def_index >= 0:
+                call_tip = '[' + args[index] + '], ' + call_tip
+            else:
+                call_tip = args[index] + ", " + call_tip
+        call_tip = '(' + call_tip.rstrip(', ') + ')'
+    return call_tip
+
+
+def generate_call_tips(definitions):
+    """
+    Generate call tips for a dictionary of object definitions (eg. globals()).
+    The call tips generated are of the form:
+        Load(InputWorkspace, [OutputWorkspace], ...)
+    where squared braces denote key-word arguments.
+
+    :param definitions: Dictionary with names of python objects as keys and
+        the objects themselves as values
+    :type definitions: dict
+    :returns: A list of call tips
+    :rtype: list
+    """
+    if not isinstance(definitions, dict):
+        return []
+    call_tips = []
+    for name, py_object in definitions.items():
+        if name.startswith('_'):
+            continue
+        if inspect.isfunction(py_object) or inspect.isbuiltin(py_object) or inspect.ismodule(
+                py_object) or inspect.isclass(py_object):
+            call_tips.append(name + get_function_spec(py_object))
+            continue
+        for attr in dir(py_object):
+            try:
+                f_attr = getattr(py_object, attr)
+            except Exception:
+                continue
+            if attr.startswith('_'):
+                continue
+            if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(
+                    f_attr):
+                call_tips.append(name + '.' + attr + get_function_spec(f_attr))
+            else:
+                call_tips.append(name + '.' + attr)
+    return call_tips
+
+
 class CodeCompleter:
+    """
+    This class generates autocompletions for Workbench's script editor.
+    It generates autocompletions from two sources:
+
+    - environment globals, this picks up Mantid's algorithms and can give
+      suggestions based on a variable's type. These completions are updated
+      on every successful script execution.
+
+    - jedi, this package performs static analysis on a given source
+      script. This provides excellent autocompletion for packages
+      e.g. numpy and matplotlib. These are updated every time the editor's
+      cursor is moved.
+
+    Generating from jedi is turned OFF by default because it crashes when
+    launched with Python 2 through PyCharm's debugger. There is no such
+    problem in Python 3 however.
+    """
 
     def __init__(self, editor, env_globals=None, enable_jedi=True):
         self.editor = editor
         self.env_globals = env_globals
         self._enable_jedi = enable_jedi
-        self.editor.enableAutoCompletion(CodeEditor.AcsAll)
+        self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
 
-        self._all_completions = dict()
+        self._non_jedi_completions = dict()
         if "from mantid.simpleapi import *" in self.editor.text():
-            self._add_to_completions(self.get_mantid_simple_api_call_tips())
+            self._add_to_completions(self._get_mantid_simple_api_call_tips())
 
         if enable_jedi:
             jedi.api.preload_module('numpy', 'matplotlib.pyplot')
             self._add_to_completions(self._generate_jedi_completions_list())
             self.editor.cursorPositionChanged.connect(self._on_cursor_position_changed)
 
-        self.editor.updateCompletionAPI(list(self._all_completions.keys()))
+        self.editor.updateCompletionAPI(list(self._non_jedi_completions.keys()))
+
+    def _get_completions_from_globals(self):
+        return generate_call_tips(self.env_globals)
 
     def _add_to_completions(self, completions):
         for completion in completions:
-            self._all_completions[completion] = True
+            self._non_jedi_completions[completion] = True
 
-    def update_completion_api(self):
-        if self._enable_jedi:
-            self._add_to_completions(self._generate_jedi_completions_list())
-        self.editor.updateCompletionAPI(list(self._all_completions.keys()))
+    def _update_completion_api(self):
+        self._add_to_completions(self._get_completions_from_globals())
+        self.editor.updateCompletionAPI(list(self._non_jedi_completions.keys()))
 
-    def get_mantid_simple_api_call_tips(self):
+    def _get_mantid_simple_api_call_tips(self):
         simple_api_module = sys.modules['mantid.simpleapi']
-        return self.generate_call_tips(simple_api_module.__dict__)
+        return generate_call_tips(simple_api_module.__dict__)
 
-    @staticmethod
-    def generate_call_tips(env_globals):
-        if not env_globals:
-            return []
-        call_tips = []
-        for name, attr, in env_globals.items():
-            if name == name.title() and not name.startswith('_'):
-                if inspect.isfunction(attr) or inspect.isbuiltin(attr):
-                    call_tips.append(name + CodeCompleter.get_function_spec(attr))
-        return call_tips
-
-    @staticmethod
-    def get_function_spec(func):
-        """
-        Get the python function signature for the given function object. First
-        the args are inspected followed by varargs, which are set by some modules,
-        e.g. mantid.simpleapi algorithm functions
-
-        :param func: A Python function object
-        :returns: A string containing the function specification
-        """
-        try:
-            argspec = getfullargspec(func)
-        except TypeError:
-            return ''
-        # mantid algorithm functions have varargs set not args
-        args = argspec[0]
-        if args:
-            # For methods strip the self argument
-            if hasattr(func, 'im_func'):
-                args = args[1:]
-            defs = argspec[3]
-        elif argspec[1] is not None:
-            # Get from varargs/keywords
-            arg_str = argspec[1].strip().lstrip('\b').replace(',', ', ')
-            defs = []
-            # Keyword args
-            kwargs = argspec[2]
-            if kwargs is not None:
-                kwargs = kwargs.strip().lstrip('\b\b')
-                if kwargs == 'kwargs':
-                    kwargs = '**' + kwargs + '=None'
-                arg_str += ', %s' % kwargs
-            # Any default argument appears in the string
-            # on the rhs of an equal
-            for arg in arg_str.split(', '):
-                arg = arg.strip()
-                if '=' in arg:
-                    arg_token = arg.split('=')
-                    args.append(arg_token[0])
-                    defs.append(arg_token[1])
-                else:
-                    args.append(arg)
-            if len(defs) == 0:
-                defs = None
-        else:
-            return ''
-
-        if defs is None:
-            call_tip = ', '.join(args)
-            call_tip = '(' + call_tip + ')'
-        else:
-            # The defaults list contains the default values for the last n arguments
-            diff = len(args) - len(defs)
-            call_tip = ''
-            for index in range(len(args) - 1, -1, -1):
-                def_index = index - diff
-                if def_index >= 0:
-                    call_tip = '[' + args[index] + '], ' + call_tip
-                else:
-                    call_tip = args[index] + ", " + call_tip
-            call_tip = '(' + call_tip.rstrip(', ') + ')'
-        return call_tip
-
-    # jedi completions generation
+    # Jedi completions generation
     def _generate_jedi_interpreter(self, line_no=None, col_no=None):
         return jedi.Script(self.editor.text(), line=line_no, column=col_no,
                            path=self.editor.fileName(), sys_path=sys.path)
@@ -136,15 +182,16 @@ class CodeCompleter:
         completions = self._generate_jedi_interpreter(line_no, col_no).completions()
         completions_list = []
         for completion in completions:
-            if self._all_completions.get(completion.name, None) is None:
-                self._all_completions[completion.name] = True
-                completions_list.append(completion.name)
+            if not completion.name.startswith('_') and completion.full_name:
+                completions_list.append(completion.full_name)
         return completions_list
 
     def _generate_jedi_call_tips(self, line_no=None, col_no=None):
         call_sigs = self._generate_jedi_interpreter(line_no, col_no).call_signatures()
         call_tips = []
         for signature in call_sigs:
+            if signature.name.startswith('_'):
+                continue
             args = []
             for param in signature.params:
                 arg = param.description.replace('param ', '').replace('\n', ' ')
@@ -155,9 +202,7 @@ class CodeCompleter:
                 continue
 
             call_tip = "{}({})".format(signature.name, ', '.join(args))
-            if self._all_completions.get(call_tip, None) is None:
-                self._all_completions[call_tip] = True
-                call_tips.append(call_tip)
+            call_tips.append(call_tip)
 
         return call_tips
 
@@ -172,15 +217,13 @@ class CodeCompleter:
         if col_no < 2:
             return
 
-        completions = []
+        jedi_completions = []
         if line.strip() and not (line.rstrip()[-1] == '(' and col_no >= line.rfind('(')):
-            completions = self._generate_jedi_completions_list(line_no + 1, col_no)
+            jedi_completions = self._generate_jedi_completions_list(line_no + 1, col_no)
 
-        # Since call tips will be generated the first time an open bracket is
-        # entered, we need not worry about counting the number of open/closed
-        # brackets
         if line.rfind(')') < line.rfind('('):
             call_tips = self._generate_jedi_call_tips(line_no + 1, col_no)
-            completions.extend(call_tips)
-        if completions:
-            self.editor.addToCompletionAPI(completions)
+            jedi_completions.extend(call_tips)
+
+        if jedi_completions:
+            self.editor.updateCompletionAPI(jedi_completions + self._non_jedi_completions.keys())
