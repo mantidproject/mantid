@@ -136,19 +136,35 @@ public:
     verifyAndClear();
   }
 
+  void testReductionResumedNotifiesAllBatchPresenters() {
+    auto presenter = makePresenter();
+    for (auto batchPresenter : m_batchPresenters)
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionResumed());
+    presenter.notifyAnyBatchReductionResumed();
+    verifyAndClear();
+  }
+
+  void testReductionPausedNotifiesAllBatchPresenters() {
+    auto presenter = makePresenter();
+    for (auto batchPresenter : m_batchPresenters)
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionPaused());
+    presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
   void testAutoreductionResumedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, anyBatchAutoreductionResumed());
-    presenter.notifyAutoreductionResumed();
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionResumed());
+    presenter.notifyAnyBatchAutoreductionResumed();
     verifyAndClear();
   }
 
   void testAutoreductionPausedNotifiesAllBatchPresenters() {
     auto presenter = makePresenter();
     for (auto batchPresenter : m_batchPresenters)
-      EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused());
-    presenter.notifyAutoreductionPaused();
+      EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused());
+    presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -185,6 +201,54 @@ public:
     expectBatchIsNotAutoreducing(1);
     auto isAutoreducing = presenter.isAnyBatchAutoreducing();
     TS_ASSERT_EQUALS(isAutoreducing, false);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedUpdatesInstrumentInModel() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentRequestedUpdatesInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    // must set the instrument to something valid first
+    presenter.notifyChangeInstrumentRequested("POLREF");
+    auto const instrument = presenter.instrumentName();
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentRequestedDoesNotChangeInstrumentName() {
+    auto presenter = makePresenter();
+    // must set the instrument to something valid first
+    presenter.notifyChangeInstrumentRequested("POLREF");
+    auto const instrument = presenter.instrumentName();
+    presenter.notifyUpdateInstrumentRequested();
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentRequestedThrowsIfInstrumentNotSet() {
+    auto presenter = makePresenter();
+    TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
     verifyAndClear();
   }
 
@@ -235,8 +299,10 @@ private:
 
   void expectBatchAdded(MockBatchPresenter *batchPresenter) {
     EXPECT_CALL(*batchPresenter, acceptMainPresenter(_)).Times(1);
-    EXPECT_CALL(*batchPresenter, reductionPaused()).Times(1);
-    EXPECT_CALL(*batchPresenter, anyBatchAutoreductionPaused()).Times(1);
+    EXPECT_CALL(*batchPresenter, initInstrumentList()).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyInstrumentChanged(_)).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
   }
 
   void expectBatchCanBeClosed(int batchIndex) {

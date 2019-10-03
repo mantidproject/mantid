@@ -39,7 +39,7 @@ private:
 
 protected:
   Sphere(const Sphere &) = default;
-  Sphere &operator=(const Sphere &) = default;
+  Sphere &operator=(const Sphere &) = delete;
 
 public:
   Sphere();

@@ -122,7 +122,7 @@ curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
 # Functions excluded from use by the guis
-curvefitting.guiExclude=CrystalFieldFunction;CrystalFieldHeatCapacity;CrystalFieldMagnetisation;CrystalFieldMoment;CrystalFieldMultiSpectrum;CrystalFieldPeaks;CrystalFieldSpectrum;CrystalFieldSusceptibility
+curvefitting.guiExclude=CrystalFieldFunction;CrystalFieldHeatCapacity;CrystalFieldMagnetisation;CrystalFieldMoment;CrystalFieldMultiSpectrum;CrystalFieldPeaks;CrystalFieldSpectrum;CrystalFieldSusceptibility;PeakParameterFunction;
 
 #Defines whether or not the sliceViewer will show NonOrthogonal view as a default
 sliceviewer.nonorthogonal=false
@@ -216,7 +216,7 @@ UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
 # Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
-ScriptRepository = http://download.mantidproject.org/scriptrepository/
+ScriptRepository = https://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;
 

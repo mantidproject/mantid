@@ -11,6 +11,9 @@
 #include "GUI/Common/IMessageHandler.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "Reduction/Batch.h"
@@ -20,6 +23,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
+using Mantid::API::AlgorithmManager;
+using Mantid::API::MatrixWorkspace_sptr;
+
+// unnamed namespace
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+}
 
 /** Constructor
  * @param view :: [input] The view we are managing
@@ -32,7 +43,8 @@ MainWindowPresenter::MainWindowPresenter(
     IMainWindowView *view, IMessageHandler *messageHandler,
     std::unique_ptr<IBatchPresenterFactory> batchPresenterFactory)
     : m_view(view), m_messageHandler(messageHandler),
-      m_batchPresenterFactory(std::move(batchPresenterFactory)) {
+      m_batchPresenterFactory(std::move(batchPresenterFactory)),
+      m_instrument() {
   view->subscribe(this);
   for (auto *batchView : m_view->batches())
     addNewBatch(batchView);
@@ -65,23 +77,47 @@ void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
   }
 }
 
-void MainWindowPresenter::notifyAutoreductionResumed() {
+void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionResumed();
+    batchPresenter->notifyAnyBatchAutoreductionResumed();
   }
 }
 
-void MainWindowPresenter::notifyAutoreductionPaused() {
+void MainWindowPresenter::notifyAnyBatchAutoreductionPaused() {
   for (const auto &batchPresenter : m_batchPresenters) {
-    batchPresenter->anyBatchAutoreductionPaused();
+    batchPresenter->notifyAnyBatchAutoreductionPaused();
   }
 }
 
 // Called on autoreduction normal reduction
-void MainWindowPresenter::reductionResumed() { disableSaveAndLoadBatch(); }
+void MainWindowPresenter::notifyAnyBatchReductionResumed() {
+  for (const auto &batchPresenter : m_batchPresenters) {
+    batchPresenter->notifyAnyBatchReductionResumed();
+  }
+  disableSaveAndLoadBatch();
+}
 
 // Called on autoreduction normal reduction
-void MainWindowPresenter::reductionPaused() { enableSaveAndLoadBatch(); }
+void MainWindowPresenter::notifyAnyBatchReductionPaused() {
+  for (const auto &batchPresenter : m_batchPresenters) {
+    batchPresenter->notifyAnyBatchReductionPaused();
+  }
+  enableSaveAndLoadBatch();
+}
+
+void MainWindowPresenter::notifyChangeInstrumentRequested(
+    std::string const &instrumentName) {
+  // Re-load instrument with the new name
+  updateInstrument(instrumentName);
+}
+
+void MainWindowPresenter::notifyUpdateInstrumentRequested() {
+  // An instrument should have been set up before any calls to this function.
+  if (!instrument())
+    throw std::runtime_error("Internal error: instrument has not been set");
+  // Re-load instrument with the existing name.
+  updateInstrument(instrumentName());
+}
 
 void MainWindowPresenter::notifyHelpPressed() { showHelp(); }
 
@@ -102,17 +138,28 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
+  // Remember the instrument name so we can re-set it (it will otherwise
+  // get overridden by the instrument list default in the new batch)
+  auto const instrument = instrumentName();
   m_batchPresenters.emplace_back(m_batchPresenterFactory->make(batchView));
   m_batchPresenters.back()->acceptMainPresenter(this);
+  initNewBatch(m_batchPresenters.back().get(), instrument);
+}
+
+void MainWindowPresenter::initNewBatch(IBatchPresenter *batchPresenter,
+                                       std::string const &instrument) {
+
+  batchPresenter->initInstrumentList();
+  batchPresenter->notifyInstrumentChanged(instrument);
 
   // starts in the paused state
-  m_batchPresenters.back()->reductionPaused();
+  batchPresenter->notifyReductionPaused();
 
   // Ensure autoreduce button is enabled/disabled correctly for the new batch
   if (isAnyBatchAutoreducing())
-    m_batchPresenters.back()->anyBatchAutoreductionResumed();
+    batchPresenter->notifyAnyBatchAutoreductionResumed();
   else
-    m_batchPresenters.back()->anyBatchAutoreductionPaused();
+    batchPresenter->notifyAnyBatchAutoreductionPaused();
 }
 
 void MainWindowPresenter::showHelp() {
@@ -146,6 +193,39 @@ void MainWindowPresenter::disableSaveAndLoadBatch() {
 
 void MainWindowPresenter::enableSaveAndLoadBatch() {
   m_view->enableSaveAndLoadBatch();
+}
+
+Mantid::Geometry::Instrument_const_sptr
+MainWindowPresenter::instrument() const {
+  return m_instrument;
+}
+
+std::string MainWindowPresenter::instrumentName() const {
+  if (m_instrument)
+    return m_instrument->getName();
+
+  return std::string();
+}
+
+void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
+  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
+                                                      instrumentName);
+  g_log.information() << "Instrument changed to " << instrumentName;
+
+  // Load a workspace for this instrument so we can get the actual instrument
+  auto loadAlg =
+      AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+  loadAlg->setChild(true);
+  loadAlg->initialize();
+  loadAlg->setProperty("InstrumentName", instrumentName);
+  loadAlg->setProperty("OutputWorkspace",
+                       "__Reflectometry_GUI_Empty_Instrument");
+  loadAlg->execute();
+  MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
+  m_instrument = instWorkspace->getInstrument();
+
+  for (auto &batchPresenter : m_batchPresenters)
+    batchPresenter->notifyInstrumentChanged(instrumentName);
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

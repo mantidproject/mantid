@@ -70,9 +70,9 @@ def save_focused_data(d_spacing_group, tof_group, output_paths):
                               Append=False)
 
     _save_xye(ws_group=d_spacing_group,
-              filename_template=ensure_dir_exists(output_paths["tof_xye_filename"]))
-    _save_xye(ws_group=tof_group,
               filename_template=ensure_dir_exists(output_paths["dspacing_xye_filename"]))
+    _save_xye(ws_group=tof_group,
+              filename_template=ensure_dir_exists(output_paths["tof_xye_filename"]))
 
 
 def _save_xye(ws_group, filename_template):

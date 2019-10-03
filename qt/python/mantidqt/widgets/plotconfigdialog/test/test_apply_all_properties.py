@@ -6,11 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+import platform
 import unittest
 
+import matplotlib
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.colors import LogNorm
+from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
 from mantid.py3compat.mock import Mock, patch
@@ -18,11 +21,14 @@ from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
 AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidgetView'
 CURVE_VIEW = 'mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter.CurvesTabWidgetView'
 IMAGE_VIEW = 'mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter.ImagesTabWidgetView'
+LEGEND_VIEW = 'mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter.LegendTabWidgetView'
+
 
 new_ax_view_props = {
     'title': 'New Title',
@@ -58,13 +64,37 @@ new_image_props = {
     'interpolation': 'hanning',
     'scale': 'Logarithmic'}
 
+new_legend_props = {
+    'visible': True,
+    'title': 'Legend',
+    'background_color': '#ffffff',
+    'edge_color': '#000000',
+    'transparency': 0.5,
+    'entries_font': 'Bitstream Vera Sans',
+    'entries_size': 12,
+    'entries_color': '#000000',
+    'title_font': 'Bitstream Vera Sans',
+    'title_size': 14,
+    'title_color': '#000000',
+    'marker_size': 3.0,
+    'box_visible': True,
+    'shadow': True,
+    'round_edges': False,
+    'columns': 1,
+    'column_spacing': 0.5,
+    'label_spacing': 0.5,
+    'marker_position': 'Left of Entries',
+    'markers': 2,
+    'border_padding': 0.0,
+    'marker_label_padding': 1.0}
+
 
 def _run_apply_properties_on_figure_with_curve():
     fig = figure()
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
     presenter = PlotConfigDialogPresenter(fig, view=Mock())
-    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+    with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
     return ax
@@ -75,10 +105,23 @@ def _run_apply_properties_on_figure_with_image():
     img_ax = img_fig.add_subplot(111)
     img_ax.imshow([[0, 1], [0, 1]], label='old label')
     presenter = PlotConfigDialogPresenter(img_fig, view=Mock())
-    with patch.object(presenter.tab_widget_presenters[0], 'update_view',
+    with patch.object(presenter.tab_widget_presenters[1], 'update_view',
                       lambda: None):
         presenter.apply_properties()
     return img_ax
+
+
+def _run_apply_properties_on_figure_with_legend():
+    fig = figure()
+    ax = fig.add_subplot(111)
+    ax.plot([1,2,3], label='old label')
+    legend = ax.legend()
+    legend.get_frame().set_alpha(0.5)
+    presenter = PlotConfigDialogPresenter(fig, view=Mock())
+    with patch.object(presenter.tab_widget_presenters[1], 'update_view',
+                      lambda: None):
+        presenter.apply_properties()
+    return ax
 
 
 class ApplyAllPropertiesTest(unittest.TestCase):
@@ -113,11 +156,21 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.img_ax = _run_apply_properties_on_figure_with_image()
         cls.new_img = cls.img_ax.images[0]
 
+        # Mock legend tab view
+        cls.legend_view_mock = Mock(
+            get_properties=lambda: LegendProperties(new_legend_props))
+        cls.legend_view_patch = patch(LEGEND_VIEW, lambda x: cls.legend_view_mock)
+        cls.legend_view_patch.start()
+
+        cls.legend_ax = _run_apply_properties_on_figure_with_legend()
+        cls.new_legend = cls.legend_ax.get_legend()
+
     @classmethod
     def tearDownClass(cls):
         cls.ax_view_patch.stop()
         cls.curve_view_patch.stop()
         cls.img_view_patch.stop()
+        cls.legend_view_patch.stop()
 
     def test_apply_properties_on_figure_with_image_sets_label(self):
         self.assertEqual(new_image_props['label'], self.new_img.get_label())
@@ -228,6 +281,97 @@ class ApplyAllPropertiesTest(unittest.TestCase):
     def test_apply_properties_on_figure_with_curve_sets_errorbar_line_width(self):
         self.assertEqual(new_curve_view_props['elinewidth'],
                          self.new_curve[2][0].get_linewidth()[0])
+
+    def test_apply_properties_on_figure_with_legend_sets_visible(self):
+        self.assertEqual(new_legend_props['visible'], self.new_legend.get_visible())
+
+    def test_apply_properties_on_figure_with_legend_sets_title(self):
+        self.assertEqual(new_legend_props['title'], self.new_legend.get_title().get_text())
+
+    def test_apply_properties_on_figure_with_legend_sets_background_color(self):
+        if int(matplotlib.__version__[0]) >= 2:
+            self.assertEqual(new_legend_props['background_color'],
+                             convert_color_to_hex(self.new_legend.get_frame().get_facecolor()))
+        else:
+            self.assertEqual("#ffffff",
+                             convert_color_to_hex(self.new_legend.get_frame().get_facecolor()))
+
+    def test_apply_properties_on_figure_with_legend_sets_edge_color(self):
+        if int(matplotlib.__version__[0]) >= 2:
+            self.assertEqual(new_legend_props['edge_color'],
+                             convert_color_to_hex(self.new_legend.get_frame().get_edgecolor()))
+        else:
+            self.assertEqual("#000000",
+                             convert_color_to_hex(self.new_legend.get_frame().get_edgecolor()))
+
+    def test_apply_properties_on_figure_with_legend_sets_transparency(self):
+        self.assertEqual(new_legend_props['transparency'],
+                         self.new_legend.get_frame().get_alpha())
+
+    def test_apply_properties_on_figure_with_legend_sets_entries_font(self):
+        if platform.system() == "Windows":
+            new_legend_props['entries_font'] = 'DejaVu Sans'
+        self.assertEqual(new_legend_props['entries_font'],
+                         self.new_legend.get_texts()[0].get_fontname())
+
+    def test_apply_properties_on_figure_with_legend_sets_entries_size(self):
+        self.assertEqual(new_legend_props['entries_size'],
+                         self.new_legend.get_texts()[0].get_fontsize())
+
+    def test_apply_properties_on_figure_with_legend_sets_entries_color(self):
+        self.assertEqual(new_legend_props['entries_color'],
+                         self.new_legend.get_texts()[0].get_color())
+
+    def test_apply_properties_on_figure_with_legend_sets_title_font(self):
+        if platform.system() == "Windows":
+            new_legend_props['title_font'] = 'DejaVu Sans'
+        self.assertEqual(new_legend_props['title_font'],
+                         self.new_legend.get_title().get_fontname())
+
+    def test_apply_properties_on_figure_with_legend_sets_title_size(self):
+        self.assertEqual(new_legend_props['title_size'],
+                         self.new_legend.get_title().get_fontsize())
+
+    def test_apply_properties_on_figure_with_legend_sets_title_color(self):
+        self.assertEqual(new_legend_props['title_color'],
+                         self.new_legend.get_title().get_color())
+
+    def test_apply_properties_on_figure_with_legend_sets_marker_size(self):
+        self.assertEqual(new_legend_props['marker_size'], self.new_legend.handlelength)
+
+    def test_apply_properties_on_figure_with_legend_sets_box_visible(self):
+        self.assertEqual(new_legend_props['box_visible'],
+                         self.new_legend.get_frame().get_visible())
+
+    def test_apply_properties_on_figure_with_legend_sets_shadow(self):
+        self.assertEqual(new_legend_props['shadow'], self.new_legend.shadow)
+
+    def test_apply_properties_on_figure_with_legend_sets_round_edges(self):
+        self.assertEqual(new_legend_props['round_edges'],
+                         isinstance(self.new_legend.legendPatch.get_boxstyle(), BoxStyle.Round))
+
+    def test_apply_properties_on_figure_with_legend_sets_number_of_columns(self):
+        self.assertEqual(new_legend_props['columns'], self.new_legend._ncol)
+
+    def test_apply_properties_on_figure_with_legend_sets_column_spacing(self):
+        self.assertEqual(new_legend_props['column_spacing'], self.new_legend.columnspacing)
+
+    def test_apply_properties_on_figure_with_legend_sets_label_spacing(self):
+        self.assertEqual(new_legend_props['label_spacing'], self.new_legend.labelspacing)
+
+    def test_apply_properties_on_figure_with_legend_sets_marker_position(self):
+        align = self.new_legend._legend_handle_box.get_children()[0].align
+        position = "Left of Entries" if align == "baseline" else "Right of Entries"
+        self.assertEqual(new_legend_props['marker_position'], position)
+
+    def test_apply_properties_on_figure_with_legend_sets_number_of_markers(self):
+        self.assertEqual(new_legend_props['markers'], self.new_legend.numpoints)
+
+    def test_apply_properties_on_figure_with_legend_sets_border_padding(self):
+        self.assertEqual(new_legend_props['border_padding'], self.new_legend.borderpad)
+
+    def test_apply_properties_on_figure_with_legend_sets_marker_label_padding(self):
+        self.assertEqual(new_legend_props['marker_label_padding'], self.new_legend.handletextpad)
 
 
 if __name__ == '__main__':

@@ -83,6 +83,31 @@ class SimplestCompare(systemtesting.MantidSystemTest):
         return (self.wksp_mem, self.wksp_file)
 
 
+class ChunkingCompare(systemtesting.MantidSystemTest):
+    # this test is very similar to SNAPRedux.Simple
+    def runTest(self):
+        # 11MB file
+        kwargs = {'Filename':'SNAP_45874',
+                  'Params':(.5,-.004,7)}
+
+        # create grouping for two output spectra
+        CreateGroupingWorkspace(InstrumentFilename='SNAP_Definition.xml',
+                                GroupDetectorsBy='Group',
+                                OutputWorkspace='SNAP_grouping')
+
+        # process in 4 chunks
+        AlignAndFocusPowderFromFiles(OutputWorkspace='with_chunks', MaxChunkSize=.01, **kwargs)
+        # process without chunks
+        AlignAndFocusPowderFromFiles(OutputWorkspace='no_chunks', MaxChunkSize=0, **kwargs)
+
+    def validateMethod(self):
+        #self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return ('with_chunks', 'no_chunks')
+
+
 class UseCache(systemtesting.MantidSystemTest):
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"

@@ -26,10 +26,6 @@ from matplotlib.patches import Patch
 from matplotlib.projections import register_projection
 from matplotlib.scale import register_scale
 from matplotlib.table import Table
-
-from mantid.plots import helperfunctions, plotfunctions
-from mantid.plots import plotfunctions3D
-
 try:
     from mpl_toolkits.mplot3d.axes3d import Axes3D
 except ImportError:
@@ -53,11 +49,9 @@ except ImportError:
 
 from mantid.api import AnalysisDataService as ads
 from mantid.kernel import logger
-from mantid.plots import helperfunctions, plotfunctions
+from mantid.plots import helperfunctions, plotfunctions, plotfunctions3D
 from mantid.plots.helperfunctions import get_normalize_by_bin_width
-from mantid.plots import plotfunctions3D
 from mantid.plots.scales import PowerScale, SquareScale
-
 
 BIN_AXIS = 0
 SPEC_AXIS = 1
@@ -290,6 +284,13 @@ class MantidAxes(Axes):
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
             return None
+
+    def get_workspace_name_from_artist(self, artist):
+        for ws_name, ws_artists_list in self.tracked_workspaces.items():
+            for ws_artists in ws_artists_list:
+                for ws_artist in ws_artists._artists:
+                    if artist == ws_artist:
+                        return ws_name
 
     def get_artists_workspace_and_spec_num(self, artist):
         """Retrieve the workspace and spec num of the given artist"""
@@ -617,8 +618,6 @@ class MantidAxes(Axes):
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.plot(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
-
-            self.set_autoscaley_on(True)
             return artist
         else:
             return Axes.plot(self, *args, **kwargs)
@@ -729,8 +728,6 @@ class MantidAxes(Axes):
             artist = self.track_workspace_artist(
                 workspace, plotfunctions.errorbar(self, *args, **kwargs),
                 _data_update, spec_num, is_normalized, MantidAxes.is_axis_of_type(SPEC_AXIS, kwargs))
-
-            self.set_autoscaley_on(True)
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)

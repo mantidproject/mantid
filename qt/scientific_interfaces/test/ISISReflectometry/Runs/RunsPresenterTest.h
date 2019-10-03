@@ -70,12 +70,10 @@ public:
     verifyAndClear();
   }
 
-  void testCreatePresenterSetsInstrumentList() {
-    auto const defaultInstrumentIndex = 0;
-    EXPECT_CALL(m_view,
-                setInstrumentList(m_instruments, defaultInstrumentIndex))
-        .Times(1);
+  void testInitInstrumentListUpdatesView() {
     auto presenter = makePresenter();
+    EXPECT_CALL(m_view, setInstrumentList(m_instruments)).Times(1);
+    presenter.initInstrumentList();
     verifyAndClear();
   }
 
@@ -96,13 +94,6 @@ public:
     auto presenter = makePresenter();
     EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
     presenter.notifySearch();
-    verifyAndClear();
-  }
-
-  void testInstrumentChangedClearsPreviousResults() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
-    presenter.notifyInstrumentChanged();
     verifyAndClear();
   }
 
@@ -187,29 +178,30 @@ public:
 
   void testNotifyReductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
-    presenter.notifyReductionResumed();
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested())
+        .Times(AtLeast(1));
+    presenter.notifyResumeReductionRequested();
     verifyAndClear();
   }
 
   void testNotifyReductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyReductionPaused());
-    presenter.notifyReductionPaused();
+    EXPECT_CALL(m_mainPresenter, notifyPauseReductionRequested());
+    presenter.notifyPauseReductionRequested();
     verifyAndClear();
   }
 
   void testNotifyAutoreductionResumed() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyAutoreductionResumed());
-    presenter.notifyAutoreductionResumed();
+    EXPECT_CALL(m_mainPresenter, notifyResumeAutoreductionRequested());
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
   void testNotifyAutoreductionPaused() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifyAutoreductionPaused());
-    presenter.notifyAutoreductionPaused();
+    EXPECT_CALL(m_mainPresenter, notifyPauseAutoreductionRequested());
+    presenter.notifyPauseAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -284,17 +276,17 @@ public:
   void testAutoreductionResumed() {
     auto presenter = makePresenter();
     expectWidgetsEnabledForAutoreducing();
-    EXPECT_CALL(*m_runsTablePresenter, autoreductionResumed()).Times(1);
-    presenter.autoreductionResumed();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAutoreductionResumed()).Times(1);
+    presenter.notifyAutoreductionResumed();
     verifyAndClear();
   }
 
   void testAutoreductionPaused() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-    EXPECT_CALL(*m_runsTablePresenter, autoreductionPaused()).Times(1);
+    EXPECT_CALL(*m_runsTablePresenter, notifyAutoreductionPaused()).Times(1);
     expectWidgetsEnabledForPaused();
-    presenter.autoreductionPaused();
+    presenter.notifyAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -306,17 +298,77 @@ public:
     verifyAndClear();
   }
 
-  void testAutoreductionDisabledWhenAnotherBatchAutoreducing() {
+  void testChildPresentersAreUpdatedWhenAnyBatchReductionResumed() {
     auto presenter = makePresenter();
-    expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing();
-    presenter.anyBatchAutoreductionResumed();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionResumed())
+        .Times(1);
+    presenter.notifyAnyBatchReductionResumed();
     verifyAndClear();
   }
 
-  void testAutoreductionDisabledWhenAnotherBatchNotAutoreducing() {
+  void testChildPresentersAreUpdatedWhenAnyBatchReductionPaused() {
     auto presenter = makePresenter();
-    expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing();
-    presenter.anyBatchAutoreductionPaused();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchReductionPaused())
+        .Times(1);
+    presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
+  void testChildPresentersAreUpdatedWhenAnyBatchAutoreductionResumed() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionResumed())
+        .Times(1);
+    presenter.notifyAnyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testChildPresentersAreUpdatedWhenAnyBatchAutoreductionPaused() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyAnyBatchAutoreductionPaused())
+        .Times(1);
+    presenter.notifyAnyBatchAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testChangingInstrumentIsDisabledWhenAnotherBatchReducing() {
+    auto presenter = makePresenter();
+    expectInstrumentComboIsDisabledWhenAnotherBatchReducing();
+    presenter.notifyAnyBatchReductionResumed();
+    verifyAndClear();
+  }
+
+  void testChangingInstrumentIsEnabledWhenNoBatchesAreReducing() {
+    auto presenter = makePresenter();
+    expectInstrumentComboIsEnabledWhenNoBatchesAreReducing();
+    presenter.notifyAnyBatchReductionPaused();
+    verifyAndClear();
+  }
+
+  void testChangingInstrumentIsDisabledWhenAnotherBatchAutoreducing() {
+    auto presenter = makePresenter();
+    expectInstrumentComboIsDisabledWhenAnotherBatchAutoreducing();
+    presenter.notifyAnyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testChangingInstrumentIsEnabledWhenNoBatchesAreAutoreducing() {
+    auto presenter = makePresenter();
+    expectInstrumentComboIsEnabledWhenNoBatchesAreAutoreducing();
+    presenter.notifyAnyBatchAutoreductionPaused();
+    verifyAndClear();
+  }
+
+  void testAutoreductionDisabledWhenAnotherBatchAutoreducing() {
+    auto presenter = makePresenter();
+    expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing();
+    presenter.notifyAnyBatchAutoreductionResumed();
+    verifyAndClear();
+  }
+
+  void testAutoreductionEnabledWhenAnotherBatchNotAutoreducing() {
+    auto presenter = makePresenter();
+    expectAutoreduceButtonEnabledWhenNoBatchesAreAutoreducing();
+    presenter.notifyAnyBatchAutoreductionPaused();
     verifyAndClear();
   }
 
@@ -346,7 +398,8 @@ public:
   void testNotifySearchResultsResumesReductionWhenAutoreducing() {
     auto presenter = makePresenter();
     expectIsAutoreducing();
-    EXPECT_CALL(m_mainPresenter, notifyReductionResumed()).Times(AtLeast(1));
+    EXPECT_CALL(m_mainPresenter, notifyResumeReductionRequested())
+        .Times(AtLeast(1));
     presenter.notifySearchComplete();
     verifyAndClear();
   }
@@ -420,12 +473,47 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChanged() {
+  void testChangeInstrumentRequestedGetsInstrumentAndNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectSearchInstrument(instrument);
-    EXPECT_CALL(m_mainPresenter, notifyInstrumentChanged(instrument)).Times(1);
-    presenter.notifyInstrumentChanged();
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
+        .Times(1);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedWithGivenNameNotifiesMainPresenter() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
+        .Times(1);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testInstrumentChangedUpdatesView() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    EXPECT_CALL(m_view, setSearchInstrument(instrument)).Times(1);
+    presenter.notifyInstrumentChanged(instrument);
+    verifyAndClear();
+  }
+
+  void testInstrumentChangedUpdatesChildPresenter() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    EXPECT_CALL(*m_runsTablePresenter, notifyInstrumentChanged(instrument))
+        .Times(1);
+    presenter.notifyInstrumentChanged(instrument);
+    verifyAndClear();
+  }
+
+  void testInstrumentChangedClearsPreviousSearchResults() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    EXPECT_CALL(*m_searcher, reset()).Times(1);
+    presenter.notifyInstrumentChanged(instrument);
     verifyAndClear();
   }
 
@@ -553,15 +641,12 @@ private:
                         const RunsTablePresenterFactory &makeRunsTablePresenter,
                         double thetaTolerance,
                         std::vector<std::string> const &instruments,
-                        int defaultInstrumentIndex,
                         IMessageHandler *messageHandler)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter,
-                        thetaTolerance, instruments, defaultInstrumentIndex,
-                        messageHandler) {}
+                        thetaTolerance, instruments, messageHandler) {}
   };
 
   RunsPresenterFriend makePresenter() {
-    auto const defaultInstrumentIndex = 0;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
     IPythonRunner *pythonRunner = new MockPythonRunner();
     Plotter plotter(pythonRunner);
@@ -570,9 +655,9 @@ private:
 #endif
     auto makeRunsTablePresenter = RunsTablePresenterFactory(
         m_instruments, m_thetaTolerance, std::move(plotter));
-    auto presenter = RunsPresenterFriend(
-        &m_view, &m_progressView, makeRunsTablePresenter, m_thetaTolerance,
-        m_instruments, defaultInstrumentIndex, &m_messageHandler);
+    auto presenter =
+        RunsPresenterFriend(&m_view, &m_progressView, makeRunsTablePresenter,
+                            m_thetaTolerance, m_instruments, &m_messageHandler);
 
     presenter.acceptMainPresenter(&m_mainPresenter);
     presenter.m_tablePresenter.reset(new NiceMock<MockRunsTablePresenter>());
@@ -806,6 +891,42 @@ private:
     EXPECT_CALL(m_view, setTransferButtonEnabled(true));
   }
 
+  void expectInstrumentComboIsDisabledWhenAnotherBatchReducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+  }
+
+  void expectInstrumentComboIsEnabledWhenNoBatchesAreReducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
+  }
+
+  void expectInstrumentComboIsDisabledWhenAnotherBatchAutoreducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(false));
+  }
+
+  void expectInstrumentComboIsEnabledWhenNoBatchesAreAutoreducing() {
+    expectIsNotProcessing();
+    expectIsNotAutoreducing();
+    EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(m_view, setInstrumentComboEnabled(true));
+  }
+
   void expectAutoreduceButtonDisabledWhenAnotherBatchAutoreducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
@@ -816,7 +937,7 @@ private:
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
   }
 
-  void expectAutoreduceButtonEnabledWhenAnotherBatchNotAutoreducing() {
+  void expectAutoreduceButtonEnabledWhenNoBatchesAreAutoreducing() {
     expectIsNotProcessing();
     expectIsNotAutoreducing();
     EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing())
@@ -824,6 +945,22 @@ private:
         .WillRepeatedly(Return(false));
     EXPECT_CALL(m_view, setAutoreduceButtonEnabled(true));
     EXPECT_CALL(m_view, setAutoreducePauseButtonEnabled(false));
+  }
+
+  void expectIsProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+    ON_CALL(m_mainPresenter, isAnyBatchProcessing())
+        .WillByDefault(Return(true));
+  }
+
+  void expectIsNotProcessing() {
+    EXPECT_CALL(m_mainPresenter, isProcessing())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+    ON_CALL(m_mainPresenter, isAnyBatchProcessing())
+        .WillByDefault(Return(false));
   }
 
   void expectIsAutoreducing() {
@@ -840,18 +977,6 @@ private:
         .WillRepeatedly(Return(false));
     ON_CALL(m_mainPresenter, isAnyBatchAutoreducing())
         .WillByDefault(Return(false));
-  }
-
-  void expectIsProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-  }
-
-  void expectIsNotProcessing() {
-    EXPECT_CALL(m_mainPresenter, isProcessing())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(false));
   }
 
   void expectSearchInstrument(std::string const &instrument) {

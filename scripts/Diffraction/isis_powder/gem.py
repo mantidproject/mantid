@@ -179,8 +179,8 @@ class Gem(AbstractInst):
                                 raise_warning=raise_warning)
 
     @staticmethod
-    def _generate_input_file_name(run_number):
-        return _gem_generate_inst_name(run_number=run_number)
+    def _generate_input_file_name(run_number, file_ext=""):
+        return _gem_generate_inst_name(run_number=run_number) + file_ext
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:

@@ -96,18 +96,35 @@ class FocusTest(systemtesting.MantidSystemTest):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)),
                             msg=generate_error_message(filename, directory))
 
+        def first_x_value(filepath):
+            with open(filepath) as dat:
+                line = dat.readline().strip()
+                columns = line.split()
+                return float(columns[0])
+
         user_output = os.path.join(output_dir, cycle_number, user_name)
         assert_output_file_exists(user_output, 'hrpd66063.nxs')
         assert_output_file_exists(user_output, 'hrpd66063.gss')
         output_dat_dir = os.path.join(user_output, 'dat_files')
         for bankno in range(1, 4):
-            assert_output_file_exists(output_dat_dir, 'hrpd66063_b{}_D.dat'.format(bankno))
-            assert_output_file_exists(output_dat_dir, 'hrpd66063_b{}_TOF.dat'.format(bankno))
+            d_filename = 'hrpd66063_b{}_D.dat'.format(bankno)
+            assert_output_file_exists(output_dat_dir, d_filename)
+            # looks like dSpacing data
+            self.assertTrue(0.20 < first_x_value(os.path.join(output_dat_dir, d_filename)) < 0.8,
+                            msg="First D value={}".format(
+                                first_x_value(os.path.join(output_dat_dir, d_filename))))
+            tof_filename = 'hrpd66063_b{}_TOF.dat'.format(bankno)
+            assert_output_file_exists(output_dat_dir, tof_filename)
+            # looks like TOF data
+            self.assertTrue(
+                9800 < first_x_value(os.path.join(output_dat_dir, tof_filename)) < 10500,
+                msg="First TOF value={}".format(
+                    first_x_value(os.path.join(output_dat_dir, tof_filename))))
 
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
-            self.tolerance = 0.4
+            self.tolerance = 0.47
         else:
-            self.tolerance = 0.05
+            self.tolerance = 0.16
         return self.focus_results.name(), "HRPD66063_focused.nxs"
 
     def cleanup(self):

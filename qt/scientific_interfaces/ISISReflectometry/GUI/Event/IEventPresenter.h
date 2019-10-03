@@ -25,10 +25,10 @@ class IEventPresenter {
 public:
   virtual ~IEventPresenter() = default;
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
-  virtual void reductionPaused() = 0;
-  virtual void reductionResumed() = 0;
-  virtual void autoreductionPaused() = 0;
-  virtual void autoreductionResumed() = 0;
+  virtual void notifyReductionPaused() = 0;
+  virtual void notifyReductionResumed() = 0;
+  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyAutoreductionResumed() = 0;
   virtual Slicing const &slicing() const = 0;
 };
 } // namespace ISISReflectometry

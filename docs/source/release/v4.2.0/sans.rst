@@ -9,6 +9,12 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New
+###
+- Support for shifting both monitor 4 and 5 on Zoom including a new setting in the 
+  ISIS SANS GUI. A new user file command has also been added to
+  perform monitor shifts without changing the selected tranmission spectrum.
+
 Improved
 ########
 

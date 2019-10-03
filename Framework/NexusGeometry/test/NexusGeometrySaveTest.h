@@ -12,34 +12,21 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FileResource.h"
 #include "MantidTestHelpers/NexusFileReader.h"
 
+#include "mockobjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
 using namespace Mantid::NexusGeometry;
 
-//---------------------------------------------------------------
-namespace {
-
-class MockProgressBase : public Mantid::Kernel::ProgressBase {
-public:
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD1(doReport, void(const std::string &));
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-};
-
-} // namespace
-
-//---------------------------------------------------------------------
-
 class NexusGeometrySaveTest : public CxxTest::TestSuite {
+private:
+  testing::NiceMock<MockLogger> m_mockLogger;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -69,7 +56,7 @@ used.
 
   void test_providing_invalid_path_throws() {
 
-    ScopedFileHandle fileResource("invalid_path_to_file_test_file.hdf5");
+    FileResource fileResource("invalid_path_to_file_test_file.hdf5");
     const std::string badDestinationPath =
         "false_directory\\" + fileResource.fullPath();
 
@@ -77,31 +64,35 @@ used.
         V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
-                         instr, badDestinationPath, DEFAULT_ROOT_PATH),
-                     std::invalid_argument &);
+    TS_ASSERT_THROWS(
+        NexusGeometrySave::saveInstrument(
+            instr, badDestinationPath, DEFAULT_ROOT_ENTRY_NAME, m_mockLogger),
+        std::invalid_argument &);
   }
 
   void test_progress_reporting() {
 
+    const int nbanks = 2;
     MockProgressBase progressRep;
-    EXPECT_CALL(progressRep, doReport(testing::_)).Times(2);
+    EXPECT_CALL(progressRep, doReport(testing::_))
+        .Times(nbanks); // Progress report once for each bank
 
-    ScopedFileHandle fileResource("progress_report_test_file.hdf5");
+    FileResource fileResource("progress_report_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
-    auto instrument =
-        ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        nbanks /*number of banks*/, 2 /*number of pixels per bank*/);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    NexusGeometrySave::saveInstrument(instr, destinationFile, DEFAULT_ROOT_PATH,
-                                      &progressRep);
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger,
+                                      false /*strict*/, &progressRep);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&progressRep));
   }
 
   void test_false_file_extension_throws() {
 
-    ScopedFileHandle fileResource("invalid_extension_test_file.abc");
+    FileResource fileResource("invalid_extension_test_file.abc");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
@@ -109,8 +100,17 @@ used.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                                       DEFAULT_ROOT_PATH),
+                                                       DEFAULT_ROOT_ENTRY_NAME,
+                                                       m_mockLogger),
                      std::invalid_argument &);
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   void test_instrument_without_sample_throws() {
@@ -120,7 +120,7 @@ used.
             true, false, true);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    ScopedFileHandle fileResource("check_no_sample_throws_test_file.hdf5");
+    FileResource fileResource("check_no_sample_throws_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
 
     // instrument cache
@@ -131,8 +131,18 @@ used.
     TS_ASSERT(!compInfo.hasSample());      // verify component has no sample
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                                       DEFAULT_ROOT_PATH),
+                                                       DEFAULT_ROOT_ENTRY_NAME,
+                                                       m_mockLogger),
                      std::invalid_argument &);
+
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument &);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   void test_instrument_without_source_throws() {
@@ -145,7 +155,7 @@ used.
     // instrument cache
     auto &compInfo = (*instr.first);
 
-    ScopedFileHandle fileResource("check_no_source_throws_test_file.hdf5");
+    FileResource fileResource("check_no_source_throws_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
 
     TS_ASSERT(compInfo.hasDetectorInfo()); // rule out throw by no detector info
@@ -153,8 +163,17 @@ used.
     TS_ASSERT(!compInfo.hasSource());      // verify component has no source
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                                       DEFAULT_ROOT_PATH),
+                                                       DEFAULT_ROOT_ENTRY_NAME,
+                                                       m_mockLogger),
                      std::invalid_argument &);
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument &);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   void test_sample_not_at_origin_throws() {
@@ -163,12 +182,21 @@ used.
         V3D(0, 0, -10), V3D(0, 0, 2), V3D(0, 0, 10));
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                                       DEFAULT_ROOT_PATH),
+                                                       DEFAULT_ROOT_ENTRY_NAME,
+                                                       m_mockLogger),
                      std::invalid_argument &);
+    // Same error but log rather than throw
+    MockLogger logger;
+    EXPECT_CALL(logger, error(testing::_)).Times(1);
+    TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
+                         instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
+                         logger, false /*append*/),
+                     std::invalid_argument &);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
   /*
@@ -190,7 +218,7 @@ used.
     // has NXclass attribute of NXentry. as required by the Nexus file format.
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("check_nxentry_group_test_file.nxs");
+    FileResource fileResource("check_nxentry_group_test_file.nxs");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument
@@ -200,13 +228,13 @@ used.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
 
     // assert the group at the root H5 path is NXentry
-    TS_ASSERT(tester.groupHasNxClass(NX_ENTRY, DEFAULT_ROOT_PATH));
+    TS_ASSERT(tester.groupHasNxClass(NX_ENTRY, DEFAULT_ROOT_ENTRY_NAME));
   }
 
   void test_nxinstrument_group_exists_in_root_group() {
@@ -214,7 +242,7 @@ used.
     // data is saved to a group of NXclass NXinstrument
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("check_nxinstrument_group_test_file.hdf5");
+    FileResource fileResource("check_nxinstrument_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with some geometry
@@ -225,7 +253,7 @@ used.
 
     // call saveinstrument taking test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check the output file
     NexusFileReader tester(destinationFile);
@@ -236,17 +264,12 @@ used.
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_INSTRUMENT));
   }
 
-  void test_NXclass_with_name_has_same_group_name_and_is_stored_in_dataset() {
-    // this test checks that when a name for some component in the instrument
-    // cache has been provided, saveInstrument will save the relevant group uder
-    // that name. this test is done for the done for the NXinstrument group. the
-    // name of the instrument will be manually set, then the test utility will
-    // try to open a group with that same same name, if such a group does not
-    // exist, a H5 group error is thrown. no such exception is expected to be
-    // thrown.
+  void test_NXInstrument_name_is_aways_instrument() {
+    // NXInstrument group name is always written as "instrument" for legacy
+    // compatibility reasons
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("check_instrument_name_test_file.nxs");
+    FileResource fileResource("check_instrument_name_test_file.nxs");
     auto destinationFile = fileResource.fullPath();
 
     // test instrument
@@ -260,13 +283,16 @@ used.
 
     // call saveInstrument passing the test instrument as parameter.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH); // saves instrument
+                                      DEFAULT_ROOT_ENTRY_NAME,
+                                      m_mockLogger); // saves instrument
 
     // test utility to check the output file.
     NexusFileReader testUtility(destinationFile);
 
+    const auto &compInfo = *instr.first;
+
     // full H5 path to the NXinstrument group
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test_instrument_name"};
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, compInfo.name(compInfo.root())};
 
     // assert no exception thrown on open of instrument group in file with
     // manually set name.
@@ -277,8 +303,8 @@ used.
 
     // assert the dataset containing the instrument name has been correctly
     // stored also.
-    TS_ASSERT(
-        testUtility.dataSetHasStrValue(NAME, "test_instrument_name", path));
+    TS_ASSERT(testUtility.dataSetHasStrValue(
+        NAME, compInfo.name(compInfo.root()), path));
   }
 
   void
@@ -291,16 +317,16 @@ used.
     // such exception to throw.
 
     // RAII file resource for test file destination.
-    ScopedFileHandle fileResource("default_group_names_test.hdf5");
+    FileResource fileResource("default_group_names_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // unnamed ("") instrument with multiple unnamed detector banks ("")
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
-        2 /*number of banks*/, 2 /*number of pixels*/, 0.008, true);
+    auto instrument = ComponentCreationHelper::createTestUnnamedRectangular2(
+        2 /*number of banks*/, 2);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     TS_ASSERT_THROWS_NOTHING(NexusGeometrySave::saveInstrument(
-        instr, destinationFile, DEFAULT_ROOT_PATH));
+        instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME, m_mockLogger));
   }
 
   void test_nxsource_group_exists_and_is_in_nxinstrument_group() {
@@ -308,7 +334,7 @@ used.
     // data is saved to a group of NXclass NXsource
 
     // RAII file resource for test file destination.
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument
@@ -319,7 +345,7 @@ used.
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -332,7 +358,7 @@ used.
 
   void test_nxsample_group_exists_and_is_in_nxentry_group() {
 
-    ScopedFileHandle fileResource("check_nxsource_group_test_file.hdf5");
+    FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     auto instrument = ComponentCreationHelper::createMinimalInstrument(
@@ -344,11 +370,33 @@ used.
     auto &compInfo = (*instr.first);
 
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
     NexusFileReader tester(destinationFile);
 
     TS_ASSERT(compInfo.hasSample());
     TS_ASSERT(tester.parentNXgroupHasChildNXgroup(NX_ENTRY, NX_SAMPLE));
+  }
+
+  void test_correct_number_of_detectors_saved() {
+
+    FileResource fileResource("check_num_of_banks_test.hdf5");
+    std::string destinationFile = fileResource.fullPath();
+
+    int banksInInstrument = 3;
+
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(
+        banksInInstrument /*number of banks*/, 4 /*pixels (arbitrary)*/);
+    auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
+
+    NexusGeometrySave::saveInstrument(instr, destinationFile,
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
+    NexusFileReader tester(destinationFile);
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+                       "basic_rect" /*instrument name*/};
+
+    int numOfNXDetectors = tester.countNXgroup(path, NX_DETECTOR);
+
+    TS_ASSERT_EQUALS(numOfNXDetectors, banksInInstrument);
   }
 
   /*
@@ -381,7 +429,7 @@ Instrument cache.
    */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_rotation_written_to_nxdetector_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -398,14 +446,14 @@ Instrument cache.
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
     FullNXPath path = {
-        DEFAULT_ROOT_PATH,
+        DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
@@ -443,7 +491,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_rotation_written_to_nx_monitor_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -459,13 +507,13 @@ Instrument cache.
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -500,7 +548,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_location_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -516,13 +564,14 @@ Instrument cache.
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+                       "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // get magnitude of vector in dataset
@@ -556,7 +605,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource(
+    FileResource fileResource(
         "check_rotation_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -572,13 +621,14 @@ Instrument cache.
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+                       "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -613,7 +663,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("origin_nx_source_location_file_test.hdf5");
+    FileResource fileResource("origin_nx_source_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // prepare geometry for instrument
@@ -630,13 +680,14 @@ Instrument cache.
 
     // call saveInstrument
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+                       "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
     // assertations
@@ -661,7 +712,7 @@ Instrument cache.
     const Quat bankRotation(0, V3D(0, 0, 1));  // set (angle) to zero
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("zero_nx_detector_rotation_file_test.hdf5");
+    FileResource fileResource("zero_nx_detector_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with zero source rotation
@@ -673,13 +724,13 @@ Instrument cache.
 
     // full path to access NXtransformations group with test utility
     FullNXPath path = {
-        DEFAULT_ROOT_PATH,
+        DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -700,7 +751,7 @@ Instrument cache.
     */
 
     // RAII file resource for test file destination
-    ScopedFileHandle fileResource("zero_nx_monitor_rotation_file_test.hdf5");
+    FileResource fileResource("zero_nx_monitor_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     V3D someLocation(0.0, 0.0, -5.0); // arbitrary monitor location
@@ -712,12 +763,12 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument-with-monitor",
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -743,7 +794,7 @@ Instrument cache.
     const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
 
     // RAII file resource for test file destination
-    ScopedFileHandle inFileResource("zero_nx_source_rotation_file_test.hdf5");
+    FileResource inFileResource("zero_nx_source_rotation_file_test.hdf5");
     std::string destinationFile = inFileResource.fullPath();
 
     // test instrument with zero rotation
@@ -754,12 +805,12 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_PATH, "test-instrument", "source",
+    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument", "source",
                        TRANSFORMATIONS};
 
     // call saveinstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -782,7 +833,7 @@ Instrument cache.
     */
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("check_pixel_offset_format_test_file.hdf5");
+    FileResource fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // prepare geometry for instrument
@@ -804,12 +855,12 @@ Instrument cache.
 
     // call save insrument passing the test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
     FullNXPath path = {
-        DEFAULT_ROOT_PATH,
+        DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/};
 
@@ -870,7 +921,7 @@ Instrument cache.
     const V3D sourceLocation(0, 0, 0);           // set to zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("no_location_dependency_test.hdf5");
+    FileResource fileResource("no_location_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with location of source at zero
@@ -882,7 +933,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     FullNXPath sourcePath = transformationsPath;
@@ -890,7 +941,7 @@ Instrument cache.
 
     // call saveInstrument with test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);
@@ -936,7 +987,7 @@ Instrument cache.
     const Quat sourceRotation(0.0, V3D(0.0, 1.0, 0.0)); // set to zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("no_orientation_dependency_test.hdf5");
+    FileResource fileResource("no_orientation_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with rotation of source of zero
@@ -948,7 +999,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     FullNXPath sourcePath = transformationsPath;
@@ -956,7 +1007,7 @@ Instrument cache.
 
     // call saveInstrument with test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility for checking file
     NexusFileReader tester(destinationFile);
@@ -1005,7 +1056,7 @@ Instrument cache.
     const Quat sourceRotation(45, V3D(0, 1, 0)); // arbitrary non-zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource("both_transformations_dependency_test.hdf5");
+    FileResource fileResource("both_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with non zero rotation and translation
@@ -1017,7 +1068,7 @@ Instrument cache.
 
     // path to NXtransformations subgoup in NXsource
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
@@ -1026,7 +1077,7 @@ Instrument cache.
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility for checking output file
     NexusFileReader tester(destinationFile);
@@ -1076,8 +1127,7 @@ Instrument cache.
     const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
     // create RAII file resource for testing
-    ScopedFileHandle fileResource(
-        "neither_transformations_dependency_test.hdf5");
+    FileResource fileResource("neither_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
     // test instrument with zero translation and rotation
@@ -1089,7 +1139,7 @@ Instrument cache.
 
     // path to NXtransformations subgoup in NXsource
     FullNXPath transformationsPath = {
-        DEFAULT_ROOT_PATH, "test-instrument" /*instrument name*/,
+        DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
@@ -1098,7 +1148,7 @@ Instrument cache.
 
     // call saveInstrument passing test instrument as parameter
     NexusGeometrySave::saveInstrument(instr, destinationFile,
-                                      DEFAULT_ROOT_PATH);
+                                      DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
 
     // test utility to check output file
     NexusFileReader tester(destinationFile);

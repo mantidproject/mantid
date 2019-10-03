@@ -18,6 +18,7 @@ from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
+from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
@@ -157,12 +158,7 @@ class PlotsLoader(object):
             self.create_text_from_dict(ax, artist)
 
         # Update Legend
-        legend = ax.get_legend()
-        if legend is not None:
-            self.update_legend(ax, dic["legend"])
-        else:
-            ax.legend()
-            self.update_legend(ax, dic["legend"])
+        self.update_legend(ax, dic["legend"])
 
         # Update colorbar if present
         if self.color_bar_remade and dic["colorbar"]["exists"]:
@@ -218,13 +214,10 @@ class PlotsLoader(object):
 
     @staticmethod
     def update_legend(ax, legend):
-        if not legend["exists"]:
+        if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-        ax.legend().set_visible(legend["visible"])
-
-        # Ensure that legend is draggable
-        ax.get_legend().draggable()
+        LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])
