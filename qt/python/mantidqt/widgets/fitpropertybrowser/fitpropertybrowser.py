@@ -46,8 +46,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.toolbar_manager = toolbar_manager
         # The peak editing tool
         self.tool = None
-        # Pyplot lines for the fit result curves
-        self.fit_result_lines = []
+        # The name of the fit result workspace
+        self.fit_result_ws_name = ""
         # Pyplot line for the guess curve
         self.guess_line = None
         # Map the indices of the markers in the peak editing tool to the peak function prefixes (in the form f0.f1...)
@@ -222,13 +222,9 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         Delete the fit curves.
         """
-        for lin in self.fit_result_lines:
-            try:
-                lin.remove()
-            except ValueError:
-                # workspace replacement could invalidate these references
-                pass
-        self.fit_result_lines = []
+
+        if self.fit_result_ws_name:
+            self.get_axes().remove_workspace_artists(mtd[self.fit_result_ws_name])
         self.update_legend()
 
     def get_lines(self):
@@ -350,6 +346,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         from mantidqt.plotting.functions import plot
 
+        self.fit_result_ws_name = name
         axes = self.get_axes()
         props = LegendProperties.from_legend(axes.legend_)
 
@@ -364,11 +361,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
         else:
             plot([ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True)
-
-        name += ':'
-        for lin in self.get_lines():
-            if lin.get_label().startswith(name):
-                self.fit_result_lines.append(lin)
 
         # Add properties back to the lines
         new_lines = self.get_lines()
