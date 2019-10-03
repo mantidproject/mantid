@@ -293,9 +293,9 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(
     MantidWidgets::IndirectFitPropertyBrowser *browser) {
   browser->init();
   m_fitPropertyBrowser = browser;
-  #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   m_fitPropertyBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
-  #endif
+#endif
 }
 
 void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
