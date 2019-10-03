@@ -376,8 +376,8 @@ class DirectEnergyConversion(object):
 
         # output workspace name.
         try:
-            _,r = funcinspect.lhs_info('both')
-            out_ws_name = r[0]
+            names = funcinspect.lhs_info('names')
+            out_ws_name = names[0]
 #pylint: disable=bare-except
         except:
             out_ws_name = None
@@ -538,8 +538,11 @@ class DirectEnergyConversion(object):
                                                                          ei_guess,mono_ws_base,tof_range, cut_ind,num_ei_cuts)
             else:
                 pass # no absolute units corrections
-            # ensure that the sample_run name is intact with workspace
+            # ensure that the sample_run name is intact with the sample workspace
             PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
+            if not prop_man.correct_absorption_on is None:
+                abs_shape = prop_man.correct_absorption_on
+                deltaE_ws_sample = abs_shape.correct_absorption(deltaE_ws_sample,prop_man.abs_corr_info)
             #
             #
             self.save_results(deltaE_ws_sample)

@@ -675,8 +675,8 @@ def iliad(reduce):
         #seq = inspect.stack()
         # output workspace name.
         try:
-            _,r = funcinspect.lhs_info('both')
-            out_ws_name = r[0]
+            name = funcinspect.lhs_info('names')
+            out_ws_name = name[0]
 # no-exception-type(s) specified. Who knows what exception this internal procedure rises...
 #pylint: disable=W0702
         except:

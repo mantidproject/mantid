@@ -9,6 +9,7 @@ import os
 from mantid.simpleapi import *
 from mantid import api
 import unittest
+import numpy as np
 from AbsorptionShapes import (anAbsorptionShape,Cylinder)
 
 class AdsorbtionShapesTest(unittest.TestCase):
@@ -62,8 +63,13 @@ class AdsorbtionShapesTest(unittest.TestCase):
         test_ws = CreateSampleWorkspace()
         test_ws = ConvertUnits(test_ws,'DeltaE',Emode='Direct',EFixed=2000)
         cor_ws,corrections = ash.correct_absorption(test_ws)
-
-        mccor_ws,mc_correc = ash.correct_absorption_MC(test_ws)
+        n_bins = corrections.blocksize()
+        corr_ranges = [n_bins,corrections.readY(0)[0],corrections.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(corr_ranges,[97,0.0006,0],4)
+        mccor_ws,mc_corr = ash.correct_absorption(test_ws,is_mc=True,NumberOfWavelengthPoints=20)
+        n_bins = mc_corr.blocksize()
+        mccorr_ranges = [n_bins,mc_corr.readY(0)[0],mc_corr.readY(0)[n_bins-1]]
+        np.testing.assert_almost_equal(mccorr_ranges ,[97,0.0042,0.0001],4)
 
 
 

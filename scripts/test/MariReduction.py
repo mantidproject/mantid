@@ -23,13 +23,13 @@ class ReduceMARI(ReductionWrapper):
 
        """ Define main properties used in reduction """
        prop = {}
-       prop['sample_run'] = 11001
-       prop['wb_run'] = 11060
-       prop['incident_energy'] = 12
-       prop['energy_bins'] = [-11,0.05,11]
+       prop['sample_run'] = 21461
+       prop['wb_run'] = 21334
+       prop['incident_energy'] = 50
+       prop['energy_bins'] = [-10,0.1,49]
 
       # Absolute units reduction properties.
-       prop['monovan_run'] = 11015
+       prop['monovan_run'] = None
        prop['sample_mass'] = 10
        prop['sample_rmm'] = 435.96
        return prop
@@ -41,10 +41,10 @@ class ReduceMARI(ReductionWrapper):
            main properties override advanced properties.
       """
       prop = {}
-      prop['map_file'] = "mari_res.map"
-      prop['monovan_mapfile'] = "mari_res.map"
-      prop['hard_mask_file'] = "mar11015.msk"
-      prop['det_cal_file'] = 11060
+      prop['map_file'] = "mari_res2013.map"
+      prop['monovan_mapfile'] = "mari_res2013.map"
+      prop['hard_mask_file'] = "mari_mask2016_1.msk"
+      prop['det_cal_file'] = 21334
       prop['save_format'] = ''
       return prop
       #
@@ -54,25 +54,38 @@ class ReduceMARI(ReductionWrapper):
       """ Method executes reduction over single file
           Overload only if custom reduction is needed
       """
+      """ Here one can define custom preprocessing procedure, to be applied to the whole
+          run, obtained from instrument
+      1) Get access to the pointer to the input workspace 
+         (the workspace will be loaded  and calibrated at this point if it has not been done yet)
+          using sample_run property class.
+      run_ws = PropertyManager.sample_run.get_worksapce()
+      2) Get access to any propertrty defined in Instrument_Properties.xml file
+         or redefined in the reduction script:
+      properties = self.prop_man
+        e.g:
+      RunNumber = properties.sample_run
+      ei = properties.incident_energy
+        Perform custom preprocessing procedure (with the values you specified)
+        preprocessed_ws = custom_preprocessing_procedure(run_ws,RunNumber,ei,...)
+      3) Store preprocessed workspace in the sample_run property for further analysis
+         for the case where the workspace name have changed in the Analysis Data Service
+        (this situation is difficult to predict so better always do this operation)
+      PropertyManager.sample_run.synchronize_ws(preprocessed_ws)
+      """
       ws = ReductionWrapper.reduce(self,input_file,output_directory)
+      """ Here one can deploy custrom post-processing procedure, in the way, similar to
+      the preprocessing procedure, using either ws pointer, or the procedure, similar to 
+      pre-processing:
+      ws = PropertyManager.sample_run.get_worksapce()
+      Do post-processing.....
+      ws_postprocessed = .....
+      Do not forget to store result in the data property.
+      PropertyManager.sample_run.synchronize_ws(ws_postprocessed)
+      """
       #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
       return ws
 #------------------------------------------------------------------------------------------------ #
-    def validate_result(self,build_validation=False):
-      """ Change this method to verify different results     """
-
-      # Two commented code rows below define location of the validation file in this script folder 
-      # (which is incorrect for Mantid development, as the files are on the data search path or
-      # mantid distribution, as the files are not there)
-      #run_dir = os.path.dirname(os.path.realpath(__file__))
-      #validation_file = os.path.join(run_dir,"MARIReduction.nxs")
-
-      # build_validation -- if true, build and overwrite new workspace rather then validating the old one
-      # if file is missing, the validation tries to build it
-      rez,message = ReductionWrapper.build_or_validate_result(self,11001,"MARIReduction.nxs",
-                                                              build_validation,1.e-3)
-      return rez,message
-
     def __init__(self,web_var=None):
        """ sets properties defaults for the instrument with Name"""
        ReductionWrapper.__init__(self,'MAR',web_var)

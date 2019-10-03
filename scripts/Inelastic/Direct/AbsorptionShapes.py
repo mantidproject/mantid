@@ -51,7 +51,8 @@ class anAbsorptionShape(object):
         self._Material=None
         # the shape holder. Not defined in this class but the holder for all other classes
         self._ShapeDescription = None
-        # the workspace used for testing correct properties 
+
+        # the workspace used for testing correct properties settings 
         rhash = random.randint(1,100000)
         self._testWorkspace = CreateSampleWorkspace(OutputWorkspace='_adsShape_'+str(rhash))
         if MaterialValue is not None:
@@ -92,19 +93,82 @@ class anAbsorptionShape(object):
         # Test if the material property are recognized by SetSampleMaterial algorithm.
         SetSampleMaterial(self._testWorkspace,**Mater_properties)
     #
-    def correct_absorption(self,ws,**argi):
-        """ Method to correct adsorption on a shape using fast (analytical) method if such method is available 
-        
-        Not available on arbitrary shapes
-        """
-        raise RuntimeError('*** The correct_absorbtion_fast is not implemented for an abstract shape')
+    def correct_absorption(self,ws,**kwargs):
+        """ The generic method, which switches between fast and Monte-Carlo absorption corrections
+        depending on the type and properties variable provided as second input
 
-    def correct_absorption_MC(self,ws,**argi):
-        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        kwargs is a dictionary, with at least one key, describing type of
+               corrections (fast or monte-carlo) and other keys (if any)
+               containgn additional properties of the correspondent correction
+               algorithm.
+
+        Returns:
+        1) absorption-corrected workspace
+        2) if two output arguments are provided, second would be workspace with adsorbtion corrections coefficients
+        """
+        n_outputs,var_names = funcinspect.lhs_info('both')
+
+        if kwargs is None:
+            kwargs = {}
+
+        correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
+        Mater_properties = self._Material
+        SetSampleMaterial(correction_base_ws,**Mater_properties)
+        shape_description = self._ShapeDescription
+        SetSample(correction_base_ws,Geometry=shape_description)
+
+        mc_corrections = kwargs.pop('is_mc', False)
+        fast_corrections = kwargs.pop('is_fast',False)
+        if  not (mc_corrections or fast_corrections):
+            fast_corrections = True
+        if fast_corrections: 
+            corrections= self.fast_abs_corrections(correction_base_ws,kwargs)
+        else:
+            corrections = self.mc_abs_corrections(correction_base_ws,kwargs)
+
+        corrections = ConvertUnits(corrections,'DeltaE',EMode='Direct')
+        ws = ws/corrections
+
+        if ws.name() != var_names[0]:
+            RenameWorkspace(ws,var_names[0])
+        if n_outputs == 1:
+            DeleteWorkspace(corrections)
+            return ws
+        elif n_outputs == 2:
+            if corrections.name() != var_names[1]:
+                RenameWorkspace(corrections,var_names[1])
+            return (ws,corrections)
+
+    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on a shape using fast (analytical) method if such method is available
         
         Not available on arbitrary shapes
+        Inputs:
+         ws     -- workspace to correct. Should be in the units of wavelength
+        **kwarg -- dictionary of the additional keyword arguments to provide as input for
+                the adsorbtion corrections algorithm
+                These arguments should not be related to the sample as the sample should already be defined.
+        Returns: 
+            workspace with adsorbtion corrections.
         """
-        raise RuntimeError('*** Monte-Carlo absorption corrections are not implemented for an abstract shape')
+        adsrbtn_correctios = AbsorptionCorrection(correction_base_ws,**kwarg)
+        return adsrbtn_correctios
+
+
+
+
+    def mc_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to correct adsorption on a shape using Mont-Carlo integration
+        Inputs:
+         ws     -- workspace to correct. Should be in the units of wavelength
+        **kwarg -- dictionary of the additional keyword arguments to provide as input for
+                the adsorbtion corrections algorithm
+                These arguments should not be related to the sample as the sample should already be defined.
+        Returns: 
+            workspace with adsorbtion corrections.
+        """
+        adsrbtn_correctios = MonteCarloAbsorption(correction_base_ws,**kwarg)
+        return adsrbtn_correctios
 
 
 class Cylinder(anAbsorptionShape):
@@ -135,6 +199,7 @@ class Cylinder(anAbsorptionShape):
 
         anAbsorptionShape.__init__(self,Material)
         self.cylinder_shape = CylinderParams
+
     @property
     def cylinder_shape(self):
         return self._ShapeDescription
@@ -168,60 +233,19 @@ class Cylinder(anAbsorptionShape):
 
         # Test if the material property are recognized by SetSampleMaterial algorithm.
         SetSample(self._testWorkspace,Geometry=shape_dict)
-
-    def correct_absorption(self,ws,**argi):
-        """ Method to correct adsorption on a cylinder using CylinderAbsorption algorithm
-
-        Inputs:
-        ws -- workspace to correct. Should be in the units of enery transfer,contain Ei and 
-               be processible in Direct mode.
-        **argi -- list of additional keyword arguments to provide as input for CylinderAdsorption algorithm
-                These argument should not be related to the sample as the sample should already be defined.
-
-        Returns:
-        1) absorption-corrected workspace
-        2) if two output arguments are provided, second would be workspace with adsorbtion corrections coefficients
+    #
+    def fast_abs_corrections(self,correction_base_ws,kwarg={}):
+        """ Method to calculate absorption corrections quickly using fast (integration) method
         """
-        n_outputs,var_names = funcinspect.lhs_info('both')
-        if n_outputs == 0:
-            return
-
-        correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
-        Mater_properties = self._Material
-        SetSampleMaterial(correction_base_ws,**Mater_properties)
-        shape_description = self._ShapeDescription
-        SetSample(correction_base_ws,Geometry=shape_description)
-        if len(argi) == 0:
-            adsrbtn_correctios = CylinderAbsorption(correction_base_ws)
-        else:
-            adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**argi)
-        adsrbtn_correctios = ConvertUnits(adsrbtn_correctios,'DeltaE',EMode='Direct')
-        ws = ws/adsrbtn_correctios
+        adsrbtn_correctios = CylinderAbsorption(correction_base_ws,**kwarg)
+        return adsrbtn_correctios
 
 
-        DeleteWorkspace(correction_base_ws)
-        RenameWorkspace(ws,var_names[0])
-        if n_outputs==1:
-            DeleteWorkspace(adsrbtn_correctios)
-            return ws
-        else: # n_outputs == 2
-            RenameWorkspace(adsrbtn_correctios,var_names[1])
-            return (ws,adsrbtn_correctios)
+
     #
     def correct_absorption_MC(self,ws,**argi):
-        """ Method to correct adsorption on a shape using Mont-Carlo integration
-        Inputs:
-        ws -- workspace to correct. Should be in the units of enery transfer,contain Ei and 
-               be processible in Direct mode.
-        **argi -- list of additional keyword arguments to provide as input for CylinderAdsorption algorithm
-                These argument should not be related to the sample as the sample should already be defined.
 
-        Returns:
-        1) absorption-corrected workspace
-        2) if two output arguments are provided, second would be workspace with adsorbtion corrections coefficients
-        """
-
-        n_outputs,var_names = funcinspect.lhs_info('both')
+        n_outputs = funcinspect.lhs_info('nreturns')
         if n_outputs == 0:
             return
 
@@ -240,12 +264,10 @@ class Cylinder(anAbsorptionShape):
 
 
         DeleteWorkspace(correction_base_ws)
-        RenameWorkspace(ws,var_names[0])
         if n_outputs==1:
             DeleteWorkspace(adsrbtn_correctios)
             return ws
         else: # n_outputs == 2
-            RenameWorkspace(adsrbtn_correctios,var_names[1])
             return (ws,adsrbtn_correctios)
 
 
