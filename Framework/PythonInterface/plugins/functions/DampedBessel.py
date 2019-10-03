@@ -23,7 +23,7 @@ class DampedBessel(IFunction1D):
         self.declareParameter("LambdaL", 0.1, 'Dynamic longitudinal spin relaxation rate')
         self.declareParameter("LambdaT", 0.1, 'Damping of the oscillation')
         self.declareParameter("FractionL", 0.1, 'Fraction of longitudinal signal component')
-
+        self.addConstraints("0 < FractionL < 1")
 
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
