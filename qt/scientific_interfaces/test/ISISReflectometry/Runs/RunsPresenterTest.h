@@ -568,9 +568,6 @@ public:
 
   void testStartMonitorUpdatesView() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_view, getLiveDataUpdateInterval())
-        .Times(1)
-        .WillOnce(Return("20"));
     expectStartingLiveDataSucceeds();
     expectUpdateViewWhenMonitorStarting();
     presenter.notifyStartMonitor();
@@ -989,12 +986,11 @@ private:
   }
 
   void expectSearchInstrument(std::string const &instrument) {
-    ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(instrument));
+    EXPECT_CALL(m_view, getSearchInstrument()).Times(AtLeast(1)).Will(Return(instrument));
   }
 
   void expectGetUpdateInterval(std::string const &updateInterval) {
-    ON_CALL(m_view, getLiveDataUpdateInterval())
-        .WillByDefault(Return(updateInterval));
+    EXPECT_CALL(m_view, getLiveDataUpdateInterval()).Times(AtLeast(1)).Will(Return(updateInterval));
   }
 
   void expectGetLiveDataOptions(
