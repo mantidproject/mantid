@@ -95,15 +95,15 @@ def run_PhaseQuad(parameters_dict, alg, phase_quad_workspace_name):
     return alg.getProperty("OutputWorkspace").valueAsStr
 
 
-def run_PaddingAndApodization(parameters_dict):
+def run_PaddingAndApodization(parameters_dict, output_workspace):
     alg = mantid.AlgorithmManager.create("PaddingAndApodization")
     alg.initialize()
-    alg.setAlwaysStoreInADS(False)
+    alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
-    alg.setProperty("OutputWorkspace", "__NotUsed")
+    alg.setProperty("OutputWorkspace", output_workspace)
     alg.setProperties(parameters_dict)
     alg.execute()
-    return alg.getProperty("OutputWorkspace").value
+    return alg.getProperty("OutputWorkspace").valueAsStr
 
 
 def run_FFT(parameters_dict):

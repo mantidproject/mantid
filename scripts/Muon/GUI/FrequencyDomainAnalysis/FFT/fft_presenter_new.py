@@ -188,7 +188,7 @@ class FFTPresenter(object):
         real_workspace_padding_parameters = self.get_pre_inputs()
         imaginary_workspace_padding_parameters = self.get_imaginary_inputs()
 
-        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters)
+        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters, '__real')
 
         if self.view.imaginary_data:
             if 'PhaseQuad' in self.view.workspace:
@@ -197,7 +197,7 @@ class FFTPresenter(object):
                     'InputWorkspace']
                 imaginary_workspace_index = 1
             else:
-                imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
+                imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters, '__Imag')
         else:
             imaginary_workspace_input = None
             imaginary_workspace_padding_parameters['InputWorkspace'] = ""
