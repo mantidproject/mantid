@@ -46,6 +46,12 @@ class CalibrationPresenter(object):
         self.disable_calibrate_buttons()
 
     def set_instrument_override(self, instrument):
+        if instrument == 0:
+            instrument = "ENGINX"
+        elif instrument == 1:
+            instrument = "IMAT"
+        else:
+            raise ValueError("Invalid instrument index")
         self.view.set_instrument_override(instrument)
         self.instrument = instrument
 

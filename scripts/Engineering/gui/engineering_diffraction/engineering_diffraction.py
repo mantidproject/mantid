@@ -50,7 +50,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.lineEdit_RBNumber.textChanged.connect(slot)
 
     def set_on_instrument_changed(self, slot):
-        self.comboBox_instrument.currentTextChanged.connect(slot)
+        self.comboBox_instrument.currentIndexChanged.connect(slot)
 
     def open_help_window(self):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
