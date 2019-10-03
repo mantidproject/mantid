@@ -986,11 +986,15 @@ private:
   }
 
   void expectSearchInstrument(std::string const &instrument) {
-    EXPECT_CALL(m_view, getSearchInstrument()).Times(AtLeast(1)).Will(Return(instrument));
+    EXPECT_CALL(m_view, getSearchInstrument())
+        .Times(AtLeast(1))
+        .Will(Return(instrument));
   }
 
   void expectGetUpdateInterval(std::string const &updateInterval) {
-    EXPECT_CALL(m_view, getLiveDataUpdateInterval()).Times(AtLeast(1)).Will(Return(updateInterval));
+    EXPECT_CALL(m_view, getLiveDataUpdateInterval())
+        .Times(AtLeast(1))
+        .Will(Return(updateInterval));
   }
 
   void expectGetLiveDataOptions(
