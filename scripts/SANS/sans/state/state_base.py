@@ -198,6 +198,17 @@ class DictParameter(TypedParameter):
         super(DictParameter, self).__init__(dict, is_not_none)
 
 
+class DictFloatsParameter(TypedParameter):
+    def __init__(self):
+        super(DictFloatsParameter, self).__init__(dict, is_not_none)
+
+    def _type_check(self, value):
+        if not all(isinstance(val, float) for val in value.values()):
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
+
+
 class ClassTypeParameter(TypedParameter):
     """
     This TypedParameter variant allows for storing a class type.
@@ -273,14 +284,14 @@ class PositiveFloatListParameter(TypedParameter):
 
 
 class StringListParameter(TypedParameter):
-        def __init__(self):
-            super(StringListParameter, self).__init__(list, all_list_elements_are_string_and_not_empty)
+    def __init__(self):
+        super(StringListParameter, self).__init__(list, all_list_elements_are_string_and_not_empty)
 
-        def _type_check(self, value):
-            if not isinstance(value, self.parameter_type) or not all_list_elements_are_string_and_not_empty(value):
-                raise TypeError("Trying to set {0} which expects a value of type {1}."
-                                " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
-                                                                                   value, type(value)))
+    def _type_check(self, value):
+        if not isinstance(value, self.parameter_type) or not all_list_elements_are_string_and_not_empty(value):
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, self.parameter_type,
+                                                                               value, type(value)))
 
 
 class PositiveIntegerListParameter(TypedParameter):

@@ -194,6 +194,7 @@ class SANSDataProcessorGui(QMainWindow,
         Initialise the interface
         """
         super(QMainWindow, self).__init__()
+
         self.setupUi(self)
 
         # Listeners allow us to to notify all presenters
@@ -210,6 +211,9 @@ class SANSDataProcessorGui(QMainWindow,
 
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
+
+        # Track if we need to refresh monitor 5 shift box when we update
+        self._has_monitor_5 = False
 
         # Instrument
         SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
@@ -661,6 +665,11 @@ class SANSDataProcessorGui(QMainWindow,
         self.load_button.setEnabled(False)
         self.export_table_button.setEnabled(False)
 
+    def set_monitor_5_enabled(self, new_state):
+        self._has_monitor_5 = new_state
+        self.transmission_mn_5_shift_label.setEnabled(new_state)
+        self.transmission_mn_5_shift_line_edit.setEnabled(new_state)
+
     def enable_buttons(self):
         self.process_selected_button.setEnabled(True)
         self.process_all_button.setEnabled(True)
@@ -854,8 +863,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.transmission_monitor_label.setEnabled(use_monitor)
         self.transmission_monitor_line_edit.setEnabled(use_monitor)
-        self.transmission_mn_shift_label.setEnabled(use_monitor)
-        self.transmission_mn_shift_line_edit.setEnabled(use_monitor)
+        self.transmission_mn_4_shift_label.setEnabled(use_monitor)
+        self.transmission_mn_4_shift_line_edit.setEnabled(use_monitor)
+
+        if self._has_monitor_5:
+            self.transmission_mn_5_shift_label.setEnabled(use_monitor)
+            self.transmission_mn_5_shift_line_edit.setEnabled(use_monitor)
 
         self.transmission_radius_label.setEnabled(use_roi)
         self.transmission_radius_line_edit.setEnabled(use_roi)
@@ -1437,13 +1450,22 @@ class SANSDataProcessorGui(QMainWindow,
         self.update_simple_line_edit_field(line_edit="transmission_monitor_line_edit", value=value)
 
     @property
-    def transmission_mn_shift(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_mn_shift_line_edit",
+    def transmission_mn_4_shift(self):
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_4_shift_line_edit",
                                                expected_type=float)
 
-    @transmission_mn_shift.setter
-    def transmission_mn_shift(self, value):
-        self.update_simple_line_edit_field(line_edit="transmission_mn_shift_line_edit", value=value)
+    @transmission_mn_4_shift.setter
+    def transmission_mn_4_shift(self, value):
+        self.update_simple_line_edit_field(line_edit="transmission_mn_4_shift_line_edit", value=value)
+
+    @property
+    def transmission_mn_5_shift(self):
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit",
+                                               expected_type=float)
+
+    @transmission_mn_5_shift.setter
+    def transmission_mn_5_shift(self, value):
+        self.update_simple_line_edit_field(line_edit="transmission_mn_5_shift_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission fit
@@ -1955,7 +1977,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.transmission_line_edit.setValidator(positive_integer_validator)
         self.transmission_monitor_line_edit.setValidator(positive_integer_validator)
         self.transmission_radius_line_edit.setValidator(positive_double_validator)
-        self.transmission_mn_shift_line_edit.setValidator(double_validator)
+        self.transmission_mn_4_shift_line_edit.setValidator(double_validator)
+        self.transmission_mn_5_shift_line_edit.setValidator(double_validator)
 
         self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
         self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -2025,7 +2048,8 @@ class SANSDataProcessorGui(QMainWindow,
         self.transmission_interpolating_rebin_check_box.setChecked(False)
         self.transmission_target_combo_box.setCurrentIndex(0)
         self.transmission_monitor_line_edit.setText("")
-        self.transmission_mn_shift_line_edit.setText("")
+        self.transmission_mn_4_shift_line_edit.setText("")
+        self.transmission_mn_5_shift_line_edit.setText("")
         self.transmission_radius_line_edit.setText("")
         self.transmission_roi_files_line_edit.setText("")
         self.transmission_mask_files_line_edit.setText("")
