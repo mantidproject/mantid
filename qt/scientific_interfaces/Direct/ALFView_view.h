@@ -24,21 +24,21 @@ class ALFView_view : public QSplitter {
   Q_OBJECT
 
 public:
-  explicit ALFView_view(const std::string instrument,
+  explicit ALFView_view(const std::string &instrument,
                         QWidget *parent = nullptr);
   std::string getFile();
-  void setRunQuietly(const std::string runNumber);
+  void setRunQuietly(const std::string &runNumber);
   void observeLoadRun(Observer *listener) {
     m_loadRunObservable->attach(listener);
   };
-  void warningBox(const std::string message);
+  void warningBox(const std::string &message);
 
 public slots:
   void fileLoaded();
 
 private:
   QWidget *generateLoadWidget();
-  void warningBox(const QString message);
+  void warningBox(const QString &message);
 
   Observable *m_loadRunObservable;
   API::MWRunFiles *m_files;

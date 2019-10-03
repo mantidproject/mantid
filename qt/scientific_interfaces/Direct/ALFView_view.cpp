@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-ALFView_view::ALFView_view(const std::string instrument, QWidget *parent)
+ALFView_view::ALFView_view(const std::string &instrument, QWidget *parent)
     : QSplitter(Qt::Vertical, parent), m_loadRunObservable(nullptr),
       m_files(nullptr), m_instrument(QString::fromStdString(instrument)) {
   auto loadWidget = generateLoadWidget();
@@ -51,7 +51,7 @@ std::string ALFView_view::getFile() {
   return "";
 }
 
-void ALFView_view::setRunQuietly(const std::string runNumber) {
+void ALFView_view::setRunQuietly(const std::string &runNumber) {
   m_files->setText(QString::fromStdString(runNumber));
 }
 
@@ -66,10 +66,10 @@ void ALFView_view::fileLoaded() {
   m_loadRunObservable->notify();
 }
 
-void ALFView_view::warningBox(const std::string message) {
+void ALFView_view::warningBox(const std::string &message) {
   warningBox(QString::fromStdString(message));
 }
-void ALFView_view::warningBox(const QString message) {
+void ALFView_view::warningBox(const QString &message) {
   QMessageBox::warning(this, m_instrument + " view", message);
 }
 

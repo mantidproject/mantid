@@ -59,7 +59,6 @@ void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {
 
 void ALFView_presenter::loadRunNumber() {
   auto pathToRun = m_view->getFile();
-  const int currentRunInADS = m_model->currentRun();
   if (pathToRun == "" || m_currentFile == pathToRun) {
     return;
   }
