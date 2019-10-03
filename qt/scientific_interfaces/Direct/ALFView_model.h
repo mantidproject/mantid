@@ -23,7 +23,7 @@ public:
   int currentRun();
   bool isErrorCode(const int run);
   std::string getInstrument();
-}; 
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

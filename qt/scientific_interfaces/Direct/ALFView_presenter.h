@@ -10,8 +10,8 @@
 #include "ALFView_model.h"
 #include "ALFView_view.h"
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include <string>
 
@@ -22,17 +22,17 @@ class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
   Q_OBJECT
 
 public:
-    ALFView_presenter(ALFView_view *view,
-                    ALFView_model *model);
+  ALFView_presenter(ALFView_view *view, ALFView_model *model);
   ~ALFView_presenter(){};
   void initLayout();
 
 private slots:
   void loadRunNumber();
+
 private:
   void loadAndAnalysis(const std::string &run);
 
- ALFView_view *m_view;
+  ALFView_view *m_view;
   ALFView_model *m_model;
   int m_currentRun;
   std::string m_currentFile;

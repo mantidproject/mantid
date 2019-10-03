@@ -33,9 +33,9 @@ protected:
   void initLayout() override;
 
 private:
-  //std::unique_ptr<ALFView_view> m_view;
-  //std::unique_ptr<ALFView_model> m_model;
-  //std::unique_ptr<ALFView_presenter> m_presenter;
+  // std::unique_ptr<ALFView_view> m_view;
+  // std::unique_ptr<ALFView_model> m_model;
+  // std::unique_ptr<ALFView_presenter> m_presenter;
   ALFView_view *m_view;
   ALFView_model *m_model;
   ALFView_presenter *m_presenter;

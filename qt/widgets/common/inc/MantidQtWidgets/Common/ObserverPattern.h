@@ -11,9 +11,9 @@
 #include <string>
 
 /**
-* Simple classes for observer and observable pattern.
-* These can be used to replace signals and slots for mocking
-**/
+ * Simple classes for observer and observable pattern.
+ * These can be used to replace signals and slots for mocking
+ **/
 
 class Observable;
 
@@ -23,25 +23,25 @@ public:
 };
 
 /**
-* Simple observable class. This is used
-* to signify if a change has been made and then needs to 
-* notify its observers. 
-**/
+ * Simple observable class. This is used
+ * to signify if a change has been made and then needs to
+ * notify its observers.
+ **/
 class Observable {
   std::set<Observer *> m_observers;
 
 public:
   /**
-  * @param listener :: want to be notified when this observer changes
-  **/
+   * @param listener :: want to be notified when this observer changes
+   **/
   void attach(Observer *listener) { m_observers.insert(listener); };
   /**
    * @param listener :: no longer want to be notified when this observer changes
    **/
   void detach(Observer *listener) { m_observers.erase(listener); };
   /**
-  * Update all of the observers that a change has been made
-  **/
+   * Update all of the observers that a change has been made
+   **/
   void notify() {
     for (auto &listener : m_observers) {
       listener->update();
@@ -58,10 +58,10 @@ public:
   VoidObserver() : m_slot(nullptr){};
   ~VoidObserver(){};
   /**
-  * Sets the function/slot for the oberver
-  * @param func:: the void function we want to call when the observer
-  * sends a notify signal
-  **/
+   * Sets the function/slot for the oberver
+   * @param func:: the void function we want to call when the observer
+   * sends a notify signal
+   **/
   void setSlot(std::function<void()> &func) { m_slot = func; };
   /**
    * Calls the function/slot
@@ -71,6 +71,5 @@ public:
 private:
   std::function<void()> m_slot;
 };
-
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_OBSERVERPATTERN_H_ */

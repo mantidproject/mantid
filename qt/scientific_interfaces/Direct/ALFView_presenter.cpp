@@ -17,8 +17,7 @@ namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
     : m_view(view), m_model(model), m_currentRun(0), m_loadRunObserver(nullptr),
-      m_currentFile("")
-{
+      m_currentFile("") {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
@@ -41,7 +40,7 @@ void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {
       m_currentRun = runNumber;
       m_currentFile = pathToRun;
     } else {
-		// reset to the previous data
+      // reset to the previous data
       std::string message =
           "Not the corrct instrument, expected " + m_model->getInstrument();
       m_view->warningBox(message);
@@ -49,24 +48,23 @@ void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {
     }
     // make displayed run number be in sinc
     m_view->setRunQuietly(std::to_string(m_currentRun));
-    
+
     if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
       m_model->transformData();
     }
   } catch (...) {
     m_view->setRunQuietly(std::to_string(m_currentRun));
   }
-  }
+}
 
 void ALFView_presenter::loadRunNumber() {
   auto pathToRun = m_view->getFile();
   const int currentRunInADS = m_model->currentRun();
-  if (pathToRun == "" ||m_currentFile == pathToRun) {
+  if (pathToRun == "" || m_currentFile == pathToRun) {
     return;
   }
   loadAndAnalysis(pathToRun);
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

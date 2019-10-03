@@ -8,16 +8,14 @@
 #define MANTIDQT_CUSTOMINTERFACES_ALFVIEW_VIEW_H_
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
-#include <string>
-#include <QLineEdit>
 #include <QObject>
-#include <QPushButton>
 #include <QSplitter>
 #include <QString>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,7 +24,8 @@ class ALFView_view : public QSplitter {
   Q_OBJECT
 
 public:
-  explicit ALFView_view(const std::string instrument, QWidget *parent = nullptr);
+  explicit ALFView_view(const std::string instrument,
+                        QWidget *parent = nullptr);
   std::string getFile();
   void setRunQuietly(const std::string runNumber);
   void observeLoadRun(Observer *listener) {
@@ -34,11 +33,11 @@ public:
   };
   void warningBox(const std::string message);
 
- public slots:
-   void fileLoaded();
+public slots:
+  void fileLoaded();
 
 private:
-  void generateLoadWidget();
+  QWidget * generateLoadWidget();
   void warningBox(const QString message);
 
   Observable *m_loadRunObservable;

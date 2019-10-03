@@ -29,7 +29,6 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-
 void ALFView_model::loadEmptyInstrument() {
   auto alg =
       Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
@@ -51,8 +50,7 @@ int ALFView_model::loadData(const std::string &name) {
   alg->setProperty("OutputWorkspace", TMPNAME); // write to tmp ws
   alg->execute();
   auto ws =
-      AnalysisDataService::Instance()
-          .retrieveWS<MatrixWorkspace>(TMPNAME);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TMPNAME);
   return ws->getRunNumber();
 }
 /*
@@ -62,8 +60,7 @@ int ALFView_model::loadData(const std::string &name) {
  */
 std::map<std::string, bool> ALFView_model::isDataValid() {
   auto ws =
-      AnalysisDataService::Instance()
-          .retrieveWS<MatrixWorkspace>(TMPNAME);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TMPNAME);
 
   bool isItALF = false;
   bool isItDSpace = false;
@@ -87,15 +84,13 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
  * If already d-space does nothing.
  */
 void ALFView_model::transformData() {
-  auto normAlg =
-      AlgorithmManager::Instance().create("NormaliseByCurrent");
+  auto normAlg = AlgorithmManager::Instance().create("NormaliseByCurrent");
   normAlg->initialize();
   normAlg->setProperty("InputWorkspace", WSNAME);
   normAlg->setProperty("OutputWorkspace", WSNAME);
   normAlg->execute();
 
-  auto dSpacingAlg =
-      AlgorithmManager::Instance().create("ConvertUnits");
+  auto dSpacingAlg = AlgorithmManager::Instance().create("ConvertUnits");
   dSpacingAlg->initialize();
   dSpacingAlg->setProperty("InputWorkspace", WSNAME);
   dSpacingAlg->setProperty("Target", "dSpacing");
@@ -114,8 +109,7 @@ int ALFView_model::currentRun() {
   try {
 
     auto ws =
-        AnalysisDataService::Instance()
-            .retrieveWS<MatrixWorkspace>(WSNAME);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(WSNAME);
     return ws->getRunNumber();
   } catch (...) {
     return ERRORCODE;
