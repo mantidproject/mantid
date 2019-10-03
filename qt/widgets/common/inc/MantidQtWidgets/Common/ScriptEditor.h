@@ -107,6 +107,7 @@ public:
   void replaceAll(const QString &search, const QString &replace, bool regex,
                   bool caseSensitive, bool matchWords, bool wrap,
                   bool forward = true);
+  void addToCompletionAPI(const QList<QString> &completions);
 
 public slots:
   /// Save the script, opening a dialog

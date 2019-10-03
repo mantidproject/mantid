@@ -11,34 +11,98 @@ from __future__ import (absolute_import, unicode_literals)
 import inspect
 import sys
 from six import PY2
-if PY2:
+if PY2:  # noqa
     from inspect import getargspec as getfullargspec
-else:
+else:  # noqa
     from inspect import getfullargspec
+
+import jedi
 
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 
 class CodeCompleter:
 
-    def __init__(self, editor, env_globals=None):
+    def __init__(self, editor, env_globals=None, enable_jedi=True):
         self.editor = editor
         self.env_globals = env_globals
-
         self.editor.enableAutoCompletion(CodeEditor.AcsAll)
 
-        default_autocompletions = []
+        self._all_completions = dict()
         if "from mantid.simpleapi import *" in self.editor.text():
-            default_autocompletions.extend(self.get_mantid_simple_api_call_tips())
+            for call_tip in self.get_mantid_simple_api_call_tips():
+                self._all_completions[call_tip] = True
 
-        self.editor.updateCompletionAPI(default_autocompletions)
+        if enable_jedi:
+            jedi.api.preload_module('numpy', 'matplotlib.pyplot')
+            self.editor.cursorPositionChanged.connect(self._on_cursor_position_changed)
+
+        self.editor.updateCompletionAPI(list(self._all_completions.keys()))
+
+    def update_completion_api(self):
+        self.editor.updateCompletionAPI(list(self._all_completions.keys()))
+
+    def _generate_jedi_interpreter(self, line_no=None, col_no=None):
+        return jedi.Script(self.editor.text(), line=line_no, column=col_no,
+                           path=self.editor.fileName(), sys_path=sys.path)
+
+    def _generate_jedi_completions_list(self, line_no=None, col_no=None):
+        completions = self._generate_jedi_interpreter(line_no, col_no).completions()
+        completions_list = []
+        for completion in completions:
+            if self._all_completions.get(completion.name, None) is None:
+                self._all_completions[completion.name] = True
+                completions_list.append(completion.name)
+        return completions_list
+
+    def _generate_jedi_call_tips(self, line_no=None, col_no=None):
+        call_sigs = self._generate_jedi_interpreter(line_no, col_no).call_signatures()
+        call_tips = []
+        for signature in call_sigs:
+            args = []
+            for param in signature.params:
+                arg = param.description.replace('param ', '').replace('\n', ' ')
+                if arg:
+                    args.append(arg)
+
+            if not args:
+                continue
+
+            call_tip = "{}({})".format(signature.name, ', '.join(args))
+            if self._all_completions.get(call_tip, None) is None:
+                self._all_completions[call_tip] = True
+                call_tips.append(call_tip)
+
+        return call_tips
+
+    def _on_cursor_position_changed(self, line_no, col_no):
+        """
+        Slot to be executed when editor's cursor position has been changed.
+        Note that Qt's line numbering starts at 0, whilst jedi's starts at 1.
+        :param int line_no: The cursor's new line number
+        :param int col_no: The cursor's new column number
+        """
+        if col_no < 2:
+            return
+
+        line = self.editor.text().split('\n')[line_no]
+
+        completions = []
+        if line.strip() and not (line.rstrip()[-1] == '(' and col_no >= line.rfind('(')):
+            completions = self._generate_jedi_completions_list(line_no + 1, col_no)
+
+        # Since call tips will be generated the first time an open bracket is
+        # entered, we need not worry about counting the number of open/closed
+        # brackets
+        if line.rfind(')') < line.rfind('('):
+            call_tips = self._generate_jedi_call_tips(line_no + 1, col_no)
+            completions.extend(call_tips)
+        if completions:
+            self.editor.addToCompletionAPI(completions)
 
     def get_mantid_simple_api_call_tips(self):
         simple_api_module = sys.modules['mantid.simpleapi']
         return self.generate_call_tips(simple_api_module.__dict__)
-
-    def update_completion_api(self):
-        self.editor.updateCompletionAPI(self.generate_call_tips(self.env_globals))
 
     @staticmethod
     def generate_call_tips(env_globals):

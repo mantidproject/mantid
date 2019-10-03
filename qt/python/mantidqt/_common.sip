@@ -145,6 +145,7 @@ public:
                QWidget *parent /TransferThis/ = 0) throw(std::invalid_argument);
 
   QString fileName() const;
+  void addToCompletionAPI(const QList<QString> &completions);
   SIP_PYTUPLE getSelection() const;
 %MethodCode
   int lineFrom(-1), indexFrom(-1), lineTo(-1), indexTo(-1);

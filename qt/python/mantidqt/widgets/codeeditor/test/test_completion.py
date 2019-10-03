@@ -9,7 +9,7 @@
 import re
 import unittest
 
-from mantid.simpleapi import *  # noqa  # we need this so simpleapi in sys.modules
+from mantid.simpleapi import *  # noqa  # we need this so simpleapi is in sys.modules
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.codeeditor.completion import CodeCompleter
 
@@ -17,7 +17,7 @@ from mantidqt.widgets.codeeditor.completion import CodeCompleter
 class CodeCompletionTest(unittest.TestCase):
 
     def _get_completer(self, text, env_globals=None):
-        return CodeCompleter(Mock(text=lambda: text), env_globals)
+        return CodeCompleter(Mock(text=lambda: text, fileName=lambda: ""), env_globals)
 
     def test_Rebin_call_tips_generated_on_construction_when_api_import_in_script(self):
         completer = self._get_completer("from mantid.simpleapi import *\n# My code")
@@ -33,6 +33,32 @@ class CodeCompletionTest(unittest.TestCase):
         call_tips = update_completion_api_mock.call_args_list[0][0][0]
         self.assertEqual(1, update_completion_api_mock.call_count)
         self.assertFalse(bool(re.search("Rebin\(InputWorkspace, .*\)", ' '.join(call_tips))))
+
+    def test_completion_api_is_updated_with_numpy_completions_when_cursor_position_changed(self):
+        completer = self._get_completer("import numpy as np\nnp.a")
+        completer._on_cursor_position_changed(1, 3)
+        self.assertIn('abs', completer.editor.addToCompletionAPI.call_args[0][0])
+
+    def test_call_tips_are_still_visible_after_argument_inserted(self):
+        completer = self._get_completer("import numpy as np\nnp.array(x, ")
+        joined_call_tips = ' '.join(completer._generate_jedi_call_tips(2, 12))
+        self.assertTrue(bool(re.search("array\(object, .*\)", joined_call_tips)))
+
+    def test_call_tips_are_not_generated_when_outside_a_function_call(self):
+        completer = self._get_completer("import numpy as np\nnp.array(x)")
+        self.assertEqual(0, len(completer._generate_jedi_call_tips(2, 11)))
+
+    def test_that_generate_jedi_completions_list_is_not_called_when_cursor_is_inside_bracket(self):
+        completer = self._get_completer("import numpy as np\nnp.array(    ")
+        with patch.object(completer, '_generate_jedi_completions_list'):
+            completer._on_cursor_position_changed(1, 11)
+            self.assertEqual(0, completer._generate_jedi_completions_list.call_count)
+
+    def test_that_generate_jedi_completions_list_is_called_when_cursor_after_closed_brackets(self):
+        completer = self._get_completer("import numpy as np\nnp.array(x)    ")
+        with patch.object(completer, '_generate_jedi_completions_list'):
+            completer._on_cursor_position_changed(1, 11)
+            self.assertEqual(1, completer._generate_jedi_completions_list.call_count)
 
 
 if __name__ == '__main__':
