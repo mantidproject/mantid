@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -31,8 +31,15 @@ class CalibrationPresenter(object):
         plot_output = self.view.get_plot_output()
         self.start_calibration_worker(vanadium_no, calib_no, plot_output, self.rb_num)
 
-    def start_calibration_worker(self, vanadium_no, calib_no, plot_output, rb_num):
-        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_no, calib_no),
+    def start_calibration_worker(self, vanadium_path, calib_path, plot_output, rb_num):
+        """
+        Calibrate the data in a separate thread so as to not freeze the GUI.
+        :param vanadium_path: Path to vanadium data file.
+        :param calib_path: Path to calibration data file.
+        :param plot_output: Whether to plot the output.
+        :param rb_num: The current RB number set in the GUI.
+        """
+        self.worker = AsyncTask(self.model.create_new_calibration, (vanadium_path, calib_path),
                                 {"plot_output": plot_output, "instrument": self.instrument, "rb_num": rb_num},
                                 error_cb=self._on_error, finished_cb=self.enable_calibrate_buttons)
         self.worker.start()
