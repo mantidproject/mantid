@@ -16,8 +16,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFView_presenter::ALFView_presenter(ALFView_view *view, ALFView_model *model)
-    : m_view(view), m_model(model), m_currentRun(0), m_loadRunObserver(nullptr),
-      m_currentFile("") {
+    : m_view(view), m_model(model), m_currentRun(0),
+      m_currentFile(""), m_loadRunObserver(nullptr)
+       {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
