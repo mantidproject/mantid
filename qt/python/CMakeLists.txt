@@ -92,6 +92,7 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/utils/test/test_writetosignal.py
     mantidqt/widgets/codeeditor/test/test_codeeditor.py
+    mantidqt/widgets/codeeditor/test/test_completion.py
     mantidqt/widgets/codeeditor/test/test_errorformatter.py
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py

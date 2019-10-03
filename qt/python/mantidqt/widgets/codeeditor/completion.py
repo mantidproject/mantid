@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import inspect
+import sys
 from six import PY2
 if PY2:
     from inspect import getargspec as getfullargspec
@@ -26,16 +27,27 @@ class CodeCompleter:
 
         self.editor.enableAutoCompletion(CodeEditor.AcsAll)
 
-    def update_completion_api(self):
-        self.editor.updateCompletionAPI(self.generate_call_tips())
+        default_autocompletions = []
+        if "from mantid.simpleapi import *" in self.editor.text():
+            default_autocompletions.extend(self.get_mantid_simple_api_call_tips())
 
-    def generate_call_tips(self):
-        if not self.env_globals:
+        self.editor.updateCompletionAPI(default_autocompletions)
+
+    def get_mantid_simple_api_call_tips(self):
+        simple_api_module = sys.modules['mantid.simpleapi']
+        return self.generate_call_tips(simple_api_module.__dict__)
+
+    def update_completion_api(self):
+        self.editor.updateCompletionAPI(self.generate_call_tips(self.env_globals))
+
+    @staticmethod
+    def generate_call_tips(env_globals):
+        if not env_globals:
             return []
         call_tips = []
-        for name, attr, in self.env_globals.items():
+        for name, attr, in env_globals.items():
             if inspect.isfunction(attr) or inspect.isbuiltin(attr):
-                call_tips.append(name + self.get_function_spec(attr))
+                call_tips.append(name + CodeCompleter.get_function_spec(attr))
         return call_tips
 
     @staticmethod
@@ -61,7 +73,7 @@ class CodeCompleter:
             defs = argspec[3]
         elif argspec[1] is not None:
             # Get from varargs/keywords
-            arg_str = argspec[1].strip().lstrip('\b')
+            arg_str = argspec[1].strip().lstrip('\b').replace(',', ', ')
             defs = []
             # Keyword args
             kwargs = argspec[2]
@@ -69,10 +81,10 @@ class CodeCompleter:
                 kwargs = kwargs.strip().lstrip('\b\b')
                 if kwargs == 'kwargs':
                     kwargs = '**' + kwargs + '=None'
-                arg_str += ',%s' % kwargs
+                arg_str += ', %s' % kwargs
             # Any default argument appears in the string
             # on the rhs of an equal
-            for arg in arg_str.split(','):
+            for arg in arg_str.split(', '):
                 arg = arg.strip()
                 if '=' in arg:
                     arg_token = arg.split('=')
@@ -86,7 +98,7 @@ class CodeCompleter:
             return ''
 
         if defs is None:
-            call_tip = ','.join(args)
+            call_tip = ', '.join(args)
             call_tip = '(' + call_tip + ')'
         else:
             # The defaults list contains the default values for the last n arguments
@@ -95,8 +107,8 @@ class CodeCompleter:
             for index in range(len(args) - 1, -1, -1):
                 def_index = index - diff
                 if def_index >= 0:
-                    call_tip = '[' + args[index] + '],' + call_tip
+                    call_tip = '[' + args[index] + '], ' + call_tip
                 else:
-                    call_tip = args[index] + "," + call_tip
-            call_tip = '(' + call_tip.rstrip(',') + ')'
+                    call_tip = args[index] + ", " + call_tip
+            call_tip = '(' + call_tip.rstrip(', ') + ')'
         return call_tip
