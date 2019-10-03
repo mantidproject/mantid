@@ -11,10 +11,13 @@ set(TEST_PY_FILES
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
     FmuFTest.py
+    MeierTest.py
     MsdGaussTest.py
     MsdPetersTest.py
     MsdYiTest.py
     MuHTest.py
+    SilverBaselineTest.py
+    StaticLorentzianKTTest.py
     StretchedExpFTTest.py
     TeixeiraWaterTest.py
     TriangleOscTest.py
