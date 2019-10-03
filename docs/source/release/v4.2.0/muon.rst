@@ -19,9 +19,10 @@ Removed
 
 Bug Fixes
 #########
-  * Fixed an issue where changeing the normalisation on a plot with autoscale disabled throws an exception.
+  * Fixed an issue where changing the normalisation on a plot with auto-scale disabled throws an exception.
   * Fixed an issue where warnings about adding workspaces to workspace groups multiple times were appearing in the log.
-  * Fixed an issue where logs in TF asymmetry mode were not being propogated to the results tab.
+  * Fixed an issue where logs in TF asymmetry mode were not being propagated to the results tab.
+  * Fixed an issue where changing the dead time to from table workspace or other file did not work and reverted back to from data file.
 
 Known Issues
 ############
