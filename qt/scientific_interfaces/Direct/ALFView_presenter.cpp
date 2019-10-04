@@ -33,7 +33,7 @@ void ALFView_presenter::initLayout() {
 void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {
   try {
     auto loadedResult = m_model->loadData(pathToRun);
-    
+
     if (loadedResult.second == "success") {
       m_currentRun = loadedResult.first;
       m_currentFile = pathToRun;

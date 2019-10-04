@@ -55,19 +55,17 @@ std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
   std::string message = "success";
   auto bools = isDataValid();
   if (bools["IsValidInstrument"]) {
-   rename();
+    rename();
 
   } else {
     // reset to the previous data
-    message =
-        "Not the corrct instrument, expected " + INSTRUMENTNAME;
+    message = "Not the corrct instrument, expected " + INSTRUMENTNAME;
     remove();
   }
   if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
     transformData();
   }
   return std::make_pair(runNumber, message);
-
 }
 /*
  * Checks loaded data is from ALF
