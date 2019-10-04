@@ -85,7 +85,6 @@ class BrowseFileWidgetPresenter(object):
         self.handle_loading(filenames)
 
     def handle_loading(self, filenames):
-        print('Entered handle loading')
         unloaded_file_names = []
         for filename in filenames:
             if not self._model.get_data(filename=filename):

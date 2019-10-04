@@ -24,7 +24,6 @@ class PhaseTableContext(object):
         return [phase_table.workspace_name for phase_table in self.phase_tables if instrument in phase_table.workspace_name]
 
     def add_phase_quad(self, workspace, run_list):
-        self.phase_quad = {key: item for key, item in self.phase_quad.items() if item.workspace_name != workspace.workspace_name}
         self.phase_quad.update({run_list: workspace})
 
     def get_phase_quad(self, instrument, run):

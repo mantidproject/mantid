@@ -230,7 +230,7 @@ class FFTPresenterTest(unittest.TestCase):
 
         apodization_mock.assert_called_once_with(
             {'Padding': 1, 'ApodizationFunction': 'Lorentz', 'NegativePadding': True,
-             'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table', 'DecayConstant': 4.4})
+             'InputWorkspace': 'MUSR22725_PhaseQuad_MUSR22725_phase_table', 'DecayConstant': 4.4}, '__real')
 
         fft_mock.assert_called_once_with({'Real': 0, 'InputWorkspace': apodization_mock_return, 'Transform': 'Forward',
                                           'AcceptXRoundingErrors': True, 'AutoShift': True,
@@ -265,7 +265,7 @@ class FFTPresenterTest(unittest.TestCase):
 
         apodization_mock.assert_called_once_with(
             {'Padding': 1, 'ApodizationFunction': 'Lorentz', 'NegativePadding': True,
-             'InputWorkspace': name, 'DecayConstant': 4.4})
+             'InputWorkspace': name, 'DecayConstant': 4.4}, '__real')
 
         fft_mock.assert_called_once_with({'AcceptXRoundingErrors': True,
                                           'Real': 0, 
