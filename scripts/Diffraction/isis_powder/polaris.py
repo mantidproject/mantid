@@ -53,13 +53,12 @@ class Polaris(AbstractInst):
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
-        run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
+        cal_file_name = self._inst_settings.calibration_dir + '/' + self._inst_settings.grouping_file_name
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
                                                   merge_banks=self._inst_settings.merge_banks,
-                                                  # q_lims=self._inst_settings.q_lims,
-                                                  # grouping_file_path=run_details.grouping_file_path
-                                                  )
+                                                  q_lims=self._inst_settings.q_lims,
+                                                  cal_file_name=cal_file_name)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

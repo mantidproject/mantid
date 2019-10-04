@@ -32,7 +32,7 @@ getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
   for (const Kernel::Material::Material::FormulaUnit element : formula) {
     const std::map<std::string, double> atomMap{
         {"mass", element.atom->mass},
-        {"stoich", element.multiplicity},
+        {"concentration", element.multiplicity},
         {"bSqrdBar", bSqrdBar}};
     atomSpecies[element.atom->symbol] = atomMap;
     totalStoich += element.multiplicity;
@@ -127,7 +127,9 @@ void CalculatePlaczekSelfScattering::exec() {
   const Geometry::DetectorInfo detInfo = inWS->detectorInfo();
   for (size_t detIndex = 0; detIndex < detInfo.size(); detIndex++) {
     if (!detInfo.isMonitor(detIndex)) {
+      if (!detInfo.l2(detIndex) == 0) {
       nReserve += 1;
+      }
     }
   }
   xLambdas.reserve(nReserve);
@@ -136,21 +138,30 @@ void CalculatePlaczekSelfScattering::exec() {
   int nSpec = 0;
   for (size_t detIndex = 0; detIndex < detInfo.size(); detIndex++) {
     if (!detInfo.isMonitor(detIndex)) {
-      const double pathLength = detInfo.l1() + detInfo.l2(detIndex);
-      const double f = detInfo.l1() / pathLength;
-      const double sinThetaBy2 = sin(detInfo.twoTheta(detIndex) / 2.0);
-      for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
-        const double term1 = (f - 1.0) * phi1[xIndex];
-        const double term2 = f * eps1[xIndex];
-        const double term3 = f - 3;
-        const double inelasticPlaczekSelfCorrection =
-            2.0 * (term1 - term2 + term3) * sinThetaBy2 * sinThetaBy2 *
-            summationTerm;
-        xLambdas.push_back(xLambda[xIndex]);
-        placzekCorrection.push_back(inelasticPlaczekSelfCorrection);
+      if (!detInfo.l2(detIndex) == 0) {
+        const double pathLength = detInfo.l1() + detInfo.l2(detIndex);
+        const double f = detInfo.l1() / pathLength;
+        const double sinThetaBy2 = sin(detInfo.twoTheta(detIndex) / 2.0);
+        for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
+          const double term1 = (f - 1.0) * phi1[xIndex];
+          const double term2 = f * eps1[xIndex];
+          const double term3 = f - 3;
+          const double inelasticPlaczekSelfCorrection =
+              2.0 * (term1 - term2 + term3) * sinThetaBy2 * sinThetaBy2 *
+              summationTerm;
+          xLambdas.push_back(xLambda[xIndex]);
+          placzekCorrection.push_back(inelasticPlaczekSelfCorrection);
+        }
+        xLambdas.push_back(xLambda.back());
+        nSpec += 1;
+      } else {
+        for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
+          xLambdas.push_back(xLambda[xIndex]);
+          placzekCorrection.push_back(0);
+        }
+        xLambdas.push_back(xLambda.back());
+        nSpec += 1;
       }
-      xLambdas.push_back(xLambda.back());
-      nSpec += 1;
     }
   }
   Mantid::API::Algorithm_sptr childAlg =
