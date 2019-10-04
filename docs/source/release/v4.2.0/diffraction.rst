@@ -47,6 +47,7 @@ Bug Fixes
 - :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` & :ref:`IndexPeaks <algm-IndexPeaks>` have been fixed
   so that they correctly report the number of main & satellite reflections that have been indexed. Also, if a satellite
   peak cannot be indexed its HKL is reset to 000 rather than accidentally setting it to the HKL of the main reflection.
+- When calculating ModUB the ModHKL are now set to the range -0.5<q<=0.5
 
 Imaging
 -------
