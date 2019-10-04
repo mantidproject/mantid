@@ -81,7 +81,7 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
     def _assert_equal_to_reference_file(self, output_name):
         expected_workspace = LoadNexus(Filename='IndirectTwoPeakFit_' + output_name + '.nxs')
         self.assertTrue(CompareWorkspaces(Workspace1=get_ads_workspace(output_name), Workspace2=expected_workspace,
-                                          Tolerance=5.0, ToleranceRelErr=True)[0])
+                                          Tolerance=1.0, ToleranceRelErr=True)[0])
 
 
 if __name__ == '__main__':
