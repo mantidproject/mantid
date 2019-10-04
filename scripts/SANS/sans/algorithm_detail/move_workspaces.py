@@ -524,7 +524,6 @@ class SANSMoveSANS2D(SANSMove):
                               monitor_spectrum_number=monitor_spectrum_number,
                               monitor_offset=move_info.monitor_4_offset)
 
-
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For LOQ we only have to coordinates
         assert len(coordinates) == 2
