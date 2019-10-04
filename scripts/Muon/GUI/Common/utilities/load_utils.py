@@ -239,8 +239,6 @@ def load_workspace_from_filename(filename,
             load_result["DataDeadTimeTable"] = None
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
 
-    # filename = alg.getProperty("Filename").value
-
     return load_result, run, filename, psi_data
 
 

@@ -67,7 +67,7 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
 
     def assert_model_contains_correct_loaded_data(self):
         # use sorted due to threads finishing at different times
-        # self.assertEqual(sorted(self.presenter._model.filenames), ['Co-added'])
+        self.assertEqual(sorted(self.presenter._model.filenames), ['Co-added'])
         self.assertEqual(sorted(self.presenter._model.runs), [sorted(self.runs)])
 
     def assert_interface_contains_correct_runs_and_files(self):
