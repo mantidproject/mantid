@@ -7,8 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import matplotlib
-
-matplotlib.use('AGG')
+matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.container import ErrorbarContainer
 import numpy as np
@@ -17,7 +16,8 @@ import unittest
 from mantid.kernel import config
 from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
-from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace)
+from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
+                              RemoveSpectra, AnalysisDataService as ADS)
 
 
 class Plots__init__Test(unittest.TestCase):
@@ -363,6 +363,31 @@ class Plots__init__Test(unittest.TestCase):
                               OutputWorkspace="ws2")
         self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
+
+    def test_that_plotting_ws_without_giving_spec_num_sets_spec_num_if_ws_has_1_histogram(self):
+        ws_name = "ws-with-one-spec"
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 5000],
+                             DataE=[1, 1],
+                             OutputWorkspace=ws_name)
+        self.ax.plot(ws)
+        ws_artist = self.ax.tracked_workspaces[ws_name][0]
+        self.assertEqual(1, ws_artist.spec_num)
+
+    def test_that_plotting_ws_without_giving_spec_num_raises_if_ws_has_more_than_1_histogram(self):
+        self.assertRaises(RuntimeError, self.ax.plot, self.ws2d_histo)
+
+    def test_that_plotting_ws_without_giving_spec_num_sets_correct_spec_num_after_spectra_removed(self):
+        CreateWorkspace(DataX=[10, 20, 30],
+                        DataY=[10, 20, 30],
+                        DataE=[1, 1, 1],
+                        NSpec=3,
+                        OutputWorkspace="ws-with-3-spec")
+        RemoveSpectra("ws-with-3-spec", [0, 1], OutputWorkspace='out_ws')
+        out_ws = ADS.retrieve('out_ws')
+        self.ax.plot(out_ws)
+        ws_artist = self.ax.tracked_workspaces['out_ws'][0]
+        self.assertEqual(3, ws_artist.spec_num)
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

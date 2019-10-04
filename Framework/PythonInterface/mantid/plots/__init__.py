@@ -282,6 +282,12 @@ class MantidAxes(Axes):
             # If wanting to plot a spectrum
             else:
                 return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
+        elif workspace.getNumberHistograms() == 1:
+            # If the workspace has one histogram, just plot that
+            kwargs['wkspIndex'] = 0
+            if MantidAxes.is_axis_of_type(BIN_AXIS, kwargs):
+                return kwargs['wkspIndex']
+            return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
         else:
             return None
 

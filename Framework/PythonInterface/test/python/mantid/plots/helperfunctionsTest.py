@@ -179,7 +179,7 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertTrue(dist)
         self.assertEqual(kwargs['label'], 'ws2d_histo: spec 2')
         # get info from default spectrum in the 1d case
-        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point)
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(self.ws1d_point, wkspIndex=0)
         self.assertEqual(index, 0)
         self.assertFalse(dist)
         self.assertEqual(kwargs['label'], 'ws1d_point: spec 1')
@@ -189,7 +189,7 @@ class HelperFunctionsTest(unittest.TestCase):
         axis = mantid.api.TextAxis.create(1)
         ws.replaceAxis(1, axis)
         ws.getAxis(1).setLabel(0, "test")
-        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws)
+        index, dist, kwargs = funcs.get_wksp_index_dist_and_label(ws, specNum=1)
         self.assertEqual(kwargs['label'], 'ws: test')
 
     def test_get_axes_labels(self):
@@ -542,27 +542,10 @@ class HelperFunctionsTest(unittest.TestCase):
         self.assertEqual(2, res_workspace_index)
         self.assertEqual(3, res_spectrum_number)
 
-    def test_get_wksp_index_and_spec_num_1_histogram_axis_spectrum(self):
-        """
-        Test getting the WorkspaceIndex and Spectrum Number for a Workspace with 1 histogram,
-        when traversing the SPECTRUM axis
-        """
+    def test_get_wksp_index_and_spec_num_throws_for_histo_with_one_bin_if_wkspIndex_and_specNum_not_set(self):
         ws = CreateSingleValuedWorkspace()
         axis = MantidAxType.SPECTRUM
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
-        self.assertEqual(0, res_workspace_index)
-        self.assertEqual(0, res_spectrum_number)
-
-    def test_get_wksp_index_and_spec_num_1_histogram_axis_bin(self):
-        """
-        Test getting the WorkspaceIndex and Spectrum Number for a Workspace with 1 histogram,
-        when traversing the BIN axis
-        """
-        ws = CreateSingleValuedWorkspace()
-        axis = MantidAxType.BIN
-        res_workspace_index, res_spectrum_number, res_kwargs = funcs._get_wksp_index_and_spec_num(ws, axis)
-        self.assertEqual(0, res_workspace_index)
-        self.assertEqual(None, res_spectrum_number)
+        self.assertRaises(RuntimeError, funcs._get_wksp_index_and_spec_num, ws, axis)
 
     def test_get_wksp_index_and_spec_num_with_wkspIndex_axis_bin(self):
         """
