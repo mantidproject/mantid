@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
-
 from mantid.api import IFunction1D, FunctionFactory
 import numpy as np
 
