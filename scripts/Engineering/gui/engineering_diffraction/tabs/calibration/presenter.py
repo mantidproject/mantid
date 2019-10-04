@@ -7,10 +7,9 @@
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from time import sleep
-
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
+
 
 class CalibrationPresenter(object):
     def __init__(self, model, view):

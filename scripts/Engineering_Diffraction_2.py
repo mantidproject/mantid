@@ -14,6 +14,14 @@ Name = "Engineering_Diffraction"
 
 if 'engineering_diffraction' in globals():
     eng_diff = globals()['engineering_diffraction']
+    if not eng_diff.isHidden():
+        eng_diff.setWindowState(
+            eng_diff.windowState(
+            ) & ~QtCore.Qt.WindowMinimized | QtCore.Qt.WindowActive)
+        eng_diff.activateWindow()
+    else:
+        eng_diff = EngineeringDiffractionGui()
+        eng_diff.show()
 else:
     eng_diff = EngineeringDiffractionGui()
     eng_diff.show()

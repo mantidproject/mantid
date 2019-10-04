@@ -123,7 +123,8 @@ class CalibrationModel(object):
             difc_zero_plot.gca().legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
             difc_zero_plot.gca().set_xlabel("Expected Peaks Centre(dSpacing, A)")
 
-    def load_ceria(self, ceria_run_no):
+    @staticmethod
+    def load_ceria(ceria_run_no):
         try:
             return Load(Filename=ceria_run_no, OutputWorkspace="engggui_calibration_sample_ws")
         except Exception as e:
