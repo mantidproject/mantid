@@ -134,7 +134,7 @@ class CodeCompleter:
     - jedi, this package performs static analysis on a given source
       script. This provides excellent autocompletion for packages
       e.g. numpy and matplotlib. These are updated every time the editor's
-      cursor is moved.
+      cursor is moved and there is no need for the user to have run any code.
 
     Generating from jedi is turned OFF by default because it crashes when
     launched with Python 2 through PyCharm's debugger. There is no such
@@ -203,6 +203,9 @@ class CodeCompleter:
 
             call_tip = "{}({})".format(signature.name, ', '.join(args))
             call_tips.append(call_tip)
+            if call_tips:
+                # We want call tips to be persistent
+                self._add_to_completions(call_tips)
 
         return call_tips
 
