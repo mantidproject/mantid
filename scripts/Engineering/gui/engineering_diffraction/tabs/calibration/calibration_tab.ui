@@ -133,14 +133,8 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="FileFinder" name="finder_calib" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="1" column="0" colspan="3">
+           <widget class="FileFinder" name="finder_vanadium" native="true">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -149,8 +143,14 @@ QGroupBox:title {
             </property>
            </widget>
           </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="FileFinder" name="finder_vanadium" native="true">
+          <item row="2" column="0" colspan="3">
+           <widget class="FileFinder" name="finder_calib" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>0</width>
