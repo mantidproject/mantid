@@ -141,8 +141,7 @@ void ConvertWANDSCDtoMDE::exec() {
       (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(
           expInfo.getLog("twotheta"))))();
 
-  Mantid::API::IMDEventWorkspace_sptr outputWS;
-  outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
+  auto outputWS = DataObjects::MDEventFactory::CreateMDWorkspace(3, "MDEvent");
   Mantid::Geometry::QSample frame;
   std::vector<double> minVals = this->getProperty("MinValues");
   std::vector<double> maxVals = this->getProperty("MaxValues");
@@ -171,7 +170,7 @@ void ConvertWANDSCDtoMDE::exec() {
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   float k =
-      2.f * boost::math::float_constants::pi / static_cast<float>(wavelength);
+      boost::math::float_constants::two_pi / static_cast<float>(wavelength);
   std::vector<Eigen::Vector3f> q_lab_pre;
   q_lab_pre.reserve(azimuthal.size());
   for (size_t m = 0; m < azimuthal.size(); ++m) {
@@ -185,7 +184,7 @@ void ConvertWANDSCDtoMDE::exec() {
   for (size_t n = 0; n < s1.size(); n++) {
     Eigen::Matrix3f goniometer;
     float sl_radian =
-        static_cast<float>(s1[n]) * boost::math::float_constants::pi / 180.f;
+        static_cast<float>(s1[n]) * boost::math::float_constants::degree;
     goniometer(0, 0) = cos(sl_radian);
     goniometer(0, 2) = sin(sl_radian);
     goniometer(2, 0) = -sin(sl_radian);
@@ -195,7 +194,7 @@ void ConvertWANDSCDtoMDE::exec() {
       Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
       size_t idx = n * azimuthal.size() + m;
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
-      if (signal > 0)
+      if (signal > 0.f)
         inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
     }
   }
