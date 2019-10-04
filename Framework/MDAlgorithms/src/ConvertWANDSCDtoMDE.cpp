@@ -17,7 +17,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include <Eigen/Dense>
+
+#include "Eigen/Dense"
+#include "boost/math/constants/constants.hpp"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -164,38 +166,37 @@ void ConvertWANDSCDtoMDE::exec() {
   bc->setSplitInto(5);
   outputWS->splitBox();
 
-  MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
+  auto mdws_mdevt_3 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
-  double k = 2. * M_PI / wavelength;
-  std::vector<Eigen::Vector3d> q_lab_pre;
+  float k =
+      2.f * boost::math::float_constants::pi / static_cast<float>(wavelength);
+  std::vector<Eigen::Vector3f> q_lab_pre;
   q_lab_pre.reserve(azimuthal.size());
   for (size_t m = 0; m < azimuthal.size(); ++m) {
-    q_lab_pre.push_back({-sin(twotheta[m]) * cos(azimuthal[m]) * k,
-                         -sin(twotheta[m]) * sin(azimuthal[m]) * k,
-                         (1. - cos(twotheta[m])) * k});
+    twotheta_f = static_cast<float>(twotheta[m]);
+    azimuthal_f = static_cast<float>(azimuthal[m]);
+    q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k,
+                         -sin(twotheta_f) * sin(azimuthal_f) * k,
+                         (1.f - cos(twotheta_f)) * k});
   }
 
   for (size_t n = 0; n < s1.size(); n++) {
-    Eigen::Matrix<double, 3, 3> goniometer;
-    goniometer(0, 0) = cos(s1[n] * M_PI / 180);
-    goniometer(0, 2) = sin(s1[n] * M_PI / 180);
-    goniometer(2, 0) = -sin(s1[n] * M_PI / 180);
-    goniometer(2, 2) = cos(s1[n] * M_PI / 180);
+    Eigen::Matrix3f goniometer;
+    float sl_radian =
+        static_cast<float>(s1[n]) * boost::math::float_constants::pi / 180.f;
+    goniometer(0, 0) = cos(sl_radian);
+    goniometer(0, 2) = sin(sl_radian);
+    goniometer(2, 0) = -sin(sl_radian);
+    goniometer(2, 2) = cos(sl_radian);
     goniometer = goniometer.inverse();
     for (size_t m = 0; m < azimuthal.size(); m++) {
-      Eigen::Vector3f q_sample;
-      auto q_lab = goniometer * q_lab_pre[m];
-      q_sample[0] = static_cast<Mantid::coord_t>(q_lab[0]);
-      q_sample[1] = static_cast<Mantid::coord_t>(q_lab[1]);
-      q_sample[2] = static_cast<Mantid::coord_t>(q_lab[2]);
+      Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
       size_t idx = n * azimuthal.size() + m;
-      signal_t signal = inputWS->getSignalAt(idx);
+      coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
       if (signal > 0)
-        inserter.insertMDEvent(static_cast<float>(signal),
-                               static_cast<float>(signal), 0, 0,
-                               q_sample.data());
+        inserter.insertMDEvent(signal, signal, 0, 0, q_sample.data());
     }
   }
 
