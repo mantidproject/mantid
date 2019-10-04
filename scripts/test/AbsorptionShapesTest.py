@@ -40,6 +40,22 @@ class AdsorbtionShapesTest(unittest.TestCase):
         self.assertRaises(TypeError,anAbsorptionShape.material.__set__,ash,[1,2,3])
         self.assertRaises(TypeError,anAbsorptionShape.material.__set__,ash,[1,2])
 
+        ash = anAbsorptionShape({'AtomicNumber':12,'AttenuationXSection':0.5,'SampleMassDensity':120}) 
+        res = ash.material;
+        self.assertEqual(res['AtomicNumber'],12)
+        self.assertEqual(res['AttenuationXSection'],0.5)
+        self.assertEqual(res['SampleMassDensity'],120)
+
+        # Add extra material property, consistent with other properties.
+        ash.material = {'ScatteringXSection':20}
+        res = ash.material;
+        self.assertEqual(res['AttenuationXSection'],0.5)
+        self.assertEqual(res['ScatteringXSection'],20)
+        self.assertEqual(len(res),4)
+
+
+
+
     def test_adsrp_cylinder(self):
         ash = Cylinder('V',[10,2])
         res = ash.cylinder_shape
@@ -74,6 +90,6 @@ class AdsorbtionShapesTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-    #unittest.main()
-    ast = AdsorbtionShapesTest('test_adsrp_cylinder')
-    ast.test_adsrp_cylinder()
+    unittest.main()
+    #ast = AdsorbtionShapesTest('test_adsrp_cylinder')
+    #ast.test_adsrp_cylinder()

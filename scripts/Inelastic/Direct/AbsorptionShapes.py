@@ -16,41 +16,54 @@ import random
 
 
 class anAbsorptionShape(object):
-    """ The parent class for all shapes, used to perform various adsorption corrections
+    """ The parent class for all shapes, used to perform various absorption corrections
     in direct inelastic analysis.
 
-    Contains material and environment properties. Environment is not yet used.
+    Contains material and environment properties necessary for absorption corrections calculations,
+    as recognized by SetSampleMaterial algorithm. 
+
+    See SetSampleMaterial for full list of properties available to set. 
 
     Usage:
-    anShape = anAdsrbShape([ChemicalFormula,NumberDensity])
+    Instanciate as:
+    anShape = anAbsorptionShape([ChemicalFormula,NumberDensity])
         where:
         -- ChemicalFormula is the string, describing the sample formula
         -- NumberDensity   is the number density of the sample in number
            of atoms or formula units per cubic Angstrom. If provided, will be used
            instead of the one, calculated from the Chemical formula
         e.g:
-        anShape = anAdsrbShape(['Li',0.1])
+        anShape = anAbsorptionShape(['Li',0.1])
     or 
-    anShape = anAdsrbShape({'ChemicalFormula':'Formula','NumberDensity':Number}) 
+    anShape = anAbsorptionShape({'ChemicalFormula':'Formula','NumberDensity':Number})
         e.g:
-        anShape = anAdsrbShape({'ChemicalFormula':'(Li7)2-C-H4-N-Cl6','NumberDensity':0.8}) 
+        anShape = anAbsorptionShape({'ChemicalFormula':'(Li7)2-C-H4-N-Cl6','NumberDensity':0.8}) 
     or 
     anShape = anAdsrbShape(Dictionary with any number of key-value pairs recognized by SetSampleMaterial algorithm)
-    the value should unambiguously define sample material for absorption calculations.
+    e.g:
+    anShape = anAbsorptionShape({'AtomicNumber':12,'AttenuationXSection':0.5,'SampleMassDensity':120})
+
+    The Material definition should unambiguously define sample material for absorption calculations.
 
     The set material value may be accessed or changes through the property material: e.g.
     mat = anShape.material
     or 
-    anShape.material = {'ChemicalFormula','Br'}
+    anShape.material = {'ChemicalFormula':'Br'} (change existing ChemicalFormula)
+
+    Note: 
+    Adding dictionary appends or modifies existing properties, but adding a list, clears up all properties, previously 
+    set-up on class. 
+    The list can contain up two members where first corresponds to the ChemicalFormula and the second one -- to the
+    material's number density
     """
 
     def __init__(self,MaterialValue=None):
         # environment according to existing definitions of the environment
-        self._Environment=None
+        self._Environment={}
         # default sample material (formula)
-        self._Material=None
+        self._Material={}
         # the shape holder. Not defined in this class but the holder for all other classes
-        self._ShapeDescription = None
+        self._ShapeDescription = {}
 
         # the workspace used for testing correct properties settings 
         rhash = random.randint(1,100000)
@@ -63,11 +76,12 @@ class anAbsorptionShape(object):
     #
     @property
     def material(self):
+        """ Contains the material, used in adsorbtion correction calculations"""
         return self._Material
     @material.setter
     def material(self,value):
         if value is None:
-            self._Material = None;
+            self._Material = {}
             return
         if isinstance(value,str):
             value = [value]
@@ -88,12 +102,13 @@ class anAbsorptionShape(object):
                 ' recognized by SetSampleMaterial algorithm')
         #
         Mater_properties = self._Material
-        if not isinstance(Mater_properties['ChemicalFormula'],str):
-            raise TypeError('*** The chemical formula for the material must be described by a string')
+        if 'ChemicalFormula' in Mater_properties:
+            if not isinstance(Mater_properties['ChemicalFormula'],str):
+                raise TypeError('*** The chemical formula for the material must be described by a string')
         # Test if the material property are recognized by SetSampleMaterial algorithm.
         SetSampleMaterial(self._testWorkspace,**Mater_properties)
     #
-    def correct_absorption(self,ws,**kwargs):
+    def correct_absorption(self,ws,*args,**kwargs):
         """ The generic method, which switches between fast and Monte-Carlo absorption corrections
         depending on the type and properties variable provided as second input
 
@@ -108,8 +123,20 @@ class anAbsorptionShape(object):
         """
         n_outputs,var_names = funcinspect.lhs_info('both')
 
-        if kwargs is None:
-            kwargs = {}
+        if args is None or len(args) == 0:
+            if kwargs is None:
+                corr_properties = {}
+            else:
+                corr_properties = kwargs
+        else:
+            corr_properties = args[0]
+            if corr_properties is None:
+                corr_properties = {}
+            else:
+                if not isinstance(corr_properties,dict):
+                    raise TypeError('*** Second non-keyword argument of the correct_absorption routine'\
+                                   ' (if present) should be a dictionary containing '\
+                                   ' additional parameters for selected AbsorptionCorrections algorithm')
 
         correction_base_ws = ConvertUnits(ws,'Wavelength',EMode='Direct')
         Mater_properties = self._Material
@@ -117,14 +144,14 @@ class anAbsorptionShape(object):
         shape_description = self._ShapeDescription
         SetSample(correction_base_ws,Geometry=shape_description)
 
-        mc_corrections = kwargs.pop('is_mc', False)
-        fast_corrections = kwargs.pop('is_fast',False)
+        mc_corrections = corr_properties.pop('is_mc', False)
+        fast_corrections = corr_properties.pop('is_fast',False)
         if  not (mc_corrections or fast_corrections):
             fast_corrections = True
         if fast_corrections: 
-            corrections= self.fast_abs_corrections(correction_base_ws,kwargs)
+            corrections= self.fast_abs_corrections(correction_base_ws,corr_properties)
         else:
-            corrections = self.mc_abs_corrections(correction_base_ws,kwargs)
+            corrections = self.mc_abs_corrections(correction_base_ws,corr_properties)
 
         corrections = ConvertUnits(corrections,'DeltaE',EMode='Direct')
         ws = ws/corrections
@@ -176,12 +203,16 @@ class Cylinder(anAbsorptionShape):
     
     Usage:
     abs = Cylinder(SampleMaterial,CylinderParameters)
-    Define the absorption cylinder with SampleMaterial defined as described on 
-    anAbsorptionShape class and CylinderParameters in the form:
-    a) The list:
-    CylinderParameters = [Height,Radus,[Axis]] 
+    The SampleMaterial is the list or dictionary as described on anAbsorptionShape class 
+
+    and
+
+    CylinderParameters can have the form:
+
+    a) The list consisting of 2 to 4 members.:
+    CylinderParameters = [Height,Radus,[[Axis],[Center]] 
     where Height, Radus are the cylinder height and radius in cm and 
-    Axis, if present is the direction of the cylinder wrt to the bean direction [0,0,1]
+    Axis, if present is the direction of the cylinder wrt to the beam direction [0,0,1]
     e.g.:
     abs = Cylinder(['Al',0.1],[10,2,[1,0,0],[0,0,0]])
     b) The diary: 
@@ -206,7 +237,7 @@ class Cylinder(anAbsorptionShape):
     @cylinder_shape.setter
     def cylinder_shape(self,value):
         if value is None:
-            self._ShapeDescription = None;
+            self._ShapeDescription = {};
             return
         shape_dict = {'Shape':'Cylinder'};
         if isinstance(value,(list,tuple)):
@@ -222,7 +253,7 @@ class Cylinder(anAbsorptionShape):
                     val = float(val)
                 shape_dict[key]  = val
         else:
-            raise TypeError('*** Cylinder shape parameter accepts only list or tuple containing up to 4 values'\
+            raise TypeError('*** Cylinder shape parameter accepts only list or tuple containing from 2 to 4 values'\
                 ' corresponding to cylinder parameters (Height,Radius,Axis and Centre) or dictionary with keys,'\
                 ' recognized by SetSample algorithm Geometry property')
         #

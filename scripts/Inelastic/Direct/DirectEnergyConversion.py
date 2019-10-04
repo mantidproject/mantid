@@ -152,7 +152,6 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-locals
-
     def diagnose(self, white,diag_sample=None,**kwargs):
         """run diagnostics on the provided workspaces.
 
@@ -518,6 +517,16 @@ class DirectEnergyConversion(object):
             else:
                 # single energy uses single workspace and all TOF are used
                 tof_range = None
+
+            # Do custom preprocessing if such operation is defined
+            try:
+                ws_to_preprocess = PropertyManager.sample_run.get_workspace()
+                ws_to_preprocess = self.do_preprocessing(ws_to_preprocess)
+                PropertyManager.sample_run.synchronize_ws(ws_to_preprocess)
+            except AttributeError:
+                pass
+
+
             #---------------
             #
             #Run the conversion first on the sample
@@ -545,6 +554,12 @@ class DirectEnergyConversion(object):
                 deltaE_ws_sample = abs_shape.correct_absorption(deltaE_ws_sample,prop_man.abs_corr_info)
             #
             #
+            # Do custom post-processing if such operation is defined
+            try:
+                deltaE_ws_sample = self.do_postprocessing(deltaE_ws_sample)
+                PropertyManager.sample_run.synchronize_ws(deltaE_ws_sample)
+            except AttributeError:
+                pass
             self.save_results(deltaE_ws_sample)
 
             # prepare output workspace
@@ -613,7 +628,6 @@ class DirectEnergyConversion(object):
                 return False
         else:
             return True
-
 #------------------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
 
@@ -1906,7 +1920,6 @@ class DirectEnergyConversion(object):
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
     #
-
     def _clear_old_results(self):
         """Remove workspaces, processed earlier and not used any more"""
         ws_list = self._old_runs_list
@@ -1915,6 +1928,12 @@ class DirectEnergyConversion(object):
                 DeleteWorkspace(ws_name)
         object.__setattr__(self,'_old_runs_list',[])
     #
+    def do_preprocessing(self,reducer,ws):
+        """ stub for custom preprocessing function"""
+        pass
+    def do_postprocessing(self,reducer,ws):
+        """ stub for custom postprocessing function"""
+        pass
 
 
 def get_failed_spectra_list_from_masks(masked_wksp,prop_man):

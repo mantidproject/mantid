@@ -427,10 +427,11 @@
 <parameter name="motor_log_names"  type="string">
    <value val="wccr;Rot"/>
 </parameter>
-<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<!-- Initial value used to identify crystal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
 <parameter name="motor_offset">
    <value val="None"/>
 </parameter>
+
 
 <parameter name="correct_absorption_on"  type="string">
   <value val="None"/>
@@ -452,7 +453,6 @@
   if set up in python script, the info can be provided both as string above and as a python dictionary. 
   "/>
 </parameter>
-
 
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords

@@ -73,7 +73,51 @@ class ReduceMAPS(ReductionWrapper):
     def __init__(self,web_var=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAP',web_var)
+        Mt = MethodType(self.do_preprocessing, self.reducer,DirectEnergyConversion)
+        DirectEnergyConversion.__setattr__(self.reducer,'do_preprocessing',Mt)
+        Mt = MethodType(self.do_postprocessing, self.reducer,DirectEnergyConversion)
+        DirectEnergyConversion.__setattr__(self.reducer,'do_postprocessing',Mt)
+		
     #
+      #
+    def do_preprocessing(self,reducer,ws):
+        """ Custom function, applied to each run or every workspace, the run is divided to
+            in multirep mode
+            Applied after diagnostics but before any further reduction is invoked.
+            Inputs:
+            self    -- initialized instance of the instrument reduction class
+            reducer -- initialized instance of the reducer 
+                       (DirectEnergyConversion class initialized for specific reduction)
+            ws         the workspace, describing the run or partial run in multirep mode
+                       to preprocess
+
+            By default, does nothing.
+            Add code to do custom preprocessing.
+            Must return pointer to the preprocessed workspace
+        """
+        return ws
+      #
+    def do_postprocessing(self,reducer,ws):
+        """ Custom function, applied to each reduced run or every reduced workspace, 
+            the run is divided into, in multirep mode.
+            Applied after reduction is completed but before saving the result.
+
+            Inputs:
+            self    -- initialized instance of the instrument reduction class
+            reducer -- initialized instance of the reducer 
+                       (DirectEnergyConversion class initialized for specific reduction)
+            ws         the workspace, describing the run or partial run in multirep mode
+                       after reduction to postprocess
+
+
+            By default, does nothing.
+            Add code to do custom postprocessing.
+            Must return pointer to the postprocessed workspace.
+
+            The postprocessed workspace should be consistent with selected save method.
+            (E.g. if you decide to convert workspace units to wavelength, you can not save result as nxspe)
+        """
+        return ws
 
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory

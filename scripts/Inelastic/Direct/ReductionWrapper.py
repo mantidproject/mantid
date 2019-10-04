@@ -17,6 +17,7 @@ import os
 import re
 import time
 from six import iteritems
+
 try:
     import h5py
     h5py_installed = True
@@ -735,6 +736,17 @@ def iliad(reduce):
         return rez
 
     return iliad_wrapper
+#
+def custom_operation(custom_fun):
+    DirectEnergyConversion.__setattr__()
+    def custom_fun_wrapper(*args):
+            # execute decorated function
+            ws = custom_fun(*args)
+            #print "in decorator: ",properties
+            host = args[0]
+            return ws
+
+    return custom_fun_wrapper
 
 
 if __name__ == "__main__":
