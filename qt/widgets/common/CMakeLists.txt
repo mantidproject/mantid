@@ -31,6 +31,7 @@ set(QT5_SRC_FILES
     # todo: move this to the instrument view library when the slice
     # viewer library is removed
     src/IndirectFitPropertyBrowser.cpp
+    src/IFunctionModel.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/InterfaceManager.cpp
@@ -411,6 +412,7 @@ set(SRC_FILES
     src/FunctionMultiDomainPresenter.cpp
     src/FunctionTreeView.cpp
     src/HintingLineEdit.cpp
+    src/IFunctionModel.cpp
     src/InputController.cpp
     src/InstrumentSelector.cpp
     src/LineEditWithClear.cpp
@@ -674,6 +676,7 @@ set(
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
+  inc/MantidQtWidgets/Common/IFunctionModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataSelector.h
   inc/MantidQtWidgets/Common/IMuonFitFunctionModel.h
@@ -897,6 +900,7 @@ set(TEST_FILES
     test/FindFilesWorkerTest.h
     test/FunctionModelTest.h
     test/FunctionMultiDomainPresenterTest.h
+    test/FunctionBrowserUtilsTest.h
     test/LogValueFinderTest.h
     test/InterfaceManagerTest.h
     test/NonOrthogonalTest.h
