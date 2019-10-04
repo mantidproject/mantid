@@ -15,7 +15,7 @@ namespace CustomInterfaces {
 class ALFView_model {
 public:
   void loadEmptyInstrument();
-  int loadData(const std::string &name);
+  std::pair<int, std::string> loadData(const std::string &name);
   std::map<std::string, bool> isDataValid();
   void transformData();
   void rename();

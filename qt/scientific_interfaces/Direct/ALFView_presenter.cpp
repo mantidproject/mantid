@@ -32,26 +32,17 @@ void ALFView_presenter::initLayout() {
 
 void ALFView_presenter::loadAndAnalysis(const std::string &pathToRun) {
   try {
-
-    int runNumber = m_model->loadData(pathToRun);
-    auto bools = m_model->isDataValid();
-    if (bools["IsValidInstrument"]) {
-      m_model->rename();
-      m_currentRun = runNumber;
+    auto loadedResult = m_model->loadData(pathToRun);
+    
+    if (loadedResult.second == "success") {
+      m_currentRun = loadedResult.first;
       m_currentFile = pathToRun;
     } else {
       // reset to the previous data
-      std::string message =
-          "Not the corrct instrument, expected " + m_model->getInstrument();
-      m_view->warningBox(message);
-      m_model->remove();
+      m_view->warningBox(loadedResult.second);
     }
     // make displayed run number be in sinc
     m_view->setRunQuietly(std::to_string(m_currentRun));
-
-    if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
-      m_model->transformData();
-    }
   } catch (...) {
     m_view->setRunQuietly(std::to_string(m_currentRun));
   }

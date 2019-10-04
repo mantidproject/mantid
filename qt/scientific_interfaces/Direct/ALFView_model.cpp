@@ -41,9 +41,9 @@ void ALFView_model::loadEmptyInstrument() {
  * Loads data for use in ALFView
  * Loads data, normalise to current and then converts to d spacing
  * @param name:: string name for ALF data
- * @return int:: the run number
+ * @return std::pair<int,std::string>:: the run number and status
  */
-int ALFView_model::loadData(const std::string &name) {
+std::pair<int, std::string> ALFView_model::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
@@ -51,7 +51,23 @@ int ALFView_model::loadData(const std::string &name) {
   alg->execute();
   auto ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TMPNAME);
-  return ws->getRunNumber();
+  int runNumber = ws->getRunNumber();
+  std::string message = "success";
+  auto bools = isDataValid();
+  if (bools["IsValidInstrument"]) {
+   rename();
+
+  } else {
+    // reset to the previous data
+    message =
+        "Not the corrct instrument, expected " + INSTRUMENTNAME;
+    remove();
+  }
+  if (bools["IsValidInstrument"] && !bools["IsItDSpace"]) {
+    transformData();
+  }
+  return std::make_pair(runNumber, message);
+
 }
 /*
  * Checks loaded data is from ALF
@@ -61,7 +77,6 @@ int ALFView_model::loadData(const std::string &name) {
 std::map<std::string, bool> ALFView_model::isDataValid() {
   auto ws =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(TMPNAME);
-
   bool isItALF = false;
   bool isItDSpace = false;
 
@@ -73,10 +88,7 @@ std::map<std::string, bool> ALFView_model::isDataValid() {
   if (unit == "dSpacing") {
     isItDSpace = true;
   }
-  std::map<std::string, bool> result = {{"IsValidInstrument", isItALF},
-                                        {"IsItDSpace", isItDSpace}};
-
-  return result;
+  return {{"IsValidInstrument", isItALF}, {"IsItDSpace", isItDSpace}};
 }
 
 /*

@@ -23,7 +23,7 @@ class MANTIDQT_DIRECT_DLL ALFView_presenter : public QObject {
 
 public:
   ALFView_presenter(ALFView_view *view, ALFView_model *model);
-  ~ALFView_presenter(){};
+  ~ALFView_presenter() { delete m_loadRunObserver; };
   void initLayout();
 
 private slots:
