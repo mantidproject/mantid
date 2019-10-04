@@ -174,7 +174,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         try:
             x_data = self.getXRange()
             return x_data
-        except RuntimeError or IndexError:
+        except (RuntimeError, IndexError, ValueError):
             return None
 
     def set_fit_bounds(self, fit_bounds):
@@ -190,7 +190,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         Sets the range to fit in the FitPropertyBrowser
         :param fit_range: The new fit range
         """
-        self.setXRange(fit_range[0], fit_range[1])
+        if fit_range is not None:
+            self.setXRange(fit_range[0], fit_range[1])
 
     def hide(self):
         """
