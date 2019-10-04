@@ -15,7 +15,7 @@ A bessel function with damped oscillation that could apply to incommensurate mag
 
 where,
  
-:math:`A_0` is the amplitude asymmetry,
+:math:`A_0` is the amplitude of asymmetry,
 
 :math:`J_0(x)` is the Bessel function of the first kind,
 
