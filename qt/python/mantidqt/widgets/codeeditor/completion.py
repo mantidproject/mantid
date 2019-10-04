@@ -103,6 +103,10 @@ def generate_call_tips(definitions):
         if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
             call_tips.append(name + get_function_spec(py_object))
             continue
+        # Ignore modules or we get duplicates of methods/classes that are imported
+        # in outer scopes, e.g. numpy.array and numpy.core.array
+        if inspect.ismodule(py_object):
+            continue
         for attr in dir(py_object):
             try:
                 f_attr = getattr(py_object, attr)
@@ -128,28 +132,41 @@ class CodeCompleter:
         self.env_globals = env_globals
 
         # A dict gives O(1) lookups and ensures we have no duplicates
-        self._interpreter_completions = dict()
+        self._completions_dict = dict()
         if "from mantid.simpleapi import *" in self.editor.text():
-            self._add_to_interpreter_completions(self._get_mantid_simple_api_call_tips())
+            self._add_to_completions(self._get_module_call_tips('mantid.simpleapi'))
+        if re.search("import .*numpy( |,|$)", self.editor.text()):
+            self._add_to_completions(self._get_module_call_tips('numpy'))
+        if re.search("import .*pyplot( |,|$)", self.editor.text()):
+            self._add_to_completions(self._get_module_call_tips('matplotlib.pyplot'))
 
         self.editor.enableAutoCompletion(CodeEditor.AcsAll)
         self.editor.updateCompletionAPI(self.completions)
 
     @property
     def completions(self):
-        return list(self._interpreter_completions.keys())
+        return list(self._completions_dict.keys())
 
     def _get_completions_from_globals(self):
         return generate_call_tips(self.env_globals)
 
-    def _add_to_interpreter_completions(self, completions):
+    def _add_to_completions(self, completions):
         for completion in completions:
-            self._interpreter_completions[completion] = True
+            self._completions_dict[completion] = True
 
-    def _update_completion_api(self):
-        self._add_to_interpreter_completions(self._get_completions_from_globals())
-        self.editor.updateCompletionAPI(list(self._interpreter_completions.keys()))
+    def update_completion_api(self):
+        self._add_to_completions(self._get_completions_from_globals())
+        self.editor.updateCompletionAPI(self.completions)
 
-    def _get_mantid_simple_api_call_tips(self):
-        simple_api_module = sys.modules['mantid.simpleapi']
-        return generate_call_tips(simple_api_module.__dict__)
+    def _get_module_call_tips(self, module):
+        """
+        Get the call tips for a given module. If the module cannot be
+        found in sys.modules return an empty list
+        :param str module: The name of the module
+        :return list: A list of call tips for the module
+        """
+        try:
+            module = sys.modules[module]
+        except KeyError:
+            return []
+        return generate_call_tips(module.__dict__)
