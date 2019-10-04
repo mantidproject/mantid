@@ -7,15 +7,16 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTWANDSCDTOMDE_H_
 #define MANTID_MDALGORITHMS_CONVERTWANDSCDTOMDE_H_
 
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 /** ConvertWANDSCDtoMDE : TODO: DESCRIPTION
 */
-class MANTID_MDALGORITHMS_DLL ConvertWANDSCDtoMDE : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL ConvertWANDSCDtoMDE
+    : public BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

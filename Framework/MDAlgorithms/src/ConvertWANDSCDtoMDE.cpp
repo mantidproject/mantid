@@ -15,6 +15,7 @@
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
@@ -96,6 +97,10 @@ std::map<std::string, std::string> ConvertWANDSCDtoMDE::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ConvertWANDSCDtoMDE::init() {
+
+  // Box controller properties. These are the defaults
+  this->initBoxControllerProps("5" /*SplitInto*/, 1000 /*SplitThreshold*/,
+                               20 /*MaxRecursionDepth*/);
   declareProperty(
       std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
           "InputWorkspace", "", Direction::Input),
@@ -160,9 +165,7 @@ void ConvertWANDSCDtoMDE::exec() {
   outputWS->initialize();
 
   BoxController_sptr bc = outputWS->getBoxController();
-  bc->setSplitThreshold(1000);
-  bc->setMaxDepth(20);
-  bc->setSplitInto(5);
+  this->setBoxController(bc);
   outputWS->splitBox();
 
   auto mdws_mdevt_3 =
@@ -174,8 +177,8 @@ void ConvertWANDSCDtoMDE::exec() {
   std::vector<Eigen::Vector3f> q_lab_pre;
   q_lab_pre.reserve(azimuthal.size());
   for (size_t m = 0; m < azimuthal.size(); ++m) {
-    twotheta_f = static_cast<float>(twotheta[m]);
-    azimuthal_f = static_cast<float>(azimuthal[m]);
+    auto twotheta_f = static_cast<float>(twotheta[m]);
+    auto azimuthal_f = static_cast<float>(azimuthal[m]);
     q_lab_pre.push_back({-sin(twotheta_f) * cos(azimuthal_f) * k,
                          -sin(twotheta_f) * sin(azimuthal_f) * k,
                          (1.f - cos(twotheta_f)) * k});
@@ -206,6 +209,15 @@ void ConvertWANDSCDtoMDE::exec() {
 
   outputWS->refreshCache();
   outputWS->copyExperimentInfos(*inputWS);
+
+  auto user_convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  auto ws_convention = outputWS->getConvention();
+  if (user_convention != ws_convention) {
+    auto convention_alg = createChildAlgorithm("ChangeQConvention");
+    convention_alg->setProperty("InputWorkspace", outputWS);
+    convention_alg->executeAsChildAlg();
+  }
   setProperty("OutputWorkspace", outputWS);
 }
 
