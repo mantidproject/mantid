@@ -592,16 +592,3 @@ void ScriptEditor::replaceAll(const QString &searchString,
   }
   this->endUndoAction();
 }
-
-/**
- * Add a list of entries to the autocompletion QSciAPI. This function does not
- * check for duplicates and items added twice will show twice in te GUI.
- *
- * @param completions A list of completions to add to the API
- */
-void ScriptEditor::addToCompletionAPI(const QList<QString> &completions) {
-  for (auto &completion : completions) {
-    m_completer->add(completion);
-  }
-  m_completer->prepare();
-}
