@@ -22,8 +22,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsTableView : public QWidget,
                                                        public IRunsTableView {
   Q_OBJECT
 public:
-  explicit QtRunsTableView(std::vector<std::string> const &instruments,
-                           int defaultInstrumentIndex);
+  explicit QtRunsTableView(std::vector<std::string> const &instruments);
   void subscribe(RunsTableViewSubscriber *notifyee) override;
   void setProgress(int value) override;
   void resetFilterBox() override;

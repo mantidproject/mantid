@@ -61,7 +61,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.reductionPaused();
+    presenter.notifyReductionPaused();
 
     verifyAndClear();
   }
@@ -71,7 +71,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectProcessing();
-    presenter.reductionResumed();
+    presenter.notifyReductionResumed();
 
     verifyAndClear();
   }
@@ -81,7 +81,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.autoreductionPaused();
+    presenter.notifyAutoreductionPaused();
 
     verifyAndClear();
   }
@@ -91,7 +91,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectAutoreducing();
-    presenter.autoreductionResumed();
+    presenter.notifyAutoreductionResumed();
 
     verifyAndClear();
   }
@@ -473,35 +473,33 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsNotifiesMainPresenter() {
-    auto defaultOptions = expectDefaults(makeEmptyExperiment());
-    auto presenter = makePresenter(std::move(defaultOptions));
-    EXPECT_CALL(m_mainPresenter, notifyRestoreDefaultsRequested())
-        .Times(AtLeast(1));
+  void testRestoreDefaultsUpdatesInstrument() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, notifyUpdateInstrumentRequested()).Times(1);
     presenter.notifyRestoreDefaultsRequested();
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesAnalysisModeInView() {
+  void testInstrumentChangedUpdatesAnalysisModeInView() {
     auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setAnalysisMode("MultiDetectorAnalysis")).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesAnalysisModeInModel() {
+  void testInstrumentChangedUpdatesAnalysisModeInModel() {
     auto model = makeModelWithAnalysisMode(AnalysisMode::MultiDetector);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.experiment().analysisMode(),
                      AnalysisMode::MultiDetector);
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesReductionOptionsInView() {
+  void testInstrumentChangedUpdatesReductionOptionsInView() {
     auto model = makeModelWithReduction(SummationType::SumInQ,
                                         ReductionType::NonFlatSample, true);
     auto defaultOptions = expectDefaults(model);
@@ -509,16 +507,16 @@ public:
     EXPECT_CALL(m_view, setSummationType("SumInQ")).Times(1);
     EXPECT_CALL(m_view, setReductionType("NonFlatSample")).Times(1);
     EXPECT_CALL(m_view, setIncludePartialBins(true)).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesReductionOptionsInModel() {
+  void testInstrumentChangedUpdatesReductionOptionsInModel() {
     auto model = makeModelWithReduction(SummationType::SumInQ,
                                         ReductionType::NonFlatSample, true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.experiment().summationType(),
                      SummationType::SumInQ);
     TS_ASSERT_EQUALS(presenter.experiment().reductionType(),
@@ -527,25 +525,25 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesDebugOptionsInView() {
+  void testInstrumentChangedUpdatesDebugOptionsInView() {
     auto model = makeModelWithDebug(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setDebugOption(true)).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesDebugOptionsInModel() {
+  void testInstrumentChangedUpdatesDebugOptionsInModel() {
     auto model = makeModelWithDebug(true);
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.experiment().debug(), true);
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesPerThetaInView() {
+  void testInstrumentChangedUpdatesPerThetaInView() {
     auto perThetaDefaults = PerThetaDefaults(
         boost::none, TransmissionRunPair(), boost::none,
         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"));
@@ -556,17 +554,17 @@ public:
         {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
          "390-415"}};
     EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesPerThetaInModel() {
+  void testInstrumentChangedUpdatesPerThetaInModel() {
     auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(
         boost::none, TransmissionRunPair(), boost::none,
         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
                                      boost::none, RangeInQ(0.01, 0.03, 0.2),
                                      0.7, std::string("390-415"));
@@ -576,22 +574,22 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesTransmissionRunRangeInView() {
+  void testInstrumentChangedUpdatesTransmissionRunRangeInView() {
     auto model = makeModelWithTransmissionRunRange(RangeInLambda{10.0, 12.0});
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setTransmissionStartOverlap(10.0)).Times(1);
     EXPECT_CALL(m_view, setTransmissionEndOverlap(12.0)).Times(1);
     EXPECT_CALL(m_view, showTransmissionRangeValid()).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesTransmissionRunRangeInModel() {
+  void testInstrumentChangedUpdatesTransmissionRunRangeInModel() {
     auto model = makeModelWithTransmissionRunRange(RangeInLambda{10.0, 12.0});
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     auto const expected = RangeInLambda{10.0, 12.0};
     TS_ASSERT_EQUALS(
         presenter.experiment().transmissionStitchOptions().overlapRange(),
@@ -599,7 +597,7 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesCorrectionInView() {
+  void testInstrumentChangedUpdatesCorrectionInView() {
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
         FloodCorrections(FloodCorrectionType::ParameterFile));
@@ -607,17 +605,17 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
-  void testRestoreDefaultsUpdatesCorrectionInModel() {
+  void testInstrumentChangedUpdatesCorrectionInModel() {
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
         FloodCorrections(FloodCorrectionType::ParameterFile));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(
         presenter.experiment().polarizationCorrections().correctionType(),
         PolarizationCorrectionType::ParameterFile);
@@ -626,12 +624,12 @@ public:
     verifyAndClear();
   }
 
-  void testRestoreDefaultsDisconnectsNotificationsBackFromView() {
+  void testInstrumentChangedDisconnectsNotificationsBackFromView() {
     auto defaultOptions = expectDefaults(makeEmptyExperiment());
     EXPECT_CALL(m_view, disconnectExperimentSettingsWidgets()).Times(1);
     EXPECT_CALL(m_view, connectExperimentSettingsWidgets()).Times(1);
     auto presenter = makePresenter(std::move(defaultOptions));
-    presenter.notifyRestoreDefaultsRequested();
+    presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 

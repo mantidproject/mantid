@@ -8,7 +8,8 @@
 
 import unittest
 
-from mantid.py3compat.mock import Mock, patch
+from mantid.api import AnalysisDataService, WorkspaceFactory
+from mantid.py3compat.mock import MagicMock, Mock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
 from testhelpers import assertRaisesNothing
@@ -32,8 +33,25 @@ class FitPropertyBrowserTest(unittest.TestCase):
             property_browser.normaliseData.assert_called_once_with(normalised)
             normaliseData_mock.reset_mock()
 
+    def test_plot_guess_plots_for_table_workspaces(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn('double', 'X', 1)
+        table.addColumn('double', 'Y', 2)
+        for i in range(1,10):
+            table.addRow([0.1*i, 5])
+        name = "table_name"
+        AnalysisDataService.Instance().addOrReplace(name, table)
+        property_browser = self._create_widget()
+        property_browser.getFittingFunction = Mock(return_value='name=FlatBackground')
+        property_browser.workspaceName = Mock(return_value=name)
+        property_browser.startX = Mock(return_value=0.15)
+        property_browser.endX = Mock(return_value=0.95)
+        property_browser.plot_guess()
+
+        self.assertEqual(1, property_browser.get_axes().plot.call_count)
+
     # Private helper functions
-    def _create_widget(self, canvas=Mock(), toolbar_manager=Mock()):
+    def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
 

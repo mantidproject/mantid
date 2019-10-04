@@ -75,13 +75,15 @@ void EventPresenter::updateWidgetEnabledState() const {
   }
 }
 
-void EventPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void EventPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void EventPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void EventPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 
-void EventPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void EventPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
-void EventPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void EventPresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());

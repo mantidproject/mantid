@@ -525,8 +525,7 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.view.function_browser.setParameter('A', 1.5)
 
-        self.assertEqual([str(item) for item in self.presenter._fit_function],
-                         ['name=GausOsc,A=1.5,Sigma=0.2,Frequency=0.1,Phi=0'] + ['name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0'] * 2)
+        self.assertEqual(str(self.view.fit_object), 'name=GausOsc,A=1.5,Sigma=0.2,Frequency=0.1,Phi=0')
 
     def test_handle_display_workspace_changed_updates_displayed_single_function(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',

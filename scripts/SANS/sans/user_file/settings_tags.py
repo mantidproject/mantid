@@ -92,7 +92,7 @@ class SetId(object):
 
 
 # --- TRANS
-@serializable_enum("spec", "spec_shift", "radius", "roi", "mask", "sample_workspace", "can_workspace")
+@serializable_enum("spec", "spec_4_shift", "spec_5_shift", "radius", "roi", "mask", "sample_workspace", "can_workspace")
 class TransId(object):
     pass
 

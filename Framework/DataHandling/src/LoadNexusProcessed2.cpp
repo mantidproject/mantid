@@ -111,12 +111,18 @@ void LoadNexusProcessed2::extractMappingInfoNew(
 
   auto &spectrumNumbers = m_spectrumNumbers;
   auto &detectorIds = m_detectorIds;
+  auto &detectorCounts = m_detectorCounts;
   for (const auto &group : inst.groups()) {
     if (group.nxclass == "NXdetector" || group.nxclass == "NXmonitor") {
       NXDetector detgroup = inst.openNXDetector(group.nxname);
 
       NXInt spectra_block = detgroup.openNXInt("spectra");
-      spectra_block.load();
+      try {
+        spectra_block.load();
+      } catch (std::runtime_error &) { // Throws if dataset zero-sized
+        detgroup.close();
+        continue;
+      }
       const size_t nSpecEntries = spectra_block.dim0();
       auto data = spectra_block.sharedBuffer();
       size_t currentSize = spectrumNumbers.size();
@@ -129,23 +135,43 @@ void LoadNexusProcessed2::extractMappingInfoNew(
       NXInt det_index = detgroup.openNXInt("detector_list");
       det_index.load();
       size_t nDetEntries = det_index.dim0();
-
-      // TODO currently hard-coded for 1:1 mapping need to go via
-      // detector_indexes to fix
-      if (nSpecEntries != nDetEntries) {
-        throw std::runtime_error("Nexus mappings only support 1:1 at present");
-      }
       currentSize = detectorIds.size();
       data = det_index.sharedBuffer();
       detectorIds.resize(currentSize + nDetEntries, 0);
       for (size_t i = 0; i < nDetEntries; ++i) {
         detectorIds[i + currentSize] = data[i];
       }
+
+      // Load the number of detectors per spectra
+      NXInt det_counts = detgroup.openNXInt("detector_count");
+      det_counts.load();
+      size_t nDetCounts = det_counts.dim0();
+      currentSize = detectorCounts.size();
+      data = det_counts.sharedBuffer();
+      detectorCounts.resize(currentSize + nDetCounts, 0);
+      size_t dataSum = 0;
+      for (size_t i = 0; i < nDetCounts; ++i) {
+        const int dataVal = data[i];
+        dataSum += dataVal;
+        detectorCounts[i + currentSize] = dataVal;
+      }
+
+      if (nDetCounts != nSpecEntries) {
+        throw std::runtime_error("Bad file. Has different number of entries in "
+                                 "spec and detector_count datasets");
+      }
+      if (dataSum != nDetEntries) {
+        throw std::runtime_error("Bad file. detector_counts sum does not match "
+                                 "the number of detectors given by number of "
+                                 "detector_list entries");
+      }
+
       detgroup.close();
     }
   }
   inst.close();
 }
+
 /**
  * Attempt to load nexus geometry. Should fail without exception if not
  * possible.
@@ -163,13 +189,13 @@ void LoadNexusProcessed2::extractMappingInfoNew(
  * @param filename : filename to load from.
  * @return true if successful
  */
-bool LoadNexusProcessed2::loadNexusGeometry(Mantid::API::Workspace &ws,
+bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws,
                                             const int nWorkspaceEntries,
                                             Kernel::Logger &logger,
                                             const std::string &filename) {
   if (m_instrumentLayout == InstrumentLayout::NexusFormat &&
       nWorkspaceEntries == 1) {
-    if (auto *matrixWs = dynamic_cast<Mantid::API::MatrixWorkspace *>(&ws)) {
+    if (auto *matrixWs = dynamic_cast<API::MatrixWorkspace *>(&ws)) {
       try {
         using namespace Mantid::NexusGeometry;
         auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(
@@ -178,22 +204,23 @@ bool LoadNexusProcessed2::loadNexusGeometry(Mantid::API::Workspace &ws,
             Geometry::Instrument_const_sptr(std::move(instrument)));
 
         auto &detInfo = matrixWs->detectorInfo();
-        if (m_detectorIds.size() != detInfo.size()) {
-          logger.warning("New style mappings will not be loaded. Detector "
-                         "mappings do not match number of detectors in "
-                         "geometry");
-          return false;
-        }
         Indexing::IndexInfo info(m_spectrumNumbers);
         std::vector<SpectrumDefinition> definitions;
-        definitions.reserve(m_detectorIds.size());
-        for (const auto &id : m_detectorIds) {
-          // Assumes 1:1 mapping
-          definitions.push_back(SpectrumDefinition{detInfo.indexOf(id)});
+        definitions.reserve(m_spectrumNumbers.size());
+        size_t detCounter = 0;
+        for (size_t i = 0; i < m_spectrumNumbers.size(); ++i) {
+          // counts gives number of detectors per spectrum
+          size_t counts = m_detectorCounts[i];
+          SpectrumDefinition def;
+          // Add the number of detectors known to be associated with this
+          // spectrum
+          for (size_t j = 0; j < counts; ++j, ++detCounter) {
+            def.add(detInfo.indexOf(m_detectorIds[detCounter]));
+          }
+          definitions.push_back(def);
         }
         info.setSpectrumDefinitions(definitions);
         matrixWs->setIndexInfo(info);
-
         return true;
       } catch (std::exception &e) {
         logger.warning(e.what());

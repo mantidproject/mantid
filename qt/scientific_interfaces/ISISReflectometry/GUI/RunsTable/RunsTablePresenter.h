@@ -38,27 +38,31 @@ public:
   RunsTable const &runsTable() const override;
   RunsTable &mutableRunsTable() override;
   void mergeAdditionalJobs(ReductionJobs const &jobs) override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
 
   // RunsTableViewSubscriber overrides
-  void notifyReductionResumed() override;
-  void notifyReductionPaused() override;
+  void notifyResumeReductionRequested() override;
+  void notifyPauseReductionRequested() override;
   void notifyInsertRowRequested() override;
   void notifyInsertGroupRequested() override;
   void notifyDeleteRowRequested() override;
   void notifyDeleteGroupRequested() override;
   void notifyFilterChanged(std::string const &filterValue) override;
-  void notifyInstrumentChanged() override;
+  void notifyChangeInstrumentRequested() override;
   void notifyExpandAllRequested() override;
   void notifyCollapseAllRequested() override;
   void notifyPlotSelectedPressed() override;
   void notifyPlotSelectedStitchedOutputPressed() override;
   void notifyFillDown() override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
 
   // JobTreeViewSubscriber overrides
   void notifyCellTextChanged(
@@ -154,6 +158,8 @@ private:
 
   bool isProcessing() const;
   bool isAutoreducing() const;
+  bool isAnyBatchProcessing() const;
+  bool isAnyBatchAutoreducing() const;
 
   static auto constexpr DEPTH_LIMIT = 2;
 

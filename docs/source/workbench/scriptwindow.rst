@@ -35,6 +35,11 @@ script is selected then only the selection will be run, if nothing is selected
 the whole script will be run. A shortcut to run the full script, regardless of
 selection, is :code:`Ctrl+Shift+Return`.
 
+Workbench does allow you to run more than one script at once. When doing this,
+be aware that when the :ref:`Messages Window <WorkbenchMessagesWindow>` is set
+to display output from only the current tab, the output from all running
+scripts will be attributed to the script executed last.
+
 Find and Replace
 ^^^^^^^^^^^^^^^^
 .. image:: ../images/Workbench/Editor/EditorFindReplace.png

@@ -59,7 +59,7 @@ public:
                 const RunsTablePresenterFactory &makeRunsTablePresenter,
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
-                int defaultInstrumentIndex, IMessageHandler *messageHandler);
+                IMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -69,36 +69,43 @@ public:
 
   // IRunsPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
+  void initInstrumentList() override;
   RunsTable const &runsTable() const override;
   RunsTable &mutableRunsTable() override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   int percentComplete() const override;
-  void notifyInstrumentChanged(std::string const &instrumentName) override;
-  void notifyReductionResumed() override;
-  void notifyReductionPaused() override;
+  void
+  notifyChangeInstrumentRequested(std::string const &instrumentName) override;
+  void notifyResumeReductionRequested() override;
+  void notifyPauseReductionRequested() override;
   void notifyRowStateChanged() override;
   void notifyRowStateChanged(boost::optional<Item const &> item) override;
   void notifyRowOutputsChanged() override;
   void notifyRowOutputsChanged(boost::optional<Item const &> item) override;
 
-  void reductionPaused() override;
-  void reductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
   bool resumeAutoreduction() override;
-  void autoreductionResumed() override;
-  void autoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
   void autoreductionCompleted() override;
-  void anyBatchAutoreductionResumed() override;
-  void anyBatchAutoreductionPaused() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void settingsChanged() override;
+
+  bool isAnyBatchProcessing() const override;
+  bool isAnyBatchAutoreducing() const override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
+  void notifyResumeAutoreductionRequested() override;
+  void notifyPauseAutoreductionRequested() override;
   void notifyTransfer() override;
-  void notifyInstrumentChanged() override;
+  void notifyChangeInstrumentRequested() override;
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
@@ -134,12 +141,8 @@ private:
   IMessageHandler *m_messageHandler;
   /// The list of instruments
   std::vector<std::string> m_instruments;
-  /// The default index in the instrument list
-  int m_defaultInstrumentIndex;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
-
-  bool isAnyBatchAutoreducing() const;
 
   /// searching
   bool search(ISearcher::SearchType searchType);

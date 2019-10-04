@@ -162,7 +162,7 @@ public:
   /// Invert this matrix
   void invert();
   /// Calculate the determinant
-  double det();
+  double det() const;
   /// Calculate the eigensystem of a symmetric matrix
   void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
   Tr<GSLMatrix> tr() { return Tr<GSLMatrix>(*this); }
@@ -178,6 +178,7 @@ private:
   std::vector<double> m_data;
   /// The pointer to the GSL vector
   gsl_matrix_view m_view;
+  GSLVector multiplyByVector(const GSLVector &v) const;
 };
 
 /// Overloaded operator for matrix multiplication

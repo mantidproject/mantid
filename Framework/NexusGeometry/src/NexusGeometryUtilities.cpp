@@ -6,8 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidNexusGeometry/NexusGeometryUtilities.h"
+#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
-
+#include <regex>
 namespace Mantid {
 namespace NexusGeometry {
 namespace utilities {
@@ -30,6 +31,50 @@ boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup,
   }
   return boost::optional<DataSet>{}; // Empty
 }
+
+boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup,
+                                           const H5std_string &name) {
+
+  for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
+    if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
+      H5std_string childPath = parentGroup.getObjnameByIdx(i);
+      if (childPath == name) {
+        return boost::optional<H5::Group>(parentGroup.openGroup(childPath));
+      }
+    }
+  }
+  return boost::optional<H5::Group>();
+}
+
+bool hasNXAttribute(const H5::Group &group, const std::string &attributeValue) {
+  bool result = false;
+  for (uint32_t attribute_index = 0;
+       attribute_index < static_cast<uint32_t>(group.getNumAttrs());
+       ++attribute_index) {
+    // Test attribute at current index for NX_class
+    Attribute attribute = group.openAttribute(attribute_index);
+    if (attribute.getName() == NX_CLASS) {
+      // Get attribute data type
+      DataType dataType = attribute.getDataType();
+      // Get the NX_class type
+      H5std_string classT;
+      attribute.read(dataType, classT);
+      // If group of correct type, return the childGroup
+      if (classT == attributeValue) {
+        result = true;
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+bool isNamed(const H5::H5Object &object, const std::string &name) {
+  const auto objName = H5_OBJ_NAME(object);
+  // resultName gives full path. We match the last name on the path
+  return std::regex_match(objName, std::regex(".*/" + name + "$"));
+}
+
 /// Find a single group inside parent (returns first match). class type must
 /// match NX_class. Optional wrapped - empty to indicate nothing found.
 boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
@@ -41,27 +86,13 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup,
       // Open the sub group
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      for (uint32_t attribute_index = 0;
-           attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
-           ++attribute_index) {
-        // Test attribute at current index for NX_class
-        Attribute attribute = childGroup.openAttribute(attribute_index);
-        if (attribute.getName() == NX_CLASS) {
-          // Get attribute data type
-          DataType dataType = attribute.getDataType();
-          // Get the NX_class type
-          H5std_string classT;
-          attribute.read(dataType, classT);
-          // If group of correct type, return the childGroup
-          if (classT == classType) {
-            return boost::optional<Group>(childGroup);
-          }
-        }
+      if (hasNXAttribute(childGroup, classType)) {
+        return boost::optional<Group>(childGroup);
       }
     }
   }
   return boost::optional<Group>{}; // Empty
-}
+} // namespace utilities
 
 /// Find all groups at the same level matching same class type. Returns first
 /// item found.
@@ -75,23 +106,8 @@ std::vector<H5::Group> findGroups(const H5::Group &parentGroup,
       // Open the sub group
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      for (uint32_t attribute_index = 0;
-           attribute_index < static_cast<uint32_t>(childGroup.getNumAttrs());
-           ++attribute_index) {
-        // Test attribute at current index for NX_class
-        Attribute attribute = childGroup.openAttribute(attribute_index);
-        if (attribute.getName() == NX_CLASS) {
-          // Get attribute data type
-          DataType dataType = attribute.getDataType();
-          // Get the NX_class type
-          H5std_string classT;
-          attribute.read(dataType, classT);
-          // If group of correct type, return the childGroup
-          if (classT == classType) {
-            groups.push_back(childGroup);
-          }
-        }
-      }
+      if (hasNXAttribute(childGroup, classType))
+        groups.push_back(childGroup);
     }
   }
   return groups; // Empty
