@@ -9,7 +9,7 @@
 import re
 import unittest
 
-from mantid.simpleapi import *  # noqa  # we need this so simpleapi is in sys.modules
+from mantid.simpleapi import Rebin  #noqa  # needed to sys.modules can pick up Rebin
 from mantid.py3compat.mock import Mock, patch
 from mantidqt.widgets.codeeditor.completion import CodeCompleter
 
@@ -63,12 +63,12 @@ class CodeCompletionTest(unittest.TestCase):
             completer._on_cursor_position_changed(1, 11)
             self.assertEqual(0, completer._generate_jedi_completions_list.call_count)
 
-    def test_that_generate_jedi_completions_list_is_called_when_cursor_is_after_closed_brackets(
+    def test_that_jedi_completions_not_called_when_whitespace_between_cursor_and_non_alpha_character(
             self):
         completer = self._get_completer("import numpy as np\nnp.array(x)    ", enable_jedi=True)
         with patch.object(completer, '_generate_jedi_completions_list'):
             completer._on_cursor_position_changed(1, 11)
-            self.assertEqual(1, completer._generate_jedi_completions_list.call_count)
+            self.assertEqual(0, completer._generate_jedi_completions_list.call_count)
 
 
 if __name__ == '__main__':

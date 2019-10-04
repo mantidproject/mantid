@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, unicode_literals)
 
 import inspect
+import re
 import sys
 from six import PY2
 if PY2:  # noqa
@@ -91,11 +92,9 @@ def generate_call_tips(definitions):
         Load(InputWorkspace, [OutputWorkspace], ...)
     where squared braces denote key-word arguments.
 
-    :param definitions: Dictionary with names of python objects as keys and
+    :param dict definitions: Dictionary with names of python objects as keys and
         the objects themselves as values
-    :type definitions: dict
-    :returns: A list of call tips
-    :rtype: list
+    :returns list: A list of call tips
     """
     if not isinstance(definitions, dict):
         return []
@@ -103,8 +102,7 @@ def generate_call_tips(definitions):
     for name, py_object in definitions.items():
         if name.startswith('_'):
             continue
-        if inspect.isfunction(py_object) or inspect.isbuiltin(py_object) or inspect.ismodule(
-                py_object) or inspect.isclass(py_object):
+        if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
             call_tips.append(name + get_function_spec(py_object))
             continue
         for attr in dir(py_object):
@@ -114,8 +112,7 @@ def generate_call_tips(definitions):
                 continue
             if attr.startswith('_'):
                 continue
-            if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(
-                    f_attr):
+            if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
                 call_tips.append(name + '.' + attr + get_function_spec(f_attr))
             else:
                 call_tips.append(name + '.' + attr)
@@ -140,54 +137,62 @@ class CodeCompleter:
     launched with Python 2 through PyCharm's debugger. There is no such
     problem in Python 3 however.
     """
-
-    def __init__(self, editor, env_globals=None, enable_jedi=True):
+    def __init__(self, editor, env_globals=None, enable_jedi=False):
         self.editor = editor
         self.env_globals = env_globals
         self._enable_jedi = enable_jedi
-        self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
+        if self._enable_jedi:
+            self.editor.enableAutoCompletion(CodeEditor.AcsAPIs)
+        else:
+            self.editor.enableAutoCompletion(CodeEditor.AcsAll)
 
-        self._non_jedi_completions = dict()
+        self._interpreter_completions = dict()
         if "from mantid.simpleapi import *" in self.editor.text():
-            self._add_to_completions(self._get_mantid_simple_api_call_tips())
+            self._add_to_interpreter_completions(self._get_mantid_simple_api_call_tips())
 
         if enable_jedi:
-            jedi.api.preload_module('numpy', 'matplotlib.pyplot')
-            self._add_to_completions(self._generate_jedi_completions_list())
+            jedi.api.preload_module('numpy', 'matplotlib.pyplot', 'np')
+            self._add_to_interpreter_completions(self._generate_jedi_completions_list())
             self.editor.cursorPositionChanged.connect(self._on_cursor_position_changed)
 
-        self.editor.updateCompletionAPI(list(self._non_jedi_completions.keys()))
+        self.editor.updateCompletionAPI(list(self._interpreter_completions.keys()))
 
     def _get_completions_from_globals(self):
         return generate_call_tips(self.env_globals)
 
-    def _add_to_completions(self, completions):
+    def _add_to_interpreter_completions(self, completions):
         for completion in completions:
-            self._non_jedi_completions[completion] = True
+            self._interpreter_completions[completion] = True
 
     def _update_completion_api(self):
-        self._add_to_completions(self._get_completions_from_globals())
-        self.editor.updateCompletionAPI(list(self._non_jedi_completions.keys()))
+        self._add_to_interpreter_completions(self._get_completions_from_globals())
+        self.editor.updateCompletionAPI(list(self._interpreter_completions.keys()))
 
     def _get_mantid_simple_api_call_tips(self):
         simple_api_module = sys.modules['mantid.simpleapi']
         return generate_call_tips(simple_api_module.__dict__)
 
     # Jedi completions generation
-    def _generate_jedi_interpreter(self, line_no=None, col_no=None):
-        return jedi.Script(self.editor.text(), line=line_no, column=col_no,
-                           path=self.editor.fileName(), sys_path=sys.path)
+    def _generate_jedi_script(self, line_no=None, col_no=None):
+        return jedi.Script(self.editor.text(),
+                           line=line_no,
+                           column=col_no,
+                           path=self.editor.fileName(),
+                           sys_path=sys.path)
 
     def _generate_jedi_completions_list(self, line_no=None, col_no=None):
-        completions = self._generate_jedi_interpreter(line_no, col_no).completions()
+        completions = self._generate_jedi_script(line_no, col_no).completions()
         completions_list = []
         for completion in completions:
-            if not completion.name.startswith('_') and completion.full_name:
-                completions_list.append(completion.full_name)
+            if not completion.name.startswith('_'):
+                if completion.full_name:
+                    completions_list.append(completion.full_name)
+                else:
+                    completions_list.append(completion.name)
         return completions_list
 
     def _generate_jedi_call_tips(self, line_no=None, col_no=None):
-        call_sigs = self._generate_jedi_interpreter(line_no, col_no).call_signatures()
+        call_sigs = self._generate_jedi_script(line_no, col_no).call_signatures()
         call_tips = []
         for signature in call_sigs:
             if signature.name.startswith('_'):
@@ -205,7 +210,7 @@ class CodeCompleter:
             call_tips.append(call_tip)
             if call_tips:
                 # We want call tips to be persistent
-                self._add_to_completions(call_tips)
+                self._add_to_interpreter_completions(call_tips)
 
         return call_tips
 
@@ -216,17 +221,27 @@ class CodeCompleter:
         :param int line_no: The cursor's new line number
         :param int col_no: The cursor's new column number
         """
-        line = self.editor.text().split('\n')[line_no]
-        if col_no < 2:
+        line = self.editor.text().split('\n')[line_no][:col_no]
+        if not line or col_no < 2 or (len(line.strip()) < 2):
             return
+
+        # Don't get jedi completions unless we are two characters clear of the
+        # last non-alpha character
+        last_var_separator = re.search("[^a-zA-Z_\d\s:]| ", line[::-1])
+        if last_var_separator:
+            var = line[len(line) - last_var_separator.end() + 1:]
+            if len(var) < 2 or var[0].isdigit():
+                return
 
         jedi_completions = []
         if line.strip() and not (line.rstrip()[-1] == '(' and col_no >= line.rfind('(')):
+            print("Completions")
             jedi_completions = self._generate_jedi_completions_list(line_no + 1, col_no)
-
-        if line.rfind(')') < line.rfind('('):
+        elif line.rfind(')') < line.rfind('('):
+            print("Call tips")
             call_tips = self._generate_jedi_call_tips(line_no + 1, col_no)
             jedi_completions.extend(call_tips)
 
         if jedi_completions:
-            self.editor.updateCompletionAPI(jedi_completions + self._non_jedi_completions.keys())
+            self.editor.updateCompletionAPI(
+                set(jedi_completions + self._interpreter_completions.keys()))
