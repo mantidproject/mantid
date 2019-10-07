@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
-from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import absorb_corrections, common
@@ -85,169 +84,16 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
 
     if merge_banks:
-        group_bin_min = None
-        group_bin_max = None
-        group_bin_width = None
-        for i in range(pdf_output.getNumberOfEntries()):
-            x_array = pdf_output.getItem(i).readX(0)
-            bin_min = x_array[0]
-            bin_max = x_array[-1]
-            bin_width = (x_array[-1] - x_array[0])/x_array.size
-            binning = [bin_min, bin_width, bin_max]
-            if not group_bin_min:
-                group_bin_min = bin_min
-                group_bin_max = bin_max
-                group_bin_width = bin_width
-            else:
-                group_bin_min = min(group_bin_min, bin_min)
-                group_bin_max = min(group_bin_max, bin_max)
-                group_bin_width = min(group_bin_width, bin_width)
-            fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=pdf_output.getItem(i),
-                                                     BinningForFit=binning,
-                                                     BinningForCalc=binning,
-                                                     FitSpectrumWith="GaussConvCubicSpline")
-            placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=fit_spectra)
-            cal_workspace = mantid.LoadCalFile(
-                InputWorkspace=placzek_self_scattering,
-                CalFileName=cal_file_name,
-                Workspacename='cal_workspace',
-                MakeOffsetsWorkspace=False,
-                MakeMaskWorkspace=False)
-            focused_correction = None
-            for spec_index in range(placzek_self_scattering.getNumberHistograms()):
-                if cal_workspace.dataY(spec_index)[0] == i + 1:
-                    if focused_correction is None:
-                        focused_correction = placzek_self_scattering.dataY(spec_index)
-                    else:
-                        focused_correction = np.add(focused_correction, placzek_self_scattering.dataY(spec_index))
-            mantid.CreateWorkspace(DataX=placzek_self_scattering.dataX(0),
-                                   DataY=focused_correction,
-                                   Distribution=True,
-                                   UnitX='MomentumTransfer',
-                                   OutputWorkspace='focused_correction_ws')
-            mantid.Rebin(InputWorkspace=pdf_output.getItem(i), OutputWorkspace='pdf_rebined', Params=binning)
-            mantid.Rebin(InputWorkspace='focused_correction_ws', OutputWorkspace='focused_correction_ws', Params=binning)
-            mantid.Subtract(LHSWorkspace='pdf_rebined', RHSWorkspace='focused_correction_ws', OutputWorkspace=pdf_output.getItem(i))
-        binning = [group_bin_min, group_bin_width, group_bin_max]
-        pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=binning)
-        pdf_output_combined = mantid.ConjoinSpectra(InputWorkspaces='pdf_output')
-        mantid.MatchSpectra(InputWorkspace=pdf_output_combined, OutputWorkspace=pdf_output_combined, ReferenceSpectrum=1)
-        if type(q_lims) == str:
-            q_min = []
-            q_max = []
-            try:
-                with open(q_lims, 'r') as f:
-                    line_list = [line.rstrip('\n') for line in f]
-                    for line in line_list[:-1]:
-                        value_list = line.split()
-                        q_min.append(value_list[2])
-                        q_max.append(value_list[3])
-            except IOError:
-                raise RuntimeError("q_lims is not valid")
-        elif type(q_lims) == list or type(q_lims) == np.ndarray:
-            q_min = q_lims[0, :]
-            q_max = q_lims[1, :]
-        else:
-            raise RuntimeError("q_lims is not valid")
-        pdf_x_array = pdf_output_combined.readX(0)
-        for i in range(q_min.size):
-            q_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= q_min[i]))]
-            q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
-        bin_width = pdf_x_array[1] - pdf_x_array[0]
-        pdf_output_combined = mantid.CropWorkspaceRagged(InputWorkspace=pdf_output_combined, XMin=q_min, XMax=q_max)
-        pdf_output_combined = mantid.Rebin(InputWorkspace=pdf_output_combined, Params=[min(q_min), bin_width, max(q_max)])
-        pdf_output_combined = mantid.SumSpectra(InputWorkspace=pdf_output_combined, WeightedSum=True, MultiplyBySpectra=False)
-        pdf_fourier_transform = mantid.PDFFourierTransform(Inputworkspace=pdf_output_combined, InputSofQType="S(Q)",
-                                                           PDFType="G(r)", Filter=True)
-        return pdf_fourier_transform
-
-    pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
-                                            Filter=True)
-    pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
-                                         PreserveEvents=True)
-    return pdf_output
-
-
-def _generate_grouped_ts_pdf(focused_data, q_lims, cal_file_name):
-    group_bin_min = None
-    group_bin_max = None
-    group_bin_width = None
-    for i in range(focused_data.getNumberOfEntries()):
-        x_array = focused_data.getItem(i).readX(0)
-        bin_min = x_array[0]
-        bin_max = x_array[-1]
-        bin_width = (x_array[-1] - x_array[0]) / x_array.size
-        binning = [bin_min, bin_width, bin_max]
-        if not group_bin_min:
-            group_bin_min = bin_min
-            group_bin_max = bin_max
-            group_bin_width = bin_width
-        else:
-            group_bin_min = min(group_bin_min, bin_min)
-            group_bin_max = min(group_bin_max, bin_max)
-            group_bin_width = min(group_bin_width, bin_width)
-        fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=focused_data.getItem(i),
-                                                 BinningForFit=binning,
-                                                 BinningForCalc=binning,
-                                                 FitSpectrumWith="GaussConvCubicSpline")
-        placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=fit_spectra)
-        cal_workspace = mantid.LoadCalFile(
-            InputWorkspace=placzek_self_scattering,
-            CalFileName=cal_file_name,
-            Workspacename='cal_workspace',
-            MakeOffsetsWorkspace=False,
-            MakeMaskWorkspace=False)
-        focused_correction = None
-        for spec_index in range(placzek_self_scattering.getNumberHistograms()):
-            if cal_workspace.dataY(spec_index)[0] == i + 1:
-                if focused_correction is None:
-                    focused_correction = placzek_self_scattering.dataY(spec_index)
-                else:
-                    focused_correction = np.add(focused_correction, placzek_self_scattering.dataY(spec_index))
-        mantid.CreateWorkspace(DataX=placzek_self_scattering.dataX(0),
-                               DataY=focused_correction,
-                               Distribution=True,
-                               UnitX='MomentumTransfer',
-                               OutputWorkspace='focused_correction_ws')
-        mantid.Rebin(InputWorkspace=focused_data.getItem(i), OutputWorkspace='focused_rebined', Params=binning)
-        mantid.Rebin(InputWorkspace='focused_correction_ws', OutputWorkspace='focused_correction_ws', Params=binning)
-        mantid.Subtract(LHSWorkspace='focused_rebined', RHSWorkspace='focused_correction_ws',
-                        OutputWorkspace=focused_data.getItem(i))
-    binning = [group_bin_min, group_bin_width, group_bin_max]
-    focused_data = mantid.Rebin(InputWorkspace=focused_data, Params=binning)
-    pdf_output_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_data)
-    mantid.MatchSpectra(InputWorkspace=pdf_output_combined, OutputWorkspace=pdf_output_combined, ReferenceSpectrum=1)
-    if type(q_lims) == str:
-        q_min = []
-        q_max = []
-        try:
-            with open(q_lims, 'r') as f:
-                line_list = [line.rstrip('\n') for line in f]
-                for line in line_list[:-1]:
-                    value_list = line.split()
-                    q_min.append(value_list[2])
-                    q_max.append(value_list[3])
-        except IOError:
-            raise RuntimeError("q_lims is not valid")
-    elif type(q_lims) == list or type(q_lims) == np.ndarray:
-        q_min = q_lims[0, :]
-        q_max = q_lims[1, :]
+        pdf_output = _generate_grouped_ts_pdf(focused_ws, q_lims, cal_file_name)
     else:
-        raise RuntimeError("q_lims is not valid")
-    pdf_x_array = pdf_output_combined.readX(0)
-    for i in range(q_min.size):
-        q_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= q_min[i]))]
-        q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
-    bin_width = pdf_x_array[1] - pdf_x_array[0]
-    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=pdf_output_combined, XMin=q_min, XMax=q_max)
-    focused_data_combined = mantid.Rebin(InputWorkspace=pdf_output_combined, Params=[min(q_min), bin_width, max(q_max)])
-    focused_data_combined = mantid.SumSpectra(InputWorkspace=pdf_output_combined, WeightedSum=True,
-                                            MultiplyBySpectra=False)
-    pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output_combined, InputSofQType="S(Q)",
-                                                       PDFType="G(r)", Filter=True)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)", PDFType="G(r)",
+                                                Filter=True)
+        pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
+                                             PreserveEvents=True)
+    common.remove_intermediate_workspace(focused_ws)
     return pdf_output
 
 
@@ -275,6 +121,95 @@ def _obtain_focused_run(run_number, focus_file_path):
                              "Please ensure a focused file has been produced and is located in the output directory."
                              % run_number)
     return focused_ws
+
+
+def _generate_grouped_ts_pdf(focused_ws, q_lims, cal_file_name):
+    group_bin_min = None
+    group_bin_max = None
+    group_bin_width = None
+    for i in range(focused_ws.getNumberOfEntries()):
+        x_array = focused_ws.getItem(i).readX(0)
+        bin_min = x_array[0]
+        bin_max = x_array[-1]
+        bin_width = (x_array[-1] - x_array[0]) / x_array.size
+        binning = [bin_min, bin_width, bin_max]
+        if not group_bin_min:
+            group_bin_min = bin_min
+            group_bin_max = bin_max
+            group_bin_width = bin_width
+        else:
+            group_bin_min = min(group_bin_min, bin_min)
+            group_bin_max = min(group_bin_max, bin_max)
+            group_bin_width = min(group_bin_width, bin_width)
+        fit_spectra = mantid.FitIncidentSpectrum(InputWorkspace=focused_ws.getItem(i),
+                                                 BinningForFit=binning,
+                                                 BinningForCalc=binning,
+                                                 FitSpectrumWith="GaussConvCubicSpline")
+        placzek_self_scattering = mantid.CalculatePlaczekSelfScattering(InputWorkspace=fit_spectra)
+        cal_workspace = mantid.LoadCalFile(InputWorkspace=placzek_self_scattering,
+                                           CalFileName=cal_file_name,
+                                           Workspacename='cal_workspace',
+                                           MakeOffsetsWorkspace=False,
+                                           MakeMaskWorkspace=False)
+        focused_correction = None
+        for spec_index in range(placzek_self_scattering.getNumberHistograms()):
+            if cal_workspace.dataY(spec_index)[0] == i + 1:
+                if focused_correction is None:
+                    focused_correction = placzek_self_scattering.dataY(spec_index)
+                else:
+                    focused_correction = np.add(focused_correction, placzek_self_scattering.dataY(spec_index))
+        focused_correction_ws = mantid.CreateWorkspace(DataX=placzek_self_scattering.dataX(0),
+                                                       DataY=focused_correction,
+                                                       Distribution=True,
+                                                       UnitX='MomentumTransfer')
+        mantid.Rebin(InputWorkspace=focused_ws.getItem(i), OutputWorkspace=focused_ws.getItem(i), Params=binning)
+        focused_correction_ws = mantid.Rebin(InputWorkspace=focused_correction_ws, Params=binning)
+        mantid.Subtract(LHSWorkspace=focused_ws.getItem(i),
+                        RHSWorkspace=focused_correction_ws,
+                        OutputWorkspace=focused_ws.getItem(i))
+    binning = [group_bin_min, group_bin_width, group_bin_max]
+    focused_data = mantid.Rebin(InputWorkspace=focused_ws, Params=binning)
+    focused_data_combined = mantid.ConjoinSpectra(InputWorkspaces=focused_data)
+    mantid.MatchSpectra(InputWorkspace=focused_data_combined, OutputWorkspace=focused_data_combined, ReferenceSpectrum=1)
+    if type(q_lims) == str:
+        q_min = []
+        q_max = []
+        try:
+            with open(q_lims, 'r') as f:
+                line_list = [line.rstrip('\n') for line in f]
+                for line in line_list[:-1]:
+                    value_list = line.split()
+                    q_min.append(value_list[2])
+                    q_max.append(value_list[3])
+        except IOError:
+            raise RuntimeError("q_lims is not valid")
+    elif type(q_lims) == list or type(q_lims) == np.ndarray:
+        q_min = q_lims[0, :]
+        q_max = q_lims[1, :]
+    else:
+        raise RuntimeError("q_lims is not valid")
+    pdf_x_array = focused_data_combined.readX(0)
+    for i in range(q_min.size):
+        q_min[i] = pdf_x_array[np.amin(np.where(pdf_x_array >= q_min[i]))]
+        q_max[i] = pdf_x_array[np.amax(np.where(pdf_x_array <= q_max[i]))]
+    bin_width = pdf_x_array[1] - pdf_x_array[0]
+    focused_data_combined = mantid.CropWorkspaceRagged(InputWorkspace=focused_data_combined, XMin=q_min, XMax=q_max)
+    focused_data_combined = mantid.Rebin(InputWorkspace=focused_data_combined,
+                                         Params=[min(q_min), bin_width, max(q_max)])
+    focused_data_combined = mantid.SumSpectra(InputWorkspace=focused_data_combined,
+                                              WeightedSum=True,
+                                              MultiplyBySpectra=False)
+    pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_data_combined,
+                                            InputSofQType="S(Q)",
+                                            PDFType="G(r)",
+                                            Filter=True)
+
+    common.remove_intermediate_workspace(cal_workspace)
+    common.remove_intermediate_workspace(fit_spectra)
+    common.remove_intermediate_workspace(focused_correction_ws)
+    common.remove_intermediate_workspace(focused_data)
+    common.remove_intermediate_workspace(placzek_self_scattering)
+    return pdf_output
 
 
 def _determine_chopper_mode(ws):
