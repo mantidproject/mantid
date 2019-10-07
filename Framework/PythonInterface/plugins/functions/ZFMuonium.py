@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
+
 from mantid.api import IFunction1D, FunctionFactory
 import numpy as np
 
@@ -34,7 +35,7 @@ class ZFMuonium(IFunction1D):
         W1 = 2 * np.pi * (FreqA - FreqD)
         W2 = 2 * np.pi * (FreqA + FreqD / 2)
         W3 = 3 * np.pi * FreqD
-        if Fcut > 0: 
+        if Fcut > 0:
             A1 = 1 / (1 + (W1 / (2 * np.pi * Fcut)) ** 2)
             A2 = 2 / (1 + (W2 / (2 * np.pi * Fcut)) ** 2)
             A3 = 2 / (1 + (W3 / (2 * np.pi * Fcut)) ** 2)
