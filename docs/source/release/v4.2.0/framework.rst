@@ -32,6 +32,8 @@ Algorithms
 * In :ref:`SaveAscii <algm-SaveAscii>` it is now possible to save out also the values of the spectrum axis.
 * :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
+* A bug in the conversion to Q3D and ModQ for indirect spectrometers at high Q in :ref:`ConvertToMD <algm-ConvertToMD>` has been fixed.
+
 
 Instrument Definition Files
 ---------------------------
