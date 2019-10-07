@@ -53,5 +53,6 @@ Bugfixes
 - Fixes an issue where changing the curve properties in the figure options menu would reset the plot's axes scales.
 - Fixed an issue with fitting where the difference would be plotted even if the Plot Difference option in the fit property browser was not enabled.
 - Fixed an issue where the plot legend would no longer be movable after removing a plot guess.
+- The fitting curves in the plot are now deleted when the fit results workspaces are deleted.
 
 :ref:`Release 4.2.0 <v4.2.0>`
