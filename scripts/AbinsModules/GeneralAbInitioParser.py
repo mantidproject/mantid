@@ -7,6 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import six
+import re
 import AbinsModules
 
 
@@ -17,18 +18,38 @@ class GeneralAbInitioParser(object):
     def __init__(self):
         pass
 
-    def find_first(self, file_obj=None, msg=None):
+    def find_first(self, file_obj=None, msg=None, regex=None):
         """
         Finds the first line with msg. Moves file current position to the next line.
         :param file_obj: file object from which we read
-        :param msg: keyword to find
+        :type file_obj: BinaryIO
+        :param msg: keyword to find (exact match)
+        :type msg: str
+        :param regex: regular expression to find (use *instead of* msg option).
+            This string will be compiled to a Python re.Pattern .
+        :type regex: str
         """
         if not six.PY2:
             msg = bytes(msg, "utf8")
-        while not self.file_end(file_obj=file_obj):
-            line = file_obj.readline()
-            if line.strip() and msg in line:
-                return line
+        if msg and regex:
+            raise ValueError("msg or regex should be provided,not both")
+        elif msg:
+            while not self.file_end(file_obj=file_obj):
+                line = file_obj.readline()
+                if line.strip() and msg in line:
+                    return line
+            raise ValueError("'{}' not found".format(msg))
+        elif regex:
+            test = re.compile(regex)
+            while not self.file_end(file_obj=file_obj):
+                line = file_obj.readline()
+                if test.match(line):
+                    return(line)
+                elif 'X(ANGSTROM)' in line:
+                    raise Exception(line)
+            raise ValueError("'{}' not found".format(regex))
+        else:
+            raise ValueError("No msg or regex provided: nothing to match")
 
     def find_last(self, file_obj=None, msg=None):
         """
