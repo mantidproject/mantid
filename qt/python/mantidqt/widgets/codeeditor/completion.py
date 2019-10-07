@@ -11,6 +11,7 @@ from __future__ import (absolute_import, unicode_literals)
 import inspect
 import re
 import sys
+from collections import namedtuple
 from six import PY2
 if PY2:  # noqa
     from inspect import getargspec as getfullargspec
@@ -32,7 +33,12 @@ def get_function_spec(func):
     try:
         argspec = getfullargspec(func)
     except TypeError:
-        return ''
+        try:
+            ArgSpec = namedtuple("ArgSpec", "args varargs keywords defaults")
+            args_obj = inspect.getargs(func.__code__)
+            argspec = ArgSpec(args_obj.args, args_obj.varargs, args_obj.varkw, defaults=None)
+        except (TypeError, AttributeError, ValueError):
+            return ''
     # mantid algorithm functions have varargs set not args
     args = argspec[0]
     if args:
@@ -83,7 +89,7 @@ def get_function_spec(func):
     return call_tip
 
 
-def generate_call_tips(definitions):
+def generate_call_tips(definitions, prepend_module_name=None):
     """
     Generate call tips for a dictionary of object definitions (eg. globals()).
     The call tips generated are of the form:
@@ -92,6 +98,8 @@ def generate_call_tips(definitions):
 
     :param dict definitions: Dictionary with names of python objects as keys and
         the objects themselves as values
+    :param str prepend_module_name: Prepend the name of the module to the call tips
+        default is None
     :returns list: A list of call tips
     """
     if not isinstance(definitions, dict):
@@ -101,7 +109,10 @@ def generate_call_tips(definitions):
         if name.startswith('_'):
             continue
         if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
-            call_tips.append(name + get_function_spec(py_object))
+            if not prepend_module_name:
+                call_tips.append(name + get_function_spec(py_object))
+            else:
+                call_tips.append(prepend_module_name + '.' + name + get_function_spec(py_object))
             continue
         # Ignore modules or we get duplicates of methods/classes that are imported
         # in outer scopes, e.g. numpy.array and numpy.core.array
@@ -115,9 +126,11 @@ def generate_call_tips(definitions):
             if attr.startswith('_'):
                 continue
             if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
-                call_tips.append(name + '.' + attr + get_function_spec(f_attr))
+                call_tip = name + '.' + attr + get_function_spec(f_attr)
             else:
-                call_tips.append(name + '.' + attr)
+                call_tip = name + '.' + attr
+            if prepend_module_name:
+                call_tips.append(prepend_module_name + '.' + call_tip)
     return call_tips
 
 
@@ -169,4 +182,4 @@ class CodeCompleter:
             module = sys.modules[module]
         except KeyError:
             return []
-        return generate_call_tips(module.__dict__)
+        return generate_call_tips(module.__dict__, module.__name__)
