@@ -18,6 +18,7 @@ from Muon.GUI.Common.contexts.fitting_context import FitInformation
 class HomeTabPlotPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = mock.MagicMock()
+        self.context.fitting_context.number_of_fits = 1
         self.plotting_window_model = mock.MagicMock()
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()

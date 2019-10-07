@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from decimal import Decimal, InvalidOperation
-
 from mantid import api
 from mantid.api import ITableWorkspace
 
@@ -81,7 +80,8 @@ class InstrumentWidgetModel(object):
         self._context.gui_context.update_and_send_signal(LastGoodData=last_good_data)
 
     def get_dead_time_table_from_data(self):
-        return self._data.current_data["DataDeadTimeTable"]
+        dead_time_name = self._data.current_data["DataDeadTimeTable"]
+        return api.AnalysisDataService.retrieve(self._data.current_data["DataDeadTimeTable"]) if dead_time_name else None
 
     def get_dead_time_table(self):
         return self._data.dead_time_table
@@ -128,6 +128,9 @@ class InstrumentWidgetModel(object):
         self._context.gui_context.update_and_send_signal(DeadTimeSource='FromFile')
 
     def set_user_dead_time_from_ADS(self, name):
+        if name == 'None':
+            self._context.gui_context.update_and_send_signal(DeadTimeTable=None)
+            return
         dtc = api.AnalysisDataService.retrieve(str(name))
         self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 

@@ -19,7 +19,6 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-
 #include <mutex>
 
 #ifdef _WIN32
