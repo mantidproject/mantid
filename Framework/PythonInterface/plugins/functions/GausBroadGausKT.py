@@ -28,6 +28,7 @@ class GauBroadGauKT(IFunction1D):
         omega = R * Delta
         DeltaEff = np.sqrt(Delta ** 2 + omega ** 2)
         denom = 1 + R ** 2 + R ** 2 * DeltaEff ** 2 * x ** 2
-        return A0 * (1./3. + 2./3. * ((1 + R ** 2) / denom) ** 1.5 * (1 - (DeltaEff * x) ** 2 / denom) * np.exp(- (DeltaEff * x) ** 2 / (2 * denom))))
+        term1 = (DeltaEff * x) ** 2 / denom
+        return A0 * (1./3. + 2./3. * ((1 + R ** 2) / denom) ** 1.5 * (1 - term1) * np.exp(- term1 / 2))
 
 FunctionFactory.subscribe(GauBroadGauKT)

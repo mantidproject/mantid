@@ -7,7 +7,6 @@
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
 from mantid.api import IFunction1D, FunctionFactory
-import numpy as np
 
 
 class RedfieldCutoff(IFunction1D):
@@ -23,7 +22,7 @@ class RedfieldCutoff(IFunction1D):
     def function1D(self, x):
         A0 = self.getParameterValue("A0")
         Hloc = self.getParameterValue("Hloc")
-        tau = self.getParameterValue("Tau") 
+        tau = self.getParameterValue("Tau")
         gmu = 0.01355342
         return A0 * 2 * (gmu * Hloc) ** 2 * tau / (1 + (gmu * x * tau) ** 2)
 
