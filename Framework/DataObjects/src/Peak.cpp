@@ -541,7 +541,7 @@ void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  *found.
  * You can call findDetector to look for the detector ID
  *
- * @param QLabFrame :: Q of the center of the peak, in reciprocal space.
+ * @param qLab :: Q of the center of the peak, in reciprocal space.
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *Angstroms).
@@ -549,8 +549,12 @@ void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  *this is provided. Then we do not
  * ray trace to find the intersecing detector.
  */
-void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab,
                         boost::optional<double> detectorDistance) {
+  if (!this->m_inst) {
+    throw std::invalid_argument("Setting QLab without an instrument would lead "
+                                "to an inconsistent state for the Peak");
+  }
   // Clear out the detector = we can't know them
   m_detectorID = -1;
   detPos = V3D();
@@ -559,10 +563,8 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
   m_col = -1;
   m_bankName = "None";
 
-  // The q-vector direction of the peak is = goniometer * ub * hkl_vector
-  V3D q = QLabFrame;
-
-  /* The incident neutron wavevector is along the beam direction, ki = 1/wl
+  /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
+   * The incident neutron wavevector is along the beam direction, ki = 1/wl
    * (usually z, but referenceframe is definitive).
    * In the inelastic convention, q = ki - kf.
    * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl)
@@ -570,28 +572,23 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
    * AND: norm(kf) = norm(ki) = 2*pi/wavelength
    * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
    */
-  double norm_q = q.norm();
-  if (!this->m_inst) {
-    throw std::invalid_argument("Setting QLab without an instrument would lead "
-                                "to an inconsistent state for the Peak");
-  }
+  const double norm_q = qLab.norm();
+  if (norm_q == 0.0)
+    throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
+
   boost::shared_ptr<const ReferenceFrame> refFrame =
       this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
-  double qSign = 1.0;
-  if (convention == "Crystallography")
-    qSign = -1.0;
-  const double qBeam = q.scalar_prod(refBeamDir) * qSign;
+  const double qSign = (convention != "Crystallography") ? 1.0 : -1.0;
+  const double qBeam = qLab.scalar_prod(refBeamDir) * qSign;
 
-  if (norm_q == 0.0)
-    throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
   if (qBeam == 0.0)
     throw std::invalid_argument(
         "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
 
-  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
-  double wl = (2.0 * M_PI) / one_over_wl;
+  const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+  const double wl = (2.0 * M_PI) / one_over_wl;
   if (wl < 0.0) {
     std::ostringstream mess;
     mess << "Peak::setQLabFrame(): Wavelength found was negative (" << wl
@@ -602,12 +599,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
   // Save the wavelength
   this->setWavelength(wl);
 
-  // Default for ki-kf has -q
-  qSign = -1.0;
-  if (convention == "Crystallography")
-    qSign = 1.0;
-
-  V3D detectorDir = q * qSign;
+  V3D detectorDir = -qLab * qSign;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 
@@ -624,7 +616,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
       // This is important, so we ought to log when this fails to happen.
       g_log.debug("Could not find detector after setting qLab via setQLab with "
                   "QLab : " +
-                  q.toString());
+                  qLab.toString());
 
       detPos = getVirtualDetectorPosition(detectorDir);
     }
@@ -704,7 +696,7 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam,
       // try adding and subtracting tube-gap in 3 q dimensions to see if you can
       // find detectors on each side of tube gap
       for (int i = 0; i < 3; i++) {
-        V3D gapDir = V3D(0., 0., 0.);
+        V3D gapDir;
         gapDir[i] = gap;
         V3D beam1 = beam + gapDir;
         tracer.traceFromSample(beam1);
